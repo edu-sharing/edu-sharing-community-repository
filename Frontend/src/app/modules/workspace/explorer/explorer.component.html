@@ -16,6 +16,7 @@
   [selectedNodes]="selection"
   [sortAscending]="sortAscending"
   (onDrop)="drop($event)"
+  [canDrop]="canDrop"
   (onSelectionChanged)="onSelection($event)"
   (onUpdateOptions)="updateOptions($event)"
   (sortListener)="setSorting($event)"

@@ -4,11 +4,15 @@ import {TranslateService} from "ng2-translate";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
 import {Toast} from "../../common/ui/toast";
 import {RestConstants} from "../../common/rest/rest-constants";
-import {NodeWrapper,Node} from "../../common/rest/data-object";
+import {NodeWrapper, Node, Collection} from "../../common/rest/data-object";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
+import {UIHelper} from "../../common/ui/ui-helper";
+import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
+import {NodeHelper} from "../../common/ui/node-helper";
+import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'workspace-management',
@@ -42,13 +46,22 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onCloseMetadata=new EventEmitter();
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
+  @Input() addToCollection:Node[];
+  @Output() addToCollectionChange = new EventEmitter();
+  @Output() onCloseAddToCollection=new EventEmitter();
   public createMetadata: string;
   public metadataParent: Node;
   public ltiToolConfig : Node;
   public ltiObject: Node;
+  public dialogTitle:string;
+  public dialogMessage:string;
+  public dialogMessageParameters:any;
+  public dialogCancelable:boolean;
+  public dialogButtons:DialogButton[];
   private currentLtiTool: Node;
   private ltiToolRefresh: Boolean;
   private nodeDeleteOnCancel: boolean;
+
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if(event.key=="Escape"){
@@ -56,6 +69,10 @@ export class WorkspaceManagementDialogsComponent  {
         if(this.mdsRef.handleKeyboardEvent(event))
           return;
         this.closeEditor(false);
+        return;
+      }
+      if(this.addToCollection!=null){
+        this.cancelAddToCollection();
         return;
       }
       if(this.nodeContributor!=null){
@@ -86,6 +103,7 @@ export class WorkspaceManagementDialogsComponent  {
     private translate:TranslateService,
     private config:ConfigurationService,
     private searchService:RestSearchService,
+    private collectionService:RestCollectionService,
     private toast:Toast,
   ){
    }
@@ -207,4 +225,30 @@ export class WorkspaceManagementDialogsComponent  {
     this.nodeReport=null;
     this.nodeReportChange.emit(null);
   }
+  private cancelAddToCollection(){
+    this.dialogTitle=null;
+    this.addToCollection=null;
+    this.addToCollectionChange.emit(null);
+    this.onCloseAddToCollection.emit();
+  }
+  public addToCollectionList(collection:Collection,list:Node[]=this.addToCollection,callback:Function=null,force=false){
+    if(!force && (collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
+      this.dialogTitle='DIALOG.COLLECTION_SHARE_PUBLIC';
+      this.dialogMessage='DIALOG.COLLECTION_SHARE_PUBLIC_INFO';
+      this.dialogCancelable=true;
+      this.dialogMessageParameters={collection:RestHelper.getTitle(collection)};
+      this.dialogButtons=DialogButton.getNextCancel(()=>{this.dialogTitle=null},()=>{
+        this.addToCollectionList(collection,list,callback,true);
+      });
+      return;
+    }
+    this.cancelAddToCollection();
+    this.globalProgress=true;
+    UIHelper.addToCollection(this.collectionService,this.toast,collection,list,()=>{
+      this.globalProgress=false;
+      if(callback)
+        callback();
+    });
+  }
+
 }

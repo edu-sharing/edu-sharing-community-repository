@@ -16,13 +16,11 @@ import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {
   Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
-  MdsMetadatasets, MdsInfo
+  MdsMetadatasets, MdsInfo, Collection, CollectionWrapper
 } from "../../common/rest/data-object";
 import {ListTableComponent} from "../../common/ui/list-table/list-table.component";
-import {RouterComponent} from "../../router/router.component";
-import {ActionbarComponent, OptionItem} from "../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../common/ui/actionbar/option-item";
 import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
-import {NodeRenderComponent} from "../../common/ui/node-render/node-render.component";
 import {Helper} from "../../common/helper";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {Title} from "@angular/platform-browser";
@@ -30,7 +28,6 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {Toast} from "../../common/ui/toast";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {RestNetworkService} from "../../common/rest/services/rest-network.service";
-import {WorkspaceMainComponent} from "../workspace/workspace.component";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
 import {NodeHelper} from "../../common/ui/node-helper";
@@ -44,6 +41,9 @@ import {ListItem} from "../../common/ui/list-item";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
 import {RequestObject} from "../../common/rest/request-object";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
+import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
+import {Action} from "rxjs/scheduler/Action";
+import {WorkspaceManagementDialogsComponent} from "../management-dialogs/management-dialogs.component";
 
 
 
@@ -62,6 +62,7 @@ import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component"
 export class SearchComponent {
   public initalized = false;
   @ViewChild('mds') mdsRef: MdsComponent;
+  @ViewChild('managementDialogs') managementDialogs : WorkspaceManagementDialogsComponent;
   public mdsSuggestions:any={}
   public mdsExtended=false;
   public sidenavTab=0;
@@ -129,6 +130,7 @@ export class SearchComponent {
   public savedSearchLoading = false;
   public savedSearchQuery:string = null;
   public savedSearchQueryModel:string = null;
+    public addToCollection: Collection;
 
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
@@ -216,16 +218,22 @@ export class SearchComponent {
     this.selection=selection;
     this.updateActionbar(selection);
   }
-  ngOnInit() {
-    Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
-      this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
-        (param: any) => {
-          console.log("query params");
-          this.mainnav=param['mainnav']=='false' ? false : true;
-          if(param['reurl']) {
-            this.searchService.reurl = param['reurl'];
-            this.applyMode=true;
-          }
+   ngOnInit() {
+     Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
+       this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
+         (param: any) => {
+           console.log("query params");
+           if(param['addToCollection']){
+             this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
+               this.addToCollection=data.collection;
+               this.refreshListOptions();
+               this.updateActionbar(null);
+             });
+           }this.mainnav=param['mainnav']=='false' ? false : true;
+           if(param['reurl']) {
+             this.searchService.reurl = param['reurl'];
+             this.applyMode=true;
+           }
 
           if(param['query'])
             this.searchService.searchTerm=param['query'];
@@ -262,47 +270,6 @@ export class SearchComponent {
           });
         });
     });
-  }
-
-  private addDefaultNodeOptions(data: LoginResult) {
-    let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
-      this.addToStore([node]);
-    });
-    this.options.push(nodeStore);
-    let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(node));
-    save.showCallback = ((node: Node) => {
-      return RestNetworkService.supportsImport(node.ref.repo, this.repositories) && !this.isGuest;
-    });
-    this.options.push(save);
-    if (!this.isGuest && this.currentRepository==RestConstants.HOME_REPOSITORY) {
-      let collection = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", (node: Node) => {
-        this.addNodesToCollection = [node];
-      });
-      collection.enabledCallback = (node: Node) => {
-        return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
-      }
-      this.options.push(collection);
-      let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', (node: Node) => {
-        NodeHelper.goToWorkspace(this.nodeApi,this.router, data, node);
-      });
-      openFolder.enabledCallback = (node: Node) => {
-        return node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
-      };
-      this.options.push(openFolder);
-    }
-    let download = new OptionItem("DOWNLOAD", "cloud_download", (node: Node) => {
-      NodeHelper.downloadNode(node);
-    });
-    download.enabledCallback = (node: Node) => {
-      return node.downloadUrl != null;
-    }
-    this.options.push(download);
-
-    if(this.config.instant("nodeReport",false)){
-      let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
-      this.options.push(report);
-    }
-    let custom = this.config.instant("searchNodeOptions");
   }
 
   /*AUTOCOMPLETE*/
@@ -446,7 +413,13 @@ export class SearchComponent {
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.currentValues){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{query:query,parameters:parameters ? JSON.stringify(parameters) : null,mds:mds,repository:repository,mdsExtended:this.mdsExtended,reurl:this.searchService.reurl}});
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
+      addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
+      query:query,
+      parameters:parameters ? JSON.stringify(parameters) : null,
+      mds:mds,repository:repository,
+      mdsExtended:this.mdsExtended,
+      reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
     if(this.showspinner && init || this.repositoryIds==null){
@@ -653,61 +626,101 @@ export class SearchComponent {
     return UIConstants.ROUTER_PREFIX+"workspace/files?root=MY_FILES&id="+node.parent.id+"&file="+node.ref.id;
   }
 
-  private updateActionbar(nodes:Node[]) {
-    this.actionOptions=[];
+  private getOptions(nodes:Node[]=this.selection,fromList:boolean) {
+    if(fromList && (!nodes || !nodes.length)){
+      nodes=[new Node()];
+    }
+    let options=[];
+    if(this.searchService.reurl) {
+      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl));
+      apply.enabledCallback=((node:Node)=> {
+        return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+      });
+      options.push(apply);
+      return options;
+    }
+    if (this.addToCollection) {
+      if (nodes && nodes.length) {
+        let addTo = new OptionItem(fromList ? "SEARCH.ADD_TO_COLLECTION_SHORT" : "SEARCH.ADD_TO_COLLECTION", "layers", (node: Node) => {
+          this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(this.selection,node), () => {
+            this.switchToCollections(this.addToCollection.ref.id);
+          });
+        });
+        addTo.isEnabled = NodeHelper.getNodesRight(this.selection, RestConstants.ACCESS_CC_PUBLISH);
+        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH)};
+
+        options.push(addTo);
+      }
+      let cancel = new OptionItem("CANCEL", 'close', (node: Node) => {
+        this.switchToCollections(this.addToCollection.ref.id);
+      });
+      if(!fromList) {
+        options.push(cancel);
+      }
+      return options;
+    }
     if(nodes && nodes.length) {
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
-        this.addToStore(this.selection);
+        this.addToStore(ActionbarHelper.getNodes(nodes,node));
       });
-      if(this.currentRepository==RestConstants.HOME_REPOSITORY)
-        this.actionOptions.push(nodeStore);
+      options.push(nodeStore);
+      let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(node));
+      save.showCallback = ((node: Node) => {
+        return RestNetworkService.supportsImport(node.ref.repo, this.repositories) && !this.isGuest;
+      });
+      this.options.push(save);
+      if (!this.isGuest && this.currentRepository == RestConstants.HOME_REPOSITORY) {
+        let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node: Node) => {
+          this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
+        });
+        collection.showCallback = (node: Node) => {
+          return this.addToCollection == null;
+        };
+        options.push(collection);
+        /*
+        let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', (node: Node) => {
+          NodeHelper.goToWorkspace(this.nodeApi, this.router, this.connector.getCurrentLogin(), node);
+        });
+        openFolder.enabledCallback = (node: Node) => {
+          this.nodeApi.getNodeParents(ActionbarHelper.getNodes(nodes,node)[0].ref.id).subscribe(()=>{
+            openFolder.enabledCallback=()=>{return true};
+          },(error:any)=>openFolder.isEnabled=false);
+          return false;
+        };
+        options.push(openFolder);
+        */
+      }
+      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,
+        (node: Node) => NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
+      if (download)
+        options.push(download);
 
-      if(nodes.length==1){
+      if(nodes.length==1 && !fromList){
         if(RestNetworkService.supportsImport(nodes[0].ref.repo, this.repositories) && !this.isGuest) {
           let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(this.getCurrentNode(node)));
-          this.actionOptions.push(save);
+          options.push(save);
         }
       }
-      let collection = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", (node: Node) => {
-        this.addNodesToCollection = nodes;
-      });
-      collection.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
-      collection.isSeperate = true;
-      if(!this.isGuest && this.currentRepository==RestConstants.HOME_REPOSITORY)
-        this.actionOptions.push(collection);
       if(nodes.length==1 && this.config.instant("nodeReport",false)){
         let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
-        this.actionOptions.push(report);
+        options.push(report);
       }
     }
     let custom=this.config.instant("searchNodeOptions");
-    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom, nodes, this.actionOptions,(load:boolean)=>this.globalProgress=load);
+    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom, nodes, options,(load:boolean)=>this.globalProgress=load);
     this.viewToggle = new OptionItem("", "", (node: Node) => this.toggleView());
     this.viewToggle.isToggle = true;
-    this.actionOptions.push(this.viewToggle);
+    options.push(this.viewToggle);
     this.setViewType(this.view);
+
+    return options;
   }
 
-  private addToCollectionList(collection:Node[],nodes=this.addNodesToCollection,position=0,error=false){
-    if(position>=nodes.length){
-      if(!error)
-        this.toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION",{count:nodes.length,collection:collection[0].title});
-      this.globalProgress=false;
-      return;
-    }
-    this.addNodesToCollection=null;
-    this.globalProgress=true;
-    this.collectionApi.addNodeToCollection(collection[0].ref.id,nodes[position].ref.id).subscribe(()=>{
-        this.addToCollectionList(collection,nodes,position+1,error);
-      },
-      (error:any)=>{
-        if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
-          this.toast.error(null,"WORKSPACE.TOAST.NODE_EXISTS_IN_COLLECTION",{name:nodes[position].name});
-        }
-        else
-          NodeHelper.handleNodeError(this.toast,nodes[position].name,error);
-        this.addToCollectionList(collection,nodes,position+1,true);
-      });
+  private addToCollectionList(collection:Collection,nodes=this.addNodesToCollection,callback:Function=null,position=0,error=false){
+    this.managementDialogs.addToCollectionList(collection,nodes,()=>{
+      if(this.addToCollection)
+        this.switchToCollections(this.addToCollection.ref.id);
+    });
   }
 
   private printListener() {
@@ -771,15 +784,8 @@ export class SearchComponent {
       }
       if(param['reurl']) {
         this.hasCheckbox=false;
-        let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl));
-        apply.enabledCallback=((node:Node)=> {
-          return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
-        });
-        this.options.push(apply);
       }
-      else {
-        this.addDefaultNodeOptions(data);
-      }
+      this.refreshListOptions();
       console.log("init "+this.searchService.searchResult.length);
       console.log(this.currentValues);
       if (this.searchService.searchResult.length < 1) {
@@ -959,5 +965,13 @@ export class SearchComponent {
   public setSavedSearchQuery(query:string){
     this.savedSearchQuery=query;
     this.loadSavedSearch();
+  }
+
+  private updateActionbar(list:Node[]) {
+    this.actionOptions=this.getOptions(list,false);
+  }
+
+  private refreshListOptions() {
+    this.options=this.getOptions(this.selection,true);
   }
 }

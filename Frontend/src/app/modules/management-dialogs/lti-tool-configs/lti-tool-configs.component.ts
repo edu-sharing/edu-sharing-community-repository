@@ -5,7 +5,7 @@ import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../comm
 import {Toast} from "../../../common/ui/toast";
 import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {TranslateService} from "ng2-translate";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {RestToolService} from "../../../common/rest/services/rest-tool.service";
 import {ListItem} from "../../../common/ui/list-item";

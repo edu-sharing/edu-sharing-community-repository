@@ -8,6 +8,7 @@ import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 
 import * as EduData from "../data-object";
+import {CollectionWrapper} from "../data-object";
 
 @Injectable()
 export class RestCollectionService {
@@ -29,7 +30,7 @@ export class RestCollectionService {
     let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/pinning",repository);
     return this.connector.post(query,JSON.stringify(collections),this.connector.getRequestOptions());
   }
-  public getCollection = (collection : string,repository=RestConstants.HOME_REPOSITORY): Observable<EduData.CollectionWrapper> => {
+  public getCollection = (collection : string,repository=RestConstants.HOME_REPOSITORY): Observable<CollectionWrapper> => {
     let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection",repository,[
       [":collection",collection],
     ]);

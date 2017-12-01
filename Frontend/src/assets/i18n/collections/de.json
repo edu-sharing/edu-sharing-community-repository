@@ -2,10 +2,34 @@
 
   "COLLECTIONS": {
     "TITLE": "Sammlungen",
+    "CREATE_COLLECTION" : "Sammlung\nerstellen",
+    "ADD_MATERIAL" : "Material\nhinzufügen",
     "ERROR_DELETE": "Fehler beim Löschen der Sammlung",
+    "ENTER_NAME" : "Bitte einen Namen für die Sammlung eingeben.",
     "DETAIL": {
       "REMOVE": "Entfernen",
       "ADD_TO_OTHER": "In Sammlung"
+    },
+    "STEP":{
+      "GENERAL":"Titel, Bild, Beschreibung und Farbe",
+      "METADATA":"Weitere Informationen",
+      "PERMISSIONS":"Freigaben",
+      "SETTINGS":"Einstellungen",
+      "EDITORIAL_GROUPS":"Zuständige Redaktionsgruppe",
+      "DONE":"Fertig"
+    },
+    "CREATE_TYPE":"Neue Sammlung erstellen...",
+    "CREATE":{
+      "PRIVATE":"Private Sammlung",
+      "PRIVATE_DESCRIPTION":"Außer Ihnen kann die Sammlung niemand sehen. Sie können die Sammlung später für andere freigeben oder veröffentlichen.",
+      "SHARED":"Gemeinsame Sammlung",
+      "SHARED_DESCRIPTION":"Sammlen Sie gemeinsam mit Freunden und Kollegen. Dabei können Sie festlegen, wer was tun darf.",
+      "PUBLIC":"Öffentliche Sammlung",
+      "PUBLIC_DESCRIPTION":"Erstellen Sie eine öffentliche Sammlung und zeigen der Welt Ihre schönsten Inhalte.",
+      "EDITORIAL":"Redaktionelle Sammlung",
+      "EDITORIAL_DESCRIPTION":"Hier sagt eine Redaktionsgruppe wo es lang geht und pflegt die Inhalte. Sie können an eine bestimmte Position festgepinnt werden.",
+      "CURRICULUM":"Lehrplan-Sammlung",
+      "CURRICULUM_DESCRIPTION":"Erstellen Sie eine (moderierte) Sammlung gemäß vorgegebener Lehrplan-Strukturen"
     },
     "PINNING":{
       "TITLE":"Gepinnte Sammlungen",
@@ -26,9 +50,6 @@
     "REMOVED_FROM_COLLECTION":"Element wurde von Sammlung entfernt",
     "EXTENDED_PERMISSIONS":"einzelne Personen oder Gruppen (sehen, mitarbeiten oder koordinieren)",
     "EXTENDED_PERMISSIONS_BUTTON":"Einladen",
-    "ORIGINAL_DELETE":"Entfernen",
-    "ORIGINAL_DELTED":"Inhalt wurde gelöscht",
-    "ORIGINAL_DELTED_INFO":"Nur Informationen sichtbar",
     "TOAST":{
       "DUPLICATE_NAME":"Eine Sammlung mit diesen Namen existiert bereits",
       "CREATED":"Sammlung wurde erstellt",
@@ -51,10 +72,8 @@
     "collections_content" : "Materialien",
     "collections_noContentAvailable" : "Hier sind noch keine Materialien vorhanden.",
     "collections_howToAddContent" : "Sie können in der Suchumgebung nach geeigneten Materialien für ihre Sammlung suchen. Klicken sie einfach auf ein geeignetes Material und wählen sie dann die Option 'zu Sammlung hinzufügen' aus.",
-    "collections_proceedToSearch" : "Materialen von Suche hinzufügen",
 
     "collections_reload" : "Neu laden",
-    "collections_createNewCollection" : "Sammlung erstellen",
 
 
 
@@ -66,7 +85,6 @@
     "collectionNew_setAccessMyOrga" : "meine Gruppen dürfen sehen",
     "collectionNew_setAccessMyOrgaNA" : "meine Gruppen (noch keinen zugeordnet)",
     "collectionNew_setAccessPublic" : "alle dürfen sehen",
-    "collectionNew_askName" : "Bitte einen Namen für die Sammlung eingeben.",
 
 
     "collectionNew_preview" : "Vorschau meiner Sammlung",

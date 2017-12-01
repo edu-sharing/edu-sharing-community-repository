@@ -114,6 +114,8 @@ export class WorkspaceShareComponent  {
 
   }
   public isCollection(){
+    if(this._node==null)
+      return true;
     return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)!=-1;
   }
   public openLink(){
@@ -135,6 +137,8 @@ export class WorkspaceShareComponent  {
   }
   @Input() set node (node : Node){
     this._node=node;
+    if(node==null)
+      return;
     if(this._node.isDirectory)
       this.currentType=[RestConstants.ACCESS_CONSUMER];
     if(this.currentPermissions) {
@@ -156,7 +160,7 @@ export class WorkspaceShareComponent  {
         }
       },(error:any)=>this.toast.error(error));
     }
-    if(node.parent.id) {
+    if(node.parent && node.parent.id) {
       this.nodeApi.getNodePermissions(node.parent.id).subscribe((data: NodePermissions) => {
         if (data.permissions) {
           this.inherit = data.permissions.inheritedPermissions;
@@ -169,26 +173,31 @@ export class WorkspaceShareComponent  {
 
       }, (error: any) => this.toast.error(error));
       this.nodeApi.getNodeParents(node.ref.id).subscribe((data: NodeList) => {
-        this.inheritAllowed = data.nodes.length > 1;
+        this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
       });
     }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       this.isAdmin=data.isAdmin;
     });
-    this.nodeApi.getNodeMetadata(node.ref.id,[RestConstants.CM_OWNER,RestConstants.CM_CREATOR]).subscribe((data : NodeWrapper)=>{
-      console.log(data);
-      let authority=data.node.properties[RestConstants.CM_CREATOR][0];
-      let user=data.node.createdBy;
+    if(node.ref.id) {
+      this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.CM_OWNER, RestConstants.CM_CREATOR]).subscribe((data: NodeWrapper) => {
+        console.log(data);
+        let authority = data.node.properties[RestConstants.CM_CREATOR][0];
+        let user = data.node.createdBy;
 
-      if(data.node.properties[RestConstants.CM_OWNER]) {
-        authority = data.node.properties[RestConstants.CM_OWNER][0];
-        user = data.node.owner;
-      }
-      this.owner=new Permission();
-      this.owner.authority={authorityName:authority,authorityType:"USER"};
-      (this.owner as any).user=user;
-      this.owner.permissions=["Owner"];
-    });
+        if (data.node.properties[RestConstants.CM_OWNER]) {
+          authority = data.node.properties[RestConstants.CM_OWNER][0];
+          user = data.node.owner;
+        }
+        this.owner = new Permission();
+        this.owner.authority = {authorityName: authority, authorityType: "USER"};
+        (this.owner as any).user = user;
+        this.owner.permissions = ["Owner"];
+      });
+    }
+    else{
+      this.updatePublishState();
+    }
   }
   @Output() onClose=new EventEmitter();
   @Output() onLoading=new EventEmitter();
@@ -274,7 +283,7 @@ export class WorkspaceShareComponent  {
     this.searchStr="";
   }
   private isNewPermission(p : Permission){
-    if(!this.originalPermissions.permissions)
+    if(!this.originalPermissions || !this.originalPermissions.permissions)
       return true;
     return !this.contains(this.originalPermissions.permissions,p);
     //return this.contains(this.newPermissions,p);

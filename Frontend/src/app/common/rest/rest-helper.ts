@@ -10,7 +10,6 @@ import {
 import {TranslateService} from "ng2-translate";
 import {DateHelper} from "../ui/DateHelper";
 import {ConfigurationService} from "../services/configuration.service";
-import {RestMdsService} from "./services/rest-mds.service";
 import {ListItem} from "../ui/list-item";
 
 export class RestHelper{
@@ -171,11 +170,15 @@ export class RestHelper{
         return ((node.type != null) && ((node.type == "ccm:map") || (node.type == "{http://www.campuscontent.de/model/1.0}map")));
     }
 
-    public static getName(node:Node):string {
+    public static getName(node:any):string {
+        if(node.reference)
+          node=node.reference;
         if (node.name) return node.name;
         return node.title;
     }
-    public static getTitle(node:Node):string {
+    public static getTitle(node:any):string {
+      if(node.reference) // for collection references
+        node=node.reference;
       if (node.title) return node.title;
       return node.name;
     }
@@ -263,8 +266,7 @@ export class RestHelper{
   static getColumns(mdsSet: any, name: string) {
     let columns=[];
     for(let list of mdsSet.lists){
-      if(list.id=="search"){
-        console.log(list);
+      if(list.id==name){
         for(let column of list.columns){
           let item=new ListItem("NODE",column.id)
           item.format=column.format;
@@ -273,7 +275,8 @@ export class RestHelper{
         return columns;
       }
     }
-    if(name=='search') {
+    console.info('mds does not define columns for '+name+', using defaults');
+    if(name=='search' || name=='collectionReferences') {
       columns.push(new ListItem("NODE", RestConstants.CM_PROP_TITLE));
       columns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
       columns.push(new ListItem("NODE", RestConstants.CCM_PROP_LICENSE));
@@ -309,6 +312,7 @@ export class RestHelper{
     }
     return metadatasets;
   }
+
 }
 export interface UrlReplace{
   search:string;

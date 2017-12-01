@@ -5,6 +5,7 @@
   (onCancel)="closeLicense()"
   (onDone)="updateLicense()"
 ></workspace-license>
+
 <node-report
   *ngIf="nodeReport"
   [node]="nodeReport"
@@ -61,4 +62,19 @@
                        (onLoading)="globalProgress=$event"
                        (onClose)="closeContributor()"
 ></workspace-contributor>
+<file-chooser *ngIf="addToCollection"
+              [collections]="true"
+              [isCancelable]="true"
+              [title]="'WORKSPACE.SELECT_COLLECTION'"
+              (onCancel)="cancelAddToCollection()"
+              (onChoose)="addToCollectionList($event[0].collection)"
+></file-chooser>
+<modal-dialog *ngIf="dialogTitle"
+              [title]="dialogTitle"
+              [message]="dialogMessage"
+              [messageParameters]="dialogMessageParameters"
+              [isCancelable]="dialogCancelable"
+              [buttons]="dialogButtons"
+              (onCancel)="dialogTitle=null"
+></modal-dialog>
 <global-progress *ngIf="globalProgress"></global-progress>

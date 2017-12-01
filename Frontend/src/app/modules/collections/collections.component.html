@@ -1,4 +1,5 @@
 <!-- <app-search-header></app-search-header> -->
+<global-progress *ngIf="globalProgress"></global-progress>
 <main-nav *ngIf="mainnav"
   [title]="'COLLECTIONS.TITLE'"
   [currentScope]="'collections'"
@@ -9,13 +10,7 @@
   [addCollection]="addPinning"
   (onClose)="addPinning=null"
 ></collections-manage-pinning>
-<file-chooser *ngIf="addToOther"
-              [collections]="true"
-              [isCancelable]="true"
-              [title]="'COLLECTIONS.ADD_TO_OTHER_TITLE'"
-              (onCancel)="cancelAddToOther()"
-              (onChoose)="storeToOtherCollection($event)"
-></file-chooser>
+
 
 <div [class.collectionsContainerMainnav]="mainnav" class="collectionsContainer">
 
@@ -52,25 +47,10 @@
   <breadcrumbs *ngIf="!isRootLevelCollection() && !isLoading" class="collections-breadcrumb"
     [home]="tabSelected=='MY'?'collections_myCollectionsLong':tabSelected=='EDU_GROUPS'?'collections_orgaCollectionsLong':'collections_allCollectionsLong'"
     [breadcrumbsAsNode]="path"
-               (onClick)="openBreadcrumb($event)"
+    [canDrop]="canDropOnCollection"
+    (onDrop)="dropOnCollection($event)"
+    (onClick)="openBreadcrumb($event)"
   ></breadcrumbs>
-  <!--
-<div *ngIf="!isRootLevelCollection() && (tabSelected.length>=-1)" class="collections-breadcrumb">
-
-    <div *ngIf="tabSelected.length==0" class="coll-breadcrumb coll-breadcrumb-clickable" (click)="selectTabMyCollections()" >{{ 'collections_collections' | translate }}</div>
-    <div *ngIf="tabSelected=='MY'" class="coll-breadcrumb coll-breadcrumb-clickable" (click)="selectTabMyCollections()" >{{ 'collections_myCollectionsLong' | translate }}
-    </div>
-    <div *ngIf="tabSelected=='EDU_GROUPS'" class="coll-breadcrumb coll-breadcrumb-clickable" (click)="selectTabMyOrganizations()">{{ 'collections_orgaCollectionsLong' | translate }}</div>
-    <div *ngIf="tabSelected=='EDU_ALL'" class="coll-breadcrumb coll-breadcrumb-clickable" (click)="selectTabAllCollections()">{{ 'collections_allCollectionsLong' | translate }}</div>
-
-    <div class="coll-breadcrumb" *ngFor="let crumb of breadcrumbs"  (click)="selectBreadcrumb(crumb)">&gt; <span class="coll-breadcrumb-clickable">{{crumb.name}}</span></div>
-
-    <div *ngIf="(!isLoading && isReady && (contentDetailObject==null))" class="coll-breadcrumb">&gt; {{collectionContent.collection.title}}</div>
-    <div *ngIf="(!isLoading && isReady && (contentDetailObject!=null))" class="coll-breadcrumb">&gt; {{contentDetailObject.reference.title}}</div>
-
-</div>
--->
-
 <!-- collection header -->
 <div *ngIf="(!isRootLevelCollection()) && (!isLoading) && isReady && (tabSelected.length>=-1)" [class.collections-headerMainnav]="mainnav" class="collections-header" [style.background-color]="collectionContent.collection.color">
 
@@ -90,7 +70,7 @@
             </div>
 
         </div>
-        <div *ngIf="pinningAllowed " class="collections-pin-button"
+        <div *ngIf="pinningAllowed && isAllowedToEditCollection() " class="collections-pin-button"
              tabindex="0"
              (keypress)="($event.which === 13)?pinCollection():0"
              (click)="pinCollection()"
@@ -162,14 +142,23 @@
 
 <section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading))" >
 
-                <div *ngIf="(!isRootLevelCollection()) && (collectionContent.collections.length>0)" class="section-headline">{{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}</div>
+                <div class="section-headline" *ngIf="isAllowedToEditCollection() || collectionContent.collections.length">{{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}</div>
 
                 <!-- COLLECTION CARDS -->
-                <edu-card *ngFor="let collection of collectionContent.collections"
-                          [collection]="collection"
-                          (onClick)="onCollectionsClick(collection)"
-
-                          ></edu-card>
+                <listTable
+                  [addElement]="isAllowedToEditCollection() ? createCollectionElement : null"
+                  [hasHeading]="false"
+                  [isLoading]="isLoading"
+                  [viewType]="isRootLevelCollection() ? 1 : 2"
+                  [dragDrop]="true"
+                  [canDrop]="canDropOnCollection"
+                  (onDrop)="dropOnCollection($event)"
+                  [columns]="collectionsColumns"
+                  [isClickable]="true"
+                  (clickRow)="onCollectionsClick($event)"
+                  (onAddElement)="onCreateCollection()"
+                  [nodes]="collectionContent.collections"
+                ></listTable>
 
                 <!-- when empty at root level -->
                 <div *ngIf="(collectionContent.collections.length==0) && (isRootLevelCollection())" class="section-headline collection-nocontent-container">
@@ -188,12 +177,22 @@
 
                 <div class="section-headline">{{ 'collections_content' | translate }}</div>
 
-                <!-- CONTENT CARDS -->
-                <edu-card *ngFor="let reference of collectionContent.references"
-                          [reference]="reference"
-                          (onClick)="onContentClick(reference)"
-                          (onDelete)="deleteReference(reference)"
-                ></edu-card>
+                <listTable
+                  [addElement]="isUserAllowedToEdit(collectionContent.collection) ? createCollectionReference : null"
+                  [hasHeading]="false"
+                  [isLoading]="isLoading"
+                  [viewType]="1"
+                  [dragDrop]="true"
+                  [columns]="referencesColumns"
+                  [options]="listOptions"
+                  [isClickable]="true"
+                  [canDrop]="canDropOnRef"
+                  (clickRow)="onContentClick($event)"
+                  (onAddElement)="switchToSearch()"
+                  [canDelete]="canDelete"
+                  (onDelete)="deleteReference($event)"
+                  [nodes]="collectionContent.references"
+                ></listTable>
 
                 <!-- NO CONTENT NOTICE -->
                 <div *ngIf="collectionContent.references.length==0" class="section-headline collection-nocontent-container">
@@ -209,14 +208,6 @@
 
 <section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading) && (isReady) && !isRootLevelCollection())" style="padding-bottom: 10px;">
     <div *ngIf="collectionContent.references.length>0" style="padding-top:8px;">&nbsp;</div>
-
-    <a class="waves-effect waves-light btn" [class.disabled]="!isUserAllowedToEdit(collectionContent.collection)"
-       tabindex="0"
-           (keyup.enter)="switchToSearch()"
-       (click)="switchToSearch()" ><i class="material-icons left">add</i>{{ 'collections_proceedToSearch' | translate }}</a>
-    <div class="noAddPermissions" *ngIf="!isUserAllowedToEdit(collectionContent.collection)">
-      {{'COLLECTIONS.NO_ADD_PERMISSIONS' | translate}}
-    </div>
 </section>
 
 <!-- error if present-->
@@ -235,5 +226,9 @@
                 [buttons]="dialogButtons"
   ></modal-dialog>
 
-
+  <workspace-management
+    [(nodeReport)]="nodeReport"
+    [(addToCollection)]="addToOther"
+    (onCloseAddToCollection)="closeAddToOther()"
+  ></workspace-management>
 </div>

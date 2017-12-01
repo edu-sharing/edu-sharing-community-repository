@@ -13,13 +13,7 @@
     [onInvalidNodeStore]="invalidateNodeStore"
     (onSearch)="routeSearch($event)"
   ></main-nav>
-  <file-chooser *ngIf="addNodesToCollection"
-                [collections]="true"
-                [isCancelable]="true"
-                [title]="'WORKSPACE.SELECT_COLLECTION'"
-                (onCancel)="addNodesToCollection=null"
-                (onChoose)="addToCollectionList($event)"
-  ></file-chooser>
+
   <div class="rowRepositories row tab-group row-dark scrollWithBanner" *ngIf="repositories">
     <div class="col s12">
       <ul class="tabs tabsRepositories">
@@ -58,7 +52,12 @@
       <div class="switchToCollections" *ngIf="isGuest">
         <a tabindex="0" title="{{'SEARCH.TO_COLLECTIONS' | translate}}" class="clickable" (click)="switchToCollections()" (keyup.enter)="switchToCollections()">{{'SEARCH.TO_COLLECTIONS' | translate}} <i class="material-icons">arrow_forward</i></a>
       </div>
+    <small-collection *ngIf="addToCollection"
+      [collection]="addToCollection"
+      [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
+    ></small-collection>
       <actionbar class="actionbarFrame"
+                 [backgroundType]="addToCollection ? 'primary' : 'bright'"
                  *ngIf="actionOptions && actionOptions.length"
                  [options]="actionOptions"></actionbar>
   </div>
@@ -180,7 +179,7 @@
 
    <div class="content_wrapper" [class.contentSidenav]="sidenav_opened">
     <div class="results alignWithBanner" [class.resultsNoRepositories]="!repositories" vocab="http://schema.org/" typeof="WebPage">
-      <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0">
+      <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0 && !addToCollection">
         <div class="collectionsHeading">
           <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{resultCount.collections}})<a *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
         </div>
@@ -227,8 +226,9 @@
    </div>
  </div>
 </div>
-<workspace-management
+<workspace-management #managementDialogs
   [(nodeReport)]="nodeReport"
+  [(addToCollection)]="addNodesToCollection"
 ></workspace-management>
 <div *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false">
   <div class="collection">

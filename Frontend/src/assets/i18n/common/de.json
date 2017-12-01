@@ -39,6 +39,7 @@
   "DAYS_AGO" : "Vor {{ days }} Tagen",
   "CREATE" : "Erstellen",
   "LOGOUT" : "Abmelden",
+  "INVALID_OPERATION":"Diese Funktion wird leider nicht unterstützt",
   "SHOW_IN_FOLDER":"Zum Speicherort",
   "EDIT_ACCOUNT":"Account Verwalten",
   "DEFAULT_METADATASET":"Standard-Metadatenset",
@@ -46,6 +47,9 @@
   "NO_CC_PUBLISH" : "Keine ausreichenden Berechtigungen",
   "ASK_CC_PUBLISH" : "Nachfragen",
   "ASK_CC_PUBLISH_SUBJECT" : "Anfrage für Berechtigungen des Elements {{name}}",
+  "ORIGINAL_DELETE":"Entfernen",
+  "ORIGINAL_DELETED":"Inhalt wurde gelöscht",
+  "ORIGINAL_DELETED_INFO":"Nur Informationen sichtbar",
   "COMMON_API_ERROR": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut",
   "COMMON_API_ERROR_TITLE": "Fehlerdetails",
   "SYSTEM_FOLDER_DELETE_ERROR":"Dieser Ordner wurde vom System erstellt und kann nicht gelöscht werden",
@@ -246,6 +250,10 @@
   "LIST":{
     "REORDER_TITLE":"Listenelemente anpassen",
     "REORDER_DRAG_DROP":"Sie können die Reihenfolge der Elemente durch Drag & Drop verändern"
+  },
+  "DIALOG":{
+    "COLLECTION_SHARE_PUBLIC":"Material in Sammlung freigeben?",
+    "COLLECTION_SHARE_PUBLIC_INFO":"Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben."
   },
   "NO_SIZE":"-",
   "VERSION_COMMENT":"Versionskommentar",

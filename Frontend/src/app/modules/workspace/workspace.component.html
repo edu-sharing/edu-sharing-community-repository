@@ -16,15 +16,6 @@
                   (onCancel)="editNodeMetadata=null"></workspace-editor>
  -->
 
-
-<file-chooser *ngIf="addNodesToCollection"
-              [collections]="true"
-              [isCancelable]="true"
-              [title]="'WORKSPACE.SELECT_COLLECTION'"
-              (onCancel)="addNodesToCollection=null"
-              (onChoose)="addToCollectionList($event)"
-></file-chooser>
-
 <div class="frame" fileDrop
      (onFileDrop)="onFileDrop($event)"
      (fileOver)="fileIsOver=$event">
@@ -161,7 +152,9 @@
   [breadcrumbsAsNode]="path"
   [searchQuery]="searchQuery"
   [home]="'WORKSPACE.'+root"
-             [homeId]="getRootFolderId()"
+  [canDrop]="canDropBreadcrumbs"
+  (onDrop)="handleDrop($event)"
+  [homeId]="getRootFolderId()"
   (onClick)="openBreadcrumb($event)"
 ></breadcrumbs>
   <recycle *ngIf="root=='RECYCLE'" class="explorer"
@@ -191,6 +184,7 @@
 [(nodeLicense)]="editNodeLicense"
 [(nodeMetadata)]="editNodeMetadata"
 [(filesToUpload)]="filesToUpload"
+[(addToCollection)]="addNodesToCollection"
 [fileIsOver]="fileIsOver"
 [(showUploadSelect)]="showUploadSelect"
 [parent]="currentFolder"

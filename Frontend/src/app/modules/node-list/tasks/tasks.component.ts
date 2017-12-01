@@ -1,6 +1,6 @@
 import {Component, Input} from "@angular/core";
 import {RestConstants} from "../../../common/rest/rest-constants";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {TranslateService} from "ng2-translate";
 import {Toast} from "../../../common/ui/toast";
 import {ArchiveRestore,Node} from "../../../common/rest/data-object";

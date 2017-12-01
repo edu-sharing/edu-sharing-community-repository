@@ -12,7 +12,7 @@ import {ConfigurationService} from "../services/configuration.service";
 import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
 import {Router} from "@angular/router";
-import {OptionItem} from "./actionbar/actionbar.component";
+import {OptionItem} from "./actionbar/option-item";
 import {DateHelper} from "./DateHelper";
 import {RestNodeService} from "../rest/services/rest-node.service";
 import {UIConstants} from "./ui-constants";
@@ -211,7 +211,9 @@ export class NodeHelper{
    * Download (a single) node
    * @param node
    */
-  public static downloadNode(node:Node,version=RestConstants.NODE_VERSION_CURRENT) {
+  public static downloadNode(node:any,version=RestConstants.NODE_VERSION_CURRENT) {
+    if(node.reference)
+      node=node.reference;
     window.open(node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""));
   }
 
@@ -334,6 +336,8 @@ export class NodeHelper{
    */
   public static getAttribute(translate:TranslateService,config:ConfigurationService,data : any,item : ListItem) : string{
     if(item.type=='NODE') {
+      if(data.reference) // collection ref, use original for properties
+        data=data.reference;
       if (item.name == RestConstants.CM_MODIFIED_DATE)
         return '<span property="dateModified" title="' + translate.instant('ACCESSIBILITY.LASTMODIFIED') + '">' + NodeHelper.getNodeAttribute(translate,config, data, item) + '</span>';
 
@@ -354,7 +358,7 @@ export class NodeHelper{
       return NodeHelper.getNodeAttribute(translate,config, data, item);
     }
     if(item.type=='COLLECTION'){
-      return NodeHelper.getCollectionAttribute(translate,data.collection,item.name);
+      return NodeHelper.getCollectionAttribute(translate,data.collection ? data.collection : data,item.name);
     }
     if(item.type=='GROUP' || item.type=='ORG'){
       if(item.name=="displayName")
@@ -487,6 +491,8 @@ export class NodeHelper{
   static getLRMIAttribute(translate:TranslateService,config:ConfigurationService,data: any, item: ListItem) {
     // http://dublincore.org/dcx/lrmi-terms/2014-10-24/
     if(item.type=='NODE'){
+      if(data.reference)
+        data=data.reference;
       if(item.name==RestConstants.CM_PROP_C_CREATED || item.name==RestConstants.CM_MODIFIED_DATE){
         return data.properties[item.name+'ISO8601'];
       }
@@ -538,6 +544,17 @@ export class NodeHelper{
       RestConstants.WORKFLOW_STATUS_HASFLAWS,
       RestConstants.WORKFLOW_STATUS_CHECKED,
     ]);
+  }
+
+  static allFiles(nodes: Node[]) {
+    let allFiles=true;
+    if(nodes) {
+      for (let node of nodes) {
+        if (node.isDirectory)
+          allFiles = false;
+      }
+    }
+    return allFiles;
   }
 }
 

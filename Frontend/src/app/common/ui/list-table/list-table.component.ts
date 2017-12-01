@@ -5,12 +5,10 @@ import {
 import {BrowserModule, DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {TranslateService} from "ng2-translate";
 import {Node} from "../../rest/data-object";
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";
 import {NodeHelper} from "../../ui/node-helper";
-import {Translation} from "../../translation";
-import {OptionItem} from "../actionbar/actionbar.component";
 import {UIAnimation} from "../ui-animation";
+import {OptionItem} from "../actionbar/option-item";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {Toast} from "../toast";
 import {UIService} from "../../services/ui.service";
@@ -20,6 +18,7 @@ import {ConfigurationService} from "../../services/configuration.service";
 import {RestHelper} from "../../rest/rest-helper";
 import {trigger} from "@angular/animations";
 import {ListItem} from "../list-item";
+import {UIHelper} from "../ui-helper";
 
 @Component({
   selector: 'listTable',
@@ -44,11 +43,9 @@ export class ListTableComponent implements EventListener{
 
   private optionsAlways:OptionItem[]=[];
 
-  private _nodes : Node[];
+  private _nodes : any[];
   private lastScroll: number;
   private static MIN_SCROLL_TIME=1000;
-  private appleCmd=false;
-  public shiftCmd = false;
 
   /**
    * Set the current list of nodes to render
@@ -117,6 +114,12 @@ export class ListTableComponent implements EventListener{
   /**
    * Are checkboxes visible (if disabled, only single select)
    */
+  /**
+   * If not null, shows a "Add Element" option as a first element (used for collections)
+   * The AddElement defines label, icon and other details
+   * The event onAddElement will be called when the user selects this element
+   */
+  @Input() addElement : AddElement;
   @Input() hasCheckbox : boolean;
   /**
    * Is a heading in table mode shown (when disabled, no sorting possible)
@@ -179,7 +182,17 @@ export class ListTableComponent implements EventListener{
    * @type {string}
    */
   @Input() listClass="list";
-
+  /**
+   *  For collection elements only, tells if the current user can delete the given item
+   *  Function should return a boolean
+   * @type {boolean}
+   */
+  @Input() canDelete:Function
+  /**
+   *  Can an element be dropped on the element
+   *  Called with same parameters as onDrop event
+   */
+  @Input() canDrop:Function=()=>{return true};
   // Callbacks
 
   /**
@@ -212,7 +225,7 @@ export class ListTableComponent implements EventListener{
    */
   @Output() onUpdateOptions = new EventEmitter();
   /**
-   * Called when a drop event happened, emits {target:<Node>,source:<Node[]>,event:<any>}
+   * Called when a drop event happened, emits {target:<Node>,source:<Node[]>,event:<any>,type:'default'|'copy'}
    * @type {EventEmitter}
    */
   @Output() onDrop=new EventEmitter();
@@ -221,7 +234,16 @@ export class ListTableComponent implements EventListener{
    * @type {EventEmitter}
    */
   @Output() columnsChanged=new EventEmitter();
-
+  /**
+   * Called when the user clicked the "addElement" item
+   * @type {EventEmitter}
+   */
+  @Output() onAddElement=new EventEmitter();
+  /**
+   * Called when the user clicked the delete for a missing reference object
+   * @type {EventEmitter}
+   */
+  @Output() onDelete=new EventEmitter();
 
   private dragHover : Node;
   private dropdownPosition = "";
@@ -233,7 +255,7 @@ export class ListTableComponent implements EventListener{
 
 
   public dropdown : Node;
-  private id : number;
+  public id : number;
 
   public currentDrag : string;
   private currentDragColumn : ListItem;
@@ -256,26 +278,9 @@ export class ListTableComponent implements EventListener{
       this.scroll();
     }
   }
-  @HostListener('document:keyup', ['$event'])
-  handleKeyboardEventUp(event: KeyboardEvent) {
-    if(event.keyCode==91 || event.keyCode==93)
-      this.appleCmd=false;
-    if(event.key=='Shift'){
-      this.shiftCmd=false;
-    }
-  }
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.key=='Shift'){
-      this.shiftCmd=true;
-    }
-    if(event.keyCode==91 || event.keyCode==93){
-      this.appleCmd=true;
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-    if(event.code=="KeyA" && (event.ctrlKey || this.appleCmd) && !KeyEvents.eventFromInputField(event)){
+    if(event.code=="KeyA" && (event.ctrlKey || this.ui.isAppleCmd()) && !KeyEvents.eventFromInputField(event)){
       this.toggleAll();
       event.preventDefault();
       event.stopPropagation();
@@ -297,6 +302,9 @@ export class ListTableComponent implements EventListener{
     this.onSelectionChanged.emit(this.selectedNodes);
 
   }
+  public delete(node:any){
+    this.onDelete.emit(node);
+  }
   public toggleAll(){
     if(this.selectedNodes.length==this._nodes.length){
       this.selectedNodes=[];
@@ -307,18 +315,10 @@ export class ListTableComponent implements EventListener{
     }
   }
   private allowDrag(event:any,target:Node){
-
-    if(!target.isDirectory || !this.storage.get("list_drag")) {
-      return;
+    if(UIHelper.handleAllowDragEvent(this.storage,this.ui,event,target,this.canDrop)) {
+      this.dragHover = target;
     }
-    if(event.altKey)
-      event.dataTransfer.dropEffect='link';
-    if(event.ctrlKey)
-      event.dataTransfer.dropEffect='copy';
-    //if(event.dataTransfer.getData("node"))
-    event.preventDefault();
-    event.stopPropagation();
-    this.dragHover=target;
+
   }
   private closeReorder(save:boolean){
     this.reorderDialog=false;
@@ -366,30 +366,31 @@ export class ListTableComponent implements EventListener{
   }
   private drop(event:any,target:Node){
     this.dragHover=null;
-    this.storage.remove("list_drag");
-    if(!event.dataTransfer.getData("node"))
-      return;
-    let data=(JSON.parse(event.dataTransfer.getData("node")) as Node[]);
-    event.preventDefault();
-    event.stopPropagation();
-    if(!data) {
-      return;
-    }
-    this.onDrop.emit({target:target,source:data,event:event});
+    UIHelper.handleDropEvent(this.storage,this.ui,event,target,this.onDrop);
   }
 
   private dragStart(event:any,node : Node){
     if(!this.dragDrop)
       return;
-    if(this.getSelectedPos(node)==-1)
-      this.selectedNodes.push(node);
+    if(this.getSelectedPos(node)==-1) {
+      if(this.hasCheckbox)
+        this.selectedNodes.push(node);
+      else
+        this.selectedNodes=[node];
+    }
     let nodes=this.selectedNodes.length ? this.selectedNodes : [node];
     event.dataTransfer.setData("node",JSON.stringify(nodes));
     event.dataTransfer.effectAllowed = 'all';
-    this.currentDrag=node.name;
+    let name="";
+    for(let node of nodes){
+      if(name)
+        name+=", ";
+      name+=RestHelper.getName(node);
+    }
+    this.currentDrag=name;
     this.currentDragCount=this.selectedNodes.length ? this.selectedNodes.length : 1;
     event.dataTransfer.setDragImage(this.drag.nativeElement,100,20);
-    this.storage.set("list_drag",nodes);
+    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,nodes);
     this.onSelectionChanged.emit(this.selectedNodes);
   }
   private dragStartColumn(event:any,index:number,column : ListItem){
@@ -419,7 +420,7 @@ export class ListTableComponent implements EventListener{
     return RestHelper.getTitle(node);
   }
   private callOption(option : OptionItem,node:Node){
-    if(!option.isEnabled || !this.optionIsValid(option,node))
+    if(!this.optionIsValid(option,node))
       return;
     option.callback(node);
     this.dropdown=null;
@@ -436,7 +437,6 @@ export class ListTableComponent implements EventListener{
 
     if(this._options.length<2)
       return;
-    this.select(node,false,false);
     this.showDropdown(node);
     this.dropdownPosition="fixed";
     this.dropdownLeft=event.clientX+"px";
@@ -456,9 +456,28 @@ export class ListTableComponent implements EventListener{
     setTimeout(()=>clearInterval(interval),500);
 
   }
+  public getCollectionColor(node : any){
+    return node.collection ? node.collection.color : node.color;
+  }
+  public getCollectionPinned(node : any){
+    return node.collection ? node.collection.pinned : node.pinned
+  }
+  public getIconUrl(node : any){
+    return node.reference ? node.reference.iconURL : node.iconURL;
+  }
+  public isCollection(node : any){
+    return node.collection || node.hasOwnProperty('childCollectionsCount');
+  }
+  public isReference(node : any){
+    return node.reference!=null;
+  }
+  public isDeleted(node:any){
+    return this.isReference(node) && !node.originalId;
+  }
   private showDropdown(node : Node){
     //if(this._options==null || this._options.length<1)
     //  return;
+    this.select(node,false,false);
     this.dropdownPosition="";
     this.dropdownLeft=null;
     this.dropdownTop=null;
@@ -508,7 +527,7 @@ export class ListTableComponent implements EventListener{
     }
     var pos=this.getSelectedPos(node);
     // select from-to range via shift key
-    if(fromCheckbox && pos==-1 && this.shiftCmd && this.selectedNodes.length==1){
+    if(fromCheckbox && pos==-1 && this.ui.isShiftCmd() && this.selectedNodes.length==1){
       let pos1=NodeHelper.getNodePositionInArray(node,this._nodes);
       let pos2=NodeHelper.getNodePositionInArray(this.selectedNodes[0],this._nodes);
       let start=pos1<pos2 ? pos1 : pos2;
@@ -557,6 +576,9 @@ export class ListTableComponent implements EventListener{
     }
     return true;
   }
+  public addElementClicked(){
+    this.onAddElement.emit();
+  }
   public askCCPublish(event:any,node : Node){
     let mail=node.createdBy.firstName+" "+node.createdBy.lastName+"<"+node.createdBy.mailbox+">";
     let subject=this.translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
@@ -567,4 +589,7 @@ export class ListTableComponent implements EventListener{
   public getItemCssClass(item:ListItem){
     return item.type.toLowerCase()+"_"+item.name.replace(":","_");
   }
+}
+export class AddElement{
+  constructor(public label:string,public icon="add"){}
 }

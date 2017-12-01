@@ -1,13 +1,20 @@
 import {TranslateService} from "ng2-translate";
 import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../services/configuration.service";
-import {Node} from "../rest/data-object";
+import {Collection, Node} from "../rest/data-object";
 import {ActivatedRoute, Router} from "@angular/router";
 import {UIConstants} from "./ui-constants";
-import {ElementRef} from "@angular/core";
+import {ElementRef, EventEmitter, HostListener} from "@angular/core";
 import {RestConstants} from "../rest/rest-constants";
+import {RestHelper} from "../rest/rest-helper";
+import {Toast} from "./toast";
+import {TemporaryStorageService} from "../services/temporary-storage.service";
+import {UIService} from "../services/ui.service";
+import {RestCollectionService} from "../rest/services/rest-collection.service";
+import {NodeHelper} from "./node-helper";
 export class UIHelper{
   static MOBILE_WIDTH = 600;
+
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
     config.get("branding").subscribe((data:any)=>{
       let t=name;
@@ -106,5 +113,76 @@ export class UIHelper{
 
   static materializeSelect() {
     eval("$('select').css('display','none');$('select').material_select()");
+  }
+
+  static showAddedToCollectionToast(toast:Toast,node: any,count:number) {
+    let scope=node.collection ? node.collection.scope : node.scope;
+    if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
+      scope='SHARED';
+    }
+    else if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
+      scope='PUBLIC';
+    }
+    toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)});
+  }
+
+
+  static handleAllowDragEvent(storage:TemporaryStorageService,ui:UIService,event: any, target: Node, canDrop: Function) {
+    let source=storage.get(TemporaryStorageService.LIST_DRAG_DATA);
+    if(!source)
+      return false;
+    if(!canDrop({source:source,target:target,event:event}))
+      return false;
+    /*
+    if(event.altKey)
+      event.dataTransfer.dropEffect='link';
+      */
+    if(event.ctrlKey || ui.isShiftCmd())
+      event.dataTransfer.dropEffect='copy';
+    //if(event.dataTransfer.getData("node"))
+    event.preventDefault();
+    event.stopPropagation();
+    return true;
+  }
+
+  static handleDropEvent(storage: TemporaryStorageService, ui: UIService, event: any, target: Node, onDrop: EventEmitter<any>) {
+    storage.remove(TemporaryStorageService.LIST_DRAG_DATA);
+    if(!event.dataTransfer.getData("node"))
+      return;
+    let data=(JSON.parse(event.dataTransfer.getData("node")) as Node[]);
+    event.preventDefault();
+    event.stopPropagation();
+    if(!data) {
+      return;
+    }
+    let type='default';
+    /*
+    if(event.altKey)
+      type='link';
+     */
+    if(event.ctrlKey || ui.isAppleCmd())
+      type='copy';
+    onDrop.emit({target:target,source:data,event:event,type:type});
+  }
+  static addToCollection(collectionService:RestCollectionService,toast:Toast,collection:Node|Collection,nodes:Node[],callback:Function=null,position=0,error=false){
+    if(position>=nodes.length){
+      if(!error)
+        UIHelper.showAddedToCollectionToast(toast,collection,nodes.length);
+      if(callback)
+        callback(error);
+      return;
+    }
+
+    collectionService.addNodeToCollection(collection.ref.id,nodes[position].ref.id).subscribe(()=>{
+        UIHelper.addToCollection(collectionService,toast,collection,nodes,callback,position+1,error);
+      },
+      (error:any)=>{
+        if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
+          toast.error(null,"WORKSPACE.TOAST.NODE_EXISTS_IN_COLLECTION",{name:RestHelper.getTitle(nodes[position])});
+        }
+        else
+          NodeHelper.handleNodeError(toast,RestHelper.getTitle(nodes[position]),error);
+        UIHelper.addToCollection(collectionService,toast,collection,nodes,callback,position+1,true);
+      });
   }
 }

@@ -59,6 +59,7 @@
   word-break: break-all;
   max-height: 48px;
   overflow: hidden;
+  @unselectableText();
 }
 .center-card .card-scroll{
   overflow-y: auto;

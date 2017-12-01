@@ -7,6 +7,7 @@
       "REMOVE": "delete",
       "ADD_TO_OTHER": "to collection"
     },
+    "ENTER_NAME" : "Please enter a name for the collection.",
     "NO_ADD_PERMISSIONS":"You have insufficient permissions to add materials to this collection",
     "ERROR_NOT_FOUND":"Collection not found",
     "ERROR_NODE_EXISTS":"The collection already contains this element",
@@ -59,7 +60,6 @@
   "collectionNew_setAccessMyOrga" : "my groups",
   "collectionNew_setAccessMyOrgaNA" : "my groups (you are no member of any groups)",
   "collectionNew_setAccessPublic" : "everybody",
-  "collectionNew_askName" : "Please enter a name for the collection.",
 
 
   "collectionNew_preview" : "preview of the collection",

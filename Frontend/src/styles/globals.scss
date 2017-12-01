@@ -86,7 +86,12 @@ a{
   text-align: center;
   padding-top:10px;
 }
-
+.material-icons.collectionScope {
+  font-size: 130%;
+  left: -1px;
+  position: relative;
+  top: 2px;
+}
 .uppercase {
   text-transform: uppercase;
 }

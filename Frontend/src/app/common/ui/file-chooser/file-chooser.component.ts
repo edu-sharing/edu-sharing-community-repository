@@ -54,7 +54,7 @@ export class FileChooserComponent implements OnInit{
    */
   @Input() set collections(collections : boolean){
     this._collections=collections;
-    this.viewType=1;
+    this.viewType=2;
     this.homeDirectory=RestConstants.ROOT;
     this.hasHeading = false;
     this._pickDirectory = false;

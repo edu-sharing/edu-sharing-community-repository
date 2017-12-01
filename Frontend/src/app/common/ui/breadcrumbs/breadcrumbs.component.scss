@@ -11,7 +11,7 @@
 .breadcrumb div{
   float:left;
   color:$primary;
-  padding:0 4px;
+  padding:2px 4px;
   font-size:70%;
 }
 .breadcrumb{
@@ -19,12 +19,18 @@
   max-height:25px;
   overflow:hidden;
 }
+.selected{
+  background-color: #fff;
+  border:2px dashed $primary;
+  padding:0 2px!important;
+}
 .breadcrumb div:last-child{
   font-weight: bold;
   color:#383838;
 }
 .breadcrumbMobile{
   display:none;
+  margin-top: -4px;
 }
 @media screen and (max-width: $mobileWidth) {
   .breadcrumbMobile{

@@ -9,7 +9,7 @@ import {ActivatedRoute} from "@angular/router";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {TranslateService} from "ng2-translate";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";

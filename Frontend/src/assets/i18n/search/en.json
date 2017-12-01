@@ -30,6 +30,9 @@
     "REPOSITORY_MORE":"More",
     "RENDER": {
       "BACK_TO_SEARCH":"Back to search"
-    }
+    },
+    "ADD_INTO_COLLECTION":"Add to collection \"{{title}}\"",
+    "ADD_TO_COLLECTION":"Add to collection",
+    "ADD_TO_COLLECTION_SHORT":"Add"
   }
 }

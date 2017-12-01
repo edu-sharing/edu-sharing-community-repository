@@ -92,6 +92,12 @@ export class DialogButton {
       new DialogButton("YES",DialogButton.TYPE_PRIMARY,yes),
     ];
   }
+  public static getNextCancel(cancel : Function,next : Function) : DialogButton[]{
+    return [
+      new DialogButton("CANCEL",DialogButton.TYPE_CANCEL,cancel),
+      new DialogButton("NEXT",DialogButton.TYPE_PRIMARY,next),
+    ];
+  }
   public static TYPE_PRIMARY=1;
   public static TYPE_CANCEL=2;
   /**

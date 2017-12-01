@@ -15,7 +15,7 @@ import {RestHelper} from "../../../common/rest/rest-helper";
 import {GwtInterfaceService} from "../../../common/services/gwt-interface.service";
 import {Toast} from "../../../common/ui/toast";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {IamUser} from "../../../common/rest/data-object";
+import {IamUser, NodeRef} from "../../../common/rest/data-object";
 import {User} from "../../../common/rest/data-object";
 import {LocalPermissions} from "../../../common/rest/data-object";
 import {Collection} from "../../../common/rest/data-object";
@@ -35,53 +35,52 @@ export class CollectionNewComponent {
   public hasCustomScope: boolean;
   public COLORS1=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A'];
   public COLORS2=['#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
-    public static SCOPE_MYCOLLECTIONS:number = 0;
-    public static SCOPE_MYORGANIZATIONS:number = 1;
-    public static SCOPE_ALLCOLLECTIONS:number = 2;
+  public isLoading:boolean = true;
+  public showPermissions = false;
+  private currentCollection:Collection;
+  private newCollectionType:string;
+  private hasUserAnyOrgasYet = false;
+  private user : User;
+  public mainnav = true;
+  public editPermissionsId: string;
+  private permissions: LocalPermissions = null;
+  public canInvite: boolean;
+  public shareToAll: boolean;
+  public createEditorial = false;
+  public createCurriculum = false;
+  public parentId: any;
+  public editId: any;
+  private imageData:string = null;
+  private imageFile:File = null;
+  private STEP_NEW = 'NEW';
+  private STEP_GENERAL = 'GENERAL';
+  private STEP_METADATA = 'METADATA';
+  private STEP_PERMISSIONS = 'PERMISSIONS';
+  private STEP_SETTINGS = 'SETTINGS';
+  private STEP_EDITORIAL_GROUPS = 'EDITORIAL_GROUPS';
+  private STEP_ICONS={
+    GENERAL:'edit',
+    METADATA:'info_outline',
+    PERMISSIONS:'group_add',
+    SETTINGS:'settings',
+    EDITORIAL_GROUPS:'star'
+  };
+  public newCollectionStep=this.STEP_NEW;
+  public editPermissionsDummy: EduData.Node;
+  private availableSteps: string[];
 
-    public isLoading:boolean = false;
-    public isReady:boolean = false;
-
-    private paramSubscription:any;
-    public lastError:string = null;
-
-    private parentId:string; // if not null --> new collection
-    private editId:string; // if not null --> edit collection
-
-    private currentCollection:Collection;
-    // new collection as state of page until router confusion settles down
-    public newCollectionStep:number;
-    private newCollectionName:string;
-    private newCollectionDescription:string;
-    private newCollectionScope:string;
-    private newCollectionColor:string;
-
-    // on edit of icon of collection is already set
-    private previewUrl:string;
-
-    private imageShow:boolean = false;
-    private imageData:string = null;
-    private imageFile:File = null;
-
-    private hasUserAnyOrgasYet = false;
-    private user : User;
-    public mainnav = false;
-    public editPermissionsId: string;
-    private permissions: LocalPermissions = null;
-    private shareToAll: boolean;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.code=="Escape"           ){
+    if(event.code=="Escape"){
       event.preventDefault();
       event.stopPropagation();
-      this.newCollectionCancel();
+      this.goBack();
       return;
     }
   }
-    // inject services
+
     constructor(
-        private gwtInterface:GwtInterfaceService,
         private collectionService : RestCollectionService,
         private nodeService : RestNodeService,
         private connector : RestConnectorService,
@@ -93,72 +92,43 @@ export class CollectionNewComponent {
         private zone: NgZone,
         private config : ConfigurationService,
         private translationService:TranslateService) {
+        Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
+          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>this.canInvite=has);
+          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has)=>this.shareToAll=has);
+          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL).subscribe((has)=>this.createEditorial=has);
+          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM).subscribe((has)=>this.createCurriculum=has);
+          this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
+          this.route.queryParams.subscribe(params => {
+            this.mainnav=params['mainnav']=='true';
+          });
 
-        Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{});
-        this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
-        // subscribe to paramter
-      this.paramSubscription = this.route.queryParams.subscribe(params => {
-        this.mainnav=params['mainnav']=='true';
-      });
-        this.paramSubscription = this.route.params.subscribe(params => {
-
-            // get id from route and validate input data
-            var id = params['id'];
-            if (typeof id == "undefined") id = RestConstants.ROOT;
-            if (id=="") id = RestConstants.ROOT;
-            if (id==":id") id = RestConstants.ROOT;
-
+          this.route.params.subscribe(params => {
             // get mode from route and validate input data
-            var mode = params['mode'];
-            if (typeof mode == "undefined") mode = "new";
-            if (mode=="") mode = "new";
-            if (mode==":mode") mode = "new";
-
+            let mode = params['mode'];
+            let id = params['id'];
             if (mode=="edit") {
-                this.editId = id;
-                this.parentId = null;
+              this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
+                this.editId=id;
+                this.currentCollection=data.collection;
+                this.newCollectionType=this.getTypeForCollection(this.currentCollection);
+                this.hasCustomScope=false;
+                this.newCollectionStep = this.STEP_GENERAL;
+                this.updateAvailableSteps();
+                this.isLoading=false;
+              });
             } else {
-                this.editId = null;
-                this.parentId = id;
+              this.parentId = id;
+              this.currentCollection=new Collection();
+              this.currentCollection.title="";
+              this.currentCollection.description="";
+              this.currentCollection.color=this.COLORS1[0];
+              this.updateAvailableSteps();
+              this.isLoading=false;
             }
-
-            this.newCollectionStep = 1;
-            this.newCollectionName = "";
-            this.newCollectionDescription = "";
-            this.newCollectionScope = RestConstants.COLLECTIONSCOPE_ALL;
-            this.newCollectionColor = "#975B5D";
-
-
-            this.collectionService.getOrganizations().subscribe((orgaList) => {
-              console.log(orgaList);
-              if (orgaList.organizations.length>0) this.hasUserAnyOrgasYet = true;
-              this.isLoading = false;
-              this.isReady = true;
-           });
-            // on edit case load values of collection
-            if (this.editId!=null) {
-                this.isLoading = true;
-
-                this.collectionService.getCollection(this.editId).subscribe((collection) => {
-                    console.log(collection);
-                    this.newCollectionName = collection.collection.title;
-                    this.newCollectionDescription = collection.collection.description;
-                    this.previewUrl = collection.collection.preview.isIcon ? null :  collection.collection.preview.url;
-                    if (collection.collection.color!=null) this.newCollectionColor = collection.collection.color;
-                  this.newCollectionScope = collection.collection.scope;
-                  if(this.newCollectionScope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC)
-                    this.newCollectionScope=RestConstants.COLLECTIONSCOPE_CUSTOM;
-
-                  this.isLoading = false;
-                  this.isReady = true;
-                });
-
-            } else {
-                this.isLoading = false;
-                this.isReady = true;
-            }
+          });
 
         });
+        // subscribe to paramter
 
 
     }
@@ -168,7 +138,6 @@ export class CollectionNewComponent {
       },(error:any)=>this.toast.error(error));
     }
     private updatePermissions(){
-      this.currentCollection.scope=this.newCollectionScope;
       this.isLoading=true;
       if(this.permissions){
         this.nodeService.setNodePermissions(this.currentCollection.ref.id,this.permissions).subscribe(()=>{
@@ -183,15 +152,30 @@ export class CollectionNewComponent {
       this.saveCollection();
 
     }
-    private permissionsSave(permissions : LocalPermissions){
-      this.permissions=permissions;
-      this.editPermissionsId=null;
+    private setPermissions(permissions : LocalPermissions){
+      if(permissions) {
+        this.permissions = permissions;
+        this.permissions.inherited=false;
+        if(this.permissions.permissions && this.permissions.permissions.length){
+          this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+        }
+      }
+      this.showPermissions=false;
     }
     private editPermissions(){
-      if(!this.hasCustomScope && this.permissions==null)
-        this.permissions=new LocalPermissions();
-      this.newCollectionScope=RestConstants.COLLECTIONSCOPE_CUSTOM;
-      this.editPermissionsId=this.currentCollection.ref.id;
+      if(this.permissions==null && !this.editId) {
+        this.permissions = new LocalPermissions();
+      }
+      if(this.editId) {
+        this.editPermissionsId = this.editId;
+      }
+      else{
+        this.editPermissionsDummy=new EduData.Node();
+        this.editPermissionsDummy.ref=new NodeRef();
+        this.editPermissionsDummy.aspects=[RestConstants.CCM_ASPECT_COLLECTION];
+        this.editPermissionsDummy.isDirectory=true;
+      }
+      this.showPermissions=true;
     }
     isNewCollection() : boolean {
         return this.editId==null;
@@ -206,24 +190,8 @@ export class CollectionNewComponent {
         if (id==null) id = this.editId;
         this.navigateToCollectionId(id);
     }
-
-    newCollectionContinue() : void {
-
-
-
-        // prepare image data
-        this.imageShow = false;
-        this.imageData = null;
-
-        // show next stepp
-        this.newCollectionStep=2;
-    }
-    newCollectionGoBack(){
-      this.newCollectionStep=1;
-    }
-
     setColor(color:string) : void {
-        this.newCollectionColor = color;
+        this.currentCollection.color = color;
     }
 
     imageDataChanged(event:any) : void {
@@ -257,7 +225,6 @@ export class CollectionNewComponent {
         var reader  = new FileReader();
         reader.addEventListener("load", () => {
             this.imageData = reader.result;
-            this.imageShow = true;
         });
         reader.readAsDataURL(file);
 
@@ -273,16 +240,11 @@ export class CollectionNewComponent {
       }
       this.toast.error(error);
     }
-    newCollectionCreate() : void {
+    save() : void {
         // input data optimize
-        this.newCollectionName = this.newCollectionName.trim();
-        this.newCollectionDescription = this.newCollectionDescription.trim();
+        this.currentCollection.title = this.currentCollection.title.trim();
+        this.currentCollection.description = this.currentCollection.description.trim();
 
-        // validate input --> TODO: Dialogs or micro interaction later
-        if (this.newCollectionName.length==0) {
-          this.toast.error(null,"collectionNew_askName");
-          return;
-        }
         if (this.isEditCollection()) {
 
             /*
@@ -290,115 +252,137 @@ export class CollectionNewComponent {
              */
 
             this.isLoading = true;
-
-            this.collectionService.getCollection(this.editId).subscribe((collectionWrapper) => {
-
-                // update with user set data
-                collectionWrapper.collection.color = this.newCollectionColor;
-                collectionWrapper.collection.title = this.newCollectionName;
-                collectionWrapper.collection.description = this.newCollectionDescription;
-                collectionWrapper.collection.scope=this.newCollectionScope;
-                // null fields that should ne ignored
-                collectionWrapper.collection.owner = null;
-
-                this.collectionService.updateCollection(collectionWrapper.collection).subscribe( result => {
-
-                    // update image if needed
-                    this.uploadImageIfSetOrChanged(collectionWrapper.collection, () => {
-
-                        // finally UPDATE PERMISSIONS and than it will navigate to collection
-                        //this.updateLocalPermissions(collectionWrapper.collection);
-                        this.showPermissions(collectionWrapper.collection);
-                    });
-
-                },(error:any)=>{
-                  this.handleError(error);
-                  this.isLoading=false;
-                });
-
+            this.collectionService.updateCollection(this.currentCollection).subscribe(()=>{
+              this.save2(this.currentCollection);
+            }
+            ,(error:any)=>{
+              this.isLoading=false;
+              this.handleError(error);
             });
-
-
-            return;
-
         } else {
 
-            /*
-             *  CREATE
-             */
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>{
-              if(!has)
-                this.newCollectionScope=RestConstants.COLLECTIONSCOPE_MY;
-              this.isLoading = true;
+        /*
+         *  CREATE
+         */
+          this.isLoading = true;
+          this.collectionService.createCollection(
+            this.currentCollection.title,
+            this.currentCollection.description,
+            this.currentCollection.color,
+            this.currentCollection.scope,
+            this.parentId
 
-              this.collectionService.createCollection(
-                this.newCollectionName,
-                this.newCollectionDescription,
-                this.newCollectionColor,
-                this.newCollectionScope,
-                this.parentId
-
-              ).subscribe((collection:EduData.CollectionWrapper) => {
-
-                // update image if set
-                this.uploadImageIfSetOrChanged(collection.collection, () => {
-                  // finally UPDATE PERMISSIONS and than it will navigate to collection
-                  //this.updateLocalPermissions(collection.collection);
-                  this.showPermissions(collection.collection);
-
-                });
-
-              },(error:any)=>{
-                this.isLoading=false;
-                this.handleError(error);
-              });
-            });
-
-
+          ).subscribe((collection:EduData.CollectionWrapper) => {
+            this.save2(collection.collection);
+          },(error:any)=>{
+            this.isLoading=false;
+            this.handleError(error);
+          });
         }
-
     }
+    private saveImage(collection:EduData.Collection) : void {
 
-    // uploads image if needed and calls callback with ...
-    // null --> if no image or not changed
-    // image url --> if image new or changed
-    private uploadImageIfSetOrChanged(collection:EduData.Collection, callbackFunction:any) : void {
-
-             if ((this.imageShow) && (this.imageData!=null) && (this.imageData).startsWith("data:")) {
-                 // image new or changed
-                 this.collectionService.uploadCollectionImage(collection.ref.id, this.imageFile, "image/png").subscribe(() => {
-                     callbackFunction();
-                 });
-             } else {
-
-                 // no image or not changed
-                callbackFunction();
-
-             }
-
+       if ((this.imageData!=null) && (this.imageData).startsWith("data:")) {
+           this.collectionService.uploadCollectionImage(collection.ref.id, this.imageFile, "image/png").subscribe(() => {
+               this.navigateToCollectionId(collection.ref.id);
+           });
+       } else {
+          this.navigateToCollectionId(collection.ref.id);
+        }
     }
-
-    showPermissions(id:Collection){
-      if(this.isNewCollection()){
-        this.toast.toast('COLLECTIONS.TOAST.CREATED');
+    setCollectionType(type:string){
+      this.newCollectionType=type;
+      if(type=='EDU_ALL'){
+        this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_ALL;
       }
-      this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>{
-        if(has){
-          this.newCollectionStep=2;
-          this.hasCustomScope=this.newCollectionScope==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionScope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC;
-          this.currentCollection=id;
-          this.shareToAll=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
-          this.isLoading=false;
-        }
-        else{
-          this.navigateToCollectionId(id.ref.id);
-        }
-      });
+      if(type=='CUSTOM'){
+        this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+      }
+      this.updateAvailableSteps();
+      this.goToNextStep();
+    }
+    public getAvailableSteps():string[]{
+      let steps:string[]=[];
+      console.log(this.newCollectionType);
+      steps.push(this.STEP_GENERAL);
+      if(this.newCollectionType=='EDITORIAL'){
+        steps.push(this.STEP_METADATA);
+      }
+      if(this.newCollectionType=='CUSTOM'){
+        steps.push(this.STEP_PERMISSIONS);
+      }
+      if(this.newCollectionType=='EDITORIAL'){
+        steps.push(this.STEP_SETTINGS);
+      }
+      if(this.newCollectionType=='EDITORIAL'){
+        steps.push(this.STEP_EDITORIAL_GROUPS);
+      }
+      return steps;
+    }
+    public isLastStep(){
+      let pos=this.currentStepPosition();
+      return pos>=this.availableSteps.length-1;
+    }
+    public goToNextStep(){
+      if(this.isLastStep()){
+        this.save();
+      }
+      else{
+        let pos=this.currentStepPosition();
+        this.newCollectionStep=this.availableSteps[pos+1];
+      }
 
+    }
+    setCollectionGeneral(){
+      if(!this.currentCollection.title){
+        this.toast.error(null,'COLLECTIONS.ENTER_NAME');
+        return;
+      }
+      this.goToNextStep();
+    }
+    currentStepPosition(){
+      return this.availableSteps.indexOf(this.newCollectionStep);
+    }
+    goBack(){
+       let pos=this.currentStepPosition();
+       if(pos==-1){
+         this.navigateToCollectionId(this.parentId);
+       }
+       else if(pos==0){
+         if(this.editId) {
+           this.navigateToCollectionId(this.editId);
+         }
+         else {
+           this.newCollectionStep = this.STEP_NEW;
+         }
+       }
+       else{
+         this.newCollectionStep = this.availableSteps[pos - 1];
+       }
     }
     navigateToCollectionId(id:string) : void {
       this.isLoading = false;
       this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'], {queryParams:{id:id,mainnav:this.mainnav}});
     }
 
+  private save2(collection: Collection) {
+    if(this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
+      this.nodeService.setNodePermissions(collection.ref.id,this.permissions).subscribe(()=>{
+        this.saveImage(collection);
+      });
+    }
+    else {
+      this.saveImage(collection);
+    }
+  }
+
+  private getTypeForCollection(collection: Collection) {
+    if(collection.scope==RestConstants.COLLECTIONSCOPE_MY || collection.scope==RestConstants.COLLECTIONSCOPE_ORGA || collection.scope==RestConstants.COLLECTIONSCOPE_ALL || collection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC)
+      return RestConstants.COLLECTIONSCOPE_CUSTOM;
+    return collection.scope;
+  }
+
+  private updateAvailableSteps() {
+    this.availableSteps=this.getAvailableSteps();
+  }
 }

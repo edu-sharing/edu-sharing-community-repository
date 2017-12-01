@@ -11,6 +11,7 @@ export class TemporaryStorageService {
   public static NODE_RENDER_PARAMETER_OPTIONS = "node_render_options";
   public static NODE_RENDER_PARAMETER_LIST = "node_render_list";
   public static SESSION_INFO = "SESSION_INFO";
+  public static LIST_DRAG_DATA = "list_drag";
 
   private data : any={};
 

@@ -1,19 +1,153 @@
 @import "../../../../styles/variables.scss";
 
-table, div {
-   font-family: open_sansregular;
-   font-size: 14px;
+$imagePath: '../../../../assets/images/collections/';
+.createContainer{
+  display:flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  .createProgress{
+    position: fixed;
+    left: 20px;
+    top: 20%;
+    color:$textLight;
+    @include unselectableText();
+    >div{
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .connection{
+      height: 25px;
+      width: 3px;
+      background-image: url($imagePath + 'dashed-line.svg');
+      position: absolute;
+      left: 9px;
+      top: 20px;
+    }
+    >div.finished{
+      color:$primary;
+      @include clickable();
+      .circle{
+        background-image: url($imagePath + 'checked-circle.svg');
+      }
+      .label{
+        font-weight: bold;
+      }
+      .connection{
+        background-image: url($imagePath + 'line.svg');
+      }
+    }
+    >div.current{
+      color:$textPrimary;
+      .circle{
+        background-image: url($imagePath + 'active-circle.svg');
+      }
+      .label{
+        font-weight: bold;
+      }
+    }
+    >div.finish{
+      .circle{
+        background-image: url($imagePath + 'finish.svg');
+      }
+      color:$colorStatusPositive;
+      .label{
+        font-weight:bold;
+        text-transform: uppercase;
+      }
+    }
+    >div,.circle,i,.label{
+      display:flex;
+    }
+    i{
+      margin-right: 10px;
+      position: relative;
+      top: -2px;
+    }
+    .circle{
+      margin-right: 10px;
+      border-radius: 50%;
+      width:21px;
+      height:21px;
+      background-image: url($imagePath + 'dashed-circle.svg');
+      background-position: 50% 50%;
+      background-repeat: no-repeat;
+
+    }
+  }
 }
 
 .collections-master-div {
   height:100%;
   margin:auto;
-  width:320px;
+  max-width:600px;
   display:table;
   padding: 20px 0px;
 }
 .collections-master-div-mainnav{
-  margin-top: $mainnavHeight;
+}
+.createCollection{
+  background-color: #fff;
+  .headline{
+    font-size: 110%;
+    padding: 20px 20px;
+    margin: 0;
+    margin-bottom: 10px;
+    @include unselectableText();
+    background-color: $actionDialogBackground;
+    i{
+      float:right;
+    }
+  }
+  .group{
+    padding-top:5px;
+    margin-top: 5px;
+    border-top:1px solid #ccc;
+  }
+  .collection-item:hover{
+    background-color: $workspaceMetadataBackground;
+  }
+  .collection-item{
+    padding:10px 5px;
+    >div,i{
+      display: table-cell;
+    }
+    .title{
+      color:$primary;
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+    .description{
+      color:$textLight;
+    }
+    .title,.description{
+      float:left;
+      width:100%;
+    }
+    .content{
+      padding:10px 0;
+    }
+    .iconLeft{
+      vertical-align: middle;
+      padding-right: 15px;
+      padding-left: 20px;
+      i {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 50%;
+        @include materialShadowBottom();
+      }
+    }
+    .next{
+      color: $primary;
+      vertical-align: middle;
+      padding-right: 15px;
+    }
+    i{
+      position:relative;
+      top:3px;
+    }
+  }
 }
 .collection-new-container {
   display:table-cell;
@@ -27,6 +161,16 @@ table, div {
     -moz-box-shadow: 0px 4px 5px 0px rgba(0,0,0,0.5);
     box-shadow: 0px 4px 5px 0px rgba(0,0,0,0.5);
     */
+}
+.collection-metadata{
+  width: 350px;
+  margin-left: -175px!important;
+  left:auto;
+  .card-scroll{
+    padding-top:0;
+    padding-left:0;
+    padding-right:0;
+  }
 }
 .groupLabel{
   margin-bottom:5px;
@@ -45,7 +189,12 @@ table, div {
   font-size:120%;
 }
 .collectionShadow{
-  @include materialShadow();
+  @include materialShadowLarge();
+}
+.collectionImage{
+  position: relative;
+  height:240px;
+  background-color:white;
 }
 
 .collection-new-preview-infoarea {
@@ -70,10 +219,6 @@ table, div {
     margin-bottom: 4px;
 }
 
-.collection-nocontent-container {
-    text-align: left;
-}
-
 .collection-nocontent-big {
     font-size: 200%;
     padding:16px;
@@ -86,7 +231,11 @@ table, div {
     padding-top: 0px;
     padding-left: 0px;
 }
-
+.collections-loading-div{
+  position: absolute;
+  top: 20%;
+  text-align: center;
+}
 .color-option {
     display:inline-block;
     border-radius: 50%;
@@ -198,20 +347,20 @@ table, div {
 }
 
 .image-upload-field-input {
-    width: 100%;
-    height: 240px;
+    display: none;
 }
 
 .image-upload-icon {
-    width: 0px;
-    height: 0px;
-    cursor: hand;
-    background-color: #fff;
-    border-radius:50%;
-    position: relative;
-    top: 210px;
-    left: 290px;
-    opacity: 0.75;
+  z-index: 1;
+  padding:10px;
+  color: $primary;
+  background-color: #fff;
+  border-radius:50%;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  @include clickable();
+  @include materialShadowBottom();
 }
 .image-upload-icon i{
   background-color: rgba(255,255,255,0.75);
@@ -236,6 +385,42 @@ input[type="radio"] {
 
 /* für schmale Screens */
 
-@media screen and (max-width: 480px) {
+@media screen and (max-height: $mobileHeight){
+  .card:not(.card-low), .card-high {
+    top:$mainnavHeight+75px;
+  }
+}
 
+@media screen and (max-width: $mobileWidth+$mobileStage*3){
+  .createContainer{
+    .createProgress{
+      position: fixed;
+      display:flex;
+      top:$mainnavHeight+40px;
+      width:100vw;
+      left:0;
+      justify-content: center;
+      .circle{
+        background-size: 60%;
+      }
+      .connection{
+        height: 20px;
+        left: 25px;
+        top: 1px;
+        transform: rotate(90deg);
+      }
+
+      .label,.material-icons{
+        display:none;
+      }
+      .current .label{
+        display: flex;
+        position: fixed;
+        left:0;
+        top:$mainnavHeight+20px;
+        width:100vw;
+        justify-content: center;
+      }
+    }
+  }
 }

@@ -1,21 +1,9 @@
 import {Component, Input, Output, EventEmitter} from "@angular/core";
 import {RestConstants} from "../../../common/rest/rest-constants";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {TranslateService} from "ng2-translate";
 import {Toast} from "../../../common/ui/toast";
-import {ArchiveRestore,Node,NodeList} from "../../../common/rest/data-object";
-import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {ConfigurationService} from "../../../common/services/configuration.service";
-import {NodeHelper} from "../../../common/ui/node-helper";
-import {Http} from "@angular/http";
-import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {NodeRenderComponent} from "../../../common/ui/node-render/node-render.component";
-import {Router} from "@angular/router";
-import {UIConstants} from "../../../common/ui/ui-constants";
-import {ListItem} from "../../../common/ui/list-item";
-import {RestHelper} from "../../../common/rest/rest-helper";
 import {DateHelper} from "../../../common/ui/DateHelper";
 
 @Component({

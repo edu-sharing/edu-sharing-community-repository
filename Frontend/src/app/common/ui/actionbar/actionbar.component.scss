@@ -12,6 +12,14 @@
   color:#fff;
   background: transparent;
 }
+.primary{
+  color: $primary!important;
+  background: #fff!important;
+}
+.primary.disabled{
+  color: $textVeryLight!important;
+  background: #eee!important;
+}
 .btn-flat:not(:hover){
   background: transparent;
 }

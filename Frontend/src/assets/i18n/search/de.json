@@ -31,7 +31,10 @@
     "RENDER": {
       "BACK_TO_SEARCH":"Zurück zur Suche"
     },
+    "ADD_INTO_COLLECTION":"In Sammlung \"{{title}}\" einsortieren",
     "NODE_IMPORTED":"Objekt wurde importiert<br><a href='{{link}}'>Anzeigen</a>",
+    "ADD_TO_COLLECTION":"In Sammlung hinzufügen",
+    "ADD_TO_COLLECTION_SHORT":"In Sammlung",
     "SHOW_NODE_STORE":"Merkliste",
     "ADD_NODE_STORE":"Auf Merkliste",
     "ADDED_TO_NODE_STORE":"{{count}} Element(e) wurden auf die Merkliste gesetzt",
