@@ -16,7 +16,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
@@ -39,10 +38,10 @@ import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.GroupProfile;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRemote;
 import org.edu_sharing.restservices.shared.NodeAccess;
 import org.edu_sharing.restservices.shared.NodePermissions;
 import org.edu_sharing.restservices.shared.NodeRef;
+import org.edu_sharing.restservices.shared.NodeRemote;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
@@ -57,7 +56,10 @@ import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -68,6 +70,8 @@ import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import io.swagger.util.Json;
 
 public class NodeDao {
 	
@@ -268,9 +272,6 @@ public class NodeDao {
 	private final String type;
 	private final List<String> aspects;
 
-	private final String[] PERMISSIONS = new String[] {
-			PermissionService.ADD_CHILDREN,PermissionService.READ_CHILDREN,PermissionService.READ_PERMISSIONS,PermissionService.CHANGE_PERMISSIONS,PermissionService.DELETE_CHILDREN,PermissionService.WRITE, PermissionService.DELETE,CCConstants.PERMISSION_CC_PUBLISH};
-	
 	private final String storeProtocol;
 	
 	private final String storeId;
@@ -290,7 +291,20 @@ public class NodeDao {
 	private NodeDao(RepositoryDao repoDao, String nodeId) throws Throwable {
 		this(repoDao,nodeId,new Filter());
 	}
-	
+	/**
+	 * return a node by a given name inside a parent folder
+	 * @param repoDao
+	 * @param parentId the folder to search
+	 * @param type the NodeType to find
+	 * @param name the CM_NAME to find
+	 * @return
+	 * @throws Throwable
+	 */
+	public static NodeDao getByParent(RepositoryDao repoDao, String parentId,String type,String name) throws Throwable {
+		NodeService nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
+		HashMap<String, Object> properties = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId,type,CCConstants.CM_NAME, name);
+		return new NodeDao(repoDao,(String)properties.get(CCConstants.SYS_PROP_NODE_UID));
+	}
 	private NodeDao(RepositoryDao repoDao, String nodeId, Filter filter) throws Throwable {
 
 		this(repoDao,defaultStoreProtocol,defaultStoreId,nodeId,filter);
@@ -322,7 +336,7 @@ public class NodeDao {
 				this.nodeProps = nodeRef.getProperties();
 			}
 	
-			this.hasPermissions = this.permissionService.hasAllPermissions(this.storeProtocol, this.storeId, nodeId, PERMISSIONS);
+			this.hasPermissions = new PermissionServiceHelper(permissionService).hasAllPermissions(storeProtocol, storeId, nodeId);
 	
 			
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
@@ -353,6 +367,11 @@ public class NodeDao {
 	
 	public NodeDao createChild(String type, List<String> aspects,
 			HashMap<String, String[]> properties,boolean renameIfExists) throws DAOException {
+		return this.createChild(type, aspects, properties, renameIfExists, null);
+	}
+	
+	public NodeDao createChild(String type, List<String> aspects,
+			HashMap<String, String[]> properties,boolean renameIfExists, String childAssoc) throws DAOException {
 
 		try {
 			NameSpaceTool<String> nameSpaceTool = new NameSpaceTool<String>();
@@ -369,7 +388,7 @@ public class NodeDao {
 			int i=2;
 			while(true){
 				try{
-					childId = this.nodeService.createNode(nodeId, type, props);
+					childId = this.nodeService.createNode(nodeId, type, props, childAssoc);
 					break;
 				}catch(DuplicateChildNodeNameException e){
 					if(renameIfExists){
@@ -384,7 +403,7 @@ public class NodeDao {
 			if (aspects != null) {
 				for (String aspect : aspects) {
 					aspect = NameSpaceTool.transformToLongQName(aspect);
-					nodeService.addAspect(nodeId, aspect);
+					nodeService.addAspect(childId, aspect);
 				}
 			}
 	
@@ -653,7 +672,7 @@ public class NodeDao {
 	}
 
 	private String getIconURL() {
-		return new MimeTypesV2(repoDao.getApplicationInfo()).getIcon(nodeProps);
+		return new MimeTypesV2(repoDao.getApplicationInfo()).getIcon(type,nodeProps,aspects);
 	}
 	public List<String> getPermissions(String authority) throws DAOException {
 		try{
@@ -974,6 +993,9 @@ public class NodeDao {
 	private String getDownloadUrl(){
 		if(isLink())
 			return null;
+		// no download url if user can not access the content
+		if(!getAccessAsString().contains(CCConstants.PERMISSION_READ_ALL))
+			return null;
 		return (String) nodeProps.get(CCConstants.DOWNLOADURL);
 	}
 
@@ -1035,7 +1057,7 @@ public class NodeDao {
 
 		List<NodeAccess> result = new ArrayList<NodeAccess>();
 
-		for (String permission : PERMISSIONS) {
+		for (String permission : PermissionServiceHelper.PERMISSIONS) {
 
 			NodeAccess access = new NodeAccess();
 			access.setPermission(permission);
@@ -1048,18 +1070,7 @@ public class NodeDao {
 	}
 	
 	private List<String> getAccessAsString() {
-
-		List<String> result = new ArrayList<String>();
-
-		for (String permission : PERMISSIONS) {
-
-			if(hasPermissions.get(permission) == null || 
-					 !hasPermissions.get(permission))
-				continue;
-			result.add(permission);
-		}
-
-		return result;
+		return PermissionServiceHelper.getPermissionsAsString(hasPermissions);
 	}
 	
 	public HashMap<String,Object> getNativeProperties() throws DAOException {
@@ -1212,7 +1223,7 @@ public class NodeDao {
 	}
 	
 	private String getMediatype() {
-		return MimeTypesV2.getNodeType(nodeProps);
+		return MimeTypesV2.getNodeType(type,nodeProps,aspects);
 	}
 
 	private String getSize() {
@@ -1233,7 +1244,7 @@ public class NodeDao {
 	}
 	
 	private String getPreviewImage() {
-		return new MimeTypesV2(repoDao.getApplicationInfo()).getPreview(nodeProps);
+		return new MimeTypesV2(repoDao.getApplicationInfo()).getPreview(type,nodeProps,aspects);
 	}
 
 	public HashMap<String, HashMap<String, Object>> getNodeHistory() throws DAOException {
@@ -1493,8 +1504,48 @@ public class NodeDao {
 		}
 		return filtered;
 	}
- 	
- 	public static NodeRemote prepareUsage(String repId, String nodeId) throws DAOException, Throwable{
+	public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
+		try{
+			NotificationServiceFactory.getNotificationService(repoDao.getApplicationInfo().getAppId())
+			.notifyNodeIssue(nodeId, reason, userEmail, userComment);
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+		
+	}
+	/** store a new search node 
+	 * @return 
+	 * @throws DAO */
+	public static NodeDao saveSearch(RepositoryDao repoDao, String mdsId, String query, String name,
+			List<MdsQueryCriteria> parameters,boolean replace) throws DAOException {
+		try{
+    		String parent = RepositoryDao.getHomeRepository().getUserSavedSearch();
+    		NodeDao parentDao = new NodeDao(RepositoryDao.getHomeRepository(), parent);
+    		HashMap<String, String[]> props=new HashMap();
+    		props.put(CCConstants.CM_NAME, new String[]{name});
+    		props.put(CCConstants.LOM_PROP_GENERAL_TITLE, new String[]{name});
+    		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY, new String[]{repoDao.getId()});
+    		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_MDS, new String[]{mdsId});
+    		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY, new String[]{query});
+    		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS, new String[]{Json.pretty(parameters)});
+    		props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, new String[]{"true"});
+    		try{
+    			return parentDao.createChild(CCConstants.CCM_TYPE_SAVED_SEARCH, null, props, false);
+    		}catch(DAOException e){
+    			if(e.getCause() instanceof DuplicateChildNodeNameException && replace){
+	    			NodeDao old = NodeDao.getByParent(repoDao, parent, CCConstants.CCM_TYPE_SAVED_SEARCH, NodeServiceHelper.cleanupCmName(name));
+	    			old.changeProperties(props);
+	    			return old;
+    			}
+    			throw e;
+    		}
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+		
+	}
+	
+	public static NodeRemote prepareUsage(String repId, String nodeId) throws DAOException, Throwable{
  		
  		String tmpNodeId = new RemoteObjectService().getRemoteObject(repId, nodeId);
  		

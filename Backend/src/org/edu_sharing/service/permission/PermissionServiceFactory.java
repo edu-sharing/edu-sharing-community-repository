@@ -2,6 +2,7 @@ package org.edu_sharing.service.permission;
 
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 
 public class PermissionServiceFactory {
 
@@ -24,6 +25,10 @@ public class PermissionServiceFactory {
 		}
 		
 		return permissionService;
+	}
+
+	public static PermissionService getLocalService() {
+		return new PermissionServiceImpl(ApplicationInfoList.getHomeRepository().getAppId());
 	}
 	
 }

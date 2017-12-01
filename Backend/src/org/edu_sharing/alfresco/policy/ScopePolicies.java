@@ -137,6 +137,7 @@ public class ScopePolicies implements BeforeDeleteNodePolicy, OnCreateNodePolicy
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "onCreateNode"));
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_MAP), new JavaBehaviour(this, "onCreateNode"));
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_NOTIFY), new JavaBehaviour(this, "onCreateNode"));
+		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_SAVED_SEARCH), new JavaBehaviour(this, "onCreateNode"));
 		
 	}
 	public boolean isAdmin(String username) throws Exception {

@@ -16,13 +16,10 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
-import org.apache.oltu.oauth2.as.issuer.MD5Generator;
-import org.apache.oltu.oauth2.as.issuer.OAuthIssuer;
-import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
-import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -75,6 +72,7 @@ public class ConnectorServlet extends HttpServlet  {
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 		
 		boolean readOnly=true;
+		String toolInstanceNodeId = null;
 		try{
 			MCAlfrescoBaseClient repoClient = null;
 			repoClient = (MCAlfrescoBaseClient)RepoFactory.getInstance(homeRepo.getAppId(), req.getSession());
@@ -84,6 +82,10 @@ public class ConnectorServlet extends HttpServlet  {
 				return;
 			}
 			
+			String toolInstanceNodeRef = repoClient.getProperty(MCAlfrescoAPIClient.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), nodeId, CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF);
+			if(toolInstanceNodeRef != null) {
+				toolInstanceNodeId = new NodeRef(toolInstanceNodeRef).getId();
+			}
 			
 		}catch(Throwable e){
 			logger.error(e.getMessage(),e);
@@ -92,15 +94,22 @@ public class ConnectorServlet extends HttpServlet  {
 		}
 		
 		Connector connector = null;
-		for(Connector con : ConnectorServiceFactory.getConnectorService().getConnectorList().getConnectors()){
-			if(con.getId().equals(connectorId)){
-				connector = con;
+		if(connectorId != null) {
+			for(Connector con : ConnectorServiceFactory.getConnectorService().getConnectorList().getConnectors()){
+				if(con.getId().equals(connectorId)){
+					connector = con;
+				}
 			}
-		}
-		if(connector == null){
-			logger.error("no valid connector");
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no valid connector");
-			return;
+			if(connector == null){
+				logger.error("no valid connector");
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no valid connector");
+				return;
+			}
+			
+			if(!ToolPermissionServiceFactory.getInstance().hasToolPermissionForConnector(connectorId)){
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+				return;
+			}
 		}
 		
 		ApplicationInfo connectorAppInfo = null;
@@ -143,14 +152,27 @@ public class ConnectorServlet extends HttpServlet  {
 		try{
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("node",nodeId);
-			jsonObject.put("endpoint",connector.getUrl());
-			jsonObject.put("tool", connector.getId());
-			String mimetype = MimeTypesV2.getMimeType(properties);
-			jsonObject.put("mimetype",mimetype);
-			for(ConnectorFileType filetype : connector.getFiletypes()){
-				if(filetype.getMimetype().equals(mimetype))
-					jsonObject.put("filetype", filetype.getFiletype());
+			
+			if(connector != null) {
+				jsonObject.put("endpoint",connector.getUrl());
+				jsonObject.put("tool", connector.getId());
+				String mimetype = MimeTypesV2.getMimeType(properties);
+				jsonObject.put("mimetype",mimetype);
+				for(ConnectorFileType filetype : connector.getFiletypes()){
+					if(filetype.getMimetype().equals(mimetype))
+						jsonObject.put("filetype", filetype.getFiletype());
+				}
+			
+				for(ConnectorFileType filetype : connector.getFiletypes()){
+					if(filetype.getMimetype().equals(mimetype))
+						jsonObject.put("filetype", filetype.getFiletype());
+				}
 			}
+			
+			if(toolInstanceNodeId != null && !toolInstanceNodeId.trim().equals("")) {
+				jsonObject.put("tool","LTI");
+			}
+			
 			jsonObject.put("ts", System.currentTimeMillis() / 1000);
 			jsonObject.put("sessionId", req.getSession().getId());
 			jsonObject.put("ticket", req.getSession().getAttribute(CCConstants.AUTH_TICKET));
@@ -168,26 +190,8 @@ public class ConnectorServlet extends HttpServlet  {
 			logger.debug("jsonObject:" + jsonObject);
 				
 			
-			/**
-			 * encrypt the values with AES to prevent the length limit of 245 bytes with RSA
-			 */
-			KeyGenerator keygen = KeyGenerator.getInstance("AES");
-			//maybe use 256:
-			//http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html
-			keygen.init(128);
-			SecretKey aesKey = keygen.generateKey();
-			Encryption eAES = new Encryption("AES");
-			byte[] encrypted = eAES.encrypt(jsonObject.toString(), aesKey);
-			String url = UrlTool.setParam(connectorAppInfo.getContentUrl(), "e", URLEncoder.encode(Base64.encodeBase64String(encrypted)));
-			
-			/**
-			 * encrypt the AES key with RSA public key
-			 */
-			Encryption eRSA = new Encryption("RSA");
-			byte[] aesKeyEncrypted = eRSA.encrypt(aesKey.getEncoded(), eRSA.getPemPublicKey(connectorAppInfo.getPublicKey()));
-			url = UrlTool.setParam(url, "k", URLEncoder.encode(Base64.encodeBase64String(aesKeyEncrypted)));
-			logger.info("url:" + url + "  length:" + url.length());
-			resp.sendRedirect(url);
+			pushToConnector(jsonObject,connectorAppInfo,resp);
+		
 		}catch(Exception e){
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
@@ -196,5 +200,28 @@ public class ConnectorServlet extends HttpServlet  {
 		
 		
 		
+	}
+	
+	public void pushToConnector(JSONObject jsonObject, ApplicationInfo connectorAppInfo, HttpServletResponse resp) throws Exception{
+		/**
+		 * encrypt the values with AES to prevent the length limit of 245 bytes with RSA
+		 */
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		//maybe use 256:
+		//http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html
+		keygen.init(128);
+		SecretKey aesKey = keygen.generateKey();
+		Encryption eAES = new Encryption("AES");
+		byte[] encrypted = eAES.encrypt(jsonObject.toString(), aesKey);
+		String url = UrlTool.setParam(connectorAppInfo.getContentUrl(), "e", URLEncoder.encode(Base64.encodeBase64String(encrypted)));
+		
+		/**
+		 * encrypt the AES key with RSA public key
+		 */
+		Encryption eRSA = new Encryption("RSA");
+		byte[] aesKeyEncrypted = eRSA.encrypt(aesKey.getEncoded(), eRSA.getPemPublicKey(connectorAppInfo.getPublicKey()));
+		url = UrlTool.setParam(url, "k", URLEncoder.encode(Base64.encodeBase64String(aesKeyEncrypted)));
+		logger.info("url:" + url + "  length:" + url.length());
+		resp.sendRedirect(url);
 	}
 }

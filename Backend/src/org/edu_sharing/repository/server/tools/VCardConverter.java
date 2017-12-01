@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.repository.server.tools;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,6 +110,7 @@ public class VCardConverter {
 			
 		}catch(Exception e){
 			logger.debug(e.getMessage(),e);
+			return new ArrayList<HashMap<String,Object>>();
 		}
 		
 		return result;
@@ -124,9 +126,10 @@ public class VCardConverter {
 			if(!name.trim().isEmpty())
 				return name.trim();
 		}
-		return (String) data.get(prefix+CCConstants.VCARD_ORG);
+		if(data.containsKey(CCConstants.VCARD_ORG))
+			return (String) data.get(prefix+CCConstants.VCARD_ORG);
+		return null;		
 	}
-	
 	public static ArrayList<HashMap<String,Object>> vcardToHashMap(String vcardString){
 		return vcardToHashMap("", vcardString);
 	}
@@ -193,7 +196,9 @@ public class VCardConverter {
 				String[] splitted = value.split(StringTool.escape(CCConstants.MULTIVALUE_SEPARATOR));
 				for(String split:splitted){
 					ArrayList<HashMap<String, Object>> vcards = vcardToHashMap(property, split);
-					if (vcards != null && vcards.size() > 0) {
+					if (vcards != null) {
+						if(vcards.size()==0)
+							return new HashMap<String,Object>();
 						if(result == null){
 							result = vcards.get(0);
 						}else{

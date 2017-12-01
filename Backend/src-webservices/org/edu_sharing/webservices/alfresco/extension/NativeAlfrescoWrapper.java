@@ -17,9 +17,19 @@ public interface NativeAlfrescoWrapper extends java.rmi.Remote {
     public java.util.HashMap getUserInfo(java.lang.String userName) throws java.rmi.RemoteException;
     public org.edu_sharing.webservices.alfresco.extension.SearchResult search(org.edu_sharing.webservices.alfresco.extension.SearchCriteria[] searchCriterias, java.lang.String metadatasetId, int start, int nrOfResults, java.lang.String[] facettes) throws java.rmi.RemoteException;
     public void removeNode(java.lang.String nodeId, java.lang.String fromId) throws java.rmi.RemoteException;
+    public void setOwner(java.lang.String nodeId, java.lang.String username) throws java.rmi.RemoteException;
+    public void copyNode(java.lang.String nodeId, java.lang.String toNodeId, boolean copyChildren) throws java.rmi.RemoteException;
     public java.util.HashMap getChildren(java.lang.String parentID, java.lang.String type) throws java.rmi.RemoteException;
     public java.util.HashMap getChild(java.lang.String parentId, java.lang.String type, java.lang.String property, java.lang.String value) throws java.rmi.RemoteException;
+    public void setPermissions(java.lang.String nodeId, org.edu_sharing.repository.client.rpc.ACE[] aces) throws java.rmi.RemoteException;
+    public org.edu_sharing.webservices.alfresco.extension.SearchResult searchSolr(java.lang.String query, int startIdx, int nrOfresults, java.lang.String[] facettes, int facettesMinCount, int facettesLimit) throws java.rmi.RemoteException;
+    public java.util.HashMap getChildrenCheckPermissions(java.lang.String parentID, java.lang.String[] permissionsOnChild) throws java.rmi.RemoteException;
+    public java.lang.String createNode(java.lang.String parentID, java.lang.String nodeTypeString, java.lang.String childAssociation, java.util.HashMap props) throws java.rmi.RemoteException;
+    public java.lang.String createNodeAtomicValues(java.lang.String parentID, java.lang.String nodeTypeString, java.lang.String childAssociation, java.util.HashMap props) throws java.rmi.RemoteException;
+    public void updateNodeAtomicValues(java.lang.String nodeId, java.util.HashMap properties) throws java.rmi.RemoteException;
+    public boolean isAdmin(java.lang.String username) throws java.rmi.RemoteException;
     public java.util.HashMap getPropertiesExt(java.lang.String storeProtocol, java.lang.String storeId, java.lang.String nodeId) throws java.rmi.RemoteException;
+    public java.util.HashMap hasPermissions(java.lang.String userId, java.lang.String[] permissions, java.lang.String nodeId) throws java.rmi.RemoteException;
     public boolean hasPermissionsSimple(java.lang.String nodeId, java.lang.String[] permissions) throws java.rmi.RemoteException;
     public void updateNode(java.lang.String nodeId, java.util.HashMap properties) throws java.rmi.RemoteException;
     public java.lang.String getCompanyHomeNodeId() throws java.rmi.RemoteException;
@@ -35,16 +45,8 @@ public interface NativeAlfrescoWrapper extends java.rmi.Remote {
     public java.lang.String[] getMetadataSets() throws java.rmi.RemoteException;
     public org.edu_sharing.webservices.alfresco.extension.SearchResult findGroups(java.lang.String searchWord, java.lang.String eduGroupNodeId, int from, int nrOfResults) throws java.rmi.RemoteException;
     public org.edu_sharing.webservices.alfresco.extension.SearchResult findUsers(org.edu_sharing.webservices.alfresco.extension.KeyValue[] searchProps, java.lang.String eduGroupNodeId, int from, int nrOfResults) throws java.rmi.RemoteException;
-    public java.util.HashMap getChildrenCheckPermissions(java.lang.String parentID, java.lang.String[] permissionsOnChild) throws java.rmi.RemoteException;
-    public java.lang.String createNode(java.lang.String parentID, java.lang.String nodeTypeString, java.lang.String childAssociation, java.util.HashMap props) throws java.rmi.RemoteException;
-    public java.lang.String createNodeAtomicValues(java.lang.String parentID, java.lang.String nodeTypeString, java.lang.String childAssociation, java.util.HashMap props) throws java.rmi.RemoteException;
-    public void updateNodeAtomicValues(java.lang.String nodeId, java.util.HashMap properties) throws java.rmi.RemoteException;
-    public boolean isAdmin(java.lang.String username) throws java.rmi.RemoteException;
-    public java.util.HashMap hasPermissions(java.lang.String userId, java.lang.String[] permissions, java.lang.String nodeId) throws java.rmi.RemoteException;
-    public org.edu_sharing.webservices.alfresco.extension.SearchResult searchSolr(java.lang.String query, int startIdx, int nrOfresults, java.lang.String[] facettes, int facettesMinCount, int facettesLimit) throws java.rmi.RemoteException;
     public org.edu_sharing.webservices.alfresco.extension.KeyValue[] getEduGroupContextOfNode(java.lang.String nodeId) throws java.rmi.RemoteException;
     public boolean hasToolPermission(java.lang.String toolPermission) throws java.rmi.RemoteException;
-    public void setOwner(java.lang.String nodeId, java.lang.String username) throws java.rmi.RemoteException;
     public void setUserDefinedPreview(java.lang.String nodeId, byte[] content, java.lang.String fileName) throws java.rmi.RemoteException;
     public void removeUserDefinedPreview(java.lang.String nodeId) throws java.rmi.RemoteException;
     public java.lang.String guessMimetype(java.lang.String filename) throws java.rmi.RemoteException;
@@ -99,7 +101,5 @@ public interface NativeAlfrescoWrapper extends java.rmi.Remote {
     public void bindEduGroupFolder(java.lang.String groupName, java.lang.String folderId) throws java.rmi.RemoteException;
     public java.lang.String findNodeByPath(java.lang.String path) throws java.rmi.RemoteException;
     public java.lang.String[] getAspects(java.lang.String storeProtocol, java.lang.String storeId, java.lang.String nodeId) throws java.rmi.RemoteException;
-    public void setPermissions(java.lang.String nodeId, org.edu_sharing.repository.client.rpc.ACE[] aces) throws java.rmi.RemoteException;
-    public void copyNode(java.lang.String nodeId, java.lang.String toNodeId, boolean copyChildren) throws java.rmi.RemoteException;
     public void removeChild(java.lang.String parentID, java.lang.String childID, java.lang.String association) throws java.rmi.RemoteException;
 }

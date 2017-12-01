@@ -16,12 +16,11 @@ public class MetadataWidget extends MetadataTranslatable{
 	};
 	private String id,type,caption,bottomCaption,icon,
 					placeholder,defaultvalue,template,condition,
-					suggestionSource,suggestionQuery,unit;
+					suggestionSource,suggestionQuery,unit,format;
 	private Integer min,max,defaultValue,defaultMin,defaultMax,step;
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty;
 	private List<MetadataKey> values;
 
-	
 	public String getSuggestionQuery() {
 		return suggestionQuery;
 	}
@@ -33,6 +32,12 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public void setUnit(String unit) {
 		this.unit = unit;
+	}
+	public String getFormat() {
+		return format;
+	}
+	public void setFormat(String format) {
+		this.format = format;
 	}
 	public String getSuggestionSource() {
 		return suggestionSource;
@@ -195,12 +200,12 @@ public class MetadataWidget extends MetadataTranslatable{
 			return condition==null;
 		return other.condition.equals(condition);
 	}
-	public Map<String, String> getValuesAsMap() {
-		Map<String,String> map=new HashMap<>();
+	public Map<String, MetadataKey> getValuesAsMap() {
+		Map<String,MetadataKey> map=new HashMap<>();
 		if(values==null)
 			return map;
 		for(MetadataKey value : values){
-			map.put(value.getKey(), value.getCaption());
+			map.put(value.getKey(), value);
 		}
 		return map;
 	}

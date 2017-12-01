@@ -216,8 +216,11 @@ public class CCConstants {
 	
 	public final static String ACTION_NAME_RESOURCEINFO = "cc-ressourceinfo-action";
 	
+	
 	public final static String CCM_TYPE_IO = "{http://www.campuscontent.de/model/1.0}io";
 	
+	public final static String CCM_TYPE_SAVED_SEARCH = "{http://www.campuscontent.de/model/1.0}saved_search";
+
 	public final static String CCM_TYPE_LO = "{http://www.campuscontent.de/model/1.0}lo";
 	
 	public final static String CCM_TYPE_EO = "{http://www.campuscontent.de/model/1.0}eo";
@@ -241,7 +244,9 @@ public class CCConstants {
 	public final static String CCM_TYPE_SHARE = "{http://www.campuscontent.de/model/1.0}share";
 	
 	public final static String CCM_TYPE_TOOLPERMISSION = "{http://www.campuscontent.de/model/1.0}toolpermission";
-		
+	
+	public final static String CCM_TYPE_TOOL_INSTANCE = "{http://www.campuscontent.de/model/1.0}tool_instance";
+	
 	public final static String LOM_TYPE_IDENTIFIER ="{http://www.campuscontent.de/model/lom/1.0}identifier";
 	
 	public final static String LOM_TYPE_EDUCATIONAL = "{http://www.campuscontent.de/model/lom/1.0}educational";
@@ -338,6 +343,7 @@ public class CCConstants {
 	
 	public final static String CM_PROP_PERSONACCESSELEMENT_CCACTIVATEKEY ="{http://www.alfresco.org/model/content/1.0}ccactivatekey";
 	
+
 	public final static String CM_PROP_THUMBNAIL_THUMBNAILNAME = "{http://www.alfresco.org/model/content/1.0}thumbnailName";
 	
 	public final static String CM_PROP_THUMBNAIL_CONTENT_PROPERTY_NAME = "{http://www.alfresco.org/model/content/1.0}contentPropertyName";
@@ -349,6 +355,11 @@ public class CCConstants {
 	public final static String CM_ASSOC_PERSON_ACCESSLIST = "{http://www.alfresco.org/model/content/1.0}accesslist";
 	
 	
+	public final static String CCM_PROP_SAVED_SEARCH_REPOSITORY = "{http://www.campuscontent.de/model/1.0}saved_search_repository";
+	public final static String CCM_PROP_SAVED_SEARCH_MDS = "{http://www.campuscontent.de/model/1.0}saved_search_mds";
+	public final static String CCM_PROP_SAVED_SEARCH_QUERY = "{http://www.campuscontent.de/model/1.0}saved_search_query";
+	public final static String CCM_PROP_SAVED_SEARCH_PARAMETERS = "{http://www.campuscontent.de/model/1.0}saved_search_parameters";
+	
 	/*CCMODEL*/
 	public final static String CCM_ASPECT_USER_EXTENSION ="{http://www.campuscontent.de/model/1.0}userExtension";
 
@@ -356,7 +367,15 @@ public class CCConstants {
 	
 	public final static String CCM_ASPECT_COLLECTION = "{http://www.campuscontent.de/model/1.0}collection";
 	
+	public final static String CCM_ASPECT_COLLECTION_PINNED = "{http://www.campuscontent.de/model/1.0}collection_pinned";
+	
 	public final static String CCM_ASPECT_COLLECTION_IO_REFERENCE = "{http://www.campuscontent.de/model/1.0}collection_io_reference";
+	
+	public final static String CCM_ASPECT_TOOL_DEFINITION = "{http://www.campuscontent.de/model/1.0}tool_definition";
+	
+	public final static String CCM_ASPECT_TOOL_OBJECT = "{http://www.campuscontent.de/model/1.0}tool_object";
+	
+	public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 	
 	public final static String CCM_PROP_IO_REF_TITLE = "{http://www.campuscontent.de/model/1.0}ref_title";
 	
@@ -400,8 +419,10 @@ public class CCConstants {
 	
 	public final static String CCM_ASSOC_ASSIGNEDLICENSES = "{http://www.campuscontent.de/model/1.0}assignedlicenses";
 	
+	public final static String CCM_ASSOC_TOOL_INSTANCES = "{http://www.campuscontent.de/model/1.0}tool_instances";
+
 	/* Templates */
-	
+		
 	public final static String CCM_ASPECT_METADATA_PRESETTING ="{http://www.campuscontent.de/model/1.0}metadataPresetting";
 	
 
@@ -601,6 +622,12 @@ public class CCConstants {
 	
 	public final static String CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX = "TOOLPERMISSION_CONNECTOR_";
 	
+	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL = "TOOLPERMISSION_COLLECTION_EDITORIAL";
+	
+	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM = "TOOLPERMISSION_COLLECTION_CURRICULUM";
+	
+	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING = "TOOLPERMISSION_COLLECTION_PINNING";
+	
 	public final static String CCM_VALUE_TOOLPERMISSION_CONFIDENTAL = "TOOLPERMISSION_CONFIDENTAL";
 
 	/**
@@ -639,6 +666,8 @@ public class CCConstants {
 	public final static String VIRT_PROP_LICENSE_ICON = "{virtualproperty}licenseicon";
 	
 	public final static String VIRT_PROP_ORIGINAL_DELETED = "{virtualproperty}originaldeleted";
+	
+	public final static String TOOL_HOMEFOLDER = "EDU_TOOL"; 
 	
 	
 	private static HashMap<String,String> lifecycleContributerPropsMap = new HashMap<String,String>();
@@ -845,6 +874,10 @@ public class CCConstants {
 	
 	public final static String CCM_PROP_MAP_COLLECTIONLEVEL0 = "{http://www.campuscontent.de/model/1.0}collectionlevel0";
 	
+	public final static String CCM_PROP_COLLECTION_PINNED_STATUS = "{http://www.campuscontent.de/model/1.0}collection_pinned_status";
+
+	public final static String CCM_PROP_COLLECTION_PINNED_ORDER = "{http://www.campuscontent.de/model/1.0}collection_pinned_order";
+
 	public final static String CCM_VALUE_LINK_LINKTYPE_CHAMELEON = "CMchameleon";
 
 	public final static String CCM_PROP_MAP_TYPE = "{http://www.campuscontent.de/model/1.0}maptype";	
@@ -852,6 +885,7 @@ public class CCConstants {
 	public final static String CCM_VALUE_MAP_TYPE_EDUGROUP = "EDUGROUP";	
 	public final static String CCM_VALUE_MAP_TYPE_DOCUMENTS = "USERDATAFOLDER";
 	public final static String CCM_VALUE_MAP_TYPE_USERINBOX = "USERINBOX";
+	public final static String CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH = "USERSAVEDSEARCH";
 	
 	public final static String CCM_VALUE_MAP_TYPE_IMAGES = "IMAGES";
 	
@@ -1166,6 +1200,7 @@ public class CCConstants {
 	 * Read Permission
 	 */
 	public final static String PERMISSION_CONSUMER = "Consumer";
+	public final static String PERMISSION_CONSUMER_METADATA = "ConsumerMetadata";
 	
 	/**
 	 * Read Permission and Write Permission to the Object
@@ -1193,6 +1228,8 @@ public class CCConstants {
 	 * Campus Content Publish Permission
 	 */
 	public final static String PERMISSION_CC_PUBLISH = "CCPublish";
+	public final static String PERMISSION_READ_ALL = "ReadAll";
+	public final static String PERMISSION_READ_PREVIEW = "ReadPreview";
 	
 	public final static String PERMISSION_ES_CHILD_MANAGER = "ESChildManager";
 	
@@ -1281,6 +1318,7 @@ public class CCConstants {
 	 * P: personal use
 	 * NC: no commercial reuse and distribution
 	 */
+	
 	
 	/**
 	 * - personal use
@@ -1495,6 +1533,8 @@ public class CCConstants {
 	
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACE_I18N_PREFIX = "taxonid_valuespace_i18n_prefix";
 	
+	public static String EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE = "resolve_website_title";
+	
 	/**
 	 * @return <namespace,localnamespace>
 	 */
@@ -1562,7 +1602,8 @@ public class CCConstants {
 	public static final String ISODATE_SUFFIX = "ISO8601";
 	
 	public static final String LONG_DATE_SUFFIX = "_LONG";
-	
+	public static final String DISPLAYNAME_SUFFIX = "_DISPLAYNAME";
+
 	public static final String I18N_CLIENTBUNDLE = "org.edu_sharing.repository.client.CCSearchI18n";
 	
 	public static final String I18N_METADATASETBUNDLE = "org.edu_sharing.metadataset.CCSearchI18n";
@@ -1591,5 +1632,8 @@ public class CCConstants {
 	public static final String EDU_SHARING_GLOBAL_GROUPS = "EDU_SHARING_GLOBAL_GROUPS";
 	
 	public static final String ADMINISTRATORS_GROUP_TYPE = "ORG_ADMINISTRATORS";
+	public static final String EDITORIAL_GROUP_TYPE = "EDITORIAL";
+
+	public static final String SESSION_LAST_SEARCH_TOKEN = "LAST_SEARCH_TOKEN";
 	
 }

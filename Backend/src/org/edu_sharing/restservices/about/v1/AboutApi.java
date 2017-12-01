@@ -9,6 +9,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiApplication;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.about.v1.model.About;
@@ -16,6 +18,7 @@ import org.edu_sharing.restservices.about.v1.model.Service;
 import org.edu_sharing.restservices.about.v1.model.ServiceInstance;
 import org.edu_sharing.restservices.about.v1.model.ServiceVersion;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.service.mime.MimeTypesV2;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,15 +47,18 @@ public class AboutApi  {
     public Response about() {
 
     	try {
-    		
 	    	About about = new About();
 	    	
 	    	ServiceVersion version = new ServiceVersion();
 	    	
 	    	version.setMajor(ApiApplication.MAJOR);
 	    	version.setMinor(ApiApplication.MINOR);
+	    	
+	    	logger.info("Request via domain "+Context.getCurrentInstance().getRequest().getServerName());
 	
 	    	about.setVersion(version);
+	    	
+	    	about.setThemesUrl(new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getThemePath());
 	    	
 	    	Map<String, Service> services = new HashMap<String, Service>(); 
 	    	for (Class<?> clazz : ApiApplication.SERVICES) {

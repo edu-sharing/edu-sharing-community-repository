@@ -43,7 +43,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
  */
 public class ShibbolethAuthenticationFilter implements Filter {
 
-	private static final String RELEASE = "$Revision: 7276 $";
+	private static final String RELEASE = "$Revision: 7283 $";
 
 	private static final String WELCOME = "WebDAV Server";
 

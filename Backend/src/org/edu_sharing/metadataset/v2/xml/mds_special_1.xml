@@ -1,6 +1,6 @@
 <metadataset id="default" label="default" hidden="false">
 		<name>Sample MDS</name>
-		<i18n>mds_translation</i18n>
+		<i18n>mds</i18n>
 		<widgets>
 			<widget>
 				<id>ccm:classification_purpose</id>

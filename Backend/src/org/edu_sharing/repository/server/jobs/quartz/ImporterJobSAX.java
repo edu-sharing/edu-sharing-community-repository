@@ -24,7 +24,7 @@ public class ImporterJobSAX extends ImporterJob {
 	
 	
 	@Override
-	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String[] sets, String recordHandlerClass, String importerClass) {
+	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass) {
 		try{
 			for(String set: sets){
 				long millisec = System.currentTimeMillis();

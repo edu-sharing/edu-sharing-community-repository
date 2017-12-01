@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.repository.server.importer.BinaryHandler;
 import org.edu_sharing.repository.server.importer.Importer;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
@@ -81,14 +82,15 @@ public class ImporterJob extends AbstractJob {
 		String metadataSetId = (String) jobDataMap.get(OAIConst.PARAM_METADATASET_ID);
 
 		String recordHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_RECORDHANDLER);
+		String binaryHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_BINARYHANDLER);
 
 		String importerClass = (String) jobDataMap.get(OAIConst.PARAM_IMPORTERCLASS);
-		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass, importerClass);
+		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass);
 		logger.info("returns");
 	}
 
 	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-			String[] sets, String recordHandlerClass, String importerClass) {
+			String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass) {
 		try {
 
 			Importer importer = null;
@@ -101,6 +103,7 @@ public class ImporterJob extends AbstractJob {
 			}
 
 			RecordHandlerInterface recordHandler = null;
+			BinaryHandler binaryHandler = null;
 
 			if (recordHandlerClass != null) {
 				Class tClass = Class.forName(recordHandlerClass);
@@ -109,12 +112,19 @@ public class ImporterJob extends AbstractJob {
 			} else {
 				recordHandler = new RecordHandlerLOM(metadataSetId);
 			}
+			if (binaryHandlerClass != null) {
+				Class tClass = Class.forName(binaryHandlerClass);
+				Constructor constructor = tClass.getConstructor();
+				binaryHandler = (BinaryHandler) constructor.newInstance();
+			} else {
+				binaryHandler = null;
+			}
 			
 			logger.info("importer:" + importer.getClass().getName());
 			logger.info("recordHandler:" + recordHandler.getClass().getName());
 			
 			importer.setBaseUrl(oaiBaseUrl);
-			importer.setBinaryHandler(null);
+			importer.setBinaryHandler(binaryHandler);
 			importer.setMetadataPrefix(metadataPrefix);
 			importer.setNrOfRecords(-1);
 			importer.setNrOfResumptions(-1);

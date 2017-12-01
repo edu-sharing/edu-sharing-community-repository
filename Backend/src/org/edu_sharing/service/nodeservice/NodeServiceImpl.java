@@ -61,7 +61,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_WF_STATUS,
 			CCConstants.CM_PROP_METADATASET_EDU_METADATASET,
 			CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET,
-			CCConstants.CCM_PROP_EDITOR_TYPE
+			CCConstants.CCM_PROP_EDITOR_TYPE,
+			CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF,
+			CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY,
+			CCConstants.CCM_PROP_SAVED_SEARCH_MDS,
+			CCConstants.CCM_PROP_SAVED_SEARCH_QUERY,
+			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
@@ -107,7 +112,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			String nodeType = getType(nodeId);
 			String parentId = nodeService.getPrimaryParent(new NodeRef(Constants.storeRef,nodeId)).getParentRef().getId();
 			HashMap<String,Object> toSafeProps = getToSafeProps(props,false,nodeType,nodeId, parentId);
-			updateNodeInternal(nodeId, toSafeProps);
+			updateNodeNative(nodeId, toSafeProps);
 	}
 	
 	public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
@@ -126,7 +131,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		if(CCConstants.CCM_TYPE_IO.equals(getType(nodeRef.getId()))) {
 			HashMap<String, Object> props = new HashMap<String,Object>();
 			props.put(CCConstants.LOM_PROP_LIFECYCLE_VERSION,"1.0");
-			updateNodeInternal(nodeRef.getId(), props);
+			updateNodeNative(nodeRef.getId(), props);
 		}
 	}
 	
@@ -135,12 +140,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return createNodeBasic(parentId, nodeType, toSafeProps);
 	}
 	
+	@Override
+	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation)
+			throws Throwable {
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,true,nodeType, null,parentId);
+		return this.createNodeBasic(Constants.storeRef, parentId, nodeType,childAssociation, toSafeProps);
+	}
+	
 	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props) {
 		return this.createNodeBasic(Constants.storeRef, parentID, nodeTypeString,CCConstants.CM_ASSOC_FOLDER_CONTAINS, _props);
 	}
 	
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, Object> _props) {
-
+		childAssociation = (childAssociation == null) ? CCConstants.CM_ASSOC_FOLDER_CONTAINS : childAssociation;
 		Map<QName, Serializable> properties = transformPropMap(_props);
 
 		NodeRef parentNodeRef = new NodeRef(store, parentID);
@@ -238,13 +250,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					cmNameReadableName = fakePaceCleanedString;
 				}
 	
-				// replace chars that can lead to an
-				// org.alfresco.repo.node.integrity.IntegrityException
-				cmNameReadableName = cmNameReadableName.replaceAll(
-						RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
-	
-				//replace ending dot with nothing
-				cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "");
+				cmNameReadableName = NodeServiceHelper.cleanupCmName(cmNameReadableName);
 	
 				toSafe.put(CCConstants.CM_NAME, cmNameReadableName);	
 			}
@@ -455,11 +461,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 	}
 	
-	public void updateNodeInternal(String nodeId, HashMap<String, Object> _props) {
-		this.updateNodeInternal(Constants.storeRef, nodeId, _props);
+	@Override
+	public void updateNodeNative(String nodeId, HashMap<String, Object> _props) {
+		this.updateNodeNative(Constants.storeRef, nodeId, _props);
 	}
 
-	public void updateNodeInternal(StoreRef store, String nodeId, HashMap<String, Object> _props) {
+	public void updateNodeNative(StoreRef store, String nodeId, HashMap<String, Object> _props) {
 
 		try {
 			Map<QName, Serializable> props = transformPropMap(_props);
@@ -585,6 +592,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);		
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
+	@Override
+	public String getOrCreateUserSavedSearch() {
+		NodeRef userhome=repositoryHelper.getUserHome(repositoryHelper.getPerson());
+		List<ChildAssociationRef> savedSearch = nodeService.getChildAssocsByPropertyValue(userhome, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE), CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
+		if(savedSearch!=null && savedSearch.size()>0)
+			return savedSearch.get(0).getChildRef().getId();
+		HashMap<String,Object> properties=new HashMap<>();
+		properties.put(CCConstants.CM_NAME,"SavedSearch");
+		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);		
+		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
+	}
 	
 	@Override
 	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
@@ -636,6 +654,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		apiClient.addAspect(nodeId, aspect);
 	}
 	
+	@Override
+	public void removeAspect(String nodeId, String aspect) {
+		apiClient.removeAspect(nodeId, aspect);
+	}
+	@Override
+	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property) {
+		nodeService.removeProperty(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId),QName.createQName(property));
+	}
 	@Override
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId){
 		return apiClient.getAspects(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId));

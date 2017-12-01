@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.iam.v1;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -90,7 +91,7 @@ public class IamApi  {
     		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
     	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -101,7 +102,8 @@ public class IamApi  {
 	    					global==null ? true : global,
 	    					skipCount!=null ? skipCount : 0,
 	    	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
-	    					new SortDefinition(CCConstants.NAMESPACE_CM,sortProperties,sortAscending)				
+	    					new SortDefinition(CCConstants.NAMESPACE_CM,sortProperties,sortAscending),
+	    					null
 	    			);
 
 	    	List<UserSimple> result = new ArrayList<UserSimple>();
@@ -189,7 +191,7 @@ public class IamApi  {
     @Path("/people/{repository}/{person}/nodeList/{list}")    
     @ApiOperation(
     	value = "Get a specific node list for a user", 
-    	notes = "Will fail for guest")
+    	notes = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
@@ -207,12 +209,9 @@ public class IamApi  {
     		@ApiParam(value = "list name",required=true) @PathParam("list") String list,
     	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
     		@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    		@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+    		@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
     		@Context HttpServletRequest req) {
 		try{
-			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-			if(service.isGuest())
-				throw new Exception("Not allowed for guest user");
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
@@ -232,7 +231,7 @@ public class IamApi  {
     @Path("/people/{repository}/{person}/nodeList/{list}/{node}")    
     @ApiOperation(
     	value = "Add a node to node a list of a user", 
-    	notes = "Will fail for guest")
+    	notes = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
@@ -251,9 +250,6 @@ public class IamApi  {
     		@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true) @PathParam("node") String node,    		
     		@Context HttpServletRequest req) {
 		try{
-			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-			if(service.isGuest())
-				throw new Exception("Not allowed for guest user");
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
 	    	personDao.addNodeList(list, node);
@@ -266,7 +262,7 @@ public class IamApi  {
     @Path("/people/{repository}/{person}/nodeList/{list}/{node}")    
     @ApiOperation(
     	value = "Deelete a node of a node list of a user", 
-    	notes = "Will fail for guest")
+    	notes = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
@@ -285,9 +281,6 @@ public class IamApi  {
     		@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true) @PathParam("node") String node,    		
     		@Context HttpServletRequest req) {
 		try{
-			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-			if(service.isGuest())
-				throw new Exception("Not allowed for guest user");
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
 	    	personDao.removeNodeList(list, node);
@@ -630,15 +623,19 @@ public class IamApi  {
         public Response searchGroups(
         		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
         		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
+        		@ApiParam(value = "find a specific groupType",required=false) @QueryParam("groupType") String groupType,
         		@ApiParam(value = "global search context, defaults to true, otherwise just searches for groups within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
         		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
         	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
         	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-        	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+        	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
         		@Context HttpServletRequest req) {
 
         	try {
-        		
+        		HashMap<String, String> props = new HashMap<String,String>();
+        		if(groupType!=null && !groupType.isEmpty()){
+        			props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), groupType);
+        		}
     	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
     	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).searchAuthorities(
     	    					AuthorityType.GROUP,
@@ -646,7 +643,8 @@ public class IamApi  {
     	    					global==null ? true : global, 
     	    					skipCount!=null ? skipCount : 0,
     	    					maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
-    	    					new SortDefinition(sortProperties,sortAscending)				
+    	    					new SortDefinition(sortProperties,sortAscending),
+    	    					props
     	    			);
 
     	    	List<Group> result = new ArrayList<Group>();
@@ -937,7 +935,7 @@ public class IamApi  {
     		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
     	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
  
     		@Context HttpServletRequest req) {
 

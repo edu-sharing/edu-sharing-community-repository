@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,6 +56,7 @@ import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gwt.widgetideas.graphics.client.Color;
@@ -105,7 +107,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
 		
 		boolean isCollection=false;
-		try {		
+		try {
 			
 			nodeId = req.getParameter("nodeId");
 			String type = req.getParameter("type");
@@ -122,6 +124,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			QName nodeType = serviceRegistry.getNodeService().getType(nodeRef);
 			
 			// check nodetype for security reasons
+			String inNodeId=nodeId;
 			if (nodeId != null) {
 				try {
 					HashMap<String,Object> props = new MCAlfrescoAPIClient().getProperties(nodeId);
@@ -137,18 +140,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						}
 					}
 					
-					String scope=(String) req.getSession().getAttribute(CCConstants.AUTH_SCOPE);
-					// Allow only valid scope
-					if(props.containsKey(CCConstants.CCM_PROP_EDUSCOPE_NAME)){
-						String nodeScope=(String) props.get(CCConstants.CCM_PROP_EDUSCOPE_NAME);
-						if(!nodeScope.equals(scope)){
-							throw new AccessDeniedException("Node has an other scope");
-						}
-					}
-					// This happens if the user tries to access a non-scoped node from a scope
-					else if(scope!=null){
-						throw new AccessDeniedException("Node does not have a scope");
-					}
+					validateScope(req, props);
+					// we need to check permissions and allow or deny access by using the READ_PREVIEW permission
+					validatePermissions(storeRef,inNodeId);
+					
 					if (nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_REMOTEOBJECT))) {
 						
 						props=NodeServiceFactory.getNodeService((String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID))
@@ -160,12 +155,17 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 								return;
 							}
 						}
-						deliverContent(nodeRef, CCConstants.CM_PROP_CONTENT, req, resp);
+						deliverContentAsSystem(nodeRef, CCConstants.CM_PROP_CONTENT, req, resp);
 						return;
+						//resp.sendRedirect(defaultImage);
+						//throw new Exception();
 					}
 					
 					if (!nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_IO)) 
-							&& !nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
+							&& !nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_MAP))
+							&& !nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_SAVED_SEARCH))) {
+						//resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "type is not an io and no map!");
+						//return;
 						throw new Exception();
 					}
 				} catch (InvalidNodeRefException e) {
@@ -178,7 +178,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			}
 			
 			if(QName.createQName(CCConstants.CCM_TYPE_MAP).equals(nodeType)){
-				if(deliverContent(nodeRef, CCConstants.CCM_PROP_MAP_ICON, req, resp))
+				if(deliverContentAsSystem(nodeRef, CCConstants.CCM_PROP_MAP_ICON, req, resp))
 					return;
 			}
 
@@ -286,18 +286,13 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						if(isCollection) {
 							NodeRef fprevNodeRef = prevNodeRef;
 							String fproperty = property;
-							boolean result = AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
-								@Override
-								public Boolean doWork() throws Exception {
-									return deliverContent(fprevNodeRef, fproperty, req, resp);
-								}
-							});
+							boolean result = deliverContentAsSystem(fprevNodeRef, fproperty, req, resp);
 							if(result) {
 								return;
 							}
 							op.close();
 						}else {
-							if(deliverContent(prevNodeRef, property, req, resp)) {
+							if(deliverContentAsSystem(prevNodeRef, property, req, resp)) {
 								
 								return;
 							}
@@ -326,6 +321,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		MimeTypesV2 mime=new MimeTypesV2(repoClient.appInfo);
 		try{
 			HashMap<String,Object> props;
+			String[] aspects=new String[]{};
+			String type=null;
 			if(isCollection){
 				final String nodeIdFinal=nodeId;
 				props=AuthenticationUtil.runAsSystem(new RunAsWork<HashMap<String,Object>>() {
@@ -341,12 +338,35 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			}
 			else{
 				props=repoClient.getProperties(nodeId);
+				aspects=repoClient.getAspects(nodeId);
+				type = repoClient.getNodeType(nodeId);
 			}
-			resp.sendRedirect(mime.getPreview(props));
+			resp.sendRedirect(mime.getPreview(type,props,Arrays.asList(aspects)));
 			return;
 		}
 		catch(Throwable t){
 			resp.sendRedirect(mime.getDefaultPreview());
+		}
+	}
+
+	private void validatePermissions(StoreRef storeRef, String nodeId) {
+		HashMap<String, Boolean> result = PermissionServiceFactory.getLocalService().hasAllPermissions(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,new String[]{CCConstants.PERMISSION_READ_PREVIEW});
+		if(!result.get(CCConstants.PERMISSION_READ_PREVIEW))
+			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ_PREVIEW+" on "+nodeId);
+	}
+
+	private void validateScope(HttpServletRequest req, HashMap<String, Object> props) {
+		String scope=(String) req.getSession().getAttribute(CCConstants.AUTH_SCOPE);
+		// Allow only valid scope
+		if(props.containsKey(CCConstants.CCM_PROP_EDUSCOPE_NAME)){
+			String nodeScope=(String) props.get(CCConstants.CCM_PROP_EDUSCOPE_NAME);
+			if(!nodeScope.equals(scope)){
+				throw new AccessDeniedException("Node has an other scope");
+			}
+		}
+		// This happens if the user tries to access a non-scoped node from a scope
+		else if(scope!=null){
+			throw new AccessDeniedException("Node does not have a scope");
 		}
 	}
 
@@ -396,7 +416,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				prevNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, previewNodeId);
 			}
 			if (prevNodeRef != null) {
-				if(deliverContent(prevNodeRef, property, req, resp))
+				if(deliverContentAsSystem(prevNodeRef, property, req, resp))
 					return true;
 				op.close();
 			}
@@ -542,43 +562,60 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		}
 		
 	}
-	private boolean deliverContent(NodeRef nodeRef, String contentProp,HttpServletRequest req, HttpServletResponse resp) throws IOException{
-		ServletOutputStream op = resp.getOutputStream();
-		ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
-				QName.createQName(contentProp));
-		
-		if(reader == null){
-			return false;
-		}
-		
-		String mimetype = reader.getMimetype();
+	private boolean deliverContentAsSystem(NodeRef nodeRef, String contentProp,HttpServletRequest req, HttpServletResponse resp) throws IOException{
+		return AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
 
-		int length = 0;
+			@Override
+			public Boolean doWork() throws Exception {
+				ServletOutputStream op = resp.getOutputStream();
+				ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
+						QName.createQName(contentProp));
+				
+				if(reader == null){
+					return false;
+				}
+				
+				String mimetype = reader.getMimetype();
 
-		// Stream to the requester.
-		byte[] bbuf = new byte[1024];
-		InputStream is=reader.getContentInputStream();
-		DataInputStream in = new DataInputStream(is);
-		if(mimetype.startsWith("image")){
-			DataInputStream tmp = postProcessImage(nodeRef.getId(),in,req);
-			if(tmp != null){
-				in = tmp;
-				mimetype = "image/jpeg";
+				
+				//resp.setContentLength((int) reader.getContentData().getSize());
+				// resp.setHeader("Content-Disposition",
+				// "attachment; filename=\" preview.png \"");
+
+				int length = 0;
+				//
+				// Stream to the requester.
+				//
+				byte[] bbuf = new byte[1024];
+				// DataInputStream in = new
+				// DataInputStream(url.openStream());
+				InputStream is=reader.getContentInputStream();
+				DataInputStream in = new DataInputStream(is);
+				if(mimetype.startsWith("image")){
+					DataInputStream tmp = postProcessImage(nodeRef.getId(),in,req);
+					if(tmp != null){
+						in = tmp;
+						mimetype = "image/jpeg";
+					}
+					
+				}
+				
+				resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
+				
+				resp.setContentLength((int) in.available());
+
+					
+				while ((in != null) && ((length = in.read(bbuf)) != -1)) {
+					op.write(bbuf, 0, length);
+				}
+				
+				in.close();
+
+				op.flush();
+				op.close();
+				return true;
 			}
-			
-		}
+		});
 		
-		resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
-		resp.setContentLength((int) in.available());
-
-		while ((in != null) && ((length = in.read(bbuf)) != -1)) {
-			op.write(bbuf, 0, length);
-		}
-		
-		in.close();
-
-		op.flush();
-		op.close();
-		return true;
 	}
 }

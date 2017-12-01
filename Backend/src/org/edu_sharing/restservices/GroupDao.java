@@ -95,9 +95,8 @@ public class GroupDao {
 				throw new DAOMissingException(
 						new IllegalArgumentException(groupName));
 				
-			}		
+			}									
 			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-
 			
 		} catch (Throwable t) {
 			
@@ -114,6 +113,7 @@ public class GroupDao {
 				@Override
 				public Void doWork() throws Exception {
 					((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
+					setGroupType(profile);
 					return null;
 				}
 			});
@@ -125,6 +125,14 @@ public class GroupDao {
 
 	}
 	
+	protected void setGroupType(GroupProfile profile) {
+		if(profile.getGroupType()!=null){
+			authorityService.addAuthorityAspect(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_ASPECT_GROUPEXTENSION);
+			authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE,profile.getGroupType());
+		}
+
+	}
+
 	public void delete() throws DAOException {
 		
 		try {
@@ -229,6 +237,7 @@ public class GroupDao {
     	
     	GroupProfile profile = new GroupProfile();
     	profile.setDisplayName(getDisplayName());
+    	profile.setGroupType(getGroupType());
     	data.setProfile(profile);
     	
     	return data;

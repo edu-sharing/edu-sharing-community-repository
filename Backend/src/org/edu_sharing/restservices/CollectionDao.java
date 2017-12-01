@@ -29,7 +29,11 @@ import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
+
+import com.google.gwt.i18n.server.testing.Child;
 
 public class CollectionDao {
 
@@ -39,7 +43,8 @@ public class CollectionDao {
 		EDU_ALL,
 		EDU_GROUPS,
 		MY,
-		CUSTOM
+		CUSTOM,
+		CUSTOM_PUBLIC
 	}
 
 	
@@ -99,7 +104,8 @@ public class CollectionDao {
 	
 					// it's a collection
 					
-					Collection collection = getCollection(repoDao, nodeId).asCollection();
+					//Collection collection = getCollection(repoDao, nodeId).asCollection();
+					Collection collection = child.getCollection();
 					
 					result.add(collection);
 					
@@ -316,6 +322,7 @@ public class CollectionDao {
 		result.setX(collection.getX());
 		result.setY(collection.getY());
 		result.setZ(collection.getZ());
+		result.setPinned(collection.isPinned());
 		
 		if (collection.getRef() != null) {
 			
@@ -385,7 +392,8 @@ public class CollectionDao {
 		result.setX(collection.getX());
 		result.setY(collection.getY());
 		result.setZ(collection.getZ());
-		
+		result.setPinned(collection.isPinned());
+
 		result.setScope(collection.getScope());
 
 		return result;
@@ -406,6 +414,18 @@ public class CollectionDao {
 		}catch(Exception e){
 			throw new DAOException(e,collectionId);
 		}
+	}
+
+	public static void setPinned(RepositoryDao repoDao, String[] collections) {
+		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING))
+			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
+		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+			@Override
+			public Void doWork() throws Exception {
+				repoDao.getCollectionClient().setPinned(collections);
+				return null;
+			}
+		});
 	}
 
 	

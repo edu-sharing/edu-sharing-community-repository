@@ -11,6 +11,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.w3c.dom.Node;
 
 public class BinaryHandlerTechnicalLocation implements BinaryHandler{
 	
@@ -26,7 +27,7 @@ public class BinaryHandlerTechnicalLocation implements BinaryHandler{
 	}
 	
 	@Override
-	public void safe(String alfrescoNodeId, HashMap<String, Object> properties) {
+	public void safe(String alfrescoNodeId, HashMap<String, Object> properties,Node nodeRecord) {
 		String technicalLocation = (String)properties.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION);
 		technicalLocation = technicalLocation.trim();
 		if(technicalLocation != null && technicalLocation.startsWith("http")){

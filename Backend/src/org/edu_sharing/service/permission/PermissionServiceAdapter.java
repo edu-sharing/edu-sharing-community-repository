@@ -99,5 +99,11 @@ public class PermissionServiceAdapter implements PermissionService {
 	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
 		return null;
 	}
+	
+	@Override
+	public void setPermission(String nodeId, String authority, String permission) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

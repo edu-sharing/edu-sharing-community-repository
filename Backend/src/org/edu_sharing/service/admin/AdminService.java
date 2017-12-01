@@ -31,11 +31,13 @@ public interface AdminService {
 	CacheInfo getCacheInfo(String name);
 	
 	public CacheCluster getCacheCluster();
+	
+	public List<CacheCluster> getCacheClusters();
 
 	List<GlobalGroup> getGlobalGroups() throws Throwable;
 
 	void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-			String importerJobClassName, String importerClassName, String recordHandlerClassName) throws Exception;
+			String importerJobClassName, String importerClassName, String recordHandlerClassName,String binaryHandlerClassName) throws Exception;
 
 	List<String> getImporterClasses() throws Exception;
 
@@ -66,6 +68,8 @@ public interface AdminService {
 
 	Collection<NodeRef> getActiveNodeLocks();
 
+	void applyTemplate(String template, String group, String folderId) throws Throwable;
+	
 	List<String> getCatalinaOut() throws IOException;
 	
 }

@@ -56,4 +56,6 @@ public interface CollectionService {
 
 	Collection createAndSetScope(String parentId, Collection collection) throws Throwable;
 
+	public void setPinned(String[] collections);
+
 }

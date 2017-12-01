@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<values>
+		<supportedLanguages>de</supportedLanguages>
+		<supportedLanguages>en</supportedLanguages>
+		<extension></extension>
+		<registerUrl></registerUrl>
+		<loginUrl></loginUrl>
+		<recoverPasswordUrl></recoverPasswordUrl>
+		<editProfileUrl></editProfileUrl>
+		<branding>true</branding>
+		<editProfile>true</editProfile>
+		<nodeReport>true</nodeReport>
+	</values>
+	<contexts>
+	</contexts>
+</config>

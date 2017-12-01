@@ -387,7 +387,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				}
 				
 				// inherit the mds from the parent folder
-				boolean mdsForce=(boolean)nodeService.getProperty(childAssocRef.getParentRef(), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+				Serializable mdsForceSer = nodeService.getProperty(childAssocRef.getParentRef(), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+				boolean mdsForce=(mdsForceSer == null) ? false : (boolean)mdsForceSer;
 				if(mdsForce){
 					String mdsName=(String)nodeService.getProperty(childAssocRef.getParentRef(), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
 					nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),mdsName);

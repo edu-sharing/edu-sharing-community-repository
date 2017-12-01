@@ -70,6 +70,8 @@ import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
+import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
 	private NodeService nodeService = null;
@@ -1260,7 +1262,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			for (String permission : permissions) {
 				AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
 				// Guest only has read permissions, no modify permissions
-				if(guest && !permission.equals(PermissionService.READ)){
+				if(guest && !Arrays.asList(GUEST_PERMISSIONS).contains(permission)){
 					accessStatus=AccessStatus.DENIED;
 				}
 				if (accessStatus.equals(AccessStatus.ALLOWED)) {
@@ -1303,5 +1305,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				return result;
 			}
 		}, authorityId);
+	}
+	
+	@Override
+	public void setPermission(String nodeId, String authority, String permission) {
+		permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId), authority, permission, true);
 	}
 }

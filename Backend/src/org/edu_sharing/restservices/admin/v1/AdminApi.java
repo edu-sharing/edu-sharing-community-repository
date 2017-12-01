@@ -83,7 +83,31 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+	@POST
+	@Path("/applyTemplate")
 	
+	@ApiOperation(value = "apply a folder template", notes = "apply a folder template.")
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response applyTemplate(@Context HttpServletRequest req,
+			@ApiParam(value = "Template Filename",required=true) @QueryParam("template") String template,
+			@ApiParam(value = "Group name",required=true) @QueryParam("group") String group,
+			@ApiParam(value = "Folder name",required=false) @QueryParam("folder") String folder
+			){
+		try {
+			AdminServiceFactory.getInstance().applyTemplate(template, group, folder);
+	    	return Response.ok().build();		
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
 	@OPTIONS    
 	@Path("/refreshAppInfo")
     @ApiOperation(hidden = true, value = "")
@@ -539,11 +563,16 @@ public class AdminApi {
 			@ApiParam(value = "id metadataset", required = false) @QueryParam("metadataset") String metadataset,
 			@ApiParam(value = "importer job class name (call /classes to obtain a list)", required = true, defaultValue="org.edu_sharing.repository.server.jobs.quartz.ImporterJob") @QueryParam("className") String className,
 			@ApiParam(value = "importer class name (call /classes to obtain a list)", required = false, defaultValue="org.edu_sharing.repository.server.importer.OAIPMHLOMImporter") @QueryParam("importerClassName") String importerClassName,
-			@ApiParam(value = "RecordHandler class name (call /classes to obtain a list)", required = false, defaultValue="org.edu_sharing.repository.server.importer.RecordHandlerLOM") @QueryParam("recordHandlerClassName") String recordHandlerClassName,
+			@ApiParam(value = "RecordHandler class name", required = false, defaultValue="org.edu_sharing.repository.server.importer.RecordHandlerLOM") @QueryParam("recordHandlerClassName") String recordHandlerClassName,
+			@ApiParam(value = "BinaryHandler class name (may be empty for none)", required = false, defaultValue="") @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
 			@ApiParam(value = "url to file", required = false) @QueryParam("fileUrl") String fileUrl,
 			@Context HttpServletRequest req){
 		try {
-			AdminServiceFactory.getInstance().importOai(set, fileUrl, baseUrl, metadataset, metadataPrefix, className, importerClassName, recordHandlerClassName);
+			AdminServiceFactory.getInstance().importOai(
+					set, fileUrl, baseUrl, metadataset, 
+					metadataPrefix, className, 
+					importerClassName, recordHandlerClassName,
+					binaryHandlerClassName);
 	    	return Response.ok().build();	
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
@@ -715,6 +744,38 @@ public class AdminApi {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}
 	
+	@GET
+	@Path("/clusterInfos")
+	@ApiOperation(value = "Get information about the Cluster", notes = "Get information the Cluster")
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CacheCluster.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response getClusters(
+			@Context HttpServletRequest req){
+		try {
+			List<CacheCluster> result = AdminServiceFactory.getInstance().getCacheClusters();
+	    	return Response.ok().entity(result).build();		
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	
+	@OPTIONS    
+	@Path("/clusterInfos")
+    @ApiOperation(hidden = true, value = "")
+	
+
+	public Response options12() {
+		
+		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+	}
+	
 	
 	@GET
 	@Path("/export/lom")
@@ -746,7 +807,7 @@ public class AdminApi {
 	@Path("/export/lom")
     @ApiOperation(hidden = true, value = "")
 
-	public Response options12() {
+	public Response options13() {
 		
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}

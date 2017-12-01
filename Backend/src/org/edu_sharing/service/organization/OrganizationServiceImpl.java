@@ -1,9 +1,13 @@
 package org.edu_sharing.service.organization;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -39,6 +43,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 					return eduOrganisationService.createOrganization(orgName, groupDisplayName);
 				}
 			});							
+	}
+	
+	@Override
+	public Map<QName, Serializable> getOrganisation(String orgName) {
+		return eduOrganisationService.getOrganisation(orgName);
 	}
 	
 }

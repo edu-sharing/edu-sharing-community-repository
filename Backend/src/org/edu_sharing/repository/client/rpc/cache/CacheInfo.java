@@ -24,6 +24,13 @@ public class CacheInfo implements Serializable{
 	
 	long ownedEntryCount;
 	
+	long getOwnedEntryMemoryCost;
+	
+	/**
+	 * calculated by Instrumentation class
+	 */
+	long sizeInMemory;
+	
 	public int getSize() {
 		return size;
 	}
@@ -90,6 +97,20 @@ public class CacheInfo implements Serializable{
 		return ownedEntryCount;
 	}
 	
+	public void setSizeInMemory(long sizeInMemory) {
+		this.sizeInMemory = sizeInMemory;
+	}
 	
+	public long getSizeInMemory() {
+		return sizeInMemory;
+	}
+	
+	public void setGetOwnedEntryMemoryCost(long getOwnedEntryMemoryCost) {
+		this.getOwnedEntryMemoryCost = getOwnedEntryMemoryCost;
+	}
+	
+	public long getGetOwnedEntryMemoryCost() {
+		return getOwnedEntryMemoryCost;
+	}
 
 }

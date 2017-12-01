@@ -23,7 +23,27 @@
 			<title>Repository</title>
 			<parent>cm:folder</parent>
 		</type>
-
+		<type name="ccm:saved_search">
+			<title>Campus Content stored search queries</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<property name="ccm:saved_search_repository">
+						<type>d:text</type>
+				</property>
+				<property name="ccm:saved_search_mds">
+						<type>d:text</type>
+				</property>
+				<property name="ccm:saved_search_query">
+						<type>d:text</type>
+				</property>
+				<property name="ccm:saved_search_parameters">
+						<type>d:text</type>
+				</property>
+			</properties>
+			<mandatory-aspects>
+    			<aspect>ccm:eduscope</aspect>
+   			</mandatory-aspects>
+		</type>
 		<type name="ccm:remoteobject">
 			<title>Campus Content foreign repository object</title>
 			<parent>cm:content</parent>
@@ -334,7 +354,40 @@
        		<title>Tool Permission</title>
          	<parent>ccm:io</parent>
        </type>
-
+       
+       <type name="ccm:tool_instance">
+       		<title>Tool Instance</title>
+       		<parent>cm:cmobject</parent>
+         	<properties>
+         		<property name="ccm:tool_instance_key">
+         			<type>d:text</type>	
+         		</property>
+         		<property name="ccm:tool_instance_secret">
+         			<type>d:text</type>	
+         		</property>
+         		<property name="ccm:tool_instance_params">
+         			<type>d:text</type>	
+         		</property>
+         		<property name="ccm:tool_instance_license">
+         			<type>d:text</type>	
+         		</property>
+         		<property name="ccm:tool_instance_support_contact">
+         			<type>d:text</type>	
+         		</property>
+         		<property name="ccm:tool_instance_support_mail">
+         			<type>d:text</type>	
+         		</property>
+         		<property name="ccm:tool_instance_provider">
+         			<type>d:text</type>	
+         		</property>
+         		<property name="ccm:tool_instance_provider_url">
+         			<type>d:text</type>	
+         		</property>
+         		<property name="ccm:tool_instance_access">
+         			<type>d:text</type>	
+         		</property>
+         	</properties>
+       </type>
 	</types>
 
 
@@ -1029,7 +1082,18 @@
 				</property>
 			</properties>
 		</aspect>
-		
+		<aspect name="ccm:collection_pinned">
+			<title>aspect for marking a collection pinned</title>
+			<properties>
+				<property name="ccm:collection_pinned_status">
+					<type>d:boolean</type>
+					<default>true</default>
+				</property>
+				<property name="ccm:collection_pinned_order">
+					<type>d:int</type>
+				</property>
+			</properties>
+		</aspect>
 		<aspect name="ccm:collection_io_reference">
 			<title>aspect for marking an io as a reference object that points to an original io</title>
 			<properties>
@@ -1050,6 +1114,12 @@
 				<property name="ccm:eaf_productionyear">
 					<type>d:date</type>
 				</property>
+				<property name="ccm:eaf_productioncountry">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:eaf_available">
+					<type>d:date</type>
+				</property>
 				<property name="ccm:eaf_fixed_keywords">
 					<type>d:text</type>
 					<multiple>true</multiple>
@@ -1057,6 +1127,41 @@
 				<property name="ccm:eaf_custom_keywords">
 					<type>d:text</type>
 					<multiple>true</multiple>
+				</property>
+				<property name="ccm:eaf_fsk">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:eaf_previous_knowledge">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:eaf_description_long">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:eaf_public_screening">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:eaf_learninggoal">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:eaf_learningtime">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:eaf_distribution">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:eaf_publisher">
+					<type>d:text</type>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	         			<tokenised>false</tokenised>
+	         		</index>
+				</property>
+				<property name="ccm:eaf_content_provider">
+					<type>d:text</type>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	         			<tokenised>false</tokenised>
+	         		</index>
 				</property>
 			</properties>
 		</aspect>
@@ -1102,13 +1207,47 @@
 		</aspect>
 		
 		<aspect name="ccm:eduscope">
-      		<title>eduscope for ios, maps</title>
-      		<properties>
-            	<property name="ccm:eduscopename">
-               		<type>d:text</type>
-            	</property>
-      		</properties>
-      </aspect>
-		
+	      		<title>eduscope for ios, maps</title>
+	      		<properties>
+		            	<property name="ccm:eduscopename">
+		               	<type>d:text</type>
+		            	</property>
+	      		</properties>
+	    </aspect>
+	    
+	    <aspect name="ccm:tool_definition">
+	    		<title>extend io's to become a tooldefinition object</title>
+	    		<properties>
+	    			<property name="ccm:tool_category">
+	    				<type>d:text</type>
+	    				<multiple>true</multiple>
+	    			</property>
+	    			<property name="ccm:tool_producer">
+	    				<type>d:text</type>
+	    			</property>
+	    		</properties> 
+	    		<associations>
+	    			<child-association name="ccm:tool_instances">
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>				
+					</source>
+					<target>
+						<class>ccm:tool_instance</class>
+						<mandatory>false</mandatory>
+						<many>true</many>				
+					</target>		
+	    			</child-association>
+	    		</associations>
+	    </aspect>
+	    
+	    <aspect name="ccm:tool_object">
+	    		<title>extend io to become a tool instance object</title>
+	    		<properties>
+	    			<property name="ccm:tool_instance_ref">
+	    				<type>d:noderef</type>
+	    			</property>
+	    		</properties>
+	    </aspect>
 	</aspects>
 </model>

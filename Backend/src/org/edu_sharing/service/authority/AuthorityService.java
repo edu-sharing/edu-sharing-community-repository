@@ -12,6 +12,7 @@ public interface AuthorityService {
 	public static String ORGANIZATION_GROUP_FOLDER="EDU_SHARED";
 	public static String ADMINISTRATORS_GROUP="ORG_ADMINISTRATORS";
 	public static String ADMINISTRATORS_GROUP_TYPE="ORG_ADMINISTRATORS";
+	public static String MEDIA_CENTER_GROUP_TYPE = "MEDIA_CENTER";
 	public static String ORG_GROUP_PREFIX = "ORG_";
 	public static String ADMINISTRATORS_GROUP_DISPLAY_POSTFIX = "_Admins";
 
@@ -66,5 +67,6 @@ public interface AuthorityService {
 	static String getGroupName(String groupName,String parentGroup){
 		return org.edu_sharing.alfresco.service.AuthorityService.getGroupName(groupName, parentGroup);
 	}
+	boolean authorityExists(String authority);
 	
 }
