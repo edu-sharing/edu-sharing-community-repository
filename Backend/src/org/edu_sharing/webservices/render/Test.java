@@ -47,7 +47,7 @@ public class Test {
 		((Stub)ri).setHeader(new SOAPHeaderElement("http://render.webservices.edu_sharing.org","signed",signData));
 		((Stub)ri).setHeader(new SOAPHeaderElement("http://render.webservices.edu_sharing.org","locale","de_DE"));
 		
-		RenderInfoResult result = ri.getRenderInfoRepo("admin","5355092c-5393-4752-a915-1780698de409", null);
+		RenderInfoResult result = ri.getRenderInfoRepo("admin","071f2abf-0000-4f47-8fe5-2cc4e52f0f70", null);
 		
 		
 		System.out.println(result.getContentHash());

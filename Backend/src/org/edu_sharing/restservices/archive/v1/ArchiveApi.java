@@ -71,7 +71,7 @@ public class ArchiveApi {
 			@ApiParam(value = "maximum items per page", defaultValue="10") @QueryParam("maxItems") Integer maxItems,
 		    @ApiParam(value = "skip a number of items", defaultValue="0") @QueryParam("skipCount") Integer skipCount,   
 		    @ApiParam(value = "sort properties") @QueryParam("sortProperties") List<String> sortProperties,
-		    @ApiParam(value = "sort ascending") @QueryParam("sortAscending") Boolean sortAscending,
+		    @ApiParam(value = "sort ascending") @QueryParam("sortAscending") List<Boolean> sortAscending,
 		    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req){
 			
@@ -108,7 +108,7 @@ public class ArchiveApi {
 			@ApiParam(value = "maximum items per page", defaultValue="10") @QueryParam("maxItems") Integer maxItems,
 		    @ApiParam(value = "skip a number of items", defaultValue="0") @QueryParam("skipCount") Integer skipCount,   
 		    @ApiParam(value = "sort properties") @QueryParam("sortProperties") List<String> sortProperties,
-		    @ApiParam(value = "sort ascending") @QueryParam("sortAscending") Boolean sortAscending,
+		    @ApiParam(value = "sort ascending") @QueryParam("sortAscending") List<Boolean> sortAscending,
 		    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req){
 		
@@ -131,7 +131,7 @@ public class ArchiveApi {
 			Integer maxItems,
 		    Integer skipCount,
 		    List<String> sortProperties,
-		    Boolean sortAscending, 
+		    List<Boolean> sortAscending, 
 		    Filter filter){
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);

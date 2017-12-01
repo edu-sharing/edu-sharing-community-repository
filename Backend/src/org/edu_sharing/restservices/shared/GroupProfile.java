@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class GroupProfile  {
   
   private String displayName = null;
+  private String groupType = null;
 
   public GroupProfile(){}
   public GroupProfile(Group group) {
@@ -27,9 +28,15 @@ public class GroupProfile  {
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
   }
-    
-
-  @Override
+  
+  @JsonProperty("groupType")
+  public String getGroupType() {
+	return groupType;
+  }
+  public void setGroupType(String groupType) {
+	this.groupType = groupType;
+  }
+@Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class GroupProfile {\n");

@@ -14,6 +14,7 @@ public class About  {
   
   private ServiceVersion version = null;
   private List<Service> services = new ArrayList<Service>();
+  private String themesUrl;
 
   
   /**
@@ -39,9 +40,14 @@ public class About  {
     this.services = services;
   }
 
-  
-
-  @Override
+  @JsonProperty
+  public String getThemesUrl() {
+	return themesUrl;
+	}
+	public void setThemesUrl(String themesUrl) {
+		this.themesUrl = themesUrl;
+	}
+@Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class About {\n");

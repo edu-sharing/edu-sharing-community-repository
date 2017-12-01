@@ -191,7 +191,7 @@ public class OAIPMHLOMImporter implements Importer{
 				recordHandler.handleRecord(nodeRecord,cursor,set);
 				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
 				if(binaryHandler != null){
-					binaryHandler.safe(nodeId, recordHandler.getProperties());
+					binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
 				}
 				new MCAlfrescoAPIClient().createVersion(nodeId, null);
 			}
@@ -291,7 +291,7 @@ public class OAIPMHLOMImporter implements Importer{
 				recordHandler.handleRecord(nodeRecord, cursor, set);
 				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
 				if(binaryHandler != null){
-					binaryHandler.safe(nodeId, recordHandler.getProperties());
+					binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
 				}
 				new MCAlfrescoAPIClient().createVersion(nodeId,null);
 			}else{

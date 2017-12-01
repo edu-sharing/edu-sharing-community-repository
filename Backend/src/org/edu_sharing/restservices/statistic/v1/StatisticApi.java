@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.statistic.v1;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -15,9 +16,11 @@ import org.edu_sharing.restservices.DAOMissingException;
 import org.edu_sharing.restservices.DAOSecurityException;
 import org.edu_sharing.restservices.DAOValidationException;
 import org.edu_sharing.restservices.StatisticDao;
+import org.edu_sharing.restservices.about.v1.model.About;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.statistic.v1.model.Filter;
 import org.edu_sharing.restservices.statistic.v1.model.Statistics;
+import org.edu_sharing.service.statistic.StatisticsGlobal;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,5 +59,31 @@ public class StatisticApi {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
 		}
 	}
+	
+	 	@GET
+		@Path("/public")
+	    @ApiOperation(
+	    	value = "Get stats.", 
+	    	notes = "Get global statistics for this repository.")
+	    
+	    @ApiResponses(
+	    	value = { 
+				@ApiResponse(code = 200, message = "OK.", response = About.class), 
+		        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
+		        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	    	})
+
+	    public Response getGlobalStatistics() {
+
+	    	try {
+		    	StatisticsGlobal statistics=StatisticDao.getGlobal();
+		    	
+		    	return Response.status(Response.Status.OK).entity(statistics).build();
+		    	
+			} catch (Throwable t) {
+				return ErrorResponse.createResponse(t);				
+			}
+	
+}
 
 }

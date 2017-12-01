@@ -1,5 +1,6 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 public class MetadataQueries {
@@ -30,6 +31,7 @@ public class MetadataQueries {
 		if(queries2.getBasequery()!=null)
 			setBasequery(queries2.getBasequery());
 		for(MetadataQuery query: queries2.getQueries()){
+			query.setParent(this);
 			if(queries.contains(query)){
 				queries.remove(query);
 				queries.add(query);
@@ -38,5 +40,13 @@ public class MetadataQueries {
 				queries.add(query);
 			}
 		}
+	}
+	public MetadataQuery findQuery(String queryId) {
+		for(MetadataQuery query : queries){
+			if(query.getId().equals(queryId)){
+				return query;
+			}
+		}
+		throw new InvalidParameterException("Query id "+queryId+" not found");
 	}
 }

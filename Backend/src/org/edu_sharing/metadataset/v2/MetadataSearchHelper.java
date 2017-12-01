@@ -1,23 +1,25 @@
 package org.edu_sharing.metadataset.v2;
 
 import java.security.InvalidParameterException;
-import java.security.Policy.Parameters;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.search.SearchParameters.FieldFacet;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.SQLKeyword;
+import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.suggest.ConnectionPool;
@@ -29,15 +31,20 @@ import com.sun.star.lang.IllegalArgumentException;
 
 public class MetadataSearchHelper {
 	public static String getLuceneSearchQuery(MetadataQueries queries,String queryId,Map<String,String[]> parameters) throws IllegalArgumentException{
-		for(MetadataQuery query : queries.getQueries()){
-			if(query.getId().equals(queryId)){
+		return getLuceneSearchQuery(queries.findQuery(queryId), parameters);
+	}
+	public static String getLuceneSearchQuery(MetadataQuery query,Map<String,String[]> parameters) throws IllegalArgumentException{
+
 				// We need to add the basequery, it's currently still getting the base query from the old mds -> added at other stage
 				//String queryString="("+queries.getBasequery()+")";
 				String queryString="";
+				if(query.getBasequery()!=null && !query.getBasequery().trim().isEmpty()){
+					queryString+="("+query.getBasequery()+")";
+				}
 				for(String name : parameters.keySet()){
 					MetadataQueryParameter parameter = query.findParameterByName(name);
 					if(parameter==null)
-						throw new IllegalArgumentException("Could not find parameter "+name+" in the query "+queryId);
+						throw new IllegalArgumentException("Could not find parameter "+name+" in the query "+query.getId());
 					
 					String[] values=parameters.get(parameter.getName());
 					if(values==null || values.length==0)
@@ -63,9 +70,7 @@ public class MetadataSearchHelper {
 					queryString+=")";
 				}
 				return queryString;
-			}
-		}
-		throw new InvalidParameterException("Query id "+queryId+" not found");
+			
 	}
 	public static MetadataQueryParameter getParameter(MetadataQueries queries,String queryId,String parameterId){
 		for(MetadataQuery query : queries.getQueries()){
@@ -97,7 +102,7 @@ public class MetadataSearchHelper {
 		searchParameters.setSkipCount(0);
 		searchParameters.setMaxItems(1);
 
-		searchParameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND "+getLuceneSuggestionQuery(parameter, value));
+		searchParameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")");
 		
 		String facetName = "@" + parameter.getName();		
 
@@ -110,7 +115,7 @@ public class MetadataSearchHelper {
 		
 		List<Pair<String, Integer>> facettPairs = rs.getFieldFacet(facetName);
 		
-		Map<String, String> captions = widget.getValuesAsMap();
+		Map<String, MetadataKey> captions = widget.getValuesAsMap();
 		for (Pair<String, Integer> pair : facettPairs) {
 			
 			//solr 4 bug: leave out zero values
@@ -124,7 +129,7 @@ public class MetadataSearchHelper {
 			
 				SuggestFacetDTO dto = new SuggestFacetDTO();
 				dto.setFacet(hit);
-				dto.setDisplayString(captions.get(hit));
+				dto.setDisplayString(captions.containsKey(hit) ? captions.get(hit).getCaption() : null);
 				
 				result.add(dto);
 			}
@@ -154,8 +159,9 @@ public class MetadataSearchHelper {
 				", use "+MetadataReaderV2.SUGGESTION_SOURCE_MDS+", "+
 				MetadataReaderV2.SUGGESTION_SOURCE_SOLR+" or "+
 				MetadataReaderV2.SUGGESTION_SOURCE_SQL
-		);	
+		);
 	}
+	
 	private static List<? extends Suggestion> getSuggestionsSql(MetadataWidget widget,
 			String value) throws IllegalArgumentException {
 		String query=widget.getSuggestionQuery();
@@ -204,5 +210,52 @@ public class MetadataSearchHelper {
 			}
 		}
 		return result;
+	}
+	private static String getSearchString(String field,String[] types) {
+		String result = "(";
+		
+		Iterator<String> iter = Arrays.asList(types).iterator();
+		while (iter.hasNext()) {
+			String key = iter.next();
+			result = result +field+":\"" + key + "\"";
+			if (iter.hasNext())
+				result = result + " OR ";
+
+		}
+		result = result + ")";
+		return result;
+	}
+	public static String getLuceneString(MetadataQuery query, SearchCriterias searchCriterias,Map<String,String[]> parameters) throws IllegalArgumentException {
+		String lucene=getLuceneSearchQuery(query, parameters);
+		if(query.isApplyBasequery()){
+			String andQuery="";
+			if(lucene!=null && !lucene.trim().isEmpty())
+				andQuery=" AND (" + lucene + ")";
+			lucene=query.getParent().getBasequery()+andQuery;
+		}
+		String searchTypesString = null;
+		String searchAspectsString = null;
+		if(searchCriterias!=null){
+			if(searchCriterias.getContentkind() == null || searchCriterias.getContentkind().length < 1){
+				//default search for IO's -> no, if no content kind is request, it equals "ALL"
+				//searchTypesString = "TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"";
+			}else{
+				searchTypesString = getSearchString("TYPE",searchCriterias.getContentkind());
+			}
+			if(searchCriterias.getAspects()!=null){
+				searchAspectsString = getSearchString("ASPECT",searchCriterias.getAspects());
+	
+			}
+				
+			if (lucene != null && !lucene.trim().equals("") && searchTypesString!=null) {
+				lucene += " AND " + searchTypesString;
+				
+			}else if(lucene == null || lucene.trim().equals("")){
+				lucene = searchTypesString;
+			}
+			if(searchAspectsString!=null)
+				lucene+=" AND "+searchAspectsString;
+		}
+		return lucene;
 	}
 }

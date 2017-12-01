@@ -17,6 +17,8 @@ public interface NodeService {
 	
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props)throws Throwable;
 	
+	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation) throws Throwable;
+	
 	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props);
 
 	public String findNodeByName(String parentId, String name );
@@ -34,6 +36,8 @@ public interface NodeService {
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
 
 	public String getOrCreateUserInbox();
+	
+	public String getOrCreateUserSavedSearch();
 	
 	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID);
 	
@@ -71,5 +75,11 @@ public interface NodeService {
 	public void removeNode(String nodeId, String parentId, boolean recycle);
 	
 	public void removeNode(String potocol, String store, String nodeId);
+
+	public void removeAspect(String nodeId, String aspect);
+
+	public void updateNodeNative(String nodeId, HashMap<String, Object> _props);
+
+	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
 
 }

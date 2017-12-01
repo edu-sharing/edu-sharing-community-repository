@@ -111,6 +111,39 @@ public class CollectionApi {
 	    		return ErrorResponse.createResponse(t);
 	    	}
 	}
+	@POST
+	@Path("/collections/{repository}/pinning")
+	
+	@ApiOperation(value = "Set pinned collections.", notes = "Remove all currently pinned collections and set them in the order send. Requires "+CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING)
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+
+	public Response setPinnedCollections(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = "List of collections that should be pinned",required=true, defaultValue="-home-" ) String[] collections
+			) {
+		try {
+			
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		
+			if (repoDao == null) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			CollectionDao.setPinned(repoDao,collections);
+			return Response.status(Response.Status.OK).build();
+	
+		} catch (Throwable t) {
+    		return ErrorResponse.createResponse(t);
+    	}
+	}
+
 	@GET
 	@Path("/collections/{repository}/search")
 	@ApiOperation(value = "Search collections.", notes = "Search collections.")
@@ -128,7 +161,7 @@ public class CollectionApi {
     	    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
     	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending){
+    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending){
 	try{
 				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 				
@@ -280,7 +313,7 @@ public class CollectionApi {
 			@ApiParam(value = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
 			@ApiParam(value = "scope", required = true) @QueryParam("scope") @DefaultValue(value = "MY") Scope scope,
 			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 

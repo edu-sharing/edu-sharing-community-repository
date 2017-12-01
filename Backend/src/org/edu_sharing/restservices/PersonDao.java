@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.alfresco.repo.search.impl.solr.facet.Exceptions.IllegalArgument;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -13,13 +15,14 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -299,7 +302,7 @@ public class PersonDao {
 		NodeDao node=NodeDao.getNode(repoDao, nodeId);
 		if(node.isDirectory())
 			throw new IllegalArgumentException("The node "+nodeId+" is a directory. Only files are allowed for this list");
-		String data=this.userInfo.get(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+		String data=getCurrentNodeListJson();
 		JSONObject json=new JSONObject();
 		if(data!=null)
 			json=new JSONObject(data);
@@ -322,8 +325,20 @@ public class PersonDao {
 		json.put(list,new JSONArray(nodes));
 		updateNodeList(json);
 	}
+	private String getCurrentNodeListJson(){
+		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
+		String data;
+		if(service.isGuest()){
+			data=(String) session.getAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+		}
+		else{
+			data=this.userInfo.get(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+		}
+		return data;
+	}
 	public List<NodeRef> getNodeList(String list) throws Exception {
-		String data=this.userInfo.get(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+		String data=getCurrentNodeListJson();
 		if(data==null)
 			return null;
 		JSONObject json=new JSONObject(data);
@@ -346,7 +361,7 @@ public class PersonDao {
 	}
 
 	public void removeNodeList(String list, String nodeId) throws Exception {
-		String data=this.userInfo.get(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+		String data=getCurrentNodeListJson();
 		if(data==null)
 			throw new IllegalArgumentException("Node list not found: "+list);
 		JSONObject json=new JSONObject(data);
@@ -369,9 +384,16 @@ public class PersonDao {
 }
 
 	private void updateNodeList(JSONObject json) throws Exception {
-		HashMap<String, String> newUserInfo = new HashMap<String, String>();
-		newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());		
-		newUserInfo.put(CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());		
-		((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
+		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
+		if(service.isGuest()){
+			session.setAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS,json.toString());
+		}
+		else{
+			HashMap<String, String> newUserInfo = new HashMap<String, String>();
+			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());		
+			newUserInfo.put(CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());		
+			((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
+		}
 	}
 }

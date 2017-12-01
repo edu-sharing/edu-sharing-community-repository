@@ -28,6 +28,8 @@
 package org.edu_sharing.repository.server.tools;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -160,12 +162,9 @@ public class ApplicationInfoList {
 		ArrayList<ApplicationInfo> appInfoList = new ArrayList<ApplicationInfo>();
 		for(String key : ApplicationInfoList.getApplicationInfos().keySet()){
 			ApplicationInfo repInfo = ApplicationInfoList.getApplicationInfos().get(key);
-			if(repInfo.ishomeNode()){
-				appInfoList.add(0, repInfo);
-			}else{
-				appInfoList.add(repInfo);
-			}
+			appInfoList.add(repInfo);
 		}
+		Collections.sort(appInfoList);
 		return appInfoList;
 	}
 	

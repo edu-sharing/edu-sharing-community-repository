@@ -150,7 +150,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 	    	httpReq.getSession().setAttribute(CCConstants.AUTH_LOCALE,locale);
 	    }
 		
-		List<String> AUTHLESS_ENDPOINTS=Arrays.asList(new String[]{"/authentication","/_about"});
+		List<String> AUTHLESS_ENDPOINTS=Arrays.asList(new String[]{"/authentication","/_about","/config"});
 		List<String> ADMIN_ENDPOINTS=Arrays.asList(new String[]{"/admin"});
 		boolean noAuthenticationNeeded=false;
 		for(String endpoint : AUTHLESS_ENDPOINTS){

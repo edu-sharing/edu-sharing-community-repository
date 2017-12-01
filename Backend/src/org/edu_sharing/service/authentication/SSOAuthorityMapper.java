@@ -238,6 +238,11 @@ public class SSOAuthorityMapper {
 						// set username to the same we get from sso
 						// context
 						personProperties.put(ContentModel.PROP_USERNAME, userName);
+						// add username also  as firstname so client code will not break and vcards still work
+						if(personProperties.get(ContentModel.PROP_FIRSTNAME)==null && personProperties.get(ContentModel.PROP_LASTNAME)==null) {
+							personProperties.put(ContentModel.PROP_FIRSTNAME, userName);
+							personProperties.put(ContentModel.PROP_LASTNAME, "");
+						}
 						
 						//so we can find out where the user comes from
 						if(appInfo != null && ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType())){

@@ -10,10 +10,10 @@ import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Result;
 import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.repository.client.tools.CCConstants;
 
 public interface PermissionService {
-	
-	
+	public static final String[] GUEST_PERMISSIONS = new String[]{ org.alfresco.service.cmr.security.PermissionService.READ,CCConstants.PERMISSION_READ_PREVIEW,CCConstants.PERMISSION_READ_ALL};
 	/**
 	 * adds permissions to the current ACL
 	 * @param _nodeId
@@ -72,4 +72,6 @@ public interface PermissionService {
 	
 	public ACL getPermissions(String nodeId) throws Exception;
 	public List<String> getPermissionsForAuthority(String nodeId,String authorityId) throws Exception;
+
+	void setPermission(String nodeId, String authority, String permission);
 }

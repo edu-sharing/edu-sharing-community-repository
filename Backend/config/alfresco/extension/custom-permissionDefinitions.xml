@@ -62,12 +62,20 @@
       <!-- Convenient groupings of low level permissions -->
       <!-- ============================================= -->
       
+      <!-- edu-sharing Read without ReadContent for metadata only access (used by ConsumerMetadata) -->
       <permissionGroup name="Read"  expose="true" allowFullControl="false">
            <includePermissionGroup type="sys:base" permissionGroup="ReadProperties"/>
            <includePermissionGroup type="sys:base" permissionGroup="ReadChildren"/>
-           <includePermissionGroup type="sys:base" permissionGroup="ReadContent"/>
       </permissionGroup>
-       
+      
+      
+      
+      <!-- edu-sharing Read + read content permission (used by Consumer) -->
+	  <permissionGroup name="ReadAll"  expose="true" allowFullControl="false">
+           <includePermissionGroup type="sys:base" permissionGroup="Read"/>
+           <includePermissionGroup type="sys:base" permissionGroup="ReadContent"/>
+           <includePermissionGroup type="sys:base" permissionGroup="ReadPreview"/>
+      </permissionGroup>
       <permissionGroup name="Write" expose="true" allowFullControl="false">
            <includePermissionGroup type="sys:base" permissionGroup="WriteProperties"/>
            <includePermissionGroup type="sys:base" permissionGroup="WriteContent"/>
@@ -104,10 +112,17 @@
       <permissionGroup name="CreateAssociations" expose="true" allowFullControl="false" />  
       <permissionGroup name="ReadPermissions" expose="true" allowFullControl="false" />  
       <permissionGroup name="ChangePermissions" expose="true" allowFullControl="false" />  
-    
+      <!-- edu-sharing Read preview permission -->
+      <permissionGroup name="ReadPreview" expose="true" allowFullControl="false" />  
+ 	  
       <!-- =========== -->
       <!-- Permissions -->
       <!-- =========== -->
+      
+      <!-- edu-sharing Read preview permission -->
+ 	  <permission name="_ReadPreview"  expose="false">
+ 	       <grantedToGroup permissionGroup="ReadPreview" />
+      </permission>
     
       <!-- The permission to read properties on a node                                    -->
       <!--                                                                                -->
@@ -320,8 +335,12 @@
           <includePermissionGroup type="sys:base" permissionGroup="ReadPermissions"/>
       </permissionGroup>
       
-      <!-- The Consumer permission allows read to everything by default.                  -->
+      <!-- edu-sharing The Consumer permission allows read to everything by default.   -->
       <permissionGroup name="Consumer" allowFullControl="false" expose="true" >
+          <includePermissionGroup permissionGroup="ReadAll" type="sys:base" />
+      </permissionGroup>
+      <!-- edu-sharing a restricted Consumer which can only read metadata of the node -->
+      <permissionGroup name="ConsumerMetadata" allowFullControl="false" expose="true" >
           <includePermissionGroup permissionGroup="Read" type="sys:base" />
       </permissionGroup>
       

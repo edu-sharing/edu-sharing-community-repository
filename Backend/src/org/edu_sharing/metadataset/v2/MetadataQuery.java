@@ -3,8 +3,26 @@ package org.edu_sharing.metadataset.v2;
 import java.util.List;
 
 public class MetadataQuery {
-	private String id,join;
+	private String id,join,basequery;
 	private List<MetadataQueryParameter> parameters;
+	private MetadataQueries parent;
+	private boolean applyBasequery;
+	public MetadataQuery(MetadataQueries parent){
+		this.parent = parent;
+	}
+	
+	public MetadataQueries getParent() {
+		return parent;
+	}
+
+	public boolean isApplyBasequery() {
+		return applyBasequery;
+	}
+
+	public void setApplyBasequery(boolean applyBasequery) {
+		this.applyBasequery = applyBasequery;
+	}
+
 	public String getId() {
 		return id;
 	}
@@ -19,6 +37,14 @@ public class MetadataQuery {
 
 	public void setJoin(String join) {
 		this.join = join;
+	}
+	
+	public String getBasequery() {
+		return basequery;
+	}
+
+	public void setBasequery(String basequery) {
+		this.basequery = basequery;
 	}
 
 	public List<MetadataQueryParameter> getParameters() {
@@ -43,6 +69,10 @@ public class MetadataQuery {
 				return parameter;
 		}
 		return null;
+	}
+
+	public void setParent(MetadataQueries parent) {
+		this.parent = parent;	
 	}
 	
 }

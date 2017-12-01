@@ -16,6 +16,46 @@ public class MimeTypesV2 {
 	private String basePath;
 	private String theme;
 
+	public static List<String> WORD=Arrays.asList(new String[]{	
+			"application/msword",
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+			"application/vnd.ms-word.document.macroEnabled.12",
+			"application/vnd.ms-word.template.macroEnabled.12"
+			});
+	public static List<String> EXCEL=Arrays.asList(new String[]{	
+			"application/vnd.ms-excel",
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.template",
+			"application/vnd.ms-excel.sheet.macroEnabled.12",
+			"application/vnd.ms-excel.addin.macroEnabled.12",
+			"application/vnd.ms-excel.sheet.binary.macroEnabled.12"
+			});
+	public static List<String> POWERPOINT=Arrays.asList(new String[]{	
+			"application/vnd.ms-powerpoint",
+			"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+			"application/vnd.openxmlformats-officedocument.presentationml.template",
+			"application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+			"application/vnd.ms-powerpoint.addin.macroEnabled.12",
+			"application/vnd.ms-powerpoint.presentation.macroEnabled.12",
+			"application/vnd.ms-powerpoint.template.macroEnabled.12",
+			"application/vnd.ms-powerpoint.slideshow.macroEnabled.12"
+			});
+	public static List<String> COMPRESSED=Arrays.asList(new String[]{	
+			"application/zip",
+			"application/x-zip-compressed",
+			"application/x-tar",
+			"application/x-ustar",
+			"application/x-rar-compressed",
+			"application/java-archive"
+			});
+	public static List<String> SCRIPT=Arrays.asList(new String[]{	
+			"application/x-c",
+			"text/css",
+			"text/html",
+			"text/x-java-source"
+			});
+	
 	public MimeTypesV2(ApplicationInfo appInfo){
 		this.basePath=appInfo.getClientBaseUrl();
 		if(this.basePath.endsWith("/")){
@@ -45,29 +85,36 @@ public class MimeTypesV2 {
 	 * Gets the path where the repo stores mime type icons
 	 * @return
 	 */
+	public String getThemePath(){
+		return basePath + "/themes/"+theme+"/";
+	}
+	/**
+	 * Gets the path where the repo stores mime type icons
+	 * @return
+	 */
 	public String getIconPath(){
-		return basePath + "/themes/"+theme+"/images/common/mime-types/svg/";
+		return getThemePath()+"images/common/mime-types/svg/";
 	}
 	/**
 	 * Gets the path where the repo stores large previews for mime type icons (for replacing the preview)
 	 * @return
 	 */
 	public String getPreviewPath(){
-		return basePath + "/themes/"+theme+"/images/common/mime-types/previews/";
+		return getThemePath()+"images/common/mime-types/previews/";
 	}
 	/**
 	 * Gets a full icon path for a small mime icon for the given node properties
 	 * @return
 	 */
-	public String getIcon(HashMap<String,Object> properties){
-		return getIconPath()+getNodeType(properties)+".svg";
+	public String getIcon(String nodeType,HashMap<String,Object> properties,List<String> aspects){
+		return getIconPath()+getNodeType(nodeType,properties,aspects)+".svg";
 	}
 	/**
 	 * Gets a full preview path for a large mime image with background for the given node properties
 	 * @return
 	 */
-	public String getPreview(HashMap<String,Object> properties){
-		return getPreviewPath()+getNodeType(properties)+".svg";
+	public String getPreview(String nodeType,HashMap<String,Object> properties,List<String> aspects){
+		return getPreviewPath()+getNodeType(nodeType,properties,aspects)+".svg";
 	}
 	/**
 	 * Gets a default "unknown" preview
@@ -88,11 +135,19 @@ public class MimeTypesV2 {
 	 * @param properties
 	 * @return
 	 */
-	public static String getNodeType(HashMap<String,Object> properties){
+	public static String getNodeType(String nodeType,HashMap<String,Object> properties,List<String> aspects){
 		if(isCollection(properties))
 			return "collection";
 		if(isDirectory(properties))
 			return "folder";
+		if(isLtiDefinition(aspects))
+			return "tool_definition";
+		if(isSavedSearch(nodeType))
+			return "saved_search";
+		if(isLtiObject(aspects))
+			return "tool_object";
+		if(isLtiInstance(nodeType))
+			return "tool_instance";
 		String fallback="file";
 		boolean isLink=properties.containsKey(CCConstants.CCM_PROP_IO_WWWURL);
 		if(isLink)
@@ -100,60 +155,21 @@ public class MimeTypesV2 {
 		String mimetype=getMimeType(properties);
 		if(mimetype==null)
 			return fallback;
-		List<String> word=Arrays.asList(new String[]{	
-				"application/msword",
-				"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-				"application/vnd.openxmlformats-officedocument.wordprocessingml.template",
-				"application/vnd.ms-word.document.macroEnabled.12",
-				"application/vnd.ms-word.template.macroEnabled.12"
-				});
-		List<String> excel=Arrays.asList(new String[]{	
-				"application/vnd.ms-excel",
-				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-				"application/vnd.openxmlformats-officedocument.spreadsheetml.template",
-				"application/vnd.ms-excel.sheet.macroEnabled.12",
-				"application/vnd.ms-excel.addin.macroEnabled.12",
-				"application/vnd.ms-excel.sheet.binary.macroEnabled.12"
-				});
-		List<String> powerpoint=Arrays.asList(new String[]{	
-				"application/vnd.ms-powerpoint",
-				"application/vnd.openxmlformats-officedocument.presentationml.presentation",
-				"application/vnd.openxmlformats-officedocument.presentationml.template",
-				"application/vnd.openxmlformats-officedocument.presentationml.slideshow",
-				"application/vnd.ms-powerpoint.addin.macroEnabled.12",
-				"application/vnd.ms-powerpoint.presentation.macroEnabled.12",
-				"application/vnd.ms-powerpoint.template.macroEnabled.12",
-				"application/vnd.ms-powerpoint.slideshow.macroEnabled.12"
-				});
-		List<String> compressed=Arrays.asList(new String[]{	
-				"application/zip",
-				"application/x-zip-compressed",
-				"application/x-tar",
-				"application/x-ustar",
-				"application/x-rar-compressed",
-				"application/java-archive"
-				});
-		List<String> script=Arrays.asList(new String[]{	
-				"application/x-c",
-				"text/css",
-				"text/html",
-				"text/x-java-source"
-				});
 		
-		if(word.contains(mimetype))
+		if(WORD.contains(mimetype))
 			return "file-word";
-		if(excel.contains(mimetype))
+		if(EXCEL.contains(mimetype))
 			return "file-excel";
-		if(powerpoint.contains(mimetype))
+		if(POWERPOINT.contains(mimetype))
 			return "file-powerpoint";
-		if(compressed.contains(mimetype)){
+		if(COMPRESSED.contains(mimetype)){
 			String ccressourcetype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
 			if("imsqti".equals(ccressourcetype))
 				return "file-qti";
 			
 			return "file-zip";
 		}
-		if(script.contains(mimetype))
+		if(SCRIPT.contains(mimetype))
 			return "file-script";
 		
 		if(mimetype.equals("text/xml"))
@@ -180,6 +196,22 @@ public class MimeTypesV2 {
 		
 	
 	}
+private static boolean isLtiDefinition(List<String> aspects) {
+		if(aspects==null)
+			return false;
+		return aspects.contains(CCConstants.CCM_ASPECT_TOOL_DEFINITION);
+	}
+private static boolean isSavedSearch(String type) {
+	return CCConstants.CCM_TYPE_SAVED_SEARCH.equals(type);
+}
+private static boolean isLtiInstance(String nodeType) {
+	return CCConstants.CCM_TYPE_TOOL_INSTANCE.equals(nodeType);
+}
+private static boolean isLtiObject(List<String> aspects) {
+	if(aspects==null)
+		return false;
+	return aspects.contains(CCConstants.CCM_ASPECT_TOOL_OBJECT);
+}
 public static HashMap<String, String> getExtensionMimeMap() {
 		
 		if(extensionMimeMap == null){

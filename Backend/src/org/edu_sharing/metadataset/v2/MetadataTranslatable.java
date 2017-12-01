@@ -1,6 +1,13 @@
 package org.edu_sharing.metadataset.v2;
 
-public abstract class MetadataTranslatable {
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+public abstract class MetadataTranslatable implements Serializable{
 	private String i18n;
 	private String i18nPrefix;
 	private String i18nFallback;
@@ -22,5 +29,32 @@ public abstract class MetadataTranslatable {
 	public void setI18nFallback(String i18nFallback) {
 		this.i18nFallback = i18nFallback;
 	}
-	
+	/**
+	 * deep copy the current object instance
+	 * @return
+	 */
+		public <T extends MetadataTranslatable> T copyInstance() {
+			T obj = null;
+	        try {
+	            // Write the object out to a byte array
+	            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	            ObjectOutputStream out = new ObjectOutputStream(bos);
+	            out.writeObject(this);
+	            out.flush();
+	            out.close();
+
+	            // Make an input stream from the byte array and read
+	            // a copy of the object back in.
+	            ObjectInputStream in = new ObjectInputStream(
+	                new ByteArrayInputStream(bos.toByteArray()));
+	            obj = (T) in.readObject();
+	        }
+	        catch(IOException e) {
+	            e.printStackTrace();
+	        }
+	        catch(ClassNotFoundException cnfe) {
+	            cnfe.printStackTrace();
+	        }
+	        return obj;
+		}
 }

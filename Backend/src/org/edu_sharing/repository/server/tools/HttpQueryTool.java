@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -60,8 +61,19 @@ public class HttpQueryTool {
 	
 	static String nonProxyHosts = null;
 	
+	String basicAuthUn = null;
+	
+	String basicAuthPw = null;
+	
+	
 	public HttpQueryTool() {
 		init();
+	}
+	
+	public HttpQueryTool(String basicAuthUn, String basicAuthPw) {
+		this();
+		this.basicAuthUn = basicAuthUn;
+		this.basicAuthPw = basicAuthPw;
 	}
 	
 	private void init(){
@@ -94,6 +106,10 @@ public class HttpQueryTool {
 		
 		HttpMethodBase method = (_method == null) ?  new GetMethod(url) : _method;
 		method.setFollowRedirects(true);
+		
+		if(basicAuthUn != null && basicAuthPw != null) {
+			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));  
+		}
 		
 		if(header != null){
 			for(Map.Entry<String, String> entry : header.entrySet()){

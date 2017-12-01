@@ -27,6 +27,7 @@ public class Collection extends CollectionBase {
 	User owner;	
 	
 	boolean fromUser;
+	boolean pinned;
 	int childCollectionsCount;
 	
 	int childReferencesCount;
@@ -159,5 +160,17 @@ public class Collection extends CollectionBase {
 	public void setChildReferencesCount(int childReferencesCount) {
 		this.childReferencesCount = childReferencesCount;
 	}
+	
+	@ApiModelProperty(required = false)
+	@JsonProperty("pinned")
+	public boolean isPinned() {
+		return pinned;
+	}
+
+	public void setPinned(boolean pinned) {
+		this.pinned = pinned;
+	}
+	
+	
 
 }

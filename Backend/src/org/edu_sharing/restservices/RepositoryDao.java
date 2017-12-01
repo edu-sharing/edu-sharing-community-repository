@@ -160,6 +160,15 @@ public class RepositoryDao {
 	public String getRepositoryType() {
 		return appInfo.getRepositoryType();
 	}
+
+	public String getUserSavedSearch() {
+		return nodeService.getOrCreateUserSavedSearch();
+
+	}
+
+	public static RepositoryDao getHomeRepository() throws DAOException {
+		return RepositoryDao.getRepository(ApplicationInfoList.getHomeRepository().getAppId());
+	}
 	
 	
 }

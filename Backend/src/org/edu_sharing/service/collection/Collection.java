@@ -5,7 +5,8 @@ import org.edu_sharing.repository.client.rpc.User;
 public class Collection {
 
 	boolean level0 = false;
-	
+	boolean pinned = false;
+
 	String nodeId; 
 	String title; 
 	String description;
@@ -137,6 +138,12 @@ public class Collection {
 	}
 	public void setScope(String scope) {
 		this.scope=scope;
+	}
+	public boolean isPinned() {
+		return pinned;
+	}
+	public void setPinned(boolean pinned) {
+		this.pinned = pinned;
 	}
 	
 

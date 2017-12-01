@@ -86,6 +86,7 @@ import org.edu_sharing.repository.update.Update;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
+import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -489,6 +490,12 @@ public class AdminServiceImpl implements AdminService  {
 		return CacheManagerFactory.getCacheCluster();
 	}
 	
+	@Override
+	public List<CacheCluster> getCacheClusters() {
+		// TODO Auto-generated method stub
+		return SystemStatistic.getAllRepoStates();
+	}
+	
 	/*
 	 * Returns the number of active sessions from tomcat
 	 */
@@ -503,6 +510,15 @@ public class AdminServiceImpl implements AdminService  {
 	    return (Integer) activeSessions;	
 	}
 	
+	@Override
+	public void applyTemplate(String template,String group,String folderId) throws Throwable{
+		FolderTemplatesImpl ft = new FolderTemplatesImpl(new MCAlfrescoAPIClient());
+	 	ft.setTemplate(template,group, folderId);			
+	 	List<String> slist = ft.getMessage();
+	 	String error=slist.toString();
+	 	if(!error.isEmpty())
+	 		throw new Exception(error);
+	}
 	@Override
 	public Collection<NodeRef> getActiveNodeLocks(){
 		 return EditLockServiceFactory.getEditLockService().getActiveLocks();
@@ -559,8 +575,7 @@ public class AdminServiceImpl implements AdminService  {
 	}
 	
 	@Override
-	public void importOai(String set,String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName) throws Exception{
-	
+	public void importOai(String set,String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName) throws Exception{	
 		//new JobExecuter().start(ImporterJob.class, authInfo, setsParam.toArray(new String[setsParam.size()]));
 		
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
@@ -590,6 +605,9 @@ public class AdminServiceImpl implements AdminService  {
 		
 		if(recordHandlerClassName != null && !recordHandlerClassName.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_RECORDHANDLER,recordHandlerClassName);
+		}
+		if(binaryHandlerClassName != null && !binaryHandlerClassName.trim().equals("")){
+			paramsMap.put(OAIConst.PARAM_BINARYHANDLER,binaryHandlerClassName);
 		}
 		
 		Class importerClass = null;
