@@ -1,0 +1,63 @@
+<metadataset id="default" label="default" hidden="false">
+		<name>Core Metadataset</name>
+		<i18n>mds_translation</i18n>
+		<widgets>
+			<widget>
+				<id>editors_choice</id>
+				<caption>Editors Choice</caption>
+				<type>checkbox</type>
+			</widget>
+			<widget>
+				<id>image_type</id>
+				<caption>Typ</caption>
+				<type>radioVertical</type>
+				<defaultvalue>all</defaultvalue>
+				<values>
+					<value cap="Alle">all</value>
+					<value cap="Foto">photo</value>
+					<value cap="Illustration">illustration</value>
+					<value cap="Vektor">vector</value>
+				</values>
+			</widget>
+			<widget>
+				<id>orientation</id>
+				<caption>Ausrichtung</caption>
+				<type>radioVertical</type>
+				<defaultvalue>all</defaultvalue>
+				<values>
+					<value cap="Alle">all</value>
+					<value cap="Querformat">horizontal</value>
+					<value cap="Hochformat">vertical</value>
+				</values>
+			</widget>
+		</widgets>
+		<lists>
+			<list>
+				<id>search</id>
+				<columns>
+					<column>cm:title</column>
+					<column>cm:creator</column>
+					<column>ccm:commonlicense_key</column>
+					<column>ccm:replicationsource</column>				
+				</columns>
+			</list>
+		</lists>
+		<templates>
+			<template>
+				<id>search</id>
+				<html><![CDATA[
+              <editors_choice>
+              <image_type>
+              <orientation>
+				]]></html>
+			</template>
+		</templates>
+		<groups>
+			<group>
+				<id>ngsearch</id>
+				<views>
+					<view>search</view>
+				</views>
+			</group>
+		</groups>
+</metadataset>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+ 
+<beans>
+
+    <!-- Registration of new models -->	
+    <!--bean id="extension.dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap"-->
+    <!-- we are using things from the custom content model so it has to depend on-->
+    <bean id="extension.dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="custom.dictionaryBootstrap">
+        <property name="models">
+            <list>
+                <value>alfresco/extension/es_models/cc-lommodel.xml</value>
+                 <value>alfresco/extension/es_models/cc-uleimodel.xml</value>
+                <value>alfresco/extension/es_models/ccmodel.xml</value>
+                <value>alfresco/extension/es_models/es-schoolcontext.xml</value>
+            </list>
+        </property>
+    </bean>
+          
+</beans>

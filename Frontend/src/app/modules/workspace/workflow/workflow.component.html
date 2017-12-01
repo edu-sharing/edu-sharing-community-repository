@@ -1,0 +1,115 @@
+<div class="dialog darken">
+  <div class="card center-card card-high card-action">
+    <div class="card-content">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div class="card-title">{{'WORKSPACE.WORKFLOW.TITLE' | translate:{name:node ? node.name : ''} }}</div>
+      <spinner *ngIf="loading"></spinner>
+      <div class="card-scroll" *ngIf="!loading">
+        <div class="inputs">
+        <autocomplete
+          [id]="searchAuthority"
+          [inputMinLength]="1"
+          [disabled]="status=='400_checked'"
+          (addItem)="addSuggestion($event)"
+          [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
+          [suggestions]="authoritySuggestions"
+          (updateInput)="updateSuggestions($event)"
+        ></autocomplete>
+          <div class="status">
+            <div class="btn-flat btn-shadow" tabindex="0" (keyup.enter)="chooseStatus=true" (click)="chooseStatus=true">
+              <i [class]="'align-icon statusIcon workflowStatus_'+status">&nbsp;</i> {{'WORKFLOW.'+status | translate}}
+              <i class="material-icons align-icon right">keyboard_arrow_down</i></div>
+          </div>
+          <div *ngIf="chooseStatus" class="chooseStatus">
+          <div class="dialog" (click)="chooseStatus=false"></div>
+          <div class="moreOpen collection">
+            <a class="collection-item" *ngFor="let s of validStatus"
+               (click)="status=s;chooseStatus=false;">
+              <i [class]="'align-icon statusIcon workflowStatus_'+s">&nbsp;</i> {{'WORKFLOW.'+s | translate}}
+              <i class="material-icons selected" *ngIf="status==s">check</i>
+            </a>
+          </div>
+          </div>
+        </div>
+        <div class="global">
+          <input type="checkbox" class="filled-in" [(ngModel)]="globalSearch" [disabled]="!globalAllowed" id="global">
+          <label for="global">{{'WORKSPACE.SHARE.GLOBAL_SEARCH' | translate}}</label>
+        </div>
+
+        <div class="receivers">
+          <div *ngIf="status!='400_checked'">
+            <div class="badge" *ngFor="let receiver of receivers">
+              <span>{{receiver | authorityName}}</span>
+              <i class="material-icons clickable" (click)="removeReceiver(receiver)">cancel</i>
+            </div>
+            </div>
+        </div>
+        <input type="text" [(ngModel)]="comment" placeholder="{{'WORKSPACE.WORKFLOW.COMMENT' | translate}}">
+        <div class="input-hint-bottom">{{'WORKSPACE.WORKFLOW.COMMENT_INFO' | translate}}</div>
+        <div class="historyLabel">
+          {{'WORKSPACE.WORKFLOW.HISTORY' | translate}}
+        </div>
+        <h2 class="noHistory" *ngIf="!history.length">{{'WORKSPACE.WORKFLOW.NO_HISTORY' | translate}}</h2>
+        <div class="history">
+          <div *ngFor="let entry of history;let i=index">
+            <div class="user">{{ entry.editor | authorityName }}</div><div class="date">{{entry.time | formatDate:{time:true} }}</div>
+            <div class="box">
+              <div class="table">
+                <div class="row">
+                <div class="receivers" *ngIf="i<history.length-1">
+                <label>{{'WORKSPACE.WORKFLOW.RECEIVERS' | translate}}</label>
+                  <div class="badge" *ngFor="let receiver of history[i+1].receiver"><i class="material-icons badgeIconLeft">person</i><span>{{ receiver | authorityName }}</span></div>
+                </div>
+                <div class="receivers" *ngIf="i>=history.length-1">
+                  <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
+                  <div class="badge" *ngFor="let receiver of entry.receiver"><i class="material-icons badgeIconLeft">person</i><span>{{ receiver | authorityName }}</span></div>
+                </div>
+                <div *ngIf="i<history.length-1">
+                  <i class="material-icons">keyboard_arrow_right</i>
+                </div>
+                <div class="receivers" *ngIf="i<history.length-1">
+                  <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
+                  <div class="badge" *ngFor="let receiver of entry.receiver"><i class="material-icons badgeIconLeft">person</i><span>{{ receiver | authorityName }}</span></div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="status" *ngIf="i<history.length-1">
+                  <label>{{'WORKSPACE.WORKFLOW.OLD_STATUS' | translate}}</label>
+                  <div [class]="'workflowStatus workflowStatus_'+history[i+1].status">{{'WORKFLOW.'+history[i+1].status | translate}}</div>
+                </div>
+                <div class="status" *ngIf="i>=history.length-1">
+                  <label>{{'WORKSPACE.WORKFLOW.NEW_STATUS' | translate}}</label>
+                  <div [class]="'workflowStatus workflowStatus_'+entry.status">{{'WORKFLOW.'+entry.status | translate}}</div>
+                </div>
+                <div *ngIf="i<history.length-1">
+                  <i class="material-icons">keyboard_arrow_right</i>
+                </div>
+                <div class="status" *ngIf="i<history.length-1">
+                  <label>{{'WORKSPACE.WORKFLOW.NEW_STATUS' | translate}}</label>
+                  <div [class]="'workflowStatus workflowStatus_'+entry.status">{{'WORKFLOW.'+entry.status | translate}}</div>
+                </div>
+              </div>
+              </div>
+              <div class="comment" *ngIf="entry.comment">
+                <label>{{'WORKSPACE.WORKFLOW.COMMENT' | translate}}</label>
+                <div>{{ entry.comment }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  <div class="card-action">
+    <a class="waves-effect waves-light btn" [class.disabled]="loading || !hasChanges()" (click)="saveWorkflow()">{{'SAVE' | translate }}</a>
+    <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+  </div>
+  </div>
+</div>
+<modal-dialog *ngIf="dialogTitle"
+              [isCancelable]="true"
+              [title]="dialogTitle"
+              [message]="dialogMessage"
+              [messageParameters]="dialogMessageParameters"
+              [buttons]="dialogButtons"
+              (onCancel)="dialogTitle=null"
+></modal-dialog>

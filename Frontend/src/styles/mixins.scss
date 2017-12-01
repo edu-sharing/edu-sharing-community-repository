@@ -1,0 +1,39 @@
+@mixin clickable() {
+  cursor: pointer!important;
+}
+@mixin imageDisabledBlur(){
+  -webkit-filter: blur(3px);
+  filter: blur(3px);
+}
+@mixin shortenText(){
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@mixin materialShadow($important: false){
+  box-shadow:0px 0px 5px rgba(0,0,0,0.3) if($important,!important,null);
+}
+@mixin materialShadowBottom(){
+  box-shadow:0px 3px 3px rgba(0,0,0,0.1);
+}
+@mixin removeDefaultFocus(){
+  outline:none;
+}
+@mixin iosScrolling(){
+  /* ios scrolling fix */
+  -webkit-overflow-scrolling: touch;
+}
+@mixin setGlobalInsetFocus(){
+  //respect element border radius
+  @include removeDefaultFocus();
+  box-shadow: inset 0 0 0 $focusWidth $focusColor !important;
+}
+@mixin darken(){
+  background-color:$darkenColor;
+}
+@mixin  setGlobalFocus(){
+  //respect element border radius
+  @include  removeDefaultFocus();
+  box-shadow: 0 0 0 $focusWidth $focusColor !important;
+}
+

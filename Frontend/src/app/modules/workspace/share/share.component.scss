@@ -1,0 +1,210 @@
+@import "../../../../styles/variables.scss";
+
+.tab{
+  background-color: transparent;
+}
+.tab a{
+  color:$textLight;
+}
+.advancedPermission{
+  float:left;
+  width:25%;
+}
+h2{
+  color:$textLight;
+  text-align: center;
+  font-size: 120%;
+}
+.advancedAuthority{
+  color: $textLight;
+  float:left;
+  width:100%;
+  font-weight: bold;
+  padding: 10px 0;
+  i{
+    position: relative;
+    top: 5px;
+    padding-right: 10px;
+  }
+}
+.history{
+  padding-right: 20px;
+  float:right;
+  text-transform: uppercase;
+  i{
+    font-size: 11pt;
+    position: relative;
+    top: 3px;
+  }
+}
+a.active{
+  color:#000!important;
+  background: linear-gradient(to top, $primary 0%,$primary 5px,transparent 5px,transparent 5%)
+}
+.publish{
+  margin: 20px -20px;
+  padding:20px 20px;
+  padding-right:30px;
+  background: $backgroundColor;
+  float: left;
+  width: calc(100% + 40px);
+  .publishElements{
+    float: left;
+    max-width: 495px;
+  }
+  .type{
+    color: $textLight;
+    float: right;
+    span{
+      position: relative;
+      top: -3px;
+      left: -5px;
+    }
+  }
+  label{
+    color: $textPrimary;
+    font-size: 110%;
+  }
+  .publishInfo{
+    margin-left: 76px;
+    color:$textLight;
+    max-width:400px;
+  }
+}
+.group{
+  display:table;
+  width:100%;
+  margin-bottom: -25px;
+}
+.global{
+  margin-bottom: 20px;
+}
+.crossed{
+  text-decoration: line-through;
+}
+.group .btn-flat{
+  position:relative;
+  left:18px;
+  top:18px;
+  padding-right:12px;
+}
+.group div,.group input{
+  display:table-cell;
+}
+
+.groupEntry{
+  width:100%;
+  display:table;
+  background: #eee;
+  width: 100%;
+  border-radius: 15px;
+  padding: 0 15px;
+  margin-bottom: 6px;
+}
+.added{
+  background: transparent;
+  border:2px dashed $workspaceInheritColor;
+}
+.inherit{
+  color:$textLight;
+  min-height:50px;
+}
+.inherit .groupEntry{
+  border:1px solid $workspaceInheritColor;
+  cursor:default;
+}
+.normal{
+  cursor:default;
+}
+.owner{
+  cursor:default;
+}
+.groupName{
+  color:$textLight;
+  font-size:90%;
+  padding-top:15px;
+  padding-bottom:5px;
+  float:left;
+}
+.inheritDisabled{
+  font-size:90%;
+  color:$textLight;
+  padding-left:10px;
+  font-style: italic;
+  width: 100%;
+  text-align: center;
+  float: left;
+}
+img.inherit{
+  position: relative;
+  top: 4px;
+}
+.search,.search div input{
+  margin-bottom:0;
+  width:95%;
+}
+.row{
+  margin:0 -30px;
+  margin-bottom: 0;
+}
+.tabContent{
+  height: calc(100% - 76px);
+  overflow: auto;
+  overflow-x: hidden;
+  padding: 0 20px;
+  margin: 0 -20px;
+  padding-top: 20px;
+  @include iosScrolling();
+}
+.right{
+  float:right;
+}
+.inheritCheck{
+  float:left;
+  padding-left: 20px;
+  position: relative;
+  top: 10px;
+}
+.manageLink{
+  float:left;
+  padding-left: 20px;
+  text-transform: uppercase;
+  position: relative;
+  top:14px;
+}
+.group .btn-flat{
+  width:210px;
+  float:none;
+}
+.typeButton{
+  width:230px;
+}
+.typeAdd{
+  position:absolute;
+  right: 20px;
+  width: 280px!important;
+  top: 160px;
+}
+.toInvite{
+  margin-top: -10px;
+  padding-bottom:45px;
+  overflow: hidden;
+}
+label.notify{
+  color:$textPrimary;
+}
+label.notify p{
+  color:$textLight;
+}
+
+@media screen and (max-width: $mobileWidth) {
+  .typeButton {
+    width: 110px;
+    .btn-flat{
+      width: 90px;
+    }
+    span {
+      display: none;
+    }
+  }
+}

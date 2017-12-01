@@ -1,0 +1,327 @@
+@import "../../../styles/variables.scss";
+
+/*
+table, div {
+   font-family: open_sansregular;
+   font-size: 14px;
+}
+*/
+.tabs{
+  max-width:1200px;
+}
+.tab-group{
+  margin-bottom:0;
+}
+.collectionsContainer{
+  width:100%;
+}
+.collection-new-preview-headline{
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+.switchToSearch{
+  position: relative;
+  top:-20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 5px;
+}
+
+.switchToSearch i{
+  position: relative;
+  top:6px;
+}
+.collectionsContainerMainnav{
+  position:absolute;
+  top: $mainnavHeight;
+}
+
+.collections-cards-div {
+    clear: left;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.table-tab {
+    vertical-align: bottom;
+    text-align: center;
+    padding: 10px;
+    padding-bottom: 3px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: $primary;
+    color: $primary;
+    cursor: pointer;
+}
+
+.table-tab-selected {
+    vertical-align: bottom;
+    padding: 10px;
+    padding-bottom: 3px;
+    background-color: white;
+    border-bottom-width: 3px;
+    border-bottom-style: solid;
+    border-bottom-color: $primary;
+}
+
+.section-headline {
+    color: #5F5F5F;
+    padding-top: 10px;
+    padding-bottom: 8px;
+}
+
+.collections-breadcrumb {
+    margin-top: 10px;
+    padding: 8px;
+}
+
+.coll-breadcrumb {
+    display: inline;
+    color: black;
+    margin-left: 2px;
+}
+
+.coll-breadcrumb-clickable {
+    color: $primary;
+    cursor: pointer;
+}
+
+.collections-master-div {
+    padding-left: 15%;
+    padding-right: 10%;
+    padding-top: 30px;
+}
+
+.collections-header-textarea {
+    padding: 20px;
+}
+
+.collections-header-texttop {
+    text-align: left;
+}
+.noAddPermissions{
+  color: $textLight;
+  padding-top: 10px;
+}
+.collection-new-preview-infoarea {
+    min-height: 120px;
+    padding: 16px;
+    color: white;
+}
+.card-image-icon-circle{
+  width:150px;
+  height:150px;
+  border-radius: 50%;
+  background-color: #fff;
+  margin:auto;
+  margin-top: 10px;
+}
+.collection-header-image{
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.collection-new-preview-headline {
+    font-size: 200%;
+}
+
+.collection-new-preview-subline {
+    font-size: 120%;
+    margin-bottom: 16px;
+    opacity: 0.85;
+}
+
+.collection-new-preview-infoline {
+    margin-left: -2px;
+    opacity: 0.85;
+    margin-bottom: 4px;
+}
+
+.collection-nocontent-container {
+    text-align: left;
+}
+
+.collection-nocontent-big {
+    font-size: 150%;
+    padding:16px;
+    padding-top: 8px;
+    padding-left: 0px;
+    text-align:center;
+}
+
+.collection-nocontent-small {
+    padding:16px;
+    padding-top: 0px;
+    padding-left: 0px;
+}
+
+.icon-bottom {
+    vertical-align: bottom;
+}
+
+.dialog-basic-area {
+    padding:16px;
+    padding-bottom:8px;
+}
+
+.dialog-dark-area {
+    padding:16px;
+    padding-bottom:8px;
+    background: #EFEFEF;
+}
+
+.button-area {
+    text-align: right;
+}
+
+.dialog-input {
+    width: 90%;
+    height: 25px;
+    padding: 4px;
+}
+
+.card-collection-image-container {
+    text-align: center;
+    vertical-align: middle;
+    height: 200px;
+    color: white;
+}
+
+.card-image-icon-container {
+    height: 200px;
+    width: 100%;
+    overflow: hidden;
+    margin: auto;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.collections-header  {
+    background-color: $primary;
+    color: #ffffff;
+    top: 0;
+    left: 0;
+    height: 110%;
+    width: 250px;
+    position: fixed;
+    overflow-y: auto;
+}
+.collections-headerMainnav  {
+  top: $mainnavHeight;
+}
+.collections-master-div-notabs {
+    padding-left:300px;
+    padding-right: 16px;
+}
+
+.table-tab-title-short {
+    display: none;
+}
+
+.collections-master-div {
+    min-width: 625px;
+}
+
+.collections-edit-button {
+    right: 50px;
+}
+
+.collections-delete-button {
+    right: 10px;
+}
+.collections-edit-button,.collections-delete-button{
+  position: absolute;
+  height:32px;
+  top: 160px;
+  color: #6b6b6b;
+  border-radius: 50%;
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+
+}
+
+@media only screen and (max-width: 1000px) {
+
+    .table-tab-title-long {
+        display: none!important;
+    }
+
+    .table-tab-title-short {
+        display: block!important;
+    }
+
+}
+
+@media only screen and (max-width: 940px) {
+
+    .collections-master-div {
+        min-width: unset;
+    }
+
+}
+
+
+@media only screen and (max-width: $mobileWidth) {
+    .collection-new-preview-infoline,.collection-description{
+      display: none;
+    }
+    .collections-master-div-notabs{
+      margin-top:0;
+    }
+    .switchToSearch{
+      float:right;
+    }
+    .collections-header {
+        margin-top: 10px;
+        top: unset;
+        left: unset;
+        height: unset;
+        width: calc(100% + 28px);
+        margin-left: -20px;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    .collections-header-texttop {
+        text-align: center;
+    }
+
+    .table-tab-middle {
+        width: unset;
+    }
+
+    .collections-master-div {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .collections-master-div-notabs {
+        padding-right: 8px;
+        min-width: unset;
+    }
+    .collections-edit-button,
+    .collections-delete-button{
+      position: absolute;
+      top: auto;
+      bottom:15px;
+    }
+    .collections-edit-button {
+        right: 60px;
+    }
+    .collections-delete-button {
+      right: 15px;
+    }
+
+    .card-collection-image-container {
+        height: 200px;
+    }
+
+    .collections-header-detailview {
+        display: none;
+    }
+    /** From Torsten */
+    .tab-group{
+      max-width:1000px;
+    }
+}

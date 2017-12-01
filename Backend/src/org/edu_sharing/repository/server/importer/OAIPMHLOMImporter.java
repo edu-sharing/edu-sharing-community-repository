@@ -1,0 +1,401 @@
+/**
+ *
+ *  
+ * 
+ * 
+ *	
+ *
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ *
+ */
+package org.edu_sharing.repository.server.importer;
+
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.URLEncoder;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+
+import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+public class OAIPMHLOMImporter implements Importer{
+	
+	Logger logger = Logger.getLogger(OAIPMHLOMImporter.class);
+	
+	XPathFactory pfactory = XPathFactory.newInstance();
+	XPath xpath = pfactory.newXPath();
+
+	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	
+	public static final String FOLDER_NAME_IMPORTED_OBJECTS = "IMP_OBJ";
+	
+	public String metadataPrefix = "oai_elixier";//oai_lom
+	
+	private RecordHandlerInterface recordHandler;
+	
+	PersistentHandlerInterface persistentHandler;
+	
+	BinaryHandler binaryHandler;
+	int nrOfResumptions = -1;
+	int nrOfRecords = -1;
+	
+	String[] sets = new String[]{"contake","melt"};
+	
+	String oai_base_url = null;
+	
+	String urlGetRecors = "";
+	
+	/**
+	 * @param oai_base_url
+	 * @param recordHandler
+	 * @param nrOfResumptions
+	 * @param nrOfRecords
+	 * @param metadataPrefix
+	 * @param sets
+	 * @throws Exception
+	 */
+	public OAIPMHLOMImporter(String oai_base_url,PersistentHandlerInterface persistentHandler, RecordHandlerInterface recordHandler, BinaryHandler binaryHandler, int nrOfResumptions, int nrOfRecords, String metadataPrefix, String[] sets) throws Exception{
+		
+		this.oai_base_url = oai_base_url;
+		this.recordHandler = recordHandler;
+		this.persistentHandler = persistentHandler;
+		this.binaryHandler = binaryHandler;
+		this.nrOfResumptions = nrOfResumptions;
+		this.nrOfRecords = nrOfRecords;
+		this.sets = sets;
+		this.metadataPrefix = metadataPrefix;
+	}
+	
+	public OAIPMHLOMImporter(){
+	}
+
+	public void startImport() throws Throwable{
+		
+		//take identifiers list cause some of the sets don't work: XML-Verarbeitungsfehler: nicht wohlgeformt
+		String url = this.oai_base_url+"?verb=ListIdentifiers&metadataPrefix="+this.metadataPrefix;
+		for(String set : sets){
+			String setUrl = url+"&set="+set;
+			this.updateWithIdentifiersList(setUrl,set);
+		}
+		
+	}
+	
+	public static void main(String[] args){
+		
+		String[] sets = new String[]{"melt","elixier","lehreronline","mbnrw","siemens"};
+	
+		String url = "http://daunddort.de/cp/oai_pmh/oai.php?verb=ListIdentifiers&metadataPrefix=oai_elixier";
+		try{
+			
+			//OAIPMHLOMImporter importer = new OAIPMHLOMImporter(new RecordHandlerElixier(),-1,-1,"oai_elixier",sets);
+			
+			//OAIPMHLOMImporter importer = new OAIPMHLOMImporter(new RecordHandlerLOM(new PersistentHandlerDB()),2,2,"oai_lom",sets);
+			OAIPMHLOMImporter importer = new OAIPMHLOMImporter();
+			importer.setBaseUrl("http://daoderdort.de/cp/oai_pmh/oai.php");
+			importer.setBinaryHandler(null);
+			importer.setMetadataPrefix("oai_lom");
+			importer.setNrOfRecords(-1);
+			importer.setNrOfResumptions(-1);
+			importer.setPersistentHandler(new PersistentHandlerInterface() {
+				
+				@Override
+				public String safe(Map props, String cursor, String set) throws Throwable {
+					return null;
+				}
+				
+				@Override
+				public boolean mustBePersisted(String replId, String timeStamp) {
+					return false;
+				}
+				
+			});
+			importer.setRecordHandler(new RecordHandlerLOMTest());
+			importer.setSet(sets[0]);
+			importer.startImport();
+		}catch(Throwable e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void updateWithRecordsList(String url,String set) throws Throwable{
+		
+		String queryResult = new HttpQueryTool().query(url);
+		if(queryResult != null){
+			//cursor
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(new InputSource(new StringReader(queryResult)));
+			
+			String cursor = (String)xpath.evaluate("/OAI-PMH/ListRecords/resumptionToken/@cursor", doc, XPathConstants.STRING);
+			String completeListSize = (String)xpath.evaluate("/OAI-PMH/ListRecords/resumptionToken/@completeListSize", doc, XPathConstants.STRING);
+			String token = (String)xpath.evaluate("/OAI-PMH/ListRecords/resumptionToken", doc, XPathConstants.STRING);
+			
+			handleSubResult(doc,cursor,set);
+			
+			if(token != null && token.trim().length() > 0 && new Integer(completeListSize) > new Integer(cursor)){
+				
+				String urlNext = oai_base_url+"?verb=listRecords&resumptionToken="+token;
+				logger.info("starting the next resumption! set:"+set+"cursor:"+cursor+" completeListSize:"+completeListSize +" token:"+token);
+				
+				updateWithRecordsList(urlNext,set);
+			} else {
+				logger.info("no more resumption. import finished!");
+			}
+		}
+	}
+	
+	public void handleSubResult(Document doc,String cursor,String set) throws Throwable{
+		String errorcode = (String)xpath.evaluate("/OAI-PMH/error ", doc, XPathConstants.STRING);
+		if(errorcode == null || errorcode.trim().equals("")){
+			NodeList nodeList = (NodeList)xpath.evaluate("/OAI-PMH/ListRecords/record", doc, XPathConstants.NODESET);
+			int nrOfRs = this.nrOfRecords;
+			if(nrOfRs == -1 || nrOfRs > nodeList.getLength()){
+				nrOfRs = nodeList.getLength();
+			}
+			for(int i = 0; i < nrOfRs; i++){
+				logger.info("node:" + (i+1) +" from:"+nrOfRs);
+				Node nodeRecord = nodeList.item(i);
+				recordHandler.handleRecord(nodeRecord,cursor,set);
+				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
+				if(binaryHandler != null){
+					binaryHandler.safe(nodeId, recordHandler.getProperties());
+				}
+				new MCAlfrescoAPIClient().createVersion(nodeId, null);
+			}
+		}else{
+			logger.error("/OAI-PMH/error:" + errorcode);
+		}
+	}
+	
+	public void updateWithIdentifiersList(String url,String set) throws Throwable{
+		logger.info("url:"+url);
+		String queryResult = new HttpQueryTool().query(url);
+		if(queryResult != null){
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(new InputSource(new StringReader(queryResult)));
+			
+			String cursor = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken/@cursor", doc, XPathConstants.STRING);
+			String completeListSize = (String)xpath.evaluate("/OAI-PMH/ListRecords/resumptionToken/@completeListSize", doc, XPathConstants.STRING);
+			String token = (String)xpath.evaluate("/OAI-PMH/ListIdentifiers/resumptionToken", doc, XPathConstants.STRING);
+			
+			token = URLEncoder.encode(token);
+			
+			handleIdentifierList(doc,cursor,set);
+			//&& completeListSize != null && cursor != null &&  (new Integer(completeListSize) > new Integer(cursor))
+			
+			if(token != null && token.trim().length() > 0 ){
+				try{
+					//int countAllRecords = new Integer(completeListSize);
+					//int maxResumptions = countAllRecords/100; //100 werden pro resumption immer geliefert
+					
+					String urlNext = this.oai_base_url+"?verb=ListIdentifiers&resumptionToken="+token;
+					//logger.info("starting the next resumption! set:"+set+" cursor:"+cursor+" completeListSize:"+completeListSize +" token:"+token);
+					System.out.println("starting the next resumption! set:"+set+" cursor:"+cursor+" completeListSize:"+completeListSize +" token:"+token);
+					if(nrOfResumptions > -1){
+						Integer cursorAsNumber = new Integer(cursor);
+						int actualNrOfResumption = cursorAsNumber / 100;
+						if(actualNrOfResumption <= this.nrOfResumptions){
+							updateWithIdentifiersList(urlNext,set);
+						}
+					}else{
+						logger.info("token:"+token);
+						updateWithIdentifiersList(urlNext,set);
+					}
+				}catch(NumberFormatException e){
+					logger.error(e.getMessage(),e);
+				}
+			}else{
+				logger.info("no more resumption. import finished!");
+			}
+		}
+	}
+	
+	
+	public void handleIdentifierList(Document docIdentifiers, String cursor, String set) throws Throwable{
+		NodeList nodeList = (NodeList)xpath.evaluate("/OAI-PMH/ListIdentifiers/header", docIdentifiers, XPathConstants.NODESET);
+		
+		int nrOfRs = this.nrOfRecords;
+		if(nrOfRs == -1 || nrOfRs > nodeList.getLength()){
+			nrOfRs = nodeList.getLength();
+		}
+		for(int i = 0; i < nrOfRs;i++){
+			Node headerNode = nodeList.item(i);
+			String identifier = (String)xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
+			String timeStamp = (String)xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
+			
+			String status = (String)xpath.evaluate("@status", headerNode, XPathConstants.STRING);
+			if(status != null && status.trim().equals("deleted")){
+				
+				logger.info("Object with Identifier:"+identifier+" is deleted. Will continue with the next one");
+				continue;
+			}
+			
+			if(persistentHandler.mustBePersisted(identifier, timeStamp)){
+				String url = oai_base_url+"?verb=GetRecord"+"&identifier="+identifier+"&metadataPrefix="+metadataPrefix;
+				logger.info("url record:"+url);
+				String result = new HttpQueryTool().query(url);
+				if(result != null && !result.trim().equals("")){
+					handleGetRecordStuff(result, cursor,set,identifier);				
+				}
+			}
+			
+			if(i > MAX_PER_RESUMPTION){
+				logger.error("only " +MAX_PER_RESUMPTION +" for one resumption token are allowed here");
+				break;
+			}
+		}
+	}
+	
+	public static final int MAX_PER_RESUMPTION = 5000;
+	
+	protected void handleGetRecordStuff(String result, String cursor, String set, String identifier){
+		try{
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(new InputSource(new StringReader(result)));
+			String errorcode = (String)xpath.evaluate("/OAI-PMH/error", doc, XPathConstants.STRING);
+			if(errorcode == null || errorcode.trim().equals("")){
+				Node nodeRecord = (Node)xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
+				recordHandler.handleRecord(nodeRecord, cursor, set);
+				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
+				if(binaryHandler != null){
+					binaryHandler.safe(nodeId, recordHandler.getProperties());
+				}
+				new MCAlfrescoAPIClient().createVersion(nodeId,null);
+			}else{
+				logger.error(errorcode);
+			}
+		}catch(org.xml.sax.SAXParseException e){
+			logger.error("SAXParseException occured: cursor:"+cursor+ " set:"+set +" identifier:"+ identifier );
+			logger.error(e.getMessage(),e);
+		}catch(Throwable e){
+			logger.error(e.getMessage(),e);
+		}
+	}
+		
+	public static final String URLIMPORT_SIGN = "URLIMPORT";
+	
+	/**
+	 * @param urlToFile
+	 * @throws Throwable
+	 */
+	public void importOAIObjectsFromFile(String urlToFile, RecordHandlerInterface recordHandlerLom) throws Throwable{
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		
+		String queryResult = new HttpQueryTool().query(urlToFile);
+		
+		Document doc = builder.parse(new InputSource(new StringReader(queryResult)));
+		
+		NodeList records = (NodeList)xpath.evaluate("/records/record", doc, XPathConstants.NODESET);
+		
+		String[] splitted = urlToFile.split("/");
+		String setName = splitted[splitted.length -1];
+		setName = setName.replace(".", "_");
+		setName = URLIMPORT_SIGN + "_"+System.currentTimeMillis() + setName; 
+		for(int i = 0; i < records.getLength(); i++){
+			
+			Node record = records.item(i);
+			int cursor = (int)(i/100);
+			
+			try{
+								
+				logger.info("cursor:"+cursor+" i:"+i);
+				//it seems when we use the record Node the whole Document will be processed. this makes the handling of record slower and slower.
+				//so we create a new document that consists only of the record part 
+				Source source = new DOMSource(record);
+	            StringWriter stringWriter = new StringWriter();
+	            Result result = new StreamResult(stringWriter);
+	            TransformerFactory factory = TransformerFactory.newInstance();
+	            Transformer transformer = factory.newTransformer();
+	            transformer.transform(source, result);
+	           
+	            String recordAsString = stringWriter.getBuffer().toString();
+	            
+	            Document standaloneRecordDoc = builder.parse(new InputSource(new StringReader(recordAsString)));
+	            
+	            //cause we want the content of record:
+	            Node standaloneRecordNode = (Node)xpath.evaluate("record", standaloneRecordDoc, XPathConstants.NODE);
+	            
+	            xpath.reset();
+	            recordHandlerLom.handleRecord(standaloneRecordNode, new Integer(cursor).toString(), setName);
+	            persistentHandler.safe(recordHandlerLom.getProperties(), new Integer(cursor).toString(), setName);
+				
+			} catch(Throwable e) {
+				logger.error(e.getMessage(),e);
+			}
+		}
+		
+	}	
+	
+	@Override
+	public void setBaseUrl(String baseUrl) {
+		this.oai_base_url = baseUrl;
+	}
+	
+	@Override
+	public void setBinaryHandler(BinaryHandler binaryHandler) {
+		this.binaryHandler = binaryHandler;
+	}
+	
+	@Override
+	public void setMetadataPrefix(String metadataPrefix) {
+		this.metadataPrefix = metadataPrefix;
+	}
+	
+	@Override
+	public void setNrOfRecords(int nrOfRecords) {
+		this.nrOfRecords = nrOfRecords;
+	}
+	
+	@Override
+	public void setNrOfResumptions(int nrOfResumptions) {
+		this.nrOfResumptions = nrOfResumptions;		
+	}
+	@Override
+	public void setPersistentHandler(PersistentHandlerInterface persistentHandler) {
+		this.persistentHandler = persistentHandler;
+	}
+	
+	@Override
+	public void setRecordHandler(RecordHandlerInterface recordHandler) {
+		this.recordHandler = recordHandler;
+	}
+	
+	@Override
+	public void setSet(String set) {
+		this.sets = new String[]{set};	
+	}
+	
+}

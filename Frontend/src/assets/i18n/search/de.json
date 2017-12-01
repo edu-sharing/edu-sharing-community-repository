@@ -1,0 +1,35 @@
+{
+  "SEARCH": {
+    "TITLE":"Suchumgebung",
+    "COLLECTIONS":"Sammlungen",
+    "MATERIALS":"Materialien",
+    "MAINSEARCHFIELD": "Eingabefeld für die Suche",
+    "TO_COLLECTIONS":"Zu Sammlungen",
+    "SEARCH":"Materialien",
+    "KEYWORD":"Schlüsselwort",
+    "SEARCH_STUFF": "Suchen ...",
+    "EXPANDED_SEARCH": "Erweiterte Suche",
+    "METADATASET":"Metadaten-Set wählen",
+    "METADATASET_INFO":"Nach anderen Suchkriterien filtern",
+    "APPLY": "Anwenden",
+    "INFORMATION":"Informationen",
+    "TOGGLE_EXPANDED_SEARCH":"Erweiterte Suche umschalten",
+    "TOGGLE_RESULT_VIEW":"Ansicht der Suchergebnisse umschalten",
+    "APPLY_FILTER":"Filter anwenden",
+    "FILTER":"Filter",
+    "CLICK_TO_REMOVE":"Klicken zum Entfernen",
+    "PREVIEWIMAGE_FOR":"Vorschaubild für",
+    "INFORMATION_AND_PREVIEW_FOR":"Informationen und Vorschau zu",
+    "QUERY_NO_RESULT":"Die Suchanfrage ergab keinen Treffer",
+    "AUTHOR":"Autor",
+    "LASTMODIFIED":"Zuletzt geändert",
+    "FREQUENTKEYWORDS": "Häufige Schlüsselwörter",
+    "REPOSITORY_ALL":"Alle",
+    "REPOSITORY_MORE":"Mehr",
+    "REPOSITORY_FILTER":"Zu durchsuchende Quellen",
+    "RENDER": {
+      "BACK_TO_SEARCH":"Zurück zur Suche"
+    },
+    "NODE_IMPORTED":"Objekt wurde importiert<br><a href='{{link}}'>Anzeigen</a>"
+  }
+}

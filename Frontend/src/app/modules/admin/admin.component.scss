@@ -1,0 +1,250 @@
+@import "../../../styles/variables.scss";
+
+
+.content{
+  padding:20px;
+  padding-top:$mainnavHeight + 70px;
+  width: 100%;
+  margin: auto;
+}
+.tabs{
+  display: flex;
+  overflow-x: auto;
+}
+.heading{
+  color:$textLight;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 110%;
+  width:100%;
+  border-bottom: 1px solid $cardSeperatorLineColor;
+  margin: 20px 0;
+  padding:0 10px;
+  i{
+    font-size:13pt;
+  }
+  span{
+    position: relative;
+    top: -3px;
+    margin-left: 10px;
+  }
+}
+.info{
+  max-width: 600px;
+  .version{
+    white-space: pre-line;
+    padding:0 20px;
+  }
+}
+.applications{
+  .tableRow div{
+    max-width: 160px;
+  }
+  .btn{
+    margin-bottom: 15px;
+  }
+  .table{
+    padding-bottom: 20px;
+  }
+  .appUrl{
+    width:calc(100% - 200px);
+    float:left;
+  }
+  .input-hint-bottom{
+    float:left;
+    margin-bottom: 15px;
+  }
+  .materialize-textarea{
+    height:150px;
+  }
+  .useFile{
+    color:$textLight;
+    float:left;
+    width:calc(100% - 200px);
+  }
+  .btn,.btn-flat{
+    float:right;
+  }
+  .btnXml,.useFile{
+    margin-top: 20px;
+  }
+  .btnXmlEditor{
+    margin-left: 15px;
+  }
+  .warning{
+    width:100%;
+    text-align: center;
+    font-style: italic;
+    padding-bottom: 20px;
+  }
+  .property{
+    width:100%;
+    float:left;
+    font-weight: bold;
+  }
+  h2{
+    font-size:120%;
+    color:$textLight;
+    float: left;
+    width:100%;
+  }
+  .appEditor{
+    .addProperty{
+      width:100%;
+      float:left;
+    }
+    .inputGroup{
+      textarea,input{
+        /*width:calc(100% - 40px);*/
+      }
+      .material-icons{
+        color:$textLight;
+        float:right;
+      }
+    }
+  }
+  padding-top: calc(#{$mainnavHeight} + 70px + 5%);
+  max-width: 1000px;
+}
+.import{
+  max-width: 800px;
+  .file,.directory{
+    display: inline-block;
+    padding: 0 10px;
+    min-width: 160px;
+    max-width: 200px;
+    vertical-align: middle;
+  }
+  .csv,.oai{
+    padding-bottom:50px;
+  }
+  .oai{
+    max-width: 500px;
+  }
+  .btn,.btn-flat{
+    margin-top: 20px;
+  }
+  .btn{
+    float:right;
+  }
+  .administration{
+    input{
+      width:200px;
+      margin-left: 50px;
+      position: relative;
+      top: 8px;
+    }
+    .cacheGroup,.propertyGroup{
+      width: 100%;
+    }
+    .propertyGroup{
+      padding-top: 30px;
+    }
+  }
+}
+.table{
+  display:table;
+  width:100%;
+}
+.tableRow{
+  display:table-row;
+  background-color: #fff;
+  div{
+    display:table-cell;
+    padding:5px 10px;
+    vertical-align: middle;
+    word-break: break-all;
+    border-bottom: 1px solid $cardSeperatorLineColor;
+    .material-icons{
+      color:$textLight;
+    }
+  }
+}
+.header{
+  color: $textLight;
+  background-color: transparent;
+}
+.update{
+  .tableRow div{
+    min-width: 160px;
+  }
+  max-width: 1000px;
+  .hint{
+    font-weight: bold;
+    text-align: center;
+    padding:40px 0;
+  }
+  .test a{
+    text-transform: uppercase;
+  }
+}
+.toolkit{
+  max-width: 900px;
+  .catalina{
+    label{
+      position: relative;
+      top:10px;
+    }
+    textarea {
+      min-height: 200px;
+    }
+    .btn-flat{
+      margin-bottom: 10px;
+    }
+  }
+  .group{
+    padding:40px 0;
+    .info{
+      float:left;
+      padding-top: 10px;
+      margin-bottom: 10px;
+    }
+    .btn-flat{
+      float:right;
+    }
+    input{
+      max-width: 250px;
+      float:left;
+    }
+  }
+}
+.row{
+  position: fixed;
+  top: $mainnavHeight;
+  width: 100%;
+  height: 48px;
+  z-index: 50;
+}
+.s12{
+  position: fixed;
+  z-index:10;
+}
+@media all and (max-width: $mobileWidth) {
+  .applications {
+    .file{
+      display: none;
+    }
+    .tableRow div {
+      padding: 5px 2px;
+    }
+  }
+  .update{
+    .description{
+      display: none;
+    }
+    .tableRow div{
+      min-width: initial;
+    }
+    .run{
+      min-width: 160px!important;
+    }
+  }
+}
+@media all and (max-width: $mobileWidth+$mobileStage*2) {
+  .applications{
+    .type,.repoType,.subtype{
+      display: none;
+    }
+  }
+}
+

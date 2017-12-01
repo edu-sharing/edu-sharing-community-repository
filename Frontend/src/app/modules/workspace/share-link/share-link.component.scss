@@ -1,0 +1,52 @@
+@import "../../../../styles/variables.scss";
+
+.info{
+  display:table;
+  .infoLeft,.infoRight{
+    display: table-cell;
+  }
+  .infoLeft{
+    width:100%;
+  }
+  .infoRight{
+    float:right;
+    text-align: right;
+    .switch{
+      float:right;
+    }
+  }
+}
+.copyLink{
+  padding-left: 10px;
+}
+.heading{
+  font-weight: bold;
+}
+.link{
+  background-color: $backgroundColor;
+  margin-top: 20px;
+  padding: 10px 30px;
+  margin-left: -20px;
+  margin-right: -20px;
+  .linkInfo,.linkDownloads{
+    display: block;
+    width:100%;
+    line-height: 1.5;
+    padding: 3px 0;
+  }
+}
+:host /deep/ .datepickerShareLink .datepicker-calendar{
+  margin-left: 50px;
+}
+.linkTitle{
+  margin-top: 20px;
+}
+.activateLink{
+  min-width:220px;
+}
+.copyLink{
+  min-width: 135px;
+  position: relative;
+  top:5px;
+  text-transform: uppercase;
+}

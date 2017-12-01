@@ -1,0 +1,227 @@
+package org.edu_sharing.service.archive;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.AuthenticationTool;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
+import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
+import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.archive.model.RestoreResult;
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchService.ContentType;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
+import org.springframework.context.ApplicationContext;
+
+public class ArchiveServiceImpl implements ArchiveService  {
+	
+	
+	public static final String RESTORESTATUS_FALLBACK_PARENT_NOT_EXISTS = "FALLBACK_PARENT_NOT_EXISTS";
+	
+	public static final String RESTORESTATUS_FALLBACK_PARENT_NO_PERMISSION = "FALLBACK_PARENT_NO_PERMISSION";
+	
+	public static final String RESTORESTATUS_DUPLICATENAME = "DUPLICATENAME";
+	
+	public static final String RESTORESTATUS_FINE = "FINE";
+	
+	
+	
+	ApplicationInfo appInfo;
+	AuthenticationTool authTool;
+	HashMap<String,String> authInfo;
+	MCAlfrescoAPIClient client;
+	
+	SearchService searchService;
+	
+	Logger logger = Logger.getLogger(ArchiveServiceImpl.class);
+	
+	ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+
+	ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+	NodeService nodeService = serviceRegistry.getNodeService();
+
+	private AuthorityService authorityService;
+	
+	public ArchiveServiceImpl() {
+		try{
+			this.appInfo = ApplicationInfoList.getHomeRepository();
+			this.authTool = new AuthenticationToolAPI();
+			this.authInfo = this.authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
+			this.client = new MCAlfrescoAPIClient();
+			this.searchService = SearchServiceFactory.getSearchService(this.appInfo.getAppId());
+			this.authorityService = AuthorityServiceFactory.getAuthorityService(this.appInfo.getAppId());
+			
+		}catch(Throwable e){
+			throw new RuntimeException(e.getMessage());
+		}
+	}
+	
+	@Override
+	public void purge(List<String> archivedNodeIds) {
+		for(String archivedNodeId : archivedNodeIds){
+			this.client.removeNode(MCAlfrescoAPIClient.archiveStoreRef.getProtocol(), MCAlfrescoAPIClient.archiveStoreRef.getIdentifier(), archivedNodeId);
+		}
+	}
+	
+	@Override
+	public List<RestoreResult> restore(List<String> archivedNodeIds, String toFolder) {
+		List<RestoreResult> result = new ArrayList<RestoreResult>();
+		for(String archivedNodeId : archivedNodeIds){
+			result.add(this.restoreNode(archivedNodeId, toFolder));
+		}
+		return result;
+	}
+	
+	@Override
+	public SearchResultNodeRef search(String searchWord, int from, int maxResults,SortDefinition sortDefinition) {
+		if(!authorityService.isGlobalAdmin()){
+			return search(searchWord,AuthenticationUtil.getFullyAuthenticatedUser(),from,maxResults,sortDefinition);
+		}
+		
+		try{
+			
+			SearchToken searchToken = new SearchToken();
+			searchToken.setFrom(from);
+			searchToken.setMaxResult(maxResults);
+			searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
+			searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
+			searchToken.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR " + "TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") AND " + "@cm\\:name:\""+QueryParser.escape(searchWord) + "*\""+" AND ASPECT:\"sys:archived\"");
+			searchToken.setSortDefinition(sortDefinition);
+			searchToken.setContentType(ContentType.ALL);
+			
+			return this.searchService.search(searchToken);
+		}catch(Throwable e){
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+		
+	}
+	
+	@Override
+	public SearchResultNodeRef search(String searchWord, String user, int from, int maxResults, SortDefinition sortDefinition) {
+		try{
+			
+			SearchToken searchToken = new SearchToken();
+			searchToken.setFrom(from);
+			searchToken.setMaxResult(maxResults);
+			searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
+			searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
+			searchToken.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR " + "TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") AND " + "@cm\\:name:\""+QueryParser.escape(searchWord) + "*\"" + " AND @sys\\:archivedBy:\"" + QueryParser.escape(user)+"\" AND ASPECT:\"sys:archived\"");
+			searchToken.setSortDefinition(sortDefinition);
+			searchToken.setContentType(ContentType.ALL);
+			return this.searchService.search(searchToken);
+			
+		}catch(Throwable e){
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+	}
+	
+	private RestoreResult restoreNode(String archivedNodeId, String destinationParentId){
+		
+		NodeRef archivedNodeRef = new NodeRef(MCAlfrescoAPIClient.archiveStoreRef,archivedNodeId);
+		String name = client.getProperty(MCAlfrescoAPIClient.archiveStoreRef,archivedNodeId,CCConstants.CM_NAME);
+		
+		RestoreResult restoreResult = new RestoreResult();
+		restoreResult.setArchiveNodeId(archivedNodeId);
+		
+		
+		//try to use original
+		if(destinationParentId == null || destinationParentId.trim().equals("")){
+			ChildAssociationRef childRef = (ChildAssociationRef)nodeService.getProperty(archivedNodeRef, QName.createQName(CCConstants.SYS_PROP_ARCHIVED_ORIGINAL_PARENT_ASSOC));
+			if(childRef != null){
+				destinationParentId = childRef.getParentRef().getId();
+			}else{
+				try{
+					destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
+					restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NOT_EXISTS);
+				}catch(Throwable e){
+					logger.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+		if(!client.exists(destinationParentId)){
+			try{
+				destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
+				restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NOT_EXISTS);
+			}catch(Throwable e){
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+		if(!client.hasPermissions(destinationParentId, new String[]{CCConstants.PERMISSION_ADD_CHILDREN})){
+			try{
+				destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
+				restoreResult.setRestoreStatus(RESTORESTATUS_DUPLICATENAME);
+			}catch(Throwable e){
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+		if(destinationParentId == null){
+			throw new RuntimeException("can not restore, no target available");
+		}
+		
+		
+		
+		try{
+			String newName = new DuplicateFinder().getUniqueValue(client.getChildren(destinationParentId), CCConstants.CM_NAME, name);
+			if(!newName.equals(name)){
+				name = newName;
+				nodeService.setProperty(archivedNodeRef, QName.createQName(CCConstants.CM_NAME), name);
+				QName type = nodeService.getType(archivedNodeRef);
+		
+				if(QName.createQName(CCConstants.CCM_TYPE_IO).equals(type)){
+					nodeService.setProperty(archivedNodeRef, QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE), name);
+				}
+				restoreResult.setRestoreStatus(RESTORESTATUS_DUPLICATENAME);
+			}
+			
+		}catch(Throwable e){
+			logger.error(e.getMessage(), e);
+		}
+		
+		String assocName = QName.createValidLocalName(name);
+		assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + assocName;
+		
+		
+		
+		NodeRef restoredNode = nodeService.restoreNode(archivedNodeRef, 
+				new NodeRef(Constants.storeRef, destinationParentId), 
+				QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS), 
+				QName.createQName(assocName));	
+		
+		restoreResult.setNodeId(restoredNode.getId());
+		restoreResult.setParent(destinationParentId);
+		restoreResult.setPath(client.getPath(restoredNode.getId()));
+		if(restoreResult.getRestoreStatus() == null){
+			restoreResult.setRestoreStatus(RESTORESTATUS_FINE);
+		}
+		restoreResult.setName(name);
+		
+		return restoreResult;
+	}
+
+}

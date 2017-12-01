@@ -1,0 +1,44 @@
+<div class="dialog darken">
+  <div class="card center-card">
+    <div class="card-content">
+        <span class="card-title">{{'RECYCLE.RESTORE.NEW_LOCATION_TITLE' | translate }}</span>
+<!--
+              <p>{{'RESTORE.NEW_LOCATION_MESSAGE' | translate }}</p>
+              <p><span class="restoreMain">{{'RESTORE.NEW_LOCATION_MAIN' | translate}}</span>
+                  &rsaquo;<span class="restoreNew">
+                   {{'RESTORE.NEW_LOCATION_FOLDER' | translate}}</span></p>
+-->
+
+      <div *ngIf="results.hasDuplicateNames">
+        <p>{{'RECYCLE.RESTORE.LIST_DUPLICATE_NAMES' | translate}}</p>
+      <div *ngFor="let result of results.results">
+        <div *ngIf="result.restoreStatus==0">
+          {{result.name}} <span class="message">({{result.message}})</span>
+        </div>
+      </div>
+        </div>
+      <div *ngIf="results.hasParentFolderMissing">
+        <hr *ngIf="results.hasDuplicateNames">
+        <p>{{'RECYCLE.RESTORE.LIST_PARENT_FOLDER_MISSING' | translate}}</p>
+        <div *ngFor="let result of results.results">
+          <div *ngIf="result.restoreStatus==1">
+            {{result.name}} <span class="message">({{result.message}})</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+         <div class="card-action">
+           <a class="waves-effect waves-light btn" (click)="confirm()">{{'CLOSE' | translate }}</a>
+           <!-- <a *ngIf="results.hasParentFolderMissing"class="waves-effect waves-light btn" (click)="chooseDirectory()">{{'CHOOSE_DIRECTORY' | translate }}</a> -->
+           <!-- <a *ngIf="results.hasParentFolderMissing"class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a> -->
+         </div>
+</div>
+</div>
+<file-chooser *ngIf="showFileChooser"
+  [isCancelable]="true"
+  [pickDirectory]="true"
+  (onChoose)="folderSelected($event)"
+  (onCancel)="closeFolder()"
+></file-chooser>

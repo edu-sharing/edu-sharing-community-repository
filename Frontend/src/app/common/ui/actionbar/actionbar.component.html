@@ -1,0 +1,46 @@
+<div class="dialog" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false"></div>
+<div class="collectionContainer" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false">
+  <div [@openOverlay]="dropdown" class="moreOpen collection" (keydown.escape)="dropdown=false;$event.preventDefault();$event.stopPropagation();">
+      <a class="collection-item"
+         *ngFor="let option of optionsMenu;let i=index;" #menuElements
+         [class.collection-item-seperate]="option.isSeperate"
+         [class.collection-item-seperate-bottom]="option.isSeperateBottom && (i<optionsMenu.length-1 && !optionsMenu[i+1].isSeperate)"
+         [class.disabled]="!option.isEnabled"
+         tabindex="0"
+         (keyup.enter)="click(option)"
+         (click)="click(option)"
+      ><i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
+  </div>
+</div>
+<div class="actionbar">
+  <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
+    <a *ngFor="let option of optionsToggle"
+       tabindex="0"
+       (keyup.enter)="click(option)"
+       (click)="click(option)"
+       [class.light]="darkBackground"
+       [class.disabled]="!option.isEnabled">
+      <i class="material-icons">{{option.icon}}</i>
+    </a>
+
+  </div>
+<div class="more btn-flat"
+     (click)="showDropdown(false)"
+     tabindex="0"
+     (keyup.enter)="showDropdown(true)"
+     [class.light]="darkBackground"
+     [class.drawButtonMore]="drawButton" *ngIf="optionsMenu.length"><a><i class="material-icons">more_vert</i></a></div>
+
+<div *ngFor="let option of optionsAlways;let i=index;"
+     [class.light]="darkBackground"
+     [class.disabled]="!option.isEnabled"
+     class="actionAlways"
+     [class.btn-flat]="i!=optionsAlways.length-1"
+     [class.btn]="i==optionsAlways.length-1"
+     tabindex="0"
+         (keyup.enter)="click(option)"
+     (click)="click(option)">
+  <i class="material-icons">{{option.icon}}</i><span class="actionAlwaysCaption"> {{option.name | translate}}</span>
+</div>
+
+</div>

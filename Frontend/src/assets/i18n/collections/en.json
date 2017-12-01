@@ -1,0 +1,74 @@
+{
+
+  "COLLECTIONS": {
+    "TITLE": "collections",
+    "ERROR_DELETE": "An error occurred while deleting the collection.",
+    "DETAIL": {
+      "REMOVE": "delete",
+      "ADD_TO_OTHER": "to collection"
+    },
+    "NO_ADD_PERMISSIONS":"You have insufficient permissions to add materials to this collection",
+    "ERROR_NOT_FOUND":"Collection not found",
+    "ERROR_NODE_EXISTS":"The collection already contains this element",
+    "ADD_TO_OTHER_TITLE": "Add element to additional collection",
+    "ADDED_TO_COLLECTION": "Element was saved in additional collection",
+    "TO_SEARCH":"view search",
+    "EDIT_PERMISSIONS":"Set permissions",
+    "OPEN_MISSING" : "Open",
+    "ORIGINAL_MISSING" : "The original has been deleted",
+    "ORIGINAL_MISSING_INFO" : "The original has been deleted and can not be accessed anymore. You can open the reference to view the metadata.",
+    "CONFIRM_DELETE" : "Do you really want to delete the collection?",
+    "CONFIRM_DELETE_INFO" : "Do you really want to delete the collection? This can take some time for folders with lots of subordinate objects.",
+    "REMOVED_FROM_COLLECTION":"The element has been removed from the selection",
+    "EXTENDED_PERMISSIONS":"Individual persons or groups (view, collaborate or coordinate)",
+    "EXTENDED_PERMISSIONS_BUTTON":"Invite",
+    "TOAST":{
+      "DUPLICATE_NAME":"A collection with the same name already exists",
+      "CREATED":"Collection has been created",
+      "INVALID_NAME":"The given name is invalid. Please don't use special characters"
+    }
+  },
+
+
+  "collections_myCollectionsLong" : "My Collections",
+  "collections_orgaCollectionsLong" : "Collections of my Groups",
+  "collections_allCollectionsLong" : "All Collections",
+
+  "collections_myCollectionsShort" : "My",
+  "collections_orgaCollectionsShort" : "Groups",
+  "collections_allCollectionsShort" : "All",
+
+  "collections_description" : "Description",
+  "collections_noOrgaCollections" : "Your groups have not shared any collections yet.",
+  "collections_noCollections" : "There are no public collections available yet.",
+
+  "collections_content" : "Content",
+  "collections_noContentAvailable" : "No content available yet.",
+  "collections_howToAddContent" : "Use the search engine to find contents for your collection. Just click on it and choose the option 'add to collection'.",
+  "collections_proceedToSearch" : "add material from search",
+
+  "collections_reload" : "reload",
+  "collections_createNewCollection" : "Create a new Collection",
+
+
+
+  "collectionNew" : "*********************** +collection-new component *************************************",
+
+  "collectionNew_setAccess" : "Who will be able to see the collection?",
+  "collectionNew_setAccessOnlyMe" : "just me",
+  "collectionNew_setAccessMyOrga" : "my groups",
+  "collectionNew_setAccessMyOrgaNA" : "my groups (you are no member of any groups)",
+  "collectionNew_setAccessPublic" : "everybody",
+  "collectionNew_askName" : "Please enter a name for the collection.",
+
+
+  "collectionNew_preview" : "preview of the collection",
+  "collectionNew_setColor" : "color of the collection:",
+  "collectionNew_createCollection" : "create",
+  "collectionNew_storeChanges" : "save changes",
+
+  "collectionNew_reload" : "reload",
+  "collectionNew_placeholderTitle" : "title of your collection ...",
+  "collectionNew_placeholderDescription" : "Whats is your collection about?"
+
+}

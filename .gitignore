@@ -1,0 +1,11 @@
+Internal/
+Frontend/.editorconfig
+Backend/version.properties
+Backend/build.*.properties
+Backend/ng/
+Backend/war/
+*.class
+/Internal/
+Backend/build.number
+Backend/edu-sharing/
+Backend/release/

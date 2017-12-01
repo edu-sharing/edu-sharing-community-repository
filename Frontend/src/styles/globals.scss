@@ -1,0 +1,106 @@
+@import "./variables";
+.clickable{
+  @include clickable();
+}
+html,body,md-card{
+  height:100%;
+  font-family:'open_sansregular',sans-serif!important;
+  font-size:10pt;
+  font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
+  background-color: $backgroundColor;
+}
+a{
+  color:$primary;
+}
+.action-title{
+  background-color: $actionDialogBackground;
+}
+.blue-label{
+  color:$primary;
+  font-weight: bold;
+  font-size: 80%;
+}
+.center{
+  margin: 0 auto;
+}
+.invisible{
+  opacity:0;
+}
+.badge{
+  border-radius: 15px;
+  background: #eee;
+  padding: 5px 15px;
+  height:auto;
+  margin: 2px;
+  display: inline-block;
+  span{
+    display:table-cell;
+    vertical-align: middle;
+    word-break: break-all;
+  }
+  i{
+    color:$textLight;
+    position: relative;
+    top: 0px;
+    left: 11px;
+    display:table-cell;
+    vertical-align: middle;
+  }
+  .badgeIconLeft{
+    left:0;
+  }
+}
+.workflowStatus{
+  width:80px;
+  color:#fff;
+  font-weight:bold;
+  font-size:8pt;
+  border-radius: 2px;
+  text-align: center;
+}
+.workflowStatus_100_unchecked{
+   background-color: #539DD5;
+}
+.workflowStatus_200_tocheck{
+  background-color: #3CB0B0;
+}
+.workflowStatus_300_hasflaws{
+  background-color: #D58553;
+}
+.workflowStatus_400_checked{
+  background-color: #42A053;
+}
+.completer-row{
+  color:$textPrimary!important;
+  background: #fff!important;
+}
+.completer-selected-row,
+.completer-row:hover{
+  color:$textOnPrimary!important;
+  background: $primary!important;
+}
+.completer-dropdown{
+  @include materialShadow();
+  border:none!important;
+  margin-top:-20px!important;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+.input-hint-bottom{
+  margin-top:-15px;
+  color:$textLight;
+  font-size: 0.8em;
+}
+:focus {
+  @include setGlobalInsetFocus();
+}
+
+@media screen and (max-width: $mobileWidth) {
+  .hidemobile {
+    display: none;
+  }
+
+}

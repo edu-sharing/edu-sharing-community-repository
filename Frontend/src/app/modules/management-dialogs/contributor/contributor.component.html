@@ -1,0 +1,160 @@
+<div class="dialog darken">
+  <div class="card center-card card-high card-action">
+    <div class="card-content">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div class="card-title">{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate:{name:node ? node.name : ''} }}</div>
+      <spinner *ngIf="loading"></spinner>
+      <div class="card-scroll" *ngIf="!loading">
+        <h2 class="lifecycleHeading">{{'WORKSPACE.CONTRIBUTOR.LIFECYCLECONTRIBUTOR' | translate}}</h2>
+        <div *ngFor="let role of rolesLifecycle">
+          <div *ngIf="contributorLifecycle[role] && contributorLifecycle[role].length"  class="group">
+            <div class="role">{{'WORKSPACE.CONTRIBUTOR.TYPE.'+role.toUpperCase() | translate}}</div>
+            <div *ngFor="let vcard of contributorLifecycle[role];let i=index" class="badge clickable"><span (click)="editVCard('lifecycle',vcard,role)">{{vcard.getDisplayName()}}</span>
+              <i class="material-icons clickable" (click)="remove(contributorLifecycle[role],i)">cancel</i>
+            </div>
+          </div>
+        </div>
+        <a class="btnAdd btn-flat btn-shadow waves-light waves-effect btn-icon" (click)="addVCard('lifecycle')"><i class="material-icons">add</i> {{'ADD' | translate}}</a>
+        <h2 class="metadataHeading">{{'WORKSPACE.CONTRIBUTOR.METADATACONTRIBUTOR' | translate}}</h2>
+        <div *ngFor="let role of rolesMetadata">
+          <div *ngIf="contributorMetadata[role] && contributorMetadata[role].length"  class="group">
+            <div class="role">{{'WORKSPACE.CONTRIBUTOR.TYPE.'+role.toUpperCase() | translate}}</div>
+            <div *ngFor="let vcard of contributorMetadata[role];let i=index" class="badge clickable"><span (click)="editVCard('metadata',vcard,role)">{{vcard.getDisplayName()}}</span>
+              <i class="material-icons clickable" (click)="remove(contributorMetadata[role],i)">cancel</i>
+            </div>
+          </div>
+        </div>
+        <a class="btnAdd btn-flat btn-shadow waves-light waves-effect btn-icon" (click)="addVCard('metadata')"><i class="material-icons">add</i> {{'ADD' | translate}}</a>
+    </div>
+    </div>
+    <div class="card-action">
+      <a class="waves-effect waves-light btn" [class.disabled]="loading" (click)="saveContributor()">{{'SAVE' | translate }}</a>
+      <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+    </div>
+    </div>
+
+  <div class="card center-card card-high card-action" *ngIf="edit">
+    <div class="card-content">
+      <div class="card-cancel" (click)="edit=null"><i class="material-icons">close</i></div>
+      <div class="card-title">{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}</div>
+      <div class="card-scroll">
+        <div class="row">
+          <div class="col s12">
+            <ul class="tabs">
+              <li class="clickable tab col s6" (click)="setTab('person')">
+                <a [class.active]="editType=='person'" >{{'WORKSPACE.CONTRIBUTOR.MODE_PERSON' | translate}}</a>
+              </li>
+              <li class="clickable tab col s6" (click)="setTab('org')">
+                <a [class.active]="editType=='org'" >{{'WORKSPACE.CONTRIBUTOR.MODE_ORG' | translate}}</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+          <div class="table" *ngIf="editType=='person'">
+        <div class="title">
+          <label for="title">{{'VCARD.Title' | translate}}</label>
+          <input type="text" id="title" [(ngModel)]="edit.title">
+        </div>
+        <div class="givenname">
+      <label for="givenname">{{'VCARD.Givenname' | translate}}</label>
+      <input type="text" id="givenname" [(ngModel)]="edit.givenname">
+        </div>
+        <div class="surname">
+      <label for="surname">{{'VCARD.Surname' | translate}}</label>
+      <input type="text" id="surname" [(ngModel)]="edit.surname">
+        </div>
+      </div>
+        <div class="table" *ngIf="editType=='org'">
+          <div>
+            <label for="orgName2">{{'VCARD.Org' | translate}}</label>
+            <input type="text" id="orgName2" [(ngModel)]="edit.org">
+          </div>
+        </div>
+      <div class="table">
+        <div>
+          <label for="email">{{'VCARD.Email' | translate}}</label>
+          <input type="text" id="email" [(ngModel)]="edit.email">
+        </div>
+      </div>
+      <div class="table">
+        <div>
+          <label for="scope">{{'WORKSPACE.CONTRIBUTOR.SCOPE' | translate}}</label>
+          <select id="scope" [(ngModel)]="editScopeNew">
+            <option *ngFor="let role of editMode=='lifecycle' ? rolesLifecycle : rolesMetadata" value="{{role}}">{{'WORKSPACE.CONTRIBUTOR.TYPE.'+role.toUpperCase() | translate}}</option>
+          </select>
+        </div>
+        <div>
+          <label for="date">{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}</label>
+          <ng2-datepicker id="date" [options]="dateOptions" [(ngModel)]="date"></ng2-datepicker>
+          <!-- <input type="date" id="date" [(ngModel)]="edit.contributeDate"> -->
+        </div>
+      </div>
+      <a class="more clickable" (click)="more=!more">
+        <i class="material-icons" *ngIf="more">keyboard_arrow_down</i>
+        <i class="material-icons" *ngIf="!more">keyboard_arrow_right</i>
+        <span>{{'WORKSPACE.CONTRIBUTOR.MORE' | translate}}</span>
+      </a>
+      <div *ngIf="more" class="moreOpen">
+        <h2>{{'WORKSPACE.CONTRIBUTOR.ORG_INFO' | translate}}</h2>
+        <div class="table">
+          <div>
+            <label for="orgName">{{'VCARD.Org' | translate}}</label>
+            <input type="text" [disabled]="editType=='org'" id="orgName" [(ngModel)]="edit.org">
+          </div>
+        </div>
+        <div class="table">
+          <div>
+            <label for="orgUrl">{{'VCARD.OrgUrl' | translate}}</label>
+            <input type="text" id="orgUrl" [(ngModel)]="edit.url">
+          </div>
+        </div>
+        <div class="table">
+          <div>
+            <label for="orgPhone">{{'VCARD.OrgPhone' | translate}}</label>
+            <input type="text" id="orgPhone" [(ngModel)]="edit.orgPhone">
+          </div>
+        </div>
+        <h2>{{'WORKSPACE.CONTRIBUTOR.ADDRESS_INFO' | translate}}</h2>
+        <div class="table">
+          <div>
+            <label for="street">{{'VCARD.Street' | translate}}</label>
+            <input type="text" id="street" [(ngModel)]="edit.street">
+          </div>
+        </div>
+        <div class="table">
+          <div>
+            <label for="zip">{{'VCARD.Zip' | translate}}</label>
+            <input type="number" id="zip" [(ngModel)]="edit.zip">
+          </div>
+          <div>
+            <label for="city">{{'VCARD.City' | translate}}</label>
+            <input type="text" id="city" [(ngModel)]="edit.city">
+          </div>
+        </div>
+        <div class="table">
+          <div>
+            <label for="region">{{'VCARD.Region' | translate}}</label>
+            <input type="text" id="region" [(ngModel)]="edit.region">
+          </div>
+          <div>
+            <label for="country">{{'VCARD.Country' | translate}}</label>
+            <input type="text" id="country" [(ngModel)]="edit.country">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <div class="card-action">
+      <a class="waves-effect waves-light btn" (click)="saveEdits()">{{'APPLY' | translate }}</a>
+      <a class="btn-flat" (click)="edit=null">{{'CANCEL' | translate }}</a>
+    </div>
+  </div>
+  <modal-dialog *ngIf="dialogTitle"
+    [title]="dialogTitle"
+    [message]="dialogMessage"
+    [messageParameters]="dialogParameters"
+    [buttons]="dialogButtons"
+    [isCancelable]="true"
+    (onCancel)="dialogTitle=null"
+  ></modal-dialog>
+  </div>

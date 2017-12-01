@@ -1,0 +1,170 @@
+<!-- Use this file to deploy some handlers/chains and services      -->
+<!-- Two ways to do this:                                           -->
+<!--   java org.apache.axis.client.AdminClient deploy.wsdd          -->
+<!--      after the axis server is running                          -->
+<!-- or                                                             -->
+<!--   java org.apache.axis.utils.Admin client|server deploy.wsdd   -->
+<!--      from the same directory that the Axis engine runs         -->
+
+<deployment
+    xmlns="http://xml.apache.org/axis/wsdd/"
+    xmlns:java="http://xml.apache.org/axis/wsdd/providers/java">
+
+  <!-- Services from NativeAlfrescoWrapperService WSDL service -->
+
+  <service name="NativeAlfrescoWrapper" provider="java:RPC" style="wrapped" use="literal">
+      <parameter name="wsdlTargetNamespace" value="http://extension.alfresco.webservices.edu_sharing.org"/>
+      <parameter name="wsdlServiceElement" value="NativeAlfrescoWrapperService"/>
+      <parameter name="schemaQualified" value="http://extension.alfresco.webservices.edu_sharing.org,http://xml.apache.org/xml-soap"/>
+      <parameter name="wsdlServicePort" value="NativeAlfrescoWrapper"/>
+      <parameter name="className" value="org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapperSoapBindingImpl"/>
+      <parameter name="wsdlPortType" value="NativeAlfrescoWrapper"/>
+      <parameter name="typeMappingVersion" value="1.2"/>
+      <operation name="getProperties" qname="operNS:getProperties" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:getPropertiesReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:Map" xmlns:rtns="http://xml.apache.org/xml-soap" soapAction="" >
+        <parameter qname="pns:nodeId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="getType" qname="operNS:getType" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:getTypeReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:nodeId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="search" qname="operNS:search" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:searchReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:SearchResult" xmlns:rtns="http://extension.alfresco.webservices.edu_sharing.org" soapAction="" >
+        <parameter qname="pns:searchCriterias" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:SearchCriteria" xmlns:tns="http://extension.alfresco.webservices.edu_sharing.org"/>
+        <parameter qname="pns:metadatasetId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:start" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:int" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:nrOfResults" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:int" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:facettes" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="getChildren" qname="operNS:getChildren" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:getChildrenReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:Map" xmlns:rtns="http://xml.apache.org/xml-soap" soapAction="" >
+        <parameter qname="pns:parentID" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:type" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="createNode" qname="operNS:createNode" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:createNodeReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:parentID" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:nodeTypeString" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:childAssociation" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:props" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:Map" xmlns:tns="http://xml.apache.org/xml-soap"/>
+      </operation>
+      <operation name="removeNode" qname="operNS:removeNode" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" soapAction="" >
+        <parameter qname="pns:nodeId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:fromId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="updateNode" qname="operNS:updateNode" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" soapAction="" >
+        <parameter qname="pns:nodeId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:properties" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:Map" xmlns:tns="http://xml.apache.org/xml-soap"/>
+      </operation>
+      <operation name="isAdmin" qname="operNS:isAdmin" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:isAdminReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:boolean" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:username" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="hasPermissions" qname="operNS:hasPermissions" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:hasPermissionsReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:Map" xmlns:rtns="http://xml.apache.org/xml-soap" soapAction="" >
+        <parameter qname="pns:userId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:permissions" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:nodeId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="getCompanyHomeNodeId" qname="operNS:getCompanyHomeNodeId" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:getCompanyHomeNodeIdReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+      </operation>
+      <operation name="getPropertiesSimple" qname="operNS:getPropertiesSimple" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:getPropertiesSimpleReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:Map" xmlns:rtns="http://xml.apache.org/xml-soap" soapAction="" >
+        <parameter qname="pns:nodeId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="searchNodeIds" qname="operNS:searchNodeIds" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:searchNodeIdsReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:store" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:luceneQuery" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:permission" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="searchNodes" qname="operNS:searchNodes" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:searchNodesReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:RepositoryNode" xmlns:rtns="http://extension.alfresco.webservices.edu_sharing.org" soapAction="" >
+        <parameter qname="pns:store" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:luceneQuery" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:permission" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+        <parameter qname="pns:propertiesToReturn" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="validateTicket" qname="operNS:validateTicket" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:validateTicketReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:string" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="" >
+        <parameter qname="pns:ticket" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <operation name="getVersionHistory" qname="operNS:getVersionHistory" xmlns:operNS="http://extension.alfresco.webservices.edu_sharing.org" returnQName="retNS:getVersionHistoryReturn" xmlns:retNS="http://extension.alfresco.webservices.edu_sharing.org" returnType="rtns:RepositoryNode" xmlns:rtns="http://extension.alfresco.webservices.edu_sharing.org" soapAction="" >
+        <parameter qname="pns:nodeId" xmlns:pns="http://extension.alfresco.webservices.edu_sharing.org" type="tns:string" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
+      </operation>
+      <parameter name="allowedMethods" value="getCompanyHomeNodeId searchNodeIds searchNodes getChildren updateNode getProperties getPropertiesSimple getType getVersionHistory createNode search removeNode hasPermissions isAdmin validateTicket"/>
+
+      <arrayMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:ArrayOf_xsd_string"
+        type="java:java.lang.String[]"
+        innerType="cmp-ns:string" xmlns:cmp-ns="http://www.w3.org/2001/XMLSchema"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:SearchResult"
+        type="java:org.edu_sharing.webservices.alfresco.extension.SearchResult"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:FacettePair"
+        type="java:org.edu_sharing.webservices.alfresco.extension.FacettePair"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <arrayMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:ArrayOfKeyValue"
+        type="java:org.edu_sharing.webservices.alfresco.extension.KeyValue[]"
+        innerType="cmp-ns:KeyValue" xmlns:cmp-ns="http://extension.alfresco.webservices.edu_sharing.org"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:SearchCriteria"
+        type="java:org.edu_sharing.webservices.alfresco.extension.SearchCriteria"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:RepositoryNode"
+        type="java:org.edu_sharing.webservices.alfresco.extension.RepositoryNode"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <arrayMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:ArrayOfRepositoryNode"
+        type="java:org.edu_sharing.webservices.alfresco.extension.RepositoryNode[]"
+        innerType="cmp-ns:RepositoryNode" xmlns:cmp-ns="http://extension.alfresco.webservices.edu_sharing.org"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:Facette"
+        type="java:org.edu_sharing.webservices.alfresco.extension.Facette"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <typeMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:KeyValue"
+        type="java:org.edu_sharing.webservices.alfresco.extension.KeyValue"
+        serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
+        deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
+        encodingStyle=""
+      />
+      <arrayMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:ArrayOfFacette"
+        type="java:org.edu_sharing.webservices.alfresco.extension.Facette[]"
+        innerType="cmp-ns:Facette" xmlns:cmp-ns="http://extension.alfresco.webservices.edu_sharing.org"
+        encodingStyle=""
+      />
+      <arrayMapping
+        xmlns:ns="http://extension.alfresco.webservices.edu_sharing.org"
+        qname="ns:ArrayOfFacettePair"
+        type="java:org.edu_sharing.webservices.alfresco.extension.FacettePair[]"
+        innerType="cmp-ns:FacettePair" xmlns:cmp-ns="http://extension.alfresco.webservices.edu_sharing.org"
+        encodingStyle=""
+      />
+  </service>
+</deployment>

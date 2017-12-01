@@ -1,0 +1,75 @@
+@import "./variables";
+
+$toastLeft:     #40BF8E;
+$toastLeftError:     #c15d5d;
+$toastPrimary:  #5C5C5C;
+$toastLink:     #81A1B8;
+
+.toast{
+  position:fixed!important;
+  top: auto!important;
+  bottom: 4%!important;
+  left: 50%!important;
+  width: 300px!important;
+  float:inherit!important;
+  border-radius:5px!important;
+  margin-left:-150px;
+  display:table-cell!important;
+  min-height:inherit!important;
+  word-break: normal!important;
+  transition: all $transitionNormal;
+}
+.toast a{
+  color:$primaryMediumLight;
+  text-transform: uppercase;
+  font-weight: bold;
+  @include clickable();
+}
+.toast a:hover{
+  text-decoration: underline;
+}
+.toast .toast-text{
+  text-align: center!important;
+  vertical-align: middle;
+  padding:10px;
+}
+.toast{
+  width:100%;
+  word-break:inherit;
+  border-radius:6px!important;
+  background-color: $toastPrimary!important;
+  background: linear-gradient(to right, $toastLeft 0%,$toastLeft 8px,$toastPrimary 8px,$toastPrimary 100%)!important;
+  box-sizing:initial;
+}
+.toasty-type-error{
+  background: linear-gradient(to right, $toastLeftError 0%,$toastLeftError 8px,$toastPrimary 8px,$toastPrimary 100%)!important;
+  width:500px!important;
+  margin-left:-250px!important;
+}
+.toast,.toasty-type-error{
+  z-index:150;
+}
+.toast .close-button:after{
+  content:"x";
+  position: absolute;
+  color:#fff;
+  top:0;
+  right:10px;
+  @include clickable();
+}
+
+$maxToasts: 10;
+@for $i from 0 to $maxToasts {
+  ng2-toast:nth-child(#{$i}) .toast {
+      bottom:calc(4% + #{($i - 1)*80}px)!important;
+  }
+}
+
+@media screen and (max-width: $mobileWidth) {
+  .toast,.toasty-type-error{
+    width:75%!important;
+    left:5%!important;
+    margin-left:0!important;
+  }
+
+}

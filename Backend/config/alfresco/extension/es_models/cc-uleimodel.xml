@@ -1,0 +1,76 @@
+<model name="cculei:campuscontentunileipzigmodel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+	<description>Campus Content Uni Leipzig Model Extension</description>
+	<author>Daniel Rudolph</author>
+	<version>1.0</version>
+	<imports>
+		<!-- Import Alfresco Dictionary Definitions -->
+		<import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+		<!-- Import Alfresco Content Domain Model Definitions -->
+		<import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+	</imports>
+	<namespaces>
+		<!-- Define a Namespace for my new definitions -->
+		<namespace uri="http://www.campuscontent.de/model/ulei/1.0" prefix="cculei" />
+	</namespaces>
+	<aspects>
+		<aspect name="cculei:unileipzigaspect">
+			<title>Uni Leipzig Extension</title>
+			<properties>
+				<!-- 4. Erklärungen -->
+				<property name="cculei:explanation">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- 6. angestrebtes Niveau -->
+				<property name="cculei:intendedlevel">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- 7. Art des Materials -->
+				<property name="cculei:materialkind">
+					<type>d:text</type>
+				</property>
+				<!-- 9. Bereiche, Subbereiche -->
+				<property name="cculei:scope">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- 10. Fertigkeit -->
+				<property name="cculei:skill">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- 11. Lerngegenstand -->
+				<property name="cculei:eduobject">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- 12. Aktivität/Uebungstyp -->
+				<property name="cculei:activity">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- 13. Feedback -->
+				<property name="cculei:feedback">
+					<type>d:text</type>
+					<multiple>false</multiple>
+				</property>
+				<!-- 14. Medium datenträger -->
+				<property name="cculei:medium">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- 15. Internet Format -->
+				<property name="cculei:internetformat">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- 16. Tests -->
+				<property name="cculei:test">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+			</properties>
+		</aspect>
+	</aspects>
+</model>

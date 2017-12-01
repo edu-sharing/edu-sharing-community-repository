@@ -1,0 +1,31 @@
+<div class="dialog darken">
+  <div class="card center-card card-action">
+    <div class="card-content">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <span class="card-title">{{'CONNECTOR.'+_connector.id+'.TITLE' | translate }}</span>
+      <form (ngSubmit)="create()">
+        <input type="text" #input [(ngModel)]="_name" name="filename" (keyup)="setState($event)" (keypress)="setState($event)" placeholder="{{'CONNECTOR.'+_connector.id+'.PLACEHOLDER' | translate }}" autofocus />
+        <select [(ngModel)]="type" name="type" name="filetype" [class.hide]="_connector.filetypes.length==1" [disabled]="_connector.filetypes.length==1">
+          <option *ngFor="let filetype of _connector.filetypes;let i=index;" [value]="i">
+            {{('CONNECTOR.MIMETYPE.'+(filetype.mimetype=='application/zip' ? filetype.ccressourcetype+'_'+filetype.ccressourceversion+'_'+filetype.ccresourcesubtype : filetype.mimetype)) | translate}}</option>
+          <!--
+          <option value="0">{{'WORKSPACE.ONLYOFFICE.TYPE_0' | translate}}</option>
+          <option value="1">{{'WORKSPACE.ONLYOFFICE.TYPE_1' | translate}}</option>
+          <option value="2">{{'WORKSPACE.ONLYOFFICE.TYPE_2' | translate}}</option>
+          <option value="3">{{'WORKSPACE.ONLYOFFICE.TYPE_3' | translate}}</option>
+          <option value="4">{{'WORKSPACE.ONLYOFFICE.TYPE_4' | translate}}</option>
+          <option value="5">{{'WORKSPACE.ONLYOFFICE.TYPE_5' | translate}}</option>
+          -->
+        </select>
+      </form>
+      <div class="name" *ngIf="_name">
+      {{'CONNECTOR.'+_connector.id+'.FILENAME' |translate}}: {{_name}}.{{getType().filetype}}
+      </div>
+      </div>
+
+    <div class="card-action">
+      <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="create()">{{'CREATE' | translate }}</a>
+      <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+    </div>
+    </div>
+  </div>

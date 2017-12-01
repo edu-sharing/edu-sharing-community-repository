@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/apache-solr-core-1.4.2-dev.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/apache-solr-solrj-1.4.2-dev.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/lucene-core-2.9.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/slf4j-api-1.5.5.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/slf4j-jdk14-1.5.5.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/alf_data/solr/lib/alfresco-solr-integration-4.0.e.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

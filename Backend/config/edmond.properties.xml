@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>campuscontent search config. Is taken for applications that can act like both a client(LMS/repository) and a server application(repository)</comment>
+	<!-- says if application is allowd to act like a client -->
+	<entry key="trustedclient">true</entry>
+	<!-- the type LMS, repository -->
+	<entry key="type">REPOSITORY</entry>
+	<entry key="repositorytype">EDUNEX</entry>
+	<!-- host: 	client: trusted host 
+				server: access url  -->
+	<entry key="host">edunex.datenbank-bildungsmedien.net</entry>
+	<!-- port: 	server: access url -->
+	<entry key="port">80</entry>
+	<entry key="path">/NRW</entry>
+	<!-- wspath:server: access url-->
+	<!-- 	searchclass: only repositories. this is important only for the home repository, cause to access 
+	  		remote repositories there must be used the MCAlfrescoWSClient always   -->
+	<entry key="searchclass">org.edu_sharing.repository.server.MCEdunexClient</entry>
+	<!-- contenturl/previewurl: the url to the render service  -->
+	<entry key="contenturl">http://localhost/mcdev196/modules/ccRenderEngine/src/render.php?type=content</entry>
+	<entry key="previewurl">http://localhost/mcdev196/modules/ccRenderEngine/src/render.php?type=preview</entry>
+	<!-- nodeid_key: Repository Property. The name of the ID of Nodes -->
+	<entry key="nodeid_key">uuid</entry>
+	<!-- explorer-start-nodeid: only for repositories -->
+	<!-- entry key="explorer-start-nodeid">90b8f896-6a1d-11dd-9edb-49a38fe89288</entry-->
+	<!-- is_home_node: Repository Property. says if this is the local and primary repository -->
+	<entry key="is_home_node">false</entry>
+	<!-- Caption of Apllication -->
+	<entry key="appcaption">edunex</entry>
+	<!-- ID of Apllication -->
+	<entry key="appid">edunex</entry>
+	<entry key="availablesearchcriterias">filetypes,user,keywords</entry>	
+</properties>

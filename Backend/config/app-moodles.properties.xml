@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>campuscontent search config. Is taken for applications that can act like both a client(LMS/repository) and a server application(repository)</comment>
+	<!-- says if application is allowd to act like a client -->
+	<entry key="trustedclient">true</entry>
+	<!-- the type LMS, REPOSITORY -->
+	<entry key="type">LMS</entry>
+	<entry key="subtype">moodle</entry>
+	<!-- host: 	client: trusted host 
+				server: access url  -->
+	<entry key="host">127.0.0.1</entry>
+	<entry key="port">80</entry>
+	<!-- Caption of Apllication -->
+	<entry key="appcaption">moodle sven</entry>
+	<!-- ID of Apllication -->
+	<entry key="appid">MOODLES</entry>
+	<!-- Path to the Authentication Web Service -->
+	<entry key="authenticationwebservice">http://127.0.0.1/moodle/campuscontent/ccauthenticationservice.php</entry>
+	<entry key="permissionwebservice"></entry>
+</properties>

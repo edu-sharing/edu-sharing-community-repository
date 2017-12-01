@@ -1,0 +1,187 @@
+import {TranslateService } from 'ng2-translate/ng2-translate';
+import {Injectable} from "@angular/core";
+import {ToastyService, ToastData} from "ng2-toasty";
+import {RestConstants} from "../rest/rest-constants";
+import {RouterComponent} from "../../router/router.component";
+import {ConfigurationService} from "../services/configuration.service";
+import {Router} from "@angular/router";
+import {RestConnectorService} from "../rest/services/rest-connector.service";
+import {TemporaryStorageService} from "../services/temporary-storage.service";
+import {DialogButton} from "./modal-dialog/modal-dialog.component";
+import {UIConstants} from "./ui-constants";
+
+@Injectable()
+export class Toast{
+  private onShowModal: Function;
+  private dialogTitle: string;
+  private dialogMessage: string;
+  private dialogParameters: any;
+  private lastToastMessage: string;
+  private lastToastMessageTime: number;
+  private lastToastError: string;
+  private lastToastErrorTime: number;
+  private static MIN_TIME_BETWEEN_TOAST = 2000;
+  constructor(private toasty : ToastyService,
+              private router : Router,
+              private storage : TemporaryStorageService,
+              private translate : TranslateService){
+    (window as any)['toastComponent']=this;
+  }
+  /**
+   * Generates a toast message
+   * @param message Translation-String of message
+   * @param parameters Additional parameter bindings for translation
+   */
+  public toast(message : string,parameters : Object = null,dialogTitle:string=null,dialogMessage:string=null,options : any = null) : void {
+    if(this.lastToastMessage==message && (Date.now()-this.lastToastMessageTime)<Toast.MIN_TIME_BETWEEN_TOAST)
+      return;
+    this.lastToastMessage=message;
+    this.lastToastMessageTime=Date.now();
+    this.translate.get(message, parameters).subscribe((text: any) => {
+      if(dialogTitle){
+        text+='<br /><a onclick="window[\'toastComponent\'].openDetails()">'+this.translate.instant("DETAILS")+'</a>';
+      }
+      this.dialogParameters=parameters;
+      this.toasty.info(this.getToastOptions(text,options));
+      this.dialogTitle=dialogTitle;
+      this.dialogMessage=dialogMessage;
+    });
+  }
+
+  private openDetails(buttons:DialogButton[]=null){
+    this.onShowModal({title:this.dialogTitle,message:this.dialogMessage,translation:this.dialogParameters,buttons:buttons});
+  }
+
+  private getToastOptions(text: string, options: any = null) {
+    return {
+      title: "",
+      msg: text,
+      showClose: true,
+      timeout: 8000,
+      onAdd: (toast:ToastData) => {
+      },
+      onRemove: function(toast:ToastData) {
+      }
+    };
+  }
+
+  /**
+   * Generates a toast error message
+   */
+  public error(errorObject : any,message="COMMON_API_ERROR",parameters: any = null,dialogTitle='',dialogMessage='') : void {
+    let errorInfo="";
+    let error=errorObject;
+    let jsonParse=null;
+    if(errorObject)
+      jsonParse=errorObject._body;
+    if(!jsonParse && errorObject)
+      jsonParse=errorObject.response;
+    try {
+      let json=JSON.parse(jsonParse);
+      error=json.message;
+
+    }catch(e){}
+    this.dialogTitle=dialogTitle;
+    this.dialogMessage=dialogMessage;
+    if(message=="COMMON_API_ERROR") {
+      this.dialogMessage = '';
+      this.dialogTitle = 'COMMON_API_ERROR_TITLE';
+      console.log(errorObject);
+      if (errorObject)
+        errorInfo = jsonParse;
+      try {
+        let json = JSON.parse(jsonParse);
+        if (json.stacktraceArray) {
+          errorInfo = json.stacktraceArray.join('\n');
+        }
+        if (json.error.indexOf("DAOToolPermissionException") != -1) {
+          this.dialogTitle = 'TOOLPERMISSION_ERROR_TITLE';
+          message = 'TOOLPERMISSION_ERROR';
+          let permission = error.split(' ')[0];
+          this.dialogMessage = this.translate.instant('TOOLPERMISSION_ERROR_HEADER') + "\n- " +
+            this.translate.instant('TOOLPERMISSION.' + permission) + "\n\n" +
+            this.translate.instant('TOOLPERMISSION_ERROR_FOOTER', {permission: permission});
+        }
+        else if (json.error.indexOf("SystemFolderDeleteDeniedException") != -1) {
+          message = 'SYSTEM_FOLDER_DELETE_ERROR';
+          this.dialogTitle = '';
+        }
+        else {
+          this.dialogMessage = '';
+          this.dialogTitle = 'COMMON_API_ERROR_TITLE';
+          if (errorObject)
+            errorInfo = jsonParse;
+          try {
+            let json = JSON.parse(jsonParse);
+            if (json.stacktraceArray) {
+              errorInfo = json.stacktraceArray.join("\n");
+            }
+            if (json.error.indexOf("DAOToolPermissionException") != -1) {
+              this.dialogTitle = 'TOOLPERMISSION_ERROR_TITLE';
+              message = 'TOOLPERMISSION_ERROR';
+              let permission = error.split(' ')[0];
+              this.dialogMessage = this.translate.instant('TOOLPERMISSION_ERROR_HEADER') + "\n- " +
+                this.translate.instant('TOOLPERMISSION.' + permission) + "\n\n" +
+                this.translate.instant('TOOLPERMISSION_ERROR_FOOTER', {permission: permission});
+            }
+            else if (json.error.indexOf("SystemFolderDeleteDeniedException") != -1) {
+              message = 'SYSTEM_FOLDER_DELETE_ERROR';
+              this.dialogTitle = '';
+            }
+            else if(json.message.indexOf("InvalidLogLevel")!=-1){
+              error=json.error;
+              errorInfo=json.message;
+            }
+          } catch (e) {
+          }
+
+        }
+      } catch (e) {}
+      if (errorInfo == undefined)
+        errorInfo = '';
+      if (errorObject.status == RestConstants.DUPLICATE_NODE_RESPONSE) {
+        message = "WORKSPACE.TOAST.DUPLICATE_NAME";
+        parameters = {name: name};
+      }
+      else if (errorObject.status == RestConstants.HTTP_FORBIDDEN) {
+        message = "TOAST.API_FORBIDDEN";
+        this.dialogTitle = '';
+
+        let login=this.storage.get(RestConnectorService.SESSION_INFO);
+        if(login && login.isGuest){
+          this.toast('TOAST.API_FORBIDDEN_LOGIN');
+          this.goToLogin();
+          return;
+        }
+      }
+      else if (errorObject.status == RestConstants.HTTP_UNAUTHORIZED) {
+        this.toast('TOAST.API_FORBIDDEN_LOGIN');
+        return;
+      }
+      else {
+        if (!this.dialogMessage)
+          this.dialogMessage = error + "\n\n" + errorInfo;
+        if (!parameters)
+          parameters = {};
+        parameters["error"] = error;
+      }
+    }
+    if(this.lastToastError==message && (Date.now()-this.lastToastErrorTime)<Toast.MIN_TIME_BETWEEN_TOAST)
+      return;
+    this.lastToastError=message;
+    this.lastToastErrorTime=Date.now();
+    this.translate.get(message, parameters).subscribe((text: any) => {
+      if (this.dialogTitle) {
+        text += '<br /><a onclick="window[\'toastComponent\'].openDetails()">' + this.translate.instant("DETAILS") + '</a>';
+      }
+      this.toasty.error(this.getToastOptions(text))
+    });
+
+  }
+  public goToLogin(){
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"login"],{queryParams:{next:window.location}});
+  }
+  onShowModalDialog(param:Function) {
+    this.onShowModal=param;
+  }
+}

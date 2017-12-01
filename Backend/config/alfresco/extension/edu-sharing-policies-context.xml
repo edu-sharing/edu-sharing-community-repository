@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<!-- Core and miscellaneous bean definitions -->
+<beans>
+	  <bean id='metadataPresettingPolicy' class="org.edu_sharing.alfresco.fixes.MetadataPresettingPolicy" init-method="init" depends-on="scopePolicies">
+   	 	<property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+         <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="defaultProperties">
+         	<list>
+				<value>{http://www.alfresco.org/model/content/1.0}edu_metadataset</value>
+				<value>{http://www.campuscontent.de/model/1.0}groupsize</value>
+				<value>{http://www.campuscontent.de/model/1.0}learninggoal</value>
+				<value>{http://www.campuscontent.de/model/1.0}guidancestudents</value>
+				<value>{http://www.campuscontent.de/model/1.0}guidanceteachers</value>
+				<value>{http://www.campuscontent.de/model/1.0}commonlicense_key</value>
+				<value>{http://www.campuscontent.de/model/1.0}questionsallowed</value>
+				<value>{http://www.campuscontent.de/model/1.0}educationalcontext</value>
+				<value>{http://www.campuscontent.de/model/1.0}educationallearningresourcetype</value>
+				<value>{http://www.campuscontent.de/model/1.0}educationalinteractivitytype</value>
+				<value>{http://www.campuscontent.de/model/1.0}educationaltypicalagerange</value>
+				<value>{http://www.campuscontent.de/model/1.0}taxonentry</value>
+				<value>{http://www.campuscontent.de/model/1.0}taxonid</value>
+				<value>{http://www.campuscontent.de/model/1.0}taxonpath_xml</value>
+				<value>{http://www.campuscontent.de/model/1.0}classification_purpose</value>
+				<value>{http://www.campuscontent.de/model/1.0}classification_keyword</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_publisher</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_author</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_initiator</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_terminator</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_validator</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_editor</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_graphical_designer</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_technical_implementer</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_content_provider</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_technical_validator</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_educational_validator</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_script_writer</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_instructional_designer</value>
+				<value>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_subject_matter_expert</value>
+				<value>{http://www.campuscontent.de/model/1.0}metadatacontributer_creator</value>
+				<value>{http://www.campuscontent.de/model/1.0}metadatacontributer_validator</value>
+				<value>{http://www.campuscontent.de/model/1.0}metadatacontributer_provider</value>
+				<value>{http://www.campuscontent.de/model/1.0}commonlicense_key</value>
+				<value>{http://www.campuscontent.de/model/lom/1.0}general_description</value>
+				<value>{http://www.campuscontent.de/model/lom/1.0}general_keyword</value>
+				<value>{http://www.campuscontent.de/model/lom/1.0}general_language</value>
+				<value>{http://www.campuscontent.de/model/lom/1.0}rights_description</value>
+            </list>
+        </property>
+        <property name="protectTemplatesInUse">
+           	<value>true</value>
+        </property>
+   	 </bean>
+</beans>

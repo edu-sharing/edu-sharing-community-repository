@@ -1,0 +1,48 @@
+*************************************************************
+*                                                           *
+* Parts of this product are based on source code released   *
+* under the Apache License, Version 2.0 by the              *
+* CampusContent Project of FernUniversität in Hagen         *
+*                                                           *
+*************************************************************
+
+Portions of this product distribution require certain copyright or other notices to 
+be included with the product distribution.  These notice may also appear in individual 
+source files.
+
+------------------------------------------------------------------------------------------------------
+Alfresco Software			 	GNU General Public License version 2
+http://www.alfresco.com/
+------------------------------------------------------------------------------------------------------
+Google Webtookit				Apache License, Version 2.0
+http://code.google.com/intl/de-DE/webtoolkit/
+------------------------------------------------------------------------------------------------------
+BlowfishJ								Apache License, Version 2.0
+http://blowfishj.sourceforge.net/
+------------------------------------------------------------------------------------------------------
+jmimemagic							GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
+http://jmimemagic.sourceforge.net/index.html
+------------------------------------------------------------------------------------------------------
+vcard4j									GNU Lesser General Public License
+http://vcard4j.sourceforge.net/
+------------------------------------------------------------------------------------------------------
+xalan										Apache License, Version 2.0
+http://xml.apache.org/xalan-j/
+------------------------------------------------------------------------------------------------------
+gwt-dnd									Apache License, Version 2.0
+http://code.google.com/p/gwt-dnd/
+------------------------------------------------------------------------------------------------------
+gwt-incubator						Apache License, Version 2.0
+http://code.google.com/p/google-web-toolkit-incubator/
+------------------------------------------------------------------------------------------------------
+gwt-widgets-0.2.0				Apache License, Version 2.0
+------------------------------------------------------------------------------------------------------
+jdom										Apache-style open source license, with the acknowledgment clause removed
+------------------------------------------------------------------------------------------------------
+Apache Commons					Apache License, Version 2.0
+http://commons.apache.org/
+------------------------------------------------------------------------------------------------------
+
+
+All rights reserved.
+

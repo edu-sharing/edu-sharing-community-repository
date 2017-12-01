@@ -1,0 +1,16 @@
+@import "../../../../styles/variables.scss";
+
+.fileName{
+  padding:10px;
+  float:left;
+}
+.loading,.done,.done i{
+  float:right;
+  color:$primary;
+  font-size:35px;
+}
+.group{
+  width:100%;
+  height:52px;
+  display: table;
+}

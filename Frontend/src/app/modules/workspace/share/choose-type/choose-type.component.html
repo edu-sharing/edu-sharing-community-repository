@@ -1,0 +1,23 @@
+<div class="dialog" (click)="cancel()"></div>
+<div class="moreOpen collection">
+  <a class="collection-item" (click)="setType('Consumer')">
+    <i class="material-icons">remove_red_eye</i> {{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}
+    <i class="material-icons selected" *ngIf="contains('Consumer')">check</i>
+    <p>{{'WORKSPACE.SHARE.TYPE_VIEWER_DESCRIPTION' | translate}}</p></a>
+  <a class="collection-item" (click)="setType('Collaborator')">
+    <i class="material-icons">edit</i> {{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}
+    <i class="material-icons selected" *ngIf="contains('Collaborator')">check</i>
+    <p>{{'WORKSPACE.SHARE.TYPE_COWORKER_DESCRIPTION' | translate}}</p></a>
+  <a class="collection-item" (click)="setType('Coordinator')">
+    <i class="material-icons">work</i> {{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}
+    <i class="material-icons selected" *ngIf="contains('Coordinator')">check</i>
+    <p>{{'WORKSPACE.SHARE.TYPE_COORDINATOR_DESCRIPTION' | translate}}</p></a>
+  <div class="collection-item switch" *ngIf="!isDirectory && canPublish">
+      <label>
+        <i class="material-icons">public</i><span>{{'WORKSPACE.SHARE.PUBLISHER' | translate}}</span>
+      <input #publish type="checkbox" (change)="setPublish($event)">
+      <span class="lever"></span>
+      </label>
+  </div>
+</div>
+

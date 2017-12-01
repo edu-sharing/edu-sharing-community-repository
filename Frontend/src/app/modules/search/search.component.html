@@ -1,0 +1,183 @@
+<div id="eduSearchWrapper" (window:resize)="onResize()">
+  <app-search-header></app-search-header>
+  <header *ngIf="banner" class="banner" [style.background-image]="'url('+banner.url+')'"></header>
+  <main-nav
+    [title]="'SEARCH.TITLE'"
+    [currentScope]="'search'"
+    [searchEnabled]="true"
+    [showScope]="mainnav"
+    [showUser]="mainnav"
+    [searchPlaceholder]="'SEARCH.SEARCH_STUFF'"
+    [canOpen]="true"
+    [(searchQuery)]="searchService.searchTerm"
+    (onSearch)="routeSearch($event)"
+  ></main-nav>
+  <file-chooser *ngIf="addNodesToCollection"
+                [collections]="true"
+                [isCancelable]="true"
+                [title]="'WORKSPACE.SELECT_COLLECTION'"
+                (onCancel)="addNodesToCollection=null"
+                (onChoose)="addToCollectionList($event)"
+  ></file-chooser>
+  <div class="row tab-group row-dark scrollWithBanner" *ngIf="repositories">
+    <div class="col s12">
+      <ul class="tabs tabsRepositories">
+        <li class="clickable tab col s3" *ngFor="let repo of repositories.length<=4 ? repositories : repositories.slice(0,3)" (click)="setRepository(repo.id)">
+          <a [class.active]="currentRepository==repo.id">
+            <img [src]="getSourceIcon(repo)"><span class="repositoryTitle">{{ repo.title }}</span></a>
+        </li>
+        <li class="clickable tab col s3" *ngIf="repositories.length>4 && !extendedRepositorySelected" (click)="showMoreRepositories=true">
+          <a>
+            <span>
+              <img [src]="getSourceIconPath('more')"><span class="repositoryTitle">{{ 'SEARCH.REPOSITORY_MORE' | translate }}</span>
+            </span>
+            <i class="material-icons" >keyboard_arrow_down</i>
+          </a>
+        </li>
+        <li class="clickable tab col s3" *ngIf="repositories.length>4 && extendedRepositorySelected"
+            (click)="currentRepository==repositories[3].id ? showMoreRepositories=true : setRepository(repositories[3].id)">
+          <a [class.active]="currentRepository==repositories[3].id">
+            <img [src]="getSourceIcon(repositories[3])"><span class="repositoryTitle">{{ repositories[3].title }}</span>
+            <i class="material-icons" (click)="$event.stopPropagation();showMoreRepositories=true">keyboard_arrow_down</i>
+          </a>
+        </li>
+        <!--
+        <li class="clickable tab col s1" *ngIf="repositories.length>4" (click)="showMoreRepositories=true">
+          <a><i class="material-icons">more_vert</i></a>
+        </li>
+        -->
+
+      </ul>
+    </div>
+  </div>
+  <div class="top scrollWithBanner" [class.topNoRepositories]="!repositories">
+    <div class="extendedSearch">
+        <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="sidenav_opened=!sidenav_opened" (click)="sidenav_opened=!sidenav_opened" class="pointed filtertoggler">{{'SEARCH.EXPANDED_SEARCH' | translate}} <i class="material-icons">{{sidenav_opened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
+    </div>
+      <div class="switchToCollections" *ngIf="isGuest">
+        <a tabindex="0" title="{{'SEARCH.TO_COLLECTIONS' | translate}}" class="clickable" (click)="switchToCollections()" (keyup.enter)="switchToCollections()">{{'SEARCH.TO_COLLECTIONS' | translate}} <i class="material-icons">arrow_forward</i></a>
+      </div>
+      <actionbar class="actionbarFrame"
+                 *ngIf="actionOptions && actionOptions.length"
+                 [options]="actionOptions"></actionbar>
+  </div>
+<div class="sidenavContainer">
+
+   <div class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories" *ngIf="sidenav_opened"  [@fromLeft]="sidenav_opened">
+     <div *ngIf="currentRepository=='-all-'" class="repositoryList">
+       <label>{{'SEARCH.REPOSITORY_FILTER' | translate}}</label>
+       <div *ngFor="let repo of repositoryIds">
+         <input type="checkbox" class="filled-in" (change)="refresh()" [(ngModel)]="repo.enabled" [id]="repo.id"><label [for]="repo.id">{{repo.title}}</label>
+       </div>
+     </div>
+      <div *ngIf="mdsSets && mdsSets.length>1" class="mdsSelect">
+        <label for="mds">{{'SEARCH.METADATASET' | translate}}</label>
+        <div>
+          <i class="material-icons">settings</i>
+          <select id="mds" [(ngModel)]="mdsId" (change)="updateMds()">
+            <option *ngFor="let set of mdsSets" [value]="set.id">{{set.name}}</option>
+          </select>
+          <div class="info">{{'SEARCH.METADATASET_INFO' | translate}}</div>
+        </div>
+      </div>
+
+      <mds *ngIf="currentRepository!='-all-' && initalized"
+        [groupId]="queryId"
+        [repository]="currentRepository"
+        [setId]="mdsId"
+        [currentValues]="currentValues"
+        [suggestions]="mdsSuggestions"
+        [invalidate]="reloadMds"
+        [(extended)]="mdsExtended"
+        (onDone)="applyParameters($event)"
+      >
+      </mds>
+     <!--
+      <label id="keywordlabel" class="a11y_hidden_label">{{'SEARCH.KEYWORD' | translate}}</label>
+      <autocomplete id="keyword" inputMinLength="2" placeholder="{{'SEARCH.KEYWORD' | translate}}" [suggestions]="autocompleteSuggestions.keyword" [chosen]="searchService.autocompleteData.keyword" (updateInput)="getAutocompleteSuggestions($event)" (addItem)="addAutocompleteValue($event)" (removeItem)="removeAutoCompleteValue($event)" [attr.labelled-by]="keywordlabel"></autocomplete>
+
+      <label id="taxonidlabel" class="a11y_hidden_label">{{'SEARCH.SUBJECTS' | translate}}</label>
+      <autocomplete id="taxonid" inputMinLength="1" placeholder="{{'SEARCH.SUBJECTS' | translate}}" [suggestions]="autocompleteSuggestions.taxonid" [chosen]="searchService.autocompleteData.taxonid" (updateInput)="getAutocompleteSuggestions($event)" (addItem)="addAutocompleteValue($event)" (removeItem)="removeAutoCompleteValue($event)" [attr.labelled-by]="taxonidlabel"></autocomplete>
+
+      <label id="lrsLabel" class="a11y_hidden_label">{{'SEARCH.RESSOURCETYPE' | translate}}</label>
+    <autocomplete id="educationallearningresourcetype" inputMinLength="1" placeholder="{{'SEARCH.RESSOURCETYPE' | translate}}" [suggestions]="autocompleteSuggestions.educationallearningresourcetype" [chosen]="searchService.autocompleteData.educationallearningresourcetype" (updateInput)="getAutocompleteSuggestions($event)" (addItem)="addAutocompleteValue($event)" (removeItem)="removeAutoCompleteValue($event)" [attr.labelled-by]="lrsLabel"></autocomplete>
+
+    <label id="contextlabel" class="a11y_hidden_label">{{'SEARCH.CONTEXT' | translate}}</label>
+      <autocomplete id="educationalcontext" inputMinLength="1" placeholder="{{'SEARCH.CONTEXT' | translate}}" [suggestions]="autocompleteSuggestions.educationalcontext" [chosen]="searchService.autocompleteData.educationalcontext" (updateInput)="getAutocompleteSuggestions($event)" (addItem)="addAutocompleteValue($event)" (removeItem)="removeAutoCompleteValue($event)" [attr.labelled-by]="contextlabel"></autocomplete>
+-->
+   <!-- <div style="text-align: right">
+       <a class="btn" tabindex="0" id="filterSubmit" title="{{'SEARCH.APPLY_FILTER' | translate}}" (click)="getSearch(null, true)">{{'SEARCH.APPLY' | translate}}</a>
+   </div> -->
+<!--
+<div id="facettes">
+    <div *ngFor="let facette of searchService.facettes">
+      <span *ngIf="facette.values" class="chosenfilters_heading">{{'SEARCH.FREQUENTKEYWORDS' | translate}}</span>
+        <div *ngFor="let fac of facette.values" role="button" title="{{'SEARCH.FILTER' | translate}} {{'SEARCH.KEYWORD' | translate}}. {{'VALUE' | translate}} {{fac.value}}." tabindex="0" class="chip facette"
+        (keyup.enter)="addAutocompleteValue({id: 'keyword', item: {title: fac.value, id: fac.value}}, true)"
+        (click)="addAutocompleteValue({id: 'keyword', item: {title: fac.value, id: fac.value}})">{{fac.value}} ({{fac.count}})</div>
+    </div>
+</div>
+-->
+
+   </div>
+
+   <div class="content_wrapper" [class.contentSidenav]="sidenav_opened">
+    <div class="results alignWithBanner" [class.resultsNoRepositories]="!repositories" vocab="http://schema.org/" typeof="WebPage">
+      <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0">
+        <div class="collectionsHeading">
+          <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}}<a *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
+        </div>
+        <div class="collections" [class.collectionsMore]="collectionsMore" id="collections">
+        <listTable
+          class="collections"
+          [nodes]="searchService.searchResultCollections"
+          [columns]="collectionsColumns"
+          [hasIcon]="true"
+          [dragDrop]="false"
+          [hasCheckbox]="false"
+          [hasHeading]="false"
+          [isClickable]="true"
+          [viewType]="2"
+          [scrollWindow]="true"
+          (clickRow)="render($event)"
+          (doubleClickRow)="render($event)"
+          [isLoading]="false"></listTable>
+        </div>
+      </div>
+      <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}}</div>
+      <listTable
+        [nodes]="searchService.searchResult"
+        [columns]="columns"
+        [hasIcon]="true"
+        [selectedNodes]="selection"
+        [options]="options"
+        [dragDrop]="false"
+        [hasCheckbox]="hasCheckbox"
+        [hasHeading]="false"
+        [isClickable]="true"
+        [viewType]="view"
+        [hasMore]="!searchService.complete"
+        [applyMode]="applyMode"
+        [scrollWindow]="true"
+        (clickRow)="render($event)"
+        (doubleClickRow)="render($event)"
+        (loadMore)="getMoreResults()"
+        (onSelectionChanged)="updateSelection($event)"
+        [isLoading]="showspinner"></listTable>
+
+        <div class="noResults" *ngIf="searchFail && !showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
+    </div>
+   </div>
+ </div>
+</div>
+<div *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false">
+  <div class="collection">
+    <a class="collection-item"
+       *ngFor="let repo of repositories.slice(3)"
+       [class.active]="currentRepository==repo.id"
+       (click)="setRepository(repo.id);showMoreRepositories=false">
+      <img [src]="getSourceIcon(repo)"><span class="repositoryTitle">{{ repo.title }}</span>
+    </a>
+  </div>
+</div>
+<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>

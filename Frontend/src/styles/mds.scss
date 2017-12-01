@@ -1,0 +1,307 @@
+@import "variables.scss";
+
+.mdsCard {
+  .mdsExtended {
+    background-color: $workspaceMetadataBackground;
+    padding:15px;
+    height: 45px;
+  }
+  .mdsExtended .switch {
+    float: right;
+  }
+  .mdsExtended .label {
+    float: left;
+  }
+}
+.mdsViewHeader{
+  font-size:140%;
+  font-weight:bold;
+  border-bottom: 1px solid #000;
+  padding-bottom:10px;
+  padding-top:8px;
+  float:left;
+  width:100%;
+  background-color: $workspaceMetadataBackground;
+  i{
+    margin-left:10px;
+    margin-right:10px;
+    color:#666;
+    position: relative;
+    top:5px;
+  }
+}
+.mdsMainCard .mdsGroup{
+  background-color: #fff;
+}
+mds .mdsGroup{
+  width:100%;
+  float:left;
+  padding:25px;
+  padding-bottom:5px;
+
+  > div{
+    padding: 15px 0px;
+  }
+  fieldset{
+    border:none;
+  }
+  .card{
+    padding: 0!important;
+    padding-bottom: 20px!important;
+  }
+  .radioVertical label,
+  .checkboxVertical label{
+    width: 100%;
+  }
+  .radioHorizontal label,
+  .checkboxHorizontal label{
+    padding-right:10px;
+  }
+  .multivalueBadges{
+    padding: 0 10px 0 10px;
+  }
+
+  .mdsWidget{
+    position: relative;
+  }
+  .mdsWidget select{
+    margin-bottom: 20px;
+  }
+  .hint{
+    color:$textLight;
+    font-size:80%;
+    margin-top:-5px;
+    margin-bottom:2px;
+  }
+  .suggestionInput{
+    position: relative;
+    z-index: 130;
+  }
+  .suggestHighlight{
+    font-weight:bold;
+    color:$primary;
+  }
+  .suggestionMoreItems{
+    font-weight: bold;
+    text-align: center;
+  }
+  .suggestionNoMatches{
+    font-style: italic;
+    cursor: default;
+  }
+  .suggestionList{
+    position: absolute;
+    width:100%;
+    max-width:600px;
+    margin-top: -18px;
+    top: 53px;
+  }
+  .suggestionListAll{
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .collection-item{
+    min-height:36px;
+  }
+
+  .suggestInput{
+    width:calc(100% - 25px);
+  }
+  .suggestInputNoOpen{
+    width:100%;
+  }
+  .suggestInput, .multivalueBadgesText {
+    margin-bottom: 10px;
+  }
+  .suggestOpen{
+    float:right;
+    padding: 0;
+    margin:0;
+  }
+  .widget_range{
+    height: 50px;
+  }
+  .widget_duration{
+    width: 100%;
+    float: left;
+  }
+  .widget_duration div.inputField{
+    padding-top: 5px;
+    width:40px;
+    float:left;
+    text-align: center;
+  }
+  .widget_duration div.inputField input{
+    margin-top:-10px;
+  }
+  .widget_duration div.inputField label{
+    font-size:70%;
+  }
+  .widget_duration div.inputField span{
+    position: relative;
+    top:18px;
+  }
+  .widget_duration div.inputSlider{
+    width:calc(100% - 130px);
+    float:right;
+    position: relative;
+    top:35px;
+  }
+  > label,
+  .widget_checkbox,
+  .mdsVersion{
+    float:left;
+    width:100%;
+    padding-bottom: 15px;
+  }
+  .vcardGroup{
+    width: 50%;
+    float: left;
+    padding: 10px;
+  }
+  .vcardGroup i{
+    float:left;
+    color:$textLight;
+    position: relative;
+    top:3px;
+  }
+  .vcardFirstInput{
+    width:calc(100% - 30px);
+    float:right;
+  }
+  .widget_vcard{
+    height:95px;
+  }
+  .licenseLink,.contributorsLink{
+    font-weight: bold;
+    text-transform: uppercase;
+    padding-top: 10px;
+    padding-bottom: 30px;
+    float: left;
+    width: 100%;
+    i{
+      position: relative;
+      top: 6px;
+    }
+  }
+  .contributorsLink{
+    padding-top: 0;
+  }
+  .version {
+    margin-top: 10px;
+  }
+  #versionGroup{
+    padding-top:20px;
+  }
+  .mdsVersion .btn-flat{
+    float:left;
+    margin-bottom: 15px;
+  }
+  #versionChooser{
+    padding-left: 20px;
+    position: relative;
+    top: 4px;
+  }
+  input[type=color]{
+    width:40px;
+    height:40px;
+  }
+  input[type="checkbox"]+label{
+    display:inline;
+  }
+  .inputRange{
+    margin-top: 35px;
+    margin-bottom: 15px;
+    float: left;
+    width: 100%;
+  }
+  .inputTable{
+    display:table;
+    width: 100%;
+  }
+  .inputTable input{
+    display:table-cell;
+  }
+  .inputIcon{
+    display:table-cell;
+    padding-right:10px;
+    position: relative;
+    top:10px;
+    color:#666;
+  }
+  .mdsAuthor{
+    float:left;
+    width:100%;
+  }
+  .mdsAuthor{
+    .materialize-textarea{
+      min-height:1.5rem;
+      height:1.5rem;
+    }
+  }
+  .mdsPreview{
+    .previewImage {
+      text-align: center;
+      width:100%;
+      float:left;
+      padding-top: 5px;
+    }
+    label{
+      float: left;
+      text-align: left;
+    }
+    .changePreview{
+      float:right;
+      color:$primary;
+      text-transform: uppercase;
+    }
+    img{
+      width:40%;
+      max-height: 175px;
+    }
+  }
+}
+.treeGroup {
+  div {
+    float: left;
+    width: 100%;
+    padding-left: 4px;
+  }
+  [type="checkbox"] + label {
+    height: 35px;
+    top: 7px;
+    max-width: calc(100% - 40px);
+  }
+  .treeSelected {
+    /* Not working when scrolling */
+    background: $workspaceSelectedBackgroundEffect;
+    background-color: $workspaceSelectedBackground;
+    /*position: absolute;
+    left: 0;*/
+  }
+  div .treeIcon{
+    position: relative;
+    z-index: 1;
+    width:30px;
+    height:35px;
+    top: 7px;
+    i{
+      color:$textLight;
+      font-size: 16pt;
+    }
+  }
+  .treeGroup{
+    padding-left:30px;
+  }
+}
+.mdsExtendedSearch {
+  margin: 0 -20px;
+  background: #fff;
+  padding: 10px 20px;
+  .switch {
+    margin-top: 10px;
+  }
+}
+mds .mdsEmbedded{
+   padding:0;
+ }

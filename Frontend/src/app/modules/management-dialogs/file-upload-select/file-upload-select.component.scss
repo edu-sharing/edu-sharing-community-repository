@@ -1,0 +1,48 @@
+@import "../../../../styles/variables.scss";
+
+.dropArea{
+  border-radius:5px;
+  width: 100%;
+  text-align: center;
+  border: 2px dashed $primary;
+  padding: 20px;
+  margin-bottom:20px;
+  color:$textLight;
+}
+.dropActive{
+  background:$primaryLight;
+}
+.dropActive i{
+  color:$primary;
+}
+hr{
+  margin-bottom:20px;
+}
+.dropArea i{
+  font-size:60px;
+}
+.linkTitle{
+  color:$textLight;
+}
+.link{
+  width:100%;
+  text-align: center;
+}
+.dropArea .btn-flat{
+  float:none;
+}
+.location{
+  padding:20px;
+  background-color: $backgroundColor;
+  .caption{
+    float:left;
+    color:$primary;
+    margin-bottom: 10px;
+  }
+  .change{
+    float:right;
+    color:$primary;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+}

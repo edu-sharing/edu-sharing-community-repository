@@ -1,0 +1,34 @@
+@import "../../../../../styles/variables.scss";
+
+
+.collection-item{
+  color:$textPrimary!important;
+}
+.switch{
+  background-color: #eee;
+  cursor:auto;
+}
+.switch label{
+  color:$textPrimary;
+}
+.switch label span{
+  position: relative;
+  top: -2px;
+  font-size: 10pt;
+}
+.collection-item p{
+  color:$textLight;
+  padding: 0 28px;
+}
+.switch i{
+  padding-right:10px;
+}
+.lever{
+  top: 8px!important;
+  left: 10px!important;
+}
+.lever,
+.selected{
+  float:right;
+}
+

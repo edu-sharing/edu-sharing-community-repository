@@ -1,0 +1,232 @@
+package org.edu_sharing.service.search;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+
+import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.search.model.SearchToken;
+import org.springframework.extensions.surf.util.URLEncoder;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+public class SearchServiceLAppsImpl extends SearchServiceAdapter{
+	
+	private static final String LAPP_API = "https://learningapps.org/api.php";
+
+	Logger logger = Logger.getLogger(SearchServiceLAppsImpl.class);
+	
+	String repositoryId = null;
+
+	String APIKey = null;
+			
+	public SearchServiceLAppsImpl(String appId) {
+		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+		this.repositoryId = appInfo.getAppId();		
+		APIKey = appInfo.getApiKey(); 
+
+	}
+	public static HttpsURLConnection openLAppsUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
+		HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+		
+		// TODO!
+		TrustManager[] trustAllCerts = new TrustManager[]{
+			    new X509TrustManager() {
+			        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+			            return null;
+			        }
+			        public void checkClientTrusted(
+			            java.security.cert.X509Certificate[] certs, String authType) {
+			        }
+			        public void checkServerTrusted(
+			            java.security.cert.X509Certificate[] certs, String authType) {
+			        }
+			    }
+			};
+		SSLContext sc = SSLContext.getInstance("SSL");
+	    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		connection.setSSLSocketFactory(sc.getSocketFactory());
+		connection.setHostnameVerifier(new HostnameVerifier() {
+		    public boolean verify(String hostname, SSLSession session) {
+		      return true;
+		    }
+		  });
+		return connection;
+	}
+	
+	public static SearchResultNodeRef searchLApps(String repositoryId,String apiKey,String path) throws Exception{
+				
+		String lang = "DE";
+		URL url=new URL(LAPP_API+"?lang="+lang.toUpperCase()+path);
+		HttpsURLConnection connection = openLAppsUrl(url);
+		connection.connect();
+		
+		XPathFactory pfactory = XPathFactory.newInstance();
+		XPath xpath = pfactory.newXPath();
+		
+		InputStream is=connection.getInputStream();
+		
+		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		Document doc = builder.parse(is);
+		NodeList lAppNode = (NodeList) xpath.evaluate("/results/app", doc, XPathConstants.NODESET);
+		Integer nc = lAppNode.getLength();
+		SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
+		List<NodeRef> data=new ArrayList<>();
+		searchResultNodeRef.setNodeCount(nc); //@todo
+		searchResultNodeRef.setData(data);
+		
+		for(int i=0;i<lAppNode.getLength();i++){
+			
+			Node node = lAppNode.item(i);
+			
+			NamedNodeMap map = node.getAttributes();
+
+			HashMap<String,Object> properties=new HashMap<>();
+			properties.put(CCConstants.SYS_PROP_NODE_UID,map.getNamedItem("id").getNodeValue());
+			properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,map.getNamedItem("title").getNodeValue());
+			
+			properties.put(CCConstants.LOM_PROP_GENERAL_KEYWORD,map.getNamedItem("tags").getNodeValue().replace(" ",CCConstants.MULTIVALUE_SEPARATOR));
+
+			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, map.getNamedItem("image").getNodeValue());
+			properties.put(CCConstants.CONTENTURL,map.getNamedItem("url").getNodeValue());
+			properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "application/xhtml+xml");
+			properties.put(CCConstants.CCM_PROP_IO_WWWURL,map.getNamedItem("url").getNodeValue());
+			properties.put(CCConstants.NODETYPE, CCConstants.CCM_TYPE_IO);
+			properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
+
+			properties.put(CCConstants.REPOSITORY_ID, "LEARNINGAPPS" );
+			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"LearningApps");
+			properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
+			properties.put(CCConstants.NODECREATOR_FIRSTNAME,map.getNamedItem("author").getNodeValue());
+			properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,map.getNamedItem("author").getNodeValue());
+			
+			String createdate = map.getNamedItem("created").getNodeValue();
+
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
+			LocalDateTime date  = LocalDateTime.parse(createdate, formatter);
+			DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN);
+			properties.put(CCConstants.CM_PROP_C_MODIFIED,date.format(formatter2));
+			  
+			properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, map.getNamedItem("id").getNodeValue()));
+			  			
+			
+			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
+					Constants.storeRef.getProtocol(),
+					Constants.storeRef.getIdentifier(),properties);
+					
+			data.add(ref);
+		}
+		
+		return searchResultNodeRef;
+	}
+	
+	@Override
+	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
+			SearchToken searchToken) throws Throwable {
+		
+		if(!MetadataSetV2.DEFAULT_CLIENT_QUERY.equals(query)){
+			throw new Exception("Only ngsearch query is supported for this repository type, requested "+query);
+		}
+		
+		String lappcategorie="0";
+		String lappsubcategorie="0";
+		String cat="";
+		String edusector="";
+		String educationsector="";
+		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
+
+		boolean retval;		
+
+ 		if(criterias.containsKey("lappcategorie")) {
+ 			if (criterias.get("lappcategorie").length != 0 ){
+ 			lappcategorie=criterias.get("lappcategorie")[0];
+ 			cat = "&category="+lappcategorie;
+ 			
+ 			retval = lappcategorie.contains("#");
+	 			if (retval){
+	 				String[] parts = lappcategorie.split("#");
+	 				lappcategorie    = parts[0];  
+	 				lappsubcategorie = parts[1]; 		
+	 				cat = "&category="+lappcategorie+"&subcategory="+lappsubcategorie;
+	 			}
+ 			}
+ 		}
+ 		
+ 		if(criterias.containsKey("educationsector"))
+ 		{	if ( criterias.get("educationsector").length != 0)
+ 			{educationsector = criterias.get("educationsector")[0];
+ 		    if (!educationsector.isEmpty()){
+ 			 edusector = "&stufeStart="+educationsector+"&stufeEnd="+educationsector;
+ 		    }
+ 		    }
+ 		}
+		
+		if(searchWordCriteria == null) {
+ 			searchWordCriteria = new String[] {""};
+ 		}
+		
+		String searchWord = searchWordCriteria[0];
+		if (searchWord.equals("*") ){
+			searchWord="";
+		}
+		HttpsURLConnection connection=null;
+
+		try {
+			int page = 0;
+			String uri="&search="+URLEncoder.encodeUriComponent(searchWord)+cat+edusector;
+			searchToken.setQueryString(uri);
+			return searchLApps(repositoryId,APIKey,uri);
+			
+		}
+		catch (IOException e) {
+			InputStream is=connection.getErrorStream();
+			StringBuilder responseStrBuilder = new StringBuilder();
+			String line;
+			BufferedReader bR = new BufferedReader(  new InputStreamReader(is));
+			while((line =  bR.readLine()) != null){
+			    responseStrBuilder.append(line);
+			}
+			is.close();
+			throw new Exception("Error from LearningApp: "+connection.getResponseCode()+" "+responseStrBuilder.toString());
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			throw t;
+		}
+
+	}	
+	
+}

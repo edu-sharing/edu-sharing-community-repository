@@ -1,0 +1,1014 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://extension.alfresco.webservices.edu_sharing.org" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://extension.alfresco.webservices.edu_sharing.org" xmlns:intf="http://extension.alfresco.webservices.edu_sharing.org" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema elementFormDefault="qualified" targetNamespace="http://extension.alfresco.webservices.edu_sharing.org" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://xml.apache.org/xml-soap"/>
+   <element name="getProperties">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getPropertiesResponse">
+    <complexType>
+     <sequence>
+      <element name="getPropertiesReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getType">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getTypeResponse">
+    <complexType>
+     <sequence>
+      <element name="getTypeReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="search">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="searchCriterias" type="impl:SearchCriteria"/>
+      <element name="metadatasetId" type="xsd:string"/>
+      <element name="start" type="xsd:int"/>
+      <element name="nrOfResults" type="xsd:int"/>
+      <element maxOccurs="unbounded" name="facettes" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="ArrayOf_xsd_string">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="SearchCriteria">
+    <sequence>
+     <element name="property" nillable="true" type="xsd:string"/>
+     <element name="queryId" nillable="true" type="xsd:string"/>
+     <element name="values" nillable="true" type="impl:ArrayOf_xsd_string"/>
+    </sequence>
+   </complexType>
+   <element name="searchResponse">
+    <complexType>
+     <sequence>
+      <element name="searchReturn" type="impl:SearchResult"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="KeyValue">
+    <sequence>
+     <element name="key" nillable="true" type="xsd:string"/>
+     <element name="value" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfKeyValue">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="impl:KeyValue"/>
+    </sequence>
+   </complexType>
+   <complexType name="RepositoryNode">
+    <sequence>
+     <element name="nodeId" nillable="true" type="xsd:string"/>
+     <element name="properties" nillable="true" type="impl:ArrayOfKeyValue"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfRepositoryNode">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="impl:RepositoryNode"/>
+    </sequence>
+   </complexType>
+   <complexType name="FacettePair">
+    <sequence>
+     <element name="count" nillable="true" type="xsd:int"/>
+     <element name="value" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfFacettePair">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="impl:FacettePair"/>
+    </sequence>
+   </complexType>
+   <complexType name="Facette">
+    <sequence>
+     <element name="facettePairs" nillable="true" type="impl:ArrayOfFacettePair"/>
+     <element name="property" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="ArrayOfFacette">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="impl:Facette"/>
+    </sequence>
+   </complexType>
+   <complexType name="SearchResult">
+    <sequence>
+     <element name="data" nillable="true" type="impl:ArrayOfRepositoryNode"/>
+     <element name="facettes" nillable="true" type="impl:ArrayOfFacette"/>
+     <element name="nodeCount" type="xsd:int"/>
+     <element name="startIDX" type="xsd:int"/>
+    </sequence>
+   </complexType>
+   <element name="getChildren">
+    <complexType>
+     <sequence>
+      <element name="parentID" type="xsd:string"/>
+      <element name="type" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getChildrenResponse">
+    <complexType>
+     <sequence>
+      <element name="getChildrenReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="createNode">
+    <complexType>
+     <sequence>
+      <element name="parentID" type="xsd:string"/>
+      <element name="nodeTypeString" type="xsd:string"/>
+      <element name="childAssociation" type="xsd:string"/>
+      <element name="props" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="createNodeResponse">
+    <complexType>
+     <sequence>
+      <element name="createNodeReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="removeNode">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="fromId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="removeNodeResponse">
+    <complexType/>
+   </element>
+   <element name="updateNode">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="properties" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="updateNodeResponse">
+    <complexType/>
+   </element>
+   <element name="isAdmin">
+    <complexType>
+     <sequence>
+      <element name="username" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="isAdminResponse">
+    <complexType>
+     <sequence>
+      <element name="isAdminReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="hasPermissions">
+    <complexType>
+     <sequence>
+      <element name="userId" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="hasPermissionsResponse">
+    <complexType>
+     <sequence>
+      <element name="hasPermissionsReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getCompanyHomeNodeId">
+    <complexType/>
+   </element>
+   <element name="getCompanyHomeNodeIdResponse">
+    <complexType>
+     <sequence>
+      <element name="getCompanyHomeNodeIdReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getPropertiesSimple">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getPropertiesSimpleResponse">
+    <complexType>
+     <sequence>
+      <element name="getPropertiesSimpleReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="searchNodeIds">
+    <complexType>
+     <sequence>
+      <element name="store" type="xsd:string"/>
+      <element name="luceneQuery" type="xsd:string"/>
+      <element name="permission" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="searchNodeIdsResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="searchNodeIdsReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="searchNodes">
+    <complexType>
+     <sequence>
+      <element name="store" type="xsd:string"/>
+      <element name="luceneQuery" type="xsd:string"/>
+      <element name="permission" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="propertiesToReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="searchNodesResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="searchNodesReturn" type="impl:RepositoryNode"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="validateTicket">
+    <complexType>
+     <sequence>
+      <element name="ticket" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="validateTicketResponse">
+    <complexType>
+     <sequence>
+      <element name="validateTicketReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getVersionHistory">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getVersionHistoryResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getVersionHistoryReturn" type="impl:RepositoryNode"/>
+     </sequence>
+    </complexType>
+   </element>
+  </schema>
+  <schema elementFormDefault="qualified" targetNamespace="http://xml.apache.org/xml-soap" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://extension.alfresco.webservices.edu_sharing.org"/>
+   <complexType name="mapItem">
+    <sequence>
+     <element name="key" nillable="true" type="xsd:anyType"/>
+     <element name="value" nillable="true" type="xsd:anyType"/>
+    </sequence>
+   </complexType>
+   <complexType name="Map">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="apachesoap:mapItem"/>
+    </sequence>
+   </complexType>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="validateTicketResponse">
+
+      <wsdl:part element="impl:validateTicketResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCompanyHomeNodeIdResponse">
+
+      <wsdl:part element="impl:getCompanyHomeNodeIdResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getVersionHistoryRequest">
+
+      <wsdl:part element="impl:getVersionHistory" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getVersionHistoryResponse">
+
+      <wsdl:part element="impl:getVersionHistoryResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="hasPermissionsResponse">
+
+      <wsdl:part element="impl:hasPermissionsResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getChildrenResponse">
+
+      <wsdl:part element="impl:getChildrenResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getPropertiesResponse">
+
+      <wsdl:part element="impl:getPropertiesResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="validateTicketRequest">
+
+      <wsdl:part element="impl:validateTicket" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="createNodeRequest">
+
+      <wsdl:part element="impl:createNode" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="isAdminRequest">
+
+      <wsdl:part element="impl:isAdmin" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="createNodeResponse">
+
+      <wsdl:part element="impl:createNodeResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateNodeResponse">
+
+      <wsdl:part element="impl:updateNodeResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="searchNodesResponse">
+
+      <wsdl:part element="impl:searchNodesResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getCompanyHomeNodeIdRequest">
+
+      <wsdl:part element="impl:getCompanyHomeNodeId" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getPropertiesSimpleRequest">
+
+      <wsdl:part element="impl:getPropertiesSimple" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getPropertiesRequest">
+
+      <wsdl:part element="impl:getProperties" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="isAdminResponse">
+
+      <wsdl:part element="impl:isAdminResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="searchNodeIdsResponse">
+
+      <wsdl:part element="impl:searchNodeIdsResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="removeNodeResponse">
+
+      <wsdl:part element="impl:removeNodeResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getTypeResponse">
+
+      <wsdl:part element="impl:getTypeResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getChildrenRequest">
+
+      <wsdl:part element="impl:getChildren" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getTypeRequest">
+
+      <wsdl:part element="impl:getType" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="searchNodeIdsRequest">
+
+      <wsdl:part element="impl:searchNodeIds" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="searchResponse">
+
+      <wsdl:part element="impl:searchResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="searchRequest">
+
+      <wsdl:part element="impl:search" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="searchNodesRequest">
+
+      <wsdl:part element="impl:searchNodes" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="hasPermissionsRequest">
+
+      <wsdl:part element="impl:hasPermissions" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="removeNodeRequest">
+
+      <wsdl:part element="impl:removeNode" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="updateNodeRequest">
+
+      <wsdl:part element="impl:updateNode" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getPropertiesSimpleResponse">
+
+      <wsdl:part element="impl:getPropertiesSimpleResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:portType name="NativeAlfrescoWrapper">
+
+      <wsdl:operation name="getProperties">
+
+         <wsdl:input message="impl:getPropertiesRequest" name="getPropertiesRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:getPropertiesResponse" name="getPropertiesResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getType">
+
+         <wsdl:input message="impl:getTypeRequest" name="getTypeRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:getTypeResponse" name="getTypeResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="search">
+
+         <wsdl:input message="impl:searchRequest" name="searchRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:searchResponse" name="searchResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildren">
+
+         <wsdl:input message="impl:getChildrenRequest" name="getChildrenRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:getChildrenResponse" name="getChildrenResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createNode">
+
+         <wsdl:input message="impl:createNodeRequest" name="createNodeRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:createNodeResponse" name="createNodeResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeNode">
+
+         <wsdl:input message="impl:removeNodeRequest" name="removeNodeRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:removeNodeResponse" name="removeNodeResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateNode">
+
+         <wsdl:input message="impl:updateNodeRequest" name="updateNodeRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:updateNodeResponse" name="updateNodeResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="isAdmin">
+
+         <wsdl:input message="impl:isAdminRequest" name="isAdminRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:isAdminResponse" name="isAdminResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="hasPermissions">
+
+         <wsdl:input message="impl:hasPermissionsRequest" name="hasPermissionsRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:hasPermissionsResponse" name="hasPermissionsResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCompanyHomeNodeId">
+
+         <wsdl:input message="impl:getCompanyHomeNodeIdRequest" name="getCompanyHomeNodeIdRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:getCompanyHomeNodeIdResponse" name="getCompanyHomeNodeIdResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getPropertiesSimple">
+
+         <wsdl:input message="impl:getPropertiesSimpleRequest" name="getPropertiesSimpleRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:getPropertiesSimpleResponse" name="getPropertiesSimpleResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="searchNodeIds">
+
+         <wsdl:input message="impl:searchNodeIdsRequest" name="searchNodeIdsRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:searchNodeIdsResponse" name="searchNodeIdsResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="searchNodes">
+
+         <wsdl:input message="impl:searchNodesRequest" name="searchNodesRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:searchNodesResponse" name="searchNodesResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="validateTicket">
+
+         <wsdl:input message="impl:validateTicketRequest" name="validateTicketRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:validateTicketResponse" name="validateTicketResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getVersionHistory">
+
+         <wsdl:input message="impl:getVersionHistoryRequest" name="getVersionHistoryRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:getVersionHistoryResponse" name="getVersionHistoryResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="NativeAlfrescoWrapperSoapBinding" type="impl:NativeAlfrescoWrapper">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="getProperties">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getPropertiesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getPropertiesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getType">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getTypeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getTypeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="search">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="searchRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="searchResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildren">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getChildrenRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getChildrenResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createNode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="createNodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="createNodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeNode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="removeNodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="removeNodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateNode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateNodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateNodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="isAdmin">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="isAdminRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="isAdminResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="hasPermissions">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="hasPermissionsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="hasPermissionsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCompanyHomeNodeId">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getCompanyHomeNodeIdRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getCompanyHomeNodeIdResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getPropertiesSimple">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getPropertiesSimpleRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getPropertiesSimpleResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="searchNodeIds">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="searchNodeIdsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="searchNodeIdsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="searchNodes">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="searchNodesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="searchNodesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="validateTicket">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="validateTicketRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="validateTicketResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getVersionHistory">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getVersionHistoryRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getVersionHistoryResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="NativeAlfrescoWrapperService">
+
+      <wsdl:port binding="impl:NativeAlfrescoWrapperSoapBinding" name="NativeAlfrescoWrapper">
+
+         <wsdlsoap:address location="http://localhost:8080/JavaOrigin/services/NativeAlfrescoWrapper"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

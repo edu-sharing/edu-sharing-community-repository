@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<beans>
+
+	<!-- Factory providing OpenCMIS with a CMISService -->
+	<bean id="CMISServiceFactory"
+		class="org.alfresco.opencmis.EduSharingCmisServiceFactory">
+		<property name="cmisConnector" ref="CMISConnector" />
+		<property name="cmisTransactions" ref="CMISService_Transactions" />
+		<property name="cmisExceptions" ref="CMISService_Exceptions" />
+		<property name="cmisControl" ref="CMISService_Control" />
+
+<!-- 		<property name="trustedIPs"> -->
+<!-- 			<set> -->
+<!-- 				<value>127.0.0.1</value> -->
+<!-- 			</set> -->
+<!-- 		</property> -->
+
+<!-- 		<property name="trustedCmisConnector"> -->
+<!-- 			<bean class="org.alfresco.opencmis.CMISConnector" parent="CMISConnector"> -->
+<!-- 				<property name="authenticationService"> -->
+<!-- 					<bean -->
+<!-- 						class="org.alfresco.repo.security.authentication.subsystems.SubsystemChainingAuthenticationService" -->
+<!-- 						parent="authenticationService"> -->
+<!-- 						<property name="sourceBeanName"> -->
+<!-- 							<value>trustedAuthenticationService</value> -->
+<!-- 						</property> -->
+<!-- 					</bean> -->
+<!-- 				</property> -->
+<!-- 			</bean> -->
+<!-- 		</property> -->
+
+	</bean>
+
+</beans>

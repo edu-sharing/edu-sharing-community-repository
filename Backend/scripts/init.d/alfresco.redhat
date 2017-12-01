@@ -1,0 +1,81 @@
+#! /bin/sh
+#
+# Copy this script to /etc/init.d/alfresco, then
+#
+# chkconfig: 345 99 99
+#
+# description: alfresco for edu-sharing.net repository
+#
+#
+
+# alfresco installation directory
+ALFRESCO_DIR="/opt/alfresco-3.4.e"
+
+# the user-account to run as
+TOMCAT_USER="alfresco"
+
+# deployment-descriptor as created by tomcat when deploying edu-sharing.war
+DEPLOYMENT_DESCRIPTOR=$ALFRESCO_DIR/"conf/Catalina/localhost/edu-sharing.xml"
+
+# keep current directory
+CWD=`pwd`
+
+# init return-value/exit-code
+RETVAL=0
+
+# remove deployment-descriptor
+remove_deployment_descriptor() {
+        if [ -f $DEPLOYMENT_DESCRIPTOR ];
+        then
+                rm $DEPLOYMENT_DESCRIPTOR
+        fi
+}
+
+# executed to starting alfresco
+start()
+{
+	# edu-sharing.net's deployment-descriptor has to be removed forcing tomcat
+	# to startup alfresco before deploying edu-sharing.net again
+	remove_deployment_descriptor
+
+	cd $ALFRESCO_DIR
+
+	sudo -u $TOMCAT_USER $ALFRESCO_DIR/alfresco.sh start
+	RETVAL=$?
+
+	cd $CWD
+}
+
+# executed to stop alfresco, e.g. when shutting down
+stop()
+{
+	cd $ALFRESCO_DIR
+
+	sudo -u $TOMCAT_USER $ALFRESCO_DIR/alfresco.sh stop
+	RETVAL=$?
+
+	cd $CWD
+}
+
+# report status
+status () {
+	$RETVAL=0
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	status)
+		status
+		;;
+	*)
+		echo $"Usage $prog {start|stop|status}"
+		exit 1
+esac
+
+exit $RETVAL
+

@@ -1,0 +1,4 @@
+<div *ngFor="let collection of collections">
+  {{collection.title}} {{collection.owner.profile.email}}
+  <img [src]="collection.preview.url" >
+</div>

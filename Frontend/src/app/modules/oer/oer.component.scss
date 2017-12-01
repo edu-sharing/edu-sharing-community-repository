@@ -1,0 +1,145 @@
+@import "../../../styles/variables.scss";
+
+:host /deep/ {
+  .topBar {
+    background: transparent !important;
+  }
+
+  .topBarSearch form input {
+    background-color: rgba(255, 255, 255, 1) !important;
+  }
+  .topBarSearch{
+    position: initial!important;
+  }
+  .topBarSearch form input,
+  .topBarSearch form i {
+    color: #999 !important;
+  }
+  .topBar {
+    position: relative !important;
+    top: -75px !important;
+  }
+  .userMenu {
+    position: absolute !important;
+  }
+  .topBarSearch form {
+    left: 50%;
+    margin-left: - 250px;
+  }
+  .topBarSearch form, .topBarSearch input {
+    width: 500px;
+    box-sizing: border-box;
+  }
+  .user {
+    width: 300px;
+  }
+  @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
+    .topBarSearch form {
+      margin-left: -200px;
+    }
+    .topBarSearch form, .topBarSearch input {
+      width: 400px;
+    }
+  }
+
+  @media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+    .user {
+      width: auto;
+    }
+    .heading{
+      display: none;
+    }
+  }
+
+
+  @media screen and (max-width: ($mobileWidth)) {
+    .topBarSearch form {
+      margin-left: 0;
+      left: 0;
+    }
+    .topBarSearch form, .topBarSearch input {
+      width: 100%;
+    }
+  }
+}
+.heading{
+  position: absolute;
+  top:0;
+  margin-top:3%;
+  width:100%;
+  text-align: center;
+  color: #fff;
+  h1 {
+    font-size: 240%;
+  }
+  h2 {
+    font-size: 120%;
+  }
+  h1,h2 {
+    text-shadow: 0 0 10px #000;
+  }
+}
+.header{
+  width:100%;
+  max-height: 300px;
+  min-height: 80px;
+}
+.content{
+  position: relative;
+  top:-20px;
+  width:100%;
+  padding:0 4%;
+  overflow: hidden;
+}
+.caption{
+  float:left;
+  color:$textLight;
+  margin-left: 15px;
+}
+.more{
+  float:right;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.list{
+  width:calc(100% + #{$cardWidth + 60px});
+  float: left;
+  overflow: hidden;
+  margin: 10px 0;
+}
+.collections{
+  min-height: $cardSmallHeight+15px;
+  max-height: $cardSmallHeight+15px;
+  margin-bottom: 70px;
+}
+.materials{
+  min-height: $cardHeight+15px;
+  max-height: $cardHeight+15px;
+}
+.scrollContent{
+  overflow-x: auto;
+}
+.listLoading{
+  width:100%;
+}
+.listMore{
+  width:100%;
+  max-height:none;
+}
+.noResults{
+  float:left;
+  width:100%;
+  font-size:120%;
+  color:$noResultsColor;
+  text-align: center;
+  padding-top:20px;
+}
+@media (pointer: coarse) {
+  :host /deep/ .collections {
+    width: 100%;
+    overflow-x: auto;
+    .list {
+      width: max-content;
+    }
+  }
+}

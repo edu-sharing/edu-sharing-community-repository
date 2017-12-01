@@ -1,0 +1,23 @@
+package org.edu_sharing.service.nodeservice;
+
+import java.util.HashMap;
+import org.edu_sharing.service.search.SearchServiceDDBImpl;
+
+public class NodeServiceDDBImpl extends NodeServiceAdapter{
+
+
+
+	
+	public NodeServiceDDBImpl(String appId) {
+		super(appId);
+	}
+
+	@Override
+	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
+
+		SearchServiceDDBImpl searchservice = new SearchServiceDDBImpl (this.appId);
+		return searchservice.getProperties(nodeId);
+
+   }
+	
+}

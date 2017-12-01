@@ -1,0 +1,87 @@
+<templates>
+	<template name="header">
+		<message><![CDATA[
+			<div class="logo">
+			<img src="{{logo}}">
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="stylesheet">
+		<style><![CDATA[
+			body{
+				padding:20px;
+				background:#f6f6f6;
+			}
+			.content{
+				max-width:600px;
+				margin:auto;
+				background:#fff;
+				box-shadow:0 2px 6px rgba(0,0,0,.5);
+				padding:20px;
+			}
+			.footer{
+				max-width:500px;
+				margin:auto;
+			}
+			h1,h2,h3,div,body{
+				font-family: Arial, sans-serif;
+				font-size:14px;
+			}
+			.logo{
+				text-align:center;
+			}
+			.logo img{
+				min-width:100px;
+				width:30%;
+				max-width:250px;
+				height:auto;
+				padding-bottom:20px;
+			}
+			h1{
+				color:#888;
+				font-size:20px;
+				font-weight:normal;
+				padding-bottom:15px;
+			}
+			h2{
+				font-size:14px;
+				font-weight:bold;
+				padding-bottom:5px;
+			}
+			.rights{
+				padding:10px 5px;
+				color:#666;
+				white-space:pre-line;
+				line-height: 175%;
+			}
+			.footer{
+				padding:30px 10px;
+			}
+			.btn{
+				margin:auto;
+				color:#fff;
+				text-decoration:none;
+				background-color:#48708e;
+				text-transform:uppercase;
+				padding:10px 25px;
+				box-shadow:0 2px 5px rgba(0,0,0,.5);
+			}
+			a{
+				color:#48708e;
+				text-decoration:none;
+			}
+			.center{
+				text-align:center;
+			}
+		]]>
+		</style>
+	</template>
+	<template name="footer">
+		<message><![CDATA[
+			<a href="http://edu-sharing.net" style="float:left;">www.edu-sharing.net</a>
+			<a href="https://twitter.com/edusharing" style="float:right;">@edusharing</a>
+		]]>
+		</message>
+	</template>
+</templates>

@@ -1,0 +1,78 @@
+{
+
+  "COLLECTIONS": {
+    "TITLE": "Sammlungen",
+    "ERROR_DELETE": "Fehler beim Löschen der Sammlung",
+    "DETAIL": {
+      "REMOVE": "Entfernen",
+      "ADD_TO_OTHER": "In Sammlung"
+    },
+    "NO_ADD_PERMISSIONS":"Sie besitzen keine Berechtigung um Materialien in diese Sammlung aufzunehmen",
+    "ERROR_NOT_FOUND":"Sammlung wurde nicht gefunden",
+    "ERROR_NODE_EXISTS":"Dieses Element ist bereits in der Sammlung vorhanden",
+    "ADD_TO_OTHER_TITLE": "Element in weitere Sammlung einfügen",
+    "ADDED_TO_COLLECTION": "Element wurde in weiterer Sammlung gespeichert",
+    "TO_SEARCH":"Zur Suche",
+    "EDIT_PERMISSIONS":"Berechtigungen festlegen",
+    "OPEN_MISSING" : "Öffnen",
+    "ORIGINAL_MISSING" : "Das Orginal wurde gelöscht",
+    "ORIGINAL_MISSING_INFO" : "Das Orginal wurde gelöscht und steht nicht mehr zur Verfügung. Sie können die Referenz öffnen, um die Metadaten anzuzeigen.",
+    "CONFIRM_DELETE" : "Sammlung wirklich löschen?",
+    "CONFIRM_DELETE_INFO" : "Sammlung wirklich löschen? Bei vielen Untersammlungen kann dies einige Zeit dauern.",
+    "REMOVED_FROM_COLLECTION":"Element wurde von Sammlung entfernt",
+    "EXTENDED_PERMISSIONS":"einzelne Personen oder Gruppen (sehen, mitarbeiten oder koordinieren)",
+    "EXTENDED_PERMISSIONS_BUTTON":"Einladen",
+    "ORIGINAL_DELETE":"Entfernen",
+    "ORIGINAL_DELTED":"Inhalt wurde gelöscht",
+    "ORIGINAL_DELTED_INFO":"Nur Informationen sichtbar",
+    "TOAST":{
+      "DUPLICATE_NAME":"Eine Sammlung mit diesen Namen existiert bereits",
+      "CREATED":"Sammlung wurde erstellt",
+      "INVALID_NAME":"Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden"
+    }
+  },
+
+    "collections_myCollectionsLong" : "Meine Sammlungen",
+    "collections_orgaCollectionsLong" : "Sammlungen meiner Gruppen",
+    "collections_allCollectionsLong" : "Alle Sammlungen",
+
+    "collections_myCollectionsShort" : "Meine",
+    "collections_orgaCollectionsShort" : "Gruppen",
+    "collections_allCollectionsShort" : "Alle",
+
+    "collections_description" : "Beschreibung",
+    "collections_noOrgaCollections" : "Ihre Gruppen haben noch keine Sammlungen freigegeben.",
+    "collections_noCollections" : "Es sind keine öffentlichen Sammlungen verfügbar.",
+
+    "collections_content" : "Materialien",
+    "collections_noContentAvailable" : "Hier sind noch keine Materialien vorhanden.",
+    "collections_howToAddContent" : "Sie können in der Suchumgebung nach geeigneten Materialien für ihre Sammlung suchen. Klicken sie einfach auf ein geeignetes Material und wählen sie dann die Option 'zu Sammlung hinzufügen' aus.",
+    "collections_proceedToSearch" : "Materialen von Suche hinzufügen",
+
+    "collections_reload" : "Neu laden",
+    "collections_createNewCollection" : "Sammlung erstellen",
+
+
+
+
+    "collectionNew" : "*********************** +collection-new component *************************************",
+
+    "collectionNew_setAccess" : "Wer hat Zugriff auf diese Sammlung?",
+    "collectionNew_setAccessOnlyMe" : "nur ich",
+    "collectionNew_setAccessMyOrga" : "meine Gruppen dürfen sehen",
+    "collectionNew_setAccessMyOrgaNA" : "meine Gruppen (noch keinen zugeordnet)",
+    "collectionNew_setAccessPublic" : "alle dürfen sehen",
+    "collectionNew_askName" : "Bitte einen Namen für die Sammlung eingeben.",
+
+
+    "collectionNew_preview" : "Vorschau meiner Sammlung",
+    "collectionNew_setColor" : "Farbe für diese Sammlung:",
+    "collectionNew_createCollection" : "erstellen",
+    "collectionNew_storeChanges" : "speichern",
+
+    "collectionNew_reload" : "Neu laden",
+    "collectionNew_placeholderTitle" : "Titel Ihrer Sammlung...",
+    "collectionNew_placeholderDescription" : "Worum geht es in Ihrer Sammlung?"
+
+
+}

@@ -1,0 +1,9 @@
+@import "../../../../styles/variables.scss";
+
+.noElements{
+  position: relative;
+  width:100%;
+  text-align: center;
+  padding-top:50px;
+  color:$noResultsColor;
+}

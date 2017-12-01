@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>campuscontent cas config</comment>
+	<entry key="proxyvalidate">https://127.0.0.1:8443/cas/proxyValidate</entry>
+	<entry key="proxycallback">https://127.0.0.1:8443/jsp-examples/proxycallback.jsp</entry>
+	<entry key="proxyticket">https://127.0.0.1:8443/cas/proxy</entry>
+	<entry key="proxyservice">http://localhost/bongo</entry>
+</properties>

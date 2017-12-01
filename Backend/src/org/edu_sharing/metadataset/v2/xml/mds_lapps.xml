@@ -1,0 +1,45 @@
+<metadataset id="default" label="default" hidden="false">
+		<name>Core Metadataset</name>
+		<i18n>mds_translation</i18n>
+	<widgets>
+      <widget>
+                <id>lappcategorie</id>
+                <caption>Kategegorie</caption>
+                <placeholder>z.B. Astronomie</placeholder>
+                <type>singlevalueTree</type>
+                <valuespace>lappcategories.xml</valuespace>
+            </widget>
+
+ <widget>
+                <id>educationsector</id>
+                <caption>Bildungsbereich/-sektor</caption>
+                <placeholder>z.B. Hochschule</placeholder>
+                <type>singleoption</type>
+                <allowempty>true</allowempty>
+                <values>
+				    <value cap="Vorschule">0</value>
+                    <value cap="Primarstufe">1</value>
+                    <value cap="Sekundarstufe 1">2</value>
+                    <value cap="Sekundarstufe 2">3</value>
+                    <value cap="Berufs- und Weiterbildung">4</value>
+                </values>
+            </widget>
+		</widgets>
+		<templates>
+			<template>
+				<id>search</id>
+				<html><![CDATA[
+              <lappcategorie>
+              <educationsector>
+			  ]]></html>
+			</template>
+		</templates>
+		<groups>
+			<group>
+				<id>ngsearch</id>
+				<views>
+					<view>search</view>
+				</views>
+			</group>
+		</groups>
+</metadataset>

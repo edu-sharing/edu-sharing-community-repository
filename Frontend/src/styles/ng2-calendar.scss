@@ -1,0 +1,46 @@
+@import "./variables";
+
+.datepicker-calendar{
+  @include materialShadow(true);
+  margin-bottom:10px;
+  .datepicker-calendar-top{
+    background: $textLight!important;
+  }
+  .datepicker-calendar-container{
+    background:$backgroundColor!important;
+  }
+  .datepicker-calendar-month-section{
+    color:$primary!important;
+    font-weight:bold;
+  }
+  .day:hover,.year:hover{
+    color:#fff!important;
+    background:$primary!important;
+  }
+  .selected{
+    background:#fff!important;
+  }
+  .today{
+    color:#fff!important;
+    background:$primary!important;
+    font-weight:bold;
+    border-radius: 4px!important;
+  }
+
+  #chevron-left,
+  #chevron-right{
+    fill:$primary!important;;
+  }
+  .datepicker-buttons{
+    .u-is-secondary{
+      background: #fff!important;
+      color:$primary!important;
+      border:1px solid $primary!important;
+    }
+    .u-is-primary{
+      background: $primary!important;
+      color:#fff!important;
+      border:none!important;
+    }
+  }
+}

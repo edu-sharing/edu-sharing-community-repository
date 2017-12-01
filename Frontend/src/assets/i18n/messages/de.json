@@ -1,0 +1,17 @@
+{
+  "MESSAGES":{
+    "GO_TO_SEARCH":"Zur Suche",
+    "INVALID":"Unbekannter Fehler",
+    "share_expired":"Dieser Link ist abgelaufen",
+    "share_file_deleted":"Die Datei wurde gelöscht",
+    "invalid_share":"Ungültiger Link",
+    "share_empty":"Die Datei kann nicht geladen werden",
+    "DETAILS":{
+      "share_expired":"Die Linkfreigabe ist abgelaufen oder wurde vom Besitzer des Materials beendet",
+      "share_file_deleted":"Die Linkfreigabe zeigt auf eine bereits gelöschte Datei. Bitte kontaktieren Sie den Autor",
+      "invalid_share":"Der angegebene Link ist ungültig",
+      "share_empty":"Der Link zeigt auf eine inkompatible Datei oder eine Datei ohne Inhalt",
+      "INVALID":""
+    }
+  }
+}

@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+ 
+<beans>
+
+	<bean id="ssoAuthorityMapper" class="org.edu_sharing.service.authentication.SSOAuthorityMapper" init-method="init">
+		<property name="mappingConfig">
+			<ref bean="ssoMapping"/>
+		</property>
+		<property name="createUser" value="true"/>
+		<property name="updateUser" value="true"/>
+		<property name="createGroups" value="true"/>
+		<property name="hashGroupNames" value="false"/>
+		<property name="updateMemberships" value="true"/>
+		<property name="debug" value="true"/>
+		<property name="organisationParam" value="affiliation"/>
+		<property name="globalGroupsParam" value="globalgroups"/>
+		
+	</bean>
+	
+	<bean id="ssoMapping" class="org.edu_sharing.service.authentication.sso.config.MappingRoot">
+		<property name="personMapping">
+	    	<ref bean="personDataMapping"/>
+	    </property>
+	    <property name="groupMapping">
+	        <list>
+	            <ref bean="groupIlmenauStudent"/>
+	        </list>
+	    </property>
+	</bean>
+	
+	<bean id="personDataMapping" class="java.util.HashMap">
+	    <constructor-arg>
+	        <map>
+	        	<entry key="userid" value="{http://www.alfresco.org/model/content/1.0}userName"/>
+	            <entry key="lastname" value="{http://www.alfresco.org/model/content/1.0}lastName" />
+	   			<entry key="firstname" value="{http://www.alfresco.org/model/content/1.0}firstName" />
+	    		<entry key="email" value="{http://www.alfresco.org/model/content/1.0}email" />
+	        </map>
+	    </constructor-arg>
+	</bean>
+	
+	<!-- Group Mapping-->
+	<bean id="groupIlmenauStudent" class="org.edu_sharing.service.authentication.sso.config.MappingGroup">
+		<property name="mapTo" value="GROUP_ILMENAU_STUDENT"/>
+		<property name="condition">
+				<ref bean="groupMappingCondition" />
+		</property>
+		
+	</bean>
+	
+	<bean id="groupMappingCondition" class="org.edu_sharing.service.authentication.sso.config.ConditionBlock">
+		<property name="operator" value="AND"/>
+	  	<property name="conditions">
+	        <list>
+	            <ref bean="groupMappingConditionAffiliationIlmenauStudent"/>
+	            <ref bean="groupMappingConditionEmailIlmenauStudent"/>
+	        </list>
+	    </property>
+	</bean>
+	
+	
+	<bean id="groupMappingConditionAffiliationIlmenauStudent" class="org.edu_sharing.service.authentication.sso.config.ConditionEquals">
+		<property name="matcher" value="student"/>
+		<property name="attribute" value="affiliation"/>	
+	</bean>
+	
+	<bean id="groupMappingConditionEmailIlmenauStudent" class="org.edu_sharing.service.authentication.sso.config.ConditionRegEx">
+		<property name="regex" value="([a-zA-Z0-9]*@tu-ilmenau.de)"/>
+		<property name="attribute" value="mail"/>	
+	</bean>
+
+</beans>

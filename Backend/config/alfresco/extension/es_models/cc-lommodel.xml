@@ -1,0 +1,570 @@
+<model name="cclom:campuscontentlommodel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+	<description>Campus Content LOM Model</description>
+	<author>Daniel Rudolph</author>
+	<version>1.0</version>
+	<imports>
+		<!-- Import Alfresco Dictionary Definitions -->
+		<import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+		<!-- Import Alfresco Content Domain Model Definitions -->
+		<import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+	</imports>
+	<namespaces>
+		<!-- Define a Namespace for my new definitions -->
+		<namespace uri="http://www.campuscontent.de/model/lom/1.0" prefix="cclom" />
+	</namespaces>
+
+	<!-- Type and Aspect definitions go here -->
+	<types>
+		<type name="cclom:identifier">
+			<title>LOM Identifier</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<property name="cclom:catalog">
+					<type>d:mltext</type>
+				</property>
+				<property name="cclom:identifier_entry">
+					<type>d:mltext</type>
+				</property>
+			</properties>
+		</type>
+		
+		<type name="cclom:contribute">
+			<title>LOM Contribute</title>
+			<parent>cm:cmobject</parent>
+			 <archive>true</archive>
+			<properties>
+				<!-- Catalog Value: author, publisher, unknown, initiator, terminator, validator, editor, graphical designer..... -->
+				<property name="cclom:role">
+					<type>d:text</type>
+				</property>
+				<!-- vcard -->
+				<property name="cclom:contribute_entity">
+					<type>d:mltext</type>
+				</property>
+				<property name="cclom:contribute_date">
+					<type>d:datetime</type>
+				</property>
+			</properties>
+		</type>
+		
+		<type name="cclom:educational">
+			<title>LOM Educational</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<!-- Catalog Value: active, expositive, mixed  -->
+				<property name="cclom:interactivitytype">
+					<type>d:text</type>
+				</property>
+				<!-- Catalog Value: exercise, simulation, questionaire, diagram, figure .... -->
+				<property name="cclom:learningresourcetype">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- Catalog Value: very low, low, medium, high, very high (Enumerated) -->
+				<property name="cclom:interactivitylevel">
+					<type>d:text</type>
+				</property>
+				<!-- Catalog Value: very low, low, medium, high, very high (Enumerated) -->
+				<property name="cclom:semanticdensity">
+					<type>d:text</type>
+				</property>
+				<!-- Catalog Value: teacher, author, learner, manager (State) -->
+				<property name="cclom:intendedenduserrole">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- Catalog Value: school, higher education, training, other (State) -->
+				<property name="cclom:context">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- "7-9","0-5", ("en","adults only") -->
+				<property name="cclom:typicalagerange">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- Catalog Value: very easy, easy, medium, difficult, very difficult -->
+				<property name="cclom:difficulty">
+					<type>d:text</type>
+				</property>
+				<!-- saved will be milliseconds(long) when exporting in LOM we can transfer it to Format like "PT1H30M" -->
+				<property name="cclom:typicallearningtime">
+					<type>d:long</type>
+				</property>
+				<property name="cclom:educational_description">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="cclom:educational_language">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+			</properties>
+		</type>
+		
+		<!-- for technical Aspect -->	
+		<type name="cclom:requirement">
+			<title>LOM Requirement</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+			</properties>
+			<associations>
+				<child-association name="cclom:requirement_orcomposite">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:orcomposite</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</type>
+		<type name="cclom:orcomposite">
+			<title>LOM Or-Composite</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<!-- Catalog Value: operating system, browser  -->
+				<property name="cclom:type">
+					<type>d:text</type>
+				</property>
+				<!-- Catalog Value(depends on cclom:type): operating system: ms-windows, macos, unix, multi-os... browser: ms-internet explorer, opera, amaya   -->
+				<property name="cclom:name">
+					<type>d:text</type>
+				</property>
+				<!-- e.g. 4.2 -->
+				<property name="cclom:minimum-version">
+					<type>d:text</type>
+				</property>
+				<!-- e.g. 6.2 -->
+				<property name="cclom:maximum-version">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</type>
+		
+		<!-- Classification -->
+		
+		<type name="cclom:classification">
+			<title>LOM Classification</title>
+			<parent>cm:cmobject</parent>
+			<archive>true</archive>
+			<properties>
+				<!-- Catalog Value: discipline, idea, prequisite, educational objective, accessibility, restrictions, educational level...  -->
+				<property name="cclom:purpose">
+					<type>d:text</type>
+				</property>
+				<property name="cclom:classification_description">
+					<type>d:mltext</type>
+				</property>
+				<property name="cclom:classification_keyword">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+				</property>
+			</properties>
+			<associations>
+				<child-association name="cclom:classification_taxonpath">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:taxonpath</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</type>
+		
+		<type name="cclom:taxonpath">
+			<title>LOM Taxonpath</title>
+			<parent>cm:cmobject</parent>
+			<archive>true</archive>
+			<properties>
+				<!-- e.g. ("en","ACM"), ("en","MESH"), ("en","ARIADNE") -->
+				<property name="cclom:source">
+					<type>d:mltext</type>
+				</property>
+			</properties>
+			<associations>
+				<!-- ordered -->
+				<child-association name="cclom:taxonpath_taxon">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:taxon</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</type>
+		
+		<!-- Taxon:
+			{["12",("en","Physics")],
+			 ["23",("en","Acoustics")],
+			 ["34",("en","Instruments")],
+			 ["45",("en","Stethoscope")]}
+			  
+			  or:
+			  
+			{["56",("en,"Medicine")],
+			 ...,
+			 ["45",("en","Stethoscope")]} -->
+		<type name="cclom:taxon">
+			<title>LOM Taxon</title>
+			<parent>cm:cmobject</parent>
+			<archive>true</archive>
+			<properties>
+				<!-- e.g. "320" "4.3.2" "BF180" -->
+				<property name="cclom:id">
+					<type>d:text</type>
+				</property>
+				<!-- e.g ("en","Medical Sciences") -->
+				<property name="cclom:taxon_entry">
+					<type>d:mltext</type>
+				</property>
+			</properties>
+		</type>
+		
+		<type name="cclom:annotation">
+			<title>LOM Annotaion</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<property name="cclom:annotation_entity">
+					<type>d:text</type>
+				</property>
+				<property name="cclom:annotation_date">
+					<type>d:datetime</type>
+				</property>
+				<property name="cclom:annotation_description">
+					<type>d:mltext</type>
+				</property>
+			</properties>
+		</type>
+		
+		<!-- relation stuff -->
+		<type name="cclom:relation">
+			<title>LOM Relation</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<!-- Catalog Value (based on dublin core) ispartof, haspart, isversionof, hasversion, isformatof, hasformat, isreferencedby, isbasedon, isbasisfor, requires, isrequiredby -->
+				<property name="cclom:kind">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<aspect>cclom:resource</aspect>
+			</mandatory-aspects>
+		</type>
+	</types>
+	
+	
+	<!-- Aspects-->
+	<aspects>
+		<aspect name="cclom:schema">
+			<title>LOM Metadata</title>
+			<properties></properties>
+			<associations>
+				<child-association name="cclom:schema_educational">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:educational</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+				<child-association name="cclom:schema_classification">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:classification</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+				<child-association name="cclom:schema_annotation">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:annotation</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+				<child-association name="cclom:schema_relation">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:relation</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+				<child-association name="cclom:schema_metametadata_identifier">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:identifier</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+			<mandatory-aspects>
+				<aspect>cclom:general</aspect>
+				<aspect>cclom:lifecycle</aspect>
+				<aspect>cclom:meta-metadata</aspect>
+				<aspect>cclom:technical</aspect>
+				<aspect>cclom:rights</aspect>
+			</mandatory-aspects>
+		</aspect>
+
+		<aspect name="cclom:general">
+			<title>LOM Metadata general</title>
+			<properties>
+				<property name="cclom:title">
+					<type>d:mltext</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>both</tokenised>
+	               </index>
+				</property>
+				<property name="cclom:general_language">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="cclom:general_description">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="cclom:general_keyword">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>both</tokenised>
+	               </index>
+				</property>
+				<property name="cclom:coverage">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- Kata Value: atomic, collection networked, hirarchical, linear-->
+				<property name="cclom:structure">
+					<type>d:text</type>
+					<!-- if we don't fill that we get an incomplete aspect at the node 
+					  so we don't make it mandatory
+					<mandatory>true</mandatory>
+					-->
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+				</property>
+				<!-- Kata Value: 1, 2, 3, 4-->
+				<property name="cclom:aggregationlevel">
+					<type>d:int</type>
+					<!-- if we don't fill that we get an incomplete aspect at the node 
+					  so we don't make it mandatory
+					<mandatory>true</mandatory>
+					-->
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+				</property>
+			</properties>
+			<associations>
+				<child-association name="cclom:general_identifier">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:identifier</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</aspect>
+		
+		
+		<aspect name="cclom:lifecycle">
+			<title>LOM Metadata lifecycle</title>
+			<properties>
+				<property name="cclom:version">
+					<type>d:mltext</type>
+				</property>
+				<property name="cclom:status">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<associations>
+				<child-association name="cclom:lifecycle_contribute">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:contribute</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</aspect>
+		
+		
+		<aspect name="cclom:meta-metadata">
+			<title>LOM Metadata Meta-Metadata</title>
+			<properties>
+				<property name="cclom:metadataschema">
+					<type>d:text</type>
+				</property>
+				<property name="cclom:metadata_language">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<associations>
+				<child-association name="cclom:meta-metadata_identifier">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:identifier</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+				<child-association name="cclom:meta-metadata_contribute">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:contribute</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</aspect>
+		
+		<aspect name="cclom:technical">
+			<title>LOM Metadata Technical</title>
+			<properties>
+				<property name="cclom:format">
+					<type>d:text</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<property name="cclom:size">
+					<type>d:text</type>
+				</property>
+				<property name="cclom:location">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="cclom:installationremarks">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="cclom:otherplatformrequirements">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- "PT1H30M" "PT1M45S" -->
+				<property name="cclom:duration">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<associations>
+				<child-association name="cclom:technical_requirement">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:requirement</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</aspect>
+		
+		
+		<aspect name="cclom:rights">
+			<title>LOM Metadata Rights</title>
+			<properties>
+				<property name="cclom:cost">
+					<type>d:boolean</type>
+				</property>
+				<property name="cclom:copyright_and_other_restrictions">
+					<type>d:boolean</type>
+				</property>
+				<property name="cclom:rights_description">
+					<type>d:mltext</type>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="cclom:resource">
+			<title>LOM Resource</title>
+			<properties>
+				<property name="cclom:resource_description">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+				</property>
+			</properties>
+			<associations>
+				<child-association name="cclom:resource_identifier">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>cclom:identifier</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</aspect>
+			
+	</aspects>
+</model>

@@ -1,0 +1,12 @@
+<div class="dialog" *ngIf="showSuggestions" (click)="showSuggestions=false"></div>
+<div class="form-group edusharing-autocomplete-wrapper">
+ <input name="valueInput" class="searchInput" [(ngModel)]="valueInput" [disabled]="disabled" placeholder="{{placeholder | translate}}" title="{{placeholder | translate}}" autocomplete="off">
+ <ul class="suggestbox" *ngIf="showSuggestions">
+     <li *ngFor="let suggestion of _suggestions">
+         <a (click)="handleSuggestClick(suggestion)" [class.activeItem]="activeItem==suggestion.index" title="{{SUGGESTION | translate}} {{suggestion.title}}">
+           <span *ngIf="suggestion.materialIcon" class="material-icons">{{suggestion.materialIcon}}</span> <span class="name">{{suggestion.title}}</span>
+         </a>
+     </li>
+ </ul>
+  <div role="button" tabindex="0" title="{{'FILTER' | translate}} {{placeholder}}. {{'VALUE' | translate}} {{item.title}}. {{'CLICKTOREMOVE' | translate}}." class="badge clickable" *ngFor="let item of chosen" (keyup.enter)="removeValue(item)" (click)="removeValue(item)"><span>{{item.title}}</span><i class="material-icons">cancel</i></div>
+</div>

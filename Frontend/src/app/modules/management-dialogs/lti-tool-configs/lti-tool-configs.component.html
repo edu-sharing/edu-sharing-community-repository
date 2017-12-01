@@ -1,0 +1,36 @@
+<div class="dialog darken">
+  <div class="card center-card card-high card-actionbar card-wide">
+    <div class="card-content" *ngIf="_tool">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div class="card-title">{{'WORKSPACE.LTI_TOOLS.TITLE_CONFIG' | translate:{tool:_tool.name} }}</div>
+      <div class="card-title-actionbar">
+        <div class="actionbar">
+          <actionbar
+            [options]="actionOptions"
+          ></actionbar>
+        </div>
+      </div>
+
+      <spinner *ngIf="loading"></spinner>
+      <div class="card-scroll" *ngIf="!loading">
+        <listTable
+        [options]="explorerOptions"
+        [columns]="columns"
+        [nodes]="configs"
+        [hasIcon]="true"
+        [hasHeading]="false"
+        ></listTable>
+      </div>
+  </div>
+  <div class="card-action">
+    <a class="btn-flat" (click)="cancel()">{{'CLOSE' | translate }}</a>
+  </div>
+  </div>
+</div>
+<modal-dialog *ngIf="dialogTitle"
+[title]="dialogTitle"
+[message]="dialogMessage"
+[buttons]="dialogButtons"
+[isCancelable]="true"
+(onCancel)="dialogTitle=null"
+></modal-dialog>

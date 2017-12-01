@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     01.02.2010 15:28:16                                                        
+
+     edusharing    
+     The Edusharing internal build file. Is not included in src release.
+                   
+     rudolph                                                                
+     ====================================================================== -->
+<project name="edusharing" default="deploy">
+	<import file="build-common-src.xml" />
+	<property file="build-internal.properties" />
+	<property file="version.properties" />
+	<property name="release.foldername" value="edu-sharing" />
+	<property name="release-src.foldername" value="edu-sharing-src" />
+	
+	<description>
+            The Edusharing internal build file. Is not included in src release
+    </description>
+	
+	
+	<!--SVN-->
+	<path id="svn.classpath">
+	        <fileset dir="ant-svn">
+	            <include name="svnant.jar"/>
+	            <include name="ganymed.jar"/>
+	            <include name="jna.jar"/>
+	          <!--  <include name="svnClientAdapter.jar"/>
+	            <include name="svnjavahl.jar"/>
+	            <include name="svnkit.jar"/> -->
+	        	<include name="svnClientAdapter.jar"/>
+	        	
+	        	<include name="svnkit/*.jar"/>
+	        </fileset>
+	    </path> 
+
+	<target name="release">
+		
+		<!--incrementimng build number-->
+		<buildnumber file="build.number"/>
+		
+		<!--loading new build number (with prefix to get the new one)-->
+		<property file="build.number" prefix="tmp"></property>
+		
+	
+		<tstamp>
+  			<format property="TODAY" pattern="yyyy-MM-dd"/>
+		</tstamp>
+		<replaceregexp match="build.number: [0-9]*\&lt;br/\&gt;" replace="build.number: ${tmp.build.number}\&lt;br/\&gt;" flags="gs" byline="true">
+			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
+		</replaceregexp>
+		<replaceregexp match="build.date: .*\&lt;br/\&gt;" replace="build.date: ${TODAY}\&lt;br/\&gt;" flags="gs" byline="true">
+			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
+		</replaceregexp>
+		<!--writing build.number to version.properties so that the svn revision in this file will be updated to the main main revision (is used in release file)-->
+		<replaceregexp match="build.number=[0-9]*" replace="build.number=${tmp.build.number}" flags="gs" byline="true">
+			<fileset dir="." includes="version.properties"/>
+		</replaceregexp>
+		
+		<exec executable="git" outputproperty="git.result">
+			<arg value="log" />
+			<arg value="-n1" />
+			<arg value="--format=%ad-%h" />
+			<arg value="--date=short" />
+		</exec>
+		<echo>${git.result}</echo>
+		<!-- replace the extension name with the current active extension -->
+		<replaceregexp match="version.extension:[a-zA-Z ]*\&lt;br/\&gt;" replace="version.extension: ${extension-name}\&lt;br/\&gt;" flags="gs" byline="true">
+		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
+		</replaceregexp>
+		<replaceregexp match="git.commit:[a-zA-Z ]*\&lt;br/\&gt;" replace="git.commit: ${git.result}\&lt;br/\&gt;" flags="gs" byline="true">
+		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
+		</replaceregexp>
+		<copyfile src="${src.dir}/org/edu_sharing/repository/public/version.html" dest="${gwt-war.dir}/${gwt-rename-to}/version.html" />
+		<delete dir="${release.foldername}" />
+		<mkdir dir="${release.foldername}" />
+		<copyfile src="build-installer.xml" dest="${release.foldername}/build.xml" />
+		<copy todir="${release.foldername}">
+			<fileset dir="." includes="${includesrelease}" excludes="${exluderelease}">
+			</fileset>
+		</copy>
+		<!-- overwrite the config stuff with extension config-->
+		<antcall target="release-extension-config"></antcall>
+		<antcall target="release-public"></antcall>
+		<antcall target="release-extension-public"></antcall>
+		<antcall target="release-ng"></antcall>
+		<antcall target="release-extension-ng"></antcall>
+		<zip destfile="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" basedir="." includes="${release.foldername}/**">
+		</zip>
+		<copy file="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" todir="release"> </copy>
+		
+		<!--clean up version tmp file -->
+		<delete file="version_tmp.properties"></delete>
+		
+	</target>
+	
+	<!-- overwrite the config stuff-->
+	<target name="release-extension-config" if="current.extension.propfile">
+		<echo>extension is active: ${current.extension.propfile}</echo>
+		<copy overwrite="true" todir="${release.foldername}/config">
+			<fileset dir="${extensions.path}${extension-name}/config" includes="**">
+			</fileset>
+		</copy>
+	</target>
+	<target name="release-public">
+				<copy overwrite="true" failonerror="true" todir="${release.foldername}/war/edu_sharing">
+					<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="**">
+					</fileset>
+				</copy>
+	</target>
+	<target name="release-extension-public" if="current.extension.propfile">
+		<!-- convert module package path to folder path -->
+		<loadresource property="module.gwt.path">
+			<string value="${module.gwt.package}" />
+			<filterchain>
+				<replaceregex pattern="\." replace="/" flags="g" />
+			</filterchain>  
+		</loadresource>
+		<echo message="module path: ${module.gwt.path}" />
+		<copy overwrite="true" failonerror="true" todir="${release.foldername}/war/edu_sharing">
+			<fileset dir="${extensions.path}${extension-name}/src/${module.gwt.path}/public/" includes="**">
+			</fileset>
+		</copy>
+	</target>
+	<target name="release-ng" unless="current.extension.propfile">
+			<copy overwrite="true" failonerror="true" todir="${release.foldername}/war/edu_sharing">
+				<fileset dir="ng" includes="**">
+				</fileset>
+			</copy>
+	</target>
+	<target name="release-extension-ng" if="current.extension.propfile">
+		<copy overwrite="true" failonerror="false" todir="${release.foldername}/war/edu_sharing">
+			<fileset dir="${extensions.path}${extension-name}/ng" includes="**">
+			</fileset>
+		</copy>
+	</target>
+	
+	<!-- take the current extension with the release -->
+		<target name="release-src-extension" if="current.extension.propfile">
+			<echo>extension is active: ${current.extension.propfile}</echo>
+			<mkdir dir="${release-src.foldername}/${extensions.path}${extension-name}" />
+			<copy todir="${release-src.foldername}/${extensions.path}${extension-name}" overwrite="true">
+				<fileset dir="${extensions.path}${extension-name}" includes="src/**,test/**,war/**,build.xml,build.properties,.classpath,.project">	
+				</fileset>
+			</copy>
+		</target>
+
+	<target name="release-src">
+		
+		<!--incrementimng build number-->
+		<buildnumber file="build.number"/>
+		
+		<!--loading new build number (with prefix to get the new one)-->
+		<property file="build.number" prefix="tmp"></property>
+		
+	
+		<!--writing build.number to version.html so that the svn revision in this file will be updated to the main main revision-->
+		<echo>${tmp.build.number}</echo>
+		<replaceregexp match="build.number: [0-9]*\&lt;br/\&gt;" replace="build.number: ${tmp.build.number}\&lt;br/\&gt;" flags="gs" byline="true">
+			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
+		</replaceregexp>
+		<!--writing build.number to version.properties so that the svn revision in this file will be updated to the main main revision (is used in release file)-->
+		<replaceregexp match="build.number=[0-9]*" replace="build.number=${tmp.build.number}" flags="gs" byline="true">
+			<fileset dir="." includes="version.properties"/>
+		</replaceregexp>
+		
+		<!--<exec executable="version.bat"></exec>-->
+		<copyfile src="${src.dir}/org/edu_sharing/repository/public/version.html" dest="${gwt-war.dir}/${gwt-rename-to}/version.html" />
+		<!--<input addproperty="terminated" message="Did you have set the right License Header? " validargs="y,n"/>
+			<condition property="do.abort">			
+			    <not><equals arg1="y" arg2="${terminated}"/></not>
+	        </condition>
+			<fail if="do.abort">Aborted by user.</fail>-->
+		
+		<input
+				    message="SVN commit. Leave comment blank to skip. comment:"
+				    addproperty="commit.comment"
+				  />
+				
+		<condition property="do.svn.commit">
+			<not>
+		    	<equals arg1="" arg2="${commit.comment}"/>
+			</not>
+		</condition>
+		
+		<antcall target="svncommit"></antcall>
+		
+		<!-- replace the extension name with the current active extension -->
+		<replaceregexp match="version.extension:[a-zA-Z ]*\&lt;br/\&gt;" replace="version.extension: ${extension-name}\&lt;br/\&gt;" flags="gs" byline="true">
+		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
+		</replaceregexp>
+		
+		<!-- create dollar free version of revision property -->
+		<copy file="version.properties" tofile="version_tmp.properties">
+			<filterchain>
+				<linecontains>
+					<contains value="version.svnrevision"/>
+				</linecontains>
+				<prefixlines prefix="clean_"/>
+				<replaceregex pattern="\$Revision: " replace=""/>
+				<replaceregex pattern=" \$" replace=""/>
+			</filterchain>
+		</copy>
+		<loadproperties srcfile="version_tmp.properties"/>
+		
+		<echo>${version.svnrevision}</echo>
+		<echo>${clean_version.svnrevision}</echo>
+		
+		<copyfile src="${src.dir}/org/edu_sharing/repository/public/version.html" dest="${gwt-war.dir}/${gwt-rename-to}/version.html" />
+
+		<delete dir="${release-src.foldername}" />
+		<mkdir dir="${release-src.foldername}" />
+		<copyfile src="build-common-src.xml" dest="${release-src.foldername}/build.xml" />
+		<copy todir="${release-src.foldername}">
+				<fileset dir="." includes="${includesrelease-src}" excludes="${excluderelase-src},${exluderelease}">
+				</fileset>
+		</copy>
+		
+		<antcall target="release-src-extension"></antcall>
+		
+		<!--
+		 replace standard header with current license header
+		 -->
+	<!--	<loadfile property="header_replace_token" srcfile="header_standard.txt"></loadfile>
+		<loadfile property="header_replace_value" srcfile="header_license.txt"></loadfile>
+		<replace dir="${release-src.foldername}" includes="**/*.java" excludes="org/alfresco/**/*.java" token="${header_replace_token}" value="${header_replace_value}">
+		</replace>
+	-->
+		<zip destfile="${release-src.foldername}/${release-src.foldername}${extension-name}_${mainversion}.${clean_version.svnrevision}.zip" basedir="." includes="${release-src.foldername}/**">
+			</zip>
+			<copy file="${release-src.foldername}/${release-src.foldername}${extension-name}_${mainversion}.${clean_version.svnrevision}.zip" todir="release"> </copy>
+			
+		<!--<zip destfile="${release-src.foldername}/${release-src.foldername}_${mainversion}.${version.svnrevision}.zip" basedir="." includes="${release-src.foldername}/**">
+		</zip>
+		<copy file="${release-src.foldername}/${release-src.foldername}_${mainversion}.${version.svnrevision}.zip" todir="release"> </copy>
+		-->
+		
+		<!--clean up version tmp file -->
+		<delete file="version_tmp.properties"></delete>
+	</target>
+	
+	
+	
+	
+	<!--
+		example for replaceregexp
+		http://www.richardnichols.net/2009/08/automatically-updating-your-source-file-headers-with-ants-replaceregexp/
+		
+		regex um header mit package zu matchen(mit QuickREx getestet, Punkt matched keine newlinebreaks daher: \s\S)
+		/\*[\s\S]*\*/[\s\S]*package
+		
+		<target name="replace_headers">
+    	<loadfile property="javaheader" srcFile="lib/standardheader.txt"/>
+    	<replaceregexp match="(/\*.*\*/.*)??^package " flags="sm" replace="${javaheader}${line.separator}package ">
+        <fileset dir="src">
+            <include name="**/*.java"/>
+        </fileset>
+    </replaceregexp>
+	</target>
+	-->
+</project>

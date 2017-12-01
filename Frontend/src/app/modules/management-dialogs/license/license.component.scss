@@ -1,0 +1,96 @@
+@import "../../../../styles/variables.scss";
+
+.card-content .cc label{
+  width:100%;
+}
+.licenseType{
+  margin-bottom:30px;
+}
+
+h4{
+  font-weight: bold;
+  font-size: 11pt;
+  margin: 2rem 0 0.912rem 0;
+}
+h5{
+  font-weight:normal;
+  font-size:9pt;
+  color: $textLight;
+  margin: 0;
+  line-height: 1.5;
+}
+.ccAuthor{
+  color:$primary;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.ccAuthor i{
+  position: relative;
+  top: 7px;
+  color: $textLight;
+}
+.ccAuthorGroup{
+  padding:10px;
+}
+.cc h5{
+  padding-bottom:5px;
+}
+.currentLicense{
+  text-align: center;
+  background-color: $backgroundColor;
+  padding: 10px 30px;
+  margin: 0 -20px;
+  h4{
+    margin: 10px 0px 20px 0px;
+  }
+}
+.currentLicenseIcon{
+  height:40px;
+  width:auto;
+}
+.currentLicenseDescription{
+  color: $textLight;
+}
+.currentLicenseDescription div{
+  margin:0 10px;
+}
+.cc .ccAbout{
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: bold;
+}
+.licenseVersion,.licenseLocale{
+  width: 140px;
+  float: right;
+  padding-right: 40px;
+  margin-top:-8px;
+  select{
+    margin-top:-4px;
+  }
+}
+.licenseLocale{
+  width: 170px;
+}
+.licenseUrl{
+  margin:10px!important;
+  text-transform: uppercase;
+}
+.licenseVersion{
+  width:100px;
+}
+.licenseCheckbox{
+  padding-top:20px;
+}
+.licenseCheckbox label{
+  width:100%;
+}
+.release{
+  font-weight: bold;
+}
+.radio{
+  padding-bottom:15px;
+}
+.radio h4{
+  margin-top: 4px;
+}

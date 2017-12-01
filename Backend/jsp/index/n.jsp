@@ -1,0 +1,1 @@
+<jsp:forward page="listing.jsp"><jsp:param name="key" value="n" /></jsp:forward>

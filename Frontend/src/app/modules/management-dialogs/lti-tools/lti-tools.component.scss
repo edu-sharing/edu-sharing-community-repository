@@ -1,0 +1,44 @@
+@import "../../../../styles/variables.scss";
+
+.card-title-actionbar{
+  .searchIcon{
+    position: absolute;
+    top: 19px;
+    left: 10px;
+    color:$textLight;
+  }
+  input{
+    padding-left:40px;
+  }
+  div{
+    display:table-cell;
+  }
+  .createList{
+    position: absolute;
+    z-index: 121;
+    right: 55px;
+    width: 230px;
+    top: 25px;
+  }
+  .search,.back{
+    width:100%;
+    position: relative;
+    top:-19px;
+  }
+  .back{
+    text-transform: uppercase;
+  }
+  .actionbar{
+    min-width: 250px;
+  }
+}
+.url{
+  float:left;
+  padding:4px 20px;
+}
+.description{
+  white-space: pre-wrap;
+  float:left;
+  width:100%;
+  padding:10px 20px;
+}

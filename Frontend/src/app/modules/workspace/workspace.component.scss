@@ -1,0 +1,237 @@
+@import "../../../styles/variables.scss";
+
+.frame{
+  position:relative;
+  display:table;
+  z-index:95;
+  width:100%;
+  height:100%;
+}
+.isBlocked{
+  position: absolute;
+  top: $mainnavHeight;
+  color:$noResultsColor;
+  font-size:150%;
+  text-align: center;
+  width:100%;
+  padding-top:25px;
+}
+.timeout{
+  position: fixed;
+  left: 180px;
+  top: 21px;
+  z-index: 105;
+  font-size: 11px;
+  color: #fff;
+  padding: 5px 15px;
+  background-color: $workspaceTopBarBackground;
+}
+.timeout i{
+  font-size: 100%;
+  position: relative;
+  left: -8px;
+  top: 2px;
+}
+.tree,.explorer{
+  display:table-cell;
+}
+
+
+.globalProgress{
+  cursor: progress;
+}
+
+.tree{
+  min-width:300px;
+  max-width:300px;
+  top:$workspaceBreadcrumbsHeight+$mainnavHeight;
+  position:fixed;
+  height:calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight});
+  z-index: 2;
+  overflow-y:auto;
+  background: $workspaceTreeBackground;
+}
+.nodeRender{
+  padding:20px;
+}
+.addDesktop,.addMobile {
+  z-index: 115;
+}
+.addDesktop span{
+  position: relative;
+  top:-3px;
+  padding-left:4px;
+}
+.addDesktop i{
+  position: relative;
+  top:1px;
+}
+.addMobile{
+  z-index:85;
+  position:fixed;
+  right:50px;
+  bottom:25px;
+  display:none;
+}
+.addDesktop,.addDesktopMenu{
+  position: fixed;
+  width: 200px;
+  left: 50px;
+  top: 13px+$mainnavHeight;
+}
+.addDesktopMenu{
+  top:42px+$mainnavHeight;
+  z-index:125;
+  .connectorBeta{
+    height: auto;
+    float: right;
+    position: absolute;
+    width: 30px;
+    margin-top: 10px;
+    right: 7px;
+  }
+}
+.selectRootMenu{
+  position: fixed;
+  width: 250px;
+  left: 311px;
+  top: 7px+$mainnavHeight;
+}
+.selectRootMenu .collection-item{
+  color:$textLight;
+}
+.rootSelected{
+  color: $primary!important;
+  font-weight: bold;
+  background:$workspaceTreeSelectedBackgroundEffect;
+  background-color: #fff;
+
+}
+.metadata{
+  min-width:300px;
+  max-width:300px;
+  position:fixed;
+  @include iosScrolling();
+  height:calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight});
+  top: $mainnavHeight+$workspaceBreadcrumbsHeight;
+  right:0;
+  overflow-x: hidden;
+  overflow-y:auto;
+  z-index: 94;
+  background-color: #fff;
+}
+.explorer{
+  position:absolute;
+  left:300px;
+  width:calc(100% - 300px);
+  height:100%;
+  padding-top:70px+$mainnavHeight;
+  transition: all $transitionNormal;
+}
+.explorerMetadata{
+  width:calc(100% - 600px);
+}
+.dropZone{
+  text-align: center;
+}
+.dropZone div{
+  position: relative;
+  top:30%;
+  color:#fff;
+}
+.dropZone p{
+  font-size:150%;
+}
+.dropZone i{
+  font-size:120pt;
+}
+
+.actionbarFrame{
+  width:auto;
+  position: fixed;
+  right:0;
+  margin-right:10px;
+  z-index:97;
+  padding-top:19px;
+  padding-left:20px;
+  top: $mainnavHeight;
+  background: linear-gradient(to right, rgba(255,255,255,0.001) 0,#fff 10px,#fff 100%); /* safari fix */
+
+}
+.viewType{
+  position:fixed;
+  color:$textLight;
+  top: $mainnavHeight;
+  padding-top:20px;
+  padding-right:25px;
+  right:0;
+  z-index:97;
+}
+.viewType div{
+  /* border-left:1px solid #ccc; */
+}
+.breadcrumbFrame{
+  position:fixed;
+  top: $mainnavHeight;
+  left:0px;
+  padding-left:320px;
+  width:100%;
+  height:$workspaceBreadcrumbsHeight;
+  z-index:96;
+  background-color: #fff;
+  padding-top: 24px;
+  padding-bottom: 20px;
+  padding-right:50px;
+}
+:host /deep/ .breadcrumbFrame div{
+  word-break: break-all;
+  /* word-break-wrap: ; */
+}
+.breadcrumbFrame,.tree,.metadata{
+  @include materialShadow();
+}
+
+@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
+  .explorerMetadata {
+    width: calc(100% - 300px);
+  }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)){
+  /*
+  .breadcrumbFrame{
+    padding-right:170px;
+  }
+  */
+}
+
+@media screen and (max-width: ($mobileWidth+$mobileStage*2)){
+  .tree,
+  .addDesktop{
+    display:none;
+  }
+  .selectRootMenu{
+    left:10px;
+  }
+  .addMobile{
+    display:inherit;
+  }
+  .breadcrumbFrame{
+    padding-left:10px;
+  }
+  .explorer{
+    left:0;
+    width:100%;
+  }
+  .timeout {
+    display: none;
+  }
+}
+
+@media screen and (max-width: $mobileWidth) {
+  /*
+  .metadata{
+    max-width:none;
+    width:100%;
+  }
+  */
+}

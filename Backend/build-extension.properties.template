@@ -1,0 +1,35 @@
+########################################
+#you must customize the following props#
+########################################
+
+#extension-name must be the name of the Project so that it can be used as pathname
+extension-name=
+
+#the gwt modul names used
+module.gwt=
+module-dev.gwt=
+
+#the rename-to prop of gwt module description
+#copy from the right dirctory in war dir (must conform with the rename-to Atttribute in the gwt module description file
+gwt-rename-to=
+
+
+########################################
+#you can customize the following props #
+########################################
+webapp.name=edu-sharing
+
+########################################
+#extension libraries                   #
+########################################
+#project.lib.path=lib:extensions/${extension-name}/lib
+
+########################################
+#leave the following part               #
+########################################
+src-java.path=src:src-webservices:extensions/${extension-name}/src
+src-gwt.path=src:extensions/${extension-name}/src
+gwt-war.dir=extensions/${extension-name}/war
+
+#java compile output dir
+output.dir=${gwt-war.dir}/WEB-INF/classes

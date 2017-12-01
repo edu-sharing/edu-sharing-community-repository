@@ -1,0 +1,80 @@
+{
+  "ADMIN":{
+    "TITLE":"Admin-Tools",
+    "UNDERSTAND":"Understand, Continue",
+    "WARNING_TITLE":"Administration Area",
+    "WARNING_INFO":"This section is only meant for administer the repository.\nWrong settings can lead fo errors or even data lost. \n\nDon't run any operations which you're not sure about!",
+    "TAB":{
+      "INFO":"Info",
+      "APPLICATIONS":"Applications",
+      "UPDATE":"Server Update",
+      "IMPORT":"Import",
+      "TOOLKIT":"Tool Kit"
+    },
+    "APPLICATIONS":{
+      "URL":"Url",
+      "URL_HINT":"Enter the url of the repository you want to connect",
+      "ADD_URL":"connect",
+      "APP_REGISTERED":"App wurde erfolgreich registriert",
+      "SELECT_XML":"Choose XML-File",
+      "USE_FILE":"Choose a XML-File of a remote-repository you want to connect",
+      "LIST":"Currently connected applications",
+      "ID":"ID",
+      "TITLE":"Name",
+      "FILE":"File",
+      "TYPE":"Type",
+      "REPOTYPE":"Repo-Type",
+      "SUBTYPE":"Sub-Type",
+      "REMOVE":"Remove",
+      "REMOVE_TITLE":"Remove application",
+      "REMOVE_MESSAGE":"The app with the details below will be removed if you continue.\nBe aware that this operation can not be undone.\n\n{{info}}"
+    },
+    "UPDATE":{
+      "HINT":"Don't forget to update your backups of documents and database.",
+      "ID":"ID",
+      "DESCRIPTION":"Description",
+      "TEST":"Test",
+      "RUN":"Run",
+      "RESULT":"Update-Output"
+    },
+    "INFO":{
+      "REPOSITORY":"Repository-Version (Server-Side)",
+      "NG":"Angular/Interface-Version (Client-Side)"
+    },
+    "IMPORT":{
+      "EXCEL":"Import Excel Data",
+      "CHOOSE_CSV":"Choose CSV-File",
+      "CHOOSE_DIRECTORY":"Choose Directory",
+      "EXCEL_START":"Start Import",
+      "OAI":"OAI Data",
+      "OAI_STARTED":"OAI Import-Job started",
+      "OAI_URL":"OAI Base URL",
+      "OAI_NO_URL":"OAI Base URL missing",
+      "OAI_SET":"OAI Set/Catalog ID",
+      "OAI_NO_SET":"OAI Set/Catalog ID missing",
+      "OAI_PREFIX":"OAI Metadata Prefix",
+      "OAI_NO_PREFIX":"OAI Metadata Prefix missing",
+      "OAI_METADATA":"OAI Metadata Set",
+      "OAI_FILE":"URL to File",
+      "OAI_IMPORTER":"IMPORTER_CLASS",
+      "OAI_STARTED":"OAI Import-Job started",
+      "OAI_START":"OAI Import",
+      "ADMINISTRATION":"Import Administration",
+      "CACHE_NAME":"Cache Name",
+      "REFRESH_CACHE":"Refresh Cache",
+      "CACHE_REFRESHED":"Cache refreshed",
+      "STICKY_REFRESH_CACHE":"Stick Refresh Cache",
+      "REMOVE_IMPORTS":"Remove Deleted Imports",
+      "IMPORTS_REMOVED":"Imports removed",
+      "PROPERTY_VALUESPACE":"Write Properties to Valuespacefile",
+      "PROPERTY_NAME":"Property-Name (e.g. cm:name)"
+    },
+    "TOOLKIT":{
+      "REFRESH_APP":"Refresh Application Info",
+      "REFRESH_APP_INFO":"Reload Metadata and Application-Info",
+      "APP_INFO_REFRESHED":"Refresh Application Info done",
+      "CACHE_INFO":"Cache Info",
+      "CACHE_NAME":"Cache Name (ID/Bean Name)"
+    }
+  }
+}

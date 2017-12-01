@@ -1,0 +1,57 @@
+<workspace-license
+  *ngIf="nodeLicense"
+  [nodes]="nodeLicense"
+  (onLoading)="globalProgress=$event"
+  (onCancel)="closeLicense()"
+  (onDone)="updateLicense()"
+></workspace-license>
+<workspace-lti-tools *ngIf="showLtiTools"
+                     [refresh]="ltiToolRefresh"
+                     [(currentTool)]="currentLtiTool"
+                     (onClose)="closeLtiTools()"
+                     (onEdit)="editLti($event)"
+                     (onCreateLtiObject)="createLtiObject($event)"
+                     (onCreate)="createLti($event)"
+                     (onOpenConfig)="openLtiConfig($event)"
+></workspace-lti-tools>
+
+<workspace-lti-tool-configs *ngIf="ltiToolConfig"
+                            [tool]="ltiToolConfig"
+                            (onClose)="closeLtiToolConfig()"
+                            (onEdit)="editLti($event)"
+                            (onCreate)="createLti($event)"
+></workspace-lti-tool-configs>
+<workspace-create-lti *ngIf="ltiObject"
+                      [tool]="ltiObject"
+                      [parent]="parent"
+                      (onCancel)="ltiObject=null"
+                      (onCreate)="createLtiNodeObject($event)"
+></workspace-create-lti>
+<mds #mds *ngIf="nodeMetadata || createMetadata"
+     [nodeId]="nodeMetadata ? nodeMetadata.ref.id : null"
+     [allowReplacing]="nodeMetadataAllowReplace"
+     [create]="createMetadata"
+     [parentNode]="metadataParent"
+     (onCancel)="closeEditor(false)"
+     (onDone)="closeEditor(true,$event)"
+     (openLicense)="nodeLicense=[nodeMetadata]"
+     (openContributor)="nodeContributor=nodeMetadata"
+></mds>
+<workspace-file-upload *ngIf="filesToUpload"
+                       [current]="parent"
+                       [files]="filesToUpload"
+                       (onDone)="uploadDone($event)"
+></workspace-file-upload>
+<workspace-file-upload-select *ngIf="showUploadSelect"
+                              [isFileOver]="fileIsOver"
+                              [showPicker]="uploadShowPicker"
+                              (onCancel)="closeUploadSelect()"
+                              (onFileSelected)="uploadFile($event)"
+                              (onLinkSelected)="createUrlLink($event)"
+></workspace-file-upload-select>
+<workspace-contributor *ngIf="nodeContributor"
+                       [nodeId]="nodeContributor.ref.id"
+                       (onLoading)="globalProgress=$event"
+                       (onClose)="closeContributor()"
+></workspace-contributor>
+<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>

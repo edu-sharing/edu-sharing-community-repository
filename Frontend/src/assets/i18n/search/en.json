@@ -1,0 +1,33 @@
+{
+  "SEARCH": {
+    "TITLE":"Search",
+    "COLLECTIONS":"Collections",
+    "MATERIALS":"Materials",
+    "MAINSEARCHFIELD": "Input field for search",
+    "SEARCH":"Stuff",
+    "TO_COLLECTIONS":"View collections",
+    "SEARCH_STUFF": "Search for stuff ...",
+    "EXPANDED_SEARCH": "Extended Search",
+    "METADATASET":"Choose Metadataset",
+    "METADATASET_INFO":"Filter other search criterias",
+    "APPLY": "APPLY",
+    "INFORMATION":"Information",
+    "TOGGLE_EXPANDED_SEARCH":"Toggleadvanced search",
+    "TOGGLE_RESULT_VIEW":"Toggle view",
+    "APPLY_FILTER":"Apply filter",
+    "FILTER":"Filter",
+    "CLICK_TO_REMOVE":"Click to remove",
+    "PREVIEWIMAGE_FOR":"Preview image for",
+    "INFORMATION_AND_PREVIEW_FOR":"Information an preview for",
+    "QUERY_NO_RESULT":"No results for this search query",
+    "AUTHOR":"Author",
+    "LASTMODIFIED":"last edited",
+    "KEYWORD":"Keyword",
+    "FREQUENTKEYWORDS": "Frequent keywords",
+    "REPOSITORY_ALL":"All",
+    "REPOSITORY_MORE":"More",
+    "RENDER": {
+      "BACK_TO_SEARCH":"Back to search"
+    }
+  }
+}

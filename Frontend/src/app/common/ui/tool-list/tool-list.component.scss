@@ -1,0 +1,35 @@
+@import "../../../../styles/variables.scss";
+
+.tool{
+  display: table;
+  width:275px;
+  max-width:275px;
+  padding:10px 5px;
+  float:left;
+  img{
+    display:table-cell;
+    width:90px;
+    height:90px;
+    margin-right: 10px;
+    border-radius: 18px;
+    @include materialShadow();
+  }
+  .info{
+    display: table-cell;
+    vertical-align: middle;
+    width:100%;
+    .name{
+      font-size: 120%;
+    }
+    .category{
+      font-size: 90%;
+      font-weight: bold;
+      color: $textLight;
+    }
+    .name,.category{
+      word-break: break-all;
+      max-height: 1.5em;
+      overflow: hidden;
+    }
+  }
+}

@@ -1,0 +1,61 @@
+<div class="dialog darken">
+  <div class="card center-card card-action">
+    <div class="card-content">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div class="card-title">{{'WORKSPACE.SHARE_LINK.TITLE' | translate:{name:_node ? _node.name : ''} }}</div>
+      <div class="card-scroll">
+        <spinner *ngIf="loading"></spinner>
+        <div *ngIf="!loading">
+          <div class="info">
+            <div class="infoLeft">
+              <div class="heading">{{'WORKSPACE.SHARE_LINK.EXPIRY_TITLE' | translate}}</div>
+              <label>{{'WORKSPACE.SHARE_LINK.EXPIRY_INFO' | translate}}</label>
+              <ng2-datepicker class="datepickerShareLink" *ngIf="expiry" [(ngModel)]="expiryDate"
+                              [options]="dateOptions"></ng2-datepicker>
+            </div>
+            <div class="infoRight">
+              <div class="switch">
+                <label>
+                  <input type="checkbox" [(ngModel)]="expiry" (change)="setExpiry(expiry)" [disabled]="!enabled">
+                  <span class="lever"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="link">
+            <div class="info">
+              <div class="infoLeft"></div>
+              <div class="infoRight activateLink">
+                <div class="switch">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="enabled" (change)="setEnabled(enabled)">
+                    <span class="lever"></span>
+                    {{ 'WORKSPACE.SHARE_LINK.ACTIVATE' | translate}}
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="heading linkTitle">{{'WORKSPACE.SHARE_LINK.LINK' | translate}}</div>
+            <div class="info">
+              <div class="linkInput infoLeft">
+                <input type="text" [disabled]="!enabled" readonly="true" [(ngModel)]="currentShare.url">
+              </div>
+              <div class="infoRight copyLink">
+                <a (click)="copyClipboard()" class="clickable" *ngIf="enabled">{{'WORKSPACE.SHARE_LINK.COPY_CLIPBOARD' |
+                  translate}}</a>
+              </div>
+            </div>
+            <label class="linkInfo">{{ 'WORKSPACE.SHARE_LINK.LINK_INFO' | translate}}</label>
+            <label class="linkDownloads">{{ 'WORKSPACE.SHARE_LINK.LINK_DOWNLOADS' |
+              translate:{count:currentShare.downloadCount} }}</label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="card-action">
+      <a class="waves-effect waves-light btn" (keyup.enter)="cancel()" (click)="cancel()">{{'CLOSE' | translate }}</a>
+    </div>
+  </div>
+</div>

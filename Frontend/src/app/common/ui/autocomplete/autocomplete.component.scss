@@ -1,0 +1,68 @@
+@import "../../../../styles/variables.scss";
+
+.edusharing-autocomplete-wrapper {
+  width: 100%;
+  margin-left: 0;
+  margin-bottom: 20px;
+}
+
+.searchInput {
+  width: 100%;
+}
+.suggestbox .material-icons{
+  position:relative;
+  top:6px;
+}
+.suggestbox .name{
+  position:relative;
+  top:0px;
+}
+
+.searchInput::-webkit-input-placeholder {
+  color: #6f6f6f;
+}
+.searchInput:-moz-placeholder {
+  color: #6f6f6f;
+}
+.searchInput::-moz-placeholder {
+  color: #6f6f6f;
+}
+.searchInput:-ms-input-placeholder {
+  color: #6f6f6f;
+}
+
+.suggestbox {
+  position:absolute;
+  background: white;
+  text-align: left;
+  z-index: 121;
+  margin-top: -20px;
+  padding-left: 0;
+  margin-right: 2px;
+  @include materialShadow();
+  border-radius: 2px;
+}
+
+.suggestbox > li {
+  list-style: none;
+  line-height: 1.8;
+}
+.suggestbox > li:hover{
+  background-color: #ddd;
+}
+
+.suggestbox > li > a {
+  display: inline-block;
+  width: 100%;
+  padding:4px 12px 8px 12px;
+  cursor: pointer;
+}
+
+.activeItem {
+  background-color: #ddd;
+}
+
+.badge {
+  margin-left: 4px;
+  margin-right: 0;
+}

@@ -1,0 +1,733 @@
+@import "../../../../styles/variables.scss";
+
+.heading div{
+  padding:0px 0px;
+}
+.sorting,.text{
+  float:left;
+  padding:0!important;
+  position:relative;
+  top:-2px;
+}
+.sorting{
+  height:13px;
+}
+.sorting a i{
+  width:12px;
+}
+.loadMore{
+  width:100%;
+  float:left;
+  text-align: center;
+  padding-top: 20px;
+  text-transform: uppercase;
+  color:$primary;
+  i{
+    font-size:50px;
+  }
+}
+:host /deep/ .collectionScope {
+  font-size: 130%;
+  left: -1px;
+  position: relative;
+  top: 2px;
+}
+.heading{
+  color:$textLight;
+  border-bottom:1px solid #aaa;
+  font-weight:normal;
+  padding:0;
+  overflow: hidden;
+}
+.heading a{
+  color:$textLight;
+  cursor: default;
+}
+.moreAlways{
+  transition: $animationTime all;
+  opacity: 1;
+  color: $primary!important;
+}
+.disabled{
+  color:$textVeryLight!important;
+  cursor: default;
+}
+.noCCPublish > div{
+  opacity:0.5;
+}
+.blurred{
+  @include imageDisabledBlur();
+  margin: -3px;
+  left: 2px;
+  right: 2px;
+}
+.ccPublishMissing{
+  width: 100%;
+  height: 100%;
+  background-color:rgba(255,255,255,0.65);
+  position: absolute;
+  left:0;
+  text-align: center;
+  padding-top: 40px;
+  div{
+    color:$textPrimary!important;
+    opacity: 1;
+    padding-bottom: 7px;
+  }
+  a{
+    i{
+      position:relative;
+      top:7px;
+    }
+  }
+}
+$badgeWidth:200px;
+.dragBadge{
+  border:2px solid $primary;
+  background-color: $primaryLight;
+  width:$badgeWidth;
+  padding:10px;
+  height: 44px;
+  border-radius: 4px;
+  position:absolute;
+  left:-999px;
+  top:-999px;
+}
+.dragBadge span{
+  @include shortenText();
+}
+.dragBadge div{
+  position:relative;
+  left: $badgeWidth - 23px;
+  top: -40px;
+  text-align: center;
+  border-radius:50%;
+  background-color: #E6B247;
+  color:#fff;
+  width:20px;
+  height:20px;
+  font-weight: bold;
+}
+.editColumns{
+  position: relative;
+  right:40px;
+  max-width:0;
+  padding:0!important;
+}
+.card-content label{
+  text-align: left;
+  float: left;
+  width: 100%;
+  padding-bottom:10px;
+}
+.card-content .checkbox{
+  height:35px;
+}
+.row:hover .moreAlways{
+  opacity: 1;
+}
+.results,.heading,.list{
+  width:100%;
+}
+.row_1{
+  width:100%;
+  font-weight:normal;
+  word-break: break-all;
+}
+.node_mediatype{
+  min-width:100px;
+}
+.node_cm_modified,
+.node_sys_archivedDate,
+.node_cm_created{
+   min-width:160px;
+}
+.node_ccm_wf_status{
+  min-width: 100px;
+}
+.node_cm_name{
+  min-width: 80px;
+}
+.node_size{
+  min-width:110px;
+}
+.node_dimensions{
+  min-width:110px;
+}
+.node_cclom_general_keyword{
+  min-width: 160px;
+  word-break: break-all;
+}
+.node_cclom_version{
+  min-width: 60px;
+}
+.node_virtual_usagecount{
+  min-width: 150px;
+}
+.node_ccm_commonlicense_key{
+  min-width: 130px;
+}
+.node_cm_creator,.node_ccm_lifecyclecontributer_authorFN,.node_ccm_metadatacontributer_creatorFN{
+  min-width:130px;
+  word-break: break-all;
+}
+.node_ccm_replicationsource{
+  min-width:50px;
+}
+.user_firstName,
+.user_lastName{
+  min-width:130px;
+  word-break: break-all;
+}
+.group_groupType{
+  min-width: 160px;
+  word-break: break-all;
+}
+
+.user_email{
+  min-width:180px;
+  word-break: break-all;
+}
+.more{
+  min-width:60px;
+  @include clickable();
+}
+.moreOpen{
+  position:absolute;
+  right:20px;
+  width:$contextMenuWidth;
+  padding:0!important;
+}
+.row .column,
+.heading > div
+{
+  display:table-cell;
+  padding:0px 5px;
+  padding-top:12px;
+  color:$textLight;
+  vertical-align: middle;
+}
+.row .icon{
+  padding-top:20px;
+}
+.list .row{
+  margin:0 0!important;
+}
+.more a{
+  color:$primary;
+}
+
+.selected{
+  background: $workspaceSelectedBackgroundEffect!important;
+  background-color:$workspaceSelectedBackground!important;
+}
+.row:focus{
+  @include setGlobalInsetFocus();
+  /* background-color:$workspaceSelectedBackground!important; */
+}
+.cardList .row:focus{
+  @include setGlobalFocus();
+  /* background-color:$workspaceSelectedBackground!important; */
+}
+
+.selected div,.selected .more a{
+
+}
+.row_1{
+  color:#383838!important;
+}
+.list .row:hover{
+  background:$workspaceSelectedBackground;
+}
+
+.list .filled-in:checked+label:after{
+  background-color:$primary;
+  border-color:$primary;
+}
+.list .filled-in:checked+label:before{
+  border-right-color: $textOnPrimary;
+  border-bottom-color: $textOnPrimary;
+}
+.list .row{
+  width:100%;
+  border-bottom:1px solid $textOnPrimary;
+  height:70px;
+  margin-bottom:0;
+  background-color: #fff;
+}
+.list .nodeCollection .row {
+  background-color: transparent;
+}
+.previewCollection{
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  position: relative;
+  left: 65px;
+  top: 50px;
+  opacity:1!important;
+}
+.previewCollection i{
+  font-size: 40pt;
+  position: relative;
+  top: 8px;
+  left: 8px;
+}
+.nodeCollection .previewCollectionContainer{
+  background-color: #fff;
+}
+
+.row{
+  display: block;
+}
+.cardList .row{
+  display: flex;
+  flex-direction: column;
+}
+.list .nodeCollection .row .column,
+.nodeCollection .more a{
+  color:#fff;
+  opacity: 0.75;
+}
+.list .nodeCollection .row_1{
+  opacity:1!important;
+  color:#fff!important;
+}
+.nodeCollection .selected{
+  background-color: transparent!important;
+}
+.checkbox{
+  min-width:70px;
+}
+.checkboxDummy{
+  min-width:10px;
+}
+.icon{
+  min-width:50px;
+  opacity: 1!important;
+}
+
+.rowFrame{
+  padding:0px;
+}
+.hover{
+  background-color:rgba($primary,0.2)!important;
+  outline:2px dashed $primary;
+  padding: 0;
+  border-radius:4px;
+  position:relative;
+  z-index:5;
+
+}
+
+.icon-bg{
+  background-color:$textOnPrimary;
+  border-radius: 50%;
+  width:38px;
+  height:38px!important;
+  position:relative;
+  top:-5px;
+}
+.icon-bg img,.icon-bg i{
+  width:50%;
+  position:relative;
+  top:10px;
+  left:9px;
+  z-index:0;
+}
+.icon-bg i{
+  color:$textPrimary;
+  font-size:20px;
+}
+
+.typeicon {
+  position: absolute;
+  top: 0;
+  left: 15px;
+  background-color: #fff;
+  height: 30px;
+  width: 25px;
+  padding: 3px !important;
+  z-index: 1;
+}
+
+.typeicon > img {
+  width: 60%;
+  position: absolute;
+  bottom: 5px;
+  z-index: 1;
+  left: 5px;
+}
+.rowInner{
+  max-height:1.5rem;
+  overflow: hidden;
+}
+.node_ccm_commonlicense_key .rowInner,
+.cardList .rowInner{
+  max-height: none;
+}
+.checkbox,
+.more{
+  padding-left:15px!important;
+  position:relative;
+  top:3px;
+}
+.more{
+  padding-right:20px!important;
+}
+.checkbox{
+  padding-left:25px!important;
+}
+.actionText{
+  display:none;
+}
+#selectAll+label{
+  top: -2px;
+}
+
+.cardList .actionText{
+  display:inherit;
+}
+.cardList{
+  display:block;
+  width:$cardWidth;
+  height:$cardHeight;
+  @include materialShadow();
+  float:left;
+  margin:6px;
+  position: relative;
+  .moreAlways{
+    display: none!important;
+  }
+}
+.cardSmallList{
+  display:block;
+  width:$cardWidth;
+  height:$cardSmallHeight;
+  @include materialShadow();
+  float:left;
+  margin:6px;
+  border-radius: 2pt;
+  border-bottom: 5px solid $primary;
+}
+.cardSmallList img{
+  position: relative;
+  left: -15px;
+  top: -40px;
+  opacity:0.7;
+  width:200px;
+  height:150px;
+}
+.cardSmallList .row_1,
+.cardSmallList .row_2{
+  position: absolute;
+  z-index: 100;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+.cardSmallList .row_1{
+  top: 0;
+  font-size: 110%;
+  height: 56px;
+  overflow: hidden;
+}
+.cardSmallList .row_2{
+  font-size: 80%;
+  bottom:7px;
+  opacity: 1!important;
+}
+.cardList .selected{
+  background: transparent!important;
+  background-color:transparent!important;
+  outline:2px solid $primary;
+  overflow: visible;
+}
+
+.cardList .row,
+.cardSmallList .row{
+  height:100%;
+  border-bottom: none;
+}
+.cardList .row_2 .rowInner,
+.cardList .row_3 .rowInner{
+  max-height: 1.5rem;
+}
+.cardList .row_2,
+.cardList .row_3,
+.cardList .row_4,
+.cardList .row_5{
+  padding-top:3px!important;
+  padding-bottom:3px!important;
+  width:100%;
+}
+.cardList .row_5,
+.cardList .row_6,
+.cardList .row_7,
+.cardList .row_8,
+.cardList .row_9,
+.cardList .row_10{
+  display:none!important;
+}
+
+.cardList .row_1{
+  width:100%;
+  padding-bottom:5px!important;
+  font-size:110%!important;
+  height: 45px;
+  overflow: hidden;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+.cardContainer{
+  padding:0 10px;
+}
+
+
+.cardList .row_2,
+.cardList .row_3,
+.cardList .row_4{
+  float:left;
+}
+.cardList .preview{
+  height:160px;
+  padding:0!important;
+  margin-top:-10px;
+  margin-bottom:15px;
+  opacity:1!important;
+}
+.cardList .preview img,
+.cardList .preview .previewCollectionContainer{
+  width:100%;
+  height: 150px;
+  position: absolute;
+  top: 0;
+  z-index:0;
+  object-fit: cover;
+  object-position: center;
+}
+.cardList .row .checkbox input:not(:checked) + label:after{
+  background-color: #fff;
+}
+.cardList .row .checkbox input+label {
+  padding-left:22px;
+}
+.cardList .more{
+  position:absolute;
+  right:-10px;
+  top:$cardHeight - 37px;
+}
+.cardList .moreSingle{
+  right:-5px;
+  text-transform: uppercase;
+}
+.cardList .moreSingle i{
+  position: relative;
+  top:4px;
+  left:-3px;
+}
+.cardList .actionText{
+  position: relative;
+  top:-3px;
+}
+.cardList .moreOpen{
+  right:-15px;
+  top:180px;
+}
+.cardList .row .checkbox{
+  position: absolute;
+  right: -6px;
+  top: 7px;
+  z-index:1;
+  min-width:initial;
+}
+.row input[type=checkbox]:checked + label:after{
+  @include materialShadow();
+}
+
+:host /deep/{
+  .row .node_ccm_replicationsource  img,
+  .row .node_ccm_commonlicense_key img{
+      height:20px;
+  }
+  .cardList .node_ccm_replicationsource img{
+    margin-top: 5px;
+  }
+
+    .cardList .node_ccm_commonlicense_key {
+    height: 20px;
+    img {
+      height: 16px;
+    }
+  }
+}
+
+@media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+  .moreAlways{
+    display:none!important;
+  }
+  .row_2,.editColumns{
+    display:none!important;
+  }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+  .row_3{
+    display:none!important;
+  }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
+  .row_4{
+    display:none!important;
+  }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
+  .row_5{
+    display:none!important;
+  }
+}
+.row_7,
+.row_8,
+.row_9,
+.row_10,
+.row_11,
+.row_12,
+.row_13,
+.row_14,
+.row_15{
+  display:none!important;
+}
+@media all and (max-width: ($mobileWidth+$mobileStage*7)) {
+  .row_6{
+    display:none!important;
+  }
+}
+.cardList .row .column {
+  display: block;
+  padding: 0 10px;
+  font-size: 90%;
+}
+
+.cardList .row .column.node_ccm_commonlicense_key,  .cardList .row > div.node_ccm_replicationsource {
+  display: inline-block;
+}
+
+@media all {
+  .cardList .row .column.node_ccm_commonlicense_key {
+    /*text-align: right;
+    position: absolute;
+    bottom: 28px;
+    left: 30px;*/
+  }
+
+  .cardSmallList .row_2,
+  .cardList .row_2,
+  .cardList .row_3,
+  .cardList .row_4{
+    display:block!important;
+  }
+}
+@media all and (max-width: ($mobileWidth)) {
+  .dialogMore{
+    overflow: scroll;
+    @include darken();
+    background: linear-gradient(to bottom, $darkenColor 0%,$darkenColor 75%,#ffffff 75%,#ffffff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  }
+  .cardList{
+    width:100%;
+    height:160px;
+    box-shadow: none;
+    border-top:1px solid $cardSeperatorLineColor;
+  }
+  .cardList .typeicon{
+    display:none!important;
+  }
+  .cardList:first-child{
+    border-top:none;
+  }
+  .cardList .row{
+    padding:0 10px;
+    padding-top:5px;
+    display:block;
+  }
+  .cardList .row:focus{
+    @include setGlobalInsetFocus();
+  }
+  .cardList .row .column {
+
+  }
+  .cardContainer{
+    padding:0;
+  }
+  .cardList{
+    margin:0;
+  }
+  .cardList .row .preview{
+    width:170px;
+    height:100%;
+    float:left;
+  }
+  .cardList .row .preview img,
+  .cardList .row .previewCollectionContainer {
+    top: calc(50% - 60px);
+    width: 160px;
+    height:120px;
+  }
+  .cardList .previewCollection{
+    left: 46px;
+    top: 28px;
+  }
+  .cardList .moreOpen{
+    top:35px;
+  }
+  .cardList .row .checkbox{
+    display:inherit !important;
+    position: absolute;
+    top: 25px;
+    left: 120px;
+  }
+  .cardList .actionText{
+    display:none;
+  }
+  .cardList .row .more{
+    position: absolute;
+    top: 45px;
+    left: calc(100% - 45px);
+  }
+  .cardList .row_1{
+    height: auto;
+    max-height: 54px;
+    padding-top:12px!important;
+    padding-bottom:0px!important;
+    width:auto;
+  }
+
+  .cardList .row_2,
+  .cardList .row_3{
+    padding-top: 0 !important;
+  }
+
+  .cardList .row .column.node_ccm_replicationsource {
+    position: absolute;
+    top: 80px;
+    left: 178px;
+  }
+
+  .cardList .row .column.node_ccm_commonlicense_key {
+    position: absolute;
+    top: 114px;
+    left: 179px;
+    text-align: left;
+  }
+
+  .cardList .row_2,
+  .cardList .row_3,
+  .cardList .row_4,
+  .cardList .row_5,
+  .cardList .row_6,
+  .cardList .row_7,
+  .cardList .row_8,
+  .cardList .row_9,
+  .cardList .row_10{
+    width:auto;
+  }
+}

@@ -1,0 +1,119 @@
+@import "../../../../styles/variables.scss";
+
+i {
+    vertical-align: middle;
+}
+
+a, a:hover, a:visited, a:active {
+    color: #fff;
+    text-decoration: none;
+}
+
+.pointed {
+    cursor: pointer;
+}
+.previous,.next{
+  position: fixed;
+  left: 0;
+  top: 50%;
+  background: rgba(0,0,0,.1);
+  border-radius: 2px;
+  padding:2px;
+  z-index: 5;
+}
+.next{
+  left:auto;
+  right:0;
+}
+.previous i,.next i{
+  font-size: 30px;
+  color:#fff;
+}
+.topBar{
+  background:#383838;
+  color: #ffffff;
+  -webkit-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.25);
+  -moz-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.25);
+  box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.25);
+  padding: 5px 20px;
+  top: 0;
+  left:0;
+  height: $mainnavHeight;
+  z-index: 10;
+  position: fixed;
+  width: 100%;
+  line-height: 62px;
+}
+.actionbarFrame{
+  position: relative;
+  top:5px;
+}
+.displayBar {
+  display: flex;
+  > span {
+    flex-grow: 2;
+    flex-basis: 0;
+    text-align: center;
+  }
+  .showDetails{
+    flex-grow: 1!important;
+  }
+}
+.displayBar > span:first-child {
+  text-align: left;
+}
+
+.displayBar > span:last-child {
+  text-align: right;
+  align-items: center;
+  padding-top: 12px;
+}
+
+#nodeRenderContent,.nodeRenderLoading {
+  background: #666;
+  height: auto;
+  position: absolute;
+  top:$mainnavHeight;
+  width:100%;
+  overflow-x: hidden;
+}
+.nodeRenderLoading{
+  height: calc(100% - #{$mainnavHeight});
+  overflow: hidden;
+  spinner{
+    position: relative;
+    top: 50px;
+  }
+}
+.edusharing_rendering_content_wrapper{
+  padding-left:20px;
+}
+
+.edusharing_rendering_metadata_top{
+  padding: 20px;
+}
+#edusharing_rendering_metadata_top_toggle {
+  color: $primary;
+  top: 10px;
+  position: relative;
+}
+a.edusharing_rendering_content{
+  background-color: $primary;
+}
+.edusharing_rendering_wrapper{
+  text-transform: uppercase;
+}
+.edusharing_rendering_content_wrapper{
+  min-height:500px;
+}
+
+div.download {
+  margin-top: -8px;
+}
+
+@media screen and (max-width: $mobileWidth) {
+  div.download i {
+    font-size: 120%;
+  }
+
+}

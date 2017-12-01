@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>mail config</comment>
+	
+	<!-- the mail server -->
+    <entry key="mail.smtp.server"></entry>
+	
+	<!-- the mail server port -->
+    <entry key="mail.smtp.port">25</entry>
+	
+	<!-- the credentials on the mail server needed to send mails, leave blank if not needed -->
+    <entry key="mail.smtp.username">root</entry>
+    <entry key="mail.smtp.passwd"></entry>
+	
+	<!-- the encryption used to send mails, at the moment only "tls" or none (blank) is supported-->
+    <entry key="mail.authtype"></entry>
+	
+	<!-- the sender address used to send mails-->
+    <entry key="mail.smtp.from">pleasechange@nodomain.com</entry>
+	
+	<!-- @deprecated -->
+    <entry key="mail.admin">adminpleasechange@nodomain.com</entry>
+     
+</properties>

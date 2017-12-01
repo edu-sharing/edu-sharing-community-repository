@@ -1,0 +1,33 @@
+<div class="dialog darken">
+  <div class="card center-card">
+    <div class="card-content">
+      <div class="card-title">{{'WORKSPACE.UPLOAD_TITLE' | translate }}</div>
+      <div class="scrollable">
+      <div *ngFor="let item of progress" class="group"><div class="fileName">{{item.name}}</div>
+        <div class="loading" *ngIf="item.progress>=0 && item.progress<100">
+          <div class="preloader-wrapper small active">
+            <div class="spinner-layer spinner-blue-only">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+            </div>
+          </div>
+        </div>
+        <div class="done" *ngIf="item.progress>=100">
+          <i class="material-icons">done</i>
+        </div>
+        <div class="done" *ngIf="item.progress<0">
+          <i class="material-icons">close</i>
+        </div>
+      </div>
+      </div>
+      <div class="card-action" *ngIf="showClose">
+        <a class="waves-effect waves-light btn" (click)="close()">{{'CLOSE' | translate }}</a>
+      </div>
+    </div>
+  </div>
+</div>

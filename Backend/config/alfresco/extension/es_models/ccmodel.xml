@@ -1,0 +1,1114 @@
+<model name="ccm:campuscontentmodel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+	<description>Campus Content custom Model</description>
+	<author>Daniel Rudolph</author>
+	<version>1.0</version>
+	<imports>
+		<!-- Import Alfresco Dictionary Definitions -->
+		<import uri="http://www.alfresco.org/model/dictionary/1.0"
+			prefix="d" />
+		<!-- Import Alfresco Content Domain Model Definitions -->
+		<import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+		<import uri="http://www.campuscontent.de/model/lom/1.0" prefix="cclom" />
+		<import uri="http://www.alfresco.org/model/system/1.0" prefix="sys"/>
+	</imports>
+	<namespaces>
+		<!-- Define a Namespace for my new definitions -->
+		<namespace uri="http://www.campuscontent.de/model/1.0"
+			prefix="ccm" />
+	</namespaces>
+
+	<!-- Type and Aspect definitions go here -->
+	<types>
+		<type name="ccm:repository">
+			<title>Repository</title>
+			<parent>cm:folder</parent>
+		</type>
+
+		<type name="ccm:remoteobject">
+			<title>Campus Content foreign repository object</title>
+			<parent>cm:content</parent>
+			<properties>
+				<property name="ccm:remoterepositoryid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:remotenodeid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:remoterepositorytype">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<aspect>ccm:usageaspect</aspect>
+			</mandatory-aspects>
+		</type>
+
+
+		<type name="ccm:sysupdate">
+			<title>edu-sharing system update marker</title>
+			<parent>cm:content</parent>
+			<properties>
+				<property name="ccm:sysupdate_id">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:sysupdate_date">
+					<type>d:date</type>
+				</property>
+			</properties>
+		</type>
+
+
+		<type name="ccm:io">
+			<title>Campus Content IO</title>
+			<parent>cm:content</parent>
+			<includedInSuperTypeQuery>true</includedInSuperTypeQuery>
+			<properties>
+				<!--0 = IO (Informationsobject), 1 = LS (Lernszenario) -->
+				<property name="ccm:objecttype">
+					<type>d:int</type>
+				</property>
+			</properties>
+			<associations>
+				<association name="ccm:ccrelatedio">
+					<target>
+						<class>ccm:io</class>
+						<mandatory>false</mandatory>
+						<many>false</many>
+					</target>
+				</association>
+				<child-association name="ccm:childio">
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>ccm:io</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+			<mandatory-aspects>
+				<aspect>ccm:iometadata</aspect>
+				<aspect>cclom:schema</aspect>
+				<aspect>ccm:usageaspect</aspect>
+				<aspect>cm:thumbnailed</aspect>
+				<aspect>ccm:lomreplication</aspect>
+				<aspect>ccm:licenses</aspect>
+				<aspect>ccm:commonlicenses</aspect>
+				<aspect>cm:metadataset</aspect>
+				<aspect>ccm:eduscope</aspect>
+			</mandatory-aspects>
+		</type>
+		
+		<type name="ccm:notify">
+			<title>Edu-Sharing notify object</title>
+			<parent>sys:base</parent>
+			<properties>
+				<property name="ccm:notify_event">
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+				</property>
+				<property name="ccm:notify_action">
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+				</property>
+				<property name="ccm:notify_user">
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+				</property>
+				<!-- when notify_event is "PERMISSION" notify_context is the AuthorityName which was invited/uninvited-->
+				<property name="ccm:notify_context">
+					<type>d:text</type>
+					<mandatory>false</mandatory>			
+				</property>
+			</properties>
+			<associations>
+				<child-association name="ccm:notify_nodes">
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>cm:cmobject</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+			<!-- for create date -->
+			<mandatory-aspects>
+				<aspect>cm:auditable</aspect>
+			</mandatory-aspects>
+		</type>
+
+
+		<!-- personal licenes that can be assigned to persons or groups -->
+		<type name="ccm:assignedlicense">
+			<title>Campus Content License,Authority</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<property name="ccm:authority">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:assignedlicense">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:assignedlicenseExpiry">
+					<type>d:datetime</type>
+					<index enabled="true">
+                  		<atomic>true</atomic>
+                  		<stored>false</stored> 
+                  		<tokenised>both</tokenised>
+                  		<facetable>true</facetable>
+               		</index>
+				</property>
+			</properties>
+		</type>
+
+		
+		<!-- direktfreigabe von cm:cmobject anstatt sys:base damit modiefied, created usw. gesetzt werden -->
+		<type name="ccm:share">
+			<title>direct share</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<property name="ccm:share_expirydate">
+					<type>d:long</type>
+				</property>
+				<property name="ccm:share_mail">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:share_token">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:share_download_counter">
+					<type>d:int</type>
+				</property>
+			</properties>
+		</type>
+
+		<type name="ccm:map">
+			<title>Campus Content Map</title>
+			<parent>cm:folder</parent>
+			<includedInSuperTypeQuery>true</includedInSuperTypeQuery>
+			<properties>
+			</properties>
+			<mandatory-aspects>
+				<aspect>ccm:mapdata</aspect>
+				<aspect>ccm:licenses</aspect>
+				<aspect>cm:metadataset</aspect>
+				<aspect>ccm:eduscope</aspect>
+			</mandatory-aspects>
+		</type>
+
+
+
+		<type name="ccm:maprelation">
+			<title>Campus Content Map Relation</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+			</properties>
+			<associations>
+				<association name="ccm:reltarget">
+					<source>
+						<role>ccm:isRelation</role>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>cm:cmobject</class>
+						<role>ccm:hasTargetRelation</role>
+						<mandatory>false</mandatory>
+						<many>false</many>
+					</target>
+				</association>
+				<association name="ccm:relsource">
+					<source>
+						<role>ccm:isRelation</role>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>cm:cmobject</class>
+						<role>ccm:hasSourceRelation</role>
+						<mandatory>false</mandatory>
+						<many>false</many>
+					</target>
+				</association>
+				<association name="ccm:reldirection">
+					<target>
+						<class>cm:cmobject</class>
+						<mandatory>false</mandatory>
+						<many>false</many>
+					</target>
+				</association>
+			</associations>
+		</type>
+
+		<type name="ccm:usage">
+			<title>Campus Content Object Usage Entity</title>
+			<parent>cm:cmobject</parent>
+			<archive>false</archive>
+			<properties>
+				<property name="ccm:usageappid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:usagecourseid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:usageparentnodeid">
+					<type>d:text</type>
+				</property>
+				<!-- user from the application (i.e. LMS) -->
+				<property name="ccm:usageappuser">
+					<type>d:text</type>
+				</property>
+				<!-- globel uid (i.e. from LDAP) -->
+				<property name="ccm:usageguid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:usageappusermail">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:usagefrom">
+					<type>d:date</type>
+				</property>
+				<property name="ccm:usageto">
+					<type>d:date</type>
+				</property>
+				<property name="ccm:usagemaxpersons">
+					<type>d:int</type>
+				</property>
+				<property name="ccm:usagecounter">
+					<type>d:int</type>
+				</property>
+				<property name="ccm:usageversion">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:usageressourceid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:usagexmlparams">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</type>
+
+		<!-- organisation, persons can be part of -->
+		<type name="ccm:organisation">
+			<title>Organisation</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<property name="ccm:org_name">
+					<type>d:mltext</type>
+				</property>
+				<property name="ccm:org_description">
+					<type>d:mltext</type>
+				</property>
+				<property name="ccm:org_url">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:org_mail">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:org_default">
+					<type>d:boolean</type>
+				</property>
+				<property name="ccm:org_contact_name">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:org_contact_firstname">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:org_contact_mail">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<aspect>cm:metadataset</aspect>
+			</mandatory-aspects>
+		</type>
+		
+		<type name="ccm:toolpermission">
+       		<title>Tool Permission</title>
+         	<parent>ccm:io</parent>
+       </type>
+
+	</types>
+
+
+	<aspects>
+
+		<aspect name="ccm:ressourceinfo">
+			<title>Aspect for additional resource Information like scorm, qti
+				Version</title>
+			<properties>
+				<property name="ccm:ccressourcetype">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:ccresourcesubtype">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:ccressourceversion">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:ccresourcecontent">
+					<type>d:content</type>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="ccm:userExtension">
+			<title>Aspect for additional user information like profile, node lists etc.
+				Version</title>
+			<properties>
+				<property name="ccm:userPreferences">
+               <type>d:text</type>
+               <mandatory>true</mandatory>
+	            </property>
+	            <property name="ccm:userNodeLists">
+	               <type>d:text</type>
+	               <mandatory>true</mandatory>
+	            </property>
+			</properties>
+		</aspect>
+
+		<aspect name="ccm:usageaspect">
+			<title>Aspect for Usage Tracking</title>
+			<properties></properties>
+			<associations>
+				<child-association name="ccm:usages">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>ccm:usage</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</aspect>
+
+		<aspect name="ccm:mapdata">
+			<title>Data for CC mapable objects</title>
+			<properties>
+				<property name="ccm:mapicon">
+					<type>d:content</type>
+					<mandatory>false</mandatory>
+				</property>
+				<property name="ccm:maptype">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
+
+		<aspect name="ccm:basemetadata">
+			<title>Metadata for a CC base object</title>
+			<properties>
+				<property name="ccm:publisher">
+					<type>d:text</type>
+				</property>
+
+				<property name="ccm:topic">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:license">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:linktype">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:wwwurl">
+					<type>d:text</type>
+					<index enabled="true">
+						<tokenised>false</tokenised>
+					</index>
+				</property>
+				<property name="ccm:filename">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
+
+		<aspect name="ccm:iometadata">
+			<title>Metadata for an information object</title>
+			<parent>ccm:basemetadata</parent>
+			<properties>
+				<property name="ccm:mediatype">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:semantictype">
+					<type>d:text</type>
+				</property>
+				
+				<!--  this is for collection ref objects to remember the original sys:node-uuid
+					 for the original object itself the ccm:original = sys:node-uuid
+					 
+					 it's used to collapse multiple refobjects and the original to one when using the search
+				 -->
+				<property name="ccm:original">
+					<type>d:text</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<property name="ccm:groupsize">
+					<type>d:int</type>
+				</property>
+				<property name="ccm:learninggoal">
+					<type>d:mltext</type>
+				</property>
+				<!--Handlungsempfehlung Lehrende -->
+				<property name="ccm:guidanceteachers">
+					<type>d:mltext</type>
+				</property>
+				<property name="ccm:guidancestudents">
+					<type>d:mltext</type>
+				</property>
+				<!--Bewertung -->
+				<property name="ccm:pointsfrom">
+					<type>d:int</type>
+				</property>
+				<property name="ccm:pointsto">
+					<type>d:int</type>
+				</property>
+				<property name="ccm:pointsdefault">
+					<type>d:int</type>
+				</property>
+				<!-- remember the source and the id of the replicated object -->
+				<property name="ccm:replicationsource">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:replicationsourceid">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:replicationsourcetimestamp">
+					<type>d:text</type>
+				</property>
+				<!-- for elixier objects thumbnail url -->
+				<property name="ccm:thumbnailurl">
+					<type>d:text</type>
+				</property>
+				<!-- for elixier serientitel -->
+				<property name="ccm:title_series">
+					<type>d:text</type>
+				</property>
+
+				<!-- userdefined preview image -->
+				<property name="ccm:userdefined_preview">
+					<type>d:content</type>
+
+					<!--d:content can not be mutivalued <multiple>true</multiple> -->
+				</property>
+				
+				<!-- 
+					save if user likes to have a new version
+				 	this will be set to false in create servlet and to true in update if not versionhistory exsists
+					webdav/cifs/synch will create a version by default
+				-->
+				<property name="ccm:create_version">
+					<type>d:boolean</type>
+               		<default>true</default>			
+				</property>
+				<property name="ccm:version_comment">
+					<type>d:text</type>
+				</property>
+				
+				<property name="ccm:schoolcontext">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<property name="ccm:schooltopic">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<property name="ccm:courseofstudies">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<property name="ccm:university">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>both</tokenised>
+	               </index>
+				</property>
+				<!-- this for customers that got an keyword catalog that comes with keyword id's.
+					we use this prop to allow full text search 
+					and building a tagcloud without the need to get caption by asking the async bigdata valuespace service -->
+				<property name="ccm:generalkeyword_caption">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>both</tokenised>
+	               </index>
+				</property>
+				
+				<!-- Klassenstufe -->
+				<property name="ccm:classlevel">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>both</tokenised>
+	         		</index>										
+				</property>		
+				<!-- Schulart -->
+				<property name="ccm:typeofschool">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>both</tokenised>
+	         		</index>
+				</property>
+				<property name="ccm:competence">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>both</tokenised>
+	         		</index>										
+				</property>	
+				<!-- Lehrplan -->
+				<property name="ccm:curriculum">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>both</tokenised>
+	         		</index>										
+				</property>
+				
+				<property name="ccm:mediacenter">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				
+				<property name="ccm:editorType">
+					<type>d:text</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				
+			</properties>
+		</aspect>
+
+		<!-- for faster access to LOM Metadata -->
+		<aspect name="ccm:lomreplication">
+			<title>redundant LOM Metadata for faster access when searching
+			</title>
+			<properties>
+				<property name="ccm:educationallearningresourcetype">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>both</tokenised>
+	               </index>
+				</property>
+				<property name="ccm:educationalcontext">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>both</tokenised>
+	         		</index>
+				</property>
+				<property name="ccm:educationaldifficulty">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:educationalinteractivitytype">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:educationaltypicalagerange">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- typicalagerange replikation nur einwertig. kann man from und to 
+					in jeweils eigenes feld tun -->
+				<property name="ccm:educationaltypicalagerange_from">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:educationaltypicalagerange_to">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:educationaltypicallearningtime">
+					<type>d:long</type>
+				</property>
+				<property name="ccm:educationalintendedenduserrole">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:educationallanguage">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:taxonentry">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>both</tokenised>
+	               </index>
+				</property>
+				<property name="ccm:taxonid">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>false</tokenised>
+	         		</index>
+				</property>
+				<property name="ccm:taxonpath">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>both</tokenised>
+	         		</index>					
+				</property>
+				<!-- taxonpath_xml contains the whole context in xml style: <taxonpath><source>DDC</source><id>200</id><entry>blaaa</entry></taxonpath> -->
+				<property name="ccm:taxonpath_xml">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- for learnline facette counting: save also the parentId's -->
+				<property name="ccm:taxonid_path">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:classification_keyword">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>both</tokenised>
+	         		</index>										
+				</property>
+				<property name="ccm:classification_purpose">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:author_freetext">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- all shapes of lifecycle contributers -->
+				<property name="ccm:lifecyclecontributer_author">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_publisher">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_unknown">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_initiator">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_terminator">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_validator">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_editor">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_graphical_designer">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_technical_implementer">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_content_provider">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_technical_validator">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_educational_validator">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_script_writer">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_instructional_designer">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_subject_matter_expert">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- all shapes of metadatacontributer -->
+				<property name="ccm:metadatacontributer_creator">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:metadatacontributer_validator">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- metadatacontributer LOM DE Extension: -->
+				<property name="ccm:metadatacontributer_provider">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- width/height of i.e. videos -->
+				<property name="ccm:width">
+					<type>d:double</type>
+				</property>
+				<property name="ccm:height">
+					<type>d:double</type>
+				</property>
+				<!-- for user defined id's -->
+				<property name="ccm:general_identifier">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+
+			</properties>
+		</aspect>
+
+		<aspect name="ccm:licenses">
+			<title>licenses that can be assigned to an authority and belong to an
+				io or map. the license properties determine how long(period) an
+				object can be found</title>
+			<properties>
+			</properties>
+			<associations>
+				<child-association name="ccm:assignedlicenses">
+					<source>
+						<mandatory>false</mandatory>
+						<!-- because of checkout Problem set many to true -->
+						<many>true</many>
+					</source>
+					<target>
+						<class>ccm:assignedlicense</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+			</associations>
+		</aspect>
+		
+		<aspect name="ccm:shares">
+			<title>aspect for add ing multiple shares to an map or io</title>
+			<properties></properties>
+			<associations>
+				<child-association name="ccm:assignedshares">
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>				
+					</source>
+					<target>
+						<class>ccm:share</class>
+						<mandatory>false</mandatory>
+						<many>true</many>				
+					</target>			
+				</child-association>		
+			</associations>	
+		</aspect>
+
+		<!-- Because of performance reasons there is just one property "commonlicense_key" 
+			that belongs to an license with a special characteristic. If we need more 
+			fields for example "period of validity" we can put them in xml and still 
+			use this property for persistence -->
+		<aspect name="ccm:commonlicenses">
+			<title>common licenses like creative commons and edusharing license.
+			</title>
+			<properties>
+				<property name="ccm:commonlicense_key">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:questionsallowed">
+					<type>d:boolean</type>
+				</property>
+				<property name="ccm:commonlicense_cc_version">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:commonlicense_cc_locale">
+					<type>d:text</type>
+				</property>
+				
+				<!-- gueltigkeitszeitraum von importierten Objecten und istLizensValide 
+					TODO raus -->
+				<property name="ccm:license_from">
+					<type>d:date</type>
+				</property>
+				<property name="ccm:license_to">
+					<type>d:date</type>
+				</property>
+				<property name="ccm:license_valid">
+					<type>d:boolean</type>
+				</property>
+				<!-- the context of imported objects -->
+				<property name="ccm:license_description">
+					<type>d:text</type>
+				</property>
+				<!-- creative commons source info -->
+				<property name="ccm:license_title_of_work">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:license_source_url">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:license_profile_url">
+					<type>d:text</type>
+				</property>
+
+			</properties>
+		</aspect>
+
+
+		<!-- campuscontent aspect for alfresco groups extending them to a school, 
+			university or other client like entity -->
+		<aspect name="ccm:edugroup">
+			<title>EduGroup - for schools, universities, etc</title>
+			<properties>
+				<property name="ccm:edu_homedir">
+					<title>home directory node of group</title>
+					<type>d:noderef</type>
+					<mandatory>false</mandatory>
+				</property>
+				<property name="ccm:edu_uniquename">
+					<title>unique name within system</title>
+					<type>d:text</type>
+					<mandatory>true</mandatory>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="ccm:groupExtension">
+			<title>extension of metadata of alfresco groups</title>
+			<properties>
+				<property name="ccm:groupType">
+					<title>type of a group in edu-sharing context</title>
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>false</tokenised>
+	         		</index>	
+				</property>
+				<!-- deprecated -->
+				<property name="ccm:groupScope">
+					<title>for searching groups in different scopes</title>
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>false</tokenised>
+	         		</index>	
+				</property>
+				
+				<property name="ccm:groupSource">
+					<title>flagging groups the are created by sso authentication, i.e the lms appid</title>
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>false</tokenised>
+	         		</index>	
+				</property>
+			</properties>
+		</aspect>
+
+		<aspect name="ccm:metadataPresetting">
+			<title>aspect for metadata presetting</title>
+			<properties>
+				<property name="ccm:metadataPresettingProperties">
+					<type>d:qname</type>
+					<multiple>true</multiple>
+				</property>
+			</properties>
+			<associations>
+				<association name="ccm:metadataPresettingTemplate">
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>ccm:io</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</association>
+			</associations>
+		</aspect>
+		
+		<aspect name="ccm:scope">
+			<title>aspect for marking nodes i.e. groups as a repository comprehensive node</title>
+			<properties>
+				<property name="ccm:scopetype">
+					<type>d:text</type>
+					<default>global</default>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="ccm:collection">
+			<title>aspect for marking a map as a collection</title>
+			<properties>
+				<property name="ccm:collectiontype">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:collectionscope">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:collectionviewtype">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:collectioncolor">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:collectionlevel0">
+					<type>d:boolean</type>
+					<default>false</default>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="ccm:collection_io_reference">
+			<title>aspect for marking an io as a reference object that points to an original io</title>
+			<properties>
+				<property name="ccm:ref_title">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:ref_description">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:ref_version">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="ccm:eaf">
+			<title>aspect for extending an io with eaf specific fields</title>
+			<properties>
+				<property name="ccm:eaf_productionyear">
+					<type>d:date</type>
+				</property>
+				<property name="ccm:eaf_fixed_keywords">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:eaf_custom_keywords">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="ccm:positionable">
+			<title>aspect to give an object position information</title>
+			<properties>
+				<property name="ccm:x">
+						<type>d:int</type>
+					</property>
+				<property name="ccm:y">
+						<type>d:int</type>
+				</property>
+				<property name="ccm:z">
+						<type>d:int</type>
+				</property>
+				<property name="ccm:order">
+					 <type>d:float</type>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="ccm:workflow">
+			<title>workflow</title>
+			<properties>
+				<!-- workflow -->
+				<property name="ccm:wf_receiver">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:wf_status">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:wf_instructions">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:wf_protocol">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="false"/>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="ccm:eduscope">
+      		<title>eduscope for ios, maps</title>
+      		<properties>
+            	<property name="ccm:eduscopename">
+               		<type>d:text</type>
+            	</property>
+      		</properties>
+      </aspect>
+		
+	</aspects>
+</model>

@@ -1,0 +1,222 @@
+<div class="dialog darken dropZone" fileDrop
+     (onFileDrop)="onFileDrop($event)"
+     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !showUploadSelect">
+  <div>
+    <i class="material-icons" *ngIf="!searchQuery && createAllowed">cloud_upload</i>
+    <i class="material-icons" *ngIf="!(!searchQuery && createAllowed)">cloud_off</i>
+    <p *ngIf="!searchQuery && createAllowed">{{'WORKSPACE.DROP_FILES' |translate}}</p>
+    <p *ngIf="!(!searchQuery  && createAllowed)">{{'WORKSPACE.DROP_FILES_DISABLED' |translate}}</p>
+  </div>
+</div>
+<!--<workspace-editor *ngIf="editNodeMetadata"
+                  [node]="editNodeMetadata"
+                  [allowReplacing]="editNodeAllowReplace"
+                  (onWorking)="globalProgress=$event"
+                  (onDone)="closeEditor()"
+                  (onCancel)="editNodeMetadata=null"></workspace-editor>
+ -->
+
+
+<file-chooser *ngIf="addNodesToCollection"
+              [collections]="true"
+              [isCancelable]="true"
+              [title]="'WORKSPACE.SELECT_COLLECTION'"
+              (onCancel)="addNodesToCollection=null"
+              (onChoose)="addToCollectionList($event)"
+></file-chooser>
+
+<div class="frame" fileDrop
+     (onFileDrop)="onFileDrop($event)"
+     (fileOver)="fileIsOver=$event">
+
+  <main-nav
+    [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
+    [currentScope]="isSafe ? 'safe' : 'workspace'"
+    [searchEnabled]="!isBlocked"
+    [searchPlaceholder]="'WORKSPACE.SEARCH'"
+    [canOpen]="mainnav"
+    [searchQuery]="searchQuery"
+    (onSearch)="doSearch($event)"
+  >
+
+  </main-nav>
+<div *ngIf="isBlocked" class="isBlocked">{{'NO_PERMISSIONS_FOR_SCOPE'|translate}}</div>
+<div *ngIf="!isBlocked">
+
+  <div class="timeout" *ngIf="isSafe && timeout">
+    <i class="material-icons">av_timer</i>
+    {{ timeout }}
+  </div>
+  <modal-dialog *ngIf="dialogTitle"
+                [title]="dialogTitle"
+                [isCancelable]="dialogCancelable"
+                (onCancel)="hideDialog()"
+                [message]="dialogMessage"
+                [messageParameters]="dialogMessageParameters"
+                [buttons]="dialogButtons"
+  ></modal-dialog>
+  <div class="dialog darken dropZone" *ngIf="fileIsOver && false">
+    <div>
+      <p><i class="material-icons">cloud_download</i></p>
+      <p>{{'WORKSPACE.DROP_FILES' | translate}}</p>
+    </div>
+  </div>
+  <workspace-share *ngIf="sharedNode"
+  [node]="sharedNode"
+  [sendMessages]="true"
+  (onLoading)="globalProgress=$event"
+  (onClose)="sharedNode=null"
+  ></workspace-share>
+  <workspace-workflow *ngIf="workflowNode"
+                         [nodeId]="workflowNode.ref.id"
+                         (onLoading)="globalProgress=$event"
+                      (onDone)="closeWorkflow()"
+                      (onClose)="workflowNode=null"
+  ></workspace-workflow>
+  <workspace-share-link *ngIf="shareLinkNode"
+                         [node]="shareLinkNode"
+                         (onLoading)="globalProgress=$event"
+                         (onClose)="shareLinkNode=null"
+  ></workspace-share-link>
+
+
+  <div class="addMobile fixed-action-btn"
+       *ngIf="createAllowed"
+       (click)="createMobile()"
+       ><a class="btn-floating btn-large waves-effect"><i class="material-icons">add</i></a>
+    <!--
+  <ul>
+    <li><a class="btn-floating btn-floating-inverted" (click)="showUploadSelect=true"><i class="material-icons">cloud_upload</i></a></li>
+    <li><a class="btn-floating btn-floating-inverted" (click)="addFolderName=''"><i class="material-icons">create_new_folder</i></a></li>
+    <li *ngFor="let connector of connectorList ? connectorList.connectors : null">
+      <a class="btn-floating btn-floating-inverted" (click)="createConnectorName='';createConnectorType=connector"><i class="material-icons">{{connector.icon}}</i></a>
+    </li>
+    <li *ngIf="false"><a class="btn-floating btn-floating-inverted" (click)="listLTI()"><i class="material-icons">extension</i></a></li>
+  </ul>
+  -->
+  </div>
+  <div class="addDesktop btn waves-effect"
+       [class.disabled]="!createAllowed"
+       (click)="createContext()">
+    <i class="material-icons">add_circle_outline</i><span>{{ 'WORKSPACE.ADD' | translate }}</span>
+  </div>
+
+  <div class="dialog" *ngIf="showAddDesktop" (click)="showAddDesktop=false" (contextmenu)="showAddDesktop=false;$event.preventDefault();$event.stopPropagation();"></div>
+  <div class="addDesktopMenu collection"
+       [@overlay]="showAddDesktop"
+       [style.position]="dropdownPosition"
+       [style.left]="dropdownLeft"
+       [style.right]="dropdownRight"
+       [style.top]="dropdownTop"
+       [style.bottom]="dropdownBottom"
+       *ngIf="showAddDesktop">
+    <a class="collection-item" (click)="showAddDesktop=false;showUploadSelect=true"><i class="material-icons">cloud_upload</i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</a>
+    <a class="collection-item" (click)="showAddDesktop=false;addFolderName=''"><i class="material-icons">create_new_folder</i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</a>
+    <a *ngFor="let connector of connectorList ? connectorList.connectors : null;let i=index"
+       class="collection-item"
+       [class.collection-item-seperate]="!i"
+       (click)="showAddDesktop=false;createConnectorName='';createConnectorType=connector">
+      <i class="material-icons">{{connector.icon}}</i> {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}<img class="connectorBeta" src="assets/images/beta.svg"></a>
+    <a *ngIf="false" class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a>
+
+  </div>
+  <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot=false"></div>
+  <div class="selectRootMenu collection" [@overlay]="showSelectRoot" *ngIf="showSelectRoot">
+    <a class="collection-item" [class.rootSelected]="root=='MY_FILES'" (click)="showSelectRoot=false;setRoot('MY_FILES')"><i class="material-icons">person</i> {{ 'WORKSPACE.MY_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='SHARED_FILES'" (click)="showSelectRoot=false;setRoot('SHARED_FILES')"><i class="material-icons">group</i> {{ 'WORKSPACE.SHARED_FILES' | translate}}</a>
+    <a *ngIf="!isSafe" class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i class="material-icons">share</i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
+    <a *ngIf="!isSafe" class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i class="material-icons">send</i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
+    <a *ngIf="!isSafe && supportsWorkflow()" class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i class="material-icons">inbox</i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i class="material-icons">delete</i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
+  </div>
+
+  <workspace-add-folder *ngIf="addFolderName!=null"
+                        [folder]="addFolderName"
+                        [parent]="currentFolder"
+                        (onCancel)="addFolderName=null"
+  (onFolderAdded)="addFolder($event)"
+  ></workspace-add-folder>
+
+  <workspace-create-connector *ngIf="createConnectorName!=null"
+                        [name]="createConnectorName"
+                        [connector]="createConnectorType"
+                        (onCancel)="createConnectorName=null"
+                        (onCreate)="createConnector($event)"
+  ></workspace-create-connector>
+
+
+  <workspace-tree class="tree" *ngIf="isLoggedIn"
+  [current]="currentFolder"
+                  [path]="path"
+                  [root]="root"
+                  [isSafe]="isSafe"
+                  [options]="explorerOptions"
+                  (onDrop)="handleDrop($event)"
+  (onSetRoot)="setRoot($event)"
+  (onOpenNode)="openNode($event)"
+                  (onDeleteNodes)="deleteNode($event)"
+                  (onUpdateOptions)="updateOptions($event)"
+  ></workspace-tree>
+<breadcrumbs class="breadcrumbFrame" *ngIf="isLoggedIn"
+  [breadcrumbsAsNode]="path"
+  [searchQuery]="searchQuery"
+  [home]="'WORKSPACE.'+root"
+             [homeId]="getRootFolderId()"
+  (onClick)="openBreadcrumb($event)"
+></breadcrumbs>
+  <recycle *ngIf="root=='RECYCLE'" class="explorer"
+           [searchWorkspace]="searchQuery"
+           [isInsideWorkspace]="true"></recycle>
+  <actionbar class="actionbarFrame"
+             *ngIf="actionOptions && actionOptions.length"
+             [@fadeFast]="actionOptions && actionOptions.length"
+             [options]="actionOptions"
+></actionbar>
+  <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'" (contextmenu)="createContext($event)"
+  [current]="currentFolder"
+  [selection]="selection"
+  [searchQuery]="searchQuery"
+  [options]="explorerOptions"
+  [viewType]="viewType"
+  (onDrop)="handleDrop($event)"
+  (onSelectNode)="clickNode($event)"
+  (onListChange)="updateList($event)"
+  (onSelectionChanged)="setSelection($event)"
+  (onOpenNode)="openNode($event)"
+  (onUpdateOptions)="updateOptions($event)"
+></workspace-explorer>
+
+<workspace-management
+[(showLtiTools)]="showLtiTools"
+[(nodeLicense)]="editNodeLicense"
+[(nodeMetadata)]="editNodeMetadata"
+[(filesToUpload)]="filesToUpload"
+[fileIsOver]="fileIsOver"
+[(showUploadSelect)]="showUploadSelect"
+[parent]="currentFolder"
+[nodeMetadataAllowReplace]="editNodeAllowReplace"
+[(nodeContributor)]="contributorNode"
+(onRefresh)="refresh()"
+(onUploadFileSelected)="uploadFiles($event)"
+(onUpdateLicense)="updateLicense()"
+(onCloseMetadata)="closeMetadata()"
+>
+</workspace-management>
+
+  <workspace-metadata *ngIf="metadataNode"
+                      [@fromRight]="metadataNode"
+                      class="metadata"
+                      [node]="metadataNode"
+                      [isAdmin]="isAdmin"
+                      (onRestore)="restoreVersion($event)"
+                      (onDisplay)="openNode($event,false)"
+                      (onEditMetadata)="editNode($event)"
+                      (onClose)="closeMetadata()"
+  ></workspace-metadata>
+
+
+
+</div>
+<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>
+</div>
+

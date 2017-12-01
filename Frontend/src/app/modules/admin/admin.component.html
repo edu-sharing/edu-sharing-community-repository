@@ -1,0 +1,192 @@
+<main-nav
+  [title]="'ADMIN.TITLE'"
+  [currentScope]="'admin'"
+  [searchEnabled]="false"
+></main-nav>
+<modal-dialog *ngIf="showWarning"
+              [title]="'ADMIN.WARNING_TITLE'"
+              [message]="'ADMIN.WARNING_INFO'"
+              [buttons]="warningButtons"
+              [isCancelable]="false"
+></modal-dialog>
+<modal-dialog *ngIf="dialogTitle"
+[title]="dialogTitle"
+[message]="dialogMessage"
+[buttons]="dialogButtons"
+[messageParameters]="dialogParameters"
+[isScrollable]="true"
+[isCancelable]="true"
+(onCancel)="dialogTitle=null"
+></modal-dialog>
+<file-chooser *ngIf="chooseDirectory"
+[isCancelable]="true"
+[title]="'ADMIN.IMPORT.CHOOSE_DIRECTORY'"
+[pickDirectory]="true"
+(onCancel)="chooseDirectory=false"
+(onChoose)="pickDirectory($event)"
+></file-chooser>
+<div class="row row-dark">
+  <div class="col s12">
+    <ul class="tabs">
+      <li class="clickable tab col s3" (click)="setTab('INFO')">
+        <a [class.active]="tab=='INFO'" >{{'ADMIN.TAB.INFO' | translate}}</a>
+      </li>
+      <li class="clickable tab col s3" (click)="setTab('APPLICATIONS')">
+        <a [class.active]="tab=='APPLICATIONS'" >{{'ADMIN.TAB.APPLICATIONS' | translate}}</a>
+      </li>
+      <li class="clickable tab col s3" (click)="setTab('UPDATE')">
+        <a [class.active]="tab=='UPDATE'" >{{'ADMIN.TAB.UPDATE' | translate}}</a>
+      </li>
+      <li class="clickable tab col s3" (click)="setTab('IMPORT')">
+        <a [class.active]="tab=='IMPORT'" >{{'ADMIN.TAB.IMPORT' | translate}}</a>
+      </li>
+      <li class="clickable tab col s3" (click)="setTab('TOOLKIT')">
+        <a [class.active]="tab=='TOOLKIT'" >{{'ADMIN.TAB.TOOLKIT' | translate}}</a>
+      </li>
+    </ul>
+  </div>
+</div>
+<div *ngIf="tab=='INFO'" class="content info">
+  <div class="heading">{{'ADMIN.INFO.REPOSITORY' | translate}}</div>
+  <div class="version">{{ repositoryVersion }}</div>
+  <div class="heading">{{'ADMIN.INFO.NG' | translate}}</div>
+  <div class="version">{{ ngVersion }}</div>
+</div>
+<div *ngIf="tab=='APPLICATIONS'" class="content applications">
+  <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
+  <form (ngSubmit)="registerApp()">
+    <input type="text" name="appUrl" class="appUrl" [(ngModel)]="appUrl" placeholder="{{'ADMIN.APPLICATIONS.URL' | translate}}">
+    <a class="btn waves-effect waves-light" (click)="registerApp()">{{'ADMIN.APPLICATIONS.ADD_URL' | translate}}</a>
+    <div class="input-hint-bottom">{{'ADMIN.APPLICATIONS.URL_HINT' | translate}}</div>
+    <div class="btn-flat btn-shadow btnXml" (click)="xmlSelect.click()">{{'ADMIN.APPLICATIONS.SELECT_XML' | translate}}</div>
+    <div class="useFile">{{'ADMIN.APPLICATIONS.USE_FILE' | translate}}</div>
+  </form>
+  <h2>{{'ADMIN.APPLICATIONS.LIST' | translate }}</h2>
+  <div class="table">
+    <div class="tableRow header">
+
+      <div class="id">{{'ADMIN.APPLICATIONS.ID' | translate}}</div>
+      <div class="title">{{'ADMIN.APPLICATIONS.TITLE' | translate}}</div>
+      <div class="file">{{'ADMIN.APPLICATIONS.FILE' | translate}}</div>
+      <div class="type">{{'ADMIN.APPLICATIONS.TYPE' | translate}}</div>
+      <div class="repoType">{{'ADMIN.APPLICATIONS.REPOTYPE' | translate}}</div>
+      <div class="subtype">{{'ADMIN.APPLICATIONS.SUBTYPE' | translate}}</div>
+      <div class="config">&nbsp;</div>
+      <div class="edit">&nbsp;</div>
+      <div class="download">&nbsp;</div>
+      <div class="delete">&nbsp;</div>
+    </div>
+    <div *ngFor="let app of applications" class="tableRow">
+      <div class="id">{{app.id}}</div>
+      <div class="title">{{app.title}}</div>
+      <div class="file">{{app.file}}</div>
+      <div class="type">{{app.type}}</div>
+      <div class="repoType">{{app.repositoryType}}</div>
+      <div class="subtype">{{app.subtype}}</div>
+      <div class="config"><i *ngIf="app.configUrl" class="material-icons clickable" (click)="configApp(app)">settings</i></div>
+      <div class="edit"><i class="material-icons clickable" (click)="editApp(app)">edit</i></div>
+      <div class="download"><i class="material-icons clickable" (click)="downloadApp(app)">cloud_download</i></div>
+      <div class="delete"><i class="material-icons clickable" (click)="removeApp(app)">delete</i></div>
+    </div>
+  </div>
+  <a *ngFor="let xml of editableXmls"
+     class="btn waves-effect waves-light btnXmlEditor"
+     (click)="editApp(xml)">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:xml.file} }}</a>
+  <div class="dialog darken" *ngIf="xmlAppProperties">
+    <div class="card center-card card-action card-high card-wide">
+      <div class="card-content">
+        <div class="card-cancel" (click)="xmlAppProperties=null"><i class="material-icons">close</i></div>
+        <div class="card-title">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:currentAppXml} }}</div>
+        <div class="card-scroll">
+          <div class="warning">{{'ADMIN.APPLICATIONS.APP_XML_WARNING' | translate}}</div>
+          <div *ngFor="let value of xmlAppKeys;let i=index;" class="appEditor">
+            <div class="property">{{value}}</div>
+            <div class="inputGroup">
+              <textarea *ngIf="xmlAppProperties[value].indexOf('\n')!=-1" class="materialize-textarea" [(ngModel)]="xmlAppProperties[value]"></textarea>
+              <input    *ngIf="xmlAppProperties[value].indexOf('\n')==-1" type="text" [(ngModel)]="xmlAppProperties[value]">
+              <!-- Api does currently not support deleting -->
+              <i class="material-icons clickable" (click)="removeAppProperty(i)" *ngIf="false">delete</i>
+            </div>
+            <div class="input-hint-bottom" *ngIf="currentApp">{{'ADMIN.APPLICATIONS.'+currentApp+"."+value | translate}}</div>
+        </div>
+        <div class="addProperty">
+          <div class="property">{{'ADMIN.APPLICATIONS.ADD_PROPERTY' | translate}}</div>
+          <input type="text" id="additionalProperty" placeholder="{{'ADMIN.APPLICATIONS.PROPERTY_NAME_PLACEHOLDER' | translate}}" [(ngModel)]="xmlAppAdditionalPropertyName">
+          <input type="text" placeholder="{{'ADMIN.APPLICATIONS.PROPERTY_VALUE_PLACEHOLDER' | translate}}" [(ngModel)]="xmlAppAdditionalPropertyValue">
+        </div>
+
+      </div>
+    </div>
+    <div class="card-action">
+      <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="saveApp()" (click)="saveApp()">{{'APPLY' | translate }}</a>
+      <a class="btn-flat" tabindex="0" (keyup.enter)="closeAppEditor()" (click)="closeAppEditor()">{{'CANCEL' | translate }}</a>
+    </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="tab=='UPDATE'" class="content update">
+  <div class="hint">
+    {{'ADMIN.UPDATE.HINT' | translate}}
+  </div>
+  <div class="table">
+    <div class="tableRow header">
+      <div class="id">{{'ADMIN.UPDATE.ID' | translate}}</div>
+      <div class="description">{{'ADMIN.UPDATE.DESCRIPTION' | translate}}</div>
+      <div class="test">{{'ADMIN.UPDATE.TEST' | translate}}</div>
+      <div class="run">{{'ADMIN.UPDATE.RUN' | translate}}</div>
+    </div>
+    <div *ngFor="let update of updates" class="tableRow">
+      <div class="id">{{update.id}}</div>
+      <div class="description">{{update.description}}</div>
+      <div class="test"><a class="clickable" (click)="runUpdate(update,false)">{{'ADMIN.UPDATE.TEST' | translate}}</a></div>
+      <div class="run"><a class="btn-flat btn-shadow" (click)="runUpdate(update,true)">{{'ADMIN.UPDATE.RUN' | translate}}</a></div>
+    </div>
+  </div>
+</div>
+<div *ngIf="tab=='IMPORT'" class="content import">
+  <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.EXCEL' | translate}}</span></div>
+  <div class="csv">
+    <input #csvSelect type="file" style="display:none" id="csvSelect" accept=".xls, .xlsx" (change)="updateExcelFile($event)">
+    <a class="btn-flat btn-shadow" (click)="csvSelect.click()">{{'ADMIN.IMPORT.CHOOSE_EXCEL' | translate}}</a><div class="file">{{ (excelFile ? excelFile.name : '') }}</div>
+    <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate}}</a>
+    <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
+    <a class="btn waves-effect waves-light" (click)="importExcel()">{{'ADMIN.IMPORT.EXCEL_START' | translate}}</a>
+  </div>
+  <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.OAI' | translate}}</span></div>
+  <div class="oai">
+    <input type="text" [(ngModel)]="oaiUrl" placeholder="{{'ADMIN.IMPORT.OAI_URL' | translate}}">
+    <input type="text" [(ngModel)]="oaiSet" placeholder="{{'ADMIN.IMPORT.OAI_SET' | translate}}">
+    <input type="text" [(ngModel)]="oaiPrefix" placeholder="{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}">
+    <input type="text" [(ngModel)]="oaiMetadata" placeholder="{{'ADMIN.IMPORT.OAI_METADATA' | translate}}">
+    <input type="text" [(ngModel)]="oaiFile" placeholder="{{'ADMIN.IMPORT.OAI_FILE' | translate}}">
+    <select [(ngModel)]="oaiImporter">
+      <option *ngFor="let option of oaiClasses">{{ option }}</option>
+    </select>
+    <a class="btn-flat btn-shadow" (click)="removeImports()">{{'ADMIN.IMPORT.REMOVE_IMPORTS' | translate}}</a>
+    <a class="btn waves-effect waves-light" (click)="oaiImport()">{{'ADMIN.IMPORT.OAI_START' | translate}}</a>
+  </div>
+  <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.ADMINISTRATION' | translate}}</span></div>
+  <div class="administration">
+    <div class="cacheGroup"><a class="btn-flat btn-shadow" (click)="refreshCache(false)">{{'ADMIN.IMPORT.REFRESH_CACHE' | translate}}</a><input type="text" [(ngModel)]="cacheName" placeholder="{{'ADMIN.IMPORT.CACHE_NAME' | translate}}"></div>
+    <a class="btn-flat btn-shadow" (click)="refreshCache(true)">{{'ADMIN.IMPORT.STICKY_REFRESH_CACHE' | translate}}</a>
+    <div class="propertyGroup"><a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.IMPORT.PROPERTY_VALUESPACE' | translate}}</a><input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.IMPORT.PROPERTY_NAME' | translate}}"></div>
+  </div>
+</div>
+<div *ngIf="tab=='TOOLKIT'" class="content toolkit">
+  <div class="group">
+    <div class="info">{{'ADMIN.TOOLKIT.REFRESH_APP_INFO' | translate }}</div>
+    <div class="btn-flat btn-shadow" (click)="refreshAppInfo()">{{'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</div>
+  </div>
+  <div class="group">
+    <form (ngSubmit)="getCacheInfo()">
+      <input type="text" name="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
+      <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
+    </form>
+  </div>
+  <div class="group catalina">
+    <label for="catalina">{{'ADMIN.TOOLKIT.CATALINA' | translate}}</label>
+    <div class="btn-flat btn-shadow" (click)="refreshCatalina()"><i class="material-icons">refresh</i></div>
+    <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
+  </div>
+</div>
+<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>

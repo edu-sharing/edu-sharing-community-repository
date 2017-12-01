@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+ 
+
+<beans>   
+  
+  	
+  	
+    <!-- edu-sharing custom: override global-properties to add es-caches.properties for cache factory -->
+    <bean id="global-properties" class="org.alfresco.config.JndiPropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:alfresco/repository.properties</value>
+                <value>classpath:alfresco/domain/transaction.properties</value>
+                <value>classpath:alfresco/caches.properties</value>
+                <!-- Enterprise defaults -->
+                <!--  Overrides supplied if this is an enterprise install (none exist for community) -->
+                <value>classpath*:alfresco/enterprise/repository.properties</value>
+                <!-- <value>classpath:alfresco/jndi.properties</value> -->
+                <!--  Overrides supplied by modules -->
+                <value>classpath*:alfresco/module/*/alfresco-global.properties</value>
+                <!--  Installer or user-provided defaults -->
+                <value>classpath*:alfresco-global.properties</value>
+                
+                <!-- edu-sharing cache -->
+                 <value>classpath:alfresco/extension/es-caches.properties</value>
+            </list>
+        </property>
+        <property name="systemPropertiesModeName">
+            <value>SYSTEM_PROPERTIES_MODE_OVERRIDE</value>
+        </property>
+        <!-- Extra properties that have no defaults that we allow to be defined through JNDI or System properties -->
+        <property name="systemProperties">
+            <list>
+                <value>hibernate.dialect</value>
+                <value>hibernate.query.substitutions</value>
+                <value>hibernate.jdbc.use_get_generated_keys</value>
+                <value>hibernate.default_schema</value>
+            </list>
+        </property>
+        <property name="propertiesPersister">
+        	<bean class="org.alfresco.config.AlfrescoPropertiesPersister"/>
+        </property>
+    </bean>
+  
+      
+    <!-- edu-sharing properties cache bean like cache-context.xml -->
+    <bean name="eduSharingPropertiesCache" factory-bean="cacheFactory" factory-method="createCache">
+      <constructor-arg value="cache.eduSharingPropertiesCache"/>      
+   </bean>
+   <bean name="eduSharingEduGroupCache" factory-bean="cacheFactory" factory-method="createCache">
+   		<constructor-arg value="cache.eduSharingEduGroupCache"/> 
+   </bean>
+   
+    <bean name="eduSharingShibbolethSessionsCache" factory-bean="cacheFactory" factory-method="createCache">
+   		<constructor-arg value="cache.eduSharingShibbolethSessionsCache"/> 
+   </bean> 
+    
+    <bean name="eduSharingTokenCache" factory-bean="cacheFactory" factory-method="createCache">
+   		<constructor-arg value="cache.eduSharingTokenCache"/> 
+   </bean> 
+   
+   <bean name="eduSharingEditLockCache" factory-bean="cacheFactory" factory-method="createCache">
+   		<constructor-arg value="cache.eduSharingEditLockCache"/> 
+   </bean> 
+
+</beans>

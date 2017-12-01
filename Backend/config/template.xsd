@@ -1,0 +1,47 @@
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="edutemplate" type="eduTemplateType"/>
+
+  <xs:complexType name="groupType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="right" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="groupsType">
+    <xs:choice minOccurs="1" maxOccurs="unbounded">
+      <xs:element type="groupType" name="group"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="TfolderType">
+	  <xs:sequence>
+		  <xs:element type="groupsType" name="groups" minOccurs="0" maxOccurs="1"/>
+		  <xs:element ref="folder" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    <xs:attribute type="xs:string" name="name"/>
+    <xs:attribute type="xs:string" name="inherited"/>
+    <xs:attribute type="xs:string" name="type"/>
+    <xs:attribute type="xs:string" name="restriction"/>
+  </xs:complexType>
+
+  <xs:element name="folder" type="TfolderType" />
+
+  <xs:complexType name="folderrootType">
+    <xs:sequence>
+      <xs:element ref="folder"  minOccurs="1" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="name"/>
+  </xs:complexType>
+
+  <xs:complexType name="eduTemplateType">
+    <xs:sequence>
+      <xs:element type="folderrootType" name="folderroot"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="name"/>
+    <xs:attribute type="xs:string" name="version"/>
+    <xs:attribute type="xs:string" name="context"/>
+  </xs:complexType>
+</xs:schema>

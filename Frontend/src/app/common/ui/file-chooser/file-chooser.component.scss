@@ -1,0 +1,68 @@
+@import "../../../../styles/variables.scss";
+
+.fileChooserOut{
+  padding:20px;
+}
+.card-content{
+  background-color: $backgroundColor;
+}
+.breadcrumbFrame{
+  float:left;
+  padding:15px;
+  /* padding-top:20px; */
+  position: relative;
+  top:-25px;
+  height: 50px;
+  z-index: 1;
+  width: calc(100% + 40px);
+  margin-left: -20px;
+  background-color: #fff;
+  @include materialShadowBottom();
+  input{
+    border: 1px solid #eee;
+    margin:0;
+    padding: 0 10px;
+    margin-top: -10px;
+    width: calc(100% - 25px);
+  }
+}
+.noElements{
+  color:#999;
+  font-size:110%;
+  width: 100%;
+  float: left;
+  text-align: center;
+  padding-top:10px;
+}
+.fileChooser{
+  margin:0 auto;
+  width:100%;
+  height: calc(100% - 45px);
+  margin-bottom:-55px;
+}
+.listFrame{
+  position: relative;
+  top:-10px;
+}
+
+/*
+.card-action{
+  float:right;
+  padding-right:20px;
+  padding-bottom:20px;
+  position: absolute;
+  right: 50%;
+  margin-right: -$width/2;
+}
+
+@media screen and (max-width: $width + 50) {
+  .card-action{
+    position: relative;
+    right: 0;
+    margin-right: 0;
+  }
+  .fileChooser{
+    width:100%;
+  }
+}
+*/

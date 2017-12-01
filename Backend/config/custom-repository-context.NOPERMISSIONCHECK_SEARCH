@@ -1,0 +1,110 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<!--
+       This shows the common minimum configuration overrides.
+       By default, the content and indexes are located at a relative location, which should only
+       be used when doing a quick preview of the Alfresco server.
+-->
+<beans>
+   
+    <!-- overriding to point to custom properties -->
+    <bean id="repository-properties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders">
+            <value>true</value>
+        </property>
+        <property name="locations">
+            <list>
+                <value>classpath:alfresco/repository.properties</value>
+                <value>classpath:alfresco/version.properties</value>
+                <value>classpath:alfresco/domain/transaction.properties</value>
+
+                <!-- Override basic repository properties -->
+                <value>classpath:alfresco/extension/custom-repository.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="hibernateConfigProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:alfresco/domain/hibernate-cfg.properties</value>
+
+                <!-- Override hibernate dialect -->
+                <value>classpath:alfresco/extension/custom-hibernate-dialect.properties</value>
+            </list>
+        </property>
+    </bean>
+    
+    <!-- campuscontent customization: extending the contentmodel-->
+    <bean id="custom.dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
+        <property name="models">
+            <list>
+                <value>alfresco/extension/model/ccContentModel.xml</value>
+            </list>
+        </property>
+    </bean>
+    
+    <!-- campuscontent customization: disabling the archiving of Nodes-->
+    <bean id="storeArchiveMap" class="org.edu_sharing.alfresco.StoreArchiveMap">
+     <property name="archiveMap">
+        <map>
+        </map>
+     </property>
+  	</bean>
+
+		<!-- campuscontent customization:  custom Permission Definitions -->
+		 <bean id='permissionsModelDAO' class="org.alfresco.repo.security.permissions.impl.model.PermissionModel">
+       <property name="model">
+           <value>alfresco/extension/custom-permissionDefinitions.xml</value>
+       </property>
+       <property name="nodeService">
+           <ref bean="nodeService" />
+       </property>
+       <property name="dictionaryService">
+           <ref bean="dictionaryService" />
+       </property>
+   	 </bean>    
+   	 
+   	 <!-- Test Disabling permissioncheck for the Search Service -->
+
+    <bean id="SearchService" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="proxyInterfaces">
+            <value>org.alfresco.service.cmr.search.SearchService</value>
+        </property>
+        <property name="target">
+            <ref bean="searchService"/>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <!--idref local="SearchService_transaction"/>
+                <idref local="AuditMethodInterceptor"/>
+                <idref local="exceptionTranslator"/>
+                <idref bean="SearchService_security"/-->
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="SearchService_transaction" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="transactionAttributes">
+            <props>
+                <prop key="*">${server.transaction.mode.default}</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="AuditMethodInterceptor" class="org.alfresco.repo.audit.AuditMethodInterceptor">
+        <property name="auditComponent">
+            <ref bean="auditComponent"/>
+        </property>
+        <property name="disabled">
+            <value>false</value>
+        </property>
+    </bean>
+    <bean id="exceptionTranslator" class="org.alfresco.repo.security.permissions.impl.ExceptionTranslatorMethodInterceptor"/>
+<!-- ENDTest Disabling permissioncheck for the Search Service -->
+   	 
+    
+</beans>

@@ -1,0 +1,90 @@
+<img src="assets/images/layout/oer_bg.jpg" class="header">
+<main-nav
+    [title]="'SEARCH.TITLE'"
+    [currentScope]="'search'"
+    [searchEnabled]="true"
+    [searchPlaceholder]="'OER.SEARCH'"
+    [canOpen]="true"
+    [searchQuery]="currentQuery"
+    (onSearch)="routeSearch($event)"
+  ></main-nav>
+<div class="heading">
+  <h1>{{'OER.HEADING_TITLE' | translate}}</h1>
+  <h2>{{'OER.HEADING_DESCRIPTION' | translate}}</h2>
+</div>
+<div class="content">
+<div class="collectionsGroup" *ngIf="nodes[COLLECTIONS].length">
+  <div class="caption">{{ 'OER.COLLECTIONS' | translate}}</div>
+  <div class="more" *ngIf="hasMore[COLLECTIONS] || true"><a class="clickable" (click)="goToCollections()">{{(showMore[COLLECTIONS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
+  <div class="noResults collections" *ngIf="!loading[COLLECTIONS] && !nodes[COLLECTIONS].length">{{'OER.NO_COLLECTION_RESULTS' | translate}}</div>
+  <div>
+  <listTable  *ngIf="loading[COLLECTIONS] || nodes[COLLECTIONS].length"
+    id="collections"
+    class="list collections"
+    [class.listLoading]="loading[COLLECTIONS]"
+    [class.listMore]="showMore[COLLECTIONS]"
+    [nodes]="nodes[COLLECTIONS]"
+    [columns]="columns[COLLECTIONS]"
+    [hasIcon]="true"
+    [options]="options[COLLECTIONS]"
+    [hasCheckbox]="false"
+    [hasHeading]="false"
+    [isClickable]="true"
+    [viewType]="2"
+    [scrollWindow]="true"
+    (clickRow)="click($event)"
+    (doubleClickRow)="doubleClick($event)"
+    (loadMore)="loadMore(COLLECTIONS)"
+    [isLoading]="loading[COLLECTIONS]"></listTable>
+  </div>
+</div>
+  <div class="materials">
+    <div class="caption">{{ 'OER.MATERIALS' | translate}}</div>
+    <div class="more" *ngIf="hasMore[MATERIALS]"><a class="clickable" (click)="goToSearch()">{{(showMore[MATERIALS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
+    <div class="noResults materials" *ngIf="!loading[MATERIALS] && !nodes[MATERIALS].length">{{'OER.NO_MATERIAL_RESULTS' | translate}}</div>
+    <listTable *ngIf="loading[MATERIALS] || nodes[MATERIALS].length"
+      id="materials"
+      class="list materials"
+      [class.listLoading]="loading[MATERIALS]"
+      [class.listMore]="showMore[MATERIALS]"
+      [nodes]="nodes[MATERIALS]"
+      [columns]="columns[MATERIALS]"
+      [hasIcon]="true"
+      [options]="options[MATERIALS]"
+      [hasCheckbox]="false"
+      [hasHeading]="false"
+      [isClickable]="true"
+      [viewType]="1"
+      [scrollWindow]="true"
+      (clickRow)="click($event)"
+      (onUpdateOptions)="updateOptions(MATERIALS,$event)"
+      (doubleClickRow)="doubleClick($event)"
+      (loadMore)="loadMore(MATERIALS)"
+      [isLoading]="loading[MATERIALS]"></listTable>
+
+  </div>
+  <div class="tools" *ngIf="false">
+    <div class="caption">{{ 'OER.TOOLS' | translate}}</div>
+    <div class="more" *ngIf="hasMore[TOOLS]"><a class="clickable" (click)="toggleMore(TOOLS)">{{(showMore[TOOLS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
+    <div class="noResults tools" *ngIf="!loading[TOOLS] && !nodes[TOOLS].length">{{'OER.NO_TOOL_RESULTS' | translate}}</div>
+    <listTable *ngIf="loading[TOOLS] || nodes[TOOLS].length"
+               id="tools"
+               class="list materials"
+               [class.listLoading]="loading[TOOLS]"
+               [class.listMore]="showMore[TOOLS]"
+               [nodes]="nodes[TOOLS]"
+               [columns]="columns[TOOLS]"
+               [hasIcon]="true"
+               [options]="options[TOOLS]"
+               [hasCheckbox]="false"
+               [hasHeading]="false"
+               [isClickable]="true"
+               [viewType]="1"
+               [scrollWindow]="true"
+               (clickRow)="click($event)"
+               (doubleClickRow)="doubleClick($event)"
+               (loadMore)="loadMore(TOOLS)"
+               [isLoading]="loading[TOOLS]"></listTable>
+
+  </div>
+</div>

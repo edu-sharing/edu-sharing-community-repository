@@ -1,0 +1,26 @@
+@import "../../../../styles/variables.scss";
+
+.row{
+  margin-bottom: 0;
+}
+.name{
+  font-weight: bold;
+  color:$textLight;
+}
+.password{
+  margin-top:20px;
+}
+.changePassword{
+  color:$primary;
+  text-transform: uppercase;
+  float:left;
+  margin-bottom: 20px;
+  width:100%;
+  div{
+    float:left;
+  }
+  i{
+    position: relative;
+    top: 6px;
+  }
+}

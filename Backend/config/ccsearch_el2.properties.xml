@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>campuscontent search config</comment>
+	<entry key="host">elearning2.uni-weimar.de</entry>
+	<entry key="port">8080</entry>
+	<entry key="wspath">/alfresco/api</entry>
+	<entry key="alfrescocontext">/alfresco</entry>
+	<entry key="searchclass">org.edu_sharing.repository.server.MCAlfrescoWSClient</entry>
+	<entry key="contenturl">http://elearning2.uni-weimar.de/mcdev196/modules/ccRenderEngine/src/render.php?type=content</entry>
+	<entry key="previewurl">http://elearning2.uni-weimar.de/mcdev196/modules/ccRenderEngine/src/render.php?type=preview</entry>
+	<entry key="nodeid_key">uuid</entry>
+	<!-- entry key="explorer-start-nodeid">90b8f896-6a1d-11dd-9edb-49a38fe89288</entry-->
+	<entry key="is_home_node">false</entry>
+	<entry key="appcaption">elearning2</entry>
+	<entry key="appid">elearning2.uni-weimar.de</entry>
+	<!-- credentials of default User -->
+	<entry key="username">admin</entry>
+	<entry key="password">admin</entry>
+</properties>

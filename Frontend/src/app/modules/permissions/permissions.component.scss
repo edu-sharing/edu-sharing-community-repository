@@ -1,0 +1,17 @@
+@import "../../../styles/variables.scss";
+
+
+.content{
+  position:absolute;
+  top:45px;
+}
+.row{
+  position: fixed;
+  top: $mainnavHeight;
+  width: 100%;
+  height: 48px;
+}
+.s12{
+  position: fixed;
+  z-index:10;
+}

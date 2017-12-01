@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/apache-solr-core-1.4.2-dev.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/apache-solr-dataimporthandler-1.4.2-dev.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/apache-solr-solrj-1.4.2-dev.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/commons-codec-1.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/commons-csv-1.0-SNAPSHOT-r609327.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/commons-fileupload-1.2.1.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/jcl-over-slf4j-1.5.5.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/lucene-analyzers-2.9.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/lucene-core-2.9.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/lucene-highlighter-2.9.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/lucene-memory-2.9.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/lucene-misc-2.9.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/lucene-queries-2.9.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/lucene-snowball-2.9.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/lucene-spellchecker-2.9.3.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/slf4j-api-1.5.5.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/slf4j-jdk14-1.5.5.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/tomcat/webapps/solr/WEB-INF/lib/wstx-asl-3.2.7.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/alf_data/solr/lib/alfresco-core-4.0.e.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/alf_data/solr/lib/alfresco-data-model-4.0.e.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/alf_data/solr/lib/alfresco-solr-integration-4.0.e.jar"/>
+	<classpathentry kind="lib" path="C:/myprogs/alfresco-4.0.e/alf_data/solr/lib/json.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,362 @@
+<?xml version="1.0"?>
+<project name="CCSearchCommon" basedir=".">
+	
+	
+	
+	<!-- allow every developer to use his local build-properties -->
+	<property file="build.${user.name}.properties" />
+	
+	<!-- for extensions-->
+	<property file="${current.extension.propfile}"/>
+	
+	<!-- include global build-properties -->
+	<property file="build.properties" />
+	<property name="config.dir" value="config" />
+	<property name="lib.dir" value="lib" />
+	
+	<property name="screenreader_src_dir" value="jsp/screenreader" />	
+	<property name="screenreader_dest_dir" value="screenreader" />	
+	
+	<property name="index_src_dir" value="jsp/index" />	
+	<property name="index_dest_dir" value="index" />		
+
+    <property name="swagger_src_dir" value="swagger" /> 
+    <property name="swagger_dest_dir" value="swagger" />        
+
+    <!-- Alfresco config files -->
+	<target name="prepare-alfresco-config">
+		<copy overwrite="true" todir="${webserver.home}/shared/classes/alfresco/extension">
+					<fileset dir="${config.dir}/alfresco/extension">
+					</fileset>
+		</copy>
+		<antcall target="prepare-alfresco-config-extension"></antcall>
+	</target>
+	
+	<!-- 
+		just for development
+		- when release is build the config dir is merged by target release-extension-config
+		- when deploying an released version current.extension.propfile is not set
+		- does the same like prepare-alfresco-config
+	 -->
+	<target name="prepare-alfresco-config-extension" if="current.extension.propfile">
+			<echo>current extension is active will overwrite</echo>
+			
+			<copy overwrite="true" todir="${webserver.home}/shared/classes/alfresco/extension" failonerror="false">
+					<fileset dir="${extensions.path}${extension-name}/config/alfresco/extension">
+					</fileset>
+			</copy>
+	</target>
+	
+	<target name="prepare-alfresco-webapps">
+		<condition property="unzip.alfresco.war">
+			<and>
+				<not>
+					<available file="${app.server.deploy.dir}/alfresco" type="dir"></available>		
+				</not>
+				<available file="${app.server.deploy.dir}/alfresco.war" type="file"></available>
+			</and>
+		</condition>
+		<antcall target="unzip-alfresco-webapp"></antcall>
+		<condition property="folder.alfresco.exists">
+			<and>
+				<available file="${app.server.deploy.dir}/alfresco" type="dir"></available>		
+			</and>
+		</condition>
+		<fail unless="folder.alfresco.exists" message="alfresco webapp folder and alfresco.war was not found!."/>
+		
+		<condition property="unzip.solr.war">
+			<and>
+				<not>
+					<available file="${app.server.deploy.dir}/solr4" type="dir"></available>		
+				</not>
+				<available file="${app.server.deploy.dir}/solr4.war" type="file"></available>
+			</and>
+		</condition>
+		<antcall target="unzip-solr-webapp"></antcall>
+		<!--
+			dont fail here cause solr could be on another server
+		<condition property="folder.solr.exists">
+			<and>
+				<available file="${app.server.deploy.dir}/solr4" type="dir"></available>		
+			</and>
+		</condition>
+		<fail unless="folder.solr.exists" message="solr webapp folder and solr.war was not found!."/>
+		-->
+		<delete>
+			<fileset dir="${app.server.tomcat.webapps.alfresco.lib}" includes="${alfrescojars_clean}"/>
+		</delete>       
+		<copy todir="${app.server.tomcat.webapps.alfresco.lib}">
+			<fileset dir="${lib.dir}" includes="${alfrescojars_prepare}"></fileset>
+		</copy>
+	</target>
+
+	<target name="prepare" depends="prepare-alfresco-config">
+		
+		
+		<mkdir dir="${webserver.home}/webapps/${webapp.name}/WEB-INF" />
+		<mkdir dir="${webserver.home}/webapps/${webapp.name}/WEB-INF/classes" />
+		<mkdir dir="${webserver.home}/webapps/${webapp.name}/WEB-INF/lib" />
+		
+		<antcall target="copy-file-if-not-exist">
+			<param name="source-file-param" value="${output.dir}/homeApplication.properties.xml"/>
+			<param name="to-file-param" value="${webserver.home}/shared/classes/homeApplication.properties.xml"/>
+		</antcall>
+		<antcall target="copy-file-if-not-exist">
+			<param name="source-file-param" value="${output.dir}/ccapp-registry.properties.xml"/>
+		    <param name="to-file-param" value="${webserver.home}/shared/classes/ccapp-registry.properties.xml"/>
+		</antcall>
+		<antcall target="copy-file-if-not-exist">
+			<param name="source-file-param" value="${config.dir}/ccmail.properties.xml"/>
+			<param name="to-file-param" value="${webserver.home}/shared/classes/ccmail.properties.xml"/>
+		</antcall>
+		
+		<copy todir="${webserver.home}/webapps/${webapp.name}/WEB-INF/lib">
+			<fileset dir="lib" includes="log4j-1.2.8.jar, commons-logging-1.0.4.jar, cas-client-core-3.2.1.jar">
+			</fileset>
+		</copy>
+		<copy file="${config.dir}/web.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/web.xml" />
+		<copy file="${config.dir}/context.xml" tofile="${app.server.deploy.dir}/${webapp.name}/META-INF/context.xml" />
+		<copy file="${output.dir}/ddc.properties" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/classes/ddc.properties" />
+	
+		<!-- Hot deployable webservices -->
+		<copy todir="${webserver.home}/webapps/${webapp.name}">
+			<fileset dir="webservices" includes="**/*.*" excludes="WEB-INF/lib/*.jar,WEB-INF/web.xml">
+			</fileset>		
+		</copy>			
+		
+		<!--copy extras-->
+		<antcall target="prepare-extension"></antcall>
+
+	</target>
+	
+	<target name="unzip-alfresco-webapp" if="unzip.alfresco.war">
+		    <echo>will unzip alfresco.war</echo>
+		    <unzip src="${app.server.deploy.dir}/alfresco.war" dest="${app.server.deploy.dir}/alfresco" />
+		</target>
+		
+		<target name="unzip-solr-webapp" if="unzip.solr.war">
+			    <echo>will unzip solr4.war</echo>
+			    <unzip src="${app.server.deploy.dir}/solr4.war" dest="${app.server.deploy.dir}/solr4" />
+		</target>
+	
+	<target name="prepare-extension" if="current.extension.propfile">
+			<echo>current extension is active will overwrite</echo>
+				
+			<copy failonerror="false" overwrite="true" file="${extensions.path}${extension-name}/config/web.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/web.xml" />
+		
+			<copy failonerror="false" todir="${app.server.tomcat.webapps.ccsearch.lib}">
+						<fileset dir="${extensions.path}${extension-name}/lib" includes="*.jar"></fileset>
+			</copy>
+			
+	</target>
+	
+	<target name="copy-file-if-not-exist">
+		
+		<echo>source:${source-file-param}, to: ${to-file-param}</echo>
+		
+		<condition property="file-does-not-exist">
+			<not>
+				<available file="${to-file-param}">
+				</available>
+			</not>
+		</condition>
+		
+		<antcall target="copy-file">
+		    <param name="source-file-param" value="${source-file-param}"/>
+		 	<param name="to-file-param" value="${to-file-param}" />
+		</antcall>
+	</target>
+	
+	<target name="copy-file" if="file-does-not-exist">
+		<echo>file-does-not-exist: ${file-does-not-exist}  source:${source-file-param} to:${to-file-param}</echo>
+		<copy overwrite="false" file="${source-file-param}" tofile="${to-file-param}" />
+	</target>
+	
+	
+	<target name="deploy-classes" depends="deploy-screenreader, deploy-swagger">
+			<copy todir="${webserver.home}/webapps/${webapp.name}/WEB-INF/classes">
+				<fileset dir="${output.dir}" includes="**/*.class, **/*.properties, org/edu_sharing/spring/**/*.xml, org/edu_sharing/repository/server/**/*.xml, **/*.xsd" excludes="org/alfresco/**/*.class, ${api_not_hotdeployable}, ${alfrescoclasses}, ${excludeclasses}, ${metadataset_files}, ${webservice.package} ${spring.package}">
+				</fileset>
+				<fileset dir="${config.dir}" includes="template.xsd">
+				</fileset>
+			</copy>
+			<copy todir="${webserver.home}/webapps/alfresco/WEB-INF/classes">
+						<fileset dir="${output.dir}" includes="${alfrescoclasses}" excludes="${excludeclasses}">
+						</fileset>
+			</copy>
+			<!--shared classes, metadataset files-->
+			<copy todir="${webserver.home}/shared/classes">
+				<fileset dir="${output.dir}" includes="${api_not_hotdeployable}, ${metadataset_files}">
+				</fileset>
+			</copy>      
+			<copy todir="${app.server.tomcat.webapps.alfresco.lib}">
+				<fileset dir="${lib.dir}" includes="${alfrescojars}"></fileset>
+			</copy>
+			<delete failonerror="false">
+		    		<fileset dir="${app.server.deploy.dir}/solr4/WEB-INF/lib" includes="${solr4jars_clean}"/>
+		    </delete>       
+			<copy failonerror="false" todir="${app.server.deploy.dir}/solr4/WEB-INF/lib">
+				<fileset dir="${lib.dir}" includes="${solr4jars}"></fileset>
+			</copy>
+			<delete>
+				<fileset dir="${app.server.tomcat.webapps.ccsearch.lib}" includes="${ccsearchjars_clean}"/>
+			</delete>		
+			<copy todir="${app.server.tomcat.webapps.ccsearch.lib}">
+				<fileset dir="${lib.dir}" includes="${ccsearchjars_apimode}"></fileset>
+			</copy>
+			<copy todir="${app.server.tomcat.webapps.ccsearch.lib}">
+				<fileset dir="${gwt.lib.path}" includes="${gwtjars}"></fileset>
+			</copy>
+			<copy todir="${app.server.tomcat.shared.lib}">
+				<fileset dir="${lib.dir}" includes="edu-sharing_classloaderstuff.jar"></fileset>
+			</copy>
+		</target>
+		
+		<target name="undeploy-gwt">
+			<delete>
+				<fileset dir="${webserver.home}/webapps/${webapp.name}" excludes="WEB-INF/**,META-INF/**,wsdl/**,screenreader/**,swagger/**">
+				</fileset>
+			</delete>
+		</target>
+		
+		<target name="deploy-gwt" depends="undeploy-gwt">
+			<copy todir="${webserver.home}/webapps/${webapp.name}">
+				<!--fileset dir="${www.dir}/org.edu_sharing.repository.CCSearch" includes="**">
+				</fileset-->
+				<!--fileset dir="war/org.edu_sharing.repository.CCSearch" includes="**">
+				</fileset-->
+				<fileset dir="${gwt-war.dir}/${gwt-rename-to}" includes="**">
+				</fileset>
+			</copy>
+		</target>
+		
+		<!-- added by Christian for JSP screenreader deployment -->
+		<target name="deploy-screenreader">
+			<delete dir="${webserver.home}/webapps/${webapp.name}/${screenreader_dest_dir}" />	
+			<mkdir dir="${webserver.home}/webapps/${webapp.name}/${screenreader_dest_dir}" />	
+			<copy todir="${webserver.home}/webapps/${webapp.name}/${screenreader_dest_dir}" overwrite="true" >
+				<fileset dir="${screenreader_src_dir}" includes="*.*">
+				</fileset>
+			</copy>		
+		</target>
+	
+    <!-- added by Frank for Swagger-UI -->
+    <target name="deploy-swagger">
+        <delete dir="${webserver.home}/webapps/${webapp.name}/${swagger_dest_dir}" />  
+        <mkdir dir="${webserver.home}/webapps/${webapp.name}/${swagger_dest_dir}" />   
+        <copy todir="${webserver.home}/webapps/${webapp.name}/${swagger_dest_dir}" overwrite="true" >
+            <fileset dir="${swagger_src_dir}" includes="**/*.*">
+            </fileset>
+        </copy>     
+    </target>
+
+            	<!-- added by Christian for JSP index deployment -->
+	<target name="deploy-index">
+		<delete dir="${webserver.home}/webapps/${webapp.name}/${index_dest_dir}" />	
+		<mkdir dir="${webserver.home}/webapps/${webapp.name}/${index_dest_dir}" />	
+		<copy todir="${webserver.home}/webapps/${webapp.name}/${index_dest_dir}" overwrite="true" >
+			<fileset dir="${index_src_dir}" includes="*.*">
+			</fileset>
+		</copy>		
+	</target>	
+	
+	<target name="undeploy" depends="undeploy-classes, undeploy-alfresco-config">
+			<delete dir="${webserver.home}/webapps/${webapp.name}">
+			</delete>
+		
+			<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-context.xml">
+			</delete>
+			
+			<delete file="${webserver.home}/conf/Catalina/localhost/${webapp.name}.xml">
+			</delete>
+	</target>
+	
+	<target name="undeploy-classes">
+			<!--delete dir="${webserver.home}/shared/classes" includes="${api_not_hotdeployable}"/-->
+			<delete dir="${webserver.home}/shared/classes/org/edu_sharing" />
+			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/edu_sharing" />
+			<delete dir="${webserver.home}/webapps/${webapp.name}/WEB-INF/classes/" />
+	</target>
+	
+
+	<target name="undeploy-alfresco-config">
+		
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/web-client-config-custom.xml">
+		</delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/example-model-context.xml">
+		</delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/ccauthentication-services-context.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-permissionDefinitions.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/model/ccContentModel.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-core-services-context.xml"></delete>	
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/es-caches.properties"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-cache-context.xml"></delete>
+		<delete dir="${webserver.home}/shared/classes/alfresco/extension/subsystems"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-opencmis-context.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/edu-sharing-sso-context.xml"></delete>
+		
+		<!-- 
+			contentmodel stuff 
+		-->
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-model-context.xml"></delete>
+		<delete dir="${webserver.home}/shared/classes/alfresco/extension/es_models"></delete>
+		<!--this is used to undeploy content models for versions prior edu-sharing 1.7-->
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/ccmodel.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-lommodel.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-uleimodel.xml"></delete>
+		
+		<!--delete alfresco jars-->
+		<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/lib" includes="${alfrescojars}"></delete>
+		
+	</target>
+	
+	
+	<!-- added by Torsten for Angular desktop app deployment -->
+	
+	<target name="compile-ng-app">
+	<echo>Compiling Angular App using ng build -prod --aot (may takes more than a minute)...</echo>
+		<property environment="env"/>
+		<echo>PATH: ${env.PATH} ${basedir}${angular.internal.location}</echo>
+		<exec osfamily="windows" executable="${angular.internal.location}build.sh" dir="${basedir}${angular.internal.location}" vmlauncher="false">
+					    <arg value="${extension-name}"/>
+		</exec>
+		<exec osfamily="unix" executable="${angular.internal.location}build.sh" dir="${basedir}${angular.internal.location}" vmlauncher="false">
+							    <arg value="${extension-name}"/>
+					<env key="PATH" value="${env.PATH}:/usr/local/bin/"/>
+				</exec>
+		 <input validargs="OK" defaultvalue="OK">Press OK when build console finished...</input>
+	</target>
+		<target name="import-ng">
+			<antcall target="compile-ng-app"></antcall>
+			<delete file="angular_build.txt" />	
+			<antcall target="copy-angular-app"></antcall>
+			<antcall target="copy-angular-app-extension"></antcall>
+		</target>
+		<target name="copy-angular-app" unless="current.extension.propfile">
+		<echo>Copying dist to ng...</echo>
+			<delete dir="ng" />	
+			<mkdir  dir="ng" />
+			<copy todir="ng" overwrite="true" >
+				<fileset dir="${angular.location}dist" includes="**">
+				</fileset>
+			</copy>				
+			
+		</target>
+		
+		<target name="copy-angular-app-extension"  if="current.extension.propfile">
+			<script language="javascript">
+			    var module = project.getProperty("module.gwt.package");
+			    project.setProperty("module.gwt.package_path", module.replaceAll("\\.", "/"));
+			</script>
+			<echo>Extension enabled: ${extensions.path}${extension-name}/ng</echo>
+				<delete dir="${extensions.path}${extension-name}/${extension-name}/ng" />	
+				<mkdir  dir="${extensions.path}${extension-name}/ng" />
+				<copy todir="${extensions.path}${extension-name}/ng" overwrite="true" >
+					<fileset dir="${angular.location}dist" includes="**">
+					</fileset>
+				</copy>
+				
+		</target>
+	
+
+</project>

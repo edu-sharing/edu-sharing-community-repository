@@ -1,0 +1,66 @@
+@import "../../../../styles/variables.scss";
+
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+h2{
+  font-size:110%;
+  margin-top: 5px;
+}
+.lifecycleHeading,.metadataHeading{
+  font-weight: bold;
+}
+.role{
+  color:$textLight;
+}
+.group{
+  padding-bottom: 10px;
+}
+.metadataHeading{
+  padding-top:30px;
+}
+.table{
+  display: table;
+  width: 100%;
+  .title{
+    width:15%;
+  }
+  .givenname,.surname{
+    width:42.5%;
+  }
+
+  div{
+    display: table-cell;
+    padding:0 10px;
+    width:50%;
+  }
+}
+.btnAdd{
+  margin-top: 10px;
+  float:none!important;
+}
+.moreOpen{
+  margin-top: 20px;
+}
+.more{
+  text-transform: uppercase;
+  > i{
+    position: relative;
+    top:7px;
+  }
+}
+:host /deep/{
+  .datepicker-input{
+    width:calc(100% - 30px)!important;
+  }
+  .datepicker-calendar{
+    left: auto;
+    right: 0px;
+  }
+}

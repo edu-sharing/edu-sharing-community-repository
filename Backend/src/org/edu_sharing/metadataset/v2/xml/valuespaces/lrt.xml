@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<valuespace property="ccm:educationallearningresourcetype">
+		<key cap=""></key>
+		<key>worksheet</key>      
+		<key>teaching aids</key>   
+		<key>experiment</key>        
+		<key>map</key>             
+		<key>course</key>              
+		<key>assessment</key>     
+		<key>educational game</key>         
+		<key>presentation</key>      
+		<key>reference</key>
+		<key>project</key>           
+		<key>role play</key>
+		<key>simulation</key>        
+		<key>drill and practice</key>             
+		<key>lesson plan</key>
+	</valuespace>
+</valuespaces>

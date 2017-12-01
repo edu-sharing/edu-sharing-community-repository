@@ -1,0 +1,50 @@
+<div class="dialog darken">
+  <div class="card center-card card-action card-high" *ngIf="user">
+    <div class="card-content">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div class="card-title">{{'EDIT_ACCOUNT' | translate }}</div>
+      <div class="card-scroll">
+        <form #form (ngSubmit)="save()">
+          <div class="name">
+            <label for="authorityName">{{'USER.authorityName' | translate }}</label>
+            <input type="text" id="authorityName" name="authorityName" [(ngModel)]="user.authorityName" readonly>
+          </div>
+          <label for="firstName">{{'USER.firstName' | translate }}</label>
+          <input type="text" id="firstName" name="firstName" [(ngModel)]="user.profile.firstName" required="true">
+          <label for="lastName">{{'USER.lastName' | translate }}</label>
+          <input type="text" id="lastName" name="lastName" [(ngModel)]="user.profile.lastName" required="true">
+          <label for="email">{{'USER.email' | translate }}</label>
+          <input type="email" id="email" name="email" [(ngModel)]="user.profile.email" required="true">
+          <div class="changePassword" (click)="changePassword=!changePassword">
+            <div class="clickable">
+              <i class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
+              <i class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
+              {{'CHANGE_PASSWORD' | translate}}
+            </div>
+          </div>
+          <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
+            <label for="oldPassword">{{'OLD_PASSWORD' | translate }}</label>
+            <input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="oldPassword" required="true">
+            <label for="password">{{'NEW_PASSWORD' | translate }}</label>
+            <input type="password" id="password" name="password" [(ngModel)]="password" required="true">
+            <label for="passwordRepeat">{{'NEW_PASSWORD_REPEAT' | translate }}</label>
+            <input type="password" id="passwordRepeat" name="passwordRepeat" [(ngModel)]="passwordRepeat" required="true">
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="card-action">
+      <a class="btn waves-effect waves-light"
+         tabindex="0"
+         (focus)="true"
+         (keyup.enter)="save()"
+         (click)="save()"
+      >{{'SAVE' | translate}}</a>
+      <a class="btn-flat"
+         tabindex="0"
+         (keyup.enter)="cancel()"
+         (click)="cancel()"
+      >{{'CANCEL' | translate}}</a>
+    </div>
+  </div>
+</div>

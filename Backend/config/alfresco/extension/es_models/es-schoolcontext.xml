@@ -1,0 +1,115 @@
+<model name="essc:schulcontext" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+	<description>Model for edu-sharing school-context</description>
+	<author>Daniel Rudolph</author>
+	<version>1.0</version>
+	<imports>
+		<!-- Import Alfresco Dictionary Definitions -->
+		<import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+		<!-- Import Alfresco Content Domain Model Definitions -->
+		<import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+	</imports>
+	<namespaces>
+		<!-- Define a Namespace for my new definitions -->
+		<namespace uri="http://www.edu-sharing.net/model/essc/1.0" prefix="essc" />
+	</namespaces>
+	
+		<!-- Type and Aspect definitions go here -->
+	<types>
+		<type name="essc:schoolcontext">
+			<title>Releation Object for Entity Objects federalstate, typeofschool, discipline, agegroup, topic </title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<property name="essc:ref_federalstate">
+					<type>d:noderef</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<property name="essc:ref_typeofschool">
+					<type>d:noderef</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<property name="essc:ref_discipline">
+					<type>d:noderef</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<property name="essc:ref_agegroup">
+					<type>d:noderef</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<property name="essc:ref_topic">
+					<type>d:noderef</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+			</properties>
+		</type>
+		<type name="essc:federalstate">
+			<title>Entity Object federalstate</title>
+			<parent>cm:content</parent>
+			<properties>
+				<property name="essc:federalstate_key">
+					<type>d:text</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+			</properties>
+		</type>
+		<type name="essc:typeofschool">
+			<title>Entity Object typeofschool</title>
+			<parent>cm:content</parent>
+			<properties>
+				<property name="essc:typeofschool_key">
+					<type>d:text</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+			</properties>
+		</type>
+		<type name="essc:discipline">
+			<title>Entity Object discipline</title>
+			<parent>cm:content</parent>
+			<properties>
+				<property name="essc:discipline_key">
+					<type>d:text</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+			</properties>
+		</type>
+		<type name="essc:agegroup">
+			<title>Entity Object agegroup</title>
+			<parent>cm:content</parent>
+		</type>
+		<type name="essc:topic">
+			<title>Entity Object topic</title>
+			<parent>cm:content</parent>
+		</type>
+	</types>
+</model>

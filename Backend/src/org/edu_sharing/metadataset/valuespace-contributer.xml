@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<valuespace property="{virtualproperty}lifecyclecontributers">
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_publisher</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_author</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_unknown</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_initiator</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_terminator</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_validator</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_editor</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_graphical_designer</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_technical_implementer</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_content_provider</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_technical_validator</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_educational_validator</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_script_writer</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_instructional_designer</key>
+		<key>{http://www.campuscontent.de/model/1.0}lifecyclecontributer_subject_matter_expert</key>
+	</valuespace>
+	<valuespace property="{virtualproperty}metadatacontributers">
+		<key>{http://www.campuscontent.de/model/1.0}metadatacontributer_creator</key>
+		<key>{http://www.campuscontent.de/model/1.0}metadatacontributer_validator</key>
+		<key>{http://www.campuscontent.de/model/1.0}metadatacontributer_provider</key>
+	</valuespace>
+</valuespaces>

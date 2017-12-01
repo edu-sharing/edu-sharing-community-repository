@@ -1,0 +1,196 @@
+import {Component, Input, EventEmitter, Output} from '@angular/core';
+import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {TranslateService} from "ng2-translate";
+import {Translation} from "../../../common/translation";
+import {RestConstants} from "../../../common/rest/rest-constants";
+import {Node,NodeList} from "../../../common/rest/data-object";
+import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
+import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {UIService} from "../../../common/services/ui.service";
+import {UIAnimation} from "../../../common/ui/ui-animation";
+import {trigger} from "@angular/animations";
+
+@Component({
+  selector: 'workspace-sub-tree',
+  templateUrl: 'sub-tree.component.html',
+  styleUrls: ['sub-tree.component.scss'],
+  animations: [
+    trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
+  ]
+})
+export class WorkspaceSubTreeComponent  {
+  public _node : string;
+  public loading = true;
+  public _nodes : Node[];
+  private dragHover : Node;
+  // the node which has the focus
+  private openNodes : Node[]=[];
+
+  private _options : OptionItem[];
+  private dropdownPosition: string;
+  private dropdownLeft: string;
+  private dropdownBottom: string;
+  private dropdownTop: string;
+  private dropdown: Node;
+  public _hasChilds:boolean[]=[];
+  /**
+   * Set the options which are valid for each node, similar to the action bar options, see @OptionItem
+   * @param options
+   */
+  @Input() set options(options : OptionItem[]){
+    options=OptionItem.filterValidOptions(this.ui,options);
+    options=OptionItem.filterToggleOptions(options,false);
+    this._options=options;
+  }
+  @Input() openPath : string[][]=[];
+  @Input() selectedPath : string[]=[];
+  @Input() parentPath : string[]=[];
+  @Input() depth = 1;
+  @Output() onClick = new EventEmitter();
+  @Output() onToggleTree = new EventEmitter();
+  @Output() onDrop = new EventEmitter();
+  @Output() hasChilds = new EventEmitter();
+  @Output() onUpdateOptions = new EventEmitter();
+  @Input() set node(node : string){
+    this._node=node;
+    if(node==null)
+      return;
+    this.nodeApi.getChildren(node,[RestConstants.FILTER_FOLDERS],{count:RestConstants.COUNT_UNLIMITED}).subscribe((data : NodeList) => {
+      this._nodes=data.nodes;
+      this.hasChilds.emit(this._nodes && this._nodes.length);
+      this.loading=false;
+    });
+  }
+  @Input() set nodes(nodes : Node[]){
+    this._nodes=nodes;
+    this.hasChilds.emit(this._nodes && this._nodes.length);
+    this.loading=false;
+  }
+  constructor(private ui : UIService,private nodeApi : RestNodeService,private storage : TemporaryStorageService) {
+  }
+  private contextMenu(event:any,node : Node){
+    event.preventDefault();
+    event.stopPropagation();
+
+    if(!this._options.length)
+      return;
+    this.showDropdown(node);
+    this.dropdownPosition="fixed";
+    //this.dropdownLeft=Math.min(100,event.clientX)+"px";
+    if(event.clientY>window.innerHeight/2){
+      this.dropdownBottom=window.innerHeight-event.clientY+"px";
+      this.dropdownTop="auto";
+    }
+    else{
+      this.dropdownTop=event.clientY+"px";
+    }
+  }
+  private callOption(option : OptionItem,node:Node){
+    if(!option.isEnabled)
+      return;
+    option.callback(node);
+    this.dropdown=null;
+  }
+  public optionIsShown(optionItem: OptionItem, node: Node) {
+    if(optionItem.showCallback) {
+      return optionItem.showCallback(node);
+    }
+    return true;
+  }
+  private updateOptions(event: Node){
+    this.onUpdateOptions.emit(event);
+  }
+  private showDropdown(node : Node){
+    //if(this._options==null || this._options.length<1)
+    //  return;
+    this.dropdownPosition="";
+    this.dropdownLeft=null;
+    this.dropdownTop=null;
+    this.dropdownBottom=null;
+    if(this.dropdown==node)
+      this.dropdown=null;
+    else {
+      this.dropdown = node;
+      this.onUpdateOptions.emit(node);
+    }
+  }
+  private allowDrop(event : any,target:Node){
+    if(!this.storage.get("list_drag")) {
+      return;
+    }
+    if(event.altKey)
+      event.dataTransfer.dropEffect='link';
+    if(event.ctrlKey)
+      event.dataTransfer.dropEffect='copy';
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragHover=target;
+  }
+  private dropToParent(event : any){
+    this.onDrop.emit(event);
+  }
+  private dropEvent(event : any,target : Node){
+    this.dragHover=null;
+    this.storage.remove("list_drag");
+    if(!event.dataTransfer.getData("node"))
+      return;
+    let data=(JSON.parse(event.dataTransfer.getData("node")) as Node[]);
+    event.preventDefault();
+    event.stopPropagation();
+    if(!data) {
+      return;
+    }
+    this.onDrop.emit({target:target,source:data,event:event});
+  }
+  private isSelected(node : Node){
+    return this.isOpen(node) && this.selectedPath[this.selectedPath.length-1]==node.ref.id;
+  }
+  private getFullPath(node : Node) : string[]{
+    let path=this.parentPath.slice();
+    path.push(node.ref.id);
+    return path;
+
+  }
+  private openPathEvent(event : string[]) : void{
+    this.onClick.emit(event);
+  }
+  private toggleTreeEvent(event : string[]) : void{
+    this.onToggleTree.emit(event);
+  }
+  private getPathOpen(node:Node){
+    for(let i=0;i<this.openPath.length;i++){
+      if(this.openPath[i].indexOf(node.ref.id)!=-1)
+        return i;
+    }
+    return -1;
+  }
+  private isOpen(node : Node) : boolean{
+    return this.getPathOpen(node)!=-1;
+  }
+  private openOrCloseNode(node : Node) : void {
+    /*
+    let pos = this.openPath.indexOf(node.ref.id);
+
+    let path =  this.parentPath.slice();
+    if (pos == -1 || pos!=this.openPath.length-1) {
+      path.push(node.ref.id);
+    }
+    this.onClick.emit(path);
+    */
+    this.onClick.emit(node);
+
+  }
+  private openOrCloseTree(node : Node) : void {
+    /*
+     let pos = this.openPath.indexOf(node.ref.id);
+
+     let path =  this.parentPath.slice();
+     if (pos == -1 || pos!=this.openPath.length-1) {
+     path.push(node.ref.id);
+     }
+     this.onClick.emit(path);
+     */
+    this.onToggleTree.emit({node:node,parent:this.parentPath});
+
+  }
+}

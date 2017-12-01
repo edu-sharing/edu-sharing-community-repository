@@ -1,0 +1,24 @@
+@import "../../../styles/variables.scss";
+
+.card-title-actionbar{
+  .material-icons{
+    position: absolute;
+    top: 18px;
+    left: 10px;
+    color:$textLight;
+  }
+  input{
+    padding-left:40px;
+  }
+  div{
+    display:table-cell;
+  }
+  .search{
+    width:100%;
+    position: relative;
+    top:-19px;
+  }
+  .actionbar{
+    min-width: 220px;
+  }
+}

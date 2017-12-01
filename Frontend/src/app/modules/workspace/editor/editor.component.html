@@ -1,0 +1,60 @@
+<input #file type="file" style="display:none" id="fileSelect" (change)="fileSelected($event)" />
+<div class="dialog darken">
+  <div class="card center-card card-action" *ngIf="_node" [class.card-high]="!_node.isDirectory">
+    <div class="card-content">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <span class="card-title">{{'WORKSPACE.EDITOR.TITLE' | translate }}</span>
+      <div class="frame card-scroll">
+        <div *ngIf="!_node.properties['ccm:wwwurl']">
+          <div class="preview" *ngIf="!_node.isDirectory"><!-- <div>{{'WORKSPACE.EDITOR.PREVIEW' | translate}}</div> -->
+          <img [src]="_node.preview.url.includes('?') ? _node.preview.url+'&crop=true&width=400&height=300' : _node.preview.url" class="preview"/>
+          </div>
+        </div>
+        <div>
+        <label for="title">{{'NODE.cm:name' | translate}}</label>
+        <input #title type="text" id="title" [class.invalid]="!title.value" (keyup)="updateState()" (keydown)="updateState()" [(ngModel)]="_node.properties['cm:name'][0]" />
+        </div>
+        <div *ngIf="!_node.isDirectory">
+          <label for="keyword">{{'WORKSPACE.EDITOR.KEYWORDS' | translate}}</label>
+
+          <input type="text" #keywordField id="keyword" [(ngModel)]="keyword" (keyup.enter)="addKeyword()" />
+          <div class="input-hint-bottom" *ngIf="keywordField.value">{{'WORKSPACE.EDITOR.KEYWORDS_ENTER' | translate}}</div>
+
+          <div class="keywords">
+          <div *ngFor="let keyword of _node.properties['cclom:general_keyword']" class="badge">
+            <span>{{keyword}}</span>
+            <i class="material-icons clickable" (click)="removeKeyword(keyword)">cancel</i>
+          </div>
+          </div>
+          <label for="description">{{'WORKSPACE.EDITOR.DESCRIPTION' | translate}}</label>
+          <input type="text" id="description" [(ngModel)]="_node.properties['cclom:general_description'][0]" />
+          <div *ngIf="_node.properties['ccm:wwwurl']">
+            <label for="url">{{'WORKSPACE.EDITOR.URL' | translate}}</label>
+            <input type="text" id="url" [(ngModel)]="_node.properties['ccm:wwwurl'][0]" />
+          </div>
+          <!--<div class="author">
+            <input type="text" class="authorFirst" id="authorFirst" [(ngModel)]="_node.createdBy.firstName" placeholder="{{'WORKSPACE.EDITOR.AUTHOR_FIRST' | translate}}" />
+            <input type="text" class="authorLast" id="authorLast" [(ngModel)]="_node.createdBy.lastName" placeholder="{{'WORKSPACE.EDITOR.AUTHOR_LAST' | translate}}" />
+          </div>-->
+          <div *ngIf="allowReplacing">
+            <label for="comment">{{'WORKSPACE.EDITOR.VERSION' | translate}}</label>
+            <div class="version">
+              <div *ngIf="!_node.properties['ccm:wwwurl'] && !selectedFile" class="btn-flat btn-shadow" (click)="fileDialog.nativeElement.click()">{{'WORKSPACE.EDITOR.REPLACE_MATERIAL' | translate}}</div>
+              <div *ngIf="!_node.properties['ccm:wwwurl'] && selectedFile" class="badge"><span>{{selectedFile.name}}</span><i class="material-icons clickable" (click)="selectedFile=null;updateState()">cancel</i></div>
+              <span *ngIf="!selectedFile"><input type="checkbox" [(ngModel)]="asVersion" (change)="updateState($event)" class="filled-in" id="version"> <label for="version">{{'WORKSPACE.EDITOR.AS_VERSION' | translate}}</label></span>
+
+            </div>
+            <div *ngIf="asVersion || selectedFile">
+            <input #comment type="text" class="comment" id="comment" [class.invalid]="!comment.value" (keyup)="updateState()" (keydown)="updateState()" [(ngModel)]="versionComment" placeholder="{{'WORKSPACE.EDITOR.VERSION_COMMENT' | translate}}" required />
+              <div class="input-hint-bottom" *ngIf="!comment.value">{{'FIELD_MUST_BE_FILLED' | translate}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-action">
+      <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="save()">{{'SAVE' | translate }}</a>
+      <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+    </div>
+    </div>
+  </div>

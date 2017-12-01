@@ -1,0 +1,27 @@
+<listTable
+  [nodes]="_nodes"
+  [columns]="columns"
+  [hasIcon]="true"
+  [options]="options"
+  [hasCheckbox]="true"
+  [hasHeading]="true"
+  [isClickable]="true"
+  [isLoading]="showLoading"
+  [viewType]="viewType"
+  [scrollWindow]="true"
+  [hasMore]="hasMoreToLoad"
+  [reorderColumns]="true"
+  [sortBy]="sortBy"
+  [dragDrop]="true"
+  [selectedNodes]="selection"
+  [sortAscending]="sortAscending"
+  (onDrop)="drop($event)"
+  (onSelectionChanged)="onSelection($event)"
+  (onUpdateOptions)="updateOptions($event)"
+  (sortListener)="setSorting($event)"
+  (clickRow)="selectItem($event)"
+  (doubleClickRow)="doubleClick($event)"
+  (columnsChanged)="columnsChanged($event)"
+  (loadMore)="load(false)"></listTable>
+<h5 class="noElements" *ngIf="!showLoading && !_nodes.length && !(_searchQuery==null || searchQuery=='')">{{'WORKSPACE.NO_NODES_IN_FOLDER' | translate }}</h5>
+<h5 class="noElements" *ngIf="!showLoading && !_nodes.length && (_searchQuery==null || searchQuery=='')">{{'WORKSPACE.NO_MATCHING_ITEMS' | translate }}</h5>

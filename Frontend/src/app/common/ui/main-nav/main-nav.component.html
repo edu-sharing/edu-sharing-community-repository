@@ -1,0 +1,80 @@
+<user-profile
+  *ngIf="showProfile"
+  (onCancel)="showProfile=false"
+></user-profile>
+
+<div class="dialog darken" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
+
+<div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
+  <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
+  <div class="sidenavImage">
+    <img src="assets/images/layout/sidenav.jpg">
+    <div><i class="material-icons">account_circle</i>
+      <div *ngIf="user && !isGuest">{{userName}}</div>
+      <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
+    </div>
+  </div>
+  <div *ngFor="let button of sidebarButtons" class="button clickable" [class.selected]="_currentScope==button.scope"
+       (click)="openButton(button)"
+       (keyup.enter)="openButton(button)"
+       [class.collection-item-seperate]="button.isSeperate"
+       tabindex="0"
+       title="{{'GOTO' | translate}} {{button.name | translate}}">
+    <i *ngIf="button.icon" class="material-icons align-icon">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}"> <span>{{button.name | translate}}</span>
+  </div>
+</div>
+<div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [class.noUser]="!_showUser">
+  <div class="menuButtonOuter">
+    <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
+      <img class="material-icons eduImage" src="assets/images/edu-white-alpha.svg" alt="{{'EDU_LOGO_ALT' | translate}}"/>
+      <i class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
+      <span>{{title | translate}}</span>
+      <i class="material-icons barIcon">keyboard_arrow_right</i>
+    </div>
+  </div>
+  <div class="topBarSearch" [class.noScope]="!showScope">
+  <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled">
+    <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
+           title="{{searchPlaceholder | translate}}" placeholder="{{searchPlaceholder | translate}}" />
+    <i class="material-icons searchIcon">search</i>
+  </form>
+  </div>
+  <div class="imprint" *ngIf="config.imprintUrl"><a class="clickable" (click)="openImprint()">{{ 'IMPRINT' | translate }}</a></div>
+  <div class="user clickable" *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
+      <div *ngIf="!isGuest">{{userName}}</div>
+      <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
+      <i class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
+      <i class="material-icons barIcon iconPerson">account_circle</i>
+    </div>
+    <div class="dialog" *ngIf="userOpen" (click)="userOpen=false" (keyup.enter)="userOpen=false" tabindex="0"></div>
+    <div class="userMenu collection" [@overlay]="userOpen" *ngIf="userOpen">
+      <a *ngIf="editUrl && !isGuest" class="collection-item"
+         (click)="editProfile()"
+         (keyup.enter)="editProfile()"
+         tabindex="0"
+         title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
+      <a *ngIf="showEditProfile && !isGuest" class="collection-item"
+         (click)="openProfileDialog()"
+         (keyup.enter)="openProfileDialog()"
+         tabindex="0"
+         title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
+
+      <a *ngIf="!isGuest" class="collection-item" (click)="showAddDesktop=false;logout()" (keyup.enter)="showAddDesktop=false;logout()" tabindex="0" title="{{ 'LOGOUT' | translate}}"><i class="material-icons">undo</i> {{ 'LOGOUT' | translate}}</a>
+      <a *ngIf="isGuest && !config.loginOptions" class="collection-item" (click)="showAddDesktop=false;login(true)" (keyup.enter)="showAddDesktop=false;login(true)" tabindex="0" title="{{ 'SIDEBAR.LOGIN' | translate}}"><i class="material-icons">person</i> {{ 'SIDEBAR.LOGIN' | translate}}</a>
+      <a *ngFor="let loginOption of isGuest?config.loginOptions:null" class="collection-item" tabindex="0" title="{{loginOption.name}}" href="{{loginOption.url}}">{{loginOption.name}}</a>
+    </div>
+  <div class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
+    <i class="material-icons">help_outline</i>
+  </div>
+  <div class="dialog" *ngIf="helpOpen" (click)="helpOpen=false" (keyup.enter)="helpOpen=false" tabindex="0"></div>
+  <div class="helpMenu collection" [@overlay]="helpOpen" *ngIf="helpOpen">
+    <a class="collection-item" *ngIf="helpUrl"
+       (click)="showHelp(helpUrl)"
+       title="{{ 'ONLINE_HELP' | translate}}"><i class="material-icons">help_outline</i> {{ 'ONLINE_HELP' | translate}}</a>
+    <a class="collection-item"
+       (click)="showHelp(whatsNewUrl)" *ngIf="whatsNewUrl"
+       title="{{ 'WHATS_NEW' | translate}}"><i class="material-icons">lightbulb_outline</i> {{ 'WHATS_NEW' | translate}}</a>
+  </div>
+</div>
+<div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
+

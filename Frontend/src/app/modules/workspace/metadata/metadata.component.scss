@@ -1,0 +1,105 @@
+@import "../../../../styles/variables.scss";
+
+
+$top:16px;
+$side:20px;
+.valign-wrapper{
+  height:100%;
+}
+.loading{
+  margin:auto;
+}
+.close{
+  padding-right:$side;
+  padding-top:$top;
+  float:right;
+}
+.mimetype{
+  word-break: break-all;
+}
+.name{
+  padding-top:$top;
+  padding-left:$side;
+  font-size:110%;
+  background-color: $workspaceMetadataBackground;
+  word-break: break-all;
+  padding-bottom: 15px;
+}
+
+.row{
+  padding-top:0;
+  background-color: $workspaceMetadataBackground;
+  margin-bottom: 0;
+}
+.row .col{
+  padding:0;
+}
+
+.btn-flat{
+  color:$primary;
+}
+.btn-flat{
+  position: relative;
+  top:-5px;
+}
+.versionTitle{
+  font-weight:bold;
+}
+.versionComment{
+  font-style: italic;
+  padding-bottom:10px;
+}
+.versionAuthor{
+  line-height:1.25;
+}
+.versionDate{
+  color:$textLight;
+}
+.versionMain{
+  padding-bottom:20px;
+}
+.version{
+  padding-top:20px;
+}
+
+.description{
+  color:$textLight;
+  font-size:90%;
+  float:left;
+}
+.edit{
+  color:$textLight;
+  float:right;
+  position: relative;
+  top: -10px;
+}
+.btnVersion{
+  margin-right: 5px;
+}
+.content{
+  margin-top:20px;
+  padding:0 12px;
+}
+.value{
+  padding-top:0;
+  float:left;
+  padding-bottom:20px;
+}
+.valueFreetext{
+  white-space: pre-line;
+}
+.description,.value{
+  width:calc(100% - 30px);
+}
+.preview{
+  width:calc(100% + 24px);
+  margin-left:-13px;
+  height:auto;
+  position: relative;
+  top:-20px;
+}
+.license{
+  padding-top: 4px;
+  height: 21px;
+}
+

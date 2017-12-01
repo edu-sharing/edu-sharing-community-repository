@@ -1,0 +1,25 @@
+<h1>Node Test</h1>
+<file (OnFileSelected)="testUpload($event)"></file>
+searchNodes:
+<div [innerHTML]="searchNodes | debugResult"></div>
+getHomeDirectory:
+<div [innerHTML]="getHomeDirectory | debugResult"></div>
+createNode:
+<div [innerHTML]="createNode | debugResult"></div>
+copyNode:
+<div [innerHTML]="copyNode | debugResult"></div>
+getChildren:
+<div [innerHTML]="getChildren | debugResult"></div>
+getNodeMetadata:
+<div [innerHTML]="getNodeMetadata | debugResult"></div>
+getNodePermissions:
+<div [innerHTML]="getNodePermissions | debugResult"></div>
+getNodeVersions:
+<div [innerHTML]="getNodeVersions | debugResult"></div>
+getNodeMetadataForVersion:
+<div [innerHTML]="getNodeMetadataForVersion | debugResult"></div>
+
+<div *ngFor="let node of nodes">
+  {{node.name}}
+</div>
+Last Error: {{ error }}

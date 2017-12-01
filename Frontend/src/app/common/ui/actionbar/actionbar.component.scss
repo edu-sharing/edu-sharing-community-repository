@@ -1,0 +1,100 @@
+@import "../../../../styles/variables.scss";
+
+.actionbar{
+
+}
+.actionAlways,.more{
+  float:right;
+  padding:0 15px;
+  @include clickable();
+}
+.light{
+  color:#fff;
+  background: transparent;
+}
+.btn-flat:not(:hover){
+  background: transparent;
+}
+.moreOpen{
+  position:absolute;
+  right:20px;
+  width:$contextMenuWidth;
+  padding:0!important;
+}
+.moreOpen a{
+  text-align: left;
+}
+.more{
+  padding:0 10px;
+}
+.more a{
+  color:$primary;
+}
+.light a{
+  color:#fff;
+}
+.more i{
+  font-size:1.5rem;
+}
+.drawButtonMore{
+  position:relative;
+  top:-4px;
+  left:10px;
+}
+.drawButtonMore a{
+  color:#fff;
+}
+.actionAlways{
+  text-transform: uppercase;
+}
+.actionAlwaysCaption{
+  position: relative;
+  padding-left: 2px;
+}
+.btn .actionAlwaysCaption{
+  top:-7px;
+}
+.btn-flat .actionAlwaysCaption{
+  top:-4px;
+}
+.btn,.btn-flat{
+  margin:0 5px;
+  position: relative;
+  top:-5px;
+}
+.btn .actionAlwaysCaption{
+  top:-3px;
+}
+.actionToggle{
+  margin-top: 1px;
+  height:26px;
+  padding-left:10px;
+  margin-left:10px;
+  float:right;
+}
+.actionToggleDivider{
+  border-left:1px solid #ddd;
+}
+
+.actionToggle a{
+  padding:0 5px;
+  color: $textLight;
+  display: inline-block;
+  @include clickable();
+}
+.actionToggle a:focus{
+  @include removeDefaultFocus();
+  color: $primary;
+}
+@media screen and (max-width: ($mobileWidth)) {
+  .dialog{
+    @include darken();
+    background: linear-gradient(to bottom, $darkenColor 0%,$darkenColor 75%,#ffffff 75%,#ffffff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+
+  }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)){
+  .actionAlwaysCaption{
+    display: none;
+  }
+}

@@ -1,0 +1,23 @@
+@import "../../../styles/variables.scss";
+
+h1,h2,a{
+  text-align: center;
+}
+h1{
+  margin-top: 20%;
+  font-weight: normal;
+  font-size:28px;
+}
+h2{
+  font-size:16px;
+  font-weight: normal;
+  line-height: 150%;
+}
+.link{
+  margin-top: 40px;
+}
+a{
+  color:$primary;
+  text-transform: uppercase;
+  font-weight: bold;
+}

@@ -1,0 +1,33 @@
+<templates>
+	<template name="header">
+		<message><![CDATA[
+			<div class="logo">
+			<img src="{{logo}}">
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="invited">
+		<subject>{{inviterFirstName}} hat dich eingeladen</subject>
+		<message><![CDATA[
+			<h1>Hallo {{firstName}}</h1>
+			<h2>{{inviterFirstName}} hat "{{name}}" für dich freigegeben</h2>
+			Dir wurden folgende Rechte zugeteilt:<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Zum Material</a></div>
+			<br><br>
+			{{if message}}Nachricht vom Nutzer:<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
+	<template name="footer">
+		<message><![CDATA[
+			<a href="http://edu-sharing.net" style="float:left;">www.edu-sharing.net</a>
+			<a href="https://twitter.com/edusharing" style="float:right;">@edusharing</a>
+		]]>
+		</message>
+	</template>
+</templates>

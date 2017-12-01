@@ -1,0 +1,256 @@
+package org.edu_sharing.restservices;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.restservices.shared.Authority;
+import org.edu_sharing.restservices.shared.Group;
+import org.edu_sharing.restservices.shared.GroupProfile;
+import org.edu_sharing.service.authority.AuthorityService;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.organization.OrganizationService;
+import org.edu_sharing.service.organization.OrganizationServiceFactory;
+
+public class GroupDao {
+
+	public static GroupDao getGroup(RepositoryDao repoDao, String groupName) throws DAOException {
+		
+		try {
+			
+			return new GroupDao(repoDao, groupName);
+			
+		} catch (Exception e) {
+
+			throw DAOException.mapping(e);
+		}
+	}
+
+	public static String createGroup(RepositoryDao repoDao, String groupName, GroupProfile profile,String parentGroup) throws DAOException {
+		try {
+			AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
+			return authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
+		} catch (Exception e) {
+			throw DAOException.mapping(e);
+		}
+	}
+	
+	public static List<GroupDao> search(RepositoryDao repoDao, String pattern) throws DAOException {
+
+		try {
+			
+			List<GroupDao> resultset = new ArrayList<GroupDao>();
+			for (String groupName : ((MCAlfrescoAPIClient)repoDao.getBaseClient()).searchGroupNames(pattern)) {
+				
+				resultset.add(new GroupDao(repoDao, groupName));
+			}
+					
+			return resultset;
+			
+		} catch (Exception e) {
+
+			throw DAOException.mapping(e);
+		}
+	}
+
+	private final MCAlfrescoBaseClient baseClient;
+
+	private final RepositoryDao repoDao;
+	
+	private final String authorityName;
+	private final String groupName;
+	private final String displayName;
+
+	private AuthorityService authorityService;
+
+	private String groupType;
+	
+	public GroupDao(RepositoryDao repoDao, String groupName) throws DAOException  {
+
+		try {
+			
+			this.baseClient = repoDao.getBaseClient();
+			this.authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
+			this.repoDao = repoDao;					
+
+			this.authorityName = 
+					  groupName.startsWith(PermissionService.GROUP_PREFIX) 
+					? groupName
+					: PermissionService.GROUP_PREFIX + groupName;
+			
+			this.groupName = 
+					  groupName.startsWith(PermissionService.GROUP_PREFIX) 
+					? groupName.substring(PermissionService.GROUP_PREFIX.length())
+					: groupName;
+								
+			this.displayName = ((MCAlfrescoAPIClient)baseClient).getGroupDisplayName(this.groupName);
+			if (displayName == null) {
+				
+				throw new DAOMissingException(
+						new IllegalArgumentException(groupName));
+				
+			}		
+			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+
+			
+		} catch (Throwable t) {
+			
+			throw DAOException.mapping(t);
+		}
+	}
+	
+	public void changeProfile(GroupProfile profile) throws DAOException {
+		
+		try {
+			checkModifyAccess();
+			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+
+				@Override
+				public Void doWork() throws Exception {
+					((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
+					return null;
+				}
+			});
+			
+		} catch (Throwable t) {
+			
+			throw DAOException.mapping(t);
+		}
+
+	}
+	
+	public void delete() throws DAOException {
+		
+		try {
+			checkModifyAccess();
+			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+				@Override
+				public Void doWork() throws Exception {
+					authorityService.deleteAuthority(PermissionService.GROUP_PREFIX+groupName);
+					return null;
+				}
+			});
+			
+		} catch (Exception e) {
+
+			throw DAOException.mapping(e);
+		}
+	}
+
+	public void addMember(String member) throws DAOException {
+		
+		try {
+			checkAdminAccess();
+			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+
+				@Override
+				public Void doWork() throws Exception {
+					((MCAlfrescoAPIClient)baseClient).addMemberships(groupName, new String[]{member});
+					return null;
+				}
+			});
+			
+		} catch (Exception e) {
+
+			throw DAOException.mapping(e);
+		}
+	}
+
+	public void checkAdminAccess() {
+		if(!authorityService.hasAdminAccessToGroup(groupName)){
+			throw new AccessDeniedException("User does not have permissions to manage this group");
+		}
+	}
+	public void checkModifyAccess() {
+		if(!authorityService.hasModifyAccessToGroup(groupName)){
+			throw new AccessDeniedException("User does not have permissions to modify this group");
+		}
+	}
+	public void deleteMember(String member) throws DAOException {
+		
+		try {
+			checkAdminAccess();
+			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+
+				@Override
+				public Void doWork() throws Exception {
+					((MCAlfrescoAPIClient)baseClient).removeMemberships(groupName, new String[]{member});
+					return null;
+				}
+			});
+			
+		} catch (Exception e) {
+
+			throw DAOException.mapping(e);
+		}
+	}
+
+	public List<Authority> getMember() throws DAOException {
+
+		List<Authority> result = new ArrayList<Authority>();
+
+		try {
+
+			checkAdminAccess();
+						
+			for (String member : ((MCAlfrescoAPIClient)this.baseClient).getMemberships(groupName)) {
+				
+				result.add(   member.startsWith(PermissionService.GROUP_PREFIX) 
+							? GroupDao.getGroup(repoDao, member).asGroup()
+							: PersonDao.getPerson(repoDao, member).asPerson());
+							
+			}
+			
+		} catch (Exception e) {
+
+			throw DAOException.mapping(e);
+		}
+		
+		return result;
+		
+	}
+
+	
+	public Group asGroup() {
+		
+    	Group data = new Group();
+    	
+    	data.setAuthorityName(getAuthorityName());
+    	data.setAuthorityType(Authority.Type.GROUP);
+    	
+    	data.setGroupName(getGroupName());
+    	data.setGroupType(getGroupType());
+    	
+    	GroupProfile profile = new GroupProfile();
+    	profile.setDisplayName(getDisplayName());
+    	data.setProfile(profile);
+    	
+    	return data;
+	}
+	
+	private String getGroupType() {
+		return this.groupType;
+	}
+
+	public String getAuthorityName() {
+	
+		return this.authorityName;
+	}
+	
+	public String getGroupName() {
+		
+		return this.groupName;
+	}
+	
+	public String getDisplayName() {
+		
+		return this.displayName;
+	}
+	
+}

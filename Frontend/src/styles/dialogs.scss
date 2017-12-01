@@ -1,0 +1,142 @@
+@import "./variables";
+
+
+
+.dialog{
+   width:100%;
+   height:100%;
+   left:0;
+   top:0;
+   position:fixed;
+   z-index:120;
+ }
+.darken{
+  @include darken();
+}
+
+.center-card{
+  position:fixed!important;
+  top:15%;
+  width:500px;
+  left:50%;
+  margin: auto!important;
+  margin-left:-250px!important;
+  padding-bottom: 20px;
+}
+.card{
+  background-color: #fff!important;
+}
+.card-content{
+  height: calc(100% - 50px);
+}
+.card .card-action a{
+  max-width: 400px;
+  word-break: break-all;
+}
+.card-action .card-content{
+  padding-top:32px;
+  background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 60px,transparent 60px,transparent 100%);
+}
+.card-actionbar .card-content {
+  padding-top:32px;
+  background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 120px,transparent 120px,transparent 100%);
+}
+.card-action,.card-actionbar{
+  .card-title-actionbar{
+    position: relative;
+    top: -10px;
+    height:60px;
+  }
+  .card-title,
+  .card-cancel {
+    font-size: 12pt;
+    position: relative;
+    top: -25px;
+  }
+}
+
+.card-title{
+  word-break: break-all;
+  max-height: 48px;
+  overflow: hidden;
+}
+.center-card .card-scroll{
+  overflow-y: auto;
+  overflow-x: hidden;
+  @include iosScrolling();
+  padding-right: 20px;
+  margin-right: -20px;
+  padding-left: 20px;
+  margin-left: -20px;
+  height: calc(100% - 8px);
+
+  top: -20px;
+  position: relative;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.card-actionbar .card-scroll{
+  height: calc(100% - 68px);
+}
+input[type=search]{
+  background: #fff;
+  border:1px solid $searchInputBorderColor;
+  padding:0 10px;
+}
+.card-high .card-content{
+  height:calc(100% - 55px);
+}
+.card-high{
+  top:10%;
+  bottom:10%;
+}
+.card-wide{
+  width:650px;
+  margin-left:-325px!important;
+}
+.card-xwide{
+  width:700px;
+  margin-left:-350px!important;
+}
+.scrollable{
+  overflow-x: hidden;
+  overflow-y: auto;
+  height:250px;
+  margin:0 -20px;
+  padding: 0 20px;
+}
+.center-card .checkbox{
+  padding-top:10px;
+}
+.center-card .btn,
+.center-card .btn-flat{
+  float:right;
+  margin: 0 5px;
+}
+.card-cancel{
+  float:right;
+  padding-top: 10px;
+  @include clickable();
+}
+@media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
+  .center-card{
+    position:fixed;
+    width:100%;
+    padding-bottom: 25px;
+    left:0%;
+    margin-left:0!important;
+  }
+  .card-low{
+    width:90%;
+    left:5%;
+  }
+}
+@media screen and (max-height: ($mobileHeight)) {
+ .card:not(.card-low), .card-high {
+    top: 0;
+    bottom: 0;
+   .scrollable{
+     height:100%;
+   }
+  }
+}

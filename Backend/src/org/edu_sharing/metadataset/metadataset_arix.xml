@@ -1,0 +1,919 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<metadataset id="default" label="default" hidden="false">
+	<name>Core Metadataset</name>
+	<i18n>org.edu_sharing.metadataset.CCSearchI18n</i18n>
+	<model>
+		<type name="{http://www.campuscontent.de/model/1.0}remoteobject">
+			<properties>
+				<property name="{http://www.campuscontent.de/model/1.0}remoterepositoryid">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}remotenodeid">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}remoterepositorytype">
+					<datatype>string</datatype>
+					<processtype>defaultvalue</processtype>
+					<defaultvalue>ALFRESCO</defaultvalue>
+				</property>
+			</properties>
+		</type>
+		<type name="{http://www.alfresco.org/model/content/1.0}folder">
+			<properties>
+				<property name="{http://www.alfresco.org/model/content/1.0}title">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+			</properties>
+		</type>
+		<type name="{http://www.campuscontent.de/model/1.0}map">
+			<properties>
+				<property name="{http://www.alfresco.org/model/content/1.0}title">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}mapicon">
+					<datatype>binary</datatype>
+					<processtype>upload</processtype>
+					<key_contenturl>{http://www.campuscontent.de/model/1.0}mapicon</key_contenturl>
+					<concatewithtype>true</concatewithtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}x">
+					<datatype>int</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}y">
+					<datatype>int</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.alfresco.org/model/content/1.0}edu_metadataset">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.alfresco.org/model/content/1.0}edu_forcemetadataset">
+					<datatype>boolean</datatype>
+					<processtype>standard</processtype>
+				</property>
+			</properties>
+		</type>
+		<type name="{http://www.campuscontent.de/model/1.0}io">
+			<properties>
+				<property name="{http://www.alfresco.org/model/content/1.0}name">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/lom/1.0}title">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<!-- multilang>true</multilang -->
+				</property>
+				<property name="{http://www.alfresco.org/model/content/1.0}title">
+					<datatype>string</datatype>
+					<processtype>copyfromrequest</processtype>
+					<copyfrom>{http://www.campuscontent.de/model/lom/1.0}title</copyfrom>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}wwwurl">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/lom/1.0}general_description">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<!-- multiple>true</multiple> <multilang>true</multilang -->
+				</property>
+				<property name="{http://www.campuscontent.de/model/lom/1.0}general_keyword">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/lom/1.0}format">
+					<datatype>string</datatype>
+					<processtype>copyfromyourself</processtype>
+					<copyfrom>AlfrescoMimeType</copyfrom>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}objecttype">
+					<datatype>int</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}groupsize">
+					<datatype>int</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/lom/1.0}general_language">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<defaultvalue>de_DE</defaultvalue>
+					<multiple>false</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}pointsfrom">
+					<datatype>int</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}pointsto">
+					<datatype>int</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}pointsdefault">
+					<datatype>int</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}learninggoal">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}guidancestudents">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}guidanceteachers">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				
+				<property name="{http://www.campuscontent.de/model/1.0}educationalcontext">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}educationallearningresourcetype">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>false</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}educationaltypicallearningtime">
+					<datatype>int</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}educationalinteractivitytype">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}educationaltypicalagerange">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}educationalintendedenduserrole">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}taxonentry">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}taxonid">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}taxonpath_xml">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				
+				<property name="{http://www.campuscontent.de/model/1.0}classification_purpose">
+					<datatype>string</datatype>
+					<processtype>defaultvalue</processtype>
+					<defaultvalue>discipline</defaultvalue>
+				</property>			
+				
+				<property name="{http://www.campuscontent.de/model/1.0}classification_keyword">
+					<datatype>string</datatype>
+					<processtype>copyfromrequest</processtype>
+					<copyfrom>{http://www.campuscontent.de/model/lom/1.0}classification_keyword</copyfrom>
+				</property>
+				<property name="{http://www.alfresco.org/model/content/1.0}edu_metadataset">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				
+				<!-- test contributer-->
+				<property name="{virtualproperty}lifecyclecontributers">
+					<datatype>string</datatype>
+					<processtype>helper</processtype>
+				</property>
+				<property name="{virtualproperty}metadatacontributers">
+					<datatype>string</datatype>
+					<processtype>helper</processtype>
+				</property>
+				<!-- all lifecycle contributers -->
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_publisher">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_author">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_unknown">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_initiator">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_terminator">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_validator">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_editor">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_graphical_designer">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_technical_implementer">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_content_provider">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_technical_validator">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_educational_validator">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_script_writer">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_instructional_designer">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_subject_matter_expert">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<!-- all metadata contributers -->
+				<property name="{http://www.campuscontent.de/model/1.0}metadatacontributer_creator">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}metadatacontributer_validator">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}metadatacontributer_provider">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}version_comment">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+				</property>
+				<property name="{http://www.campuscontent.de/model/1.0}userdefined_preview">
+					<datatype>binary</datatype>
+					<processtype>helper</processtype>
+				</property>
+				
+				<!-- for processing {http://www.campuscontent.de/model/1.0}schoolcontext -->
+				<property name="{virtualproperty}federal_state">
+					<datatype>string</datatype>
+					<processtype>helper</processtype>
+				</property>
+				<property name="{virtualproperty}type_of_school">
+					<datatype>string</datatype>
+					<processtype>helper</processtype>
+				</property>
+				<property name="{virtualproperty}school_subject">
+					<datatype>string</datatype>
+					<processtype>helper</processtype>
+				</property>
+				<property name="{virtualproperty}age_group">
+					<datatype>string</datatype>
+					<processtype>helper</processtype>
+				</property>
+				<property name="{virtualproperty}topic">
+					<datatype>string</datatype>
+					<processtype>helper</processtype>
+				</property>
+				<property name="{virtualproperty}button">
+					<datatype>string</datatype>
+					<processtype>helper</processtype>
+				</property>
+				
+				<property name="{http://www.campuscontent.de/model/1.0}schoolcontext">
+					<datatype>string</datatype>
+					<processtype>standard</processtype>
+					<multiple>true</multiple>
+				</property>
+				
+				<!--
+				     Content is the last prop now. Because thumbnail creation in policy would block the following props.
+				     (Even ASYNC thumbnail processing)
+				 -->
+				<property name="{http://www.alfresco.org/model/content/1.0}content">
+					<datatype>binary</datatype>
+					<processtype>upload</processtype>
+					<key_contenturl>ContentURL</key_contenturl>
+					<concatewithtype>true</concatewithtype>
+				</property>
+			</properties>
+		</type>
+		
+		<type name="{http://www.alfresco.org/model/content/1.0}thumbnail">
+			<properties>
+				<property name="{http://www.alfresco.org/model/content/1.0}content">
+					<datatype>binary</datatype>
+					<processtype>helper</processtype>
+					<concatewithtype>true</concatewithtype>
+					<key_contenturl>{http://www.alfresco.org/model/rendition/1.0}rendition</key_contenturl>
+				</property>
+			</properties>
+		</type>
+	</model>
+	<forms>
+		<form id="{http://www.campuscontent.de/model/1.0}remoteobject">
+			<panel name="remoteobject">
+				<labelkey>ccm_type_remoteobject</labelkey>
+				<properties>
+					<property name="{http://www.campuscontent.de/model/1.0}remoterepositoryid">
+						<type>{http://www.campuscontent.de/model/1.0}remoteobject</type>
+						<labelkey>ccm_prop_remoteobject_repid</labelkey>
+						<validators>
+							<validator type="MANDATORY" />
+						</validators>
+					</property>
+					<property name="{http://www.campuscontent.de/model/1.0}remotenodeid">
+						<type>{http://www.campuscontent.de/model/1.0}remoteobject</type>
+						<labelkey>ccm_prop_remoteobject_nodeid</labelkey>
+						<validators>
+							<validator type="MANDATORY" />
+						</validators>
+					</property>
+				</properties>
+			</panel>
+		</form>
+		<form id="{http://www.alfresco.org/model/content/1.0}folder">
+			<panel name="folder">
+				<labelkey>ccm_type_map</labelkey>
+				<properties>
+					<property name="{http://www.alfresco.org/model/content/1.0}title">
+						<type>{http://www.alfresco.org/model/content/1.0}folder</type>
+						<labelkey>cm_prop_title</labelkey>
+						<validators>
+							<validator type="MANDATORY" />
+						</validators>
+					</property>
+				</properties>
+			</panel>
+		</form>
+		<form id="{http://www.campuscontent.de/model/1.0}map">
+			<panel name="metadataset">
+				<oncreate>false</oncreate>
+				<onupdate>false</onupdate>
+				<labelkey>cm_aspect_metadataset</labelkey>
+				<properties>
+					<property name="{http://www.alfresco.org/model/content/1.0}edu_metadataset">
+						<type>{http://www.campuscontent.de/model/1.0}map</type>
+						<labelkey>cm_aspect_metadataset</labelkey>
+						<widget>listbox</widget>
+						<!-- valuespace>/org/edu_sharing/metadataset/valuespaces.xml</valuespace> <valuespace_i18n>org.edu_sharing.metadataset.valuespaces_i18n</valuespace_i18n -->
+						<formlength>206px</formlength>
+						<!-- formheight>100</formheight -->
+					</property>
+					<property name="{http://www.alfresco.org/model/content/1.0}edu_forcemetadataset">
+						<type>{http://www.campuscontent.de/model/1.0}map</type>
+						<labelkey>cm_aspect_metadataset_forcemetadataset</labelkey>
+					</property>
+				</properties>
+			</panel>
+			<panel name="map">
+				<labelkey>ccm_type_map</labelkey>
+				<properties>
+					<property name="{http://www.alfresco.org/model/content/1.0}title">
+						<type>{http://www.campuscontent.de/model/1.0}map</type>
+						<labelkey>cm_prop_title</labelkey>
+						<validators>
+							<validator type="MANDATORY" />
+						</validators>
+					</property>
+					<property name="{http://www.campuscontent.de/model/1.0}mapicon">
+						<type>{http://www.campuscontent.de/model/1.0}map</type>
+						<labelkey>ccm_prop_map_icon</labelkey>
+					</property>
+				</properties>
+			</panel>
+		</form>
+		<form id="{http://www.campuscontent.de/model/1.0}io">
+			<panel name="Basic" styleName="basicPanel" multiupload="true">
+				<labelkey>dialog_upload_tab_basic</labelkey>
+				<oncreate>false</oncreate>
+				<properties>
+					<property name="{http://www.campuscontent.de/model/lom/1.0}title">
+						<type>{http://www.campuscontent.de/model/1.0}io</type>
+						<labelkey>lom_prop_general_title</labelkey>
+						<labelhint>lom_prop_general_title_labelhint</labelhint>
+						<!-- <widget>textfield</widget>-->
+						<widget>name</widget>
+						<copyfrom>{http://www.campuscontent.de/model/1.0}filename,{http://www.campuscontent.de/model/1.0}wwwurl</copyfrom>
+						<validators>
+							<validator type="MANDATORYTITLE" />
+						</validators>
+						<formlength>380px</formlength>
+					</property>
+					<property name="{http://www.campuscontent.de/model/lom/1.0}general_description">
+						<type>{http://www.campuscontent.de/model/1.0}io</type>
+						<labelkey>lom_prop_general_description</labelkey>
+						<widget>textarea</widget>
+						<formlength>300px</formlength>
+						<formheight>100px</formheight>
+					</property>
+					<property name="{http://www.campuscontent.de/model/lom/1.0}general_keyword">
+						<type>{http://www.campuscontent.de/model/1.0}io</type>
+						<labelkey>lom_prop_general_keyword</labelkey>
+						<!-- <widget>multivaluetextboxform</widget>-->
+						<widget>multivaluedynamicsuggestbox</widget>
+						<formlength>300px</formlength>
+						<params>
+							<param>
+								<key>search_suggestbox_properties</key>
+								<value>{http://www.campuscontent.de/model/lom/1.0}general_keyword.__u,{http://www.campuscontent.de/model/lom/1.0}general_keyword.sort,{http://www.campuscontent.de/model/lom/1.0}general_keyword.u</value>
+							</param>
+						</params>
+					</property>
+					<property name="{http://www.campuscontent.de/model/1.0}userdefined_preview">
+						<type>{http://www.campuscontent.de/model/1.0}io</type>
+						<widget>preview</widget>
+					</property>
+					<property name="{http://www.alfresco.org/model/content/1.0}content">
+						<type>{http://www.campuscontent.de/model/1.0}io</type>
+						<widget>file_link</widget>
+					</property>
+					<property name="{http://www.campuscontent.de/model/1.0}version_comment">
+						<type>{http://www.campuscontent.de/model/1.0}io</type>
+						<widget>version</widget>
+						<placeholder>ph_versioncomment</placeholder>
+					</property>
+					
+				</properties>
+				<order>0</order>
+			</panel>
+			<!-- Contributer-->
+			<panel name="Contributer" styleName="contributerPanel">
+				<labelkey>dialog_upload_tab_contributers</labelkey>
+				<oncreate>false</oncreate>
+				<properties>
+					<property name="{virtualproperty}lifecyclecontributers">
+						<type>{http://www.campuscontent.de/model/1.0}io</type>
+						<labelkey>contributer_lifecycle</labelkey>
+						<widget>contributer</widget>
+						<valuespace>/org/edu_sharing/metadataset/valuespace-contributer.xml</valuespace>
+						<valuespace_i18n>org.edu_sharing.metadataset.valuespace_i18n-contributer</valuespace_i18n>
+					</property>
+					<property name="{virtualproperty}metadatacontributers">
+						<type>{http://www.campuscontent.de/model/1.0}io</type>
+						<labelkey>contributer_metametadata</labelkey>
+						<widget>contributer</widget>
+						<valuespace>/org/edu_sharing/metadataset/valuespace-contributer.xml</valuespace>
+						<valuespace_i18n>org.edu_sharing.metadataset.valuespace_i18n-contributer</valuespace_i18n>
+					</property>
+				</properties>	
+			</panel>
+		</form>
+	</forms>
+	<lists>
+		<list id="{http://www.campuscontent.de/model/1.0}io">
+			<property name="{http://www.campuscontent.de/model/lom/1.0}title">
+				<labelkey>lom_prop_general_title</labelkey>
+			</property>
+			<!-- <property name="{http://www.campuscontent.de/model/1.0}educationallearningresourcetype">
+				<labelkey>lom_prop_educational_learningresourcetype</labelkey>
+				<valuespace_key>{http://www.campuscontent.de/model/lom/1.0}learningresourcetype</valuespace_key>
+				<valuespace>/org/edu_sharing/metadataset/valuespaces.xml</valuespace>
+				<valuespace_i18n>org.edu_sharing.metadataset.valuespaces_i18n</valuespace_i18n>
+			</property>
+			-->
+			<property name="{http://www.campuscontent.de/model/lom/1.0}format">
+				<labelkey>ccm_prop_io_format</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}wwwurl">
+				<labelkey>ccm_prop_io_wwwurl</labelkey>
+			</property>
+		</list>
+	</lists>
+	<views>
+		<view id="{http://www.campuscontent.de/model/1.0}io">
+			<property name="{http://www.campuscontent.de/model/lom/1.0}title">
+				<labelkey>lom_prop_general_title</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}creator">
+				<labelkey>cm_prop_creator</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}created">
+				<labelkey>cm_prop_created</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}modified">
+				<labelkey>cm_prop_modified</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}commonlicense_key">
+				<labelkey>ccm_prop_io_license</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/lom/1.0}rights_description">
+				<labelkey>search2_prop_rights_description</labelkey>		
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}questionsallowed">
+				<labelkey>Questions allowed</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/lom/1.0}version">
+				<labelkey>version</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/lom/1.0}format">
+				<labelkey>ccm_prop_io_format</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}wwwurl">
+				<labelkey>ccm_prop_io_wwwlink</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}filename">
+				<labelkey>lb_io_contenttype_upload</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}groupsize">
+				<labelkey>ccm_prop_io_groupsize</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}mediatype">
+				<labelkey>ccm_prop_io_mediatype</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}educationalcontext">
+				<labelkey>lom_prop_educational_context</labelkey>
+				<valuespace>/org/edu_sharing/metadataset/valuespaces.xml</valuespace>
+				<valuespace_i18n_prefix>cb_educational_context_</valuespace_i18n_prefix>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}educationalinteractivitytype">
+				<labelkey>lom_prop_educational_interactivitytype</labelkey>
+				<valuespace>/org/edu_sharing/metadataset/valuespaces.xml</valuespace>
+				<valuespace_i18n_prefix>cb_educational_interactivitytype_</valuespace_i18n_prefix>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}educationallearningresourcetype">
+				<labelkey>lom_prop_educational_learningresourcetype</labelkey>
+				<valuespace_key>{http://www.campuscontent.de/model/lom/1.0}learningresourcetype</valuespace_key>
+				<valuespace>/org/edu_sharing/metadataset/valuespaces.xml</valuespace>
+				<valuespace_i18n>org.edu_sharing.metadataset.valuespaces_i18n</valuespace_i18n>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}educationaltypicalagerange">
+				<labelkey>lom_prop_educational_typicalagerange</labelkey>
+				<valuespace>/org/edu_sharing/metadataset/valuespaces.xml</valuespace>
+				<valuespace_i18n_prefix>typicalagerange_</valuespace_i18n_prefix>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}educationaltypicallearningtime">
+				<labelkey>lom_prop_educational_typicallearningtyime</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/lom/1.0}general_description">
+				<labelkey>lom_prop_general_description</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/lom/1.0}general_keyword">
+				<labelkey>search2_prop_general_keyword</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/lom/1.0}general_language">
+				<labelkey>lom_prop_general_language</labelkey>
+				<valuespace>/org/edu_sharing/metadataset/valuespaces.xml</valuespace>
+				<valuespace_i18n>org.edu_sharing.metadataset.valuespaces_i18n</valuespace_i18n>
+			</property>
+			<property name="{http://www.campuscontent.de/model/lom/1.0}resource_description">
+				<labelkey>lom_prop_ressource_description</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}schoolcontext">
+				<labelkey>school_context</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}taxonentry">
+				<labelkey>input_taxonentry</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}taxonid">
+				<labelkey>input_taxonentry</labelkey>
+				<valuespace_i18n_prefix>ddc_</valuespace_i18n_prefix>
+				<valuespace>/org/edu_sharing/metadataset/valuespace_ddc.xml</valuespace>
+				<valuespace_i18n>org.edu_sharing.metadataset.valuespaces_i18n</valuespace_i18n>
+			</property>
+			<property name="REPOSITORY_CAPTION">
+				<labelkey>repository</labelkey>
+			</property>
+			<property name="REPOSITORY_ID">
+				<labelkey>repositoryid</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}replicationsource">
+				<labelkey>replicationsource</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}replicationsourceid">
+				<labelkey>replicationsourceid</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/lom/1.0}location">
+				<labelkey>lom_prop_technical_location</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}name">
+				<labelkey>cm_name</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}edu_metadataset">
+				<labelkey>cm_aspect_metadataset</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}edu_forcemetadataset">
+				<labelkey>cm_aspect_metadataset_forcemetadataset</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}learninggoal">
+				<labelkey>ccm_prop_io_learninggoal</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}guidancestudents">
+				<labelkey>ccm_prop_io_guidancestudents</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}guidanceteachers">
+				<labelkey>ccm_prop_io_guidanceteachers</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}pointsfrom">
+				<labelkey>ccm_prop_io_pointsfrom</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}pointsto">
+				<labelkey>ccm_prop_io_pointsto</labelkey>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}pointsdefault">
+				<labelkey>ccm_prop_io_pointsdefault</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/system/1.0}node-uuid">
+				<labelkey>id</labelkey>
+			</property>
+			
+			<!--all contributers-->
+			<property name="{http://www.campuscontent.de/model/1.0}metadatacontributer_creatorVCARD_SURNAME">
+				<labelkey>search2_prop_metadatacontributer</labelkey>
+				<multiple>true</multiple>
+			</property>		
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_authorFN">
+				<labelkey>cb_contr_author</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_publisherFN">
+				<labelkey>cb_contr_publisher</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_unknownFN">
+				<labelkey>cb_contr_unknown</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_initiatorFN">
+				<labelkey>cb_contr_initiator</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_terminatorFN">
+				<labelkey>cb_contr_terminator</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_validatorFN">
+				<labelkey>cb_contr_validator</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_editorFN">
+				<labelkey>cb_contr_editor</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_graphical_designerFN">
+				<labelkey>cb_contr_graphical_designer</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_technical_implementerFN">
+				<labelkey>cb_contr_technical_implementer</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_content_providerFN">
+				<labelkey>cb_contr_content_provider</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_technical_validatorFN">
+				<labelkey>cb_contr_technical_validator</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_educational_validatorFN">
+				<labelkey>cb_contr_educational_validator</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_script_writerFN">
+				<labelkey>cb_contr_script_writer</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_instructional_designerFN">
+				<labelkey>cb_contr_instructional_designer</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}lifecyclecontributer_subject_matter_expertFN">
+				<labelkey>cb_contr_subject_matter_expert</labelkey>
+				<multiple>true</multiple>
+			</property>
+			
+			<!--metadata contributer-->
+			<property name="{http://www.campuscontent.de/model/1.0}metadatacontributer_creatorFN">
+				<labelkey>cb_contr_creator</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}metadatacontributer_validatorFN">
+				<labelkey>cb_contr_validator</labelkey>
+				<multiple>true</multiple>
+			</property>
+			<property name="{http://www.campuscontent.de/model/1.0}metadatacontributer_providerFN">
+				<labelkey>cb_contr_provider</labelkey>
+				<multiple>true</multiple>
+			</property>
+			
+			
+			
+		</view>
+		<view id="{http://www.alfresco.org/model/content/1.0}folder">
+			<property name="{http://www.alfresco.org/model/content/1.0}title">
+				<labelkey>lom_prop_general_title</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}creator">
+				<labelkey>cm_prop_creator</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}created">
+				<labelkey>cm_prop_created</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}modified">
+				<labelkey>cm_prop_modified</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}name">
+				<labelkey>cm_name</labelkey>
+			</property>
+		</view>
+		<view id="{http://www.campuscontent.de/model/1.0}map">
+			<property name="{http://www.alfresco.org/model/content/1.0}title">
+				<labelkey>lom_prop_general_title</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}creator">
+				<labelkey>cm_prop_creator</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}created">
+				<labelkey>cm_prop_created</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}modified">
+				<labelkey>cm_prop_modified</labelkey>
+			</property>
+			<property name="REPOSITORY_CAPTION">
+				<labelkey>repository</labelkey>
+			</property>
+			<property name="REPOSITORY_ID">
+				<labelkey>repositoryid</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}name">
+				<labelkey>cm_name</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}edu_metadataset">
+				<labelkey>cm_aspect_metadataset</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/content/1.0}edu_forcemetadataset">
+				<labelkey>cm_aspect_metadataset_forcemetadataset</labelkey>
+			</property>
+			<property name="{http://www.alfresco.org/model/system/1.0}node-uuid">
+				<labelkey>id</labelkey>
+			</property>
+		</view>
+	</views>
+	<queries>
+		<basequery>-TYPE:"{http://www.campuscontent.de/model/1.0}toolpermission" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*"</basequery>
+		<allow_search_without_criteria>true</allow_search_without_criteria>
+		
+		<query join="AND" labelkey="topAreaView" criteriaboxid="topAreaView">
+			<property name="searchword">
+				<!--  <widget>multivaluetextbox</widget>-->
+				<widget>textfield</widget>
+				<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				<labelkey>cap_searchword</labelkey>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<stylename>searchword</stylename>
+			<!-- 	<validators>
+					<validator type="MINCHARS"/>
+				</validators>
+			 -->
+				<init_by_get_param>p_searchtext</init_by_get_param>
+			</property>
+		</query>
+		
+		<query join="AND" labelkey="search2_pw_search" criteriaboxid="search2_pw_search">
+			<widget>org.edu_sharing.repository.client.search.MetadataSetQueryGuiMaster</widget>
+		
+			<!--<property name="searchword_suggest">
+				<widget>searchsuggestbox</widget>
+				<statement>(TEXT:"*${value}*" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				<labelkey>cap_searchword</labelkey>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<stylename>searchword</stylename>
+				
+				<init_by_get_param>p_searchtext</init_by_get_param>
+				<params>
+					<param>
+						<key>search_suggestbox_properties</key>
+						
+						<value>{http://www.campuscontent.de/model/lom/1.0}title.__,{http://www.campuscontent.de/model/lom/1.0}general_keyword.__.u,{http://www.campuscontent.de/model/1.0}educationallearningresourcetype.__.u,{http://www.campuscontent.de/model/lom/1.0}general_description.__,{http://www.campuscontent.de/model/1.0}educationalcontext</value>
+					</param>
+				</params>
+			</property>
+			-->
+			<!--uncomment the following property if there are federated repositories in your ccapp-registry.properties.xml, 
+			    the valuespace will be filled by the application
+			-->
+			
+			<property name="EDU_SHARING_REPOSITORIES">
+				<widget>multivaluesuggestbox</widget>
+				<toggle>false</toggle>
+				<labelkey>search2_repositiories</labelkey>
+				<stylename>repositiories</stylename>
+				<defaultvalues>learnline3,edmond,local</defaultvalues>
+				<!-- <defaultvalues>edmond,equ25</defaultvalues>-->
+			</property>
+			<property name="geb">
+				<widget>suggestlistbox</widget>
+				<valuespace>/org/edu_sharing/metadataset/valuespaces-arix.xml</valuespace>
+				<valuespace_i18n>org.edu_sharing.metadataset.CCSearchI18n</valuespace_i18n>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+				<toggle>true</toggle>
+				<labelkey>Fachgebiet</labelkey>
+				<stylename>mimetypes</stylename>
+				<init_by_get_param>p_mimetype</init_by_get_param>
+			</property>
+			<property name="typ">
+				<widget>suggestlistbox</widget>
+				<valuespace>/org/edu_sharing/metadataset/valuespaces-arix.xml</valuespace>
+				<valuespace_i18n>org.edu_sharing.metadataset.CCSearchI18n</valuespace_i18n>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+				<toggle>true</toggle>
+				<labelkey>Typ</labelkey>
+				<stylename>mimetypes</stylename>
+				<init_by_get_param>p_mimetype</init_by_get_param>
+			</property>
+			<property name="adressat">
+				<widget>suggestlistbox</widget>
+				<valuespace>/org/edu_sharing/metadataset/valuespaces-arix.xml</valuespace>
+				<valuespace_i18n>org.edu_sharing.metadataset.CCSearchI18n</valuespace_i18n>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+				<toggle>true</toggle>
+				<labelkey>Adressat</labelkey>
+				<stylename>mimetypes</stylename>
+				<init_by_get_param>p_mimetype</init_by_get_param>
+			</property>
+			
+		</query>
+		
+		 <!-- do not remove, this is referenced by the federated repository gui logic -->
+		<!-- <query labelkey="" criteriaboxid="tagcloud" join="AND">
+			<property name="{http://www.campuscontent.de/model/lom/1.0}general_keyword.__.u">
+				<widget>tagcloud</widget>
+				<statement>@cclom\:general_keyword:"${value}"</statement>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<labelkey>search2_prop_general_keyword</labelkey>
+				<escape>false</escape>
+				<stylename>cc_search2_tagcloud_container</stylename>
+			</property>
+		</query>
+		 -->
+		<!-- don't edit! it's for seraching by path in workspace2-->
+		<query labelkey="" criteriaboxid="pathquery">
+				<property name="path">
+					<widget>textfield</widget>		
+					<statement>PATH:"${value}//."</statement>	
+					<labelkey>hallo</labelkey>
+				</property>
+		</query>
+		
+		<!--  don't edit! it's for searching invited objects in workspace2 -->
+		<query labelkey="" criteriaboxid="invitedquery" join="AND">
+				<property name="invited">
+					<widget>textfield</widget>		
+					<statement>PATH:"/app\:company_home/ccm\:Edu_Sharing_System/ccm\:Edu_Sharing_Sys_Notify//." AND ISNULL:"ccm:maptype"</statement>	
+					<labelkey>hallo</labelkey>
+				</property>
+		</query>
+
+	</queries>
+</metadataset>

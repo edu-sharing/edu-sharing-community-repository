@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<valuespaces>
+	<valuespace property="geb">
+		<key cap="Biologie">080</key>
+		<key cap="Chemie">100</key>
+		<key cap="Deutsch">120</key>
+		<key cap="Englisch">20001</key>
+		<key cap="Französisch">20002</key>
+		<key cap="Geographie">220</key>
+		<key cap="Geschichte">240</key>
+		<key cap="Griechisch">20003</key>
+		<key cap="Informatik">320</key>
+		<key cap="Italienisch">20004</key>
+		<key cap="Kunst">060</key>
+		<key cap="Latein">20005</key>
+		<key cap="Mathematik">380</key>
+		<key cap="Musik">420</key>
+		<key cap="Naturwissenschaften">320 380 460 080 100</key>
+		<key cap="Philosophie">450</key>
+		<key cap="Physik">460</key>
+		<key cap="Religion">520</key>
+		<key cap="Sachunterricht">28010</key>
+		<key cap="Spanisch">20007</key>
+		<key cap="Sport">600</key>
+		<key cap="Technik">50005</key>
+		<key cap="Wirtschaft">700</key>
+		<key cap="Politik/Gemeinschaftskunde">480</key>
+	</valuespace>
+	<valuespace property="typ">
+		<key cap="Audio">29</key>
+		<key cap="Video">49 55</key>
+		<key cap="Bild">19</key>
+		<key cap="Dokument">79</key>
+		<key cap="Internet-seite">58</key>
+		<key cap="Programm">69</key>
+		<key cap="Scorm">55</key>
+	</valuespace>
+	
+	<valuespace property="adressat">
+		<key cap="Vorschulbereich">E</key>
+		<key cap="Primarstufe">A(1- A(2 A(3 A(4 A(1)</key>
+		<key cap="Sekundarstufe 1">A(5 A(6 A(7 A(8 A(9 A(10</key>
+		<key cap="Sekundarstufe 2">A(11 A(12 A(13 -11) -12) -13)</key>
+		<key cap="Hochschulbereich/Formale Erwachsenenbildung">Q</key>
+		<!--  <key cap="Formale Erwachsenenbildung">Q</key>-->
+		<key cap="Weiterbildung">T</key>
+	</valuespace>
+	
+</valuespaces>

@@ -1,0 +1,89 @@
+package org.edu_sharing.service.connector;
+
+public class ConnectorFileType {
+
+	private String ccressourceversion;
+	
+	private String ccressourcetype;
+	
+	private String ccresourcesubtype;
+	
+	private String editorType;
+
+	
+	private String mimetype;
+	
+	private String filetype;
+	
+	private boolean createable;
+	
+	private boolean editable;
+
+	public String getCcressourceversion() {
+		return ccressourceversion;
+	}
+
+	public void setCcressourceversion(String ccressourceversion) {
+		this.ccressourceversion = ccressourceversion;
+	}
+
+	public String getCcressourcetype() {
+		return ccressourcetype;
+	}
+
+	public void setCcressourcetype(String ccressourcetype) {
+		this.ccressourcetype = ccressourcetype;
+	}
+
+	public String getCcresourcesubtype() {
+		return ccresourcesubtype;
+	}
+
+	public void setCcresourcesubtype(String ccresourcesubtype) {
+		this.ccresourcesubtype = ccresourcesubtype;
+	}
+
+	public String getMimetype() {
+		return mimetype;
+	}
+
+	public void setMimetype(String mimetype) {
+		this.mimetype = mimetype;
+	}
+
+	public String getFiletype() {
+		return filetype;
+	}
+
+	public void setFiletype(String filetype) {
+		this.filetype = filetype;
+	}
+
+	public boolean isCreateable() {
+		return createable;
+	}
+	
+	public void setCreateable(boolean createable) {
+		this.createable = createable;
+	}
+
+	public boolean isEditable() {
+		return editable;
+	}
+	
+	public void setEditable(boolean editable) {
+		this.editable = editable;
+	}
+
+	public String getEditorType() {
+		return editorType;
+	}
+
+	public void setEditorType(String editorType) {
+		this.editorType = editorType;
+	}
+	
+	
+	
+	
+}

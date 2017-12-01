@@ -1,0 +1,11 @@
+<div *ngFor="let node of _nodes; let i = index"
+     class="tool"
+     [class.clickable]="clickable"
+     (click)="click(node)"
+>
+  <img [src]="node.preview.url+'&crop=true&width=90&height=90'">
+  <div class="info">
+    <div class="name">{{ node.name }}</div>
+    <div class="category">{{ node.properties['ccm:tool_category']}}</div>
+  </div>
+</div>

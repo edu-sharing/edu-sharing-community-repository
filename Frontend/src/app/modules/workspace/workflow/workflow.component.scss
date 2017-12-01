@@ -1,0 +1,111 @@
+@import "../../../../styles/variables.scss";
+
+h2{
+  text-align: center;
+  padding-top: 5%;
+  font-size: 120%;
+  color:$textLight;
+}
+.statusIcon{
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  position: relative;
+  top: 13px;
+}
+.global{
+  margin-bottom: 20px;
+}
+.receivers{
+  margin-bottom: 20px;
+}
+.historyLabel{
+  font-weight: bold;
+  padding-top:30px;
+}
+.history {
+  .user,.date{
+    padding-top: 20px;
+    padding-bottom: 10px;
+    color: $textLight;
+  }
+  .user{
+    float:left;
+  }
+  .date{
+    float:right;
+  }
+  .box {
+    background-color: $backgroundColor;
+    padding:20px;
+    float:left;
+    width:100%;
+    label{
+      padding-bottom: 5px;
+    }
+    .workflowStatus{
+      float:left;
+    }
+
+    .receivers,.status{
+      width:50%;
+      vertical-align: top!important;
+    }
+    .status,.comment{
+      padding-top: 15px;
+    }
+    .table{
+      display:table;
+      .row{
+        display:table-row;
+        >div{
+          display: table-cell;
+          vertical-align: middle;
+          min-width: 40px;
+        }
+      }
+
+    }
+    label{
+      float: left;
+      width: 100%;
+    }
+  }
+
+
+}
+.inputs{
+  display:table;
+  width:100%;
+  margin-bottom: -25px;
+
+  .btn-flat {
+    float: none;
+    position: relative;
+    left: 10px;
+    width: 190px;
+    .right{
+      position: relative;
+      top:2px;
+      left:2px;
+    }
+  }
+  >div{
+    display: table-cell;
+    width:200px;
+  }
+  .selected{
+    float:right;
+  }
+  .collection-item{
+    height:40px;
+    line-height: 3rem;
+  }
+}
+.chooseStatus{
+  position:absolute;
+  right: 30px;
+  width: 200px;
+  top: 10px;
+}

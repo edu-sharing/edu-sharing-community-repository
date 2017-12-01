@@ -1,0 +1,16 @@
+{
+  "LOGIN": {
+    "POWERED_BY": "Powered by edu-sharing",
+    "TITLE": "Login",
+    "TITLE_SAFE": "Login zum Safe",
+    "USERNAME":"Nutzername",
+    "PASSWORD":"Passwort",
+    "LOGIN":"Anmelden",
+    "RECOVER_PASSWORD":"Login vergessen",
+    "ERROR":"Zugangsdaten fehlerhaft",
+    "REGISTER_TEXT":"Noch keinen Zugang?",
+    "REGISTER_LINK":"Jetzt erstellen",
+    "SAFE_PREVIOUS":"Um sich im geschützten Bereich anzumelden, melden Sie sich bitte zuerst im Workspace an",
+    "NO_ACCESS":"Keine Berechtigungen für diesen Bereich"
+  }
+}

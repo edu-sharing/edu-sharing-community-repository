@@ -1,0 +1,151 @@
+<main-nav *ngIf="mainnav"
+          [title]="'COLLECTIONS.TITLE'"
+          [currentScope]="'collections'"
+          [searchEnabled]="false"
+></main-nav>
+<workspace-share *ngIf="editPermissionsId"
+[nodeId]="editPermissionsId"
+[sendMessages]="false"
+[sendToApi]="false"
+[disableInherition]="true"
+[currentPermissions]="permissions"
+(onClose)="permissionsSave($event)"
+>
+</workspace-share>
+<div class="collections-master-div" [class.collections-master-div-mainnav]="mainnav">
+
+<!-- spinner if loading -->
+<section *ngIf="(isLoading || (!isReady))" class="collections-loading-div" style="padding-top: 24px;text-align: center;">
+  <spinner></spinner>
+</section>
+
+<!-- new collection step 1 -->
+<section *ngIf="((newCollectionStep===1) && (!isLoading))" class="collection-new-container collection1">
+  <div class="collectionShadow">
+        <div style="background-color:#383838;padding:8px;color:#FFFFFF;">
+            {{ 'collectionNew_preview' | translate }}
+        </div>
+
+        <div style="height:240px;background-color:white;">
+
+            <div class='image-upload-field'>
+                <input #file type='file' accept="image/*" name='userFile' (change)="imageDataChanged($event)"
+                class="image-upload-field-input" >
+            </div>
+
+            <div class="image-upload-icon" tabindex="0" (keyup.enter)="file.click()">
+                <i class="material-icons icon-bottom">file_upload</i>
+            </div>
+
+            <div *ngIf="(!imageShow) && (previewUrl==null)" class="card-collection-icon-container">
+                <div style="height: 35px;"></div>
+                <div class="card-image-icon-container" [style.background-color]="newCollectionColor">
+                    <i class="material-icons" style="font-size: 75px; margin-top: 44px;">layers</i>
+                </div>
+            </div>
+
+            <div *ngIf="(!imageShow) && (previewUrl!=null)" class="card-collection-icon-container">
+                <img [src]="previewUrl+'&crop=true&width=320&height=240'" class="card-image-preview" (error)="previewUrl=null"/>
+            </div>
+
+            <div *ngIf="imageShow" class="card-collection-image-container">
+                <div class="card-image-container">
+                    <img src="{{imageData}}" class="card-image-preview" >
+                </div>
+            </div>
+
+        </div>
+
+        <div class="collection-new-preview-infoarea" [style.background-color]="newCollectionColor" >
+
+          <div class="dialog-basic-area" style="padding-top: 0; padding-bottom:0;">
+            <input type="text" id="input1" class="title" [(ngModel)]="newCollectionName"  placeholder="{{'collectionNew_placeholderTitle' | translate }}" autofocus>
+
+            <textarea id="input2" [(ngModel)]="newCollectionDescription" class="materialize-textarea" placeholder="{{'collectionNew_placeholderDescription' | translate }}"></textarea>
+          </div>
+            <div class="collection-new-preview-infoline">
+                <i class="material-icons icon-bottom">person</i> {{user | authorityName}}</div>
+
+        </div>
+
+        <div style="background-color:#FFFFFF;">
+            <div class="dialog-basic-area">
+                <div class="collection-new-preview-infoline" style="opacity:0.85;">
+                    {{ 'collectionNew_setColor' | translate }}
+                </div>
+
+                <div style="text-align: center;margin-top: 8px;">
+                    <div *ngFor="let color of COLORS1"(click)="setColor(color)"
+                         class="color-option"
+                         [ngClass]="{'color-selected': (newCollectionColor==color)}"
+                         [style.background-color]="color">&nbsp;</div>
+                </div>
+                <div style="text-align: center;margin-top: 8px;">
+                  <div *ngFor="let color of COLORS2"(click)="setColor(color)"
+                       class="color-option"
+                       [ngClass]="{'color-selected': (newCollectionColor==color)}"
+                       [style.background-color]="color">&nbsp;</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div style="background-color:#FFFFFF;">
+            <div class="dialog-basic-area button-area" style="padding-right: 12px;">
+
+
+              <a class="waves-effect btn" tabindex="0" (keyup.enter)="newCollectionCreate()" (click)="newCollectionCreate()">
+                    <!-- <span *ngIf="isNewCollection()">{{ 'collectionNew_createCollection' | translate }}</span>
+                <span *ngIf="isEditCollection()">{{ 'collectionNew_storeChanges' | translate }}</span> -->
+                <span>{{ 'NEXT' | translate }}</span>
+              </a>
+              <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="newCollectionCancel()" (click)="newCollectionCancel()">{{ 'CANCEL' | translate }}</a>
+            </div>
+        </div>
+  </div>
+</section>
+  <section *ngIf="((newCollectionStep===2) && (!isLoading))" class="card center-card">
+    <div class="card-content">
+      <div class="card-title">
+        <span>{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}</span>
+      </div>
+      <div style="background-color:#FFFFFF;">
+        <div class="dialog-basic-area" *ngIf="!hasCustomScope" style="padding-top: 10px;padding-bottom: 0;">
+          <label class="groupLabel">{{ 'collectionNew_setAccess' | translate }}</label>
+          <p style="margin-top:0px;">
+            <input name="group1" type="radio" id="test1" [(ngModel)]="newCollectionScope" [value]="'MY'" />
+            <label for="test1">{{ 'collectionNew_setAccessOnlyMe' | translate }}</label><br>
+            <span *ngIf="hasUserAnyOrgasYet">
+                            <input name="group1" type="radio" id="test2" [(ngModel)]="newCollectionScope" [value]="'EDU_GROUPS'" />
+                            <label for="test2">{{ 'collectionNew_setAccessMyOrga' | translate }}</label>
+                        </span>
+            <span *ngIf="!hasUserAnyOrgasYet">
+                            <input name="group1" type="radio" id="test2" [(ngModel)]="newCollectionScope" [value]="'EDU_GROUPS'" disabled />
+                            <label for="test2">{{ 'collectionNew_setAccessMyOrgaNA' | translate }}</label>
+                        </span>
+            <div *ngIf="shareToAll">
+            <input name="group1" type="radio" id="test3" [(ngModel)]="newCollectionScope" [value]="'EDU_ALL'" />
+            <label for="test3">{{ 'collectionNew_setAccessPublic' | translate }}</label>
+            </div>
+            <br>
+        </div>
+        <input name="group1" type="radio" id="test4" [(ngModel)]="newCollectionScope" [value]="'CUSTOM'" />
+        <label for="test4">{{'COLLECTIONS.EXTENDED_PERMISSIONS' | translate}}</label>
+        <div class="dialog-basic-area permissionsBtn">
+          <a class="btn-flat btn-shadow btn-icon" tabindex="0" (keyup.enter)="editPermissions()" (click)="editPermissions()"><i class="material-icons">person_add</i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</a>
+        </div>
+      </div>
+    </div>
+      <div class="card-action">
+        <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="updatePermissions()" (click)="updatePermissions()">{{ 'APPLY' | translate }}</a>
+        <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="newCollectionCancel()" (click)="newCollectionCancel()">{{ 'CANCEL' | translate }}</a>
+      </div>
+  </section>
+
+<!-- error if present-->
+<section *ngIf="(lastError!=null)" style="text-align: center;">
+    <p style="color:red;">{{lastError}}</p>
+    <button md-raised-button color="warn" (click)="refreshContent()">{{ 'collectionNew_reload' | translate }}</button>
+</section>
+
+</div>

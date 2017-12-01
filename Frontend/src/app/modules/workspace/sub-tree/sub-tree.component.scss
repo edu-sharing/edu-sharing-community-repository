@@ -1,0 +1,58 @@
+@import "../../../../styles/variables.scss";
+
+.node{
+  @include clickable();
+  padding-top:10px;
+  padding-bottom:10px;
+  width:100%;
+  white-space: nowrap;
+  img{
+    z-index: 1;
+  }
+}
+i.arrow{
+  width:20px;
+}
+.moreOpen{
+  left:($workspaceSidebarWidth - $contextMenuWidth)/2;
+  width:$contextMenuWidth;
+}
+.node:hover{
+  background-color: $workspaceTreeSelectedBackground;
+}
+.nodeSelected{
+  background-color: $workspaceTreeSelectedBackground!important;
+  background: $workspaceTreeSelectedBackgroundEffect;
+  font-weight:bold;
+}
+.hover{
+  background-color: rgba($primary,0.2)!important;
+  outline: 2px $primary dashed;
+}
+.node i{
+  color:$textLight;
+  margin-right:5px;
+}
+.arrow{
+  position: relative;
+  top: 4px;
+}
+.name{
+  position:absolute;
+  top:0px;
+  line-height: 3.7em;
+  width:100%;
+  display: inline-block;
+}
+.node img{
+  padding-right:10px;
+  width:30px;
+  height:20px; /* ie fix */
+}
+.sub-tree{
+
+}
+.empty{
+  font-style: italic;
+  padding-top:10px;
+}

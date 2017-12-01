@@ -1,0 +1,272 @@
+@import "../../../../styles/variables.scss";
+.topBar{
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  max-width:100%;
+  z-index:98;
+  height: $mainnavHeight;
+  background: $workspaceTopBarBackground;
+  color:$textOnPrimary;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+user-profile{
+  display:inherit!important;
+}
+.imprint{
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font-size:7pt;
+  a{
+    color:$textVeryLight!important;
+  }
+  a:hover{
+    color:#fff!important;
+  }
+}
+
+.menuButton {
+  width: 300px;
+  display: table-cell;
+  vertical-align: middle;
+}
+.menuButtonOuter{
+  height:100%;
+  display: table;
+}
+
+.topBarSearch {
+  flex: auto;
+  padding: 18px 20px 0 20px;
+}
+
+.menuButton .barIcon, .menuButton img {
+  vertical-align: bottom;
+}
+.menuButton img{
+  /*
+  margin-left: 16pp;
+  width: 24px;
+  */
+  margin-left: 0px;
+  width: 35px;
+  height: auto;
+}
+
+.sidenavClose{
+  position: absolute;
+  top:10px;
+  right:10px;
+  z-index: 1;
+  color: #fff;
+}
+.sidenavImage img{
+  width:100%;
+  height:auto;
+  position: absolute;
+  left:0;
+  top:0;
+}
+.sidenavImage > div{
+  position: absolute;
+  left:0;
+  top:60px;
+  width:100%;
+  text-align: center;
+  color:#fff;
+}
+.sidenavImage > div i{
+  font-size:50pt;
+}
+.sidenavImage > div > div{
+  font-size: 120%;
+  overflow: hidden;
+}
+.sidenavImage > div > div,.sidenavClose{
+  text-shadow: 0 0 30px rgba(0,0,0,.5);
+}
+.sidenavImage{
+  height:200px;
+}
+
+.topBar span{
+  font-size: 130%;
+  position: relative;
+  margin-left: 10px;
+}
+
+.noScope{
+  margin-left:60px;
+}
+
+.topBar input,.topBar input:focus{
+  padding: 0;
+  padding-left: 50px;
+  border-radius: 2px;
+  width:100%;
+  max-width:500px;
+  background: #595959;
+  border:none!important;
+  height:40px;
+  box-shadow:none!important;
+  -webkit-appearance: none;
+}
+
+.topBar .topBarSearch form {
+  position: relative;
+}
+
+.topBar .topBarSearch input:focus {
+  @include setGlobalInsetFocus();
+}
+.noUser input,.noUser input:focus{
+  width:calc(100% - 150px);
+}
+.barIcon{
+  font-size: 24px;
+  z-index:115;
+}
+.searchIcon{
+  font-size: 28px !important;
+  position: absolute;
+  top: 7px;
+  left: 8px;
+}
+.topBar .user{
+  text-align: right;
+  position: relative;
+  top:5px;
+  display: table;
+}
+
+.topBar .user div{
+  overflow: hidden;
+  max-width: 160px;
+  height: 20px;
+  word-break: break-all;
+  display: inline-block;
+}
+.topBar .help{
+  margin-top: 15px;
+  padding-right:15px;
+}
+.topBar .user span{
+  font-size:100%;
+}
+.sidenav span{
+  position: relative;
+  top:-4px;
+}
+.topBar .user i{
+  font-size:25px;
+  vertical-align: top;
+  margin-right: 10px;
+  margin-left: 5px;
+}
+.sidenav .button{
+  padding:20px 30px;
+  width:100%;
+}
+.userMenu,.helpMenu{
+  position: absolute;
+  right:0;
+  top: $mainnavHeight - 10px;
+  width:200px;
+}
+.userMenu{
+  top: $mainnavHeight - 20px;
+  right:40px;
+}
+
+.sidenav .button:hover{
+  background:$workspaceTreeSelectedBackground;
+}
+.sidenav .button i{
+  padding-right:10px;
+}
+.sidenav .selected{
+  color: $primary;
+  font-weight: bold;
+  background:$workspaceTreeSelectedBackgroundEffect!important;
+}
+.sidenav{
+  position: fixed;
+  top:0;
+  left:0;
+  height:100%;
+  z-index: 300;
+  overflow-y: auto;
+  background: $workspaceTreeBackground;
+  width:$workspaceSidebarWidth;
+  @include materialShadow();
+}
+
+#scrollToTop {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 5;
+  padding: 1px 10px;
+  display: none;
+  i {
+    font-size: 25px;
+  }
+}
+.topBar .scopeIcon{
+  margin-left: 13px;
+  position: relative;
+  top: 4px;
+  display:none;
+}
+.topBar .iconPerson{
+  display:none;
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+  .topBar input, .topBar input:focus {
+    width: calc(100% - 50px);
+  }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*2)) {
+  #scrollToTop {
+    display: none !important;
+  }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*1)){
+  #scrollToTop {
+    display: none!important;
+  }
+  .topBar span,
+  .topBar .user div{
+    display:none;
+  }
+  .topBar {
+    .iconPerson {
+      display: inherit;
+    }
+    .iconArrow {
+      display: none;
+    }
+    .eduImage{
+      display:none;
+    }
+    .scopeIcon{
+      display: inline-block;
+    }
+  }
+
+
+
+  .menuButton {
+    width: auto;
+    margin-bottom: 3px;
+  }
+}
+@media print{
+  .topBar {
+    position: absolute;
+  }
+}

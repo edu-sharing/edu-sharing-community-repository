@@ -1,0 +1,29 @@
+<project name="CCSearchInstaller" basedir=".">
+	<import file="build-common.xml" />
+	<!-- todo:
+	  - webserver.home gestezt ?
+	  - wurde alfresco webapp ausgepackt ?
+	  - alfresco   -->
+	
+	<target name="install-requirements" depends="prepare-alfresco-webapps">
+		
+		<condition property="webserver.home.exists">
+			<and>
+				<available file="${webserver.home}" type="dir"></available>
+			</and>
+		</condition>
+		<fail unless="webserver.home.exists" message="tomcat folder was not found! Please check 'webserver.home' in build.properties."/>
+		
+	</target>
+	
+	
+	
+	<target name="install" depends="install-requirements, prepare, deploy-classes, deploy-gwt">
+		<!--<zip destfile="${webserver.home}/webapps/${webapp.name}.war" basedir="${webserver.home}/webapps/${webapp.name}"></zip>
+		<delete dir="${webserver.home}/webapps/${webapp.name}"></delete>
+		-->
+		<echo>
+			Don't forget to configure your repository under ${alfresco_home}/tomcat/shared/classes/homeApplication.properties.xml! 
+		</echo>
+	</target>
+</project>

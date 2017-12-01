@@ -1,0 +1,55 @@
+@import "../../../../styles/variables.scss";
+
+.mdsCard{
+  margin-left: -40px;
+  margin-right: -20px;
+  padding-right: 0;
+  padding-top: 0;
+}
+.suggestions{
+  padding-top:40px;
+}
+.mdsCardJumpmarks{
+  margin-left:-220px!important;
+}
+.loading{
+  position: relative;
+  top:50px;
+}
+.card-jumpmarks{
+  position:fixed;
+  top:10%;
+  left:50%;
+  width:200px;
+  margin-left:-425px;
+  background-color: $workspaceTreeBackground;
+  border-radius:3pt;
+  padding:10px 0;
+}
+
+:host /deep/ .card-jumpmarks{
+  a{
+    padding:5px 10px;
+    padding-bottom:12px;
+    width:100%;
+    display:block;
+
+  }
+  a.active{
+    background: $workspaceTreeSelectedBackgroundEffect;
+    background-color: $workspaceTreeSelectedBackground;
+  }
+  a i{
+    position: relative;
+    top:5px;
+    margin-right:10px;
+  }
+}
+@media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
+  .mdsMainCard {
+    margin-left: 0!important;
+  }
+  .card-jumpmarks{
+    display: none;
+  }
+}

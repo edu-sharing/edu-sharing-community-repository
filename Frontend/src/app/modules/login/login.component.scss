@@ -1,0 +1,42 @@
+@import "../../../styles/variables.scss";
+
+md-input{
+  width:100%;
+}
+.powered{
+  text-align: center;
+  width: 100%;
+  position:fixed;
+  top:calc(15% + 455px);
+  color: #fff;
+}
+.branding{
+  width:100%;
+  height:100px;
+  text-align: center;
+}
+.register{
+  color:$textLight;
+}
+
+@media only screen and (max-width: $mobileWidth+$mobileStage*1) {
+  .card-title{
+    margin-bottom: 15px;
+  }
+  .branding{
+    position: absolute;
+    top: 25px;
+    left: calc(50% - 75px);
+    height:50px;
+    img{
+      width:100px;
+      height:auto;
+    }
+  }
+}
+
+@media screen and (max-height: ($mobileHeight)) {
+  .card{
+    top: $mainnavHeight;
+  }
+}

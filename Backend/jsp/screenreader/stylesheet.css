@@ -1,0 +1,56 @@
+@CHARSET "ISO-8859-1";
+
+body {
+	font-family: arial,sans-serif;
+	bgcolor: #ffffff;
+	text-color: #000000;
+}
+
+a {
+	link=#0000cc;	
+}
+a:visited {
+	text-color: #551a8b;
+}
+
+a:active {
+	text-color: #ff0000;
+}
+
+/* CLASSES */
+
+.mainfieldset {
+	font-weight: bold;
+}
+
+.result_download {
+	margin-bottom: 15px;
+}
+
+/* IDS */
+
+#beschreibung {
+	font-weight: bold;
+}
+
+/* FORMATTING OF METADATA ON SEARCH FORM */
+
+#taxonsimple_pwheader_keywords_taxonentry {
+	display: block;
+	margin-bottom: 5px;
+}
+
+
+/* FORMATTING OF METADATA ON SEARCH RESULTS */
+
+.result_httpwwwcampuscontentdemodellomformat {
+	display: inline;
+}
+
+.result_httpwwwalfrescoorgmodelcontentmodified {
+	display: inline;
+}
+
+.pair_key {
+	font-weight: bold;
+}

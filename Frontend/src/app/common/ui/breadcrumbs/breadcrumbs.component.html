@@ -1,0 +1,21 @@
+<div class="breadcrumb breadcrumbDesktop">
+  <div *ngIf="home" tabindex="0" class="home" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}}</div>
+  <div *ngIf="!home" tabindex="0" class="home homeIcon" [class.clickable]="clickable" (click)="openBreadcrumb(0)"><i class="material-icons">home</i></div>
+  <div *ngFor="let node of _breadcrumbsAsNode;let i=index " tabindex="0" [class.homeIsIcon]="!home" class="folder" [class.clickable]="clickable" (click)="openBreadcrumb(i+1)" (keyup.enter)="openBreadcrumb(i+1)"> &rsaquo; {{node ? node.name : ''}}</div>
+</div>
+<!--
+<div class="breadcrumb breadcrumbMobile" *ngIf="_breadcrumbsAsNodeShort">
+  <div *ngIf="home && _breadcrumbsAsNode.length<2" tabindex="0" class="home" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}}</div>
+  <div *ngIf="!home && _breadcrumbsAsNode.length<2" tabindex="0" class="home homeIcon" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)"><i class="material-icons">home</i></div>
+  <div *ngIf="_breadcrumbsAsNode.length==1" tabindex="0" [class.homeIsIcon]="!home" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)" [class.clickable]="clickable">&rsaquo;</div>
+  <div *ngIf="_breadcrumbsAsNode.length>=2" tabindex="0" [class.homeIsIcon]="!home" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)" [class.clickable]="clickable">&lsaquo;</div>
+  <div *ngIf="_breadcrumbsAsNodeShort.length" tabindex="0" [class.homeIsIcon]="!home" class="folder" [class.clickable]="clickable" (click)="openBreadcrumb(_breadcrumbsAsNodeShort.length>1 ? _breadcrumbsAsNode.length-1 : 1)" (keyup.enter)="openBreadcrumb(_breadcrumbsAsNodeShort.length>1 ? _breadcrumbsAsNode.length-1 : 1)">{{_breadcrumbsAsNodeShort[0] ? _breadcrumbsAsNodeShort[0].name : ''}}</div>
+  <div *ngIf="_breadcrumbsAsNodeShort.length>1" tabindex="0" [class.homeIsIcon]="!home" class="folder" [class.clickable]="clickable" (click)="openBreadcrumb(_breadcrumbsAsNode.length)" (keyup.enter)="openBreadcrumb(_breadcrumbsAsNode.length)"> &rsaquo; {{_breadcrumbsAsNodeShort[1] ? _breadcrumbsAsNodeShort[1].name : ''}}</div>
+</div>
+-->
+<div class="breadcrumb breadcrumbMobile" *ngIf="_breadcrumbsAsNodeShort">
+  <div *ngIf="home && _breadcrumbsAsNode.length<1" tabindex="0" class="home" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}}</div>
+  <div *ngIf="!home && _breadcrumbsAsNode.length<1" tabindex="0" class="home homeIcon" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)"><i class="material-icons">home</i></div>
+  <div *ngIf="_breadcrumbsAsNodeShort.length" tabindex="0" (click)="openBreadcrumb(_breadcrumbsAsNode.length-1)" class="homeIcon" (keyup.enter)="openBreadcrumb(_breadcrumbsAsNode.length-1)" [class.clickable]="clickable"><i class="material-icons">keyboard_arrow_left</i></div>
+  <div *ngIf="_breadcrumbsAsNodeShort.length" tabindex="0" class="folder homeIsIcon" [class.clickable]="clickable" (click)="openBreadcrumb(_breadcrumbsAsNode.length)" (keyup.enter)="openBreadcrumb(_breadcrumbsAsNode.length)">{{_breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1] ? _breadcrumbsAsNodeShort[_breadcrumbsAsNodeShort.length-1].name : ''}}</div>
+</div>

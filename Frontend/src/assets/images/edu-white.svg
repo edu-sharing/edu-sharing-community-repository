@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="31px" height="32px" viewBox="0 0 31 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+    <title>Waben</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Header-mit-Suche" transform="translate(-27.000000, -16.000000)" fill="#FFFFFF">
+            <g id="Waben" transform="translate(27.000000, 16.000000)">
+                <polygon id="Fill-1" points="18.3155918 22.8468005 14.2432432 15.6339266 18.3155918 8.42105263 26.4612006 8.42105263 30.5335491 15.6339266 26.4612006 22.8468005"></polygon>
+                <polygon id="Fill-2" points="4.07234854 0 0 7.21287392 4.07234854 14.4257478 12.2179573 14.4257478 16.2903059 7.21287392 12.2179573 0"></polygon>
+                <polygon id="Fill-3" points="4.07234854 16.8421053 0 24.0549792 4.07234854 31.2678531 12.2179573 31.2678531 16.2903059 24.0549792 12.2179573 16.8421053"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

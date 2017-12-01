@@ -1,0 +1,49 @@
+@import "../../../../../styles/variables.scss";
+
+
+.container div{
+  display:table-cell;
+}
+.publish{
+  width:50px;
+  padding-right: 5px;
+}
+.container{
+  width:100%;
+}
+.readOnly{
+  color: $textLight;
+}
+.permission div{
+  width:140px;
+  float:left;
+}
+.permission span{
+  position: relative;
+  top:-2px;
+}
+.icon{
+  padding-right:5px;
+}
+.inherit{
+  position: relative;
+  top: -2px;
+}
+.name{
+  width:100%;
+  position: relative;
+  top:-7px;
+}
+.typeAdd{
+  position:absolute;
+  right: 20px;
+  width: 280px!important;
+  top: 160px;
+}
+.align{
+  position:relative;
+  top:6px;
+}
+.remove i,.type{
+  color:$textLight;
+}
