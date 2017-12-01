@@ -75,9 +75,8 @@
         <div class="card-collection-ownerline">
             <span *ngIf="getCollectionPrivacyScope()==''"><i class="material-icons icon-bottom">help outline</i> ...</span>
             <span *ngIf="getCollectionPrivacyScope()=='MY'"><i class="material-icons icon-bottom">lock</i> {{ 'COLLECTION.SCOPE.MY' | translate }}</span>
-            <span *ngIf="getCollectionPrivacyScope()=='EDU_GROUPS'"><i class="material-icons icon-bottom">domain</i> {{ 'COLLECTION.SCOPE.EDU_GROUPS' | translate }}</span>
-            <span *ngIf="getCollectionPrivacyScope()=='EDU_ALL'"><i class="material-icons icon-bottom">language</i> {{ 'COLLECTION.SCOPE.EDU_ALL' | translate }}</span>
-            <span *ngIf="getCollectionPrivacyScope()=='CUSTOM'"><i class="material-icons icon-bottom">build</i> {{ 'COLLECTION.SCOPE.CUSTOM' | translate }}</span>
+            <span *ngIf="getCollectionPrivacyScope()=='EDU_GROUPS' || getCollectionPrivacyScope()=='CUSTOM'"><i class="material-icons icon-bottom">group</i> {{ 'COLLECTION.SCOPE.SHARED' | translate }}</span>
+            <span *ngIf="getCollectionPrivacyScope()=='EDU_ALL' || getCollectionPrivacyScope()=='CUSTOM_PUBLIC'"><i class="material-icons icon-bottom">language</i> {{ 'COLLECTION.SCOPE.PUBLIC' | translate }}</span>
         </div>
 
     </section>

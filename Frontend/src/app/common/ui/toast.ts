@@ -5,7 +5,6 @@ import {RestConstants} from "../rest/rest-constants";
 import {RouterComponent} from "../../router/router.component";
 import {ConfigurationService} from "../services/configuration.service";
 import {Router} from "@angular/router";
-import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {DialogButton} from "./modal-dialog/modal-dialog.component";
 import {UIConstants} from "./ui-constants";
@@ -147,7 +146,7 @@ export class Toast{
         message = "TOAST.API_FORBIDDEN";
         this.dialogTitle = '';
 
-        let login=this.storage.get(RestConnectorService.SESSION_INFO);
+        let login=this.storage.get(TemporaryStorageService.SESSION_INFO);
         if(login && login.isGuest){
           this.toast('TOAST.API_FORBIDDEN_LOGIN');
           this.goToLogin();

@@ -272,7 +272,9 @@
     "TOAST":{
       "FOLDER_ADDED":"Folder added",
       "NODE_EXISTS_IN_COLLECTION":"The collection already contains the element {{name}}",
-      "ADDED_TO_COLLECTION":"{{count}} element(s) have been added to collection {{collection}}",
+      "ADDED_TO_COLLECTION_MY":"{{count}} element(s) have been added to collection {{collection}} and is visible for you",
+      "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to collection {{collection}} and is visible to all invited persons",
+      "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to collection {{collection}} and is visible to everyone",
       "DELETE_FINISHED":"Element(s) move to recycle",
       "CUT_COPY":"{{count}} Element(s) copied to clipboard",
       "PASTE":"{{count}} Element(s) have been {{mode}} from {{from}} to {{to}}",
@@ -283,8 +285,7 @@
       "NO_WRITE_PERMISSION":"You have insufficient permissions to store items at the current location",
       "NOT_FOUND":"The folder {{id}} was not found. May it has been deleted.",
       "LICENSE_UPDATED":"License has been updated",
-      "CONTRIBUTOR_UPDATED":"Information of contributors have been updated",
-      "WORKFLOW_UPDATED":"Information of workflow has been updated"
+      "CONTRIBUTOR_UPDATED":"Information of contributors have been updated"
     }
   }
 }

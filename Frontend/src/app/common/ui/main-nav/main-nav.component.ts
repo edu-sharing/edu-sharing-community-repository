@@ -5,7 +5,7 @@ import {
 import {TranslateService} from "ng2-translate";
 import {UIAnimation} from "../ui-animation";
 import {RestIamService} from "../../rest/services/rest-iam.service";
-import {IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations} from "../../rest/data-object";
+import {IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList} from "../../rest/data-object";
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../../router/router.component";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
@@ -13,7 +13,8 @@ import {RestConstants} from "../../rest/rest-constants";
 import {RestOrganizationService} from "../../rest/services/rest-organization.service";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {ConfigurationService} from "../../services/configuration.service";
-import {trigger} from "@angular/animations";
+import {style, transition, trigger, animate, keyframes} from "@angular/animations";
+import {SearchNodeStoreComponent} from "../../../modules/search/node-store/node-store.component";
 import {UIHelper} from "../ui-helper";
 import {UIConstants} from "../ui-constants";
 import {RestHelper} from "../../rest/rest-helper";
@@ -28,7 +29,30 @@ import {TemporaryStorageService} from "../../services/temporary-storage.service"
   animations: [
     trigger('fromLeft', UIAnimation.fromLeft()),
     trigger('overlay', UIAnimation.openOverlay()),
-    trigger('fade', UIAnimation.fade())
+    trigger('fade', UIAnimation.fade()),
+    trigger('nodeStore', [
+      transition(':enter', [
+        animate(UIAnimation.ANIMATION_TIME_SLOW+'ms ease-in', keyframes([
+          style({opacity: 0, top:'0', transform: 'scale(0.25)', offset: 0}),
+          style({opacity: 1, top:'10px', transform: 'scale(1)', offset: 1}),
+          //style({opacity:0,offset:0}),
+          //style({opacity:1,offset:1}),
+
+        ]))
+      ]),
+      transition(':leave', [
+        animate(UIAnimation.ANIMATION_TIME_SLOW+'ms ease-in', keyframes([
+          style({opacity: 1, transform: 'scale(1)', offset: 0}),
+          style({opacity: 0, transform: 'scale(10)', offset: 1}),
+          /*
+          style({offset:0}),
+          style({transform:'scale(1)',
+            left:this.nodeStoreRef ? this.nodeStoreRef.nativeElement.getBoundingClientRect().left : '100%',
+            top:this.nodeStoreRef ? this.nodeStoreRef.nativeElement.getBoundingClientRect().top : 0,offset:1})
+          */
+        ]))
+
+      ])]),
   ]
 })
 /**
@@ -38,9 +62,17 @@ export class MainNavComponent {
   @ViewChild('search') search : ElementRef;
   @ViewChild('sidebar') sidebar:ElementRef;
   @ViewChild('topbar') topbar:ElementRef;
+  @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
   @ViewChild('scrolltotop') scrolltotop:ElementRef;
   public config: any={};
   private editUrl: string;
+  public nodeStoreAnimation=0;
+  public showNodeStore=false;
+  private nodeStoreCount = 0;
+  private static bannerPositionInterval: any;
+  public setNodeStore(value:boolean){
+    UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
+  }
   public showEditProfile: boolean;
   public showProfile: boolean;
 
@@ -58,8 +90,6 @@ export class MainNavComponent {
     }
   }
   private scrollInitialPositions : any[]=[];
-
-  @HostListener('window:resize', ['$event'])
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
     let y=0;
@@ -105,7 +135,7 @@ export class MainNavComponent {
       }
     }
     /*
-    // previously for BPS header
+    // previously for custom header
     if(this.topbar.nativeElement.classList.contains('topBar-search') || this.topbar.nativeElement.classList.contains('topBar-collections')) {
       if((window.pageYOffset || document.documentElement.scrollTop) > y) {
         this.topbar.nativeElement.style.position = 'fixed';
@@ -168,13 +198,23 @@ export class MainNavComponent {
    */
   @Input() searchQuery:string;
   @Output() searchQueryChange = new EventEmitter<string>();
+  @Input() set onInvalidNodeStore(data:Boolean){
+    this.iam.getNodeList(SearchNodeStoreComponent.LIST).subscribe((data:NodeList)=>{
+      if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
+        this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
+      this.nodeStoreCount=data.nodes.length;
+      setTimeout(()=>{
+        this.nodeStoreAnimation=-1;
+      },1500);
+    });
+  };
 
   /**
    * Called when a search event happened, emits the search string
    * @type {EventEmitter}
    */
   @Output() onSearch=new EventEmitter();
-  private isGuest = false;
+  public isGuest = false;
   private isAdmin = false;
   public _showUser = false;
   onEvent(event:string,data:any){
@@ -198,9 +238,15 @@ export class MainNavComponent {
   }
   ngAfterViewInit() {
     this.handleScroll(null);
+    /*
     for(let i=0;i<200;i++) {
       setTimeout(() => this.handleScroll(null), i * 50);
     }
+    */
+    if(MainNavComponent.bannerPositionInterval){
+      clearInterval(MainNavComponent.bannerPositionInterval);
+    }
+    MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),200);
   }
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
@@ -232,6 +278,7 @@ export class MainNavComponent {
         let reurl=null;
         if(params["reurl"])
           reurl={reurl:params["reurl"]};
+        this.showNodeStore=params['nodeStore']=="true";
         if(!data.isGuest && this.canAccessWorkspace) {
           //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});
           buttons.push({
@@ -257,6 +304,7 @@ export class MainNavComponent {
             this.userName=RestHelper.getPersonWithConfigDisplayName(this.user.person,this.configServive);
           });
         });
+        this.onInvalidNodeStore=new Boolean(true);
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
           if(data.hasAccess)
             buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE"});

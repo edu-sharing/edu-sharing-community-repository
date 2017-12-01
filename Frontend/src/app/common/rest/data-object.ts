@@ -30,6 +30,12 @@ export interface CacheInfo{
   statisticHits:number;
 }
 
+export interface WorkflowDefinition{
+  id:string;
+  color:string;
+  hasReceiver:boolean;
+  next:string[];
+}
 export class WorkflowEntry {
   time: number;
   editor: string;
@@ -278,6 +284,7 @@ export interface Collection {
   preview: Preview;
   fromUser:boolean;
   scope : string;
+  pinned : boolean;
 }
 
 export interface CollectionWrapper {
@@ -979,6 +986,7 @@ export class Organizations {
 
 export class Profile {
   displayName:string;
+  groupType:string;
 }
 
 export class PersonalProfile {

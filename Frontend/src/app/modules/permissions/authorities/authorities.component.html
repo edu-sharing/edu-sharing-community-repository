@@ -45,10 +45,14 @@
       <div *ngIf="_mode=='GROUP'">
         <label for="groupName">{{'GROUP.displayName' | translate}}</label>
         <input type="text" id="groupName" name="groupName" [(ngModel)]="edit.profile.displayName" autofocus required>
+        <label for="groupType">{{'GROUP.groupType' | translate}}</label>
+        <select id="groupType" name="groupType" [(ngModel)]="edit.profile.groupType"><option *ngFor="let type of GROUP_TYPES">{{type}}</option></select>
       </div>
         <div *ngIf="_mode=='ORG'">
           <label for="orgName">{{'ORG.displayName' | translate}}</label>
           <input type="text" id="orgName" name="orgName" [(ngModel)]="edit.profile.displayName" autofocus required>
+          <label for="orgName">{{'ORG.groupType' | translate}}</label>
+          <select id="orgType" name="orgType" [(ngModel)]="edit.profile.groupType"><option *ngFor="let type of GROUP_TYPES">{{type}}</option></select>
           <div class="infoText">{{edit.folder}}</div>
         </div>
       <div *ngIf="_mode=='USER'">
@@ -150,4 +154,4 @@
   ></listTable>
 <h5 class="noElements" *ngIf="!loading && (!list || !list.length) && !_searchQuery">{{'PERMISSIONS.NO_ELEMENTS' | translate}}</h5>
 <h5 class="noElements" *ngIf="!loading && (!list || !list.length) && _searchQuery!='' && searchQuery!=null">{{'PERMISSIONS.NO_ELEMENTS_SEARCH' | translate}}</h5>
-<div class="dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>
+<global-progress *ngIf="globalProgress"></global-progress>

@@ -6,7 +6,7 @@ import {RestConnectorService} from "./rest-connector.service";
 import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {
-  ArchiveRestore, ArchiveSearch, Node, IamGroup, IamGroups, IamAuthorities, GroupProfile,
+  ArchiveRestore, ArchiveSearch, Node, NodeList, IamGroup, IamGroups, IamAuthorities, GroupProfile,
   IamUsers, IamUser, UserProfile, UserCredentials
 } from "../data-object";
 
@@ -90,6 +90,34 @@ export class RestIamService {
   public deleteUser = (user : string,repository=RestConstants.HOME_REPOSITORY): Observable<Response> => {
     let query=this.connector.createUrl("iam/:version/people/:repository/:user",repository,[[":user",user]]);
     return this.connector.delete(query,this.connector.getRequestOptions());
+  }
+  public getNodeList = (list : string,request:any=null,user=RestConstants.ME,repository=RestConstants.HOME_REPOSITORY): Observable<NodeList> => {
+    let query=this.connector.createUrlNoEscape("iam/:version/people/:repository/:user/nodeList/:list?:request",repository,
+      [
+        [":user",encodeURIComponent(user)],
+        [":list",encodeURIComponent(list)],
+        [":request",this.connector.createRequestString(request)],
+      ]);
+    return this.connector.get(query,this.connector.getRequestOptions())
+      .map((response: Response) => response.json());
+  }
+  public removeNodeList = (list : string,node:string,user=RestConstants.ME,repository=RestConstants.HOME_REPOSITORY): Observable<Response> => {
+    let query=this.connector.createUrl("iam/:version/people/:repository/:user/nodeList/:list/:node",repository,
+      [
+        [":user",user],
+        [":list",list],
+        [":node",node],
+      ]);
+    return this.connector.delete(query,this.connector.getRequestOptions());
+  }
+  public addNodeList = (list : string,node:string,user=RestConstants.ME,repository=RestConstants.HOME_REPOSITORY): Observable<Response> => {
+    let query=this.connector.createUrl("iam/:version/people/:repository/:user/nodeList/:list/:node",repository,
+      [
+        [":user",user],
+        [":list",list],
+        [":node",node],
+      ]);
+    return this.connector.put(query,null,this.connector.getRequestOptions());
   }
   public getUser = (user=RestConstants.ME,repository=RestConstants.HOME_REPOSITORY): Observable<IamUser> => {
     let query=this.connector.createUrl("iam/:version/people/:repository/:user",repository,[[":user",user]]);

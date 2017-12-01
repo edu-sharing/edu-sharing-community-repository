@@ -5,6 +5,13 @@
   (onCancel)="closeLicense()"
   (onDone)="updateLicense()"
 ></workspace-license>
+<node-report
+  *ngIf="nodeReport"
+  [node]="nodeReport"
+  (onLoading)="globalProgress=$event"
+  (onCancel)="closeReport()"
+  (onDone)="closeReport()"
+></node-report>
 <workspace-lti-tools *ngIf="showLtiTools"
                      [refresh]="ltiToolRefresh"
                      [(currentTool)]="currentLtiTool"
@@ -54,4 +61,4 @@
                        (onLoading)="globalProgress=$event"
                        (onClose)="closeContributor()"
 ></workspace-contributor>
-<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>
+<global-progress *ngIf="globalProgress"></global-progress>

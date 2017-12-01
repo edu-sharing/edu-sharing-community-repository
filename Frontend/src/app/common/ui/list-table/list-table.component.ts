@@ -2,7 +2,7 @@ import {
   Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ApplicationRef,
   ChangeDetectorRef, ViewChild, ElementRef, HostListener, ViewEncapsulation
 } from '@angular/core';
-import {BrowserModule, DomSanitizer} from '@angular/platform-browser';
+import {BrowserModule, DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {TranslateService} from "ng2-translate";
 import {Node} from "../../rest/data-object";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
@@ -531,8 +531,8 @@ export class ListTableComponent implements EventListener{
 
 
   }
-  private getAttribute(data : any,item : ListItem) : string{
-    return NodeHelper.getAttribute(this.translate,this.config,data,item);
+  private getAttribute(data : any,item : ListItem) : SafeHtml{
+    return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
   }
   private getLRMIAttribute(data : any,item : ListItem) : string{
     return NodeHelper.getLRMIAttribute(this.translate,this.config,data,item);

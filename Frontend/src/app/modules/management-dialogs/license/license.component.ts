@@ -8,6 +8,7 @@ import {TranslateService} from "ng2-translate";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {RestHelper} from "../../../common/rest/rest-helper";
+import {VCard} from "../../../common/VCard";
 import {UIHelper} from "../../../common/ui/ui-helper";
 
 @Component({
@@ -18,16 +19,25 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 export class WorkspaceLicenseComponent  {
   @ViewChild('contactCheckbox') contactCheckbox : ElementRef;
   @ViewChild('releaseCheckbox') releaseCheckbox : ElementRef;
+  @ViewChild('selectLicense') selectLicense : ElementRef;
 
-  public type="";
-  private ccShare="";
+  private _type="";
+  public set type(type:string){
+    this._type=type;
+    if(this._type=='CC_0' && !this.cc0Type)
+      this.cc0Type='CC_0';
+  }
+  public get type(){
+    return this._type;
+  }
+  public ccShare="";
   private ccCommercial="";
   private ccTitleOfWork="";
   private ccSourceUrl="";
   private ccVersion="4.0";
   private ccLocale="";
+  private cc0Type="";
   private ccProfileUrl="";
-  private cc0Type="CC_0";
   private copyrightType="COPYRIGHT_FREE";
   private eduType="P_NR";
   private rightsDescription="";
@@ -36,6 +46,14 @@ export class WorkspaceLicenseComponent  {
   private contact=true;
   private release=false;
   private eduDownload=true;
+  private _oerMode=true;
+  public set oerMode(oerMode:boolean){
+    this._oerMode=oerMode;
+    this.showCcAuthor=false;
+  }
+  public get oerMode(){
+    return this._oerMode;
+  }
   private ccLocales=["ar","be","bg","de","fi","fr",
                      "in","it","ca","hr","mt","mk","nl",
                      "no","pl","pt","ro","es","th",
@@ -47,9 +65,16 @@ export class WorkspaceLicenseComponent  {
   public loading=true;
   private allowedLicenses: string[];
   private releaseMulti: string;
+  public authorTab=0;
+  public authorVCard:VCard;
+  public authorFreetext:string;
   private allowRelease = true;
   public isAllowedLicense(license:string){
     return this.allowedLicenses==null || this.allowedLicenses.indexOf(license)!=-1;
+  }
+  public isOerLicense(){
+    return this.getLicenseProperty()=="CC_0" || this.getLicenseProperty()=="PDM"
+      || this.getLicenseProperty()=="CC_BY" || this.getLicenseProperty()=="CC_BY_SA";
   }
   @Input() set nodes(nodes : Node[]){
       this.config.get("allowedLicenses").subscribe((data:string[])=>{
@@ -68,8 +93,6 @@ export class WorkspaceLicenseComponent  {
             else if (entry == "CC_0" || entry == "PDM") {
               if (this.licenseMainTypes.indexOf("CC_0") == -1)
                 this.licenseMainTypes.push("CC_0");
-              if (data.indexOf(this.cc0Type) == -1)
-                this.cc0Type = entry;
             }
             else if (entry.startsWith("COPYRIGHT")) {
               this.licenseMainTypes.push("COPYRIGHT");
@@ -133,6 +156,8 @@ export class WorkspaceLicenseComponent  {
       if(this.ccLocale)
         prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]=[this.ccLocale];
     }
+    prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=[this.authorVCard.toVCardString()];
+    prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
 
     if(this.type=='CUSTOM') {
       prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
@@ -184,16 +209,16 @@ export class WorkspaceLicenseComponent  {
       this.ccTitleOfWork=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK);
       this.ccSourceUrl=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_SOURCE_URL);
       this.ccProfileUrl=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_PROFILE_URL);
-      this.ccVersion=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_VERSION);
+      this.ccVersion=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_VERSION,this.ccVersion);
       this.ccLocale=this.getValueForAll(RestConstants.CCM_PROP_LICENSE_CC_LOCALE);
     }
     if(license=='CC_0'){
-      this.type='CC_0';
       this.cc0Type='CC_0';
+      this.type='CC_0';
     }
     if(license=='PDM'){
-      this.type='CC_0';
       this.cc0Type='PDM';
+      this.type='CC_0';
     }
     if(license.startsWith("COPYRIGHT")){
       this.type="COPYRIGHT";
@@ -216,6 +241,13 @@ export class WorkspaceLicenseComponent  {
     this.rightsDescription=this.getValueForAll(RestConstants.LOM_PROP_RIGHTS_DESCRIPTION);
     let contactState=this.getValueForAll(RestConstants.CCM_PROP_QUESTIONSALLOWED,"multi","true");
     this.contact=contactState=='true';
+    this.oerMode=this.isOerLicense() || this.type=='NONE';
+    this.authorVCard=new VCard(this.getValueForAll(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR));
+    this.authorFreetext=this.getValueForAll(RestConstants.CCM_PROP_AUTHOR_FREETEXT);
+    UIHelper.invalidateMaterializeTextarea('authorFreetext');
+    UIHelper.invalidateMaterializeTextarea('licenseRights');
+    if(this.authorVCard.isValid())
+      this.authorTab=1;
     setTimeout(()=>{
       if(contactState=='multi')
         this.contactCheckbox.nativeElement.indeterminate=true;
@@ -343,5 +375,15 @@ export class WorkspaceLicenseComponent  {
         }
       }
     });
+  }
+
+  setCCBy() {
+    this.type='CC_BY';
+    this.ccShare='';
+    this.ccCommercial='';
+  }
+  setCC0() {
+    this.type='CC_0';
+    this.cc0Type='CC_0';
   }
 }

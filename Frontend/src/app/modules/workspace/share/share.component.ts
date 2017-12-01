@@ -24,12 +24,15 @@ import {Helper} from "../../../common/helper";
   styleUrls: ['share.component.scss']
 })
 export class WorkspaceShareComponent  {
-  public ALL_PERMISSIONS=["All","Read","Write","Delete",
-    "DeleteChildren","DeleteNode","AddChildren","Consumer",
+  public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
+    "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
-    "Publisher","ReadPermissions","ChangePermissions"];
+    "Publisher","ReadPermissions","ChangePermissions","CCPublish"];
   public PERMISSIONS_FORCES:any= [
+    ["Read",["ConsumerMetadata"]],
     ["Read",["Consumer"]],
+    ["ReadPreview",["Consumer"]],
+    ["ReadAll",["Consumer"]],
     ["Write",["Editor"]],
     ["DeleteChildren",["Delete"]],
     ["DeleteNode",["Delete"]],
@@ -341,8 +344,8 @@ export class WorkspaceShareComponent  {
     this.applicationRef.tick();
   }
   public isImplicitPermission(permission:Permission,name:string){
-    if(name=="Consumer") // this is the default permission, can't be removed
-      return true;
+    //if(name=="Consumer") // this is the default permission, can't be removed
+    //  return true;
     if(name!="All" && permission.permissions.indexOf("All")!=-1) // coordinator implies all permissions
       return true;
     if(name!="Coordinator" && permission.permissions.indexOf("Coordinator")!=-1) // coordinator implies all permissions

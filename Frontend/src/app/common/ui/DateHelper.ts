@@ -25,13 +25,32 @@ export class DateHelper{
   }
 
   /**
+   * format a date with a given, fixed string
+   * For consistency, we use the patterns from
+   * https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
+   * @param date
+   * @param {string} format
+   * @returns {string}
+   */
+  public static formatDateByPattern(date: any,format:string) : string{
+    if(!isNumeric(date)) {
+      return date;
+    }
+    let dateObject = new Date(date * 1);
+    format=format.replace("y",""+dateObject.getFullYear());
+    format=format.replace("M",""+DateHelper.fillDate(dateObject.getMonth()));
+    format=format.replace("d",""+DateHelper.fillDate(dateObject.getDate()));
+    return format;
+  }
+
+  /**
    * Format a date for the current language
    * @param translation
    * @param date
    * @param showAlwaysTime
    * @returns {any}
    */
-  public static formatDate(translation : TranslateService,date: any,showAlwaysTime=false) : string{
+  public static formatDate(translation : TranslateService,date: any,showAlwaysTime=false,useRelativeLabels=true) : string{
     try {
       if(!isNumeric(date)) {
         return date;
@@ -47,15 +66,15 @@ export class DateHelper{
       let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
       let addDate=true;
       let timeFormat="HH:mm";
-      if (isToday) {
+      if (isToday && useRelativeLabels) {
         prefix = translation.instant("TODAY");
         addDate = false;
       }
-      else if(isYesterday){
+      else if(isYesterday && useRelativeLabels){
         prefix = translation.instant("YESTERDAY");
         addDate = false;
       }
-      else if(diffDays<6){
+      else if(diffDays<6 && useRelativeLabels){
         prefix = translation.instant("DAYS_AGO",{days:diffDays});
         addDate = false;
         if(!showAlwaysTime)

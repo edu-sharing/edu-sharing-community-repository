@@ -7,6 +7,10 @@
       "REMOVE": "Entfernen",
       "ADD_TO_OTHER": "In Sammlung"
     },
+    "PINNING":{
+      "TITLE":"Gepinnte Sammlungen",
+      "UPDATED":"Liste gepinnter Sammlungen wurde aktualisiert"
+    },
     "NO_ADD_PERMISSIONS":"Sie besitzen keine Berechtigung um Materialien in diese Sammlung aufzunehmen",
     "ERROR_NOT_FOUND":"Sammlung wurde nicht gefunden",
     "ERROR_NODE_EXISTS":"Dieses Element ist bereits in der Sammlung vorhanden",

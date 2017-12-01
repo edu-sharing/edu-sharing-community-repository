@@ -40,7 +40,7 @@
      tabindex="0"
          (keyup.enter)="click(option)"
      (click)="click(option)">
-  <i class="material-icons">{{option.icon}}</i><span class="actionAlwaysCaption"> {{option.name | translate}}</span>
+  <i class="material-icons" title="{{option.showName ? null : (option.name | translate)}}">{{option.icon}}</i><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
 </div>
 
 </div>

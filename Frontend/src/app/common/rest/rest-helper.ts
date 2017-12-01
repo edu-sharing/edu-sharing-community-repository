@@ -55,7 +55,7 @@ export class RestHelper{
     }
     return nodes;
   }
-  public static getQueryString(queryName : string,values : string[]) : string{
+  public static getQueryString(queryName : string,values : any[]) : string{
     let query="";
     for(var i=0;i<values.length;i++){
       if(i)
@@ -266,7 +266,9 @@ export class RestHelper{
       if(list.id=="search"){
         console.log(list);
         for(let column of list.columns){
-          columns.push(new ListItem("NODE",column.id));
+          let item=new ListItem("NODE",column.id)
+          item.format=column.format;
+          columns.push(item);
         }
         return columns;
       }
@@ -293,6 +295,19 @@ export class RestHelper{
       permissions.permissions.push(permClean);
     }
     return permissions;
+  }
+
+  public static filterValidMds(metadatasets: MdsInfo[], config: ConfigurationService) {
+    let validMds=config.instant("availableMds");
+    if(validMds && validMds.length){
+      for(let i=0;i<metadatasets.length;i++){
+        if(validMds.indexOf(metadatasets[i].id)==-1){
+          metadatasets.splice(i,1);
+          i--;
+        }
+      }
+    }
+    return metadatasets;
   }
 }
 export interface UrlReplace{

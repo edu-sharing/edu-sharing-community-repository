@@ -9,7 +9,7 @@
         <autocomplete
           [id]="searchAuthority"
           [inputMinLength]="1"
-          [disabled]="status=='400_checked'"
+          [disabled]="!status.hasReceiver"
           (addItem)="addSuggestion($event)"
           [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
           [suggestions]="authoritySuggestions"
@@ -17,15 +17,15 @@
         ></autocomplete>
           <div class="status">
             <div class="btn-flat btn-shadow" tabindex="0" (keyup.enter)="chooseStatus=true" (click)="chooseStatus=true">
-              <i [class]="'align-icon statusIcon workflowStatus_'+status">&nbsp;</i> {{'WORKFLOW.'+status | translate}}
+              <i class="align-icon statusIcon" [style.background-color]="status.color">&nbsp;</i> {{'WORKFLOW.'+status.id | translate}}
               <i class="material-icons align-icon right">keyboard_arrow_down</i></div>
           </div>
           <div *ngIf="chooseStatus" class="chooseStatus">
           <div class="dialog" (click)="chooseStatus=false"></div>
           <div class="moreOpen collection">
             <a class="collection-item" *ngFor="let s of validStatus"
-               (click)="status=s;chooseStatus=false;">
-              <i [class]="'align-icon statusIcon workflowStatus_'+s">&nbsp;</i> {{'WORKFLOW.'+s | translate}}
+               (click)="setStatus(s)" [class.disabled]="!isAllowedAsNext(s)">
+              <i class="align-icon statusIcon" [style.background-color]="s.color">&nbsp;</i> {{'WORKFLOW.'+s.id | translate}}
               <i class="material-icons selected" *ngIf="status==s">check</i>
             </a>
           </div>
@@ -37,7 +37,7 @@
         </div>
 
         <div class="receivers">
-          <div *ngIf="status!='400_checked'">
+          <div *ngIf="status.hasReceiver">
             <div class="badge" *ngFor="let receiver of receivers">
               <span>{{receiver | authorityName}}</span>
               <i class="material-icons clickable" (click)="removeReceiver(receiver)">cancel</i>
@@ -75,18 +75,18 @@
               <div class="row">
                 <div class="status" *ngIf="i<history.length-1">
                   <label>{{'WORKSPACE.WORKFLOW.OLD_STATUS' | translate}}</label>
-                  <div [class]="'workflowStatus workflowStatus_'+history[i+1].status">{{'WORKFLOW.'+history[i+1].status | translate}}</div>
+                  <div class="workflowStatus" [style.background-color]="getWorkflowForId(history[i+1].status).color">{{'WORKFLOW.'+history[i+1].status | translate}}</div>
                 </div>
                 <div class="status" *ngIf="i>=history.length-1">
                   <label>{{'WORKSPACE.WORKFLOW.NEW_STATUS' | translate}}</label>
-                  <div [class]="'workflowStatus workflowStatus_'+entry.status">{{'WORKFLOW.'+entry.status | translate}}</div>
+                  <div class="workflowStatus" [style.background-color]="getWorkflowForId(entry.status).color">{{'WORKFLOW.'+entry.status | translate}}</div>
                 </div>
                 <div *ngIf="i<history.length-1">
                   <i class="material-icons">keyboard_arrow_right</i>
                 </div>
                 <div class="status" *ngIf="i<history.length-1">
                   <label>{{'WORKSPACE.WORKFLOW.NEW_STATUS' | translate}}</label>
-                  <div [class]="'workflowStatus workflowStatus_'+entry.status">{{'WORKFLOW.'+entry.status | translate}}</div>
+                  <div class="workflowStatus" [style.background-color]="getWorkflowForId(entry.status).color">{{'WORKFLOW.'+entry.status | translate}}</div>
                 </div>
               </div>
               </div>

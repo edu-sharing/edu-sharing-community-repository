@@ -129,8 +129,10 @@
             </div>
             <br>
         </div>
-        <input name="group1" type="radio" id="test4" [(ngModel)]="newCollectionScope" [value]="'CUSTOM'" />
-        <label for="test4">{{'COLLECTIONS.EXTENDED_PERMISSIONS' | translate}}</label>
+        <div class="dialog-basic-area">
+          <input name="group1" type="radio" id="test4" [(ngModel)]="newCollectionScope" [value]="'CUSTOM'" />
+          <label for="test4">{{'COLLECTIONS.EXTENDED_PERMISSIONS' | translate}}</label>
+        </div>
         <div class="dialog-basic-area permissionsBtn">
           <a class="btn-flat btn-shadow btn-icon" tabindex="0" (keyup.enter)="editPermissions()" (click)="editPermissions()"><i class="material-icons">person_add</i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</a>
         </div>

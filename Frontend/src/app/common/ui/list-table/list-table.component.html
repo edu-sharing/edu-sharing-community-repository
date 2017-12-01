@@ -102,6 +102,7 @@
         <div *ngIf="viewType==1 && !node.collection" class="typeicon column">
           <img src="{{node.iconURL}}" [attr.role]="presentation" alt="">
         </div>
+        <div *ngIf="node.collection && node.collection.pinned" class="collectionPinned"><custom-icon iconId="pin"></custom-icon></div>
         <div class="checkbox column" *ngIf="hasCheckbox">
           <input (click)="select(node,true)" type="checkbox" class="filled-in" [attr.id]="id+'select'+i"
                  checked="{{getSelectedPos(node)!=-1 ? 'checked' : ''}}"/>

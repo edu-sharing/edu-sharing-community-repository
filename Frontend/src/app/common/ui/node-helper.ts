@@ -2,7 +2,7 @@ import {RestConstants} from "../rest/rest-constants";
 import {TranslateService} from "ng2-translate";
 import {
   Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
-  Repository
+  Repository, WorkflowDefinition
 } from "../rest/data-object";
 import {FormatSizePipe} from "./file-size.pipe";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
@@ -10,7 +10,6 @@ import {Observable, Observer} from "rxjs";
 import {Response, ResponseContentType, Http} from "@angular/http";
 import {ConfigurationService} from "../services/configuration.service";
 import {RestHelper} from "../rest/rest-helper";
-import {WorkspaceWorkflowComponent} from "../../modules/workspace/workflow/workflow.component";
 import {Toast} from "./toast";
 import {Router} from "@angular/router";
 import {OptionItem} from "./actionbar/actionbar.component";
@@ -21,6 +20,7 @@ import {Translation} from "../translation";
 import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {ApplyToLmsComponent} from "./apply-to-lms/apply-to-lms.component";
 import {ListItem} from "./list-item";
+import {Helper} from "../helper";
 
 export class NodeHelper{
   /**
@@ -29,30 +29,34 @@ export class NodeHelper{
    * @param item
    * @returns {any}
    */
-  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : string) : string
+  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : string|ListItem) : string
   {
-    if(item==RestConstants.CM_NAME)
+    let name:string;
+    if(typeof item !== "string"){
+      name=item.name;
+    }
+    else{
+      name=item;
+    }
+    if(name==RestConstants.CM_NAME)
       return node["name"];
-    if(item==RestConstants.CM_PROP_TITLE){
+    if(name==RestConstants.CM_PROP_TITLE){
       return RestHelper.getTitle(node);
     }
-    if(item==RestConstants.SIZE) {
+    if(name==RestConstants.SIZE) {
       return node.size ? (new FormatSizePipe().transform(node.size,null) as string) : translation.instant('NO_SIZE');
     }
-    if(item==RestConstants.MEDIATYPE){
+    if(name==RestConstants.MEDIATYPE){
       return translation.instant("MEDIATYPE."+node.mediatype);
     }
-    if(item==RestConstants.CM_CREATOR){
+    if(name==RestConstants.CM_CREATOR){
       return RestHelper.getPersonWithConfigDisplayName(node.createdBy,config);
     }
-    if(item==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
-      let value=node.properties[RestConstants.CCM_PROP_WF_STATUS];
-      if(value) value=value[0];
-      if(!value)
-        value=WorkspaceWorkflowComponent.STATUS_UNCHECKED;
-      return '<div class="workflowStatus workflowStatus_'+value+'">'+translation.instant('WORKFLOW.'+value)+'</div>'
+    if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
+      let workflow=NodeHelper.getWorkflowStatus(config,node);
+      return '<div class="workflowStatus" style="background-color: '+workflow.color+'">'+translation.instant('WORKFLOW.'+workflow.id)+'</div>'
     }
-    if(item==RestConstants.DIMENSIONS){
+    if(name==RestConstants.DIMENSIONS){
       let width=node.properties[RestConstants.CCM_PROP_WIDTH];
       let height=node.properties[RestConstants.CCM_PROP_HEIGHT];
       let megapixel=Math.round((width*height)/1000000.);
@@ -64,15 +68,23 @@ export class NodeHelper{
       }
     }
     let value : string;
-    if(node.properties[item])
-      value=node.properties[item].join(", ");
-    if((node as any)[item])
-      value=(node as any)[item];
+    if(node.properties[name])
+      value=node.properties[name].join(", ");
+    if((node as any)[name])
+      value=(node as any)[name];
 
-    if(value && RestConstants.DATE_FIELDS.indexOf(item)!=-1){
-      value=DateHelper.formatDate(translation,value);
-      if(node.properties[item])
-        node.properties[item][0]=value;
+    if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1){
+      if(typeof item !== "string" && item.format){
+        value=DateHelper.formatDateByPattern(value,item.format);
+      }
+      else {
+        value = DateHelper.formatDate(translation, value);
+      }
+      if(node.properties[name])
+        node.properties[name][0]=value;
+    }
+    if(node.properties[name+RestConstants.DISPLAYNAME_SUFFIX]){
+      value=node.properties[name+RestConstants.DISPLAYNAME_SUFFIX].join(", ");
     }
     if(value)
       return value;
@@ -132,6 +144,17 @@ export class NodeHelper{
         {queryParams:{id:node.parent.id,file:node.ref.id,root:data.scope}});
     });
   }
+  /**
+   * Navigate to the workspace
+   * @param nodeService instance of NodeService
+   * @param router instance of Router
+   * @param login a result of the isValidLogin method
+   * @param folder The folder id to open
+   */
+  public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
+    router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
+      {queryParams:{id:folder}});
+  }
 
   /**
    * Get a formatted attribute from a collection
@@ -145,6 +168,9 @@ export class NodeHelper{
     if(item=='info'){
       let childs=collection.childReferencesCount;
       let coll=collection.childCollectionsCount;
+
+      return '<i class="material-icons">layers</i> '+coll+' <i class="material-icons">insert_drive_file</i> '+childs;
+      /*
       let result="";
       if(coll>0){
         result=coll+" "+translate.instant("COLLECTION.INFO_REFERENCES"+(coll>1 ? "_MULTI" : ""));
@@ -158,23 +184,25 @@ export class NodeHelper{
         return translate.instant("COLLECTION.INFO_NO_CONTENT");
       }
       return result;
+          */
     }
     if(item=='scope'){
       let scope=collection.scope;
       let icon="help";
+      let scopeName="help";
       if(scope==RestConstants.COLLECTIONSCOPE_MY){
         icon="lock";
+        scopeName="MY";
       }
-      if(scope==RestConstants.COLLECTIONSCOPE_ORGA){
-        icon="domain";
+      if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
+        icon="group";
+        scopeName="SHARED";
       }
-      if(scope==RestConstants.COLLECTIONSCOPE_ALL){
+      if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
         icon="language";
+        scopeName="PUBLIC";
       }
-      if(scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
-        icon="build";
-      }
-      return '<i class="material-icons collectionScope">'+icon+'</i> '+translate.instant('COLLECTION.SCOPE.'+scope);
+      return '<i class="material-icons collectionScope">'+icon+'</i> '+translate.instant('COLLECTION.SCOPE.'+scopeName);
     }
     return collection[item];
   }
@@ -307,7 +335,7 @@ export class NodeHelper{
   public static getAttribute(translate:TranslateService,config:ConfigurationService,data : any,item : ListItem) : string{
     if(item.type=='NODE') {
       if (item.name == RestConstants.CM_MODIFIED_DATE)
-        return '<span property="dateModified" title="' + translate.instant('ACCESSIBILITY.LASTMODIFIED') + '">' + NodeHelper.getNodeAttribute(translate,config, data, item.name) + '</span>';
+        return '<span property="dateModified" title="' + translate.instant('ACCESSIBILITY.LASTMODIFIED') + '">' + NodeHelper.getNodeAttribute(translate,config, data, item) + '</span>';
 
       if (item.name == RestConstants.CCM_PROP_LICENSE) {
         if (data.licenseURL) {
@@ -323,7 +351,7 @@ export class NodeHelper{
         }
         return '<img alt="" src="'+NodeHelper.getSourceIconPath('home')+'">';
       }
-      return NodeHelper.getNodeAttribute(translate,config, data, item.name);
+      return NodeHelper.getNodeAttribute(translate,config, data, item);
     }
     if(item.type=='COLLECTION'){
       return NodeHelper.getCollectionAttribute(translate,data.collection,item.name);
@@ -353,10 +381,20 @@ export class NodeHelper{
    * @param options
    * @param progressCallback
    */
-  public static addCustomNodeOptions(toast:Toast,http:Http,connector:RestConnectorService,custom: any, nodesIn: Node[], options: OptionItem[],progressCallback:Function) {
+  public static applyCustomNodeOptions(toast:Toast, http:Http, connector:RestConnectorService, custom: any, nodesIn: Node[], options: OptionItem[], progressCallback:Function,replaceUrl:any={}) {
     if (custom) {
       for (let c of custom) {
-        if (c.isDirectory != 'any' && nodesIn && c.isDirectory != nodesIn[0].isDirectory)
+        if(c.remove){
+          let i=Helper.indexOfObjectArray(options,'name',c.name)
+          if(i!=-1)
+            options.splice(i,1);
+          continue;
+        }
+        if(c.mode=='nodes' && (!nodesIn || nodesIn.length))
+          continue;
+        if(c.mode=='noNodes' && nodesIn && nodesIn.length)
+          continue;
+        if (c.mode=='nodes' && c.isDirectory != 'any' && nodesIn && c.isDirectory != nodesIn[0].isDirectory)
           continue;
         if (!c.multiple && nodesIn && nodesIn.length > 1)
           continue;
@@ -366,13 +404,20 @@ export class NodeHelper{
         let item = new OptionItem(c.name, c.icon, (node: Node) => {
           let nodes = node == null ? nodesIn : [node];
           let ids = "";
-          for (let node of nodes) {
-            if (ids)
-              ids += ",";
-            ids += node.ref.id;
+          if(nodes) {
+            for (let node of nodes) {
+              if (ids)
+                ids += ",";
+              ids += node.ref.id;
+            }
           }
           let url = c.url.replace(":id", ids)
           url = url.replace(":api", connector.getAbsoluteEndpointUrl());
+          if(replaceUrl){
+            for(let key in replaceUrl){
+              url = url.replace(key,encodeURIComponent(replaceUrl[key]));
+            }
+          }
           if (!c.ajax) {
             window.open(url);
             return;
@@ -471,6 +516,28 @@ export class NodeHelper{
   }
   public static getSourceIconPath(src: string) {
     return 'assets/images/sources/' + src + '.png';
+  }
+  public static getWorkflowStatusById(config:ConfigurationService,id:string) : WorkflowDefinition{
+    let workflows=NodeHelper.getWorkflows(config);
+    let pos=Helper.indexOfObjectArray(workflows,'id',id);
+    if(pos==-1) pos=0;
+    let workflow=workflows[pos];
+    return workflow;
+  }
+  public static getWorkflowStatus(config:ConfigurationService,node:Node) : WorkflowDefinition{
+    let value=node.properties[RestConstants.CCM_PROP_WF_STATUS];
+    if(value) value=value[0];
+    if(!value)
+      return NodeHelper.getWorkflows(config)[0];
+   return NodeHelper.getWorkflowStatusById(config,value);
+  }
+  static getWorkflows(config: ConfigurationService) : WorkflowDefinition[] {
+    return config.instant("workflows",[
+      RestConstants.WORKFLOW_STATUS_UNCHECKED,
+      RestConstants.WORKFLOW_STATUS_TO_CHECK,
+      RestConstants.WORKFLOW_STATUS_HASFLAWS,
+      RestConstants.WORKFLOW_STATUS_CHECKED,
+    ]);
   }
 }
 

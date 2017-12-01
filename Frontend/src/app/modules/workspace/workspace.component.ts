@@ -34,6 +34,7 @@ import {trigger} from "@angular/animations";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {UIConstants} from "../../common/ui/ui-constants";
+import {RestSearchService} from "../../common/rest/services/rest-search.service";
 
 @Component({
   selector: 'workspace-main',
@@ -826,7 +827,7 @@ export class WorkspaceMainComponent{
       options.push(del);
 
       let custom=this.config.instant("nodeOptions");
-      NodeHelper.addCustomNodeOptions(this.toast,this.http,this.connector,custom, nodes, options,(load:boolean)=>this.globalProgress=load);
+      NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom, nodes, options,(load:boolean)=>this.globalProgress=load);
     }
     if(!fromList && this.root!='RECYCLE') {
       this.viewToggle = new OptionItem("", this.viewType==0 ? "view_module" : "list", (node: Node) => this.toggleView());
@@ -903,7 +904,10 @@ export class WorkspaceMainComponent{
   }
   private openNode(node : Node,useConnector=true) {
     if(!node.isDirectory){
-      if(RestToolService.isLtiObject(node)){
+      if(RestSearchService.isSavedSearchObject(node)){
+        UIHelper.routeToSearchNode(this.router,node);
+      }
+      else if(RestToolService.isLtiObject(node)){
         this.toolService.openLtiObject(node);
       }
       else if(useConnector && RestConnectorsService.connectorSupportsEdit(this.connectorList,node)){
@@ -1020,8 +1024,16 @@ export class WorkspaceMainComponent{
   }
   private addToCollectionList(collection:Node[],nodes=this.addNodesToCollection,position=0,error=false){
     if(position>=nodes.length){
-      if(!error)
-        this.toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION",{count:nodes.length,collection:collection[0].title});
+      if(!error) {
+        let scope=collection[0].collection.scope;
+        if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
+          scope='SHARED';
+        }
+        else if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
+          scope='PUBLIC';
+        }
+        this.toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: nodes.length, collection: collection[0].title});
+      }
       this.globalProgress=false;
       return;
     }

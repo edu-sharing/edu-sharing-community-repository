@@ -6,73 +6,20 @@
       <div *ngIf="this._nodes && this._nodes.length!=1" class="card-title">{{'WORKSPACE.LICENSE.TITLE_MULTI' | translate:{count:this._nodes.length} }}</div>
       <spinner *ngIf="loading"></spinner>
       <div *ngIf="this._nodes && !loading" class="card-scroll">
-      <div>
-      <label for="type">{{'WORKSPACE.LICENSE.TYPE' | translate}}</label>
-      <select class="licenseType" id="type" type="text" [(ngModel)]="type">
-        <option *ngFor="let license of licenseMainTypes" [value]="license">{{ 'WORKSPACE.LICENSE.'+license+"_NAME" | translate}}</option>
-        <!--
-        <option value="">{{'WORKSPACE.LICENSE.NONE' | translate}}</option>
-        <option value="CC_BY">{{'WORKSPACE.LICENSE.CC_NAME' | translate}}</option>
-        <option value="CC_0">{{'WORKSPACE.LICENSE.CC0_NAME' | translate}}</option>
-        <option value="EDU">{{'WORKSPACE.LICENSE.EDU_NAME' | translate}}</option>
-        <option value="CUSTOM">{{'WORKSPACE.LICENSE.CUSTOM_NAME' | translate}}</option>
-        -->
-      </select>
-      </div>
-        <div>
-      <div *ngIf="type=='CC_BY'" class="cc">
-        <h5 class="ccAbout"><a [href]="licenseUrls.CC_BY_ABOUT" target="_blank">{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate}}</a></h5>
-        <div *ngIf="isAllowedLicense('CC_BY_SA') || isAllowedLicense('CC_BY_ND')">
-          <h4>{{'WORKSPACE.LICENSE.CC.SHARE' | translate}}</h4>
-          <h5>{{'WORKSPACE.LICENSE.CC.SHARE_INFO' | translate}}</h5>
-          <input type="radio" name="CC_SHARE" [(ngModel)]="ccShare" value="" id="CC_ALL"><label for="CC_ALL">{{'YES' | translate}}</label>
-          <div *ngIf="isAllowedLicense('CC_BY_SA')"><input type="radio" name="CC_SHARE" [(ngModel)]="ccShare" value="SA" id="CC_SA"><label for="CC_SA">{{'WORKSPACE.LICENSE.CC.YES_ALIKE' | translate}}</label></div>
-          <div *ngIf="isAllowedLicense('CC_BY_ND')"><input type="radio" name="CC_SHARE" [(ngModel)]="ccShare" value="ND" id="CC_ND"><label for="CC_ND">{{'NO' | translate}}</label></div>
+        <div class="oerSelect switch">
+          <label>
+            {{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}
+            <input type="checkbox" [(ngModel)]="oerMode">
+            <span class="lever"></span>
+          </label>
         </div>
-        <div *ngIf="isAllowedLicense('CC_BY_NC')">
-          <h4>{{'WORKSPACE.LICENSE.CC.COMMERCIAL' | translate}}</h4>
-          <h5>{{'WORKSPACE.LICENSE.CC.COMMERCIAL_INFO' | translate}}</h5>
-          <input type="radio" name="CC_COMMERCIAL" [(ngModel)]="ccCommercial" value="" id="CC_C"><label for="CC_C">{{'YES' | translate}}</label>
-          <input type="radio" name="CC_COMMERCIAL" [(ngModel)]="ccCommercial" value="NC" id="CC_NC"><label for="CC_NC">{{'NO' | translate}}</label>
-        </div>
-        <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i class="material-icons">{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
-        <div *ngIf="showCcAuthor">
-          <div class="ccAuthorGroup">
-          <label for="CC_TITLE">{{'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate}}</label>
-          <input type="text" id="CC_TITLE" [(ngModel)]="ccTitleOfWork">
-          <label for="CC_URL">{{'WORKSPACE.LICENSE.CC.SOURCE_URL' | translate}}</label>
-          <input type="text" id="CC_URL" [(ngModel)]="ccSourceUrl">
-          <label for="CC_PROFILE">{{'WORKSPACE.LICENSE.CC.PROFILE_URL' | translate}}</label>
-          <input type="text" id="CC_PROFILE" [(ngModel)]="ccProfileUrl">
-          </div>
-        </div>
-      </div>
-          <div *ngIf="type=='COPYRIGHT'" class="copyright">
-            <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
-              <div class="radio">
-                <input type="radio" [(ngModel)]="copyrightType" value="COPYRIGHT_FREE" id="COPYRIGHT_FREE">
-                <label for="COPYRIGHT_FREE">
-                  <h4>{{'WORKSPACE.LICENSE.COPYRIGHT.FREE' | translate}}</h4>
-                  <h5 innerHTML="{{'WORKSPACE.LICENSE.COPYRIGHT.FREE_INFO' | translate}}"></h5>
-                </label>
-              </div>
-            </div>
-            <div *ngIf="isAllowedLicense('COPYRIGHT_LICENSE')">
-              <div class="radio">
-                <input type="radio" [(ngModel)]="copyrightType" value="COPYRIGHT_LICENSE" id="COPYRIGHT_LICENSE">
-                <label for="COPYRIGHT_LICENSE">
-                  <h4>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE' | translate}}</h4>
-                  <h5>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE_INFO' | translate}}</h5>
-                </label>
-              </div>
-            </div>
-
-          </div>
-          <div *ngIf="type=='CC_0'" class="cc">
+        <div class="oerLicenses" *ngIf="oerMode">
+          <div class="oerCC0">
+            <h4>{{'WORKSPACE.LICENSE.CC_0_NAME' | translate}}</h4>
             <div *ngIf="isAllowedLicense('CC_0')">
               <div class="radio">
-                <input type="radio" [(ngModel)]="cc0Type" value="CC_0" id="CC_0">
-                <label for="CC_0">
+                <input type="radio" (ngModel)="type" [ngModel]="cc0Type" (change)="setCC0()" value="CC_0" id="CC_02">
+                <label for="CC_02">
                   <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
                   <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
                   <h5><a [href]="licenseUrls.CC_0" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
@@ -81,39 +28,170 @@
             </div>
             <div *ngIf="isAllowedLicense('PDM')">
               <div class="radio">
-                <input type="radio" [(ngModel)]="cc0Type" value="PDM" id="PDM">
-                <label for="PDM">
+                <input type="radio" [(ngModel)]="cc0Type" (change)="$event.target.checked ? type='CC_0' : null" value="PDM" id="PDM2">
+                <label for="PDM2">
                   <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
                   <h5><a [href]="licenseUrls.PDM" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
-
           </div>
-          <div *ngIf="type=='EDU'" class="edu">
-            <div class="radio">
-              <input type="radio" [(ngModel)]="eduType" value="P_NR" id="P_NR">
-              <label for="P_NR">
-                <h4>{{'WORKSPACE.LICENSE.EDU.P_NR' | translate}}</h4>
-                <h5>{{'WORKSPACE.LICENSE.EDU.P_NR_INFO' | translate}}</h5>
-              </label>
+          <div class="oerCCBY">
+            <h4>{{'WORKSPACE.LICENSE.CC_BY_NAME' | translate}}</h4>
+            <div *ngIf="isAllowedLicense('CC_BY')">
+              <div class="radio">
+                <input type="radio" [ngModel]="type+(ccShare ? '_'+ccShare : '')" value="CC_BY" (change)="$event.target.checked ? setCCBy() : null" id="CC_BY">
+                <label for="CC_BY">
+                  <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_RADIO' | translate}}</h4>
+                  <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_INFO' | translate}}</h5>
+                  <h5><a [href]="licenseUrls.CC_BY" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                </label>
+              </div>
             </div>
-            <div class="radio">
-              <input type="radio" [(ngModel)]="eduType" value="NC" id="NC">
-              <label for="NC">
-                <h4>{{'WORKSPACE.LICENSE.EDU.NC' | translate}}</h4>
-                <h5>{{'WORKSPACE.LICENSE.EDU.NC_INFO' | translate}}</h5>
-              </label>
+            <div *ngIf="isAllowedLicense('CC_BY_SA')">
+              <div class="radio">
+                <input type="radio" [(ngModel)]="ccShare" (change)="$event.target.checked ? type='CC_BY' : null"  value="SA" id="CC_BY_SA">
+                <label for="CC_BY_SA">
+                  <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_RADIO' | translate}}</h4>
+                  <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_INFO' | translate}}</h5>
+                  <h5><a [href]="licenseUrls.CC_BY" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                </label>
+              </div>
             </div>
-            <input type="checkbox" class="filled-in" [(ngModel)]="eduDownload" id="DOWNLOAD"><label for="DOWNLOAD">{{'WORKSPACE.LICENSE.EDU.DOWNLOAD' | translate}}</label>
-
+            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i class="material-icons">{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
           </div>
-          <div *ngIf="type=='CUSTOM'" class="custom">
-            <textarea class="materialize-textarea" [(ngModel)]="rightsDescription" placeholder="{{'WORKSPACE.LICENSE.CUSTOM_RIGHTS' | translate}}"></textarea>
+        </div>
+        <div class="allLicenses" *ngIf="!oerMode">
+          <label for="type" class="licenseTypeLabel">{{'WORKSPACE.LICENSE.TYPE' | translate}}</label>
+          <select #selectLicense class="licenseType" id="type" type="text" [(ngModel)]="type">
+            <option *ngFor="let license of licenseMainTypes" [value]="license">{{ 'WORKSPACE.LICENSE.'+license+"_NAME" | translate}}</option>
+            <!--
+            <option value="">{{'WORKSPACE.LICENSE.NONE' | translate}}</option>
+            <option value="CC_BY">{{'WORKSPACE.LICENSE.CC_NAME' | translate}}</option>
+            <option value="CC_0">{{'WORKSPACE.LICENSE.CC0_NAME' | translate}}</option>
+            <option value="EDU">{{'WORKSPACE.LICENSE.EDU_NAME' | translate}}</option>
+            <option value="CUSTOM">{{'WORKSPACE.LICENSE.CUSTOM_NAME' | translate}}</option>
+            -->
+          </select>
+            <div>
+          <div *ngIf="type=='CC_BY'" class="cc">
+            <h5 class="ccAbout"><a [href]="licenseUrls.CC_BY_ABOUT" target="_blank">{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate}}</a></h5>
+            <div *ngIf="isAllowedLicense('CC_BY_SA') || isAllowedLicense('CC_BY_ND')">
+              <h4>{{'WORKSPACE.LICENSE.CC.SHARE' | translate}}</h4>
+              <h5>{{'WORKSPACE.LICENSE.CC.SHARE_INFO' | translate}}</h5>
+              <input type="radio" name="CC_SHARE" [(ngModel)]="ccShare" value="" id="CC_ALL"><label for="CC_ALL">{{'YES' | translate}}</label>
+              <div *ngIf="isAllowedLicense('CC_BY_SA')"><input type="radio" name="CC_SHARE" [(ngModel)]="ccShare" value="SA" id="CC_SA"><label for="CC_SA">{{'WORKSPACE.LICENSE.CC.YES_ALIKE' | translate}}</label></div>
+              <div *ngIf="isAllowedLicense('CC_BY_ND')"><input type="radio" name="CC_SHARE" [(ngModel)]="ccShare" value="ND" id="CC_ND"><label for="CC_ND">{{'NO' | translate}}</label></div>
+            </div>
+            <div *ngIf="isAllowedLicense('CC_BY_NC')">
+              <h4>{{'WORKSPACE.LICENSE.CC.COMMERCIAL' | translate}}</h4>
+              <h5>{{'WORKSPACE.LICENSE.CC.COMMERCIAL_INFO' | translate}}</h5>
+              <input type="radio" name="CC_COMMERCIAL" [(ngModel)]="ccCommercial" value="" id="CC_C"><label for="CC_C">{{'YES' | translate}}</label>
+              <input type="radio" name="CC_COMMERCIAL" [(ngModel)]="ccCommercial" value="NC" id="CC_NC"><label for="CC_NC">{{'NO' | translate}}</label>
+            </div>
+            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i class="material-icons">{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
           </div>
+              <div *ngIf="type=='COPYRIGHT'" class="copyright">
+                <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
+                  <div class="radio">
+                    <input type="radio" [(ngModel)]="copyrightType" value="COPYRIGHT_FREE" id="COPYRIGHT_FREE">
+                    <label for="COPYRIGHT_FREE">
+                      <h4>{{'WORKSPACE.LICENSE.COPYRIGHT.FREE' | translate}}</h4>
+                      <h5 innerHTML="{{'WORKSPACE.LICENSE.COPYRIGHT.FREE_INFO' | translate}}"></h5>
+                    </label>
+                  </div>
+                </div>
+                <div *ngIf="isAllowedLicense('COPYRIGHT_LICENSE')">
+                  <div class="radio">
+                    <input type="radio" [(ngModel)]="copyrightType" value="COPYRIGHT_LICENSE" id="COPYRIGHT_LICENSE">
+                    <label for="COPYRIGHT_LICENSE">
+                      <h4>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE' | translate}}</h4>
+                      <h5>{{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE_INFO' | translate}}</h5>
+                    </label>
+                  </div>
+                </div>
 
+              </div>
+              <div *ngIf="type=='CC_0'" class="cc">
+                <div *ngIf="isAllowedLicense('CC_0')">
+                  <div class="radio">
+                    <input type="radio" [(ngModel)]="cc0Type" value="CC_0" id="CC_0">
+                    <label for="CC_0">
+                      <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
+                      <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
+                      <h5><a [href]="licenseUrls.CC_0" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                    </label>
+                  </div>
+                </div>
+                <div *ngIf="isAllowedLicense('PDM')">
+                  <div class="radio">
+                    <input type="radio" [(ngModel)]="cc0Type" value="PDM" id="PDM">
+                    <label for="PDM">
+                      <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
+                      <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
+                      <h5><a [href]="licenseUrls.PDM" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                    </label>
+                  </div>
+                </div>
 
+              </div>
+              <div *ngIf="type=='EDU'" class="edu">
+                <div class="radio">
+                  <input type="radio" [(ngModel)]="eduType" value="P_NR" id="P_NR">
+                  <label for="P_NR">
+                    <h4>{{'WORKSPACE.LICENSE.EDU.P_NR' | translate}}</h4>
+                    <h5>{{'WORKSPACE.LICENSE.EDU.P_NR_INFO' | translate}}</h5>
+                  </label>
+                </div>
+                <div class="radio">
+                  <input type="radio" [(ngModel)]="eduType" value="NC" id="NC">
+                  <label for="NC">
+                    <h4>{{'WORKSPACE.LICENSE.EDU.NC' | translate}}</h4>
+                    <h5>{{'WORKSPACE.LICENSE.EDU.NC_INFO' | translate}}</h5>
+                  </label>
+                </div>
+                <input type="checkbox" class="filled-in" [(ngModel)]="eduDownload" id="DOWNLOAD"><label for="DOWNLOAD">{{'WORKSPACE.LICENSE.EDU.DOWNLOAD' | translate}}</label>
+
+              </div>
+              <div *ngIf="type=='CUSTOM'" class="custom">
+                <textarea #rights id="licenseRights" class="materialize-textarea" [(ngModel)]="rightsDescription" placeholder="{{'WORKSPACE.LICENSE.CUSTOM_RIGHTS' | translate}}"></textarea>
+              </div>
+          </div>
+        </div>
+        <div *ngIf="showCcAuthor">
+          <div class="ccAuthorGroup" [class.ccAuthorGroupOer]="oerMode">
+            <label for="CC_TITLE">{{'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate}}</label>
+            <input type="text" id="CC_TITLE" [(ngModel)]="ccTitleOfWork">
+            <label for="CC_URL">{{'WORKSPACE.LICENSE.CC.SOURCE_URL' | translate}}</label>
+            <input type="text" id="CC_URL" [(ngModel)]="ccSourceUrl">
+            <label for="CC_PROFILE">{{'WORKSPACE.LICENSE.CC.PROFILE_URL' | translate}}</label>
+            <input type="text" id="CC_PROFILE" [(ngModel)]="ccProfileUrl">
+          </div>
+        </div>
+        <div class="row">
+            <div class="col s12">
+              <ul class="tabs" id="mdsAuthorTabs">
+                <li class="clickable tab col s6" (click)="authorTab=0">
+                  <a [class.active]="authorTab==0">{{'MDS.AUTHOR_FREETEXT' | translate}}</a>
+                </li>
+                <li class="clickable tab col s6" (click)="authorTab=1">
+                  <a [class.active]="authorTab==1">{{'MDS.AUTHOR_PERSON' | translate}}</a>
+                </li>
+              </ul>
+            </div>
+            <div class="authorFreetext" *ngIf="authorTab==0"><textarea class="materialize-textarea" id="authorFreetext" #freetext [(ngModel)]="authorFreetext" placeholder="{{'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate}}"></textarea></div>
+            <div class="authorPerson" *ngIf="authorTab==1">
+              <div class="vcardGroup">
+                <label for="firstName">{{'VCARD.Givenname' | translate}}</label>
+                <input type="text" class="vcard_Givenname vcardFirstInput" id="firstName" [(ngModel)]="authorVCard.givenname"><i class="material-icons">person</i>
+              </div>
+              <div class="vcardGroup">
+                <label for="lastName">{{'VCARD.Surname' | translate}}</label>
+                <input type="text" class="vcard_Surname" id="lastName" [(ngModel)]="authorVCard.surname">
+              </div>
+            </div>
+          </div>
           <div class="currentLicense">
           <h4  *ngIf="type!='MULTI'">{{'WORKSPACE.LICENSE.CURRENT' | translate}}</h4>
           <img *ngIf="type!='MULTI'" class="currentLicenseIcon" src="{{getLicenseIcon()}}">
@@ -130,12 +208,17 @@
               <option value="2.0">2.0</option>
               <option value="3.0">3.0</option>
               <option value="4.0">4.0</option>
-
             </select>
           </div>
+            <div class="licenseName">
           <h4>{{getLicenseName()}}</h4>
+              <div class="oerStatus" *ngIf="getLicenseProperty()!='MULTI'">
+                <span class="oer" *ngIf="isOerLicense()">{{'WORKSPACE.LICENSE.OER' | translate }}</span>
+                <span class="notOer" *ngIf="!isOerLicense()">{{'WORKSPACE.LICENSE.NOT_OER' | translate }}</span>
+              </div>
+            </div>
           <div class="currentLicenseDescription">
-            <div *ngIf="type=='CUSTOM'">{{rightsDescription}}</div>
+            <div class="customLicenseDescription" *ngIf="type=='CUSTOM'">{{rightsDescription}}</div>
             <div *ngIf="type!='CUSTOM' && type!='COPYRIGHT'" innerHTML="{{ 'WORKSPACE.LICENSE.DESCRIPTION.'+type | translate }}">
             </div>
             <div *ngIf="type=='COPYRIGHT'">
@@ -166,11 +249,10 @@
         </div>
     </div>
     </div>
-    </div>
 
     <div class="card-action">
       <a class="waves-effect waves-light btn" [class.disabled]="loading || type=='MULTI'" (click)="saveLicense()">{{'SAVE' | translate }}</a>
       <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
-    </div>
   </div>
+</div>

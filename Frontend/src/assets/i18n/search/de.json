@@ -11,11 +11,12 @@
     "EXPANDED_SEARCH": "Erweiterte Suche",
     "METADATASET":"Metadaten-Set wählen",
     "METADATASET_INFO":"Nach anderen Suchkriterien filtern",
-    "APPLY": "Anwenden",
+    "APPLY": "Übernehmen",
     "INFORMATION":"Informationen",
     "TOGGLE_EXPANDED_SEARCH":"Erweiterte Suche umschalten",
     "TOGGLE_RESULT_VIEW":"Ansicht der Suchergebnisse umschalten",
-    "APPLY_FILTER":"Filter anwenden",
+    "EMBED_SEARCH_ACTION":"Suche einbinden",
+    "SAVE_SEARCH_ACTION":"Suche speichern",
     "FILTER":"Filter",
     "CLICK_TO_REMOVE":"Klicken zum Entfernen",
     "PREVIEWIMAGE_FOR":"Vorschaubild für",
@@ -30,6 +31,33 @@
     "RENDER": {
       "BACK_TO_SEARCH":"Zurück zur Suche"
     },
-    "NODE_IMPORTED":"Objekt wurde importiert<br><a href='{{link}}'>Anzeigen</a>"
+    "NODE_IMPORTED":"Objekt wurde importiert<br><a href='{{link}}'>Anzeigen</a>",
+    "SHOW_NODE_STORE":"Merkliste",
+    "ADD_NODE_STORE":"Auf Merkliste",
+    "ADDED_TO_NODE_STORE":"{{count}} Element(e) wurden auf die Merkliste gesetzt",
+    "ADDED_TO_NODE_STORE_EXISTS":"Element {{name}} ist bereits auf der Merkliste",
+    "NODE_STORE":{
+      "TITLE":"Merkliste",
+      "LIST_EMPTY":"Keine Elemente auf der Merkliste",
+      "REMOVE_ITEM":"Entfernen",
+      "REMOVED_ITEMS":"{{count}} Element(e) wurden von der Merkliste entfernt"
+    },
+    "APPLY_FILTER":"Anwenden",
+    "TAB_FILTER":"Filter",
+    "TAB_SAVED":"Gespeichert",
+    "MANAGE_SAVED_SEARCH":"Suchen verwalten",
+    "NO_SAVED_SEARCH":"Noch keine gespeicherten Suchen.",
+    "NO_SAVED_SEARCH_FOUND":"Keine übereinstimmenden gespeicherten Suchen.",
+    "SAVED_SEARCH_ONLY_OWN":"Nur meine anzeigen",
+    "SAVED_SEARCH_QUERY":"Durchsuchen...",
+    "SAVE_SEARCH":{
+      "TITLE":"Suche speichern",
+      "DESCRIPTION":"Ihre aktuelle Suche wird in einer Datei gespeichert. Wenn Sie diese Datei öffnen, können Sie die aktuelle Suchanfrage wiederherstellen. Die Ergebnisse der Suchanfrage werden nicht gespeichert und können sich mit der Zeit ändern.",
+      "NAME":"Bezeichnung",
+      "UNKNOWN_QUERY":"Neue Suche",
+      "SEARCH_EXISTS_TITLE":"Suchanfrage existiert bereits",
+      "SEARCH_EXISTS_MESSAGE":"Es ist bereits eine gespeicherte Suchanfrage mit diesen Namen vorhanden. Wenn Sie fortfahren, wird die bestehende Suchanfrage mit den aktuellen Einstellungen ersetzt",
+      "TOAST_SAVED":"Die aktuelle Suchanfrage wurde erfolgreich gespeichert"
+    }
   }
 }

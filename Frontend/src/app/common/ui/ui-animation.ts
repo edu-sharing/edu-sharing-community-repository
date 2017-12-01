@@ -2,6 +2,7 @@ import {style, animate, transition} from "@angular/animations";
 export class UIAnimation{
   public static ANIMATION_TIME_FAST=100;
   public static ANIMATION_TIME_NORMAL=200;
+  public static ANIMATION_TIME_SLOW=300;
   public static fade(time=UIAnimation.ANIMATION_TIME_NORMAL){
     return  [transition(':enter', [
       style({opacity:0}),

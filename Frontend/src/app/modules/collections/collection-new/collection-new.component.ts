@@ -146,6 +146,8 @@ export class CollectionNewComponent {
                     this.previewUrl = collection.collection.preview.isIcon ? null :  collection.collection.preview.url;
                     if (collection.collection.color!=null) this.newCollectionColor = collection.collection.color;
                   this.newCollectionScope = collection.collection.scope;
+                  if(this.newCollectionScope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC)
+                    this.newCollectionScope=RestConstants.COLLECTIONSCOPE_CUSTOM;
 
                   this.isLoading = false;
                   this.isReady = true;
@@ -383,7 +385,7 @@ export class CollectionNewComponent {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>{
         if(has){
           this.newCollectionStep=2;
-          this.hasCustomScope=this.newCollectionScope==RestConstants.COLLECTIONSCOPE_CUSTOM;
+          this.hasCustomScope=this.newCollectionScope==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionScope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC;
           this.currentCollection=id;
           this.shareToAll=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
           this.isLoading=false;

@@ -225,12 +225,15 @@ table, div {
 .collections-edit-button {
     right: 50px;
 }
-
+.collections-pin-button {
+  right: 90px;
+}
 .collections-delete-button {
     right: 10px;
 }
-.collections-edit-button,.collections-delete-button{
+.collections-pin-button,.collections-edit-button,.collections-delete-button{
   position: absolute;
+  width:32px;
   height:32px;
   top: 160px;
   color: #6b6b6b;
@@ -238,7 +241,11 @@ table, div {
   padding: 5px;
   background-color: #fff;
   cursor: pointer;
-
+}
+:host /deep/{
+  .collections-pin-button custom-icon g{
+    fill: #6b6b6b;
+  }
 }
 
 @media only screen and (max-width: 1000px) {
@@ -300,11 +307,15 @@ table, div {
         padding-right: 8px;
         min-width: unset;
     }
+    .collections-pin-button,
     .collections-edit-button,
     .collections-delete-button{
       position: absolute;
       top: auto;
       bottom:15px;
+    }
+    .collections-pin-button {
+      right: 105px;
     }
     .collections-edit-button {
         right: 60px;

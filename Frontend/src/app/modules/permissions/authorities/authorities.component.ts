@@ -31,6 +31,7 @@ import {ListItem} from "../../../common/ui/list-item";
   ]
 })
 export class PermissionsAuthoritiesComponent {
+  public GROUP_TYPES=RestConstants.VALID_GROUP_TYPES;
   public list : any[]=[];
   public edit : any;
   private editDetails : any;

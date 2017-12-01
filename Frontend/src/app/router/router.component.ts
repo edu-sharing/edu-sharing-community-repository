@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {RestTestComponent} from "../common/rest/directives/rest-test/rest-test.component";
 import {NodeRenderComponent} from "../common/ui/node-render/node-render.component";
-import {Router} from "@angular/router";
+import {Router, ActivatedRoute} from "@angular/router";
 import { ApplyToLmsComponent} from "../common/ui/apply-to-lms/apply-to-lms.component";
 import {SearchComponent} from "../modules/search/search.component";
 import {WorkspaceMainComponent} from "../modules/workspace/workspace.component";
@@ -31,7 +31,7 @@ export class RouterComponent {
    * @param route
    * @returns {any}
    */
-  static transformRoute(route : any) : any {
+  static transformRoute(route: any): any {
     let result: any = []; // we need a deep copy
     for (let r of route) {
       let a: any = {
@@ -47,7 +47,6 @@ export class RouterComponent {
     return result;
   }
 }
-
 // RouterComponent.transformRoute
 // this fails for aot because it can't call static functions
 /*

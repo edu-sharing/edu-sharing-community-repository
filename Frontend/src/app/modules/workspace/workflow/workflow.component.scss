@@ -76,15 +76,19 @@ h2{
 
 }
 .inputs{
-  display:table;
+  display:flex;
   width:100%;
   margin-bottom: -25px;
-
+  autocomplete{
+    display: flex;
+    width:0;
+    flex-grow: 1;
+  }
   .btn-flat {
     float: none;
     position: relative;
     left: 10px;
-    width: 190px;
+    min-width: 150px;
     .right{
       position: relative;
       top:2px;
@@ -92,20 +96,28 @@ h2{
     }
   }
   >div{
-    display: table-cell;
-    width:200px;
+    display: flex;
   }
   .selected{
     float:right;
+    left:7px;
   }
   .collection-item{
     height:40px;
     line-height: 3rem;
   }
+  .collection-item.disabled{
+    /*filter:blur(1px);*/
+    color:$textVeryLight;
+    i{
+      filter:saturate(0.5) contrast(0.5);
+      opacity: 0.5;
+    }
+  }
 }
 .chooseStatus{
   position:absolute;
   right: 30px;
-  width: 200px;
+  min-width: 200px;
   top: 10px;
 }

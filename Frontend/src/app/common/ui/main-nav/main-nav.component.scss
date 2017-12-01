@@ -1,4 +1,5 @@
 @import "../../../../styles/variables.scss";
+@import "../../../../styles/toast.scss";
 .topBar{
   position: fixed;
   top:0;
@@ -93,10 +94,53 @@ user-profile{
   height:200px;
 }
 
-.topBar span{
-  font-size: 130%;
-  position: relative;
-  margin-left: 10px;
+.topBar{
+  span {
+    font-size: 130%;
+    position: relative;
+    margin-left: 10px;
+  }
+  .nodeStore{
+    margin-right:10px;
+    position: relative;
+    top:5px;
+    >i{
+      color:$primary;
+    }
+  }
+  .nodeStoreCount{
+    position: absolute;
+    right: -3px;
+    top: -3px;
+    background-color: #fff;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    color: $primary;
+    font-size: 0.8em;
+    display: flex;
+    justify-content: center;
+  }
+  .nodeStoreAnimation{
+    position:absolute;
+    left:-5px;
+    top:10px;
+    /*
+    position:fixed;
+    transform:scale(4);
+    top:50%;
+    left:50%;
+    */
+    background-color: $toastLeft;
+    border-radius: 50%;
+    color:$textOnPrimary;
+    font-weight: bold;
+    font-size:11pt;
+    text-align: center;
+    width: 35px;
+    height: 35px;
+    padding-top: 7px;
+  }
 }
 
 .noScope{
@@ -225,7 +269,7 @@ user-profile{
 .topBar .iconPerson{
   display:none;
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+@media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .topBar input, .topBar input:focus {
     width: calc(100% - 50px);
   }

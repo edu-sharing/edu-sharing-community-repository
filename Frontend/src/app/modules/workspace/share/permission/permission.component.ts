@@ -32,14 +32,14 @@ export class WorkspacePermissionComponent  {
     }
 
     console.log(check);
-    this.invalidPermission=check.length!=1;
+    this.invalidPermission=check.length!=1 ||
+      (check[0]!=RestConstants.PERMISSION_CONSUMER && check[0]!=RestConstants.PERMISSION_COLLABORATOR && check[0]!=RestConstants.PERMISSION_COORDINATOR);
   }
   @Input() inherit = false;
   @Input() added = false;
   @Input() readOnly = true;
   @Input() showDelete = true;
   @Input() isDirectory = false;
-  @Input() canPublish = true;
   @Output() onRemove = new EventEmitter();
   @Output() onType = new EventEmitter();
 

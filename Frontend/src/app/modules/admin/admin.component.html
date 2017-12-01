@@ -154,14 +154,20 @@
   </div>
   <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.OAI' | translate}}</span></div>
   <div class="oai">
-    <input type="text" [(ngModel)]="oaiUrl" placeholder="{{'ADMIN.IMPORT.OAI_URL' | translate}}">
-    <input type="text" [(ngModel)]="oaiSet" placeholder="{{'ADMIN.IMPORT.OAI_SET' | translate}}">
-    <input type="text" [(ngModel)]="oaiPrefix" placeholder="{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}">
-    <input type="text" [(ngModel)]="oaiMetadata" placeholder="{{'ADMIN.IMPORT.OAI_METADATA' | translate}}">
-    <input type="text" [(ngModel)]="oaiFile" placeholder="{{'ADMIN.IMPORT.OAI_FILE' | translate}}">
-    <select [(ngModel)]="oaiImporter">
+    <input type="text" [(ngModel)]="oai.url" placeholder="{{'ADMIN.IMPORT.OAI_URL' | translate}}">
+    <input type="text" [(ngModel)]="oai.set" placeholder="{{'ADMIN.IMPORT.OAI_SET' | translate}}">
+    <input type="text" [(ngModel)]="oai.prefix" placeholder="{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}">
+    <input type="text" [(ngModel)]="oai.metadata" placeholder="{{'ADMIN.IMPORT.OAI_METADATA' | translate}}">
+    <input type="text" [(ngModel)]="oai.file" placeholder="{{'ADMIN.IMPORT.OAI_FILE' | translate}}">
+    <select [(ngModel)]="oai.className">
       <option *ngFor="let option of oaiClasses">{{ option }}</option>
     </select>
+    <input type="text" [(ngModel)]="oai.importerClassName" placeholder="{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}">
+    <input type="text" [(ngModel)]="oai.recordHandlerClassName" placeholder="{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}">
+    <input type="text" [(ngModel)]="oai.binaryHandlerClassName" placeholder="{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}">
+    <div class="oaiSave">
+      <input type="checkbox" id="oaiSave" class="filled-in" [(ngModel)]="oaiSave"><label for="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</label>
+    </div>
     <a class="btn-flat btn-shadow" (click)="removeImports()">{{'ADMIN.IMPORT.REMOVE_IMPORTS' | translate}}</a>
     <a class="btn waves-effect waves-light" (click)="oaiImport()">{{'ADMIN.IMPORT.OAI_START' | translate}}</a>
   </div>
@@ -189,4 +195,4 @@
     <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
   </div>
 </div>
-<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>
+<global-progress *ngIf="globalProgress"></global-progress>

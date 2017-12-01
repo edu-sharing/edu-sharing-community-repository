@@ -28,7 +28,7 @@ export class Translation  {
   };
   public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
-      config.get("supportedLanguages").subscribe((data: string[]) => {
+      config.get("supportedLanguages",["de","en"]).subscribe((data: string[]) => {
         translate.addLangs(data);
         translate.setDefaultLang(data[0]);
         translate.use(data[0]);

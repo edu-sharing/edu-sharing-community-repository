@@ -29,6 +29,8 @@
   import {ToolListComponent} from "./common/ui/tool-list/tool-list.component";
   import {UserProfileComponent} from "./common/ui/user-profile/user-profile.component";
   import {ToucheventDirective} from "./common/ui/touchevents/touchevents";
+  import {NodeTitlePipe} from "./common/ui/node-title.pipe";
+  import {CustomIconComponent} from "./common/ui/custom-icon/custom-icon.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -39,11 +41,13 @@ export const DECLARATIONS = [
       RestIamTestComponent,
       RestMdsTestComponent,
       AttributeHtmlPipe,
+      CustomIconComponent,
       DebugResultPipe,
       FormatSizePipe,
       NodeDatePipe,
       PermissionNamePipe,
       AuthorityNamePipe,
+      NodeTitlePipe,
       FileComponent,
       SpinnerComponent,
       ListTableComponent,

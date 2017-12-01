@@ -25,7 +25,10 @@ export class RestCollectionService {
     ]);
     return this.connector.put(query,null,this.connector.getRequestOptions());
   }
-
+  public setPinning = (collections : string[],repository=RestConstants.HOME_REPOSITORY): Observable<Response> => {
+    let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/pinning",repository);
+    return this.connector.post(query,JSON.stringify(collections),this.connector.getRequestOptions());
+  }
   public getCollection = (collection : string,repository=RestConstants.HOME_REPOSITORY): Observable<EduData.CollectionWrapper> => {
     let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection",repository,[
       [":collection",collection],

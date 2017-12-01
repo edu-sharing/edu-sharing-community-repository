@@ -151,6 +151,15 @@ $badgeWidth:200px;
 .node_size{
   min-width:110px;
 }
+.node_ccm_educationallearningresourcetype{
+  min-width:150px;
+}
+.node_ccm_replicationsourceid{
+  min-width:150px;
+}
+.node_ccm_eaf_productionyear{
+  min-width:70px;
+}
 .node_dimensions{
   min-width:110px;
 }
@@ -293,8 +302,31 @@ $badgeWidth:200px;
   opacity:1!important;
   color:#fff!important;
 }
-.nodeCollection .selected{
-  background-color: transparent!important;
+.nodeCollection {
+  .selected {
+    background-color: transparent !important;
+  }
+  .collectionPinned{
+    position:absolute;
+    right:5px;
+    top:5px;
+    width: 17px;
+    height: 17px;
+    padding: 0 3px;
+    border-radius:50%;
+    background-color: #444;
+    color:#fff;
+    custom-icon{
+      width:12px;
+      height:12px;
+      position:initial;
+    }
+  }
+}
+:host /deep/{
+  .collectionPinned custom-icon g{
+    fill:#fff;
+  }
 }
 .checkbox{
   min-width:70px;
@@ -427,7 +459,7 @@ $badgeWidth:200px;
   text-align: center;
 }
 .cardSmallList .row_1{
-  top: 0;
+  top: 5px;
   font-size: 110%;
   height: 56px;
   overflow: hidden;
@@ -441,7 +473,6 @@ $badgeWidth:200px;
   background: transparent!important;
   background-color:transparent!important;
   outline:2px solid $primary;
-  overflow: visible;
 }
 
 .cardList .row,
@@ -544,8 +575,38 @@ $badgeWidth:200px;
 .row input[type=checkbox]:checked + label:after{
   @include materialShadow();
 }
+:host /deep/ {
+  .nodeCollection {
+    .collection_info {
+      i {
+        position: relative;
+        top: 2px;
+        font-size: 9pt;
+      }
+      i:not(:first-child){
+        margin-left: 5px;
+      }
+    }
+  }
+  .cardSmallList{
+    .collection_info {
+      width: auto !important;
+      position: absolute;
+      left: 5px;
+      bottom: 10px;
+    }
+    .collection_scope{
+      i{
+        margin-right: 1px;
+      }
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      opacity: 1!important;
+      font-size: 10px;
+    }
+  }
 
-:host /deep/{
   .row .node_ccm_replicationsource  img,
   .row .node_ccm_commonlicense_key img{
       height:20px;

@@ -84,6 +84,8 @@ export class CollectionsMainComponent implements GwtEventListener {
     public isGuest = true;
     public addToOther:string;
     private showCollection=true;
+    private pinningAllowed = false;
+    public addPinning: string;
   // default hides the tabs
 
     // inject services
@@ -112,6 +114,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
       this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
         if(data.isValidLogin && data.currentScope==null) {
+          this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
           this.isGuest=data.isGuest;
           if(data.isValidLogin){
             this.organizationService.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
@@ -275,6 +278,9 @@ export class CollectionsMainComponent implements GwtEventListener {
 
     isUserAllowedToEdit(collection:EduData.Collection) : boolean {
         return RestHelper.isUserAllowedToEdit(collection, this.person);
+    }
+    pinCollection(){
+      this.addPinning=this.collectionContent.collection.ref.id;
     }
 
     getPrivacyScope(collection:EduData.Collection) : string {

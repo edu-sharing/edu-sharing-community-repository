@@ -3,6 +3,9 @@
 import {Injectable} from "@angular/core";
 import {Http, Response} from "@angular/http";
 import {Observer, Observable} from "rxjs";
+import {RestConnectorService} from "../rest/services/rest-connector.service";
+import {RestLocatorService} from "../rest/services/rest-locator.service";
+import {Toast} from "../ui/toast";
 /**
  Service to get configuration data while running (e.g. loaded extension)
  */
@@ -10,7 +13,7 @@ import {Observer, Observable} from "rxjs";
 export class ConfigurationService {
   private data : any=null;
 
-  constructor(private http : Http) {
+  constructor(private http : Http,private toast:Toast,private locator : RestLocatorService) {
     this.getAll().subscribe(()=>{});
   }
 
@@ -25,17 +28,24 @@ export class ConfigurationService {
         observer.complete();
         return;
       }
-      this.http.get("assets/config.json").map((response: Response) => response.json()).subscribe((data:any)=>{
-        this.data=data;
+      //this.http.get("assets/config.json").map((response: Response) => response.json()).subscribe((data:any)=>{
+      this.locator.getConfig().subscribe((data:any)=>{
+        this.data=data.current;
         observer.next(this.data);
         observer.complete();
-      },(error:any)=>console.warn(error));
+      },(error:any)=>{
+        // no language available, so use a fixed string
+        this.toast.error(null,'Error fetching configuration data. Please contact administrator.<br />Fehler beim Abrufen der Konfigurationsdaten. Bitte Administrator kontaktieren.');
+        console.warn(error)
+      });
     });
   }
 
   /**
    * Gets a value
    * Example: config.get("extension").subscribe((data)=>console.log(data));
+   * Cascaded values can be also resolved by using a "." for seperation
+   * E.g. rendering.showMetadata
    * @param name
    * @param defaultValue
    * @returns {any}
@@ -53,11 +63,24 @@ export class ConfigurationService {
       });
     });
   }
-  public instant(name:string,defaultValue:any=null) : any{
-    if(!this.data)
+  public instantInternal(name:string,defaultValue:any=null,object:any=this.data) : any{
+    if(!object)
       return null;
-    if (this.data[name] != null)
-      return this.data[name];
+    let parts=name.split(".");
+    if(parts.length>1){
+      if(object[parts[0]]) {
+        let joined=name.substr(parts[0].length+1);
+        return this.instantInternal(joined, defaultValue,object[parts[0]]);
+      }
+      else{
+        return defaultValue;
+      }
+    }
+    if (object[name] != null)
+      return object[name];
     return defaultValue;
+  }
+  public instant(name:string,defaultValue:any=null) : any {
+    return this.instantInternal(name, defaultValue);
   }
 }

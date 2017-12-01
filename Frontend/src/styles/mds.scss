@@ -154,21 +154,6 @@ mds .mdsGroup{
     width:100%;
     padding-bottom: 15px;
   }
-  .vcardGroup{
-    width: 50%;
-    float: left;
-    padding: 10px;
-  }
-  .vcardGroup i{
-    float:left;
-    color:$textLight;
-    position: relative;
-    top:3px;
-  }
-  .vcardFirstInput{
-    width:calc(100% - 30px);
-    float:right;
-  }
   .widget_vcard{
     height:95px;
   }
@@ -259,6 +244,21 @@ mds .mdsGroup{
       width:40%;
       max-height: 175px;
     }
+  }
+}
+.vcardGroup{
+  width: 50%;
+  float: left;
+  padding: 10px;
+  .vcardFirstInput{
+    width:calc(100% - 30px);
+    float:right;
+  }
+  i{
+    float:left;
+    color:$textLight;
+    position: relative;
+    top:3px;
   }
 }
 .treeGroup {

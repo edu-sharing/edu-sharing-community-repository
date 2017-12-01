@@ -81,6 +81,23 @@ export class RestNodeService {
       .map((response: Response) => response.json());
   }
   /**
+   * Report abuse for a node
+   */
+  public reportNode = (node : string,
+                        reason: string,
+                        userEmail: string,
+                        userComment : string = "",
+                        repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
+    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/report?reason=:reason&userEmail=:userEmail&userComment=:userComment",repository,
+      [
+        [":node",node],
+        [":reason",reason],
+        [":userEmail",userEmail],
+        [":userComment",userComment],
+      ]);
+    return this.connector.post(query,null,this.connector.getRequestOptions());
+  }
+  /**
    * import a node from a remote repository
    */
   public importNode = (repository:string,

@@ -91,7 +91,7 @@
     <li *ngFor="let connector of connectorList ? connectorList.connectors : null">
       <a class="btn-floating btn-floating-inverted" (click)="createConnectorName='';createConnectorType=connector"><i class="material-icons">{{connector.icon}}</i></a>
     </li>
-    <li *ngIf="false"><a class="btn-floating btn-floating-inverted" (click)="listLTI()"><i class="material-icons">extension</i></a></li>
+    <li><a class="btn-floating btn-floating-inverted" (click)="listLTI()"><i class="material-icons">extension</i></a></li>
   </ul>
   -->
   </div>
@@ -117,7 +117,7 @@
        [class.collection-item-seperate]="!i"
        (click)="showAddDesktop=false;createConnectorName='';createConnectorType=connector">
       <i class="material-icons">{{connector.icon}}</i> {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}<img class="connectorBeta" src="assets/images/beta.svg"></a>
-    <a *ngIf="false" class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a>
+    <a class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a>
 
   </div>
   <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot=false"></div>
@@ -217,6 +217,6 @@
 
 
 </div>
-<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>
+  <global-progress *ngIf="globalProgress"></global-progress>
 </div>
 

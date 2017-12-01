@@ -13,7 +13,6 @@ export class WorkspaceShareChooseTypeComponent  {
     setTimeout(()=>this.checkPublish(),10);
   }
   @Input() isDirectory=false;
-  @Input() canPublish=true;
   @Output() onCancel = new EventEmitter();
   @Output() onType = new EventEmitter();
 

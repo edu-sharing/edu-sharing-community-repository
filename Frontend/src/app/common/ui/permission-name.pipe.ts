@@ -5,9 +5,9 @@ import {TranslateService} from "ng2-translate";
 @Pipe({name: 'permissionName'})
 export class PermissionNamePipe implements PipeTransform {
   transform(permission : any,args:string[]): string {
-    if(permission.user)
+    if(permission.user && (permission.user.firstName || permission.user.lastName))
       return permission.user.firstName+" "+permission.user.lastName;
-    if(permission.group)
+    if(permission.group && permission.group.displayName)
       return permission.group.displayName;
     return this.translate.instant(permission.authority.authorityName);
   }

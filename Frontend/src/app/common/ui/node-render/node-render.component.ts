@@ -265,6 +265,7 @@ export class NodeRenderComponent {
         }
         else {
           jQuery('#nodeRenderContent').html(data.detailsSnippet);
+          parent.postprocessHtml();
         }
         parent.isLoading = false;
       },
@@ -275,6 +276,12 @@ export class NodeRenderComponent {
         parent.isLoading = false;
       }
     });
+  }
+
+  private postprocessHtml() {
+    if(!this.config.instant("rendering.showPreview",true)){
+      jQuery('.edusharing_rendering_content_wrapper').hide();
+    }
   }
 
   private downloadCurrentNode() {

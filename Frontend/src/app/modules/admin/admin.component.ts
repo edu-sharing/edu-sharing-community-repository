@@ -30,12 +30,8 @@ export class AdminComponent {
   public chooseDirectory=false;
   public cacheName:string;
   public cacheInfo:string;
-  public oaiUrl:string;
-  public oaiSet:string;
-  public oaiPrefix:string;
-  public oaiMetadata:string;
-  public oaiFile:string;
-  public oaiImporter:string;
+  public oai:any={};
+  public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
   public updates: ServerUpdate[]=[];
@@ -94,7 +90,11 @@ export class AdminComponent {
         this.refreshAppList();
         this.admin.getOAIClasses().subscribe((data:string[])=>{
           this.oaiClasses=data;
-          this.oaiImporter=data[0];
+          this.oai.className=data[0];
+          this.storage.get("admin_oai").subscribe((data:any)=>{
+            if(data)
+              this.oai=data;
+          });
         });
         this.admin.getRepositoryVersion().subscribe((data:string)=>{
           this.repositoryVersion=data;
@@ -145,8 +145,9 @@ export class AdminComponent {
     }
     this.admin.updateApplicationXML(this.currentAppXml,this.xmlAppProperties).subscribe(()=>{
       this.toast.toast('ADMIN.APPLICATIONS.APP_SAVED',{xml:this.currentAppXml});
-      this.globalProgress=false;
-      this.closeAppEditor();
+        this.globalProgress=false;
+        this.closeAppEditor();
+        this.refreshAppList();
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -271,8 +272,10 @@ export class AdminComponent {
     if(!this.oaiPreconditions())
       return;
     this.globalProgress=true;
-    this.admin.importOAI(this.oaiUrl,this.oaiSet,this.oaiPrefix,this.oaiImporter,this.oaiMetadata,this.oaiFile).subscribe(()=>{
-      this.globalProgress=false;
+    if(this.oaiSave){
+      this.storage.set("admin_oai",this.oai);
+    }
+    this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,this.oai.file).subscribe(()=>{      this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.OAI_STARTED');
     },(error:any)=>{
       this.globalProgress=false;
@@ -281,15 +284,15 @@ export class AdminComponent {
   }
 
   private oaiPreconditions() {
-    if(!this.oaiUrl) {
+    if(!this.oai.url) {
       this.toast.error(null, 'ADMIN.IMPORT.OAI_NO_URL');
       return false;
     }
-    if(!this.oaiSet) {
+    if(!this.oai.set) {
       this.toast.error(null, 'ADMIN.IMPORT.OAI_NO_SET');
       return false;
     }
-    if(!this.oaiPrefix) {
+    if(!this.oai.prefix) {
       this.toast.error(null, 'ADMIN.IMPORT.OAI_NO_PREFIX');
       return false;
     }
@@ -299,7 +302,7 @@ export class AdminComponent {
     if(!this.oaiPreconditions())
       return;
     this.globalProgress=true;
-    this.admin.removeDeletedImports(this.oaiUrl,this.oaiSet,this.oaiPrefix).subscribe((data:any)=>{
+    this.admin.removeDeletedImports(this.oai.url,this.oai.set,this.oai.prefix).subscribe((data:any)=>{
       this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.IMPORTS_REMOVED');
       this.appUrl='';

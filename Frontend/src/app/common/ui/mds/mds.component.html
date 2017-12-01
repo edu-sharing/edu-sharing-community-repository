@@ -22,8 +22,9 @@
   </div>
 </div>
 <div *ngIf="embedded">
-  <div [innerHTML]="rendered"></div>
-  <a *ngIf="rendered" class="btn" tabindex="0" (keyup.enter)="saveValues()" [class.disabled]="isLoading" (click)="saveValues()">{{'APPLY' | translate}}</a>
-  <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
+  <div class="mdsEmbeddedGroup">
+    <div [innerHTML]="rendered"></div>
+    <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
+  </div>
 </div>
-<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>
+<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress && !embedded"><spinner class="center"></spinner></div>

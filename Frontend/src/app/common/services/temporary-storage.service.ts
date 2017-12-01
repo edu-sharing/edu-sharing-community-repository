@@ -10,6 +10,7 @@ export class TemporaryStorageService {
   public static APPLY_TO_LMS_PARAMETER_NODE ="apply_to_lms_node";
   public static NODE_RENDER_PARAMETER_OPTIONS = "node_render_options";
   public static NODE_RENDER_PARAMETER_LIST = "node_render_list";
+  public static SESSION_INFO = "SESSION_INFO";
 
   private data : any={};
 

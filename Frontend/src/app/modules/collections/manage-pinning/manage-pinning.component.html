@@ -1,0 +1,33 @@
+  <div class="dialog darken">
+  <div class="card center-card card-action card-high">
+    <div class="card-content">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div class="card-title">{{'COLLECTIONS.PINNING.TITLE' | translate }}</div>
+      <div class="card-scroll">
+        <div *ngFor="let collection of pinnedCollections;let i=index" class="entry"
+             [draggable]="true"
+             (dragend)="currentDragColumn=null"
+             (dragover)="allowDragColumn($event,i,collection)" (drop)="dropColumn($event,i,collection)"
+             (dragstart)="dragStartColumn($event,i,collection)"
+        >
+          <input type="checkbox" [checked]="isChecked(collection)" class="filled-in" (change)="setChecked(collection,$event)" id="checkbox_{{i}}"><label for="checkbox_{{i}}"></label>
+          <div class="name">{{getName(collection)}}</div>
+          <i class="material-icons moveDown clickable" *ngIf="isMobile && i<pinnedCollections.length-1" (click)="moveDown(i)">keyboard_arrow_down</i>
+          <i class="material-icons moveUp clickable" *ngIf="isMobile && i>0" (click)="moveUp(i)">keyboard_arrow_up</i>
+          <i class="material-icons drag" *ngIf="!isMobile">dehaze</i>
+        </div>
+      </div>
+    </div>
+    <div class="card-action">
+      <a class="btn"
+         (keyup.enter)="apply()"
+         (click)="apply()"
+      >{{'SAVE' | translate}}</a>
+      <a class="btn-flat"
+         (keyup.enter)="cancel()"
+         (click)="cancel()"
+      >{{'CANCEL' | translate}}</a>
+    </div>
+  </div>
+</div>
+<global-progress *ngIf="globalProgress"></global-progress>

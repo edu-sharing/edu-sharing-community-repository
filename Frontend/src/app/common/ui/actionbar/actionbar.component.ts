@@ -151,6 +151,11 @@ export class OptionItem {
    * A function called with the node in content which should return true or false if the option should be enabled or not
    */
   public enabledCallback : Function;
+
+  /**
+   *   Show the given name (if false, only icon will show)
+   */
+  public showName = true;
   /**
    *
    * @param name the option name, which is used for the translation

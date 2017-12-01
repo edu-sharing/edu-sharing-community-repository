@@ -11,6 +11,7 @@
   "SAVE" : "Speichern",
   "APPLY" : "Übernehmen",
   "CANCEL" : "Abbrechen",
+  "RENAME" : "Umbenennen",
   "USERMENU": "Nutzermenü",
   "USER_GUEST" : "Gast",
   "IMPRINT" : "Impressum",
@@ -68,6 +69,7 @@
   "GOTO":"Gehe zu",
   "VALUE":"Wert",
   "FILTER": "Filter",
+  "REPLACE":"Ersetzen",
   "SUGGESTION": "Vorschlag",
   "CLICKTOREMOVE": "Klicken zum Entfernen",
   "NO_PERMISSIONS_FOR_SCOPE":"Keine Berechtigungen, um diesen Bereich anzuzeigen",
@@ -126,6 +128,25 @@
     "SCHULFUNK":"Schulfunk (§47 UrhG)",
     "CUSTOM":"Benutzerdefinierte Lizenz"
   },
+  "NODE_REPORT":{
+    "TITLE":"Problem melden",
+    "OPTION":"Problem melden",
+    "REPORT":"Melden",
+    "REPORT_INFO":"Problem mit {{name}} melden",
+    "COMMENT":"Bitte nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
+    "COMMENT_PLACEHOLDER":"Details angeben...",
+    "EMAIL":"Ihre E-Mail-Adresse",
+    "EMAIL_PLACEHOLDER":"jemand@beispiel.de",
+    "EMAIL_REQUIRED":"Bitte eine gültige E-Mail-Adresse angeben",
+    "REASON_REQUIRED":"Bitte wählen Sie aus, welches Problem besteht",
+    "DONE":"Ihre Anfrage wurde gesendet. Vielen Dank!",
+    "REASONS": {
+      "UNAVAILABLE":"Medium nicht verfügbar",
+      "INAPPROPRIATE_CONTENT":"Problematischer Inhalt",
+      "INVALID_METADATA":"Fehlerhafte Beschreibung",
+      "OTHER":"Anderer Fehler"
+    }
+  },
   "COLLECTION":{
     "INFO_REFERENCES":"Sammlung",
     "INFO_REFERENCES_MULTI":"Sammlungen",
@@ -135,7 +156,8 @@
     "SCOPE":{
       "MY" : "Privat",
       "EDU_GROUPS" : "Organisationen",
-      "EDU_ALL" : "Öffentlich",
+      "PUBLIC" : "Öffentlich",
+      "SHARED" : "Freigegeben",
       "CUSTOM" : "Benutzerdefiniert"
     }
   },
@@ -159,7 +181,8 @@
     "link":"Website",
     "folder":"Ordner",
     "file":"Unbekannt",
-    "collection":"Sammlung"
+    "collection":"Sammlung",
+    "saved_search":"Suche"
 
   },
   "PERMISSION_TYPE":{
@@ -178,7 +201,8 @@
     "groupType" : "Typ"
   },
   "ORG" : {
-    "displayName" : "Organisation"
+    "displayName" : "Organisations-Name",
+    "groupType" : "Typ"
   },
   "USER":{
     "authorityName" : "Nutzername",

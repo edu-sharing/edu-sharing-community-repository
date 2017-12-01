@@ -4,6 +4,11 @@
   [currentScope]="'collections'"
   [searchEnabled]="false"
 ></main-nav>
+<collections-manage-pinning
+  *ngIf="addPinning"
+  [addCollection]="addPinning"
+  (onClose)="addPinning=null"
+></collections-manage-pinning>
 <file-chooser *ngIf="addToOther"
               [collections]="true"
               [isCancelable]="true"
@@ -85,7 +90,13 @@
             </div>
 
         </div>
-
+        <div *ngIf="pinningAllowed " class="collections-pin-button"
+             tabindex="0"
+             (keypress)="($event.which === 13)?pinCollection():0"
+             (click)="pinCollection()"
+        >
+          <custom-icon iconId="pin"></custom-icon>
+        </div>
        <div *ngIf="isAllowedToEditCollection() " class="collections-edit-button"
             tabindex="0"
             (keypress)="($event.which === 13)?buttonCollectionEdit():0"
@@ -124,18 +135,14 @@
                 class="collection-new-preview-infoline">
                 <i class="material-icons icon-bottom">lock</i>&nbsp;{{ 'COLLECTION.SCOPE.MY' | translate }}
            </div>
-           <div *ngIf="(getPrivacyScope(collectionContent.collection)=='EDU_GROUPS')"
+           <div *ngIf="(getPrivacyScope(collectionContent.collection)=='EDU_GROUPS' || getPrivacyScope(collectionContent.collection)=='CUSTOM')"
                 class="collection-new-preview-infoline">
-                <i class="material-icons icon-bottom">domain</i>&nbsp;{{ 'COLLECTION.SCOPE.EDU_GROUPS' | translate }}
+                <i class="material-icons icon-bottom">group</i>&nbsp;{{ 'COLLECTION.SCOPE.SHARED' | translate }}
            </div>
-            <div *ngIf="(getPrivacyScope(collectionContent.collection)=='EDU_ALL')"
+            <div *ngIf="(getPrivacyScope(collectionContent.collection)=='EDU_ALL' || getPrivacyScope(collectionContent.collection)=='CUSTOM_PUBLIC')"
                 class="collection-new-preview-infoline">
-                <i class="material-icons icon-bottom">language</i>&nbsp;{{ 'COLLECTION.SCOPE.EDU_ALL' | translate }}
+                <i class="material-icons icon-bottom">language</i>&nbsp;{{ 'COLLECTION.SCOPE.PUBLIC' | translate }}
            </div>
-          <div *ngIf="(getPrivacyScope(collectionContent.collection)=='CUSTOM')"
-               class="collection-new-preview-infoline">
-            <i class="material-icons icon-bottom">build</i>&nbsp;{{ 'COLLECTION.SCOPE.CUSTOM' | translate }}
-          </div>
 
            <div class="collection-description" style="margin-top:16px;opacity:0.85;">{{ 'collections_description' | translate }}</div>
 

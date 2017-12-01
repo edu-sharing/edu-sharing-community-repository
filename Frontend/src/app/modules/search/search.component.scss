@@ -1,6 +1,6 @@
 @import "../../../styles/variables.scss";
 
-$sidenavWidth:250px;
+$sidenavWidth:285px;
 $bannerHeight:130px;
 .switchToCollections{
   float:left;
@@ -32,7 +32,7 @@ $bannerHeight:130px;
     padding-bottom: 10px;
   }
 }
-.row{
+.rowRepositories{
   position: fixed;
   top:$mainnavHeight;
   width:100%;
@@ -41,6 +41,9 @@ $bannerHeight:130px;
   ul{
     border-bottom: none;
   }
+}
+.sidenav .row{
+  margin:0 -30px;
 }
 .repositoryActive{
   background: $workspaceTreeSelectedBackgroundEffect;
@@ -237,27 +240,33 @@ a, a:hover, a:visited, a:active, button {
   top: $mainnavHeight;
 }
 .mdsSelect{
-  padding:10px 10px;
-  margin:0 -20px;
-  margin-top: 7px;
-  background-color: #fff;
-  >div{
-    display:table;
+  float:left;
+  width:calc(100% + 40px);
+  margin-bottom: 56px;
+  >div {
     width: 100%;
-    .material-icons,select{
-      display:table-cell;
+    padding: 10px 10px;
+    margin: 0 -20px;
+    margin-top: 20px;
+    background-color: #fff;
+    > div {
+      display: table;
+      width: 100%;
+      .material-icons, select {
+        display: table-cell;
+      }
+      .material-icons {
+        color: $textLight;
+        font-size: 16px;
+        vertical-align: top;
+        padding-top: 9px;
+      }
     }
-    .material-icons{
-      color:$textLight;
-      font-size: 16px;
-      vertical-align: top;
-      padding-top: 9px;
+    .info {
+      padding-top: 3px;
+      font-size: 80%;
+      color: $textLight;
     }
-  }
-  .info{
-    padding-top: 3px;
-    font-size:80%;
-    color:$textLight;
   }
 }
 .sidenav{
@@ -270,7 +279,7 @@ a, a:hover, a:visited, a:active, button {
   overflow-x: hidden;
   overflow-y: auto;
   width: $sidenavWidth;
-  padding-top: 10px;
+  padding-top: 0;
   top:$mainnavHeight+110px;
   height: calc(100% - #{$mainnavHeight} - 110px);
 }
@@ -396,13 +405,67 @@ listtable {
     min-width:50px;
   }
 }
-
+.sidenav{
+  .empty{
+    margin-top:20px;
+    text-align: center;
+    color: $textLight;
+    width:100%;
+  }
+  .apply, .manageSavedSearch {
+    position: fixed;
+    background-color: $backgroundColor;
+    width:$sidenavWidth;
+    text-align: center;
+    left:0;
+    bottom:0;
+    padding:20px 8px;
+    z-index: 1;
+    actionbar,a{
+      position: relative;
+      top: 5px;
+    }
+  }
+  input[type=search]{
+    width: calc(100% - 20px);
+    margin-bottom: 10px;
+  }
+  .manageSavedSearch{
+    text-transform: uppercase;
+  }
+  listtable{
+    width: 100%;
+  }
+  .switch{
+    text-align: right;
+    margin: 10px 0px;
+  }
+}
 div.dialog.darken {
   z-index: 1040;
 }
 :host /deep/{
+  .sidenav .list > div{
+    margin:0 -20px;
+    margin-bottom: 40px;
+  }
+  .sidenav .actionAlwaysCaption{
+    display: inline-block!important;
+  }
+  .sidenav actionbar .moreOpen{
+    left: 0px;
+    top: -56px;
+    width: 220px;
+  }
   .btn-flat{
     background: transparent;
+  }
+  mds {
+    .mdsEmbeddedGroup {
+      float:left;
+      width: 100%;
+      /* margin-bottom: 40px; */
+    }
   }
 }
 .rowFrame, listtable {
@@ -463,7 +526,7 @@ div.dialog.darken {
   .sidenav,.top{
     display: none;
   }
-  .row{
+  .rowRepositories{
     position: absolute;
   }
   .contentSidenav{

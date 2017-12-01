@@ -32,6 +32,7 @@ export class MdsComponent{
   private jumpmarksCount: number;
   public static TYPE_TOOLDEFINITION = "tool_definition";
   public static TYPE_TOOLINSTANCE = "tool_instance";
+  public static TYPE_SAVED_SEARCH = "saved_search";
   private static VCARD_FIELDS=["Surname","Givenname"];
   /**
    * Can the node content be replaced?
@@ -54,17 +55,18 @@ export class MdsComponent{
   private lastMdsQuery: string;
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
-    this.applySuggestions();
+    setTimeout(()=>this.loadMdsFinal(),5);
   };
   @Input() set repository(repository:string){
+    this.isLoading=false;
     this._repository=repository;
-    setTimeout(()=>this.loadMds(),5);
+    setTimeout(()=>this.loadMdsFinal(),5);
   }
   @Input() set currentValues(currentValues:any){
     if(!currentValues)
       return;
     this._currentValues=currentValues;
-    //setTimeout(()=>this.loadMds(),5);
+    setTimeout(()=>this.loadMdsFinal(),5);
   }
   @Input() set setId(setId:string){
     if(!setId)
@@ -78,12 +80,25 @@ export class MdsComponent{
 
   @Input() set groupId(groupId:string){
     this._groupId=groupId;
-    setTimeout(()=>this.loadMds(),5);
   }
   private isSearch(){
     return this._groupId!=null;
   }
+
+  private loadMdsFinal() {
+    if(!this.mds)
+      return;
+    this.renderGroup(this._groupId,this.mds);
+    this.isLoading=false;
+    this.setValuesByProperty(this.mds,this._currentValues ? this._currentValues : {});
+    this.applySuggestions();
+    setTimeout(()=>this.showExtended(this.extended),5);
+  }
   private loadMds(){
+    if(this.isLoading) {
+      setTimeout(()=>this.loadMds(),5);
+      return;
+    }
     this.mds=null;
     this.rendered=null;
     this.renderedSuggestions=null;
@@ -91,12 +106,8 @@ export class MdsComponent{
     this.isLoading=true;
     this.mdsService.getSet(this._setId,this._repository).subscribe((data:any)=>{
       this.mds=data;
-      this.renderGroup(this._groupId,this.mds,data.node);
-      this.isLoading=false;
-      this.applySuggestions();
-      this.setValuesByProperty(data,this._currentValues ? this._currentValues : {});
-      setTimeout(()=>this.showExtended(this.extended),5);
-    },(error:any)=>this.toast.error(error));
+      this.loadMdsFinal();
+      },(error:any)=>this.toast.error(error));
   }
 
   /**
@@ -137,6 +148,9 @@ export class MdsComponent{
         }
         if(this.currentNode.type==RestConstants.CCM_TYPE_TOOL_INSTANCE){
           nodeGroup=MdsComponent.TYPE_TOOLINSTANCE;
+        }
+        if(this.currentNode.type==RestConstants.CCM_TYPE_SAVED_SEARCH){
+          nodeGroup=MdsComponent.TYPE_SAVED_SEARCH;
         }
         console.log("render node group "+nodeGroup);
         this.renderGroup(nodeGroup,this.mds,this.currentNode);
@@ -399,7 +413,7 @@ export class MdsComponent{
     return html;
   }
 
-  private renderGroup(id:string,data:any,node:Node){
+  private renderGroup(id:string,data:any,node:Node=null){
     if(!id)
       return;
     this.currentWidgets=[];
@@ -417,7 +431,6 @@ export class MdsComponent{
         this.rendered=this.sanitizer.bypassSecurityTrustHtml(result.main);
         if(result.suggestions)
           this.renderedSuggestions=this.sanitizer.bypassSecurityTrustHtml(result.suggestions);
-        this.suggestions=this.sanitizer.bypassSecurityTrustHtml(result.suggestions);
         let jumpHtml=this.renderJumpmarks(group,data);
         this.jumpmarks=this.sanitizer.bypassSecurityTrustHtml(jumpHtml);
         this.readValues(data,node);
@@ -520,10 +533,10 @@ export class MdsComponent{
     }
     return properties;
   }
-  private saveValues(callback:Function=null){
+  public saveValues(callback:Function=null){
     if(this.embedded){
       this.onDone.emit(this.getValues());
-      return;
+      return this.getValues();
     }
     let properties:any={};
     if(this.currentNode)
@@ -1124,7 +1137,7 @@ export class MdsComponent{
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+widget.id+`_tree').style.display='none';"><i class="material-icons">close</i></div>
-                  <div class="card-title">`+widget.caption+`</div>
+                  <div class="card-title">`+(widget.caption ? widget.caption : widget.placeholder)+`</div>
                     <div class="card-scroll">
                     `+this.renderSubTree(widget,multivalue,null)+`
                     </div>
@@ -1150,8 +1163,15 @@ export class MdsComponent{
                 </div>
               </div>
               <div id="`+widget.id+`" class="multivalueBadges"></div>`;
-    // dirty hack: In search, the tree is inside the sidebar which does not render correctly. So we need to append it to the main body
-    setTimeout(()=>eval(`document.getElementsByTagName("body")[0].appendChild(document.getElementById('`+widget.id+`_tree'));`),5);
+    // delete existing tree from document
+    try{
+      document.getElementsByTagName("body")[0].removeChild(document.getElementById(widget.id+'_tree'));
+    }catch(e){}
+    // dirty hack: In search, the tree is inside the sidebar which does not render correctly. So we need to append it to the main body and delete any existing trees
+    setTimeout(()=> {
+      let id = widget.id+'_tree';
+      document.getElementsByTagName("body")[0].appendChild(document.getElementById(id));
+    },5);
     return html;
   }
   private renderTextareaWidget(widget:any,attr:string){
@@ -1623,6 +1643,7 @@ export class MdsComponent{
   private applySuggestions() {
     setTimeout(() => {
         console.log("applySuggestions");
+        console.log(this._suggestions);
         if (!this.currentWidgets)
           return;
         let values=this.getValues([],false);
@@ -1634,10 +1655,10 @@ export class MdsComponent{
           }
           let element = document.getElementById(property + "_badgeSuggestions");
           if (element) {
-              console.log(widget);
-              element.style.display='';
-              element.innerHTML = '';
-              for(let item of this._suggestions[property]) {
+            element.style.display='';
+            element.innerHTML = '';
+            console.log(values);
+            for(let item of this._suggestions[property]) {
                 if (Helper.indexOfNoCase(values[property], item.id) == -1) {
                   element.innerHTML += this.getSuggestBadge(item.id, item.caption, property);
                 }
@@ -1721,4 +1742,5 @@ export class MdsComponent{
     }
 
   }
+
 }

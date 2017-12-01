@@ -54,7 +54,8 @@ export class WorkspaceLtiToolsComponent  {
   }
   public openTool(node:Node,emit=true){
     if(emit){
-      this.currentToolChange.emit(node);
+      // causes ui flickering
+      //this.currentToolChange.emit(node);
     }
     this._currentTool=node;
     this.options=[];
