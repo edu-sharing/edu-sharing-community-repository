@@ -31,4 +31,5 @@ public class Values{
 	@XmlElement	public Integer searchViewType;
 	@XmlElement	public Integer itemsPerRequest;
 	@XmlElement	public Rendering rendering;
+	@XmlElement	public SessionExpiredDialog sessionExpiredDialog;
 }
