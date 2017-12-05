@@ -83,11 +83,6 @@ export class RestConnectorService {
               private config: ConfigurationService,
               private storage : TemporaryStorageService,
               private event:FrameEventsService) {
-
-    if(!environment.production){
-      //this._username="admin";
-      //this._password="admin";
-    }
     this.numberPerRequest=RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
     event.addListener(this);
   }
