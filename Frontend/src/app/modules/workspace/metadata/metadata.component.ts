@@ -18,6 +18,7 @@ import {RestHelper} from "../../../common/rest/rest-helper";
 import {Router} from "@angular/router";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {UIConstants} from "../../../common/ui/ui-constants";
+import {ListItem} from "../../../common/ui/list-item";
 
 @Component({
   selector: 'workspace-metadata',
@@ -140,16 +141,16 @@ export class WorkspaceMetadataComponent  {
       data["keywords"]=null;
     //data["creator"]=node.properties[RestConstants.CM_CREATOR];
     data["creator"]=RestHelper.getPersonWithConfigDisplayName(node.createdBy,this.config);
-    data["createDate"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,RestConstants.CM_PROP_C_CREATED);
+    data["createDate"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.CM_PROP_C_CREATED));
     data["author"]=this.toVCards(node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]).join(", ");
     data["author_freetext"]=node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] ? node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT][0] : null;
     data["mediatype"]=node.mediatype=="file" ? node.mimetype : node.mediatype;
     data["mimetype"]=node.mimetype;
     data["size"]=node.size;
     if(node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL])
-      data["exifDate"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL);
+      data["exifDate"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL));
 
-    data["dimensions"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,RestConstants.DIMENSIONS);
+    data["dimensions"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.DIMENSIONS));
 
     data["license"]=NodeHelper.getLicenseIcon(node);
     data["licenseName"]=NodeHelper.getLicenseName(node,this.translate);

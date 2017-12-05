@@ -29,15 +29,10 @@ export class NodeHelper{
    * @param item
    * @returns {any}
    */
-  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : string|ListItem) : string
+  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : ListItem) : string
   {
-    let name:string;
-    if(typeof item !== "string"){
-      name=item.name;
-    }
-    else{
-      name=item;
-    }
+
+    let name=item.name;
     if(name==RestConstants.CM_NAME)
       return node["name"];
     if(name==RestConstants.CM_PROP_TITLE){
@@ -73,15 +68,24 @@ export class NodeHelper{
     if((node as any)[name])
       value=(node as any)[name];
 
-    if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1){
-      if(typeof item !== "string" && item.format){
-        value=DateHelper.formatDateByPattern(value,item.format);
+    // Store already formatted dates inside node
+    if(!(node as any).propertiesFormatted){
+      (node as any).propertiesFormatted=[];
+    }
+    if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1 && !(node as any).propertiesFormatted[name]){
+      if(item.format){
+        console.log(item);
+        console.log(value);
+        value=DateHelper.formatDateByPattern(value,item.format).trim();
+        console.log(value);
       }
       else {
         value = DateHelper.formatDate(translation, value);
       }
       if(node.properties[name])
         node.properties[name][0]=value;
+
+      (node as any).propertiesFormatted[name]=true;
     }
     if(node.properties[name+RestConstants.DISPLAYNAME_SUFFIX]){
       value=node.properties[name+RestConstants.DISPLAYNAME_SUFFIX].join(", ");
