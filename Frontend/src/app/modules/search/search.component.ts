@@ -569,6 +569,7 @@ export class SearchComponent {
     this.searchFail = false;
     this.searchService.searchResult = this.searchService.searchResult.concat(data.nodes);
     this.checkFail();
+    this.updateActionbar(this.selection);
     if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
       this.searchService.init();
