@@ -104,18 +104,6 @@ export class MainNavComponent {
         }
       }
     }
-    /*
-    // previously for BPS header
-    if(this.topbar.nativeElement.classList.contains('topBar-search') || this.topbar.nativeElement.classList.contains('topBar-collections')) {
-      if((window.pageYOffset || document.documentElement.scrollTop) > y) {
-        this.topbar.nativeElement.style.position = 'fixed';
-        this.topbar.nativeElement.style.top = '0';
-      } else {
-        this.topbar.nativeElement.style.position = 'absolute';
-        this.topbar.nativeElement.style.top = y+'px';
-      }
-    }
-    */
 
     if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
       this.scrolltotop.nativeElement.style.display = 'block';
