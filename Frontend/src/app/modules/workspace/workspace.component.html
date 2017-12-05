@@ -36,7 +36,7 @@
     [searchPlaceholder]="'WORKSPACE.SEARCH'"
     [canOpen]="mainnav"
     [searchQuery]="searchQuery"
-    (onSearch)="doSearch($event)"
+    (onSearch)="doSearch($event.query)"
   >
 
   </main-nav>

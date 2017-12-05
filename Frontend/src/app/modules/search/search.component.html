@@ -11,7 +11,7 @@
     [canOpen]="true"
     [(searchQuery)]="searchService.searchTerm"
     [onInvalidNodeStore]="invalidateNodeStore"
-    (onSearch)="routeSearch($event)"
+    (onSearch)="routeAndClearSearch($event)"
   ></main-nav>
   <file-chooser *ngIf="addNodesToCollection"
                 [collections]="true"

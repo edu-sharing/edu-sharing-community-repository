@@ -197,7 +197,8 @@ export class MainNavComponent {
   };
 
   /**
-   * Called when a search event happened, emits the search string
+   * Called when a search event happened, emits the search string and additional event info
+   * {query:string,cleared:boolean}
    * @type {EventEmitter}
    */
   @Output() onSearch=new EventEmitter();
@@ -234,6 +235,10 @@ export class MainNavComponent {
       clearInterval(MainNavComponent.bannerPositionInterval);
     }
     MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),200);
+  }
+  private clearSearch(){
+    this.searchQuery="";
+    this.onSearch.emit({query:"",cleared:true});
   }
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
@@ -372,7 +377,7 @@ export class MainNavComponent {
   private doSearch(value=this.search.nativeElement.value,broadcast=true){
     if(broadcast)
       this.event.broadcastEvent(FrameEventsService.EVENT_GLOBAL_SEARCH,value);
-    this.onSearch.emit(value);
+    this.onSearch.emit({query:value,cleared:false});
   }
   private openButton(button : any){
     this.displaySidebar=false;

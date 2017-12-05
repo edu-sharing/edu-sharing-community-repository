@@ -63,10 +63,7 @@ export class MdsComponent{
     setTimeout(()=>this.loadMdsFinal(),5);
   }
   @Input() set currentValues(currentValues:any){
-    if(!currentValues)
-      return;
     this._currentValues=currentValues;
-    setTimeout(()=>this.loadMdsFinal(),5);
   }
   @Input() set setId(setId:string){
     if(!setId)

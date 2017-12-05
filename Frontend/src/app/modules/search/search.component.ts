@@ -234,7 +234,6 @@ export class SearchComponent {
             if(this.currentRepository!=param['repository'])
               this.mdsId=RestConstants.DEFAULT;
             this.currentRepository=param['repository'];
-            this.currentValues=null;
             this.updateRepositoryOrder();
           }
           if(param['savedQuery']){
@@ -445,7 +444,16 @@ export class SearchComponent {
     console.log(JSON.stringify(parameters));
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
+  public routeAndClearSearch(query:any) {
+    let parameters=this.currentValues;
+    if (query.cleared) {
+      parameters = null;
+    }
+    this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
+  }
+
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.currentValues){
+
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{query:query,parameters:parameters ? JSON.stringify(parameters) : null,mds:mds,repository:repository,mdsExtended:this.mdsExtended,reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
@@ -761,13 +769,16 @@ export class SearchComponent {
       this.isGuest = data.isGuest;
       this.hasCheckbox=true;
       this.options=[];
-      this.currentValues=null;
       this.mdsExtended=false;
       this.loadSavedSearch();
       if(param['mdsExtended'])
         this.mdsExtended=param['mdsExtended']=='true';
       if(param['parameters']){
         this.currentValues=JSON.parse(param['parameters']);
+        this.reloadMds=new Boolean(true);
+      }
+      else if(this.currentValues){
+        this.currentValues=null;
         this.reloadMds=new Boolean(true);
       }
       if(param['reurl']) {
