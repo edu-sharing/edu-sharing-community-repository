@@ -1123,10 +1123,18 @@
 				<property name="ccm:eaf_fixed_keywords">
 					<type>d:text</type>
 					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	         			<tokenised>false</tokenised>
+	         		</index>
 				</property>
 				<property name="ccm:eaf_custom_keywords">
 					<type>d:text</type>
 					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	         			<tokenised>false</tokenised>
+	         		</index>
 				</property>
 				<property name="ccm:eaf_fsk">
 					<type>d:text</type>
