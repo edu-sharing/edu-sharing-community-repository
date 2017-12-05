@@ -16,6 +16,12 @@
   position: relative;
   top:50px;
 }
+.reset{
+  text-transform: uppercase;
+  color: $primary;
+  text-align: right;
+  @include clickable();
+}
 .card-jumpmarks{
   position:fixed;
   top:10%;

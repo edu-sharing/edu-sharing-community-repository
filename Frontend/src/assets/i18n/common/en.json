@@ -40,6 +40,7 @@
   "CREATE" : "create",
   "LOGOUT" : "log out",
   "SHOW_IN_FOLDER":"Open storage location",
+  "CLEAR_FILTERS":"Clear all filters",
   "EDIT_ACCOUNT":"Manage account",
   "DEFAULT_METADATASET":"Default-Metadataset",
   "NO_MATCHES" : "No matches found",
