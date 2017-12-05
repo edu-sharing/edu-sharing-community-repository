@@ -276,7 +276,7 @@ public class SSOAuthorityMapper {
 				/**
 				 * create eduGroup for affiliation
 				 */
-				if(organisationName != null) {
+				if(organisationName != null && !organisationName.trim().equals("")) {
 					
 					organisationDisplayName = ssoAttributes.get(organisationParam + "name");
 					if(organisationDisplayName == null) {
@@ -306,7 +306,7 @@ public class SSOAuthorityMapper {
 				 * create LMS globalGroups
 				 */
 				organisationName = (organisationName == null) ? "" : organisationName;
-				if(lmsGlobalGroups != null){
+				if(lmsGlobalGroups != null && !organisationName.trim().equals("")){
 					JSONArray globalGroupsJA = new JSONArray(lmsGlobalGroups);
 					
 					HashMap<String,String> alfrescoNameLmsIdMap = new HashMap<String,String>();
