@@ -32,4 +32,5 @@ public class Values{
 	@XmlElement	public Integer itemsPerRequest;
 	@XmlElement	public Rendering rendering;
 	@XmlElement	public SessionExpiredDialog sessionExpiredDialog;
+	@XmlElement	public String loginDefaultLocation;
 }
