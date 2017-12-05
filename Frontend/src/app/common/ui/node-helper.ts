@@ -74,10 +74,7 @@ export class NodeHelper{
     }
     if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1 && !(node as any).propertiesFormatted[name]){
       if(item.format){
-        console.log(item);
-        console.log(value);
         value=DateHelper.formatDateByPattern(value,item.format).trim();
-        console.log(value);
       }
       else {
         value = DateHelper.formatDate(translation, value);
@@ -385,7 +382,7 @@ export class NodeHelper{
    * @param options
    * @param progressCallback
    */
-  public static applyCustomNodeOptions(toast:Toast, http:Http, connector:RestConnectorService, custom: any, nodesIn: Node[], options: OptionItem[], progressCallback:Function,replaceUrl:any={}) {
+  public static applyCustomNodeOptions(toast:Toast, http:Http, connector:RestConnectorService, custom: any,allNodes:Node[], selectedNodes: Node[], options: OptionItem[], progressCallback:Function,replaceUrl:any={}) {
     if (custom) {
       for (let c of custom) {
         if(c.remove){
@@ -394,19 +391,21 @@ export class NodeHelper{
             options.splice(i,1);
           continue;
         }
-        if(c.mode=='nodes' && (!nodesIn || nodesIn.length))
+        if(c.mode=='nodes' && (!selectedNodes || selectedNodes.length))
           continue;
-        if(c.mode=='noNodes' && nodesIn && nodesIn.length)
+        if(c.mode=='noNodes' && selectedNodes && selectedNodes.length)
           continue;
-        if (c.mode=='nodes' && c.isDirectory != 'any' && nodesIn && c.isDirectory != nodesIn[0].isDirectory)
+        if(c.mode=='noNodesNotEmpty' && (selectedNodes && selectedNodes.length || !allNodes || !allNodes.length))
           continue;
-        if (!c.multiple && nodesIn && nodesIn.length > 1)
+        if (c.mode=='nodes' && c.isDirectory != 'any' && selectedNodes && c.isDirectory != selectedNodes[0].isDirectory)
+          continue;
+        if (!c.multiple && selectedNodes && selectedNodes.length > 1)
           continue;
         let position = c.position;
         if (c.position < 0)
           position = options.length - c.position;
         let item = new OptionItem(c.name, c.icon, (node: Node) => {
-          let nodes = node == null ? nodesIn : [node];
+          let nodes = node == null ? selectedNodes : [node];
           let ids = "";
           if(nodes) {
             for (let node of nodes) {
@@ -442,7 +441,7 @@ export class NodeHelper{
         });
         item.isSeperate = c.isSeperate;
         if (c.permission) {
-          item.isEnabled = NodeHelper.getNodesRight(nodesIn, c.permission);
+          item.isEnabled = NodeHelper.getNodesRight(selectedNodes, c.permission);
         }
         options.splice(position, 0, item);
       }

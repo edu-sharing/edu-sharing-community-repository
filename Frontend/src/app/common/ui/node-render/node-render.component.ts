@@ -25,6 +25,7 @@ import {trigger} from "@angular/animations";
 import {NodeHelper} from "../node-helper";
 import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIConstants} from "../ui-constants";
+import {ConfigurationHelper} from "../../rest/configuration-helper";
 
 declare var jQuery:any;
 declare var window: any;
@@ -305,7 +306,7 @@ export class NodeRenderComponent {
         this.nodeApi.getNodeParents(this._node.parent.id,false,[],this._node.parent.repo).subscribe((data:NodeList)=>{
           openFolder.isEnabled = true;
         });
-        if(this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT)
+        if(this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config,"workspace"))
           this.options.push(openFolder);
 
         let edit=new OptionItem('WORKSPACE.OPTION.EDIT','info_outline',()=>this.nodeMetadata=this._node);

@@ -681,7 +681,7 @@ export class SearchComponent {
       }
     }
     let custom=this.config.instant("searchNodeOptions");
-    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom, nodes, this.actionOptions,(load:boolean)=>this.globalProgress=load);
+    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, nodes, this.actionOptions,(load:boolean)=>this.globalProgress=load);
     this.viewToggle = new OptionItem("", "", (node: Node) => this.toggleView());
     this.viewToggle.isToggle = true;
     this.actionOptions.push(this.viewToggle);

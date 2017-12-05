@@ -831,7 +831,7 @@ export class WorkspaceMainComponent{
       options.push(del);
 
       let custom=this.config.instant("nodeOptions");
-      NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom, nodes, options,(load:boolean)=>this.globalProgress=load);
+      NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.currentNodes, nodes, options,(load:boolean)=>this.globalProgress=load);
     }
     if(!fromList && this.root!='RECYCLE') {
       this.viewToggle = new OptionItem("", this.viewType==0 ? "view_module" : "list", (node: Node) => this.toggleView());
