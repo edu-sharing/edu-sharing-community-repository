@@ -12,3 +12,6 @@ Backend/release/
 Backend/lib/edu-sharing_webservices.jar
 Backend/lib/edu-sharing_webdav.jar
 Backend/lib/edu-sharing_cmis.jar
+Backend/lib/edu-sharing_spring.jar
+Backend/lib/edu-sharing_classloaderstuff.jar
+Backend/lib/edu-sharing_security.jar
