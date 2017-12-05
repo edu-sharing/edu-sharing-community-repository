@@ -9,3 +9,6 @@ Backend/war/
 Backend/build.number
 Backend/edu-sharing/
 Backend/release/
+Backend/lib/edu-sharing_cmis.jar
+Backend/lib/edu-sharing_webdav.jar
+Backend/lib/edu-sharing_webservices.jar
