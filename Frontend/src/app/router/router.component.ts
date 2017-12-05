@@ -69,7 +69,7 @@ export class RouterComponent {
 // Due to ahead of time, we need to create all routes manuall
 export var ROUTES=[
   // global
-    { path: '', component: WorkspaceMainComponent },
+    { path: '', component: LoginComponent },
     { path: UIConstants.ROUTER_PREFIX+'test/mds',component: MdsTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'test/rest',component: RestTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node', component: NodeRenderComponent},
