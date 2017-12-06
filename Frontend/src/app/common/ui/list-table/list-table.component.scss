@@ -245,8 +245,8 @@ $badgeWidth:200px;
 .row_1{
   color:#383838!important;
 }
-.list .row:hover:not(.selected){
-  background:$workspaceSelectedBackground;
+.list .row:hover{
+  background-color:$workspaceSelectedBackground;
 }
 
 .list .filled-in:checked+label:after{
