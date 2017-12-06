@@ -106,7 +106,6 @@ export class SearchComponent {
     private sidenavSet=false;
     public extendedRepositorySelected = false;
     public banner: any;
-    private allowRemote = true;
 
     @HostListener('window:scroll', ['$event'])
     handleScroll(event: Event) {
@@ -195,7 +194,6 @@ export class SearchComponent {
        this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
          (param: any) => {
            console.log("query params");
-           this.allowRemote=param['allowRemote']=='false' ? false : true;
            this.mainnav=param['mainnav']=='false' ? false : true;
            if(param['reurl']) {
              this.searchService.reurl = param['reurl'];
@@ -414,7 +412,7 @@ export class SearchComponent {
       this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.currentValues){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{query:query,parameters:parameters ? JSON.stringify(parameters) : null,mds:mds,repository:repository,mdsExtended:this.mdsExtended,reurl:this.searchService.reurl,allowRemote:this.allowRemote}});
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{query:query,parameters:parameters ? JSON.stringify(parameters) : null,mds:mds,repository:repository,mdsExtended:this.mdsExtended,reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
     if(this.showspinner && init || this.repositoryIds==null){
@@ -741,8 +739,7 @@ export class SearchComponent {
         this.hasCheckbox=false;
         let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl));
         apply.enabledCallback=((node:Node)=> {
-          return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1 && (
-            this.allowRemote || RestNetworkService.isFromHomeRepo(node));
+          return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
         });
         this.options.push(apply);
       }

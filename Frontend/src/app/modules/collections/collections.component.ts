@@ -291,7 +291,7 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.gwtInterface.sendEventSwitchToSearchView(this.collectionContent.collection.ref.id, JSON.stringify(this.breadcrumbs));
       }
       else{
-        ApplyToLmsComponent.navigateToSearchUsingReurl(this.router,window.location.href,false);
+        ApplyToLmsComponent.navigateToSearchUsingReurl(this.router,window.location.href);
       }
     }
 

@@ -95,8 +95,8 @@ export class ApplyToLmsComponent{
     window.location.replace(this.node.contentUrl + contentParams);// + params;
   }
 
-  public static navigateToSearchUsingReurl(router:Router,url=window.location.href,allowRemote=true) {
-    router.navigate(["./"+UIConstants.ROUTER_PREFIX+"search"],{queryParams:{reurl:url,allowRemote:allowRemote}});
+  public static navigateToSearchUsingReurl(router:Router,url=window.location.href) {
+    router.navigate(["./"+UIConstants.ROUTER_PREFIX+"search"],{queryParams:{reurl:url}});
   }
 
   private static roundNumber(number: number) {
