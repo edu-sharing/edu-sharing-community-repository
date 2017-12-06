@@ -15,6 +15,7 @@ export class BannerComponent {
   @Input() scope:string;
   public banner: any;
   constructor(private config:ConfigurationService) {
+    this.banner = ConfigurationHelper.getBanner(this.config);
     this.config.getAll().subscribe(()=>{
       this.banner = ConfigurationHelper.getBanner(this.config);
     });
