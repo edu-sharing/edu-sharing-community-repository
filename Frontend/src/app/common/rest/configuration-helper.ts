@@ -15,6 +15,15 @@ import {ListItem} from "../ui/list-item";
 import {Helper} from "../helper";
 
 export class ConfigurationHelper {
+  public static getBanner(config: ConfigurationService){
+    let banner=config.instant("banner");
+    if(!banner)
+      banner={};
+    if(!banner.components || !banner.components.length)
+      banner.components=["search"];
+    console.log(banner);
+    return banner;
+  }
   public static hasMenuButton(config: ConfigurationService,button:string): boolean {
     let hide = config.instant("hideMainMenu");
     if(!hide)

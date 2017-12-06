@@ -67,6 +67,7 @@ export class NodeRenderComponent {
   public nodeMetadata: Node;
   private editor: string;
   private fromLogin = false;
+  public banner: any;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
@@ -167,6 +168,7 @@ export class NodeRenderComponent {
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
       Translation.initialize(translate,config,storage,route).subscribe(()=>{
+        this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.route.queryParams.subscribe((params:Params)=>{
           this.closeOnBack=params['closeOnBack']=='true';

@@ -1,7 +1,6 @@
 @import "../../../styles/variables.scss";
 
 $sidenavWidth:285px;
-$bannerHeight:130px;
 .switchToCollections{
   float:left;
   font-weight:bold;
@@ -84,16 +83,7 @@ $bannerHeight:130px;
     display: inline-block;
     height: 100%;
 }
-.banner{
-  position: absolute;
-  left:0;
-  top:0;
-  width:100%;
-  height:$bannerHeight;
-  z-index: 100;
-  background-repeat:repeat-y;
-  background-position: 0 0;
-}
+
 .main_view_selector {
  padding: 15px;
  cursor: pointer;

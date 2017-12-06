@@ -44,6 +44,7 @@ import {ListItem} from "../../common/ui/list-item";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
 import {RequestObject} from "../../common/rest/request-object";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
+import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 
 
 
@@ -115,7 +116,6 @@ export class SearchComponent {
   private currentMdsSet: any;
   private sidenavSet=false;
   public extendedRepositorySelected = false;
-  public banner: any;
   public savedSearch : Node[]=[];
   public savedSearchColumns : ListItem[]=[];
   private mdsActions: OptionItem[];
@@ -165,7 +165,6 @@ export class SearchComponent {
       Translation.initialize(translate, this.config, this.storage, this.activatedRoute).subscribe(() => {
         UIHelper.setTitle('SEARCH.TITLE', title, translate, config);
         this.initalized = true;
-        this.banner = this.config.instant('bannerSearch');
         this.printListener();
         this.view = this.config.instant('searchViewType',temporaryStorageService.get('view', '1'));
         this.setViewType(this.view);
@@ -877,7 +876,6 @@ export class SearchComponent {
       this.repositoryIds.push({id:repo.id,title:repo.title,enabled:true});
     }
   }
-
   private updateMdsActions() {
     this.savedSearchOptions=[];
 

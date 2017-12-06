@@ -1,6 +1,6 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
   <app-search-header></app-search-header>
-  <header *ngIf="banner" class="banner" [style.background-image]="'url('+banner.url+')'"></header>
+  <app-banner [scope]="'search'"></app-banner>
   <main-nav
     [title]="'SEARCH.TITLE'"
     [currentScope]="'search'"

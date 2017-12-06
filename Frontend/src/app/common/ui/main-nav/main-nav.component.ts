@@ -118,7 +118,7 @@ export class MainNavComponent {
         console.log(this.scrollInitialPositions);
       }
     }
-    if(this.topbar.nativeElement.classList.contains('topBar-search')) {
+    if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
       for(let i=0;i<elements.length;i++) {
         let element:any=elements[i];
         if(element.className.indexOf('alignWithBanner')!=-1){
