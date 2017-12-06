@@ -227,8 +227,8 @@ $badgeWidth:200px;
 }
 
 .selected{
-  background: $workspaceSelectedBackgroundEffect!important;
-  background-color:$workspaceSelectedBackground!important;
+  background: $workspaceSelectedBackgroundEffect;
+  background-color:$workspaceSelectedBackground;
 }
 .row:focus{
   @include setGlobalInsetFocus();
@@ -245,7 +245,7 @@ $badgeWidth:200px;
 .row_1{
   color:#383838!important;
 }
-.list .row:hover{
+.list .row:hover:not(.selected){
   background:$workspaceSelectedBackground;
 }
 
@@ -470,8 +470,8 @@ $badgeWidth:200px;
   opacity: 1!important;
 }
 .cardList .selected{
-  background: transparent!important;
-  background-color:transparent!important;
+  background: transparent;
+  background-color:transparent;
   outline:2px solid $primary;
 }
 
