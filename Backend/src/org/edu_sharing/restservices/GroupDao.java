@@ -35,7 +35,11 @@ public class GroupDao {
 	public static String createGroup(RepositoryDao repoDao, String groupName, GroupProfile profile,String parentGroup) throws DAOException {
 		try {
 			AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
-			return authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
+			String result=authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
+			if(result!=null) {
+				GroupDao.getGroup(repoDao, result).setGroupType(profile);
+			}
+			return result;
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
