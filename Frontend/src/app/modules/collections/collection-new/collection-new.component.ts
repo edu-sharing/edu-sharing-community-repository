@@ -1,4 +1,4 @@
-import {Component, OnInit, NgZone, HostListener} from '@angular/core';
+import {Component, OnInit, NgZone, HostListener, ViewChild} from '@angular/core';
 
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
@@ -23,6 +23,7 @@ import {RestConnectorService} from "../../../common/rest/services/rest-connector
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {SessionStorageService} from "../../../common/services/session-storage.service";
 import {UIConstants} from "../../../common/ui/ui-constants";
+import {MdsComponent} from "../../../common/ui/mds/mds.component";
 
 // component class
 @Component({
@@ -32,6 +33,7 @@ import {UIConstants} from "../../../common/ui/ui-constants";
   providers: [GwtInterfaceService]
 })
 export class CollectionNewComponent {
+  @ViewChild('mds') mds : MdsComponent;
   public hasCustomScope: boolean;
   public COLORS1=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A'];
   public COLORS2=['#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
@@ -110,13 +112,16 @@ export class CollectionNewComponent {
             let id = params['id'];
             if (mode=="edit") {
               this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
-                this.editId=id;
-                this.currentCollection=data.collection;
-                this.newCollectionType=this.getTypeForCollection(this.currentCollection);
-                this.hasCustomScope=false;
-                this.newCollectionStep = this.STEP_GENERAL;
-                this.updateAvailableSteps();
-                this.isLoading=false;
+                this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
+                  this.editId=id;
+                  this.currentCollection=data.collection;
+                  this.properties=node.node.properties;
+                  this.newCollectionType=this.getTypeForCollection(this.currentCollection);
+                  this.hasCustomScope=false;
+                  this.newCollectionStep = this.STEP_GENERAL;
+                  this.updateAvailableSteps();
+                  this.isLoading=false;
+                });
               });
             } else {
               this.parentId = id;
@@ -368,7 +373,15 @@ export class CollectionNewComponent {
       this.isLoading = false;
       this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'], {queryParams:{id:id,mainnav:this.mainnav}});
     }
-
+  private syncMetadata(goToNext:boolean){
+      this.properties=this.mds.getValues({},goToNext);
+      if(goToNext && this.properties!=null){
+        this.goToNextStep();
+      }
+      if(!goToNext){
+        this.goBack();
+      }
+  }
   private save2(collection: Collection) {
     if(this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
       this.nodeService.setNodePermissions(collection.ref.id,this.permissions).subscribe(()=>{

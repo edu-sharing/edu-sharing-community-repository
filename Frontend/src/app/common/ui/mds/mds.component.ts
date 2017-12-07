@@ -448,7 +448,7 @@ export class MdsComponent{
     let html="Group '"+id+"' was not found in the mds";
     this.rendered=this.sanitizer.bypassSecurityTrustHtml(html);
   }
-  private getValues(propertiesIn:any={},showError=true){
+  public getValues(propertiesIn:any={},showError=true){
     let properties:any={};
     // add author data
     this.addAuthorValue(properties);
@@ -1702,7 +1702,7 @@ export class MdsComponent{
   }
 
   private isContentEditable() {
-    let value=this.currentNode.properties[RestConstants.CCM_PROP_EDITOR_TYPE];
+    let value=this.currentNode && this.currentNode.properties[RestConstants.CCM_PROP_EDITOR_TYPE];
     return value!='tinymce';
   }
 

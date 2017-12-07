@@ -427,12 +427,25 @@
                	</script>
 				]]></html>
 			</template>
+			<template>
+				<id>collection_editorial</id>
+				<caption>collection_editorial</caption>
+				<html><![CDATA[
+					<cclom:general_keyword>
+				]]></html>
+			</template>
 		</templates>
 		<groups>
 			<group>
 				<id>io</id>
 				<views>
 					<view>node_general</view>
+				</views>
+			</group>
+			<group>
+				<id>collection_editorial</id>
+				<views>
+					<view>collection_editorial</view>
 				</views>
 			</group>
 			<group>

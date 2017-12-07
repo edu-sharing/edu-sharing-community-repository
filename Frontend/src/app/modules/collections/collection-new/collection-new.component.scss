@@ -162,7 +162,7 @@ $imagePath: '../../../../assets/images/collections/';
     box-shadow: 0px 4px 5px 0px rgba(0,0,0,0.5);
     */
 }
-.collection-metadata{
+.collection-basic{
   width: 350px;
   margin-left: -175px!important;
   left:auto;
@@ -171,6 +171,9 @@ $imagePath: '../../../../assets/images/collections/';
     padding-left:0;
     padding-right:0;
   }
+}
+.collection-metadata{
+
 }
 .groupLabel{
   margin-bottom:5px;

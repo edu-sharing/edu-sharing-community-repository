@@ -82,7 +82,7 @@
     </div>
   </div>
 </section>
-<section *ngIf="newCollectionStep==STEP_GENERAL" class="card center-card card-action collectionShadow collection-new-container collection-metadata">
+<section *ngIf="newCollectionStep==STEP_GENERAL" class="card center-card card-action collectionShadow collection-new-container collection-basic">
 
     <div class="card-content">
       <div class="card-title">
@@ -161,12 +161,23 @@
         <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
     </div>
 </section>
-<section *ngIf="newCollectionStep==STEP_METADATA" class="card center-card card-action collectionShadow collection-new-container collection-metadata">
-  <mds
-    [groupId]="'COLLECTION_'+newCollectionType"
-    [currentValues]="properties"
-    [invalidate]="reloadMds"
-  ></mds>
+<section *ngIf="newCollectionStep==STEP_METADATA" class="card center-card card-action card-high collectionShadow collection-new-container collection-metadata">
+  <div class="card-content">
+    <div class="card-title">
+      <span>{{ 'COLLECTIONS.STEP.METADATA' | translate }}</span>
+    </div>
+    <div class="card-scroll">
+      <mds #mds
+        [groupId]="'collection_'+newCollectionType.toLowerCase()"
+        [currentValues]="properties"
+        [invalidate]="reloadMds"
+      ></mds>
+    </div>
+  </div>
+  <div class="card-action">
+    <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="syncMetadata(true)" (click)="syncMetadata(true)">{{ (isLastStep() ? 'SAVE' : 'NEXT') | translate }}</a>
+    <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="syncMetadata(false)" (click)="syncMetadata(false)">{{ 'BACK' | translate }}</a>
+  </div>
 </section>
 
   <section *ngIf="newCollectionStep==STEP_PERMISSIONS" class="card center-card card-action collectionShadow">
@@ -174,14 +185,14 @@
       <div class="card-title">
         <span>{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}</span>
       </div>
-      <div style="background-color:#FFFFFF;">
+      <div>
         <div class="dialog-basic-area permissionsBtn">
           <a class="btn-flat btn-shadow btn-icon" tabindex="0" (keyup.enter)="editPermissions()" (click)="editPermissions()"><i class="material-icons">person_add</i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</a>
         </div>
       </div>
     </div>
       <div class="card-action">
-        <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="setPermissions()" (click)="goToNextStep()">{{ (isLastStep() ? 'SAVE' : 'NEXT') | translate }}</a>
+        <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="goToNextStep()" (click)="goToNextStep()">{{ (isLastStep() ? 'SAVE' : 'NEXT') | translate }}</a>
         <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
       </div>
   </section>
