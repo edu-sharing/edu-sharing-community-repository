@@ -63,10 +63,7 @@ export class MdsComponent{
     setTimeout(()=>this.loadMdsFinal(),5);
   }
   @Input() set currentValues(currentValues:any){
-    if(!currentValues)
-      return;
     this._currentValues=currentValues;
-    setTimeout(()=>this.loadMdsFinal(),5);
   }
   @Input() set setId(setId:string){
     if(!setId)
@@ -182,6 +179,10 @@ export class MdsComponent{
   private mds: any;
   private static MAX_SUGGESTIONS = 5;
   private suggestionsViaSearch = false;
+  private resetValues(){
+    this._currentValues=null;
+    this.onDone.emit(null);
+  }
   private onAddWidget(){
     let values:any=[];
     for(let i=0;i<100;i++){

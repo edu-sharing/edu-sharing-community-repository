@@ -56,70 +56,71 @@ export class LoginComponent  implements OnInit{
               private route : ActivatedRoute){
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
-    });
-    this.configService.getAll().subscribe((data:any)=>{
-      this.config=data;
-      this.username=this.configService.instant("defaultUsername","");
-      this.password=this.configService.instant("defaultPassword","");
-    });
-    this.route.queryParams.forEach((params: Params) => {
-      console.log(params);
-      this.scope=params['scope'];
-      if(!this.scope)
-        this.scope=null;
-      this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-        if(data.currentScope){
-          this.connector.logout().subscribe(()=>{}); // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
-        }
-        else if(data.currentScope==this.scope){
-           if(data.statusCode==RestConstants.STATUS_CODE_OK){
-              this.goToNext();
-        }
-      }
-      });
-      this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
-      this.next=params['next'];
-      this.mainnav=params['mainnav']=='false' ? false : true;
-      if(this.scope==RestConstants.SAFE_SCOPE){
-        this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-          if(data.statusCode!=RestConstants.STATUS_CODE_OK){
-            UIHelper.goToLogin(this.router,this.configService);
-          }
-          else{
-            this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((scope:AccessScope)=>{
-              if(scope.hasAccess){
-                this.username=data.authorityName;
-                if (this.passwordInput)
-                  this.passwordInput.nativeElement.focus();
+      this.configService.getAll().subscribe((data:any)=>{
+        this.config=data;
+        this.username=this.configService.instant("defaultUsername","");
+        this.password=this.configService.instant("defaultPassword","");
+        this.route.queryParams.forEach((params: Params) => {
+          this.connector.onAllRequestsReady().subscribe(()=>this.isLoading=false);
+          this.scope=params['scope'];
+          if(!this.scope)
+            this.scope=null;
+          this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+            if(data.currentScope){
+              this.connector.logout().subscribe(()=>{}); // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
+            }
+            else if(data.currentScope==this.scope){
+              if(data.statusCode==RestConstants.STATUS_CODE_OK){
+                this.goToNext();
+              }
+            }
+          });
+          this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
+          this.next=params['next'];
+          this.mainnav=params['mainnav']=='false' ? false : true;
+          if(this.scope==RestConstants.SAFE_SCOPE){
+            this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+              if(data.statusCode!=RestConstants.STATUS_CODE_OK){
+                UIHelper.goToLogin(this.router,this.configService);
               }
               else{
-                this.toast.error(null,'LOGIN.NO_ACCESS');
-                this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
-                //window.history.back();
+                this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((scope:AccessScope)=>{
+                  if(scope.hasAccess){
+                    this.username=data.authorityName;
+                    if (this.passwordInput)
+                      this.passwordInput.nativeElement.focus();
+                  }
+                  else{
+                    this.toast.error(null,'LOGIN.NO_ACCESS');
+                    this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
+                    //window.history.back();
+                  }
+                },(error:any)=>{
+                  this.toast.error(error);
+                });
               }
-            },(error:any)=>{
-              this.toast.error(error);
-            });
+            },(error:any)=>UIHelper.goToLogin(this.router,this.configService));
           }
-        },(error:any)=>UIHelper.goToLogin(this.router,this.configService));
-      }
-      setTimeout(()=>{
-        if (this.username && this.passwordInput)
-          this.passwordInput.nativeElement.focus();
-        else if(this.usernameInput){
-          this.usernameInput.nativeElement.focus();
-        }
-      },250);
+          setTimeout(()=>{
+            if (this.username && this.passwordInput)
+              this.passwordInput.nativeElement.focus();
+            else if(this.usernameInput){
+              this.usernameInput.nativeElement.focus();
+            }
+          },250);
 
-      if(this.scope==RestConstants.SAFE_SCOPE){
-        this.caption='LOGIN.TITLE_SAFE';
-      }
-      else{
-        this.caption='LOGIN.TITLE';
-      }
+          if(this.scope==RestConstants.SAFE_SCOPE){
+            this.caption='LOGIN.TITLE_SAFE';
+          }
+          else{
+            this.caption='LOGIN.TITLE';
+          }
+        });
+
+      });
+
     });
     this.isLoading=true;
-    this.connector.onAllRequestsReady().subscribe(()=>this.isLoading=false);
   }
   ngOnInit() {
 
@@ -153,7 +154,7 @@ export class LoginComponent  implements OnInit{
       window.location.assign(this.next);
     }
     else {
-      this.router.navigate([UIConstants.ROUTER_PREFIX + "workspace/files"]);
+      this.router.navigate([UIConstants.ROUTER_PREFIX + this.configService.instant("loginDefaultLocation","workspace")]);
     }
   }
 }

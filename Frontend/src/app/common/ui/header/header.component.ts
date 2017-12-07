@@ -6,7 +6,7 @@ import { Component} from '@angular/core';
 import {ConfigurationService} from "../../services/configuration.service";
 
 @Component({
-  selector: 'app-search-header',
+  selector: 'app-header',
   templateUrl: 'header.component.html',
 })
 export class SearchHeaderComponent {

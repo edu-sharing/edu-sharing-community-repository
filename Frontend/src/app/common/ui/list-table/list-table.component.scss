@@ -223,8 +223,8 @@ $badgeWidth:200px;
 
 .tableList .selected,
 .cardList .selected{
-  background: $workspaceSelectedBackgroundEffect!important;
-  background-color:$workspaceSelectedBackground!important;
+  background: $workspaceSelectedBackgroundEffect;
+  background-color:$workspaceSelectedBackground;
 }
 
 .tableList .row:focus,
@@ -243,7 +243,7 @@ $badgeWidth:200px;
   color:#383838!important;
 }
 .list .row:hover{
-  background:$workspaceSelectedBackground;
+  background-color:$workspaceSelectedBackground;
 }
 
 .list .filled-in:checked+label:after{
@@ -342,7 +342,7 @@ $badgeWidth:200px;
 .hover{
   background-color:rgba($primary,0.2)!important;
   outline:2px dashed $primary;
-  border:none!important;;
+  border:none!important;
   padding: 0;
   position:relative;
   z-index:5;
@@ -535,8 +535,8 @@ $badgeWidth:200px;
   opacity: 1!important;
 }
 .cardList .selected{
-  background: transparent!important;
-  background-color:transparent!important;
+  background: transparent;
+  background-color:transparent;
   outline:2px solid $primary;
 }
 

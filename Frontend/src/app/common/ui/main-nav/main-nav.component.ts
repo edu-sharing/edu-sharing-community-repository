@@ -76,7 +76,7 @@ export class MainNavComponent {
   public showEditProfile: boolean;
   public showProfile: boolean;
 
-  public helpUrl = 'http://docs.edu-sharing.com/confluence/edp/de/edu-sharing-ueberblick';
+  public helpUrl = 'http://docs.edu-sharing.com/confluence/edp/';
   public whatsNewUrl = 'http://docs.edu-sharing.com/confluence/edp/de/was-ist-neu-in-edu-sharing';
   private toolpermissions: string[];
   public canAccessWorkspace = true;
@@ -118,7 +118,7 @@ export class MainNavComponent {
         console.log(this.scrollInitialPositions);
       }
     }
-    if(this.topbar.nativeElement.classList.contains('topBar-search')) {
+    if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
       for(let i=0;i<elements.length;i++) {
         let element:any=elements[i];
         if(element.className.indexOf('alignWithBanner')!=-1){
@@ -134,19 +134,6 @@ export class MainNavComponent {
         }
       }
     }
-    /*
-    // previously for custom header
-    if(this.topbar.nativeElement.classList.contains('topBar-search') || this.topbar.nativeElement.classList.contains('topBar-collections')) {
-      if((window.pageYOffset || document.documentElement.scrollTop) > y) {
-        this.topbar.nativeElement.style.position = 'fixed';
-        this.topbar.nativeElement.style.top = '0';
-      } else {
-        this.topbar.nativeElement.style.position = 'absolute';
-        this.topbar.nativeElement.style.top = y+'px';
-      }
-    }
-    */
-
     if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
       this.scrolltotop.nativeElement.style.display = 'block';
     } else {
@@ -210,7 +197,8 @@ export class MainNavComponent {
   };
 
   /**
-   * Called when a search event happened, emits the search string
+   * Called when a search event happened, emits the search string and additional event info
+   * {query:string,cleared:boolean}
    * @type {EventEmitter}
    */
   @Output() onSearch=new EventEmitter();
@@ -247,6 +235,10 @@ export class MainNavComponent {
       clearInterval(MainNavComponent.bannerPositionInterval);
     }
     MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),200);
+  }
+  private clearSearch(){
+    this.searchQuery="";
+    this.onSearch.emit({query:"",cleared:true});
   }
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
@@ -385,7 +377,7 @@ export class MainNavComponent {
   private doSearch(value=this.search.nativeElement.value,broadcast=true){
     if(broadcast)
       this.event.broadcastEvent(FrameEventsService.EVENT_GLOBAL_SEARCH,value);
-    this.onSearch.emit(value);
+    this.onSearch.emit({query:value,cleared:false});
   }
   private openButton(button : any){
     this.displaySidebar=false;

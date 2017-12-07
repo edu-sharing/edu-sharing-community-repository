@@ -50,11 +50,12 @@ user-profile{
 }
 .menuButton img{
   /*
-  margin-left: 16pp;
+  margin-left: 16px;
   width: 24px;
   */
   margin-left: 0px;
   width: 35px;
+
   height: auto;
 }
 
@@ -148,16 +149,22 @@ user-profile{
 }
 
 .topBar input,.topBar input:focus{
-  padding: 0;
-  padding-left: 50px;
+  padding: 0 40px;
   border-radius: 2px;
   width:100%;
-  max-width:500px;
   background: #595959;
   border:none!important;
   height:40px;
   box-shadow:none!important;
   -webkit-appearance: none;
+}
+.searchInputGroup{
+  position: relative;
+  width:100%;
+  max-width:500px;
+}
+.noUser .searchInputGroup{
+  width:calc(100% - 150px);
 }
 
 .topBar .topBarSearch form {
@@ -167,18 +174,22 @@ user-profile{
 .topBar .topBarSearch input:focus {
   @include setGlobalInsetFocus();
 }
-.noUser input,.noUser input:focus{
-  width:calc(100% - 150px);
-}
+
 .barIcon{
   font-size: 24px;
   z-index:115;
 }
-.searchIcon{
-  font-size: 28px !important;
+.searchIcon,.searchClearIcon{
+  font-size: 22px !important;
   position: absolute;
-  top: 7px;
+  top: 10px;
+}
+.searchIcon{
   left: 8px;
+}
+.searchClearIcon{
+  right:-70px;
+  @include clickable();
 }
 .topBar .user{
   text-align: right;
@@ -270,8 +281,8 @@ user-profile{
   display:none;
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
-  .topBar input, .topBar input:focus {
-    width: calc(100% - 50px);
+  .searchInputGroup{
+    width: calc(100% - 80px);
   }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*2)) {

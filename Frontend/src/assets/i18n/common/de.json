@@ -41,6 +41,7 @@
   "LOGOUT" : "Abmelden",
   "INVALID_OPERATION":"Diese Funktion wird leider nicht unterstützt",
   "SHOW_IN_FOLDER":"Zum Speicherort",
+  "CLEAR_FILTERS":"Alle Filter zurücksetzen",
   "EDIT_ACCOUNT":"Account Verwalten",
   "DEFAULT_METADATASET":"Standard-Metadatenset",
   "NO_MATCHES" : "Keine übereinstimmenden Einträge",

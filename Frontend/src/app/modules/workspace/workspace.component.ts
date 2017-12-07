@@ -220,6 +220,10 @@ export class WorkspaceMainComponent{
     this.explorerOptions=this.getOptions([new Node()],true);
     //this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
   }
+  private showTimeout(){
+    return this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
+      (this.isSafe || !this.isSafe && this.config.instant('sessionExpiredDialog',{show:true}).show);
+  }
   private updateTimeout(){
     let time=this.connector.logoutTimeout - Math.floor((new Date().getTime()-this.connector.lastActionTime)/1000);
     let min=Math.floor(time/60);
@@ -229,7 +233,7 @@ export class WorkspaceMainComponent{
       this.timeout = this.formatTimeout(min, 2) + ":" + this.formatTimeout(sec, 2);
       this.timeIsValid=true;
     }
-    else if(this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT'){
+    else if(this.showTimeout()){
       this.dialogTitle='WORKSPACE.AUTOLOGOUT';
       this.dialogMessage='WORKSPACE.AUTOLOGOUT_INFO';
       this.dialogCancelable=false;
@@ -810,7 +814,7 @@ export class WorkspaceMainComponent{
       options.push(del);
 
       let custom=this.config.instant("nodeOptions");
-      NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom, nodes, options,(load:boolean)=>this.globalProgress=load);
+      NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.currentNodes, nodes, options,(load:boolean)=>this.globalProgress=load);
     }
     if(!fromList && this.root!='RECYCLE') {
       this.viewToggle = new OptionItem("", this.viewType==0 ? "view_module" : "list", (node: Node) => this.toggleView());

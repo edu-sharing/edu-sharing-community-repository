@@ -1,6 +1,5 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
-  <app-search-header></app-search-header>
-  <header *ngIf="banner" class="banner" [style.background-image]="'url('+banner.url+')'"></header>
+  <app-banner [scope]="'search'"></app-banner>
   <main-nav
     [title]="'SEARCH.TITLE'"
     [currentScope]="'search'"
@@ -11,7 +10,7 @@
     [canOpen]="true"
     [(searchQuery)]="searchService.searchTerm"
     [onInvalidNodeStore]="invalidateNodeStore"
-    (onSearch)="routeSearch($event)"
+    (onSearch)="routeAndClearSearch($event)"
   ></main-nav>
 
   <div class="rowRepositories row tab-group row-dark scrollWithBanner" *ngIf="repositories">
@@ -97,6 +96,7 @@
         [suggestions]="mdsSuggestions"
         [invalidate]="reloadMds"
         [(extended)]="mdsExtended"
+        (onDone)="applyParameters()"
       >
       </mds>
        <div class="mdsSelect">

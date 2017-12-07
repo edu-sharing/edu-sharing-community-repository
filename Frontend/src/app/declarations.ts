@@ -31,6 +31,7 @@
   import {ToucheventDirective} from "./common/ui/touchevents/touchevents";
   import {NodeTitlePipe} from "./common/ui/node-title.pipe";
   import {CustomIconComponent} from "./common/ui/custom-icon/custom-icon.component";
+  import {BannerComponent} from "./common/ui/banner/banner.component";
   import {SmallCollectionComponent} from "./common/ui/small-collection/small-collection.component";
 
 export const DECLARATIONS = [
@@ -68,4 +69,5 @@ export const DECLARATIONS = [
       ModalDialogToastComponent,
       ToolListComponent,
       ToucheventDirective,
+      BannerComponent
     ];

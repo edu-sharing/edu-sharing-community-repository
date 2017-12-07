@@ -34,9 +34,12 @@
   </div>
   <div class="topBarSearch" [class.noScope]="!showScope">
   <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled">
-    <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
-           title="{{searchPlaceholder | translate}}" placeholder="{{searchPlaceholder | translate}}" />
-    <i class="material-icons searchIcon">search</i>
+    <div class="searchInputGroup">
+      <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
+             title="{{searchPlaceholder | translate}}" placeholder="{{searchPlaceholder | translate}}" />
+      <i class="material-icons searchIcon">search</i>
+      <i class="material-icons searchClearIcon" *ngIf="searchQuery" (click)="clearSearch()">clear</i>
+    </div>
   </form>
   </div>
   <div class="imprint" *ngIf="config.imprintUrl"><a class="clickable" (click)="openImprint()">{{ 'IMPRINT' | translate }}</a></div>

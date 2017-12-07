@@ -96,7 +96,6 @@ export class ListTableComponent implements EventListener{
       if(option.showAlways)
         this.optionsAlways.push(option);
     }
-    console.log(this.optionsAlways);
   }
 
   /**

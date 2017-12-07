@@ -24,6 +24,7 @@
 <div *ngIf="embedded">
   <div class="mdsEmbeddedGroup">
     <div [innerHTML]="rendered"></div>
+    <div class="reset" *ngIf="rendered" (click)="resetValues()">{{'CLEAR_FILTERS' | translate}}</div>
     <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
   </div>
 </div>

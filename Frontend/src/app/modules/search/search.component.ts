@@ -28,6 +28,7 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {Toast} from "../../common/ui/toast";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {RestNetworkService} from "../../common/rest/services/rest-network.service";
+import {WorkspaceMainComponent} from "../workspace/workspace.component";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
 import {NodeHelper} from "../../common/ui/node-helper";
@@ -44,6 +45,7 @@ import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component"
 import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {Action} from "rxjs/scheduler/Action";
 import {WorkspaceManagementDialogsComponent} from "../management-dialogs/management-dialogs.component";
+import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 
 
 
@@ -116,7 +118,6 @@ export class SearchComponent {
   private currentMdsSet: any;
   private sidenavSet=false;
   public extendedRepositorySelected = false;
-  public banner: any;
   public savedSearch : Node[]=[];
   public savedSearchColumns : ListItem[]=[];
   private mdsActions: OptionItem[];
@@ -167,7 +168,6 @@ export class SearchComponent {
       Translation.initialize(translate, this.config, this.storage, this.activatedRoute).subscribe(() => {
         UIHelper.setTitle('SEARCH.TITLE', title, translate, config);
         this.initalized = true;
-        this.banner = this.config.instant('bannerSearch');
         this.printListener();
         this.view = this.config.instant('searchViewType',temporaryStorageService.get('view', '1'));
         this.setViewType(this.view);
@@ -242,7 +242,6 @@ export class SearchComponent {
             if(this.currentRepository!=param['repository'])
               this.mdsId=RestConstants.DEFAULT;
             this.currentRepository=param['repository'];
-            this.currentValues=null;
             this.updateRepositoryOrder();
           }
           if(param['savedQuery']){
@@ -412,7 +411,16 @@ export class SearchComponent {
     console.log(JSON.stringify(parameters));
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
+  public routeAndClearSearch(query:any) {
+    let parameters=this.currentValues;
+    if (query.cleared) {
+      parameters = null;
+    }
+    this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
+  }
+
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.currentValues){
+
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
@@ -542,6 +550,7 @@ export class SearchComponent {
     this.searchFail = false;
     this.searchService.searchResult = this.searchService.searchResult.concat(data.nodes);
     this.checkFail();
+    this.updateActionbar(this.selection);
     if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
       this.searchService.init();
@@ -707,7 +716,7 @@ export class SearchComponent {
       }
     }
     let custom=this.config.instant("searchNodeOptions");
-    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom, nodes, options,(load:boolean)=>this.globalProgress=load);
+    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, nodes, options,(load:boolean)=>this.globalProgress=load);
     this.viewToggle = new OptionItem("", "", (node: Node) => this.toggleView());
     this.viewToggle.isToggle = true;
     options.push(this.viewToggle);
@@ -773,13 +782,16 @@ export class SearchComponent {
       this.isGuest = data.isGuest;
       this.hasCheckbox=true;
       this.options=[];
-      this.currentValues=null;
       this.mdsExtended=false;
       this.loadSavedSearch();
       if(param['mdsExtended'])
         this.mdsExtended=param['mdsExtended']=='true';
       if(param['parameters']){
         this.currentValues=JSON.parse(param['parameters']);
+        this.reloadMds=new Boolean(true);
+      }
+      else if(this.currentValues){
+        this.currentValues=null;
         this.reloadMds=new Boolean(true);
       }
       if(param['reurl']) {
@@ -871,7 +883,6 @@ export class SearchComponent {
       this.repositoryIds.push({id:repo.id,title:repo.title,enabled:true});
     }
   }
-
   private updateMdsActions() {
     this.savedSearchOptions=[];
 

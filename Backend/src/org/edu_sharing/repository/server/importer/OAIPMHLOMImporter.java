@@ -301,6 +301,7 @@ public class OAIPMHLOMImporter implements Importer{
 			logger.error("SAXParseException occured: cursor:"+cursor+ " set:"+set +" identifier:"+ identifier );
 			logger.error(e.getMessage(),e);
 		}catch(Throwable e){
+			logger.error("Throwable occured at set: "+set+", identifier: "+identifier);
 			logger.error(e.getMessage(),e);
 		}
 	}
