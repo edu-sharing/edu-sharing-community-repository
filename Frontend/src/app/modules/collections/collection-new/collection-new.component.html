@@ -161,6 +161,14 @@
         <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
     </div>
 </section>
+<section *ngIf="newCollectionStep==STEP_METADATA" class="card center-card card-action collectionShadow collection-new-container collection-metadata">
+  <mds
+    [groupId]="'COLLECTION_'+newCollectionType"
+    [currentValues]="properties"
+    [invalidate]="reloadMds"
+  ></mds>
+</section>
+
   <section *ngIf="newCollectionStep==STEP_PERMISSIONS" class="card center-card card-action collectionShadow">
     <div class="card-content">
       <div class="card-title">

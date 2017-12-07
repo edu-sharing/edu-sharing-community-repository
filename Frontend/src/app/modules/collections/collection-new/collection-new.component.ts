@@ -38,7 +38,9 @@ export class CollectionNewComponent {
   public isLoading:boolean = true;
   public showPermissions = false;
   private currentCollection:Collection;
-  private newCollectionType:string;
+  public newCollectionType:string;
+  public properties:any;
+  public reloadMds:Boolean;
   private hasUserAnyOrgasYet = false;
   private user : User;
   public mainnav = true;
@@ -330,6 +332,7 @@ export class CollectionNewComponent {
       else{
         let pos=this.currentStepPosition();
         this.newCollectionStep=this.availableSteps[pos+1];
+        this.reloadMds=new Boolean(true);
       }
 
     }
@@ -358,6 +361,7 @@ export class CollectionNewComponent {
        }
        else{
          this.newCollectionStep = this.availableSteps[pos - 1];
+         this.reloadMds=new Boolean(true);
        }
     }
     navigateToCollectionId(id:string) : void {

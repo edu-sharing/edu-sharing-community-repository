@@ -49,6 +49,12 @@ export class MdsComponent{
    * Show extended widgets
    */
   @Input() extended=false;
+  /**
+   * mode, currently "search" or "default"
+   * @type {string}
+   */
+  @Input() mode:string='default';
+
   @Output() extendedChange=new EventEmitter();
   private static AUTHOR_TYPE_FREETEXT = 0;
   private static AUTHOR_TYPE_PERSON = 1;
@@ -168,7 +174,7 @@ export class MdsComponent{
   private rendered : SafeHtml;
   private renderedSuggestions : SafeHtml;
   private jumpmarks: SafeHtml;
-  private isLoading = true;
+  private isLoading = false;
 
   private widgetName="cclom:general_keyword";
   private widgetType="multivalueFixedBadges";
