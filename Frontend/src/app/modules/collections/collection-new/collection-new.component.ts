@@ -15,7 +15,7 @@ import {RestHelper} from "../../../common/rest/rest-helper";
 import {GwtInterfaceService} from "../../../common/services/gwt-interface.service";
 import {Toast} from "../../../common/ui/toast";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {IamUser, NodeRef} from "../../../common/rest/data-object";
+import {Group, IamGroups, IamUser, NodeRef, Permission} from "../../../common/rest/data-object";
 import {User} from "../../../common/rest/data-object";
 import {LocalPermissions} from "../../../common/rest/data-object";
 import {Collection} from "../../../common/rest/data-object";
@@ -24,6 +24,7 @@ import {ConfigurationService} from "../../../common/services/configuration.servi
 import {SessionStorageService} from "../../../common/services/session-storage.service";
 import {UIConstants} from "../../../common/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
+import {ListItem} from "../../../common/ui/list-item";
 
 // component class
 @Component({
@@ -54,6 +55,9 @@ export class CollectionNewComponent {
   public createCurriculum = false;
   public parentId: any;
   public editId: any;
+  public editorialGroups:Group[]=[];
+  public editorialGroupsSelected:Group[]=[];
+  public editorialColumns:ListItem[]=[new ListItem("GROUP",RestConstants.AUTHORITY_DISPLAYNAME)];
   private imageData:string = null;
   private imageFile:File = null;
   private STEP_NEW = 'NEW';
@@ -105,7 +109,9 @@ export class CollectionNewComponent {
           this.route.queryParams.subscribe(params => {
             this.mainnav=params['mainnav']=='true';
           });
-
+          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
+            this.editorialGroups=data.groups;
+          });
           this.route.params.subscribe(params => {
             // get mode from route and validate input data
             let mode = params['mode'];
@@ -383,7 +389,20 @@ export class CollectionNewComponent {
       }
   }
   private save2(collection: Collection) {
-    if(this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
+    if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
+      this.nodeService.editNodeMetadata(collection.ref.id,this.properties).subscribe(()=>{
+        this.save3(collection);
+      });
+    }
+    else{
+      this.save3(collection);
+    }
+  }
+  private save3(collection:Collection){
+    if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
+      this.permissions=this.getEditorialGroupPermissions();
+    }
+    if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
       this.nodeService.setNodePermissions(collection.ref.id,this.permissions).subscribe(()=>{
         this.saveImage(collection);
       });
@@ -401,5 +420,17 @@ export class CollectionNewComponent {
 
   private updateAvailableSteps() {
     this.availableSteps=this.getAvailableSteps();
+  }
+
+  private getEditorialGroupPermissions() {
+    let permissions=new LocalPermissions();
+    permissions.permissions=[];
+    for(let group of this.editorialGroupsSelected){
+      let perm=new Permission();
+      perm.authority={authorityName:group.authorityName,authorityType:group.authorityType};
+      perm.permissions=[RestConstants.PERMISSION_COORDINATOR];
+      permissions.permissions.push(perm);
+    }
+    return permissions;
   }
 }

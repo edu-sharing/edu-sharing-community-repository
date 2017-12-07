@@ -394,7 +394,7 @@ export class PermissionsAuthoritiesComponent {
       }
       else if(this._mode=='GROUP'){
         this.offset += this.connector.numberPerRequest;
-        this.iam.searchGroups(query,true,request).subscribe((data:IamGroups)=>{
+        this.iam.searchGroups(query,true,"",request).subscribe((data:IamGroups)=>{
           for (let auth of data.groups)
             this.list.push(auth);
           this.loading = false;
