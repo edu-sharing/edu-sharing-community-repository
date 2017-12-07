@@ -15,3 +15,4 @@ Backend/lib/edu-sharing_cmis.jar
 Backend/lib/edu-sharing_spring.jar
 Backend/lib/edu-sharing_security.jar
 Backend/lib/edu-sharing_classloaderstuff.jar
+Backend/src/org/edu_sharing/repository/public/version.html
