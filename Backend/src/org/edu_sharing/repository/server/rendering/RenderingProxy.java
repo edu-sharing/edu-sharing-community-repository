@@ -155,11 +155,11 @@ public class RenderingProxy extends HttpServlet {
 			}
 			
 			String paramVersion=req.getParameter("version");
+			String version="/"+paramVersion;
 			if(paramVersion==null || !StringUtils.isNumeric(paramVersion)) {
 				logger.warn("parameter version missing, will use latest (-1)");
-				paramVersion="-1";
+				version="";
 			}
-			String version="/"+paramVersion;
 			try {
 				if(Double.parseDouble(paramVersion)<1)
 					version="";
