@@ -267,6 +267,26 @@
 				<caption>lom_prop_size</caption>
 				<type>filesize</type>
 			</widget>
+			<widget>
+				<id>ccm:educationaltypicalagerange</id>
+				<caption>lom_prop_educational_typicalagerange</caption>
+				<type>range</type>
+				<min>0</min>
+				<max>99</max>
+			</widget>
+			<widget>
+				<id>ccm:taxonid</id>
+				<caption>input_taxonentry</caption>
+				<type>multivalueTree</type>
+				<valuespace>eaf_discipline.xml</valuespace>
+			</widget>
+			<widget>
+				<id>ccm:educationalcontext</id>
+				<caption>school_context_type_of_school</caption>
+				<type>multivalueFixedBadges</type>
+				<valuespace>context.xml</valuespace>
+				<valuespace_i18n>valuespace_context_i18n</valuespace_i18n>
+			</widget>
 		</widgets>
 		<templates>
 			<template>
@@ -431,6 +451,9 @@
 				<id>collection_editorial</id>
 				<caption>collection_editorial</caption>
 				<html><![CDATA[
+					<ccm:educationaltypicalagerange>
+					<ccm:taxonid>
+					<ccm:educationalcontext>
 					<cclom:general_keyword>
 				]]></html>
 			</template>

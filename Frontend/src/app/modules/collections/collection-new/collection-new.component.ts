@@ -319,7 +319,7 @@ export class CollectionNewComponent {
         steps.push(this.STEP_PERMISSIONS);
       }
       if(this.newCollectionType=='EDITORIAL'){
-        steps.push(this.STEP_SETTINGS);
+        //steps.push(this.STEP_SETTINGS);
       }
       if(this.newCollectionType=='EDITORIAL'){
         steps.push(this.STEP_EDITORIAL_GROUPS);
