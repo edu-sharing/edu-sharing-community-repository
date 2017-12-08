@@ -238,6 +238,7 @@ export class SearchComponent {
           if(param['savedQuery']){
             this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
               this.currentSavedSearch=data.node;
+              this.sidenavTab=1;
             });
           }
           this.updateSelection([]);
