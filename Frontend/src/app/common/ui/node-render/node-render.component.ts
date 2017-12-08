@@ -284,6 +284,7 @@ export class NodeRenderComponent {
   private postprocessHtml() {
     if(!this.config.instant("rendering.showPreview",true)){
       jQuery('.edusharing_rendering_content_wrapper').hide();
+      jQuery('.showDetails').hide();
     }
   }
 
