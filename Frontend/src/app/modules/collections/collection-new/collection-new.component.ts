@@ -119,14 +119,17 @@ export class CollectionNewComponent {
             if (mode=="edit") {
               this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
                 this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
-                  this.editId=id;
-                  this.currentCollection=data.collection;
-                  this.properties=node.node.properties;
-                  this.newCollectionType=this.getTypeForCollection(this.currentCollection);
-                  this.hasCustomScope=false;
-                  this.newCollectionStep = this.STEP_GENERAL;
-                  this.updateAvailableSteps();
-                  this.isLoading=false;
+                  this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
+                    this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
+                    this.editId=id;
+                    this.currentCollection=data.collection;
+                    this.properties=node.node.properties;
+                    this.newCollectionType=this.getTypeForCollection(this.currentCollection);
+                    this.hasCustomScope=false;
+                    this.newCollectionStep = this.STEP_GENERAL;
+                    this.updateAvailableSteps();
+                    this.isLoading=false;
+                  });
                 });
               });
             } else {
@@ -257,7 +260,9 @@ export class CollectionNewComponent {
         // input data optimize
         this.currentCollection.title = this.currentCollection.title.trim();
         this.currentCollection.description = this.currentCollection.description.trim();
-
+        if(this.newCollectionType==RestConstants.COLLECTION_TYPE_EDITORIAL){
+          this.currentCollection.type=this.newCollectionType;
+        }
         if (this.isEditCollection()) {
 
             /*
@@ -279,12 +284,8 @@ export class CollectionNewComponent {
          */
           this.isLoading = true;
           this.collectionService.createCollection(
-            this.currentCollection.title,
-            this.currentCollection.description,
-            this.currentCollection.color,
-            this.currentCollection.scope,
+            this.currentCollection,
             this.parentId
-
           ).subscribe((collection:EduData.CollectionWrapper) => {
             this.save2(collection.collection);
           },(error:any)=>{
@@ -413,6 +414,9 @@ export class CollectionNewComponent {
   }
 
   private getTypeForCollection(collection: Collection) {
+    if(collection.type==RestConstants.GROUP_TYPE_EDITORIAL){
+      return collection.type;
+    }
     if(collection.scope==RestConstants.COLLECTIONSCOPE_MY || collection.scope==RestConstants.COLLECTIONSCOPE_ORGA || collection.scope==RestConstants.COLLECTIONSCOPE_ALL || collection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC)
       return RestConstants.COLLECTIONSCOPE_CUSTOM;
     return collection.scope;
@@ -432,5 +436,17 @@ export class CollectionNewComponent {
       permissions.permissions.push(perm);
     }
     return permissions;
+  }
+
+  private getEditoralGroups(permissions: Permission[]) {
+    let list:Group[]=[];
+    for(let perm of permissions){
+      for(let group of this.editorialGroups){
+        if(group.authorityName==perm.authority.authorityName){
+          list.push(group);
+        }
+      }
+    }
+    return list;
   }
 }

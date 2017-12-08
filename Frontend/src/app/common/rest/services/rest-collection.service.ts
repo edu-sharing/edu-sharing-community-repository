@@ -75,26 +75,15 @@ export class RestCollectionService {
   }
 
   public createCollection = (
-      title:string,
-      description:string="",
-      color:string="#759CB7",
-      scope:string=RestConstants.COLLECTIONSCOPE_MY,
+      collection:EduData.Collection,
       parentCollectionId:string=RestConstants.ROOT, repository:string=RestConstants.HOME_REPOSITORY
     ) : Observable<EduData.CollectionWrapper> => {
 
     let query:string = this.connector.createUrl("collection/:version/collections/:repository/:collectionid/children",repository,[[":collectionid",parentCollectionId]]);
-
-    let body={
-      title:title,
-      description:description,
-      type:"default",
-      scope:scope,
-      color:color
-    };
     let options:RequestOptionsArgs = this.connector.getRequestOptions();
     options.headers.append('Accept', 'text/html');
 
-    return this.connector.post(query, JSON.stringify(body), options)
+    return this.connector.post(query, JSON.stringify(collection), options)
       .map((response: Response) => response.json());
 
   }
