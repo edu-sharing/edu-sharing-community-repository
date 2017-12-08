@@ -288,7 +288,6 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			rir.setPropertiesToolInstance(propsResultToolInstance.toArray(new KeyValue[propsResultToolInstance.size()]));
 		}
 
-		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 		String clientBaseUrl = appInfo.getClientBaseUrl();
 		String previewUrl = URLTool.getPreviewServletUrl(new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId));
 		
