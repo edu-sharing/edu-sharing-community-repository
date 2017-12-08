@@ -217,12 +217,12 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		Map<String,Object> props = (versionProps == null) ? client.getPropertiesCached(nodeRef, true, true, false) : versionProps;//client.getProperties(nodeId);
 		String nodeType = (String)props.get(CCConstants.NODETYPE);
 		boolean isRemoteObject = CCConstants.CCM_TYPE_REMOTEOBJECT.equals(nodeType);
-		String appId=ApplicationInfoList.getHomeRepository().getAppId();
+		ApplicationInfo appInfo=ApplicationInfoList.getHomeRepository();
 		if(isRemoteObject){
 			// 4.0: Fetch actual metadata from the remote object
-			appId=(String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID);
+			appInfo=ApplicationInfoList.getRepositoryInfoById((String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
 			String remoteId=(String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID);
-			HashMap<String, Object> propsNew = NodeServiceFactory.getNodeService(appId).getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), remoteId);
+			HashMap<String, Object> propsNew = NodeServiceFactory.getNodeService(appInfo.getAppId()).getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), remoteId);
 			props.putAll(propsNew);
 		}
 		
@@ -263,25 +263,23 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		rir.setProperties(propsresult.toArray(new KeyValue[propsresult.size()]));	
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
 		
-		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-		String clientBaseUrl = appInfo.getClientBaseUrl();
+		String clientBaseUrl = ApplicationInfoList.getHomeRepository().getClientBaseUrl();
 		String previewUrl = URLTool.getPreviewServletUrl(new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId));
 		
 		rir.setPreviewUrl(previewUrl);
 		rir.setMimeTypeUrl(new MimeTypes(clientBaseUrl).getIconUrl(props, Theme.getThemeId()));
 		rir.setAspects(client.getAspects(nodeId));
 		
-		addMetadataTemplate(rir,locale,nodeType,props);
+		addMetadataTemplate(rir,locale,nodeType,props,appInfo);
 
 		return rir;
 	}
-	
-	private void addMetadataTemplate(RenderInfoResult rir,String locale,String type, Map<String, Object> props) throws Exception {
+
+	private void addMetadataTemplate(RenderInfoResult rir,String locale,String type, Map<String, Object> props,ApplicationInfo appInfo) throws Exception {
 		String mdsId = (String)props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		if(mdsId==null)
 			mdsId = CCConstants.metadatasetdefault_id;
-		
-		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsId,locale);
+		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(appInfo, mdsId,locale);
 		
 		HashMap<String, String[]> props2 = new HashMap<String, String[]>();
 		for(String key : props.keySet()){			

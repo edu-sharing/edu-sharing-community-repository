@@ -6,8 +6,10 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -103,7 +105,7 @@ public class NodeServiceLAppsImpl extends NodeServiceAdapter{
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
 		LocalDateTime date  = LocalDateTime.parse(createdate, formatter);
 		DateTimeFormatter formatter2 = DateTimeFormatter.ISO_DATE_TIME;//ofPattern("dd.MM.yyyy", Locale.GERMAN);
-		properties.put(CCConstants.CM_PROP_C_MODIFIED,date.format(formatter2));
+		properties.put(CCConstants.CM_PROP_C_MODIFIED,Date.from(date.atZone(ZoneId.systemDefault()).toInstant()).getTime());
 		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,"https://learningapps.org/view"+map.getNamedItem("id").getNodeValue());
 
 
