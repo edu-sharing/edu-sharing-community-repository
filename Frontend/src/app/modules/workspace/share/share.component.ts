@@ -50,8 +50,8 @@ export class WorkspaceShareComponent  {
   private notifyMessage = "";
   private inherit : Permission[]=[];
   private permissions : Permission[]=[];
-  private permissionsUser : Permission[];
-  private permissionsGroup : Permission[];
+  public permissionsUser : Permission[];
+  public permissionsGroup : Permission[];
   private newPermissions : Permission[]=[];
   public owner : Permission;
   public linkEnabled : Permission;
