@@ -30,6 +30,7 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -126,7 +127,8 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CCM_PROP_IO_WWWURL,map.getNamedItem("url").getNodeValue());
 			properties.put(CCConstants.NODETYPE, CCConstants.CCM_TYPE_IO);
 			properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
-
+			String author=VCardTool.nameToVCard(map.getNamedItem("author").getNodeValue());
+			properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR,author);
 			properties.put(CCConstants.REPOSITORY_ID, "LEARNINGAPPS" );
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"LearningApps");
 			properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
