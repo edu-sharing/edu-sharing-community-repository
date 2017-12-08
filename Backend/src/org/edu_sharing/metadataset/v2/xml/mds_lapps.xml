@@ -33,6 +33,18 @@
               <educationsector>
 			  ]]></html>
 			</template>
+			<template>
+				<id>node_render_general</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<html><![CDATA[
+              <cclom:title>
+              <cclom:general_keyword>
+              
+              <cclom:general_description>
+              <cm:modified>
+              <sys:node-uuid>
+				]]></html>
+			</template>
 		</templates>
 		<groups>
 			<group>

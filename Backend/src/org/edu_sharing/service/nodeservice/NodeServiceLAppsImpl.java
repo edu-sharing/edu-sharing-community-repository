@@ -102,7 +102,7 @@ public class NodeServiceLAppsImpl extends NodeServiceAdapter{
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
 		LocalDateTime date  = LocalDateTime.parse(createdate, formatter);
-		DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN);
+		DateTimeFormatter formatter2 = DateTimeFormatter.ISO_DATE_TIME;//ofPattern("dd.MM.yyyy", Locale.GERMAN);
 		properties.put(CCConstants.CM_PROP_C_MODIFIED,date.format(formatter2));
 		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,"https://learningapps.org/view"+map.getNamedItem("id").getNodeValue());
 
