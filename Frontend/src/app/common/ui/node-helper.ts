@@ -156,7 +156,28 @@ export class NodeHelper{
     router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
       {queryParams:{id:folder}});
   }
-
+  public static getCollectionScopeInfo(collection : any) : any{
+    let scope=collection.scope;
+    let icon="help";
+    let scopeName="help";
+    if(scope==RestConstants.COLLECTIONSCOPE_MY){
+      icon="lock";
+      scopeName="MY";
+    }
+    if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
+      icon="group";
+      scopeName="SHARED";
+    }
+    if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
+      icon="language";
+      scopeName="PUBLIC";
+    }
+    if(collection.type==RestConstants.COLLECTION_TYPE_EDITORIAL){
+      icon="star";
+      scopeName="TYPE_EDITORIAL";
+    }
+    return {icon:icon,scopeName:scopeName};
+  }
   /**
    * Get a formatted attribute from a collection
    * @param translate
@@ -188,22 +209,8 @@ export class NodeHelper{
           */
     }
     if(item=='scope'){
-      let scope=collection.scope;
-      let icon="help";
-      let scopeName="help";
-      if(scope==RestConstants.COLLECTIONSCOPE_MY){
-        icon="lock";
-        scopeName="MY";
-      }
-      if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
-        icon="group";
-        scopeName="SHARED";
-      }
-      if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
-        icon="language";
-        scopeName="PUBLIC";
-      }
-      return '<i class="material-icons collectionScope">'+icon+'</i> '+translate.instant('COLLECTION.SCOPE.'+scopeName);
+      let info=NodeHelper.getCollectionScopeInfo(collection);
+      return '<i class="material-icons collectionScope">'+info.icon+'</i> '+translate.instant('COLLECTION.SCOPE.'+info.scopeName);
     }
     return collection[item];
   }

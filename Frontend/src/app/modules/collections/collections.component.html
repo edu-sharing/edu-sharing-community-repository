@@ -107,21 +107,9 @@
             <div class="collection-new-preview-infoline">
                 <i class="material-icons icon-bottom">person</i> {{collectionContent.collection.owner.profile.firstName}} {{collectionContent.collection.owner.profile.lastName}}</div>
 
-            <div *ngIf="(getPrivacyScope(collectionContent.collection)=='')"
+            <div
                 class="collection-new-preview-infoline">
-                <i class="material-icons icon-bottom">help outline</i>&nbsp;...
-           </div>
-            <div *ngIf="(getPrivacyScope(collectionContent.collection)=='MY')"
-                class="collection-new-preview-infoline">
-                <i class="material-icons icon-bottom">lock</i>&nbsp;{{ 'COLLECTION.SCOPE.MY' | translate }}
-           </div>
-           <div *ngIf="(getPrivacyScope(collectionContent.collection)=='EDU_GROUPS' || getPrivacyScope(collectionContent.collection)=='CUSTOM')"
-                class="collection-new-preview-infoline">
-                <i class="material-icons icon-bottom">group</i>&nbsp;{{ 'COLLECTION.SCOPE.SHARED' | translate }}
-           </div>
-            <div *ngIf="(getPrivacyScope(collectionContent.collection)=='EDU_ALL' || getPrivacyScope(collectionContent.collection)=='CUSTOM_PUBLIC')"
-                class="collection-new-preview-infoline">
-                <i class="material-icons icon-bottom">language</i>&nbsp;{{ 'COLLECTION.SCOPE.PUBLIC' | translate }}
+                <i class="material-icons icon-bottom">{{getScopeInfo().icon}}</i>&nbsp;{{ 'COLLECTION.SCOPE.'+getScopeInfo().scopeName | translate }}
            </div>
 
            <div class="collection-description" style="margin-top:16px;opacity:0.85;">{{ 'collections_description' | translate }}</div>

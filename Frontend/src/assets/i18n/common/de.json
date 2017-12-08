@@ -163,7 +163,8 @@
       "EDU_GROUPS" : "Organisationen",
       "PUBLIC" : "Öffentlich",
       "SHARED" : "Freigegeben",
-      "CUSTOM" : "Benutzerdefiniert"
+      "CUSTOM" : "Benutzerdefiniert",
+      "TYPE_EDITORIAL" : "Redaktionell"
     }
   },
   "CREATE_NODE":{

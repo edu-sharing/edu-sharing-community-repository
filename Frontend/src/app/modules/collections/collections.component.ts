@@ -288,6 +288,9 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
       }
     }
+    getScopeInfo(){
+      return NodeHelper.getCollectionScopeInfo(this.collectionContent.collection);
+    }
     getOptions(nodes:Node[]=null,fromList:boolean) {
       if(fromList && (!nodes || !nodes.length)){
         nodes=[new Node()];

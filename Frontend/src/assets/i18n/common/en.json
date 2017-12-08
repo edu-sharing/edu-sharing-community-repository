@@ -131,7 +131,8 @@
       "EDU_GROUPS" : "organisations",
       "PUBLIC" : "public",
       "SHARED":"shared",
-      "CUSTOM" : "custom"
+      "CUSTOM" : "custom",
+      "TYPE_EDITORIAL" : "editorial"
     }
   },
   "MEDIATYPE":{
