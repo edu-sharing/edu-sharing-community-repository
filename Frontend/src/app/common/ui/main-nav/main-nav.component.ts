@@ -97,7 +97,6 @@ export class MainNavComponent {
       let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
       y = rect.bottom-rect.top;
     }catch(e){
-      return;
     }
     let elementsScroll=document.getElementsByClassName('scrollWithBanner');
     let elementsAlign=document.getElementsByClassName('alignWithBanner');
@@ -121,6 +120,11 @@ export class MainNavComponent {
     if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
       for(let i=0;i<elements.length;i++) {
         let element:any=elements[i];
+        if(y==0){
+          element.style.position=null;
+          element.style.top=null;
+          continue;
+        }
         if(element.className.indexOf('alignWithBanner')!=-1){
           element.style.position = 'relative';
           element.style.top = y + 'px';
@@ -234,7 +238,7 @@ export class MainNavComponent {
     if(MainNavComponent.bannerPositionInterval){
       clearInterval(MainNavComponent.bannerPositionInterval);
     }
-    MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),200);
+    MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),100);
   }
   private clearSearch(){
     this.searchQuery="";
