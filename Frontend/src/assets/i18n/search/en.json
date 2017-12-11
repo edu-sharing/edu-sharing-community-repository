@@ -3,6 +3,7 @@
     "TITLE":"Search",
     "COLLECTIONS":"Collections",
     "MATERIALS":"Materials",
+    "IGNORED_PARAMETERS":"The result contains objects which may not fit all given search criterias",
     "MAINSEARCHFIELD": "Input field for search",
     "SEARCH":"Stuff",
     "TO_COLLECTIONS":"View collections",
