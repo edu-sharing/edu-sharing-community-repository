@@ -26,6 +26,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
+import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.DAOMissingException;
 import org.edu_sharing.restservices.DAOSecurityException;
 import org.edu_sharing.restservices.DAOValidationException;
@@ -311,7 +312,7 @@ public class CollectionApi {
 	public Response getCollections(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
 			@ApiParam(value = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
-			@ApiParam(value = "scope", required = true) @QueryParam("scope") @DefaultValue(value = "MY") Scope scope,
+			@ApiParam(value = "scope", required = true) @QueryParam("scope") @DefaultValue(value = "MY") SearchScope scope,
 			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,

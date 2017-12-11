@@ -46,7 +46,12 @@ public class CollectionDao {
 		CUSTOM,
 		CUSTOM_PUBLIC
 	}
-
+	public enum SearchScope {
+		EDU_ALL,
+		EDU_GROUPS,
+		TYPE_EDITORIAL,
+		MY
+	}
 	
 	private final static String[] PERMISSIONS = new String[] {
 			PermissionService.WRITE, PermissionService.DELETE };
@@ -83,7 +88,7 @@ public class CollectionDao {
 		}			
 	}
 
-	public static List<CollectionBase> getCollections(RepositoryDao repoDao, String parentId, Scope scope, Filter filter,SortDefinition sortDefinition)
+	public static List<CollectionBase> getCollections(RepositoryDao repoDao, String parentId, SearchScope scope, Filter filter,SortDefinition sortDefinition)
 			throws DAOException {
 
 		try {

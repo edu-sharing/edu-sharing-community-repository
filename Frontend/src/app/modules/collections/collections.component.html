@@ -16,21 +16,22 @@
 
 <div class="row tab-group row-dark" *ngIf="isRootLevelCollection() && !isGuest">
   <div class="col s12">
-    <ul class="tabs">
-
-      <!-- replace table tabs with Angular Material 2 tabs when those are production ready-->
-
-      <li class="clickable tab col s4" [class.s4]="hasOrganizations" [class.s6]="!hasOrganizations" (click)="selectTabMyCollections()">
-        <a class="table-tab-title-long" [class.active]="(tabSelected==='MY')">{{ 'collections_myCollectionsLong' | translate }}</a>
-        <a class="table-tab-title-short" [class.active]="(tabSelected==='MY')">{{ 'collections_myCollectionsShort' | translate }}</a>
+    <ul class="tabs tabs-fixed-width">
+      <li class="clickable tab col s3" (click)="selectTabMyCollections()">
+        <a class="table-tab-title-long" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY' | translate }}</a>
+        <a class="table-tab-title-short" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY_SHORT' | translate }}</a>
       </li>
-      <li class="clickable tab col" [class.s4]="hasOrganizations" [class.s6]="!hasOrganizations" (click)="selectTabMyOrganizations()" *ngIf="hasOrganizations">
-        <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'collections_orgaCollectionsLong' | translate }}</a>
-        <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'collections_orgaCollectionsShort' | translate }}</a>
+      <li class="clickable tab col s3" (click)="selectTabMyOrganizations()" *ngIf="hasOrganizations">
+        <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</a>
+        <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS_SHORT' | translate }}</a>
       </li>
-      <li class="clickable tab col" [class.s4]="hasOrganizations" [class.s6]="!hasOrganizations" (click)="selectTabAllCollections()">
-        <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_ALL')">{{ 'collections_allCollectionsLong' | translate }}</a>
-        <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_ALL')">{{ 'collections_allCollectionsShort' | translate }}</a>
+      <li class="clickable tab col s3" (click)="selectTab('TYPE_EDITORIAL')" *ngIf="hasEditorial">
+        <a class="table-tab-title-long" [class.active]="(tabSelected==='TYPE_EDITORIAL')">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</a>
+        <a class="table-tab-title-short" [class.active]="(tabSelected==='TYPE_EDITORIAL')">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL_SHORT' | translate }}</a>
+      </li>
+      <li class="clickable tab col s3" (click)="selectTabAllCollections()">
+        <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.ALL' | translate }}</a>
+        <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.ALL_SHORT' | translate }}</a>
       </li>
     </ul>
   </div>
@@ -45,7 +46,7 @@
 
 <!-- breadcrumbs -->
   <breadcrumbs *ngIf="!isRootLevelCollection() && !isLoading" class="collections-breadcrumb"
-    [home]="tabSelected=='MY'?'collections_myCollectionsLong':tabSelected=='EDU_GROUPS'?'collections_orgaCollectionsLong':'collections_allCollectionsLong'"
+    [home]="'COLLECTIONS.TAB.'+tabSelected"
     [breadcrumbsAsNode]="path"
     [canDrop]="canDropOnCollection"
     (onDrop)="dropOnCollection($event)"
@@ -70,7 +71,7 @@
             </div>
 
         </div>
-        <div *ngIf="pinningAllowed && isAllowedToEditCollection() " class="collections-pin-button"
+        <div *ngIf="pinningAllowed && isAllowedToEditCollection() && collectionContent.collection.type=='EDITORIAL'" class="collections-pin-button"
              tabindex="0"
              (keypress)="($event.which === 13)?pinCollection():0"
              (click)="pinCollection()"

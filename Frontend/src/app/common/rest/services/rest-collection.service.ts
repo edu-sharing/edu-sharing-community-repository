@@ -55,7 +55,7 @@ export class RestCollectionService {
       collection : string,
       scope = RestConstants.COLLECTIONSCOPE_ALL,
       propertyFilter : string[] = [],
-      request:any,
+      request:any = null,
       repository=RestConstants.HOME_REPOSITORY
     ): Observable<EduData.CollectionContent> => {
     let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection/children?scope=:scope&:propertyFilter&:request",repository,[

@@ -429,6 +429,9 @@ export class CollectionNewComponent {
   private getEditorialGroupPermissions() {
     let permissions=new LocalPermissions();
     permissions.permissions=[];
+    let pub=RestHelper.getAllAuthoritiesPermission();
+    pub.permissions=[RestConstants.PERMISSION_CONSUMER];
+    permissions.permissions.push(pub);
     for(let group of this.editorialGroupsSelected){
       let perm=new Permission();
       perm.authority={authorityName:group.authorityName,authorityType:group.authorityType};

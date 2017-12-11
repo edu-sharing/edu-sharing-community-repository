@@ -18,6 +18,16 @@
       "EDITORIAL_GROUPS":"Zuständige Redaktionsgruppe",
       "DONE":"Fertig"
     },
+    "TAB":{
+      "TYPE_EDITORIAL":"Redaktionelle Sammlungen",
+      "MY" : "Meine Sammlungen",
+      "EDU_GROUPS" : "Sammlungen meiner Gruppen",
+      "ALL" : "Alle Sammlungen",
+      "MY_SHORT" : "Meine",
+      "EDU_GROUPS_SHORT" : "Gruppen",
+      "ALL_SHORT" : "Alle",
+      "TYPE_EDITORIAL_SHORT":"Redaktionell"
+    },
     "CREATE_TYPE":"Neue Sammlung erstellen...",
     "CREATE":{
       "PRIVATE":"Private Sammlung",
@@ -57,13 +67,7 @@
     }
   },
 
-    "collections_myCollectionsLong" : "Meine Sammlungen",
-    "collections_orgaCollectionsLong" : "Sammlungen meiner Gruppen",
-    "collections_allCollectionsLong" : "Alle Sammlungen",
 
-    "collections_myCollectionsShort" : "Meine",
-    "collections_orgaCollectionsShort" : "Gruppen",
-    "collections_allCollectionsShort" : "Alle",
 
     "collections_description" : "Beschreibung",
     "collections_noOrgaCollections" : "Ihre Gruppen haben noch keine Sammlungen freigegeben.",

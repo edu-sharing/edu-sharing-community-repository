@@ -32,6 +32,7 @@ export class RestConstants {
   public static COLLECTIONSCOPE_ALL = "EDU_ALL";
   public static COLLECTIONSCOPE_CUSTOM = "CUSTOM";
   public static COLLECTIONSCOPE_CUSTOM_PUBLIC = "CUSTOM_PUBLIC";
+  public static COLLECTIONSCOPE_TYPE_EDITORIAL = "TYPE_EDITORIAL";
 
   public static CCM_ASPECT_TOOL_DEFINITION = "ccm:tool_definition";
   public static CCM_ASPECT_TOOL_OBJECT = "ccm:tool_object";

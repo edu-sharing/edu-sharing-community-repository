@@ -7,6 +7,16 @@
       "REMOVE": "delete",
       "ADD_TO_OTHER": "to collection"
     },
+    "TAB":{
+      "TYPE_EDITORIAL":"Editorial Collections",
+      "MY" : "My Collections",
+      "EDU_GROUPS" : "Collections of my Groups",
+      "ALL" : "All Collections",
+      "MY_SHORT" : "My",
+      "EDU_GROUPS_SHORT" : "Groups",
+      "ALL_SHORT" : "All",
+      "TYPE_EDITORIAL_SHORT":"Editorial"
+    },
     "ENTER_NAME" : "Please enter a name for the collection.",
     "NO_ADD_PERMISSIONS":"You have insufficient permissions to add materials to this collection",
     "ERROR_NOT_FOUND":"Collection not found",
@@ -29,15 +39,6 @@
       "INVALID_NAME":"The given name is invalid. Please don't use special characters"
     }
   },
-
-
-  "collections_myCollectionsLong" : "My Collections",
-  "collections_orgaCollectionsLong" : "Collections of my Groups",
-  "collections_allCollectionsLong" : "All Collections",
-
-  "collections_myCollectionsShort" : "My",
-  "collections_orgaCollectionsShort" : "Groups",
-  "collections_allCollectionsShort" : "All",
 
   "collections_description" : "Description",
   "collections_noOrgaCollections" : "Your groups have not shared any collections yet.",

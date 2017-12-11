@@ -41,6 +41,7 @@ import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
+import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -593,14 +594,12 @@ public class CollectionServiceImpl implements CollectionService{
 				 */
 				String queryString = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION + "\"" + " AND @ccm\\:collectionlevel0:true";
 				boolean eduGroupScope = false;
-				if(Scope.EDU_GROUPS.name().equals(scope)){
+				if(SearchScope.EDU_GROUPS.name().equals(scope)){
 					eduGroupScope = true;
 				}
-				
-				if(Scope.MY.name().equals(scope)){
+				if(SearchScope.MY.name().equals(scope)){
 					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
 				}
-
 				HashMap<String,HashMap<String,Object>> returnVal = new HashMap<String,HashMap<String,Object>>();
 				Set<Entry<String, HashMap<String, Object>>> searchResult = client.search(queryString,eduGroupScope).entrySet();
 				for(Map.Entry<String, HashMap<String,Object>> entry : searchResult){
@@ -637,7 +636,10 @@ public class CollectionServiceImpl implements CollectionService{
 				if(Scope.MY.name().equals(scope)){
 					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
 				}
-
+				
+				if(SearchScope.TYPE_EDITORIAL.name().equals(scope)){
+					queryString += " AND @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
+				}
 				List<NodeRef> returnVal = new ArrayList<NodeRef>();
 				List<NodeRef> nodeRefs = client.searchNodeRefs(queryString,eduGroupScope);
 				for(NodeRef nodeRef : nodeRefs){

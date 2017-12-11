@@ -18,7 +18,7 @@ import {RestConstants} from "../../common/rest/rest-constants";
 import {GwtInterfaceService, GwtEventListener} from "../../common/services/gwt-interface.service";
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {LoginResult, MdsMetadataset} from "../../common/rest/data-object";
+import {CollectionContent, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
 import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
 import {OrganizationOrganizations} from "../../common/rest/data-object";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
@@ -81,6 +81,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     public mainnav = true;
     private path : EduData.Node[];
     private hasOrganizations = false;
+    private hasEditorial = false;
     private nodeOptions: OptionItem[]=[];
     public isGuest = true;
     public addToOther:EduData.Node[];
@@ -135,6 +136,10 @@ export class CollectionsMainComponent implements GwtEventListener {
               this.hasOrganizations=data.organizations.length>0;
             });
           }
+          this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
+            console.log(data);
+            this.hasEditorial=data.collections.length>0;
+          });
           this.initialize();
         }else
           UIHelper.goToLogin(this.router,this.config);
