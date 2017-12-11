@@ -619,6 +619,9 @@ export interface NodeList {
   pagination: Pagination;
   facettes: Facette[];
 }
+export interface SearchList extends NodeList {
+  ignored : string[];
+}
 export interface ParentList extends NodeList{
   scope:string;
 }

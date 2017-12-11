@@ -5,7 +5,7 @@ public class MetadataQueryParameter {
 	private String statement;
 	private boolean multiple;
 	private String multiplejoin;
-
+	private int ignorable;
 	
 	public String getName() {
 		return name;
@@ -40,5 +40,14 @@ public class MetadataQueryParameter {
 	public void setMultiplejoin(String multiplejoin) {
 		this.multiplejoin = multiplejoin;
 	}
+
+	public int getIgnorable() {
+		return ignorable;
+	}
+
+	public void setIgnorable(int ignorable) {
+		this.ignorable = ignorable;
+	}
+	
 	
 }

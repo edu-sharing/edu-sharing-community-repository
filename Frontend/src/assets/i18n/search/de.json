@@ -3,6 +3,7 @@
     "TITLE":"Suchumgebung",
     "COLLECTIONS":"Sammlungen",
     "MATERIALS":"Materialien",
+    "IGNORED_PARAMETERS":"Die Liste enthält Ergebnisse, für die nicht alle gewählten Kriterien zutreffen",
     "MAINSEARCHFIELD": "Eingabefeld für die Suche",
     "TO_COLLECTIONS":"Zu Sammlungen",
     "SEARCH":"Materialien",

@@ -6,6 +6,7 @@ export class SearchService {
   searchTerm: string = '';
   searchResult: Array<any> = [];
   searchResultCollections: Array<any> = [];
+  ignored: Array<string> = [];
   reurl: string;
   facettes: Array<any> = [];
   autocompleteData:any = [];

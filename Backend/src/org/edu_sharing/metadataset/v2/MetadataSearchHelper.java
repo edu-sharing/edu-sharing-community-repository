@@ -47,8 +47,14 @@ public class MetadataSearchHelper {
 						throw new IllegalArgumentException("Could not find parameter "+name+" in the query "+query.getId());
 					
 					String[] values=parameters.get(parameter.getName());
-					if(values==null || values.length==0)
-						continue;
+					if((values==null || values.length==0)) {
+						if(parameter.getIgnorable()==0)
+							continue;
+						if(!queryString.isEmpty())
+							queryString+=" "+query.getJoin()+" ";
+						queryString+="ISNULL:@"+QueryParser.escape(parameter.getName());
+							continue;
+					}
 					if(!queryString.isEmpty())
 						queryString+=" "+query.getJoin()+" ";
 					queryString+="(";

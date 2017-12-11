@@ -154,6 +154,8 @@ public class MetadataReaderV2 {
 					String value=data.getTextContent();
 					if(name.equals("statement"))
 						parameter.setStatement(value);
+					if(name.equals("ignorable"))
+						parameter.setIgnorable(Integer.parseInt(value));
 					if(name.equals("multiple"))
 						parameter.setMultiple(value.equalsIgnoreCase("true"));
 					if(name.equals("multiplejoin"))

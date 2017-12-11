@@ -136,6 +136,7 @@ public class SearchApi  {
 		    	
 		    	SearchResult response = new SearchResult();
 		    	response.setNodes(data);
+		    	response.setIgnored(search.getIgnored());
 		    	response.setPagination(pagination);	    	
 		    	response.setFacettes(search.getFacettes());
 		    	

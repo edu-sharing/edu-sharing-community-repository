@@ -202,6 +202,7 @@
         </div>
       </div>
       <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} ({{resultCount.materials}})</div>
+      <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
       <listTable
         [nodes]="searchService.searchResult"
         [columns]="columns"

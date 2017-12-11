@@ -63,7 +63,8 @@ public class NodeSearch {
 			this.values = values;
 		}
 	}
-
+	
+	private List<String> ignored = null;
 	private List<NodeRef> result = null;
 	private List<Facette> facettes = null;
 	private Integer count = null;
@@ -77,9 +78,18 @@ public class NodeSearch {
 	public List<NodeRef> getResult() {
 		return result;
 	}
-
+	
 	public void setResult(List<NodeRef> result) {
 		this.result = result;
+	}
+	
+	@JsonProperty(value = "ignored")
+	public List<String> getIgnored() {
+		return ignored;
+	}
+
+	public void setIgnored(List<String> ignored) {
+		this.ignored = ignored;
 	}
 
 	/**

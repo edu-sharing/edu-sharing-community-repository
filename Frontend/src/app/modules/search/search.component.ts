@@ -16,7 +16,7 @@ import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {
   Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
-  MdsMetadatasets, MdsInfo, Collection, CollectionWrapper
+  MdsMetadatasets, MdsInfo, Collection, CollectionWrapper, SearchList
 } from "../../common/rest/data-object";
 import {ListTableComponent} from "../../common/ui/list-table/list-table.component";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
@@ -547,9 +547,10 @@ export class SearchComponent {
     }
   }
 
-  processSearchResult(data: NodeList,init:boolean) {
+  processSearchResult(data: SearchList,init:boolean) {
     this.searchFail = false;
     this.searchService.searchResult = this.searchService.searchResult.concat(data.nodes);
+    this.searchService.ignored = data.ignored;
     this.checkFail();
     this.updateActionbar(this.selection);
     if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
@@ -844,7 +845,7 @@ export class SearchComponent {
       repo ? repo.id : RestConstants.HOME_REPOSITORY,
       this.mdsId
     ).subscribe(
-      (data: NodeList) => {
+      (data: SearchList) => {
         this.resultCount.materials = data.pagination.total;
         this.processSearchResult(data,init);
         this.showspinner = false;

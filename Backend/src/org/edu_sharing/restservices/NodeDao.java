@@ -16,6 +16,9 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.edu_sharing.metadataset.v2.MetadataQuery;
+import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
@@ -144,12 +147,31 @@ public class NodeDao {
 			criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
 		}
 		try {
-			return transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
+			NodeSearch result = transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
+			if(result.getCount()==0) {
+				// try to search for ignorable properties to be null
+				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query));
+				result=transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
+				result.setIgnored(removed);
+				return result;
+			}
+			return result;
 		} catch (Throwable e) {
 			throw DAOException.mapping(e);
 		}
 	}
 	
+	private static List<String> slackCriteriasMap(Map<String, String[]> criteriasMap, MetadataQuery metadataQuery) {
+		List<String> removed=new ArrayList<>();
+		for(MetadataQueryParameter param : metadataQuery.getParameters()){
+			if(param.getIgnorable()>0 && criteriasMap.containsKey(param.getName())) {
+				criteriasMap.put(param.getName(),null);
+				removed.add(param.getName());
+			}
+		}
+		return removed;
+	}
+
 	public static NodeSearch search(RepositoryDao repoDao,MdsDao mdsDao,
 			String query, List<MdsQueryCriteria> criterias,SearchToken token, Filter filter) throws DAOException {
 		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
