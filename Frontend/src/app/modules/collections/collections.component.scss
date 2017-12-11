@@ -233,6 +233,15 @@ table, div {
 .collections-delete-button {
     right: 10px;
 }
+.collections-edit-button,
+.collections-pin-button,
+.collections-delete-button{
+  i{
+    position: relative;
+    top: -1px;
+    left: -1px;
+  }
+}
 .collections-pin-button,.collections-edit-button,.collections-delete-button{
   position: absolute;
   width:32px;

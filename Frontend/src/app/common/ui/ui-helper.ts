@@ -117,11 +117,17 @@ export class UIHelper{
 
   static showAddedToCollectionToast(toast:Toast,node: any,count:number) {
     let scope=node.collection ? node.collection.scope : node.scope;
+    if(scope==RestConstants.COLLECTIONSCOPE_MY){
+      scope='MY';
+    }
     if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
       scope='SHARED';
     }
     else if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
       scope='PUBLIC';
+    }
+    else{
+      scope='SHARED';
     }
     toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)});
   }

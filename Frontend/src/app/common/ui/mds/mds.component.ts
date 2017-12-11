@@ -485,7 +485,6 @@ export class MdsComponent{
         continue;
       if(widget.type=='checkboxVertical' || widget.type=='checkboxHorizontal'){
         let inputs=element.getElementsByTagName('input');
-        console.log(inputs);
         properties[widget.id]=[];
         for(let input of inputs){
           if(input.checked){
@@ -693,7 +692,6 @@ export class MdsComponent{
             element.checked=props[0];
           }
           else if(widget.type=='checkboxVertical' || widget.type=='checkboxHorizontal'){
-            console.log(props);
             for(let input of element.getElementsByTagName('input')){
               input.checked=props.indexOf(input.value)!=-1;
             }
