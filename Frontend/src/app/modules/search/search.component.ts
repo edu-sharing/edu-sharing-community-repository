@@ -109,7 +109,14 @@ export class SearchComponent {
   private repositoryIds: any[];
   public addNodesToCollection: Node[];
   private mdsSets: MdsInfo[];
-  public mdsId: string;
+  private _mdsId: string;
+  public get mdsId(){
+    return this._mdsId;
+  }
+  public set mdsId(mdsId:string){
+    this._mdsId=mdsId;
+    this.invalidateMds();
+  }
   public selection: Node[];
   private currentValues: any;
   private reloadMds: Boolean;
@@ -775,11 +782,11 @@ export class SearchComponent {
         this.mdsExtended=param['mdsExtended']=='true';
       if(param['parameters']){
         this.currentValues=JSON.parse(param['parameters']);
-        this.reloadMds=new Boolean(true);
+        this.invalidateMds();
       }
       else if(this.currentValues){
         this.currentValues=null;
-        this.reloadMds=new Boolean(true);
+        this.invalidateMds();
       }
       if(param['reurl']) {
         this.hasCheckbox=false;
@@ -970,5 +977,9 @@ export class SearchComponent {
   public setSavedSearchQuery(query:string){
     this.savedSearchQuery=query;
     this.loadSavedSearch();
+  }
+
+  private invalidateMds() {
+    this.reloadMds=new Boolean(true);
   }
 }
