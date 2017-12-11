@@ -1584,4 +1584,10 @@ public class NodeDao {
  		
  	}
 
+	public void addAspects(List<String> aspects) {
+		for(String aspect : aspects) {
+			nodeService.addAspect(nodeId, CCConstants.getValidGlobalName(aspect));
+		}
+	}
+
 }

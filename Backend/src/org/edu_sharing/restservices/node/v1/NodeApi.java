@@ -188,6 +188,45 @@ public class NodeApi  {
 	    	}
 
 	    }
+	
+	  	@PUT
+	    @Path("/nodes/{repository}/{node}/aspects")
+	        
+	    @ApiOperation(
+	    	value = "Add aspect to node.", 
+	    	notes = "Add aspect to node.")
+	    
+	    @ApiResponses(
+	    	value = { 
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
+		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		    })
+
+	    public Response addAspects(
+	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@ApiParam(value = "aspect name, e.g. ccm:lomreplication",required=true) List<String> aspects,
+			@Context HttpServletRequest req) {
+	    	
+	    	try {
+		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+		    	nodeDao.addAspects(aspects);
+		    	NodeEntry response = new NodeEntry();
+		    	response.setNode(nodeDao.asNode());
+		    	
+		    	return Response.status(Response.Status.OK).entity(response).build();
+		
+	    	} catch (Throwable t) {
+	    		return ErrorResponse.createResponse(t);    		
+	    	}
+
+	    }
+	  
     @GET
     @Path("/nodes/{repository}/{node}/metadata")
         
