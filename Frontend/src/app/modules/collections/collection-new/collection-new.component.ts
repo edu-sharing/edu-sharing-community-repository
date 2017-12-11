@@ -397,8 +397,10 @@ export class CollectionNewComponent {
   }
   private save2(collection: Collection) {
     if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
-      this.nodeService.editNodeMetadata(collection.ref.id,this.properties).subscribe(()=>{
-        this.save3(collection);
+      this.nodeService.AddNodeAspects(collection.ref.id,[RestConstants.CCM_ASPECT_LOMREPLICATION,RestConstants.CCM_ASPECT_CCLOM_GENERAL]).subscribe(()=> {
+        this.nodeService.editNodeMetadata(collection.ref.id, this.properties).subscribe(() => {
+          this.save3(collection);
+        });
       });
     }
     else{

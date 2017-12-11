@@ -378,6 +378,20 @@ export class RestNodeService {
       .map((response: Response) => response.json());
   }
   /**
+   * Add one or more aspects to an existing
+   * @param node The node id
+   * @param aspects The new aspects to add
+   * @returns {Observable<R>}
+   */
+  public AddNodeAspects = (node : string,aspects : string[],repository=RestConstants.HOME_REPOSITORY) : Observable<void> => {
+    let query = this.connector.createUrl("node/:version/nodes/:repository/:node/aspects", repository,
+      [
+        [":node", encodeURIComponent(node)],
+      ]);
+    return this.connector.put(query, JSON.stringify(aspects), this.connector.getRequestOptions())
+      .map((response: Response) => response.json());
+  }
+  /**
    * Like @editNodeMetadataNewVersion, but no versioning
    * @param node
    * @param node The node id
