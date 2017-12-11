@@ -858,7 +858,7 @@ export class MdsComponent{
     let html=this.autoSuggestField(widget,'',allowCustom,true)+`<div id="`+widget.id+`" class="multivalueBadges"></div>`;
     return html;
   }
-  private renderSubTree(widget:any,multivalue:boolean,parent:string=null){
+  private renderSubTree(widget:any,parent:string=null){
     let html='<div id="'+widget.id+"_group_"+parent+'" class="treeGroup"';
     if(parent!=null){
       html+=' style="display:none;"';
@@ -870,7 +870,7 @@ export class MdsComponent{
         if (value.parent != parent)
           continue;
         let id = widget.id + "_" + value.id;
-        let sub = this.renderSubTree(widget,multivalue, value.id);
+        let sub = this.renderSubTree(widget, value.id);
         html += '<div><div id="'+id+'_bg"><div class="treeIcon">';
         if (sub) {
           html += `<i class="material-icons clickable" onclick="
@@ -883,19 +883,7 @@ export class MdsComponent{
         else
           html += "&nbsp;";
         html += '</div>'
-        html += `<input type="checkbox" id="` + id + `" class="filled-in" onchange="
-                  document.getElementById('`+id+`_bg').className=this.checked ? 'treeSelected' : '';`;
-        if(!multivalue){
-          html += `var inputs=document.getElementById('`+widget.id+`_tree').getElementsByTagName('input');
-                   for(var i=0;i<inputs.length;i++){
-                    if(inputs[i].id==this.id)
-                      continue;
-                      inputs[i].checked=false;
-                      document.getElementById(inputs[i].id+'_bg').className='';
-                   }
-          `;
-        }
-        html+=`"`;
+        html += `<input type="checkbox" id="` + id + `" class="filled-in" onchange="window.mdsComponentRef.component.changeTreeItem(this,'`+widget.id+`')"`;
         if (value.disabled) {
           html += ' disabled="true"';
         }
@@ -912,6 +900,31 @@ export class MdsComponent{
 
     html+='</div>';
     return html;
+  }
+  private changeTreeItem(element:any,widgetId:string){
+    let widget=this.getWidget(widgetId);
+    let multivalue=widget.type=='multivalueTree';
+    document.getElementById(element.id+'_bg').className=element.checked ? 'treeSelected' : '';
+    if(!multivalue) {
+      let inputs = document.getElementById('`+widget.id+`_tree').getElementsByTagName('input');
+      for (let i = 0; i < inputs.length; i++) {
+        if (inputs[i].id == element.id)
+          continue;
+        inputs[i].checked = false;
+        document.getElementById(inputs[i].id + '_bg').className = '';
+      }
+    }
+    if(this.mode=='search'){
+      // disable all sub-elements if the element is checked, because they will all be found as well
+      let subElements=element.parentElement.parentElement.getElementsByTagName('input');
+      for(let i=0;i<subElements.length;i++){
+        if(subElements.item(i)==element)
+          continue;
+        subElements.item(i).disabled=element.checked;
+        subElements.item(i).checked=element.checked;
+        document.getElementById(subElements.item(i).id+'_bg').className=element.checked ? 'treeSelected' : '';
+      }
+    }
   }
   public handleKeyboardEvent(event: KeyboardEvent) {
     if(event.code=="Escape"){
@@ -1134,7 +1147,7 @@ export class MdsComponent{
     }
     return html;
   }
-  private renderTreeWidget(widget:any,attr:string,multivalue:boolean){
+  private renderTreeWidget(widget:any,attr:string){
     let html=this.autoSuggestField(widget)+`<div class="btn-flat suggestOpen" onclick="
                   var tree=document.getElementById('`+widget.id+`_tree');
                   tree.style.display='';
@@ -1150,7 +1163,7 @@ export class MdsComponent{
                      var elementBg=document.getElementById(element.id+'_bg');
                      if(element){
                       element.checked=true;
-                      elementBg.className='treeSelected';
+                      window.mdsComponentRef.component.changeTreeItem(element,'`+widget.id+`');
                      }
                   }
               "><i class="material-icons">arrow_forward</i></div>
@@ -1160,26 +1173,11 @@ export class MdsComponent{
                   <div class="card-cancel" onclick="document.getElementById('`+widget.id+`_tree').style.display='none';"><i class="material-icons">close</i></div>
                   <div class="card-title">`+(widget.caption ? widget.caption : widget.placeholder)+`</div>
                     <div class="card-scroll">
-                    `+this.renderSubTree(widget,multivalue,null)+`
+                    `+this.renderSubTree(widget,null)+`
                     </div>
                   </div>
                   <div class="card-action">
-                       <a class="waves-effect waves-light btn" onclick="
-                       var tree=document.getElementById('`+widget.id+`_tree');
-                       tree.style.display='none';
-                       var badges=document.getElementById('`+widget.id+`');
-                       while (badges.firstChild)
-                          badges.removeChild(badges.firstChild);
-                       var elements=tree.getElementsByTagName('input');
-                       var labels=tree.getElementsByTagName('label');
-                       for(var i=0;i<elements.length;i++){
-                           var element=elements[i];
-                           var label=labels[i];
-                           if(!element.checked)
-                               continue;
-                           badges.innerHTML+='`+this.getMultivalueBadgeEmbedded('label.innerHTML','element.value')+`';
-                       }
-                       ">`+this.translate.instant("SAVE")+`</a>
+                       <a class="waves-effect waves-light btn" onclick="window.mdsComponentRef.component.saveTree('` + widget.id + `')">`+this.translate.instant("SAVE")+`</a>
                      </div>
                 </div>
               </div>
@@ -1194,6 +1192,22 @@ export class MdsComponent{
       document.getElementsByTagName("body")[0].appendChild(document.getElementById(id));
     },5);
     return html;
+  }
+  private saveTree(widgetId:string){
+    let tree=document.getElementById(widgetId+'_tree');
+    tree.style.display='none';
+    let badges=document.getElementById(widgetId);
+    while (badges.firstChild)
+      badges.removeChild(badges.firstChild);
+    let elements=tree.getElementsByTagName('input');
+    let labels=tree.getElementsByTagName('label');
+    for(let i=0;i<elements.length;i++){
+      let element=elements[i];
+      let label=labels[i];
+      if(!element.checked || element.disabled)
+        continue;
+      badges.innerHTML+=this.getMultivalueBadge(element.value,label.innerHTML);
+    }
   }
   private renderTextareaWidget(widget:any,attr:string){
     let html='<textarea class="materialize-textarea" id="'+widget.id+'"';
@@ -1407,11 +1421,8 @@ export class MdsComponent{
     else if(widget.type=="multivalueSuggestBadges" || widget.type=="multivalueFixedBadges"){
       html+=this.renderSuggestBadgesWidget(widget,attr,widget.type=="multivalueSuggestBadges");
     }
-    else if(widget.type=="multivalueTree"){
-      html+=this.renderTreeWidget(widget,attr,true);
-    }
-    else if(widget.type=="singlevalueTree"){
-      html+=this.renderTreeWidget(widget,attr,false);
+    else if(widget.type=="multivalueTree" || widget.type=="singlevalueTree") {
+      html += this.renderTreeWidget(widget, attr);
     }
     else if(widget.type=='checkbox') {
       html+=this.renderPrimitiveWidget(widget,attr,widget.type,"filled-in");
