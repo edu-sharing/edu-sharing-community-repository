@@ -532,6 +532,11 @@
 				<property name="ccm:classification_purpose" />
 				<property name="ccm:commonlicense_key" />
 				<property name="ccm:educationallearningresourcetype" />
+				<property name="license">
+					<statement>@ccm\:commonlicense_key:"${value}*"</statement>
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
 			</query>
 			<query join="AND" id="saved_search" applyBasequery="false">
 				<basequery>TYPE:"ccm:saved_search"</basequery>

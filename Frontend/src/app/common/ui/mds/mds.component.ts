@@ -16,6 +16,8 @@ import {SessionStorageService} from "../../services/session-storage.service";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIHelper} from "../ui-helper";
+import {RestHelper} from "../../rest/rest-helper";
+import {NodeHelper} from "../node-helper";
 
 @Component({
   selector: 'mds',
@@ -481,6 +483,17 @@ export class MdsComponent{
       let element=(document.getElementById(widget.id) as any);
       if(!element)
         continue;
+      if(widget.type=='checkboxVertical' || widget.type=='checkboxHorizontal'){
+        let inputs=element.getElementsByTagName('input');
+        console.log(inputs);
+        properties[widget.id]=[];
+        for(let input of inputs){
+          if(input.checked){
+            properties[widget.id].push(input.value);
+          }
+        }
+        continue;
+      }
       element.className=element.className.replace("invalid","").trim();
       let v=element.value;
       if(element.getAttribute('data-value')){
@@ -676,8 +689,14 @@ export class MdsComponent{
               }
             }
           }
-          else if(widget.type=="checkbox"){
+          else if(widget.type=='checkbox'){
             element.checked=props[0];
+          }
+          else if(widget.type=='checkboxVertical' || widget.type=='checkboxHorizontal'){
+            console.log(props);
+            for(let input of element.getElementsByTagName('input')){
+              input.checked=props.indexOf(input.value)!=-1;
+            }
           }
           else if(widget.type=='singleoption'){
             element.value=props[0];
@@ -1316,11 +1335,11 @@ export class MdsComponent{
     return html;
   }
   private renderCheckboxWidget(widget:any,attr:string,vertical:boolean){
-    let html='<fieldset class="'+(vertical ? "checkboxVertical" : "checkboxHorizontal")+'">';
+    let html='<fieldset id="'+widget.id+'" class="'+(vertical ? "checkboxVertical" : "checkboxHorizontal")+'">';
 
     for(let option of widget.values){
       let id=widget.id+"_"+option.id;
-      html+='<input type="checkbox" class="filled-in" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+option.caption+'</label>';
+      html+='<input type="checkbox" class="filled-in" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+(option.imageSrc ? '<img src="'+option.imageSrc+'">' : option.caption)+'</label>';
     }
     html+='</fieldset>';
     return html;
@@ -1577,11 +1596,22 @@ export class MdsComponent{
     })
   }
   private renderLicense(widget: any) {
-
-    let html=`<div class="mdsLicense">
-          <a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">`+
-      this.translate.instant('MDS.LICENSE_LINK')+` <i class="material-icons">arrow_forward</i></a>`;
-    return html;
+    if(this.mode=='search'){
+      widget.values=[
+        {id:'CC_0',imageSrc:NodeHelper.getLicenseIconByString('CC_0',this.connector)},
+        {id:'CC_BY',imageSrc:NodeHelper.getLicenseIconByString('CC_BY',this.connector)},
+        {id:'PDM',imageSrc:NodeHelper.getLicenseIconByString('PDM',this.connector)},
+      ];
+      widget.type='checkboxVertical';
+      let html = this.renderCheckboxWidget(widget,null,true);
+      return html;
+    }
+    else {
+      let html = `<div class="mdsLicense">
+          <a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
+        this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>`;
+      return html;
+    }
   }
 
   private setPreview(node: Node,counter=1) {

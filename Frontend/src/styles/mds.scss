@@ -52,6 +52,8 @@ mds .mdsGroup{
   .radioVertical label,
   .checkboxVertical label{
     width: 100%;
+    float:left;
+    margin:5px 0;
   }
   .radioHorizontal label,
   .checkboxHorizontal label{
@@ -156,6 +158,11 @@ mds .mdsGroup{
   }
   .widget_vcard{
     height:95px;
+  }
+  .license{
+    img{
+      max-height:20px;
+    }
   }
   .licenseLink,.contributorsLink{
     font-weight: bold;
