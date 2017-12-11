@@ -117,6 +117,7 @@ export class UIHelper{
 
   static showAddedToCollectionToast(toast:Toast,node: any,count:number) {
     let scope=node.collection ? node.collection.scope : node.scope;
+    let type=node.collection ? node.collection.type : node.type;
     if(scope==RestConstants.COLLECTIONSCOPE_MY){
       scope='MY';
     }
@@ -126,8 +127,8 @@ export class UIHelper{
     else if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
       scope='PUBLIC';
     }
-    else{
-      scope='SHARED';
+    else if(type=RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL){
+      scope='PUBLIC';
     }
     toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)});
   }
