@@ -173,7 +173,7 @@ $imagePath: '../../../../assets/images/collections/';
   }
 }
 .card-high{
-  top:15%;
+  top:calc(#{$mainnavHeight} + 5%);
 }
 .collection-metadata{
 
@@ -398,6 +398,9 @@ input[type="radio"] {
 }
 
 @media screen and (max-width: $mobileWidth+$mobileStage*3){
+  .card-high{
+    top:15%;
+  }
   .createContainer{
     .createProgress{
       position: fixed;

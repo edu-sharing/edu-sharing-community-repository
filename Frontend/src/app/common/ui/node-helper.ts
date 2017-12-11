@@ -172,7 +172,7 @@ export class NodeHelper{
       icon="language";
       scopeName="PUBLIC";
     }
-    if(collection.type==RestConstants.COLLECTION_TYPE_EDITORIAL){
+    if(collection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
       icon="star";
       scopeName="TYPE_EDITORIAL";
     }

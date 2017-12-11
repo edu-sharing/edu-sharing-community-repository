@@ -426,7 +426,13 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.collectionService.getCollectionContent(this.collectionContent.collection.ref.id,
           scope,
           [RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR],
-          {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false},
+          {sortBy: [
+            RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+            RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+            RestConstants.CM_MODIFIED_DATE
+           ],
+            sortAscending: [false,true,false]
+          },
           this.collectionContent.collection.ref.repo
         ).subscribe((collection:EduData.CollectionContent) => {
             console.log(collection);

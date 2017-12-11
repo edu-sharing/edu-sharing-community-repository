@@ -260,8 +260,11 @@ export class CollectionNewComponent {
         // input data optimize
         this.currentCollection.title = this.currentCollection.title.trim();
         this.currentCollection.description = this.currentCollection.description.trim();
-        if(this.newCollectionType==RestConstants.COLLECTION_TYPE_EDITORIAL){
+        if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL){
           this.currentCollection.type=this.newCollectionType;
+        }
+        else{
+          this.currentCollection.type=RestConstants.COLLECTIONTYPE_DEFAULT;
         }
         if (this.isEditCollection()) {
 
@@ -306,10 +309,13 @@ export class CollectionNewComponent {
     }
     setCollectionType(type:string){
       this.newCollectionType=type;
-      if(type=='EDU_ALL'){
+      if(type==RestConstants.COLLECTIONSCOPE_MY){
+        this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_MY;
+      }
+      if(type==RestConstants.COLLECTIONSCOPE_ALL){
         this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_ALL;
       }
-      if(type=='CUSTOM'){
+      if(type==RestConstants.COLLECTIONSCOPE_CUSTOM){
         this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
       }
       this.updateAvailableSteps();
