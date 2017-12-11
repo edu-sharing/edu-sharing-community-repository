@@ -61,12 +61,10 @@ export class MdsComponent{
   private lastMdsQuery: string;
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
-    setTimeout(()=>this.loadMdsFinal(),5);
   };
   @Input() set repository(repository:string){
     this.isLoading=false;
     this._repository=repository;
-    setTimeout(()=>this.loadMdsFinal(),5);
   }
   @Input() set currentValues(currentValues:any){
     this._currentValues=currentValues;
@@ -75,7 +73,6 @@ export class MdsComponent{
     if(!setId)
       return;
     this._setId=setId;
-    setTimeout(()=>this.loadMds(),5);
   }
   @Input() set invalidate(invalidate:Boolean){
     setTimeout(()=>this.loadMds(),5);
