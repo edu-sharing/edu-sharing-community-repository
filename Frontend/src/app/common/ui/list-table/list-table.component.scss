@@ -303,6 +303,19 @@ $badgeWidth:200px;
   .selected {
     background-color: transparent !important;
   }
+  .collectionEditorial{
+    position:absolute;
+    left:10px;
+    top:0;
+    padding:0 3px;
+    padding-top: 3px;
+    color:#fff;
+    background-color: $editorialCollectionsBackground;
+    z-index: 1;
+    i{
+      font-size:14px;
+    }
+  }
   .collectionPinned{
     position:absolute;
     right:5px;

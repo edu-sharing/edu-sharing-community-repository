@@ -458,8 +458,8 @@ export class ListTableComponent implements EventListener{
   public getCollectionColor(node : any){
     return node.collection ? node.collection.color : node.color;
   }
-  public getCollectionPinned(node : any){
-    return node.collection ? node.collection.pinned : node.pinned
+  public getCollection(node : any){
+    return node.collection ? node.collection : node
   }
   public getIconUrl(node : any){
     return node.reference ? node.reference.iconURL : node.iconURL;
