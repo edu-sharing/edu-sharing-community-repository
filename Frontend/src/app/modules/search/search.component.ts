@@ -103,7 +103,7 @@ export class SearchComponent {
   public hasMoreCollections=false;
   public queryId=RestConstants.DEFAULT_QUERY_NAME;
   private viewToggle: OptionItem;
-  private groupResults = false;
+  public groupResults = false;
   public actionOptions:OptionItem[]=[];
   public repositories: Repository[];
   public globalProgress = false;
