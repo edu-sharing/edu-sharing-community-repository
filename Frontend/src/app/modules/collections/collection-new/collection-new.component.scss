@@ -176,7 +176,11 @@ $imagePath: '../../../../assets/images/collections/';
   top:calc(#{$mainnavHeight} + 5%);
 }
 .collection-metadata{
-
+  .noGroups{
+    font-size:120%;
+    color:$textLight;
+    text-align: center;
+  }
 }
 .groupLabel{
   margin-bottom:5px;

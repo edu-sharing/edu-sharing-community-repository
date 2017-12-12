@@ -3,6 +3,7 @@
   "COLLECTIONS": {
     "TITLE": "collections",
     "ERROR_DELETE": "An error occurred while deleting the collection.",
+    "NO_EDITORIAL_GROUPS":"No editorial groups found",
     "DETAIL": {
       "REMOVE": "delete",
       "ADD_TO_OTHER": "to collection"

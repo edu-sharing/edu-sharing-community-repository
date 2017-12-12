@@ -187,6 +187,7 @@
         <span>{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}</span>
       </div>
       <div class="card-scroll">
+        <div class="noGroups" *ngIf="editorialGroups.length==0">{{'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate}}</div>
         <listTable
           [nodes]="editorialGroups"
           [columns]="editorialColumns"

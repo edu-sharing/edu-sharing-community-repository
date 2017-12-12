@@ -6,6 +6,7 @@
     "ADD_MATERIAL" : "Material\nhinzufügen",
     "ERROR_DELETE": "Fehler beim Löschen der Sammlung",
     "ENTER_NAME" : "Bitte einen Namen für die Sammlung eingeben.",
+    "NO_EDITORIAL_GROUPS":"Noch keine Redaktionsgruppen festgelegt.",
     "DETAIL": {
       "REMOVE": "Entfernen",
       "ADD_TO_OTHER": "In Sammlung"
