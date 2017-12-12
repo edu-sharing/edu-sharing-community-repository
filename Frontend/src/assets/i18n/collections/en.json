@@ -9,6 +9,10 @@
       "ADD_TO_OTHER": "to collection"
     },
     "TAB":{
+      "TYPE_EDITORIAL_LONG":" editorially managed collections ",
+      "MY_LONG" : " collections created by you ",
+      "EDU_GROUPS_LONG" : " collections that have been shared by or with you. ",
+      "EDU_ALL_LONG" : " all collections that are available to you ",
       "TYPE_EDITORIAL":"Editorial",
       "MY" : "My",
       "EDU_GROUPS" : "Shared",
