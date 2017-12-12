@@ -5,6 +5,7 @@ export class SearchService {
 
   searchTerm: string = '';
   searchResult: Array<any> = [];
+  searchResultRepositories: Array<any> = [];
   searchResultCollections: Array<any> = [];
   ignored: Array<string> = [];
   reurl: string;
@@ -22,6 +23,7 @@ export class SearchService {
      this.skipcount = 0;
      this.offset = 0;
      this.searchResult = [];
+     this.searchResultRepositories = [];
      this.complete = false;
      this.facettes = [];
    }

@@ -103,6 +103,7 @@ export class SearchComponent {
   public hasMoreCollections=false;
   public queryId=RestConstants.DEFAULT_QUERY_NAME;
   private viewToggle: OptionItem;
+  private groupResults = false;
   public actionOptions:OptionItem[]=[];
   public repositories: Repository[];
   public globalProgress = false;
@@ -177,6 +178,7 @@ export class SearchComponent {
         this.initalized = true;
         this.printListener();
         this.view = this.config.instant('searchViewType',temporaryStorageService.get('view', '1'));
+        this.groupResults=this.config.instant('searchGroupResults',false);
         this.setViewType(this.view);
 
         this.collectionsColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
@@ -424,7 +426,6 @@ export class SearchComponent {
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
-
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.currentValues){
 
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
@@ -554,7 +555,12 @@ export class SearchComponent {
 
   processSearchResult(data: SearchList,init:boolean) {
     this.searchFail = false;
-    this.searchService.searchResult = this.searchService.searchResult.concat(data.nodes);
+    if(this.currentRepository==RestConstants.ALL && this.groupResults){
+      this.searchService.searchResultRepositories.push(data.nodes);
+    }
+    else {
+      this.searchService.searchResult = this.searchService.searchResult.concat(data.nodes);
+    }
     this.searchService.ignored = data.ignored;
     this.checkFail();
     this.updateActionbar(this.selection);
@@ -843,7 +849,7 @@ export class SearchComponent {
       {
         sortBy: [RestConstants.LUCENE_SCORE,RestConstants.CM_MODIFIED_DATE],
         sortAscending: false,
-        count:this.currentRepository==RestConstants.ALL ?
+        count:this.currentRepository==RestConstants.ALL && !this.groupResults ?
           Math.max(5,Math.round(this.connector.numberPerRequest/(this.repositories.length-1))) : null,
         offset: this.searchService.skipcount,
         propertyFilter: [

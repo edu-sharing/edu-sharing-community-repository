@@ -401,6 +401,41 @@ listtable {
     min-width:50px;
   }
 }
+.searchGrouped{
+  >div{
+    float:left;
+    width:100%;
+  }
+  listTable,.noResults{
+    width:calc(100% + #{$cardWidth + 60px});
+    float: left;
+    overflow: hidden;
+    height: $cardHeight+15px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+  }
+  .noResults{
+    width: 100%;
+    height: auto;
+  }
+  .heading{
+    float:left;
+    margin-top: 5px;
+    img{
+      padding-right: 5px;
+      max-height: 16px;
+    }
+    span{
+      position: relative;
+      top:-3px;
+    }
+  }
+  .more{
+    float:right;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+}
 .sidenav{
   .empty{
     margin-top:20px;
@@ -464,7 +499,7 @@ div.dialog.darken {
     }
   }
 }
-.rowFrame, listtable {
+.rowFrame, .searchUngrouped listtable {
   background-color: #fff !important;
 }
 @media all and (max-width: $mobileWidth) {

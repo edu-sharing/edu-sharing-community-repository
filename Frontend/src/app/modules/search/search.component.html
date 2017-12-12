@@ -201,8 +201,9 @@
           [isLoading]="false"></listTable>
         </div>
       </div>
-      <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} ({{resultCount.materials}})</div>
-      <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
+      <div *ngIf="!(currentRepository=='-all-' && groupResults)" class="searchUngrouped">
+        <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} <span *ngIf="resultCount.materials">({{resultCount.materials}})</span></div>
+      <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
       <listTable
         [nodes]="searchService.searchResult"
         [columns]="columns"
@@ -224,6 +225,31 @@
         [isLoading]="showspinner"></listTable>
 
         <div class="noResults" *ngIf="searchFail && !showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
+      </div>
+      <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories">
+      <div *ngFor="let repo of repositories.slice(1);let i=index">
+        <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
+        <a class="more clickable" (click)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
+        <div class="noResults" *ngIf="searchService.searchResultRepositories[i] && !searchService.searchResultRepositories[i].length && !showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
+        <listTable *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
+          [nodes]="searchService.searchResultRepositories[i]"
+          [columns]="columns"
+          [hasIcon]="true"
+          [options]="options"
+          [dragDrop]="false"
+          [hasCheckbox]="false"
+          [hasHeading]="false"
+          [isClickable]="true"
+          [viewType]="view"
+          [hasMore]="false"
+          [applyMode]="applyMode"
+          [scrollWindow]="true"
+          (clickRow)="render($event)"
+          (doubleClickRow)="render($event)"
+          (onSelectionChanged)="updateSelection($event)"
+          [isLoading]="showspinner"></listTable>
+      </div>
+      </div>
     </div>
    </div>
  </div>
