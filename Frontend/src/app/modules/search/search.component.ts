@@ -844,6 +844,8 @@ export class SearchComponent {
       {
         sortBy: [RestConstants.LUCENE_SCORE,RestConstants.CM_MODIFIED_DATE],
         sortAscending: false,
+        count:this.currentRepository==RestConstants.ALL ?
+          Math.max(5,Math.round(this.connector.numberPerRequest/(this.repositories.length-1))) : null,
         offset: this.searchService.skipcount,
         propertyFilter: [
           properties]
