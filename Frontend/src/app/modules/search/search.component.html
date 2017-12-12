@@ -201,7 +201,7 @@
           [isLoading]="false"></listTable>
         </div>
       </div>
-      <div *ngIf="!(currentRepository=='-all-' && groupResults)" class="searchUngrouped">
+      <div *ngIf="!(currentRepository=='-all-' && groupResults && !showspinner)" class="searchUngrouped">
         <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} <span *ngIf="resultCount.materials">({{resultCount.materials}})</span></div>
       <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
       <listTable
@@ -226,7 +226,7 @@
 
         <div class="noResults" *ngIf="searchFail && !showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
       </div>
-      <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories">
+      <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories && !showspinner">
       <div *ngFor="let repo of repositories.slice(1);let i=index">
         <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
         <a class="more clickable" (click)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>

@@ -828,6 +828,7 @@ export class SearchComponent {
   private searchRepository(repos: Repository[],criterias:any,init:boolean,position=0,count=0) {
     if(position>0 && position>=repos.length) {
       this.searchService.numberofresults = count;
+      this.showspinner = false;
       return;
     }
 
@@ -862,12 +863,10 @@ export class SearchComponent {
       (data: SearchList) => {
         this.resultCount.materials = data.pagination.total;
         this.processSearchResult(data,init);
-        this.showspinner = false;
         this.searchService.showchosenfilters = true;
         this.searchRepository(repos,criterias,init,position+1,count+data.pagination.total);
       },
       (error: any) => {
-        this.showspinner = false;
         this.toast.error(error);
         this.searchRepository(repos,criterias,init,position+1,count);
       }
