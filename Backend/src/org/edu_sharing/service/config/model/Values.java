@@ -33,4 +33,5 @@ public class Values{
 	@XmlElement	public Rendering rendering;
 	@XmlElement	public SessionExpiredDialog sessionExpiredDialog;
 	@XmlElement	public String loginDefaultLocation;
+	@XmlElement	public Boolean searchGroupResults;
 }

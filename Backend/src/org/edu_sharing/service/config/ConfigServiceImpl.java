@@ -108,7 +108,7 @@ public class ConfigServiceImpl implements ConfigService{
 	@Override
 	public Values getConfigValuesByDomain(String domain) throws Exception {
 		Config config=getConfig();
-		if(config.contexts.context!=null) {
+		if(config.contexts!=null && config.contexts.context!=null) {
 			for(Context context : config.contexts.context) {
 				if(context.domain==null)
 					continue;
