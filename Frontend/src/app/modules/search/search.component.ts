@@ -213,8 +213,6 @@ export class SearchComponent {
 
   applyParameters(props:any){
     this.currentValues=props;
-    console.log(this.searchService.searchTerm);
-    console.log(this.currentValues);
     this.routeSearchParameters(props);
     //this.getSearch(null,true,props);
   }
