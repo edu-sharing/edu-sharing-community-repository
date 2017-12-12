@@ -566,7 +566,6 @@ export class SearchComponent {
       this.searchService.complete = true;
       return;
     }
-    this.searchService.numberofresults = data.pagination.count;
     if(init) {
       this.searchService.facettes = data.facettes;
       this.mdsSuggestions = {};
@@ -822,9 +821,11 @@ export class SearchComponent {
     return node ? node : this.selection[0];
   }
 
-  private searchRepository(repos: Repository[],criterias:any,init:boolean,position=0) {
-    if(position>0 && position>=repos.length)
+  private searchRepository(repos: Repository[],criterias:any,init:boolean,position=0,count=0) {
+    if(position>0 && position>=repos.length) {
+      this.searchService.numberofresults = count;
       return;
+    }
 
     let repo=repos[position];
     /*
@@ -859,12 +860,12 @@ export class SearchComponent {
         this.processSearchResult(data,init);
         this.showspinner = false;
         this.searchService.showchosenfilters = true;
-        this.searchRepository(repos,criterias,init,position+1);
+        this.searchRepository(repos,criterias,init,position+1,count+data.pagination.total);
       },
       (error: any) => {
         this.showspinner = false;
         this.toast.error(error);
-        this.searchRepository(repos,criterias,init,position+1);
+        this.searchRepository(repos,criterias,init,position+1,count);
       }
     );
 
