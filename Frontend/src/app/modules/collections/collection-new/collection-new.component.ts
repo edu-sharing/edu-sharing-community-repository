@@ -76,6 +76,7 @@ export class CollectionNewComponent {
   public newCollectionStep=this.STEP_NEW;
   public editPermissionsDummy: EduData.Node;
   private availableSteps: string[];
+  private parentCollection: Collection;
 
 
   @HostListener('document:keydown', ['$event'])
@@ -110,7 +111,7 @@ export class CollectionNewComponent {
             this.mainnav=params['mainnav']=='true';
           });
           this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
-            this.editorialGroups=data.groups;
+            //this.editorialGroups=data.groups;
           });
           this.route.params.subscribe(params => {
             // get mode from route and validate input data
@@ -133,13 +134,20 @@ export class CollectionNewComponent {
                 });
               });
             } else {
-              this.parentId = id;
-              this.currentCollection=new Collection();
-              this.currentCollection.title="";
-              this.currentCollection.description="";
-              this.currentCollection.color=this.COLORS1[0];
-              this.updateAvailableSteps();
-              this.isLoading=false;
+              this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
+                this.parentId = id;
+                this.parentCollection = data.collection;
+                if(this.parentCollection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
+                  this.newCollectionStep = this.STEP_GENERAL;
+                  this.newCollectionType=RestConstants.COLLECTIONTYPE_EDITORIAL;
+                }
+                this.currentCollection=new Collection();
+                this.currentCollection.title="";
+                this.currentCollection.description="";
+                this.currentCollection.color=this.COLORS1[0];
+                this.updateAvailableSteps();
+                this.isLoading=false;
+              });
             }
           });
 
@@ -323,7 +331,6 @@ export class CollectionNewComponent {
     }
     public getAvailableSteps():string[]{
       let steps:string[]=[];
-      console.log(this.newCollectionType);
       steps.push(this.STEP_GENERAL);
       if(this.newCollectionType=='EDITORIAL'){
         steps.push(this.STEP_METADATA);
@@ -372,6 +379,9 @@ export class CollectionNewComponent {
        else if(pos==0){
          if(this.editId) {
            this.navigateToCollectionId(this.editId);
+         }
+         else if(this.parentCollection && this.parentCollection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
+           this.navigateToCollectionId(this.parentId);
          }
          else {
            this.newCollectionStep = this.STEP_NEW;
