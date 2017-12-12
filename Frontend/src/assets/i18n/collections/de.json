@@ -20,14 +20,18 @@
       "DONE":"Fertig"
     },
     "TAB":{
-      "TYPE_EDITORIAL":"Redaktionelle Sammlungen",
-      "MY" : "Meine Sammlungen",
-      "EDU_GROUPS" : "Sammlungen meiner Gruppen",
-      "ALL" : "Alle Sammlungen",
+      "TYPE_EDITORIAL_LONG":" Redaktionell betreute Sammlungen",
+      "MY_LONG" : "Sammlungen, die von Ihnen erstellt wurden",
+      "EDU_GROUPS_LONG" : "Sammlungen, die von Ihnen oder für Sie freigegeben wurden",
+      "EDU_ALL_LONG" : "Alle Sammlungen, die für Sie sichtbar sind",
+      "TYPE_EDITORIAL":"Redaktionelle",
+      "MY" : "Meine",
+      "EDU_GROUPS" : "Gemeinsame",
+      "EDU_ALL" : "Alle",
       "MY_SHORT" : "Meine",
-      "EDU_GROUPS_SHORT" : "Gruppen",
-      "ALL_SHORT" : "Alle",
-      "TYPE_EDITORIAL_SHORT":"Redaktionell"
+      "EDU_GROUPS_SHORT" : "Gemeinsame",
+      "EDU_ALL_SHORT" : "Alle",
+      "TYPE_EDITORIAL_SHORT":"Redaktionelle"
     },
     "CREATE_TYPE":"Neue Sammlung erstellen...",
     "CREATE":{

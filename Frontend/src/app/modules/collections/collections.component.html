@@ -30,8 +30,8 @@
         <a class="table-tab-title-short" [class.active]="(tabSelected==='TYPE_EDITORIAL')">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL_SHORT' | translate }}</a>
       </li>
       <li class="clickable tab col s3" (click)="selectTabAllCollections()">
-        <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.ALL' | translate }}</a>
-        <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.ALL_SHORT' | translate }}</a>
+        <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</a>
+        <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.EDU_ALL_SHORT' | translate }}</a>
       </li>
     </ul>
   </div>
@@ -131,7 +131,10 @@
 
 <section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading))" >
 
-                <div class="section-headline" *ngIf="isAllowedToEditCollection() || collectionContent.collections.length">{{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}</div>
+                <div class="section-headline" *ngIf="isAllowedToEditCollection() || collectionContent.collections.length">
+                  <span *ngIf="isRootLevelCollection()">{{ 'COLLECTIONS.TAB.'+tabSelected+"_LONG" | translate }}</span>
+                  <span *ngIf="!isRootLevelCollection()">{{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}</span>
+                </div>
 
                 <!-- COLLECTION CARDS -->
                 <listTable

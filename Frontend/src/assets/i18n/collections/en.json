@@ -9,13 +9,13 @@
       "ADD_TO_OTHER": "to collection"
     },
     "TAB":{
-      "TYPE_EDITORIAL":"Editorial Collections",
-      "MY" : "My Collections",
-      "EDU_GROUPS" : "Collections of my Groups",
-      "ALL" : "All Collections",
+      "TYPE_EDITORIAL":"Editorial",
+      "MY" : "My",
+      "EDU_GROUPS" : "Shared",
+      "EDU_ALL" : "All",
       "MY_SHORT" : "My",
-      "EDU_GROUPS_SHORT" : "Groups",
-      "ALL_SHORT" : "All",
+      "EDU_GROUPS_SHORT" : "Shared",
+      "EDU_ALL_SHORT" : "All",
       "TYPE_EDITORIAL_SHORT":"Editorial"
     },
     "ENTER_NAME" : "Please enter a name for the collection.",
