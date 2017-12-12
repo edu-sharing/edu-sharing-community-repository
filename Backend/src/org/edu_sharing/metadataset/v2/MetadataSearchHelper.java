@@ -52,6 +52,7 @@ public class MetadataSearchHelper {
 							continue;
 						if(!queryString.isEmpty())
 							queryString+=" "+query.getJoin()+" ";
+						// handle ignorable parameters
 						queryString+="ISNULL:@"+QueryParser.escape(parameter.getName());
 							continue;
 					}
@@ -63,7 +64,7 @@ public class MetadataSearchHelper {
 						for(String value : values){
 							if(i>0)
 								queryString+=" "+parameter.getMultiplejoin()+" ";
-							queryString+="("+parameter.getStatement().replace("${value}", QueryParser.escape(value))+")";
+							queryString+="("+getStatmentForValue(parameter,value)+")";
 							i++;
 						}
 					}
@@ -71,12 +72,31 @@ public class MetadataSearchHelper {
 						throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field "+parameter.getName());
 					}
 					else{
-						queryString+=parameter.getStatement().replace("${value}", QueryParser.escape(values[0]));
+						queryString+=getStatmentForValue(parameter, values[0]);
 					}
 					queryString+=")";
 				}
 				return queryString;
 			
+	}
+	/**
+	 * If string is enclosed in "", search for the whole string
+	 * otherwise, search for every single word (concat with AND)
+	 * @param parameter
+	 * @param value
+	 * @return
+	 */
+	private static String getStatmentForValue(MetadataQueryParameter parameter, String value) {
+		if(value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching())
+			return parameter.getStatement().replace("${value}", QueryParser.escape(value));
+		String[] words = value.split(" ");
+		String query="";
+		for(String word : words) {
+			if(!query.isEmpty())
+				query+=" AND ";
+			query+=parameter.getStatement().replace("${value}", QueryParser.escape(word));
+		}
+		return query;
 	}
 	public static MetadataQueryParameter getParameter(MetadataQueries queries,String queryId,String parameterId){
 		for(MetadataQuery query : queries.getQueries()){

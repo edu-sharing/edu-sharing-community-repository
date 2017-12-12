@@ -4,6 +4,7 @@ public class MetadataQueryParameter {
 	private String name;
 	private String statement;
 	private boolean multiple;
+	private boolean exactMatching;
 	private String multiplejoin;
 	private int ignorable;
 	
@@ -48,6 +49,15 @@ public class MetadataQueryParameter {
 	public void setIgnorable(int ignorable) {
 		this.ignorable = ignorable;
 	}
+
+	public boolean isExactMatching() {
+		return exactMatching;
+	}
+
+	public void setExactMatching(boolean exactMatching) {
+		this.exactMatching = exactMatching;
+	}
+	
 	
 	
 }

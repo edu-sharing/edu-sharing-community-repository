@@ -163,6 +163,8 @@ public class MetadataReaderV2 {
 						parameter.setStatement(value);
 					if(name.equals("ignorable"))
 						parameter.setIgnorable(Integer.parseInt(value));
+					if(name.equals("exactMatching"))
+						parameter.setExactMatching(value.equalsIgnoreCase("true"));
 					if(name.equals("multiple"))
 						parameter.setMultiple(value.equalsIgnoreCase("true"));
 					if(name.equals("multiplejoin"))
