@@ -951,7 +951,8 @@ export class SearchComponent {
       criterias.push({'property': RestConstants.PRIMARY_SEARCH_CRITERIA, 'values': [searchString]});
     if(properties) {
       for (var property in properties) {
-        criterias.push({'property':property,'values':properties[property]});
+        if(properties[property] && properties[property].length)
+          criterias.push({'property':property,'values':properties[property]});
       }
     }
     return criterias;
