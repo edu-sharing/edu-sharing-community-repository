@@ -118,7 +118,7 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 				
 				HashMap<String, HashMap<String, Object>> resultData = new HashMap<String, HashMap<String, Object>>();
 				searchResultNodeRef.setStartIDX(token.getFrom());
-				searchResultNodeRef.setNodeCount(searchResponse.getPageInfo().getTotalResults());
+				searchResultNodeRef.setNodeCount(searchResponse.getPageInfo()==null ? 0 : searchResponse.getPageInfo().getTotalResults());
 				Iterator<SearchResult> iteratorSearchResults = searchResultList.iterator();
 				int i = 0;
 				
