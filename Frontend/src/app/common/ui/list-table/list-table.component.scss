@@ -221,14 +221,19 @@ $badgeWidth:200px;
   color:$primary;
 }
 
-.tableList .selected,
-.cardList .selected{
+.tableList .row.selected,
+.cardList .row.selected{
   background: $workspaceSelectedBackgroundEffect;
   background-color:$workspaceSelectedBackground;
 }
 
 .tableList .row:focus,
-.cardList .row:focus{
+.cardList .cardList .row.selected{
+  background: transparent;
+  background-color:transparent;
+  outline:2px solid $primary;
+}
+.row:focus{
   @include setGlobalInsetFocus();
   /* background-color:$workspaceSelectedBackground!important; */
 }
@@ -547,11 +552,6 @@ $badgeWidth:200px;
   bottom:7px;
   left:5px;
   opacity: 1!important;
-}
-.cardList .selected{
-  background: transparent;
-  background-color:transparent;
-  outline:2px solid $primary;
 }
 
 .cardList .row,
