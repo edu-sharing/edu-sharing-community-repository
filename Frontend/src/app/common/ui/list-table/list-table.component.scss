@@ -228,7 +228,7 @@ $badgeWidth:200px;
 }
 
 .tableList .row:focus,
-.cardList .cardList .row.selected{
+.cardList .row.selected{
   background: transparent;
   background-color:transparent;
   outline:2px solid $primary;
