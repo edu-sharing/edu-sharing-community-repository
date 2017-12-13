@@ -226,9 +226,14 @@ $badgeWidth:200px;
   color:$primary;
 }
 
-.selected{
+.list .row.selected{
   background: $workspaceSelectedBackgroundEffect;
   background-color:$workspaceSelectedBackground;
+}
+.cardList .row.selected{
+  background: transparent;
+  background-color:transparent;
+  outline:2px solid $primary;
 }
 .row:focus{
   @include setGlobalInsetFocus();
@@ -468,11 +473,6 @@ $badgeWidth:200px;
   font-size: 80%;
   bottom:7px;
   opacity: 1!important;
-}
-.cardList .selected{
-  background: transparent;
-  background-color:transparent;
-  outline:2px solid $primary;
 }
 
 .cardList .row,
