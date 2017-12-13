@@ -1,5 +1,6 @@
 <!-- <app-search-header></app-search-header> -->
 <global-progress *ngIf="globalProgress"></global-progress>
+<app-banner [scope]="'collections'"></app-banner>
 <main-nav *ngIf="mainnav"
   [title]="'COLLECTIONS.TITLE'"
   [currentScope]="'collections'"
@@ -12,9 +13,7 @@
 ></collections-manage-pinning>
 
 
-<div [class.collectionsContainerMainnav]="mainnav" class="collectionsContainer">
-
-<div class="row tab-group row-dark" *ngIf="isRootLevelCollection() && !isGuest">
+<div class="row tab-group row-dark scrollWithBanner" *ngIf="isRootLevelCollection() && !isGuest">
   <div class="col s12">
     <ul class="tabs tabs-fixed-width">
       <li class="clickable tab col s3" (click)="selectTabMyCollections()">
@@ -36,6 +35,9 @@
     </ul>
   </div>
 </div>
+<div class="alignWithBanner">
+<div [class.collectionsContainerTabs]="isRootLevelCollection() && !isGuest" class="collectionsContainer">
+
   <section *ngIf="(isLoading || (!isReady))" class="collections-loading-div" style="padding-top: 24px;text-align: center;">
     <spinner></spinner>
   </section>
@@ -52,78 +54,6 @@
     (onDrop)="dropOnCollection($event)"
     (onClick)="openBreadcrumb($event)"
   ></breadcrumbs>
-<!-- collection header -->
-<div *ngIf="(!isRootLevelCollection()) && (!isLoading) && isReady && (tabSelected.length>=-1)" [class.collections-headerMainnav]="mainnav" class="collections-header" [style.background-color]="collectionContent.collection.color">
-
-        <div class="card-collection-image-container" style="width:100%;">
-
-            <div *ngIf="collectionContent.collection.preview.isIcon" style="width: 250px; height: 200px; margin-left: auto;
-    margin-right: auto;" >
-                <div class="card-image-icon-container">
-                  <div class="card-image-icon-circle">
-                    <i class="material-icons" style="font-size: 75px; margin-top: 42px;" [style.color]="collectionContent.collection.color">layers</i>
-                  </div>
-                </div>
-            </div>
-
-            <div *ngIf="!collectionContent.collection.preview.isIcon" class="card-image-icon-container">
-                <img class="collection-header-image" [src]="collectionContent.collection.preview.url+'&crop=true&width=250&height=200'" (error)="collectionContent.collection.previewUrl=null" style="width: 100%; height: auto;" role="presentation"/>
-            </div>
-
-        </div>
-        <div *ngIf="pinningAllowed && isAllowedToEditCollection() && collectionContent.collection.type=='EDITORIAL'" class="collections-pin-button"
-             tabindex="0"
-             (keypress)="($event.which === 13)?pinCollection():0"
-             (click)="pinCollection()"
-        >
-          <custom-icon iconId="pin"></custom-icon>
-        </div>
-       <div *ngIf="isAllowedToEditCollection() " class="collections-edit-button"
-            tabindex="0"
-            (keypress)="($event.which === 13)?buttonCollectionEdit():0"
-            (click)="buttonCollectionEdit()"
-       >
-                <i class="material-icons" style="display:inline;">edit</i>
-            </div>
-
-       <div *ngIf="isAllowedToDeleteCollection()" class="collections-delete-button"
-            tabindex="0"
-            (keypress)="($event.which === 13)?buttonCollectionDelete():0"
-            (click)="buttonCollectionDelete()">
-                <i class="material-icons" style="display:inline;">delete</i>
-        </div>
-
-        <div class="collections-header-textarea">
-
-            <div class="collection-new-preview-headline collections-header-texttop" style="overflow:hidden;">
-                {{collectionContent.collection.title}}
-            </div>
-
-            <div *ngIf="(collectionContent.collection.childReferencesCount>=collectionContent.collection.childCollectionsCount)" class="collection-new-preview-subline collections-header-texttop">{{collectionContent.collection.childReferencesCount}} {{ 'COLLECTION.INFO_CHILDS_MULTI' | translate }}
-            </div>
-
-            <div *ngIf="(collectionContent.collection.childReferencesCount<collectionContent.collection.childCollectionsCount)" class="collection-new-preview-subline collections-header-texttop">{{collectionContent.collection.childCollectionsCount}} {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
-            </div>
-
-            <div class="collection-new-preview-infoline">
-                <i class="material-icons icon-bottom">person</i> {{collectionContent.collection.owner.profile.firstName}} {{collectionContent.collection.owner.profile.lastName}}</div>
-
-            <div
-                class="collection-new-preview-infoline">
-                <i class="material-icons icon-bottom">{{getScopeInfo().icon}}</i>&nbsp;{{ 'COLLECTION.SCOPE.'+getScopeInfo().scopeName | translate }}
-           </div>
-
-           <div class="collection-description" style="margin-top:16px;opacity:0.85;">{{ 'collections_description' | translate }}</div>
-
-           <div class="collection-description" style="margin-top:5px;">
-               {{collectionContent.collection.description}}
-               <span *ngIf="(collectionContent.collection.description==null) || (collectionContent.collection.description.length==0)" style="padding:2px;">-</span>
-           </div>
-
-        </div>
-
-
-</div>
 
 
 
@@ -224,3 +154,77 @@
     (onCloseAddToCollection)="closeAddToOther()"
   ></workspace-management>
 </div>
+</div>
+<!-- collection header -->
+<div *ngIf="(!isRootLevelCollection()) && (!isLoading) && isReady && (tabSelected.length>=-1)" class="collections-header scrollWithBanner" [style.background-color]="collectionContent.collection.color">
+
+  <div class="card-collection-image-container" style="width:100%;">
+
+    <div *ngIf="collectionContent.collection.preview.isIcon" style="width: 250px; height: 200px; margin-left: auto;
+    margin-right: auto;" >
+      <div class="card-image-icon-container">
+        <div class="card-image-icon-circle">
+          <i class="material-icons" style="font-size: 75px; margin-top: 42px;" [style.color]="collectionContent.collection.color">layers</i>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!collectionContent.collection.preview.isIcon" class="card-image-icon-container">
+      <img class="collection-header-image" [src]="collectionContent.collection.preview.url+'&crop=true&width=250&height=200'" (error)="collectionContent.collection.previewUrl=null" style="width: 100%; height: auto;" role="presentation"/>
+    </div>
+
+  </div>
+  <div *ngIf="pinningAllowed && isAllowedToEditCollection() && collectionContent.collection.type=='EDITORIAL'" class="collections-pin-button"
+       tabindex="0"
+       (keypress)="($event.which === 13)?pinCollection():0"
+       (click)="pinCollection()"
+  >
+    <custom-icon iconId="pin"></custom-icon>
+  </div>
+  <div *ngIf="isAllowedToEditCollection() " class="collections-edit-button"
+       tabindex="0"
+       (keypress)="($event.which === 13)?buttonCollectionEdit():0"
+       (click)="buttonCollectionEdit()"
+  >
+    <i class="material-icons" style="display:inline;">edit</i>
+  </div>
+
+  <div *ngIf="isAllowedToDeleteCollection()" class="collections-delete-button"
+       tabindex="0"
+       (keypress)="($event.which === 13)?buttonCollectionDelete():0"
+       (click)="buttonCollectionDelete()">
+    <i class="material-icons" style="display:inline;">delete</i>
+  </div>
+
+  <div class="collections-header-textarea">
+
+    <div class="collection-new-preview-headline collections-header-texttop" style="overflow:hidden;">
+      {{collectionContent.collection.title}}
+    </div>
+
+    <div *ngIf="(collectionContent.collection.childReferencesCount>=collectionContent.collection.childCollectionsCount)" class="collection-new-preview-subline collections-header-texttop">{{collectionContent.collection.childReferencesCount}} {{ 'COLLECTION.INFO_CHILDS_MULTI' | translate }}
+    </div>
+
+    <div *ngIf="(collectionContent.collection.childReferencesCount<collectionContent.collection.childCollectionsCount)" class="collection-new-preview-subline collections-header-texttop">{{collectionContent.collection.childCollectionsCount}} {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
+    </div>
+
+    <div class="collection-new-preview-infoline">
+      <i class="material-icons icon-bottom">person</i> {{collectionContent.collection.owner.profile.firstName}} {{collectionContent.collection.owner.profile.lastName}}</div>
+
+    <div
+      class="collection-new-preview-infoline">
+      <i class="material-icons icon-bottom">{{getScopeInfo().icon}}</i>&nbsp;{{ 'COLLECTION.SCOPE.'+getScopeInfo().scopeName | translate }}
+    </div>
+
+    <div class="collection-description" style="margin-top:16px;opacity:0.85;">{{ 'collections_description' | translate }}</div>
+
+    <div class="collection-description" style="margin-top:5px;">
+      {{collectionContent.collection.description}}
+      <span *ngIf="(collectionContent.collection.description==null) || (collectionContent.collection.description.length==0)" style="padding:2px;">-</span>
+    </div>
+
+  </div>
+
+
+</div>
+

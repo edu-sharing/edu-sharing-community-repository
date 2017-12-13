@@ -11,9 +11,18 @@ table, div {
 }
 .tab-group{
   margin-bottom:0;
+  position:fixed;
+  top:$mainnavHeight;
+  width:100%;
+  z-index: 100;
 }
 .collectionsContainer{
   width:100%;
+  position:absolute;
+  top: $mainnavHeight;
+}
+.collectionsContainerTabs{
+  top: $mainnavHeight+48px;
 }
 .collection-new-preview-headline{
   word-break: normal;
@@ -30,10 +39,6 @@ table, div {
 .switchToSearch i{
   position: relative;
   top:6px;
-}
-.collectionsContainerMainnav{
-  position:absolute;
-  top: $mainnavHeight;
 }
 
 .collections-cards-div {
@@ -89,7 +94,7 @@ table, div {
 .collections-master-div {
     padding-left: 15%;
     padding-right: 10%;
-    padding-top: 30px;
+    padding-top: 20px;
 }
 
 .collections-header-textarea {
@@ -201,15 +206,12 @@ table, div {
 .collections-header  {
     background-color: $primary;
     color: #ffffff;
-    top: 0;
     left: 0;
     height: 110%;
     width: 250px;
     position: fixed;
     overflow-y: auto;
-}
-.collections-headerMainnav  {
-  top: $mainnavHeight;
+    top:$mainnavHeight;
 }
 .collections-master-div-notabs {
     padding-left:300px;
@@ -342,7 +344,6 @@ table, div {
     .collections-header-detailview {
         display: none;
     }
-    /** From Torsten */
     .tab-group{
       max-width:1000px;
     }
