@@ -135,18 +135,9 @@ export class CollectionNewComponent {
               });
             } else {
               this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
-                this.parentId = id;
-                this.parentCollection = data.collection;
-                if(this.parentCollection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
-                  this.newCollectionStep = this.STEP_GENERAL;
-                  this.newCollectionType=RestConstants.COLLECTIONTYPE_EDITORIAL;
-                }
-                this.currentCollection=new Collection();
-                this.currentCollection.title="";
-                this.currentCollection.description="";
-                this.currentCollection.color=this.COLORS1[0];
-                this.updateAvailableSteps();
-                this.isLoading=false;
+                this.setParent(id,data.collection);
+              },(error:any)=>{
+                this.setParent(id,null);
               });
             }
           });
@@ -469,5 +460,20 @@ export class CollectionNewComponent {
       }
     }
     return list;
+  }
+
+  private setParent(id:string,parent:Collection) {
+    this.parentId = id;
+    this.parentCollection = parent;
+    if(this.parentCollection && this.parentCollection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
+      this.newCollectionStep = this.STEP_GENERAL;
+      this.newCollectionType=RestConstants.COLLECTIONTYPE_EDITORIAL;
+    }
+    this.currentCollection=new Collection();
+    this.currentCollection.title="";
+    this.currentCollection.description="";
+    this.currentCollection.color=this.COLORS1[0];
+    this.updateAvailableSteps();
+    this.isLoading=false;
   }
 }
