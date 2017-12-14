@@ -213,8 +213,9 @@ public class RepoFactory {
 				appAuthToolCache.put(applicationId, result);
 			}else{
 				//TODO getAuthClass from ApplicationInfoFile
-				Class clazz = Class.forName("org.edu_sharing.repository.server.AuthenticationToolWS");
-				result = (AuthenticationTool)clazz.getConstructor(new Class[] { String.class}).newInstance(	new Object[] { appInfo.getAppId()});
+				//Class clazz = Class.forName("org.edu_sharing.repository.server.AuthenticationToolWS");
+				//result = (AuthenticationTool)clazz.getConstructor(new Class[] { String.class}).newInstance(	new Object[] { appInfo.getAppId()});
+				result = new AuthenticationToolAPI();
 			}
 		}
 		return result;
