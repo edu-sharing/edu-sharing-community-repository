@@ -117,7 +117,7 @@
        [class.collection-item-seperate]="!i"
        (click)="showAddDesktop=false;createConnectorName='';createConnectorType=connector">
       <i class="material-icons">{{connector.icon}}</i> {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}<img class="connectorBeta" src="assets/images/beta.svg"></a>
-    <a class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a>
+    <!-- <a class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a> -->
 
   </div>
   <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot=false"></div>
