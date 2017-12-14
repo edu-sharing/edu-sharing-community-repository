@@ -6,7 +6,7 @@
     "WARNING_INFO":"Dieser Bereich ist nur zur Administration des Repositorys gedacht.\nFalsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\n\nFühren Sie keine Aktionen durch, bei denen sie unsicher sind!",
     "TAB":{
       "INFO":"Info",
-      "APPLICATIONS":"Applications",
+      "APPLICATIONS":"Quellen",
       "UPDATE":"Server Update",
       "IMPORT":"Import",
       "TOOLKIT":"Tool Kit"
