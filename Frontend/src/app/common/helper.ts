@@ -10,7 +10,7 @@ export class Helper {
    * @param needle
    * @returns {number}
    */
-  public static indexOfObjectArray(haystack: any, property: string, needle: string): number {
+  public static indexOfObjectArray(haystack: any, property: string, needle: any): number {
     for(let i = 0; i<haystack.length; i++) {
       if (haystack[i][property] == needle)
         return i;
