@@ -687,7 +687,8 @@ export class SearchComponent {
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));
       });
-      options.push(nodeStore);
+      if(this.currentRepository==RestConstants.HOME_REPOSITORY)
+        options.push(nodeStore);
       let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(node));
       save.showCallback = ((node: Node) => {
         return RestNetworkService.supportsImport(node.ref.repo, this.repositories) && !this.isGuest;

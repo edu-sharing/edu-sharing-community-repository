@@ -22,6 +22,7 @@ export class ActionbarHelper{
             list[0]=list[0].reference;
           return list && list[0].downloadUrl && list[0].properties && !list[0].properties[RestConstants.CCM_PROP_IO_WWWURL];
         }
+        option.isEnabled=option.enabledCallback(null);
       }
     }
     if(type=='ADD_TO_COLLECTION') {
