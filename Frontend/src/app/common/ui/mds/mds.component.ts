@@ -193,7 +193,7 @@ export class MdsComponent{
     this.mds.widgets[this.widgetName].widget=this.widgetType;
     let html='<'+this.widgetName+'>';
     this.currentWidgets=[];
-    this.rendered=this.sanitizer.bypassSecurityTrustHtml(this.renderTemplate(html,data,null,null));
+    this.setRenderedHtml(this.renderTemplate(html,data,null,null));
     this.readValues(data,this.currentNode);
   }
   constructor(private mdsService : RestMdsService,
@@ -426,7 +426,7 @@ export class MdsComponent{
     for(let group of data.groups){
       if(group.id==id){
         let result=this.renderList(group,data,node);
-        this.rendered=this.sanitizer.bypassSecurityTrustHtml(result.main);
+        this.setRenderedHtml(result.main);
         if(result.suggestions)
           this.renderedSuggestions=this.sanitizer.bypassSecurityTrustHtml(result.suggestions);
         let jumpHtml=this.renderJumpmarks(group,data);
@@ -437,7 +437,7 @@ export class MdsComponent{
       }
     }
     let html="Group '"+id+"' was not found in the mds";
-    this.rendered=this.sanitizer.bypassSecurityTrustHtml(html);
+    this.setRenderedHtml(html);
   }
   private getValues(propertiesIn:any={},showError=true){
     let properties:any={};
@@ -730,6 +730,9 @@ export class MdsComponent{
     this.setValuesByProperty(data,node ? node.properties : []);
   }
   private renderTemplate(template : any,data:any,extended:boolean[],node:Node) {
+    if(!template.html || !template.html.trim()){
+      return "";
+    }
     let html='<div class="mdsGroup'+(this.embedded?" mdsEmbedded":"")+'">'+template.html;
 
     for(let widget of data.widgets){
@@ -1741,4 +1744,11 @@ export class MdsComponent{
 
   }
 
+  private setRenderedHtml(html: string) {
+    console.log(html);
+    if(!html.trim())
+      this.rendered=null;
+    else
+      this.rendered=this.sanitizer.bypassSecurityTrustHtml(html);
+  }
 }

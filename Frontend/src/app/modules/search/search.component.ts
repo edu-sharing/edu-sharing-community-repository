@@ -274,6 +274,9 @@ export class SearchComponent {
     let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
       this.addToStore([node]);
     });
+    nodeStore.showCallback = (node:Node) => {
+      return RestNetworkService.isFromHomeRepo(node);
+    };
     this.options.push(nodeStore);
     let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(node));
     save.showCallback = ((node: Node) => {
@@ -306,6 +309,9 @@ export class SearchComponent {
 
     if(this.config.instant("nodeReport",false)){
       let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
+      report.showCallback=(node:Node)=>{
+        return RestNetworkService.isFromHomeRepo(node);
+      };
       this.options.push(report);
     }
     let custom = this.config.instant("searchNodeOptions");
@@ -692,7 +698,8 @@ export class SearchComponent {
         this.actionOptions.push(collection);
       if(nodes.length==1 && this.config.instant("nodeReport",false)){
         let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
-        this.actionOptions.push(report);
+        if(this.currentRepository==RestConstants.HOME_REPOSITORY)
+          this.actionOptions.push(report);
       }
     }
     let custom=this.config.instant("searchNodeOptions");
