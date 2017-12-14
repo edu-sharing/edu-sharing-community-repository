@@ -282,7 +282,7 @@ export class WorkspaceShareComponent  {
   private save(){
     this.onLoading.emit(true);
     if(this.permissions!=null) {
-      let permissions=RestHelper.copyAndCleanPermissions(this.permissions,this.inherited && this.inheritAllowed);
+      let permissions=RestHelper.copyAndCleanPermissions(this.permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
       if(!this.sendToApi) {
         this.onClose.emit(permissions);
         return;
