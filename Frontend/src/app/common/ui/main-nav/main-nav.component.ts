@@ -114,8 +114,9 @@ export class MainNavComponent {
         element.style.position = null;
         element.style.top = null;
         this.scrollInitialPositions.push(window.getComputedStyle(element).getPropertyValue('top'));
-        console.log(this.scrollInitialPositions);
       }
+      console.log("initial pos");
+      console.log(this.scrollInitialPositions);
     }
     if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
       for(let i=0;i<elements.length;i++) {
