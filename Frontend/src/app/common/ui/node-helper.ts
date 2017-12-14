@@ -528,6 +528,8 @@ export class NodeHelper{
   public static getSourceIconRepoPath(repo:Repository) {
     if(repo.isHomeRepo)
       return NodeHelper.getSourceIconPath('home');
+    if(repo.icon)
+      return repo.icon;
     return NodeHelper.getSourceIconPath(repo.repositoryType.toLowerCase());
   }
   public static getSourceIconPath(src: string) {

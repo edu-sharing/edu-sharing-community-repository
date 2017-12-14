@@ -74,6 +74,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	public static final String KEY_LOGO = "logo";
 	
+	public static final String KEY_ICON = "icon";
+	
 	public static final String KEY_AUTHENTICATIONWEBSERVICE = "authenticationwebservice";
 	
 	public static final String KEY_WEBAPPNAME = "webappname";
@@ -179,6 +181,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	private String logo = null;
 	
+	private String icon = null;
+
 	private String guest_username = null;
 	
 	private String guest_password = null;
@@ -356,6 +360,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		logo = PropertiesHelper.getProperty(KEY_LOGO, appFile, PropertiesHelper.XML);
 		
+		icon = PropertiesHelper.getProperty(KEY_ICON, appFile, PropertiesHelper.XML);
+
 		appCaption = PropertiesHelper.getProperty(KEY_APPCAPTION, appFile, PropertiesHelper.XML);
 		
 		appId = PropertiesHelper.getProperty(KEY_APPID, appFile, PropertiesHelper.XML);
@@ -908,6 +914,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		return logo;
 	}
 	
+	public String getIcon() {
+		return icon;
+	}
+
 	public String getApiKey() {
 		return apiKey;
 	}

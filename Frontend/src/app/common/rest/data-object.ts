@@ -47,7 +47,8 @@ export class WorkflowEntry {
 export class Repository {
   id: string;
   title: string;
-  preview: Preview;
+  icon:string;
+  logo:string;
   isHomeRepo: boolean;
   repositoryType: string;
 }
