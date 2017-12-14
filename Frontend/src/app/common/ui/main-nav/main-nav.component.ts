@@ -107,7 +107,7 @@ export class MainNavComponent {
     for(let i=0;i<elementsAlign.length;i++) {
       elements.push(elementsAlign[i]);
     }
-    if(this.scrollInitialPositions.length!=elements.length) {
+    if(/*this.scrollInitialPositions.length!=elements.length || */true) {
       this.scrollInitialPositions=[];
       for(let i=0;i<elements.length;i++) {
         let element: any = elements[i];
