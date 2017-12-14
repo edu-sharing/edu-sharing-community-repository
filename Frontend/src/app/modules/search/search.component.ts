@@ -727,7 +727,8 @@ export class SearchComponent {
       }
       if(nodes.length==1 && this.config.instant("nodeReport",false)){
         let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
-        options.push(report);
+        if(this.currentRepository==RestConstants.HOME_REPOSITORY)
+          this.actionOptions.push(report);
       }
     }
     let custom=this.config.instant("searchNodeOptions");

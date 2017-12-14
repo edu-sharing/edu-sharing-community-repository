@@ -66,14 +66,9 @@ public class RenderingProxy extends HttpServlet {
 			doRedirect = false;
 		}
 		
-		
-		//evtFehler schmeißen misssing signed
 		if(signed == null || signed.trim().equals("")){
 			signed = rep_id + ts;
 		}
-		
-		
-		
 		
 		if(rep_id == null || rep_id.trim().equals("")){
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing rep_id");

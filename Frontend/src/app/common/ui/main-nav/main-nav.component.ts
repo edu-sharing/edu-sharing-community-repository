@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter, OnInit, ElementRef, ViewChild,
-  HostListener, Renderer
+  HostListener, Renderer, ChangeDetectorRef
 } from '@angular/core';
 import {TranslateService} from "ng2-translate";
 import {UIAnimation} from "../ui-animation";
@@ -90,6 +90,7 @@ export class MainNavComponent {
     }
   }
   private scrollInitialPositions : any[]=[];
+  private scrollCount = 0;
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
     let y=0;
@@ -107,13 +108,14 @@ export class MainNavComponent {
     for(let i=0;i<elementsAlign.length;i++) {
       elements.push(elementsAlign[i]);
     }
-    if(this.scrollInitialPositions.length!=elements.length) {
+    if(this.scrollInitialPositions.length!=elements.length && this.scrollCount<50) {
       this.scrollInitialPositions=[];
       for(let i=0;i<elements.length;i++) {
         let element: any = elements[i];
         element.style.position = null;
         element.style.top = null;
         this.scrollInitialPositions.push(window.getComputedStyle(element).getPropertyValue('top'));
+        this.scrollCount++;
       }
       console.log("initial pos");
       console.log(this.scrollInitialPositions);
@@ -239,6 +241,7 @@ export class MainNavComponent {
     if(MainNavComponent.bannerPositionInterval){
       clearInterval(MainNavComponent.bannerPositionInterval);
     }
+    this.scrollCount=0;
     MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),100);
   }
   private clearSearch(){
@@ -247,6 +250,7 @@ export class MainNavComponent {
   }
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
+              private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
               private configServive : ConfigurationService,
               private storage : TemporaryStorageService,
