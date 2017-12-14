@@ -90,7 +90,6 @@ export class MainNavComponent {
     }
   }
   private scrollInitialPositions : any[]=[];
-  private scrollCount = 0;
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
     let y=0;
@@ -108,14 +107,13 @@ export class MainNavComponent {
     for(let i=0;i<elementsAlign.length;i++) {
       elements.push(elementsAlign[i]);
     }
-    if(this.scrollInitialPositions.length!=elements.length && this.scrollCount<50) {
+    if(/*this.scrollInitialPositions.length!=elements.length && */true) {
       this.scrollInitialPositions=[];
       for(let i=0;i<elements.length;i++) {
         let element: any = elements[i];
         element.style.position = null;
         element.style.top = null;
         this.scrollInitialPositions.push(window.getComputedStyle(element).getPropertyValue('top'));
-        this.scrollCount++;
       }
       console.log("initial pos");
       console.log(this.scrollInitialPositions);
@@ -241,7 +239,6 @@ export class MainNavComponent {
     if(MainNavComponent.bannerPositionInterval){
       clearInterval(MainNavComponent.bannerPositionInterval);
     }
-    this.scrollCount=0;
     MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),100);
   }
   private clearSearch(){
