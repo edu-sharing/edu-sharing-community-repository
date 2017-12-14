@@ -72,10 +72,18 @@ $sidenavWidth:285px;
 .extendedSearch a, .switchToCollections a, .switchToSearch a{
   padding: 5px;
 }
-.noResults{
-  color:$noResultsColor;
+.noResults,.noResultsMatched{
+  color: $noResultsColor;
   text-align: center;
-  font-size:120%;
+  padding-top: 30px;
+  font-size: 120%;
+  i{
+    font-size: 60px;
+    width: 100%;
+  }
+}
+.noResultsMatched{
+  padding-bottom: 70px;
 }
 
 #main_view_selector_wrapper {
