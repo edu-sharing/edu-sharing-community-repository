@@ -66,6 +66,7 @@ export class NodeRenderComponent {
   private editor: string;
   private fromLogin = false;
   public banner: any;
+  private repository: string;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
@@ -172,19 +173,21 @@ export class NodeRenderComponent {
           this.closeOnBack=params['closeOnBack']=='true';
           this.editor=params['editor'];
           this.fromLogin=params['fromLogin']=='true';
+          this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
+          this.route.params.subscribe((params: Params) => {
+            if(params['node']) {
+              this.isRoute=true;
+              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+              this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+                this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
+                if(params['version'])
+                  this.version=params['version'];
+                setTimeout(()=>this.node = params['node'],10);
+              });
+            }
+          });
         });
-        this.route.params.subscribe((params: Params) => {
-          if(params['node']) {
-            this.isRoute=true;
-            this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
-            this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-              this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
-              if(params['version'])
-                this.version=params['version'];
-              setTimeout(()=>this.node = params['node'],10);
-            });
-          }
-        });
+
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
     }

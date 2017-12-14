@@ -526,15 +526,18 @@ export class SearchComponent {
       this.switchToCollections(node.ref.id);
       return;
     }
-    if(!RestNetworkService.isFromHomeRepo(node)){
+    if(!RestNetworkService.isFromHomeRepo(node) && RestNetworkService.getRepositoryById(node.ref.repo,this.repositories).repositoryType!=RestConstants.REPOSITORY_TYPE_ALFRESCO){
       window.open(node.contentUrl);
       return;
     }
     this.renderedNode = node;
     this.render_options=[];
+    let queryParams={
+      "repository" : RestNetworkService.isFromHomeRepo(node) ? null : node.ref.repo
+    };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id]);
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id],{queryParams:queryParams});
   }
   switchToCollections(id=""){
     this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:{mainnav:this.mainnav,id:id}});

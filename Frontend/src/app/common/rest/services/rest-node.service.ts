@@ -7,7 +7,7 @@ import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {
   NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList, NodePermissionsHistory,
-  NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails
+  NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper
 } from "../data-object";
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
@@ -58,7 +58,21 @@ export class RestNodeService {
     return this.connector.get(query,this.connector.getRequestOptions())
       .map((response: Response) => response.json().person.homeFolder);
   }
-
+  /**
+   * Prepare a remote object (an object from a foreign repository) local cache and return the cached instance
+   * @param node the id of the node
+   * @param repository the repository id where the original node is located
+   * @returns {Observable<R>}
+   */
+  public prepareUsage = (node : string,
+                        repository=RestConstants.HOME_REPOSITORY) : Observable<NodeRemoteWrapper> => {
+    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/prepareUsage",repository,
+      [
+        [":node",node]
+      ]);
+    return this.connector.post(query,null,this.connector.getRequestOptions())
+      .map((response: Response) => response.json());
+  }
   /**
    * Get all children of a particular parent
    * @param parent the id, or one of the constants USERHOME, SHARED_FILES, MY_SHARED_FILES or TO_ME_SHARED_FILES
@@ -498,15 +512,15 @@ export class RestNodeService {
     },(error:any)=>this.toast.error(error));
   }
 
-  public getNodeRenderSnippetUrl(node:string,version:string="-1"){
-    return this.connector.createUrl("rendering/:version/details/:repository/:node?version=:nodeVersion",RestConstants.HOME_REPOSITORY,[
+  public getNodeRenderSnippetUrl(node:string,version:string="-1",repository=RestConstants.HOME_REPOSITORY){
+    return this.connector.createUrl("rendering/:version/details/:repository/:node?version=:nodeVersion",repository,[
       [":node",node],
       [":nodeVersion",version ? version : "-1"]
     ]);
   }
-  public getNodeRenderSnippet(node:string,version:string="-1") : Observable<RenderDetails>{
+  public getNodeRenderSnippet(node:string,version:string="-1",repository=RestConstants.HOME_REPOSITORY) : Observable<RenderDetails>{
 
-    return this.connector.get(this.getNodeRenderSnippetUrl(node,version),this.connector.getRequestOptions())
+    return this.connector.get(this.getNodeRenderSnippetUrl(node,version,repository),this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
 }

@@ -4,6 +4,7 @@ import {Observable} from "rxjs";
 import {RestConnectorService} from "./rest-connector.service";
 import {IamUsers, IamAuthorities, OrganizationOrganizations, NetworkRepositories, Repository,Node} from "../data-object";
 import {Response} from "@angular/http";
+import {Helper} from "../../helper";
 
 @Injectable()
 export class RestNetworkService {
@@ -28,5 +29,17 @@ export class RestNetworkService {
 
   static isFromHomeRepo(node: Node) {
     return node.ref.repo==RestConstants.HOME_REPOSITORY || node.ref.isHomeRepo;
+  }
+
+  static getRepositoryById(id: string, repositories: Repository[]) {
+    console.log(id);
+    console.log(repositories);
+    let i=Helper.indexOfObjectArray(repositories,'id',id);
+    if(id==RestConstants.HOME_REPOSITORY){
+      i=Helper.indexOfObjectArray(repositories,'isHomeRepo',true);
+    }
+    if(i==-1)
+      return null;
+    return repositories[i];
   }
 }

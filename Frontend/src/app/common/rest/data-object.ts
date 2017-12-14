@@ -615,6 +615,9 @@ export interface Facette {
 export interface NodeWrapper {
   node : Node;
 }
+export interface NodeRemoteWrapper extends NodeWrapper{
+  remote : Node;
+}
 export interface NodeList {
   nodes: Node[];
   pagination: Pagination;
