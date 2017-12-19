@@ -13,7 +13,7 @@ import {Subject} from "rxjs";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {RestHelper} from "../../../common/rest/rest-helper";
 import {Helper} from "../../../common/helper";
@@ -50,8 +50,8 @@ export class WorkspaceShareComponent  {
   private notifyMessage = "";
   private inherit : Permission[]=[];
   private permissions : Permission[]=[];
-  public permissionsUser : Permission[];
-  public permissionsGroup : Permission[];
+  private permissionsUser : Permission[];
+  private permissionsGroup : Permission[];
   private newPermissions : Permission[]=[];
   public owner : Permission;
   public linkEnabled : Permission;
@@ -291,7 +291,7 @@ export class WorkspaceShareComponent  {
   private save(){
     this.onLoading.emit(true);
     if(this.permissions!=null) {
-      let permissions=RestHelper.copyAndCleanPermissions(this.permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
+      let permissions=RestHelper.copyAndCleanPermissions(this.permissions,this.inherited);
       if(!this.sendToApi) {
         this.onClose.emit(permissions);
         return;

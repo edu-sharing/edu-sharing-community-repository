@@ -3,7 +3,7 @@ import {Component} from "@angular/core";
 import {Translation} from "../../common/translation";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {SessionStorageService} from "../../common/services/session-storage.service";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
 import {ActivatedRoute} from "@angular/router";
 import {Toast} from "../../common/ui/toast";

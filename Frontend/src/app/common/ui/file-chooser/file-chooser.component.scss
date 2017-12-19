@@ -6,6 +6,10 @@
 .card-content{
   background-color: $backgroundColor;
 }
+.noElements{
+  text-align: center;
+  color: $textLight;
+}
 .breadcrumbFrame{
   float:left;
   padding:15px;

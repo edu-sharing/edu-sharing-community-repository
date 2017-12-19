@@ -7,7 +7,7 @@ import { WindowRefService } from './window-ref.service';
 import { Subscription } from 'rxjs/Subscription';
 import { SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
 import {Router, ActivatedRoute} from '@angular/router';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
 import {RestMetadataService} from '../../common/rest/services/rest-metadata.service';

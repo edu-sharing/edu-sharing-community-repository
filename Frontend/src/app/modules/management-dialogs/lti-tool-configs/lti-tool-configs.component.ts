@@ -4,11 +4,11 @@ import {RestConstants} from "../../../common/rest/rest-constants";
 import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../common/rest/data-object";
 import {Toast} from "../../../common/ui/toast";
 import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {TranslateService} from "ng2-translate";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {TranslateService} from "@ngx-translate/core";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {RestToolService} from "../../../common/rest/services/rest-tool.service";
 import {ListItem} from "../../../common/ui/list-item";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 
 @Component({
   selector: 'workspace-lti-tool-configs',

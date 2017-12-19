@@ -1,5 +1,5 @@
 import {Component, Input, Output, EventEmitter, OnInit, NgZone, group, HostListener} from '@angular/core';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {RestMdsService} from "../../rest/services/rest-mds.service";
 import {MdsMetadataset, View, Type, Node, NodeList, NodeWrapper, MdsValueList} from "../../rest/data-object";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";

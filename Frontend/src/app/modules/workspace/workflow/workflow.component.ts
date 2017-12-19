@@ -8,9 +8,8 @@ import {
 import {VCard} from "../../../common/VCard";
 import {Toast} from "../../../common/ui/toast";
 import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {DateModel, DatePickerOptions} from "ng2-datepicker";
 import {Translation} from "../../../common/translation";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import any = jasmine.any;
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";

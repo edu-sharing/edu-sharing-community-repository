@@ -1,10 +1,9 @@
 import {Component, Input, Output, EventEmitter} from "@angular/core";
 import {RestConstants} from "../../../common/rest/rest-constants";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
-import {TranslateService} from "ng2-translate";
 import {Toast} from "../../../common/ui/toast";
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
 import {DateHelper} from "../../../common/ui/DateHelper";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'search-save-search',

@@ -3,7 +3,7 @@ import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../common/rest/data-object";
 import {Toast} from "../../../common/ui/toast";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";

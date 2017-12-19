@@ -1,7 +1,7 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
 import {RestMdsService} from "../../../common/rest/services/rest-mds.service";
 import {MdsMetadatasets, Node, MdsInfo} from "../../../common/rest/data-object";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {RestHelper} from "../../../common/rest/rest-helper";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 

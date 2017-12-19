@@ -5,9 +5,10 @@ import {NodeWrapper,Node} from "../../../common/rest/data-object";
 import {VCard} from "../../../common/VCard";
 import {Toast} from "../../../common/ui/toast";
 import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {DateModel, DatePickerOptions} from "ng2-datepicker";
 import {Translation} from "../../../common/translation";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
+import {DatepickerOptions} from "ng2-datepicker";
+import {DateHelper} from "../../../common/ui/DateHelper";
 
 @Component({
   selector: 'workspace-contributor',
@@ -36,8 +37,8 @@ export class WorkspaceContributorComponent  {
   public dialogButtons: DialogButton[];
   public dialogParameters: any;
   public node: Node;
-  public date : DateModel;
-  public dateOptions: DatePickerOptions;
+  public date : Date;
+  public dateOptions: DatepickerOptions;
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
@@ -83,14 +84,13 @@ export class WorkspaceContributorComponent  {
 
   }
   public addVCard(mode:string) {
-    this.date=null;
+    this.date=new Date();
     this.editType='person';
     this.editMode=mode;
     this.edit=new VCard();
     this.editOriginal=null;
     this.editScopeOld=null;
     this.editScopeNew=this.editMode=='lifecycle' ? this.rolesLifecycle[0] : this.rolesMetadata[0];
-    this.date=new DateModel();
 
   }
   public editVCard(mode:string,vcard : VCard,scope:string){
@@ -100,11 +100,12 @@ export class WorkspaceContributorComponent  {
     this.editScopeOld=scope;
     this.editScopeNew=scope;
     this.editType=vcard.givenname||vcard.surname ? 'person' : 'org';
-    this.date=new DateModel();
+    this.date=null;
     let contributeDate=vcard.contributeDate;
     if(contributeDate) {
-      this.date.formatted=contributeDate;
-      this.dateOptions.initialDate=new Date(contributeDate);
+      //this.date.formatted=contributeDate;
+      //this.dateOptions.initialDate=new Date(contributeDate);
+      this.date=new Date(contributeDate);
       /*
       let split=contributeDate.split("-");
       if(split.length==3){
@@ -129,7 +130,7 @@ export class WorkspaceContributorComponent  {
       this.edit.surname='';
       this.edit.title='';
     }
-    this.edit.contributeDate=this.date.formatted;
+    this.edit.contributeDate=DateHelper.getDateFromDatepicker(this.date).toISOString();
     let array=this.editMode=='lifecycle' ? this.contributorLifecycle : this.contributorMetadata;
     if(this.editScopeOld) {
       let pos = array[this.editScopeOld].indexOf(this.editOriginal);
@@ -186,7 +187,7 @@ export class WorkspaceContributorComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
-    this.dateOptions=new DatePickerOptions();
+    this.dateOptions={};
     //this.dateOptions.format="DD.MM.YYYY";
     Translation.applyToDateOptions(this.translate,this.dateOptions);
 

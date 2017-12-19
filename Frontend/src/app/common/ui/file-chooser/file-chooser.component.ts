@@ -1,5 +1,5 @@
 import {Component, Input, Output, EventEmitter, OnInit, HostListener} from '@angular/core';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";

@@ -1,6 +1,7 @@
 import {Component, Input, EventEmitter, ViewEncapsulation, Output} from '@angular/core';
 import 'rxjs/add/operator/map'
-import {TranslateService } from 'ng2-translate/ng2-translate';
+import { Observable } from 'rxjs/Observable';
+import { BrowserModule } from '@angular/platform-browser';
 import {Translation} from "../../common/translation";
 import {Toast} from "../../common/ui/toast";
 import {ArchiveRestore, RestoreResult, ArchiveSearch,Node} from "../../common/rest/data-object";
@@ -10,6 +11,7 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {ActivatedRoute} from "@angular/router";
 import {ListItem} from "../../common/ui/list-item";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'node-list',

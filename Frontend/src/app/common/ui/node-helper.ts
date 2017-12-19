@@ -1,5 +1,5 @@
 import {RestConstants} from "../rest/rest-constants";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {
   Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
   Repository, WorkflowDefinition
@@ -533,7 +533,7 @@ export class NodeHelper{
     return NodeHelper.getSourceIconPath(repo.repositoryType.toLowerCase());
   }
   public static getSourceIconPath(src: string) {
-    return 'assets/images/sources/' + src + '.png';
+    return 'assets/images/sources/' + src.toLowerCase() + '.png';
   }
   public static getWorkflowStatusById(config:ConfigurationService,id:string) : WorkflowDefinition{
     let workflows=NodeHelper.getWorkflows(config);

@@ -7,7 +7,7 @@ import {
   RestError, Node, Collection, Person, Permission, Permissions, User, MdsInfo,
   CollectionReference, LocalPermissions, Authority
 } from "./data-object";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../ui/DateHelper";
 import {ConfigurationService} from "../services/configuration.service";
 import {ListItem} from "../ui/list-item";

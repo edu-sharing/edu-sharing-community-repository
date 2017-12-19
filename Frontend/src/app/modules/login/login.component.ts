@@ -3,7 +3,7 @@ import {Toast} from "../../common/ui/toast";
 import {Router, Route, Params, ActivatedRoute} from "@angular/router";
 import {OAuthResult, LoginResult, AccessScope} from "../../common/rest/data-object";
 import {RouterComponent} from "../../router/router.component";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {RestConstants} from "../../common/rest/rest-constants";

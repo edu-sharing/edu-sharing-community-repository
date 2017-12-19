@@ -30,14 +30,12 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.model.NodeRef;
-import org.edu_sharing.service.nodeservice.NodeServiceLAppsImpl;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.extensions.surf.util.URLEncoder;
 import org.w3c.dom.Document;
@@ -115,9 +113,36 @@ public class SearchServiceLAppsImpl extends SearchServiceAdapter{
 			Node node = lAppNode.item(i);
 			
 			NamedNodeMap map = node.getAttributes();
+
+			HashMap<String,Object> properties=new HashMap<>();
+			properties.put(CCConstants.SYS_PROP_NODE_UID,map.getNamedItem("id").getNodeValue());
+			properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,map.getNamedItem("title").getNodeValue());
 			
-			HashMap<String, Object> properties = NodeServiceLAppsImpl.getPropertiesForNode(repositoryId, map);
-			  						
+			properties.put(CCConstants.LOM_PROP_GENERAL_KEYWORD,map.getNamedItem("tags").getNodeValue().replace(" ",CCConstants.MULTIVALUE_SEPARATOR));
+
+			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, map.getNamedItem("image").getNodeValue());
+			properties.put(CCConstants.CONTENTURL,map.getNamedItem("url").getNodeValue());
+			properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "application/xhtml+xml");
+			properties.put(CCConstants.CCM_PROP_IO_WWWURL,map.getNamedItem("url").getNodeValue());
+			properties.put(CCConstants.NODETYPE, CCConstants.CCM_TYPE_IO);
+			properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
+
+			properties.put(CCConstants.REPOSITORY_ID, "LEARNINGAPPS" );
+			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"LearningApps");
+			properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
+			properties.put(CCConstants.NODECREATOR_FIRSTNAME,map.getNamedItem("author").getNodeValue());
+			properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,map.getNamedItem("author").getNodeValue());
+			
+			String createdate = map.getNamedItem("created").getNodeValue();
+
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
+			LocalDateTime date  = LocalDateTime.parse(createdate, formatter);
+			DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN);
+			properties.put(CCConstants.CM_PROP_C_MODIFIED,date.format(formatter2));
+			  
+			properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, map.getNamedItem("id").getNodeValue()));
+			  			
+			
 			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
 					Constants.storeRef.getProtocol(),
 					Constants.storeRef.getIdentifier(),properties);

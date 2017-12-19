@@ -1,10 +1,10 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Collection, CollectionWrapper} from "../../rest/data-object";
 import {RestCollectionService} from "../../rest/services/rest-collection.service";
-import {TranslateService} from "ng2-translate";
 import {ConfigurationService} from "../../services/configuration.service";
 import {ListItem} from "../list-item";
 import {NodeHelper} from "../node-helper";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'small-collection',

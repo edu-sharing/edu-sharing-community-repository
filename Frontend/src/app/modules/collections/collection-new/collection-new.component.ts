@@ -3,7 +3,6 @@ import {Component, OnInit, NgZone, HostListener, ViewChild} from '@angular/core'
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 
-import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 import {Translation} from './../../../common/translation';
 
 import * as EduData from "../../../common/rest/data-object";
@@ -25,6 +24,7 @@ import {SessionStorageService} from "../../../common/services/session-storage.se
 import {UIConstants} from "../../../common/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {ListItem} from "../../../common/ui/list-item";
+import {TranslateService} from "@ngx-translate/core";
 
 // component class
 @Component({
