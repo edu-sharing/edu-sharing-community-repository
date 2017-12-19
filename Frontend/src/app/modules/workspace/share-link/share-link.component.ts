@@ -35,7 +35,6 @@ export class WorkspaceShareLinkComponent  {
     this._node=node;
     this.loading=true;
     this.nodeService.getNodeShares(node.ref.id,RestConstants.SHARE_LINK).subscribe((data:NodeShare[])=>{
-      console.log(data);
       this._expiryDate=new Date(new Date().getTime()+3600*24*1000);
       if(data.length){
         this.currentShare=data[0];
