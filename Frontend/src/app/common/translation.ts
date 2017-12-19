@@ -8,7 +8,6 @@ import 'rxjs/add/observable/concat';
 import {Observer} from "rxjs";
 import {ConfigurationService} from "./services/configuration.service";
 import {DatepickerOptions} from "ng2-datepicker";
-import * as moment from 'moment';
 import {ActivatedRoute} from "@angular/router";
 import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
@@ -81,8 +80,6 @@ export class Translation  {
     return "YYYY/MM/DD";
   }
   static applyToDateOptions(translate:TranslateService,dateOptions: DatepickerOptions) {
-    moment.locale(this.getLanguage());
-    console.log(this.getLanguage());
     //dateOptions.locale=moment.localeData(this.getLanguage());
     dateOptions.displayFormat=Translation.getDateFormat();
     /*
