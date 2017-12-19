@@ -4,7 +4,7 @@ import {Toast} from "../../../common/ui/toast";
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission} from "../../../common/rest/data-object";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {RestHelper} from "../../../common/rest/rest-helper";

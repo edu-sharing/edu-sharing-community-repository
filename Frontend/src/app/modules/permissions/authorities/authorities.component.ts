@@ -7,7 +7,7 @@ import {
 import {Toast} from "../../../common/ui/toast";
 import {ActivatedRoute} from "@angular/router";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
 import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";

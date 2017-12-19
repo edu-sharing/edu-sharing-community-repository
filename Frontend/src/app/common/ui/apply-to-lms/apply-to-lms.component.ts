@@ -10,7 +10,7 @@ import {FrameEventsService} from "../../services/frame-events.service";
 import {NodeHelper} from "../node-helper";
 import {UIConstants} from "../ui-constants";
 import {Translation} from "../../translation";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {ConfigurationService} from "../../services/configuration.service";
 import {SessionStorageService} from "../../services/session-storage.service";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";

@@ -3,7 +3,6 @@ import {Component, OnInit, NgZone, HostListener} from '@angular/core';
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 
-import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 import {Translation} from './../../../common/translation';
 
 import * as EduData from "../../../common/rest/data-object";
@@ -23,6 +22,7 @@ import {RestConnectorService} from "../../../common/rest/services/rest-connector
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {SessionStorageService} from "../../../common/services/session-storage.service";
 import {UIConstants} from "../../../common/ui/ui-constants";
+import {TranslateService} from "@ngx-translate/core";
 
 // component class
 @Component({
@@ -184,18 +184,12 @@ export class CollectionNewComponent {
 
     }
     private permissionsSave(permissions : LocalPermissions){
-      if(permissions!=null)
-        this.permissions=permissions;
+      this.permissions=permissions;
       this.editPermissionsId=null;
     }
-    private setScopeCustom(){
-      if(!this.hasCustomScope && this.permissions==null) {
-        this.permissions = new LocalPermissions();
-        this.permissions.permissions=[];
-      }
-   }
     private editPermissions(){
-      this.setScopeCustom();
+      if(!this.hasCustomScope && this.permissions==null)
+        this.permissions=new LocalPermissions();
       this.newCollectionScope=RestConstants.COLLECTIONSCOPE_CUSTOM;
       this.editPermissionsId=this.currentCollection.ref.id;
     }

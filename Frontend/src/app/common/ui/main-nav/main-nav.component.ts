@@ -2,7 +2,7 @@ import {
   Component, Input, Output, EventEmitter, OnInit, ElementRef, ViewChild,
   HostListener, Renderer, ChangeDetectorRef
 } from '@angular/core';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList} from "../../rest/data-object";
@@ -76,7 +76,7 @@ export class MainNavComponent {
   public showEditProfile: boolean;
   public showProfile: boolean;
 
-  public helpUrl = 'http://docs.edu-sharing.com/confluence/edp/';
+  public helpUrl = 'http://docs.edu-sharing.com/confluence/edp/de/edu-sharing-ueberblick';
   public whatsNewUrl = 'http://docs.edu-sharing.com/confluence/edp/de/was-ist-neu-in-edu-sharing';
   private toolpermissions: string[];
   public canAccessWorkspace = true;
@@ -115,8 +115,6 @@ export class MainNavComponent {
         element.style.top = null;
         this.scrollInitialPositions.push(window.getComputedStyle(element).getPropertyValue('top'));
       }
-      console.log("initial pos");
-      console.log(this.scrollInitialPositions);
     }
     if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
       for(let i=0;i<elements.length;i++) {

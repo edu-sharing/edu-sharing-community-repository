@@ -40,6 +40,7 @@ export class WorkspacePermissionComponent  {
   @Input() readOnly = true;
   @Input() showDelete = true;
   @Input() isDirectory = false;
+  @Input() canPublish = true;
   @Output() onRemove = new EventEmitter();
   @Output() onType = new EventEmitter();
 

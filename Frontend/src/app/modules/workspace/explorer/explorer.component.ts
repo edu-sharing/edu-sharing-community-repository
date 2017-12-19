@@ -2,7 +2,7 @@ import {Component, Input, EventEmitter, Output} from '@angular/core';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {Node, NodeList, NodeWrapper} from "../../../common/rest/data-object";
 import {RestConstants} from "../../../common/rest/rest-constants";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
 import {Toast} from "../../../common/ui/toast";

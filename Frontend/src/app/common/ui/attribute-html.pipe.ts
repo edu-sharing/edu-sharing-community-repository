@@ -1,5 +1,5 @@
 import {PipeTransform, Pipe} from '@angular/core';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import { DomSanitizer } from '@angular/platform-browser';
 import {RestConstants} from "../rest/rest-constants";
 import {Node} from "../rest/data-object";

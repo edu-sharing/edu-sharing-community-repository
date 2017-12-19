@@ -124,7 +124,7 @@
                             <label for="test2">{{ 'collectionNew_setAccessMyOrgaNA' | translate }}</label>
                         </span>
             <div *ngIf="shareToAll">
-            <input name="group1" type="radio" id="test3" [(ngModel)]="newCollectionScope" (change)="setScopeCustom()" [value]="'EDU_ALL'" />
+            <input name="group1" type="radio" id="test3" [(ngModel)]="newCollectionScope" [value]="'EDU_ALL'" />
             <label for="test3">{{ 'collectionNew_setAccessPublic' | translate }}</label>
             </div>
             <br>

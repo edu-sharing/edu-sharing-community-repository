@@ -1,7 +1,6 @@
 import {Component, Input, Output, EventEmitter} from "@angular/core";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
-import {TranslateService} from "ng2-translate";
 import {Toast} from "../../../common/ui/toast";
 import {ArchiveRestore,Node,NodeList} from "../../../common/rest/data-object";
 import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
@@ -15,6 +14,7 @@ import {NodeRenderComponent} from "../../../common/ui/node-render/node-render.co
 import {Router} from "@angular/router";
 import {UIConstants} from "../../../common/ui/ui-constants";
 import {ListItem} from "../../../common/ui/list-item";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'search-node-store',

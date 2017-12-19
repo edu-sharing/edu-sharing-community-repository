@@ -1,5 +1,5 @@
 
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {isNumeric} from "rxjs/util/isNumeric";
 import {Translation} from "../translation";
 
@@ -119,6 +119,9 @@ export class DateHelper{
     catch(e){
       return (date as string);
     }
+  }
+  static getDateFromDatepicker(date:Date){
+    return new Date(date.getTime()-date.getTimezoneOffset()*60*1000);
   }
 
 }

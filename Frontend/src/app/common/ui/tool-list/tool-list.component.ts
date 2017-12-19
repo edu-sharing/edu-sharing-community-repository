@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef, ViewChild, ElementRef, HostListener, ViewEncapsulation
 } from '@angular/core';
 import {BrowserModule, DomSanitizer} from '@angular/platform-browser';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {Node} from "../../rest/data-object";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";

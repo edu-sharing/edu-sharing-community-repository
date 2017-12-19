@@ -6,10 +6,10 @@ import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
   LoginResult
 } from "../../../common/rest/data-object";
-import {TranslateService} from "ng2-translate";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'node-report',

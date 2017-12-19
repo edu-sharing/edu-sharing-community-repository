@@ -1,7 +1,6 @@
 import {Component, Input, Output, EventEmitter} from "@angular/core";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {Node,NodeList,NodeWrapper} from "../../../common/rest/data-object";
-import {TranslateService} from "ng2-translate";
 import {Toast} from "../../../common/ui/toast";
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
 import {RestHelper} from "../../../common/rest/rest-helper";
@@ -9,6 +8,7 @@ import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {Helper} from "../../../common/helper";
 import {UIService} from "../../../common/services/ui.service";
 import {RestCollectionService} from "../../../common/rest/services/rest-collection.service";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'collections-manage-pinning',

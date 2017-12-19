@@ -3,7 +3,6 @@ import { Http, Response, Headers } from '@angular/http';
 import 'rxjs/add/operator/map'
 import { Observable } from 'rxjs/Observable';
 import { BrowserModule } from '@angular/platform-browser';
-import {TranslateService } from 'ng2-translate/ng2-translate';
 import {Translation} from "../../common/translation";
 import {RecycleRestoreComponent} from "./recycle/restore/restore.component";
 import {Toast} from "../../common/ui/toast";
@@ -17,6 +16,7 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {ActivatedRoute} from "@angular/router";
 import {ListItem} from "../../common/ui/list-item";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'node-list',

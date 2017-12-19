@@ -9,7 +9,7 @@ public class MetadataSetV2 {
 	public static String DEFAULT_CLIENT_QUERY="ngsearch";
 	public static String DEFAULT_CLIENT_QUERY_CRITERIA = "ngsearchword";	
 	
-	private String id,repositoryId,label,i18n,name,inherit;
+	private String id,repositoryId,label,i18n,name;
 	private List<MetadataWidget> widgets;
 	private boolean hidden;
 	private List<MetadataTemplate> templates;
@@ -34,12 +34,6 @@ public class MetadataSetV2 {
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	public String getInherit() {
-		return inherit;
-	}
-	public void setInherit(String inherit) {
-		this.inherit = inherit;
 	}
 	public String getLabel() {
 		return label;

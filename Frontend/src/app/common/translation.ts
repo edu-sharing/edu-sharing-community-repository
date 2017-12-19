@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {TranslateService, TranslateLoader} from "ng2-translate";
+import {TranslateService, TranslateLoader} from "@ngx-translate/core";
 import { Http, Response, Headers } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
@@ -7,7 +7,7 @@ import 'rxjs/add/observable/forkJoin';
 import 'rxjs/add/observable/concat';
 import {Observer} from "rxjs";
 import {ConfigurationService} from "./services/configuration.service";
-import {DatePickerOptions} from "ng2-datepicker";
+import {DatepickerOptions} from "ng2-datepicker";
 import * as moment from 'moment';
 import {ActivatedRoute} from "@angular/router";
 import {SessionStorageService} from "./services/session-storage.service";
@@ -74,13 +74,22 @@ export class Translation  {
     console.log("language","use "+language);
     Translation.language = language;
   }
-
-  static applyToDateOptions(translate:TranslateService,dateOptions: DatePickerOptions) {
+  static getDateFormat(){
+    if(Translation.getLanguage()=="de"){
+      return "DD.MM.YYYY";
+    }
+    return "YYYY/MM/DD";
+  }
+  static applyToDateOptions(translate:TranslateService,dateOptions: DatepickerOptions) {
     moment.locale(this.getLanguage());
-    dateOptions.locale=this.getLanguage();
+    console.log(this.getLanguage());
+    //dateOptions.locale=moment.localeData(this.getLanguage());
+    dateOptions.displayFormat=Translation.getDateFormat();
+    /*
     dateOptions.todayText=translate.instant("TODAY");
     dateOptions.clearText=translate.instant("DATE_CLEAR");
     dateOptions.selectYearText=translate.instant("DATE_SELECT_YEAR");
+    */
   }
 }
 export function createTranslateLoader(http: Http) {

@@ -136,8 +136,8 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			String author=VCardTool.nameToVCard(json.getString("user"));
 			properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR,author);
 			properties.put(CCConstants.VIRT_PROP_USAGECOUNT,json.getInt("downloads"));
-			properties.put(CCConstants.CCM_PROP_IO_WIDTH,json.getString("imageWidth"));
-			properties.put(CCConstants.CCM_PROP_IO_HEIGHT,json.getString("imageHeight"));
+			properties.put(CCConstants.EXIF_PROP_PIXELXDIMENSION,json.getString("imageWidth"));
+			properties.put(CCConstants.EXIF_PROP_PIXELYDIMENSION,json.getString("imageHeight"));
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"pixabay");
 			//properties.put(CCConstants.CONTENTURL,json.getString("pageURL"));
 			properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,json.getString("pageURL"));
