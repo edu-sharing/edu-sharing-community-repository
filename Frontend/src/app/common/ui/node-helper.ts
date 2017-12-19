@@ -470,7 +470,7 @@ export class NodeHelper{
     return NodeHelper.getSourceIconPath(repo.repositoryType.toLowerCase());
   }
   public static getSourceIconPath(src: string) {
-    return 'assets/images/sources/' + src + '.png';
+    return 'assets/images/sources/' + src.toLowerCase() + '.png';
   }
 }
 
