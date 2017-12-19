@@ -83,13 +83,6 @@ public class MetadataReaderV2 {
 		reader=new MetadataReaderV2(mdsNameDefault+".xml",locale);
 		mds=reader.getMetadatasetForFile(mdsNameDefault);
 		mds.setRepositoryId(appId.getAppId());
-		if(mds.getInherit()!=null && !mds.getInherit().isEmpty()) {
-			String inheritName=mds.getInherit()+".xml";
-			reader=new MetadataReaderV2(inheritName,locale);
-			MetadataSetV2 mdsInherit = reader.getMetadatasetForFile(inheritName);
-			mdsInherit.overrideWith(mds);
-			mds=mdsInherit;
-		}
 		if(!mdsName.equals(mdsNameDefault)){
 			reader=new MetadataReaderV2(mdsName+".xml",locale);
 			MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
@@ -195,10 +188,6 @@ public class MetadataReaderV2 {
 		String mdsName="";
 		if(name!=null)
 			mdsName=name.getTextContent();
-		Node inherit = (Node) xpath.evaluate("/metadataset/inherit", doc, XPathConstants.NODE);
-		String mdsInherit=null;
-		if(inherit!=null)
-			mdsInherit=inherit.getTextContent();
 		Node i18n = (Node) xpath.evaluate("/metadataset/i18n", doc, XPathConstants.NODE);
 		
 		i18nPath=i18n.getTextContent();
@@ -216,7 +205,6 @@ public class MetadataReaderV2 {
 		
 		mds.setId(id);
 		mds.setName(mdsName);
-		mds.setInherit(mdsInherit);
 		mds.setI18n(i18n.getTextContent());
 		mds.setLabel(label);
 		

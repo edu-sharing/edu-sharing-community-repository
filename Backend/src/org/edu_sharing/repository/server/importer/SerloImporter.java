@@ -297,7 +297,7 @@ public class SerloImporter implements Importer{
 				serloContributer.put(CCConstants.VCARD_SURNAME, "serlo");
 				serloContributer.put(CCConstants.VCARD_ORG, "serlo");
 				serloContributer.put(CCConstants.VCARD_EMAIL, "info-de@serlo.org");
-				serloContributer.put(CCConstants.VCARD_CITY, "München");
+				serloContributer.put(CCConstants.VCARD_CITY, "MÃ¼nchen");
 				
 				
 				String vcard = VCardTool.hashMap2VCard(serloContributer);

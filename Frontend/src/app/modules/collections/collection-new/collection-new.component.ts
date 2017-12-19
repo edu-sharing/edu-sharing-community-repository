@@ -182,18 +182,12 @@ export class CollectionNewComponent {
 
     }
     private permissionsSave(permissions : LocalPermissions){
-      if(permissions!=null)
-        this.permissions=permissions;
+      this.permissions=permissions;
       this.editPermissionsId=null;
     }
-    private setScopeCustom(){
-      if(!this.hasCustomScope && this.permissions==null) {
-        this.permissions = new LocalPermissions();
-        this.permissions.permissions=[];
-      }
-   }
     private editPermissions(){
-      this.setScopeCustom();
+      if(!this.hasCustomScope && this.permissions==null)
+        this.permissions=new LocalPermissions();
       this.newCollectionScope=RestConstants.COLLECTIONSCOPE_CUSTOM;
       this.editPermissionsId=this.currentCollection.ref.id;
     }

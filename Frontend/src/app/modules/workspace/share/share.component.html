@@ -30,9 +30,9 @@
             [placeholder]="'WORKSPACE.INVITE_FIELD'"
             [suggestions]="authoritySuggestions"
             (updateInput)="updateSuggestions($event)"
-            ></autocomplete>
+          ></autocomplete>
 
-            <!-- <ng2-completer [(ngModel)]="searchStr" [clearSelected]="true" (selected)="addAuthority($event)" [dataService]="dataService" [minSearchLength]="2" class="search"></ng2-completer>-->
+          <!-- <ng2-completer [(ngModel)]="searchStr" [clearSelected]="true" (selected)="addAuthority($event)" [dataService]="dataService" [minSearchLength]="2" class="search"></ng2-completer>-->
           <!-- <input type="text" id="inviteName" /> -->
           <div class="typeButton">
             <div class="btn-flat btn-shadow" *ngIf="currentType.indexOf('Consumer')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align-icon">remove_red_eye</i><span> {{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
@@ -43,12 +43,13 @@
               <i class="material-icons align-icon right">keyboard_arrow_down</i></div>
           </div>
 
-            <workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
-             [selected]="currentType"
-             [isDirectory]="_node.isDirectory"
-             (onCancel)="showChooseType=false"
-             (onType)="setType($event)"
-            ></workspace-share-choose-type>
+          <workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
+                                       [selected]="currentType"
+                                       [isDirectory]="_node.isDirectory"
+                                       [canPublish]="!isSafe"
+                                       (onCancel)="showChooseType=false"
+                                       (onType)="setType($event)"
+          ></workspace-share-choose-type>
 
         </div>
         <div class="global">
@@ -58,30 +59,30 @@
         <div class="toInvite">
           <div class="badge" *ngFor="let permission of newPermissions">
             <span>{{permission | permissionName}}</span>
-              <i class="material-icons clickable" (click)="removePermission(permission)">cancel</i>
-            </div>
+            <i class="material-icons clickable" (click)="removePermission(permission)">cancel</i>
+          </div>
         </div>
         <div *ngIf="sendMessages">
           <label for="message">{{'WORKSPACE.SHARE.MESSAGE' | translate}}</label>
           <input type="text" id="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
-        <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}<p>{{'WORKSPACE.NOTIFY_INFO' | translate}}</p></label>
+          <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}<p>{{'WORKSPACE.NOTIFY_INFO' | translate}}</p></label>
         </div>
         <div class="publish" *ngIf="!isSafe">
           <div class="publishElements">
-          <div class="switch">
-            <label>
-              <input type="checkbox" [disabled]="!publishPermission || publishInherit" [(ngModel)]="publishActive" (change)="setPublish(publishActive)">
-              <span class="lever"></span>
-              {{ 'WORKSPACE.SHARE.PUBLISH' | translate}}
-            </label>
-          </div>
-          <div *ngIf="!publishPermission" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
-          <div *ngIf="publishActive">
-            <div *ngIf="publishPermission && publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
-            <div *ngIf="!(publishPermission && publishInherit)" class="publishInfo">
-              {{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? "COLLECTION" : _node.isDirectory ? "DIRECTORY" : "DOCUMENT")) | translate}}
+            <div class="switch">
+              <label>
+                <input type="checkbox" [disabled]="!publishPermission || publishInherit" [(ngModel)]="publishActive" (change)="setPublish(publishActive)">
+                <span class="lever"></span>
+                {{ 'WORKSPACE.SHARE.PUBLISH' | translate}}
+              </label>
             </div>
-          </div>
+            <div *ngIf="!publishPermission" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
+            <div *ngIf="publishActive">
+              <div *ngIf="publishPermission && publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
+              <div *ngIf="!(publishPermission && publishInherit)" class="publishInfo">
+                {{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? "COLLECTION" : _node.isDirectory ? "DIRECTORY" : "DOCUMENT")) | translate}}
+              </div>
+            </div>
           </div>
           <div *ngIf="publishActive" class="type"><i class="material-icons align-icon">remove_red_eye</i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span></div>
         </div>
@@ -90,10 +91,10 @@
         <a class="history clickable" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}}<i class="material-icons">arrow_forward</i></a>
         <div class="groupName">{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</div>
         <workspace-share-permission class="groupEntry owner" *ngIf="owner"
-          [permission]="owner"
-          [isDirectory]="_node.isDirectory"
-          [readOnly]="true"
-          [showDelete]="false"
+                                    [permission]="owner"
+                                    [isDirectory]="_node.isDirectory"
+                                    [readOnly]="true"
+                                    [showDelete]="false"
         ></workspace-share-permission>
         <div *ngIf="inheritAllowed || !disableInherition">
           <div class="groupName">{{'WORKSPACE.SHARE.GROUP_INHERIT' | translate}}</div>
@@ -124,24 +125,26 @@
                                         [readOnly]="!permission.editable && !isNewPermission(permission)"
                                         [showDelete]="permission.editable || isNewPermission(permission)"
                                         [isDirectory]="_node.isDirectory"
+                                        [canPublish]="!isSafe"
                                         [added]="isNewPermission(permission)"
                                         (onRemove)="removePermission(permission)"
                                         (onType)="permission.permissions=$event.permissions"
             ></workspace-share-permission>
           </div>
-          </div>
+        </div>
         <div class="groupName" *ngIf="permissionsUser && permissionsUser.length">{{'WORKSPACE.SHARE.GROUP_USERS' | translate}}</div>
         <div class="normal">
           <div *ngFor="let permission of permissionsUser"
           >
             <workspace-share-permission class="groupEntry" [class.added]="isNewPermission(permission)"
-              [permission]="permission"
-              [readOnly]="!permission.editable && !isNewPermission(permission)"
-              [showDelete]="permission.editable || isNewPermission(permission)"
-              [isDirectory]="_node.isDirectory"
-              [added]="isNewPermission(permission)"
-              (onRemove)="removePermission(permission)"
-              (onType)="permission.permissions=$event.permissions"
+                                        [permission]="permission"
+                                        [readOnly]="!permission.editable && !isNewPermission(permission)"
+                                        [showDelete]="permission.editable || isNewPermission(permission)"
+                                        [isDirectory]="_node.isDirectory"
+                                        [canPublish]="!isSafe"
+                                        [added]="isNewPermission(permission)"
+                                        (onRemove)="removePermission(permission)"
+                                        (onType)="permission.permissions=$event.permissions"
             ></workspace-share-permission>
           </div>
         </div>
@@ -166,7 +169,7 @@
         ></workspace-share-permission>
         -->
       </div>
-      <div *ngIf="tab==ADVANCED && permissionsUser && permissionsGroup" class="tabContent">
+      <div *ngIf="tab==ADVANCED" class="tabContent">
         <h2 *ngIf="permissionsUser.length+permissionsGroup.length==0">
           {{'WORKSPACE.SHARE.NO_PERMISSIONS' | translate}}
         </h2>
@@ -190,7 +193,7 @@
       <a class="btn-flat" tabindex="0" (keyup.enter)="cancel()" (click)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
   </div>
- </div>
+</div>
 <workspace-share-history
   *ngIf="history"
   [node]="history"

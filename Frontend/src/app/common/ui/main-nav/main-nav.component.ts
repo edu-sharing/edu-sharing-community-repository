@@ -44,7 +44,7 @@ export class MainNavComponent {
   public showEditProfile: boolean;
   public showProfile: boolean;
 
-  public helpUrl = 'http://docs.edu-sharing.com/confluence/edp/';
+  public helpUrl = 'http://docs.edu-sharing.com/confluence/edp/de/edu-sharing-ueberblick';
   public whatsNewUrl = 'http://docs.edu-sharing.com/confluence/edp/de/was-ist-neu-in-edu-sharing';
   private toolpermissions: string[];
   public canAccessWorkspace = true;

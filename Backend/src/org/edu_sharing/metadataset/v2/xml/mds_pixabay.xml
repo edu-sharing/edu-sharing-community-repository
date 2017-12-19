@@ -1,7 +1,6 @@
 <metadataset id="default" label="default" hidden="false">
 		<name>Core Metadataset</name>
-		<inherit>mds</inherit>
-		<i18n>mds</i18n>
+		<i18n>mds_translation</i18n>
 		<widgets>
 			<widget>
 				<id>editors_choice</id>
@@ -50,17 +49,6 @@
               <editors_choice>
               <image_type>
               <orientation>
-				]]></html>
-			</template>
-			<template>
-				<id>node_general_render</id>
-				<caption>dialog_upload_tab_basic</caption>
-				<html><![CDATA[
-              <cclom:title>
-              <cclom:general_keyword>
-              <license>
-              <cclom:general_description>
-              <sys:node-uuid>
 				]]></html>
 			</template>
 		</templates>
