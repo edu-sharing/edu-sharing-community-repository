@@ -1,4 +1,3 @@
-import {TranslateService } from 'ng2-translate/ng2-translate';
 import {Injectable} from "@angular/core";
 import {ToastyService, ToastData} from "ng2-toasty";
 import {RestConstants} from "../rest/rest-constants";
@@ -9,6 +8,7 @@ import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {DialogButton} from "./modal-dialog/modal-dialog.component";
 import {UIConstants} from "./ui-constants";
+import {TranslateService} from "@ngx-translate/core";
 
 @Injectable()
 export class Toast{

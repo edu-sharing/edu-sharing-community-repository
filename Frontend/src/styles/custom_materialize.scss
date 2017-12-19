@@ -304,7 +304,14 @@ label:active{
   font-size:1rem;
   color:$textLight;
 }
-
+/* ng2-datepicker */
+.ngx-datepicker-input{
+  color:$textPrimary!important;
+  border:none!important;
+  padding-top: 0!important;
+  padding-bottom: 0!important;
+  border-bottom: 1px solid #ccc!important;
+}
 
 /* material angular2 */
 .md-sidenav-focus-trap>.cdk-focus-trap-content {

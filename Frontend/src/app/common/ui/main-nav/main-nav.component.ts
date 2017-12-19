@@ -2,7 +2,7 @@ import {
   Component, Input, Output, EventEmitter, OnInit, ElementRef, ViewChild,
   HostListener, Renderer
 } from '@angular/core';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations} from "../../rest/data-object";

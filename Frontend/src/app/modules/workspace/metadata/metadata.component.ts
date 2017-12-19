@@ -5,7 +5,7 @@ import {
   Version, LoginResult, IamUser, Permission
 } from "../../../common/rest/data-object";
 import {RestConstants} from "../../../common/rest/rest-constants";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {RestUsageService} from "../../../common/rest/services/rest-usage.service";
 import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";

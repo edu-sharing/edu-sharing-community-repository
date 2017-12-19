@@ -3,7 +3,6 @@ import {Component, OnInit} from '@angular/core';
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../router/router.component";
 
-import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 import {Translation} from './../../common/translation';
 
 
@@ -35,6 +34,7 @@ import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {UIConstants} from "../../common/ui/ui-constants";
+import {TranslateService} from "@ngx-translate/core";
 
 // data class for breadcrumbs
 export class Breadcrumb {

@@ -1,5 +1,5 @@
 import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef} from '@angular/core';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
 import {UIService} from "../../services/ui.service";
 import {trigger} from "@angular/animations";

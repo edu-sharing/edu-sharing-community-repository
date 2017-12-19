@@ -1,5 +1,5 @@
 import {RestConstants} from "../rest/rest-constants";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {
   Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
   Repository

@@ -1,12 +1,10 @@
 import {Component, OnInit, Input, EventEmitter, Output} from '@angular/core';
-
-import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
-
 import * as EduData from "../../../common/rest/data-object";
 import { RestConstants } from "../../../common/rest/rest-constants";
 import { RestHelper } from "../../../common/rest/rest-helper";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {VCard} from "../../../common/VCard";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'edu-card',

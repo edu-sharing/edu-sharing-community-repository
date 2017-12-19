@@ -2,7 +2,7 @@ import {
   Component, Input, Output, EventEmitter, OnInit, HostListener, ViewChild, ElementRef,
   QueryList
 } from '@angular/core';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {Toast} from "../toast";
 import {DialogButton} from "../modal-dialog/modal-dialog.component";
 

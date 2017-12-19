@@ -8,7 +8,7 @@ import {NodeList, Node, NodeWrapper, LoginResult, ConnectorList} from "../../res
 import {Toast} from "../toast";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../translation";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {OptionItem} from "../actionbar/actionbar.component";

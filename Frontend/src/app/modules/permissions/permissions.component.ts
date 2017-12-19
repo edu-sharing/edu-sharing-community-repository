@@ -1,5 +1,5 @@
 import {Component, ViewChild, ElementRef, style, animate, transition, trigger} from '@angular/core';
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {
   NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult,

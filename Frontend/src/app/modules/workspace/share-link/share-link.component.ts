@@ -5,10 +5,11 @@ import {NodeWrapper, Node, NodeShare} from "../../../common/rest/data-object";
 import {VCard} from "../../../common/VCard";
 import {Toast} from "../../../common/ui/toast";
 import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {DateModel, DatePickerOptions} from "ng2-datepicker";
 import {Translation} from "../../../common/translation";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {Helper} from "../../../common/helper";
+import { DatepickerOptions } from 'ng2-datepicker';
+import {DateHelper} from "../../../common/ui/DateHelper";
 
 @Component({
   selector: 'workspace-share-link',
@@ -18,11 +19,11 @@ import {Helper} from "../../../common/helper";
 export class WorkspaceShareLinkComponent  {
   public loading=true;
   public _node: Node;
-  public dateOptions: DatePickerOptions;
+  public dateOptions: DatepickerOptions;
   public enabled=true;
   public expiry=false;
-  public _expiryDate : DateModel;
-  public set expiryDate(date:DateModel){
+  public _expiryDate : Date;
+  public set expiryDate(date:Date){
     this._expiryDate=date;
     this.setExpiry(true);
   }
@@ -35,18 +36,14 @@ export class WorkspaceShareLinkComponent  {
     this.loading=true;
     this.nodeService.getNodeShares(node.ref.id,RestConstants.SHARE_LINK).subscribe((data:NodeShare[])=>{
       console.log(data);
+      this._expiryDate=new Date(new Date().getTime()+3600*24*1000);
       if(data.length){
         this.currentShare=data[0];
         this.expiry=data[0].expiryDate>0;
         if(this.expiry) {
-          this.dateOptions.initialDate = new Date(data[0].expiryDate);
-          this._expiryDate=new DateModel();
-          this._expiryDate.formatted=Helper.dateToString(new Date(data[0].expiryDate));
+          this.expiryDate=new Date(data[0].expiryDate);
         }
         if(data[0].expiryDate==0){
-          /*this.nodeService.updateNodeShare(node.ref.id,data[0].shareId,RestConstants.SHARE_EXPIRY_UNLIMITED).subscribe(()=>{
-           this.loading=false;
-          })*/
           this.enabled=false;
           this.loading=false;
           this.currentShare.url=this.translate.instant('WORKSPACE.SHARE_LINK.DISABLED');
@@ -116,7 +113,7 @@ export class WorkspaceShareLinkComponent  {
   public setExpiry(value:boolean){
     if(!this.enabled)
       return;
-    let date=value && this.expiryDate ? this.expiryDate.momentObj.toDate().getTime() : RestConstants.SHARE_EXPIRY_UNLIMITED;
+    let date=value ? DateHelper.getDateFromDatepicker(this.expiryDate).getTime() : RestConstants.SHARE_EXPIRY_UNLIMITED;
     this.updateShare(date);
     console.log(date);
   }
@@ -125,9 +122,9 @@ export class WorkspaceShareLinkComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
-    this.dateOptions=new DatePickerOptions();
-    this.dateOptions.minDate=new Date();
-    this.dateOptions.maxDate=new Date(new Date().getTime() * 1000 * 3600 * 365);
+    this.dateOptions={};
+    this.dateOptions.minYear=new Date().getFullYear();
+    this.dateOptions.maxYear=new Date(new Date().getTime() * 1000 * 3600 * 365).getFullYear();
     //this.dateOptions.format="DD.MM.YYYY";
     Translation.applyToDateOptions(this.translate,this.dateOptions);
   }

@@ -59,8 +59,7 @@ h2{
   .datepicker-input{
     width:calc(100% - 30px)!important;
   }
-  .datepicker-calendar{
-    left: auto;
-    right: 0px;
+  .ngx-datepicker-calendar-container{
+    left: -80px!important;
   }
 }

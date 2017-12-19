@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../../common/translation";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {Node,NodeList} from "../../../common/rest/data-object";

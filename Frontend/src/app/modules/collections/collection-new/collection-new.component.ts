@@ -3,7 +3,6 @@ import {Component, OnInit, NgZone, HostListener} from '@angular/core';
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 
-import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 import {Translation} from './../../../common/translation';
 
 import * as EduData from "../../../common/rest/data-object";
@@ -23,6 +22,7 @@ import {RestConnectorService} from "../../../common/rest/services/rest-connector
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {SessionStorageService} from "../../../common/services/session-storage.service";
 import {UIConstants} from "../../../common/ui/ui-constants";
+import {TranslateService} from "@ngx-translate/core";
 
 // component class
 @Component({

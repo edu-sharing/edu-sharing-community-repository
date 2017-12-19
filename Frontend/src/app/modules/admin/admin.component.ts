@@ -4,7 +4,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {Toast} from "../../common/ui/toast";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {Title} from "@angular/platform-browser";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {Component, ViewChild, ElementRef} from "@angular/core";

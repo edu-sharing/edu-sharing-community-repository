@@ -2,16 +2,8 @@ import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@an
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../common/rest/data-object";
-import {VCard} from "../../../common/VCard";
 import {Toast} from "../../../common/ui/toast";
-import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
-import {DateModel, DatePickerOptions} from "ng2-datepicker";
-import {Translation} from "../../../common/translation";
-import {TranslateService} from "ng2-translate";
-import any = jasmine.any;
-import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
-import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {NodeHelper} from "../../../common/ui/node-helper";
+import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
 import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";

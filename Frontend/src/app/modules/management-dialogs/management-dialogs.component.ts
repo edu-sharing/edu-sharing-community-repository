@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
 import {RestNodeService} from "../../common/rest/services/rest-node.service";
-import {TranslateService} from "ng2-translate";
+import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
 import {Toast} from "../../common/ui/toast";
 import {RestConstants} from "../../common/rest/rest-constants";
