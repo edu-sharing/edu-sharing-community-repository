@@ -73,7 +73,6 @@ export class SearchComponent {
   public resultsRight=false;
   public collectionsMore=false;
   view = ListTableComponent.VIEW_TYPE_GRID;
-  main_view:string = 'view_search'; // view_search | view_collection
   searchFail: boolean = false;
   showspinner: boolean = false;
   public nodeReport: Node;
@@ -90,10 +89,6 @@ export class SearchComponent {
 
   @ViewChild('toolbar') toolbar: any;
 
-  //@ViewChildren(AutocompleteComponent) autocompletes: QueryList<AutocompleteComponent>;
-  //autocompletesArray: Array<any> = [];
-
-  autocompleteSuggestions:any = [];
   public options : OptionItem[]=[];
   public savedSearchOptions : OptionItem[]=[];
   private render_options: OptionItem[]=[];
@@ -108,7 +103,7 @@ export class SearchComponent {
   public repositories: Repository[];
   public globalProgress = false;
   // Max items to fetch at all (afterwards no more infinite scroll)
-  private static MAX_ITEMS_COUNT = 250;
+  private static MAX_ITEMS_COUNT = 400;
   private repositoryIds: any[];
   public addNodesToCollection: Node[];
   private mdsSets: MdsInfo[];
