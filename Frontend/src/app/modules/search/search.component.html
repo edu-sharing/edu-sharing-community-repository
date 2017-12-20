@@ -81,7 +81,7 @@
         </div>
       </div>
 
-      <mds *ngIf="currentRepository!='-all-' && initalized"
+      <mds #mds *ngIf="currentRepository!='-all-' && initalized"
         [groupId]="queryId"
         [repository]="currentRepository"
         [setId]="mdsId"
