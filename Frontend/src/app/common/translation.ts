@@ -70,7 +70,6 @@ export class Translation  {
     return Translation.LANGUAGES[Translation.language];
   }
   private static setLanguage(language: string) {
-    console.log("language","use "+language);
     Translation.language = language;
   }
   static getDateFormat(){

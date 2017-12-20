@@ -1689,8 +1689,6 @@ export class MdsComponent{
 
   private applySuggestions() {
     setTimeout(() => {
-        console.log("applySuggestions");
-        console.log(this._suggestions);
         if (!this.currentWidgets)
           return;
         let values=this.getValues([],false);
@@ -1791,7 +1789,6 @@ export class MdsComponent{
   }
 
   private setRenderedHtml(html: string) {
-    console.log(html);
     if(!html.trim())
       this.rendered=null;
     else

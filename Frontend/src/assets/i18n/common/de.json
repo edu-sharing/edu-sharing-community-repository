@@ -46,6 +46,8 @@
   "DEFAULT_METADATASET":"Standard-Metadatenset",
   "NO_MATCHES" : "Keine übereinstimmenden Einträge",
   "NO_CC_PUBLISH" : "Keine ausreichenden Berechtigungen",
+  "ADD_TO_RECENT_COLLECTION":"In zuletzt verwendete Sammlungen",
+  "SEARCH_COLLECTIONS":"Sammlung suchen...",
   "ASK_CC_PUBLISH" : "Nachfragen",
   "ASK_CC_PUBLISH_SUBJECT" : "Anfrage für Berechtigungen des Elements {{name}}",
   "ORIGINAL_DELETE":"Entfernen",

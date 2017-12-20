@@ -2,6 +2,20 @@
    <i class="material-icons close clickable" (click)="cancel()">close</i>
   </div>
   <div class="content">
+    <listTable
+      [viewType]="2"
+      [hasHeading]="false"
+      [addElement]="createCollectionElement"
+      (onAddElement)="createCollection()"
+    ></listTable>
+    <div class="search">
+      <label>{{ 'ADD_TO_RECENT_COLLECTION' | translate}}</label>
+      <form (ngSubmit)="loadData(true)" autocomplete="off">
+          <input name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
+                 title="{{'SEARCH_COLLECTIONS' | translate}}" placeholder="{{'SEARCH_COLLECTIONS' | translate}}" />
+          <i class="material-icons searchIcon">search</i>
+      </form>
+    </div>
       <listTable *ngIf="isLoading || list.length"
         [nodes]="list"
         [columns]="columns"

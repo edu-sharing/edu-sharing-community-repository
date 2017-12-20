@@ -255,6 +255,9 @@ export class WorkspaceManagementDialogsComponent  {
     }
     if(close)
       this.cancelAddToCollection();
+    else{
+      this.dialogTitle=null;
+    }
     this.globalProgress=true;
     UIHelper.addToCollection(this.collectionService,this.toast,collection,list,()=>{
       this.globalProgress=false;

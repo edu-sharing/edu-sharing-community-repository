@@ -25,6 +25,7 @@ import {UIConstants} from "../../../common/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {ListItem} from "../../../common/ui/list-item";
 import {TranslateService} from "@ngx-translate/core";
+import {NodeHelper} from "../../../common/ui/node-helper";
 
 // component class
 @Component({
@@ -150,7 +151,10 @@ export class CollectionNewComponent {
     private saveCollection(){
        this.collectionService.updateCollection(this.currentCollection).subscribe(()=>{
         this.navigateToCollectionId(this.currentCollection.ref.id);
-      },(error:any)=>this.toast.error(error));
+      },(error:any)=> {
+         NodeHelper.handleNodeError(this.toast, this.currentCollection.title, error);
+         //this.toast.error(error)
+       });
     }
     private updatePermissions(){
       this.isLoading=true;

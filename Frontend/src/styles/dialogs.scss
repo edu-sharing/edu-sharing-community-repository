@@ -140,7 +140,26 @@ input[type=search]{
       float:right;
     }
   }
+  .search{
+    padding:10px 30px;
+    float:left;
+    form {
+      position: relative;
+      padding-top: 10px;
+      input {
+        padding-left: 40px;
+        width: $dialogRightWidth - 110px;
+      }
+      .searchIcon {
+        position: absolute;
+        color: $textLight;
+        left: 10px;
+        top: 17px;
+      }
+    }
+  }
   .content{
+    padding:10px 0;
     height: calc( 100% - #{$mainnavHeight});
     overflow-x: hidden;
     overflow-y: auto;

@@ -3,14 +3,15 @@
 .noElements{
   text-align: center;
   color:$textLight;
+  font-size: 110%;
 }
 
 :host /deep/{
   .cardSmallList{
-    width:$dialogRightWidth - 30px;
+    width:$dialogRightWidth - 50px;
   }
   .cardContainer{
-    padding:0 10px !important;
+    padding:0 20px !important;
   }
   .preview img{
     width:$dialogRightWidth - 29px!important;

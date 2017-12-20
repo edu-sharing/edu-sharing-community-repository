@@ -8,6 +8,9 @@ import {RestConstants} from "../../rest/rest-constants";
 import {RestCollectionService} from "../../rest/services/rest-collection.service";
 import {Toast} from "../toast";
 import {ListItem} from "../list-item";
+import {AddElement} from "../list-table/list-table.component";
+import {Router} from "@angular/router";
+import {UIConstants} from "../ui-constants";
 
 @Component({
   selector: 'collection-chooser',
@@ -18,6 +21,7 @@ import {ListItem} from "../list-item";
  * An edu-sharing sidebar dialog for adding data to a collection
  */
 export class CollectionChooserComponent implements OnInit{
+  public createCollectionElement = new AddElement("COLLECTIONS.CREATE_COLLECTION");
   private hasMoreToLoad : boolean;
   private searchQuery : string;
   private columns:ListItem[]=[];
@@ -61,6 +65,9 @@ export class CollectionChooserComponent implements OnInit{
     }
     return true;
   }
+  private createCollection(){
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"collections/collection","new",RestConstants.ROOT]);
+  }
   private clickCollection(node:Collection){
     if(!this.checkPermissions(node)){
       return;
@@ -68,6 +75,7 @@ export class CollectionChooserComponent implements OnInit{
     this.onChoose.emit(node);
   }
   constructor(private connector : RestConnectorService,
+              private router : Router,
               private iam : RestIamService,
               private collectionApi : RestCollectionService,
               private node : RestNodeService,

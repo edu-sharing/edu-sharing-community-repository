@@ -229,7 +229,6 @@ export class SearchComponent {
      Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
        this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
          (param: any) => {
-           console.log("query params");
            if(param['addToCollection']){
              this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
                this.addToCollection=data.collection;
@@ -273,9 +272,9 @@ export class SearchComponent {
                 console.warn(this.mdsSets);
                 console.warn("will continue with default mds");
                 this.mdsId=RestConstants.DEFAULT;
-                this.searchService.init();
-                this.prepare(param);
               }
+              this.searchService.init();
+              this.prepare(param);
             }
           },(error:any)=>{
             this.mdsId=RestConstants.DEFAULT;
@@ -752,7 +751,7 @@ export class SearchComponent {
   }
 
   private addToCollectionList(collection:Collection,nodes=this.addNodesToCollection,callback:Function=null,position=0,error=false){
-    this.managementDialogs.addToCollectionList(collection,nodes,()=>{
+    this.managementDialogs.addToCollectionList(collection,nodes,true,()=>{
       if(this.addToCollection)
         this.switchToCollections(this.addToCollection.ref.id);
     });
@@ -765,10 +764,8 @@ export class SearchComponent {
     mediaQueryList.addListener((mql)=> {
       let lastType=-1;
       if (mql.matches) {
-        console.log("print match");
         lastType=this.view;
         this.view=ListTableComponent.VIEW_TYPE_LIST;
-        console.log(this.view);
       } else if(lastType!=-1) {
         this.view=lastType;
         lastType=-1;
@@ -797,6 +794,7 @@ export class SearchComponent {
   }
 
   private prepare(param:any) {
+    console.log("prepare");
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       this.login=data;
       //if (data.isValidLogin && data.currentScope == null) {
@@ -824,8 +822,6 @@ export class SearchComponent {
         this.hasCheckbox=false;
       }
       this.refreshListOptions();
-      console.log("init "+this.searchService.searchResult.length);
-      console.log(this.currentValues);
       if (this.searchService.searchResult.length < 1) {
         this.getSearch(param['query'] ? param['query'] : '', true,this.currentValues);
       }
@@ -893,9 +889,7 @@ export class SearchComponent {
   private updateRepositoryOrder() {
     if(!this.repositories)
       return;
-    console.log("check swap "+this.repositories.length);
     if(this.repositories.length>4){
-      console.log("check swap "+this.currentRepository);
       let hit=false;
       for(let i=3;i<this.repositories.length;i++){
         if(this.currentRepository==this.repositories[i].id){
@@ -936,7 +930,6 @@ export class SearchComponent {
   }
   private saveSearch(name:string,replace=false){
     this.search.saveSearch(name,this.queryId,this.getCriterias(),this.currentRepository,this.mdsId,replace).subscribe((data:NodeWrapper)=>{
-        console.log(data);
         this.saveSearchDialog=false;
         this.toast.toast('SEARCH.SAVE_SEARCH.TOAST_SAVED');
         this.loadSavedSearch();
