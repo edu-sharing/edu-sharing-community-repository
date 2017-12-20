@@ -9,6 +9,10 @@ import {RestHelper} from "../../common/rest/rest-helper";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
+import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
+import {NodeHelper} from "../../common/ui/node-helper";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../common/ui/ui-animation";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
 import {NodeHelper} from "../../common/ui/node-helper";
@@ -17,7 +21,12 @@ import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component"
 @Component({
   selector: 'workspace-management',
   templateUrl: 'management-dialogs.component.html',
-  styleUrls: ['management-dialogs.component.scss']
+  styleUrls: ['management-dialogs.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('fromLeft', UIAnimation.fromLeft()),
+    trigger('fromRight',UIAnimation.fromRight())
+  ]
 })
 export class WorkspaceManagementDialogsComponent  {
   public globalProgress = false;
@@ -25,6 +34,8 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
   @Input() fileIsOver = false;
+  @Input() addToCollection:Node[];
+  @Output() addToCollectionChange = new EventEmitter();
   @Input() filesToUpload : Node[]
   @Output() filesToUploadChange = new EventEmitter();
   @Input() parent : Node;
@@ -100,6 +111,7 @@ export class WorkspaceManagementDialogsComponent  {
   public constructor(
     private nodeService:RestNodeService,
     private toolService:RestToolService,
+    private collectionService:RestCollectionService,
     private translate:TranslateService,
     private config:ConfigurationService,
     private searchService:RestSearchService,
@@ -107,6 +119,31 @@ export class WorkspaceManagementDialogsComponent  {
     private toast:Toast,
   ){
    }
+   private closeAddToCollection(){
+      this.addToCollection=null;
+      this.addToCollectionChange.emit(null);
+   }
+  private addToCollectionList(collection:Collection,nodes=this.addToCollection,position=0,error=false){
+    if(position>=nodes.length){
+      if(!error)
+        this.toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION",{count:nodes.length,collection:collection.title});
+      this.globalProgress=false;
+      return;
+    }
+    this.closeAddToCollection();
+    this.globalProgress=true;
+    this.collectionService.addNodeToCollection(collection.ref.id,nodes[position].ref.id).subscribe(()=>{
+        this.addToCollectionList(collection,nodes,position+1,error);
+      },
+      (error:any)=>{
+        if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
+          this.toast.error(null,"WORKSPACE.TOAST.NODE_EXISTS_IN_COLLECTION",{name:nodes[position].name});
+        }
+        else
+          NodeHelper.handleNodeError(this.toast,nodes[position].name,error);
+        this.addToCollectionList(collection,nodes,position+1,true);
+      });
+  }
  private closeLtiToolConfig(){
     this.ltiToolConfig=null;
     this.ltiToolRefresh=new Boolean();

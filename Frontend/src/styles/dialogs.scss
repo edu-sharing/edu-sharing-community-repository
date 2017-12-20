@@ -119,6 +119,32 @@ input[type=search]{
   padding-top: 10px;
   @include clickable();
 }
+.dialog-right{
+  position: fixed;
+  z-index: 100;
+  right:0;
+  top:$mainnavHeight;
+  height: calc( 100% - #{$mainnavHeight});
+  width:$dialogRightWidth;
+  background-color: #fff;
+  @include materialShadow();
+  .title{
+    padding-top:16px;
+    padding-left:20px;
+    padding-right:20px;
+    font-size:110%;
+    background-color: $workspaceMetadataBackground;
+    word-break: break-all;
+    padding-bottom: 15px;
+    .close{
+      float:right;
+    }
+  }
+  .content{
+    height:100%;
+    overflow-y: auto;
+  }
+}
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
   .center-card{
     position:fixed;

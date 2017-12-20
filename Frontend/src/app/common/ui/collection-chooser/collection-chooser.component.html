@@ -1,0 +1,26 @@
+  <div class="title">{{ title | translate}}
+   <i class="material-icons close clickable" (click)="cancel()">close</i>
+  </div>
+  <div class="content">
+      <listTable *ngIf="isLoading || list.length"
+        [nodes]="list"
+        [columns]="columns"
+        [hasIcon]="true"
+        [hasCheckbox]="false"
+        [hasHeading]="false"
+        [isClickable]="true"
+        [viewType]="2"
+        [selectOnClick]="true"
+        [isLoading]="isLoading"
+        [scrollWindow]="false"
+        [sortBy]="sortBy"
+        [sortAscending]="sortAscending"
+        (onSelectionChanged)="onSelection($event)"
+        [listClass]="'fileChooserList'"
+        (sortListener)="setSorting($event)"
+        (clickRow)="selectItem($event)"
+        (loadMore)="loadMore()"></listTable>
+    <h5 class="noElements" *ngIf="!isLoading && !list.length && !searchQuery">{{'NO_MORE_ELEMENTS' | translate }}</h5>
+    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery">{{'NO_MATCHES' | translate }}</h5>
+  </div>
+

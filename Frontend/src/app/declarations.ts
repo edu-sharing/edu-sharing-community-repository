@@ -33,6 +33,7 @@
   import {CustomIconComponent} from "./common/ui/custom-icon/custom-icon.component";
   import {BannerComponent} from "./common/ui/banner/banner.component";
   import {SmallCollectionComponent} from "./common/ui/small-collection/small-collection.component";
+  import {CollectionChooserComponent} from "./common/ui/collection-chooser/collection-chooser.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -54,6 +55,7 @@ export const DECLARATIONS = [
       SpinnerComponent,
       ListTableComponent,
       FileChooserComponent,
+      CollectionChooserComponent,
       BreadcrumbsComponent,
       ActionbarComponent,
       SmallCollectionComponent,
