@@ -147,6 +147,12 @@ export class WorkspaceMainComponent{
       event.stopPropagation();
       return;
     }
+    if(event.code=="F2" && this.selection.length==1 && !hasOpenWindow && !fromInputField){
+      this.editNode(this.selection[0]);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     if(event.code=="KeyC" && (event.ctrlKey || this.appleCmd) && this.selection.length && !hasOpenWindow && !fromInputField){
       this.cutCopyNode(null,true);
       event.preventDefault();
