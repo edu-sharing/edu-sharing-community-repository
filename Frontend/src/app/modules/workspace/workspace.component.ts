@@ -974,7 +974,12 @@ export class WorkspaceMainComponent{
   }
   private routeTo(root: string,node : string=null,search="") {
     console.log("update route "+root+" "+node);
-    this.router.navigate(["./"],{queryParams:{root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav},relativeTo:this.route});
+    this.router.navigate(["./"],{queryParams:{root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav},relativeTo:this.route})
+      .then((result:boolean)=>{
+        if(!result){
+          this.refresh();
+        }
+      });
   }
 
   private showAlpha() {
