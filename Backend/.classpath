@@ -52,7 +52,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/lib-gwt-file-0.3.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.oltu.oauth2.authzserver-1.0.2.jar" sourcepath="/org.apache.oltu.oauth2.authzserver"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.oltu.oauth2.common-1.0.2.jar" sourcepath="/org.apache.oltu.oauth2.common"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_TOMCAT_LIB"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/acegi-security-0.8.2_patched.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/activation-1.1.jar"/>
@@ -367,5 +366,7 @@
 	<classpathentry kind="lib" path="lib/de.axelfaust.alfresco.simplecontentstores.repo-0.0.1.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-validator-1.6.jar"/>
 	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/webapps/alfresco/WEB-INF/lib/pdfbox-1.8.10-alfresco-patched.jar"/>
+	<classpathentry kind="var" path="ALFRESCO_50d_TOMCAT_LIB"/>
+	<classpathentry kind="var" path="ALFRESCO_50d_WEBAPP_LIB"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
