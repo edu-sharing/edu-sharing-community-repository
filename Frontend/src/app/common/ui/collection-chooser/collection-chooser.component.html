@@ -32,7 +32,7 @@
         (onDrop)="drop($event)"
         (clickRow)="clickCollection($event)"
         (loadMore)="loadData()"></listTable>
-    <h5 class="noElements" *ngIf="!isLoading && !list.length && !searchQuery">{{'NO_MORE_ELEMENTS' | translate }}</h5>
-    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery">{{'NO_MATCHES' | translate }}</h5>
+    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery==''">{{'NO_MORE_ELEMENTS' | translate }}</h5>
+    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery!=''">{{'NO_MATCHES' | translate }}</h5>
   </div>
 

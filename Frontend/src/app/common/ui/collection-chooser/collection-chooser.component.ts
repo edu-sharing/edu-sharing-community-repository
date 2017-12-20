@@ -23,7 +23,7 @@ import {UIConstants} from "../ui-constants";
 export class CollectionChooserComponent implements OnInit{
   public createCollectionElement = new AddElement("COLLECTIONS.CREATE_COLLECTION");
   private hasMoreToLoad : boolean;
-  public searchQuery : string;
+  public searchQuery = "";
   private columns:ListItem[]=[];
   private sortBy: string[];
   public isLoading=true;
