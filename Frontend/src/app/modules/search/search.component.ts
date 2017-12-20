@@ -210,10 +210,7 @@ export class SearchComponent {
 
   applyParameters(props:any){
     this.currentValues=props;
-    console.log(this.searchService.searchTerm);
-    console.log(this.currentValues);
     this.routeSearchParameters(props);
-    //this.getSearch(null,true,props);
   }
   downloadNode() {
     window.open(this.renderedNode.downloadUrl);
@@ -226,7 +223,6 @@ export class SearchComponent {
     Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
       this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
         (param: any) => {
-          console.log("query params");
           this.mainnav=param['mainnav']=='false' ? false : true;
           if(param['reurl']) {
             this.searchService.reurl = param['reurl'];
@@ -250,11 +246,9 @@ export class SearchComponent {
           }
           this.updateSelection([]);
           this.mds.getSets(this.currentRepository).subscribe((data:MdsMetadatasets)=>{
-            console.log(data.metadatasets);
             this.mdsSets=RestHelper.filterValidMds(data.metadatasets,this.config);
             if(this.mdsSets){
               RestHelper.prepareMetadatasets(this.translate,this.mdsSets);
-              console.log(this.mdsSets);
               this.mdsId = this.mdsSets[0].id;
               if(param['mds'])
                 this.mdsId=param['mds'];
@@ -340,63 +334,6 @@ export class SearchComponent {
     this.getSearch(null,true);
   }
 
-  /* implement this for your autocomplete element */
-  /*
-      getAutocompleteSuggestions(data: any) {
-          if(data.id == 'keyword') {
-                  this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/lom/1.0}general_keyword', data.input).subscribe(
-                  md => {
-                      var ret:SuggestItem[] = [];
-                      for (var index = 0; index < md.values.length; index++) {
-                          ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', ''));
-                      }
-                      this.autocompleteSuggestions['keyword'] = ret;
-                  },
-                  error => console.log(error));
-          }
-
-          if(data.id == 'educationallearningresourcetype') {
-                  this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/1.0}educationallearningresourcetype', data.input).subscribe(
-                  md => {
-                      var ret:SuggestItem[] = [];
-                      for (var index = 0; index < md.values.length; index++) {
-                          ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', ''));
-                      }
-                      this.autocompleteSuggestions['educationallearningresourcetype'] = ret;
-                  },
-                  error => console.log(error));
-          }
-
-        if(data.id == 'taxonid') {
-          this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/1.0}taxonid', data.input).subscribe(
-            md => {
-              var ret:SuggestItem[] = [];
-              for (var index = 0; index < md.values.length; index++) {
-                ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', md.values[index]["key"]));
-              }
-              this.autocompleteSuggestions['taxonid'] = ret;
-            },
-            error => console.log(error));
-        }
-
-        if(data.id == 'educationalcontext') {
-          this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/1.0}educationalcontext', data.input).subscribe(
-            md => {
-              var ret:SuggestItem[] = [];
-              for (var index = 0; index < md.values.length; index++) {
-                ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', ''));
-              }
-              this.autocompleteSuggestions['educationalcontext'] = ret;
-            },
-            error => console.log(error));
-        }
-      }
-  */
-  /*AUTOCOMPLETE*/
-
-
-
-
   ngOnDestroy() {
     this.queryParamsSubscription.unsubscribe();
   }
@@ -413,7 +350,6 @@ export class SearchComponent {
     this.winRef.getNativeWindow().scrollTo(0, this.searchService.offset);
     this.innerWidth = this.winRef.getNativeWindow().innerWidth;
     this.setSidenavSettings();
-    //this.autocompletesArray = this.autocompletes.toArray();
   }
 
   setFilterIndicator(status: string) {
@@ -429,7 +365,6 @@ export class SearchComponent {
 
   getMoreResults() {
     if(this.searchService.complete == false) {
-      //console.log("getMoreResults() "+this.searchService.skipcount+" "+this.searchService.searchResult.length);
       this.searchService.skipcount += this.connector.numberPerRequest;
       this.getSearch();
     }
@@ -454,7 +389,6 @@ export class SearchComponent {
     }
   }
   public routeSearchParameters(parameters:any){
-    console.log(JSON.stringify(parameters));
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
   public routeAndClearSearch(query:any) {
@@ -743,10 +677,8 @@ export class SearchComponent {
     mediaQueryList.addListener((mql)=> {
       let lastType=-1;
       if (mql.matches) {
-        console.log("print match");
         lastType=this.view;
         this.view=ListTableComponent.VIEW_TYPE_LIST;
-        console.log(this.view);
       } else if(lastType!=-1) {
         this.view=lastType;
         lastType=-1;
@@ -809,8 +741,6 @@ export class SearchComponent {
       else {
         this.addDefaultNodeOptions(data);
       }
-      console.log("init "+this.searchService.searchResult.length);
-      console.log(this.currentValues);
       if (this.searchService.searchResult.length < 1) {
         this.getSearch(param['query'] ? param['query'] : '', true,this.currentValues);
       }
@@ -877,9 +807,7 @@ export class SearchComponent {
   private updateRepositoryOrder() {
     if(!this.repositories)
       return;
-    console.log("check swap "+this.repositories.length);
     if(this.repositories.length>4){
-      console.log("check swap "+this.currentRepository);
       let hit=false;
       for(let i=3;i<this.repositories.length;i++){
         if(this.currentRepository==this.repositories[i].id){
@@ -920,7 +848,6 @@ export class SearchComponent {
   }
   private saveSearch(name:string,replace=false){
     this.search.saveSearch(name,this.queryId,this.getCriterias(),this.currentRepository,this.mdsId,replace).subscribe((data:NodeWrapper)=>{
-        console.log(data);
         this.saveSearchDialog=false;
         this.toast.toast('SEARCH.SAVE_SEARCH.TOAST_SAVED');
         this.loadSavedSearch();
