@@ -439,7 +439,7 @@ export class MdsComponent{
     let html="Group '"+id+"' was not found in the mds";
     this.setRenderedHtml(html);
   }
-  private getValues(propertiesIn:any={},showError=true){
+  public getValues(propertiesIn:any={},showError=true){
     let properties:any={};
     // add author data
     this.addAuthorValue(properties);
