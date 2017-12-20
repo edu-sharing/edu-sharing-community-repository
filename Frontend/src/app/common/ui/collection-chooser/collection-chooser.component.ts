@@ -96,7 +96,7 @@ export class CollectionChooserComponent implements OnInit{
       return;
     }
   }
-  private loadData(reset=false) {
+  public loadData(reset=false) {
     if(reset){
       this.list=[];
     }
@@ -115,7 +115,7 @@ export class CollectionChooserComponent implements OnInit{
     });
   }
 
-  private cancel() {
+  public cancel() {
     this.onCancel.emit();
   }
 }
