@@ -452,13 +452,9 @@ public class CollectionServiceImpl implements CollectionService{
 	
 	@Override
 	public void update(Collection collection) {
-		try{
-			HashMap<String,Object> props = asProps(collection);
-			props.remove(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0);
-			client.updateNode(collection.getNodeId(), props);
-		}catch(Throwable e){
-			throw new RuntimeException(e.getMessage());
-		}	
+		HashMap<String,Object> props = asProps(collection);
+		props.remove(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0);
+		client.updateNode(collection.getNodeId(), props);
 	}
 	
 	@Override
