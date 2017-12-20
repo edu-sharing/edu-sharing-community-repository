@@ -39,6 +39,7 @@ import {RestMdsService} from "../../common/rest/services/rest-mds.service";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {ListItem} from "../../common/ui/list-item";
+import {MdsComponent} from "../../common/ui/mds/mds.component";
 
 
 
@@ -55,6 +56,7 @@ import {ListItem} from "../../common/ui/list-item";
 
 
 export class SearchComponent {
+    @ViewChild('mds') mdsRef : MdsComponent;
     public initalized = false;
     public mdsSuggestions:any={}
     public mdsExtended=false;
@@ -408,10 +410,9 @@ export class SearchComponent {
      }
   }
   public routeSearchParameters(parameters:any){
-      console.log(JSON.stringify(parameters));
       this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
-  public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.currentValues){
+  public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{query:query,parameters:parameters ? JSON.stringify(parameters) : null,mds:mds,repository:repository,mdsExtended:this.mdsExtended,reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
