@@ -65,7 +65,7 @@ export class CollectionChooserComponent implements OnInit{
     }
     return true;
   }
-  private createCollection(){
+  public createCollection(){
     this.router.navigate([UIConstants.ROUTER_PREFIX+"collections/collection","new",RestConstants.ROOT]);
   }
   private clickCollection(node:Collection){
