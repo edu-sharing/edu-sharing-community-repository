@@ -11,7 +11,7 @@
     <div class="search">
       <label>{{ 'ADD_TO_RECENT_COLLECTION' | translate}}</label>
       <form (ngSubmit)="loadData(true)" autocomplete="off">
-          <input name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
+          <input name="search" type="search" [(ngModel)]="searchQuery"
                  title="{{'SEARCH_COLLECTIONS' | translate}}" placeholder="{{'SEARCH_COLLECTIONS' | translate}}" />
           <i class="material-icons searchIcon">search</i>
       </form>
