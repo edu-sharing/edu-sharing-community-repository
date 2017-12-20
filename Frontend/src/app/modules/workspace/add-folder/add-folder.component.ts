@@ -4,6 +4,7 @@ import {MdsMetadatasets, Node, MdsInfo} from "../../../common/rest/data-object";
 import {TranslateService} from "@ngx-translate/core";
 import {RestHelper} from "../../../common/rest/rest-helper";
 import {ConfigurationService} from "../../../common/services/configuration.service";
+import {RestConstants} from "../../../common/rest/rest-constants";
 
 @Component({
   selector: 'workspace-add-folder',
@@ -24,7 +25,7 @@ export class WorkspaceAddFolder  {
   }
   @Input() set parent(parent : Node){
     this.mds.getSets().subscribe((data:MdsMetadatasets)=>{
-      this.mdsSets=RestHelper.filterValidMds(data.metadatasets,this.config);
+      this.mdsSets=RestHelper.filterValidMds(RestConstants.HOME_REPOSITORY,data.metadatasets,this.config);
       if(this.mdsSets) {
         RestHelper.prepareMetadatasets(this.translate,this.mdsSets);
         this.mdsSet = this.mdsSets[0].id;

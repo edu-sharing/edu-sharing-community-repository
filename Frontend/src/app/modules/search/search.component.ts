@@ -254,7 +254,7 @@ export class SearchComponent {
           this.updateSelection([]);
           this.mds.getSets(this.currentRepository).subscribe((data:MdsMetadatasets)=>{
             console.log(data.metadatasets);
-            this.mdsSets=RestHelper.filterValidMds(data.metadatasets,this.config);
+            this.mdsSets=RestHelper.filterValidMds(this.currentRepository,data.metadatasets,this.config);
             if(this.mdsSets){
               RestHelper.prepareMetadatasets(this.translate,this.mdsSets);
               try {

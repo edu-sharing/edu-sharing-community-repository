@@ -27,7 +27,7 @@ public class Values{
 	@XmlElement	public String defaultUsername;
 	@XmlElement	public String defaultPassword;
 	@XmlElement	public Banner banner;
-	@XmlElement	public String[] availableMds;
+	@XmlElement	public AvailableMds[] availableMds;
 	@XmlElement	public Integer searchViewType;
 	@XmlElement	public Integer itemsPerRequest;
 	@XmlElement	public Rendering rendering;

@@ -5,7 +5,7 @@
 import {RestConstants} from "./rest-constants";
 import {
   RestError, Node, Collection, Person, Permission, Permissions, User, MdsInfo,
-  CollectionReference, LocalPermissions, Authority
+  CollectionReference, LocalPermissions, Authority, Repository
 } from "./data-object";
 import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../ui/DateHelper";
@@ -300,15 +300,20 @@ export class RestHelper{
     return permissions;
   }
 
-  public static filterValidMds(metadatasets: MdsInfo[], config: ConfigurationService) {
+  public static filterValidMds(repository:string,metadatasets: MdsInfo[], config: ConfigurationService) {
     let validMds=config.instant("availableMds");
     if(validMds && validMds.length){
-      for(let i=0;i<metadatasets.length;i++){
-        if(validMds.indexOf(metadatasets[i].id)==-1){
-          metadatasets.splice(i,1);
-          i--;
+      for(let mds of validMds){
+        if(mds.repository!=repository)
+          continue;
+        for(let i=0;i<metadatasets.length;i++){
+          if(validMds.indexOf(metadatasets[i].id)==-1){
+            metadatasets.splice(i,1);
+            i--;
+          }
         }
       }
+
     }
     return metadatasets;
   }
