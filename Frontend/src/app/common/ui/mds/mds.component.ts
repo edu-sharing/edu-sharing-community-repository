@@ -451,6 +451,8 @@ export class MdsComponent{
     let properties:any={};
     // add author data
     this.addAuthorValue(properties);
+    if(!this.currentWidgets)
+      return properties;
     for(let widget of this.currentWidgets){
       if(widget.id=='preview' || widget.id=='author'){
         continue;

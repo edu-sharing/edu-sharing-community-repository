@@ -313,9 +313,20 @@ export class RestHelper{
           }
         }
       }
-
     }
     return metadatasets;
+  }
+  public static filterValidRepositories(repositories: Repository[], config: ConfigurationService) {
+    let validRepositories = config.instant("availableRepositories");
+    if (validRepositories && validRepositories.length) {
+      for (let i = 0; i < repositories.length; i++) {
+        if (validRepositories.indexOf(repositories[i].id) == -1) {
+          repositories.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    return repositories;
   }
 
 }

@@ -183,10 +183,14 @@ export class SearchComponent {
         setInterval(() => this.updateHasMore(), 1000);
 
         this.network.getRepositories().subscribe((data: NetworkRepositories) => {
-          this.repositories = data.repositories;
+          this.repositories=RestHelper.filterValidRepositories(data.repositories,this.config);
+          if(this.repositories.length && Helper.indexOfObjectArray(this.repositories,this.currentRepository,'id')==-1){
+            console.log("current repository is restricted by context, switching to primary "+this.repositories[0].id);
+            this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
+          }
           if (this.repositories.length < 2) {
+            this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
             this.repositories = null;
-            this.repositoryIds = [RestConstants.HOME_REPOSITORY];
             return;
           }
           let all = new Repository();
