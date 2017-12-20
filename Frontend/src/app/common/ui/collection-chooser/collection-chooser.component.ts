@@ -23,10 +23,10 @@ import {UIConstants} from "../ui-constants";
 export class CollectionChooserComponent implements OnInit{
   public createCollectionElement = new AddElement("COLLECTIONS.CREATE_COLLECTION");
   private hasMoreToLoad : boolean;
-  private searchQuery : string;
+  public searchQuery : string;
   private columns:ListItem[]=[];
   private sortBy: string[];
-  private isLoading=true;
+  public isLoading=true;
   ngOnInit(): void {
     this.loadData(true);
   }
