@@ -466,7 +466,12 @@ export class SearchComponent {
   }
 
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{query:query,parameters:parameters ? JSON.stringify(parameters) : null,mds:mds,repository:repository,mdsExtended:this.mdsExtended,reurl:this.searchService.reurl}});
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{query:query,parameters:parameters ? JSON.stringify(parameters) : null,mds:mds,repository:repository,mdsExtended:this.mdsExtended,reurl:this.searchService.reurl}}).
+    then((result:boolean)=>{
+      if(!result){
+        this.refresh();
+      }
+    });
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
     if(this.showspinner && init || this.repositoryIds==null){
