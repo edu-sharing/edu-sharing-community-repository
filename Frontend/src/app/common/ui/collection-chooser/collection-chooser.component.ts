@@ -37,15 +37,32 @@ export class CollectionChooserComponent implements OnInit{
    */
   @Output() onChoose = new EventEmitter();
   /**
+   * Fired when a list of nodes is dropped on a collection item
+   * @type {EventEmitter}
+   */
+  @Output() onDrop = new EventEmitter();
+  /**
    * Fired when the dialog should be closed
    * @type {EventEmitter}
    */
   @Output() onCancel = new EventEmitter();
 
+  private drop(event:any){
+    if(!this.checkPermissions(event.target)) {
+      return;
+    }
+    this.onDrop.emit(event);
+  }
 
-  private clickCollection(node:Node){
+  private checkPermissions(node:Collection) {
     if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){
       this.toast.error(null,"NO_WRITE_PERMISSIONS");
+      return false;
+    }
+    return true;
+  }
+  private clickCollection(node:Collection){
+    if(!this.checkPermissions(node)){
       return;
     }
     this.onChoose.emit(node);
@@ -57,8 +74,9 @@ export class CollectionChooserComponent implements OnInit{
               private toast : Toast,
               private translate : TranslateService) {
     // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
-    this.columns.push(new ListItem("NODE",RestConstants.CM_NAME));
-    this.columns.push(new ListItem("COLLECTION","info"));
+    this.columns.push(new ListItem("COLLECTION", 'title'));
+    this.columns.push(new ListItem("COLLECTION", 'info'));
+    this.columns.push(new ListItem("COLLECTION",'scope'));
     this.sortBy=[RestConstants.CM_MODIFIED_DATE];
   }
   @HostListener('document:keydown', ['$event'])
@@ -71,18 +89,21 @@ export class CollectionChooserComponent implements OnInit{
     }
   }
   private loadData(reset=false) {
-    this.isLoading=true;
     if(reset){
       this.list=[];
     }
+    else if(!this.hasMoreToLoad){
+      return;
+    }
+    this.isLoading=true;
     this.collectionApi.search(this.searchQuery,{
       sortBy:this.sortBy,
+      offset:this.list.length,
       sortAscending:false,
     }).subscribe((data:CollectionContent)=>{
       this.isLoading=false;
       this.hasMoreToLoad=data.collections.length>0;
       this.list=this.list.concat(data.collections);
-      console.log(this.list);
     });
   }
 

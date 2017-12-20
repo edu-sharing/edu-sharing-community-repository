@@ -4,3 +4,15 @@
   text-align: center;
   color:$textLight;
 }
+
+:host /deep/{
+  .cardSmallList{
+    width:$dialogRightWidth - 30px;
+  }
+  .cardContainer{
+    padding:0 10px !important;
+  }
+  .preview img{
+    width:$dialogRightWidth - 29px!important;
+  }
+}

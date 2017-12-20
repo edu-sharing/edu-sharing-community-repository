@@ -35,7 +35,7 @@
 
   </main-nav>
 <div *ngIf="isBlocked" class="isBlocked">{{'NO_PERMISSIONS_FOR_SCOPE'|translate}}</div>
-<div *ngIf="!isBlocked">
+<div *ngIf="!isBlocked && !globalProgress">
 
   <div class="timeout" *ngIf="isSafe && timeout">
     <i class="material-icons">av_timer</i>
@@ -181,14 +181,7 @@
   (onOpenNode)="openNode($event)"
   (onUpdateOptions)="updateOptions($event)"
 ></workspace-explorer>
-<!--
-  <file-chooser *ngIf="addNodesToCollection"
-                [collections]="true"
-                [isCancelable]="true"
-                [title]="'WORKSPACE.SELECT_COLLECTION'"
-                (onCancel)="addNodesToCollection=null"
-                (onChoose)="addToCollectionList($event)"
-  ></file-chooser>-->
+
 <workspace-management
 [(showLtiTools)]="showLtiTools"
 [(addToCollection)]="addNodesToCollection"

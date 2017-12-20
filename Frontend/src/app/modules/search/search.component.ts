@@ -263,12 +263,19 @@ export class SearchComponent {
             this.mdsSets=RestHelper.filterValidMds(data.metadatasets,this.config);
             if(this.mdsSets){
               RestHelper.prepareMetadatasets(this.translate,this.mdsSets);
-              console.log(this.mdsSets);
-              this.mdsId = this.mdsSets[0].id;
-              if(param['mds'])
-                this.mdsId=param['mds'];
-              this.searchService.init();
-              this.prepare(param);
+              try {
+                this.mdsId = this.mdsSets[0].id;
+                if (param['mds'])
+                  this.mdsId = param['mds'];
+              }
+              catch(e){
+                console.warn("got invalid mds list from repository:");
+                console.warn(this.mdsSets);
+                console.warn("will continue with default mds");
+                this.mdsId=RestConstants.DEFAULT;
+                this.searchService.init();
+                this.prepare(param);
+              }
             }
           },(error:any)=>{
             this.mdsId=RestConstants.DEFAULT;
@@ -388,7 +395,9 @@ export class SearchComponent {
   }
 
 
-
+  canDrop(){
+    return false;
+  }
   getMoreResults() {
     if(this.searchService.complete == false) {
       //console.log("getMoreResults() "+this.searchService.skipcount+" "+this.searchService.searchResult.length);

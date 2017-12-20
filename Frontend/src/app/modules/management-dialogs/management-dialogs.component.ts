@@ -241,18 +241,20 @@ export class WorkspaceManagementDialogsComponent  {
     this.addToCollectionChange.emit(null);
     this.onCloseAddToCollection.emit();
   }
-  public addToCollectionList(collection:Collection,list:Node[]=this.addToCollection,callback:Function=null,force=false){
+  public addToCollectionList(collection:Collection,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
+    console.log(collection);
     if(!force && (collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
       this.dialogTitle='DIALOG.COLLECTION_SHARE_PUBLIC';
       this.dialogMessage='DIALOG.COLLECTION_SHARE_PUBLIC_INFO';
       this.dialogCancelable=true;
       this.dialogMessageParameters={collection:RestHelper.getTitle(collection)};
       this.dialogButtons=DialogButton.getNextCancel(()=>{this.dialogTitle=null},()=>{
-        this.addToCollectionList(collection,list,callback,true);
+        this.addToCollectionList(collection,list,close,callback,true);
       });
       return;
     }
-    this.cancelAddToCollection();
+    if(close)
+      this.cancelAddToCollection();
     this.globalProgress=true;
     UIHelper.addToCollection(this.collectionService,this.toast,collection,list,()=>{
       this.globalProgress=false;

@@ -14,11 +14,12 @@
   (onDone)="closeReport()"
 ></node-report>
 <collection-chooser
-  class="dialog-right"
+  class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"
   [@fromRight]="addToCollection"
   [title]="'WORKSPACE.SELECT_COLLECTION'"
   (onCancel)="closeAddToCollection()"
+  (onDrop)="addToCollectionList($event.target,$event.source,false)"
   (onChoose)="addToCollectionList($event)"
 ></collection-chooser>
 <workspace-lti-tools *ngIf="showLtiTools"

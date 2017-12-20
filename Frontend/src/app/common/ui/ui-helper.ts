@@ -121,13 +121,13 @@ export class UIHelper{
     if(scope==RestConstants.COLLECTIONSCOPE_MY){
       scope='MY';
     }
-    if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
+    else if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
       scope='SHARED';
     }
     else if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
       scope='PUBLIC';
     }
-    else if(type=RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL){
+    else if(type==RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL){
       scope='PUBLIC';
     }
     toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)});

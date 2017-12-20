@@ -141,7 +141,8 @@ input[type=search]{
     }
   }
   .content{
-    height:100%;
+    height: calc( 100% - #{$mainnavHeight});
+    overflow-x: hidden;
     overflow-y: auto;
   }
 }
