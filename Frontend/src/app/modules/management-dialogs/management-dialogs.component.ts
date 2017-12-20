@@ -10,12 +10,9 @@ import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
 import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
-import {NodeHelper} from "../../common/ui/node-helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {UIHelper} from "../../common/ui/ui-helper";
-import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
-import {NodeHelper} from "../../common/ui/node-helper";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
@@ -57,8 +54,6 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onCloseMetadata=new EventEmitter();
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
-  @Input() addToCollection:Node[];
-  @Output() addToCollectionChange = new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
   public createMetadata: string;
   public metadataParent: Node;
@@ -115,7 +110,6 @@ export class WorkspaceManagementDialogsComponent  {
     private translate:TranslateService,
     private config:ConfigurationService,
     private searchService:RestSearchService,
-    private collectionService:RestCollectionService,
     private toast:Toast,
   ){
    }
@@ -123,27 +117,6 @@ export class WorkspaceManagementDialogsComponent  {
       this.addToCollection=null;
       this.addToCollectionChange.emit(null);
    }
-  private addToCollectionList(collection:Collection,nodes=this.addToCollection,position=0,error=false){
-    if(position>=nodes.length){
-      if(!error)
-        this.toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION",{count:nodes.length,collection:collection.title});
-      this.globalProgress=false;
-      return;
-    }
-    this.closeAddToCollection();
-    this.globalProgress=true;
-    this.collectionService.addNodeToCollection(collection.ref.id,nodes[position].ref.id).subscribe(()=>{
-        this.addToCollectionList(collection,nodes,position+1,error);
-      },
-      (error:any)=>{
-        if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
-          this.toast.error(null,"WORKSPACE.TOAST.NODE_EXISTS_IN_COLLECTION",{name:nodes[position].name});
-        }
-        else
-          NodeHelper.handleNodeError(this.toast,nodes[position].name,error);
-        this.addToCollectionList(collection,nodes,position+1,true);
-      });
-  }
  private closeLtiToolConfig(){
     this.ltiToolConfig=null;
     this.ltiToolRefresh=new Boolean();
