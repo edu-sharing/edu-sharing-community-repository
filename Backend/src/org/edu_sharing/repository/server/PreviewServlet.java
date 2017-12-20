@@ -558,6 +558,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			
 		}
 		catch(Throwable t){
+			try {
+				in.close();
+			} catch (IOException e) {}
 			return null;
 		}
 		
@@ -596,6 +599,13 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					if(tmp != null){
 						in = tmp;
 						mimetype = "image/jpeg";
+					}
+					else {
+						// image was broken but stream is consumed, open a new one
+						reader = serviceRegistry.getContentService().getReader(nodeRef,
+								QName.createQName(contentProp));
+						is=reader.getContentInputStream();
+						in = new DataInputStream(is);
 					}
 					
 				}
