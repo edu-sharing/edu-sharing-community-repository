@@ -355,10 +355,6 @@
 		</target>
 		
 		<target name="copy-angular-app-extension" if="extension-name">
-			<script language="javascript">
-			    var module = project.getProperty("module.gwt.package");
-			    project.setProperty("module.gwt.package_path", module.replaceAll("\\.", "/"));
-			</script>
 			<echo>Extension enabled: ${extensions.path}${extension-name}/ng</echo>
 				<delete dir="${extensions.path}${extension-name}/${extension-name}/ng" />	
 				<mkdir  dir="${extensions.path}${extension-name}/ng" />
