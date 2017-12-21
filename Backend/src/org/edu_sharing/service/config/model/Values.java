@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 public class Values{
 	@XmlElement public String[] supportedLanguages;
 	@XmlElement public String extension;
+	@XmlElement public String loginUrl;
 	@XmlElement public String registerUrl;
 	@XmlElement public String recoverPasswordUrl;
 	@XmlElement	public String imprintUrl;
