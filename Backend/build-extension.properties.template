@@ -27,7 +27,6 @@ webapp.name=edu-sharing
 ########################################
 #leave the following part               #
 ########################################
-src-java.path=src:src-webservices:extensions/${extension-name}/src
 src-gwt.path=src:extensions/${extension-name}/src
 gwt-war.dir=extensions/${extension-name}/war
 

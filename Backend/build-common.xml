@@ -7,10 +7,10 @@
 	<property file="build.${user.name}.properties" />
 	
 	<!-- for extensions-->
-	<property file="${current.extension.propfile}"/>
+	<!--<property file="${current.extension.propfile}"/>
 	
-	<!-- include global build-properties -->
-	<property file="build.properties" />
+	 include global build-properties 
+	<property file="build.properties" /-->
 	<property name="config.dir" value="config" />
 	<property name="lib.dir" value="lib" />
 	
@@ -21,8 +21,19 @@
 	<property name="index_dest_dir" value="index" />		
 
     <property name="swagger_src_dir" value="swagger" /> 
-    <property name="swagger_dest_dir" value="swagger" />        
+    <property name="swagger_dest_dir" value="swagger" />      
+	
+	<target name="prepare-property-file-extension" if="extension-name">
+		<echo>extension properties file: ${extensions.path}${extension-name}/build.properties</echo>
+		<loadproperties srcfile="${extensions.path}${extension-name}/build.properties"/>
+		<echo>module.gwt.package: ${module.gwt.package}</echo>
+	</target>
 
+	<target name="prepare-property-file">
+		<echo>loading build.properties</echo>
+		<loadproperties srcfile="build.properties"/>
+	</target>
+	
     <!-- Alfresco config files -->
 	<target name="prepare-alfresco-config">
 		<copy overwrite="true" todir="${webserver.home}/shared/classes/alfresco/extension">
@@ -35,10 +46,10 @@
 	<!-- 
 		just for development
 		- when release is build the config dir is merged by target release-extension-config
-		- when deploying an released version current.extension.propfile is not set
+		- when deploying an released version extension-name is not set
 		- does the same like prepare-alfresco-config
 	 -->
-	<target name="prepare-alfresco-config-extension" if="current.extension.propfile">
+	<target name="prepare-alfresco-config-extension" if="extension-name">
 			<echo>current extension is active will overwrite</echo>
 			
 			<copy overwrite="true" todir="${webserver.home}/shared/classes/alfresco/extension" failonerror="false">
@@ -47,7 +58,7 @@
 			</copy>
 	</target>
 	
-	<target name="prepare-alfresco-webapps">
+	<target name="prepare-alfresco-webapps" depends="prepare-property-file-extension,prepare-property-file">
 		<condition property="unzip.alfresco.war">
 			<and>
 				<not>
@@ -139,7 +150,7 @@
 			    <unzip src="${app.server.deploy.dir}/solr4.war" dest="${app.server.deploy.dir}/solr4" />
 		</target>
 	
-	<target name="prepare-extension" if="current.extension.propfile">
+	<target name="prepare-extension" if="extension-name">
 			<echo>current extension is active will overwrite</echo>
 				
 			<copy failonerror="false" overwrite="true" file="${extensions.path}${extension-name}/config/web.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/web.xml" />
@@ -332,7 +343,7 @@
 			<antcall target="copy-angular-app"></antcall>
 			<antcall target="copy-angular-app-extension"></antcall>
 		</target>
-		<target name="copy-angular-app" unless="current.extension.propfile">
+		<target name="copy-angular-app" unless="extension-name">
 		<echo>Copying dist to ng...</echo>
 			<delete dir="ng" />	
 			<mkdir  dir="ng" />
@@ -343,7 +354,7 @@
 			
 		</target>
 		
-		<target name="copy-angular-app-extension"  if="current.extension.propfile">
+		<target name="copy-angular-app-extension" if="extension-name">
 			<script language="javascript">
 			    var module = project.getProperty("module.gwt.package");
 			    project.setProperty("module.gwt.package_path", module.replaceAll("\\.", "/"));
