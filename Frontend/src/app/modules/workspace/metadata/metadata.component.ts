@@ -19,6 +19,7 @@ import {Router} from "@angular/router";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {UIConstants} from "../../../common/ui/ui-constants";
 import {ListItem} from "../../../common/ui/list-item";
+import {ConfigurationHelper} from "../../../common/rest/configuration-helper";
 
 @Component({
   selector: 'workspace-metadata',
@@ -140,7 +141,7 @@ export class WorkspaceMetadataComponent  {
     if(data["keywords"] && data["keywords"].length==1 && !data["keywords"][0])
       data["keywords"]=null;
     //data["creator"]=node.properties[RestConstants.CM_CREATOR];
-    data["creator"]=RestHelper.getPersonWithConfigDisplayName(node.createdBy,this.config);
+    data["creator"]=ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,this.config);
     data["createDate"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.CM_PROP_C_CREATED));
     data["author"]=this.toVCards(node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]).join(", ");
     data["author_freetext"]=node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] ? node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT][0] : null;

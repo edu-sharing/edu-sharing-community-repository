@@ -21,6 +21,7 @@ import {RestHelper} from "../../rest/rest-helper";
 import {Http} from "@angular/http";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
+import {ConfigurationHelper} from "../../rest/configuration-helper";
 
 @Component({
   selector: 'main-nav',
@@ -297,7 +298,7 @@ export class MainNavComponent {
         this.iam.getUser().subscribe((user : IamUser) => {
           this.user=user;
           this.configServive.getAll().subscribe(()=>{
-            this.userName=RestHelper.getPersonWithConfigDisplayName(this.user.person,this.configServive);
+            this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configServive);
           });
         });
         this.onInvalidNodeStore=new Boolean(true);
@@ -376,7 +377,7 @@ export class MainNavComponent {
     }
   }
   private login(reurl=false){
-    UIHelper.goToLogin(this.router,this.configServive,"",reurl?window.location.href:"")
+    RestHelper.goToLogin(this.router,this.configServive,"",reurl?window.location.href:"")
   }
   private doSearch(value=this.search.nativeElement.value,broadcast=true){
     if(broadcast)

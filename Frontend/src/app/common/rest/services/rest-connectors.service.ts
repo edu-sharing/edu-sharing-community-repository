@@ -8,16 +8,12 @@ import {RestConstants} from "../rest-constants";
 import {RequestObject} from "../request-object";
 import {Node, Connector, OAuthResult, ConnectorList, Filetype, NodeLock, RestError} from "../data-object";
 import {Observer} from "rxjs";
-import {Toast} from "../../ui/toast";
 import {RestNodeService} from "./rest-node.service";
-import {FrameEventsService} from "../../services/frame-events.service";
 
 @Injectable()
 export class RestConnectorsService {
   constructor(private connector : RestConnectorService,
-              private nodeApi : RestNodeService,
-              private events : FrameEventsService,
-              private toast : Toast) {}
+              public nodeApi : RestNodeService) {}
 
 
   public list = (repository=RestConstants.HOME_REPOSITORY
@@ -34,38 +30,6 @@ export class RestConnectorsService {
         return connector;
     }
     return null;
-  }
-  public openConnector(connectorList:ConnectorList,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
-    if(connectorType==null){
-      connectorType=RestConnectorsService.connectorSupportsEdit(connectorList,node);
-    }
-    if(win==null && newWindow)
-      win=window.open("",'_blank');
-
-    this.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
-      if(result.isLocked) {
-        this.toast.error(null, "TOAST.NODE_LOCKED");
-        win.close();
-        return;
-      }
-      this.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
-        if(newWindow)
-          win.location.href=url;
-        else
-          window.location.replace(url);
-
-          this.events.addWindow(win);
-        },
-        (error:string)=>{
-          this.toast.error(null,error);
-          if(win)
-            win.close();
-        });
-    },(error:any)=> {
-      this.toast.error(error);
-      if(win)
-        win.close();
-    });
   }
 
   private static MODE_NONE=0;

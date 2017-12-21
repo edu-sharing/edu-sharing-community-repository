@@ -21,6 +21,7 @@ import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {ApplyToLmsComponent} from "./apply-to-lms/apply-to-lms.component";
 import {ListItem} from "./list-item";
 import {Helper} from "../helper";
+import {ConfigurationHelper} from "../rest/configuration-helper";
 
 export class NodeHelper{
   /**
@@ -45,7 +46,7 @@ export class NodeHelper{
       return translation.instant("MEDIATYPE."+node.mediatype);
     }
     if(name==RestConstants.CM_CREATOR){
-      return RestHelper.getPersonWithConfigDisplayName(node.createdBy,config);
+      return ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,config);
     }
     if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
       let workflow=NodeHelper.getWorkflowStatus(config,node);

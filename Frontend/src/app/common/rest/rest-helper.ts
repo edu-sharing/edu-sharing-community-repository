@@ -7,10 +7,9 @@ import {
   RestError, Node, Collection, Person, Permission, Permissions, User, MdsInfo,
   CollectionReference, LocalPermissions, Authority, Repository
 } from "./data-object";
-import {TranslateService} from "@ngx-translate/core";
-import {DateHelper} from "../ui/DateHelper";
+import {Router} from "@angular/router";
 import {ConfigurationService} from "../services/configuration.service";
-import {ListItem} from "../ui/list-item";
+import {UIConstants} from "../ui/ui-constants";
 
 export class RestHelper{
   public static getNodeIds(nodes : Node[]): Array<string>{
@@ -19,6 +18,20 @@ export class RestHelper{
       data[i]=nodes[i].ref.id;
     }
     return data;
+  }
+  static copyAndCleanPermissions(permissionsIn: Permission[],inherited=true) {
+    let permissions: LocalPermissions = new LocalPermissions();
+    permissions.inherited=inherited;
+    permissions.permissions=[];
+    for(let perm of permissionsIn) {
+      let permClean=new Permission();
+      permClean.authority=new Authority();
+      permClean.authority.authorityName=perm.authority.authorityName;
+      permClean.authority.authorityType=perm.authority.authorityType;
+      permClean.permissions=perm.permissions;
+      permissions.permissions.push(permClean);
+    }
+    return permissions;
   }
 
   /**
@@ -190,13 +203,6 @@ export class RestHelper{
         }
         return result.trim();
     }
-
-    public static getCreateTime(translation : TranslateService,node:Node):string {
-      return DateHelper.formatDate(translation,DateHelper.convertDate(node.createdAt));
-    }
-    public static getModifiedTime(translation : TranslateService,node:Node):string {
-      return DateHelper.formatDate(translation,DateHelper.convertDate(node.modifiedAt));
-    }
     public static getPreviewUrl(node:Node):string {
         if ((node.preview!=null) && (node.preview.url!=null) && (node.preview.url.length>0)) {
             return node.preview.url;
@@ -215,44 +221,6 @@ export class RestHelper{
         return node.properties[name];
     }
 
-
-  static prepareMetadatasets(translate:TranslateService,mdsSets: MdsInfo[]) {
-    for(let i=0;i<mdsSets.length;i++){
-      if(mdsSets[i].id=="mds")
-        mdsSets[i].name=translate.instant('DEFAULT_METADATASET');
-    }
-  }
-
-  static getPersonWithConfigDisplayName(person: any, config: ConfigurationService) {
-    let field=config.instant("userDisplayName","fullName");
-    if(field=="authorityName"){
-      if(person.authorityName==null)
-        field="fullName";
-      else
-        return person.authorityName;
-    }
-    if(field=="fullName"){
-      if(person.profile){
-        return ((person.profile.firstName ? person.profile.firstName : "")+" "+(person.profile.lastName ? person.profile.lastName : "")).trim();
-      }
-      return ((person.firstName ? person.firstName : "")+" "+(person.lastName ? person.lastName : "")).trim();
-    }
-    if(field=="firstName" || field=="lastName"){
-      if(person.profile){
-        return person.profile[field];
-      }
-      return person[field];
-    }
-    if(field=="email"){
-      if(person.profile && person.profile.email)
-        return person.profile.email;
-      if(person.email==null)
-        return person.mailbox;
-      return person.email;
-    }
-    return person[field];
-  }
-
   static createSpacesStoreRef(node: Node) {
     return "workspace://SpacesStore/"+node.ref.id;
   }
@@ -262,71 +230,19 @@ export class RestHelper{
     perm.authority={authorityName:RestConstants.AUTHORITY_EVERYONE,authorityType:RestConstants.AUTHORITY_TYPE_EVERYONE};
     return perm;
   }
-
-  static getColumns(mdsSet: any, name: string) {
-    let columns=[];
-    for(let list of mdsSet.lists){
-      if(list.id==name){
-        for(let column of list.columns){
-          let item=new ListItem("NODE",column.id)
-          item.format=column.format;
-          columns.push(item);
-        }
-        return columns;
+  public static goToLogin(router : Router,config:ConfigurationService,scope="",next=window.location.href) {
+    config.get("loginUrl").subscribe((url:string)=> {
+      if(url && !scope){
+        window.location.href=url;
+        return;
       }
-    }
-    console.info('mds does not define columns for '+name+', using defaults');
-    if(name=='search' || name=='collectionReferences') {
-      columns.push(new ListItem("NODE", RestConstants.CM_PROP_TITLE));
-      columns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
-      columns.push(new ListItem("NODE", RestConstants.CCM_PROP_LICENSE));
-      columns.push(new ListItem("NODE", RestConstants.CCM_PROP_REPLICATIONSOURCE));
-    }
-    return columns;
-  }
-
-  static copyAndCleanPermissions(permissionsIn: Permission[],inherited=true) {
-    let permissions: LocalPermissions = new LocalPermissions();
-    permissions.inherited=inherited;
-    permissions.permissions=[];
-    for(let perm of permissionsIn) {
-      let permClean=new Permission();
-      permClean.authority=new Authority();
-      permClean.authority.authorityName=perm.authority.authorityName;
-      permClean.authority.authorityType=perm.authority.authorityType;
-      permClean.permissions=perm.permissions;
-      permissions.permissions.push(permClean);
-    }
-    return permissions;
-  }
-
-  public static filterValidMds(repository:string,metadatasets: MdsInfo[], config: ConfigurationService) {
-    let validMds=config.instant("availableMds");
-    if(validMds && validMds.length){
-      for(let mds of validMds){
-        if(mds.repository!=repository)
-          continue;
-        for(let i=0;i<metadatasets.length;i++){
-          if(validMds.indexOf(metadatasets[i].id)==-1){
-            metadatasets.splice(i,1);
-            i--;
-          }
+      router.navigate([UIConstants.ROUTER_PREFIX + "login"], {
+        queryParams: {
+          scope: scope,
+          next: next
         }
-      }
-    }
-    return metadatasets;
-  }
-  public static filterValidRepositories(repositories: Repository[], config: ConfigurationService) {
-    let validRepositories = config.instant("availableRepositories");
-    if (validRepositories && validRepositories.length) {
-      for (let i = 0; i < repositories.length; i++) {
-        if (validRepositories.indexOf(repositories[i].id) == -1) {
-          repositories.splice(i, 1);
-          i--;
-        }
-      }
-    }
-    return repositories;
+      });
+    });
   }
 
 }

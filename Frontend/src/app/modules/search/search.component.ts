@@ -46,7 +46,7 @@ import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {Action} from "rxjs/scheduler/Action";
 import {WorkspaceManagementDialogsComponent} from "../management-dialogs/management-dialogs.component";
 import {ConfigurationHelper} from "../../common/rest/configuration-helper";
-
+import {MdsHelper} from "../../common/rest/mds-helper";
 
 
 @Component({
@@ -183,7 +183,7 @@ export class SearchComponent {
         setInterval(() => this.updateHasMore(), 1000);
 
         this.network.getRepositories().subscribe((data: NetworkRepositories) => {
-          this.repositories=RestHelper.filterValidRepositories(data.repositories,this.config);
+          this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
           if(this.repositories.length && Helper.indexOfObjectArray(this.repositories,this.currentRepository,'id')==-1){
             console.log("current repository is restricted by context, switching to primary "+this.repositories[0].id);
             this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
@@ -258,9 +258,9 @@ export class SearchComponent {
           this.updateSelection([]);
           this.mds.getSets(this.currentRepository).subscribe((data:MdsMetadatasets)=>{
             console.log(data.metadatasets);
-            this.mdsSets=RestHelper.filterValidMds(this.currentRepository,data.metadatasets,this.config);
+            this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepository,data.metadatasets,this.config);
             if(this.mdsSets){
-              RestHelper.prepareMetadatasets(this.translate,this.mdsSets);
+              UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
               try {
                 this.mdsId = this.mdsSets[0].id;
                 if (param['mds'])
@@ -637,7 +637,7 @@ export class SearchComponent {
       }
     });
     */
-    this.columns=RestHelper.getColumns(this.currentMdsSet,'search');
+    this.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
 
     console.warn("mds set is missing list 'search' for column rendering");
   }

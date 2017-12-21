@@ -1,7 +1,7 @@
 import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../services/configuration.service";
-import {Collection, Node} from "../rest/data-object";
+import {Collection, Connector, ConnectorList, Filetype, MdsInfo, Node, NodeLock} from "../rest/data-object";
 import {ActivatedRoute, Router} from "@angular/router";
 import {UIConstants} from "./ui-constants";
 import {ElementRef, EventEmitter, HostListener} from "@angular/core";
@@ -12,6 +12,9 @@ import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {UIService} from "../services/ui.service";
 import {RestCollectionService} from "../rest/services/rest-collection.service";
 import {NodeHelper} from "./node-helper";
+import {RestConnectorService} from "../rest/services/rest-connector.service";
+import {RestConnectorsService} from "../rest/services/rest-connectors.service";
+import {FrameEventsService} from "../services/frame-events.service";
 export class UIHelper{
   static MOBILE_WIDTH = 600;
 
@@ -27,20 +30,6 @@ export class UIHelper{
   public static setTitle(name:string,title:Title,translate:TranslateService,config:ConfigurationService){
     translate.get(name).subscribe((name:string)=>{
       this.setTitleNoTranslation(name,title,config);
-    });
-  }
-  public static goToLogin(router : Router,config:ConfigurationService,scope="",next=window.location.href) {
-    config.get("loginUrl").subscribe((url:string)=> {
-      if(url && !scope){
-        window.location.href=url;
-        return;
-      }
-      router.navigate([UIConstants.ROUTER_PREFIX + "login"], {
-        queryParams: {
-          scope: scope,
-          next: next
-        }
-      });
     });
   }
 
@@ -171,6 +160,12 @@ export class UIHelper{
       type='copy';
     onDrop.emit({target:target,source:data,event:event,type:type});
   }
+  static prepareMetadatasets(translate:TranslateService,mdsSets: MdsInfo[]) {
+    for(let i=0;i<mdsSets.length;i++){
+      if(mdsSets[i].id=="mds")
+        mdsSets[i].name=translate.instant('DEFAULT_METADATASET');
+    }
+  }
   static addToCollection(collectionService:RestCollectionService,toast:Toast,collection:Node|Collection,nodes:Node[],callback:Function=null,position=0,error=false){
     if(position>=nodes.length){
       if(!error)
@@ -192,4 +187,37 @@ export class UIHelper{
         UIHelper.addToCollection(collectionService,toast,collection,nodes,callback,position+1,true);
       });
   }
+  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,connectorList:ConnectorList,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
+    if(connectorType==null){
+      connectorType=RestConnectorsService.connectorSupportsEdit(connectorList,node);
+    }
+    if(win==null && newWindow)
+      win=window.open("",'_blank');
+
+    connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
+      if(result.isLocked) {
+        toast.error(null, "TOAST.NODE_LOCKED");
+        win.close();
+        return;
+      }
+      connector.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
+          if(newWindow)
+            win.location.href=url;
+          else
+            window.location.replace(url);
+
+          events.addWindow(win);
+        },
+        (error:string)=>{
+          toast.error(null,error);
+          if(win)
+            win.close();
+        });
+    },(error:any)=> {
+      toast.error(error);
+      if(win)
+        win.close();
+    });
+  }
+
 }

@@ -13,6 +13,7 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {Title} from "@angular/platform-browser";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {SessionStorageService} from "../../common/services/session-storage.service";
+import {RestHelper} from "../../common/rest/rest-helper";
 
 @Component({
   selector: 'permissions-main',
@@ -78,6 +79,6 @@ export class PermissionsMainComponent {
   }
 
   private goToLogin() {
-    UIHelper.goToLogin(this.router,this.config);
+    RestHelper.goToLogin(this.router,this.config);
   }
 }

@@ -298,7 +298,7 @@ export class NodeRenderComponent {
       this.toolService.openLtiObject(this._node);
     }
     else {
-      this.connectors.openConnector(list, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.frame,this.toast,list, this._node,null,null,null,newWindow);
     }
   }
 

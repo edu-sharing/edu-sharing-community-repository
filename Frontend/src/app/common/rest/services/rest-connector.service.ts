@@ -10,7 +10,6 @@ import {FrameEventsService} from "../../services/frame-events.service";
 import {Router, ActivatedRoute} from "@angular/router";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {UIConstants} from "../../ui/ui-constants";
-import {UIHelper} from "../../ui/ui-helper";
 import {ConfigurationService} from "../../services/configuration.service";
 import {RestLocatorService} from "./rest-locator.service";
 
@@ -470,7 +469,7 @@ export class RestConnectorService {
   private goToLogin(scope=this._scope) {
     if(this.currentPageIsLogin())
       return;
-    UIHelper.goToLogin(this.router,this.config,scope);
+    RestHelper.goToLogin(this.router,this.config,scope);
     //this.router.navigate([UIConstants.ROUTER_PREFIX+"login"],{queryParams:{scope:scope?scope:"",next:window.location}});
   }
 

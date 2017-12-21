@@ -37,6 +37,7 @@ import {RestMdsService} from "../../common/rest/services/rest-mds.service";
 import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {NodeHelper} from "../../common/ui/node-helper";
 import {TranslateService} from "@ngx-translate/core";
+import {MdsHelper} from "../../common/rest/mds-helper";
 
 // data class for breadcrumbs
 export class Breadcrumb {
@@ -123,7 +124,7 @@ export class CollectionsMainComponent implements GwtEventListener {
             Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
               UIHelper.setTitle('COLLECTIONS.TITLE',title,translationService,config);
               this.mdsService.getSet().subscribe((data:MdsMetadataset)=>{
-                this.referencesColumns=RestHelper.getColumns(data,'collectionReferences');
+                this.referencesColumns=MdsHelper.getColumns(data,'collectionReferences');
               })
             });
 
@@ -142,8 +143,8 @@ export class CollectionsMainComponent implements GwtEventListener {
           });
           this.initialize();
         }else
-          UIHelper.goToLogin(this.router,this.config);
-      },(error:any)=> UIHelper.goToLogin(this.router,this.config));
+          RestHelper.goToLogin(this.router,this.config);
+      },(error:any)=> RestHelper.goToLogin(this.router,this.config));
 
     }
     navigate(id:string="",addToOther=""){

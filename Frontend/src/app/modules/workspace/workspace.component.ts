@@ -284,7 +284,7 @@ export class WorkspaceMainComponent{
 
   }
   private editConnector(node : Node=null,type : Filetype=null,win : any = null,connectorType : Connector = null){
-    this.connectors.openConnector(this.connectorList,this.getNodeList(node)[0],type,win,connectorType);
+    UIHelper.openConnector(this.connectors,this.event,this.toast,this.connectorList,this.getNodeList(node)[0],type,win,connectorType);
   }
   private handleDrop(event:any){
     console.log("handle drop "+event);
@@ -369,7 +369,7 @@ export class WorkspaceMainComponent{
       this.isSafe = params['mode'] == 'safe';
       this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
         if(data.statusCode!=RestConstants.STATUS_CODE_OK){
-          UIHelper.goToLogin(this.router,this.config);
+          RestHelper.goToLogin(this.router,this.config);
           return;
         }
         this.iam.getUser().subscribe((user : IamUser) => {
@@ -1022,7 +1022,7 @@ export class WorkspaceMainComponent{
   }
 
   private goToLogin() {
-    UIHelper.goToLogin(this.router,this.config,this.isSafe ? RestConstants.SAFE_SCOPE : "");
+    RestHelper.goToLogin(this.router,this.config,this.isSafe ? RestConstants.SAFE_SCOPE : "");
   }
 
   private getRootFolderId() {

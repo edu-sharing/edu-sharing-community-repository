@@ -3,6 +3,7 @@
  */
 
 import {ConfigurationService} from "../services/configuration.service";
+import {MdsInfo, Repository} from "./data-object";
 
 export class ConfigurationHelper {
   public static getBanner(config: ConfigurationService){
@@ -20,5 +21,62 @@ export class ConfigurationHelper {
       return true;
     // if button was not found in hide -> it has the menu button
     return hide.indexOf(button) == -1;
+  }
+  static getPersonWithConfigDisplayName(person: any, config: ConfigurationService) {
+    let field=config.instant("userDisplayName","fullName");
+    if(field=="authorityName"){
+      if(person.authorityName==null)
+        field="fullName";
+      else
+        return person.authorityName;
+    }
+    if(field=="fullName"){
+      if(person.profile){
+        return ((person.profile.firstName ? person.profile.firstName : "")+" "+(person.profile.lastName ? person.profile.lastName : "")).trim();
+      }
+      return ((person.firstName ? person.firstName : "")+" "+(person.lastName ? person.lastName : "")).trim();
+    }
+    if(field=="firstName" || field=="lastName"){
+      if(person.profile){
+        return person.profile[field];
+      }
+      return person[field];
+    }
+    if(field=="email"){
+      if(person.profile && person.profile.email)
+        return person.profile.email;
+      if(person.email==null)
+        return person.mailbox;
+      return person.email;
+    }
+    return person[field];
+  }
+  public static filterValidMds(repository:string,metadatasets: MdsInfo[], config: ConfigurationService) {
+    let validMds=config.instant("availableMds");
+    if(validMds && validMds.length){
+      for(let mds of validMds){
+        if(mds.repository!=repository)
+          continue;
+        for(let i=0;i<metadatasets.length;i++){
+          if(validMds.indexOf(metadatasets[i].id)==-1){
+            metadatasets.splice(i,1);
+            i--;
+          }
+        }
+      }
+    }
+    return metadatasets;
+  }
+  public static filterValidRepositories(repositories: Repository[], config: ConfigurationService) {
+    let validRepositories = config.instant("availableRepositories");
+    if (validRepositories && validRepositories.length) {
+      for (let i = 0; i < repositories.length; i++) {
+        if (validRepositories.indexOf(repositories[i].id) == -1) {
+          repositories.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    return repositories;
   }
 }
