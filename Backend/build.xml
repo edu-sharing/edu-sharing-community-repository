@@ -34,7 +34,7 @@
 	        </fileset>
 	    </path> 
 
-	<target name="release" depends="prepare-property-file-extension,prepare-property-file">
+	<target name="release">
 		
 		<!--incrementimng build number-->
 		<buildnumber file="build.number"/>
