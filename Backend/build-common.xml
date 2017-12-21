@@ -4,13 +4,14 @@
 	
 	
 	<!-- allow every developer to use his local build-properties -->
-	<property file="build.${user.name}.properties" />
+	<property file="build.${user.name}.properties"/>
 	
 	<!-- for extensions-->
-	<!--<property file="${current.extension.propfile}"/>
+	<property file="${extensions.path}${extension-name}/build.properties"/>
 	
-	 include global build-properties 
-	<property file="build.properties" /-->
+	 <!--include global build-properties -->
+	<property file="build.properties"/>
+	
 	<property name="config.dir" value="config" />
 	<property name="lib.dir" value="lib" />
 	
@@ -23,17 +24,7 @@
     <property name="swagger_src_dir" value="swagger" /> 
     <property name="swagger_dest_dir" value="swagger" />      
 	
-	<target name="prepare-property-file-extension" if="extension-name">
-		<echo>extension properties file: ${extensions.path}${extension-name}/build.properties</echo>
-		<loadproperties srcfile="${extensions.path}${extension-name}/build.properties"/>
-		<echo>module.gwt.package: ${module.gwt.package}</echo>
-	</target>
-
-	<target name="prepare-property-file">
-		<echo>loading build.properties</echo>
-		<loadproperties srcfile="build.properties"/>
-	</target>
-	
+		
     <!-- Alfresco config files -->
 	<target name="prepare-alfresco-config">
 		<copy overwrite="true" todir="${webserver.home}/shared/classes/alfresco/extension">
@@ -58,7 +49,7 @@
 			</copy>
 	</target>
 	
-	<target name="prepare-alfresco-webapps" depends="prepare-property-file-extension,prepare-property-file">
+	<target name="prepare-alfresco-webapps">
 		<condition property="unzip.alfresco.war">
 			<and>
 				<not>
@@ -355,10 +346,6 @@
 		</target>
 		
 		<target name="copy-angular-app-extension" if="extension-name">
-			<script language="javascript">
-			    var module = project.getProperty("module.gwt.package");
-			    project.setProperty("module.gwt.package_path", module.replaceAll("\\.", "/"));
-			</script>
 			<echo>Extension enabled: ${extensions.path}${extension-name}/ng</echo>
 				<delete dir="${extensions.path}${extension-name}/${extension-name}/ng" />	
 				<mkdir  dir="${extensions.path}${extension-name}/ng" />
