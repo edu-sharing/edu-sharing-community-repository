@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,20 +10,27 @@ import javax.servlet.http.HttpSession;
 import org.alfresco.repo.search.impl.solr.facet.Exceptions.IllegalArgument;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,13 +102,16 @@ public class PersonDao {
 	private final HashMap<String, String> userInfo;
 	private final String homeFolderId;
 	private final List<String> sharedFolderIds = new ArrayList<String>();
+
+	private NodeService nodeService;
 	
 	public PersonDao(RepositoryDao repoDao, String userName) throws DAOException  {
 
 		try {
 			
 			this.baseClient = repoDao.getBaseClient();
-	
+			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
+
 			this.repoDao = repoDao;
 
 			this.userInfo = baseClient.getUserInfo(userName);
@@ -201,7 +212,9 @@ public class PersonDao {
 		}
 	}
 
-
+	private String getNodeId() {
+		return this.userInfo.get(CCConstants.SYS_PROP_NODE_UID);
+	}
 	public User asPerson() {
 		
     	User data = new User();
@@ -215,6 +228,7 @@ public class PersonDao {
     	profile.setFirstName(getFirstName());
     	profile.setLastName(getLastName());
     	profile.setEmail(getEmail());
+    	profile.setAvatar(getAvatar());
     	data.setProfile(profile);
     	
     	NodeRef homeDir = new NodeRef();
@@ -235,6 +249,48 @@ public class PersonDao {
 
     	return data;
 	}
+	private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
+		List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
+		for(ChildAssociationRef ref : refs) {
+			if(ref.getTypeQName().equals(QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE))){
+				return ref.getChildRef();
+			}
+		}
+		return null;
+	}
+	private String getAvatar() {
+		org.alfresco.service.cmr.repository.NodeRef avatar=getAvatarNode();
+		if(avatar==null)
+			return null;
+		return URLTool.getPreviewServletUrl(avatar);
+	}
+	public void removeAvatar() throws DAOException {
+		try {
+			org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
+			if(currentAvatar!=null) {
+				this.nodeService.removeNode(currentAvatar.getId(), getNodeId(), false);
+			}
+		}catch(Throwable t) {
+			throw DAOException.mapping(t);
+		}
+	}
+	public void changeAvatar(InputStream is) throws DAOException {
+		try {
+		org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
+		String nodeId=null;
+		if(currentAvatar==null) {
+			nodeId = this.nodeService.createNode(getNodeId(), CCConstants.CCM_TYPE_IO, new HashMap<>(), CCConstants.ASSOC_USER_PREFERENCEIMAGE);
+			this.baseClient.createAssociation(getNodeId(), nodeId, CCConstants.ASSOC_USER_AVATAR);
+		}
+		else {
+			nodeId=currentAvatar.getId();
+		}
+		NodeServiceHelper.setCreateVersion(nodeId,false);
+		nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, is, "image", null, CCConstants.CM_PROP_CONTENT);
+		}catch(Throwable t) {
+			throw DAOException.mapping(t);
+		}
+	}
 	public UserSimple asPersonSimple() {
 		UserSimple data = new UserSimple();    	
     	data.setAuthorityName(getAuthorityName());
@@ -244,6 +300,7 @@ public class PersonDao {
     	profile.setFirstName(getFirstName());
     	profile.setLastName(getLastName());
     	profile.setEmail(getEmail());
+    	profile.setAvatar(getAvatar());
     	data.setProfile(profile);
     	
     	NodeRef homeDir = new NodeRef();

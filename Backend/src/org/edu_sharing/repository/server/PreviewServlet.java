@@ -421,6 +421,14 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				op.close();
 			}
 		}
+		if (getPrevResult.getType().equals(GetPreviewResult.TYPE_DEFAULT)) {
+			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
+			ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, QName.createQName(CCConstants.CM_PROP_CONTENT));
+			if(reader.getMimetype().startsWith("image")) {
+				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp))
+					return true;
+			}
+		}
 		return false;
 	}
 	private DataInputStream postProcessImage(String nodeId,DataInputStream in,HttpServletRequest req){

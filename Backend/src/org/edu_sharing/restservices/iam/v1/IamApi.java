@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices.iam.v1;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +53,7 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -484,12 +486,12 @@ public class IamApi  {
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
 
     public Response changeUserProfile(
@@ -507,25 +509,73 @@ public class IamApi  {
 	    		    	
 	    	return Response.status(Response.Status.OK).build();
 	    	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
+    		return ErrorResponse.createResponse(t);
+    	}
+    }
+    @PUT
+    @Path("/people/{repository}/{person}/avatar")    
+    @ApiOperation(
+    	value = "Set avatar of the user.", 
+    	notes = "Set avatar of the user. (To set foreign avatars, admin rights are required.)")
+    @ApiResponses(
+    	value = { 
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+
+    public Response changeUserAvatar(
+    		@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+    	    @ApiParam(value = "avatar image" ,required=true ) @FormDataParam("avatar") InputStream avatar,
+    		@Context HttpServletRequest req) {
+
+    	try {
     		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
+	    	
+	    	personDao.changeAvatar(avatar);
+	    		    	
+	    	return Response.status(Response.Status.OK).build();
+	    	
+    	} catch (Throwable t) {
+ 	
+    		return ErrorResponse.createResponse(t);
+    	}
+    }
+    @DELETE
+    @Path("/people/{repository}/{person}/avatar")    
+    @ApiOperation(
+    	value = "Remove avatar of the user.", 
+    	notes = "Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)")
+    @ApiResponses(
+    	value = { 
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+
+    public Response removeUserAvatar(
+    		@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+    		@Context HttpServletRequest req) {
+
+    	try {
+	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
+	    	personDao.removeAvatar();	    		    	
+	    	return Response.status(Response.Status.OK).build();
+	    	
+    	} catch (Throwable t) {
+    		return ErrorResponse.createResponse(t);
     	}
     }
 

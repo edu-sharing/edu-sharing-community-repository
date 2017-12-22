@@ -1,6 +1,9 @@
 package org.edu_sharing.service.nodeservice;
 
+import java.util.HashMap;
+
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 
 public class NodeServiceHelper {
@@ -19,5 +22,13 @@ public class NodeServiceHelper {
 		//cmNameReadableName = cmNameReadableName.replaceAll("\\.$", "");
 		cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "");
 		return cmNameReadableName;
+	}
+
+	/**
+	 * enable or disable the create version for the node
+	 * Note:Only works for local nodes!
+	 */
+	public static void setCreateVersion(String nodeId, boolean create) {
+		new MCAlfrescoAPIClient().setProperty(nodeId, CCConstants.CCM_PROP_IO_CREATE_VERSION, create);
 	}
 }

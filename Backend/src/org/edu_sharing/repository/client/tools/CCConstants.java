@@ -181,6 +181,8 @@ public class CCConstants {
 	public static final String PROP_USER_ISSHADOWUSER = "{http://www.alfresco.org/model/content/1.0}isShadowUser";
 	public static final String PROP_USER_REPOSITORYID = "{http://www.alfresco.org/model/content/1.0}repositoryId";
 	public static final String PROP_USER_ESUID = "{http://www.alfresco.org/model/content/1.0}esuid";
+	public static final String ASSOC_USER_AVATAR = "{http://www.alfresco.org/model/content/1.0}avatar";
+	public static final String ASSOC_USER_PREFERENCEIMAGE = "{http://www.alfresco.org/model/content/1.0}preferenceImage";
 	
 	//public final static String NODETYPE_BASKET = "{campus.content.model}basketfolder";
 	

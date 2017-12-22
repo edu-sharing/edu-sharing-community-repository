@@ -3393,7 +3393,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		this.resolveRemoteObjects = resolveRemoteObjects;
 	}
 
-	public void setProperty(String nodeId, String property, String value) {
+	public void setProperty(String nodeId, String property, Serializable value) {
 		this.nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(property), value);
 	}
 	
