@@ -1193,8 +1193,10 @@ export class MdsComponent{
     }catch(e){}
     // dirty hack: In search, the tree is inside the sidebar which does not render correctly. So we need to append it to the main body and delete any existing trees
     setTimeout(()=> {
-      let id = widget.id+'_tree';
-      document.getElementsByTagName("body")[0].appendChild(document.getElementById(id));
+      try {
+        let id = widget.id + '_tree';
+        document.getElementsByTagName("body")[0].appendChild(document.getElementById(id));
+      }catch(e){}
     },5);
     return html;
   }
