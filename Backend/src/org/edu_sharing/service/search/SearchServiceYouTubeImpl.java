@@ -33,8 +33,6 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 
 	String googleAPIKey = null;
 	
-	static Long NUMBER_OF_VIDEOS_RETURNED = (long) 50;
-	
 	public SearchServiceYouTubeImpl(String appId) {
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();		
@@ -99,7 +97,7 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 
 			// To increase efficiency, only retrieve the fields that the application uses.
 			search.setFields("items(id/kind,id/videoId,snippet/title,snippet/description,snippet/publishedAt,snippet/thumbnails/default/url,snippet/channelTitle)");
-			search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+			search.setMaxResults((long) token.getMaxResult());
 			
 			search.setVideoLicense("creativecommon");
 			//search.setPageToken(arg0)
@@ -114,16 +112,13 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 				
 				// prettyPrint(searchResultList.iterator(), queryTerm);
 
-				org.edu_sharing.repository.client.rpc.SearchResult sr = new org.edu_sharing.repository.client.rpc.SearchResult();
 				
 				searchResultNodeRef.setSearchCriterias(rc);
 				
-				sr.setStartIDX(token.getFrom());
 				
 				HashMap<String, HashMap<String, Object>> resultData = new HashMap<String, HashMap<String, Object>>();
-				sr.setData(resultData);
-				sr.setNodeCount(searchResultList.size());
-
+				searchResultNodeRef.setStartIDX(token.getFrom());
+				searchResultNodeRef.setNodeCount(searchResponse.getPageInfo()==null ? 0 : searchResponse.getPageInfo().getTotalResults());
 				Iterator<SearchResult> iteratorSearchResults = searchResultList.iterator();
 				int i = 0;
 				

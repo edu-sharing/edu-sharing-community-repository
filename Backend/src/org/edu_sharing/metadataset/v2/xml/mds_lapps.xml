@@ -1,6 +1,7 @@
 <metadataset id="default" label="default" hidden="false">
 		<name>Core Metadataset</name>
-		<i18n>mds_translation</i18n>
+		<inherit>mds</inherit>
+		<i18n>mds</i18n>
 	<widgets>
       <widget>
                 <id>lappcategorie</id>
@@ -10,7 +11,7 @@
                 <valuespace>lappcategories.xml</valuespace>
             </widget>
 
- <widget>
+ 	<widget>
                 <id>educationsector</id>
                 <caption>Bildungsbereich/-sektor</caption>
                 <placeholder>z.B. Hochschule</placeholder>
@@ -32,6 +33,18 @@
               <lappcategorie>
               <educationsector>
 			  ]]></html>
+			</template>
+			<template>
+				<id>node_general_render</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<html><![CDATA[
+              <cclom:title>
+              <cclom:general_keyword>
+              
+              <cclom:general_description>
+              <cm:modified>
+              <sys:node-uuid>
+				]]></html>
 			</template>
 		</templates>
 		<groups>

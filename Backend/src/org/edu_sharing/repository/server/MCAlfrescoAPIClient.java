@@ -2573,16 +2573,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 {
                     public String execute() throws Throwable
                     {
-	                    try {
-		                		String key = PermissionService.GROUP_PREFIX + groupName;
-		                		
-		                		return 	  authorityService.authorityExists(key)
-		                				? authorityService.getAuthorityDisplayName(key)
-		                				: null;
-		                } catch(Throwable e) {
-	                    	logger.error(e.getMessage(), e);
-	                    	return null;
-	                    }
+                		String key = PermissionService.GROUP_PREFIX + groupName;
+                		
+                		return 	  authorityService.authorityExists(key)
+                				? authorityService.getAuthorityDisplayName(key)
+                				: null;
                     }
                 }, true); 
 		

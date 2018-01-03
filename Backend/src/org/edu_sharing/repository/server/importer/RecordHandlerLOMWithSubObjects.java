@@ -291,12 +291,8 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 							logger.error("can not map lifecycle contributer role "+role+" to edu-sharing property");
 						}
 					}
-				
-				
-				/***
-				 * not longer used there will be a separate job to get the expiry date
-				 */
-				/*if (role != null && role.equals("terminator")) {
+					
+					if (role != null && role.equals("terminator")) {
 						assignedLicenseExpiryDate =  (Date)contr.get(CCConstants.LOM_PROP_CONTRIBUTE_DATE);
 					}
 					if (role != null && role.equals("distributor")) {
@@ -308,7 +304,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 								assignedLicensesAuthorities.add(mediaCenter);
 							}
 						}
-					}*/
+					}
 				}
 				
 				if(assignedLicenseExpiryDate != null){
