@@ -254,7 +254,7 @@
 							<replaceregex pattern="\." replace="/" flags="g" />
 						</filterchain>  
 					</loadresource>					
-					<copy todir="${webserver.home}/webapps/${webapp.name}">
+					<copy todir="${webserver.home}/webapps/${webapp.name}" failonerror="false">
 						<fileset dir="${extensions.path}${extension-name}/src/${module.gwt.path}/public" includes="**">
 						</fileset>
 					</copy>
