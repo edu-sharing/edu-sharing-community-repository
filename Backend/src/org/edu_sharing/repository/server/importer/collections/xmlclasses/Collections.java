@@ -1,8 +1,8 @@
 //
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
+// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.6 generiert 
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
-// Ã„nderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2018.01.04 um 12:56:44 PM CET 
+// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+// Generiert: 2018.01.04 um 04:36:46 PM CET 
 //
 
 
@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java-Klasse fÃ¼r anonymous complex type.
+ * <p>Java-Klasse für anonymous complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
@@ -42,7 +42,7 @@ import javax.xml.bind.annotation.XmlType;
  *                       &lt;complexContent>
  *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                           &lt;sequence>
- *                             &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *                             &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
  *                           &lt;/sequence>
  *                           &lt;attribute name="key" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *                         &lt;/restriction>
@@ -103,7 +103,7 @@ public class Collections {
 
 
     /**
-     * <p>Java-Klasse fÃ¼r anonymous complex type.
+     * <p>Java-Klasse für anonymous complex type.
      * 
      * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
      * 
@@ -121,7 +121,7 @@ public class Collections {
      *             &lt;complexContent>
      *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                 &lt;sequence>
-     *                   &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}string"/>
+     *                   &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
      *                 &lt;/sequence>
      *                 &lt;attribute name="key" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
      *               &lt;/restriction>
@@ -307,7 +307,7 @@ public class Collections {
 
 
         /**
-         * <p>Java-Klasse fÃ¼r anonymous complex type.
+         * <p>Java-Klasse für anonymous complex type.
          * 
          * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
          * 
@@ -316,7 +316,7 @@ public class Collections {
          *   &lt;complexContent>
          *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *       &lt;sequence>
-         *         &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}string"/>
+         *         &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
          *       &lt;/sequence>
          *       &lt;attribute name="key" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
          *     &lt;/restriction>
@@ -333,32 +333,37 @@ public class Collections {
         public static class Property {
 
             @XmlElement(required = true)
-            protected String value;
+            protected List<String> value;
             @XmlAttribute(name = "key", required = true)
             protected String key;
 
             /**
-             * Ruft den Wert der value-Eigenschaft ab.
+             * Gets the value of the value property.
              * 
-             * @return
-             *     possible object is
-             *     {@link String }
-             *     
-             */
-            public String getValue() {
-                return value;
-            }
-
-            /**
-             * Legt den Wert der value-Eigenschaft fest.
+             * <p>
+             * This accessor method returns a reference to the live list,
+             * not a snapshot. Therefore any modification you make to the
+             * returned list will be present inside the JAXB object.
+             * This is why there is not a <CODE>set</CODE> method for the value property.
              * 
-             * @param value
-             *     allowed object is
-             *     {@link String }
-             *     
+             * <p>
+             * For example, to add a new item, do as follows:
+             * <pre>
+             *    getValue().add(newItem);
+             * </pre>
+             * 
+             * 
+             * <p>
+             * Objects of the following type(s) are allowed in the list
+             * {@link String }
+             * 
+             * 
              */
-            public void setValue(String value) {
-                this.value = value;
+            public List<String> getValue() {
+                if (value == null) {
+                    value = new ArrayList<String>();
+                }
+                return this.value;
             }
 
             /**

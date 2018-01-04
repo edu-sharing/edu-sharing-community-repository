@@ -123,22 +123,28 @@ public class CollectionImporter {
     		if(collection.getProperty()!=null) {
     			HashMap<String,String[]> properties=new HashMap<>();
     			for(Property property : collection.getProperty()) {
-    				properties.put(property.getKey(),new String[] {property.getValue() });
+    				properties.put(property.getKey(),property.getValue().toArray(new String[0]));
     			}
     			nodeService.updateNode(collectionID,NodeServiceHelper.transformShortToLongProperties(properties));    			
     		}
     		if(collection.getImage()!=null) {
     			InputStream is=null;
-    			if(zip!=null) {
-    				is=findFile(collection.getImage());
+    			
+    			try {
+    				if(zip!=null) {
+        				is=findFile(collection.getImage());
+        			}
+	    			if(is==null) {
+		    			URL url = new URL(collection.getImage());   
+		    			URLConnection connection = url.openConnection();
+				        connection.setDoOutput(true);
+				        is = connection.getInputStream();
+	    			}
+    			
+    				collectionService.writePreviewImage(collectionID, is, "image");
+    			}catch(Throwable t) {
+    				t.printStackTrace();
     			}
-    			if(is==null) {
-	    			URL url = new URL(collection.getImage());   
-	    			URLConnection connection = url.openConnection();
-			        connection.setDoOutput(true);
-			        is = connection.getInputStream();
-    			}
-    			collectionService.writePreviewImage(collectionID, is, "image");
     			is.close();
     		}
     		
