@@ -23,6 +23,7 @@
     <workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
                                  [selected]="_permission.permissions"
                                  [isDirectory]="isDirectory"
+                                 [canPublish]="canPublish"
                                  (onCancel)="showChooseType=false"
                                  (onType)="changeType($event)"
     ></workspace-share-choose-type>
