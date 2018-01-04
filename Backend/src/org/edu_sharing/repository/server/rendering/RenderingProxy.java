@@ -15,6 +15,8 @@ import javax.servlet.http.HttpSession;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.axis.AxisFault;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.NumberUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.application.ApplicationImpl;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -64,14 +66,9 @@ public class RenderingProxy extends HttpServlet {
 			doRedirect = false;
 		}
 		
-		
-		//evtFehler schmeißen misssing signed
 		if(signed == null || signed.trim().equals("")){
 			signed = rep_id + ts;
 		}
-		
-		
-		
 		
 		if(rep_id == null || rep_id.trim().equals("")){
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing rep_id");
@@ -152,10 +149,19 @@ public class RenderingProxy extends HttpServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
 			}
 			
-			
-			String version="/"+req.getParameter("version");
-			if(Double.parseDouble(req.getParameter("version"))<1)
+			String paramVersion=req.getParameter("version");
+			String version="/"+paramVersion;
+			if(paramVersion==null || !StringUtils.isNumeric(paramVersion)) {
+				logger.warn("parameter version missing, will use latest (-1)");
 				version="";
+			}
+			try {
+				if(Double.parseDouble(paramVersion)<1)
+					version="";
+			}catch(Throwable t) {
+				logger.warn("parameter version is non-numeric ("+paramVersion+"), will use latest (-1)");
+				version="";
+			}
 			String closeOnBack="";
 			if(req.getParameter("closeOnBack")!=null){
 				closeOnBack="?closeOnBack="+req.getParameter("closeOnBack");

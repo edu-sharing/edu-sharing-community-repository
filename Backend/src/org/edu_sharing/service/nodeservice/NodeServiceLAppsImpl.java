@@ -6,8 +6,10 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -25,6 +27,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.model.NodeRef;
@@ -71,6 +74,10 @@ public class NodeServiceLAppsImpl extends NodeServiceAdapter{
 		NamedNodeMap map = node.getAttributes();
 
 		
+		return getPropertiesForNode(this.appId,map);
+   }
+
+	public static HashMap<String,Object> getPropertiesForNode(String appId, NamedNodeMap map) {
 		HashMap<String,Object> properties=new HashMap<>();
 		properties.put(CCConstants.SYS_PROP_NODE_UID,map.getNamedItem("id").getNodeValue());
 		properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,map.getNamedItem("title").getNodeValue());
@@ -84,6 +91,9 @@ public class NodeServiceLAppsImpl extends NodeServiceAdapter{
 		properties.put(CCConstants.NODETYPE, CCConstants.CCM_TYPE_IO);
 		properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
 
+		String author=VCardTool.nameToVCard(map.getNamedItem("author").getNodeValue());
+		properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR,author);
+		
 		properties.put(CCConstants.REPOSITORY_ID, "LEARNINGAPPS" );
 		properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"LearningApps");
 		properties.put(CCConstants.CM_PROP_C_CREATOR,map.getNamedItem("author").getNodeValue());
@@ -94,16 +104,15 @@ public class NodeServiceLAppsImpl extends NodeServiceAdapter{
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
 		LocalDateTime date  = LocalDateTime.parse(createdate, formatter);
-		DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN);
-		properties.put(CCConstants.CM_PROP_C_MODIFIED,date.format(formatter2));
+		DateTimeFormatter formatter2 = DateTimeFormatter.ISO_DATE_TIME;//ofPattern("dd.MM.yyyy", Locale.GERMAN);
+		properties.put(CCConstants.CM_PROP_C_MODIFIED,Date.from(date.atZone(ZoneId.systemDefault()).toInstant()).getTime());
 		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,"https://learningapps.org/view"+map.getNamedItem("id").getNodeValue());
 
 
-		String nodeurl = URLTool.getRedirectServletLink(this.appId, map.getNamedItem("id").getNodeValue());
+		String nodeurl = URLTool.getRedirectServletLink(appId, map.getNamedItem("id").getNodeValue());
 		properties.put(CCConstants.CONTENTURL,nodeurl);
-		
 		return properties;
-   }
+	}
 	
    public static HttpsURLConnection openLAppsUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
 		HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
