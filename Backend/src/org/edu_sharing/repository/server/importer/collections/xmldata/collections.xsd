@@ -21,6 +21,13 @@
 							<!-- Description text - not too long -->
 							<xs:element name="description" type="xs:string"
 								minOccurs="0" maxOccurs="1" />
+								
+							<!-- Type of collection -->
+							<xs:element name="type" type="xs:string"
+								minOccurs="0" maxOccurs="1" />
+							<!-- Scope of collection -->
+							<xs:element name="scope" type="xs:string"
+								minOccurs="0" maxOccurs="1" />
 
 							<!-- Should be a filename (if file is part of directory/zip) or HTTP 
 								URL to image -->

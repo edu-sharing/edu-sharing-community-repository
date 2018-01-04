@@ -28,6 +28,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.collections.xmlclasses.Collections;
 import org.edu_sharing.repository.server.importer.collections.xmlclasses.Collections.Collection.Property;
 import org.edu_sharing.restservices.CollectionDao;
+import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.admin.v1.AdminApi;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.collection.Collection;
@@ -109,12 +110,11 @@ public class CollectionImporter {
 			
 			// set main attributes and create collection
     		Collection collectionObj = new Collection();
-    		collectionObj.setType(CCConstants.COLLECTIONTYPE_DEFAULT);
-    		collectionObj.setTitle(collection.getTitle());
-    		collectionObj.setDescription(collection.getDescription());
+    		collectionObj.setTitle(collection.getTitle()!=null ? collection.getTitle().trim() : "");
+    		collectionObj.setDescription(collection.getDescription()!=null ? collection.getDescription().trim() : "");
     		collectionObj.setColor(collection.getColor()!=null ? collection.getColor() : CCConstants.COLLECTION_COLOR_DEFAULT);
-    		collectionObj.setScope(CollectionDao.Scope.EDU_ALL.name());
-    		collectionObj.setLevel0(parentId==null);
+    		collectionObj.setType(collection.getType()!=null ? collection.getType() : CCConstants.COLLECTIONTYPE_DEFAULT);
+    		collectionObj.setScope(collection.getScope()!=null ? collection.getScope() : CollectionDao.Scope.EDU_ALL.name());
     		String collectionID = collectionService.createAndSetScope(parentId, collectionObj).getNodeId();
     		
     		importCount++;
