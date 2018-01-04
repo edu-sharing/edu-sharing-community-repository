@@ -434,7 +434,7 @@ export class ListTableComponent implements EventListener{
     event.preventDefault();
     event.stopPropagation();
 
-    if(this._options.length<2)
+    if(!this._options || this._options.length<2)
       return;
     this.showDropdown(node);
     this.dropdownPosition="fixed";
