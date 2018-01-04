@@ -279,7 +279,7 @@ export class RestConnectorService {
               observer.next(xhr);
               observer.complete();
             } else {
-              console.log(xhr);
+              console.error(xhr);
               observer.error(xhr);
             }
           }
@@ -295,7 +295,7 @@ export class RestConnectorService {
         xhr.send(formData);
         console.log("xhr send");
       }catch(e){
-        console.log(e);
+        console.error(e);
         observer.error(e);
       }
     });

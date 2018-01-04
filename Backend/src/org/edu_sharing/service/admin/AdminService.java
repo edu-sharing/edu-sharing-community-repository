@@ -71,5 +71,7 @@ public interface AdminService {
 	void applyTemplate(String template, String group, String folderId) throws Throwable;
 	
 	List<String> getCatalinaOut() throws IOException;
+
+	void importCollections(String root, InputStream is);
 	
 }

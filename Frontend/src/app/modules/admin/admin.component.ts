@@ -28,6 +28,7 @@ export class AdminComponent {
   public appUrl:string;
   public propertyName:string;
   public chooseDirectory=false;
+  public chooseCollection=false;
   public cacheName:string;
   public cacheInfo:string;
   public oai:any={};
@@ -46,12 +47,14 @@ export class AdminComponent {
   public xmlAppAdditionalPropertyName:string;
   public xmlAppAdditionalPropertyValue:string;
   private parentNode: Node;
+  private parentCollection: Node;
   public catalina : string;
   private oaiClasses: string[];
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
   @ViewChild('excelSelect') excelSelect : ElementRef;
   private excelFile: File;
+  private collectionsFile: File;
   public xmlAppKeys: string[];
   public currentApp: string;
   private currentAppXml: string;
@@ -115,9 +118,30 @@ export class AdminComponent {
   public updateExcelFile(event:any){
     this.excelFile=event.target.files[0];
   }
+  public updateCollectionsFile(event:any){
+    this.collectionsFile=event.target.files[0];
+  }
+  public importCollections(){
+    if(!this.collectionsFile){
+      this.toast.error(null,'ADMIN.IMPORT.CHOOSE_COLLECTIONS_XML');
+      return;
+    }
+    if(!this.parentCollection){
+      this.toast.error(null,'ADMIN.IMPORT.CHOOSE_COLLECTION');
+      return;
+    }
+    this.globalProgress=true;
+    this.admin.importCollections(this.collectionsFile,this.parentCollection.ref.id).subscribe((data:any)=>{
+      this.toast.toast('ADMIN.IMPORT.COLLECTIONS_IMPORTED',{rows:data.rows});
+      this.globalProgress=false;
+    },(error:any)=>{
+      this.toast.error(error);
+      this.globalProgress=false;
+    });
+  }
   public importExcel(){
     if(!this.excelFile){
-      this.toast.error(null,'ADMIN.IMPORT.CHOOSE_CSV');
+      this.toast.error(null,'ADMIN.IMPORT.CHOOSE_EXCEL');
       return;
     }
     if(!this.parentNode){
@@ -201,6 +225,10 @@ export class AdminComponent {
   public pickDirectory(event : Node[]){
     this.parentNode=event[0];
     this.chooseDirectory=false;
+  }
+  public pickCollection(event : Node[]){
+    this.parentCollection=event[0];
+    this.chooseCollection=false;
   }
   public registerAppXml(event:any){
     let file=event.target.files[0];

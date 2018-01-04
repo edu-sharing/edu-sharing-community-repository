@@ -65,9 +65,13 @@
     },
     "IMPORT":{
       "EXCEL":"Import Excel Data",
+      "COLLECTION":"Import Collection Structure",
       "CHOOSE_EXCEL":"Excel-Datei wählen",
+      "CHOOSE_COLLECTIONS_XML":"XML-Datei wählen",
       "CHOOSE_DIRECTORY":"Speicherort wählen",
+      "CHOOSE_COLLECTION":"Übergeordnete Sammlung wählen",
       "EXCEL_START":"Import Starten",
+      "COLLECTION_START":"Import starten",
       "OAI":"OAI Data",
       "OAI_STARTED":"OAI Import-Job gestartet",
       "OAI_URL":"OAI Base URL",

@@ -108,14 +108,20 @@
 }
 .import{
   max-width: 800px;
+  .inputGroup{
+    padding:20px 0;
+    display: flex;
+    align-items: center;
+    >a,>div{
+      display: flex;
+    }
+  }
   .file,.directory{
     display: inline-block;
     padding: 0 10px;
-    min-width: 160px;
-    max-width: 200px;
     vertical-align: middle;
   }
-  .csv,.oai{
+  .collections,.csv,.oai{
     padding-bottom:50px;
   }
   .oai{
@@ -125,7 +131,7 @@
       width: 100%;
     }
   }
-  .btn,.btn-flat{
+  >.btn{
     margin-top: 20px;
   }
   .btn{

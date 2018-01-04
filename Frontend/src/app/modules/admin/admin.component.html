@@ -25,6 +25,13 @@
 (onCancel)="chooseDirectory=false"
 (onChoose)="pickDirectory($event)"
 ></file-chooser>
+<file-chooser *ngIf="chooseCollection"
+              [isCancelable]="true"
+              [title]="'ADMIN.IMPORT.CHOOSE_COLLECTION'"
+              [collections]="true"
+              (onCancel)="chooseCollection=false"
+              (onChoose)="pickCollection($event)"
+></file-chooser>
 <div class="row row-dark">
   <div class="col s12">
     <ul class="tabs">
@@ -144,12 +151,30 @@
   </div>
 </div>
 <div *ngIf="tab=='IMPORT'" class="content import">
+  <div class="heading"><i class="material-icons">layers</i><span>{{'ADMIN.IMPORT.COLLECTION' | translate}}</span></div>
+  <div class="collections">
+    <input #xmlCollectionsSelect type="file" style="display:none" id="xmlCollectionsSelect" accept=".xml" (change)="updateCollectionsFile($event)">
+    <div class="inputGroup">
+      <a class="btn-flat btn-shadow" (click)="xmlCollectionsSelect.click()">{{'ADMIN.IMPORT.CHOOSE_COLLECTIONS_XML' | translate}}</a>
+      <div class="file">{{ (collectionsFile ? collectionsFile.name : '') }}</div>
+    </div>
+    <div class="inputGroup">
+      <a class="btn-flat btn-shadow" (click)="chooseCollection=true">{{'ADMIN.IMPORT.CHOOSE_COLLECTION' | translate}}</a>
+      <div class="directory"><div *ngIf="parentCollection">{{ parentCollection.title}} ({{parentCollection.ref.id}})</div></div>
+    </div>
+    <a class="btn waves-effect waves-light" (click)="importCollections()">{{'ADMIN.IMPORT.COLLECTION_START' | translate}}</a>
+  </div>
   <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.EXCEL' | translate}}</span></div>
   <div class="csv">
     <input #csvSelect type="file" style="display:none" id="csvSelect" accept=".xls, .xlsx" (change)="updateExcelFile($event)">
-    <a class="btn-flat btn-shadow" (click)="csvSelect.click()">{{'ADMIN.IMPORT.CHOOSE_EXCEL' | translate}}</a><div class="file">{{ (excelFile ? excelFile.name : '') }}</div>
-    <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate}}</a>
-    <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
+    <div class="inputGroup">
+      <a class="btn-flat btn-shadow" (click)="csvSelect.click()">{{'ADMIN.IMPORT.CHOOSE_EXCEL' | translate}}</a>
+      <div class="file">{{ (excelFile ? excelFile.name : '') }}</div>
+    </div>
+    <div class="inputGroup">
+      <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate}}</a>
+      <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
+    </div>
     <a class="btn waves-effect waves-light" (click)="importExcel()">{{'ADMIN.IMPORT.EXCEL_START' | translate}}</a>
   </div>
   <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.OAI' | translate}}</span></div>

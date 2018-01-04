@@ -92,6 +92,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.io.Files;
+import com.sun.star.uno.RuntimeException;
 
 public class AdminServiceImpl implements AdminService  {
 	
@@ -682,6 +683,11 @@ public class AdminServiceImpl implements AdminService  {
 		if(jobListener.isVetoed()){
 			throw new Exception("job was vetoed by "+jobListener.getVetoBy());
 		}
+	}
+
+	@Override
+	public void importCollections(String root, InputStream is) {
+		throw new RuntimeException("not yet implemented");
 	}
 	
 }

@@ -31,6 +31,15 @@ export class RestAdminService {
     return this.connector.sendDataViaXHR(query,file,"POST","excel")
       .map((response:XMLHttpRequest) => {return JSON.parse(response.response)});
   }
+  public importCollections = (file : File,parent:string) : Observable<any> => {
+    let query=this.connector.createUrl("admin/:version/import/collections?parent=:parent",null,[
+      [":parent",parent]
+    ]);
+    let options=this.connector.getRequestOptions();
+
+    return this.connector.sendDataViaXHR(query,file,"POST","xml")
+      .map((response:XMLHttpRequest) => {return JSON.parse(response.response)});
+  }
   public addApplicationXml = (file : File) : Observable<any> => {
     let query=this.connector.createUrl("admin/:version/applications/xml",null);
     let options=this.connector.getRequestOptions();
