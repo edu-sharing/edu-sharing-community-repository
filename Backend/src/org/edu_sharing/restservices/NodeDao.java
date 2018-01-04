@@ -78,7 +78,6 @@ import io.swagger.util.Json;
 
 public class NodeDao {
 	
-	static final int MAX_THUMB_SIZE = 900;
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
@@ -536,7 +535,7 @@ public class NodeDao {
 	public NodeDao changePreview(InputStream is,String mimetype) throws DAOException {
 
 		try {
-			is=ImageTool.autoRotateImage(is,MAX_THUMB_SIZE);
+			is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
 			nodeService.writeContent(storeRef, nodeId, is, mimetype, null,
 					isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			PreviewCache.purgeCache(nodeId);
@@ -863,22 +862,7 @@ public class NodeDao {
 	
 	private HashMap<String,String[]> transformProperties(
 			HashMap<String,String[]> properties) {
-		
-		/**
-		 * shortNames to long names
-		 */
-		HashMap<String,String[]>  propsLongKeys = (HashMap<String,String[]>)new NameSpaceTool<String[]>()
-				.transformKeysToLongQname(properties);
-		
-		HashMap<String, String[]> result = new HashMap<String, String[]>();
-
-		for (Map.Entry<String,String[]> property : propsLongKeys.entrySet()) {
-			if(result.containsKey(property.getKey())) continue;
-			
-			result.put(property.getKey(), property.getValue());
-		}
-
-		return result;
+		return NodeServiceHelper.transformShortToLongProperties(properties);
 	}
 
 	private String getId() {

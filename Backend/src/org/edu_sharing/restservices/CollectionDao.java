@@ -406,15 +406,7 @@ public class CollectionDao {
 	
 	public void writePreviewImage(InputStream is, String mimeType) throws DAOException{
 		try{
-			//new ImageMagickContentTransformerWorker()
-			is=ImageTool.autoRotateImage(is,NodeDao.MAX_THUMB_SIZE);
-			((MCAlfrescoAPIClient)baseClient).writeContent(MCAlfrescoAPIClient.storeRef, this.collectionId, is, mimeType,null, CCConstants.CCM_PROP_MAP_ICON);
-			ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
-			ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-			ThumbnailService thumbnailService = serviceRegistry.getThumbnailService();
-			org.alfresco.service.cmr.repository.NodeRef ref=new org.alfresco.service.cmr.repository.NodeRef(MCAlfrescoAPIClient.storeRef,this.collectionId);
-			PreviewCache.purgeCache(this.collectionId);
-
+			collectionClient.writePreviewImage(collectionId,is,mimeType);
 			//thumbnailService.createThumbnail(ref, QName.createQName(CCConstants.CCM_PROP_MAP_ICON), ,"collection");
 		}catch(Exception e){
 			throw new DAOException(e,collectionId);

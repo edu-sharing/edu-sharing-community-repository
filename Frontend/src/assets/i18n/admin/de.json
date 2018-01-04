@@ -65,9 +65,9 @@
     },
     "IMPORT":{
       "EXCEL":"Import Excel Data",
-      "COLLECTION":"Import Collection Structure",
+      "COLLECTION":"Import Sammlungs-Struktur",
       "CHOOSE_EXCEL":"Excel-Datei wählen",
-      "CHOOSE_COLLECTIONS_XML":"XML-Datei wählen",
+      "CHOOSE_COLLECTIONS_XML":"XML/ZIP-Datei wählen",
       "CHOOSE_DIRECTORY":"Speicherort wählen",
       "CHOOSE_COLLECTION":"Übergeordnete Sammlung wählen",
       "EXCEL_START":"Import Starten",
@@ -98,7 +98,8 @@
       "IMPORTS_REMOVED":"Imports removed",
       "PROPERTY_VALUESPACE":"Write Properties to Valuespacefile",
       "PROPERTY_NAME":"Property-Name (z.B. cm:name)",
-      "CSV_IMPORTED":"CSV-Datei importiert ({{ rows }} Zeilen importiert)"
+      "CSV_IMPORTED":"CSV-Datei importiert ({{ rows }} Zeilen importiert)",
+      "COLLECTIONS_IMPORTED":"{{ count }} Sammlungen importiert"
     },
     "TOOLKIT":{
       "REFRESH_APP":"Refresh Application Info",

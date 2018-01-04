@@ -1,5 +1,7 @@
 package org.edu_sharing.service.collection;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
@@ -57,5 +59,7 @@ public interface CollectionService {
 	Collection createAndSetScope(String parentId, Collection collection) throws Throwable;
 
 	public void setPinned(String[] collections);
+
+	void writePreviewImage(String collectionId, InputStream is, String mimeType) throws Exception;
 
 }

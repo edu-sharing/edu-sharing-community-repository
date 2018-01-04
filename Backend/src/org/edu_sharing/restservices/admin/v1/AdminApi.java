@@ -34,6 +34,7 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.admin.v1.model.AdminStatistics;
+import org.edu_sharing.restservices.admin.v1.model.CollectionsResult;
 import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
@@ -523,7 +524,7 @@ public class AdminApi {
 	@ApiOperation(value = "import collections via a xml file", notes = "xml file must be structured as defined by the xsd standard")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionsResult.class),
 	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -531,12 +532,14 @@ public class AdminApi {
 	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
 	public Response importCollections(
-			@ApiParam(value="Id of the root to initialize the collection structure") @PathParam("parent") String parent,
-			@ApiParam(value = "XML file to parse",required=true) @FormDataParam("xml") InputStream is,
+			@ApiParam(value="Id of the root to initialize the collection structure") @QueryParam("parent") String parent,
+			@ApiParam(value = "XML file to parse (or zip file containing exactly 1 xml file to parse)",required=true) @FormDataParam("xml") InputStream is,
 			@Context HttpServletRequest req){
 		try {
-			AdminServiceFactory.getInstance().importCollections(parent,is);
-	    	return Response.ok().build();		
+			int count=AdminServiceFactory.getInstance().importCollections(parent,is);
+			CollectionsResult result=new CollectionsResult();
+			result.setCount(count);
+	    	return Response.ok().entity(result).build();	
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
@@ -548,7 +551,7 @@ public class AdminApi {
 	@ApiOperation(value = "Import excel data", notes = "Import excel data.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ExcelResult.class),
 	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        

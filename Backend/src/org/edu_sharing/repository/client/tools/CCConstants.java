@@ -1635,7 +1635,10 @@ public class CCConstants {
 	
 	public static final String ADMINISTRATORS_GROUP_TYPE = "ORG_ADMINISTRATORS";
 	public static final String EDITORIAL_GROUP_TYPE = "EDITORIAL";
+	public static final String COLLECTIONTYPE_DEFAULT = "default";
 	public static final String COLLECTIONTYPE_EDITORIAL = "EDITORIAL";
+	
+	public static final String COLLECTION_COLOR_DEFAULT = "#975B5D";
 
 	public static final String SESSION_LAST_SEARCH_TOKEN = "LAST_SEARCH_TOKEN";
 	

@@ -54,6 +54,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
+import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
 import org.edu_sharing.repository.server.jobs.quartz.ExporterJob;
 import org.edu_sharing.repository.server.jobs.quartz.ImmediateJobListener;
 import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
@@ -686,8 +687,8 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public void importCollections(String root, InputStream is) {
-		throw new RuntimeException("not yet implemented");
+	public int importCollections(String parent, InputStream is) throws Throwable {
+		return new CollectionImporter().importFile(parent, is);
 	}
 	
 }

@@ -1,5 +1,7 @@
 package org.edu_sharing.service.collection;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
@@ -36,10 +39,13 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.I18nServer;
+import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.NodeTool;
+import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.restservices.CollectionDao;
+import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
@@ -753,5 +759,17 @@ public class CollectionServiceImpl implements CollectionService{
 			
 			order++;
 		}
+	}
+
+	@Override
+	public void writePreviewImage(String collectionId,InputStream is, String mimeType) throws Exception {
+		//new ImageMagickContentTransformerWorker()
+		is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
+		client.writeContent(MCAlfrescoAPIClient.storeRef, collectionId, is, mimeType,null, CCConstants.CCM_PROP_MAP_ICON);
+		ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		ThumbnailService thumbnailService = serviceRegistry.getThumbnailService();
+		org.alfresco.service.cmr.repository.NodeRef ref=new org.alfresco.service.cmr.repository.NodeRef(MCAlfrescoAPIClient.storeRef,collectionId);
+		PreviewCache.purgeCache(collectionId);
 	}
 }

@@ -153,7 +153,7 @@
 <div *ngIf="tab=='IMPORT'" class="content import">
   <div class="heading"><i class="material-icons">layers</i><span>{{'ADMIN.IMPORT.COLLECTION' | translate}}</span></div>
   <div class="collections">
-    <input #xmlCollectionsSelect type="file" style="display:none" id="xmlCollectionsSelect" accept=".xml" (change)="updateCollectionsFile($event)">
+    <input #xmlCollectionsSelect type="file" style="display:none" id="xmlCollectionsSelect" accept=".xml, .zip" (change)="updateCollectionsFile($event)">
     <div class="inputGroup">
       <a class="btn-flat btn-shadow" (click)="xmlCollectionsSelect.click()">{{'ADMIN.IMPORT.CHOOSE_COLLECTIONS_XML' | translate}}</a>
       <div class="file">{{ (collectionsFile ? collectionsFile.name : '') }}</div>

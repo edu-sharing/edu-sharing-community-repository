@@ -261,6 +261,8 @@ export class CollectionNewComponent {
     }
     save() : void {
         // input data optimize
+        if(!this.currentCollection.description)
+          this.currentCollection.description="";
         this.currentCollection.title = this.currentCollection.title.trim();
         this.currentCollection.description = this.currentCollection.description.trim();
         if(this.newCollectionType==RestConstants.COLLECTIONTYPE_EDITORIAL){

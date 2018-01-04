@@ -1,0 +1,159 @@
+package org.edu_sharing.repository.server.importer.collections;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.http.HttpUtils;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import org.apache.commons.compress.archivers.zip.ZipUtil;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.log4j.Logger;
+import org.apache.poi.util.IOUtils;
+import org.apache.tika.Tika;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.importer.collections.xmlclasses.Collections;
+import org.edu_sharing.repository.server.importer.collections.xmlclasses.Collections.Collection.Property;
+import org.edu_sharing.restservices.CollectionDao;
+import org.edu_sharing.restservices.admin.v1.AdminApi;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.collection.Collection;
+import org.edu_sharing.service.collection.CollectionService;
+import org.edu_sharing.service.collection.CollectionServiceImpl;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+
+public class CollectionImporter {	
+	private static Logger logger = Logger.getLogger(CollectionImporter.class);
+
+	private int importCount;
+
+	private ZipInputStream zip;
+
+	private ByteArrayOutputStream buffer;
+	/**
+	 * Import file (either a single xml or a zip file including exactly one xml file (any name) and any number of images to refer to)
+	 * @param parent
+	 * @param is
+	 * @return
+	 * @throws Throwable
+	 */
+	public int importFile(String parent,InputStream is) throws Throwable {
+		importCount=0;
+	    zip=null;
+        buffer=new ByteArrayOutputStream();
+        IOUtils.copy(is,buffer);
+        String mimetype=new Tika().detect(buffer.toByteArray());
+        if(mimetype.equals("application/xml")) {
+        	readXML(parent,new ByteArrayInputStream(buffer.toByteArray()));
+        }
+        else if(mimetype.equals("application/zip")) {
+            InputStream xml=findFile("*.xml");
+            if(xml==null) {
+            	xml=findFile("*.XML");
+            }
+            if(xml==null) {
+            	throw new IllegalArgumentException("Zip file contained no *.xml file");            
+            }
+        	readXML(parent,xml);
+        }
+        else {
+        	throw new IllegalArgumentException("Only application/xml or application/zip files are allowed");            
+        }
+        return importCount;
+	}
+	private InputStream findFile(String name) throws IOException {
+        zip = new ZipInputStream(new ByteArrayInputStream(buffer.toByteArray()));
+		ZipEntry entry;
+		while ((entry = zip.getNextEntry())!=null) {
+		    if (name.startsWith("*") && entry.getName().endsWith(name.substring(1)))
+		    	break;
+			if (entry.getName().equals(name))
+				break;
+		}
+		if(entry==null)
+			return null;
+		ByteArrayOutputStream out=new ByteArrayOutputStream();
+		IOUtils.copy(zip, out);
+		return new ByteArrayInputStream(out.toByteArray());
+		}
+    private void readXML(String parent, InputStream is) throws Throwable {
+    	JAXBContext jc = JAXBContext.newInstance(Collections.class);
+        Unmarshaller unmarshaller = jc.createUnmarshaller();
+    	Collections collections = (Collections) unmarshaller.unmarshal(is);
+        // process all collections
+        for (Collections.Collection collection : collections.getCollection()) {
+        		createCollection(parent, collection);
+        }
+	}
+
+	// created a collection and returns the nodeID
+    private String createCollection(String parentId, Collections.Collection collection) throws Throwable {
+    		
+			CollectionService collectionService=CollectionServiceFactory.getLocalService();
+			NodeService nodeService=NodeServiceFactory.getLocalService();
+			
+			// set main attributes and create collection
+    		Collection collectionObj = new Collection();
+    		collectionObj.setType(CCConstants.COLLECTIONTYPE_DEFAULT);
+    		collectionObj.setTitle(collection.getTitle());
+    		collectionObj.setDescription(collection.getDescription());
+    		collectionObj.setColor(collection.getColor()!=null ? collection.getColor() : CCConstants.COLLECTION_COLOR_DEFAULT);
+    		collectionObj.setScope(CollectionDao.Scope.EDU_ALL.name());
+    		collectionObj.setLevel0(false);
+    		String collectionID = collectionService.createAndSetScope(parentId, collectionObj).getNodeId();
+    		
+    		importCount++;
+    		
+    		// set custom collection properties
+    		if(collection.getProperty()!=null) {
+    			HashMap<String,String[]> properties=new HashMap<>();
+    			for(Property property : collection.getProperty()) {
+    				properties.put(property.getKey(),new String[] {property.getValue() });
+    			}
+    			nodeService.updateNode(collectionID,NodeServiceHelper.transformShortToLongProperties(properties));    			
+    		}
+    		if(collection.getImage()!=null) {
+    			InputStream is=null;
+    			if(zip!=null) {
+    				is=findFile(collection.getImage());
+    			}
+    			if(is==null) {
+	    			URL url = new URL(collection.getImage());   
+	    			URLConnection connection = url.openConnection();
+			        connection.setDoOutput(true);
+			        is = connection.getInputStream();
+    			}
+    			collectionService.writePreviewImage(collectionID, is, "image");
+    			is.close();
+    		}
+    		
+    	
+    		// create sub collections recursively
+    		Collections subCollections = collection.getCollections();
+    		if ((subCollections!=null) && (subCollections.getCollection().size()>0)) {
+    	        for (Collections.Collection subCollection : subCollections.getCollection()) {
+    	        		createCollection(collectionID, subCollection);
+    	        }		
+    		}
+    		
+    		return collectionID;
+    }
+
+    
+		
+}

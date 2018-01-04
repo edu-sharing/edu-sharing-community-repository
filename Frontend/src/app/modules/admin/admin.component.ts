@@ -132,7 +132,7 @@ export class AdminComponent {
     }
     this.globalProgress=true;
     this.admin.importCollections(this.collectionsFile,this.parentCollection.ref.id).subscribe((data:any)=>{
-      this.toast.toast('ADMIN.IMPORT.COLLECTIONS_IMPORTED',{rows:data.rows});
+      this.toast.toast('ADMIN.IMPORT.COLLECTIONS_IMPORTED',{count:data.count});
       this.globalProgress=false;
     },(error:any)=>{
       this.toast.error(error);
