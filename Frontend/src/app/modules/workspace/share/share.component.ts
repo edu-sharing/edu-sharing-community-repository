@@ -235,10 +235,14 @@ export class WorkspaceShareComponent  {
   public cancel(){
     this.onClose.emit();
   }
-  private contains(permissions : Permission[],permission : Permission) : boolean{
-    for(let p of permissions){
-      if(p.authority.authorityName==permission.authority.authorityName && Helper.arrayEquals(p.permissions,permission.permissions))
-        return true;
+  private contains(permissions : Permission[],permission : Permission,comparePermissions:boolean) : boolean{
+    for(let p of permissions) {
+      if (p.authority.authorityName == permission.authority.authorityName) {
+        if (!comparePermissions)
+          return true;
+        if (Helper.arrayEquals(p.permissions, permission.permissions))
+          return true;
+      }
     }
     return false;
   }
@@ -261,7 +265,7 @@ export class WorkspaceShareComponent  {
     }
     permission.permissions=this.currentType;
     permission=JSON.parse(JSON.stringify(permission));
-    if(!this.contains(this.permissions,permission)) {
+    if(!this.contains(this.permissions,permission,false)) {
       this.newPermissions.push(permission);
       this.permissions.push(permission);
       this.setPermissions(this.permissions);
@@ -273,21 +277,21 @@ export class WorkspaceShareComponent  {
   private isNewPermission(p : Permission){
     if(!this.originalPermissions.permissions)
       return true;
-    return !this.contains(this.originalPermissions.permissions,p);
+    return !this.contains(this.originalPermissions.permissions,p,true);
     //return this.contains(this.newPermissions,p);
   }
   private save(){
-    this.onLoading.emit(true);
     if(this.permissions!=null) {
+      this.onLoading.emit(true);
       let permissions=RestHelper.copyAndCleanPermissions(this.permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
       if(!this.sendToApi) {
         this.onClose.emit(permissions);
         return;
       }
       this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage).subscribe(() => {
+          this.onLoading.emit(false);
           this.onClose.emit(permissions);
           this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
-          this.onLoading.emit(false);
         },
         (error : any)=> {
           this.toast.error(error);
