@@ -46,6 +46,7 @@
             <workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
              [selected]="currentType"
              [isDirectory]="_node.isDirectory"
+             [canPublish]="!isSafe"
              (onCancel)="showChooseType=false"
              (onType)="setType($event)"
             ></workspace-share-choose-type>
