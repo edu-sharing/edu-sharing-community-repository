@@ -30,6 +30,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.ApiService;
+import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
@@ -532,10 +533,13 @@ public class AdminApi {
 	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
 	public Response importCollections(
-			@ApiParam(value="Id of the root to initialize the collection structure") @QueryParam("parent") String parent,
+			@ApiParam(value="Id of the root to initialize the collection structure, or '-root-' to inflate them on the first level") @QueryParam("parent") String parent,
 			@ApiParam(value = "XML file to parse (or zip file containing exactly 1 xml file to parse)",required=true) @FormDataParam("xml") InputStream is,
 			@Context HttpServletRequest req){
 		try {
+			if(CollectionDao.ROOT.equals(parent)) {
+				parent=null;
+			}
 			int count=AdminServiceFactory.getInstance().importCollections(parent,is);
 			CollectionsResult result=new CollectionsResult();
 			result.setCount(count);

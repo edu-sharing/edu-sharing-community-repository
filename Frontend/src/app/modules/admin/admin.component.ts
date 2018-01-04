@@ -48,6 +48,7 @@ export class AdminComponent {
   public xmlAppAdditionalPropertyValue:string;
   private parentNode: Node;
   private parentCollection: Node;
+  private parentCollectionType = "root";
   public catalina : string;
   private oaiClasses: string[];
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
@@ -126,12 +127,12 @@ export class AdminComponent {
       this.toast.error(null,'ADMIN.IMPORT.CHOOSE_COLLECTIONS_XML');
       return;
     }
-    if(!this.parentCollection){
+    if(!this.parentCollection && this.parentCollectionType=="choose"){
       this.toast.error(null,'ADMIN.IMPORT.CHOOSE_COLLECTION');
       return;
     }
     this.globalProgress=true;
-    this.admin.importCollections(this.collectionsFile,this.parentCollection.ref.id).subscribe((data:any)=>{
+    this.admin.importCollections(this.collectionsFile,this.parentCollectionType=="root" ? RestConstants.ROOT : this.parentCollection.ref.id).subscribe((data:any)=>{
       this.toast.toast('ADMIN.IMPORT.COLLECTIONS_IMPORTED',{count:data.count});
       this.globalProgress=false;
     },(error:any)=>{

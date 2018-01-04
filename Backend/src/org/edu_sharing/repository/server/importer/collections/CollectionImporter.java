@@ -114,7 +114,7 @@ public class CollectionImporter {
     		collectionObj.setDescription(collection.getDescription());
     		collectionObj.setColor(collection.getColor()!=null ? collection.getColor() : CCConstants.COLLECTION_COLOR_DEFAULT);
     		collectionObj.setScope(CollectionDao.Scope.EDU_ALL.name());
-    		collectionObj.setLevel0(false);
+    		collectionObj.setLevel0(parentId==null);
     		String collectionID = collectionService.createAndSetScope(parentId, collectionObj).getNodeId();
     		
     		importCount++;
@@ -142,10 +142,10 @@ public class CollectionImporter {
 	    			}
     			
     				collectionService.writePreviewImage(collectionID, is, "image");
+        			is.close();
     			}catch(Throwable t) {
     				t.printStackTrace();
     			}
-    			is.close();
     		}
     		
     	

@@ -159,6 +159,12 @@
       <div class="file">{{ (collectionsFile ? collectionsFile.name : '') }}</div>
     </div>
     <div class="inputGroup">
+      <input type="radio" name="parentCollection" id="parentCollectionRoot" [(ngModel)]="parentCollectionType" value="root">
+      <label for="parentCollectionRoot">{{'ADMIN.IMPORT.PARENT_COLLECTION_ROOT' | translate}}</label>
+      <input type="radio" name="parentCollection" id="parentCollectionChoose" [(ngModel)]="parentCollectionType" value="choose">
+      <label for="parentCollectionChoose">{{'ADMIN.IMPORT.PARENT_COLLECTION_CHOOSE' | translate}}</label>
+    </div>
+    <div class="inputGroup" *ngIf="parentCollectionType=='choose'">
       <a class="btn-flat btn-shadow" (click)="chooseCollection=true">{{'ADMIN.IMPORT.CHOOSE_COLLECTION' | translate}}</a>
       <div class="directory"><div *ngIf="parentCollection">{{ parentCollection.title}} ({{parentCollection.ref.id}})</div></div>
     </div>

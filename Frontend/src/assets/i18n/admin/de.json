@@ -70,6 +70,8 @@
       "CHOOSE_COLLECTIONS_XML":"XML/ZIP-Datei wählen",
       "CHOOSE_DIRECTORY":"Speicherort wählen",
       "CHOOSE_COLLECTION":"Übergeordnete Sammlung wählen",
+      "PARENT_COLLECTION_ROOT":"Auf Hauptebene importieren",
+      "PARENT_COLLECTION_CHOOSE":"Gewünschte Hauptsammlung wählen",
       "EXCEL_START":"Import Starten",
       "COLLECTION_START":"Import starten",
       "OAI":"OAI Data",
