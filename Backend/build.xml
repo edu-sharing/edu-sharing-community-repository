@@ -71,6 +71,8 @@
 		<replaceregexp match="git.commit:[a-zA-Z ]*\&lt;br/\&gt;" replace="git.commit: ${git.result}\&lt;br/\&gt;" flags="gs" byline="true">
 		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
+		<antcall target="release-extension-gitinfo"></antcall>
+		
 		<copyfile src="${src.dir}/org/edu_sharing/repository/public/version.html" dest="${gwt-war.dir}/${gwt-rename-to}/version.html" />
 		<delete dir="${release.foldername}" />
 		<mkdir dir="${release.foldername}" />
@@ -92,6 +94,19 @@
 		<!--clean up version tmp file -->
 		<delete file="version_tmp.properties"></delete>
 		
+	</target>
+	
+	<target name="release-extension-gitinfo" if="extension-name">
+		<exec executable="git" outputproperty="git.extension.result" dir="${extensions.path}${extension-name}">
+					<arg value="log" />
+					<arg value="-n1" />
+					<arg value="--format=%ad-%h" />
+					<arg value="--date=short" />
+		</exec>
+		
+		<replaceregexp match="git.extension.commit:[a-zA-Z ]*\&lt;br/\&gt;" replace="git.extension.commit: ${git.extension.result}\&lt;br/\&gt;" flags="gs" byline="true">
+			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
+		</replaceregexp>
 	</target>
 	
 	<!-- overwrite the config stuff-->
