@@ -35,8 +35,13 @@
     padding: 3px 0;
   }
 }
-:host /deep/ .datepickerShareLink .datepicker-calendar{
-  margin-left: 50px;
+:host /deep/{
+  .datepickerShareLink .datepicker-calendar {
+    margin-left: 50px;
+  }
+  .ngx-datepicker-container{
+    z-index: 1;
+  }
 }
 .linkTitle{
   margin-top: 20px;
