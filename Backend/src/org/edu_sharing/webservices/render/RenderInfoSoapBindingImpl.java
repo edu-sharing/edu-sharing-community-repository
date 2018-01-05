@@ -284,6 +284,9 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		HashMap<String, String[]> props2 = new HashMap<String, String[]>();
 		for(String key : props.keySet()){			
 			String keyLocal=CCConstants.getValidLocalName(key);
+			
+			if(props.get(key) == null) continue;
+			
 			String[] values=new ValueTool().getMultivalue(props.get(key).toString());
 			
 			if (values!=null && values.length > 0){
