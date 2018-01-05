@@ -13,7 +13,7 @@
     },
     "APPLICATIONS":{
       "URL":"Url",
-      "URL_HINT":"Geben Sie hier die URL für ein Repositorum an, welches Sie anbinden möchten",
+      "URL_HINT":"Geben Sie hier die URL für ein Repositorum oder Service an, welchen Sie anbinden möchten (z.B. Rendering-Service, moodle, mediawiki)",
       "ADD_URL":"anbinden",
       "APP_REGISTERED":"App wurde erfolgreich registriert",
       "SELECT_XML":"XML-Datei wählen",
