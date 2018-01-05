@@ -35,3 +35,9 @@ Run `ng github-pages:deploy` to deploy to GitHub Pages.
 To get more help on the `angular-cli` use `ng help` or go check out the [Angular-CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
 ## Build works but packaged electron apps wont :( Use project desktopApp.
+
+## Managing routes
+Routes are defined in the file /src/app/router.component.ts
+
+## Managing language
+Open the specific components lanaguge file, you can find them in src/assets/i18n/<component>/<language>.json 
