@@ -15,6 +15,7 @@ import {DECLARATIONS_ADMIN} from "./modules/admin/declarations";
 import {DECLARATIONS_MANAGEMENT_DIALOGS} from "./modules/management-dialogs/declarations";
 import {DECLARATIONS_MESSAGES} from "./modules/messages/declarations";
 import {DECLARATIONS_UPLOAD} from "./modules/upload/declarations";
+import {DECLARATIONS_STREAM} from "./modules/stream/declarations";
 
 
 
@@ -32,6 +33,7 @@ import {DECLARATIONS_UPLOAD} from "./modules/upload/declarations";
     DECLARATIONS_LOGIN,
     DECLARATIONS_PERMISSIONS,
     DECLARATIONS_OER,
+    DECLARATIONS_STREAM,
     DECLARATIONS_MANAGEMENT_DIALOGS,
     DECLARATIONS_ADMIN,
     DECLARATIONS_UPLOAD,
