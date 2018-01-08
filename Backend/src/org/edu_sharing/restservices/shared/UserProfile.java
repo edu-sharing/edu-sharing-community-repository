@@ -1,5 +1,7 @@
 package org.edu_sharing.restservices.shared;
 
+import java.util.List;
+
 import org.edu_sharing.repository.client.rpc.User;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,6 +17,8 @@ public class UserProfile  {
   private String lastName = null;
   private String email = null;
   private String avatar = null;
+  private String about = null;
+  private String[] skills = null;
 
   public UserProfile(){
 	  
@@ -63,13 +67,27 @@ public class UserProfile  {
     this.email = email;
   }
   
-  @JsonProperty("avatar")
-  public String getAvatar() {
-	return avatar;
-}
-public void setAvatar(String avatar) {
-	this.avatar = avatar;
-}
+	@JsonProperty("avatar")
+	public String getAvatar() {
+		return avatar;
+	}
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+	@JsonProperty("about")
+	public String getAbout() {
+		return about;
+	}
+	public void setAbout(String about) {
+		this.about = about;
+	}
+	@JsonProperty("skills")
+	public String[] getSkills() {
+		return skills;
+	}
+	public void setSkills(String[] skills) {
+		this.skills = skills;
+	}
 @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();

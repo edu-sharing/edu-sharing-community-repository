@@ -9,7 +9,9 @@
   <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
   <div class="sidenavImage">
     <img src="assets/images/layout/sidenav.jpg">
-    <div><i class="material-icons">account_circle</i>
+    <div>
+      <user-avatar *ngIf="user" [user]="user.person" [size]="'medium'" class="clickable" (click)="openProfile()"></user-avatar>
+      <!-- <i *ngIf="isGuest" class="material-icons">account_circle</i> -->
       <div *ngIf="user && !isGuest">{{userName}}</div>
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
     </div>
@@ -52,10 +54,11 @@
   </div>
 
   <div class="user clickable" *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
+      <user-avatar [user]="user.person" [size]="'small'"></user-avatar>
       <div *ngIf="!isGuest">{{userName}}</div>
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
       <i class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
-      <i class="material-icons barIcon iconPerson">account_circle</i>
+      <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
     </div>
     <div class="dialog" *ngIf="userOpen" (click)="userOpen=false" (keyup.enter)="userOpen=false" tabindex="0"></div>
     <div class="userMenu collection" [@overlay]="userOpen" *ngIf="userOpen">

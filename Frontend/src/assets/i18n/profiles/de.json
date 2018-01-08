@@ -3,6 +3,11 @@
     "TITLE": "Profil von {{ name }}",
     "TITLE_NAV": "Nutzer",
     "LOAD_ERROR": "Profil konnte nicht gefunden werden",
+    "EDIT":"Bearbeiten",
+    "CANCEL_EDIT":"Abbrechen",
+    "ABOUT_LABEL":"Über mich",
+    "NO_ABOUT":"Dieser Nutzer hat noch keine Beschreibung angelegt",
+    "NO_ABOUT_ME":"Ihre Profilbeschreibung ist leer\nBearbeiten Sie Ihr Profil, um eine Beschreibung anzulegen",
     "STATS":{
       "MATERIALS":"Materialien",
       "COLLECTIONS":"Sammlungen",

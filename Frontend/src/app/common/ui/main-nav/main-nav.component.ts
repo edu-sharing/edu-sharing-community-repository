@@ -218,6 +218,10 @@ export class MainNavComponent {
     this.userOpen=false;
     this.showProfile=true;
   }
+  public openProfile(){
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",RestConstants.ME]);
+    this.displaySidebar=false;
+  }
   public getCurrentScopeIcon(){
     if(this._currentScope=='login' || this._currentScope=='profiles')
       return 'person';

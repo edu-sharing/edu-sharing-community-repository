@@ -1,26 +1,78 @@
 @import "../../../styles/variables.scss";
 
+$path:'../../../assets/images/';
+
 .profiles{
-  margin-top: $mainnavHeight;
+  padding-top: $mainnavHeight;
   .name{
     font-size:140%;
     font-weight: bold;
   }
   .top{
+    position: relative;
     padding-top: 40px;
     padding-bottom: 20px;
-    background-color: #eee;
+    background: linear-gradient(to bottom, $primary,$primaryDark 100%);
     text-align: center;
+    color: $textOnPrimary;
+    a{
+      color: $textOnPrimary;
+    }
+    .mail{
+      opacity:0.75;
+    }
     user-avatar{
     }
+    input{
+      width: auto;
+      margin-bottom: 10px;
+    }
+    .edit{
+      position: absolute;
+      right:20px;
+      top:20px;
+    }
+    .editAvatar{
+      position: absolute;
+      left: calc(50% + 80px);
+      top: 85px;
+    }
+  }
+  .about,.stats,.authorityName{
+    max-width: 500px;
+    margin: auto;
+    padding:0 20px;
+  }
+  .about{
+    position: relative;
+    padding-left: 70px;
+    >div{
+      padding-top: 20px;
+    }
+    .profiles{
+      white-space: pre-line;
+    }
+    .empty{
+      color:$textVeryLight;
+    }
+    /* background: url($path + 'quotes.svg') 10px 0 no-repeat; */
+  }
+  .quotes{
+    position: absolute;
+    top:20px;
+    left:30px;
+  }
+  .statsBackground{
+    background-color: #fff;
+    width:100%;
+    @include materialShadow();
   }
   .stats{
-    padding-top: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
     display:flex;
-    max-width: 600px;
     text-align: center;
     flex-direction: row;
-    margin: auto;
     >div{
       display:flex;
       flex-direction: column;
@@ -37,5 +89,13 @@
     .value{
       font-size:30pt;
     }
+  }
+  .authorityName{
+    padding-top: 30px;
+  }
+  .save{
+    position: absolute;
+    bottom:20px;
+    right:20px;
   }
 }

@@ -1,22 +1,39 @@
+@import "../../../../styles/variables.scss";
+
 .avatarOuter{
   border-radius: 50%;
-  border:3px solid #ddd;
+  border:3px solid #fff;
   overflow: hidden;
   display:inline-block;
   img{
-    width: 100%;
     overflow: hidden;
+    object-fit: cover;
+    position: relative;
+    top:-3px;
+    left:-3px;
   }
 }
-.size_large{
+.size_large,.size_large img{
   width:120px;
   height:120px;
+  @include materialShadow();
 }
-.size_medium{
-  width:50px;
-  height:50px;
+.size_medium,.size_medium img{
+  width:70px;
+  height:70px;
+  @include materialShadow();
+  border-width: 2px;
 }
-.size_small{
+.size_medium img{
+  left: -2px;
+  top: -2px;
+}
+.size_small,.size_small img{
   width:20px;
   height:20px;
+  border-width: 1px;
+}
+.size_small img{
+  left: -1px;
+  top: -1px;
 }

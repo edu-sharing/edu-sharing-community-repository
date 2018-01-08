@@ -22,9 +22,13 @@ import {AuthorityNamePipe} from "../../common/ui/authority-name.pipe";
   ]
 })
 export class ProfilesComponent {
-  private user: User;
+  public user: User;
+  public userEdit: User;
+  public globalProgress = true;
+  public isMe: boolean;
+  public edit: boolean;
+  public avatarFile: any;
 
-  private globalProgress = true;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private title: Title,
@@ -34,17 +38,69 @@ export class ProfilesComponent {
               private iamService: RestIamService) {
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
         route.params.subscribe((params)=>{
-          this.iamService.getUser(params['authority']).subscribe((profile:IamUser)=>{
-            this.user=profile.person;
-            let name=new AuthorityNamePipe().transform(this.user,null);
-            UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config,{name:name});
-            this.globalProgress=false;
-          },(error:any)=>{
-            this.globalProgress=false;
-            this.toast.error(null,'PROFILES.LOAD_ERROR');
-          });
+          this.loadUser(params['authority']);
         });
       });
+  }
+  public loadUser(authority:string){
+    this.globalProgress=true;
+    this.iamService.getUser(authority).subscribe((profile:IamUser)=>{
+      this.user=profile.person;
+      console.log(this.user);
+      let name=new AuthorityNamePipe().transform(this.user,null);
+      UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config,{name:name});
+      this.globalProgress=false;
+      this.iamService.getUser().subscribe((profile:IamUser)=>{
+        this.isMe=profile.person.authorityName==this.user.authorityName;
+      })
+    },(error:any)=>{
+      this.globalProgress=false;
+      this.toast.error(null,'PROFILES.LOAD_ERROR');
+    });
+  }
+  public updateAvatar(event:any){
+    console.log(event);
+    if(event.srcElement.files && event.srcElement.files.length){
+      this.avatarFile=event.srcElement.files[0];
+    }
+  }
+  public beginEdit(){
+    this.userEdit=JSON.parse(JSON.stringify(this.user));
+    this.edit=true;
+    this.avatarFile=null;
+  }
+  public clearAvatar(){
+    this.avatarFile=null;
+    this.userEdit.profile.avatar=null;
+  }
+  public hasAvatar(){
+    return this.userEdit.profile.avatar || this.avatarFile;
+  }
+  public saveEdits(){
+    this.globalProgress=true;
+    this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=>{
+      if(!this.userEdit.profile.avatar && !this.avatarFile){
+        this.iamService.removeUserAvatar(this.user.authorityName).subscribe(()=>{
+          this.edit=false;
+          this.loadUser(this.user.authorityName);
+        });
+      }
+      else if(this.avatarFile){
+        this.iamService.setUserAvatar(this.avatarFile,this.user.authorityName).subscribe(()=>{
+          this.edit=false;
+          this.loadUser(this.user.authorityName);
+        });
+      }
+      else{
+        this.globalProgress=false;
+        this.edit=false;
+        this.loadUser(this.user.authorityName);
+      }
+
+    },(error:any)=>{
+      this.globalProgress=false;
+      this.toast.error(error);
+    });
   }
 }
 

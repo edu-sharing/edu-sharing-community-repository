@@ -271,14 +271,20 @@ user-profile{
     font-size: 25px;
   }
 }
-.topBar .scopeIcon{
-  margin-left: 13px;
-  position: relative;
-  top: 4px;
-  display:none;
-}
-.topBar .iconPerson{
-  display:none;
+.topBar{
+  .scopeIcon{
+    margin-left: 13px;
+    position: relative;
+    top: 4px;
+    display:none;
+  }
+  .iconPerson{
+    display:none;
+  }
+  user-avatar{
+    position: relative;
+    right:5px;
+  }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .searchInputGroup{
@@ -301,6 +307,9 @@ user-profile{
   .topBar {
     .iconPerson {
       display: inherit;
+    }
+    user-avatar{
+      top:2px;
     }
     .iconArrow {
       display: none;

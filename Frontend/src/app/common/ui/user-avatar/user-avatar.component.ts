@@ -17,6 +17,19 @@ export class UserAvatarComponent {
    * either small, medium or large
    */
   @Input() size = 'large';
+
+  private _customImage:any;
+  @Input() set customImage(customImage:File){
+    if(customImage==null){
+      this._customImage=null;
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = (e:any) => {
+      this._customImage=e.target.result;
+    }
+    reader.readAsDataURL(customImage);
+  };
   constructor() {
   }
 }

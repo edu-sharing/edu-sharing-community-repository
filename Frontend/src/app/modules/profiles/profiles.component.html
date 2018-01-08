@@ -7,36 +7,74 @@
 <global-progress *ngIf="globalProgress"></global-progress>
 <div class="profiles" *ngIf="user">
   <div class="top">
-    <user-avatar
-    [user]="user"
+    <a class="edit clickable" *ngIf="isMe && !edit" (click)="beginEdit()">{{'PROFILES.EDIT' | translate}}</a>
+    <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false">{{'PROFILES.CANCEL_EDIT' | translate}}</a>
+    <user-avatar *ngIf="!edit"
+     [user]="user"
     ></user-avatar>
-    <div class="name">{{user | authorityName}}</div>
-    <div class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
-  </div>
-  <div class="stats">
-    <div>
-      <div class="stat">
-        {{'PROFILES.STATS.MATERIALS' | translate}}
-      </div>
-      <div class="value">
-        {{ user.stats.nodeCount }}
-      </div>
+    <user-avatar *ngIf="edit"
+     [user]="userEdit"
+     [customImage]="avatarFile"
+    ></user-avatar>
+    <div *ngIf="edit" class="editAvatar">
+      <input #avatar type="file" (change)="updateAvatar($event)" accept="image/*" class="hide">
+      <i class="material-icons clickable" (click)="avatar.click()">edit</i>
+      <i *ngIf="hasAvatar()" class="material-icons clickable" (click)="clearAvatar()">delete</i>
     </div>
-    <div>
-      <div class="stat">
-        {{'PROFILES.STATS.COLLECTIONS' | translate}}
-      </div>
-      <div class="value">
-        {{ user.stats.collectionCount }}
-      </div>
+    <div *ngIf="!edit">
+      <div class="name">{{user | authorityName}}</div>
+      <div class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
     </div>
-    <div>
-      <div class="stat">
-        {{'PROFILES.STATS.MATERIALS_CC' | translate}}
-      </div>
-      <div class="value">
-        {{ user.stats.nodeCountCC }}
+    <div *ngIf="edit">
+      <input type="text" [(ngModel)]="userEdit.profile.firstName" placeholder="{{'USER.firstName' | translate}}">
+      <input type="text" [(ngModel)]="userEdit.profile.lastName" placeholder="{{'USER.lastName' | translate}}">
+      <div class="email">
+        <input type="email" [(ngModel)]="userEdit.profile.email" placeholder="{{'USER.email' | translate}}">
       </div>
     </div>
   </div>
+  <div class="statsBackground">
+    <div class="stats">
+      <div>
+        <div class="stat">
+          {{'PROFILES.STATS.MATERIALS' | translate}}
+        </div>
+        <div class="value">
+          {{ user.stats.nodeCount }}
+        </div>
+      </div>
+      <div>
+        <div class="stat">
+          {{'PROFILES.STATS.COLLECTIONS' | translate}}
+        </div>
+        <div class="value">
+          {{ user.stats.collectionCount }}
+        </div>
+      </div>
+      <div>
+        <div class="stat">
+          {{'PROFILES.STATS.MATERIALS_CC' | translate}}
+        </div>
+        <div class="value">
+          {{ user.stats.nodeCountCC }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="about">
+    <img class="quotes" src="assets/images/quotes.svg">
+    <div *ngIf="edit">
+      <label for="about">{{'PROFILES.ABOUT_LABEL' | translate}}</label>
+      <textarea id="about" class="materialize-textarea" [(ngModel)]="userEdit.profile.about"></textarea>
+    </div>
+    <div *ngIf="!edit">
+      <div *ngIf="user.profile.about" class="profile">{{user.profile.about}}</div>
+      <div *ngIf="!user.profile.about" class="empty">{{'PROFILES.NO_ABOUT'+(isMe ? "_ME" : "") | translate}}</div>
+    </div>
+  </div>
+  <div class="authorityName">
+    <label>{{'USER.authorityName' | translate}}</label>
+    <div>{{ user.authorityName }}</div>
+  </div>
+  <div *ngIf="edit" class="save btn waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
 </div>

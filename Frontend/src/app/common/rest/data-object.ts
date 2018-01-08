@@ -199,6 +199,9 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
+  avatar: string;
+  about: string;
+  skills: string[];
 }
 export interface UserStats {
   nodeCount: number;
