@@ -1,0 +1,22 @@
+.avatarOuter{
+  border-radius: 50%;
+  border:3px solid #ddd;
+  overflow: hidden;
+  display:inline-block;
+  img{
+    width: 100%;
+    overflow: hidden;
+  }
+}
+.size_large{
+  width:120px;
+  height:120px;
+}
+.size_medium{
+  width:50px;
+  height:50px;
+}
+.size_small{
+  width:20px;
+  height:20px;
+}

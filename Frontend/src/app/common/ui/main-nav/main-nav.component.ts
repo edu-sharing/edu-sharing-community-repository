@@ -219,7 +219,7 @@ export class MainNavComponent {
     this.showProfile=true;
   }
   public getCurrentScopeIcon(){
-    if(this._currentScope=='login')
+    if(this._currentScope=='login' || this._currentScope=='profiles')
       return 'person';
 
     for(let button of this.sidebarButtons){

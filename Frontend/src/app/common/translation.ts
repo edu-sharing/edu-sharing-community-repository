@@ -12,7 +12,7 @@ import {ActivatedRoute} from "@angular/router";
 import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
 
-export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','override'];
+export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','profiles','messages','override'];
 
 export class Translation  {
   private static language : string;

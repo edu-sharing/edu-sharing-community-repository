@@ -1,0 +1,41 @@
+@import "../../../styles/variables.scss";
+
+.profiles{
+  margin-top: $mainnavHeight;
+  .name{
+    font-size:140%;
+    font-weight: bold;
+  }
+  .top{
+    padding-top: 40px;
+    padding-bottom: 20px;
+    background-color: #eee;
+    text-align: center;
+    user-avatar{
+    }
+  }
+  .stats{
+    padding-top: 10px;
+    display:flex;
+    max-width: 600px;
+    text-align: center;
+    flex-direction: row;
+    margin: auto;
+    >div{
+      display:flex;
+      flex-direction: column;
+      flex-grow: 1;
+      align-items: center;
+      padding:0 10px;
+      >div{
+        display: flex;
+      }
+    }
+    .stat{
+      color: $textLight;
+    }
+    .value{
+      font-size:30pt;
+    }
+  }
+}

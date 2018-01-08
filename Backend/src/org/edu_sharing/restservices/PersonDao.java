@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.search.impl.solr.facet.Exceptions.IllegalArgument;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
@@ -16,9 +17,11 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
+import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -27,13 +30,19 @@ import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.restservices.shared.UserStats;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.oracle.jrockit.jfr.ContentType;
 
 public class PersonDao {
 
@@ -104,6 +113,7 @@ public class PersonDao {
 	private final List<String> sharedFolderIds = new ArrayList<String>();
 
 	private NodeService nodeService;
+	private SearchService searchService;
 	
 	public PersonDao(RepositoryDao repoDao, String userName) throws DAOException  {
 
@@ -111,6 +121,7 @@ public class PersonDao {
 			
 			this.baseClient = repoDao.getBaseClient();
 			this.nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
+			this.searchService = SearchServiceFactory.getSearchService(repoDao.getId());
 
 			this.repoDao = repoDao;
 
@@ -226,6 +237,7 @@ public class PersonDao {
     	
     	
     	data.setProfile(getProfile());
+    	data.setStats(getStats());
     	
     	NodeRef homeDir = new NodeRef();
     	homeDir.setRepo(repoDao.getId());
@@ -252,6 +264,33 @@ public class PersonDao {
     	profile.setEmail(getEmail());
     	profile.setAvatar(getAvatar());
     	return profile;
+	}
+	private UserStats getStats() {
+		UserStats stats = new UserStats();
+		// run as admin so solr counts all materials and collections
+		return AuthenticationUtil.runAsSystem(new RunAsWork<UserStats>() {
+
+			@Override
+			public UserStats doWork() throws Exception {
+				String luceneUser = "@cm\\:creator:\""+QueryParser.escape(getAuthorityName())+"\"";
+				SearchToken token=new SearchToken();
+				token.setMaxResult(0);
+				token.setLuceneString(luceneUser);
+				token.setContentType(SearchService.ContentType.FILES_AND_FOLDERS);
+		    	SearchResultNodeRef result = searchService.search(token);
+		    	stats.setNodeCount(result.getNodeCount());
+		    	
+		    	token.setLuceneString(luceneUser+" AND @ccm\\:commonlicense_key:\"CC_*\"");
+		    	result = searchService.search(token);
+		    	stats.setNodeCountCC(result.getNodeCount());
+		    	
+		    	token.setLuceneString(luceneUser);
+		    	token.setContentType(SearchService.ContentType.COLLECTIONS);
+		    	result = searchService.search(token);
+		    	stats.setCollectionCount(result.getNodeCount());
+				return stats;
+			}
+		});		
 	}
 
 	private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {

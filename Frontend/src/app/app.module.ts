@@ -15,6 +15,7 @@ import {DECLARATIONS_ADMIN} from "./modules/admin/declarations";
 import {DECLARATIONS_MANAGEMENT_DIALOGS} from "./modules/management-dialogs/declarations";
 import {DECLARATIONS_MESSAGES} from "./modules/messages/declarations";
 import {DECLARATIONS_UPLOAD} from "./modules/upload/declarations";
+import {DECLARATIONS_PROFILES} from "./modules/profiles/declarations";
 
 
 
@@ -35,6 +36,7 @@ import {DECLARATIONS_UPLOAD} from "./modules/upload/declarations";
     DECLARATIONS_MANAGEMENT_DIALOGS,
     DECLARATIONS_ADMIN,
     DECLARATIONS_UPLOAD,
+    DECLARATIONS_PROFILES,
     DECLARATIONS_MESSAGES
   ],
   imports: [

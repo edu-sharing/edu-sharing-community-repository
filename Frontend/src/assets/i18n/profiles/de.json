@@ -1,0 +1,12 @@
+{
+  "PROFILES": {
+    "TITLE": "Profil von {{ name }}",
+    "TITLE_NAV": "Nutzer",
+    "LOAD_ERROR": "Profil konnte nicht gefunden werden",
+    "STATS":{
+      "MATERIALS":"Materialien",
+      "COLLECTIONS":"Sammlungen",
+      "MATERIALS_CC":"CC-Materialien"
+    }
+  }
+}

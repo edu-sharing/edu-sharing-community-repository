@@ -34,6 +34,7 @@
   import {BannerComponent} from "./common/ui/banner/banner.component";
   import {SmallCollectionComponent} from "./common/ui/small-collection/small-collection.component";
   import {CollectionChooserComponent} from "./common/ui/collection-chooser/collection-chooser.component";
+  import {UserAvatarComponent} from "./common/ui/user-avatar/user-avatar.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -61,6 +62,7 @@ export const DECLARATIONS = [
       SmallCollectionComponent,
       MainNavComponent,
       UserProfileComponent,
+      UserAvatarComponent,
       MdsComponent,
       RouterComponent,
       FileDropDirective,

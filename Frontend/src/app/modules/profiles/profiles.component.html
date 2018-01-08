@@ -1,0 +1,42 @@
+<main-nav
+  [title]="'PROFILES.TITLE_NAV'"
+  [currentScope]="'profiles'"
+  [searchEnabled]="false"
+></main-nav>
+
+<global-progress *ngIf="globalProgress"></global-progress>
+<div class="profiles" *ngIf="user">
+  <div class="top">
+    <user-avatar
+    [user]="user"
+    ></user-avatar>
+    <div class="name">{{user | authorityName}}</div>
+    <div class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
+  </div>
+  <div class="stats">
+    <div>
+      <div class="stat">
+        {{'PROFILES.STATS.MATERIALS' | translate}}
+      </div>
+      <div class="value">
+        {{ user.stats.nodeCount }}
+      </div>
+    </div>
+    <div>
+      <div class="stat">
+        {{'PROFILES.STATS.COLLECTIONS' | translate}}
+      </div>
+      <div class="value">
+        {{ user.stats.collectionCount }}
+      </div>
+    </div>
+    <div>
+      <div class="stat">
+        {{'PROFILES.STATS.MATERIALS_CC' | translate}}
+      </div>
+      <div class="value">
+        {{ user.stats.nodeCountCC }}
+      </div>
+    </div>
+  </div>
+</div>
