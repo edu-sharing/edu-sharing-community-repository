@@ -6,6 +6,7 @@
 
 <global-progress *ngIf="globalProgress"></global-progress>
 <div class="profiles" *ngIf="user">
+  <div class="main">
   <div class="top">
     <img *ngIf="user.profile.avatar" class="background" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
     <a class="edit clickable" *ngIf="isMe && !edit" (click)="beginEdit()"><i class="material-icons">edit</i>{{'PROFILES.EDIT' | translate}}</a>
@@ -94,5 +95,8 @@
       <input type="password" id="passwordRepeat" name="passwordRepeat" [(ngModel)]="passwordRepeat" required="true">
     </div>
   </div>
-  <div *ngIf="edit" class="save btn waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
+  </div>
+  <div class="save">
+    <div *ngIf="edit" class="btn waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
+  </div>
 </div>

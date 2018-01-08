@@ -3,6 +3,9 @@
 $path:'../../../assets/images/';
 
 .profiles{
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   padding-top: $mainnavHeight;
   padding-bottom: 20px;
   .name{
@@ -135,9 +138,15 @@ $path:'../../../assets/images/';
   .authorityName{
     padding-top: 30px;
   }
+
+  .main{
+    flex-grow: 1;
+  }
   .save{
-    position: absolute;
-    bottom:20px;
-    right:20px;
+    width:100%;
+    padding-right: 20px;
+    div {
+      float: right;
+    }
   }
 }
