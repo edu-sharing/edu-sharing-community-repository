@@ -68,8 +68,8 @@
          tabindex="0"
          title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
       <a *ngIf="showEditProfile && !isGuest" class="collection-item"
-         (click)="openProfileDialog()"
-         (keyup.enter)="openProfileDialog()"
+         (click)="openProfile()"
+         (keyup.enter)="openProfile()"
          tabindex="0"
          title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
 

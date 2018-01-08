@@ -12,6 +12,11 @@
       "MATERIALS":"Materialien",
       "COLLECTIONS":"Sammlungen",
       "MATERIALS_CC":"CC-Materialien"
+    },
+    "ERROR":{
+      "FIRST_NAME":"Bitte Vornamen angeben",
+      "LAST_NAME":"Bitte Nachnamen angeben",
+      "EMAIL":"Bitte E-Mail angeben"
     }
   }
 }

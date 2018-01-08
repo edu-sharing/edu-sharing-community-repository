@@ -7,8 +7,9 @@
 <global-progress *ngIf="globalProgress"></global-progress>
 <div class="profiles" *ngIf="user">
   <div class="top">
-    <a class="edit clickable" *ngIf="isMe && !edit" (click)="beginEdit()">{{'PROFILES.EDIT' | translate}}</a>
-    <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false">{{'PROFILES.CANCEL_EDIT' | translate}}</a>
+    <img *ngIf="user.profile.avatar" class="background" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
+    <a class="edit clickable" *ngIf="isMe && !edit" (click)="beginEdit()"><i class="material-icons">edit</i>{{'PROFILES.EDIT' | translate}}</a>
+    <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i class="material-icons">close</i>{{'PROFILES.CANCEL_EDIT' | translate}}</a>
     <user-avatar *ngIf="!edit"
      [user]="user"
     ></user-avatar>
@@ -75,6 +76,23 @@
   <div class="authorityName">
     <label>{{'USER.authorityName' | translate}}</label>
     <div>{{ user.authorityName }}</div>
+  </div>
+  <div class="changePassword" *ngIf="edit">
+    <div class="toggle" (click)="changePassword=!changePassword">
+      <div class="clickable">
+        <i class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
+        <i class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
+        {{'CHANGE_PASSWORD' | translate}}
+      </div>
+    </div>
+    <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
+      <label for="oldPassword">{{'OLD_PASSWORD' | translate }}</label>
+      <input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="oldPassword" required="true">
+      <label for="password">{{'NEW_PASSWORD' | translate }}</label>
+      <input type="password" id="password" name="password" [(ngModel)]="password" required="true">
+      <label for="passwordRepeat">{{'NEW_PASSWORD_REPEAT' | translate }}</label>
+      <input type="password" id="passwordRepeat" name="passwordRepeat" [(ngModel)]="passwordRepeat" required="true">
+    </div>
   </div>
   <div *ngIf="edit" class="save btn waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
 </div>

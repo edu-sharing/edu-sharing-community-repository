@@ -221,6 +221,7 @@ export class MainNavComponent {
   public openProfile(){
     this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",RestConstants.ME]);
     this.displaySidebar=false;
+    this.userOpen=false;
   }
   public getCurrentScopeIcon(){
     if(this._currentScope=='login' || this._currentScope=='profiles')

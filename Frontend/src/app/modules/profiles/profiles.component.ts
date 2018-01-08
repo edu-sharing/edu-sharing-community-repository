@@ -12,13 +12,18 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {RestIamService} from "../../common/rest/services/rest-iam.service";
 import {IamUser, User} from "../../common/rest/data-object";
 import {AuthorityNamePipe} from "../../common/ui/authority-name.pipe";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../common/ui/ui-animation";
+import {UserProfileComponent} from "../../common/ui/user-profile/user-profile.component";
+import {RestConstants} from "../../common/rest/rest-constants";
+import {RestHelper} from "../../common/rest/rest-helper";
 
 @Component({
   selector: 'app-profiles',
   templateUrl: 'profiles.component.html',
   styleUrls: ['profiles.component.scss'],
   animations: [
-
+    trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
 export class ProfilesComponent {
@@ -28,6 +33,11 @@ export class ProfilesComponent {
   public isMe: boolean;
   public edit: boolean;
   public avatarFile: any;
+  public changePassword: boolean;
+  public oldPassword="";
+  public password="";
+  public passwordRepeat="";
+  private static PASSWORD_MIN_LENGTH = 5;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -67,7 +77,11 @@ export class ProfilesComponent {
   public beginEdit(){
     this.userEdit=JSON.parse(JSON.stringify(this.user));
     this.edit=true;
+    this.changePassword=false;
     this.avatarFile=null;
+    this.password="";
+    this.oldPassword="";
+    this.passwordRepeat="";
   }
   public clearAvatar(){
     this.avatarFile=null;
@@ -76,31 +90,76 @@ export class ProfilesComponent {
   public hasAvatar(){
     return this.userEdit.profile.avatar || this.avatarFile;
   }
+  public savePassword(){
+    if(this.changePassword){
+      if(this.password.length<ProfilesComponent.PASSWORD_MIN_LENGTH){
+        this.toast.error(null,'PASSWORD_MIN_LENGTH',{length:ProfilesComponent.PASSWORD_MIN_LENGTH});
+        this.globalProgress=false;
+        return;
+      }
+      if(this.password!=this.passwordRepeat){
+        this.toast.error(null,'PASSWORD_NOT_MATCH');
+        this.globalProgress=false;
+        return;
+      }
+      let credentials={oldPassword:this.oldPassword,newPassword:this.password};
+      this.iamService.editUserCredentials(RestConstants.ME,credentials).subscribe(()=>{
+        this.saveAvatar();
+      },(error:any)=>{
+        if(RestHelper.errorMessageContains(error,"BadCredentialsException")){
+          this.toast.error(null,"WRONG_PASSWORD");
+          this.globalProgress=false;
+        }
+        else {
+          this.toast.error(error);
+          this.saveAvatar();
+        }
+      });
+    }
+    else{
+      this.saveAvatar();
+    }
+  }
   public saveEdits(){
+    if(!this.userEdit.profile.firstName.trim()){
+      this.toast.error(null,'PROFILES.ERROR.FIRST_NAME');
+      return;
+    }
+    if(!this.userEdit.profile.lastName.trim()){
+      this.toast.error(null,'PROFILES.ERROR.LAST_NAME');
+      return;
+    }
+    if(!this.userEdit.profile.email.trim()){
+      this.toast.error(null,'PROFILES.ERROR.EMAIL');
+      return;
+    }
     this.globalProgress=true;
     this.iamService.editUser(this.user.authorityName,this.userEdit.profile).subscribe(()=>{
-      if(!this.userEdit.profile.avatar && !this.avatarFile){
-        this.iamService.removeUserAvatar(this.user.authorityName).subscribe(()=>{
-          this.edit=false;
-          this.loadUser(this.user.authorityName);
-        });
-      }
-      else if(this.avatarFile){
-        this.iamService.setUserAvatar(this.avatarFile,this.user.authorityName).subscribe(()=>{
-          this.edit=false;
-          this.loadUser(this.user.authorityName);
-        });
-      }
-      else{
-        this.globalProgress=false;
-        this.edit=false;
-        this.loadUser(this.user.authorityName);
-      }
-
+      this.savePassword();
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
     });
+  }
+
+  private saveAvatar() {
+    if(!this.userEdit.profile.avatar && !this.avatarFile){
+      this.iamService.removeUserAvatar(this.user.authorityName).subscribe(()=>{
+        this.edit=false;
+        this.loadUser(this.user.authorityName);
+      });
+    }
+    else if(this.avatarFile){
+      this.iamService.setUserAvatar(this.avatarFile,this.user.authorityName).subscribe(()=>{
+        this.edit=false;
+        this.loadUser(this.user.authorityName);
+      });
+    }
+    else{
+      this.globalProgress=false;
+      this.edit=false;
+      this.loadUser(this.user.authorityName);
+    }
   }
 }
 
