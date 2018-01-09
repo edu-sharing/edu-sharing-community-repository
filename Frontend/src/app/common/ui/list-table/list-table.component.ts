@@ -16,7 +16,7 @@ import {KeyEvents} from "../key-events";
 import {FrameEventsService,EventListener} from "../../services/frame-events.service";
 import {ConfigurationService} from "../../services/configuration.service";
 import {RestHelper} from "../../rest/rest-helper";
-import {trigger} from "@angular/animations";
+import {animate, sequence, style, transition, trigger} from "@angular/animations";
 import {ListItem} from "../list-item";
 import {UIHelper} from "../ui-helper";
 
@@ -26,7 +26,19 @@ import {UIHelper} from "../ui-helper";
   styleUrls: ['list-table.component.scss'],
   animations: [
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
-    trigger('openOverlayBottom', UIAnimation.openOverlayBottom(UIAnimation.ANIMATION_TIME_FAST))
+    trigger('openOverlayBottom', UIAnimation.openOverlayBottom(UIAnimation.ANIMATION_TIME_FAST)),
+    trigger('orderAnimation', [
+        transition('* => void', [
+          sequence([
+            animate(UIAnimation.ANIMATION_TIME_SLOW+"ms ease", style({ opacity: 0 }))
+          ])
+        ]),
+        transition('void => *', [
+          sequence([
+            animate(UIAnimation.ANIMATION_TIME_SLOW+"ms ease", style({ opacity: 1 }))
+          ])
+        ])
+      ])
   ],
   // Causes action menu not to align properly
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -347,7 +359,7 @@ export class ListTableComponent implements EventListener{
   private allowDrag(event:any,target:Node){
     if(this.orderElements){
       let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
-      if(source.view==this.id && source.nodes.length==1){
+      if(source.view==this.id && source.nodes.length==1 && source.nodes[0].ref.id!=target.ref.id){
         console.log(source);
         this.orderElementsActive=true;
         this.orderElementsActiveChange.emit(true);

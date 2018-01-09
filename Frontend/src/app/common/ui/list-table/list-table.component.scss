@@ -357,7 +357,7 @@ $badgeWidth:200px;
 $strength:0.75deg;
 
 @keyframes OrderAnimation {
-  0% {    transform:rotate(0);  }
+  0% {     transform:rotate(-$strength*random(1));  }
   10% {    transform:rotate($strength*random(1));  }
   20% {    transform:rotate(-$strength*random(1));  }
   30% {    transform:rotate($strength*random(1));  }
@@ -367,8 +367,7 @@ $strength:0.75deg;
   70% {    transform:rotate($strength*random(1));  }
   80% {    transform:rotate(-$strength*random(1));  }
   90% {    transform:rotate($strength*random(1));  }
-  100% {    transform:rotate(0);  }
-
+  100% {   transform:rotate(-$strength*random(1));  }
 }
 $orderAnimationTime:$animationTime*5;
 .order-animation {

@@ -69,6 +69,7 @@
       </div>
     </div>
     <div *ngFor="let node of _nodes; let i = index" class="collection-item rowFrame"
+         [@orderAnimation]="node.ref"
          [class.order-animation]="orderElementsActive"
          [class.nodeCollection]="isCollection(node)"
          [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
