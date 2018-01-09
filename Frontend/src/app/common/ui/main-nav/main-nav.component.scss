@@ -196,6 +196,7 @@ user-profile{
   position: relative;
   top:5px;
   display: table;
+  margin-right: 7px;
 }
 
 .topBar .user div{
@@ -283,7 +284,7 @@ user-profile{
   }
   user-avatar{
     position: relative;
-    right:5px;
+    margin-right: 7px;
   }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {

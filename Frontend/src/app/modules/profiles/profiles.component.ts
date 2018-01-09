@@ -38,6 +38,8 @@ export class ProfilesComponent {
   public password="";
   public passwordRepeat="";
   private static PASSWORD_MIN_LENGTH = 5;
+  private editProfile: boolean;
+  private editProfileUrl: string;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -49,6 +51,8 @@ export class ProfilesComponent {
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
         route.params.subscribe((params)=>{
           this.loadUser(params['authority']);
+          this.editProfileUrl=this.config.instant("editProfileUrl");
+          this.editProfile=this.config.instant("editProfile",true);
         });
       });
   }
@@ -56,7 +60,6 @@ export class ProfilesComponent {
     this.globalProgress=true;
     this.iamService.getUser(authority).subscribe((profile:IamUser)=>{
       this.user=profile.person;
-      console.log(this.user);
       let name=new AuthorityNamePipe().transform(this.user,null);
       UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config,{name:name});
       this.globalProgress=false;
@@ -69,12 +72,15 @@ export class ProfilesComponent {
     });
   }
   public updateAvatar(event:any){
-    console.log(event);
     if(event.srcElement.files && event.srcElement.files.length){
       this.avatarFile=event.srcElement.files[0];
     }
   }
   public beginEdit(){
+    if(this.editProfileUrl){
+      window.location.href=this.editProfileUrl;
+      return;
+    }
     this.userEdit=JSON.parse(JSON.stringify(this.user));
     this.edit=true;
     this.changePassword=false;

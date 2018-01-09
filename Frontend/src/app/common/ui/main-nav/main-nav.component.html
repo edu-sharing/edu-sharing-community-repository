@@ -62,12 +62,7 @@
     </div>
     <div class="dialog" *ngIf="userOpen" (click)="userOpen=false" (keyup.enter)="userOpen=false" tabindex="0"></div>
     <div class="userMenu collection" [@overlay]="userOpen" *ngIf="userOpen">
-      <a *ngIf="editUrl && !isGuest" class="collection-item"
-         (click)="editProfile()"
-         (keyup.enter)="editProfile()"
-         tabindex="0"
-         title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
-      <a *ngIf="showEditProfile && !isGuest" class="collection-item"
+      <a *ngIf="!isGuest" class="collection-item"
          (click)="openProfile()"
          (keyup.enter)="openProfile()"
          tabindex="0"
