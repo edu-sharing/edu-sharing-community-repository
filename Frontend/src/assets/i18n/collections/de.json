@@ -82,26 +82,11 @@
     "collections_noContentAvailable" : "Hier sind noch keine Materialien vorhanden.",
     "collections_howToAddContent" : "Sie können in der Suchumgebung nach geeigneten Materialien für ihre Sammlung suchen. Klicken sie einfach auf ein geeignetes Material und wählen sie dann die Option 'zu Sammlung hinzufügen' aus.",
 
-    "collections_reload" : "Neu laden",
-
-
-
-
-    "collectionNew" : "*********************** +collection-new component *************************************",
-
-    "collectionNew_setAccess" : "Wer hat Zugriff auf diese Sammlung?",
-    "collectionNew_setAccessOnlyMe" : "nur ich",
-    "collectionNew_setAccessMyOrga" : "meine Gruppen dürfen sehen",
-    "collectionNew_setAccessMyOrgaNA" : "meine Gruppen (noch keinen zugeordnet)",
-    "collectionNew_setAccessPublic" : "alle dürfen sehen",
-
-
     "collectionNew_preview" : "Vorschau meiner Sammlung",
     "collectionNew_setColor" : "Farbe für diese Sammlung:",
     "collectionNew_createCollection" : "erstellen",
     "collectionNew_storeChanges" : "speichern",
 
-    "collectionNew_reload" : "Neu laden",
     "collectionNew_placeholderTitle" : "Titel Ihrer Sammlung...",
     "collectionNew_placeholderDescription" : "Worum geht es in Ihrer Sammlung?"
 

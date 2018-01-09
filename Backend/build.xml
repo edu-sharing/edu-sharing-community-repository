@@ -68,7 +68,7 @@
 		<replaceregexp match="version.extension:[a-zA-Z ]*\&lt;br/\&gt;" replace="version.extension: ${extension-name}\&lt;br/\&gt;" flags="gs" byline="true">
 		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
-		<replaceregexp match="git.commit:[a-zA-Z ]*\&lt;br/\&gt;" replace="git.commit: ${git.result}\&lt;br/\&gt;" flags="gs" byline="true">
+		<replaceregexp match="git.commit:[a-zA-Z0-9\- ]*\&lt;br/\&gt;" replace="git.commit: ${git.result}\&lt;br/\&gt;" flags="gs" byline="true">
 		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
 		<antcall target="release-extension-gitinfo"></antcall>
@@ -109,7 +109,7 @@
 					<arg value="--date=short" />
 		</exec>
 		
-		<replaceregexp match="git.extension.commit:[a-zA-Z ]*\&lt;br/\&gt;" replace="git.extension.commit: ${git.extension.result}\&lt;br/\&gt;" flags="gs" byline="true">
+		<replaceregexp match="git.extension.commit:[a-zA-Z0-9\- ]*\&lt;br/\&gt;" replace="git.extension.commit: ${git.extension.result}\&lt;br/\&gt;" flags="gs" byline="true">
 			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
 	</target>

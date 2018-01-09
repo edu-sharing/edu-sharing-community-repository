@@ -184,8 +184,9 @@ export class SearchComponent {
 
         this.network.getRepositories().subscribe((data: NetworkRepositories) => {
           this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
-          if(this.repositories.length && Helper.indexOfObjectArray(this.repositories,this.currentRepository,'id')==-1){
-            console.log("current repository is restricted by context, switching to primary "+this.repositories[0].id);
+          if(this.repositories.length && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
+            console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+this.repositories[0].id);
+            console.log(this.repositories);
             this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
           }
           if (this.repositories.length < 2) {

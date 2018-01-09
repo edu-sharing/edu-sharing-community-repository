@@ -224,12 +224,8 @@ public class PersonDao {
     	
     	data.setUserName(getUserName());
     	
-    	UserProfile profile = new UserProfile();
-    	profile.setFirstName(getFirstName());
-    	profile.setLastName(getLastName());
-    	profile.setEmail(getEmail());
-    	profile.setAvatar(getAvatar());
-    	data.setProfile(profile);
+    	
+    	data.setProfile(getProfile());
     	
     	NodeRef homeDir = new NodeRef();
     	homeDir.setRepo(repoDao.getId());
@@ -249,6 +245,15 @@ public class PersonDao {
 
     	return data;
 	}
+	private UserProfile getProfile() {
+		UserProfile profile = new UserProfile();
+    	profile.setFirstName(getFirstName());
+    	profile.setLastName(getLastName());
+    	profile.setEmail(getEmail());
+    	profile.setAvatar(getAvatar());
+    	return profile;
+	}
+
 	private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
 		List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
 		for(ChildAssociationRef ref : refs) {
@@ -296,12 +301,7 @@ public class PersonDao {
     	data.setAuthorityName(getAuthorityName());
     	data.setAuthorityType(Authority.Type.USER);    	
     	data.setUserName(getUserName());    	
-    	UserProfile profile = new UserProfile();
-    	profile.setFirstName(getFirstName());
-    	profile.setLastName(getLastName());
-    	profile.setEmail(getEmail());
-    	profile.setAvatar(getAvatar());
-    	data.setProfile(profile);
+    	data.setProfile(getProfile());
     	
     	NodeRef homeDir = new NodeRef();
     	homeDir.setRepo(repoDao.getId());
