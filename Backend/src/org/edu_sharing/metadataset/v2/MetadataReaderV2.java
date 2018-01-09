@@ -87,6 +87,12 @@ public class MetadataReaderV2 {
 			String inheritName=mds.getInherit()+".xml";
 			reader=new MetadataReaderV2(inheritName,locale);
 			MetadataSetV2 mdsInherit = reader.getMetadatasetForFile(inheritName);
+			try{
+				reader=new MetadataReaderV2(mds.getInherit()+"_override.xml",locale);
+				MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(inheritName);
+				mdsInherit.overrideWith(mdsOverride);
+			}catch(IOException e){
+			}
 			mdsInherit.overrideWith(mds);
 			mds=mdsInherit;
 		}
