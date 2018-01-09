@@ -1136,7 +1136,7 @@ export class MdsComponent{
     }
     if(widget.values) {
       for (let value of widget.values) {
-        if (value.disabled || value.parent)
+        if (value.disabled/* || value.parent*/) // find all fields, not only main nodes of a tree
           continue;
         html += this.getListEntry(widget.id,value.id,value.caption,singleValue);
       }

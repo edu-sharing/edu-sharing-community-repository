@@ -106,6 +106,13 @@ mds .mdsGroup{
   }
   .collection-item{
     min-height:36px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* number of lines to show */
+    line-height: 2em;        /* fallback */
+    max-height: 4em;       /* fallback */
   }
 
   .suggestInput{
