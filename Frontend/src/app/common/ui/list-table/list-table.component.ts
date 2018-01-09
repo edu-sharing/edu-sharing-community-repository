@@ -153,6 +153,11 @@ export class ListTableComponent implements EventListener{
    */
   @Input() dragDrop = false;
   /**
+   * Can the content be re-ordered via drag and drop? (requires dragDrop to be enabled)
+   * @type {boolean}
+   */
+  @Input() orderElements = false;
+  /**
    * Is reordering of columns via settings menu allowed
    * @type {Array}
    */
@@ -314,6 +319,12 @@ export class ListTableComponent implements EventListener{
     }
   }
   private allowDrag(event:any,target:Node){
+    if(this.orderElements){
+      let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
+      if(source.id==this.id && source.nodes.length==1){
+        console.log(source);
+      }
+    }
     if(UIHelper.handleAllowDragEvent(this.storage,this.ui,event,target,this.canDrop)) {
       this.dragHover = target;
     }
@@ -389,7 +400,7 @@ export class ListTableComponent implements EventListener{
     this.currentDrag=name;
     this.currentDragCount=this.selectedNodes.length ? this.selectedNodes.length : 1;
     event.dataTransfer.setDragImage(this.drag.nativeElement,100,20);
-    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,nodes);
+    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,{nodes:nodes,view:this.id});
     this.onSelectionChanged.emit(this.selectedNodes);
   }
   private dragStartColumn(event:any,index:number,column : ListItem){

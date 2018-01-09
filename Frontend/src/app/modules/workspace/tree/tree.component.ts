@@ -116,7 +116,7 @@ export class WorkspaceTreeComponent  {
     }
     this.dragHover=null;
     if(target==this.RECYCLE) {
-      this.onDeleteNodes.emit(this.storage.get(TemporaryStorageService.LIST_DRAG_DATA));
+      this.onDeleteNodes.emit(this.storage.get(TemporaryStorageService.LIST_DRAG_DATA).nodes);
     }
   }
   constructor(private node:RestNodeService,
