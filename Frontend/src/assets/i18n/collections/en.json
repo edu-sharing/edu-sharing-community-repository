@@ -35,20 +35,20 @@
     },
     "CREATE_TYPE":"Create new collection...",
     "CREATE":{
-      "PRIVATE":"Private Sammlung",
-      "PRIVATE_DESCRIPTION":"Außer Ihnen kann die Sammlung niemand sehen. Sie können die Sammlung später für andere freigeben oder veröffentlichen.",
-      "SHARED":"Gemeinsame Sammlung",
-      "SHARED_DESCRIPTION":"Sammlen Sie gemeinsam mit Freunden und Kollegen. Dabei können Sie festlegen, wer was tun darf.",
-      "PUBLIC":"Öffentliche Sammlung",
-      "PUBLIC_DESCRIPTION":"Erstellen Sie eine öffentliche Sammlung und zeigen der Welt Ihre schönsten Inhalte.",
-      "EDITORIAL":"Redaktionelle Sammlung",
-      "EDITORIAL_DESCRIPTION":"Hier sagt eine Redaktionsgruppe wo es lang geht und pflegt die Inhalte. Sie können an eine bestimmte Position festgepinnt werden.",
-      "CURRICULUM":"Lehrplan-Sammlung",
-      "CURRICULUM_DESCRIPTION":"Erstellen Sie eine (moderierte) Sammlung gemäß vorgegebener Lehrplan-Strukturen"
+      "PRIVATE":"private collection",
+      "PRIVATE_DESCRIPTION":"Nobody but you can see the collection. You can always share or publish the collection to others later.",
+      "SHARED":"collaborative collection",
+      "SHARED_DESCRIPTION":"Collect together with friends and colleagues. You can determine who is allowed to do what with the collection.",
+      "PUBLIC":"public collection",
+      "PUBLIC_DESCRIPTION":"Create a public collection and show the world your most beautiful content.",
+      "EDITORIAL":"editorial collection",
+      "EDITORIAL_DESCRIPTION":"Here an editorial group takes care of the collection and maintains its contents. Collections can be pinned to a certain position.",
+      "CURRICULUM":"curriculum collection",
+      "CURRICULUM_DESCRIPTION":"Create a (moderated) collection according to predefined curriculum structures."
     },
     "PINNING":{
-      "TITLE":"Gepinnte Sammlungen",
-      "UPDATED":"Liste gepinnter Sammlungen wurde aktualisiert"
+      "TITLE":"pinned collections",
+      "UPDATED":"The list of pinned collections has been updated."
     },
     "NO_ADD_PERMISSIONS":"You have insufficient permissions to add materials to this collection",
     "ERROR_NOT_FOUND":"Collection not found",

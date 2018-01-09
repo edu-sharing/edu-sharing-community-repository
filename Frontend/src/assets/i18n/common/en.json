@@ -128,22 +128,22 @@
     "ccm:wf_status":"Status"
   },
   "NODE_REPORT":{
-    "TITLE":"Problem melden",
-    "OPTION":"Problem melden",
-    "REPORT":"Melden",
+    "TITLE":"report problem",
+    "OPTION":"report problem",
+    "REPORT":"report",
     "REPORT_INFO":"Problem mit {{name}} melden",
-    "COMMENT":"Bitte nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
-    "COMMENT_PLACEHOLDER":"Details angeben...",
-    "EMAIL":"Ihre E-Mail-Adresse",
-    "EMAIL_PLACEHOLDER":"jemand@beispiel.de",
-    "EMAIL_REQUIRED":"Bitte eine gültige E-Mail-Adresse angeben",
-    "REASON_REQUIRED":"Bitte wählen Sie aus, welches Problem besteht",
-    "DONE":"Ihre Anfrage wurde gesendet. Vielen Dank!",
+    "COMMENT":"Please provide additional information about the problem that has occurred.",
+    "COMMENT_PLACEHOLDER":"provide details...",
+    "EMAIL":"your e-mail-address",
+    "EMAIL_PLACEHOLDER":"somebody@example.net",
+    "EMAIL_REQUIRED":"Please provide a valind e-mail address.",
+    "REASON_REQUIRED":"Please select what kind of problem you are experiencing.",
+    "DONE":"Your request has been sent. Thank you very much!",
     "REASONS": {
-      "UNAVAILABLE":"Medium nicht verfügbar",
-      "INAPPROPRIATE_CONTENT":"Problematischer Inhalt",
-      "INVALID_METADATA":"Fehlerhafte Beschreibung",
-      "OTHER":"Anderer Fehler"
+      "UNAVAILABLE":"object not available",
+      "INAPPROPRIATE_CONTENT":"problematic content",
+      "INVALID_METADATA":"incorrect description",
+      "OTHER":"none of the above"
     }
   },
   "COLLECTION":{
