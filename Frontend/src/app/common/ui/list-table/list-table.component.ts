@@ -154,9 +154,16 @@ export class ListTableComponent implements EventListener{
   @Input() dragDrop = false;
   /**
    * Can the content be re-ordered via drag and drop? (requires dragDrop to be enabled)
+   * onOrderElements will be emitted containing the new array of items as they are sorted
    * @type {boolean}
    */
   @Input() orderElements = false;
+  /**
+   * May changes when the user starts ordering elements. Disable it to stop the order animation
+   * @type {boolean}
+   */
+  @Input() orderElementsActive = false;
+  @Output() orderElementsActiveChange = new EventEmitter();
   /**
    * Is reordering of columns via settings menu allowed
    * @type {Array}
@@ -248,6 +255,11 @@ export class ListTableComponent implements EventListener{
    * @type {EventEmitter}
    */
   @Output() onDelete=new EventEmitter();
+  /**
+   * Called when the user performed a custom order of items
+   * @type {EventEmitter}
+   */
+  @Output() onOrderElements=new EventEmitter();
 
   private dragHover : Node;
   private dropdownPosition = "";
@@ -318,11 +330,29 @@ export class ListTableComponent implements EventListener{
       this.selectAll();
     }
   }
+  private exchange(node1:Node,node2:Node){
+    let i1,i2;
+    let i=0;
+    for(let node of this._nodes){
+      let id=node.ref.id;
+      if(id==node1.ref.id)
+        i1=i;
+      if(id==node2.ref.id)
+        i2=i;
+      i++;
+    }
+    this._nodes.splice(i1,1,node2);
+    this._nodes.splice(i2,1,node1);
+  }
   private allowDrag(event:any,target:Node){
     if(this.orderElements){
       let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
-      if(source.id==this.id && source.nodes.length==1){
+      if(source.view==this.id && source.nodes.length==1){
         console.log(source);
+        this.orderElementsActive=true;
+        this.orderElementsActiveChange.emit(true);
+        this.exchange(source.nodes[0],target);
+        return;
       }
     }
     if(UIHelper.handleAllowDragEvent(this.storage,this.ui,event,target,this.canDrop)) {
@@ -376,6 +406,13 @@ export class ListTableComponent implements EventListener{
   }
   private drop(event:any,target:Node){
     this.dragHover=null;
+    if(this.orderElements){
+      let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
+      if(source.view==this.id && source.nodes.length==1){
+        this.onOrderElements.emit(this._nodes);
+        return;
+      }
+    }
     UIHelper.handleDropEvent(this.storage,this.ui,event,target,this.onDrop);
   }
 

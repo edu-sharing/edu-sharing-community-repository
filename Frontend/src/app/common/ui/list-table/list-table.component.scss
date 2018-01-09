@@ -354,7 +354,38 @@ $badgeWidth:200px;
   min-width:50px;
   opacity: 1!important;
 }
+$strength:0.75deg;
 
+@keyframes OrderAnimation {
+  0% {    transform:rotate(0);  }
+  10% {    transform:rotate($strength*random(1));  }
+  20% {    transform:rotate(-$strength*random(1));  }
+  30% {    transform:rotate($strength*random(1));  }
+  40% {    transform:rotate(-$strength*random(1));  }
+  50% {    transform:rotate($strength*random(1));  }
+  60% {    transform:rotate(-$strength*random(1));  }
+  70% {    transform:rotate($strength*random(1));  }
+  80% {    transform:rotate(-$strength*random(1));  }
+  90% {    transform:rotate($strength*random(1));  }
+  100% {    transform:rotate(0);  }
+
+}
+$orderAnimationTime:$animationTime*5;
+.order-animation {
+  animation: OrderAnimation $orderAnimationTime infinite;
+}
+.order-animation:nth-of-type(2n){
+  animation-delay: 0s;
+}
+.order-animation:nth-of-type(2n+1){
+  animation-delay: -$orderAnimationTime/2;
+}
+.order-animation:nth-of-type(3n){
+  animation-delay: -$orderAnimationTime/4;
+}
+.order-animation:nth-of-type(5n){
+  animation-delay: -$orderAnimationTime/8;
+}
 .rowFrame{
   padding:0px;
 }
