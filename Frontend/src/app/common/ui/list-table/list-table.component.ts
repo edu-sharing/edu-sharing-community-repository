@@ -28,12 +28,12 @@ import {UIHelper} from "../ui-helper";
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
     trigger('openOverlayBottom', UIAnimation.openOverlayBottom(UIAnimation.ANIMATION_TIME_FAST)),
     trigger('orderAnimation', [
-        transition('* => void', [
+        transition(':enter', [
           sequence([
             animate(UIAnimation.ANIMATION_TIME_SLOW+"ms ease", style({ opacity: 0 }))
           ])
         ]),
-        transition('void => *', [
+        transition(':leave', [
           sequence([
             animate(UIAnimation.ANIMATION_TIME_SLOW+"ms ease", style({ opacity: 1 }))
           ])
