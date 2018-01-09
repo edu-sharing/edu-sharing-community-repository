@@ -16,7 +16,7 @@ import {KeyEvents} from "../key-events";
 import {FrameEventsService,EventListener} from "../../services/frame-events.service";
 import {ConfigurationService} from "../../services/configuration.service";
 import {RestHelper} from "../../rest/rest-helper";
-import {trigger} from "@angular/animations";
+import {animate, sequence, style, transition, trigger} from "@angular/animations";
 import {ListItem} from "../list-item";
 import {UIHelper} from "../ui-helper";
 
@@ -26,7 +26,19 @@ import {UIHelper} from "../ui-helper";
   styleUrls: ['list-table.component.scss'],
   animations: [
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
-    trigger('openOverlayBottom', UIAnimation.openOverlayBottom(UIAnimation.ANIMATION_TIME_FAST))
+    trigger('openOverlayBottom', UIAnimation.openOverlayBottom(UIAnimation.ANIMATION_TIME_FAST)),
+    trigger('orderAnimation', [
+        transition(':enter', [
+          sequence([
+            animate(UIAnimation.ANIMATION_TIME_SLOW+"ms ease", style({ opacity: 0 }))
+          ])
+        ]),
+        transition(':leave', [
+          sequence([
+            animate(UIAnimation.ANIMATION_TIME_SLOW+"ms ease", style({ opacity: 1 }))
+          ])
+        ])
+      ])
   ],
   // Causes action menu not to align properly
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -153,6 +165,18 @@ export class ListTableComponent implements EventListener{
    */
   @Input() dragDrop = false;
   /**
+   * Can the content be re-ordered via drag and drop? (requires dragDrop to be enabled)
+   * onOrderElements will be emitted containing the new array of items as they are sorted
+   * @type {boolean}
+   */
+  @Input() orderElements = false;
+  /**
+   * May changes when the user starts ordering elements. Disable it to stop the order animation
+   * @type {boolean}
+   */
+  @Input() orderElementsActive = false;
+  @Output() orderElementsActiveChange = new EventEmitter();
+  /**
    * Is reordering of columns via settings menu allowed
    * @type {Array}
    */
@@ -243,6 +267,11 @@ export class ListTableComponent implements EventListener{
    * @type {EventEmitter}
    */
   @Output() onDelete=new EventEmitter();
+  /**
+   * Called when the user performed a custom order of items
+   * @type {EventEmitter}
+   */
+  @Output() onOrderElements=new EventEmitter();
 
   private dragHover : Node;
   private dropdownPosition = "";
@@ -313,7 +342,31 @@ export class ListTableComponent implements EventListener{
       this.selectAll();
     }
   }
+  private exchange(node1:Node,node2:Node){
+    let i1,i2;
+    let i=0;
+    for(let node of this._nodes){
+      let id=node.ref.id;
+      if(id==node1.ref.id)
+        i1=i;
+      if(id==node2.ref.id)
+        i2=i;
+      i++;
+    }
+    this._nodes.splice(i1,1,node2);
+    this._nodes.splice(i2,1,node1);
+  }
   private allowDrag(event:any,target:Node){
+    if(this.orderElements){
+      let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
+      if(source.view==this.id && source.nodes.length==1 && source.nodes[0].ref.id!=target.ref.id){
+        console.log(source);
+        this.orderElementsActive=true;
+        this.orderElementsActiveChange.emit(true);
+        this.exchange(source.nodes[0],target);
+        return;
+      }
+    }
     if(UIHelper.handleAllowDragEvent(this.storage,this.ui,event,target,this.canDrop)) {
       this.dragHover = target;
     }
@@ -365,6 +418,13 @@ export class ListTableComponent implements EventListener{
   }
   private drop(event:any,target:Node){
     this.dragHover=null;
+    if(this.orderElements){
+      let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
+      if(source.view==this.id && source.nodes.length==1){
+        this.onOrderElements.emit(this._nodes);
+        return;
+      }
+    }
     UIHelper.handleDropEvent(this.storage,this.ui,event,target,this.onDrop);
   }
 
@@ -389,7 +449,7 @@ export class ListTableComponent implements EventListener{
     this.currentDrag=name;
     this.currentDragCount=this.selectedNodes.length ? this.selectedNodes.length : 1;
     event.dataTransfer.setDragImage(this.drag.nativeElement,100,20);
-    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,nodes);
+    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,{nodes:nodes,view:this.id});
     this.onSelectionChanged.emit(this.selectedNodes);
   }
   private dragStartColumn(event:any,index:number,column : ListItem){

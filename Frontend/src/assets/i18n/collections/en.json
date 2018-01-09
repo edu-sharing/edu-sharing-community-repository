@@ -2,11 +2,22 @@
 
   "COLLECTIONS": {
     "TITLE": "collections",
+    "CREATE_COLLECTION" : "Create\ncollection",
+    "ADD_MATERIAL" : "Add\nmaterial",
     "ERROR_DELETE": "An error occurred while deleting the collection.",
+    "ENTER_NAME" : "Please enter a name for this collection.",
     "NO_EDITORIAL_GROUPS":"No editorial groups found",
     "DETAIL": {
       "REMOVE": "delete",
       "ADD_TO_OTHER": "to collection"
+    },
+    "STEP":{
+      "GENERAL":"Title, Image, Description and Color",
+      "METADATA":"Additional information",
+      "PERMISSIONS":"Share",
+      "SETTINGS":"Settings",
+      "EDITORIAL_GROUPS":"Responsible Redactional groups",
+      "DONE":"Done"
     },
     "TAB":{
       "TYPE_EDITORIAL_LONG":" editorially managed collections ",
@@ -22,7 +33,23 @@
       "EDU_ALL_SHORT" : "All",
       "TYPE_EDITORIAL_SHORT":"Editorial"
     },
-    "ENTER_NAME" : "Please enter a name for the collection.",
+    "CREATE_TYPE":"Create new collection...",
+    "CREATE":{
+      "PRIVATE":"private collection",
+      "PRIVATE_DESCRIPTION":"Nobody but you can see the collection. You can always share or publish the collection to others later.",
+      "SHARED":"collaborative collection",
+      "SHARED_DESCRIPTION":"Collect together with friends and colleagues. You can determine who is allowed to do what with the collection.",
+      "PUBLIC":"public collection",
+      "PUBLIC_DESCRIPTION":"Create a public collection and show the world your most beautiful content.",
+      "EDITORIAL":"editorial collection",
+      "EDITORIAL_DESCRIPTION":"Here an editorial group takes care of the collection and maintains its contents. Collections can be pinned to a certain position.",
+      "CURRICULUM":"curriculum collection",
+      "CURRICULUM_DESCRIPTION":"Create a (moderated) collection according to predefined curriculum structures."
+    },
+    "PINNING":{
+      "TITLE":"pinned collections",
+      "UPDATED":"The list of pinned collections has been updated."
+    },
     "NO_ADD_PERMISSIONS":"You have insufficient permissions to add materials to this collection",
     "ERROR_NOT_FOUND":"Collection not found",
     "ERROR_NODE_EXISTS":"The collection already contains this element",
@@ -51,29 +78,13 @@
 
   "collections_content" : "Content",
   "collections_noContentAvailable" : "No content available yet.",
-  "collections_howToAddContent" : "Use the search engine to find contents for your collection. Just click on it and choose the option 'add to collection'.",
-  "collections_proceedToSearch" : "add material from search",
-
-  "collections_reload" : "reload",
-  "collections_createNewCollection" : "Create a new Collection",
-
-
-
-  "collectionNew" : "*********************** +collection-new component *************************************",
-
-  "collectionNew_setAccess" : "Who will be able to see the collection?",
-  "collectionNew_setAccessOnlyMe" : "just me",
-  "collectionNew_setAccessMyOrga" : "my groups",
-  "collectionNew_setAccessMyOrgaNA" : "my groups (you are no member of any groups)",
-  "collectionNew_setAccessPublic" : "everybody",
-
+  "collections_howToAddContent" : "Use the search engine to find contents for your collection. Just click on it and choose the option 'Add'.",
 
   "collectionNew_preview" : "preview of the collection",
   "collectionNew_setColor" : "color of the collection:",
   "collectionNew_createCollection" : "create",
   "collectionNew_storeChanges" : "save changes",
 
-  "collectionNew_reload" : "reload",
   "collectionNew_placeholderTitle" : "title of your collection ...",
   "collectionNew_placeholderDescription" : "Whats is your collection about?"
 

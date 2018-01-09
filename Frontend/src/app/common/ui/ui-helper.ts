@@ -127,7 +127,7 @@ export class UIHelper{
     let source=storage.get(TemporaryStorageService.LIST_DRAG_DATA);
     if(!source)
       return false;
-    if(!canDrop({source:source,target:target,event:event}))
+    if(!canDrop({source:source.nodes,target:target,event:event}))
       return false;
     /*
     if(event.altKey)

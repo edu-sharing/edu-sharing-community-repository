@@ -104,60 +104,62 @@ public class CollectionImporter {
 
 	// created a collection and returns the nodeID
     private String createCollection(String parentId, Collections.Collection collection) throws Throwable {
-    		
+    	String collectionID = null;
+		try {
 			CollectionService collectionService=CollectionServiceFactory.getLocalService();
 			NodeService nodeService=NodeServiceFactory.getLocalService();
 			
 			// set main attributes and create collection
-    		Collection collectionObj = new Collection();
-    		collectionObj.setTitle(collection.getTitle()!=null ? collection.getTitle().trim() : "");
-    		collectionObj.setDescription(collection.getDescription()!=null ? collection.getDescription().trim() : "");
-    		collectionObj.setColor(collection.getColor()!=null ? collection.getColor() : CCConstants.COLLECTION_COLOR_DEFAULT);
-    		collectionObj.setType(collection.getType()!=null ? collection.getType() : CCConstants.COLLECTIONTYPE_DEFAULT);
-    		collectionObj.setScope(collection.getScope()!=null ? collection.getScope() : CollectionDao.Scope.EDU_ALL.name());
-    		String collectionID = collectionService.createAndSetScope(parentId, collectionObj).getNodeId();
-    		
-    		importCount++;
-    		
-    		// set custom collection properties
-    		if(collection.getProperty()!=null) {
-    			HashMap<String,String[]> properties=new HashMap<>();
-    			for(Property property : collection.getProperty()) {
-    				properties.put(property.getKey(),property.getValue().toArray(new String[0]));
-    			}
-    			nodeService.updateNode(collectionID,NodeServiceHelper.transformShortToLongProperties(properties));    			
-    		}
-    		if(collection.getImage()!=null) {
-    			InputStream is=null;
-    			
-    			try {
-    				if(zip!=null) {
-        				is=findFile(collection.getImage());
-        			}
+			Collection collectionObj = new Collection();
+			collectionObj.setTitle(collection.getTitle()!=null ? collection.getTitle().trim() : "");
+			collectionObj.setDescription(collection.getDescription()!=null ? collection.getDescription().trim() : "");
+			collectionObj.setColor(collection.getColor()!=null ? collection.getColor() : CCConstants.COLLECTION_COLOR_DEFAULT);
+			collectionObj.setType(collection.getType()!=null ? collection.getType() : CCConstants.COLLECTIONTYPE_DEFAULT);
+			collectionObj.setScope(collection.getScope()!=null ? collection.getScope() : CollectionDao.Scope.EDU_ALL.name());
+			collectionID = collectionService.createAndSetScope(parentId, collectionObj).getNodeId();
+			
+			importCount++;
+			
+			// set custom collection properties
+			if(collection.getProperty()!=null) {
+				HashMap<String,String[]> properties=new HashMap<>();
+				for(Property property : collection.getProperty()) {
+					properties.put(property.getKey(),property.getValue().toArray(new String[0]));
+				}
+				nodeService.updateNode(collectionID,NodeServiceHelper.transformShortToLongProperties(properties));    			
+			}
+			if(collection.getImage()!=null) {
+				InputStream is=null;
+				
+				try {
+					if(zip!=null) {
+	    				is=findFile(collection.getImage());
+	    			}
 	    			if(is==null) {
 		    			URL url = new URL(collection.getImage());   
 		    			URLConnection connection = url.openConnection();
 				        connection.setDoOutput(true);
 				        is = connection.getInputStream();
 	    			}
-    			
-    				collectionService.writePreviewImage(collectionID, is, "image");
-        			is.close();
-    			}catch(Throwable t) {
-    				t.printStackTrace();
-    			}
-    		}
-    		
-    	
-    		// create sub collections recursively
-    		Collections subCollections = collection.getCollections();
-    		if ((subCollections!=null) && (subCollections.getCollection().size()>0)) {
-    	        for (Collections.Collection subCollection : subCollections.getCollection()) {
-    	        		createCollection(collectionID, subCollection);
-    	        }		
-    		}
-    		
-    		return collectionID;
+				
+					collectionService.writePreviewImage(collectionID, is, "image");
+	    			is.close();
+				}catch(Throwable t) {
+					t.printStackTrace();
+				}
+			}
+		}catch(Throwable t) {
+    		throw new Throwable("Failed while importing collection "+collection.getTitle()+": "+t.getMessage(),t);
+    	}
+		// create sub collections recursively
+		Collections subCollections = collection.getCollections();
+		if ((subCollections!=null) && (subCollections.getCollection().size()>0)) {
+	        for (Collections.Collection subCollection : subCollections.getCollection()) {
+	        	createCollection(collectionID, subCollection);
+	        }		
+		}
+		return collectionID;
+
     }
 
     
