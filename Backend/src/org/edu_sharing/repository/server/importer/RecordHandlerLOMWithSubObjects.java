@@ -604,12 +604,16 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		List lomReplicationTaxonEntry = new ArrayList();
 		List lomReplicationTaxonId = new ArrayList();
 		
+		List<String> competenceIds = new ArrayList<String>();
+		
 		List<String> classificationKeywords = new ArrayList<String>();
 		for (int i = 0; i < nodeClassificationList.getLength(); i++) {
 			Node classificationNode = nodeClassificationList.item(i);
 			String purposeSource = (String) xpath.evaluate("purpose/source", classificationNode, XPathConstants.STRING);
 			String purposeValue = (String) xpath.evaluate("purpose/value", classificationNode, XPathConstants.STRING);
 
+			boolean isCompetencyPath = (purposeValue != null && purposeValue.trim().equals("competency")) ? true : false;
+			
 			NodeList taxonPathList = (NodeList) xpath.evaluate("taxonPath", classificationNode, XPathConstants.NODESET);
 			List taxonPathToSafeList = new ArrayList();
 			for (int taxonPathIdx = 0; taxonPathIdx < taxonPathList.getLength(); taxonPathIdx++) {
@@ -637,6 +641,10 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 					}
 					
 					taxonToSafeList.add(taxonProps);
+					
+					if(isCompetencyPath && taxonId != null) {
+						competenceIds.add(taxonId);
+					}
 				}
 
 				
@@ -680,6 +688,10 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ENTRY, null);
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID, null);
 			
+		}
+		
+		if(competenceIds.size() > 0) {
+			toSafeMap.put(CCConstants.CCM_PROP_IO_COMPETENCE_DIGITAL, competenceIds);
 		}
 		
 		/**

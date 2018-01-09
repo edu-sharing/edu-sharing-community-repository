@@ -564,6 +564,10 @@ public class CCConstants {
 	
 	public final static String CCM_PROP_IO_GENERALKEYWORD_CAPTION = "{http://www.campuscontent.de/model/1.0}generalkeyword_caption";
 	
+	public final static String CCM_PROP_IO_COMPETENCE = "{http://www.campuscontent.de/model/1.0}competence";
+	
+	public final static String CCM_PROP_IO_COMPETENCE_DIGITAL = "{http://www.campuscontent.de/model/1.0}competence_digital";
+	
 	/**
 	 * share props
 	 */
