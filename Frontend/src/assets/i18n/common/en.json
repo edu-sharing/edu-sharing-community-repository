@@ -7,7 +7,7 @@
   "ADD":"Add",
   "OK" : "ok",
   "BACK": "back",
-  "NEXT": "next",
+  "NEXT": "continue",
   "SAVE" : "save",
   "APPLY" : "apply",
   "CANCEL" : "cancel",
@@ -50,6 +50,9 @@
   "SEARCH_COLLECTIONS":"Search collection...",
   "ASK_CC_PUBLISH" : "Ask",
   "ASK_CC_PUBLISH_SUBJECT" : "Request for permissions of element {{name}}",
+  "ORIGINAL_DELETE":"Remove",
+  "ORIGINAL_DELETED":"Content deleted",
+  "ORIGINAL_DELETED_INFO":"Only metadata accessable",
   "COMMON_API_ERROR": "An error occured. Please try again.",
   "COMMON_API_ERROR_TITLE": "Error details",
   "SYSTEM_FOLDER_DELETE_ERROR":"This system folder can not be deleted",
@@ -85,6 +88,7 @@
   "GROUP_EVERYONE":"everybody",
   "DETAILS": "details",
   "INFO": "info",
+  "GOTO_LOGIN": "Go to login",
   "GOTO":"go to",
   "SIDEBAR":{
     "WORKSPACE_OLD":"old workspace",
@@ -120,7 +124,27 @@
     "cclom:version": "version",
     "virtual:usagecount": "usage count",
     "ccm:author_freetext":"General Author information",
-    "ccm:lifecyclecontributer_authorFN":"author"
+    "ccm:lifecyclecontributer_authorFN":"author",
+    "ccm:wf_status":"Status"
+  },
+  "NODE_REPORT":{
+    "TITLE":"Problem melden",
+    "OPTION":"Problem melden",
+    "REPORT":"Melden",
+    "REPORT_INFO":"Problem mit {{name}} melden",
+    "COMMENT":"Bitte nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
+    "COMMENT_PLACEHOLDER":"Details angeben...",
+    "EMAIL":"Ihre E-Mail-Adresse",
+    "EMAIL_PLACEHOLDER":"jemand@beispiel.de",
+    "EMAIL_REQUIRED":"Bitte eine gültige E-Mail-Adresse angeben",
+    "REASON_REQUIRED":"Bitte wählen Sie aus, welches Problem besteht",
+    "DONE":"Ihre Anfrage wurde gesendet. Vielen Dank!",
+    "REASONS": {
+      "UNAVAILABLE":"Medium nicht verfügbar",
+      "INAPPROPRIATE_CONTENT":"Problematischer Inhalt",
+      "INVALID_METADATA":"Fehlerhafte Beschreibung",
+      "OTHER":"Anderer Fehler"
+    }
   },
   "COLLECTION":{
     "INFO_REFERENCES":"collection",
@@ -136,6 +160,10 @@
       "CUSTOM" : "custom",
       "TYPE_EDITORIAL" : "editorial"
     }
+  },
+  "CREATE_NODE":{
+    "tool_definition":"Add new tool description",
+    "tool_instance":"Create new configuration for tool {{ parent }}"
   },
   "MEDIATYPE":{
     "file-image":"image",
@@ -195,10 +223,17 @@
       "PLACEHOLDER": "file name",
       "FILENAME": "the following file is being created"
     },
+    "TINYMCE":{
+      "NAME": "Online-Texteditor",
+      "TITLE":"New html document",
+      "PLACEHOLDER":"document title",
+      "FILENAME": "the following file is being created"
+    },
     "MIMETYPE": {
       "imsqti_xmlv2p1_questionnaire": "Questionnaire",
       "imsqti_xmlv2p1_test": "Test",
       "imsqti_xmlv2p1_item": "Task",
+      "text/html": "html document (.html)",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "text document (.docx)",
       "application/vnd.oasis.opendocument.text": "text document (.odt)",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "spreadsheet (.xlsx)",
@@ -218,6 +253,10 @@
   "LIST":{
     "REORDER_TITLE":"Change columns",
     "REORDER_DRAG_DROP":"You can change the order of the elements via drag & drop"
+  },
+  "DIALOG":{
+    "COLLECTION_SHARE_PUBLIC":"Publish material in collection?",
+    "COLLECTION_SHARE_PUBLIC_INFO":"By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it."
   },
   "NO_SIZE":"-",
   "VERSION_COMMENT":"Version comment",

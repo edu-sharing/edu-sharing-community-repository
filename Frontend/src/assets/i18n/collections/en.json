@@ -2,11 +2,22 @@
 
   "COLLECTIONS": {
     "TITLE": "collections",
+    "CREATE_COLLECTION" : "Create\ncollection",
+    "ADD_MATERIAL" : "Add\nmaterial",
     "ERROR_DELETE": "An error occurred while deleting the collection.",
+    "ENTER_NAME" : "Please enter a name for this collection.",
     "NO_EDITORIAL_GROUPS":"No editorial groups found",
     "DETAIL": {
       "REMOVE": "delete",
       "ADD_TO_OTHER": "to collection"
+    },
+    "STEP":{
+      "GENERAL":"Title, Image, Description and Color",
+      "METADATA":"Additional information",
+      "PERMISSIONS":"Share",
+      "SETTINGS":"Settings",
+      "EDITORIAL_GROUPS":"Responsible Redactional groups",
+      "DONE":"Done"
     },
     "TAB":{
       "TYPE_EDITORIAL_LONG":" editorially managed collections ",
@@ -22,7 +33,23 @@
       "EDU_ALL_SHORT" : "All",
       "TYPE_EDITORIAL_SHORT":"Editorial"
     },
-    "ENTER_NAME" : "Please enter a name for the collection.",
+    "CREATE_TYPE":"Create new collection...",
+    "CREATE":{
+      "PRIVATE":"Private Sammlung",
+      "PRIVATE_DESCRIPTION":"Außer Ihnen kann die Sammlung niemand sehen. Sie können die Sammlung später für andere freigeben oder veröffentlichen.",
+      "SHARED":"Gemeinsame Sammlung",
+      "SHARED_DESCRIPTION":"Sammlen Sie gemeinsam mit Freunden und Kollegen. Dabei können Sie festlegen, wer was tun darf.",
+      "PUBLIC":"Öffentliche Sammlung",
+      "PUBLIC_DESCRIPTION":"Erstellen Sie eine öffentliche Sammlung und zeigen der Welt Ihre schönsten Inhalte.",
+      "EDITORIAL":"Redaktionelle Sammlung",
+      "EDITORIAL_DESCRIPTION":"Hier sagt eine Redaktionsgruppe wo es lang geht und pflegt die Inhalte. Sie können an eine bestimmte Position festgepinnt werden.",
+      "CURRICULUM":"Lehrplan-Sammlung",
+      "CURRICULUM_DESCRIPTION":"Erstellen Sie eine (moderierte) Sammlung gemäß vorgegebener Lehrplan-Strukturen"
+    },
+    "PINNING":{
+      "TITLE":"Gepinnte Sammlungen",
+      "UPDATED":"Liste gepinnter Sammlungen wurde aktualisiert"
+    },
     "NO_ADD_PERMISSIONS":"You have insufficient permissions to add materials to this collection",
     "ERROR_NOT_FOUND":"Collection not found",
     "ERROR_NODE_EXISTS":"The collection already contains this element",
@@ -51,30 +78,5 @@
 
   "collections_content" : "Content",
   "collections_noContentAvailable" : "No content available yet.",
-  "collections_howToAddContent" : "Use the search engine to find contents for your collection. Just click on it and choose the option 'add to collection'.",
-  "collections_proceedToSearch" : "add material from search",
-
-  "collections_reload" : "reload",
-  "collections_createNewCollection" : "Create a new Collection",
-
-
-
-  "collectionNew" : "*********************** +collection-new component *************************************",
-
-  "collectionNew_setAccess" : "Who will be able to see the collection?",
-  "collectionNew_setAccessOnlyMe" : "just me",
-  "collectionNew_setAccessMyOrga" : "my groups",
-  "collectionNew_setAccessMyOrgaNA" : "my groups (you are no member of any groups)",
-  "collectionNew_setAccessPublic" : "everybody",
-
-
-  "collectionNew_preview" : "preview of the collection",
-  "collectionNew_setColor" : "color of the collection:",
-  "collectionNew_createCollection" : "create",
-  "collectionNew_storeChanges" : "save changes",
-
-  "collectionNew_reload" : "reload",
-  "collectionNew_placeholderTitle" : "title of your collection ...",
-  "collectionNew_placeholderDescription" : "Whats is your collection about?"
-
+  "collections_howToAddContent" : "Use the search engine to find contents for your collection. Just click on it and choose the option 'Add'."
 }

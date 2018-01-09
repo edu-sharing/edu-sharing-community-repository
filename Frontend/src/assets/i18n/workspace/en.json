@@ -48,6 +48,7 @@
     "CHOOSE_LOCATION":"Choose location",
     "SHARE": {
       "TITLE": "Manage Sharing",
+      "NO_PERMISSIONS":"Noch keine expliziten Berechtigungen an diesem Element",
       "GROUP_OWNER":"Owner",
       "GROUP_INHERIT":"Inherited",
       "GROUP_USERS":"These users have access:",
@@ -137,7 +138,8 @@
       "COLLECTION":"Add To collection",
       "LICENSE":"assign a license",
       "CONTRIBUTOR":"Contributors",
-      "SHARE_LINK":"Share download-link"
+      "SHARE_LINK":"Share download-link",
+      "WORKFLOW":"Workflow"
     },
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",
@@ -219,8 +221,10 @@
       "TYPE":"Choose license",
       "NONE_NAME":"No license chosen",
       "COPYRIGHT_NAME":"protected by copyright law",
-      "CC_NAME":"Creative Commons",
       "CC_0_NAME":"CC 0 / Public Domain",
+      "ONLY_OER":"Nur OER-Lizenzen",
+      "OER":"OER",
+      "NOT_OER":"Kein OER",
       "SCHULFUNK_NAME":"German educational radio/television license (§47 UrhG)",
       "EDU_NAME":"edu-sharing Licenses",
       "CUSTOM_NAME":"define custom license",
@@ -240,6 +244,10 @@
         "LICENSE_INFO":"Available for licensed users in accordance with the contractual conditions. No use by third parties. Attribution in accordance with common practice"
       },
       "CC":{
+        "CC_BY_RADIO":"CC-BY",
+        "CC_BY_INFO":"Andere dürfen Bearbeitungen des Materials teilen, solange sie den Urheber nennen",
+        "CC_BY_SA_RADIO":"CC-BY-SA",
+        "CC_BY_SA_INFO":"Andere dürfen Bearbeitungen des Materials teilen, solange sie den Urheber nennen und es auch selbst unter denselben Bedingungen weitergeben",
         "YES_ALIKE":"Yes, as long as others share alike",
         "NAME_AUTHOR":"Reference information",
         "TITLE_OF_WORK":"Title of work",
@@ -259,6 +267,7 @@
       },
       "DESCRIPTION":{
         "NONE":"Use and source indication according to the legal conditions specified in the medium or according to the general legal regulation.",
+        "MULTI":"Die gewählten Elemente besitzen unterschiedliche Lizenzen.<br />Durch das Festlegen einer Lizenz werden die Lizeninformationen aller Elemente überschrieben",
         "CC_BY":"The authors have to be credited in a manner specified by these.",
         "CC_SHARE_ND":"Licensees may copy, distribute, display and perform only verbatim copies of the work, not derivative works and remixes based on it.",
         "CC_SHARE_SA":"Licensees may copy, distribute, display, and perform the work and make derivative works and remixes based on it, as long as they distribute derivative works only under a license identical (\"not more restrictive\") to the license that governs the original work.",
@@ -273,8 +282,8 @@
       "FOLDER_ADDED":"Folder added",
       "NODE_EXISTS_IN_COLLECTION":"The collection already contains the element {{name}}",
       "ADDED_TO_COLLECTION_MY":"{{count}} element(s) have been added to collection {{collection}} and is visible for you",
-      "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to collection {{collection}} and is visible to all invited persons",
-      "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to collection {{collection}} and is visible to everyone",
+      "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to collection {{collection}} and are visible to all invited persons",
+      "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to collection {{collection}} and are visible to everyone",
       "DELETE_FINISHED":"Element(s) move to recycle",
       "CUT_COPY":"{{count}} Element(s) copied to clipboard",
       "PASTE":"{{count}} Element(s) have been {{mode}} from {{from}} to {{to}}",
@@ -285,7 +294,8 @@
       "NO_WRITE_PERMISSION":"You have insufficient permissions to store items at the current location",
       "NOT_FOUND":"The folder {{id}} was not found. May it has been deleted.",
       "LICENSE_UPDATED":"License has been updated",
-      "CONTRIBUTOR_UPDATED":"Information of contributors have been updated"
+      "CONTRIBUTOR_UPDATED":"Information of contributors have been updated",
+      "WORKFLOW_UPDATED":"Information of workflow have been updated"
     }
   }
 }
