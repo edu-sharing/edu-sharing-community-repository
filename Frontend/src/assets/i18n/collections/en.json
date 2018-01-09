@@ -78,5 +78,14 @@
 
   "collections_content" : "Content",
   "collections_noContentAvailable" : "No content available yet.",
-  "collections_howToAddContent" : "Use the search engine to find contents for your collection. Just click on it and choose the option 'Add'."
+  "collections_howToAddContent" : "Use the search engine to find contents for your collection. Just click on it and choose the option 'Add'.",
+
+  "collectionNew_preview" : "preview of the collection",
+  "collectionNew_setColor" : "color of the collection:",
+  "collectionNew_createCollection" : "create",
+  "collectionNew_storeChanges" : "save changes",
+
+  "collectionNew_placeholderTitle" : "title of your collection ...",
+  "collectionNew_placeholderDescription" : "Whats is your collection about?"
+
 }
