@@ -68,7 +68,9 @@ public class SortDefinition {
 	public List<SortDefinitionEntry> getSortDefinitionEntries() {
 		return sortDefinitionEntries;
 	}
-	
+	public void addSortDefinitionEntry(SortDefinitionEntry sortDefinitionEntry,int position){
+		sortDefinitionEntries.add(position,sortDefinitionEntry);
+	}
 	public void addSortDefinitionEntry(SortDefinitionEntry sortDefinitionEntry){
 		sortDefinitionEntries.add(sortDefinitionEntry);
 	}

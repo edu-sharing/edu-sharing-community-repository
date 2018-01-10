@@ -159,9 +159,10 @@ export class CollectionsMainComponent implements GwtEventListener {
     public set orderActive(orderActive:boolean){
       this._orderActive=orderActive;
       if(this._orderActive){
-        this.infoTitle='SEARCH.ORDER_ELEMENTS';
-        this.infoMessage='SEARCH.ORDER_ELEMENTS_INFO';
+        this.infoTitle='COLLECTIONS.ORDER_ELEMENTS';
+        this.infoMessage='COLLECTIONS.ORDER_ELEMENTS_INFO';
         this.infoButtons=DialogButton.getSingleButton("SAVE",()=>{
+          this.changeOrder();
         });
         this.infoClose=()=>{
           console.log("close");
@@ -727,5 +728,18 @@ export class CollectionsMainComponent implements GwtEventListener {
     }else {
       this.toast.error(error);
     }
+  }
+
+  private changeOrder() {
+      this.globalProgress=true;
+    this.collectionService.setOrder(this.collectionContent.collection.ref.id,RestHelper.getNodeIds(this.collectionContent.references)).subscribe(()=>{
+      this.collectionContentOriginal=Helper.deepCopy(this.collectionContent);
+      this.orderActive=false;
+      this.globalProgress=false;
+      this.toast.toast('COLLECTIONS.ORDER_SAVED');
+    },(error:any)=>{
+      this.globalProgress=false;
+      this.toast.error(error);
+    });
   }
 }

@@ -12,7 +12,7 @@ import {ConfigurationService} from "../services/configuration.service";
 import {UIConstants} from "../ui/ui-constants";
 
 export class RestHelper{
-  public static getNodeIds(nodes : Node[]): Array<string>{
+  public static getNodeIds(nodes : Node[]|Collection[]|CollectionReference[]): Array<string>{
     let data=new Array<string>(nodes.length);
     for(let i=0;i<nodes.length;i++){
       data[i]=nodes[i].ref.id;

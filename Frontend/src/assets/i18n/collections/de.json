@@ -7,6 +7,9 @@
     "ERROR_DELETE": "Fehler beim Löschen der Sammlung",
     "ENTER_NAME" : "Bitte einen Namen für die Sammlung eingeben.",
     "NO_EDITORIAL_GROUPS":"Noch keine Redaktionsgruppen festgelegt.",
+    "ORDER_ELEMENTS":"Reihenfolge der Materialien manuell festlegen?",
+    "ORDER_ELEMENTS_INFO":"Betrachter der Sammlung sehen die enthaltenen Materialien in einer bestimmten Reihenfolge.",
+    "ORDER_SAVED":"Reihenfolge erfolgreich festgelegt",
     "DETAIL": {
       "REMOVE": "Entfernen",
       "ADD_TO_OTHER": "In Sammlung"

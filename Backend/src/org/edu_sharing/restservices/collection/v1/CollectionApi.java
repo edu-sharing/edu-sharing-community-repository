@@ -113,10 +113,8 @@ public class CollectionApi {
 	    	}
 	}
 	@POST
-	@Path("/collections/{repository}/pinning")
-	
-	@ApiOperation(value = "Set pinned collections.", notes = "Remove all currently pinned collections and set them in the order send. Requires "+CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING)
-	
+	@Path("/collections/{repository}/{collection}/order")
+	@ApiOperation(value = "Set order of nodes in a collection. In order to work as expected, provide a list of all nodes in this collection", notes = "Current order will be overriden. Requires full permissions for the parent collection")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
 	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
@@ -125,7 +123,36 @@ public class CollectionApi {
 	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
-
+	public Response setCollectionOrder(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@ApiParam(value = "List of nodes in the order to be saved. If empty, custom order of the collection will be disabled", required = false) String[] nodes
+			) {
+		try {
+			
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		
+			if (repoDao == null) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			CollectionDao.getCollection(repoDao, collectionId).setOrder(nodes);
+			return Response.status(Response.Status.OK).build();
+	
+		} catch (Throwable t) {
+    		return ErrorResponse.createResponse(t);
+    	}
+	}
+	@POST
+	@Path("/collections/{repository}/pinning")
+	@ApiOperation(value = "Set pinned collections.", notes = "Remove all currently pinned collections and set them in the order send. Requires "+CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING)
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
 	public Response setPinnedCollections(
 			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 			@ApiParam(value = "List of collections that should be pinned",required=true, defaultValue="-home-" ) String[] collections
@@ -144,7 +171,6 @@ public class CollectionApi {
     		return ErrorResponse.createResponse(t);
     	}
 	}
-
 	@GET
 	@Path("/collections/{repository}/search")
 	@ApiOperation(value = "Search collections.", notes = "Search collections.")

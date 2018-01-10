@@ -1098,6 +1098,9 @@
 					<type>d:boolean</type>
 					<default>false</default>
 				</property>
+				<property name="ccm:collectionordermode">
+					<type>d:text</type>
+				</property>
 			</properties>
 		</aspect>
 		<aspect name="ccm:collection_pinned">
@@ -1123,6 +1126,14 @@
 				</property>
 				<property name="ccm:ref_version">
 					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
+		<aspect name="ccm:collection_ordered">
+			<title>aspect for marking an io or collection to be ordered</title>
+			<properties>
+				<property name="ccm:collection_ordered_position">
+					<type>d:int</type>
 				</property>
 			</properties>
 		</aspect>

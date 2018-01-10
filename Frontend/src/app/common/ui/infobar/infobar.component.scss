@@ -24,8 +24,11 @@
       margin-left: auto;
     }
     .title{
-      font-size:130%;
+      font-size:120%;
       font-weight: bold;
+    }
+    .message{
+      color:$textOnPrimaryLight;
     }
   }
   .infobar-cancel{
