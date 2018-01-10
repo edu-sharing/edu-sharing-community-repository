@@ -1,0 +1,47 @@
+@import "../../../../styles/variables.scss";
+
+.infobar{
+  background: $primary;
+  color: $textOnPrimary;
+  width:100%;
+  position: fixed;
+  left:0;
+  height:70px;
+  z-index: 30;
+  display:flex;
+  >div{
+    display: flex;
+    align-items: center;
+  }
+  .infobar-message{
+    flex-grow: 1;
+    padding-left: 20px;
+    flex-direction: column;
+    align-items: right;
+    justify-content: center;
+    >div{
+      display: flex;
+      margin-left: auto;
+    }
+    .title{
+      font-size:130%;
+      font-weight: bold;
+    }
+  }
+  .infobar-cancel{
+    padding-right:20px;
+  }
+  .infobar-buttons{
+    padding:0 20px;
+    .btn{
+      color:$primary!important;
+      background: #fff!important;
+    }
+    .btn-flat{
+      color:$textOnPrimary!important;
+    }
+  }
+}
+.infobar-bottom{
+  bottom:0;
+}

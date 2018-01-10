@@ -1,0 +1,22 @@
+<div class="infobar infobar-{{position}}"
+      *ngIf="title"
+      [@infobarBottom]="title"
+>
+    <div class="infobar-message">
+      <div class="title">{{title | translate}}</div>
+      <div class="message">{{message | translate:messageParameters }}</div>
+    </div>
+    <div class="infobar-buttons" *ngIf="_buttons">
+      <a *ngFor="let button of _buttons;let i=index" #buttonElements
+         [class.btn-flat]="button.type==2"
+         [class.waves-effect]="button.type==1"
+         [class.waves-light]="button.type==1"
+         [class.btn]="button.type==1"
+         tabindex="0"
+         (focus)="i==0"
+         (keyup.enter)="click(button)"
+         (click)="click(button)"
+      >{{button.name | translate}}</a>
+    </div>
+    <div *ngIf="isCancelable" class="infobar-cancel clickable" (click)="cancel()"><i class="material-icons">close</i></div>
+</div>

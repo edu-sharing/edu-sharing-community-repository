@@ -417,7 +417,7 @@ export class PermissionsAuthoritiesComponent {
 
     if(this._mode=='ORG'){
       this.node.getNodeParents(list[0].sharedFolder.id,true).subscribe((data:NodeList)=>{
-        this.edit = JSON.parse(JSON.stringify(list[0]));
+        this.edit = Helper.deepCopy(list[0]);
         this.edit.folder="";
         data.nodes=data.nodes.reverse().slice(1);
         for(let node of data.nodes){
@@ -427,7 +427,7 @@ export class PermissionsAuthoritiesComponent {
       },(error:any)=>this.toast.error(error));
     }
     else {
-      this.edit = JSON.parse(JSON.stringify(list[0]));
+      this.edit = Helper.deepCopy(list[0]);
       this.editId = this.edit.authorityName;
     }
 
@@ -627,7 +627,7 @@ export class PermissionsAuthoritiesComponent {
         this.iam.getGroupMembers(this.org.authorityName,this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data: IamAuthorities) => {
           for (let member of data.authorities)
             this.memberList.push(member);
-          this.memberList=JSON.parse(JSON.stringify(this.memberList));
+          this.memberList=Helper.deepCopy(this.memberList);
         });
       }else {
         let request:any={
@@ -638,7 +638,7 @@ export class PermissionsAuthoritiesComponent {
         this.iam.searchUsers(this.manageMemberSearch, true, request).subscribe((data: IamUsers) => {
           for (let member of data.users)
             this.memberList.push(member);
-          this.memberList=JSON.parse(JSON.stringify(this.memberList));
+          this.memberList=Helper.deepCopy(this.memberList);
         });
       }
     }
@@ -651,7 +651,7 @@ export class PermissionsAuthoritiesComponent {
       this.iam.getGroupMembers((this.editMembers as Group).authorityName, this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data: IamAuthorities) => {
         for (let member of data.authorities)
           this.memberList.push(member);
-        this.memberList=JSON.parse(JSON.stringify(this.memberList));
+        this.memberList=Helper.deepCopy(this.memberList);
       });
     }
   }

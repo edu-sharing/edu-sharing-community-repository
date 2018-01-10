@@ -11,6 +11,13 @@
   [addCollection]="addPinning"
   (onClose)="addPinning=null"
 ></collections-manage-pinning>
+<infobar
+  [title]="infoTitle"
+  [message]="infoMessage"
+  [buttons]="infoButtons"
+  [isCancelable]="true"
+  (onCancel)="infoClose()"
+></infobar>
 
 
 <div class="row tab-group row-dark scrollWithBanner" *ngIf="isRootLevelCollection() && !isGuest">
@@ -106,6 +113,7 @@
                   [viewType]="1"
                   [dragDrop]="true"
                   [orderElements]="false"
+                  [(orderElementsActive)]="orderActive"
                   [columns]="referencesColumns"
                   [options]="listOptions"
                   [isClickable]="true"

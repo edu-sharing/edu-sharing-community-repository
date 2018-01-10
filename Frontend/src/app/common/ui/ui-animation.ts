@@ -34,7 +34,16 @@ export class UIAnimation{
         animate(time, style({transform:'translateX(100%)'}))      ])
     ];
   }
-
+  public static infobarBottom(time=UIAnimation.ANIMATION_TIME_NORMAL){
+    return  [transition(':enter', [
+      style({bottom:'-70px'}),
+      animate(time+"ms ease", style({bottom:'0'}))
+    ]),
+      transition(':leave', [
+        style({bottom:'0'}),
+        animate(time+"ms ease", style({bottom:'-70px'}))      ])
+    ];
+  }
   /**
    * Useful animation for opening any overflow menus
    * @param time

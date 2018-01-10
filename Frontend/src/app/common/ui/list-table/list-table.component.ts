@@ -19,6 +19,7 @@ import {RestHelper} from "../../rest/rest-helper";
 import {animate, sequence, style, transition, trigger} from "@angular/animations";
 import {ListItem} from "../list-item";
 import {UIHelper} from "../ui-helper";
+import {Helper} from "../../helper";
 
 @Component({
   selector: 'listTable',
@@ -79,7 +80,7 @@ export class ListTableComponent implements EventListener{
   private columnsAll : ListItem[];
   private columnsVisible : ListItem[];
   @Input() set columns (columns : ListItem[]){
-    this.columnsOriginal=JSON.parse(JSON.stringify(columns));
+    this.columnsOriginal=Helper.deepCopy(columns);
     this.columnsAll=columns;
     this.columnsVisible=[];
     for(let col of columns){
