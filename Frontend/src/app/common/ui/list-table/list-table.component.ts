@@ -19,6 +19,7 @@ import {RestHelper} from "../../rest/rest-helper";
 import {animate, sequence, style, transition, trigger} from "@angular/animations";
 import {ListItem} from "../list-item";
 import {UIHelper} from "../ui-helper";
+import {Helper} from "../../helper";
 
 @Component({
   selector: 'listTable',
@@ -28,12 +29,12 @@ import {UIHelper} from "../ui-helper";
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
     trigger('openOverlayBottom', UIAnimation.openOverlayBottom(UIAnimation.ANIMATION_TIME_FAST)),
     trigger('orderAnimation', [
-        transition('* => void', [
+        transition(':enter', [
           sequence([
             animate(UIAnimation.ANIMATION_TIME_SLOW+"ms ease", style({ opacity: 0 }))
           ])
         ]),
-        transition('void => *', [
+        transition(':leave', [
           sequence([
             animate(UIAnimation.ANIMATION_TIME_SLOW+"ms ease", style({ opacity: 1 }))
           ])
@@ -79,7 +80,7 @@ export class ListTableComponent implements EventListener{
   private columnsAll : ListItem[];
   private columnsVisible : ListItem[];
   @Input() set columns (columns : ListItem[]){
-    this.columnsOriginal=JSON.parse(JSON.stringify(columns));
+    this.columnsOriginal=Helper.deepCopy(columns);
     this.columnsAll=columns;
     this.columnsVisible=[];
     for(let col of columns){

@@ -32,6 +32,7 @@ import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
 import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
+import {Helper} from "../../common/helper";
 
 @Component({
   selector: 'workspace-main',
@@ -619,7 +620,7 @@ export class WorkspaceMainComponent{
     let list=this.getNodeList(node);
     if(!list || !list.length)
       return;
-    list=JSON.parse(JSON.stringify(list));
+    list=Helper.deepCopy(list);
     let clip : ClipboardObject={sourceNode : this.currentFolder,nodes:list,copy:copy};
     this.storage.set("workspace_clipboard",clip);
     this.toast.toast("WORKSPACE.TOAST.CUT_COPY",{count:list.length});
@@ -935,7 +936,6 @@ export class WorkspaceMainComponent{
     let folder=this.currentFolder;
     this.currentFolder=null;
     this.searchQuery=null;
-    //this.currentFolder=JSON.parse(JSON.stringify(this.currentFolder));
     this.selection=[];
     this.actionOptions=this.getOptions(this.selection,false);
     let path=this.path;

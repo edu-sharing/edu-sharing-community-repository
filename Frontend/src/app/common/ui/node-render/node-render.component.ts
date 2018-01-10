@@ -220,7 +220,6 @@ export class NodeRenderComponent {
 
     let input=this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS);
     if(!input) input=[];
-    //this.options = JSON.parse(JSON.stringify(this.temporaryStorageService.get(NodeRenderComponent.OPTIONS)));
     let opt=[];
     for(let o of input){
       opt.push(o);

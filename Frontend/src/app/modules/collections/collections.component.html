@@ -11,6 +11,13 @@
   [addCollection]="addPinning"
   (onClose)="addPinning=null"
 ></collections-manage-pinning>
+<infobar
+  [title]="infoTitle"
+  [message]="infoMessage"
+  [buttons]="infoButtons"
+  [isCancelable]="true"
+  (onCancel)="infoClose()"
+></infobar>
 
 
 <div class="row tab-group row-dark scrollWithBanner" *ngIf="isRootLevelCollection() && !isGuest">
@@ -68,6 +75,7 @@
 
                 <!-- COLLECTION CARDS -->
                 <listTable
+                  [listClass]="'subcollections'"
                   [addElement]="isAllowedToEditCollection() ? createCollectionElement : null"
                   [hasHeading]="false"
                   [isLoading]="isLoading"
@@ -106,6 +114,7 @@
                   [viewType]="1"
                   [dragDrop]="true"
                   [orderElements]="false"
+                  [(orderElementsActive)]="orderActive"
                   [columns]="referencesColumns"
                   [options]="listOptions"
                   [isClickable]="true"
@@ -171,7 +180,7 @@
     </div>
 
     <div *ngIf="!collectionContent.collection.preview.isIcon" class="card-image-icon-container">
-      <img class="collection-header-image" [src]="collectionContent.collection.preview.url+'&crop=true&width=250&height=200'" (error)="collectionContent.collection.previewUrl=null" style="width: 100%; height: auto;" role="presentation"/>
+      <img class="collection-header-image" [src]="collectionContent.collection.preview.url+'&crop=true&width=400&height=300'" (error)="collectionContent.collection.previewUrl=null" style="width: 100%; height: auto;" role="presentation"/>
     </div>
 
   </div>

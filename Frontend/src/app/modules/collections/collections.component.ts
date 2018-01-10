@@ -38,6 +38,9 @@ import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {NodeHelper} from "../../common/ui/node-helper";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsHelper} from "../../common/rest/mds-helper";
+import {UIAnimation} from "../../common/ui/ui-animation";
+import {trigger} from "@angular/animations";
+import {Helper} from "../../common/helper";
 
 // data class for breadcrumbs
 export class Breadcrumb {
@@ -50,7 +53,7 @@ export class Breadcrumb {
   selector: 'app-collections',
   templateUrl: 'collections.component.html',
   styleUrls: ['collections.component.scss'],
-  providers: [GwtInterfaceService]
+  providers: [GwtInterfaceService],
 })
 export class CollectionsMainComponent implements GwtEventListener {
     public dialogTitle : string;
@@ -65,6 +68,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     private clearSearchOnNextStateChange:boolean = false;
 
     public collectionContent:EduData.CollectionContent;
+    private collectionContentOriginal: EduData.CollectionContent;
     private filteredOutCollections:Array<EduData.Collection> = new Array<EduData.Collection>();
     private filteredOutReferences:Array<EduData.CollectionReference> = new Array<EduData.CollectionReference>();
     private collectionIdParamSubscription:any;
@@ -89,12 +93,17 @@ export class CollectionsMainComponent implements GwtEventListener {
     private showCollection=true;
     private pinningAllowed = false;
     public addPinning: string;
+    public infoTitle: string;
+    public infoMessage: string;
+    public infoButtons: DialogButton[];
+    public infoClose: Function;
   public nodeReport: Node;
   public collectionsColumns : ListItem[]=[];
     public referencesColumns : ListItem[]=[];
     public createCollectionElement = new AddElement("COLLECTIONS.CREATE_COLLECTION");
     public createCollectionReference = new AddElement("COLLECTIONS.ADD_MATERIAL","redo");
     private listOptions: OptionItem[];
+    private _orderActive: boolean;
   // default hides the tabs
 
     // inject services
@@ -146,6 +155,26 @@ export class CollectionsMainComponent implements GwtEventListener {
           RestHelper.goToLogin(this.router,this.config);
       },(error:any)=> RestHelper.goToLogin(this.router,this.config));
 
+    }
+    public set orderActive(orderActive:boolean){
+      this._orderActive=orderActive;
+      if(this._orderActive){
+        this.infoTitle='SEARCH.ORDER_ELEMENTS';
+        this.infoMessage='SEARCH.ORDER_ELEMENTS_INFO';
+        this.infoButtons=DialogButton.getSingleButton("SAVE",()=>{
+        });
+        this.infoClose=()=>{
+          console.log("close");
+          this.orderActive=false;
+        }
+      }
+      else{
+        this.infoTitle=null;
+        this.collectionContent.references=Helper.deepCopy(this.collectionContentOriginal.references);
+      }
+    }
+    public get orderActive(){
+      return this._orderActive;
     }
     navigate(id:string="",addToOther=""){
       let params:any={};
@@ -442,7 +471,7 @@ export class CollectionsMainComponent implements GwtEventListener {
             // transfere sub collections and content
             this.collectionContent.collections = collection.collections;
             this.collectionContent.references = collection.references;
-
+            this.collectionContentOriginal=Helper.deepCopy(this.collectionContent);
             // add an empty collection for the "add new colleciton" card
             //if (this.isAllowedToEditCollection()) this.collectionContent.collections.unshift(new EduData.Collection());
 

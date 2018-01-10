@@ -52,6 +52,7 @@ import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -475,7 +476,7 @@ public class CollectionServiceImpl implements CollectionService{
 			props.put(CCConstants.SYS_PROP_NODE_UID, collection.getNodeId());
 		}
 		props.put(CCConstants.CM_PROP_TITLE, collection.getTitle());
-		props.put(CCConstants.CM_NAME, collection.getTitle());
+		props.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName(collection.getTitle()));
 		props.put(CCConstants.CM_PROP_DESCRIPTION, collection.getDescription());
 		props.put(CCConstants.CCM_PROP_MAP_X, collection.getX());
 		props.put(CCConstants.CCM_PROP_MAP_Y, collection.getY());
