@@ -261,7 +261,7 @@ table, div {
   }
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: $mobileWidth+$mobileStage*3) {
 
     .table-tab-title-long {
         display: none!important;
@@ -273,16 +273,12 @@ table, div {
 
 }
 
-@media only screen and (max-width: 940px) {
-
-    .collections-master-div {
-        min-width: unset;
-    }
-
-}
-
-
 @media only screen and (max-width: $mobileWidth) {
+    :host /deep/{
+      .subcollections{
+        margin-top: 220px;
+      }
+    }
     .collection-new-preview-infoline,.collection-description{
       display: none;
     }
@@ -297,7 +293,7 @@ table, div {
         top: unset;
         left: unset;
         height: unset;
-        width: calc(100% + 28px);
+        width: calc(100% + 20px);
         margin-left: -20px;
         position: relative;
         overflow-x: hidden;

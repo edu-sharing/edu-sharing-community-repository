@@ -75,6 +75,7 @@
 
                 <!-- COLLECTION CARDS -->
                 <listTable
+                  [listClass]="'subcollections'"
                   [addElement]="isAllowedToEditCollection() ? createCollectionElement : null"
                   [hasHeading]="false"
                   [isLoading]="isLoading"
