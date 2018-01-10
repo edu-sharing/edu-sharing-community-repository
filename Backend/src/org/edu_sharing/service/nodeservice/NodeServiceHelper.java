@@ -22,7 +22,7 @@ public class NodeServiceHelper {
 
 		//replace ending dot with nothing
 		//cmNameReadableName = cmNameReadableName.replaceAll("\\.$", "");
-		cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "");
+		cmNameReadableName = cmNameReadableName.replaceAll("[\\.]*$", "").trim();
 		return cmNameReadableName;
 	}
 

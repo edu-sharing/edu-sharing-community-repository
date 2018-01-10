@@ -142,7 +142,7 @@ export class WorkspaceShareComponent  {
     if(this._node.isDirectory)
       this.currentType=[RestConstants.ACCESS_CONSUMER];
     if(this.currentPermissions) {
-      this.originalPermissions=JSON.parse(JSON.stringify(this.currentPermissions));
+      this.originalPermissions=Helper.deepCopy(this.currentPermissions);
       this.setPermissions(this.currentPermissions.permissions);
       this.inherited = this.currentPermissions.inherited;
       this.showLink=false;
@@ -153,7 +153,7 @@ export class WorkspaceShareComponent  {
       this.nodeApi.getNodePermissions(node.ref.id).subscribe((data: NodePermissions) => {
         //this.inherit=data.permissions.inheritedPermissions;
         if(data.permissions) {
-          this.originalPermissions=JSON.parse(JSON.stringify(data.permissions.localPermissions));
+          this.originalPermissions=Helper.deepCopy(data.permissions.localPermissions);
           this.setPermissions(data.permissions.localPermissions.permissions)
           this.inherited = data.permissions.localPermissions.inherited;
           this.updatePublishState();
@@ -241,7 +241,7 @@ export class WorkspaceShareComponent  {
     if(type.wasMain)
       this.showChooseType=false;
     for(let permission of this.newPermissions){
-      permission.permissions=JSON.parse(JSON.stringify(this.currentType));
+      permission.permissions=Helper.deepCopy(this.currentType);
     }
   }
   public cancel(){
@@ -276,7 +276,7 @@ export class WorkspaceShareComponent  {
       permission.group=selected.profile;
     }
     permission.permissions=this.currentType;
-    permission=JSON.parse(JSON.stringify(permission));
+    permission=Helper.deepCopy(permission);
     if(!this.contains(this.permissions,permission,false)) {
       this.newPermissions.push(permission);
       this.permissions.push(permission);

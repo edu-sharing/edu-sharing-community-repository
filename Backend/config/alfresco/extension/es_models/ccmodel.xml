@@ -661,6 +661,15 @@
 	          			<stored>false</stored>
 	         			<tokenised>both</tokenised>
 	         		</index>										
+				</property>
+				<property name="ccm:competence_digital2">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>both</tokenised>
+	         		</index>										
 				</property>	
 				<!-- Lehrplan -->
 				<property name="ccm:curriculum">

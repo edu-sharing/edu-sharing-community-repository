@@ -35,6 +35,7 @@
   import {SmallCollectionComponent} from "./common/ui/small-collection/small-collection.component";
   import {CollectionChooserComponent} from "./common/ui/collection-chooser/collection-chooser.component";
   import {UserAvatarComponent} from "./common/ui/user-avatar/user-avatar.component";
+  import {InfobarComponent} from "./common/ui/infobar/infobar.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -67,6 +68,7 @@ export const DECLARATIONS = [
       RouterComponent,
       FileDropDirective,
       ModalDialogComponent,
+      InfobarComponent,
       ModalLoadingComponent,
       NodeRenderComponent,
       ApplyToLmsComponent,

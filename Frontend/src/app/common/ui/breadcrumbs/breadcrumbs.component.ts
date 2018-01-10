@@ -127,8 +127,6 @@ export class BreadcrumbsComponent{
 
   private addSearch() {
     let add=!(this._breadcrumbsAsNode.length>0 && this._breadcrumbsAsNode[0] && this._breadcrumbsAsNode[0].type=="SEARCH");
-    console.log(JSON.parse(JSON.stringify(this._breadcrumbsAsNode)));
-    console.log("add search "+add+" "+this._searchQuery);
     if(this._searchQuery){
       let search=new Node();
       search.name="'"+this._searchQuery+"'";

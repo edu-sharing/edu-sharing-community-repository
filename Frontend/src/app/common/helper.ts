@@ -106,4 +106,8 @@ export class Helper {
 
     return url+param+"="+encodeURIComponent(value);
   }
+
+  public static deepCopy(data: any) {
+    return JSON.parse(JSON.stringify(data));
+  }
 }
