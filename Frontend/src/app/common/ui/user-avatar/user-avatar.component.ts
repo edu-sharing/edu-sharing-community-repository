@@ -18,7 +18,7 @@ export class UserAvatarComponent {
    */
   @Input() size = 'large';
 
-  private _customImage:any;
+  public _customImage:any;
   @Input() set customImage(customImage:File){
     if(customImage==null){
       this._customImage=null;
