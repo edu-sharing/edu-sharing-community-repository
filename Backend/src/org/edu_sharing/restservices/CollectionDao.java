@@ -99,10 +99,16 @@ public class CollectionDao {
 					repoDao.getCollectionClient().getChildReferences(
 							ROOT.equals(parentId) ? null : parentId, 
 							scope.toString());
+			
+			// if this collection is ordered by user, use the position of the elements as primary order criteria
+			if(!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(getCollection(repoDao, parentId).getOrderMode())) {
+				sortDefinition.addSortDefinitionEntry(
+						new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
+			}
+			
 			List<Node> sorted = NodeDao.sortAndFilterByType(repoDao, NodeDao.convertAlfrescoNodeRef(repoDao,children), sortDefinition,null,Filter.createShowAllFilter());
 			for (Node child : sorted) {
 	
-				String nodeId = child.getRef().getId();
 				String nodeType = child.getType();
 				
 				if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP).equals(nodeType)) {
@@ -164,6 +170,10 @@ public class CollectionDao {
 
 			throw DAOException.mapping(e);
 		}
+	}
+
+	private String getOrderMode() {
+		return this.collection.getOrderMode();
 	}
 
 	private CollectionDao(RepositoryDao repoDao, String collectionId) throws DAOException {
@@ -393,6 +403,7 @@ public class CollectionDao {
 		
 		result.setTitle(collection.getTitle());
 		result.setType(collection.getType());
+		result.setOrderMode(collection.getOrderMode());
 		result.setViewtype(collection.getViewtype());
 		result.setX(collection.getX());
 		result.setY(collection.getY());
@@ -423,6 +434,10 @@ public class CollectionDao {
 				return null;
 			}
 		});
+	}
+
+	public void setOrder(String[] nodes) {
+		collectionClient.setOrder(collectionId,nodes);
 	}
 
 	

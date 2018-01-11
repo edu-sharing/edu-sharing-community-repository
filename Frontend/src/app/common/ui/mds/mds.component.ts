@@ -772,12 +772,20 @@ export class MdsComponent{
       else{
         continue; // already processed!
       }
-      let search="<"+widget.id;
+      let search="<"+widget.id+">";
       let start=html.indexOf(search);
+      let end=start+search.length;
+      if(start<0){
+        search="<"+widget.id+" ";
+        start=html.indexOf(search);
+        end=-1;
+      }
       if(start<0)
         continue;
       this.currentWidgets.push(widget);
-      let end=html.indexOf(">",start);
+      if(end==-1)
+        end=html.indexOf(">",start);
+
       let first=html.substring(0,start);
       let second=html.substring(end+1);
       let attributes=this.getAttributes(html.substring(start,end));

@@ -109,7 +109,7 @@ export class CollectionNewComponent {
           this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM).subscribe((has)=>this.createCurriculum=has);
           this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
           this.route.queryParams.subscribe(params => {
-            this.mainnav=params['mainnav']=='true';
+            this.mainnav=params['mainnav']!='false';
           });
           this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
             this.editorialGroups=data.groups;

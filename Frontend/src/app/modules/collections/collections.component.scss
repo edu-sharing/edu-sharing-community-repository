@@ -255,6 +255,16 @@ table, div {
   background-color: #fff;
   cursor: pointer;
 }
+.section-headline {
+  float:left;
+  width:100%;
+  > div {
+    float: left;
+  }
+  .custom-order {
+    padding-left: 10px;
+  }
+}
 :host /deep/{
   .collections-pin-button custom-icon g{
     fill: #6b6b6b;

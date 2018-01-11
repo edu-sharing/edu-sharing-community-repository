@@ -295,6 +295,7 @@ export interface Collection {
   fromUser:boolean;
   scope : string;
   pinned : boolean;
+  orderMode: string;
 }
 
 export interface CollectionWrapper {
