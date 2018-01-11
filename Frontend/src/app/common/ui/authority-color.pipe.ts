@@ -1,7 +1,7 @@
 import {Pipe, PipeTransform} from "@angular/core";
 @Pipe({name: 'authorityColor'})
 export class AuthorityColorPipe implements PipeTransform {
-  public static COLORS=['#48708e','#975B5D','#692426','#E6B247','#A89B39','#60998F','#29685C','#759CB7','#537997','#976097'];
+  public static COLORS=['#48708e','#975B5D','#6A9663','#62998F','#769CB6','#966196'];
   transform(authority : any,args:string[]): string {
     if(!authority)
       return AuthorityColorPipe.COLORS[0];
