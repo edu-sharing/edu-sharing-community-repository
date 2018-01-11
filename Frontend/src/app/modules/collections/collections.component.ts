@@ -670,7 +670,7 @@ export class CollectionsMainComponent implements GwtEventListener {
         if(this.isGuest)
           this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
         if(params['mainnav'])
-          this.mainnav=params['mainnav']=='true';
+          this.mainnav=params['mainnav']!='false';
 
         // get id from route and validate input data
         var id = params['id'] || '-root-';
