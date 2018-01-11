@@ -106,7 +106,7 @@
 <section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading) && (isReady) && !isRootLevelCollection())" >
 
     <div class="section-headline"><div>{{ 'collections_content' | translate }}</div>
-                  <div class="custom-order" *ngIf="!isMobile() && isUserAllowedToEdit(collectionContent.collection)">
+                  <div class="custom-order" *ngIf="!isMobile() && collectionContent.references && collectionContent.references.length>1 && isUserAllowedToEdit(collectionContent.collection)">
                     <div class="switch">
                       <label>
                         <input type="checkbox" [ngModel]="collectionContent.collection.orderMode=='custom'" (change)="setCustomOrder($event)">
