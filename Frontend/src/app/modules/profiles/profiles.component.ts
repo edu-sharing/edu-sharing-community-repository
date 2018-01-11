@@ -40,6 +40,7 @@ export class ProfilesComponent {
   private static PASSWORD_MIN_LENGTH = 5;
   private editProfile: boolean;
   private editProfileUrl: string;
+  private avatarImage: any;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -74,6 +75,11 @@ export class ProfilesComponent {
   public updateAvatar(event:any){
     if(event.srcElement.files && event.srcElement.files.length){
       this.avatarFile=event.srcElement.files[0];
+      var reader = new FileReader();
+      reader.onload = (e:any) => {
+        this.avatarImage=e.target.result;
+      }
+      reader.readAsDataURL(this.avatarFile);
     }
   }
   public beginEdit(){

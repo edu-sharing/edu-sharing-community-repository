@@ -16,7 +16,6 @@ $path:'../../../assets/images/';
     position: relative;
     padding-top: 40px;
     padding-bottom: 20px;
-    background: linear-gradient(to bottom, $primary,$primaryDark 100%);
     text-align: center;
     color: $textOnPrimary;
     z-index: 2;
@@ -24,21 +23,9 @@ $path:'../../../assets/images/';
     a{
       color: $textOnPrimary;
     }
-    a,div,user-avatar,input{
+    a,.name,.mail,user-avatar,input,.editAvatar {
       position: relative;
       z-index: 2;
-    }
-    .background{
-      position: absolute;
-      left:-20px;
-      top:-20px;
-      width:calc(100% + 40px);
-      height:calc(100% + 40px);
-      z-index: 1;
-      overflow: hidden;
-      filter: blur(25px);
-      object-fit: cover;
-      opacity: 0.5;
     }
     .mail{
       opacity:0.75;
