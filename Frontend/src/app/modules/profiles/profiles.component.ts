@@ -115,7 +115,7 @@ export class ProfilesComponent {
         return;
       }
       let credentials={oldPassword:this.oldPassword,newPassword:this.password};
-      this.iamService.editUserCredentials(RestConstants.ME,credentials).subscribe(()=>{
+      this.iamService.editUserCredentials(this.user.authorityName,credentials).subscribe(()=>{
         this.saveAvatar();
       },(error:any)=>{
         if(RestHelper.errorMessageContains(error,"BadCredentialsException")){
@@ -155,22 +155,23 @@ export class ProfilesComponent {
   }
 
   private saveAvatar() {
+    this.user=null;
     if(!this.userEdit.profile.avatar && !this.avatarFile){
-      this.iamService.removeUserAvatar(this.user.authorityName).subscribe(()=>{
+      this.iamService.removeUserAvatar(this.userEdit.authorityName).subscribe(()=>{
         this.edit=false;
-        this.loadUser(this.user.authorityName);
+        this.loadUser(this.userEdit.authorityName);
       });
     }
     else if(this.avatarFile){
-      this.iamService.setUserAvatar(this.avatarFile,this.user.authorityName).subscribe(()=>{
+      this.iamService.setUserAvatar(this.avatarFile,this.userEdit.authorityName).subscribe(()=>{
         this.edit=false;
-        this.loadUser(this.user.authorityName);
+        this.loadUser(this.userEdit.authorityName);
       });
     }
     else{
       this.globalProgress=false;
       this.edit=false;
-      this.loadUser(this.user.authorityName);
+      this.loadUser(this.userEdit.authorityName);
     }
   }
 }
