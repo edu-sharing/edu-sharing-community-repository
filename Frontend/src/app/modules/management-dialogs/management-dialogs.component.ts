@@ -75,30 +75,37 @@ export class WorkspaceManagementDialogsComponent  {
         if(this.mdsRef.handleKeyboardEvent(event))
           return;
         this.closeEditor(false);
+        event.stopPropagation();
         return;
       }
       if(this.addToCollection!=null){
         this.cancelAddToCollection();
+        event.stopPropagation();
         return;
       }
       if(this.nodeContributor!=null){
         this.closeContributor();
+        event.stopPropagation();
         return;
       }
       if(this.nodeLicense!=null){
         this.closeLicense();
+        event.stopPropagation();
         return;
       }
       if(this.showLtiTools){
         this.closeLtiTools();
+        event.stopPropagation();
         return;
       }
       if(this.nodeReport!=null){
         this.closeReport();
+        event.stopPropagation();
         return;
       }
       if(this.ltiObject){
         this.ltiObject=null;
+        event.stopPropagation();
         return;
       }
     }
