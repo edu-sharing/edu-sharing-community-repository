@@ -13,6 +13,7 @@ public class Collection {
 	String type;
 	String viewtype;
 	String scope;
+	String orderMode;
 	
 	int childCollectionsCount;
 	
@@ -144,6 +145,12 @@ public class Collection {
 	}
 	public void setPinned(boolean pinned) {
 		this.pinned = pinned;
+	}
+	public String getOrderMode() {
+		return orderMode;
+	}
+	public void setOrderMode(String orderMode) {
+		this.orderMode = orderMode;
 	}
 	
 

@@ -537,7 +537,7 @@ export class ListTableComponent implements EventListener{
   private showDropdown(node : Node){
     //if(this._options==null || this._options.length<1)
     //  return;
-    this.select(node,false,false);
+    this.select(node,false,false,false);
     this.dropdownPosition="";
     this.dropdownLeft=null;
     this.dropdownTop=null;
@@ -569,7 +569,7 @@ export class ListTableComponent implements EventListener{
   private doubleClick(node : Node){
     this.doubleClickRow.emit(node);
   }
-  private select(node : Node,fromCheckbox : boolean,fireEvent=true){
+  private select(node : Node,fromCheckbox : boolean,fireEvent=true,unselect=true){
     if(!fromCheckbox && !this.isClickable)
       return;
     if(!fromCheckbox && !this.selectOnClick && fireEvent){
@@ -578,14 +578,14 @@ export class ListTableComponent implements EventListener{
     }
 
     if(!this.hasCheckbox || !fromCheckbox){ // Single value select
-      if(this.selectedNodes.length && this.selectedNodes[0]==node)
+      if(this.selectedNodes.length && this.selectedNodes[0]==node && unselect)
         this.selectedNodes=[];
       else
         this.selectedNodes=[node];
       this.onSelectionChanged.emit(this.selectedNodes);
       return;
     }
-    var pos=this.getSelectedPos(node);
+    let pos=this.getSelectedPos(node);
     // select from-to range via shift key
     if(fromCheckbox && pos==-1 && this.ui.isShiftCmd() && this.selectedNodes.length==1){
       let pos1=NodeHelper.getNodePositionInArray(node,this._nodes);
@@ -599,9 +599,9 @@ export class ListTableComponent implements EventListener{
       }
     }
     else {
-      if (pos != -1)
+      if (pos != -1 && unselect)
         this.selectedNodes.splice(pos, 1);
-      else {
+      if (pos == -1) {
         this.selectedNodes.push(node);
       }
     }

@@ -371,6 +371,8 @@ public class CCConstants {
 	
 	public final static String CCM_ASPECT_COLLECTION_PINNED = "{http://www.campuscontent.de/model/1.0}collection_pinned";
 	
+	public final static String CCM_ASPECT_COLLECTION_ORDERED = "{http://www.campuscontent.de/model/1.0}collection_ordered";
+	
 	public final static String CCM_ASPECT_COLLECTION_IO_REFERENCE = "{http://www.campuscontent.de/model/1.0}collection_io_reference";
 	
 	public final static String CCM_ASPECT_TOOL_DEFINITION = "{http://www.campuscontent.de/model/1.0}tool_definition";
@@ -882,9 +884,13 @@ public class CCConstants {
 	
 	public final static String CCM_PROP_MAP_COLLECTIONLEVEL0 = "{http://www.campuscontent.de/model/1.0}collectionlevel0";
 	
+	public final static String CCM_PROP_MAP_COLLECTION_ORDER_MODE = "{http://www.campuscontent.de/model/1.0}collectionordermode";
+
 	public final static String CCM_PROP_COLLECTION_PINNED_STATUS = "{http://www.campuscontent.de/model/1.0}collection_pinned_status";
 
 	public final static String CCM_PROP_COLLECTION_PINNED_ORDER = "{http://www.campuscontent.de/model/1.0}collection_pinned_order";
+	
+	public final static String CCM_PROP_COLLECTION_ORDERED_POSITION = "{http://www.campuscontent.de/model/1.0}collection_ordered_position";
 
 	public final static String CCM_VALUE_LINK_LINKTYPE_CHAMELEON = "CMchameleon";
 
@@ -1647,5 +1653,7 @@ public class CCConstants {
 	public static final String COLLECTION_COLOR_DEFAULT = "#975B5D";
 
 	public static final String SESSION_LAST_SEARCH_TOKEN = "LAST_SEARCH_TOKEN";
+
+	public static final String COLLECTION_ORDER_MODE_CUSTOM = "custom";
 	
 }

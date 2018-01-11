@@ -17,6 +17,7 @@ public class Collection extends CollectionBase {
 	String description;
 	String type;
 	String viewtype;
+	String orderMode;
 	
 	int x;
 	int y;
@@ -170,6 +171,17 @@ public class Collection extends CollectionBase {
 	public void setPinned(boolean pinned) {
 		this.pinned = pinned;
 	}
+	
+	@ApiModelProperty(required = false)
+	@JsonProperty("orderMode")
+	public String getOrderMode() {
+		return orderMode;
+	}
+
+	public void setOrderMode(String orderMode) {
+		this.orderMode = orderMode;
+	}
+	
 	
 	
 

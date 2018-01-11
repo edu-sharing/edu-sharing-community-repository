@@ -510,6 +510,7 @@ public class CollectionServiceImpl implements CollectionService{
 		collection.setType((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE));
 		collection.setViewtype((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONVIEWTYPE));		
 		collection.setScope((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE));		
+		collection.setOrderMode((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTION_ORDER_MODE));		
 		if(props.containsKey(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS))
 			collection.setPinned(new Boolean((String)props.get(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS)));
 		
@@ -520,10 +521,7 @@ public class CollectionServiceImpl implements CollectionService{
 	public Collection get(String storeId,String storeProtocol,String collectionId) {
 		try{
 			HashMap<String,Object> props = client.getProperties(storeProtocol,storeId,collectionId);
-			if(!Arrays.asList(client.getAspects(storeProtocol,storeId,collectionId)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
-				logger.warn("this node is no collection:"+collectionId);
-				throw new RuntimeException("this node is no collection");
-			}
+			throwIfNotACollection(storeProtocol,storeId,collectionId);
 			
 			Collection collection = asCollection(props);			
 			collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
@@ -751,6 +749,7 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 		int order=0;
 		for(String collection : collections) {
+			throwIfNotACollection(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),collection);
 			nodeService.addAspect(collection, CCConstants.CCM_ASPECT_COLLECTION_PINNED);
 			
 			HashMap<String,Object> props = new HashMap<String,Object>();
@@ -760,6 +759,14 @@ public class CollectionServiceImpl implements CollectionService{
 			
 			order++;
 		}
+	}
+
+	private void throwIfNotACollection(String storeProtocol,String storeId,String collection) {
+		String[] aspects=nodeService.getAspects(storeProtocol,storeId, collection);
+		if(!Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION)) {
+			throw new IllegalArgumentException("Node "+collection+" is not a collection (Aspect "+CCConstants.CCM_ASPECT_COLLECTION+" not found)");
+		}
+		
 	}
 
 	@Override
@@ -772,5 +779,33 @@ public class CollectionServiceImpl implements CollectionService{
 		ThumbnailService thumbnailService = serviceRegistry.getThumbnailService();
 		org.alfresco.service.cmr.repository.NodeRef ref=new org.alfresco.service.cmr.repository.NodeRef(MCAlfrescoAPIClient.storeRef,collectionId);
 		PreviewCache.purgeCache(collectionId);
+	}
+
+	@Override
+	public void setOrder(String parentId, String[] nodes) {
+		List<NodeRef> refs=getChildReferences(parentId, null);
+		int order=0;
+		
+		String mode=CCConstants.COLLECTION_ORDER_MODE_CUSTOM;
+		if(nodes==null || nodes.length==0)
+			mode=null;
+		
+		HashMap<String,Object> collectionProps=new HashMap<>();
+		collectionProps.put(CCConstants.CCM_PROP_MAP_COLLECTION_ORDER_MODE, mode);
+		nodeService.updateNodeNative(parentId, collectionProps);
+		
+		if(nodes==null || nodes.length==0)
+			return;
+		for(String node : nodes) {
+			NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node);
+			if(!refs.contains(ref))
+				throw new IllegalArgumentException("Node id "+node+" is not a children of the collection "+parentId);
+			
+			nodeService.addAspect(node, CCConstants.CCM_ASPECT_COLLECTION_ORDERED);
+			HashMap<String,Object> props=new HashMap<>();
+			props.put(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, order);
+			nodeService.updateNodeNative(node, props);
+			order++;
+		}
 	}
 }

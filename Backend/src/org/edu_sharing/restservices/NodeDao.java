@@ -1429,21 +1429,22 @@ public class NodeDao {
 					if(o1.isDirectory()!=o2.isDirectory()){
 						return o1.isDirectory() ? -1 : 1;
 					}
-					HashMap<String, String[]> o1props=null;
-					HashMap<String, String[]> o2props=null;
+					HashMap<String, Object> o1props=null;
+					HashMap<String, Object> o2props=null;
 					try{
-					o1props=o1.getAllProperties();
-					o2props=o2.getAllProperties();
+						o1props=o1.getNativeProperties();
+						o2props=o2.getNativeProperties();
 					}catch(DAOException e){
 						e.printStackTrace();
 						return 0;
 					}
 					for(SortDefinitionEntry criteria : sort.getSortDefinitionEntries()){
 						int value=0;
-						String[] prop1=null,prop2=null;
-						
-							prop1=o1props.get(criteria.getProperty());
-							prop2=o2props.get(criteria.getProperty());
+						String property=CCConstants.getValidGlobalName(criteria.getProperty());
+						Object prop1=null,prop2=null;
+							
+						prop1=o1props.get(property);
+						prop2=o2props.get(property);
 							
 						// TODO: Use Node and nodeProps to get values for sorting!
 						
@@ -1451,14 +1452,20 @@ public class NodeDao {
 							//exception[0]=DAOException.mapping(new InvalidParameterException("Sort criteria "+criteria.getProperty()+" not found"));
 							//break;
 						}
-						if(prop1==null)
-							prop1=new String[]{""};
-						if(prop2==null)
-							prop2=new String[]{""};
+						if(prop1==null || !(prop1 instanceof Comparable))
+							prop1="";
+						if(prop2==null || !(prop2 instanceof Comparable))
+							prop2="";
+						if(prop1 instanceof String) {
+							prop1=((String) prop1).toLowerCase();
+						}
+						if(prop2 instanceof String) {
+							prop2=((String) prop2).toLowerCase();
+						}
 						if(criteria.isAscending())
-							value=prop1[0].compareToIgnoreCase(prop2[0]);
+							value=((Comparable)prop1).compareTo(prop2);
 						else
-							value=prop2[0].compareToIgnoreCase(prop1[0]);
+							value=((Comparable)prop2).compareTo(prop1);
 							
 						if(value!=0)
 							return value;

@@ -116,7 +116,7 @@ export class UIHelper{
     else if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
       scope='PUBLIC';
     }
-    else if(type==RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL){
+    else if(type==RestConstants.COLLECTIONTYPE_EDITORIAL){
       scope='PUBLIC';
     }
     toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)});

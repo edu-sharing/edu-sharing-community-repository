@@ -30,6 +30,12 @@ export class RestCollectionService {
     let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/pinning",repository);
     return this.connector.post(query,JSON.stringify(collections),this.connector.getRequestOptions());
   }
+  public setOrder = (collection : string,nodes : string[]=[],repository=RestConstants.HOME_REPOSITORY): Observable<Response> => {
+    let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection/order",repository,[
+      [":collection",collection],
+    ]);
+    return this.connector.post(query,JSON.stringify(nodes),this.connector.getRequestOptions());
+  }
   public getCollection = (collection : string,repository=RestConstants.HOME_REPOSITORY): Observable<CollectionWrapper> => {
     let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection",repository,[
       [":collection",collection],

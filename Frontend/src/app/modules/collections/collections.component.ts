@@ -41,6 +41,7 @@ import {MdsHelper} from "../../common/rest/mds-helper";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
 import {Helper} from "../../common/helper";
+import {UIService} from "../../common/services/ui.service";
 
 // data class for breadcrumbs
 export class Breadcrumb {
@@ -97,8 +98,8 @@ export class CollectionsMainComponent implements GwtEventListener {
     public infoMessage: string;
     public infoButtons: DialogButton[];
     public infoClose: Function;
-  public nodeReport: Node;
-  public collectionsColumns : ListItem[]=[];
+    public nodeReport: Node;
+    public collectionsColumns : ListItem[]=[];
     public referencesColumns : ListItem[]=[];
     public createCollectionElement = new AddElement("COLLECTIONS.CREATE_COLLECTION");
     public createCollectionReference = new AddElement("COLLECTIONS.ADD_MATERIAL","redo");
@@ -119,6 +120,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       private storage : SessionStorageService,
       private connector : RestConnectorService,
         private route:ActivatedRoute,
+        private uiService:UIService,
         private router : Router,
         private toast : Toast,
       private title:Title,
@@ -156,21 +158,43 @@ export class CollectionsMainComponent implements GwtEventListener {
       },(error:any)=> RestHelper.goToLogin(this.router,this.config));
 
     }
+    public isMobile(){
+      return this.uiService.isMobile();
+    }
+    public setCustomOrder(event:any){
+      let checked=event.target.checked;
+      this.collectionContent.collection.orderMode=checked ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM : null;
+      if(checked){
+        this.orderActive=true;
+      }
+      else{
+        this.globalProgress = true;
+        this.collectionService.setOrder(this.collectionContent.collection.ref.id).subscribe(()=>{
+          this.globalProgress = false;
+          this.orderActive=false;
+          //this.refreshContent(()=>this.globalProgress=false);
+        });
+      }
+
+    }
     public set orderActive(orderActive:boolean){
       this._orderActive=orderActive;
+      this.collectionContent.collection.orderMode=orderActive ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM : null;
+
       if(this._orderActive){
-        this.infoTitle='SEARCH.ORDER_ELEMENTS';
-        this.infoMessage='SEARCH.ORDER_ELEMENTS_INFO';
+        this.infoTitle='COLLECTIONS.ORDER_ELEMENTS';
+        this.infoMessage='COLLECTIONS.ORDER_ELEMENTS_INFO';
         this.infoButtons=DialogButton.getSingleButton("SAVE",()=>{
+          this.changeOrder();
         });
         this.infoClose=()=>{
-          console.log("close");
           this.orderActive=false;
         }
       }
       else{
         this.infoTitle=null;
-        this.collectionContent.references=Helper.deepCopy(this.collectionContentOriginal.references);
+        //this.collectionContent.references=Helper.deepCopy(this.collectionContentOriginal.references);
+        this.refreshAll();
       }
     }
     public get orderActive(){
@@ -443,7 +467,6 @@ export class CollectionsMainComponent implements GwtEventListener {
     refreshContent(callback:Function=null) : void {
         if (!this.isReady) return;
         this.isLoading=true;
-
         // clear search field in GWT top area
         if (this.clearSearchOnNextStateChange) {
             this.clearSearchOnNextStateChange=false;
@@ -467,7 +490,6 @@ export class CollectionsMainComponent implements GwtEventListener {
         ).subscribe((collection:EduData.CollectionContent) => {
             console.log(collection);
             this.lastError = null;
-
             // transfere sub collections and content
             this.collectionContent.collections = collection.collections;
             this.collectionContent.references = collection.references;
@@ -541,10 +563,6 @@ export class CollectionsMainComponent implements GwtEventListener {
             NodeRenderComponent.close();
           })));
         }
-        if(!this.isGuest && content.originalId)
-          this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.ADD_TO_OTHER", "layers", () => {
-            this.addToOtherCollection(data.node);
-          }));
         // set content for being displayed in detail
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,this.nodeOptions);
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,this.collectionContent.references);
@@ -571,7 +589,9 @@ export class CollectionsMainComponent implements GwtEventListener {
     onGwtEvent(command:string, message:any) : void {
     }
 
-
+    public refreshAll(){
+      this.displayCollectionById(this.collectionContent.collection.ref.id);
+    }
     displayCollectionById(id:string,callback:Function=null) : void {
             if (id==null) id=RestConstants.ROOT;
             if (id=="-root-") {
@@ -646,7 +666,7 @@ export class CollectionsMainComponent implements GwtEventListener {
         if(this.isGuest)
           this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
         if(params['mainnav'])
-          this.mainnav=params['mainnav']=='true';
+          this.mainnav=params['mainnav']!='false';
 
         // get id from route and validate input data
         var id = params['id'] || '-root-';
@@ -727,5 +747,19 @@ export class CollectionsMainComponent implements GwtEventListener {
     }else {
       this.toast.error(error);
     }
+  }
+
+  private changeOrder() {
+    this.globalProgress=true;
+    this.collectionService.setOrder(this.collectionContent.collection.ref.id,RestHelper.getNodeIds(this.collectionContent.references)).subscribe(()=>{
+      this.collectionContentOriginal=Helper.deepCopy(this.collectionContent);
+      this._orderActive=false;
+      this.infoTitle=null;
+      this.toast.toast('COLLECTIONS.ORDER_SAVED');
+      this.globalProgress=false;
+    },(error:any)=>{
+      this.globalProgress=false;
+      this.toast.error(error);
+    });
   }
 }
