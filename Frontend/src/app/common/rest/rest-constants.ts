@@ -219,4 +219,5 @@ export class RestConstants {
   public static COLLECTIONTYPE_EDITORIAL = "EDITORIAL";
   public static COLLECTIONTYPE_CURRICULUM = "CURRICULUM";
   public static REPOSITORY_TYPE_ALFRESCO = "ALFRESCO";
+  static COLLECTION_ORDER_MODE_CUSTOM = "custom";
 }

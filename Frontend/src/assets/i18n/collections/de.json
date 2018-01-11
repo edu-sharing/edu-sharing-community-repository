@@ -10,6 +10,7 @@
     "ORDER_ELEMENTS":"Reihenfolge der Materialien manuell festlegen?",
     "ORDER_ELEMENTS_INFO":"Betrachter der Sammlung sehen die enthaltenen Materialien in einer bestimmten Reihenfolge.",
     "ORDER_SAVED":"Reihenfolge erfolgreich festgelegt",
+    "CUSTOM_ORDER":"Reihenfolge festlegen",
     "DETAIL": {
       "REMOVE": "Entfernen",
       "ADD_TO_OTHER": "In Sammlung"

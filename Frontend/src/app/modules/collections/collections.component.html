@@ -105,7 +105,17 @@
 <!-- content (content cards) if not error -->
 <section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading) && (isReady) && !isRootLevelCollection())" >
 
-                <div class="section-headline">{{ 'collections_content' | translate }}</div>
+    <div class="section-headline"><div>{{ 'collections_content' | translate }}</div>
+                  <div class="custom-order" *ngIf="!isMobile() && isUserAllowedToEdit(collectionContent.collection)">
+                    <div class="switch">
+                      <label>
+                        <input type="checkbox" [ngModel]="collectionContent.collection.orderMode=='custom'" (change)="setCustomOrder($event)">
+                        <span class="lever"></span>
+                        {{ 'COLLECTIONS.CUSTOM_ORDER' | translate}}
+                      </label>
+                    </div>
+                  </div>
+                </div>
 
                 <listTable
                   [addElement]="isUserAllowedToEdit(collectionContent.collection) ? createCollectionReference : null"
@@ -113,7 +123,7 @@
                   [isLoading]="isLoading"
                   [viewType]="1"
                   [dragDrop]="true"
-                  [orderElements]="false && isUserAllowedToEdit(collectionContent.collection)"
+                  [orderElements]="isUserAllowedToEdit(collectionContent.collection)"
                   [(orderElementsActive)]="orderActive"
                   [columns]="referencesColumns"
                   [options]="listOptions"
