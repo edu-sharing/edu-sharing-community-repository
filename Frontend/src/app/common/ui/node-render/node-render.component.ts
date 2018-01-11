@@ -63,6 +63,8 @@ export class NodeRenderComponent {
   private isOpenable: boolean;
   private closeOnBack: boolean;
   public nodeMetadata: Node;
+  public addToCollection: Node[];
+  public nodeReport: Node;
   private editor: string;
   private fromLogin = false;
   public banner: any;
@@ -331,7 +333,16 @@ export class NodeRenderComponent {
         });
         this.options.push(openFolder);
       }
+      let addCollection=new OptionItem('WORKSPACE.OPTION.COLLECTION','layers',()=>this.addToCollection=[this._node]);
+      addCollection.isEnabled=this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH)!=-1 && this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT;
+      this.options.push(addCollection);
 
+      if (this.config.instant("nodeReport", false)) {
+        let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
+        this.options.push(nodeReport);
+      }
+
+      this.isOpenable=false;
       this.connectors.list().subscribe((data:ConnectorList)=>{
         if(this.version==RestConstants.NODE_VERSION_CURRENT && RestConnectorsService.connectorSupportsEdit(data,this._node) || RestToolService.isLtiObject(this._node)){
           let view=new OptionItem("WORKSPACE.OPTION.VIEW", "launch",()=>this.openConnector(data,true));

@@ -563,10 +563,6 @@ export class CollectionsMainComponent implements GwtEventListener {
             NodeRenderComponent.close();
           })));
         }
-        if(!this.isGuest && content.originalId)
-          this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.ADD_TO_OTHER", "layers", () => {
-            this.addToOtherCollection(data.node);
-          }));
         // set content for being displayed in detail
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,this.nodeOptions);
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,this.collectionContent.references);
