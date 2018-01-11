@@ -188,14 +188,13 @@ export class CollectionsMainComponent implements GwtEventListener {
           this.changeOrder();
         });
         this.infoClose=()=>{
-          console.log("close");
           this.orderActive=false;
         }
       }
       else{
         this.infoTitle=null;
         //this.collectionContent.references=Helper.deepCopy(this.collectionContentOriginal.references);
-        this.refreshContent();
+        this.refreshAll();
       }
     }
     public get orderActive(){
@@ -594,7 +593,9 @@ export class CollectionsMainComponent implements GwtEventListener {
     onGwtEvent(command:string, message:any) : void {
     }
 
-
+    public refreshAll(){
+      this.displayCollectionById(this.collectionContent.collection.ref.id);
+    }
     displayCollectionById(id:string,callback:Function=null) : void {
             if (id==null) id=RestConstants.ROOT;
             if (id=="-root-") {
