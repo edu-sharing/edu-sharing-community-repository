@@ -106,7 +106,11 @@ export class WorkspaceExplorerComponent  {
     console.log(this._node);
     this.nodeApi.getChildren(this._node,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
       (error:any) => {
-        this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
+        if (error.status == 404)
+          this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
+        else
+          this.toast.error(error);
+
         this.loading=false;
         this.showLoading=false;
       });

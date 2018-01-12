@@ -63,28 +63,44 @@ public class CollectionImporter {
         	readXML(parent,new ByteArrayInputStream(buffer.toByteArray()));
         }
         else if(mimetype.equals("application/zip")) {
-            InputStream xml=findFile("*.xml");
-            if(xml==null) {
-            	xml=findFile("*.XML");
-            }
-            if(xml==null) {
-            	throw new IllegalArgumentException("Zip file contained no *.xml file");            
-            }
-        	readXML(parent,xml);
+        	InputStream xml;
+        	int pos=0;
+        	while(true) {
+	            xml=findFile("*.xml",false,pos);
+	            if(xml==null && pos==0) {
+	            	throw new IllegalArgumentException("Zip file contained no *.xml file");            
+	            }
+	            if(xml==null)
+	            	break;
+            	readXML(parent,xml);
+	            pos++;
+        	}
         }
         else {
         	throw new IllegalArgumentException("Only application/xml or application/zip files are allowed");            
         }
         return importCount;
 	}
-	private InputStream findFile(String name) throws IOException {
+	private InputStream findFile(String name,boolean caseSensitive, int pos) throws IOException {
         zip = new ZipInputStream(new ByteArrayInputStream(buffer.toByteArray()));
 		ZipEntry entry;
+		int count=0;
+		if(!caseSensitive) {
+			name=name.toLowerCase();
+		}
 		while ((entry = zip.getNextEntry())!=null) {
-		    if (name.startsWith("*") && entry.getName().endsWith(name.substring(1)))
-		    	break;
-			if (entry.getName().equals(name))
-				break;
+			String entryName=entry.getName();
+			if(!caseSensitive) {
+				entryName=entryName.toLowerCase();
+			}
+		    if (name.startsWith("*") && entryName.endsWith(name.substring(1))) {
+		    	if(count++==pos)
+		    		break;
+		    }
+			if (entryName.equals(name)) {
+		    	if(count++==pos)
+		    		break;
+			}
 		}
 		if(entry==null)
 			return null;
@@ -133,7 +149,7 @@ public class CollectionImporter {
 				
 				try {
 					if(zip!=null) {
-	    				is=findFile(collection.getImage());
+	    				is=findFile(collection.getImage(),true,0);
 	    			}
 	    			if(is==null) {
 		    			URL url = new URL(collection.getImage());   
