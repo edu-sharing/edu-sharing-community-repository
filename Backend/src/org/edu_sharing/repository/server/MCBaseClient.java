@@ -78,26 +78,7 @@ public abstract class MCBaseClient {
 	public static String getBlowFishEncrypted(String toEncrypt, ApplicationInfo appInfo){
 		return  BlowFish.encryptForUrl(toEncrypt, appInfo.getBlowfishiv(),  appInfo.getBlowfishkey());
 	}
-	/**
-	 * encrypts a String with the blowfish algorithm using iv and key from the homeApplication
-	 * also an Base64encoding and URLEncoding is done
-	 * 
-	 * 
-	 * @param toEncrypt
-	 * @return
-	 */
-	public static String getBlowFishEncrypted(String toEncrypt){
-		String encrypted = null;
-		String iv = ApplicationInfoList.getHomeRepository().getBlowfishiv();
-		String key = ApplicationInfoList.getHomeRepository().getBlowfishkey();
-		if (iv != null && key != null) {
-			BlowFish.setIv(iv);
-			encrypted =  BlowFish.encryptForUrl(toEncrypt, iv, key);
-		}
-		return encrypted;
-	}
-	
-	
+		
 	/**
 	 * decrypts a blofish encrypted file
 	 * 
