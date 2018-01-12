@@ -66,7 +66,7 @@ export class ProfilesComponent {
       this.globalProgress=false;
       this.iamService.getUser().subscribe((profile:IamUser)=>{
         this.isMe=profile.person.authorityName==this.user.authorityName;
-      })
+      });
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(null,'PROFILES.LOAD_ERROR');
