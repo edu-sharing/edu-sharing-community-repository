@@ -77,8 +77,7 @@ export class Toast{
       jsonParse=errorObject.response;
     try {
       let json=JSON.parse(jsonParse);
-      error=json.message;
-
+      error=json.error+": "+json.message;
     }catch(e){}
     this.dialogTitle=dialogTitle;
     this.dialogMessage=dialogMessage;
