@@ -222,9 +222,6 @@ table, div {
     display: none;
 }
 
-.collections-master-div {
-    min-width: 625px;
-}
 
 .collections-edit-button {
     right: 50px;
@@ -285,9 +282,14 @@ table, div {
 
 @media only screen and (max-width: $mobileWidth) {
     :host /deep/{
-      .subcollections{
-        margin-top: 190px;
+      .collections-master-div-notabs .subcollections{
+        margin-top: 240px;
       }
+    }
+    .collections-breadcrumb{
+      position: absolute;
+      top: 252px;
+      right: -10px;
     }
     .collection-new-preview-infoline,.collection-description{
       display: none;
@@ -323,7 +325,6 @@ table, div {
     }
 
     .collections-master-div-notabs {
-        padding-right: 8px;
         min-width: unset;
     }
     .collections-pin-button,
