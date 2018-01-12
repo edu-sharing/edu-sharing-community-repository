@@ -9,7 +9,7 @@
   <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
   <div class="sidenavImage" style.background-color="{{ (user ? user.person : null) | authorityColor }}">
     <div class="profile-gradient"></div>
-    <img *ngIf="user && user.person.profile.avatar" class="profile-background" [src]="user.person.profile.avatar+'&crop=true&width=150&height=150'">
+    <img *ngIf="user && user.person.profile.avatar" class="profile-background" [src]="user.person.profile.avatar+'&crop=true&width=200&height=200'">
     <div class="sidenavProfile">
       <user-avatar *ngIf="user" [user]="user.person" [size]="'medium'" class="clickable" (click)="openProfile()"></user-avatar>
       <!-- <i *ngIf="isGuest" class="material-icons">account_circle</i> -->

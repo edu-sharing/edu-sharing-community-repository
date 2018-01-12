@@ -32,12 +32,15 @@ user-profile{
 
 .menuButton {
   width: 300px;
-  display: table-cell;
-  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  .barIcon{
+    margin-top: 2px;
+  }
 }
 .menuButtonOuter{
   height:100%;
-  display: table;
+  display: flex;
 }
 
 .topBarSearch {
@@ -46,7 +49,6 @@ user-profile{
 }
 
 .menuButton .barIcon, .menuButton img {
-  vertical-align: bottom;
 }
 .menuButton img{
   /*
@@ -100,7 +102,7 @@ user-profile{
   .nodeStore{
     margin-right:10px;
     position: relative;
-    top:5px;
+    top:8px;
     >i{
       color:$primary;
     }
@@ -174,6 +176,7 @@ user-profile{
 .barIcon{
   font-size: 24px;
   z-index:115;
+
 }
 .searchIcon,.searchClearIcon{
   font-size: 22px !important;
@@ -191,7 +194,7 @@ user-profile{
   text-align: right;
   position: relative;
   top:5px;
-  display: table;
+  display: flex;
   margin-right: 7px;
 }
 
@@ -199,6 +202,7 @@ user-profile{
   overflow: hidden;
   max-width: 160px;
   height: 18px;
+  margin-top: 1px;
   word-break: break-all;
   display: inline-block;
 }
@@ -216,7 +220,7 @@ user-profile{
 .topBar .user i{
   font-size:25px;
   vertical-align: top;
-  margin-right: 10px;
+  margin-right: 5px;
   margin-left: 5px;
 }
 .sidenav .button{
@@ -272,7 +276,7 @@ user-profile{
   .scopeIcon{
     margin-left: 13px;
     position: relative;
-    top: 4px;
+    top: 0px;
     display:none;
   }
   .iconPerson{
@@ -308,14 +312,15 @@ user-profile{
     user-avatar{
       top:2px;
     }
-    .iconArrow {
-      display: none;
+    .user .iconArrow {
+      margin-right: 0;
+      margin-left: -7px;
     }
     .eduImage{
       display:none;
     }
     .scopeIcon{
-      display: inline-block;
+      display: flex;
     }
   }
 
