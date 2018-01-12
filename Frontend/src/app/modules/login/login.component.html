@@ -12,7 +12,8 @@
   <div class="card center-card">
     <div class="card-content">
     <div class="card-title">{{caption | translate}}</div>
-      <div class="branding"><img src="assets/images/logo.svg"></div>
+      <div class="branding" *ngIf="config.branding"><img src="assets/images/logo.svg"></div>
+      <div class="card-scroll ">
       <form (ngSubmit)="login()" #loginForm>
       <div *ngIf="showUsername">
         <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
@@ -27,7 +28,7 @@
         {{'LOGIN.REGISTER_TEXT' | translate}}
         <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
       </div>
-
+      </div>
     </div>
       <div class="card-action">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
