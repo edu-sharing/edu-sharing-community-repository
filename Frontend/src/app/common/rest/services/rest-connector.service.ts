@@ -25,7 +25,7 @@ export class RestConnectorService {
     "rest/",
     "http://localhost:8080/edu-sharing/rest/",
     "http://localhost:8081/edu-sharing/rest/",
-    "http://edu40.edu-sharing.de/edu-sharing/rest/",
+    "http://edu41.edu-sharing.de/edu-sharing/rest/",
     //"https://repository.oer-berlin.de/edu-sharing/rest/",
     "http://alfresco5.vm:8080/edu-sharing/rest/"
   ];
