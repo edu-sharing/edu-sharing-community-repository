@@ -65,22 +65,7 @@ public abstract class MCBaseClient {
 		return URLTool.getRedirectServletLink(repId, nodeId);
 	}
 	
-	/**
-	 * sets encrypted username in authInfo when it's not already there and returns encrypted username
-	 * @param authInfo
-	 * @param appInfo where blowfishkey is set
-	 */
-	public String getUserNameEncrypted(HashMap authInfo, ApplicationInfo appInfo){
-		String user_encrypted = (String)authInfo.get(CCConstants.AUTH_USERNAME_ENCRYPTED);
-		if(user_encrypted == null){
-			logger.info("encrypt will be called");
-			
-			String username =  (String)authInfo.get(CCConstants.AUTH_USERNAME);
-			user_encrypted = getBlowFishEncrypted(username,appInfo);
-			authInfo.put(CCConstants.AUTH_USERNAME_ENCRYPTED, user_encrypted);
-		}
-		return user_encrypted;
-	}
+	
 	
 	/**
 	 * encrypts a String with the blowfish algorithm
