@@ -286,10 +286,20 @@ table, div {
         margin-top: 240px;
       }
     }
+  .collection-new-preview-headline{
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    /*line-height: 1em;*/
+    max-height: 1.5em;
+    overflow: hidden;
+  }
     .collections-breadcrumb{
       position: absolute;
       top: 252px;
-      right: -10px;
+      right: 10px;
+      max-width: calc(100% - 100px);
     }
     .collection-new-preview-infoline,.collection-description{
       display: none;

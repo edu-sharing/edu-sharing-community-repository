@@ -31,10 +31,13 @@
 .breadcrumbMobile{
   display:none;
   margin-top: -4px;
+  .folder{
+    word-break: break-all;
+  }
 }
 @media screen and (max-width: $mobileWidth) {
   .breadcrumbMobile{
-    display:inherit;
+    display:flex;
   }
   .breadcrumbDesktop{
     display:none;
