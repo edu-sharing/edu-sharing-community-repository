@@ -60,6 +60,20 @@ public class ApplicationInfoList {
 		return result;		
 	}
 	
+	public static ApplicationInfo getRenderService() {
+		
+		if(appInfos == null || appInfos.size() < 1){
+			
+			getApplicationInfos();
+		}
+		for(ApplicationInfo appInfo : appInfos.values()){
+			if(ApplicationInfo.TYPE_RENDERSERVICE.equals(appInfo.getType())){
+				return appInfo;
+			}
+		}
+		return null;
+	}
+	
 	public static ApplicationInfo getRepositoryInfoById(String repId){
 		ApplicationInfo result = null;
 		if(appInfos == null || appInfos.size() < 1){

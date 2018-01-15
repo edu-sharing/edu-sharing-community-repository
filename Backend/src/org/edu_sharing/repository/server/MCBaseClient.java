@@ -65,34 +65,6 @@ public abstract class MCBaseClient {
 		return URLTool.getRedirectServletLink(repId, nodeId);
 	}
 	
-	
-	
-	/**
-	 * encrypts a String with the blowfish algorithm
-	 * also an Base64encoding and URLEncoding is done
-	 * 
-	 * @param toencrypt the String to encrypt
-	 * @param appInfo the ApplicationInfo where the iv for encryption is found
-	 * @return
-	 */
-	public static String getBlowFishEncrypted(String toEncrypt, ApplicationInfo appInfo){
-		return  BlowFish.encryptForUrl(toEncrypt, appInfo.getBlowfishiv(),  appInfo.getBlowfishkey());
-	}
-		
-	/**
-	 * decrypts a blofish encrypted file
-	 * 
-	 * @param toDecrypt the String to decrypt
-	 * @param appInfo the ApplicationInfo where the iv for decryption is found
-	 * @return
-	 */
-	public static String getBlowFishDecrypted(String toDecrypt,ApplicationInfo appInfo){
-		byte[] base64decoded = BlowFish.getBase64Decoded(toDecrypt);
-		String result = BlowFish.decrypt(base64decoded, appInfo.getBlowfishkey());
-		return result;
-	}
-	
-	
 	/**
 	 * Creates a node. 
 	 * @param parentID the Id of the parent node
