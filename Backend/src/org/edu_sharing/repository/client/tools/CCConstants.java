@@ -113,8 +113,6 @@ public class CCConstants {
 	
 	public final static String AUTH_USERNAME = "UserName";
 	
-	public final static String AUTH_USERNAME_ENCRYPTED = "AUTH_USERNAME_ENCRYPTED"; 
-	
 	public final static String AUTH_USERNAME_CAPTION = "AUTH_USERNAME_CAPTION";
 	
 	public final static String AUTH_USER_HOMEDIR = "AUTH_USER_HOMEDIR";

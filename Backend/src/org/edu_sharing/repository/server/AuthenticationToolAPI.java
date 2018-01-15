@@ -125,8 +125,6 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		
 		boolean isAdmin = mcAlfrescoAPIClient.isAdmin(authInfo.get(CCConstants.AUTH_USERNAME));
 		authInfo.put(CCConstants.AUTH_USER_ISADMIN, new Boolean(isAdmin).toString());
-		
-		authInfo.put(CCConstants.AUTH_USERNAME_ENCRYPTED, MCAlfrescoBaseClient.getBlowFishEncrypted(authInfo.get(CCConstants.AUTH_USERNAME)));
 	}
 	
 	@Override
