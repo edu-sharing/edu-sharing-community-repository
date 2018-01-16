@@ -16,12 +16,20 @@ import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.content.transform.ContentTransformerHelper;
 import org.alfresco.repo.content.transform.ContentTransformerWorker;
+import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
+import org.alfresco.repo.transaction.AlfrescoTransactionSupport.TxnReadState;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.MimetypeService;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.TransformationOptions;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.util.TempFileProvider;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.CCConstants;
 
 public class VideoTransformerWorker extends ContentTransformerHelper implements ContentTransformerWorker  {
 
@@ -30,7 +38,9 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	
 	Logger logger = Logger.getLogger(VideoTransformerWorker.class);
 	
-	
+	NodeService nodeService = null;
+	TransactionService transactionService = null;
+
 	@Override
 	public String getComments(boolean available) {
 		StringBuilder sb = new StringBuilder();
@@ -97,34 +107,60 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
         reader.getContent(sourceFile);
         
         
-        
-//        long videoLength = getViedeoLength(sourceFile.getAbsolutePath());
-//        if(videoLength > 1){
-        	
-        	//ProcessBuilder pb = new ProcessBuilder("ffmpeg", "-an", "-ss", ""+videoLength, "-t", "00:00:01", "-vframes","1", "-i",sourceFile.getAbsolutePath(),"-f", "image2", targetFile.getAbsolutePath());
-        
-        	ProcessBuilder pb = new ProcessBuilder("ffmpeg", "-i",sourceFile.getCanonicalPath(),"-vf","thumbnail,scale=640:360","-frames:v","1","-ss","1", "-y", targetFile.getCanonicalPath());
-        	//ffmpeg -i <video> -vf  "thumbnail,scale=640:360" -frames:v 1 -ss 1 <image>
-        	
-        	pb.environment().remove("LD_LIBRARY_PATH");
-			Process p = pb.start();
-			p.waitFor();
-//        }else{
-//        	logger.error("determined videoLength is to small");
-//        }
-        
-        if(targetFile.length() > 0){
-        	writer.putContent(targetFile);
-        }else{
-        	logger.error("generated preview file has no content");
+        try {
+	//        long videoLength = getViedeoLength(sourceFile.getAbsolutePath());
+	//        if(videoLength > 1){
+	        	
+	        	//ProcessBuilder pb = new ProcessBuilder("ffmpeg", "-an", "-ss", ""+videoLength, "-t", "00:00:01", "-vframes","1", "-i",sourceFile.getAbsolutePath(),"-f", "image2", targetFile.getAbsolutePath());
+	        
+	        	ProcessBuilder pb = new ProcessBuilder("ffmpeg", "-i",sourceFile.getCanonicalPath(),"-vf","thumbnail,scale=640:360","-frames:v","1","-ss","1", "-y", targetFile.getCanonicalPath());
+	        	//ffmpeg -i <video> -vf  "thumbnail,scale=640:360" -frames:v 1 -ss 1 <image>
+	        	
+	        	pb.environment().remove("LD_LIBRARY_PATH");
+				Process p = pb.start();
+				p.waitFor();
+	//        }else{
+	//        	logger.error("determined videoLength is to small");
+	//        }
+	        if(targetFile.length() > 0){
+	        	writer.putContent(targetFile);
+	        }else{
+	        	logger.warn("ffpmpeg: generated preview file has no content");
+	        }
+	        writeLength(sourceFile,options);
+			
+        }catch(Throwable t) {
+        	logger.error("Error initializing ffmpeg. Generating preview+reading metadata failed ("+t.getMessage()+")");
         }
         		
 	}
 	
 	
-	long getViedeoLength(String videoFilePath){
-		ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c",this.ffmpegPath+" -i "+videoFilePath+ " 2>&1 | grep Duration | awk '{print $2}' | tr -d ,");
-		
+	private void writeLength(File sourceFile, TransformationOptions options) throws IOException {
+		long length=getVideoLength(sourceFile.getCanonicalPath());
+		if(length<0)
+			return;
+		RetryingTransactionHelper txnHelper = transactionService.getRetryingTransactionHelper();
+        txnHelper.setForceWritable(true);
+        boolean requiresNew = false;
+        if (AlfrescoTransactionSupport.getTransactionReadState() != TxnReadState.TXN_READ_WRITE){
+            requiresNew = true;
+        }
+        txnHelper.doInTransaction(new RetryingTransactionCallback<Void>() {
+
+            @Override
+            public Void execute() throws Throwable{
+            	nodeService.setProperty(options.getSourceNodeRef(), 
+            			QName.createQName(CCConstants.LOM_PROP_TECHNICAL_DURATION), 
+            			"PT"+length+"S");
+            	return null;
+            }
+    
+        }, false, requiresNew);
+	}
+
+	long getVideoLength(String videoFilePath){
+		ProcessBuilder pb = new ProcessBuilder("ffmpeg","-i",videoFilePath);
 		pb.environment().remove("LD_LIBRARY_PATH");
 		
 		InputStream pResult = null;
@@ -132,24 +168,28 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 			Process p = pb.start();
 			p.waitFor();
 			pResult = p.getInputStream();
-		
 			String output = convertStreamToString(pResult);
+
+			if(output == null || output.trim().equals("")){
+				pResult = p.getErrorStream();
+				output = convertStreamToString(pResult);
+			}
 			
 			if(output == null || output.trim().equals("")){
 				return -1;
 			}
 			
-			long millisecs = getMilliseconds(output);
+			String[] result=output.split("Duration: ");
+			String[] duration=result[1].split(",")[0].split(":");
+			long seconds=Math.round(Double.parseDouble(duration[0])*60*60 + Double.parseDouble(duration[1])*60+Double.parseDouble(duration[2]));
 			
-			long secondsThumbnail = millisecs / 1000;
-			return secondsThumbnail;
+			return seconds;
 			
 		}catch(IOException e){
 			e.printStackTrace();
-		}catch(ParseException e){
-			e.printStackTrace();
-		}catch(InterruptedException e){
-			e.printStackTrace();
+		}
+		catch(Throwable t){
+			t.printStackTrace();
 		}finally{
 			if(pResult != null){
 				try{
@@ -165,7 +205,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 		
 	}
 	
-	
+
 	
 	long getMilliseconds(String timeString) throws ParseException{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS");
@@ -190,5 +230,14 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	     }
 	     return sb.toString();
 	}
+
+	public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
+	}
+
+	public void setTransactionService(TransactionService transactionService) {
+		this.transactionService = transactionService;
+	}
+	
 	
 }
