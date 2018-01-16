@@ -31,7 +31,7 @@
       <div class="badge" *ngFor="let keyword of data.keywords"><span class="text">{{ keyword }}</span></div>
     </div>
     <div class="description" *ngIf="data.description">{{'NODE.description' | translate}}</div>
-    <div class="value" *ngIf="data.description">{{data.description}}</div>
+    <div class="value descriptionValue" *ngIf="data.description">{{data.description}}</div>
     <div class="description" *ngIf="data.author_freetext">{{'NODE.ccm:author_freetext' | translate}}</div>
     <div class="value valueFreetext" *ngIf="data.author_freetext">{{data.author_freetext}}</div>
     <div class="description" *ngIf="data.author">{{'NODE.ccm:lifecyclecontributer_authorFN' | translate}}</div>
