@@ -34,12 +34,23 @@
   </div>
   <div class="topBarSearch" [class.noScope]="!showScope">
   <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled">
-    <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
-           title="{{searchPlaceholder | translate}}" placeholder="{{searchPlaceholder | translate}}" />
-    <i class="material-icons searchIcon">search</i>
+    <div class="searchInputGroup">
+      <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
+             title="{{searchPlaceholder | translate}}" placeholder="{{searchPlaceholder | translate}}" />
+      <i class="material-icons searchIcon">search</i>
+      <i class="material-icons searchClearIcon" *ngIf="searchQuery" (click)="clearSearch()">clear</i>
+    </div>
   </form>
   </div>
   <div class="imprint" *ngIf="config.imprintUrl"><a class="clickable" (click)="openImprint()">{{ 'IMPRINT' | translate }}</a></div>
+  <div *ngIf="user && _currentScope=='search'" #nodeStoreRef class="nodeStore" class="clickable nodeStore" (click)="setNodeStore(true)">
+    <i class="material-icons barIcon">bookmark_border</i>
+    <div class="nodeStoreCount">{{nodeStoreCount}}</div>
+    <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">
+      <div>+{{nodeStoreAnimation}}</div>
+    </div>
+  </div>
+
   <div class="user clickable" *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
       <div *ngIf="!isGuest">{{userName}}</div>
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
@@ -77,4 +88,9 @@
   </div>
 </div>
 <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
+
+<search-node-store
+  *ngIf="showNodeStore"
+  (onClose)="setNodeStore(false)"
+></search-node-store>
 

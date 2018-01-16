@@ -1,7 +1,17 @@
 <div class="breadcrumb breadcrumbDesktop">
   <div *ngIf="home" tabindex="0" class="home" [class.clickable]="clickable" (click)="openBreadcrumb(0)" (keyup.enter)="openBreadcrumb(0)">{{home | translate}}</div>
   <div *ngIf="!home" tabindex="0" class="home homeIcon" [class.clickable]="clickable" (click)="openBreadcrumb(0)"><i class="material-icons">home</i></div>
-  <div *ngFor="let node of _breadcrumbsAsNode;let i=index " tabindex="0" [class.homeIsIcon]="!home" class="folder" [class.clickable]="clickable" (click)="openBreadcrumb(i+1)" (keyup.enter)="openBreadcrumb(i+1)"> &rsaquo; {{node ? node.name : ''}}</div>
+  <div *ngFor="let node of _breadcrumbsAsNode;let i=index " tabindex="0"
+       (dragend)="dragHover=null"
+       (dragend)="dragHover=null"
+       (dragexit)="dragHover=null"
+       (dragleave)="dragHover=null"
+       (dragover)="allowDrag($event,node)" (drop)="drop($event,node)"
+       [class.homeIsIcon]="!home" class="folder"
+       [class.clickable]="clickable"
+       [class.selected]="dragHover==node"
+       (click)="openBreadcrumb(i+1)"
+       (keyup.enter)="openBreadcrumb(i+1)"> &rsaquo; {{node ? node.name : ''}}</div>
 </div>
 <!--
 <div class="breadcrumb breadcrumbMobile" *ngIf="_breadcrumbsAsNodeShort">

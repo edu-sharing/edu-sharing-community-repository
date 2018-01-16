@@ -1,0 +1,37 @@
+<div class="dialog darken">
+  <div class="card center-card card-high card-action">
+    <div class="card-content">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <span class="card-title ">{{'SEARCH.NODE_STORE.TITLE' | translate }}</span>
+      <div class="card-scroll">
+        <actionbar class="actions"
+                   [options]="actionOptions"
+        ></actionbar>
+        <div class="noElementsInfo noElements" *ngIf="!nodes.length">{{'SEARCH.NODE_STORE.LIST_EMPTY' | translate}}</div>
+        <listTable *ngIf="nodes.length"
+          [nodes]="nodes"
+          [columns]="columns"
+          [hasIcon]="true"
+          [options]="options"
+          [hasCheckbox]="true"
+          [isClickable]="true"
+          [dragDrop]="false"
+          [selectOnClick]="true"
+          [selectedNodes]="selected"
+          [sortBy]="sortBy"
+          [sortAscending]="sortAscending"
+          (sortListener)="changeSort($event)"
+          (onSelectionChanged)="onSelection($event)"
+          (doubleClickRow)="onDoubleClick($event)"
+          ></listTable>
+      </div>
+    </div>
+    <div class="card-action">
+      <a class="btn-flat"
+         (keyup.enter)="cancel()"
+         (click)="cancel()"
+      >{{'CLOSE' | translate}}</a>
+    </div>
+  </div>
+</div>
+<global-progress *ngIf="globalProgress"></global-progress>

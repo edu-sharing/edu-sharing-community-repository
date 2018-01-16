@@ -25,6 +25,13 @@
 (onCancel)="chooseDirectory=false"
 (onChoose)="pickDirectory($event)"
 ></file-chooser>
+<file-chooser *ngIf="chooseCollection"
+              [isCancelable]="true"
+              [title]="'ADMIN.IMPORT.CHOOSE_COLLECTION'"
+              [collections]="true"
+              (onCancel)="chooseCollection=false"
+              (onChoose)="pickCollection($event)"
+></file-chooser>
 <div class="row row-dark">
   <div class="col s12">
     <ul class="tabs">
@@ -144,24 +151,54 @@
   </div>
 </div>
 <div *ngIf="tab=='IMPORT'" class="content import">
+  <div class="heading"><i class="material-icons">layers</i><span>{{'ADMIN.IMPORT.COLLECTION' | translate}}</span></div>
+  <div class="collections">
+    <input #xmlCollectionsSelect type="file" style="display:none" id="xmlCollectionsSelect" accept=".xml, .zip" (change)="updateCollectionsFile($event)">
+    <div class="inputGroup">
+      <a class="btn-flat btn-shadow" (click)="xmlCollectionsSelect.click()">{{'ADMIN.IMPORT.CHOOSE_COLLECTIONS_XML' | translate}}</a>
+      <div class="file">{{ (collectionsFile ? collectionsFile.name : '') }}</div>
+    </div>
+    <div class="inputGroup">
+      <input type="radio" name="parentCollection" id="parentCollectionRoot" [(ngModel)]="parentCollectionType" value="root">
+      <label for="parentCollectionRoot">{{'ADMIN.IMPORT.PARENT_COLLECTION_ROOT' | translate}}</label>
+      <input type="radio" name="parentCollection" id="parentCollectionChoose" [(ngModel)]="parentCollectionType" value="choose">
+      <label for="parentCollectionChoose">{{'ADMIN.IMPORT.PARENT_COLLECTION_CHOOSE' | translate}}</label>
+    </div>
+    <div class="inputGroup" *ngIf="parentCollectionType=='choose'">
+      <a class="btn-flat btn-shadow" (click)="chooseCollection=true">{{'ADMIN.IMPORT.CHOOSE_COLLECTION' | translate}}</a>
+      <div class="directory"><div *ngIf="parentCollection">{{ parentCollection.title}} ({{parentCollection.ref.id}})</div></div>
+    </div>
+    <a class="btn waves-effect waves-light" (click)="importCollections()">{{'ADMIN.IMPORT.COLLECTION_START' | translate}}</a>
+  </div>
   <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.EXCEL' | translate}}</span></div>
   <div class="csv">
     <input #csvSelect type="file" style="display:none" id="csvSelect" accept=".xls, .xlsx" (change)="updateExcelFile($event)">
-    <a class="btn-flat btn-shadow" (click)="csvSelect.click()">{{'ADMIN.IMPORT.CHOOSE_EXCEL' | translate}}</a><div class="file">{{ (excelFile ? excelFile.name : '') }}</div>
-    <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate}}</a>
-    <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
+    <div class="inputGroup">
+      <a class="btn-flat btn-shadow" (click)="csvSelect.click()">{{'ADMIN.IMPORT.CHOOSE_EXCEL' | translate}}</a>
+      <div class="file">{{ (excelFile ? excelFile.name : '') }}</div>
+    </div>
+    <div class="inputGroup">
+      <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate}}</a>
+      <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
+    </div>
     <a class="btn waves-effect waves-light" (click)="importExcel()">{{'ADMIN.IMPORT.EXCEL_START' | translate}}</a>
   </div>
   <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.OAI' | translate}}</span></div>
   <div class="oai">
-    <input type="text" [(ngModel)]="oaiUrl" placeholder="{{'ADMIN.IMPORT.OAI_URL' | translate}}">
-    <input type="text" [(ngModel)]="oaiSet" placeholder="{{'ADMIN.IMPORT.OAI_SET' | translate}}">
-    <input type="text" [(ngModel)]="oaiPrefix" placeholder="{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}">
-    <input type="text" [(ngModel)]="oaiMetadata" placeholder="{{'ADMIN.IMPORT.OAI_METADATA' | translate}}">
-    <input type="text" [(ngModel)]="oaiFile" placeholder="{{'ADMIN.IMPORT.OAI_FILE' | translate}}">
-    <select [(ngModel)]="oaiImporter">
+    <input type="text" [(ngModel)]="oai.url" placeholder="{{'ADMIN.IMPORT.OAI_URL' | translate}}">
+    <input type="text" [(ngModel)]="oai.set" placeholder="{{'ADMIN.IMPORT.OAI_SET' | translate}}">
+    <input type="text" [(ngModel)]="oai.prefix" placeholder="{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}">
+    <input type="text" [(ngModel)]="oai.metadata" placeholder="{{'ADMIN.IMPORT.OAI_METADATA' | translate}}">
+    <input type="text" [(ngModel)]="oai.file" placeholder="{{'ADMIN.IMPORT.OAI_FILE' | translate}}">
+    <select [(ngModel)]="oai.className">
       <option *ngFor="let option of oaiClasses">{{ option }}</option>
     </select>
+    <input type="text" [(ngModel)]="oai.importerClassName" placeholder="{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}">
+    <input type="text" [(ngModel)]="oai.recordHandlerClassName" placeholder="{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}">
+    <input type="text" [(ngModel)]="oai.binaryHandlerClassName" placeholder="{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}">
+    <div class="oaiSave">
+      <input type="checkbox" id="oaiSave" class="filled-in" [(ngModel)]="oaiSave"><label for="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</label>
+    </div>
     <a class="btn-flat btn-shadow" (click)="removeImports()">{{'ADMIN.IMPORT.REMOVE_IMPORTS' | translate}}</a>
     <a class="btn waves-effect waves-light" (click)="oaiImport()">{{'ADMIN.IMPORT.OAI_START' | translate}}</a>
   </div>
@@ -189,4 +226,4 @@
     <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
   </div>
 </div>
-<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>
+<global-progress *ngIf="globalProgress"></global-progress>

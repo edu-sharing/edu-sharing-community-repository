@@ -24,32 +24,14 @@ public class Usage2SoapBindingStub extends org.apache.axis.client.Stub implement
         org.apache.axis.description.OperationDesc oper;
         org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("setUsage");
+        oper.setName("getUsagesByEduRef");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "eduRef"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "user"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "lmsId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "courseId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "userMail"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "fromUsed"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "dateTime"), java.util.Calendar.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "toUsed"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "dateTime"), java.util.Calendar.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "distinctPersons"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "version"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "resourceId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "xmlParams"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
         oper.setReturnType(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "Usage2Result"));
-        oper.setReturnClass(org.edu_sharing.webservices.usage2.Usage2Result.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "setUsageReturn"));
+        oper.setReturnClass(org.edu_sharing.webservices.usage2.Usage2Result[].class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "getUsagesByEduRefReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         oper.addFault(new org.apache.axis.description.FaultDesc(
@@ -111,14 +93,32 @@ public class Usage2SoapBindingStub extends org.apache.axis.client.Stub implement
         _operations[2] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getUsagesByEduRef");
+        oper.setName("setUsage");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "eduRef"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "user"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "lmsId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "courseId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "userMail"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "fromUsed"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "dateTime"), java.util.Calendar.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "toUsed"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "dateTime"), java.util.Calendar.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "distinctPersons"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "version"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "resourceId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "xmlParams"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
         oper.setReturnType(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "Usage2Result"));
-        oper.setReturnClass(org.edu_sharing.webservices.usage2.Usage2Result[].class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "getUsagesByEduRefReturn"));
+        oper.setReturnClass(org.edu_sharing.webservices.usage2.Usage2Result.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "setUsageReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         oper.addFault(new org.apache.axis.description.FaultDesc(
@@ -240,7 +240,7 @@ public class Usage2SoapBindingStub extends org.apache.axis.client.Stub implement
         }
     }
 
-    public org.edu_sharing.webservices.usage2.Usage2Result setUsage(java.lang.String eduRef, java.lang.String user, java.lang.String lmsId, java.lang.String courseId, java.lang.String userMail, java.util.Calendar fromUsed, java.util.Calendar toUsed, int distinctPersons, java.lang.String version, java.lang.String resourceId, java.lang.String xmlParams) throws java.rmi.RemoteException, org.edu_sharing.webservices.usage2.Usage2Exception {
+    public org.edu_sharing.webservices.usage2.Usage2Result[] getUsagesByEduRef(java.lang.String eduRef, java.lang.String user) throws java.rmi.RemoteException, org.edu_sharing.webservices.usage2.Usage2Exception {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -252,11 +252,11 @@ public class Usage2SoapBindingStub extends org.apache.axis.client.Stub implement
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "setUsage"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "getUsagesByEduRef"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {eduRef, user, lmsId, courseId, userMail, fromUsed, toUsed, new java.lang.Integer(distinctPersons), version, resourceId, xmlParams});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {eduRef, user});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -264,9 +264,9 @@ public class Usage2SoapBindingStub extends org.apache.axis.client.Stub implement
         else {
             extractAttachments(_call);
             try {
-                return (org.edu_sharing.webservices.usage2.Usage2Result) _resp;
+                return (org.edu_sharing.webservices.usage2.Usage2Result[]) _resp;
             } catch (java.lang.Exception _exception) {
-                return (org.edu_sharing.webservices.usage2.Usage2Result) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.usage2.Usage2Result.class);
+                return (org.edu_sharing.webservices.usage2.Usage2Result[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.usage2.Usage2Result[].class);
             }
         }
   } catch (org.apache.axis.AxisFault axisFaultException) {
@@ -366,7 +366,7 @@ public class Usage2SoapBindingStub extends org.apache.axis.client.Stub implement
 }
     }
 
-    public org.edu_sharing.webservices.usage2.Usage2Result[] getUsagesByEduRef(java.lang.String eduRef, java.lang.String user) throws java.rmi.RemoteException, org.edu_sharing.webservices.usage2.Usage2Exception {
+    public org.edu_sharing.webservices.usage2.Usage2Result setUsage(java.lang.String eduRef, java.lang.String user, java.lang.String lmsId, java.lang.String courseId, java.lang.String userMail, java.util.Calendar fromUsed, java.util.Calendar toUsed, int distinctPersons, java.lang.String version, java.lang.String resourceId, java.lang.String xmlParams) throws java.rmi.RemoteException, org.edu_sharing.webservices.usage2.Usage2Exception {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -378,11 +378,11 @@ public class Usage2SoapBindingStub extends org.apache.axis.client.Stub implement
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "getUsagesByEduRef"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "setUsage"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {eduRef, user});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {eduRef, user, lmsId, courseId, userMail, fromUsed, toUsed, new java.lang.Integer(distinctPersons), version, resourceId, xmlParams});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -390,9 +390,9 @@ public class Usage2SoapBindingStub extends org.apache.axis.client.Stub implement
         else {
             extractAttachments(_call);
             try {
-                return (org.edu_sharing.webservices.usage2.Usage2Result[]) _resp;
+                return (org.edu_sharing.webservices.usage2.Usage2Result) _resp;
             } catch (java.lang.Exception _exception) {
-                return (org.edu_sharing.webservices.usage2.Usage2Result[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.usage2.Usage2Result[].class);
+                return (org.edu_sharing.webservices.usage2.Usage2Result) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.usage2.Usage2Result.class);
             }
         }
   } catch (org.apache.axis.AxisFault axisFaultException) {

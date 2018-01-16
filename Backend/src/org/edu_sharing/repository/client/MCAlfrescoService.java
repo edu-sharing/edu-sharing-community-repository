@@ -210,8 +210,6 @@ public interface MCAlfrescoService extends RemoteService {
 
 	public void removeUserDefinedPreview(String nodeId, String repId) throws CCException;
 
-	public String encrypt(String toEncrypt) throws CCException;
-
 	public boolean hasPermissions(String nodeId, String[] permissions, String repId) throws CCException;
 
 	public HashMap<String, Boolean> hasAllPermissions(String nodeId, String[] permissions, String repId) throws CCException;

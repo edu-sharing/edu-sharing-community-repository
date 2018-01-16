@@ -1,4 +1,7 @@
-<div class="topBar fixed" *ngIf="showTopBar">
+<!-- dummy for banner-->
+<main-nav style="display:none"></main-nav>
+<app-banner [scope]="'render'"></app-banner>
+<div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
   <div class="displayBar">
     <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i class="material-icons">keyboard_arrow_left</i> {{'BACK' | translate}}</span>
     <span *ngIf="_node" class="clickable showDetails" (click)="showDetails()" (keypress)="($event.which === 13)?showDetails():0" tabindex="0" title="{{'GOTO' | translate}} {{'INFO' | translate}}"><i class="material-icons">info_outline</i> <span class="uppercase hidemobile">{{'INFO' | translate}}</span></span>
@@ -8,7 +11,7 @@
                [node]="_node"
                [@fadeFast]="options && options.length"
                [options]="options"
-               [darkBackground]="true"
+               [backgroundType]="'dark'"
     ></actionbar>
 
     </span>
@@ -18,16 +21,21 @@
   <div class="previous clickable" *ngIf="canSwitchBack()" (click)="switchPosition(getPosition()-1)"><i class="material-icons">keyboard_arrow_left</i></div>
   <div class="next clickable" *ngIf="canSwitchForward()" (click)="switchPosition(getPosition()+1)"><i class="material-icons">keyboard_arrow_right</i></div>
 </div>
-<div id="nodeRenderContent" [class.hide]="isLoading" ng-touchevent
+<div class="alignWithBanner">
+  <div id="nodeRenderContent" [class.hide]="isLoading" ng-touchevent
      (ngSwipeRight)="canSwitchBack() ? switchPosition(getPosition()-1) : null"
      (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition()+1) : null">
+  </div>
+  <div class="nodeRenderLoading" *ngIf="isLoading">
+    <spinner></spinner>
+  </div>
 </div>
-<div class="nodeRenderLoading" *ngIf="isLoading">
-  <spinner></spinner>
-</div>
+
 <workspace-management
   [(nodeMetadata)]="nodeMetadata"
   [nodeMetadataAllowReplace]="true"
+  [(addToCollection)]="addToCollection"
+  [(nodeReport)]="nodeReport"
   (onRefresh)="refresh()"
   (onCloseMetadata)="closeMetadata()"
 >

@@ -14,6 +14,7 @@ public class UserProfile  {
   private String firstName = null;
   private String lastName = null;
   private String email = null;
+  private String avatar = null;
 
   public UserProfile(){
 	  
@@ -61,10 +62,15 @@ public class UserProfile  {
   public void setEmail(String email) {
     this.email = email;
   }
-
-    
-
-  @Override
+  
+  @JsonProperty("avatar")
+  public String getAvatar() {
+	return avatar;
+}
+public void setAvatar(String avatar) {
+	this.avatar = avatar;
+}
+@Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class UserProfile {\n");

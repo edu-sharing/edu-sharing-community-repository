@@ -14,6 +14,7 @@ public class SearchResult {
 	private List<Node> nodes = new ArrayList<Node>();
 	private Pagination pagination = null;
 	private List<Facette> facettes = null;
+	private List<String> ignored;
 
 	/**
 	   **/
@@ -50,5 +51,15 @@ public class SearchResult {
 	public void setFacettes(List<Facette> facettes) {
 		this.facettes = facettes;
 	}
-
+	
+	@JsonProperty("ignored")
+	public List<String> getIgnored() {
+		return ignored;
+	}
+	public void setIgnored(List<String> ignored) {
+		this.ignored = ignored;
+	}
+	
+	
+	
 }

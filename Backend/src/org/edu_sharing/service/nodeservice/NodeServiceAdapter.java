@@ -172,6 +172,13 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
+	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation)
+			throws Throwable {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String contentProp)
 			throws Throwable {
 		return null;
@@ -185,4 +192,27 @@ public class NodeServiceAdapter implements NodeService {
 	public void removeNode(String potocol, String store, String nodeId) {	
 	}
 
+	@Override
+	public String getOrCreateUserSavedSearch() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void removeAspect(String nodeId, String aspect) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateNodeNative(String nodeId, HashMap<String, Object> _props) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property) {
+		// TODO Auto-generated method stub
+		
+	}
 }

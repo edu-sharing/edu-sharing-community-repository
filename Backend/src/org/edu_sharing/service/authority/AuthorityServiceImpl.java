@@ -245,7 +245,6 @@ public EduGroup getEduGroup(String authority){
 		}
 		return result;
 	}
-
 	@Override
 	public Set<String> getMemberships(String username) {
 		return serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
@@ -380,9 +379,14 @@ public EduGroup getEduGroup(String authority){
 				return getEduGroup(eduGroup.getGroupname());
 			}
 		};
-
+		
 		return AuthenticationUtil.runAs(createEduGroupWorker, ApplicationInfoList.getHomeRepository().getUsername());
 
+	}
+	
+	@Override
+	public boolean authorityExists(String authority) {
+		return authorityService.authorityExists(authority);
 	}
 	
 }

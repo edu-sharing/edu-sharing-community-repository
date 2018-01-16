@@ -1,17 +1,12 @@
 import {Component, Input, EventEmitter, ViewEncapsulation, Output} from '@angular/core';
-import { Http, Response, Headers } from '@angular/http';
 import 'rxjs/add/operator/map'
 import { Observable } from 'rxjs/Observable';
 import { BrowserModule } from '@angular/platform-browser';
 import {Translation} from "../../common/translation";
-import {RecycleRestoreComponent} from "./recycle/restore/restore.component";
 import {Toast} from "../../common/ui/toast";
-import {RestArchiveService} from "../../common/rest/services/rest-archive.service";
 import {ArchiveRestore, RestoreResult, ArchiveSearch,Node} from "../../common/rest/data-object";
-import {RestConstants} from "../../common/rest/rest-constants";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {OptionItem} from "../../common/ui/actionbar/actionbar.component";
-import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
+import {OptionItem} from "../../common/ui/actionbar/option-item";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {ActivatedRoute} from "@angular/router";

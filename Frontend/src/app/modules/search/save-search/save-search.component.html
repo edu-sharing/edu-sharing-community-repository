@@ -1,0 +1,21 @@
+<div class="dialog darken">
+  <div class="card center-card card-action">
+    <div class="card-content">
+      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div class="card-title ">{{'SEARCH.SAVE_SEARCH.TITLE' | translate }}</div>
+      <label for="name">{{'SEARCH.SAVE_SEARCH.NAME' | translate}}</label>
+      <input type="text" id="name" [(ngModel)]="_name">
+      <label class="description">{{'SEARCH.SAVE_SEARCH.DESCRIPTION' | translate}}</label>
+    </div>
+    <div class="card-action">
+      <a class="btn"
+         (keyup.enter)="save()"
+         (click)="save()"
+      >{{'SAVE' | translate}}</a>
+      <a class="btn-flat"
+         (keyup.enter)="cancel()"
+         (click)="cancel()"
+      >{{'CANCEL' | translate}}</a>
+    </div>
+  </div>
+</div>

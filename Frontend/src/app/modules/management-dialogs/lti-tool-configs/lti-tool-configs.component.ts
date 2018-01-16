@@ -5,10 +5,10 @@ import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../comm
 import {Toast} from "../../../common/ui/toast";
 import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {TranslateService} from "@ngx-translate/core";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {RestToolService} from "../../../common/rest/services/rest-tool.service";
 import {ListItem} from "../../../common/ui/list-item";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 
 @Component({
   selector: 'workspace-lti-tool-configs',

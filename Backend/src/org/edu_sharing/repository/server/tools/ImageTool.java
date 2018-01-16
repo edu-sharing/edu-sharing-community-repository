@@ -31,6 +31,8 @@ import com.sun.star.uno.Exception;
  * Tool for common image tasks like rotating by exif orientation
  */
 public class ImageTool {
+	public static final int MAX_THUMB_SIZE = 900;
+
 	private static int readImageOrientation(InputStream imageFile)  throws IOException, MetadataException, ImageProcessingException {
 	    Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(imageFile),true);
 	    Directory directory = metadata.getDirectory(ExifIFD0Directory.class);

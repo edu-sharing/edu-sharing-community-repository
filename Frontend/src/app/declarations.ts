@@ -29,6 +29,12 @@
   import {ToolListComponent} from "./common/ui/tool-list/tool-list.component";
   import {UserProfileComponent} from "./common/ui/user-profile/user-profile.component";
   import {ToucheventDirective} from "./common/ui/touchevents/touchevents";
+  import {NodeTitlePipe} from "./common/ui/node-title.pipe";
+  import {CustomIconComponent} from "./common/ui/custom-icon/custom-icon.component";
+  import {BannerComponent} from "./common/ui/banner/banner.component";
+  import {SmallCollectionComponent} from "./common/ui/small-collection/small-collection.component";
+  import {CollectionChooserComponent} from "./common/ui/collection-chooser/collection-chooser.component";
+  import {InfobarComponent} from "./common/ui/infobar/infobar.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -39,27 +45,33 @@ export const DECLARATIONS = [
       RestIamTestComponent,
       RestMdsTestComponent,
       AttributeHtmlPipe,
+      CustomIconComponent,
       DebugResultPipe,
       FormatSizePipe,
       NodeDatePipe,
       PermissionNamePipe,
       AuthorityNamePipe,
+      NodeTitlePipe,
       FileComponent,
       SpinnerComponent,
       ListTableComponent,
       FileChooserComponent,
+      CollectionChooserComponent,
       BreadcrumbsComponent,
       ActionbarComponent,
+      SmallCollectionComponent,
       MainNavComponent,
       UserProfileComponent,
       MdsComponent,
       RouterComponent,
       FileDropDirective,
       ModalDialogComponent,
+      InfobarComponent,
       ModalLoadingComponent,
       NodeRenderComponent,
       ApplyToLmsComponent,
       ModalDialogToastComponent,
       ToolListComponent,
       ToucheventDirective,
+      BannerComponent
     ];

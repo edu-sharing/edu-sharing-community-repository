@@ -5,21 +5,33 @@
 import {RestConstants} from "./rest-constants";
 import {
   RestError, Node, Collection, Person, Permission, Permissions, User, MdsInfo,
-  CollectionReference, LocalPermissions, Authority
+  CollectionReference, LocalPermissions, Authority, Repository
 } from "./data-object";
-import {TranslateService} from "@ngx-translate/core";
-import {DateHelper} from "../ui/DateHelper";
+import {Router} from "@angular/router";
 import {ConfigurationService} from "../services/configuration.service";
-import {RestMdsService} from "./services/rest-mds.service";
-import {ListItem} from "../ui/list-item";
+import {UIConstants} from "../ui/ui-constants";
 
 export class RestHelper{
-  public static getNodeIds(nodes : Node[]): Array<string>{
+  public static getNodeIds(nodes : Node[]|Collection[]|CollectionReference[]): Array<string>{
     let data=new Array<string>(nodes.length);
     for(let i=0;i<nodes.length;i++){
       data[i]=nodes[i].ref.id;
     }
     return data;
+  }
+  static copyAndCleanPermissions(permissionsIn: Permission[],inherited=true) {
+    let permissions: LocalPermissions = new LocalPermissions();
+    permissions.inherited=inherited;
+    permissions.permissions=[];
+    for(let perm of permissionsIn) {
+      let permClean=new Permission();
+      permClean.authority=new Authority();
+      permClean.authority.authorityName=perm.authority.authorityName;
+      permClean.authority.authorityType=perm.authority.authorityType;
+      permClean.permissions=perm.permissions;
+      permissions.permissions.push(permClean);
+    }
+    return permissions;
   }
 
   /**
@@ -55,7 +67,7 @@ export class RestHelper{
     }
     return nodes;
   }
-  public static getQueryString(queryName : string,values : string[]) : string{
+  public static getQueryString(queryName : string,values : any[]) : string{
     let query="";
     for(var i=0;i<values.length;i++){
       if(i)
@@ -171,11 +183,15 @@ export class RestHelper{
         return ((node.type != null) && ((node.type == "ccm:map") || (node.type == "{http://www.campuscontent.de/model/1.0}map")));
     }
 
-    public static getName(node:Node):string {
+    public static getName(node:any):string {
+        if(node.reference)
+          node=node.reference;
         if (node.name) return node.name;
         return node.title;
     }
-    public static getTitle(node:Node):string {
+    public static getTitle(node:any):string {
+      if(node.reference) // for collection references
+        node=node.reference;
       if (node.title) return node.title;
       return node.name;
     }
@@ -186,13 +202,6 @@ export class RestHelper{
             if (node.createdBy.lastName!=null) result += " "+node.createdBy.lastName;
         }
         return result.trim();
-    }
-
-    public static getCreateTime(translation : TranslateService,node:Node):string {
-      return DateHelper.formatDate(translation,DateHelper.convertDate(node.createdAt));
-    }
-    public static getModifiedTime(translation : TranslateService,node:Node):string {
-      return DateHelper.formatDate(translation,DateHelper.convertDate(node.modifiedAt));
     }
     public static getPreviewUrl(node:Node):string {
         if ((node.preview!=null) && (node.preview.url!=null) && (node.preview.url.length>0)) {
@@ -212,44 +221,6 @@ export class RestHelper{
         return node.properties[name];
     }
 
-
-  static prepareMetadatasets(translate:TranslateService,mdsSets: MdsInfo[]) {
-    for(let i=0;i<mdsSets.length;i++){
-      if(mdsSets[i].id=="mds")
-        mdsSets[i].name=translate.instant('DEFAULT_METADATASET');
-    }
-  }
-
-  static getPersonWithConfigDisplayName(person: any, config: ConfigurationService) {
-    let field=config.instant("userDisplayName","fullName");
-    if(field=="authorityName"){
-      if(person.authorityName==null)
-        field="fullName";
-      else
-        return person.authorityName;
-    }
-    if(field=="fullName"){
-      if(person.profile){
-        return ((person.profile.firstName ? person.profile.firstName : "")+" "+(person.profile.lastName ? person.profile.lastName : "")).trim();
-      }
-      return ((person.firstName ? person.firstName : "")+" "+(person.lastName ? person.lastName : "")).trim();
-    }
-    if(field=="firstName" || field=="lastName"){
-      if(person.profile){
-        return person.profile[field];
-      }
-      return person[field];
-    }
-    if(field=="email"){
-      if(person.profile && person.profile.email)
-        return person.profile.email;
-      if(person.email==null)
-        return person.mailbox;
-      return person.email;
-    }
-    return person[field];
-  }
-
   static createSpacesStoreRef(node: Node) {
     return "workspace://SpacesStore/"+node.ref.id;
   }
@@ -259,41 +230,21 @@ export class RestHelper{
     perm.authority={authorityName:RestConstants.AUTHORITY_EVERYONE,authorityType:RestConstants.AUTHORITY_TYPE_EVERYONE};
     return perm;
   }
-
-  static getColumns(mdsSet: any, name: string) {
-    let columns=[];
-    for(let list of mdsSet.lists){
-      if(list.id=="search"){
-        console.log(list);
-        for(let column of list.columns){
-          columns.push(new ListItem("NODE",column.id));
-        }
-        return columns;
+  public static goToLogin(router : Router,config:ConfigurationService,scope="",next=window.location.href) {
+    config.get("loginUrl").subscribe((url:string)=> {
+      if(url && !scope){
+        window.location.href=url;
+        return;
       }
-    }
-    if(name=='search') {
-      columns.push(new ListItem("NODE", RestConstants.CM_PROP_TITLE));
-      columns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
-      columns.push(new ListItem("NODE", RestConstants.CCM_PROP_LICENSE));
-      columns.push(new ListItem("NODE", RestConstants.CCM_PROP_REPLICATIONSOURCE));
-    }
-    return columns;
+      router.navigate([UIConstants.ROUTER_PREFIX + "login"], {
+        queryParams: {
+          scope: scope,
+          next: next
+        }
+      });
+    });
   }
 
-  static copyAndCleanPermissions(permissionsIn: Permission[],inherited=true) {
-    let permissions: LocalPermissions = new LocalPermissions();
-    permissions.inherited=inherited;
-    permissions.permissions=[];
-    for(let perm of permissionsIn) {
-      let permClean=new Permission();
-      permClean.authority=new Authority();
-      permClean.authority.authorityName=perm.authority.authorityName;
-      permClean.authority.authorityType=perm.authority.authorityType;
-      permClean.permissions=perm.permissions;
-      permissions.permissions.push(permClean);
-    }
-    return permissions;
-  }
 }
 export interface UrlReplace{
   search:string;

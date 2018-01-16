@@ -9,7 +9,7 @@ import {ActivatedRoute} from "@angular/router";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {SuggestItem} from "../../../common/ui/autocomplete/autocomplete.component";
@@ -31,6 +31,7 @@ import {ListItem} from "../../../common/ui/list-item";
   ]
 })
 export class PermissionsAuthoritiesComponent {
+  public GROUP_TYPES=RestConstants.VALID_GROUP_TYPES;
   public list : any[]=[];
   public edit : any;
   private editDetails : any;
@@ -393,7 +394,7 @@ export class PermissionsAuthoritiesComponent {
       }
       else if(this._mode=='GROUP'){
         this.offset += this.connector.numberPerRequest;
-        this.iam.searchGroups(query,true,request).subscribe((data:IamGroups)=>{
+        this.iam.searchGroups(query,true,"",request).subscribe((data:IamGroups)=>{
           for (let auth of data.groups)
             this.list.push(auth);
           this.loading = false;
@@ -416,7 +417,7 @@ export class PermissionsAuthoritiesComponent {
 
     if(this._mode=='ORG'){
       this.node.getNodeParents(list[0].sharedFolder.id,true).subscribe((data:NodeList)=>{
-        this.edit = JSON.parse(JSON.stringify(list[0]));
+        this.edit = Helper.deepCopy(list[0]);
         this.edit.folder="";
         data.nodes=data.nodes.reverse().slice(1);
         for(let node of data.nodes){
@@ -426,7 +427,7 @@ export class PermissionsAuthoritiesComponent {
       },(error:any)=>this.toast.error(error));
     }
     else {
-      this.edit = JSON.parse(JSON.stringify(list[0]));
+      this.edit = Helper.deepCopy(list[0]);
       this.editId = this.edit.authorityName;
     }
 
@@ -626,7 +627,7 @@ export class PermissionsAuthoritiesComponent {
         this.iam.getGroupMembers(this.org.authorityName,this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data: IamAuthorities) => {
           for (let member of data.authorities)
             this.memberList.push(member);
-          this.memberList=JSON.parse(JSON.stringify(this.memberList));
+          this.memberList=Helper.deepCopy(this.memberList);
         });
       }else {
         let request:any={
@@ -637,7 +638,7 @@ export class PermissionsAuthoritiesComponent {
         this.iam.searchUsers(this.manageMemberSearch, true, request).subscribe((data: IamUsers) => {
           for (let member of data.users)
             this.memberList.push(member);
-          this.memberList=JSON.parse(JSON.stringify(this.memberList));
+          this.memberList=Helper.deepCopy(this.memberList);
         });
       }
     }
@@ -650,7 +651,7 @@ export class PermissionsAuthoritiesComponent {
       this.iam.getGroupMembers((this.editMembers as Group).authorityName, this.manageMemberSearch, RestConstants.AUTHORITY_TYPE_USER, request).subscribe((data: IamAuthorities) => {
         for (let member of data.authorities)
           this.memberList.push(member);
-        this.memberList=JSON.parse(JSON.stringify(this.memberList));
+        this.memberList=Helper.deepCopy(this.memberList);
       });
     }
   }

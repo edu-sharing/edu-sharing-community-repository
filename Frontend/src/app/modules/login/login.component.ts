@@ -15,6 +15,7 @@ import {SessionStorageService} from "../../common/services/session-storage.servi
 import {Scope} from "@angular/core/src/profile/wtf_impl";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {Helper} from "../../common/helper";
+import {RestHelper} from "../../common/rest/rest-helper";
 
 @Component({
   selector: 'workspace-login',
@@ -58,6 +59,10 @@ export class LoginComponent  implements OnInit{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
         this.config=data;
+        if(configService.instant("loginUrl")){
+            window.location.href=configService.instant("loginUrl");
+            return;
+        }
         this.username=this.configService.instant("defaultUsername","");
         this.password=this.configService.instant("defaultPassword","");
         this.route.queryParams.forEach((params: Params) => {
@@ -81,7 +86,7 @@ export class LoginComponent  implements OnInit{
           if(this.scope==RestConstants.SAFE_SCOPE){
             this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
               if(data.statusCode!=RestConstants.STATUS_CODE_OK){
-                UIHelper.goToLogin(this.router,this.configService);
+                RestHelper.goToLogin(this.router,this.configService);
               }
               else{
                 this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((scope:AccessScope)=>{
@@ -99,7 +104,7 @@ export class LoginComponent  implements OnInit{
                   this.toast.error(error);
                 });
               }
-            },(error:any)=>UIHelper.goToLogin(this.router,this.configService));
+            },(error:any)=>RestHelper.goToLogin(this.router,this.configService));
           }
           setTimeout(()=>{
             if (this.username && this.passwordInput)

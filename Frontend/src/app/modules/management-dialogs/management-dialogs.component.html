@@ -5,6 +5,23 @@
   (onCancel)="closeLicense()"
   (onDone)="updateLicense()"
 ></workspace-license>
+
+<node-report
+  *ngIf="nodeReport"
+  [node]="nodeReport"
+  (onLoading)="globalProgress=$event"
+  (onCancel)="closeReport()"
+  (onDone)="closeReport()"
+></node-report>
+<collection-chooser
+  class="dialog-right scrollWithBanner"
+  *ngIf="addToCollection"
+  [@fromRight]="addToCollection"
+  [title]="'WORKSPACE.SELECT_COLLECTION'"
+  (onCancel)="closeAddToCollection()"
+  (onDrop)="addToCollectionList($event.target,$event.source,false)"
+  (onChoose)="addToCollectionList($event)"
+></collection-chooser>
 <workspace-lti-tools *ngIf="showLtiTools"
                      [refresh]="ltiToolRefresh"
                      [(currentTool)]="currentLtiTool"
@@ -54,4 +71,12 @@
                        (onLoading)="globalProgress=$event"
                        (onClose)="closeContributor()"
 ></workspace-contributor>
-<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>
+<modal-dialog *ngIf="dialogTitle"
+              [title]="dialogTitle"
+              [message]="dialogMessage"
+              [messageParameters]="dialogMessageParameters"
+              [isCancelable]="dialogCancelable"
+              [buttons]="dialogButtons"
+              (onCancel)="dialogTitle=null"
+></modal-dialog>
+<global-progress *ngIf="globalProgress"></global-progress>

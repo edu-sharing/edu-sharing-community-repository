@@ -1,10 +1,11 @@
 import {Component, Input, Output, EventEmitter} from '@angular/core';
 import {NodeList,Node} from "../../../common/rest/data-object";
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
+import {Helper} from "../../../common/helper";
 
 @Component({
   selector: 'workspace-tree',
@@ -96,14 +97,14 @@ export class WorkspaceTreeComponent  {
       */
     }
     if(create) {
-      let path = JSON.parse(JSON.stringify(event.parent));
+      let path = Helper.deepCopy(event.parent);
       path.push(id);
       this._path.push(path);
     }
     console.log(this._path);
   }
   public allowDrop(event : any,target:string){
-    if(!this.storage.get("list_drag")) {
+    if(!this.storage.get(TemporaryStorageService.LIST_DRAG_DATA)) {
       return;
     }
     event.preventDefault();
@@ -111,12 +112,12 @@ export class WorkspaceTreeComponent  {
     this.dragHover=target;
   }
   public dropEvent(event : any,target:string){
-    if(!this.storage.get("list_drag")) {
+    if(!this.storage.get(TemporaryStorageService.LIST_DRAG_DATA)) {
       return;
     }
     this.dragHover=null;
     if(target==this.RECYCLE) {
-      this.onDeleteNodes.emit(this.storage.get("list_drag"));
+      this.onDeleteNodes.emit(this.storage.get(TemporaryStorageService.LIST_DRAG_DATA).nodes);
     }
   }
   constructor(private node:RestNodeService,

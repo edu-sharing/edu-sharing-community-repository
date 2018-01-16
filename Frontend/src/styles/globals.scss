@@ -59,18 +59,6 @@ a{
   border-radius: 2px;
   text-align: center;
 }
-.workflowStatus_100_unchecked{
-   background-color: #539DD5;
-}
-.workflowStatus_200_tocheck{
-  background-color: #3CB0B0;
-}
-.workflowStatus_300_hasflaws{
-  background-color: #D58553;
-}
-.workflowStatus_400_checked{
-  background-color: #42A053;
-}
 .completer-row{
   color:$textPrimary!important;
   background: #fff!important;
@@ -85,7 +73,25 @@ a{
   border:none!important;
   margin-top:-20px!important;
 }
-
+.card-action .card-title,.card-action .card-cancel{
+  font-size:12pt;
+  position: relative;
+  top:-25px;
+}
+.noElementsInfo{
+  color:#999;
+  font-size:110%;
+  width: 100%;
+  float: left;
+  text-align: center;
+  padding-top:10px;
+}
+.material-icons.collectionScope {
+  font-size: 130%;
+  left: -1px;
+  position: relative;
+  top: 2px;
+}
 .uppercase {
   text-transform: uppercase;
 }

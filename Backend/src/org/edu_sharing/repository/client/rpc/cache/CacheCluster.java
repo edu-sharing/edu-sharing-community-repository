@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.client.rpc.cache;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 public class CacheCluster implements Serializable{
@@ -10,6 +11,17 @@ public class CacheCluster implements Serializable{
 	List<CacheInfo> cacheInfos;
 	
 	String localMember;
+	
+	long freeMemory;
+	
+	long totalMemory;
+	
+	long maxMemory;
+	
+	int availableProcessors;
+	
+	Date timeStamp;
+	
 
 	public List<CacheInfo> getCacheInfos() {
 		return cacheInfos;
@@ -35,6 +47,47 @@ public class CacheCluster implements Serializable{
 	public String getLocalMember() {
 		return localMember;
 	}
+
+	public long getFreeMemory() {
+		return freeMemory;
+	}
+
+	public void setFreeMemory(long freeMemory) {
+		this.freeMemory = freeMemory;
+	}
+
+	public long getTotalMemory() {
+		return totalMemory;
+	}
+
+	public void setTotalMemory(long totalMemory) {
+		this.totalMemory = totalMemory;
+	}
+
+	public long getMaxMemory() {
+		return maxMemory;
+	}
+
+	public void setMaxMemory(long maxMemory) {
+		this.maxMemory = maxMemory;
+	}
+
+	public int getAvailableProcessors() {
+		return availableProcessors;
+	}
+
+	public void setAvailableProcessors(int availableProcessors) {
+		this.availableProcessors = availableProcessors;
+	}
+	
+	public void setTimeStamp(Date timeStamp) {
+		this.timeStamp = timeStamp;
+	}
+	
+	public Date getTimeStamp() {
+		return timeStamp;
+	}
+	
 	
 	
 }

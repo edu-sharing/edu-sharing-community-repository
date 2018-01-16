@@ -45,26 +45,32 @@ public class SortDefinition {
 	 * @param sortProperties the names to sort by
 	 * @param sortAscending sort ascending or descending
 	 */
-	public SortDefinition(Iterable<String> sortProperties,Boolean sortAscending){
+	public SortDefinition(Iterable<String> sortProperties,List<Boolean> sortAscending){
 		this(null,sortProperties,sortAscending);		
 	}
-	public SortDefinition(String namespace, Iterable<String> sortProperties, Boolean sortAscending) {
+	public SortDefinition(String namespace, Iterable<String> sortProperties, List<Boolean> sortAscending) {
 		if(sortProperties == null)
 			return;			
-		if(sortAscending==null)
-			sortAscending=new Boolean(true);
-		
+		if(sortAscending==null) {
+			sortAscending=new ArrayList<Boolean>();
+			sortAscending.add(new Boolean(true));
+		}
+		int i=0;
 		for(String sortProp : sortProperties){
 				SortDefinitionEntry entry = new SortDefinitionEntry();
-				entry.setAscending(new Boolean(sortAscending));
+				Boolean sortAsc=sortAscending.size()==1 ? sortAscending.get(0) : sortAscending.get(i);
+				entry.setAscending(sortAsc);
 				entry.setProperty(namespace!=null ? "{"+namespace+"}"+sortProp : sortProp);
 				addSortDefinitionEntry(entry);
+				i++;
 			}
 	}
 	public List<SortDefinitionEntry> getSortDefinitionEntries() {
 		return sortDefinitionEntries;
 	}
-	
+	public void addSortDefinitionEntry(SortDefinitionEntry sortDefinitionEntry,int position){
+		sortDefinitionEntries.add(position,sortDefinitionEntry);
+	}
 	public void addSortDefinitionEntry(SortDefinitionEntry sortDefinitionEntry){
 		sortDefinitionEntries.add(sortDefinitionEntry);
 	}

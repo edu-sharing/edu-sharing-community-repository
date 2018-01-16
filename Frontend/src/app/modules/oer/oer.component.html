@@ -1,12 +1,12 @@
 <img src="assets/images/layout/oer_bg.jpg" class="header">
 <main-nav
     [title]="'SEARCH.TITLE'"
-    [currentScope]="'search'"
+    [currentScope]="'oer'"
     [searchEnabled]="true"
     [searchPlaceholder]="'OER.SEARCH'"
     [canOpen]="true"
     [searchQuery]="currentQuery"
-    (onSearch)="routeSearch($event)"
+    (onSearch)="routeSearch($event.query)"
   ></main-nav>
 <div class="heading">
   <h1>{{'OER.HEADING_TITLE' | translate}}</h1>

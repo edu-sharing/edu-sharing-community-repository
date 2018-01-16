@@ -1,0 +1,45 @@
+@import "../../../../styles/variables.scss";
+
+.smallCollection{
+  display: flex;
+  height:$secondaryBarHeight;
+  width:100%;
+  background-color: $primary;
+  .right{
+    padding-left: 20px;
+    display:flex;
+    justify-content: center;
+    flex-direction: column;
+    flex-grow: 1;
+    color: #fff;
+    .title{
+      font-size: 120%;
+    }
+    .scope{
+      color:#eee;
+      font-size: 80%;
+    }
+  }
+
+  .image-icon{
+    align-items: center;
+    justify-content:center;
+  }
+  .image{
+    width:$secondaryBarHeight - 5px;
+    display:flex;
+    .icon{
+      display:flex;
+      align-items: center;
+      justify-content:center;
+      background-color: #fff;
+      width:45px;
+      height:45px;
+      border-radius: 50%;
+    }
+    img{
+      height:calc(#{$secondaryBarHeight} - 5px);
+      width:100%;
+    }
+  }
+}

@@ -1882,13 +1882,6 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 		}
 	}
 
-	/**
-	 * encrypts and URL encodes the string
-	 */
-	public String encrypt(String toEncrypt) {
-		return MCAlfrescoBaseClient.getBlowFishEncrypted(toEncrypt);
-	}
-
 	public boolean hasPermissions(String nodeId, String[] permissions, String repId) throws CCException {
 		ArrayList<String> alfPerm = new ArrayList<String>();
 		try {

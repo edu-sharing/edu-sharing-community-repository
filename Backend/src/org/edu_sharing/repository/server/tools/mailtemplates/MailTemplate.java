@@ -32,18 +32,16 @@ public class MailTemplate {
 	static XPathFactory pfactory = XPathFactory.newInstance();
 	static XPath xpath = pfactory.newXPath();
 	public static String getSubject(String template,String locale) throws Exception{
-	    Document document = getXML(locale);
-	    return getChildContent(document,template,"subject");
+	    return getChildContent(locale,template,"subject");
 	}
 	
 	public static String getContent(String template,String locale,boolean addFooter) throws Exception{
-		Document document = getXML(locale);
 		String data="<style>";
 		data += getChildContent(getXML(null), "stylesheet", "style");
 		data += "</style>";
-	    data += getChildContent(document,"header","message") + 
-	    		"<div class='content'>"+getChildContent(document,template,"message") + "</div>" + 
-	    		(addFooter ? ("<div class='footer'>"+getChildContent(document,"footer","message")+"</div>") : "");
+	    data += getChildContent(locale,"header","message") + 
+	    		"<div class='content'>"+getChildContent(locale,template,"message") + "</div>" + 
+	    		(addFooter ? ("<div class='footer'>"+getChildContent(locale,"footer","message")+"</div>") : "");
 	    return data;
 	}
 	public static String generateContentLink(ApplicationInfo appInfo,String nodeId) throws Throwable{
@@ -54,7 +52,15 @@ public class MailTemplate {
 		}
 		return 	URLTool.getNgComponentsUrl()+"render/"+nodeId+"?closeOnBack=true"; 	
 	}
-	private static String getChildContent(Document document,String template, String name) throws XPathExpressionException {
+	private static String getChildContent(String locale,String template, String name) throws XPathExpressionException, SAXException, IOException, ParserConfigurationException {
+	    Document document = getXML(locale);
+		String content=getChildContent(document,template,name);
+		if(content!=null)
+			return content;
+		document = getXML(null);
+		return getChildContent(document,template,name);
+	}
+	private static String getChildContent(Document document, String template, String name) throws XPathExpressionException {
 		NodeList templates = (NodeList) xpath.evaluate("/templates/template", document, XPathConstants.NODESET);
 		for(int i=0;i<templates.getLength();i++){
 			NamedNodeMap attributes = templates.item(i).getAttributes();
@@ -66,9 +72,9 @@ public class MailTemplate {
 			    }
 			}
 		}
-	    
 	    return null;
 	}
+
 	private static Document getXML(String locale) throws SAXException, IOException, ParserConfigurationException {
 		InputStream in = null;
 		try{

@@ -59,6 +59,7 @@
   word-break: break-all;
   max-height: 48px;
   overflow: hidden;
+  @unselectableText();
 }
 .center-card .card-scroll{
   overflow-y: auto;
@@ -117,6 +118,53 @@ input[type=search]{
   float:right;
   padding-top: 10px;
   @include clickable();
+}
+.dialog-right{
+  position: fixed;
+  z-index: 100;
+  right:0;
+  top:$mainnavHeight;
+  height: calc( 100% - #{$mainnavHeight});
+  width:$dialogRightWidth;
+  background-color: #fff;
+  @include materialShadow();
+  .title{
+    padding-top:16px;
+    padding-left:20px;
+    padding-right:20px;
+    font-size:110%;
+    background-color: $workspaceMetadataBackground;
+    word-break: break-all;
+    padding-bottom: 15px;
+    .close{
+      float:right;
+    }
+  }
+  .search{
+    padding:10px 30px;
+    float:left;
+    form {
+      position: relative;
+      padding-top: 10px;
+      input {
+        padding-left: 40px;
+        width: $dialogRightWidth - 110px;
+        margin-bottom: 0;
+      }
+      .searchIcon {
+        position: absolute;
+        color: $textLight;
+        left: 10px;
+        top: 17px;
+      }
+    }
+  }
+  .content{
+    padding:10px 0;
+    height: calc( 100% - #{$mainnavHeight});
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
   .center-card{

@@ -34,8 +34,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
+
+import org.alfresco.model.ContentModel;
+import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.repo.policy.BehaviourFilterImpl;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -233,25 +247,41 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			} else {
 				logger.info(" newTimeStamp.equals(oldTimeStamp) I'll do nothing");
 			}
-			
+			setModifiedDate((String) childProps.get(CCConstants.SYS_PROP_NODE_UID), newNodeProps);
 			return (String) childProps.get(CCConstants.SYS_PROP_NODE_UID);
 
 		} else {
 			// insert
+			String nodeId;
 			logger.info("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
-
 			try{			
-				return createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
+				nodeId=createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
 			}catch(org.alfresco.service.cmr.repository.DuplicateChildNodeNameException e){
 				String name = (String)newNodeProps.get(CCConstants.CM_NAME);
 				name = name + System.currentTimeMillis();
 				newNodeProps.put(CCConstants.CM_NAME, name);
-				return createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
+				nodeId=createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
 			}
-			
+			setModifiedDate(nodeId,newNodeProps);
+			return nodeId;
 			
 		}
 		
+	}
+
+	private synchronized void setModifiedDate(String nodeId,Map newNodeProps) throws NotSupportedException, SystemException, IllegalStateException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
+		if(newNodeProps.containsKey(CCConstants.CM_PROP_C_MODIFIED)){
+			NodeRef nodeRef=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+			BehaviourFilter filter=(BehaviourFilter)AlfAppContextGate.getApplicationContext().getBean("policyBehaviourFilter");
+			ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+			UserTransaction tx = serviceRegistry.getTransactionService().getUserTransaction();
+			tx.begin();
+			filter.disableBehaviour(nodeRef,ContentModel.ASPECT_AUDITABLE);
+
+			mcAlfrescoBaseClient.setProperty(nodeId, CCConstants.CM_PROP_C_MODIFIED,(String) newNodeProps.get(CCConstants.CM_PROP_C_MODIFIED));
+			filter.enableBehaviour(nodeRef,ContentModel.ASPECT_AUDITABLE);
+			tx.commit();
+		}
 	}
 
 	private HashMap<String, Object> getPropsIfExsists(String replSource, String replSourceId, String importFolderId) throws Throwable {
@@ -335,9 +365,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	public String createNode(String parentId, String type, String association, Map props) throws Throwable {
 		HashMap<String, Object> simpleProps = new HashMap<String, Object>();
 		HashMap<String, Object> nodeProps = new HashMap<String, Object>();
+		String[] aspects=null;
 		for (Object key : props.keySet()) {
 			String propKey = (String) key;
-			if (propKey.startsWith("TYPE#")) {
+			if(propKey.equals("ASPECTS")){
+				aspects=(String[])props.get(propKey);
+			}
+			else if (propKey.startsWith("TYPE#")) {
 				nodeProps.put(propKey, props.get(propKey));
 			} else {
 				simpleProps.put(propKey, props.get(propKey));
@@ -381,6 +415,11 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	*/
 		
 		String newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+		if(aspects!=null){
+			for(String aspect : aspects){
+				mcAlfrescoBaseClient.addAspect(newNodeId, aspect);
+			}
+		}
 		for (Object key : nodeProps.keySet()) {
 			String typekey = (String) key;
 			String[] splitted = typekey.split("#");

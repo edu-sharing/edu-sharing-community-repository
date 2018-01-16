@@ -1,15 +1,24 @@
 package org.edu_sharing.service.search.model;
 
 import java.util.List;
+import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataQuery;
+import org.edu_sharing.metadataset.v2.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.search.QueryBuilder;
 import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
+import org.edu_sharing.service.search.SearchServiceImpl;
+
+import com.sun.star.lang.IllegalArgumentException;
+
 import org.edu_sharing.service.search.SearchService.ContentType;
 
 public class SearchToken {
-	
+	Logger logger = Logger.getLogger(SearchToken.class);
+
 	SortDefinition sortDefinition;
 	
 	String luceneString;
@@ -36,7 +45,7 @@ public class SearchToken {
 	}
 	public void setContentType(ContentType contentType){
 		this.contentType=contentType;
-		updateSearchCriterias();
+		updateSearchCriterias(true);
 	}
 	public int getFacettesMinCount() {
 		return facettesMinCount;
@@ -58,6 +67,10 @@ public class SearchToken {
 	private SearchCriterias searchCriterias;
 
 	private String queryString;
+
+	private MetadataQuery query;
+
+	private Map<String, String[]> parameters;
 	
 	public SortDefinition getSortDefinition() {
 		return sortDefinition;
@@ -67,8 +80,12 @@ public class SearchToken {
 		this.sortDefinition = sortDefinition;
 	}
 
-	public String getLuceneString() throws QueryValidationFailedException {
+	public String getLuceneString() throws QueryValidationFailedException, IllegalArgumentException {
+		if(query!=null){
+			return MetadataSearchHelper.getLuceneString(query,searchCriterias,parameters);
+		}
 		if(searchCriterias!=null){
+			logger.warn("Using legacy search method");
 			QueryBuilder queryBuilder = new QueryBuilder();
 			queryBuilder.setSearchCriterias(searchCriterias);
 			if(luceneString==null || luceneString.trim().isEmpty())
@@ -86,7 +103,10 @@ public class SearchToken {
 	public void setLuceneString(String luceneString) {
 		this.luceneString = luceneString;
 	}
-
+	public void setMetadataQuery(MetadataQuery query, Map<String, String[]> parameters) {
+		this.query = query;
+		this.parameters = parameters;
+	}
 	public String getStoreProtocol() {
 		return storeProtocol;
 	}
@@ -132,13 +152,13 @@ public class SearchToken {
 
 	public void setSearchCriterias(SearchCriterias searchCriterias) {
 		this.searchCriterias=searchCriterias;
-		updateSearchCriterias();
+		updateSearchCriterias(false);
 	}
-	private void updateSearchCriterias() {
-		if(searchCriterias==null)
+	private void updateSearchCriterias(boolean rebuild) {
+		if(searchCriterias==null || rebuild)
 			searchCriterias=new SearchCriterias();
 		if(getContentType()==null || getContentType().equals(ContentType.ALL)){
-			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_IO,CCConstants.CCM_TYPE_MAP});
+			//searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_IO,CCConstants.CCM_TYPE_MAP});
 			return;
 		}
 		if(getContentType().equals(ContentType.FILES)){
@@ -162,11 +182,10 @@ public class SearchToken {
 	public void setQueryString(String queryString) {
 		this.queryString=queryString;
 	}
-	public String getQueryString() throws QueryValidationFailedException {
+	public String getQueryString() throws QueryValidationFailedException, IllegalArgumentException {
 		if(queryString!=null)
 			return queryString;
 		return getLuceneString();
-	}
-	
+	}	
 	
 }

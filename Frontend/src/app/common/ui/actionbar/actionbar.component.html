@@ -18,7 +18,7 @@
        tabindex="0"
        (keyup.enter)="click(option)"
        (click)="click(option)"
-       [class.light]="darkBackground"
+       [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.disabled]="!option.isEnabled">
       <i class="material-icons">{{option.icon}}</i>
     </a>
@@ -28,11 +28,12 @@
      (click)="showDropdown(false)"
      tabindex="0"
      (keyup.enter)="showDropdown(true)"
-     [class.light]="darkBackground"
+     [class.light]="backgroundType=='dark' || backgroundType=='primary'"
      [class.drawButtonMore]="drawButton" *ngIf="optionsMenu.length"><a><i class="material-icons">more_vert</i></a></div>
 
 <div *ngFor="let option of optionsAlways;let i=index;"
-     [class.light]="darkBackground"
+     [class.light]="backgroundType=='dark' || backgroundType=='primary'"
+     [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
      [class.disabled]="!option.isEnabled"
      class="actionAlways"
      [class.btn-flat]="i!=optionsAlways.length-1"
@@ -40,7 +41,7 @@
      tabindex="0"
          (keyup.enter)="click(option)"
      (click)="click(option)">
-  <i class="material-icons">{{option.icon}}</i><span class="actionAlwaysCaption"> {{option.name | translate}}</span>
+  <i class="material-icons" title="{{option.showName ? null : (option.name | translate)}}">{{option.icon}}</i><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
 </div>
 
 </div>

@@ -1,0 +1,14 @@
+.entry{
+  padding:10px 5px;
+  display:flex;
+  div,i,input,label{
+    display:flex;
+  }
+  .name{
+    flex-grow: 1;
+  }
+  .drag{
+    color:#aaa;
+    margin-left:15px;
+  }
+}

@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import {RestConnectorService} from "./rest-connector.service";
 import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
-import { NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList} from "../data-object";
+import { NodeRef, Node, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList} from "../data-object";
 import {RequestObject} from "../request-object";
 
 @Injectable()
@@ -24,8 +24,23 @@ export class RestSearchService {
     return this.connector.get(url,this.connector.getRequestOptions()).map((response: Response) => response.json());
 
   }
+  saveSearch(name:string,query:string,criterias:any[],repository = RestConstants.HOME_REPOSITORY, metadataset = RestConstants.DEFAULT,replace=false) : Observable<NodeWrapper> {
+    let url=this.connector.createUrl('search/:version/queriesV2/:repository/:metadataset/:query/save?name=:name&replace=:replace',repository,[
+      [":name",name],
+      [":query",query],
+      [":metadataset",metadataset],
+      [":replace",""+replace],
+    ]);
+    return this.connector.post(url,JSON.stringify(criterias),this.connector.getRequestOptions()).map((response: Response) => response.json());
 
-  search(criterias: Array<any>,facettes:string[]=[], request: any=null,contentType=RestConstants.CONTENT_TYPE_FILES, repository = RestConstants.HOME_REPOSITORY, metadataset = RestConstants.DEFAULT,propertyFilter:string[]=[], query = 'ngsearch') : Observable<NodeList> {
+  }
+  searchSimple(queryId = 'ngsearch',criterias: any[]=[],query:string=null,request: any=null,type=RestConstants.CONTENT_TYPE_FILES) : Observable<NodeList> {
+    if(query){
+      criterias.push({property:RestConstants.PRIMARY_SEARCH_CRITERIA,values:[query]});
+    }
+    return this.search(criterias,null,request,type, RestConstants.HOME_REPOSITORY,RestConstants.DEFAULT,[],queryId);
+  }
+    search(criterias: any[],facettes:string[]=[], request: any=null,contentType=RestConstants.CONTENT_TYPE_FILES, repository = RestConstants.HOME_REPOSITORY, metadataset = RestConstants.DEFAULT,propertyFilter:string[]=[], query = 'ngsearch') : Observable<NodeList> {
         let properties = '';
         for(var i = 0; i < criterias.length; i++) {
             if(i > 0)
@@ -44,4 +59,7 @@ export class RestSearchService {
       return this.connector.post(q,body,this.connector.getRequestOptions()).map((response: Response) => response.json());
     }
 
+  static isSavedSearchObject(node: Node) {
+    return node.mediatype=='saved_search';
+  }
 }

@@ -6,6 +6,7 @@ import {WorkspaceCreateLtiComponent} from "./create-lti/create-lti.component";
 import {WorkspaceFileUploadComponent} from "./file-upload/file-upload.component";
 import {WorkspaceFileUploadSelectComponent} from "./file-upload-select/file-upload-select.component";
 import {WorkspaceContributorComponent} from "./contributor/contributor.component";
+import {NodeReportComponent} from "./node-report/node-report.component";
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -15,5 +16,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceCreateLtiComponent,
   WorkspaceFileUploadComponent,
   WorkspaceFileUploadSelectComponent,
-  WorkspaceContributorComponent
+  WorkspaceContributorComponent,
+  NodeReportComponent
 ];

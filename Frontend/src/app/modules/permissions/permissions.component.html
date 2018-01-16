@@ -4,7 +4,7 @@
   [searchEnabled]="tab"
   [searchQuery]="searchQuery"
   [searchPlaceholder]="'PERMISSIONS.SEARCH_'+tab"
-  (onSearch)="doSearch($event)"
+  (onSearch)="doSearch($event.query)"
 ></main-nav>
 
 <div class="row row-dark" *ngIf="!disabled">

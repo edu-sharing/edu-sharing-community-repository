@@ -42,7 +42,10 @@ import org.edu_sharing.repository.server.tools.LocaleValidator;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.license.LicenseService;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.usage.AlfServicesWrapper;
 import org.edu_sharing.service.usage.UsageDAO;
 import org.edu_sharing.service.usage.UsageService;
@@ -58,7 +61,9 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 	public static String EXCEPTION_USER_DOES_NOT_EXISTS = "EXCEPTION_USER_DOES_NOT_EXISTS";
 	
 	private static Logger logger = Logger.getLogger(RenderInfoSoapBindingImpl.class);
-	
+	private NodeService nodeService;
+	private org.edu_sharing.service.permission.PermissionService permissionService;
+
 	@Override
 	public RenderInfoResult getRenderInfoLMS(String userName, String nodeId, String lmsId, String courseId, String resourceId, String version)
 			throws RemoteException {
@@ -71,6 +76,8 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			
 			ticket = authTool.createNewSession(homeAppInfo.getUsername(), homeAppInfo.getPassword()).get(CCConstants.AUTH_TICKET);
 			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
+			nodeService = NodeServiceFactory.getLocalService();
+			permissionService = PermissionServiceFactory.getLocalService();
 			RenderInfoResult result = getBaseData(userName, nodeId, version, client);
 			UsageDAO usageDao = new AlfServicesWrapper();
 			HashMap<String, Object> usageMap =  usageDao.getUsage(lmsId, courseId, nodeId, resourceId);
@@ -152,9 +159,9 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		if(userInfo == null){
 			throw new RemoteException(EXCEPTION_USER_DOES_NOT_EXISTS);
 		}
-		
-		HashMap<String, Boolean> perms = client.hasAllPermissions(nodeId, userName, new String[]{CCConstants.PERMISSION_CC_PUBLISH,PermissionService.READ});
-		
+		HashMap<String, Boolean> perms = client.hasAllPermissions(nodeId, userName, PermissionServiceHelper.PERMISSIONS);
+
+		rir.setPermissions(PermissionServiceHelper.getPermissionsAsString(perms).toArray(new String[0]));
 		rir.setPublishRight(new Boolean(perms.get(CCConstants.PERMISSION_CC_PUBLISH)));
 		rir.setUserReadAllowed(new Boolean(perms.get(PermissionService.READ)));
 		
@@ -263,7 +270,23 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		rir.setProperties(propsresult.toArray(new KeyValue[propsresult.size()]));	
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
 		
-		String clientBaseUrl = ApplicationInfoList.getHomeRepository().getClientBaseUrl();
+		if(Arrays.asList(client.getAspects(nodeId)).contains(CCConstants.CCM_ASPECT_TOOL_OBJECT)) {
+			String toolInstanceNodeRef = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId, CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF);
+			String nodeIdToolInstance = new NodeRef(toolInstanceNodeRef).getId();
+
+			HashMap<String,Object> propsToolInstance = client.getProperties(MCAlfrescoAPIClient.storeRef.getProtocol(),
+					MCAlfrescoAPIClient.storeRef.getIdentifier(),
+					nodeIdToolInstance);
+
+			List<KeyValue> propsResultToolInstance = new ArrayList<KeyValue>();
+			for(Map.Entry<String, Object> entry : propsToolInstance.entrySet()) {
+				KeyValue kv = new KeyValue(entry.getKey(),(String)entry.getValue());
+				propsResultToolInstance.add(kv);
+			}
+
+			rir.setPropertiesToolInstance(propsResultToolInstance.toArray(new KeyValue[propsResultToolInstance.size()]));
+		}
+		String clientBaseUrl = appInfo.getClientBaseUrl();
 		String previewUrl = URLTool.getPreviewServletUrl(new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId));
 		
 		rir.setPreviewUrl(previewUrl);

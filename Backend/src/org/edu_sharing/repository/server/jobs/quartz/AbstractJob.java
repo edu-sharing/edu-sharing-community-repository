@@ -27,6 +27,9 @@
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.Job;
@@ -53,7 +56,11 @@ public abstract class AbstractJob implements Job {
 
 	public abstract Class[] getJobClasses();
 	
-	
+	protected synchronized void addJobClass(Class job) {
+		ArrayList<Class> list = new ArrayList<Class>(Arrays.asList(allJobs));
+		list.add(job);
+		allJobs = list.toArray(new Class[list.size()]);
+	}
 	
 	
 }

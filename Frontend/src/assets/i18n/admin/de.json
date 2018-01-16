@@ -6,7 +6,7 @@
     "WARNING_INFO":"Dieser Bereich ist nur zur Administration des Repositorys gedacht.\nFalsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\n\nFühren Sie keine Aktionen durch, bei denen sie unsicher sind!",
     "TAB":{
       "INFO":"Info",
-      "APPLICATIONS":"Applications",
+      "APPLICATIONS":"Quellen",
       "UPDATE":"Server Update",
       "IMPORT":"Import",
       "TOOLKIT":"Tool Kit"
@@ -65,9 +65,15 @@
     },
     "IMPORT":{
       "EXCEL":"Import Excel Data",
+      "COLLECTION":"Import Sammlungs-Struktur",
       "CHOOSE_EXCEL":"Excel-Datei wählen",
+      "CHOOSE_COLLECTIONS_XML":"XML/ZIP-Datei wählen",
       "CHOOSE_DIRECTORY":"Speicherort wählen",
+      "CHOOSE_COLLECTION":"Übergeordnete Sammlung wählen",
+      "PARENT_COLLECTION_ROOT":"Auf Hauptebene importieren",
+      "PARENT_COLLECTION_CHOOSE":"Gewünschte Hauptsammlung wählen",
       "EXCEL_START":"Import Starten",
+      "COLLECTION_START":"Import starten",
       "OAI":"OAI Data",
       "OAI_STARTED":"OAI Import-Job gestartet",
       "OAI_URL":"OAI Base URL",
@@ -78,9 +84,13 @@
       "OAI_NO_PREFIX":"OAI Metadata Prefix fehlt",
       "OAI_METADATA":"OAI Metadata Set",
       "OAI_FILE":"URL to File",
-      "OAI_IMPORTER":"IMPORTER_CLASS",
+      "OAI_IMPORTER":"Importer Job",
+      "OAI_IMPORTER_CLASS_NAME":"Importer Class Name",
+      "OAI_RECORD_HANDLER_CLASS_NAME":"Record Handler Class Name",
+      "OAI_BINARY_HANDLER_CLASS_NAME":"Binary Handler Class Name",
       "OAI_STARTED":"OAI Import-Job gestartet",
       "OAI_START":"OAI Import",
+      "OAI_SAVE":"Werte für nächsten Import speichern",
       "ADMINISTRATION":"Import Administration",
       "CACHE_NAME":"Cache Name",
       "REFRESH_CACHE":"Refresh Cache",
@@ -90,7 +100,8 @@
       "IMPORTS_REMOVED":"Imports removed",
       "PROPERTY_VALUESPACE":"Write Properties to Valuespacefile",
       "PROPERTY_NAME":"Property-Name (z.B. cm:name)",
-      "CSV_IMPORTED":"CSV-Datei importiert ({{ rows }} Zeilen importiert)"
+      "CSV_IMPORTED":"CSV-Datei importiert ({{ rows }} Zeilen importiert)",
+      "COLLECTIONS_IMPORTED":"{{ count }} Sammlungen importiert"
     },
     "TOOLKIT":{
       "REFRESH_APP":"Refresh Application Info",

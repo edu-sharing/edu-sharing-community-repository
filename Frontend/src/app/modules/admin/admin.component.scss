@@ -108,20 +108,33 @@
 }
 .import{
   max-width: 800px;
+  .inputGroup{
+    input[type="radio"]+label{
+      padding-right:20px;
+    }
+    padding:20px 0;
+    display: flex;
+    align-items: center;
+    >a,>div{
+      display: flex;
+    }
+  }
   .file,.directory{
     display: inline-block;
     padding: 0 10px;
-    min-width: 160px;
-    max-width: 200px;
     vertical-align: middle;
   }
-  .csv,.oai{
+  .collections,.csv,.oai{
     padding-bottom:50px;
   }
   .oai{
     max-width: 500px;
+    .oaiSave{
+      float: left;
+      width: 100%;
+    }
   }
-  .btn,.btn-flat{
+  >.btn{
     margin-top: 20px;
   }
   .btn{

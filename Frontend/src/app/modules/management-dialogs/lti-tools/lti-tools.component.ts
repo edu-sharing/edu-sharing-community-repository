@@ -5,7 +5,7 @@ import {NodeWrapper,NodeList, Node, IamUsers, WorkflowEntry} from "../../../comm
 import {Toast} from "../../../common/ui/toast";
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {RestToolService} from "../../../common/rest/services/rest-tool.service";
 import {UIAnimation} from "../../../common/ui/ui-animation";
@@ -46,7 +46,8 @@ export class WorkspaceLtiToolsComponent  {
   }
   public openTool(node:Node,emit=true){
     if(emit){
-      this.currentToolChange.emit(node);
+      // causes ui flickering
+      //this.currentToolChange.emit(node);
     }
     this._currentTool=node;
     this.options=[];

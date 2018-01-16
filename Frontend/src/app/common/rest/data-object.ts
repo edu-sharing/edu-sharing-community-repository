@@ -30,6 +30,12 @@ export interface CacheInfo{
   statisticHits:number;
 }
 
+export interface WorkflowDefinition{
+  id:string;
+  color:string;
+  hasReceiver:boolean;
+  next:string[];
+}
 export class WorkflowEntry {
   time: number;
   editor: string;
@@ -41,7 +47,8 @@ export class WorkflowEntry {
 export class Repository {
   id: string;
   title: string;
-  preview: Preview;
+  icon:string;
+  logo:string;
   isHomeRepo: boolean;
   repositoryType: string;
 }
@@ -278,6 +285,8 @@ export interface Collection {
   preview: Preview;
   fromUser:boolean;
   scope : string;
+  pinned : boolean;
+  orderMode: string;
 }
 
 export interface CollectionWrapper {
@@ -607,10 +616,16 @@ export interface Facette {
 export interface NodeWrapper {
   node : Node;
 }
+export interface NodeRemoteWrapper extends NodeWrapper{
+  remote : Node;
+}
 export interface NodeList {
   nodes: Node[];
   pagination: Pagination;
   facettes: Facette[];
+}
+export interface SearchList extends NodeList {
+  ignored : string[];
 }
 export interface ParentList extends NodeList{
   scope:string;
@@ -979,6 +994,7 @@ export class Organizations {
 
 export class Profile {
   displayName:string;
+  groupType:string;
 }
 
 export class PersonalProfile {

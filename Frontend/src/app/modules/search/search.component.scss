@@ -1,7 +1,6 @@
 @import "../../../styles/variables.scss";
 
-$sidenavWidth:250px;
-$bannerHeight:130px;
+$sidenavWidth:285px;
 .switchToCollections{
   float:left;
   font-weight:bold;
@@ -32,7 +31,7 @@ $bannerHeight:130px;
     padding-bottom: 10px;
   }
 }
-.row{
+.rowRepositories{
   position: fixed;
   top:$mainnavHeight;
   width:100%;
@@ -41,6 +40,9 @@ $bannerHeight:130px;
   ul{
     border-bottom: none;
   }
+}
+.sidenav .row{
+  margin:0 -30px;
 }
 .repositoryActive{
   background: $workspaceTreeSelectedBackgroundEffect;
@@ -70,10 +72,18 @@ $bannerHeight:130px;
 .extendedSearch a, .switchToCollections a, .switchToSearch a{
   padding: 5px;
 }
-.noResults{
-  color:$noResultsColor;
+.noResults,.noResultsMatched{
+  color: $noResultsColor;
   text-align: center;
-  font-size:120%;
+  padding-top: 30px;
+  font-size: 120%;
+  i{
+    font-size: 60px;
+    width: 100%;
+  }
+}
+.noResultsMatched{
+  padding-bottom: 70px;
 }
 
 #main_view_selector_wrapper {
@@ -81,16 +91,7 @@ $bannerHeight:130px;
     display: inline-block;
     height: 100%;
 }
-.banner{
-  position: absolute;
-  left:0;
-  top:0;
-  width:100%;
-  height:$bannerHeight;
-  z-index: 100;
-  background-repeat:repeat-y;
-  background-position: 0 0;
-}
+
 .main_view_selector {
  padding: 15px;
  cursor: pointer;
@@ -230,34 +231,46 @@ a, a:hover, a:visited, a:active, button {
     top: $mainnavHeight+48px;
     z-index: 12;
     width:100%;
-    height:65px;
+    height:$secondaryBarHeight;
     @include materialShadow();
+}
+small-collection{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
 }
 .topNoRepositories{
   top: $mainnavHeight;
 }
 .mdsSelect{
-  padding:10px 10px;
-  margin:0 -20px;
-  margin-top: 7px;
-  background-color: #fff;
-  >div{
-    display:table;
+  float:left;
+  width:calc(100% + 40px);
+  margin-bottom: 56px;
+  >div {
     width: 100%;
-    .material-icons,select{
-      display:table-cell;
+    padding: 10px 10px;
+    margin: 0 -20px;
+    margin-top: 20px;
+    background-color: #fff;
+    > div {
+      display: table;
+      width: 100%;
+      .material-icons, select {
+        display: table-cell;
+      }
+      .material-icons {
+        color: $textLight;
+        font-size: 16px;
+        vertical-align: top;
+        padding-top: 9px;
+      }
     }
-    .material-icons{
-      color:$textLight;
-      font-size: 16px;
-      vertical-align: top;
-      padding-top: 9px;
+    .info {
+      padding-top: 3px;
+      font-size: 80%;
+      color: $textLight;
     }
-  }
-  .info{
-    padding-top: 3px;
-    font-size:80%;
-    color:$textLight;
   }
 }
 .sidenav{
@@ -270,9 +283,10 @@ a, a:hover, a:visited, a:active, button {
   overflow-x: hidden;
   overflow-y: auto;
   width: $sidenavWidth;
-  padding-top: 10px;
+  padding-top: 0;
   top:$mainnavHeight+110px;
   height: calc(100% - #{$mainnavHeight} - 110px);
+  @include iosScrolling();
 }
 .sidenavNoRepositories{
   top:$mainnavHeight+65px;
@@ -396,16 +410,106 @@ listtable {
     min-width:50px;
   }
 }
-
+.searchGrouped{
+  >div{
+    float:left;
+    width:100%;
+  }
+  listTable,.noResults{
+    width:calc(100% + #{$cardWidth + 60px});
+    float: left;
+    overflow: hidden;
+    height: $cardHeight+15px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+  }
+  .noResults{
+    width: 100%;
+    height: auto;
+  }
+  .heading{
+    float:left;
+    margin-top: 5px;
+    img{
+      padding-right: 5px;
+      max-height: 16px;
+    }
+    span{
+      position: relative;
+      top:-3px;
+    }
+  }
+  .more{
+    float:right;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+}
+.sidenav{
+  .empty{
+    margin-top:20px;
+    text-align: center;
+    color: $textLight;
+    width:100%;
+  }
+  .apply, .manageSavedSearch {
+    position: fixed;
+    background-color: $backgroundColor;
+    width:$sidenavWidth;
+    text-align: center;
+    left:0;
+    bottom:0;
+    padding:20px 8px;
+    z-index: 1;
+    actionbar,a{
+      position: relative;
+      top: 5px;
+    }
+  }
+  input[type=search]{
+    width: calc(100% - 20px);
+    margin-bottom: 10px;
+  }
+  .manageSavedSearch{
+    text-transform: uppercase;
+  }
+  listtable{
+    width: 100%;
+  }
+  .switch{
+    text-align: right;
+    margin: 10px 0px;
+  }
+}
 div.dialog.darken {
   z-index: 1040;
 }
 :host /deep/{
+  .sidenav .list > div{
+    margin:0 -20px;
+    margin-bottom: 40px;
+  }
+  .sidenav .actionAlwaysCaption{
+    display: inline-block!important;
+  }
+  .sidenav actionbar .moreOpen{
+    left: 0px;
+    top: -56px;
+    width: 220px;
+  }
   .btn-flat{
     background: transparent;
   }
+  mds {
+    .mdsEmbeddedGroup {
+      float:left;
+      width: 100%;
+      /* margin-bottom: 40px; */
+    }
+  }
 }
-.rowFrame, listtable {
+.rowFrame, .searchUngrouped listtable {
   background-color: #fff !important;
 }
 @media all and (max-width: $mobileWidth) {
@@ -463,7 +567,7 @@ div.dialog.darken {
   .sidenav,.top{
     display: none;
   }
-  .row{
+  .rowRepositories{
     position: absolute;
   }
   .contentSidenav{

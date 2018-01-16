@@ -44,6 +44,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.authentication.Context;
 
 
 
@@ -65,6 +66,9 @@ public class Mail {
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 		}
+	}
+	public Properties getProperties(){
+		return props;
 	}
 	
 	private void sendMail(String sender, String senderName, String receiver, String subject, String message) throws EmailException {
@@ -219,11 +223,17 @@ public class Mail {
 		message=replaceString(message,replace);
 		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"),senderName, receiver, subject, message);
 	}
+	public void sendMailHtml(ServletContext context,String receiver,String subject,String message,Map<String,String> replace) throws Exception {
+		sendMailHtml(context,props.getProperty("mail.smtp.from", "no-reply@edu-sharing.com"), receiver, subject, message,replace);
+	}
 
 	private String replaceString(String string, Map<String, String> replace) throws Exception {
 		if(replace!=null){
 			for(String key : replace.keySet()){
-				string=string.replace("{{"+key+"}}",replace.get(key));
+				String value=replace.get(key);
+				if(value==null)
+					value="";
+				string=string.replace("{{"+key+"}}",value);
 			}
 		}
 		String[] conds=StringUtils.splitByWholeSeparator(string,"{{if ");
@@ -244,6 +254,7 @@ public class Mail {
 				int endif=cond.indexOf("{{endif}}");
 				String content=cond.substring(end+2,endif);
 				conds[i]=isTrue ? content : "";
+				conds[i]+=cond.substring(endif+9);
 			}
 		}catch(Throwable t){
 			throw new Exception("Error evaluating if conditions in mail template, please check your template syntax",t);

@@ -1,12 +1,12 @@
 import {Component, Input} from "@angular/core";
 import {RestConstants} from "../../../common/rest/rest-constants";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
 import {TranslateService} from "@ngx-translate/core";
 import {Toast} from "../../../common/ui/toast";
 import {ArchiveRestore,Node} from "../../../common/rest/data-object";
 import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
 import {ListItem} from "../../../common/ui/list-item";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 
 @Component({
   selector: 'tasks',

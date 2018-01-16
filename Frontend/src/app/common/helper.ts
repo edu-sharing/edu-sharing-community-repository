@@ -10,7 +10,7 @@ export class Helper {
    * @param needle
    * @returns {number}
    */
-  public static indexOfObjectArray(haystack: any, property: string, needle: string): number {
+  public static indexOfObjectArray(haystack: any, property: string, needle: any): number {
     for(let i = 0; i<haystack.length; i++) {
       if (haystack[i][property] == needle)
         return i;
@@ -105,5 +105,9 @@ export class Helper {
       url+="&";
 
     return url+param+"="+encodeURIComponent(value);
+  }
+
+  public static deepCopy(data: any) {
+    return JSON.parse(JSON.stringify(data));
   }
 }

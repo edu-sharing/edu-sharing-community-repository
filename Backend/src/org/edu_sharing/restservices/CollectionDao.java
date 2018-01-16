@@ -29,7 +29,11 @@ import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
+
+import com.google.gwt.i18n.server.testing.Child;
 
 public class CollectionDao {
 
@@ -39,9 +43,15 @@ public class CollectionDao {
 		EDU_ALL,
 		EDU_GROUPS,
 		MY,
-		CUSTOM
+		CUSTOM,
+		CUSTOM_PUBLIC
 	}
-
+	public enum SearchScope {
+		EDU_ALL,
+		EDU_GROUPS,
+		TYPE_EDITORIAL,
+		MY
+	}
 	
 	private final static String[] PERMISSIONS = new String[] {
 			PermissionService.WRITE, PermissionService.DELETE };
@@ -78,7 +88,7 @@ public class CollectionDao {
 		}			
 	}
 
-	public static List<CollectionBase> getCollections(RepositoryDao repoDao, String parentId, Scope scope, Filter filter,SortDefinition sortDefinition)
+	public static List<CollectionBase> getCollections(RepositoryDao repoDao, String parentId, SearchScope scope, Filter filter,SortDefinition sortDefinition)
 			throws DAOException {
 
 		try {
@@ -89,17 +99,24 @@ public class CollectionDao {
 					repoDao.getCollectionClient().getChildReferences(
 							ROOT.equals(parentId) ? null : parentId, 
 							scope.toString());
+			
+			// if this collection is ordered by user, use the position of the elements as primary order criteria
+			if(!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(getCollection(repoDao, parentId).getOrderMode())) {
+				sortDefinition.addSortDefinitionEntry(
+						new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
+			}
+			
 			List<Node> sorted = NodeDao.sortAndFilterByType(repoDao, NodeDao.convertAlfrescoNodeRef(repoDao,children), sortDefinition,null,Filter.createShowAllFilter());
 			for (Node child : sorted) {
 	
-				String nodeId = child.getRef().getId();
 				String nodeType = child.getType();
 				
 				if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP).equals(nodeType)) {
 	
 					// it's a collection
 					
-					Collection collection = getCollection(repoDao, nodeId).asCollection();
+					//Collection collection = getCollection(repoDao, nodeId).asCollection();
+					Collection collection = child.getCollection();
 					
 					result.add(collection);
 					
@@ -153,6 +170,10 @@ public class CollectionDao {
 
 			throw DAOException.mapping(e);
 		}
+	}
+
+	private String getOrderMode() {
+		return this.collection.getOrderMode();
 	}
 
 	private CollectionDao(RepositoryDao repoDao, String collectionId) throws DAOException {
@@ -316,6 +337,7 @@ public class CollectionDao {
 		result.setX(collection.getX());
 		result.setY(collection.getY());
 		result.setZ(collection.getZ());
+		result.setPinned(collection.isPinned());
 		
 		if (collection.getRef() != null) {
 			
@@ -381,11 +403,13 @@ public class CollectionDao {
 		
 		result.setTitle(collection.getTitle());
 		result.setType(collection.getType());
+		result.setOrderMode(collection.getOrderMode());
 		result.setViewtype(collection.getViewtype());
 		result.setX(collection.getX());
 		result.setY(collection.getY());
 		result.setZ(collection.getZ());
-		
+		result.setPinned(collection.isPinned());
+
 		result.setScope(collection.getScope());
 
 		return result;
@@ -393,19 +417,27 @@ public class CollectionDao {
 	
 	public void writePreviewImage(InputStream is, String mimeType) throws DAOException{
 		try{
-			//new ImageMagickContentTransformerWorker()
-			is=ImageTool.autoRotateImage(is,NodeDao.MAX_THUMB_SIZE);
-			((MCAlfrescoAPIClient)baseClient).writeContent(MCAlfrescoAPIClient.storeRef, this.collectionId, is, mimeType,null, CCConstants.CCM_PROP_MAP_ICON);
-			ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
-			ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-			ThumbnailService thumbnailService = serviceRegistry.getThumbnailService();
-			org.alfresco.service.cmr.repository.NodeRef ref=new org.alfresco.service.cmr.repository.NodeRef(MCAlfrescoAPIClient.storeRef,this.collectionId);
-			PreviewCache.purgeCache(this.collectionId);
-
+			collectionClient.writePreviewImage(collectionId,is,mimeType);
 			//thumbnailService.createThumbnail(ref, QName.createQName(CCConstants.CCM_PROP_MAP_ICON), ,"collection");
 		}catch(Exception e){
 			throw new DAOException(e,collectionId);
 		}
+	}
+
+	public static void setPinned(RepositoryDao repoDao, String[] collections) {
+		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING))
+			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
+		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+			@Override
+			public Void doWork() throws Exception {
+				repoDao.getCollectionClient().setPinned(collections);
+				return null;
+			}
+		});
+	}
+
+	public void setOrder(String[] nodes) {
+		collectionClient.setOrder(collectionId,nodes);
 	}
 
 	

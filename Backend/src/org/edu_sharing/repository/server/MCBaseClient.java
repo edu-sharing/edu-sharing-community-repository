@@ -66,68 +66,6 @@ public abstract class MCBaseClient {
 	}
 	
 	/**
-	 * sets encrypted username in authInfo when it's not already there and returns encrypted username
-	 * @param authInfo
-	 * @param appInfo where blowfishkey is set
-	 */
-	public String getUserNameEncrypted(HashMap authInfo, ApplicationInfo appInfo){
-		String user_encrypted = (String)authInfo.get(CCConstants.AUTH_USERNAME_ENCRYPTED);
-		if(user_encrypted == null){
-			logger.info("encrypt will be called");
-			
-			String username =  (String)authInfo.get(CCConstants.AUTH_USERNAME);
-			user_encrypted = getBlowFishEncrypted(username,appInfo);
-			authInfo.put(CCConstants.AUTH_USERNAME_ENCRYPTED, user_encrypted);
-		}
-		return user_encrypted;
-	}
-	
-	/**
-	 * encrypts a String with the blowfish algorithm
-	 * also an Base64encoding and URLEncoding is done
-	 * 
-	 * @param toencrypt the String to encrypt
-	 * @param appInfo the ApplicationInfo where the iv for encryption is found
-	 * @return
-	 */
-	public static String getBlowFishEncrypted(String toEncrypt, ApplicationInfo appInfo){
-		return  BlowFish.encryptForUrl(toEncrypt, appInfo.getBlowfishiv(),  appInfo.getBlowfishkey());
-	}
-	/**
-	 * encrypts a String with the blowfish algorithm using iv and key from the homeApplication
-	 * also an Base64encoding and URLEncoding is done
-	 * 
-	 * 
-	 * @param toEncrypt
-	 * @return
-	 */
-	public static String getBlowFishEncrypted(String toEncrypt){
-		String encrypted = null;
-		String iv = ApplicationInfoList.getHomeRepository().getBlowfishiv();
-		String key = ApplicationInfoList.getHomeRepository().getBlowfishkey();
-		if (iv != null && key != null) {
-			BlowFish.setIv(iv);
-			encrypted =  BlowFish.encryptForUrl(toEncrypt, iv, key);
-		}
-		return encrypted;
-	}
-	
-	
-	/**
-	 * decrypts a blofish encrypted file
-	 * 
-	 * @param toDecrypt the String to decrypt
-	 * @param appInfo the ApplicationInfo where the iv for decryption is found
-	 * @return
-	 */
-	public static String getBlowFishDecrypted(String toDecrypt,ApplicationInfo appInfo){
-		byte[] base64decoded = BlowFish.getBase64Decoded(toDecrypt);
-		String result = BlowFish.decrypt(base64decoded, appInfo.getBlowfishkey());
-		return result;
-	}
-	
-	
-	/**
 	 * Creates a node. 
 	 * @param parentID the Id of the parent node
 	 * @param nodeTypeString the type of node (folder, content, map,  io...)

@@ -250,4 +250,17 @@
 		<key>true</key>
 		<key>false</key>
 	</valuespace>
+	<valuespace
+		property="ccm:tool_category">
+		<key>communication</key>
+		<key>cooperation</key>
+		<key>coordination</key>
+		<key>learning</key>
+	</valuespace>
+	<valuespace
+	 	property="ccm:tool_instance_access">
+	 	<key>free</key>
+	 	<key>free_account</key>
+	 	<key>commercical</key>
+	 	</valuespace>
 </valuespaces>

@@ -11,20 +11,19 @@ import {ActivatedRoute, Params, Router} from "@angular/router";
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../translation";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
-import {OptionItem} from "../actionbar/actionbar.component";
+import {OptionItem} from "../actionbar/option-item";
 import {UIAnimation} from "../ui-animation";
 import {FrameEventsService} from "../../services/frame-events.service";
-import {RouterComponent} from "../../../router/router.component";
 import {UIHelper} from "../ui-helper";
 import {ConfigurationService} from "../../services/configuration.service";
 import {Title} from "@angular/platform-browser";
 import {SessionStorageService} from "../../services/session-storage.service";
 import {RestConnectorsService} from "../../rest/services/rest-connectors.service";
-import {WorkspaceMainComponent} from "../../../modules/workspace/workspace.component";
 import {trigger} from "@angular/animations";
 import {NodeHelper} from "../node-helper";
 import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIConstants} from "../ui-constants";
+import {ConfigurationHelper} from "../../rest/configuration-helper";
 
 declare var jQuery:any;
 declare var window: any;
@@ -64,8 +63,12 @@ export class NodeRenderComponent {
   private isOpenable: boolean;
   private closeOnBack: boolean;
   public nodeMetadata: Node;
+  public addToCollection: Node[];
+  public nodeReport: Node;
   private editor: string;
   private fromLogin = false;
+  public banner: any;
+  private repository: string;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
@@ -166,24 +169,27 @@ export class NodeRenderComponent {
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
       Translation.initialize(translate,config,storage,route).subscribe(()=>{
+        this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.route.queryParams.subscribe((params:Params)=>{
           this.closeOnBack=params['closeOnBack']=='true';
           this.editor=params['editor'];
           this.fromLogin=params['fromLogin']=='true';
+          this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
+          this.route.params.subscribe((params: Params) => {
+            if(params['node']) {
+              this.isRoute=true;
+              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+              this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+                this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
+                if(params['version'])
+                  this.version=params['version'];
+                setTimeout(()=>this.node = params['node'],10);
+              });
+            }
+          });
         });
-        this.route.params.subscribe((params: Params) => {
-          if(params['node']) {
-            this.isRoute=true;
-            this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
-            this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-              this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
-              if(params['version'])
-                this.version=params['version'];
-              setTimeout(()=>this.node = params['node'],10);
-            });
-          }
-        });
+
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
     }
@@ -216,7 +222,6 @@ export class NodeRenderComponent {
 
     let input=this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS);
     if(!input) input=[];
-    //this.options = JSON.parse(JSON.stringify(this.temporaryStorageService.get(NodeRenderComponent.OPTIONS)));
     let opt=[];
     for(let o of input){
       opt.push(o);
@@ -265,6 +270,7 @@ export class NodeRenderComponent {
         }
         else {
           jQuery('#nodeRenderContent').html(data.detailsSnippet);
+          parent.postprocessHtml();
         }
         parent.isLoading = false;
       },
@@ -277,6 +283,13 @@ export class NodeRenderComponent {
     });
   }
 
+  private postprocessHtml() {
+    if(!this.config.instant("rendering.showPreview",true)){
+      jQuery('.edusharing_rendering_content_wrapper').hide();
+      jQuery('.showDetails').hide();
+    }
+  }
+
   private downloadCurrentNode() {
     NodeHelper.downloadNode(this._node,this.version);
   }
@@ -286,7 +299,7 @@ export class NodeRenderComponent {
       this.toolService.openLtiObject(this._node);
     }
     else {
-      this.connectors.openConnector(list, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.frame,this.toast,list, this._node,null,null,null,newWindow);
     }
   }
 
@@ -298,7 +311,7 @@ export class NodeRenderComponent {
         this.nodeApi.getNodeParents(this._node.parent.id,false,[],this._node.parent.repo).subscribe((data:NodeList)=>{
           openFolder.isEnabled = true;
         });
-        if(this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT)
+        if(this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config,"workspace"))
           this.options.push(openFolder);
 
         let edit=new OptionItem('WORKSPACE.OPTION.EDIT','info_outline',()=>this.nodeMetadata=this._node);
@@ -320,7 +333,16 @@ export class NodeRenderComponent {
         });
         this.options.push(openFolder);
       }
+      let addCollection=new OptionItem('WORKSPACE.OPTION.COLLECTION','layers',()=>this.addToCollection=[this._node]);
+      addCollection.isEnabled=this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH)!=-1 && this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT;
+      this.options.push(addCollection);
 
+      if (this.config.instant("nodeReport", false)) {
+        let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
+        this.options.push(nodeReport);
+      }
+
+      this.isOpenable=false;
       this.connectors.list().subscribe((data:ConnectorList)=>{
         if(this.version==RestConstants.NODE_VERSION_CURRENT && RestConnectorsService.connectorSupportsEdit(data,this._node) || RestToolService.isLtiObject(this._node)){
           let view=new OptionItem("WORKSPACE.OPTION.VIEW", "launch",()=>this.openConnector(data,true));

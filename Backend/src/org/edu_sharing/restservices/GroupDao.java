@@ -35,7 +35,11 @@ public class GroupDao {
 	public static String createGroup(RepositoryDao repoDao, String groupName, GroupProfile profile,String parentGroup) throws DAOException {
 		try {
 			AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
-			return authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
+			String result=authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
+			if(result!=null) {
+				GroupDao.getGroup(repoDao, result).setGroupType(profile);
+			}
+			return result;
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
@@ -95,9 +99,8 @@ public class GroupDao {
 				throw new DAOMissingException(
 						new IllegalArgumentException(groupName));
 				
-			}		
+			}									
 			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-
 			
 		} catch (Throwable t) {
 			
@@ -114,6 +117,7 @@ public class GroupDao {
 				@Override
 				public Void doWork() throws Exception {
 					((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
+					setGroupType(profile);
 					return null;
 				}
 			});
@@ -125,6 +129,14 @@ public class GroupDao {
 
 	}
 	
+	protected void setGroupType(GroupProfile profile) {
+		if(profile.getGroupType()!=null){
+			authorityService.addAuthorityAspect(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_ASPECT_GROUPEXTENSION);
+			authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE,profile.getGroupType());
+		}
+
+	}
+
 	public void delete() throws DAOException {
 		
 		try {
@@ -229,6 +241,7 @@ public class GroupDao {
     	
     	GroupProfile profile = new GroupProfile();
     	profile.setDisplayName(getDisplayName());
+    	profile.setGroupType(getGroupType());
     	data.setProfile(profile);
     	
     	return data;

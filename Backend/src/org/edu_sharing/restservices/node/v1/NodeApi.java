@@ -115,6 +115,43 @@ public class NodeApi  {
 	    	}
 
 	    }
+	  @POST
+	    @Path("/nodes/{repository}/{node}/report")
+	        
+	    @ApiOperation(
+	    	value = "Report the node.", 
+	    	notes = "Report a node to notify the admin about an issue)")
+	    
+	    @ApiResponses(
+	    	value = { 
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		    })
+
+	    public Response reportNode(
+	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@ApiParam(value = "the reason for the report",required=true ) @QueryParam("reason") String reason,
+	    	@ApiParam(value = "mail of reporting user",required=true ) @QueryParam("userEmail") String userEmail,
+	    	@ApiParam(value = "additional user comment",required=false ) @QueryParam("userComment") String userComment,
+			@Context HttpServletRequest req) {
+	    	
+	    	try {
+		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+		    	nodeDao.reportNode(reason,userEmail,userComment);
+		    	
+		    	return Response.status(Response.Status.OK).build();
+		
+	    	} catch (Throwable t) {
+	    		return ErrorResponse.createResponse(t);    		
+	    	}
+
+	    }
 	  @PUT
 	    @Path("/nodes/{repository}/{node}/workflow")
 	        
@@ -151,6 +188,45 @@ public class NodeApi  {
 	    	}
 
 	    }
+	
+	  	@PUT
+	    @Path("/nodes/{repository}/{node}/aspects")
+	        
+	    @ApiOperation(
+	    	value = "Add aspect to node.", 
+	    	notes = "Add aspect to node.")
+	    
+	    @ApiResponses(
+	    	value = { 
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
+		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		    })
+
+	    public Response addAspects(
+	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@ApiParam(value = "aspect name, e.g. ccm:lomreplication",required=true) List<String> aspects,
+			@Context HttpServletRequest req) {
+	    	
+	    	try {
+		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+		    	nodeDao.addAspects(aspects);
+		    	NodeEntry response = new NodeEntry();
+		    	response.setNode(nodeDao.asNode());
+		    	
+		    	return Response.status(Response.Status.OK).entity(response).build();
+		
+	    	} catch (Throwable t) {
+	    		return ErrorResponse.createResponse(t);    		
+	    	}
+
+	    }
+	  
     @GET
     @Path("/nodes/{repository}/{node}/metadata")
         
@@ -182,6 +258,9 @@ public class NodeApi  {
 	    	if("-userhome-".equals(node)){
     			node = repoDao.getUserHome();
     		}
+	    	if("-saved_search-".equals(node)){
+	    		node = repoDao.getUserSavedSearch();
+	    	}
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
 	    	NodeEntry response = new NodeEntry();
@@ -594,12 +673,12 @@ public class NodeApi  {
 
     public Response getChildren(
     	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = "ID of parent node (or \"-userhome-\" for home directory of current user, \"-shared_files-\" for shared folders, \"-to_me_shared_files\" for shared files for the user,\"-my_shared_files-\" for files shared by the user, \"-inbox-\" for the inbox, \"-workflow_receive-\" for files assigned by workflow)",required=true ) @PathParam("node") String node,
+	    @ApiParam(value = "ID of parent node (or \"-userhome-\" for home directory of current user, \"-shared_files-\" for shared folders, \"-to_me_shared_files\" for shared files for the user,\"-my_shared_files-\" for files shared by the user, \"-inbox-\" for the inbox, \"-workflow_receive-\" for files assigned by workflow, \"-saved_search-\" for saved searches of the user)",required=true ) @PathParam("node") String node,
 	    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
 	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
 	    @ApiParam(value = RestConstants.MESSAGE_FILTER) @QueryParam("filter") List<String> filter,
 	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 	     
 	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
@@ -615,6 +694,9 @@ public class NodeApi  {
 	    	if("-inbox-".equals(node)){
     			node = repoDao.getUserInbox();
     		}
+	    	if("-saved_search-".equals(node)){
+	    		node = repoDao.getUserSavedSearch();
+	    	}
 	    	List<NodeRef> children;
 
 	    	if("-shared_files-".equals(node)){
@@ -921,7 +1003,7 @@ public class NodeApi  {
 
     }
     
-    private void resolveURLTitle(HashMap<String, String[]> properties) {
+    public void resolveURLTitle(HashMap<String, String[]> properties) {
 		String[] url=(String[])properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
 		if(url==null)
 			return;
@@ -1431,7 +1513,7 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="10") @QueryParam("maxItems") Integer maxItems,
 	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
 	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 	    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 		    

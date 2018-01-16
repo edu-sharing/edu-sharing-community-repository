@@ -4,7 +4,7 @@ import {Node, NodeList, NodeWrapper} from "../../../common/rest/data-object";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {Toast} from "../../../common/ui/toast";
 import {SessionStorageService} from "../../../common/services/session-storage.service";
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
@@ -106,7 +106,11 @@ export class WorkspaceExplorerComponent  {
     console.log(this._node);
     this.nodeApi.getChildren(this._node,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
       (error:any) => {
-        this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
+        if (error.status == 404)
+          this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
+        else
+          this.toast.error(error);
+
         this.loading=false;
         this.showLoading=false;
       });
@@ -292,5 +296,8 @@ export class WorkspaceExplorerComponent  {
         this.load(true);
       }
     });
+  }
+  canDrop = (event:any)=>{
+    return event.target.isDirectory;
   }
 }

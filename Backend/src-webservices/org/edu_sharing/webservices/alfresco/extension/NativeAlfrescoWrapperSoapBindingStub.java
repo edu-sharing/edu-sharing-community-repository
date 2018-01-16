@@ -148,6 +148,35 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         _operations[8] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("setOwner");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[9] = oper;
+
+    }
+
+    private static void _initOperationDesc2(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("copyNode");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "toNodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "copyChildren"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"), boolean.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[10] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getChildren");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
@@ -158,13 +187,8 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildrenReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[9] = oper;
+        _operations[11] = oper;
 
-    }
-
-    private static void _initOperationDesc2(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getChild");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -180,309 +204,18 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[10] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getPropertiesExt");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeProtocol"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
-        oper.setReturnClass(java.util.HashMap.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesExtReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[11] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("hasPermissionsSimple");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permissions"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
-        oper.setReturnClass(boolean.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasPermissionsSimpleReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[12] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("updateNode");
+        oper.setName("setPermissions");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "properties"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"), java.util.HashMap.class, false, false);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "aces"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://rpc.client.repository.edu_sharing.org", "ACE"), org.edu_sharing.repository.client.rpc.ACE[].class, false, false);
         oper.addParameter(param);
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[13] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getCompanyHomeNodeId");
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        oper.setReturnClass(java.lang.String.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getCompanyHomeNodeIdReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[14] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getPropertiesSimple");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
-        oper.setReturnClass(java.util.HashMap.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesSimpleReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[15] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("searchNodeIds");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "store"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "luceneQuery"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permission"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        oper.setReturnClass(java.lang.String[].class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchNodeIdsReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[16] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("searchNodes");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "store"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "luceneQuery"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permission"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "propertiesToReturn"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "RepositoryNode"));
-        oper.setReturnClass(org.edu_sharing.webservices.alfresco.extension.RepositoryNode[].class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchNodesReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[17] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("validateTicket");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "ticket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        oper.setReturnClass(java.lang.String.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "validateTicketReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[18] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getVersionHistory");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "RepositoryNode"));
-        oper.setReturnClass(org.edu_sharing.webservices.alfresco.extension.RepositoryNode[].class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getVersionHistoryReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[19] = oper;
-
-    }
-
-    private static void _initOperationDesc3(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getPreviewUrl");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeProtocol"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeIdentifier"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://rpc.client.repository.edu_sharing.org", "GetPreviewResult"));
-        oper.setReturnClass(org.edu_sharing.repository.client.rpc.GetPreviewResult.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPreviewUrlReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[20] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("createShare");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "emails"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "expiryDate"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "long"), long.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[21] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getShares");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://rpc.client.repository.edu_sharing.org", "Share"));
-        oper.setReturnClass(org.edu_sharing.repository.client.rpc.Share[].class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getSharesReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[22] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("isOwner");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "user"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
-        oper.setReturnClass(boolean.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "isOwnerReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[23] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getMetadataSets");
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        oper.setReturnClass(java.lang.String[].class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getMetadataSetsReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[24] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("findGroups");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchWord"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "eduGroupNodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "from"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nrOfResults"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "SearchResult"));
-        oper.setReturnClass(org.edu_sharing.webservices.alfresco.extension.SearchResult.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "findGroupsReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[25] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("findUsers");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchProps"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "KeyValue"), org.edu_sharing.webservices.alfresco.extension.KeyValue[].class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "eduGroupNodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "from"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nrOfResults"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "SearchResult"));
-        oper.setReturnClass(org.edu_sharing.webservices.alfresco.extension.SearchResult.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "findUsersReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[26] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getChildrenCheckPermissions");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permissionsOnChild"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
-        oper.setReturnClass(java.util.HashMap.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildrenCheckPermissionsReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[27] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("createNode");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeTypeString"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "childAssociation"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "props"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"), java.util.HashMap.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        oper.setReturnClass(java.lang.String.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "createNodeReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[28] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("createNodeAtomicValues");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeTypeString"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "childAssociation"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "props"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"), java.util.HashMap.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        oper.setReturnClass(java.lang.String.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "createNodeAtomicValuesReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[29] = oper;
-
-    }
-
-    private static void _initOperationDesc4(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("updateNodeAtomicValues");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "properties"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"), java.util.HashMap.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[30] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("isAdmin");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
-        oper.setReturnClass(boolean.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "isAdminReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[31] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("hasPermissions");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "userId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permissions"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
-        oper.setReturnClass(java.util.HashMap.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasPermissionsReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[32] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("searchSolr");
@@ -503,7 +236,309 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchSolrReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[14] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("getChildrenCheckPermissions");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permissionsOnChild"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
+        oper.setReturnClass(java.util.HashMap.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildrenCheckPermissionsReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[15] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("createNode");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeTypeString"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "childAssociation"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "props"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"), java.util.HashMap.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        oper.setReturnClass(java.lang.String.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "createNodeReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[16] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("createNodeAtomicValues");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeTypeString"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "childAssociation"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "props"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"), java.util.HashMap.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        oper.setReturnClass(java.lang.String.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "createNodeAtomicValuesReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[17] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("updateNodeAtomicValues");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "properties"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"), java.util.HashMap.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[18] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("isAdmin");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        oper.setReturnClass(boolean.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "isAdminReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[19] = oper;
+
+    }
+
+    private static void _initOperationDesc3(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("getPropertiesExt");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeProtocol"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
+        oper.setReturnClass(java.util.HashMap.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesExtReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[20] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("hasPermissions");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "userId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permissions"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
+        oper.setReturnClass(java.util.HashMap.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasPermissionsReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[21] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("hasPermissionsSimple");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permissions"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        oper.setReturnClass(boolean.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasPermissionsSimpleReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[22] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("updateNode");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "properties"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"), java.util.HashMap.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[23] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("getCompanyHomeNodeId");
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        oper.setReturnClass(java.lang.String.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getCompanyHomeNodeIdReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[24] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("getPropertiesSimple");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
+        oper.setReturnClass(java.util.HashMap.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesSimpleReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[25] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("searchNodeIds");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "store"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "luceneQuery"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permission"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        oper.setReturnClass(java.lang.String[].class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchNodeIdsReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[26] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("searchNodes");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "store"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "luceneQuery"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permission"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "propertiesToReturn"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "RepositoryNode"));
+        oper.setReturnClass(org.edu_sharing.webservices.alfresco.extension.RepositoryNode[].class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchNodesReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[27] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("validateTicket");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "ticket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        oper.setReturnClass(java.lang.String.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "validateTicketReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[28] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("getVersionHistory");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "RepositoryNode"));
+        oper.setReturnClass(org.edu_sharing.webservices.alfresco.extension.RepositoryNode[].class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getVersionHistoryReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[29] = oper;
+
+    }
+
+    private static void _initOperationDesc4(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("getPreviewUrl");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeProtocol"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeIdentifier"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://rpc.client.repository.edu_sharing.org", "GetPreviewResult"));
+        oper.setReturnClass(org.edu_sharing.repository.client.rpc.GetPreviewResult.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPreviewUrlReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[30] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("createShare");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "emails"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "expiryDate"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "long"), long.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[31] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("getShares");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://rpc.client.repository.edu_sharing.org", "Share"));
+        oper.setReturnClass(org.edu_sharing.repository.client.rpc.Share[].class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getSharesReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[32] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("isOwner");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "user"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        oper.setReturnClass(boolean.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "isOwnerReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[33] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("getMetadataSets");
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        oper.setReturnClass(java.lang.String[].class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getMetadataSetsReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[34] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("findGroups");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchWord"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "eduGroupNodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "from"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nrOfResults"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "SearchResult"));
+        oper.setReturnClass(org.edu_sharing.webservices.alfresco.extension.SearchResult.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "findGroupsReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[35] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("findUsers");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchProps"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "KeyValue"), org.edu_sharing.webservices.alfresco.extension.KeyValue[].class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "eduGroupNodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "from"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nrOfResults"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "SearchResult"));
+        oper.setReturnClass(org.edu_sharing.webservices.alfresco.extension.SearchResult.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "findUsersReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[36] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getEduGroupContextOfNode");
@@ -514,7 +549,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getEduGroupContextOfNodeReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[34] = oper;
+        _operations[37] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("hasToolPermission");
@@ -525,18 +560,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasToolPermissionReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[35] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("setOwner");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[36] = oper;
+        _operations[38] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("setUserDefinedPreview");
@@ -549,8 +573,13 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[37] = oper;
+        _operations[39] = oper;
 
+    }
+
+    private static void _initOperationDesc5(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removeUserDefinedPreview");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -558,7 +587,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[38] = oper;
+        _operations[40] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("guessMimetype");
@@ -569,13 +598,8 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "guessMimetypeReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[39] = oper;
+        _operations[41] = oper;
 
-    }
-
-    private static void _initOperationDesc5(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("searchNodeIdsLimit");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "luceneString"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -587,7 +611,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchNodeIdsLimitReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[40] = oper;
+        _operations[42] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removeAspect");
@@ -598,7 +622,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[41] = oper;
+        _operations[43] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removeGlobalAspectFromGroup");
@@ -607,7 +631,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[42] = oper;
+        _operations[44] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getNotifyList");
@@ -618,7 +642,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getNotifyListReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[43] = oper;
+        _operations[45] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("revertVersion");
@@ -629,7 +653,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[44] = oper;
+        _operations[46] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("createVersion");
@@ -640,7 +664,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[45] = oper;
+        _operations[47] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("hasAllPermissions");
@@ -653,7 +677,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasAllPermissionsReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[46] = oper;
+        _operations[48] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("hasAllPermissionsExt");
@@ -670,8 +694,13 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasAllPermissionsExtReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[47] = oper;
+        _operations[49] = oper;
 
+    }
+
+    private static void _initOperationDesc6(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getHomeFolderID");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -681,7 +710,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getHomeFolderIDReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[48] = oper;
+        _operations[50] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("addPermissionACEs");
@@ -692,13 +721,8 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[49] = oper;
+        _operations[51] = oper;
 
-    }
-
-    private static void _initOperationDesc6(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removePermissionACEs");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -708,7 +732,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[50] = oper;
+        _operations[52] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("setPermissionsBasic");
@@ -725,7 +749,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[51] = oper;
+        _operations[53] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removePermissions");
@@ -738,7 +762,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[52] = oper;
+        _operations[54] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("executeAction");
@@ -755,7 +779,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[53] = oper;
+        _operations[55] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("createAssociation");
@@ -768,7 +792,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[54] = oper;
+        _operations[56] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("createChildAssociation");
@@ -783,7 +807,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[55] = oper;
+        _operations[57] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("moveNode");
@@ -796,7 +820,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[56] = oper;
+        _operations[58] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removeAssociation");
@@ -809,8 +833,13 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[57] = oper;
+        _operations[59] = oper;
 
+    }
+
+    private static void _initOperationDesc7(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removeRelationsForNode");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -820,7 +849,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[58] = oper;
+        _operations[60] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removeRelations");
@@ -829,13 +858,8 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[59] = oper;
+        _operations[61] = oper;
 
-    }
-
-    private static void _initOperationDesc7(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("addAspect");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -845,7 +869,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[60] = oper;
+        _operations[62] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getGroupFolderId");
@@ -854,7 +878,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getGroupFolderIdReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[61] = oper;
+        _operations[63] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getRepositoryRoot");
@@ -863,7 +887,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getRepositoryRootReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[62] = oper;
+        _operations[64] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getChildenByProps");
@@ -878,7 +902,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildenByPropsReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[63] = oper;
+        _operations[65] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getChildrenByType");
@@ -891,7 +915,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildrenByTypeReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[64] = oper;
+        _operations[66] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getChildrenByAssociation");
@@ -906,7 +930,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildrenByAssociationReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[65] = oper;
+        _operations[67] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getParents");
@@ -919,7 +943,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getParentsReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[66] = oper;
+        _operations[68] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getAssocNode");
@@ -932,8 +956,13 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getAssocNodeReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[67] = oper;
+        _operations[69] = oper;
 
+    }
+
+    private static void _initOperationDesc8(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getChildRecursive");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -947,7 +976,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildRecursiveReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[68] = oper;
+        _operations[70] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getChildrenRecursive");
@@ -960,13 +989,8 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildrenRecursiveReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[69] = oper;
+        _operations[71] = oper;
 
-    }
-
-    private static void _initOperationDesc8(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getAssociationNodeIds");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -978,7 +1002,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getAssociationNodeIdsReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[70] = oper;
+        _operations[72] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getUserNames");
@@ -987,7 +1011,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getUserNamesReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[71] = oper;
+        _operations[73] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getUserDetails");
@@ -998,7 +1022,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getUserDetailsReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[72] = oper;
+        _operations[74] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("setUserDetails");
@@ -1007,7 +1031,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[73] = oper;
+        _operations[75] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("deleteUser");
@@ -1016,7 +1040,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[74] = oper;
+        _operations[76] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getGroupNames");
@@ -1025,7 +1049,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getGroupNamesReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[75] = oper;
+        _operations[77] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getGroupDetails");
@@ -1036,7 +1060,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getGroupDetailsReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[76] = oper;
+        _operations[78] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("setGroupDetails");
@@ -1047,8 +1071,13 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "setGroupDetailsReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[77] = oper;
+        _operations[79] = oper;
 
+    }
+
+    private static void _initOperationDesc9(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("deleteGroup");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "groupNames"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false);
@@ -1056,7 +1085,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[78] = oper;
+        _operations[80] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getMemberships");
@@ -1067,13 +1096,8 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getMembershipsReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[79] = oper;
+        _operations[81] = oper;
 
-    }
-
-    private static void _initOperationDesc9(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("addMemberships");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "groupName"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -1083,7 +1107,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[80] = oper;
+        _operations[82] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removeMemberships");
@@ -1094,7 +1118,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[81] = oper;
+        _operations[83] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("removeAllMemberships");
@@ -1103,7 +1127,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[82] = oper;
+        _operations[84] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("isSubOf");
@@ -1116,7 +1140,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "isSubOfReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[83] = oper;
+        _operations[85] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("hasContent");
@@ -1129,7 +1153,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasContentReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[84] = oper;
+        _operations[86] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("writeContent");
@@ -1146,7 +1170,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[85] = oper;
+        _operations[87] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("setUserPassword");
@@ -1157,7 +1181,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[86] = oper;
+        _operations[88] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("invalideTicket");
@@ -1166,8 +1190,13 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[87] = oper;
+        _operations[89] = oper;
 
+    }
+
+    private static void _initOperationDesc10(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("bindEduGroupFolder");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "groupName"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -1177,7 +1206,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[88] = oper;
+        _operations[90] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("findNodeByPath");
@@ -1188,13 +1217,8 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "findNodeByPathReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[89] = oper;
+        _operations[91] = oper;
 
-    }
-
-    private static void _initOperationDesc10(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getAspects");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeProtocol"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
@@ -1206,30 +1230,6 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         oper.setReturnClass(java.lang.String[].class);
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getAspectsReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[90] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("setPermissions");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "aces"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://rpc.client.repository.edu_sharing.org", "ACE"), org.edu_sharing.repository.client.rpc.ACE[].class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[91] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("copyNode");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "toNodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "copyChildren"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"), boolean.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[92] = oper;
@@ -1793,12 +1793,66 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
 }
     }
 
-    public java.util.HashMap getChildren(java.lang.String parentID, java.lang.String type) throws java.rmi.RemoteException {
+    public void setOwner(java.lang.String nodeId, java.lang.String username) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
         _call.setOperation(_operations[9]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "setOwner"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, username});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        extractAttachments(_call);
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public void copyNode(java.lang.String nodeId, java.lang.String toNodeId, boolean copyChildren) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[10]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "copyNode"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, toNodeId, new java.lang.Boolean(copyChildren)});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        extractAttachments(_call);
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.util.HashMap getChildren(java.lang.String parentID, java.lang.String type) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[11]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -1832,7 +1886,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[10]);
+        _call.setOperation(_operations[12]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -1861,75 +1915,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
 }
     }
 
-    public java.util.HashMap getPropertiesExt(java.lang.String storeProtocol, java.lang.String storeId, java.lang.String nodeId) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[11]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesExt"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {storeProtocol, storeId, nodeId});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (java.util.HashMap) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (java.util.HashMap) org.apache.axis.utils.JavaUtils.convert(_resp, java.util.HashMap.class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public boolean hasPermissionsSimple(java.lang.String nodeId, java.lang.String[] permissions) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[12]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasPermissionsSimple"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, permissions});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return ((java.lang.Boolean) _resp).booleanValue();
-            } catch (java.lang.Exception _exception) {
-                return ((java.lang.Boolean) org.apache.axis.utils.JavaUtils.convert(_resp, boolean.class)).booleanValue();
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public void updateNode(java.lang.String nodeId, java.util.HashMap properties) throws java.rmi.RemoteException {
+    public void setPermissions(java.lang.String nodeId, org.edu_sharing.repository.client.rpc.ACE[] aces) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -1941,11 +1927,11 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "updateNode"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "setPermissions"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, properties});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, aces});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -1956,7 +1942,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
 }
     }
 
-    public java.lang.String getCompanyHomeNodeId() throws java.rmi.RemoteException {
+    public org.edu_sharing.webservices.alfresco.extension.SearchResult searchSolr(java.lang.String query, int startIdx, int nrOfresults, java.lang.String[] facettes, int facettesMinCount, int facettesLimit) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -1968,412 +1954,11 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getCompanyHomeNodeId"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchSolr"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (java.lang.String) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (java.lang.String) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.String.class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public java.util.HashMap getPropertiesSimple(java.lang.String nodeId) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[15]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesSimple"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (java.util.HashMap) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (java.util.HashMap) org.apache.axis.utils.JavaUtils.convert(_resp, java.util.HashMap.class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public java.lang.String[] searchNodeIds(java.lang.String store, java.lang.String luceneQuery, java.lang.String permission) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[16]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchNodeIds"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {store, luceneQuery, permission});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (java.lang.String[]) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (java.lang.String[]) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.String[].class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public org.edu_sharing.webservices.alfresco.extension.RepositoryNode[] searchNodes(java.lang.String store, java.lang.String luceneQuery, java.lang.String permission, java.lang.String[] propertiesToReturn) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[17]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchNodes"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {store, luceneQuery, permission, propertiesToReturn});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (org.edu_sharing.webservices.alfresco.extension.RepositoryNode[]) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (org.edu_sharing.webservices.alfresco.extension.RepositoryNode[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.alfresco.extension.RepositoryNode[].class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public java.lang.String validateTicket(java.lang.String ticket) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[18]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "validateTicket"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {ticket});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (java.lang.String) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (java.lang.String) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.String.class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public org.edu_sharing.webservices.alfresco.extension.RepositoryNode[] getVersionHistory(java.lang.String nodeId) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[19]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getVersionHistory"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (org.edu_sharing.webservices.alfresco.extension.RepositoryNode[]) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (org.edu_sharing.webservices.alfresco.extension.RepositoryNode[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.alfresco.extension.RepositoryNode[].class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[20]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPreviewUrl"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {storeProtocol, storeIdentifier, nodeId});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (org.edu_sharing.repository.client.rpc.GetPreviewResult) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (org.edu_sharing.repository.client.rpc.GetPreviewResult) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.repository.client.rpc.GetPreviewResult.class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public void createShare(java.lang.String nodeId, java.lang.String[] emails, long expiryDate) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[21]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "createShare"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, emails, new java.lang.Long(expiryDate)});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        extractAttachments(_call);
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public org.edu_sharing.repository.client.rpc.Share[] getShares(java.lang.String nodeId) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[22]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getShares"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (org.edu_sharing.repository.client.rpc.Share[]) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (org.edu_sharing.repository.client.rpc.Share[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.repository.client.rpc.Share[].class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public boolean isOwner(java.lang.String nodeId, java.lang.String user) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[23]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "isOwner"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, user});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return ((java.lang.Boolean) _resp).booleanValue();
-            } catch (java.lang.Exception _exception) {
-                return ((java.lang.Boolean) org.apache.axis.utils.JavaUtils.convert(_resp, boolean.class)).booleanValue();
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public java.lang.String[] getMetadataSets() throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[24]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getMetadataSets"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (java.lang.String[]) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (java.lang.String[]) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.String[].class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public org.edu_sharing.webservices.alfresco.extension.SearchResult findGroups(java.lang.String searchWord, java.lang.String eduGroupNodeId, int from, int nrOfResults) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[25]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "findGroups"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {searchWord, eduGroupNodeId, new java.lang.Integer(from), new java.lang.Integer(nrOfResults)});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        else {
-            extractAttachments(_call);
-            try {
-                return (org.edu_sharing.webservices.alfresco.extension.SearchResult) _resp;
-            } catch (java.lang.Exception _exception) {
-                return (org.edu_sharing.webservices.alfresco.extension.SearchResult) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.alfresco.extension.SearchResult.class);
-            }
-        }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public org.edu_sharing.webservices.alfresco.extension.SearchResult findUsers(org.edu_sharing.webservices.alfresco.extension.KeyValue[] searchProps, java.lang.String eduGroupNodeId, int from, int nrOfResults) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[26]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "findUsers"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {searchProps, eduGroupNodeId, new java.lang.Integer(from), new java.lang.Integer(nrOfResults)});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {query, new java.lang.Integer(startIdx), new java.lang.Integer(nrOfresults), facettes, new java.lang.Integer(facettesMinCount), new java.lang.Integer(facettesLimit)});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -2396,7 +1981,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[27]);
+        _call.setOperation(_operations[15]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2430,7 +2015,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[28]);
+        _call.setOperation(_operations[16]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2464,7 +2049,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[29]);
+        _call.setOperation(_operations[17]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2498,7 +2083,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[30]);
+        _call.setOperation(_operations[18]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2525,7 +2110,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[31]);
+        _call.setOperation(_operations[19]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2554,12 +2139,46 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
 }
     }
 
+    public java.util.HashMap getPropertiesExt(java.lang.String storeProtocol, java.lang.String storeId, java.lang.String nodeId) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[20]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesExt"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {storeProtocol, storeId, nodeId});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.util.HashMap) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.util.HashMap) org.apache.axis.utils.JavaUtils.convert(_resp, java.util.HashMap.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
     public java.util.HashMap hasPermissions(java.lang.String userId, java.lang.String[] permissions, java.lang.String nodeId) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[32]);
+        _call.setOperation(_operations[21]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2588,7 +2207,367 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
 }
     }
 
-    public org.edu_sharing.webservices.alfresco.extension.SearchResult searchSolr(java.lang.String query, int startIdx, int nrOfresults, java.lang.String[] facettes, int facettesMinCount, int facettesLimit) throws java.rmi.RemoteException {
+    public boolean hasPermissionsSimple(java.lang.String nodeId, java.lang.String[] permissions) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[22]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "hasPermissionsSimple"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, permissions});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return ((java.lang.Boolean) _resp).booleanValue();
+            } catch (java.lang.Exception _exception) {
+                return ((java.lang.Boolean) org.apache.axis.utils.JavaUtils.convert(_resp, boolean.class)).booleanValue();
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public void updateNode(java.lang.String nodeId, java.util.HashMap properties) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[23]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "updateNode"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, properties});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        extractAttachments(_call);
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.lang.String getCompanyHomeNodeId() throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[24]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getCompanyHomeNodeId"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.lang.String) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.lang.String) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.String.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.util.HashMap getPropertiesSimple(java.lang.String nodeId) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[25]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesSimple"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.util.HashMap) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.util.HashMap) org.apache.axis.utils.JavaUtils.convert(_resp, java.util.HashMap.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.lang.String[] searchNodeIds(java.lang.String store, java.lang.String luceneQuery, java.lang.String permission) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[26]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchNodeIds"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {store, luceneQuery, permission});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.lang.String[]) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.lang.String[]) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.String[].class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public org.edu_sharing.webservices.alfresco.extension.RepositoryNode[] searchNodes(java.lang.String store, java.lang.String luceneQuery, java.lang.String permission, java.lang.String[] propertiesToReturn) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[27]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchNodes"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {store, luceneQuery, permission, propertiesToReturn});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (org.edu_sharing.webservices.alfresco.extension.RepositoryNode[]) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (org.edu_sharing.webservices.alfresco.extension.RepositoryNode[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.alfresco.extension.RepositoryNode[].class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.lang.String validateTicket(java.lang.String ticket) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[28]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "validateTicket"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {ticket});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.lang.String) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.lang.String) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.String.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public org.edu_sharing.webservices.alfresco.extension.RepositoryNode[] getVersionHistory(java.lang.String nodeId) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[29]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getVersionHistory"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (org.edu_sharing.webservices.alfresco.extension.RepositoryNode[]) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (org.edu_sharing.webservices.alfresco.extension.RepositoryNode[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.alfresco.extension.RepositoryNode[].class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[30]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPreviewUrl"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {storeProtocol, storeIdentifier, nodeId});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (org.edu_sharing.repository.client.rpc.GetPreviewResult) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (org.edu_sharing.repository.client.rpc.GetPreviewResult) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.repository.client.rpc.GetPreviewResult.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public void createShare(java.lang.String nodeId, java.lang.String[] emails, long expiryDate) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[31]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "createShare"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, emails, new java.lang.Long(expiryDate)});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        extractAttachments(_call);
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public org.edu_sharing.repository.client.rpc.Share[] getShares(java.lang.String nodeId) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[32]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getShares"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (org.edu_sharing.repository.client.rpc.Share[]) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (org.edu_sharing.repository.client.rpc.Share[]) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.repository.client.rpc.Share[].class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public boolean isOwner(java.lang.String nodeId, java.lang.String user) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -2600,11 +2579,113 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "searchSolr"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "isOwner"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {query, new java.lang.Integer(startIdx), new java.lang.Integer(nrOfresults), facettes, new java.lang.Integer(facettesMinCount), new java.lang.Integer(facettesLimit)});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, user});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return ((java.lang.Boolean) _resp).booleanValue();
+            } catch (java.lang.Exception _exception) {
+                return ((java.lang.Boolean) org.apache.axis.utils.JavaUtils.convert(_resp, boolean.class)).booleanValue();
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.lang.String[] getMetadataSets() throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[34]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getMetadataSets"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.lang.String[]) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.lang.String[]) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.String[].class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public org.edu_sharing.webservices.alfresco.extension.SearchResult findGroups(java.lang.String searchWord, java.lang.String eduGroupNodeId, int from, int nrOfResults) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[35]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "findGroups"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {searchWord, eduGroupNodeId, new java.lang.Integer(from), new java.lang.Integer(nrOfResults)});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (org.edu_sharing.webservices.alfresco.extension.SearchResult) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (org.edu_sharing.webservices.alfresco.extension.SearchResult) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.alfresco.extension.SearchResult.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public org.edu_sharing.webservices.alfresco.extension.SearchResult findUsers(org.edu_sharing.webservices.alfresco.extension.KeyValue[] searchProps, java.lang.String eduGroupNodeId, int from, int nrOfResults) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[36]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "findUsers"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {searchProps, eduGroupNodeId, new java.lang.Integer(from), new java.lang.Integer(nrOfResults)});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -2627,7 +2708,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[34]);
+        _call.setOperation(_operations[37]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2661,7 +2742,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[35]);
+        _call.setOperation(_operations[38]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2690,39 +2771,12 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
 }
     }
 
-    public void setOwner(java.lang.String nodeId, java.lang.String username) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[36]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "setOwner"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, username});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        extractAttachments(_call);
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
     public void setUserDefinedPreview(java.lang.String nodeId, byte[] content, java.lang.String fileName) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[37]);
+        _call.setOperation(_operations[39]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2749,7 +2803,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[38]);
+        _call.setOperation(_operations[40]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2776,7 +2830,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[39]);
+        _call.setOperation(_operations[41]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2810,7 +2864,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[40]);
+        _call.setOperation(_operations[42]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2844,7 +2898,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[41]);
+        _call.setOperation(_operations[43]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2871,7 +2925,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[42]);
+        _call.setOperation(_operations[44]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2898,7 +2952,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[43]);
+        _call.setOperation(_operations[45]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2932,7 +2986,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[44]);
+        _call.setOperation(_operations[46]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2959,7 +3013,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[45]);
+        _call.setOperation(_operations[47]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -2986,7 +3040,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[46]);
+        _call.setOperation(_operations[48]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3020,7 +3074,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[47]);
+        _call.setOperation(_operations[49]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3054,7 +3108,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[48]);
+        _call.setOperation(_operations[50]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3088,7 +3142,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[49]);
+        _call.setOperation(_operations[51]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3115,7 +3169,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[50]);
+        _call.setOperation(_operations[52]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3142,7 +3196,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[51]);
+        _call.setOperation(_operations[53]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3169,7 +3223,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[52]);
+        _call.setOperation(_operations[54]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3196,7 +3250,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[53]);
+        _call.setOperation(_operations[55]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3223,7 +3277,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[54]);
+        _call.setOperation(_operations[56]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3250,7 +3304,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[55]);
+        _call.setOperation(_operations[57]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3277,7 +3331,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[56]);
+        _call.setOperation(_operations[58]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3304,7 +3358,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[57]);
+        _call.setOperation(_operations[59]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3331,7 +3385,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[58]);
+        _call.setOperation(_operations[60]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3358,7 +3412,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[59]);
+        _call.setOperation(_operations[61]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3385,7 +3439,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[60]);
+        _call.setOperation(_operations[62]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3412,7 +3466,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[61]);
+        _call.setOperation(_operations[63]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3446,7 +3500,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[62]);
+        _call.setOperation(_operations[64]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3480,7 +3534,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[63]);
+        _call.setOperation(_operations[65]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3514,7 +3568,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[64]);
+        _call.setOperation(_operations[66]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3548,7 +3602,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[65]);
+        _call.setOperation(_operations[67]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3582,7 +3636,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[66]);
+        _call.setOperation(_operations[68]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3616,7 +3670,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[67]);
+        _call.setOperation(_operations[69]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3650,7 +3704,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[68]);
+        _call.setOperation(_operations[70]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3684,7 +3738,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[69]);
+        _call.setOperation(_operations[71]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3718,7 +3772,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[70]);
+        _call.setOperation(_operations[72]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3752,7 +3806,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[71]);
+        _call.setOperation(_operations[73]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3786,7 +3840,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[72]);
+        _call.setOperation(_operations[74]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3820,7 +3874,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[73]);
+        _call.setOperation(_operations[75]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3847,7 +3901,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[74]);
+        _call.setOperation(_operations[76]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3874,7 +3928,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[75]);
+        _call.setOperation(_operations[77]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3908,7 +3962,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[76]);
+        _call.setOperation(_operations[78]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3942,7 +3996,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[77]);
+        _call.setOperation(_operations[79]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -3976,7 +4030,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[78]);
+        _call.setOperation(_operations[80]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4003,7 +4057,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[79]);
+        _call.setOperation(_operations[81]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4037,7 +4091,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[80]);
+        _call.setOperation(_operations[82]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4064,7 +4118,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[81]);
+        _call.setOperation(_operations[83]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4091,7 +4145,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[82]);
+        _call.setOperation(_operations[84]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4118,7 +4172,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[83]);
+        _call.setOperation(_operations[85]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4152,7 +4206,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[84]);
+        _call.setOperation(_operations[86]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4186,7 +4240,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[85]);
+        _call.setOperation(_operations[87]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4213,7 +4267,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[86]);
+        _call.setOperation(_operations[88]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4240,7 +4294,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[87]);
+        _call.setOperation(_operations[89]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4267,7 +4321,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[88]);
+        _call.setOperation(_operations[90]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4294,7 +4348,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[89]);
+        _call.setOperation(_operations[91]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4328,7 +4382,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[90]);
+        _call.setOperation(_operations[92]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("");
         _call.setEncodingStyle(null);
@@ -4352,60 +4406,6 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
                 return (java.lang.String[]) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.String[].class);
             }
         }
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public void setPermissions(java.lang.String nodeId, org.edu_sharing.repository.client.rpc.ACE[] aces) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[91]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "setPermissions"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, aces});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        extractAttachments(_call);
-  } catch (org.apache.axis.AxisFault axisFaultException) {
-  throw axisFaultException;
-}
-    }
-
-    public void copyNode(java.lang.String nodeId, java.lang.String toNodeId, boolean copyChildren) throws java.rmi.RemoteException {
-        if (super.cachedEndpoint == null) {
-            throw new org.apache.axis.NoEndPointException();
-        }
-        org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[92]);
-        _call.setUseSOAPAction(true);
-        _call.setSOAPActionURI("");
-        _call.setEncodingStyle(null);
-        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
-        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
-        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "copyNode"));
-
-        setRequestHeaders(_call);
-        setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {nodeId, toNodeId, new java.lang.Boolean(copyChildren)});
-
-        if (_resp instanceof java.rmi.RemoteException) {
-            throw (java.rmi.RemoteException)_resp;
-        }
-        extractAttachments(_call);
   } catch (org.apache.axis.AxisFault axisFaultException) {
   throw axisFaultException;
 }

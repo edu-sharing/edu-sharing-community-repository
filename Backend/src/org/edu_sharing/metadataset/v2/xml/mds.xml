@@ -61,6 +61,70 @@
 				<hideIfEmpty>true</hideIfEmpty>
 			</widget>
 			<widget>
+				<id>ccm:tool_category</id>
+				<type>singleoption</type>
+				<caption>cb_tool_category</caption>
+				<valuespace>valuespaces.xml</valuespace>
+				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
+				<valuespace_i18n_prefix>tool_category_</valuespace_i18n_prefix>
+			</widget>
+			<widget>
+				<id>ccm:tool_producer</id>
+				<type>text</type>
+				<caption>cb_tool_producer</caption>
+				<placeholder>cb_tool_producer_placeholder</placeholder>
+			</widget>
+			<widget>
+				<id>ccm:tool_instance_key</id>
+				<type>text</type>
+				<caption>cb_tool_instance_key</caption>
+			</widget>
+			<widget>
+				<id>ccm:tool_instance_secret</id>
+				<type>text</type>
+				<caption>cb_tool_instance_secret</caption>
+			</widget>
+			<widget>
+				<id>ccm:tool_instance_params</id>
+				<type>textarea</type>
+				<caption>cb_tool_instance_params</caption>
+			</widget>
+			<widget>
+				<id>ccm:tool_instance_license</id>
+				<type>text</type>
+				<caption>cb_tool_instance_license</caption>
+			</widget>
+			<widget>
+				<id>ccm:tool_instance_support_contact</id>
+				<type>text</type>
+				<caption>cb_tool_instance_support_contact</caption>
+			</widget>
+			<widget>
+				<id>ccm:tool_instance_support_mail</id>
+				<type>email</type>
+				<caption>cb_tool_instance_support_mail</caption>
+			</widget>
+			<widget>
+				<id>ccm:tool_instance_provider</id>
+				<type>text</type>
+				<required>true</required>
+				<caption>cb_tool_instance_provider</caption>
+			</widget>
+			<widget>
+				<id>ccm:tool_instance_provider_url</id>
+				<type>text</type>
+				<required>true</required>
+				<caption>cb_tool_instance_provider_url</caption>
+			</widget>
+			<widget>
+				<id>ccm:tool_instance_access</id>
+				<type>singleoption</type>
+				<caption>cb_tool_instance_access</caption>
+				<valuespace>valuespaces.xml</valuespace>
+				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
+				<valuespace_i18n_prefix>tool_access_</valuespace_i18n_prefix>
+			</widget>
+			<widget>
 				<id>ccm:lifecyclecontributer_author</id>
 				<caption>cb_contr_author</caption>
 				<type>vcard</type>
@@ -203,6 +267,26 @@
 				<caption>lom_prop_size</caption>
 				<type>filesize</type>
 			</widget>
+			<widget>
+				<id>ccm:educationaltypicalagerange</id>
+				<caption>lom_prop_educational_typicalagerange</caption>
+				<type>range</type>
+				<min>0</min>
+				<max>99</max>
+			</widget>
+			<widget>
+				<id>ccm:taxonid</id>
+				<caption>input_taxonentry</caption>
+				<type>multivalueTree</type>
+				<valuespace>eaf_discipline.xml</valuespace>
+			</widget>
+			<widget>
+				<id>ccm:educationalcontext</id>
+				<caption>school_context_type_of_school</caption>
+				<type>multivalueFixedBadges</type>
+				<valuespace>context.xml</valuespace>
+				<valuespace_i18n>valuespace_context_i18n</valuespace_i18n>
+			</widget>
 		</widgets>
 		<templates>
 			<template>
@@ -221,12 +305,76 @@
 				]]></html>
 			</template>
 			<template>
+				<id>saved_search_general</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <cm:name>
+              <cclom:title>
+				]]></html>
+			</template>
+			<template>
 				<id>node_map</id>
 				<caption>dialog_upload_tab_basic</caption>
 				<icon>description</icon>
 				<html><![CDATA[
 			  <preview>
               <cm:name>
+				]]></html>
+			</template>
+			<template>
+				<id>tool_definition</id>
+				<caption></caption>
+				<html><![CDATA[
+				<div style="width:40%;float:left;padding-right:30px;min-height:130px;">
+				  	<preview>
+		        </div>
+		        <div style="padding-top:40px;width:60%;float:left;font-weight:bold;">
+              		<cm:name caption="{{cm_toolname}}" placeholder="{{cm_toolname_placeholder}}" bottomCaption="" icon="build">
+              	</div>
+              	<div style="width:100%;float:left;">
+              		<cclom:general_description type="textarea" placeholder="{{lom_prop_tool_description_placeholder}}">
+              		<div class="row">
+	              		<div class="col s6"><ccm:tool_category></div>
+	              		<div class="col s6"><ccm:tool_producer></div>
+              		</div>             
+				]]></html>
+			</template>
+			<template>
+				<id>tool_instance_general</id>
+				<caption>dialog_upload_tab_tool_instance_general</caption>
+				<icon>build</icon>
+				<html><![CDATA[
+				<cm:name caption="{{cm_toolinstancename}}" placeholder="{{cm_toolinstancename_placeholder}}" icon="" bottomCaption="">
+				<div class="row">
+					<div class="col s6"><ccm:tool_instance_key></div>
+					<div class="col s6"><ccm:tool_instance_secret></div>
+				</div>				
+				]]></html>
+			</template>
+			<template>
+				<id>tool_instance_provider</id>
+				<caption>dialog_upload_tab_tool_instance_provider</caption>
+				<icon>group</icon>
+				<html><![CDATA[
+				<div class="row">
+					<div class="col s6"><ccm:tool_instance_provider></div>
+					<div class="col s6"><ccm:tool_instance_provider_url></div>
+				</div>
+				<div class="row">
+					<div class="col s6"><ccm:tool_instance_provider_support_contact></div>
+					<div class="col s6"><ccm:tool_instance_provider_support_mail></div>
+				</div>
+				]]></html>
+			</template>
+			<template>
+				<id>tool_instance_extended</id>
+				<caption>dialog_upload_tab_tool_instance_extended</caption>
+				<icon>extension</icon>
+				<html><![CDATA[
+					<ccm:tool_instance_license>
+					<ccm:tool_instance_access>
+					<ccm:tool_instance_params>
 				]]></html>
 			</template>
 			<template>
@@ -264,8 +412,8 @@
 				<caption>dialog_upload_tab_contributers</caption>
 				<html><![CDATA[
 				<div class="mdsContributorGroup mdsWidgetCaption">
-					<div class="mdsLifecyclecontributorsTitle mdsContributorTitle">{{ cb_contr_material }}</div>
-					<div class="mdsLifecyclecontributors">
+					<div id="mdsLifecyclecontributorsTitle" class="mdsContributorTitle">{{ cb_contr_material }}</div>
+					<div id="mdsLifecyclecontributors">
 	               		<ccm:lifecyclecontributer_author>
 	               		<ccm:lifecyclecontributer_publisher>
 	               		<ccm:lifecyclecontributer_unknown>
@@ -281,8 +429,8 @@
 	               		<ccm:lifecyclecontributer_instructional_designer>
 	               		<ccm:lifecyclecontributer_subject_matter_expert>
                		</div>
-               		<div class="mdsMetadatcontributorsTitle mdsContributorTitle">{{ cb_contr_metadata }}</div>
-               		<div class="mdsMetadatcontributors">
+               		<div id="mdsMetadatcontributorsTitle" class="mdsContributorTitle">{{ cb_contr_metadata }}</div>
+               		<div id="mdsMetadatcontributors">
 	               		<ccm:metadatacontributer_creator>
 	               		<ccm:metadatacontributer_validator>
 	               		<ccm:metadatacontributer_provider>
@@ -290,24 +438,23 @@
                	</div>
                	<script>
                		function hideIfEmpty(toHide,isEmpty){
-               			for(var i=0;i<toHide.length;i++){
-               				if(isEmpty[i].innerHTML.trim()==""){
-               					toHide[i].style.display='none';
-               				}
+               			if(isEmpty.innerHTML.trim()==""){
+               				toHide.style.display='none';
                			}
                		}
-               		var lifecycle=document.getElementsByClassName("mdsLifecyclecontributors");
-               		var metadata=document.getElementsByClassName("mdsMetadatcontributors");
-               		
-               		var group=document.getElementsByClassName("node_contributor_render");
-               		hideIfEmpty(document.getElementsByClassName("mdsLifecyclecontributorsTitle"),lifecycle);
-               		hideIfEmpty(document.getElementsByClassName("mdsMetadatcontributorsTitle"),metadata);
-               		for(var i=0;i<lifecycle.length;i++){
-               			if(lifecycle[i].innerHTML.trim()+metadata[i].innerHTML.trim()==""){
-               				group[i].style.display='none';
-               			}
-               		}
+               		hideIfEmpty(document.getElementById("mdsLifecyclecontributorsTitle"),document.getElementById("mdsLifecyclecontributors"));
+               		hideIfEmpty(document.getElementById("mdsMetadatcontributorsTitle"),document.getElementById("mdsMetadatcontributors"));
                	</script>
+				]]></html>
+			</template>
+			<template>
+				<id>collection_editorial</id>
+				<caption>collection_editorial</caption>
+				<html><![CDATA[
+					<ccm:educationaltypicalagerange>
+					<ccm:taxonid>
+					<ccm:educationalcontext>
+					<cclom:general_keyword>
 				]]></html>
 			</template>
 		</templates>
@@ -316,6 +463,32 @@
 				<id>io</id>
 				<views>
 					<view>node_general</view>
+				</views>
+			</group>
+			<group>
+				<id>collection_editorial</id>
+				<views>
+					<view>collection_editorial</view>
+				</views>
+			</group>
+			<group>
+				<id>saved_search</id>
+				<views>
+					<view>saved_search_general</view>
+				</views>
+			</group>
+			<group>
+				<id>tool_definition</id>
+				<views>
+					<view>tool_definition</view>
+				</views>
+			</group>
+			<group>
+				<id>tool_instance</id>
+				<views>
+					<view>tool_instance_general</view>
+					<view>tool_instance_provider</view>
+					<view>tool_instance_extended</view>
 				</views>
 			</group>
 			<group>
@@ -339,22 +512,12 @@
 				</views>
 			</group>
 		</groups>
-		<lists>
-			<list>
-				<id>search</id>
-				<columns>
-					<column>cm:title</column>
-					<column>cm:modified</column>
-					<column>ccm:commonlicense_key</column>
-					<column>ccm:replicationsource</column>
-				</columns>
-			</list>
-		</lists>
 		<queries>
 			<basequery>-TYPE:"ccm:toolpermission" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 			
 			<query join="AND"  id="ngsearch">
+				<basequery>ISNULL:@ccm\:tool_category</basequery>
 				<property name="ngsearchword">
 					<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 					<multiple>true</multiple>
@@ -369,13 +532,32 @@
 				<property name="ccm:classification_purpose" />
 				<property name="ccm:commonlicense_key" />
 				<property name="ccm:educationallearningresourcetype" />
-			</query>
-			<query join="AND"  id="workspace">
-				<property name="ngsearchword">
-					<statement>NOT ASPECT:"ccm:collection_io_reference" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				<property name="license">
+					<statement>@ccm\:commonlicense_key:"${value}*"</statement>
 					<multiple>true</multiple>
-					<multiplejoin>AND</multiplejoin>
+					<multiplejoin>OR</multiplejoin>
 				</property>
 			</query>
+			<query join="AND" id="saved_search" applyBasequery="false">
+				<basequery>TYPE:"ccm:saved_search"</basequery>
+				<property name="ngsearchword">
+					<statement>(@cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
+				</property>
+			</query>
+			<query join="AND"  id="tools">
+				<basequery>ASPECT:"{http://www.campuscontent.de/model/1.0}tool_definition"</basequery>
+				<property name="toolname">
+					<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
+				</property>	
+			</query>
+			<query join="AND"  id="workspace">
+		   		<property name="ngsearchword">
+				    <statement>NOT ASPECT:"ccm:collection_io_reference" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				    <multiple>true</multiple>
+				    <multiplejoin>AND</multiplejoin>
+			    </property>
+		   </query>
 		</queries>
 </metadataset>

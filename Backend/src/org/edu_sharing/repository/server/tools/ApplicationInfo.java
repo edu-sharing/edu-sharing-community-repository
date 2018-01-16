@@ -37,7 +37,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-public class ApplicationInfo {
+public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	
 	/**
@@ -74,6 +74,8 @@ public class ApplicationInfo {
 	
 	public static final String KEY_LOGO = "logo";
 	
+	public static final String KEY_ICON = "icon";
+	
 	public static final String KEY_AUTHENTICATIONWEBSERVICE = "authenticationwebservice";
 	
 	public static final String KEY_WEBAPPNAME = "webappname";
@@ -108,6 +110,8 @@ public class ApplicationInfo {
 	public static final String KEY_LOGOUT_URL = "logouturl";
 	
 	public static final String KEY_API_KEY = "apikey";
+	
+	public static final String KEY_ORDER = "order";
 	/**
 	 * property file vals
 	 */
@@ -177,6 +181,8 @@ public class ApplicationInfo {
 	
 	private String logo = null;
 	
+	private String icon = null;
+
 	private String guest_username = null;
 	
 	private String guest_password = null;
@@ -294,6 +300,8 @@ public class ApplicationInfo {
 	
 	private String apiKey;
 	
+	private int order;
+
 	Logger logger = Logger.getLogger(ApplicationInfo.class);
 
 	private String xml;
@@ -352,6 +360,8 @@ public class ApplicationInfo {
 		
 		logo = PropertiesHelper.getProperty(KEY_LOGO, appFile, PropertiesHelper.XML);
 		
+		icon = PropertiesHelper.getProperty(KEY_ICON, appFile, PropertiesHelper.XML);
+
 		appCaption = PropertiesHelper.getProperty(KEY_APPCAPTION, appFile, PropertiesHelper.XML);
 		
 		appId = PropertiesHelper.getProperty(KEY_APPID, appFile, PropertiesHelper.XML);
@@ -446,6 +456,9 @@ public class ApplicationInfo {
 
 		websitepreviewrenderservice = PropertiesHelper.getProperty(WEBSITEPREVIEWRENDERSERVICE, appFile, PropertiesHelper.XML);
 
+		String orderString = PropertiesHelper.getProperty(KEY_ORDER, appFile, PropertiesHelper.XML);
+		order = orderString==null ? (ishomeNode() ? 0 : 1) : Integer.parseInt(orderString);
+
 		getWebServiceUrl();
 		getWebServerUrl();
 		
@@ -453,6 +466,10 @@ public class ApplicationInfo {
 	
 	public String getXml() {
 		return xml;
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 	public void setXml(String xml) {
@@ -897,11 +914,20 @@ public class ApplicationInfo {
 		return logo;
 	}
 	
+	public String getIcon() {
+		return icon;
+	}
+
 	public String getApiKey() {
 		return apiKey;
 	}
-
+	
 	public String getWebsitepreviewrenderservice() {
 		return websitepreviewrenderservice;
 	}	
+	
+	@Override
+	public int compareTo(ApplicationInfo o) {
+		return Integer.compare(getOrder(), o.getOrder());
+	}
 }

@@ -211,6 +211,11 @@ public class FolderTemplatesImpl implements FolderTemplates {
 				this.templatePropertiesFile = (String) tl.get(CCConstants.SYS_PROP_NODE_UID);
 			}
 		}
+		if(fileNodeId.isEmpty()){
+			logger.fatal("Template "+templateName+" not found");
+			loggingErrorHandler.getMessage().add("Template "+templateName+" not found");
+			return;
+		}
 		if (filename.isEmpty()) {
 			logger.fatal("no Templates found");
 			loggingErrorHandler.getMessage().add("no Templates  found");

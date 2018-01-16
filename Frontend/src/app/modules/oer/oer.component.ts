@@ -11,8 +11,7 @@ import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {Node, NodeList, LoginResult} from "../../common/rest/data-object";
-import {OptionItem} from "../../common/ui/actionbar/actionbar.component";
-import {NodeRenderComponent} from "../../common/ui/node-render/node-render.component";
+import {OptionItem} from "../../common/ui/actionbar/option-item";
 import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {Title} from "@angular/platform-browser";
@@ -22,6 +21,7 @@ import {UIConstants} from "../../common/ui/ui-constants";
 import {RestMdsService} from "../../common/rest/services/rest-mds.service";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {ListItem} from "../../common/ui/list-item";
+import {MdsHelper} from "../../common/rest/mds-helper";
 
 
 
@@ -75,7 +75,7 @@ export class OerComponent {
     this.columns[this.COLLECTIONS].push(new ListItem("NODE",RestConstants.CM_NAME));
     this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'info'));
     this.mdsService.getSet().subscribe((mds:any)=>{
-      this.columns[this.MATERIALS]=RestHelper.getColumns(mds,'search');
+      this.columns[this.MATERIALS]=MdsHelper.getColumns(mds,'search');
     });
     /*
     this.config.get("searchColumns").subscribe((data:any)=>{

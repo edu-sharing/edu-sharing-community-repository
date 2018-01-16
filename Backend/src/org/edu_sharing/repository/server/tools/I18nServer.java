@@ -99,12 +99,15 @@ public class I18nServer {
 		if(permViewMapper == null){
 			permViewMapper = new HashMap<String,String>();
 			permViewMapper.put(CCConstants.PERMISSION_READ, "dialog_inviteusers_perm_read");
+			permViewMapper.put(CCConstants.PERMISSION_READ_PREVIEW, "dialog_inviteusers_perm_readpreview");
+			permViewMapper.put(CCConstants.PERMISSION_READ_ALL, "dialog_inviteusers_perm_readall");
 			permViewMapper.put(CCConstants.PERMISSION_WRITE, "dialog_inviteusers_perm_write");
 			permViewMapper.put(CCConstants.PERMISSION_DELETE, "dialog_inviteusers_perm_delete");
 			permViewMapper.put(CCConstants.PERMISSION_DELETE_CHILDREN, "dialog_inviteusers_perm_deletechildren");
 			permViewMapper.put(CCConstants.PERMISSION_DELETE_NODE, "dialog_inviteusers_perm_deletenode");
 			permViewMapper.put(CCConstants.PERMISSION_ADD_CHILDREN, "dialog_inviteusers_perm_addchildren");
 			permViewMapper.put(CCConstants.PERMISSION_CONSUMER, "dialog_inviteusers_perm_consumer");
+			permViewMapper.put(CCConstants.PERMISSION_CONSUMER_METADATA, "dialog_inviteusers_perm_consumermetadata");
 			permViewMapper.put(CCConstants.PERMISSION_EDITOR, "dialog_inviteusers_perm_editor");
 			permViewMapper.put(CCConstants.PERMISSION_CONTRIBUTER, "dialog_inviteusers_perm_contributer");
 			permViewMapper.put(CCConstants.PERMISSION_COORDINATOR, "dialog_inviteusers_perm_coordinator");
@@ -123,12 +126,15 @@ public class I18nServer {
 		if(permDescriptionMapper == null){
 			permDescriptionMapper = new HashMap<String,String>();
 			permDescriptionMapper.put(CCConstants.PERMISSION_READ, "dialog_inviteusers_perm_desc_read");
+			permDescriptionMapper.put(CCConstants.PERMISSION_READ_PREVIEW, "dialog_inviteusers_perm_desc_readpreview");
+			permDescriptionMapper.put(CCConstants.PERMISSION_READ_ALL, "dialog_inviteusers_perm_desc_readall");
 			permDescriptionMapper.put(CCConstants.PERMISSION_WRITE, "dialog_inviteusers_perm_desc_write");
 			permDescriptionMapper.put(CCConstants.PERMISSION_DELETE, "dialog_inviteusers_perm_desc_delete");
 			permDescriptionMapper.put(CCConstants.PERMISSION_DELETE_CHILDREN, "dialog_inviteusers_perm_desc_deletechildren");
 			permDescriptionMapper.put(CCConstants.PERMISSION_DELETE_NODE, "dialog_inviteusers_perm_desc_deletenode");
 			permDescriptionMapper.put(CCConstants.PERMISSION_ADD_CHILDREN, "dialog_inviteusers_perm_desc_addchildren");
 			permDescriptionMapper.put(CCConstants.PERMISSION_CONSUMER, "dialog_inviteusers_perm_desc_consumer");
+			permDescriptionMapper.put(CCConstants.PERMISSION_CONSUMER_METADATA, "dialog_inviteusers_perm_desc_consumermetadata");
 			permDescriptionMapper.put(CCConstants.PERMISSION_EDITOR, "dialog_inviteusers_perm_desc_editor");
 			permDescriptionMapper.put(CCConstants.PERMISSION_CONTRIBUTER, "dialog_inviteusers_perm_desc_contributer");
 			permDescriptionMapper.put(CCConstants.PERMISSION_COORDINATOR, "dialog_inviteusers_perm_desc_coordinator");

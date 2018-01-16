@@ -8,5 +8,7 @@
   "searchColumns":[],
   "hideMainMenu":[],
   "branding":true,
-  "editProfile":true
+  "editProfile":true,
+  "nodeReport":true
 }
+

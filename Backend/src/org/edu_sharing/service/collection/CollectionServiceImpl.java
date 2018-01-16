@@ -1,5 +1,7 @@
 package org.edu_sharing.service.collection;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -17,9 +21,12 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
@@ -32,15 +39,25 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.I18nServer;
+import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.NodeTool;
+import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
+import org.edu_sharing.restservices.CollectionDao;
+import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
+import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.SearchService.ContentType;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -72,6 +89,7 @@ public class CollectionServiceImpl implements CollectionService{
 	HashMap<String,String> authInfo;
 	
 	SearchService searchService;
+	NodeService nodeService;
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 
@@ -104,6 +122,7 @@ public class CollectionServiceImpl implements CollectionService{
 				logger.warn(e.getMessage());
 			}
 			this.searchService = SearchServiceFactory.getSearchService(appId);
+			this.nodeService = NodeServiceFactory.getNodeService(appId);
 			this.pattern = pattern;
 			this.path = path;
 			this.toolPermissionService = ToolPermissionServiceFactory.getInstance();
@@ -457,7 +476,7 @@ public class CollectionServiceImpl implements CollectionService{
 			props.put(CCConstants.SYS_PROP_NODE_UID, collection.getNodeId());
 		}
 		props.put(CCConstants.CM_PROP_TITLE, collection.getTitle());
-		props.put(CCConstants.CM_NAME, collection.getTitle());
+		props.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName(collection.getTitle()));
 		props.put(CCConstants.CM_PROP_DESCRIPTION, collection.getDescription());
 		props.put(CCConstants.CCM_PROP_MAP_X, collection.getX());
 		props.put(CCConstants.CCM_PROP_MAP_Y, collection.getY());
@@ -491,6 +510,9 @@ public class CollectionServiceImpl implements CollectionService{
 		collection.setType((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE));
 		collection.setViewtype((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONVIEWTYPE));		
 		collection.setScope((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE));		
+		collection.setOrderMode((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTION_ORDER_MODE));		
+		if(props.containsKey(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS))
+			collection.setPinned(new Boolean((String)props.get(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS)));
 		
 		return collection;
 	}
@@ -499,10 +521,7 @@ public class CollectionServiceImpl implements CollectionService{
 	public Collection get(String storeId,String storeProtocol,String collectionId) {
 		try{
 			HashMap<String,Object> props = client.getProperties(storeProtocol,storeId,collectionId);
-			if(!Arrays.asList(client.getAspects(storeProtocol,storeId,collectionId)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
-				logger.warn("this node is no collection:"+collectionId);
-				throw new RuntimeException("this node is no collection");
-			}
+			throwIfNotACollection(storeProtocol,storeId,collectionId);
 			
 			Collection collection = asCollection(props);			
 			collection.setChildReferencesCount(client.getChildAssociationByType(storeProtocol,storeId,collectionId, CCConstants.CCM_TYPE_IO).size());
@@ -536,13 +555,32 @@ public class CollectionServiceImpl implements CollectionService{
 					return null;
 				}				
 			});
-				
+			detectAndSetCollectionScope(collectionId,collection);
 			return collection;
 			
 		} catch(Throwable e) {
 			logger.error(e.getMessage(),e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	private void detectAndSetCollectionScope(String collectionId,Collection collection) {
+		if(!CollectionDao.Scope.CUSTOM.name().equals(collection.getScope())){
+			return;
+		}
+		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+			@Override
+			public Void doWork() throws Exception {
+				ACL permissions = permissionService.getPermissions(collectionId);
+				for(ACE acl : permissions.getAces()){
+					if(acl.getAuthority().equals(CCConstants.AUTHORITY_GROUP_EVERYONE)){
+						collection.setScope(CollectionDao.Scope.CUSTOM_PUBLIC.name());
+						break;
+					}
+				}
+				return null;
+			}
+		});
 	}
 
 	@Override
@@ -557,16 +595,15 @@ public class CollectionServiceImpl implements CollectionService{
 				 */
 				String queryString = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION + "\"" + " AND @ccm\\:collectionlevel0:true";
 				boolean eduGroupScope = false;
-				if(Scope.EDU_GROUPS.name().equals(scope)){
+				if(SearchScope.EDU_GROUPS.name().equals(scope)){
 					eduGroupScope = true;
 				}
-				
-				if(Scope.MY.name().equals(scope)){
+				if(SearchScope.MY.name().equals(scope)){
 					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
 				}
-
 				HashMap<String,HashMap<String,Object>> returnVal = new HashMap<String,HashMap<String,Object>>();
-				for(Map.Entry<String, HashMap<String,Object>> entry : client.search(queryString,eduGroupScope).entrySet()){
+				Set<Entry<String, HashMap<String, Object>>> searchResult = client.search(queryString,eduGroupScope).entrySet();
+				for(Map.Entry<String, HashMap<String,Object>> entry : searchResult){
 					String parent = (String)entry.getValue().get(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID);
 					if(Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
 						continue;
@@ -600,9 +637,13 @@ public class CollectionServiceImpl implements CollectionService{
 				if(Scope.MY.name().equals(scope)){
 					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
 				}
-
+				
+				if(SearchScope.TYPE_EDITORIAL.name().equals(scope)){
+					queryString += " AND @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
+				}
 				List<NodeRef> returnVal = new ArrayList<NodeRef>();
-				for(NodeRef nodeRef : client.searchNodeRefs(queryString,eduGroupScope)){
+				List<NodeRef> nodeRefs = client.searchNodeRefs(queryString,eduGroupScope);
+				for(NodeRef nodeRef : nodeRefs){
 					String parent = client.getParent(nodeRef).getParentRef().getId();
 					if(Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
 						continue;
@@ -689,5 +730,82 @@ public class CollectionServiceImpl implements CollectionService{
 			permissionService.setPermissions(collectionId, aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]),aclFinal.isInherited());
 		}
 	
+	}
+
+	/**
+	 * unpin all current collections and set the list of collection ids pinned
+	 */
+	@Override
+	public void setPinned(String[] collections) {
+		SearchToken searchToken = new SearchToken();
+		searchToken.setContentType(ContentType.COLLECTIONS);
+		searchToken.setLuceneString("ASPECT:"+QueryParser.escape(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION_PINNED)));
+		searchToken.setMaxResult(Integer.MAX_VALUE);
+		List<org.edu_sharing.service.model.NodeRef> currentPinned = searchService.search(searchToken).getData();
+		for(org.edu_sharing.service.model.NodeRef pinned : currentPinned) {
+			nodeService.removeAspect(pinned.getNodeId(), CCConstants.CCM_ASPECT_COLLECTION_PINNED);
+			nodeService.removeProperty(pinned.getStoreProtocol(), pinned.getStoreId(), pinned.getNodeId(), CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS);
+			nodeService.removeProperty(pinned.getStoreProtocol(), pinned.getStoreId(), pinned.getNodeId(), CCConstants.CCM_PROP_COLLECTION_PINNED_ORDER);
+		}
+		int order=0;
+		for(String collection : collections) {
+			throwIfNotACollection(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),collection);
+			nodeService.addAspect(collection, CCConstants.CCM_ASPECT_COLLECTION_PINNED);
+			
+			HashMap<String,Object> props = new HashMap<String,Object>();
+			props.put(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS, true);
+			props.put(CCConstants.CCM_PROP_COLLECTION_PINNED_ORDER, order);
+			nodeService.updateNodeNative(collection, props);
+			
+			order++;
+		}
+	}
+
+	private void throwIfNotACollection(String storeProtocol,String storeId,String collection) {
+		String[] aspects=nodeService.getAspects(storeProtocol,storeId, collection);
+		if(!Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION)) {
+			throw new IllegalArgumentException("Node "+collection+" is not a collection (Aspect "+CCConstants.CCM_ASPECT_COLLECTION+" not found)");
+		}
+		
+	}
+
+	@Override
+	public void writePreviewImage(String collectionId,InputStream is, String mimeType) throws Exception {
+		//new ImageMagickContentTransformerWorker()
+		is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
+		client.writeContent(MCAlfrescoAPIClient.storeRef, collectionId, is, mimeType,null, CCConstants.CCM_PROP_MAP_ICON);
+		ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		ThumbnailService thumbnailService = serviceRegistry.getThumbnailService();
+		org.alfresco.service.cmr.repository.NodeRef ref=new org.alfresco.service.cmr.repository.NodeRef(MCAlfrescoAPIClient.storeRef,collectionId);
+		PreviewCache.purgeCache(collectionId);
+	}
+
+	@Override
+	public void setOrder(String parentId, String[] nodes) {
+		List<NodeRef> refs=getChildReferences(parentId, null);
+		int order=0;
+		
+		String mode=CCConstants.COLLECTION_ORDER_MODE_CUSTOM;
+		if(nodes==null || nodes.length==0)
+			mode=null;
+		
+		HashMap<String,Object> collectionProps=new HashMap<>();
+		collectionProps.put(CCConstants.CCM_PROP_MAP_COLLECTION_ORDER_MODE, mode);
+		nodeService.updateNodeNative(parentId, collectionProps);
+		
+		if(nodes==null || nodes.length==0)
+			return;
+		for(String node : nodes) {
+			NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node);
+			if(!refs.contains(ref))
+				throw new IllegalArgumentException("Node id "+node+" is not a children of the collection "+parentId);
+			
+			nodeService.addAspect(node, CCConstants.CCM_ASPECT_COLLECTION_ORDERED);
+			HashMap<String,Object> props=new HashMap<>();
+			props.put(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, order);
+			nodeService.updateNodeNative(node, props);
+			order++;
+		}
 	}
 }

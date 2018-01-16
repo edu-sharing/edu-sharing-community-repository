@@ -637,6 +637,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 					}
 					
 					taxonToSafeList.add(taxonProps);
+					
 				}
 
 				
@@ -681,6 +682,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID, null);
 			
 		}
+		
 		
 		/**
 		 * Annotation

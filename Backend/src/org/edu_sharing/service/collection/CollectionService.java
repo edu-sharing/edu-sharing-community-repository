@@ -1,5 +1,7 @@
 package org.edu_sharing.service.collection;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
@@ -51,9 +53,20 @@ public interface CollectionService {
 	public List<NodeRef> getChildReferences(String parentId, String scope);
 
 	public Collection get(String storeId, String storeProtocol, String collectionId);
+	
+	/**
+	 * 
+	 * @param parentId collection to set the order of the children
+	 * @param nodes Children in the order. Use null to reset the order
+	 */
+	public void setOrder(String parentId, String[] nodes);
 
 	void updateAndSetScope(Collection collection) throws Exception;
 
 	Collection createAndSetScope(String parentId, Collection collection) throws Throwable;
+
+	public void setPinned(String[] collections);
+
+	void writePreviewImage(String collectionId, InputStream is, String mimeType) throws Exception;
 
 }

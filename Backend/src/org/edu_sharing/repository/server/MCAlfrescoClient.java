@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.repository.server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -489,7 +490,7 @@ public interface MCAlfrescoClient {
 	
 	public ArrayList<HashMap<String, Object>> getNewestNodes(Integer from, Integer to) throws Throwable;
 	
-	public void setProperty(String nodeId, String property, String value);
+	public void setProperty(String nodeId, String property, Serializable value);
 	
 	public String getProperty(String storeProtocol, String storeIdentifier, String nodeId, String property);
 	

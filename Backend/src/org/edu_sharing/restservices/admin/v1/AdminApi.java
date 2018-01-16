@@ -30,10 +30,12 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.ApiService;
+import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.admin.v1.model.AdminStatistics;
+import org.edu_sharing.restservices.admin.v1.model.CollectionsResult;
 import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
@@ -83,7 +85,31 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+	@POST
+	@Path("/applyTemplate")
 	
+	@ApiOperation(value = "apply a folder template", notes = "apply a folder template.")
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response applyTemplate(@Context HttpServletRequest req,
+			@ApiParam(value = "Template Filename",required=true) @QueryParam("template") String template,
+			@ApiParam(value = "Group name",required=true) @QueryParam("group") String group,
+			@ApiParam(value = "Folder name",required=false) @QueryParam("folder") String folder
+			){
+		try {
+			AdminServiceFactory.getInstance().applyTemplate(template, group, folder);
+	    	return Response.ok().build();		
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
 	@OPTIONS    
 	@Path("/refreshAppInfo")
     @ApiOperation(hidden = true, value = "")
@@ -252,6 +278,7 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+	
 	@PUT
 	@Path("/applications/xml")
 	
@@ -493,12 +520,42 @@ public class AdminApi {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}
 	@POST
+	@Path("/import/collections")
+	
+	@ApiOperation(value = "import collections via a xml file", notes = "xml file must be structured as defined by the xsd standard")
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionsResult.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response importCollections(
+			@ApiParam(value="Id of the root to initialize the collection structure, or '-root-' to inflate them on the first level") @QueryParam("parent") String parent,
+			@ApiParam(value = "XML file to parse (or zip file containing exactly 1 xml file to parse)",required=true) @FormDataParam("xml") InputStream is,
+			@Context HttpServletRequest req){
+		try {
+			if(CollectionDao.ROOT.equals(parent)) {
+				parent=null;
+			}
+			int count=AdminServiceFactory.getInstance().importCollections(parent,is);
+			CollectionsResult result=new CollectionsResult();
+			result.setCount(count);
+	    	return Response.ok().entity(result).build();	
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	
+	@POST
 	@Path("/import/excel")
 	
 	@ApiOperation(value = "Import excel data", notes = "Import excel data.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ExcelResult.class),
 	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -539,11 +596,16 @@ public class AdminApi {
 			@ApiParam(value = "id metadataset", required = false) @QueryParam("metadataset") String metadataset,
 			@ApiParam(value = "importer job class name (call /classes to obtain a list)", required = true, defaultValue="org.edu_sharing.repository.server.jobs.quartz.ImporterJob") @QueryParam("className") String className,
 			@ApiParam(value = "importer class name (call /classes to obtain a list)", required = false, defaultValue="org.edu_sharing.repository.server.importer.OAIPMHLOMImporter") @QueryParam("importerClassName") String importerClassName,
-			@ApiParam(value = "RecordHandler class name (call /classes to obtain a list)", required = false, defaultValue="org.edu_sharing.repository.server.importer.RecordHandlerLOM") @QueryParam("recordHandlerClassName") String recordHandlerClassName,
+			@ApiParam(value = "RecordHandler class name", required = false, defaultValue="org.edu_sharing.repository.server.importer.RecordHandlerLOM") @QueryParam("recordHandlerClassName") String recordHandlerClassName,
+			@ApiParam(value = "BinaryHandler class name (may be empty for none)", required = false, defaultValue="") @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
 			@ApiParam(value = "url to file", required = false) @QueryParam("fileUrl") String fileUrl,
 			@Context HttpServletRequest req){
 		try {
-			AdminServiceFactory.getInstance().importOai(set, fileUrl, baseUrl, metadataset, metadataPrefix, className, importerClassName, recordHandlerClassName);
+			AdminServiceFactory.getInstance().importOai(
+					set, fileUrl, baseUrl, metadataset, 
+					metadataPrefix, className, 
+					importerClassName, recordHandlerClassName,
+					binaryHandlerClassName);
 	    	return Response.ok().build();	
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
@@ -715,6 +777,38 @@ public class AdminApi {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}
 	
+	@GET
+	@Path("/clusterInfos")
+	@ApiOperation(value = "Get information about the Cluster", notes = "Get information the Cluster")
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CacheCluster.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response getClusters(
+			@Context HttpServletRequest req){
+		try {
+			List<CacheCluster> result = AdminServiceFactory.getInstance().getCacheClusters();
+	    	return Response.ok().entity(result).build();		
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	
+	@OPTIONS    
+	@Path("/clusterInfos")
+    @ApiOperation(hidden = true, value = "")
+	
+
+	public Response options12() {
+		
+		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+	}
+	
 	
 	@GET
 	@Path("/export/lom")
@@ -746,7 +840,7 @@ public class AdminApi {
 	@Path("/export/lom")
     @ApiOperation(hidden = true, value = "")
 
-	public Response options12() {
+	public Response options13() {
 		
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}

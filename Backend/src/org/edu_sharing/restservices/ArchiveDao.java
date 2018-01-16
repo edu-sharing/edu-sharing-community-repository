@@ -16,7 +16,7 @@ public class ArchiveDao {
 	public static NodeSearch search(RepositoryDao repoDao, 
 			String query, 
 			int startIdx,
-			int nrOfresults, List<String> sortProperties, Boolean sortAscending) throws DAOException {
+			int nrOfresults, List<String> sortProperties, List<Boolean> sortAscending) throws DAOException {
 
 		try {
 			ArchiveService archivService = ArchiveServiceFactory.getArchiveService(repoDao.getId());
@@ -34,12 +34,10 @@ public class ArchiveDao {
 			String query, 
 			String user,
 			int startIdx,
-			int nrOfresults, List<String> sortProperties, Boolean sortAscending) throws DAOException {
+			int nrOfresults, List<String> sortProperties, List<Boolean> sortAscending) throws DAOException {
 
 		try {
-			
-			if(sortAscending == null) sortAscending = true;
-			
+						
 			String currentUser = AuthenticationUtil.getFullyAuthenticatedUser(); 
 			
 			if (PersonDao.ME.equals(user)) {
@@ -48,16 +46,8 @@ public class ArchiveDao {
 			
 			ArchiveService archivService = ArchiveServiceFactory.getArchiveService(repoDao.getId());
 			
-			SortDefinition sortDefinition = new SortDefinition();
-			if(sortProperties != null){
-				
-				for(String sortProp : sortProperties){
-					SortDefinitionEntry entry = new SortDefinitionEntry();
-					entry.setAscending(new Boolean(sortAscending));
-					entry.setProperty(sortProp);
-					sortDefinition.addSortDefinitionEntry(entry);
-				}
-			}
+			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
+			
 			
 			return NodeDao.transform(repoDao, archivService.search(query, user, startIdx, nrOfresults,sortDefinition));
 		} catch (Throwable t) {

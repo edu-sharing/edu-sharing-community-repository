@@ -14,6 +14,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {ConfigurationService} from "../../services/configuration.service";
 import {SessionStorageService} from "../../services/session-storage.service";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
+import {RestLocatorService} from "../../rest/services/rest-locator.service";
 
 @Component({
   selector: 'add-node-to-lms',
@@ -27,6 +28,7 @@ export class ApplyToLmsComponent{
 
   constructor(
     private connector : RestConnectorService,
+    private locator  : RestLocatorService,
     private nodeApi : RestNodeService,
     private toast : Toast,
     private events : FrameEventsService,
@@ -46,7 +48,7 @@ export class ApplyToLmsComponent{
           this.forward();
         }
         else if(params['node']) {
-          this.connector.locateApi().subscribe(()=>{
+          this.locator.locateApi().subscribe(()=>{
             this.nodeApi.getNodeMetadata(params['node'], [RestConstants.ALL],params['repo']).subscribe(
               (data : NodeWrapper) => {
                 this.node = data.node;
@@ -67,15 +69,18 @@ export class ApplyToLmsComponent{
   forward() {
     let reurl = this.reurl;
     console.log(reurl);
+    let ccrepUrl='ccrep://'+encodeURIComponent(this.node.ref.repo)+'/'+encodeURIComponent(this.node.ref.id);
     if(reurl=="IFRAME"){
+      (this.node as any).objectUrl=ccrepUrl;
       NodeHelper.appendImageData(this.connector,this.node).subscribe((data:Node)=>{
+        console.log(data);
         this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE,data);
         window.history.back();
       });
       return;
     }
     let params = reurl.indexOf("?")==-1 ? '?' : '&';
-    params += 'nodeId=ccrep://'+encodeURIComponent(this.node.ref.repo)+'/'+encodeURIComponent(this.node.ref.id);
+    params += 'nodeId='+ccrepUrl;
     params += '&localId='+encodeURIComponent(this.node.ref.id);
     if(this.node.title)
       params += '&title='+encodeURIComponent(this.node.title);

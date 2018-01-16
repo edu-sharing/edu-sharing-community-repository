@@ -87,6 +87,12 @@ public class MetadataReaderV2 {
 			String inheritName=mds.getInherit()+".xml";
 			reader=new MetadataReaderV2(inheritName,locale);
 			MetadataSetV2 mdsInherit = reader.getMetadatasetForFile(inheritName);
+			try{
+				reader=new MetadataReaderV2(mds.getInherit()+"_override.xml",locale);
+				MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(inheritName);
+				mdsInherit.overrideWith(mdsOverride);
+			}catch(IOException e){
+			}
 			mdsInherit.overrideWith(mds);
 			mds=mdsInherit;
 		}
@@ -125,17 +131,29 @@ public class MetadataReaderV2 {
 		NodeList queriesNode = (NodeList) xpath.evaluate("/metadataset/queries/query", doc, XPathConstants.NODESET);
 		List<MetadataQuery> queries=new ArrayList<>();
 		for(int i=0;i<queriesNode.getLength();i++){
-			MetadataQuery query=new MetadataQuery();
+			MetadataQuery query=new MetadataQuery(result);
 			Node node=queriesNode.item(i);
 			NamedNodeMap nodeMap = node.getAttributes();
 			query.setId(nodeMap.getNamedItem("id").getTextContent());
-			query.setJoin(nodeMap.getNamedItem("join").getTextContent());
+			if(nodeMap.getNamedItem("join")!=null)
+				query.setJoin(nodeMap.getNamedItem("join").getTextContent());
+			else
+				query.setJoin("AND");
+			
+			if(nodeMap.getNamedItem("applyBasequery")!=null)
+				query.setApplyBasequery(nodeMap.getNamedItem("applyBasequery").getTextContent().equals("true"));
+			else
+				query.setApplyBasequery(true);
+			
 			List<MetadataQueryParameter> parameters=new ArrayList<>();
 
 			NodeList list2=node.getChildNodes();
 			
 			for(int j=0;j<list2.getLength();j++){
 				Node parameterNode=list2.item(j);
+				if(parameterNode.getNodeName().equals("basequery")){
+					query.setBasequery(parameterNode.getTextContent());
+				}
 				MetadataQueryParameter parameter=new MetadataQueryParameter();
 				NodeList list3=parameterNode.getChildNodes();
 				NamedNodeMap attributes = parameterNode.getAttributes();
@@ -149,6 +167,10 @@ public class MetadataReaderV2 {
 					String value=data.getTextContent();
 					if(name.equals("statement"))
 						parameter.setStatement(value);
+					if(name.equals("ignorable"))
+						parameter.setIgnorable(Integer.parseInt(value));
+					if(name.equals("exactMatching"))
+						parameter.setExactMatching(value.equalsIgnoreCase("true"));
 					if(name.equals("multiple"))
 						parameter.setMultiple(value.equalsIgnoreCase("true"));
 					if(name.equals("multiplejoin"))
@@ -265,6 +287,8 @@ public class MetadataReaderV2 {
 				}
 				if(name.equals("defaultvalue"))
 					widget.setDefaultvalue(value); 
+				if(name.equals("format"))
+					widget.setFormat(value); 
 				if(name.equals("type"))
 					widget.setType(value);
 				if(name.equals("condition"))
@@ -386,7 +410,7 @@ public class MetadataReaderV2 {
 	
 	private String translateHtml(String i18nPath, String html) {
 		String[] parts=StringUtils.splitByWholeSeparator(html,"{{");
-		for(int i=0;i<parts.length;i++){
+		for(int i=1;i<parts.length;i++){
 			String[] key=StringUtils.splitByWholeSeparator(parts[i],"}}");
 			String i18nKey=key[0].trim();
 			key[0]=getTranslation(i18nPath, i18nKey,null,locale);
@@ -450,6 +474,9 @@ public class MetadataReaderV2 {
 								Node showDefault = attributes.getNamedItem("showDefault");
 								if(showDefault!=null)
 									col.setShowDefault(showDefault.getTextContent().equals("true"));
+								Node format = attributes.getNamedItem("format");
+								if(format!=null)
+									col.setFormat(format.getTextContent());
 							}
 							columns.add(col);
 						}

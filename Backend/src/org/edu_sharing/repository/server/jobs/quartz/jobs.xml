@@ -222,6 +222,15 @@
 		</params>
 	</job>	
 	
+	
+	<job>
+		<class>org.edu_sharing.repository.server.jobs.quartz.SystemStatisticJob</class>
+		<trigger>Cron[0 0/2 * * * ?]</trigger>
+		<params>
+		</params>
+	</job>
+	
+	
 	<!-- <job>
 		<class>org.edu_sharing.repository.server.importer.ImporterJobDDB</class>
 		

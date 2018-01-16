@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified"
+	elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<!-- LIST OF COLLECTIONS use as root element if you want to start with list 
+		of root collections -->
+	<xs:element name="collections">
+		<xs:complexType>
+			<xs:sequence>
+
+				<!-- COLLECTION ELEMENT - that can contain sub collections (recursive) 
+					use as root element if you have just one collection and no list on root level -->
+				<xs:element name="collection" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+
+							<!-- REQUIRED: Title of collection -->
+							<xs:element name="title" type="xs:string" minOccurs="1"
+								maxOccurs="1" />
+
+							<!-- Description text - not too long -->
+							<xs:element name="description" type="xs:string"
+								minOccurs="0" maxOccurs="1" />
+								
+							<!-- Type of collection -->
+							<xs:element name="type" type="xs:string"
+								minOccurs="0" maxOccurs="1" />
+							<!-- Scope of collection -->
+							<xs:element name="scope" type="xs:string"
+								minOccurs="0" maxOccurs="1" />
+
+							<!-- Should be a filename (if file is part of directory/zip) or HTTP 
+								URL to image -->
+							<xs:element name="image" type="xs:string" minOccurs="0"
+								maxOccurs="1" />
+
+							<!-- Valid HTML color -->
+							<xs:element name="color" type="xs:string" minOccurs="0"
+								maxOccurs="1" />
+
+							<!-- Dynamic properties - see ccmodel.xml for possible values -->
+							<xs:element minOccurs="0" maxOccurs="unbounded" name="property">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="value" minOccurs="1" maxOccurs="unbounded" type="xs:string" />
+									</xs:sequence>
+									<xs:attribute name="key" type="xs:string" use="required" />
+								</xs:complexType>
+							</xs:element>
+
+							<!-- List of child collections (recursive use of this schema as list 
+								elements) -->
+							<xs:element ref="collections" minOccurs="0" maxOccurs="1" />
+
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>

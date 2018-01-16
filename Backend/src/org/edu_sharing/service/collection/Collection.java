@@ -5,13 +5,15 @@ import org.edu_sharing.repository.client.rpc.User;
 public class Collection {
 
 	boolean level0 = false;
-	
+	boolean pinned = false;
+
 	String nodeId; 
 	String title; 
 	String description;
 	String type;
 	String viewtype;
 	String scope;
+	String orderMode;
 	
 	int childCollectionsCount;
 	
@@ -137,6 +139,18 @@ public class Collection {
 	}
 	public void setScope(String scope) {
 		this.scope=scope;
+	}
+	public boolean isPinned() {
+		return pinned;
+	}
+	public void setPinned(boolean pinned) {
+		this.pinned = pinned;
+	}
+	public String getOrderMode() {
+		return orderMode;
+	}
+	public void setOrderMode(String orderMode) {
+		this.orderMode = orderMode;
 	}
 	
 

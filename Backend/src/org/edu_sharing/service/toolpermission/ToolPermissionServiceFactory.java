@@ -16,6 +16,7 @@ public class ToolPermissionServiceFactory {
 	static ToolPermissionService tps = null;
 	
 	public static List<String> getAllToolPermissions(){
+		// @TODO Torsten: wouldn't it be much easier if we just return/copy an instance of ToolPermissionService.validToolPermissions?
 		List<String> toInit=new ArrayList<String>();
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE);
@@ -34,6 +35,11 @@ public class ToolPermissionServiceFactory {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_UNCHECKEDCONTENT);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_WORKSPACE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
+		
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
+
 		
 		ConnectorList connectorList =  ConnectorServiceFactory.getConnectorService().getConnectorList();
 		for(Connector c : connectorList.getConnectors()){

@@ -5,7 +5,7 @@ import {Translation} from "../../../common/translation";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {Node,NodeList} from "../../../common/rest/data-object";
 import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
-import {OptionItem} from "../../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {UIService} from "../../../common/services/ui.service";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
@@ -115,7 +115,7 @@ export class WorkspaceSubTreeComponent  {
     }
   }
   private allowDrop(event : any,target:Node){
-    if(!this.storage.get("list_drag")) {
+    if(!this.storage.get(TemporaryStorageService.LIST_DRAG_DATA)) {
       return;
     }
     if(event.altKey)
@@ -131,7 +131,7 @@ export class WorkspaceSubTreeComponent  {
   }
   private dropEvent(event : any,target : Node){
     this.dragHover=null;
-    this.storage.remove("list_drag");
+    this.storage.remove(TemporaryStorageService.LIST_DRAG_DATA);
     if(!event.dataTransfer.getData("node"))
       return;
     let data=(JSON.parse(event.dataTransfer.getData("node")) as Node[]);

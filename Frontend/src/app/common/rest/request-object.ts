@@ -8,7 +8,7 @@ import {RestConstants} from "./rest-constants";
 
 export interface RequestObject{
   sortBy : string[];
-  sortAscending : boolean;
+  sortAscending : boolean[];
   offset : number;
   count : number;
   propertyFilter : string[];

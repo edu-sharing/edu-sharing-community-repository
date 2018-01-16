@@ -11,6 +11,7 @@
   "SAVE" : "Speichern",
   "APPLY" : "Übernehmen",
   "CANCEL" : "Abbrechen",
+  "RENAME" : "Umbenennen",
   "USERMENU": "Nutzermenü",
   "USER_GUEST" : "Gast",
   "IMPRINT" : "Impressum",
@@ -38,13 +39,20 @@
   "DAYS_AGO" : "Vor {{ days }} Tagen",
   "CREATE" : "Erstellen",
   "LOGOUT" : "Abmelden",
+  "INVALID_OPERATION":"Diese Funktion wird leider nicht unterstützt",
   "SHOW_IN_FOLDER":"Zum Speicherort",
+  "CLEAR_FILTERS":"Alle Filter zurücksetzen",
   "EDIT_ACCOUNT":"Account Verwalten",
   "DEFAULT_METADATASET":"Standard-Metadatenset",
   "NO_MATCHES" : "Keine übereinstimmenden Einträge",
   "NO_CC_PUBLISH" : "Keine ausreichenden Berechtigungen",
+  "ADD_TO_RECENT_COLLECTION":"In zuletzt verwendete Sammlungen",
+  "SEARCH_COLLECTIONS":"Sammlung suchen...",
   "ASK_CC_PUBLISH" : "Nachfragen",
   "ASK_CC_PUBLISH_SUBJECT" : "Anfrage für Berechtigungen des Elements {{name}}",
+  "ORIGINAL_DELETE":"Entfernen",
+  "ORIGINAL_DELETED":"Inhalt wurde gelöscht",
+  "ORIGINAL_DELETED_INFO":"Nur Informationen sichtbar",
   "COMMON_API_ERROR": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut",
   "COMMON_API_ERROR_TITLE": "Fehlerdetails",
   "SYSTEM_FOLDER_DELETE_ERROR":"Dieser Ordner wurde vom System erstellt und kann nicht gelöscht werden",
@@ -68,6 +76,7 @@
   "GOTO":"Gehe zu",
   "VALUE":"Wert",
   "FILTER": "Filter",
+  "REPLACE":"Ersetzen",
   "SUGGESTION": "Vorschlag",
   "CLICKTOREMOVE": "Klicken zum Entfernen",
   "NO_PERMISSIONS_FOR_SCOPE":"Keine Berechtigungen, um diesen Bereich anzuzeigen",
@@ -126,6 +135,25 @@
     "SCHULFUNK":"Schulfunk (§47 UrhG)",
     "CUSTOM":"Benutzerdefinierte Lizenz"
   },
+  "NODE_REPORT":{
+    "TITLE":"Problem melden",
+    "OPTION":"Problem melden",
+    "REPORT":"Melden",
+    "REPORT_INFO":"Problem mit {{name}} melden",
+    "COMMENT":"Bitte nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
+    "COMMENT_PLACEHOLDER":"Details angeben...",
+    "EMAIL":"Ihre E-Mail-Adresse",
+    "EMAIL_PLACEHOLDER":"jemand@beispiel.de",
+    "EMAIL_REQUIRED":"Bitte eine gültige E-Mail-Adresse angeben",
+    "REASON_REQUIRED":"Bitte wählen Sie aus, welches Problem besteht",
+    "DONE":"Ihre Anfrage wurde gesendet. Vielen Dank!",
+    "REASONS": {
+      "UNAVAILABLE":"Medium nicht verfügbar",
+      "INAPPROPRIATE_CONTENT":"Problematischer Inhalt",
+      "INVALID_METADATA":"Fehlerhafte Beschreibung",
+      "OTHER":"Anderer Fehler"
+    }
+  },
   "COLLECTION":{
     "INFO_REFERENCES":"Sammlung",
     "INFO_REFERENCES_MULTI":"Sammlungen",
@@ -135,8 +163,10 @@
     "SCOPE":{
       "MY" : "Privat",
       "EDU_GROUPS" : "Organisationen",
-      "EDU_ALL" : "Öffentlich",
-      "CUSTOM" : "Benutzerdefiniert"
+      "PUBLIC" : "Öffentlich",
+      "SHARED" : "Freigegeben",
+      "CUSTOM" : "Benutzerdefiniert",
+      "TYPE_EDITORIAL" : "Redaktionell"
     }
   },
   "CREATE_NODE":{
@@ -159,7 +189,8 @@
     "link":"Website",
     "folder":"Ordner",
     "file":"Unbekannt",
-    "collection":"Sammlung"
+    "collection":"Sammlung",
+    "saved_search":"Suche"
 
   },
   "PERMISSION_TYPE":{
@@ -178,7 +209,8 @@
     "groupType" : "Typ"
   },
   "ORG" : {
-    "displayName" : "Organisation"
+    "displayName" : "Organisations-Name",
+    "groupType" : "Typ"
   },
   "USER":{
     "authorityName" : "Nutzername",
@@ -222,6 +254,10 @@
   "LIST":{
     "REORDER_TITLE":"Listenelemente anpassen",
     "REORDER_DRAG_DROP":"Sie können die Reihenfolge der Elemente durch Drag & Drop verändern"
+  },
+  "DIALOG":{
+    "COLLECTION_SHARE_PUBLIC":"Material in Sammlung freigeben?",
+    "COLLECTION_SHARE_PUBLIC_INFO":"Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben."
   },
   "NO_SIZE":"-",
   "VERSION_COMMENT":"Versionskommentar",

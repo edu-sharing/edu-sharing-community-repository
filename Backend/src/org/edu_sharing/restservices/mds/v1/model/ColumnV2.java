@@ -14,11 +14,13 @@ import io.swagger.annotations.ApiModel;
 @ApiModel(description = "")
 public class ColumnV2 {
 		private String id;
+		private String format;
 		private boolean showDefault;
 	
 		public ColumnV2(MetadataColumn column) {
 			this.id=column.getId();		
 			this.showDefault=column.isShowDefault();
+			this.format=column.getFormat();
 		}
 		
 		
@@ -30,14 +32,22 @@ public class ColumnV2 {
 			this.id = id;
 		}
 
-
+		@JsonProperty("showDefault")
 		public boolean isShowDefault() {
 			return showDefault;
 		}
 
-		@JsonProperty("showDefault")
 		public void setShowDefault(boolean showDefault) {
 			this.showDefault = showDefault;
+		}
+
+		@JsonProperty("format")
+		public String getFormat() {
+			return format;
+		}
+
+		public void setFormat(String format) {
+			this.format = format;
 		}
 		
 		

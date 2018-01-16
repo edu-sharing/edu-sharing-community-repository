@@ -19,12 +19,14 @@ import {FrameEventsService} from "./common/services/frame-events.service";
 import {RestAdminService} from "./common/rest/services/rest-admin.service";
 import {RestNetworkService} from "./common/rest/services/rest-network.service";
 import {RestToolService} from "./common/rest/services/rest-tool.service";
+import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 
 
 export const PROVIDERS=[
   FrameEventsService,
   Toast,
   GwtInterfaceService,
+  RestLocatorService,
   RestConnectorService,
   RestConnectorsService,
   RestArchiveService,

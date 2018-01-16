@@ -8,11 +8,10 @@ import {environment} from "../../../../environments/environment";
 import {OAuthResult, LoginResult, AccessScope} from "../data-object";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Router, ActivatedRoute} from "@angular/router";
-import {Translation} from "../../translation";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {UIConstants} from "../../ui/ui-constants";
-import {UIHelper} from "../../ui/ui-helper";
 import {ConfigurationService} from "../../services/configuration.service";
+import {RestLocatorService} from "./rest-locator.service";
 
 /**
  * The main connector. Manages the API Endpoint as well as common api parameters and url generation
@@ -26,7 +25,7 @@ export class RestConnectorService {
     "rest/",
     "http://localhost:8080/edu-sharing/rest/",
     "http://localhost:8081/edu-sharing/rest/",
-    "http://edu40.edu-sharing.de/edu-sharing/rest/",
+    "http://edu41.edu-sharing.de/edu-sharing/rest/",
     //"https://repository.oer-berlin.de/edu-sharing/rest/",
     "http://alfresco5.vm:8080/edu-sharing/rest/"
   ];
@@ -38,8 +37,6 @@ export class RestConnectorService {
   private _logoutTimeout: number;
   private _autoLogin = true;
   public _scope: string;
-  private ticket: string;
-  private apiVersion=-1;
   private themesUrl: any;
 
   get autoLogin(): boolean {
@@ -58,19 +55,14 @@ export class RestConnectorService {
     this._autoLogin = value;
   }
   get endpointUrl(): string {
-    return this._endpointUrl;
+    return this.locator.endpointUrl;
   }
-
-  set endpointUrl(value: string) {
-    this._endpointUrl = value;
-  }
-
   get numberPerRequest(): number {
-    return this._numberPerRequest;
+    return this.locator.numberPerRequest;
   }
 
   set numberPerRequest(value: number) {
-    this._numberPerRequest = value;
+    this.locator.numberPerRequest=value;
   }
   get lastActionTime(){
     return this._lastActionTime;
@@ -78,9 +70,13 @@ export class RestConnectorService {
   get logoutTimeout(){
     return this._logoutTimeout;
   }
+  public getRequestOptions(contentType="application/json",username:string = null,password:string = null) : RequestOptionsArgs{
+    return this.locator.getRequestOptions(contentType,username,password);
+  }
   constructor(private router:Router,
               private http : Http,
               private config: ConfigurationService,
+              private locator: RestLocatorService,
               private storage : TemporaryStorageService,
               private event:FrameEventsService) {
     this.numberPerRequest=RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
@@ -102,25 +98,7 @@ export class RestConnectorService {
     }
   }
 
-  public getRequestOptions(contentType="application/json",username:string = null,password:string = null) : RequestOptionsArgs{
-    let headers = new Headers();
-    if(contentType)
-      headers.append('Content-Type', contentType);
-    headers.append('Accept', 'application/json');
-    headers.append('locale',Translation.getISOLanguage());
-    if(username!=null) {
-      headers.append('Authorization', "Basic " + btoa(username + ":" + password));
-    }
-    else if(this.ticket!=null){
-      headers.append('Authorization', "EDU-TICKET " + this.ticket);
-      this.ticket=null;
-    }
-    else{
-      headers.append('Authorization',"");
-    }
 
-    return {headers:headers,withCredentials:true}; // Warn: withCredentials true will ignore a Bearer from OAuth!
-  }
   public getOAuthToken() : Observable<OAuthResult>{
   let url=this.createUrl("../oauth2/token",null);
   //"grant_type=password&client_id=eduApp&client_secret=secret&username=admin&password=admin"
@@ -156,7 +134,12 @@ export class RestConnectorService {
     return result;
   }
   public getCurrentLogin() : LoginResult{
-    return this.storage.get(RestConnectorService.SESSION_INFO);
+    return this.storage.get(TemporaryStorageService.SESSION_INFO);
+  }
+  public getConfig() : Observable<any>{
+    let url=this.createUrl("config/:version/get",null);
+    return this.http.get(url,this.getRequestOptions())
+      .map((response: Response) => response.json());
   }
   public isLoggedIn() : Observable<LoginResult>{
     let url=this.createUrl("authentication/:version/validateSession",null);
@@ -165,7 +148,7 @@ export class RestConnectorService {
         (data:LoginResult)=>{
           this.toolPermissions=data.toolPermissions;
           this.event.broadcastEvent(FrameEventsService.EVENT_UPDATE_LOGIN_STATE,data);
-          this.storage.set(RestConnectorService.SESSION_INFO,data);
+          this.storage.set(TemporaryStorageService.SESSION_INFO,data);
           this._logoutTimeout=data.sessionTimeout;
           observer.next(data);
           observer.complete();
@@ -218,7 +201,7 @@ export class RestConnectorService {
           (data:LoginResult) => {
             if(data.isValidLogin)
               this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
-            this.storage.set(RestConnectorService.SESSION_INFO,data);
+            this.storage.set(TemporaryStorageService.SESSION_INFO,data);
             observer.next(data.statusCode);
             observer.complete();
           },
@@ -233,7 +216,7 @@ export class RestConnectorService {
           (data: LoginResult) => {
             if(data.isValidLogin)
               this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
-            this.storage.set(RestConnectorService.SESSION_INFO,data);
+            this.storage.set(TemporaryStorageService.SESSION_INFO,data);
             observer.next(data.statusCode);
             observer.complete();
           },
@@ -252,9 +235,14 @@ export class RestConnectorService {
       "&maxItems="+(request && request.count!=null ?  request.count : this.numberPerRequest);
     if(request==null)
       return str;
-    str+="&"+RestHelper.getQueryString("sortProperties",request && request.sortBy!=null ? request.sortBy : RestConstants.DEFAULT_SORT_CRITERIA)+
-      "&sortAscending="+(request && request.sortAscending!=null ? request.sortAscending : RestConstants.DEFAULT_SORT_ASCENDING)+
-      "&"+RestHelper.getQueryString("propertyFilter",request && request.propertyFilter!=null ? request.propertyFilter : []);
+    str+="&"+RestHelper.getQueryString("sortProperties",request && request.sortBy!=null ? request.sortBy : RestConstants.DEFAULT_SORT_CRITERIA);
+
+    if(request.sortAscending!=null && request.sortAscending.length>1)
+      str+="&"+RestHelper.getQueryString("sortAscending",request.sortAscending);
+    else
+      str+="&sortAscending="+(request && request.sortAscending!=null ? request.sortAscending : RestConstants.DEFAULT_SORT_ASCENDING);
+
+    str+="&"+RestHelper.getQueryString("propertyFilter",request && request.propertyFilter!=null ? request.propertyFilter : []);
     return str;
   }
   /**
@@ -266,10 +254,7 @@ export class RestConnectorService {
    * @returns {string}
    */
   public createUrl(url : string,repository : string,urlParams : string[][] = []) {
-    for(let params of urlParams){
-      params[1]=encodeURIComponent(params[1]);
-    }
-    return this.createUrlNoEscape(url,repository,urlParams);
+    return RestLocatorService.createUrl(url,repository,urlParams);
   }
 
 
@@ -281,26 +266,7 @@ export class RestConnectorService {
    * @returns {string}
    */
   public createUrlNoEscape(url : string,repository : string,urlParams : string[][] = []) {
-    urlParams.push([":version",RestConstants.API_VERSION])
-    urlParams.push([":repository",encodeURIComponent(repository)]);
-
-    urlParams.sort(function(a,b){
-      return url.indexOf(a[0])>url.indexOf(b[0]) ? 1 : -1;
-    });
-    let urlIn=url;
-    let offset=0;
-      for (let param of urlParams) {
-        let pos=urlIn.indexOf(param[0]);
-        if(pos==-1)
-          continue;
-        let start=url.substr(0,pos+offset);
-        let end=url.substr(pos+offset+param[0].length,url.length);
-        url=start+param[1]+end;
-        offset+=param[1].length-param[0].length;
-      }
-    if(url.length>1000)
-      console.warn("URL is "+url.length+" long");
-    return url;
+    return RestLocatorService.createUrlNoEscape(url,repository,urlParams);
   }
 
   public sendDataViaXHR(url : string,file : File,method='POST',fieldName='file') : Observable<XMLHttpRequest>{
@@ -313,7 +279,7 @@ export class RestConnectorService {
               observer.next(xhr);
               observer.complete();
             } else {
-              console.log(xhr);
+              console.error(xhr);
               observer.error(xhr);
             }
           }
@@ -329,53 +295,16 @@ export class RestConnectorService {
         xhr.send(formData);
         console.log("xhr send");
       }catch(e){
-        console.log(e);
+        console.error(e);
         observer.error(e);
       }
     });
   }
-  private testApi(pos : number,observer : Observer<void>) : void{
-    if(pos==RestConnectorService.ENDPOINT_URLS.length)
-      return;
-
-    this.http.get(RestConnectorService.ENDPOINT_URLS[pos] + "_about", this.getRequestOptions(""))
-      .map((response:Response)=>response.json())
-      .subscribe((data:any)=> {
-        this.endpointUrl=RestConnectorService.ENDPOINT_URLS[pos];
-        this.apiVersion=data.version.major+data.version.minor/10;
-        this.themesUrl=data.themesUrl;
-        console.log("API version "+this.apiVersion);
-        observer.next(null);
-        observer.complete();
-        return;
-    },
-    (error)=>{
-      if(error.status==RestConstants.HTTP_UNAUTHORIZED){
-        this.endpointUrl=RestConnectorService.ENDPOINT_URLS[pos];
-        observer.next(null);
-        observer.complete();
-        return;
-      }
-      this.testApi(pos+1,observer);
-    });
-  }
-  public locateApi() : Observable<void> {
-    this._lastActionTime=new Date().getTime();
-    if (this.endpointUrl != null) {
-      return new Observable<void>((observer: Observer<void>) => {
-        observer.next(null);
-        observer.complete()
-      });
-    }
-    return new Observable<void>((observer: Observer<void>) => {
-      this.testApi(0,observer);
-    });
-  }
-
 
   public get(url:string,options:RequestOptionsArgs,appendUrl=true) : Observable<Response>{
     return new Observable<Response>((observer : Observer<Response>) => {
-      this.locateApi().subscribe(data => {
+      this.locator.locateApi().subscribe(data => {
+        this._lastActionTime=new Date().getTime();
         this._currentRequestCount++;
         this.http.get((appendUrl ? this.endpointUrl : '') + url, options).subscribe(response => {
             this._currentRequestCount--;
@@ -394,7 +323,8 @@ export class RestConnectorService {
   }
   public post(url:string,body : any,options:RequestOptionsArgs) : Observable<Response>{
     return new Observable<Response>((observer : Observer<Response>) => {
-      this.locateApi().subscribe(data => {
+      this.locator.locateApi().subscribe(data => {
+        this._lastActionTime=new Date().getTime();
         this._currentRequestCount++;
         this.http.post(this.endpointUrl + url,body, options).subscribe(response => {
             this._currentRequestCount--;
@@ -413,7 +343,8 @@ export class RestConnectorService {
   }
   public put(url:string,body : any,options:RequestOptionsArgs) : Observable<Response>{
     return new Observable<Response>((observer : Observer<Response>) => {
-      this.locateApi().subscribe(data => {
+      this.locator.locateApi().subscribe(data => {
+        this._lastActionTime=new Date().getTime();
         this._currentRequestCount++;
         this.http.put(this.endpointUrl + url,body, options).subscribe(response => {
             this._currentRequestCount--;
@@ -432,7 +363,8 @@ export class RestConnectorService {
   }
   public delete(url:string,options:RequestOptionsArgs) : Observable<Response>{
     return new Observable<Response>((observer : Observer<Response>) => {
-      this.locateApi().subscribe(data => {
+      this.locator.locateApi().subscribe(data => {
+        this._lastActionTime=new Date().getTime();
         this._currentRequestCount++;
         this.http.delete(this.endpointUrl + url, options).subscribe(response => {
             this._currentRequestCount--;
@@ -483,7 +415,7 @@ export class RestConnectorService {
    * @returns {number}
    */
   public getApiVersion(){
-    return this.apiVersion;
+    return this.locator.apiVersion;
   }
 
   /**
@@ -523,16 +455,8 @@ export class RestConnectorService {
     this.event.broadcastEvent(FrameEventsService.EVENT_REST_RESPONSE,result);
   }
 
-  public setRoute(route: ActivatedRoute) : Observable<void>{
-    return new Observable<void>((observer: Observer<void>) => {
-      route.queryParams.subscribe((params: any) => {
-        this.ticket = null;
-        if (params["ticket"])
-          this.ticket = params["ticket"];
-        observer.next(null);
-        observer.complete();
-      });
-    });
+  public setRoute(route: ActivatedRoute) {
+    return this.locator.setRoute(route);
   }
 
   private checkHeaders(response: Response) {
@@ -545,7 +469,7 @@ export class RestConnectorService {
   private goToLogin(scope=this._scope) {
     if(this.currentPageIsLogin())
       return;
-    UIHelper.goToLogin(this.router,this.config,scope);
+    RestHelper.goToLogin(this.router,this.config,scope);
     //this.router.navigate([UIConstants.ROUTER_PREFIX+"login"],{queryParams:{scope:scope?scope:"",next:window.location}});
   }
 
@@ -558,4 +482,6 @@ export class RestConnectorService {
   public getThemeMimePreview(name:string){
     return this.themesUrl+"images/common/mime-types/previews/"+name;
   }
+
+
 }

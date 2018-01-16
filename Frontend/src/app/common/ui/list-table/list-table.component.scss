@@ -1,4 +1,5 @@
 @import "../../../../styles/variables.scss";
+$borderRadius:2px;
 
 .heading div{
   padding:0px 0px;
@@ -25,12 +26,6 @@
   i{
     font-size:50px;
   }
-}
-:host /deep/ .collectionScope {
-  font-size: 130%;
-  left: -1px;
-  position: relative;
-  top: 2px;
 }
 .heading{
   color:$textLight;
@@ -92,21 +87,21 @@ $badgeWidth:200px;
   position:absolute;
   left:-999px;
   top:-999px;
-}
-.dragBadge span{
-  @include shortenText();
-}
-.dragBadge div{
-  position:relative;
-  left: $badgeWidth - 23px;
-  top: -40px;
-  text-align: center;
-  border-radius:50%;
-  background-color: #E6B247;
-  color:#fff;
-  width:20px;
-  height:20px;
-  font-weight: bold;
+  div{
+    @include shortenText();
+  }
+  .count{
+    position:relative;
+    left: $badgeWidth - 23px;
+    top: -40px;
+    text-align: center;
+    border-radius:50%;
+    background-color: #E6B247;
+    color:#fff;
+    width:20px;
+    height:20px;
+    font-weight: bold;
+  }
 }
 .editColumns{
   position: relative;
@@ -150,6 +145,15 @@ $badgeWidth:200px;
 }
 .node_size{
   min-width:110px;
+}
+.node_ccm_educationallearningresourcetype{
+  min-width:150px;
+}
+.node_ccm_replicationsourceid{
+  min-width:150px;
+}
+.node_ccm_eaf_productionyear{
+  min-width:70px;
 }
 .node_dimensions{
   min-width:110px;
@@ -217,17 +221,24 @@ $badgeWidth:200px;
   color:$primary;
 }
 
-.selected{
-  background: $workspaceSelectedBackgroundEffect!important;
-  background-color:$workspaceSelectedBackground!important;
+.tableList .row.selected,
+.cardList .row.selected{
+  background: $workspaceSelectedBackgroundEffect;
+  background-color:$workspaceSelectedBackground;
+}
+
+.tableList .row:focus,
+.cardList .row.selected{
+  background: transparent;
+  background-color:transparent;
+  outline:2px solid $primary;
 }
 .row:focus{
   @include setGlobalInsetFocus();
   /* background-color:$workspaceSelectedBackground!important; */
 }
-.cardList .row:focus{
-  @include setGlobalFocus();
-  /* background-color:$workspaceSelectedBackground!important; */
+.cardSmallList .row:focus{
+  box-shadow: none!important;
 }
 
 .selected div,.selected .more a{
@@ -237,7 +248,7 @@ $badgeWidth:200px;
   color:#383838!important;
 }
 .list .row:hover{
-  background:$workspaceSelectedBackground;
+  background-color:$workspaceSelectedBackground;
 }
 
 .list .filled-in:checked+label:after{
@@ -293,8 +304,45 @@ $badgeWidth:200px;
   opacity:1!important;
   color:#fff!important;
 }
-.nodeCollection .selected{
-  background-color: transparent!important;
+.nodeCollection {
+  .selected {
+    background-color: transparent !important;
+  }
+  .collectionEditorial{
+    position:absolute;
+    left:10px;
+    top:0;
+    padding:0 3px;
+    padding-top: 2px;
+    color:#fff;
+    background-color: $editorialCollectionsBackground;
+    z-index: 1;
+    i{
+      font-size:13px;
+    }
+  }
+  .collectionPinned{
+    position:absolute;
+    right:5px;
+    top:5px;
+    width: 17px;
+    height: 17px;
+    padding: 0 3px;
+    border-radius:50%;
+    background-color: #444;
+    color:#fff;
+    z-index: 1;
+    custom-icon{
+      width:12px;
+      height:12px;
+      position:initial;
+    }
+  }
+}
+:host /deep/{
+  .collectionPinned custom-icon g{
+    fill:#fff;
+  }
 }
 .checkbox{
   min-width:70px;
@@ -306,15 +354,45 @@ $badgeWidth:200px;
   min-width:50px;
   opacity: 1!important;
 }
+$strength:0.75deg;
 
+@keyframes OrderAnimation {
+  0% {     transform:rotate(-$strength*random(1));  }
+  10% {    transform:rotate($strength*random(1));  }
+  20% {    transform:rotate(-$strength*random(1));  }
+  30% {    transform:rotate($strength*random(1));  }
+  40% {    transform:rotate(-$strength*random(1));  }
+  50% {    transform:rotate($strength*random(1));  }
+  60% {    transform:rotate(-$strength*random(1));  }
+  70% {    transform:rotate($strength*random(1));  }
+  80% {    transform:rotate(-$strength*random(1));  }
+  90% {    transform:rotate($strength*random(1));  }
+  100% {   transform:rotate(-$strength*random(1));  }
+}
+$orderAnimationTime:$animationTime*5;
+.order-animation {
+  animation: OrderAnimation $orderAnimationTime infinite;
+}
+.order-animation:nth-of-type(2n){
+  animation-delay: 0s;
+}
+.order-animation:nth-of-type(2n+1){
+  animation-delay: -$orderAnimationTime/2;
+}
+.order-animation:nth-of-type(3n){
+  animation-delay: -$orderAnimationTime/4;
+}
+.order-animation:nth-of-type(5n){
+  animation-delay: -$orderAnimationTime/8;
+}
 .rowFrame{
   padding:0px;
 }
 .hover{
   background-color:rgba($primary,0.2)!important;
   outline:2px dashed $primary;
+  border:none!important;
   padding: 0;
-  border-radius:4px;
   position:relative;
   z-index:5;
 
@@ -396,9 +474,76 @@ $badgeWidth:200px;
   float:left;
   margin:6px;
   position: relative;
+  border-radius: $borderRadius;
   .moreAlways{
     display: none!important;
   }
+  .nodeDeleted{
+    width: 100%;
+    height: 100%;
+    background-color:rgba(255,255,255,0.85);
+    position: absolute;
+    border-radius: $borderRadius;
+    left:0;
+    top:0;
+    text-align: center;
+    padding-top: 20px;
+    div{
+      opacity: 1;
+      padding-bottom: 7px;
+    }
+    >div i{
+      font-size:26pt;
+      color:$textPrimary;
+
+    }
+    .headline{
+      color:$textPrimary;
+      font-size: 120%;
+    }
+    .subline{
+      color:$textLight;
+      font-size: 90%;
+    }
+    a{
+      text-transform: uppercase;
+      font-weight: bold;
+      i{
+        position:relative;
+        top:7px;
+      }
+    }
+  }
+}
+.cardList.addElement,
+.cardSmallList.addElement{
+  border:2px dashed $primary;
+  display:table;
+  background-color: #fff;
+  >div{
+    color:$primary;
+    display:table-cell;
+    vertical-align: middle;
+    text-align: center;
+    .label{
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+  }
+}
+.cardList.addElement .label {
+  white-space: pre-wrap;
+}
+.cardSmallList.addElement .label {
+  white-space: normal;
+}
+.cardList.addElement i{
+  font-size:40px;
+  margin-bottom: 30px;
+}
+.cardSmallList.addElement i{
+  font-size:30px;
 }
 .cardSmallList{
   display:block;
@@ -415,8 +560,8 @@ $badgeWidth:200px;
   left: -15px;
   top: -40px;
   opacity:0.7;
-  width:200px;
-  height:150px;
+  width:201px;
+  height:151px;
 }
 .cardSmallList .row_1,
 .cardSmallList .row_2{
@@ -427,7 +572,7 @@ $badgeWidth:200px;
   text-align: center;
 }
 .cardSmallList .row_1{
-  top: 0;
+  top: 5px;
   font-size: 110%;
   height: 56px;
   overflow: hidden;
@@ -435,13 +580,8 @@ $badgeWidth:200px;
 .cardSmallList .row_2{
   font-size: 80%;
   bottom:7px;
+  left:5px;
   opacity: 1!important;
-}
-.cardList .selected{
-  background: transparent!important;
-  background-color:transparent!important;
-  outline:2px solid $primary;
-  overflow: visible;
 }
 
 .cardList .row,
@@ -495,11 +635,13 @@ $badgeWidth:200px;
   margin-top:-10px;
   margin-bottom:15px;
   opacity:1!important;
+  border-radius: $borderRadius $borderRadius 0 0;
 }
 .cardList .preview img,
 .cardList .preview .previewCollectionContainer{
   width:100%;
   height: 150px;
+  border-radius: $borderRadius $borderRadius 0 0;
   position: absolute;
   top: 0;
   z-index:0;
@@ -544,8 +686,42 @@ $badgeWidth:200px;
 .row input[type=checkbox]:checked + label:after{
   @include materialShadow();
 }
-
-:host /deep/{
+:host /deep/ {
+  .nodeCollection {
+    .collection_info {
+      i {
+        position: relative;
+        top: 2px;
+        font-size: 9pt;
+      }
+      i:not(:first-child){
+        margin-left: 5px;
+      }
+    }
+  }
+  .cardSmallList{
+    .collection_info {
+      width: auto !important;
+      position: absolute;
+      left: 5px;
+      bottom: 10px;
+    }
+    .collection_scope{
+      i{
+        margin-right: 1px;
+      }
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      opacity: 1!important;
+      font-size: 10px;
+    }
+  }
+  .cardList{
+    .collection_info {
+      margin-top: 34px;
+    }
+  }
   .row .node_ccm_replicationsource  img,
   .row .node_ccm_commonlicense_key img{
       height:20px;
@@ -620,6 +796,8 @@ $badgeWidth:200px;
   }
 
   .cardSmallList .row_2,
+  .cardSmallList .row_3,
+  .cardSmallList .row_4,
   .cardList .row_2,
   .cardList .row_3,
   .cardList .row_4{
@@ -637,11 +815,21 @@ $badgeWidth:200px;
     height:160px;
     box-shadow: none;
     border-top:1px solid $cardSeperatorLineColor;
+    .typeicon{
+      display:none!important;
+    }
   }
-  .cardList .typeicon{
-    display:none!important;
+  .cardList.addElement{
+    height:90px;
+    margin-bottom: 20px;
+    i{
+      margin-bottom: 0;
+    }
+    .label{
+      white-space: normal;
+    }
   }
-  .cardList:first-child{
+  .cardList:first-child:not(.addElement){
     border-top:none;
   }
   .cardList .row{

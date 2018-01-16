@@ -177,7 +177,7 @@
 	
 	<target name="deploy-classes" depends="deploy-screenreader, deploy-swagger">
 			<copy todir="${webserver.home}/webapps/${webapp.name}/WEB-INF/classes">
-				<fileset dir="${output.dir}" includes="**/*.class, **/*.properties, org/edu_sharing/spring/**/*.xml, org/edu_sharing/repository/server/**/*.xml, **/*.xsd" excludes="org/alfresco/**/*.class, ${api_not_hotdeployable}, ${alfrescoclasses}, ${excludeclasses}, ${metadataset_files}, ${webservice.package} ${spring.package}">
+				<fileset dir="${output.dir}" includes="**/*.class, org/edu_sharing/service/**/*.xml, **/*.properties, org/edu_sharing/spring/**/*.xml, org/edu_sharing/repository/server/**/*.xml, **/*.xsd" excludes="org/alfresco/**/*.class, ${api_not_hotdeployable}, ${alfrescoclasses}, ${excludeclasses}, ${metadataset_files}, ${webservice.package} ${spring.package}">
 				</fileset>
 				<fileset dir="${config.dir}" includes="template.xsd">
 				</fileset>

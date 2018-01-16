@@ -20,9 +20,13 @@ public class RenderInfoResult  implements java.io.Serializable {
 
     private java.lang.String mimeTypeUrl;
 
+    private java.lang.String[] permissions;
+
     private java.lang.String previewUrl;
 
     private org.edu_sharing.webservices.types.KeyValue[] properties;
+
+    private org.edu_sharing.webservices.types.KeyValue[] propertiesToolInstance;
 
     private java.lang.Boolean publishRight;
 
@@ -40,8 +44,10 @@ public class RenderInfoResult  implements java.io.Serializable {
            org.edu_sharing.webservices.types.KeyValue[] labels,
            java.lang.String mdsTemplate,
            java.lang.String mimeTypeUrl,
+           java.lang.String[] permissions,
            java.lang.String previewUrl,
            org.edu_sharing.webservices.types.KeyValue[] properties,
+           org.edu_sharing.webservices.types.KeyValue[] propertiesToolInstance,
            java.lang.Boolean publishRight,
            org.edu_sharing.webservices.usage.UsageResult usage,
            java.lang.Boolean userReadAllowed) {
@@ -51,8 +57,10 @@ public class RenderInfoResult  implements java.io.Serializable {
            this.labels = labels;
            this.mdsTemplate = mdsTemplate;
            this.mimeTypeUrl = mimeTypeUrl;
+           this.permissions = permissions;
            this.previewUrl = previewUrl;
            this.properties = properties;
+           this.propertiesToolInstance = propertiesToolInstance;
            this.publishRight = publishRight;
            this.usage = usage;
            this.userReadAllowed = userReadAllowed;
@@ -180,6 +188,26 @@ public class RenderInfoResult  implements java.io.Serializable {
 
 
     /**
+     * Gets the permissions value for this RenderInfoResult.
+     * 
+     * @return permissions
+     */
+    public java.lang.String[] getPermissions() {
+        return permissions;
+    }
+
+
+    /**
+     * Sets the permissions value for this RenderInfoResult.
+     * 
+     * @param permissions
+     */
+    public void setPermissions(java.lang.String[] permissions) {
+        this.permissions = permissions;
+    }
+
+
+    /**
      * Gets the previewUrl value for this RenderInfoResult.
      * 
      * @return previewUrl
@@ -216,6 +244,26 @@ public class RenderInfoResult  implements java.io.Serializable {
      */
     public void setProperties(org.edu_sharing.webservices.types.KeyValue[] properties) {
         this.properties = properties;
+    }
+
+
+    /**
+     * Gets the propertiesToolInstance value for this RenderInfoResult.
+     * 
+     * @return propertiesToolInstance
+     */
+    public org.edu_sharing.webservices.types.KeyValue[] getPropertiesToolInstance() {
+        return propertiesToolInstance;
+    }
+
+
+    /**
+     * Sets the propertiesToolInstance value for this RenderInfoResult.
+     * 
+     * @param propertiesToolInstance
+     */
+    public void setPropertiesToolInstance(org.edu_sharing.webservices.types.KeyValue[] propertiesToolInstance) {
+        this.propertiesToolInstance = propertiesToolInstance;
     }
 
 
@@ -306,12 +354,18 @@ public class RenderInfoResult  implements java.io.Serializable {
             ((this.mimeTypeUrl==null && other.getMimeTypeUrl()==null) || 
              (this.mimeTypeUrl!=null &&
               this.mimeTypeUrl.equals(other.getMimeTypeUrl()))) &&
+            ((this.permissions==null && other.getPermissions()==null) || 
+             (this.permissions!=null &&
+              java.util.Arrays.equals(this.permissions, other.getPermissions()))) &&
             ((this.previewUrl==null && other.getPreviewUrl()==null) || 
              (this.previewUrl!=null &&
               this.previewUrl.equals(other.getPreviewUrl()))) &&
             ((this.properties==null && other.getProperties()==null) || 
              (this.properties!=null &&
               java.util.Arrays.equals(this.properties, other.getProperties()))) &&
+            ((this.propertiesToolInstance==null && other.getPropertiesToolInstance()==null) || 
+             (this.propertiesToolInstance!=null &&
+              java.util.Arrays.equals(this.propertiesToolInstance, other.getPropertiesToolInstance()))) &&
             ((this.publishRight==null && other.getPublishRight()==null) || 
              (this.publishRight!=null &&
               this.publishRight.equals(other.getPublishRight()))) &&
@@ -364,6 +418,17 @@ public class RenderInfoResult  implements java.io.Serializable {
         if (getMimeTypeUrl() != null) {
             _hashCode += getMimeTypeUrl().hashCode();
         }
+        if (getPermissions() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getPermissions());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getPermissions(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
         if (getPreviewUrl() != null) {
             _hashCode += getPreviewUrl().hashCode();
         }
@@ -372,6 +437,17 @@ public class RenderInfoResult  implements java.io.Serializable {
                  i<java.lang.reflect.Array.getLength(getProperties());
                  i++) {
                 java.lang.Object obj = java.lang.reflect.Array.get(getProperties(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
+        if (getPropertiesToolInstance() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getPropertiesToolInstance());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getPropertiesToolInstance(), i);
                 if (obj != null &&
                     !obj.getClass().isArray()) {
                     _hashCode += obj.hashCode();
@@ -436,6 +512,13 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("permissions");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "permissions"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
+        elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("previewUrl");
         elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "previewUrl"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
@@ -444,6 +527,13 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("properties");
         elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "properties"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "KeyValue"));
+        elemField.setNillable(true);
+        elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("propertiesToolInstance");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "propertiesToolInstance"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "KeyValue"));
         elemField.setNillable(true);
         elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));

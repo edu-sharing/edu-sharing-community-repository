@@ -24,12 +24,15 @@ import {Helper} from "../../../common/helper";
   styleUrls: ['share.component.scss']
 })
 export class WorkspaceShareComponent  {
-  public ALL_PERMISSIONS=["All","Read","Write","Delete",
-    "DeleteChildren","DeleteNode","AddChildren","Consumer",
+  public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
+    "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
-    "Publisher","ReadPermissions","ChangePermissions"];
+    "Publisher","ReadPermissions","ChangePermissions","CCPublish"];
   public PERMISSIONS_FORCES:any= [
+    ["Read",["ConsumerMetadata"]],
     ["Read",["Consumer"]],
+    ["ReadPreview",["Consumer"]],
+    ["ReadAll",["Consumer"]],
     ["Write",["Editor"]],
     ["DeleteChildren",["Delete"]],
     ["DeleteNode",["Delete"]],
@@ -111,6 +114,8 @@ export class WorkspaceShareComponent  {
 
   }
   public isCollection(){
+    if(this._node==null)
+      return true;
     return this._node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION)!=-1;
   }
   public openLink(){
@@ -132,10 +137,12 @@ export class WorkspaceShareComponent  {
   }
   @Input() set node (node : Node){
     this._node=node;
+    if(node==null)
+      return;
     if(this._node.isDirectory)
       this.currentType=[RestConstants.ACCESS_CONSUMER];
     if(this.currentPermissions) {
-      this.originalPermissions=JSON.parse(JSON.stringify(this.currentPermissions));
+      this.originalPermissions=Helper.deepCopy(this.currentPermissions);
       this.setPermissions(this.currentPermissions.permissions);
       this.inherited = this.currentPermissions.inherited;
       this.showLink=false;
@@ -146,14 +153,14 @@ export class WorkspaceShareComponent  {
       this.nodeApi.getNodePermissions(node.ref.id).subscribe((data: NodePermissions) => {
         //this.inherit=data.permissions.inheritedPermissions;
         if(data.permissions) {
-          this.originalPermissions=JSON.parse(JSON.stringify(data.permissions.localPermissions));
+          this.originalPermissions=Helper.deepCopy(data.permissions.localPermissions);
           this.setPermissions(data.permissions.localPermissions.permissions)
           this.inherited = data.permissions.localPermissions.inherited;
           this.updatePublishState();
         }
       },(error:any)=>this.toast.error(error));
     }
-    if(node.parent.id) {
+    if(node.parent && node.parent.id) {
       this.nodeApi.getNodePermissions(node.parent.id).subscribe((data: NodePermissions) => {
         if (data.permissions) {
           this.inherit = data.permissions.inheritedPermissions;
@@ -166,26 +173,31 @@ export class WorkspaceShareComponent  {
 
       }, (error: any) => this.toast.error(error));
       this.nodeApi.getNodeParents(node.ref.id).subscribe((data: NodeList) => {
-        this.inheritAllowed = data.nodes.length > 1;
+        this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
       });
     }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       this.isAdmin=data.isAdmin;
     });
-    this.nodeApi.getNodeMetadata(node.ref.id,[RestConstants.CM_OWNER,RestConstants.CM_CREATOR]).subscribe((data : NodeWrapper)=>{
-      console.log(data);
-      let authority=data.node.properties[RestConstants.CM_CREATOR][0];
-      let user=data.node.createdBy;
+    if(node.ref.id) {
+      this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.CM_OWNER, RestConstants.CM_CREATOR]).subscribe((data: NodeWrapper) => {
+        console.log(data);
+        let authority = data.node.properties[RestConstants.CM_CREATOR][0];
+        let user = data.node.createdBy;
 
-      if(data.node.properties[RestConstants.CM_OWNER]) {
-        authority = data.node.properties[RestConstants.CM_OWNER][0];
-        user = data.node.owner;
-      }
-      this.owner=new Permission();
-      this.owner.authority={authorityName:authority,authorityType:"USER"};
-      (this.owner as any).user=user;
-      this.owner.permissions=["Owner"];
-    });
+        if (data.node.properties[RestConstants.CM_OWNER]) {
+          authority = data.node.properties[RestConstants.CM_OWNER][0];
+          user = data.node.owner;
+        }
+        this.owner = new Permission();
+        this.owner.authority = {authorityName: authority, authorityType: "USER"};
+        (this.owner as any).user = user;
+        this.owner.permissions = ["Owner"];
+      });
+    }
+    else{
+      this.updatePublishState();
+    }
   }
   @Output() onClose=new EventEmitter();
   @Output() onLoading=new EventEmitter();
@@ -229,7 +241,7 @@ export class WorkspaceShareComponent  {
     if(type.wasMain)
       this.showChooseType=false;
     for(let permission of this.newPermissions){
-      permission.permissions=JSON.parse(JSON.stringify(this.currentType));
+      permission.permissions=Helper.deepCopy(this.currentType);
     }
   }
   public cancel(){
@@ -264,7 +276,7 @@ export class WorkspaceShareComponent  {
       permission.group=selected.profile;
     }
     permission.permissions=this.currentType;
-    permission=JSON.parse(JSON.stringify(permission));
+    permission=Helper.deepCopy(permission);
     if(!this.contains(this.permissions,permission,false)) {
       this.newPermissions.push(permission);
       this.permissions.push(permission);
@@ -275,7 +287,7 @@ export class WorkspaceShareComponent  {
     this.searchStr="";
   }
   private isNewPermission(p : Permission){
-    if(!this.originalPermissions.permissions)
+    if(!this.originalPermissions || !this.originalPermissions.permissions)
       return true;
     return !this.contains(this.originalPermissions.permissions,p,true);
     //return this.contains(this.newPermissions,p);
@@ -345,8 +357,8 @@ export class WorkspaceShareComponent  {
     this.applicationRef.tick();
   }
   public isImplicitPermission(permission:Permission,name:string){
-    if(name=="Consumer") // this is the default permission, can't be removed
-      return true;
+    //if(name=="Consumer") // this is the default permission, can't be removed
+    //  return true;
     if(name!="All" && permission.permissions.indexOf("All")!=-1) // coordinator implies all permissions
       return true;
     if(name!="Coordinator" && permission.permissions.indexOf("Coordinator")!=-1) // coordinator implies all permissions

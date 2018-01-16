@@ -31,6 +31,15 @@ export class RestAdminService {
     return this.connector.sendDataViaXHR(query,file,"POST","excel")
       .map((response:XMLHttpRequest) => {return JSON.parse(response.response)});
   }
+  public importCollections = (file : File,parent:string) : Observable<any> => {
+    let query=this.connector.createUrl("admin/:version/import/collections?parent=:parent",null,[
+      [":parent",parent]
+    ]);
+    let options=this.connector.getRequestOptions();
+
+    return this.connector.sendDataViaXHR(query,file,"POST","xml")
+      .map((response:XMLHttpRequest) => {return JSON.parse(response.response)});
+  }
   public addApplicationXml = (file : File) : Observable<any> => {
     let query=this.connector.createUrl("admin/:version/applications/xml",null);
     let options=this.connector.getRequestOptions();
@@ -75,12 +84,15 @@ export class RestAdminService {
     return this.connector.get(query,this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
-  public importOAI = (baseUrl:string,set:string,metadataPrefix:string,className:string,metadataset="",fileUrl=""): Observable<Response> => {
-    let query=this.connector.createUrl("admin/:version/import/oai?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix&className=:className&metadataset=:metadataset&fileUrl=:fileUrl",null,[
+  public importOAI = (baseUrl:string,set:string,metadataPrefix:string,className:string,importerClassName:string,recordHandlerClassName:string,binaryHandlerClassName:string,metadataset="",fileUrl=""): Observable<Response> => {
+    let query=this.connector.createUrl("admin/:version/import/oai?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix&className=:className&importerClassName=:importerClassName&recordHandlerClassName=:recordHandlerClassName&binaryHandlerClassName=:binaryHandlerClassName&metadataset=:metadataset&fileUrl=:fileUrl",null,[
       [":baseUrl",baseUrl],
       [":set",set],
       [":metadataPrefix",metadataPrefix],
       [":className",className],
+      [":importerClassName",importerClassName],
+      [":recordHandlerClassName",recordHandlerClassName],
+      [":binaryHandlerClassName",binaryHandlerClassName],
       [":metadataset",metadataset],
       [":fileUrl",fileUrl]
     ]);

@@ -1,6 +1,8 @@
 package org.edu_sharing.restservices.iam.v1;
 
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,6 +53,7 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -90,7 +93,7 @@ public class IamApi  {
     		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
     	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
     		@Context HttpServletRequest req) {
 
     	try {
@@ -101,7 +104,8 @@ public class IamApi  {
 	    					global==null ? true : global,
 	    					skipCount!=null ? skipCount : 0,
 	    	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
-	    					new SortDefinition(CCConstants.NAMESPACE_CM,sortProperties,sortAscending)				
+	    					new SortDefinition(CCConstants.NAMESPACE_CM,sortProperties,sortAscending),
+	    					null
 	    			);
 
 	    	List<UserSimple> result = new ArrayList<UserSimple>();
@@ -189,7 +193,7 @@ public class IamApi  {
     @Path("/people/{repository}/{person}/nodeList/{list}")    
     @ApiOperation(
     	value = "Get a specific node list for a user", 
-    	notes = "Will fail for guest")
+    	notes = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
@@ -207,12 +211,9 @@ public class IamApi  {
     		@ApiParam(value = "list name",required=true) @PathParam("list") String list,
     	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
     		@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    		@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+    		@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
     		@Context HttpServletRequest req) {
 		try{
-			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-			if(service.isGuest())
-				throw new Exception("Not allowed for guest user");
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
@@ -232,7 +233,7 @@ public class IamApi  {
     @Path("/people/{repository}/{person}/nodeList/{list}/{node}")    
     @ApiOperation(
     	value = "Add a node to node a list of a user", 
-    	notes = "Will fail for guest")
+    	notes = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
@@ -251,9 +252,6 @@ public class IamApi  {
     		@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true) @PathParam("node") String node,    		
     		@Context HttpServletRequest req) {
 		try{
-			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-			if(service.isGuest())
-				throw new Exception("Not allowed for guest user");
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
 	    	personDao.addNodeList(list, node);
@@ -266,7 +264,7 @@ public class IamApi  {
     @Path("/people/{repository}/{person}/nodeList/{list}/{node}")    
     @ApiOperation(
     	value = "Deelete a node of a node list of a user", 
-    	notes = "Will fail for guest")
+    	notes = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
@@ -285,9 +283,6 @@ public class IamApi  {
     		@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true) @PathParam("node") String node,    		
     		@Context HttpServletRequest req) {
 		try{
-			org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-			if(service.isGuest())
-				throw new Exception("Not allowed for guest user");
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
 	    	personDao.removeNodeList(list, node);
@@ -491,12 +486,12 @@ public class IamApi  {
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
 
     public Response changeUserProfile(
@@ -514,25 +509,73 @@ public class IamApi  {
 	    		    	
 	    	return Response.status(Response.Status.OK).build();
 	    	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
+    		return ErrorResponse.createResponse(t);
+    	}
+    }
+    @PUT
+    @Path("/people/{repository}/{person}/avatar")    
+    @ApiOperation(
+    	value = "Set avatar of the user.", 
+    	notes = "Set avatar of the user. (To set foreign avatars, admin rights are required.)")
+    @ApiResponses(
+    	value = { 
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+
+    public Response changeUserAvatar(
+    		@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+    	    @ApiParam(value = "avatar image" ,required=true ) @FormDataParam("avatar") InputStream avatar,
+    		@Context HttpServletRequest req) {
+
+    	try {
     		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
+	    	
+	    	personDao.changeAvatar(avatar);
+	    		    	
+	    	return Response.status(Response.Status.OK).build();
+	    	
+    	} catch (Throwable t) {
+ 	
+    		return ErrorResponse.createResponse(t);
+    	}
+    }
+    @DELETE
+    @Path("/people/{repository}/{person}/avatar")    
+    @ApiOperation(
+    	value = "Remove avatar of the user.", 
+    	notes = "Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)")
+    @ApiResponses(
+    	value = { 
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+
+    public Response removeUserAvatar(
+    		@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+    		@ApiParam(value = "username (or \"-me-\" for current user)",required=true, defaultValue="-me-" ) @PathParam("person") String person,
+    		@Context HttpServletRequest req) {
+
+    	try {
+	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
+	    	personDao.removeAvatar();	    		    	
+	    	return Response.status(Response.Status.OK).build();
+	    	
+    	} catch (Throwable t) {
+    		return ErrorResponse.createResponse(t);
     	}
     }
 
@@ -619,7 +662,7 @@ public class IamApi  {
 
     @ApiResponses(
         	value = { 
-    	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UserEntries.class),        
+    	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = GroupEntries.class),        
     	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
     	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
     	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -630,15 +673,19 @@ public class IamApi  {
         public Response searchGroups(
         		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
         		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
+        		@ApiParam(value = "find a specific groupType",required=false) @QueryParam("groupType") String groupType,
         		@ApiParam(value = "global search context, defaults to true, otherwise just searches for groups within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
         		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
         	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
         	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-        	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+        	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
         		@Context HttpServletRequest req) {
 
         	try {
-        		
+        		HashMap<String, String> props = new HashMap<String,String>();
+        		if(groupType!=null && !groupType.isEmpty()){
+        			props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), groupType);
+        		}
     	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
     	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).searchAuthorities(
     	    					AuthorityType.GROUP,
@@ -646,7 +693,8 @@ public class IamApi  {
     	    					global==null ? true : global, 
     	    					skipCount!=null ? skipCount : 0,
     	    					maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
-    	    					new SortDefinition(sortProperties,sortAscending)				
+    	    					new SortDefinition(sortProperties,sortAscending),
+    	    					props
     	    			);
 
     	    	List<Group> result = new ArrayList<Group>();
@@ -937,7 +985,7 @@ public class IamApi  {
     		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
     	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
  
     		@Context HttpServletRequest req) {
 

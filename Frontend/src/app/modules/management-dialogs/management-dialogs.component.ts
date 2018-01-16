@@ -4,16 +4,26 @@ import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
 import {Toast} from "../../common/ui/toast";
 import {RestConstants} from "../../common/rest/rest-constants";
-import {NodeWrapper,Node} from "../../common/rest/data-object";
+import {NodeWrapper, Node, Collection} from "../../common/rest/data-object";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
+import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../common/ui/ui-animation";
+import {UIHelper} from "../../common/ui/ui-helper";
+import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 
 @Component({
   selector: 'workspace-management',
   templateUrl: 'management-dialogs.component.html',
-  styleUrls: ['management-dialogs.component.scss']
+  styleUrls: ['management-dialogs.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('fromLeft', UIAnimation.fromLeft()),
+    trigger('fromRight',UIAnimation.fromRight())
+  ]
 })
 export class WorkspaceManagementDialogsComponent  {
   public globalProgress = false;
@@ -21,12 +31,16 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
   @Input() fileIsOver = false;
+  @Input() addToCollection:Node[];
+  @Output() addToCollectionChange = new EventEmitter();
   @Input() filesToUpload : Node[]
   @Output() filesToUploadChange = new EventEmitter();
   @Input() parent : Node;
   @Output() showLtiToolsChange = new EventEmitter();
   @Input() nodeLicense : Node[];
   @Output() nodeLicenseChange = new EventEmitter();
+  @Input() nodeReport : Node;
+  @Output() nodeReportChange = new EventEmitter();
   @Input() nodeMetadata : Node;
   @Input() nodeContributor : Node;
   @Output() nodeContributorChange = new EventEmitter();
@@ -40,13 +54,20 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onCloseMetadata=new EventEmitter();
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
+  @Output() onCloseAddToCollection=new EventEmitter();
   public createMetadata: string;
   public metadataParent: Node;
   public ltiToolConfig : Node;
   public ltiObject: Node;
+  public dialogTitle:string;
+  public dialogMessage:string;
+  public dialogMessageParameters:any;
+  public dialogCancelable:boolean;
+  public dialogButtons:DialogButton[];
   private currentLtiTool: Node;
   private ltiToolRefresh: Boolean;
   private nodeDeleteOnCancel: boolean;
+
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if(event.key=="Escape"){
@@ -54,22 +75,37 @@ export class WorkspaceManagementDialogsComponent  {
         if(this.mdsRef.handleKeyboardEvent(event))
           return;
         this.closeEditor(false);
+        event.stopPropagation();
+        return;
+      }
+      if(this.addToCollection!=null){
+        this.cancelAddToCollection();
+        event.stopPropagation();
         return;
       }
       if(this.nodeContributor!=null){
         this.closeContributor();
+        event.stopPropagation();
         return;
       }
       if(this.nodeLicense!=null){
         this.closeLicense();
+        event.stopPropagation();
         return;
       }
       if(this.showLtiTools){
         this.closeLtiTools();
+        event.stopPropagation();
+        return;
+      }
+      if(this.nodeReport!=null){
+        this.closeReport();
+        event.stopPropagation();
         return;
       }
       if(this.ltiObject){
         this.ltiObject=null;
+        event.stopPropagation();
         return;
       }
     }
@@ -77,11 +113,16 @@ export class WorkspaceManagementDialogsComponent  {
   public constructor(
     private nodeService:RestNodeService,
     private toolService:RestToolService,
+    private collectionService:RestCollectionService,
     private translate:TranslateService,
     private config:ConfigurationService,
     private searchService:RestSearchService,
     private toast:Toast,
   ){
+   }
+   private closeAddToCollection(){
+      this.addToCollection=null;
+      this.addToCollectionChange.emit(null);
    }
  private closeLtiToolConfig(){
     this.ltiToolConfig=null;
@@ -196,4 +237,40 @@ export class WorkspaceManagementDialogsComponent  {
       win.close();
     });
   }
+
+  public closeReport() {
+    this.nodeReport=null;
+    this.nodeReportChange.emit(null);
+  }
+  private cancelAddToCollection(){
+    this.dialogTitle=null;
+    this.addToCollection=null;
+    this.addToCollectionChange.emit(null);
+    this.onCloseAddToCollection.emit();
+  }
+  public addToCollectionList(collection:Collection,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
+    console.log(collection);
+    if(!force && (collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
+      this.dialogTitle='DIALOG.COLLECTION_SHARE_PUBLIC';
+      this.dialogMessage='DIALOG.COLLECTION_SHARE_PUBLIC_INFO';
+      this.dialogCancelable=true;
+      this.dialogMessageParameters={collection:RestHelper.getTitle(collection)};
+      this.dialogButtons=DialogButton.getNextCancel(()=>{this.dialogTitle=null},()=>{
+        this.addToCollectionList(collection,list,close,callback,true);
+      });
+      return;
+    }
+    if(close)
+      this.cancelAddToCollection();
+    else{
+      this.dialogTitle=null;
+    }
+    this.globalProgress=true;
+    UIHelper.addToCollection(this.collectionService,this.toast,collection,list,()=>{
+      this.globalProgress=false;
+      if(callback)
+        callback();
+    });
+  }
+
 }

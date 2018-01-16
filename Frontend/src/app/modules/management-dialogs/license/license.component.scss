@@ -32,6 +32,10 @@ h5{
 }
 .ccAuthorGroup{
   padding:10px;
+  margin:0 20px;
+}
+.ccAuthorGroupOer{
+  margin:0 40px;
 }
 .cc h5{
   padding-bottom:5px;
@@ -44,6 +48,62 @@ h5{
   h4{
     margin: 10px 0px 20px 0px;
   }
+  float:left;
+  width: calc(100% + 40px);
+}
+.licenseName{
+  display: table;
+  margin: auto;
+  padding: 10px 0;
+  h4,div{
+    display: table-cell;
+  }
+}
+.oerStatus{
+  padding-left: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 80%;
+  color:$textOnPrimary;
+  .oer{
+    background: #0b0;
+  }
+  .notOer{
+    background: #e80;
+  }
+  .oer,.notOer{
+    padding: 2px 12px;
+    border-radius: 50%;
+  }
+}
+.oerLicenses{
+  float:left;
+  width:100%;
+  .ccAuthor{
+    margin-left: 20px;
+  }
+}
+.authorFreetext{
+  textarea{
+    min-height: 1.5rem;
+  }
+}
+.oerCC0,.oerCCBY{
+  >h4{
+    color:$textLight;
+    font-weight: bold;
+  }
+  .radio{
+    padding-left:20px;
+    padding-right:20px;
+  }
+}
+.oerSelect{
+  float:right;
+}
+.licenseTypeLabel{
+  float:left;
+  width:100%;
 }
 .currentLicenseIcon{
   height:40px;
@@ -51,6 +111,9 @@ h5{
 }
 .currentLicenseDescription{
   color: $textLight;
+}
+.customLicenseDescription{
+  white-space: pre-line;
 }
 .currentLicenseDescription div{
   margin:0 10px;
@@ -81,6 +144,7 @@ h5{
 }
 .licenseCheckbox{
   padding-top:20px;
+  float:left;
 }
 .licenseCheckbox label{
   width:100%;

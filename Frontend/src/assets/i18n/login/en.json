@@ -10,6 +10,7 @@
     "ERROR":"Invalid credentials",
     "REGISTER_TEXT":"No account yet?",
     "REGISTER_LINK":"Create one",
-    "SAFE_PREVIOUS":"In order to login to the safe space, please login to the regular workspace first"
+    "SAFE_PREVIOUS":"In order to login to the safe space, please login to the regular workspace first",
+    "NO_ACCESS":"No permissions to access this area"
   }
 }

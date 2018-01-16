@@ -43,6 +43,8 @@
 		<property file="build.number" prefix="tmp"></property>
 		
 	
+		<copyfile src="version.html.template" dest="${src.dir}/org/edu_sharing/repository/public/version.html" />
+		
 		<tstamp>
   			<format property="TODAY" pattern="yyyy-MM-dd"/>
 		</tstamp>

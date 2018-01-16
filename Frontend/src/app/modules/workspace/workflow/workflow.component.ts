@@ -3,7 +3,7 @@ import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {
   NodeWrapper, Node, IamUsers, WorkflowEntry, NodePermissions,
-  Permission, UserSimple
+  Permission, UserSimple, WorkflowDefinition
 } from "../../../common/rest/data-object";
 import {VCard} from "../../../common/VCard";
 import {Toast} from "../../../common/ui/toast";
@@ -16,7 +16,8 @@ import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {AuthorityNamePipe} from "../../../common/ui/authority-name.pipe";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
-import {RestHelper} from "../../../common/rest/rest-helper";
+import {UIHelper} from "../../../common/ui/ui-helper";
+import {ConfigurationService} from "../../../common/services/configuration.service";
 
 @Component({
   selector: 'workspace-workflow',
@@ -33,16 +34,11 @@ export class WorkspaceWorkflowComponent  {
   public node: Node;
   public authoritySuggestions : SuggestItem[];
   public receivers:UserSimple[]=[];
-  public status=WorkspaceWorkflowComponent.STATUS_UNCHECKED;
+  public status=RestConstants.WORKFLOW_STATUS_UNCHECKED;
+  public initialStatus=RestConstants.WORKFLOW_STATUS_UNCHECKED;
   public chooseStatus = false;
   public comment:string;
-  public validStatus=[
-    WorkspaceWorkflowComponent.STATUS_UNCHECKED,WorkspaceWorkflowComponent.STATUS_TO_CHECK,WorkspaceWorkflowComponent.STATUS_HASFLAWS,WorkspaceWorkflowComponent.STATUS_CHECKED
-  ];
-  public static STATUS_UNCHECKED='100_unchecked';
-  public static STATUS_TO_CHECK='200_tocheck';
-  public static STATUS_HASFLAWS='300_hasflaws';
-  public static STATUS_CHECKED='400_checked';
+  public validStatus:WorkflowDefinition[];
   public history: WorkflowEntry[];
   public globalAllowed: boolean;
   public globalSearch = false;
@@ -60,11 +56,8 @@ export class WorkspaceWorkflowComponent  {
           this.receivers = workflow[0].receiver;
         if(!this.receivers || (this.receivers.length==1 && !this.receivers[0]))
           this.receivers=[];
-        this.status=this.node.properties[RestConstants.CCM_PROP_WF_STATUS];
-        if(this.status && !(this.status.length==1 && !this.status[0]))
-          this.status=this.status[0];
-        else
-          this.status=WorkspaceWorkflowComponent.STATUS_UNCHECKED;
+        this.status=NodeHelper.getWorkflowStatus(this.config,this.node);
+        this.initialStatus=this.status;
       },(error:any)=>{
         this.toast.error(error);
         this.cancel();
@@ -89,10 +82,27 @@ export class WorkspaceWorkflowComponent  {
       },
       error => console.log(error));
   }
+  public isAllowedAsNext(status:WorkflowDefinition){
+    if(!this.initialStatus.next)
+      return true;
+    if(this.initialStatus.id==status.id)
+      return true;
+    return this.initialStatus.next.indexOf(status.id)!=-1;
+  }
+  public setStatus(status:WorkflowDefinition){
+    if(!this.isAllowedAsNext(status)){
+      return;
+    }
+    this.status=status;
+    this.chooseStatus=false;
+  }
   private addSuggestion(data: any) {
     /*if(this.receivers.indexOf(data.item.id)==-1)
       this.receivers.push(data.item.id);*/
     this.receivers=[data.item.originalObject];
+  }
+  public getWorkflowForId(id:string){
+    return NodeHelper.getWorkflowStatusById(this.config,id);
   }
   public removeReceiver(data : UserSimple){
     let pos=this.receivers.indexOf(data);
@@ -108,7 +118,7 @@ export class WorkspaceWorkflowComponent  {
       this.toast.error(null,'WORKSPACE.WORKFLOW.NO_COMMENT');
       return;
     }
-    let receivers=this.status==WorkspaceWorkflowComponent.STATUS_CHECKED ? [] : this.receivers;
+    let receivers=this.status.hasReceiver ? this.receivers : [];
     if(receivers.length){
       this.nodeService.getNodePermissionsForUser(this._nodeId,receivers[0].authorityName).subscribe((data:string[])=>{
         if(data.indexOf(RestConstants.PERMISSION_COLLABORATOR)==-1 && data.indexOf(RestConstants.PERMISSION_COORDINATOR)==-1){
@@ -141,7 +151,7 @@ export class WorkspaceWorkflowComponent  {
     }
     entry.receiver=receiversClean;
     entry.comment=this.comment;
-    entry.status=this.status;
+    entry.status=this.status.id;
     this.onLoading.emit(true);
     this.nodeService.addWorkflow(this._nodeId,entry).subscribe(()=>{
       this.toast.toast('WORKSPACE.TOAST.WORKFLOW_UPDATED');
@@ -159,10 +169,14 @@ export class WorkspaceWorkflowComponent  {
     private nodeService:RestNodeService,
     private translate:TranslateService,
     private iam:RestIamService,
+    private config:ConfigurationService,
     private connector:RestConnectorService,
     private toast:Toast,
   ){
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
+    this.config.getAll().subscribe(()=> {
+      this.validStatus = NodeHelper.getWorkflows(this.config);
+    });
   }
   private receiversChanged(){
       let prop=this.node.properties[RestConstants.CCM_PROP_WF_RECEIVER];
@@ -180,7 +194,7 @@ export class WorkspaceWorkflowComponent  {
   private statusChanged() {
     if(this.node.properties[RestConstants.CCM_PROP_WF_STATUS])
       return this.status!=this.node.properties[RestConstants.CCM_PROP_WF_STATUS][0];
-    return this.status!=WorkspaceWorkflowComponent.STATUS_UNCHECKED;
+    return this.status!=RestConstants.WORKFLOW_STATUS_UNCHECKED;
   }
 
   private addWritePermission(authority: string) {
@@ -189,8 +203,7 @@ export class WorkspaceWorkflowComponent  {
       permission.authority={authorityName:authority,authorityType:RestConstants.AUTHORITY_TYPE_USER};
       permission.permissions=[RestConstants.PERMISSION_COLLABORATOR];
       data.permissions.localPermissions.permissions.push(permission);
-      let permissions=RestHelper.copyAndCleanPermissions(data.permissions.localPermissions.permissions,data.permissions.localPermissions.inherited);
-      this.nodeService.setNodePermissions(this._nodeId,permissions,false).subscribe(()=>{
+      this.nodeService.setNodePermissions(this._nodeId,data.permissions.localPermissions,false).subscribe(()=>{
         this.saveWorkflow();
       },(error:any)=>this.toast.error(error));
     },(error:any)=>this.toast.error(error));

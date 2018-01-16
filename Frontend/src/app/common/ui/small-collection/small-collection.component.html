@@ -1,0 +1,13 @@
+<div class="smallCollection" *ngIf="_collection">
+  <div class="image" [class.image-icon]="_collection.preview.isIcon" [style.background-color]="_collection.color">
+    <img [src]="_collection.preview.url+'&crop=true&width=65&height=65'" *ngIf="!_collection.preview.isIcon">
+    <div *ngIf="_collection.preview.isIcon" class="icon">
+      <i class="material-icons" [style.color]="_collection.color">layers</i>
+    </div>
+  </div>
+  <div class="right">
+    <div class="title" *ngIf="titleLabel">{{titleLabel |translate:{title:_collection.title} }}</div>
+    <div class="title" *ngIf="!titleLabel">{{_collection.title}}</div>
+    <div class="scope" [innerHTML]="getAttribute('scope')"></div>
+  </div>
+</div>

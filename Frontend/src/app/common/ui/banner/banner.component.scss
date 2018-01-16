@@ -1,0 +1,12 @@
+$bannerHeight:130px;
+
+.banner{
+  position: absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:$bannerHeight;
+  z-index: 100;
+  background-repeat:repeat-y;
+  background-position: 0 0;
+}

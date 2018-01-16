@@ -8,6 +8,7 @@ import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 
 import * as EduData from "../data-object";
+import {CollectionWrapper} from "../data-object";
 
 @Injectable()
 export class RestCollectionService {
@@ -25,8 +26,17 @@ export class RestCollectionService {
     ]);
     return this.connector.put(query,null,this.connector.getRequestOptions());
   }
-
-  public getCollection = (collection : string,repository=RestConstants.HOME_REPOSITORY): Observable<EduData.CollectionWrapper> => {
+  public setPinning = (collections : string[],repository=RestConstants.HOME_REPOSITORY): Observable<Response> => {
+    let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/pinning",repository);
+    return this.connector.post(query,JSON.stringify(collections),this.connector.getRequestOptions());
+  }
+  public setOrder = (collection : string,nodes : string[]=[],repository=RestConstants.HOME_REPOSITORY): Observable<Response> => {
+    let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection/order",repository,[
+      [":collection",collection],
+    ]);
+    return this.connector.post(query,JSON.stringify(nodes),this.connector.getRequestOptions());
+  }
+  public getCollection = (collection : string,repository=RestConstants.HOME_REPOSITORY): Observable<CollectionWrapper> => {
     let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection",repository,[
       [":collection",collection],
     ]);
@@ -51,7 +61,7 @@ export class RestCollectionService {
       collection : string,
       scope = RestConstants.COLLECTIONSCOPE_ALL,
       propertyFilter : string[] = [],
-      request:any,
+      request:any = null,
       repository=RestConstants.HOME_REPOSITORY
     ): Observable<EduData.CollectionContent> => {
     let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection/children?scope=:scope&:propertyFilter&:request",repository,[
@@ -71,26 +81,15 @@ export class RestCollectionService {
   }
 
   public createCollection = (
-      title:string,
-      description:string="",
-      color:string="#759CB7",
-      scope:string=RestConstants.COLLECTIONSCOPE_MY,
+      collection:EduData.Collection,
       parentCollectionId:string=RestConstants.ROOT, repository:string=RestConstants.HOME_REPOSITORY
     ) : Observable<EduData.CollectionWrapper> => {
 
     let query:string = this.connector.createUrl("collection/:version/collections/:repository/:collectionid/children",repository,[[":collectionid",parentCollectionId]]);
-
-    let body={
-      title:title,
-      description:description,
-      type:"default",
-      scope:scope,
-      color:color
-    };
     let options:RequestOptionsArgs = this.connector.getRequestOptions();
     options.headers.append('Accept', 'text/html');
 
-    return this.connector.post(query, JSON.stringify(body), options)
+    return this.connector.post(query, JSON.stringify(collection), options)
       .map((response: Response) => response.json());
 
   }

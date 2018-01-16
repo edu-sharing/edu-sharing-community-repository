@@ -1,6 +1,9 @@
 import {Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {Node, NodeList, IamUsers, IamUser, NodeWrapper} from "../../rest/data-object";
+import {TemporaryStorageService} from "../../services/temporary-storage.service";
+import {UIHelper} from "../ui-helper";
+import {UIService} from "../../services/ui.service";
 
 @Component({
   selector: 'breadcrumbs',
@@ -22,6 +25,12 @@ export class BreadcrumbsComponent{
    * @type {boolean}
    */
   @Input() clickable = true;
+  /**
+   * Allow Dropping of other items (nodes) on to the breadcrumb items
+   * A function that should return true or false and gets the same argument object as the onDrop callback
+   * @type {boolean}
+   */
+  @Input() canDrop:Function = ()=>{return false};
   private mainParents: Node[];
 
   /**
@@ -34,6 +43,15 @@ export class BreadcrumbsComponent{
       this.findMainParent();
     })
   }
+
+  /**
+   * Called when an item is dropped on the breadcrumbs
+   *
+   * @type {EventEmitter<any>}
+   */
+  @Output() onDrop=new EventEmitter();
+
+  private dragHover:Node;
   private _searchQuery : string;
   private isBuilding = false;
 
@@ -89,8 +107,16 @@ export class BreadcrumbsComponent{
     this.onClick.emit(position);
   }
 
-  constructor(private node : RestNodeService){}
-
+  constructor(private node : RestNodeService,private storage:TemporaryStorageService,private ui:UIService){}
+  private allowDrag(event:any,target:Node){
+    if(UIHelper.handleAllowDragEvent(this.storage,this.ui,event,target,this.canDrop)) {
+      this.dragHover = target;
+    }
+  }
+  private drop(event:any,target:Node){
+    this.dragHover=null;
+    UIHelper.handleDropEvent(this.storage,this.ui,event,target,this.onDrop);
+  }
   private generateShort() {
 	  this.addSearch();
     if(this._breadcrumbsAsNode.length<2)
@@ -101,8 +127,6 @@ export class BreadcrumbsComponent{
 
   private addSearch() {
     let add=!(this._breadcrumbsAsNode.length>0 && this._breadcrumbsAsNode[0] && this._breadcrumbsAsNode[0].type=="SEARCH");
-    console.log(JSON.parse(JSON.stringify(this._breadcrumbsAsNode)));
-    console.log("add search "+add+" "+this._searchQuery);
     if(this._searchQuery){
       let search=new Node();
       search.name="'"+this._searchQuery+"'";

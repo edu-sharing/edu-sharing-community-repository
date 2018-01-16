@@ -8,8 +8,7 @@ import {
 } from "../../common/rest/data-object";
 import {RestIamService} from "../../common/rest/services/rest-iam.service";
 import {Router, Params, ActivatedRoute, Routes} from "@angular/router";
-import {RouterComponent} from "../../router/router.component";
-import {OptionItem} from "../../common/ui/actionbar/actionbar.component";
+import {OptionItem} from "../../common/ui/actionbar/option-item";
 import {DialogButton, ModalDialogComponent} from "../../common/ui/modal-dialog/modal-dialog.component";
 import {RestConstants} from "../../common/rest/rest-constants";
 import {RestHelper} from "../../common/rest/rest-helper";
@@ -18,12 +17,10 @@ import {TemporaryStorageService} from "../../common/services/temporary-storage.s
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {SessionStorageService} from "../../common/services/session-storage.service";
-import {environment} from "../../common/rest/environments/environment";
 import {NodeHelper} from "../../common/ui/node-helper";
 import {UIService} from "../../common/services/ui.service";
 import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
 import {RestConnectorsService} from "../../common/rest/services/rest-connectors.service";
-import {NodeRenderComponent} from "../../common/ui/node-render/node-render.component";
 import {KeyEvents} from "../../common/ui/key-events";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {FrameEventsService} from "../../common/services/frame-events.service";
@@ -31,9 +28,11 @@ import {Title} from "@angular/platform-browser";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {Http,Response} from "@angular/http";
 import {trigger} from "@angular/animations";
-import {MdsComponent} from "../../common/ui/mds/mds.component";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {UIConstants} from "../../common/ui/ui-constants";
+import {RestSearchService} from "../../common/rest/services/rest-search.service";
+import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
+import {Helper} from "../../common/helper";
 
 @Component({
   selector: 'workspace-main',
@@ -145,6 +144,12 @@ export class WorkspaceMainComponent{
     let hasOpenWindow=this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
     if(event.code=="KeyX" && (event.ctrlKey || this.appleCmd) && this.selection.length && !hasOpenWindow && !fromInputField){
       this.cutCopyNode(null,false);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    if(event.code=="F2" && this.selection.length==1 && !hasOpenWindow && !fromInputField){
+      this.editNode(this.selection[0]);
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -280,9 +285,10 @@ export class WorkspaceMainComponent{
 
   }
   private editConnector(node : Node=null,type : Filetype=null,win : any = null,connectorType : Connector = null){
-    this.connectors.openConnector(this.connectorList,this.getNodeList(node)[0],type,win,connectorType);
+    UIHelper.openConnector(this.connectors,this.event,this.toast,this.connectorList,this.getNodeList(node)[0],type,win,connectorType);
   }
   private handleDrop(event:any){
+    console.log("handle drop "+event);
     for(let s of event.source) {
       if (event.target.ref.id == s.ref.id || event.target.ref.id==s.parent.id) {
         this.toast.error(null, "WORKSPACE.SOURCE_TARGET_IDENTICAL");
@@ -296,7 +302,7 @@ export class WorkspaceMainComponent{
     if(event.event.altKey){
       this.toast.error(null,"WORKSPACE.FEATURE_NOT_IMPLEMENTED");
     }
-    else if(event.event.ctrlKey){
+    else if(event.type=='copy'){
       this.copyNode(event.target,event.source);
     }
     else{
@@ -314,6 +320,7 @@ export class WorkspaceMainComponent{
     console.log(event);
     */
   }
+  canDropBreadcrumbs = (event:any)=>{return event.target.ref.id!=this.currentFolder.ref.id};
   private moveNode(target:Node,source:Node[],position = 0){
     this.globalProgress=true;
     if(position>=source.length){
@@ -363,7 +370,7 @@ export class WorkspaceMainComponent{
       this.isSafe = params['mode'] == 'safe';
       this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
         if(data.statusCode!=RestConstants.STATUS_CODE_OK){
-          UIHelper.goToLogin(this.router,this.config);
+          RestHelper.goToLogin(this.router,this.config);
           return;
         }
         this.iam.getUser().subscribe((user : IamUser) => {
@@ -613,7 +620,7 @@ export class WorkspaceMainComponent{
     let list=this.getNodeList(node);
     if(!list || !list.length)
       return;
-    list=JSON.parse(JSON.stringify(list));
+    list=Helper.deepCopy(list);
     let clip : ClipboardObject={sourceNode : this.currentFolder,nodes:list,copy:copy};
     this.storage.set("workspace_clipboard",clip);
     this.toast.toast("WORKSPACE.TOAST.CUT_COPY",{count:list.length});
@@ -715,13 +722,8 @@ export class WorkspaceMainComponent{
       nodes=null;
     let options: OptionItem[] = [];
 
-    let allFiles=true;
-    if(nodes) {
-      for (let node of nodes) {
-        if (node.isDirectory)
-          allFiles = false;
-      }
-    }
+    let allFiles = NodeHelper.allFiles(nodes);
+
     let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
     if(this.currentFolder && !nodes && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed) {
       options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
@@ -760,30 +762,25 @@ export class WorkspaceMainComponent{
         options.push(edit);
     }
     if(nodes && nodes.length && allFiles) {
-      let collection = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", (node: Node) => this.addToCollection(node));
-      collection.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
-      collection.showAsAction=true;
-      if (!this.isSafe)
+      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node:Node)=>this.addToCollection(node));
+      if (collection && !this.isSafe)
         options.push(collection);
     }
 
     if (nodes && nodes.length == 1) {
-      let share = new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", (node: Node) => this.shareNode(node));
-      share.isSeperate = allFiles;
-      share.showAsAction = true;
-      share.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS) && (
-        (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
-        || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
-      );
-      if (this.isSafe && this.root!='SHARED_FILES')
-        share.isEnabled=false;
-      options.push(share);
-      let shareLink = new OptionItem("WORKSPACE.OPTION.SHARE_LINK", "link", (node: Node) => this.setShareLinkNode(node));
-      shareLink.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
-
-      if (nodes && !nodes[0].isDirectory && !this.isSafe)
+      let share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,(node: Node) => this.shareNode(node));
+      if(share) {
+        share.isEnabled = share.isEnabled && (
+          (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
+          || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
+        );
+        if (this.isSafe && this.root != 'SHARED_FILES')
+          share.isEnabled = false;
+        options.push(share);
+      }
+      let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,(node: Node) => this.setShareLinkNode(node));
+      if (shareLink && !this.isSafe)
         options.push(shareLink);
-
     }
     if(nodes) {
       let license = new OptionItem("WORKSPACE.OPTION.LICENSE", "copyright", (node: Node) => this.editLicense(node));
@@ -810,16 +807,10 @@ export class WorkspaceMainComponent{
 
 
     }
+    let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,(node: Node) => this.downloadNode(node));
+    if(download)
+      options.push(download);
     if (nodes && nodes.length) {
-      if(allFiles){
-        let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download", (node: Node) => this.downloadNode(node));
-        download.enabledCallback=(node:Node)=>{
-          return nodes && nodes[0].downloadUrl && nodes[0].properties && !nodes[0].properties[RestConstants.CCM_PROP_IO_WWWURL];
-        }
-        if(download.isEnabled)
-          options.push(download);
-      }
-
       let cut=new OptionItem("WORKSPACE.OPTION.CUT", "content_cut", (node: Node) => this.cutCopyNode(node, false));
       cut.isSeperate = true;
       options.push(cut);
@@ -830,7 +821,7 @@ export class WorkspaceMainComponent{
       options.push(del);
 
       let custom=this.config.instant("nodeOptions");
-      NodeHelper.addCustomNodeOptions(this.toast,this.http,this.connector,custom, nodes, options,(load:boolean)=>this.globalProgress=load);
+      NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.currentNodes, nodes, options,(load:boolean)=>this.globalProgress=load);
     }
     if(!fromList && this.root!='RECYCLE') {
       this.viewToggle = new OptionItem("", this.viewType==0 ? "view_module" : "list", (node: Node) => this.toggleView());
@@ -907,7 +898,10 @@ export class WorkspaceMainComponent{
   }
   private openNode(node : Node,useConnector=true) {
     if(!node.isDirectory){
-      if(RestToolService.isLtiObject(node)){
+      if(RestSearchService.isSavedSearchObject(node)){
+        UIHelper.routeToSearchNode(this.router,node);
+      }
+      else if(RestToolService.isLtiObject(node)){
         this.toolService.openLtiObject(node);
       }
       else if(useConnector && RestConnectorsService.connectorSupportsEdit(this.connectorList,node)){
@@ -942,7 +936,6 @@ export class WorkspaceMainComponent{
     let folder=this.currentFolder;
     this.currentFolder=null;
     this.searchQuery=null;
-    //this.currentFolder=JSON.parse(JSON.stringify(this.currentFolder));
     this.selection=[];
     this.actionOptions=this.getOptions(this.selection,false);
     let path=this.path;
@@ -1027,30 +1020,9 @@ export class WorkspaceMainComponent{
     this.dropdownBottom = "30px";
     this.dropdownRight = "70px";
   }
-  private addToCollectionList(collection:Node[],nodes=this.addNodesToCollection,position=0,error=false){
-    if(position>=nodes.length){
-      if(!error)
-        this.toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION",{count:nodes.length,collection:collection[0].title});
-      this.globalProgress=false;
-      return;
-    }
-    this.addNodesToCollection=null;
-    this.globalProgress=true;
-    this.collectionApi.addNodeToCollection(collection[0].ref.id,nodes[position].ref.id).subscribe(()=>{
-        this.addToCollectionList(collection,nodes,position+1,error);
-      },
-      (error:any)=>{
-        if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
-          this.toast.error(null,"WORKSPACE.TOAST.NODE_EXISTS_IN_COLLECTION",{name:nodes[position].name});
-        }
-        else
-          NodeHelper.handleNodeError(this.toast,nodes[position].name,error);
-        this.addToCollectionList(collection,nodes,position+1,true);
-      });
-  }
 
   private goToLogin() {
-    UIHelper.goToLogin(this.router,this.config,this.isSafe ? RestConstants.SAFE_SCOPE : "");
+    RestHelper.goToLogin(this.router,this.config,this.isSafe ? RestConstants.SAFE_SCOPE : "");
   }
 
   private getRootFolderId() {

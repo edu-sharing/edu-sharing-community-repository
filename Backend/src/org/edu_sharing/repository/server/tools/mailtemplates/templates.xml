@@ -77,6 +77,21 @@
 		]]>
 		</style>
 	</template>
+	<template name="nodeIssue">
+		<subject>{{reporterEmail}} hat ein Problem gemeldet</subject>
+		<message><![CDATA[
+			<h1>Hallo!</h1>
+			<h2>{{reporterEmail}} hat ein Problem mit dem Element "{{name}}" ({{id}}) gemeldet.</h2>
+			Die Begründung der Meldung: {{reason}}<br><br><br>
+			{{if userComment}}Weitere Informationen vom Nutzer:<br>
+				{{userComment}}
+				<br><br><br>
+			{{endif}}
+			<div class="center"><a class="btn" href="{{link}}">Zum gemeldeten Material</a></div>
+			<br><br>		
+		]]>
+		</message>
+	</template>
 	<template name="footer">
 		<message><![CDATA[
 			<a href="http://edu-sharing.net" style="float:left;">www.edu-sharing.net</a>

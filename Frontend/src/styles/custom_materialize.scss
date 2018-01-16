@@ -28,6 +28,9 @@
 .tabs .indicator{
   display:none;
 }
+.tabs .tab a{
+  padding:0 10px;
+}
 input[type=date]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   display: none;
@@ -229,6 +232,10 @@ img.align-icon {
 }
 .tab a{
   color:$textLight!important;
+  .material-icons{
+    font-size:20px;
+    margin-right: 3px;
+  }
 }
 .tabs .indicator{
   background-color: $primary;

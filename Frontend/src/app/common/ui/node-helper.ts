@@ -2,7 +2,7 @@ import {RestConstants} from "../rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {
   Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
-  Repository
+  Repository, WorkflowDefinition
 } from "../rest/data-object";
 import {FormatSizePipe} from "./file-size.pipe";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
@@ -10,10 +10,9 @@ import {Observable, Observer} from "rxjs";
 import {Response, ResponseContentType, Http} from "@angular/http";
 import {ConfigurationService} from "../services/configuration.service";
 import {RestHelper} from "../rest/rest-helper";
-import {WorkspaceWorkflowComponent} from "../../modules/workspace/workflow/workflow.component";
 import {Toast} from "./toast";
 import {Router} from "@angular/router";
-import {OptionItem} from "./actionbar/actionbar.component";
+import {OptionItem} from "./actionbar/option-item";
 import {DateHelper} from "./DateHelper";
 import {RestNodeService} from "../rest/services/rest-node.service";
 import {UIConstants} from "./ui-constants";
@@ -21,6 +20,8 @@ import {Translation} from "../translation";
 import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {ApplyToLmsComponent} from "./apply-to-lms/apply-to-lms.component";
 import {ListItem} from "./list-item";
+import {Helper} from "../helper";
+import {ConfigurationHelper} from "../rest/configuration-helper";
 
 export class NodeHelper{
   /**
@@ -29,30 +30,29 @@ export class NodeHelper{
    * @param item
    * @returns {any}
    */
-  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : string) : string
+  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : ListItem) : string
   {
-    if(item==RestConstants.CM_NAME)
+
+    let name=item.name;
+    if(name==RestConstants.CM_NAME)
       return node["name"];
-    if(item==RestConstants.CM_PROP_TITLE){
+    if(name==RestConstants.CM_PROP_TITLE){
       return RestHelper.getTitle(node);
     }
-    if(item==RestConstants.SIZE) {
+    if(name==RestConstants.SIZE) {
       return node.size ? (new FormatSizePipe().transform(node.size,null) as string) : translation.instant('NO_SIZE');
     }
-    if(item==RestConstants.MEDIATYPE){
+    if(name==RestConstants.MEDIATYPE){
       return translation.instant("MEDIATYPE."+node.mediatype);
     }
-    if(item==RestConstants.CM_CREATOR){
-      return RestHelper.getPersonWithConfigDisplayName(node.createdBy,config);
+    if(name==RestConstants.CM_CREATOR){
+      return ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,config);
     }
-    if(item==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
-      let value=node.properties[RestConstants.CCM_PROP_WF_STATUS];
-      if(value) value=value[0];
-      if(!value)
-        value=WorkspaceWorkflowComponent.STATUS_UNCHECKED;
-      return '<div class="workflowStatus workflowStatus_'+value+'">'+translation.instant('WORKFLOW.'+value)+'</div>'
+    if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
+      let workflow=NodeHelper.getWorkflowStatus(config,node);
+      return '<div class="workflowStatus" style="background-color: '+workflow.color+'">'+translation.instant('WORKFLOW.'+workflow.id)+'</div>'
     }
-    if(item==RestConstants.DIMENSIONS){
+    if(name==RestConstants.DIMENSIONS){
       let width=node.properties[RestConstants.CCM_PROP_WIDTH];
       let height=node.properties[RestConstants.CCM_PROP_HEIGHT];
       let megapixel=Math.round((width*height)/1000000.);
@@ -64,15 +64,29 @@ export class NodeHelper{
       }
     }
     let value : string;
-    if(node.properties[item])
-      value=node.properties[item].join(", ");
-    if((node as any)[item])
-      value=(node as any)[item];
+    if(node.properties[name])
+      value=node.properties[name].join(", ");
+    if((node as any)[name])
+      value=(node as any)[name];
 
-    if(value && RestConstants.DATE_FIELDS.indexOf(item)!=-1){
-      value=DateHelper.formatDate(translation,value);
-      if(node.properties[item])
-        node.properties[item][0]=value;
+    // Store already formatted dates inside node
+    if(!(node as any).propertiesFormatted){
+      (node as any).propertiesFormatted=[];
+    }
+    if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1 && !(node as any).propertiesFormatted[name]){
+      if(item.format){
+        value=DateHelper.formatDateByPattern(value,item.format).trim();
+      }
+      else {
+        value = DateHelper.formatDate(translation, value);
+      }
+      if(node.properties[name])
+        node.properties[name][0]=value;
+
+      (node as any).propertiesFormatted[name]=true;
+    }
+    if(node.properties[name+RestConstants.DISPLAYNAME_SUFFIX]){
+      value=node.properties[name+RestConstants.DISPLAYNAME_SUFFIX].join(", ");
     }
     if(value)
       return value;
@@ -132,7 +146,39 @@ export class NodeHelper{
         {queryParams:{id:node.parent.id,file:node.ref.id,root:data.scope}});
     });
   }
-
+  /**
+   * Navigate to the workspace
+   * @param nodeService instance of NodeService
+   * @param router instance of Router
+   * @param login a result of the isValidLogin method
+   * @param folder The folder id to open
+   */
+  public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
+    router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
+      {queryParams:{id:folder}});
+  }
+  public static getCollectionScopeInfo(collection : any) : any{
+    let scope=collection.scope;
+    let icon="help";
+    let scopeName="help";
+    if(scope==RestConstants.COLLECTIONSCOPE_MY){
+      icon="lock";
+      scopeName="MY";
+    }
+    if(scope==RestConstants.COLLECTIONSCOPE_ORGA || scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
+      icon="group";
+      scopeName="SHARED";
+    }
+    if(scope==RestConstants.COLLECTIONSCOPE_ALL || scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
+      icon="language";
+      scopeName="PUBLIC";
+    }
+    if(collection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
+      icon="star";
+      scopeName="TYPE_EDITORIAL";
+    }
+    return {icon:icon,scopeName:scopeName};
+  }
   /**
    * Get a formatted attribute from a collection
    * @param translate
@@ -145,6 +191,9 @@ export class NodeHelper{
     if(item=='info'){
       let childs=collection.childReferencesCount;
       let coll=collection.childCollectionsCount;
+
+      return '<i class="material-icons">layers</i> '+coll+' <i class="material-icons">insert_drive_file</i> '+childs;
+      /*
       let result="";
       if(coll>0){
         result=coll+" "+translate.instant("COLLECTION.INFO_REFERENCES"+(coll>1 ? "_MULTI" : ""));
@@ -158,23 +207,11 @@ export class NodeHelper{
         return translate.instant("COLLECTION.INFO_NO_CONTENT");
       }
       return result;
+          */
     }
     if(item=='scope'){
-      let scope=collection.scope;
-      let icon="help";
-      if(scope==RestConstants.COLLECTIONSCOPE_MY){
-        icon="lock";
-      }
-      if(scope==RestConstants.COLLECTIONSCOPE_ORGA){
-        icon="domain";
-      }
-      if(scope==RestConstants.COLLECTIONSCOPE_ALL){
-        icon="language";
-      }
-      if(scope==RestConstants.COLLECTIONSCOPE_CUSTOM){
-        icon="build";
-      }
-      return '<i class="material-icons collectionScope">'+icon+'</i> '+translate.instant('COLLECTION.SCOPE.'+scope);
+      let info=NodeHelper.getCollectionScopeInfo(collection);
+      return '<i class="material-icons collectionScope">'+info.icon+'</i> '+translate.instant('COLLECTION.SCOPE.'+info.scopeName);
     }
     return collection[item];
   }
@@ -183,7 +220,9 @@ export class NodeHelper{
    * Download (a single) node
    * @param node
    */
-  public static downloadNode(node:Node,version=RestConstants.NODE_VERSION_CURRENT) {
+  public static downloadNode(node:any,version=RestConstants.NODE_VERSION_CURRENT) {
+    if(node.reference)
+      node=node.reference;
     window.open(node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""));
   }
 
@@ -306,8 +345,10 @@ export class NodeHelper{
    */
   public static getAttribute(translate:TranslateService,config:ConfigurationService,data : any,item : ListItem) : string{
     if(item.type=='NODE') {
+      if(data.reference) // collection ref, use original for properties
+        data=data.reference;
       if (item.name == RestConstants.CM_MODIFIED_DATE)
-        return '<span property="dateModified" title="' + translate.instant('ACCESSIBILITY.LASTMODIFIED') + '">' + NodeHelper.getNodeAttribute(translate,config, data, item.name) + '</span>';
+        return '<span property="dateModified" title="' + translate.instant('ACCESSIBILITY.LASTMODIFIED') + '">' + NodeHelper.getNodeAttribute(translate,config, data, item) + '</span>';
 
       if (item.name == RestConstants.CCM_PROP_LICENSE) {
         if (data.licenseURL) {
@@ -323,10 +364,10 @@ export class NodeHelper{
         }
         return '<img alt="" src="'+NodeHelper.getSourceIconPath('home')+'">';
       }
-      return NodeHelper.getNodeAttribute(translate,config, data, item.name);
+      return NodeHelper.getNodeAttribute(translate,config, data, item);
     }
     if(item.type=='COLLECTION'){
-      return NodeHelper.getCollectionAttribute(translate,data.collection,item.name);
+      return NodeHelper.getCollectionAttribute(translate,data.collection ? data.collection : data,item.name);
     }
     if(item.type=='GROUP' || item.type=='ORG'){
       if(item.name=="displayName")
@@ -353,26 +394,45 @@ export class NodeHelper{
    * @param options
    * @param progressCallback
    */
-  public static addCustomNodeOptions(toast:Toast,http:Http,connector:RestConnectorService,custom: any, nodesIn: Node[], options: OptionItem[],progressCallback:Function) {
+  public static applyCustomNodeOptions(toast:Toast, http:Http, connector:RestConnectorService, custom: any,allNodes:Node[], selectedNodes: Node[], options: OptionItem[], progressCallback:Function,replaceUrl:any={}) {
     if (custom) {
       for (let c of custom) {
-        if (c.isDirectory != 'any' && nodesIn && c.isDirectory != nodesIn[0].isDirectory)
+        if(c.remove){
+          let i=Helper.indexOfObjectArray(options,'name',c.name)
+          if(i!=-1)
+            options.splice(i,1);
           continue;
-        if (!c.multiple && nodesIn && nodesIn.length > 1)
+        }
+        if(c.mode=='nodes' && (!selectedNodes || selectedNodes.length))
+          continue;
+        if(c.mode=='noNodes' && selectedNodes && selectedNodes.length)
+          continue;
+        if(c.mode=='noNodesNotEmpty' && (selectedNodes && selectedNodes.length || !allNodes || !allNodes.length))
+          continue;
+        if (c.mode=='nodes' && c.isDirectory != 'any' && selectedNodes && c.isDirectory != selectedNodes[0].isDirectory)
+          continue;
+        if (!c.multiple && selectedNodes && selectedNodes.length > 1)
           continue;
         let position = c.position;
         if (c.position < 0)
           position = options.length - c.position;
         let item = new OptionItem(c.name, c.icon, (node: Node) => {
-          let nodes = node == null ? nodesIn : [node];
+          let nodes = node == null ? selectedNodes : [node];
           let ids = "";
-          for (let node of nodes) {
-            if (ids)
-              ids += ",";
-            ids += node.ref.id;
+          if(nodes) {
+            for (let node of nodes) {
+              if (ids)
+                ids += ",";
+              ids += node.ref.id;
+            }
           }
           let url = c.url.replace(":id", ids)
           url = url.replace(":api", connector.getAbsoluteEndpointUrl());
+          if(replaceUrl){
+            for(let key in replaceUrl){
+              url = url.replace(key,encodeURIComponent(replaceUrl[key]));
+            }
+          }
           if (!c.ajax) {
             window.open(url);
             return;
@@ -393,7 +453,7 @@ export class NodeHelper{
         });
         item.isSeperate = c.isSeperate;
         if (c.permission) {
-          item.isEnabled = NodeHelper.getNodesRight(nodesIn, c.permission);
+          item.isEnabled = NodeHelper.getNodesRight(selectedNodes, c.permission);
         }
         options.splice(position, 0, item);
       }
@@ -442,6 +502,8 @@ export class NodeHelper{
   static getLRMIAttribute(translate:TranslateService,config:ConfigurationService,data: any, item: ListItem) {
     // http://dublincore.org/dcx/lrmi-terms/2014-10-24/
     if(item.type=='NODE'){
+      if(data.reference)
+        data=data.reference;
       if(item.name==RestConstants.CM_PROP_C_CREATED || item.name==RestConstants.CM_MODIFIED_DATE){
         return data.properties[item.name+'ISO8601'];
       }
@@ -467,10 +529,45 @@ export class NodeHelper{
   public static getSourceIconRepoPath(repo:Repository) {
     if(repo.isHomeRepo)
       return NodeHelper.getSourceIconPath('home');
+    if(repo.icon)
+      return repo.icon;
     return NodeHelper.getSourceIconPath(repo.repositoryType.toLowerCase());
   }
   public static getSourceIconPath(src: string) {
     return 'assets/images/sources/' + src.toLowerCase() + '.png';
+  }
+  public static getWorkflowStatusById(config:ConfigurationService,id:string) : WorkflowDefinition{
+    let workflows=NodeHelper.getWorkflows(config);
+    let pos=Helper.indexOfObjectArray(workflows,'id',id);
+    if(pos==-1) pos=0;
+    let workflow=workflows[pos];
+    return workflow;
+  }
+  public static getWorkflowStatus(config:ConfigurationService,node:Node) : WorkflowDefinition{
+    let value=node.properties[RestConstants.CCM_PROP_WF_STATUS];
+    if(value) value=value[0];
+    if(!value)
+      return NodeHelper.getWorkflows(config)[0];
+   return NodeHelper.getWorkflowStatusById(config,value);
+  }
+  static getWorkflows(config: ConfigurationService) : WorkflowDefinition[] {
+    return config.instant("workflows",[
+      RestConstants.WORKFLOW_STATUS_UNCHECKED,
+      RestConstants.WORKFLOW_STATUS_TO_CHECK,
+      RestConstants.WORKFLOW_STATUS_HASFLAWS,
+      RestConstants.WORKFLOW_STATUS_CHECKED,
+    ]);
+  }
+
+  static allFiles(nodes: Node[]) {
+    let allFiles=true;
+    if(nodes) {
+      for (let node of nodes) {
+        if (node.isDirectory)
+          allFiles = false;
+      }
+    }
+    return allFiles;
   }
 }
 

@@ -1,4 +1,5 @@
 @import "../../../../styles/variables.scss";
+@import "../../../../styles/toast.scss";
 .topBar{
   position: fixed;
   top:0;
@@ -94,10 +95,53 @@ user-profile{
   height:200px;
 }
 
-.topBar span{
-  font-size: 130%;
-  position: relative;
-  margin-left: 10px;
+.topBar{
+  span {
+    font-size: 130%;
+    position: relative;
+    margin-left: 10px;
+  }
+  .nodeStore{
+    margin-right:10px;
+    position: relative;
+    top:5px;
+    >i{
+      color:$primary;
+    }
+  }
+  .nodeStoreCount{
+    position: absolute;
+    right: -3px;
+    top: -3px;
+    background-color: #fff;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    color: $primary;
+    font-size: 0.8em;
+    display: flex;
+    justify-content: center;
+  }
+  .nodeStoreAnimation{
+    position:absolute;
+    left:-5px;
+    top:10px;
+    /*
+    position:fixed;
+    transform:scale(4);
+    top:50%;
+    left:50%;
+    */
+    background-color: $toastLeft;
+    border-radius: 50%;
+    color:$textOnPrimary;
+    font-weight: bold;
+    font-size:11pt;
+    text-align: center;
+    width: 35px;
+    height: 35px;
+    padding-top: 7px;
+  }
 }
 
 .noScope{
@@ -105,16 +149,22 @@ user-profile{
 }
 
 .topBar input,.topBar input:focus{
-  padding: 0;
-  padding-left: 50px;
+  padding: 0 40px;
   border-radius: 2px;
   width:100%;
-  max-width:500px;
   background: #595959;
   border:none!important;
   height:40px;
   box-shadow:none!important;
   -webkit-appearance: none;
+}
+.searchInputGroup{
+  position: relative;
+  width:100%;
+  max-width:500px;
+}
+.noUser .searchInputGroup{
+  width:calc(100% - 150px);
 }
 
 .topBar .topBarSearch form {
@@ -124,18 +174,22 @@ user-profile{
 .topBar .topBarSearch input:focus {
   @include setGlobalInsetFocus();
 }
-.noUser input,.noUser input:focus{
-  width:calc(100% - 150px);
-}
+
 .barIcon{
   font-size: 24px;
   z-index:115;
 }
-.searchIcon{
-  font-size: 28px !important;
+.searchIcon,.searchClearIcon{
+  font-size: 22px !important;
   position: absolute;
-  top: 7px;
+  top: 10px;
+}
+.searchIcon{
   left: 8px;
+}
+.searchClearIcon{
+  right:-70px;
+  @include clickable();
 }
 .topBar .user{
   text-align: right;
@@ -226,9 +280,9 @@ user-profile{
 .topBar .iconPerson{
   display:none;
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
-  .topBar input, .topBar input:focus {
-    width: calc(100% - 50px);
+@media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
+  .searchInputGroup{
+    width: calc(100% - 80px);
   }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*2)) {

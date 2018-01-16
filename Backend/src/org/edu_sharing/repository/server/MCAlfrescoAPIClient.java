@@ -126,12 +126,17 @@ import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.util.ISO8601DateFormat;
 import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
@@ -153,6 +158,7 @@ import org.edu_sharing.repository.client.rpc.metadataset.MetadataSets;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.UrlTool;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.client.tools.metadata.search.SearchMetadataHelper;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ActionObserver;
@@ -1213,7 +1219,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		 * user locale
 		 */
 		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
-
+			String mdsId=CCConstants.metadatasetdefault_id;
+			if(propsCopy.containsKey(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)){
+				mdsId=(String)propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
+			}
+			MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
 			HashMap<String, Object> addAndOverwriteDateMap = new HashMap<String, Object>();
 			for (Map.Entry<String, Object> entry : propsCopy.entrySet()) {
 
@@ -1230,13 +1240,26 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					// put formated
 					addAndOverwriteDateMap.put(entry.getKey(), new DateTool().formatDate(new Long(timeAsLongString)));
 				}
+				try{
+					MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
+					Map<String, MetadataKey> map = widget.getValuesAsMap();
+					if(!map.isEmpty()){
+						String[] keys=new ValueTool().getMultivalue((String) entry.getValue());
+						String[] values=new String[keys.length];
+						for(int i=0;i<keys.length;i++)
+							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : null;
+						addAndOverwriteDateMap.put(entry.getKey() + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values,CCConstants.MULTIVALUE_SEPARATOR));
+					}
+				
+				}catch(Throwable t){
+					
+				}
 			}
 
 			for (Map.Entry<String, Object> entry : addAndOverwriteDateMap.entrySet()) {
 				propsCopy.put(entry.getKey(), entry.getValue());
 			}
 		}
-
 		// Preview this was done already in getPropertiesCached (the heavy
 		// performance must be done in getPropertiesCached)
 		// but we need to set the ticket when it's an alfresco generated preview
@@ -1499,10 +1522,19 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 
 		// MimeType
-		ContentReader contentReader = contentService.getReader(nodeRef, QName.createQName(CCConstants.CM_PROP_CONTENT));
-		if (contentReader != null) {
-			properties.put(CCConstants.ALFRESCO_MIMETYPE, contentReader.getMimetype());
-		}
+		// we run as system because the current user may not has enough permissions to access content
+		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+
+			@Override
+			public Void doWork() throws Exception {
+				ContentReader contentReader = contentService.getReader(nodeRef, QName.createQName(CCConstants.CM_PROP_CONTENT));
+				if (contentReader != null) {
+					properties.put(CCConstants.ALFRESCO_MIMETYPE, contentReader.getMimetype());
+				}
+				return null;
+			}
+		});
+		
 
 		// MapRelations
 		if (nodeType.equals(CCConstants.CCM_TYPE_MAPRELATION)) {
@@ -3256,7 +3288,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			for (String permission : permissions) {
 				AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
 				// Guest only has read permissions, no modify permissions
-				if(guest && !permission.equals(PermissionService.READ)){
+				if(guest && !Arrays.asList(org.edu_sharing.service.permission.PermissionService.GUEST_PERMISSIONS).contains(permission)){
 					accessStatus=AccessStatus.DENIED;
 				}
 				if (accessStatus.equals(AccessStatus.ALLOWED)) {
@@ -3361,7 +3393,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		this.resolveRemoteObjects = resolveRemoteObjects;
 	}
 
-	public void setProperty(String nodeId, String property, String value) {
+	public void setProperty(String nodeId, String property, Serializable value) {
 		this.nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(property), value);
 	}
 	
@@ -4273,8 +4305,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		String defaultImageUrl = getUrl() + "/"
 				+ CCConstants.DEFAULT_PREVIEW_IMG;
 
-		ContentReader crUserDefinedPreview = this.contentService.getReader(new NodeRef(storeRef, nodeId),
+		ContentReader crUserDefinedPreview = null;
+		try{
+			crUserDefinedPreview=this.contentService.getReader(new NodeRef(storeRef, nodeId),
 				QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW));
+		}catch(Throwable t){
+			// may fails if the user does not has access for content
+		}
 
 		/**
 		 * userdefined

@@ -1,11 +1,11 @@
 import {
   Component, Input, Output, EventEmitter, OnInit, ElementRef, ViewChild,
-  HostListener, Renderer
+  HostListener, Renderer, ChangeDetectorRef
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
 import {RestIamService} from "../../rest/services/rest-iam.service";
-import {IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations} from "../../rest/data-object";
+import {IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList} from "../../rest/data-object";
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../../router/router.component";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
@@ -13,13 +13,15 @@ import {RestConstants} from "../../rest/rest-constants";
 import {RestOrganizationService} from "../../rest/services/rest-organization.service";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {ConfigurationService} from "../../services/configuration.service";
-import {trigger} from "@angular/animations";
+import {style, transition, trigger, animate, keyframes} from "@angular/animations";
+import {SearchNodeStoreComponent} from "../../../modules/search/node-store/node-store.component";
 import {UIHelper} from "../ui-helper";
 import {UIConstants} from "../ui-constants";
 import {RestHelper} from "../../rest/rest-helper";
 import {Http} from "@angular/http";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
+import {ConfigurationHelper} from "../../rest/configuration-helper";
 
 @Component({
   selector: 'main-nav',
@@ -28,7 +30,30 @@ import {TemporaryStorageService} from "../../services/temporary-storage.service"
   animations: [
     trigger('fromLeft', UIAnimation.fromLeft()),
     trigger('overlay', UIAnimation.openOverlay()),
-    trigger('fade', UIAnimation.fade())
+    trigger('fade', UIAnimation.fade()),
+    trigger('nodeStore', [
+      transition(':enter', [
+        animate(UIAnimation.ANIMATION_TIME_SLOW+'ms ease-in', keyframes([
+          style({opacity: 0, top:'0', transform: 'scale(0.25)', offset: 0}),
+          style({opacity: 1, top:'10px', transform: 'scale(1)', offset: 1}),
+          //style({opacity:0,offset:0}),
+          //style({opacity:1,offset:1}),
+
+        ]))
+      ]),
+      transition(':leave', [
+        animate(UIAnimation.ANIMATION_TIME_SLOW+'ms ease-in', keyframes([
+          style({opacity: 1, transform: 'scale(1)', offset: 0}),
+          style({opacity: 0, transform: 'scale(10)', offset: 1}),
+          /*
+          style({offset:0}),
+          style({transform:'scale(1)',
+            left:this.nodeStoreRef ? this.nodeStoreRef.nativeElement.getBoundingClientRect().left : '100%',
+            top:this.nodeStoreRef ? this.nodeStoreRef.nativeElement.getBoundingClientRect().top : 0,offset:1})
+          */
+        ]))
+
+      ])]),
   ]
 })
 /**
@@ -38,9 +63,17 @@ export class MainNavComponent {
   @ViewChild('search') search : ElementRef;
   @ViewChild('sidebar') sidebar:ElementRef;
   @ViewChild('topbar') topbar:ElementRef;
+  @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
   @ViewChild('scrolltotop') scrolltotop:ElementRef;
   public config: any={};
   private editUrl: string;
+  public nodeStoreAnimation=0;
+  public showNodeStore=false;
+  private nodeStoreCount = 0;
+  private static bannerPositionInterval: any;
+  public setNodeStore(value:boolean){
+    UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
+  }
   public showEditProfile: boolean;
   public showProfile: boolean;
 
@@ -58,8 +91,6 @@ export class MainNavComponent {
     }
   }
   private scrollInitialPositions : any[]=[];
-
-  @HostListener('window:resize', ['$event'])
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
     let y=0;
@@ -67,7 +98,6 @@ export class MainNavComponent {
       let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
       y = rect.bottom-rect.top;
     }catch(e){
-      return;
     }
     let elementsScroll=document.getElementsByClassName('scrollWithBanner');
     let elementsAlign=document.getElementsByClassName('alignWithBanner');
@@ -78,19 +108,23 @@ export class MainNavComponent {
     for(let i=0;i<elementsAlign.length;i++) {
       elements.push(elementsAlign[i]);
     }
-    if(this.scrollInitialPositions.length!=elements.length) {
+    if(/*this.scrollInitialPositions.length!=elements.length && */true) {
       this.scrollInitialPositions=[];
       for(let i=0;i<elements.length;i++) {
         let element: any = elements[i];
         element.style.position = null;
         element.style.top = null;
         this.scrollInitialPositions.push(window.getComputedStyle(element).getPropertyValue('top'));
-        console.log(this.scrollInitialPositions);
       }
     }
-    if(this.topbar.nativeElement.classList.contains('topBar-search')) {
+    if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
       for(let i=0;i<elements.length;i++) {
         let element:any=elements[i];
+        if(y==0){
+          element.style.position=null;
+          element.style.top=null;
+          continue;
+        }
         if(element.className.indexOf('alignWithBanner')!=-1){
           element.style.position = 'relative';
           element.style.top = y + 'px';
@@ -104,7 +138,6 @@ export class MainNavComponent {
         }
       }
     }
-
     if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
       this.scrolltotop.nativeElement.style.display = 'block';
     } else {
@@ -156,13 +189,24 @@ export class MainNavComponent {
    */
   @Input() searchQuery:string;
   @Output() searchQueryChange = new EventEmitter<string>();
+  @Input() set onInvalidNodeStore(data:Boolean){
+    this.iam.getNodeList(SearchNodeStoreComponent.LIST).subscribe((data:NodeList)=>{
+      if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
+        this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
+      this.nodeStoreCount=data.nodes.length;
+      setTimeout(()=>{
+        this.nodeStoreAnimation=-1;
+      },1500);
+    });
+  };
 
   /**
-   * Called when a search event happened, emits the search string
+   * Called when a search event happened, emits the search string and additional event info
+   * {query:string,cleared:boolean}
    * @type {EventEmitter}
    */
   @Output() onSearch=new EventEmitter();
-  private isGuest = false;
+  public isGuest = false;
   private isAdmin = false;
   public _showUser = false;
   onEvent(event:string,data:any){
@@ -186,12 +230,23 @@ export class MainNavComponent {
   }
   ngAfterViewInit() {
     this.handleScroll(null);
+    /*
     for(let i=0;i<200;i++) {
       setTimeout(() => this.handleScroll(null), i * 50);
     }
+    */
+    if(MainNavComponent.bannerPositionInterval){
+      clearInterval(MainNavComponent.bannerPositionInterval);
+    }
+    MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),100);
+  }
+  private clearSearch(){
+    this.searchQuery="";
+    this.onSearch.emit({query:"",cleared:true});
   }
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
+              private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
               private configServive : ConfigurationService,
               private storage : TemporaryStorageService,
@@ -220,6 +275,7 @@ export class MainNavComponent {
         let reurl=null;
         if(params["reurl"])
           reurl={reurl:params["reurl"]};
+        this.showNodeStore=params['nodeStore']=="true";
         if(!data.isGuest && this.canAccessWorkspace) {
           //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});
           buttons.push({
@@ -242,9 +298,10 @@ export class MainNavComponent {
         this.iam.getUser().subscribe((user : IamUser) => {
           this.user=user;
           this.configServive.getAll().subscribe(()=>{
-            this.userName=RestHelper.getPersonWithConfigDisplayName(this.user.person,this.configServive);
+            this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configServive);
           });
         });
+        this.onInvalidNodeStore=new Boolean(true);
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
           if(data.hasAccess)
             buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE"});
@@ -320,12 +377,12 @@ export class MainNavComponent {
     }
   }
   private login(reurl=false){
-    UIHelper.goToLogin(this.router,this.configServive,"",reurl?window.location.href:"")
+    RestHelper.goToLogin(this.router,this.configServive,"",reurl?window.location.href:"")
   }
   private doSearch(value=this.search.nativeElement.value,broadcast=true){
     if(broadcast)
       this.event.broadcastEvent(FrameEventsService.EVENT_GLOBAL_SEARCH,value);
-    this.onSearch.emit(value);
+    this.onSearch.emit({query:value,cleared:false});
   }
   private openButton(button : any){
     this.displaySidebar=false;

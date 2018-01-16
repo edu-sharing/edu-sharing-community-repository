@@ -17,6 +17,7 @@ public class Collection extends CollectionBase {
 	String description;
 	String type;
 	String viewtype;
+	String orderMode;
 	
 	int x;
 	int y;
@@ -27,6 +28,7 @@ public class Collection extends CollectionBase {
 	User owner;	
 	
 	boolean fromUser;
+	boolean pinned;
 	int childCollectionsCount;
 	
 	int childReferencesCount;
@@ -159,5 +161,28 @@ public class Collection extends CollectionBase {
 	public void setChildReferencesCount(int childReferencesCount) {
 		this.childReferencesCount = childReferencesCount;
 	}
+	
+	@ApiModelProperty(required = false)
+	@JsonProperty("pinned")
+	public boolean isPinned() {
+		return pinned;
+	}
+
+	public void setPinned(boolean pinned) {
+		this.pinned = pinned;
+	}
+	
+	@ApiModelProperty(required = false)
+	@JsonProperty("orderMode")
+	public String getOrderMode() {
+		return orderMode;
+	}
+
+	public void setOrderMode(String orderMode) {
+		this.orderMode = orderMode;
+	}
+	
+	
+	
 
 }

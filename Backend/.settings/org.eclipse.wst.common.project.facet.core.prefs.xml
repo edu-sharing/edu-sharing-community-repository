@@ -1,0 +1,7 @@
+<root>
+  <facet id="jpt.jaxb">
+    <node name="classgen">
+      <attribute name="package" value="org.edu_sharing.repository.server.importer.collections.xmlclasses"/>
+    </node>
+  </facet>
+</root>

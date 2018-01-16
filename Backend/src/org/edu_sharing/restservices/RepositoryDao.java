@@ -13,6 +13,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -119,7 +120,16 @@ public class RepositoryDao {
 		
 		return this.appInfo.getAppCaption();
 	}
-
+	public String getIcon() {
+		if(this.appInfo.getIcon()!=null && !this.appInfo.getIcon().isEmpty())
+			return URLTool.getBaseUrl()+"/"+this.appInfo.getIcon();
+		return null;
+	}
+	public String getLogo() {
+		if(this.appInfo.getLogo()!=null && !this.appInfo.getLogo().isEmpty())
+			return URLTool.getBaseUrl()+"/"+this.appInfo.getLogo();
+		return null;
+	}
 	public boolean isHomeRepo() {
 		
 		return this.appInfo.ishomeNode();
@@ -159,6 +169,15 @@ public class RepositoryDao {
 
 	public String getRepositoryType() {
 		return appInfo.getRepositoryType();
+	}
+
+	public String getUserSavedSearch() {
+		return nodeService.getOrCreateUserSavedSearch();
+
+	}
+
+	public static RepositoryDao getHomeRepository() throws DAOException {
+		return RepositoryDao.getRepository(ApplicationInfoList.getHomeRepository().getAppId());
 	}
 	
 	

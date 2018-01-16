@@ -88,8 +88,8 @@
         </div>
       </div>
       <div *ngIf="tab==INVITED" class="tabContent">
-        <a class="history clickable" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}}<i class="material-icons">arrow_forward</i></a>
-        <div class="groupName">{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</div>
+        <a *ngIf="_node && _node.ref.id" class="history clickable" (click)="showHistory()">{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate}}<i class="material-icons">arrow_forward</i></a>
+        <div class="groupName" *ngIf="owner">{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</div>
         <workspace-share-permission class="groupEntry owner" *ngIf="owner"
           [permission]="owner"
           [isDirectory]="_node.isDirectory"

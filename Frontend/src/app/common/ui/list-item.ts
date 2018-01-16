@@ -10,6 +10,11 @@ export class ListItem{
    * @type {boolean}
    */
   public visible=true;
+
+  /**
+   * custom format string for date fields, may be null
+   */
+  public format:string;
   constructor(public type : string,public name : string) {
   }
 }
