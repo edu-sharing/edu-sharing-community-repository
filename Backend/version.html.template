@@ -9,6 +9,6 @@ build.date: 2018-01-05<br/>
 version.main: 4.1.0 <br/>
 version.extension: Extension<br/>
 git.commit: 2018-01-05-bd7c1eb<br/>
-git.extension.commit: 2018-01-05-93e37c4<br/>
+git.extension.commit: no-extension<br/>
 </body>
 </html>
