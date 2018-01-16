@@ -472,6 +472,12 @@
     	 <property name="transformerConfig">
          <ref bean="transformerConfig" />
       </property>
+      <property name="nodeService">
+    	   <ref bean="NodeService" />
+      </property>
+       <property name="transactionService">
+    	   <ref bean="TransactionService" />
+      </property>
     </bean>
     <bean id="transformer.ESVideoTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
       <property name="worker">
