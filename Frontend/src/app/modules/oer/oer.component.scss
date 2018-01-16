@@ -134,6 +134,18 @@
   text-align: center;
   padding-top:20px;
 }
+@media all and (max-width: $mobileWidth+$mobileStage*1) {
+  :host /deep/ .collections {
+    .list {
+      width: max-content;
+    }
+  }
+  .collections {
+    overflow-x: auto;
+    width: calc(100% + 40px);
+    margin:10px -20px;
+  }
+}
 @media (pointer: coarse) {
   :host /deep/ .collections {
     width: 100%;
