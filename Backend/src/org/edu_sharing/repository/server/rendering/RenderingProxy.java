@@ -29,6 +29,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
+import org.edu_sharing.repository.server.tools.BlowFish;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
@@ -97,9 +98,24 @@ public class RenderingProxy extends HttpServlet {
 				return;
 			}
 		}
+		
+		
+		String uEncrypted = req.getParameter("u");
+		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
+		
+		String usernameDecrypted = null;
+		Encryption encryptionTool = new Encryption("RSA");
+		
+		try {
+			
+			usernameDecrypted = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRepo.getPrivateKey()));
+		}catch(GeneralSecurityException e) {
+			logger.error(e.getMessage(), e);
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
+		}
 			
 		if("window".equals(display)) {
-			String uEncrypted = req.getParameter("u");
+			
 			if(uEncrypted == null) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no user provided");
 				return;
@@ -121,11 +137,7 @@ public class RenderingProxy extends HttpServlet {
 				return;
 			}
 			
-			ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 			
-			// TODO change to other encryption in 4.1
-			String usernameDecrypted = MCAlfrescoBaseClient.getBlowFishDecrypted(uEncrypted, homeRepo);
-			usernameDecrypted=usernameDecrypted.trim();
 			
 			/**
 			 * when it's an lms the user who is in a course where the node is used (Angular path can not handle signatures) 
@@ -225,7 +237,7 @@ public class RenderingProxy extends HttpServlet {
 			}
 			
 			if(key.equals("u") && !homeRep.getAppId().equals(rep_id)){
-				final String usernameDecrypted = MCAlfrescoBaseClient.getBlowFishDecrypted(value, homeRep);
+				final String usernameDecrypted2 = usernameDecrypted;
 				
 				final String finalRepId = rep_id;
 				
@@ -235,7 +247,7 @@ public class RenderingProxy extends HttpServlet {
 					@Override
 					public String doWork() throws Exception {
 						
-						String localUsername = new String(usernameDecrypted).trim();
+						String localUsername = new String(usernameDecrypted2).trim();
 						
 						MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
 						
@@ -302,9 +314,13 @@ public class RenderingProxy extends HttpServlet {
 				};
 				
 			    try{
-			    	String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
-			    	value = esuid + "@" + homeRep.getAppId();
-			    	value = MCAlfrescoBaseClient.getBlowFishEncrypted(value, homeRep);
+				    	String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
+				    	value = esuid + "@" + homeRep.getAppId();
+				    	
+					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(appInfoApplication.getPublicKey()));
+					value = Base64.encodeBase64String(esuidEncrptedBytes);
+						
+					value = URLEncoder.encode(value, "UTF-8");
 			    	
 			    }catch(Exception e){
 				    	e.printStackTrace();
@@ -315,7 +331,20 @@ public class RenderingProxy extends HttpServlet {
 			
 			//request.getParameter encodes the value, so we have to decode it again
 			if(key.equals("u")){
-				value = URLEncoder.encode(value, "UTF-8");
+				try {
+					ApplicationInfo targetApplication = ApplicationInfoList.getRenderService();
+					if(!homeRep.getAppId().equals(rep_id)){
+						targetApplication = ApplicationInfoList.getRepositoryInfoById(rep_id);
+					}
+					byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
+					value = Base64.encodeBase64String(userEncryptedBytes);
+					value = URLEncoder.encode(value, "UTF-8");
+					
+				}catch(Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+				
+				
 			}
 			
 			contentUrl = UrlTool.setParam(contentUrl, key, value);

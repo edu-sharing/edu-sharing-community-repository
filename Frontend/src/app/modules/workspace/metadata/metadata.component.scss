@@ -67,6 +67,9 @@ $side:20px;
   font-size:90%;
   float:left;
 }
+.descriptionValue{
+  white-space: pre-wrap;
+}
 .edit{
   color:$textLight;
   float:right;

@@ -497,7 +497,7 @@ export class MdsComponent{
       }
       element.className=element.className.replace("invalid","").trim();
       let v=element.value;
-      if(element.getAttribute('data-value')){
+      if(element.getAttribute('data-value') && !this.isPrimitiveWidget(widget)){
         v=element.getAttribute('data-value');
       }
       let props=[v];
@@ -1404,7 +1404,7 @@ export class MdsComponent{
     if(template.rel=='suggestions'){
       html+=`<div id="`+widget.id+`_badgeSuggestions" style="display:none" class="multivalueBadges"></div>`;
     }
-    else if(widget.type=="text" || widget.type=="number" || widget.type=="email" || widget.type=="date" || widget.type=="month" || widget.type=="color"){
+    else if(this.isPrimitiveWidget(widget)){
       html+=this.renderPrimitiveWidget(widget,attr,widget.type);
     }
     else if(widget.type=="textarea"){
@@ -1805,5 +1805,9 @@ export class MdsComponent{
       this.rendered=null;
     else
       this.rendered=this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  private isPrimitiveWidget(widget: any) {
+    return widget.type=="text" || widget.type=="number" || widget.type=="email" || widget.type=="date" || widget.type=="month" || widget.type=="color"
   }
 }
