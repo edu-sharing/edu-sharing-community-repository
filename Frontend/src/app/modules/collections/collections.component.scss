@@ -283,7 +283,7 @@ table, div {
 @media only screen and (max-width: $mobileWidth) {
     :host /deep/{
       .collections-master-div-notabs .subcollections{
-        margin-top: 240px;
+        margin-top: 240px+$mainnavHeight;
       }
     }
   .collection-new-preview-headline{
@@ -295,9 +295,12 @@ table, div {
     max-height: 1.5em;
     overflow: hidden;
   }
+  .card-image-icon-container{
+    margin-top: $mainnavHeight;
+  }
     .collections-breadcrumb{
       position: absolute;
-      top: 252px;
+      top: 252px+$mainnavHeight;
       right: 10px;
       max-width: calc(100% - 100px);
     }
@@ -311,7 +314,7 @@ table, div {
       float:right;
     }
     .collections-header {
-        margin-top: 10px;
+        margin-top: 0;
         top: unset;
         left: unset;
         height: unset;
