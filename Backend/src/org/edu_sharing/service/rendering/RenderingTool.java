@@ -14,6 +14,7 @@ import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.Signing;
 
 public class RenderingTool {
@@ -41,7 +42,7 @@ public class RenderingTool {
 	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId, String username,String version,Map<String,String> parameters, boolean backendCall) throws GeneralSecurityException{
 		
 		
-		String usernameEncrypted = MCAlfrescoBaseClient.getBlowFishEncrypted(username, ApplicationInfoList.getHomeRepository());
+		String usernameEncrypted = getUsernameEncrypted(username);
 		
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 		
@@ -110,8 +111,7 @@ public class RenderingTool {
 	
 	public String getRenderServiceUrl(ApplicationInfo repInfo, String nodeId, String username,String version,boolean displayMetadata, boolean backendCall) throws GeneralSecurityException{
 		
-		
-		String usernameEncrypted = MCAlfrescoBaseClient.getBlowFishEncrypted(username, ApplicationInfoList.getHomeRepository());
+		String usernameEncrypted = getUsernameEncrypted(username);
 		
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
 		
@@ -156,6 +156,21 @@ public class RenderingTool {
 			
 		return renderingProxy;
 		
+	}
+	
+	private String getUsernameEncrypted(String username) {
+		ApplicationInfo appInfoRender = ApplicationInfoList.getHomeRepository();
+		String usernameEncrypted = null;
+		try {
+			Encryption encryptionTool = new Encryption("RSA");
+			byte[] userEncryptedBytes = encryptionTool.encrypt(username.getBytes(), encryptionTool.getPemPublicKey(appInfoRender.getPublicKey()));
+			usernameEncrypted = Base64.encodeBase64String(userEncryptedBytes);
+			usernameEncrypted = URLEncoder.encode(usernameEncrypted, "UTF-8");
+			return usernameEncrypted;
+		}catch(Exception e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
 	}
 	
 }
