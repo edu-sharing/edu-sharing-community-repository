@@ -120,6 +120,7 @@
     "cm:creator": "created by",
     "cclom:title": "Title",
     "cclom:general_keyword": "key words",
+    "cclom:duration": "duration",
     "sys:archivedDate": "deleted",
     "cclom:version": "version",
     "virtual:usagecount": "usage count",

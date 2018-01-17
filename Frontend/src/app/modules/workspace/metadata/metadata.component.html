@@ -50,6 +50,8 @@
     <div class="value" *ngIf="data.exifDate">{{data.exifDate}}</div>
     <div class="description" *ngIf="data.dimensions">{{'NODE.dimensions' | translate}}</div>
     <div class="value" *ngIf="data.dimensions">{{data.dimensions}}</div>
+    <div class="description" *ngIf="data.duration">{{'NODE.cclom:duration' | translate}}</div>
+    <div class="value" *ngIf="data.duration">{{data.duration}}</div>
     <div class="description" *ngIf="!data.isDirectory">{{'NODE.size' | translate}}</div>
     <div class="value" *ngIf="!data.isDirectory && data.size">{{data.size | formatSize}}</div>
     <div class="value" *ngIf="!data.isDirectory && !data.size">{{'NO_SIZE' | translate}}</div>
