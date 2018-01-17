@@ -569,5 +569,9 @@ export class NodeHelper{
     }
     return allFiles;
   }
+
+  static hasAnimatedPreview(node: Node) {
+    return !node.preview.isIcon && (node.mediatype=="file-video" || node.mimetype=="image/gif");
+  }
 }
 

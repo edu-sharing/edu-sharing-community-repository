@@ -180,6 +180,9 @@ export class WorkspaceMetadataComponent  {
   private restoreVersion(restore : Version){
     this.onRestore.emit(restore);
   }
+  private isAnimated(){
+    return NodeHelper.hasAnimatedPreview(this.nodeObject);
+  }
   private formatPermissions(login:IamUser,permissions: NodePermissions) : any{
     let data : any = {};
     data["users"]=[];

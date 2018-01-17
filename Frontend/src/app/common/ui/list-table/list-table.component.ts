@@ -59,6 +59,7 @@ export class ListTableComponent implements EventListener{
   private _nodes : any[];
   private lastScroll: number;
   private static MIN_SCROLL_TIME=1000;
+  private animateNode: Node;
 
   /**
    * Set the current list of nodes to render
@@ -428,7 +429,16 @@ export class ListTableComponent implements EventListener{
     }
     UIHelper.handleDropEvent(this.storage,this.ui,event,target,this.onDrop);
   }
-
+  private animateIcon(node:Node,animate:boolean){
+    if(animate){
+      if(NodeHelper.hasAnimatedPreview(node)){
+        this.animateNode=node;
+      }
+    }
+    else {
+      this.animateNode = null;
+    }
+  }
   private dragStart(event:any,node : Node){
     if(!this.dragDrop)
       return;
