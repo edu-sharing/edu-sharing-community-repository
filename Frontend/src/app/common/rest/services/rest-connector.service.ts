@@ -21,9 +21,6 @@ import {RestLocatorService} from "./rest-locator.service";
 @Injectable()
 export class RestConnectorService {
   private static DEFAULT_NUMBER_PER_REQUEST = 25;
-  public static SESSION_INFO = "SESSION_INFO";
-  private _endpointUrl : string;
-  private _numberPerRequest = RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
   private _lastActionTime=0;
   private _currentRequestCount=0;
   private _logoutTimeout: number;
