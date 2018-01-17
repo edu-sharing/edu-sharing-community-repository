@@ -6,7 +6,6 @@ import {
   NodeRef, NodeWrapper, NodePermissions, NodeVersions,NodeVersion,NodeList,Node
 } from "../../data-object";
 import {RestNodeService} from "../../services/rest-node.service";
-import {GwtInterfaceService} from "../../../services/gwt-interface.service";
 
 @Component({
   selector: 'app-rest-node-test',
@@ -24,7 +23,7 @@ export class RestNodeTestComponent {
   public getNodeMetadataForVersion : NodeVersion;
   public nodes : Node[];
   public error : string;
-  constructor(private node : RestNodeService,private gwt : GwtInterfaceService) {
+  constructor(private node : RestNodeService) {
     /*node.searchNodes("*",[],0).subscribe(
       data => this.searchNodes=data,
       error => this.error=RestHelper.printError(error)

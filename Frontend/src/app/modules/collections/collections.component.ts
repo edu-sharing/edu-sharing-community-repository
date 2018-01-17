@@ -53,7 +53,6 @@ export class Breadcrumb {
   selector: 'app-collections',
   templateUrl: 'collections.component.html',
   styleUrls: ['collections.component.scss'],
-  providers: [GwtInterfaceService],
 })
 export class CollectionsMainComponent {
     public dialogTitle : string;

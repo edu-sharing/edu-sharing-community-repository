@@ -11,7 +11,6 @@ import {RestCollectionService} from "../../../common/rest/services/rest-collecti
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {RestHelper} from "../../../common/rest/rest-helper";
-import {GwtInterfaceService} from "../../../common/services/gwt-interface.service";
 import {Toast} from "../../../common/ui/toast";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {Group, IamGroups, IamUser, NodeRef, Permission} from "../../../common/rest/data-object";
@@ -32,7 +31,6 @@ import {NodeHelper} from "../../../common/ui/node-helper";
   selector: 'app-collection-new',
   templateUrl: 'collection-new.component.html',
   styleUrls: ['collection-new.component.scss'],
-  providers: [GwtInterfaceService]
 })
 export class CollectionNewComponent {
   @ViewChild('mds') mds : MdsComponent;
