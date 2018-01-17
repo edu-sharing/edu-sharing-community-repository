@@ -25,7 +25,6 @@ import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 export const PROVIDERS=[
   FrameEventsService,
   Toast,
-  GwtInterfaceService,
   RestLocatorService,
   RestConnectorService,
   RestConnectorsService,
