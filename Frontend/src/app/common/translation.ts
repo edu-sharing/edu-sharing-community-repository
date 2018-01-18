@@ -11,6 +11,7 @@ import {DatepickerOptions} from "ng2-datepicker";
 import {ActivatedRoute} from "@angular/router";
 import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
+import {RestLocatorService} from "./rest/services/rest-locator.service";
 
 export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','override'];
 
@@ -51,9 +52,11 @@ export class Translation  {
               storage.set("language", language);
             translate.use(language);
             Translation.setLanguage(language);
-            Translation.languageLoaded=true;
-            observer.next(language);
-            observer.complete();
+            translate.getTranslation(language).subscribe(()=>{
+              Translation.languageLoaded=true;
+              observer.next(language);
+              observer.complete();
+            });
           });
         });
 
@@ -88,11 +91,11 @@ export class Translation  {
     */
   }
 }
-export function createTranslateLoader(http: Http) {
-  return new TranslationLoader(http);
+export function createTranslateLoader(http: Http,locator:RestLocatorService) {
+  return new TranslationLoader(http,locator);
 }
 export class TranslationLoader implements TranslateLoader {
-  constructor(private http: Http, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
+  constructor(private http: Http,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
   /**
    * Gets the translations from the server
    * @param lang
@@ -109,9 +112,13 @@ export class TranslationLoader implements TranslateLoader {
         .map((res: Response) => res.json()).subscribe((data : any) => translations.push(data));
 
     }
+    this.locator.getConfigLanguage(lang).subscribe((data:any)=>{
+      translations.push(data.current);
+    });
+
     return new Observable<any>((observer : Observer<any>) => {
       let callback = ()=> {
-        if (translations.length < TRANSLATION_LIST.length) {
+        if (translations.length < TRANSLATION_LIST.length + 1) {
           setTimeout(callback, 10);
           return;
         }

@@ -125,11 +125,6 @@ export class RestConnectorService {
   public getCurrentLogin() : LoginResult{
     return this.storage.get(TemporaryStorageService.SESSION_INFO);
   }
-  public getConfig() : Observable<any>{
-    let url=this.createUrl("config/:version/get",null);
-    return this.http.get(url,this.getRequestOptions())
-      .map((response: Response) => response.json());
-  }
   public isLoggedIn() : Observable<LoginResult>{
     let url=this.createUrl("authentication/:version/validateSession",null);
     return new Observable<LoginResult>((observer : Observer<LoginResult>)=>{
