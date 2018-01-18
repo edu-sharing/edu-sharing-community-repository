@@ -248,7 +248,7 @@ export class MainNavComponent {
               private connector : RestConnectorService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
-              private configServive : ConfigurationService,
+              private configService : ConfigurationService,
               private storage : TemporaryStorageService,
               private http : Http,
               private org : RestOrganizationService,
@@ -297,8 +297,8 @@ export class MainNavComponent {
         this._showUser=this.currentScope!='login' && this.showUser;
         this.iam.getUser().subscribe((user : IamUser) => {
           this.user=user;
-          this.configServive.getAll().subscribe(()=>{
-            this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configServive);
+          this.configService.getAll().subscribe(()=>{
+            this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
         });
         this.onInvalidNodeStore=new Boolean(true);
@@ -377,7 +377,7 @@ export class MainNavComponent {
     }
   }
   private login(reurl=false){
-    RestHelper.goToLogin(this.router,this.configServive,"",reurl?window.location.href:"")
+    RestHelper.goToLogin(this.router,this.configService,"",reurl?window.location.href:"")
   }
   private doSearch(value=this.search.nativeElement.value,broadcast=true){
     if(broadcast)
@@ -437,12 +437,12 @@ export class MainNavComponent {
     window.document.location.href=this.config.imprintUrl;
   }
   private checkConfig(buttons: any[]) {
-    this.configServive.getAll().subscribe((data:any)=>{
+    this.configService.getAll().subscribe((data:any)=>{
       this.config=data;
       this.editUrl=data["editProfileUrl"];
       this.showEditProfile=data["editProfile"];
-      this.helpUrl=this.configServive.instant("helpUrl",this.helpUrl);
-      this.whatsNewUrl=this.configServive.instant("whatsNewUrl",this.whatsNewUrl);
+      this.helpUrl=this.configService.instant("helpUrl",this.helpUrl);
+      this.whatsNewUrl=this.configService.instant("whatsNewUrl",this.whatsNewUrl);
       this.hideButtons(buttons);
       this.addButtons(buttons);
     },(error:any)=>this.hideButtons(buttons));
@@ -465,5 +465,11 @@ export class MainNavComponent {
       window.location.href=this.config.logout.next;
     else
       this.login(false);
+  }
+  getIconSource() {
+    return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
+  }
+  getBackground() {
+    return this.configService.instant('mainnav.background');
   }
 }

@@ -36,4 +36,5 @@ public class Values{
 	@XmlElement	public SessionExpiredDialog sessionExpiredDialog;
 	@XmlElement	public String loginDefaultLocation;
 	@XmlElement	public Boolean searchGroupResults;
+	@XmlElement	public Mainnav mainnav;
 }

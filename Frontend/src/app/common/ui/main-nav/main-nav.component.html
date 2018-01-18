@@ -23,10 +23,10 @@
     <i *ngIf="button.icon" class="material-icons align-icon">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}"> <span>{{button.name | translate}}</span>
   </div>
 </div>
-<div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [class.noUser]="!_showUser">
+<div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [style.background]="getBackground()" [class.noUser]="!_showUser">
   <div class="menuButtonOuter">
     <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
-      <img class="material-icons eduImage" src="assets/images/edu-white-alpha.svg" alt="{{'EDU_LOGO_ALT' | translate}}"/>
+      <img class="material-icons eduImage" [src]="getIconSource()" alt="{{'EDU_LOGO_ALT' | translate}}"/>
       <i class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
       <span>{{title | translate}}</span>
       <i class="material-icons barIcon">keyboard_arrow_right</i>
