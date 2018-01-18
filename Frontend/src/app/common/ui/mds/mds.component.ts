@@ -1658,7 +1658,7 @@ export class MdsComponent{
         setTimeout(()=>{
           //this.node.getNodeMetadata(node.ref.id).subscribe((data:NodeWrapper)=>{this.setPreview(data.node)});
           this.setPreview(node,counter*2);
-        },500*counter)
+        },Math.min(10000,500*counter));
       //}
     }
   }
