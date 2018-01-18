@@ -28,7 +28,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import com.sun.star.auth.InvalidArgumentException;
 
 public class MetadataReaderV2 {
 	
@@ -73,7 +72,7 @@ public class MetadataReaderV2 {
 					mdsName=mdsName.substring(0,mdsName.length()-4);
 			}
 			else{
-				throw new InvalidArgumentException("Invalid mds set "+mdsSet+", was not found in the list of mds sets of appid "+appId.getAppId());
+				throw new IllegalArgumentException("Invalid mds set "+mdsSet+", was not found in the list of mds sets of appid "+appId.getAppId());
 			}
 		}
 		String id=appId.getAppId()+mdsName+"_"+locale;
