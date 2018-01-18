@@ -65,7 +65,7 @@ export class ConfigurationService {
   }
   public instantInternal(name:string,defaultValue:any=null,object:any=this.data) : any{
     if(!object)
-      return null;
+      return defaultValue;
     let parts=name.split(".");
     if(parts.length>1){
       if(object[parts[0]]) {
