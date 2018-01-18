@@ -131,7 +131,7 @@ public class RepositoryDao {
 		return null;
 	}
 	public boolean isHomeRepo() {
-		return this.appInfo.ishomeNode();
+		return this.appInfo.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(getRepositoryType());
 	}
 	
 	ApplicationInfo getApplicationInfo() {

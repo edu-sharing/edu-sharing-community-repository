@@ -41,12 +41,12 @@ export class RestNetworkService {
     return repositories[i];
   }
 
-  static isHomeRepo(currentRepository: string, repositories: Repository[]) {
-    if(currentRepository==RestConstants.HOME_REPOSITORY)
+  static isHomeRepo(repositoryId: string, repositories: Repository[]) {
+    if(repositoryId==RestConstants.HOME_REPOSITORY)
       return true;
     if(!repositories)
       return false;
-    let repository=RestNetworkService.getRepositoryById(currentRepository,repositories);
+    let repository=RestNetworkService.getRepositoryById(repositoryId,repositories);
     if(repository){
       return repository.isHomeRepo;
     }

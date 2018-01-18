@@ -61,12 +61,12 @@ public class NetworkApi  {
 	    		Repo repo = new Repo();
 	    		
 	    		repo.setId(repository.getId());
-	    		if(repository.isHomeRepo())
-	    			repo.setId(RepositoryDao.HOME);
+	    		//if(repository.isHomeRepo())
+	    		//	repo.setId(RepositoryDao.HOME);
 	    		repo.setTitle(repository.getCaption());
 	    		repo.setIcon(repository.getIcon());
 	    		repo.setLogo(repository.getLogo());
-	    		repo.setHomeRepo(repository.isHomeRepo() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(repository.getRepositoryType()));
+	    		repo.setHomeRepo(repository.isHomeRepo());
 				repo.setRepositoryType(repository.getRepositoryType());
 	    		
 	    		repos.add(repo);
