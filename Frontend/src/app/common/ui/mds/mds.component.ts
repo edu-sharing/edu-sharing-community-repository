@@ -90,6 +90,7 @@ export class MdsComponent{
   private loadMdsFinal() {
     if(!this.mds)
       return;
+    this.onMdsLoaded.emit(this.mds);
     this.renderGroup(this._groupId,this.mds);
     this.isLoading=false;
     this.setValuesByProperty(this.mds,this._currentValues ? this._currentValues : {});
@@ -170,6 +171,7 @@ export class MdsComponent{
   @Output() onDone=new EventEmitter();
   @Output() openLicense=new EventEmitter();
   @Output() openContributor=new EventEmitter();
+  @Output() onMdsLoaded=new EventEmitter();
   private rendered : SafeHtml;
   private renderedSuggestions : SafeHtml;
   private jumpmarks: SafeHtml;

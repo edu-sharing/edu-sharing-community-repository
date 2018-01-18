@@ -640,7 +640,6 @@ export class SearchComponent {
     */
     this.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
 
-    console.warn("mds set is missing list 'search' for column rendering");
   }
 
   private importNode(node: Node) {
@@ -792,16 +791,15 @@ export class SearchComponent {
       this.addToStore(selection,position+1,errors+1)
     });
   }
-
+  private onMdsReady(mds:any){
+    this.currentMdsSet=mds;
+    this.updateColumns();
+  }
   private prepare(param:any) {
-    console.log("prepare");
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       this.login=data;
+      this.updateColumns();
       //if (data.isValidLogin && data.currentScope == null) {
-      this.mds.getSet(this.mdsId,this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository).subscribe((data:any)=>{
-        this.currentMdsSet=data;
-        this.updateColumns();
-      });
       this.updateMdsActions();
       this.isGuest = data.isGuest;
       this.hasCheckbox=true;

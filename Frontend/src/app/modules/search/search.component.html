@@ -97,6 +97,7 @@
         [invalidate]="reloadMds"
         [mode]="'search'"
         [(extended)]="mdsExtended"
+        (onMdsLoaded)="onMdsReady($event)"
         (onDone)="applyParameters()"
       >
       </mds>

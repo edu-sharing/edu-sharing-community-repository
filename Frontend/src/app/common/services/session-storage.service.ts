@@ -76,7 +76,6 @@ export class SessionStorageService {
   }
     // http://stackoverflow.com/questions/34298133/angular-2-cookies
   public getCookie(name: string,fallback:any=null) {
-    console.log("getCookie",name);
     let ca: Array<string> = document.cookie.split(';');
     let caLen: number = ca.length;
     let cookieName = name + "=";
@@ -96,7 +95,6 @@ export class SessionStorageService {
   }
 
   public setCookie(name: string, value: string, expireDays: number=60, path: string = "/") {
-    console.log("setCookie",name);
     let d:Date = new Date();
     d.setTime(d.getTime() + expireDays * 24 * 60 * 60 * 1000);
     let expires:string = "expires=" + d.toUTCString();
