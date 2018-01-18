@@ -158,6 +158,7 @@ public class RenderingProxy extends HttpServlet {
 				}
 			}else {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
+				return;
 			}
 			
 			String paramVersion=req.getParameter("version");

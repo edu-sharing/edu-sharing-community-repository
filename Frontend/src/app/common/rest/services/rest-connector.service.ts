@@ -21,17 +21,6 @@ import {RestLocatorService} from "./rest-locator.service";
 @Injectable()
 export class RestConnectorService {
   private static DEFAULT_NUMBER_PER_REQUEST = 25;
-  private static ENDPOINT_URLS=[
-    "rest/",
-    "http://localhost:8080/edu-sharing/rest/",
-    "http://localhost:8081/edu-sharing/rest/",
-    "http://edu41.edu-sharing.de/edu-sharing/rest/",
-    //"https://repository.oer-berlin.de/edu-sharing/rest/",
-    "http://alfresco5.vm:8080/edu-sharing/rest/"
-  ];
-  public static SESSION_INFO = "SESSION_INFO";
-  private _endpointUrl : string;
-  private _numberPerRequest = RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
   private _lastActionTime=0;
   private _currentRequestCount=0;
   private _logoutTimeout: number;

@@ -65,6 +65,7 @@ export class RestConstants {
   public static EXIF_PROP_DATE_TIME_ORIGINAL = "exif:dateTimeOriginal";
   public static CCM_PROP_HEIGHT = "ccm:height";
   public static LOM_PROP_GENERAL_KEYWORD = "cclom:general_keyword";
+  public static LOM_PROP_TECHNICAL_DURATION = "cclom:duration";
   public static LOM_PROP_GENERAL_DESCRIPTION = "cclom:general_description";
   public static LOM_PROP_LIFECYCLE_VERSION = "cclom:version";
   public static LOM_PROP_TECHNICAL_FORMAT = "cclom:format";

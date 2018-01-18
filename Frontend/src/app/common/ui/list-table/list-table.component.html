@@ -125,8 +125,10 @@
 
         <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)" >
           <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
-               src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(node.ref.repo=='local' || node.ref.isHomeRepo ? '&crop=true&width=200&height=150' : '') : null}}"
+               src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+((node.ref.repo=='local' || node.ref.isHomeRepo) && animateNode!=node ? '&crop=true&width=200&height=150' : '') : null}}"
                [attr.role]="presentation"
+               (mouseenter)="animateIcon(node,true)"
+               (mouseleave)="animateIcon(node,false)"
                [class.blurred]="isDeleted(node) || applyMode && node.access.indexOf('CCPublish')==-1"
                alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{ node.title }}"/>
           <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
