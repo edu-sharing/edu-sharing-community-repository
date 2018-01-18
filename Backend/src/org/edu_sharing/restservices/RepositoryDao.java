@@ -131,7 +131,6 @@ public class RepositoryDao {
 		return null;
 	}
 	public boolean isHomeRepo() {
-		
 		return this.appInfo.ishomeNode();
 	}
 	

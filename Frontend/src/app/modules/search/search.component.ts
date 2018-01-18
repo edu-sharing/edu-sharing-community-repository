@@ -184,7 +184,7 @@ export class SearchComponent {
 
         this.network.getRepositories().subscribe((data: NetworkRepositories) => {
           this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
-          if(this.repositories.length && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
+          if(this.repositories.length && this.currentRepository!=RestConstants.ALL && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
             console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+this.repositories[0].id);
             console.log(this.repositories);
             this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
@@ -507,7 +507,7 @@ export class SearchComponent {
 
     if(init) {
       this.searchService.searchResultCollections = [];
-      if(this.currentRepository==RestConstants.HOME_REPOSITORY || this.currentRepository==RestConstants.ALL) {
+      if(this.isHomeRepository() || this.currentRepository==RestConstants.ALL) {
         this.search.search(criterias, [], {
           sortBy: [
             RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
@@ -515,7 +515,7 @@ export class SearchComponent {
             RestConstants.CM_MODIFIED_DATE
           ],
           sortAscending: [false,true,false]
-        }, RestConstants.CONTENT_TYPE_COLLECTIONS,RestConstants.HOME_REPOSITORY,this.mdsId).subscribe(
+        }, RestConstants.CONTENT_TYPE_COLLECTIONS,this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository,this.mdsId).subscribe(
           (data: NodeList) => {
             this.searchService.searchResultCollections = data.nodes
             this.resultCount.collections = data.pagination.total;
@@ -534,14 +534,14 @@ export class SearchComponent {
       this.switchToCollections(node.ref.id);
       return;
     }
-    if(!RestNetworkService.isFromHomeRepo(node) && RestNetworkService.getRepositoryById(node.ref.repo,this.repositories).repositoryType!=RestConstants.REPOSITORY_TYPE_ALFRESCO){
+    if(!RestNetworkService.isFromHomeRepo(node,this.repositories)){
       window.open(node.contentUrl);
       return;
     }
     this.renderedNode = node;
     this.render_options=[];
     let queryParams={
-      "repository" : RestNetworkService.isFromHomeRepo(node) ? null : node.ref.repo
+      "repository" : RestNetworkService.isFromHomeRepo(node,this.repositories) ? null : node.ref.repo
     };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
@@ -695,7 +695,7 @@ export class SearchComponent {
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));
       });
-      if(this.currentRepository==RestConstants.HOME_REPOSITORY)
+      if(this.isHomeRepository())
         options.push(nodeStore);
       let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(node));
       save.showCallback = ((node: Node) => {
@@ -736,8 +736,8 @@ export class SearchComponent {
       }
       if(nodes.length==1 && this.config.instant("nodeReport",false)){
         let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
-        if(this.currentRepository==RestConstants.HOME_REPOSITORY)
-          this.actionOptions.push(report);
+        if(this.isHomeRepository())
+          options.push(report);
       }
     }
     let custom=this.config.instant("searchNodeOptions");
@@ -1011,5 +1011,9 @@ export class SearchComponent {
 
   private invalidateMds() {
     this.reloadMds=new Boolean(true);
+  }
+
+  private isHomeRepository() {
+   return RestNetworkService.isHomeRepo(this.currentRepository,this.repositories);
   }
 }
