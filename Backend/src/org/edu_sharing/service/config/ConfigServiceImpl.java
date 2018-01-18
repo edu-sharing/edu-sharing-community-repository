@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -26,6 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.service.config.model.Config;
 import org.edu_sharing.service.config.model.Context;
+import org.edu_sharing.service.config.model.Language;
 import org.edu_sharing.service.config.model.Values;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,7 +87,8 @@ public class ConfigServiceImpl implements ConfigService{
 		return copy;
 	}
 	*/
-	private Config getConfig() throws Exception {
+	@Override
+	public Config getConfig() throws Exception {
 		JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		InputStream is = getConfigInputStream();
@@ -102,11 +105,7 @@ public class ConfigServiceImpl implements ConfigService{
 		return classLoader.getResourceAsStream("/org/edu_sharing/service/config/client.config.xml");	
 	}
 	@Override
-	public Values getConfigValues() throws Exception {
-		return getConfig().values;
-	}
-	@Override
-	public Values getConfigValuesByDomain(String domain) throws Exception {
+	public Config getConfigByDomain(String domain) throws Exception {
 		Config config=getConfig();
 		if(config.contexts!=null && config.contexts.context!=null) {
 			for(Context context : config.contexts.context) {
@@ -115,7 +114,9 @@ public class ConfigServiceImpl implements ConfigService{
 				for(String cd : context.domain) {
 					if(cd.equals(domain)) {
 						overrideValues(config.values,context.values);
-						return config.values;
+						if(context.language!=null)
+							config.language=overrideLanguage(config.language,context.language);
+						return config;
 					}
 				}
 			}
@@ -124,6 +125,25 @@ public class ConfigServiceImpl implements ConfigService{
 		
 	}
 
+	private List<Language> overrideLanguage(List<Language> values, List<Language> override) {
+		if(values==null)
+			return override;
+		if(override==null)
+			return values;
+		for(Language language : override) {
+			for(Language language2 : values) {
+				if(language.language.equals(language2.language)) {
+					for(Language.String string : language.string) {
+						if(language2.string.contains(string)) {
+							language2.string.remove(string);
+						}
+						language2.string.add(string);
+					}
+				}
+			}
+		}
+		return values;
+	}
 	private void overrideValues(Values values, Values override) throws IllegalArgumentException, IllegalAccessException {
 		Class<?> c = override.getClass();
 		Field[] fields = c.getDeclaredFields();

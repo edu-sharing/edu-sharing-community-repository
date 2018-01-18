@@ -495,7 +495,4 @@ export class MainNavComponent {
   getIconSource() {
     return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
   }
-  getBackground() {
-    return this.configService.instant('mainnav.background');
-  }
 }

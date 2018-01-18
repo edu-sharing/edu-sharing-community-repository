@@ -9,6 +9,7 @@ import {ROUTES} from "./router/router.component";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
 import {NgDatepickerModule} from "ng2-datepicker";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 
 
 export const IMPORTS=[
@@ -22,7 +23,7 @@ export const IMPORTS=[
     loader:{
       provide: TranslateLoader,
       useFactory: createTranslateLoader,
-      deps: [Http]
+      deps: [Http,RestLocatorService]
     }
   }),
   ToastyModule.forRoot(),
