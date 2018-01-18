@@ -139,14 +139,15 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
                     "   target mimetype: " + targetMimetype + "\n" +
                     "   target extension: " + targetExtension);
         }
+        File sourceFile = TempFileProvider.createTempFile(
+                getClass().getSimpleName() + "_source_",
+                "." + sourceExtension);
+        File targetFile = TempFileProvider.createTempFile(
+                getClass().getSimpleName() + "_target_",
+                "." + targetExtension);
         try {
 	        // create required temp files
-	        File sourceFile = TempFileProvider.createTempFile(
-	                getClass().getSimpleName() + "_source_",
-	                "." + sourceExtension);
-	        File targetFile = TempFileProvider.createTempFile(
-	                getClass().getSimpleName() + "_target_",
-	                "." + targetExtension);
+	        
 	        // pull reader file into source temp file
 	        reader.getContent(sourceFile);
 	        convertFFMPEG(sourceFile, targetFile);
@@ -155,13 +156,17 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	        	writer.putContent(targetFile);
 	        }else{
 	        	logger.warn("ffmpeg: generated preview file has no content");
+	        	throw new AlfrescoRuntimeException("ffmpeg: generated preview file has no content");
 	        }
 	        writeLength(sourceFile,options);
-	        sourceFile.delete();
-	        targetFile.delete();
 	        
         }catch(Throwable t) {
         	logger.error("Error initializing ffmpeg. Generating preview+reading metadata failed ("+t.getMessage()+")");
+        	throw t;
+        }
+        finally {
+        	sourceFile.delete();
+	        targetFile.delete();
         }
         		
 	}
