@@ -125,7 +125,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	public static final String TYPE_CONNECTOR = "CONNECTOR";
 	
-	public static final String REPOSITORY_TYPE_ALFRESCO = "ALFRESCO";
+	public static final String REPOSITORY_TYPE_ALFRESCO = "ALFRESCO"; // a remote alfresco repository
+	
+	public static final String REPOSITORY_TYPE_LOCAL = "LOCAL"; // the local alfreso repository
 	
 	public static final String REPOSITORY_TYPE_EDUNEX = "EDUNEX";
 	
