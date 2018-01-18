@@ -268,6 +268,8 @@ export class MdsComponent{
       element.style.display = 'none';
       let caption=element.getAttribute('data-caption');
       let pos=-1;
+      console.log(caption);
+
       if(caption && search)
         pos=caption.toLowerCase().indexOf(searchField.value.toLowerCase());
       else {
@@ -276,6 +278,7 @@ export class MdsComponent{
       if(pos==-1) {
         continue;
       }
+      console.log("HIT: "+caption);
       if(hits>=MdsComponent.MAX_SUGGESTIONS && !showMore){
         moreCount++;
         continue;
@@ -1016,7 +1019,7 @@ export class MdsComponent{
     });
   }
   private getListEntry(id:string,key:string,caption:string,singleValue=false,searchString:string=null){
-    let html=`<a class="collection-item" tabindex="0" data-value="` + key + `" data-caption="` + caption + `" onkeydown="
+    let html=`<a class="collection-item" tabindex="0" data-value="` + key + `" data-caption="` + this.htmlEscape(caption) + `" onkeydown="
                 if(event.keyCode==13){ 
                     this.click();
                 }
@@ -1811,5 +1814,9 @@ export class MdsComponent{
 
   private isPrimitiveWidget(widget: any) {
     return widget.type=="text" || widget.type=="number" || widget.type=="email" || widget.type=="date" || widget.type=="month" || widget.type=="color"
+  }
+
+  private htmlEscape(caption: string) {
+    return caption.split("\"").join("&quot;");
   }
 }
