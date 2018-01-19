@@ -25,7 +25,7 @@ private boolean isIcon;
 	  
   }
   public Preview(String repositoryType,String node,String storeProtocol,String storeIdentifier,HashMap<String, Object> nodeProps) {
-	  if(repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_ALFRESCO)){
+	  if(repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_ALFRESCO) || repositoryType.equals(ApplicationInfo.REPOSITORY_TYPE_LOCAL)){
 		  setUrl(URLTool.getPreviewServletUrl(node,storeProtocol,storeIdentifier));
 		  setIsIcon(!(nodeProps.containsKey(CCConstants.CCM_PROP_MAP_ICON) || nodeProps.containsKey(CCConstants.CM_ASSOC_THUMBNAILS)));
 	  }

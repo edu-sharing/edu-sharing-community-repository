@@ -125,7 +125,7 @@
 
         <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)" >
           <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
-               src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+((node.ref.repo=='local' || node.ref.isHomeRepo) && animateNode!=node ? '&crop=true&width=200&height=150' : '') : null}}"
+               src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&width=200&height=150' : '') : null}}"
                [attr.role]="presentation"
                (mouseenter)="animateIcon(node,true)"
                (mouseleave)="animateIcon(node,false)"

@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import {BrowserModule, DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {TranslateService} from "@ngx-translate/core";
-import {Node} from "../../rest/data-object";
+import {NetworkRepositories, Node, Repository} from "../../rest/data-object";
 import {RestConstants} from "../../rest/rest-constants";
 import {NodeHelper} from "../../ui/node-helper";
 import {UIAnimation} from "../ui-animation";
@@ -20,6 +20,7 @@ import {animate, sequence, style, transition, trigger} from "@angular/animations
 import {ListItem} from "../list-item";
 import {UIHelper} from "../ui-helper";
 import {Helper} from "../../helper";
+import {RestNetworkService} from "../../rest/services/rest-network.service";
 
 @Component({
   selector: 'listTable',
@@ -60,6 +61,7 @@ export class ListTableComponent implements EventListener{
   private lastScroll: number;
   private static MIN_SCROLL_TIME=1000;
   private animateNode: Node;
+  private repositories: Repository[];
 
   /**
    * Set the current list of nodes to render
@@ -297,11 +299,16 @@ export class ListTableComponent implements EventListener{
               private config : ConfigurationService,
               private changes : ChangeDetectorRef,
               private storage : TemporaryStorageService,
+              private network : RestNetworkService,
               private toast : Toast,
               private frame : FrameEventsService,
               private sanitizer: DomSanitizer) {
     this.id=Math.random();
     frame.addListener(this);
+
+    this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
+      this.repositories=data.repositories;
+    });
   }
   onEvent(event:string,data:any){
     if(event==FrameEventsService.EVENT_PARENT_SCROLL){
@@ -362,7 +369,6 @@ export class ListTableComponent implements EventListener{
     if(this.orderElements){
       let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
       if(source.view==this.id && source.nodes.length==1 && source.nodes[0].ref.id!=target.ref.id){
-        console.log(source);
         this.orderElementsActive=true;
         this.orderElementsActiveChange.emit(true);
         this.exchange(source.nodes[0],target);
@@ -531,6 +537,9 @@ export class ListTableComponent implements EventListener{
   }
   public getCollection(node : any){
     return node.collection ? node.collection : node
+  }
+  public isHomeNode(node : any){
+    return RestNetworkService.isFromHomeRepo(node,this.repositories);
   }
   public getIconUrl(node : any){
     return node.reference ? node.reference.iconURL : node.iconURL;
