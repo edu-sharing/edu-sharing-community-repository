@@ -70,11 +70,12 @@
       
       
       
-      <!-- edu-sharing Read + read content permission (used by Consumer) -->
+      <!-- edu-sharing Read + read content permission + comment permissions(used by Consumer) -->
 	  <permissionGroup name="ReadAll"  expose="true" allowFullControl="false">
            <includePermissionGroup type="sys:base" permissionGroup="Read"/>
            <includePermissionGroup type="sys:base" permissionGroup="ReadContent"/>
            <includePermissionGroup type="sys:base" permissionGroup="ReadPreview"/>
+           <includePermissionGroup type="sys:base" permissionGroup="Comment"/>
       </permissionGroup>
       <permissionGroup name="Write" expose="true" allowFullControl="false">
            <includePermissionGroup type="sys:base" permissionGroup="WriteProperties"/>
@@ -113,7 +114,9 @@
       <permissionGroup name="ReadPermissions" expose="true" allowFullControl="false" />  
       <permissionGroup name="ChangePermissions" expose="true" allowFullControl="false" />  
       <!-- edu-sharing Read preview permission -->
-      <permissionGroup name="ReadPreview" expose="true" allowFullControl="false" />  
+      <permissionGroup name="ReadPreview" expose="true" allowFullControl="false" />
+      <!-- edu-sharing comment permission --> 
+      <permissionGroup name="Comment" expose="true" allowFullControl="false" />  
  	  
       <!-- =========== -->
       <!-- Permissions -->
@@ -122,6 +125,10 @@
       <!-- edu-sharing Read preview permission -->
  	  <permission name="_ReadPreview"  expose="false">
  	       <grantedToGroup permissionGroup="ReadPreview" />
+      </permission>
+      <!-- edu-sharing comment permission -->
+       <permission name="_Comment"  expose="false">
+ 	       <grantedToGroup permissionGroup="Comment" />
       </permission>
     
       <!-- The permission to read properties on a node                                    -->
