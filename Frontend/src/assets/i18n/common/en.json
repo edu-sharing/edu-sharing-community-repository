@@ -37,6 +37,8 @@
   "TODAY" : "today",
   "YESTERDAY" : "yesterday",
   "DAYS_AGO" : "{{ days }} days ago",
+  "HOURS_AGO" : "{{ hours }} hours ago",
+  "MINUTES_AGO" : "{{ minutes }} minutes ago",
   "CREATE" : "create",
   "LOGOUT" : "log out",
   "INVALID_OPERATION":"This feature is currently not supported",

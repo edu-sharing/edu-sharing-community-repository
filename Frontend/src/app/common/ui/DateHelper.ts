@@ -62,11 +62,21 @@ export class DateHelper{
       let isToday = dateObject.toDateString()==dateToday.toDateString();
       let isYesterday = dateObject.toDateString()==dateYesterday.toDateString();
       let prefix = "";
-      let timeDiff = dateToday.getTime()-dateObject.getTime();
-      let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      let timeDiff = (dateToday.getTime()-dateObject.getTime())/1000;
+      let diffDays = Math.ceil(timeDiff / (3600 * 24));
       let addDate=true;
       let timeFormat="HH:mm";
-      if (isToday && useRelativeLabels) {
+      if(timeDiff<3600*6 && useRelativeLabels){
+        if(timeDiff<60*100){
+          prefix=translation.instant("MINUTES_AGO",{minutes:Math.round(timeDiff/60)})
+        }
+        else{
+          prefix=translation.instant("HOURS_AGO",{hours:Math.round(timeDiff/(60*60))})
+        }
+        addDate=false;
+        timeFormat="";
+      }
+      else if (isToday && useRelativeLabels) {
         prefix = translation.instant("TODAY");
         addDate = false;
       }

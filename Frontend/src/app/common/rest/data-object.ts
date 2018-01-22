@@ -20,7 +20,7 @@ export interface Comments {
 }
 export interface Comment {
   ref: Ref;
-  creator: UserProfile;
+  creator: UserSimple;
   created: number;
   comment: string;
 }

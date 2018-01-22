@@ -15,10 +15,10 @@
     <a class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
     <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i class="material-icons">close</i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
     <user-avatar *ngIf="!edit"
-     [user]="user"
+     [profile]="user.profile"
     ></user-avatar>
     <user-avatar *ngIf="edit"
-     [user]="userEdit"
+     [profile]="userEdit.profile"
      [customImage]="avatarFile"
     ></user-avatar>
     <div *ngIf="edit" class="editAvatar">

@@ -4,7 +4,7 @@
 
 import {Component, Input} from '@angular/core';
 import {ConfigurationService} from "../../services/configuration.service";
-import {Person} from "../../rest/data-object";
+import {Person, UserProfile} from "../../rest/data-object";
 
 @Component({
   selector: 'user-avatar',
@@ -12,9 +12,9 @@ import {Person} from "../../rest/data-object";
   styleUrls: ['user-avatar.component.scss'],
 })
 export class UserAvatarComponent {
-  @Input() user : Person;
+  @Input() profile : UserProfile;
   /**
-   * either small, medium or large
+   * either xsmall, small, medium or large
    */
   @Input() size = 'large';
 

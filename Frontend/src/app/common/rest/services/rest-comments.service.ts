@@ -17,12 +17,21 @@ export class RestCommentsService {
   constructor(private connector : RestConnectorService) {}
 
     getComments(node:string,repository = RestConstants.HOME_REPOSITORY): Observable<Comments> {
-        let q=this.connector.createUrl('comment/:version/comments/:repository/:node', repository, [
+        let query=this.connector.createUrl('comment/:version/comments/:repository/:node', repository, [
           [':node',node]
         ]);
-        return this.connector.get(q,this.connector.getRequestOptions()) .map((response: Response) => response.json());
+        return this.connector.get(query,this.connector.getRequestOptions()) .map((response: Response) => response.json());
     }
-
-
-
+    addComment(node:string,comment:string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> {
+      let query = this.connector.createUrl('comment/:version/comments/:repository/:node', repository, [
+        [':node', node]
+      ]);
+      return this.connector.put(query, comment, this.connector.getRequestOptions());
+    }
+  deleteComment(comment:string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> {
+    let query = this.connector.createUrl('comment/:version/comments/:repository/:comment', repository, [
+      [':comment', comment]
+    ]);
+    return this.connector.delete(query, this.connector.getRequestOptions());
+  }
 }

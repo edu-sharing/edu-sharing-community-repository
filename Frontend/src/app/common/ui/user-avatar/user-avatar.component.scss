@@ -30,11 +30,21 @@
   top: -2px;
 }
 .size_small,.size_small img{
+  width:40px;
+  height:40px;
+  @include materialShadow();
+  border-width: 2px;
+}
+.size_small img{
+  left: -2px;
+  top: -2px;
+}
+.size_xsmall,.size_xsmall img{
   width:20px;
   height:20px;
   border-width: 1px;
 }
-.size_small img{
+.size_xsmall img{
   left: -1px;
   top: -1px;
 }

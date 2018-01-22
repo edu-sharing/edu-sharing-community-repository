@@ -37,6 +37,8 @@
   "TODAY" : "Heute",
   "YESTERDAY" : "Gestern",
   "DAYS_AGO" : "Vor {{ days }} Tagen",
+  "HOURS_AGO" : "Vor {{ hours }} Stunden",
+  "MINUTES_AGO" : "Vor {{ minutes }} Minuten",
   "CREATE" : "Erstellen",
   "LOGOUT" : "Abmelden",
   "INVALID_OPERATION":"Diese Funktion wird leider nicht unterstützt",

@@ -3,8 +3,8 @@
     <img [src]="_customImage">
   </div>
   <div *ngIf="!_customImage">
-    <img *ngIf="user && user.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=200&height=200'">
-    <img *ngIf="!(user && user.profile.avatar)" src="assets/images/user-profile.svg">
+    <img *ngIf="profile && profile.avatar" [src]="profile.avatar+'&crop=true&width=200&height=200'">
+    <img *ngIf="!(profile && profile.avatar)" src="assets/images/user-profile.svg">
   </div>
 </div>
 

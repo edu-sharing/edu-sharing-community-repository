@@ -8,6 +8,8 @@ export class AuthorityNamePipe implements PipeTransform {
       return authority.profile.firstName+" "+authority.profile.lastName;
     if(authority.authorityName)
       return authority.authorityName;
+    if(authority.firstName || authority.lastName)
+      return authority.firstName+" "+authority.lastName;
     return "invalid";
   }
 }
