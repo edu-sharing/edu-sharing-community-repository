@@ -15,6 +15,7 @@ export class RestIamTestComponent{
   public error : string;
   public getGroupMembers : IamAuthorities;
   constructor(iam : RestIamService) {
+    /*
     iam.searchGroups("*").subscribe(
       data => {console.log(data);this.searchGroups=data},
       error => this.error=RestHelper.printError(error)
@@ -27,11 +28,11 @@ export class RestIamTestComponent{
       data => null,
       error => this.error=RestHelper.printError(error)
     );
-    iam.createUser("testUser3","password",{firstName:"max",lastName:"tester",email:"a@b.de"}).subscribe(
+    iam.createUser("testUser3","password",{firstName:"max",lastName:"tester",email:"a@b.de",avatar:null}).subscribe(
       data => null,
       error => this.error=RestHelper.printError(error)
     );
-    iam.editUser("testUser3",{firstName:"max2",lastName:"tester2",email:"a@b.de2"}).subscribe(
+    iam.editUser("testUser3",{firstName:"max2",lastName:"tester2",email:"a@b.de2",avatar:null}).subscribe(
       data => null,
       error => this.error=RestHelper.printError(error)
     );
@@ -60,7 +61,6 @@ export class RestIamTestComponent{
       error => this.error=RestHelper.printError(error)
     );
 
-    /*
     iam.createGroup("testGroup","testDisplay").subscribe(
       data => null,
       error => this.error=RestHelper.printError(error)

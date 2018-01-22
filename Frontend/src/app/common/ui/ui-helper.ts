@@ -27,8 +27,8 @@ export class UIHelper{
       title.setTitle(t);
     });
   }
-  public static setTitle(name:string,title:Title,translate:TranslateService,config:ConfigurationService){
-    translate.get(name).subscribe((name:string)=>{
+  public static setTitle(name:string,title:Title,translate:TranslateService,config:ConfigurationService,languageParams:any=null){
+    translate.get(name,languageParams).subscribe((name:string)=>{
       this.setTitleNoTranslation(name,title,config);
     });
   }

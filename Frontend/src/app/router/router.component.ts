@@ -18,6 +18,7 @@ import {ConfigurationService} from "../common/services/configuration.service";
 import {AdminComponent} from "../modules/admin/admin.component";
 import {MessagesComponent} from "../modules/messages/messages.component";
 import {UIConstants} from "../common/ui/ui-constants";
+import {ProfilesComponent} from "../modules/profiles/profiles.component";
 
 
 
@@ -99,6 +100,8 @@ export var ROUTES=[
     },
     // oer
     { path: UIConstants.ROUTER_PREFIX+'oer', component: OerComponent },
+    // profiles
+    { path: UIConstants.ROUTER_PREFIX+'profiles/:authority', component: ProfilesComponent },
 
     // messages
     { path: UIConstants.ROUTER_PREFIX+'messages/:message', component: MessagesComponent },

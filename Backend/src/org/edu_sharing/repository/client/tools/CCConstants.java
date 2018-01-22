@@ -942,6 +942,9 @@ public class CCConstants {
 	public static final String CCM_ASSOC_USAGEASPECT_USAGES = "{http://www.campuscontent.de/model/1.0}usages";
 	
 	
+	public static final String CM_PROP_PERSON_ABOUT = "{http://www.alfresco.org/model/content/1.0}personabout";
+	public static final String CM_PROP_PERSON_SKILLS = "{http://www.alfresco.org/model/content/1.0}personskills";
+	
 	/**
 	 * tempory, non persistent properties
 	 */

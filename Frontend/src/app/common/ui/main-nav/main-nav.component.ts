@@ -144,6 +144,27 @@ export class MainNavComponent {
       this.scrolltotop.nativeElement.style.display = 'none';
     }
   }
+  private touchStart : any;
+  @HostListener('document:touchstart',['$event']) onTouchStart(event:any) {
+    this.touchStart=event;
+  }
+  @HostListener('document:touchend',['$event']) onTouchEnd(event:any) {
+    let horizontal=event.changedTouches[0].clientX-this.touchStart.changedTouches[0].clientX;
+    let vertical=event.changedTouches[0].clientY-this.touchStart.changedTouches[0].clientY;
+    let horizontalRelative=horizontal/window.innerWidth;
+    if(Math.abs(horizontal)/Math.abs(vertical)<5)
+      return;
+    if(this.touchStart.changedTouches[0].clientX<window.innerWidth/7){
+      if(horizontalRelative>0.2){
+        this.displaySidebar=true;
+      }
+    }
+    if(this.touchStart.changedTouches[0].clientX>window.innerWidth/7){
+      if(horizontalRelative<-0.2){
+        this.displaySidebar=false;
+      }
+    }
+  }
 
   private sidebarButtons : any=[];
   public displaySidebar=false;
@@ -218,8 +239,13 @@ export class MainNavComponent {
     this.userOpen=false;
     this.showProfile=true;
   }
+  public openProfile(){
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",RestConstants.ME]);
+    this.displaySidebar=false;
+    this.userOpen=false;
+  }
   public getCurrentScopeIcon(){
-    if(this._currentScope=='login')
+    if(this._currentScope=='login' || this._currentScope=='profiles')
       return 'person';
 
     for(let button of this.sidebarButtons){

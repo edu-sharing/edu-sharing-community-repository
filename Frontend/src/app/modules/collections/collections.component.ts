@@ -14,7 +14,6 @@ import {RestIamService} from "../../common/rest/services/rest-iam.service";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {RestConstants} from "../../common/rest/rest-constants";
 
-import {GwtInterfaceService, GwtEventListener} from "../../common/services/gwt-interface.service";
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {CollectionContent, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
@@ -54,9 +53,8 @@ export class Breadcrumb {
   selector: 'app-collections',
   templateUrl: 'collections.component.html',
   styleUrls: ['collections.component.scss'],
-  providers: [GwtInterfaceService],
 })
-export class CollectionsMainComponent implements GwtEventListener {
+export class CollectionsMainComponent {
     public dialogTitle : string;
     public globalProgress=false;
     private dialogCancelable = false;
@@ -109,7 +107,6 @@ export class CollectionsMainComponent implements GwtEventListener {
 
     // inject services
     constructor(
-      public gwtInterface:GwtInterfaceService,
       private frame : FrameEventsService,
       private temporaryStorageService : TemporaryStorageService,
         private collectionService : RestCollectionService,
@@ -131,7 +128,6 @@ export class CollectionsMainComponent implements GwtEventListener {
             this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
             this.collectionContent = new EduData.CollectionContent();
             this.collectionContent.setCollectionID(RestConstants.ROOT);
-            this.gwtInterface.addListenerOfGwtEvents(this);
             Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
               UIHelper.setTitle('COLLECTIONS.TITLE',title,translationService,config);
               this.mdsService.getSet().subscribe((data:MdsMetadataset)=>{
@@ -470,7 +466,6 @@ export class CollectionsMainComponent implements GwtEventListener {
         // clear search field in GWT top area
         if (this.clearSearchOnNextStateChange) {
             this.clearSearchOnNextStateChange=false;
-            this.gwtInterface.sendEvent("clearsearch", null);
         }
 
         // set correct scope
@@ -586,8 +581,6 @@ export class CollectionsMainComponent implements GwtEventListener {
         if (event.refresh) this.refreshContent();
     }
 
-    onGwtEvent(command:string, message:any) : void {
-    }
 
     public refreshAll(){
       this.displayCollectionById(this.collectionContent.collection.ref.id);
@@ -654,8 +647,6 @@ export class CollectionsMainComponent implements GwtEventListener {
 
       this.person = iamUser.person;
 
-      // set app to ready state
-      this.gwtInterface.addListenerOfGwtEvents(this);
       this.isReady = true;
 
       // subscribe to parameters of url

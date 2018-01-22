@@ -134,7 +134,7 @@ export class SearchComponent {
   public savedSearchLoading = false;
   public savedSearchQuery:string = null;
   public savedSearchQueryModel:string = null;
-    public addToCollection: Collection;
+  public addToCollection: Collection;
 
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
