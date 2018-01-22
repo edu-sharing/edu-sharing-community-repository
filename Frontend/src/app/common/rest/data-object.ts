@@ -15,7 +15,15 @@ export interface RestoreResult {
 export class ArchiveRestore {
   public results: RestoreResult[];
 }
-
+export interface Comments {
+  comments: Comment[];
+}
+export interface Comment {
+  ref: Ref;
+  creator: UserProfile;
+  created: number;
+  comment: string;
+}
 export interface Parent {
   repo: string;
   id: string;

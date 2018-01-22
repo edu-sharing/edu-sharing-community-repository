@@ -39,6 +39,8 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() showLtiToolsChange = new EventEmitter();
   @Input() nodeLicense : Node[];
   @Output() nodeLicenseChange = new EventEmitter();
+  @Input() nodeComment : Node;
+  @Output() nodeCommentChange = new EventEmitter();
   @Input() nodeReport : Node;
   @Output() nodeReportChange = new EventEmitter();
   @Input() nodeMetadata : Node;
@@ -241,6 +243,10 @@ export class WorkspaceManagementDialogsComponent  {
   public closeReport() {
     this.nodeReport=null;
     this.nodeReportChange.emit(null);
+  }
+  public closeComments() {
+    this.nodeComment=null;
+    this.nodeCommentChange.emit(null);
   }
   private cancelAddToCollection(){
     this.dialogTitle=null;

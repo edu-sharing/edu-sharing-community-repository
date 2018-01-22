@@ -7,6 +7,7 @@ import {WorkspaceFileUploadComponent} from "./file-upload/file-upload.component"
 import {WorkspaceFileUploadSelectComponent} from "./file-upload-select/file-upload-select.component";
 import {WorkspaceContributorComponent} from "./contributor/contributor.component";
 import {NodeReportComponent} from "./node-report/node-report.component";
+import {NodeCommentsComponent} from "./node-comments/node-comments.component";
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -17,5 +18,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceFileUploadComponent,
   WorkspaceFileUploadSelectComponent,
   WorkspaceContributorComponent,
-  NodeReportComponent
+  NodeReportComponent,
+  NodeCommentsComponent,
 ];
