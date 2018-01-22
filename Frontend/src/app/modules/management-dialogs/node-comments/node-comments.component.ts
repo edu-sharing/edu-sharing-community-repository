@@ -28,6 +28,7 @@ export class NodeCommentsComponent  {
   private isGuest: boolean;
   private user: User;
   private comments: Comment[];
+  private edit: Comment[];
   private options: OptionItem[][];
   public newComment="";
 
@@ -54,7 +55,7 @@ export class NodeCommentsComponent  {
   }
   private getOptions(comment:Comment){
     let options:OptionItem[]=[];
-    let isAuthor=this.user.authorityName==comment.creator.authorityName;
+    let isAuthor=this.user && this.user.authorityName==comment.creator.authorityName;
     if(isAuthor){
       options.push(new OptionItem('NODE_COMMENTS.OPTION_EDIT','edit',()=>{
 
@@ -81,6 +82,11 @@ export class NodeCommentsComponent  {
       }));
     }
     return options;
+  }
+  public canComment(){
+    if(this.isGuest || !this.user)
+      return false;
+    return this._node.access.indexOf(RestConstants.ACCESS_COMMENT)!=-1;
   }
   public addComment(){
     if(!this.newComment.trim()){

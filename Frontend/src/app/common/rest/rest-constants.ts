@@ -141,6 +141,7 @@ export class RestConstants {
   public static ACCESS_CHANGE_PERMISSIONS="ChangePermissions";
   public static ACCESS_CONSUMER="Consumer";
   public static ACCESS_CC_PUBLISH="CCPublish";
+  public static ACCESS_COMMENT="Comment";
   public static CONTENT_TYPE_FILES="FILES";
   public static CONTENT_TYPE_FILES_AND_FOLDERS="FILES_AND_FOLDERS";
   public static CONTENT_TYPE_ALL="ALL";

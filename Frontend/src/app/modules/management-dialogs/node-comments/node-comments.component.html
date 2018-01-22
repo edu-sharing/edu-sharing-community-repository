@@ -5,7 +5,7 @@
       <div class="card-title">{{'NODE_COMMENTS.TITLE' | translate }}</div>
 
         <div *ngIf="_node" class="group">
-          <div class="comments" [class.commentsLong]="isGuest || !user">
+          <div class="comments" [class.commentsLong]="!canComment()">
             <div *ngFor="let comment of comments;let i=index" class="comment">
               <div class="top">
               <div class="left">
@@ -26,11 +26,12 @@
                 <actionbar
                   [numberOfAlwaysVisibleOptions]="1"
                   [options]="options[i]"
+                  [style]="'flat'"
                 ></actionbar>
               </div>
             </div>
           </div>
-          <div class="new" *ngIf="!isGuest && user">
+          <div class="new" *ngIf="canComment()">
             <div class="left">
               <user-avatar
                 [size]="'small'"

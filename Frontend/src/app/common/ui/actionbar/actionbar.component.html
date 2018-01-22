@@ -36,8 +36,8 @@
      [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
      [class.disabled]="!option.isEnabled"
      class="actionAlways"
-     [class.btn-flat]="i!=optionsAlways.length-1"
-     [class.btn]="i==optionsAlways.length-1"
+     [class.btn-flat]="i!=optionsAlways.length-1 || style=='flat'"
+     [class.btn]="i==optionsAlways.length-1 && style!='flat'"
      tabindex="0"
          (keyup.enter)="click(option)"
      (click)="click(option)">

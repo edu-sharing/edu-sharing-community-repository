@@ -106,7 +106,21 @@ a.edusharing_rendering_content{
 .edusharing_rendering_content_wrapper{
   min-height:500px;
 }
-
+:host /deep/ {
+  .nodeDetails {
+    margin:10px;
+    color: $primary;
+    display: flex;
+    align-items:center;
+    .item {
+      display: flex;
+      @include clickable();
+      i{
+        padding-right: 5px;
+      }
+    }
+  }
+}
 div.download {
   margin-top: -8px;
 }
@@ -117,3 +131,4 @@ div.download {
   }
 
 }
+

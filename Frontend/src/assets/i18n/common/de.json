@@ -157,6 +157,14 @@
       "OTHER":"Anderer Fehler"
     }
   },
+  "NODE_COMMENTS":{
+    "TITLE":"Kommentare",
+    "NEW_COMMENT_PLACEHOLDER":"Neuer Kommentar...",
+    "OPTION_EDIT":"Bearbeiten",
+    "OPTION_DELETE":"Löschen",
+    "DELETE_COMMENT":"Kommentar löschen?",
+    "DELETE_COMMENT_MESSAGE":"Sind Sie sicher, dass Sie den gewählten Kommentar löschen möchten"
+  },
   "COLLECTION":{
     "INFO_REFERENCES":"Sammlung",
     "INFO_REFERENCES_MULTI":"Sammlungen",

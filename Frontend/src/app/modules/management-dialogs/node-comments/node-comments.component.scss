@@ -54,10 +54,10 @@
   max-height: calc(100% - 100px);
   overflow-y: auto;
   margin:-$cardPadding;
-  padding:$cardPadding/2;
+  padding:$cardPadding;
   background-color: $backgroundColor;
   .comment {
-    padding:$cardPadding/2;
+    padding:10px;
     background-color: #fff;
     @include materialShadow();
     margin:10px 0;
