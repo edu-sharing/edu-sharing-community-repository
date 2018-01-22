@@ -149,6 +149,14 @@
       "OTHER":"none of the above"
     }
   },
+  "NODE_COMMENTS":{
+    "TITLE":"Comments",
+    "NEW_COMMENT_PLACEHOLDER":"New comment...",
+    "OPTION_EDIT":"edit",
+    "OPTION_DELETE":"delete",
+    "DELETE_COMMENT":"Delete comment?",
+    "DELETE_COMMENT_MESSAGE":"Are you sure you want to remove the selected comment?"
+  },
   "COLLECTION":{
     "INFO_REFERENCES":"collection",
     "INFO_REFERENCES_MULTI":"collections",

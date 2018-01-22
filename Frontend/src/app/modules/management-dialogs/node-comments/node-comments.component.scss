@@ -32,26 +32,33 @@
   .right{
     flex-grow: 1;
   }
-  .right form{
-    display: flex;
-    flex-grow: 1;
-    align-items: center;
-    textarea,i{
-      display: flex;
-    }
+}
+.new .right,.comments .right{
+  form{
     textarea{
       flex-grow: 1;
       margin-right: 10px;
       max-height: 2em;
     }
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    textarea,i,div{
+      display: flex;
+    }
+    .icons{
+      align-self: start;
+      flex-direction: column;
+    }
     i{
       color:$primary;
+      margin:7px 0;
     }
   }
 }
 .comments {
   flex-grow: 1;
-  max-height: calc(100% - 100px);
+  max-height: calc(100% - 95px);
   overflow-y: auto;
   margin:-$cardPadding;
   padding:$cardPadding;

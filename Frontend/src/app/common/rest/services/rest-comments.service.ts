@@ -16,18 +16,24 @@ export class RestCommentsService {
 
   constructor(private connector : RestConnectorService) {}
 
-    getComments(node:string,repository = RestConstants.HOME_REPOSITORY): Observable<Comments> {
-        let query=this.connector.createUrl('comment/:version/comments/:repository/:node', repository, [
-          [':node',node]
-        ]);
-        return this.connector.get(query,this.connector.getRequestOptions()) .map((response: Response) => response.json());
-    }
-    addComment(node:string,comment:string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> {
-      let query = this.connector.createUrl('comment/:version/comments/:repository/:node', repository, [
-        [':node', node]
+  getComments(node:string,repository = RestConstants.HOME_REPOSITORY): Observable<Comments> {
+      let query=this.connector.createUrl('comment/:version/comments/:repository/:node', repository, [
+        [':node',node]
       ]);
-      return this.connector.put(query, comment, this.connector.getRequestOptions());
-    }
+      return this.connector.get(query,this.connector.getRequestOptions()) .map((response: Response) => response.json());
+  }
+  addComment(node:string,comment:string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> {
+    let query = this.connector.createUrl('comment/:version/comments/:repository/:node', repository, [
+      [':node', node]
+    ]);
+    return this.connector.put(query, comment, this.connector.getRequestOptions());
+  }
+  editComment(comment:string,text:string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> {
+    let query = this.connector.createUrl('comment/:version/comments/:repository/:comment', repository, [
+      [':comment', comment]
+    ]);
+    return this.connector.post(query,text, this.connector.getRequestOptions());
+  }
   deleteComment(comment:string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> {
     let query = this.connector.createUrl('comment/:version/comments/:repository/:comment', repository, [
       [':comment', comment]

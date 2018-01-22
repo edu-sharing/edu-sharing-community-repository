@@ -31,10 +31,11 @@ export class NodeCommentsComponent  {
   private edit: Comment[];
   private options: OptionItem[][];
   public newComment="";
+  public editComment:Comment=null;
+  public editCommentText:string;
 
   @Input() set node(node : Node){
     this._node=node;
-    this.refresh();
   }
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
@@ -51,14 +52,27 @@ export class NodeCommentsComponent  {
           this.user=data.person;
         });
       }
+      this.refresh();
     });
+  }
+  private saveEditComment(){
+    this.onLoading.emit(true);
+    this.commentsApi.editComment(this.editComment.ref.id,this.editCommentText.trim()).subscribe(()=>{
+      this.onLoading.emit(false);
+      this.editComment=null;
+      this.refresh();
+    },(error:any)=>{
+      this.toast.error(error);
+      this.onLoading.emit(false);
+    })
   }
   private getOptions(comment:Comment){
     let options:OptionItem[]=[];
     let isAuthor=this.user && this.user.authorityName==comment.creator.authorityName;
     if(isAuthor){
       options.push(new OptionItem('NODE_COMMENTS.OPTION_EDIT','edit',()=>{
-
+        this.editComment=comment;
+        this.editCommentText=comment.comment;
       }));
     }
     if(isAuthor || this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1){
@@ -94,7 +108,7 @@ export class NodeCommentsComponent  {
       return;
     }
     this.onLoading.emit(true);
-    this.commentsApi.addComment(this._node.ref.id,this.newComment).subscribe(()=>{
+    this.commentsApi.addComment(this._node.ref.id,this.newComment.trim()).subscribe(()=>{
       this.onLoading.emit(false);
       this.newComment="";
       this.refresh();

@@ -19,7 +19,16 @@
                   <div class="name">{{comment.creator | authorityName}}</div>
                   <div class="date">{{comment.created | formatDate}}</div>
                 </div>
-                <div class="commentText">{{comment.comment}}</div>
+                <div class="commentText" *ngIf="comment!=editComment">{{comment.comment}}</div>
+                <div class="commentTextEdit" *ngIf="comment==editComment">
+                  <form (ngSubmit)="saveEditComment()">
+                    <textarea name="comment" class="materialize-textarea" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="editCommentText"></textarea>
+                    <div class="icons">
+                      <i class="material-icons clickable" (click)="editComment=null">close</i>
+                      <i class="material-icons clickable" (click)="saveEditComment()">save</i>
+                    </div>
+                  </form>
+                </div>
               </div>
               </div>
               <div class="actions" [class.actionsAvailable]="options[i] && options[i].length">

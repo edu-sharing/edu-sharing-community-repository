@@ -163,7 +163,7 @@
     "OPTION_EDIT":"Bearbeiten",
     "OPTION_DELETE":"Löschen",
     "DELETE_COMMENT":"Kommentar löschen?",
-    "DELETE_COMMENT_MESSAGE":"Sind Sie sicher, dass Sie den gewählten Kommentar löschen möchten"
+    "DELETE_COMMENT_MESSAGE":"Sind Sie sicher, dass Sie den gewählten Kommentar löschen möchten?"
   },
   "COLLECTION":{
     "INFO_REFERENCES":"Sammlung",
