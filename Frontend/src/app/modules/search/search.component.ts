@@ -167,6 +167,7 @@ export class SearchComponent {
     private network : RestNetworkService,
     private temporaryStorageService: TemporaryStorageService
   ) {
+    this.searchService.init();
     this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
     this.connector.setRoute(this.activatedRoute).subscribe(()=> {
       Translation.initialize(translate, this.config, this.storage, this.activatedRoute).subscribe(() => {
@@ -186,7 +187,7 @@ export class SearchComponent {
         this.network.getRepositories().subscribe((data: NetworkRepositories) => {
           this.allRepositories=data.repositories;
           this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
-          if(this.repositories.length && this.currentRepository!=RestConstants.ALL && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
+          if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
             console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+this.repositories[0].id);
             console.log(this.repositories);
             this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
@@ -437,7 +438,6 @@ export class SearchComponent {
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
-
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
