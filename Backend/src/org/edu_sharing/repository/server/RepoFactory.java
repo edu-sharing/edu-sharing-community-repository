@@ -224,6 +224,7 @@ public class RepoFactory {
 	public static void refresh() {
 		appClassCache.clear();
 		repositoryMetadataSets.clear();
+		MetadataReaderV2.refresh();
 		defaultMetadataSet = null;
 		eduSharingProps = null;
 	}
