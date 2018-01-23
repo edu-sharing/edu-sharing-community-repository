@@ -1283,11 +1283,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	@Override
 	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
 		if(!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
-			if(!getPermissionsForAuthority(nodeId, AuthenticationUtil.getFullyAuthenticatedUser())
-					.contains(PermissionService.READ_PERMISSIONS))
-				throw new InsufficientPermissionException("Current user is missing "+PermissionService.READ_PERMISSIONS+" for this node");
+			if(!AuthenticationUtil.getFullyAuthenticatedUser().equals(AuthenticationUtil.SYSTEM_USER_NAME)) {
+				if(!getPermissionsForAuthority(nodeId, AuthenticationUtil.getFullyAuthenticatedUser())
+						.contains(PermissionService.READ_PERMISSIONS)) {
+					throw new InsufficientPermissionException("Current user is missing "+PermissionService.READ_PERMISSIONS+" for this node");
+				}
+			}
 		}
-		if(!personService.personExists(authorityId)){
+		
+		if(!authorityService.authorityExists(authorityId)){
 			throw new IllegalArgumentException("Authority "+authorityId+" does not exist");
 		}
 		return AuthenticationUtil.runAs(new RunAsWork<List<String>>() {
