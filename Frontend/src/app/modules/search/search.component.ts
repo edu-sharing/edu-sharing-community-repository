@@ -47,6 +47,7 @@ import {Action} from "rxjs/scheduler/Action";
 import {WorkspaceManagementDialogsComponent} from "../management-dialogs/management-dialogs.component";
 import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 import {MdsHelper} from "../../common/rest/mds-helper";
+import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 
 
 @Component({
@@ -64,6 +65,7 @@ import {MdsHelper} from "../../common/rest/mds-helper";
 export class SearchComponent {
   public initalized = false;
   @ViewChild('mds') mdsRef: MdsComponent;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('managementDialogs') managementDialogs : WorkspaceManagementDialogsComponent;
   public mdsSuggestions:any={}
   public mdsExtended=false;
@@ -77,6 +79,7 @@ export class SearchComponent {
   showspinner: boolean = false;
   public nodeReport: Node;
   public currentRepository:string=RestConstants.HOME_REPOSITORY;
+  public currentRepositoryObject:Repository;
 
   public applyMode=false;
   public columns : ListItem[]=[];
@@ -114,7 +117,6 @@ export class SearchComponent {
   }
   public set mdsId(mdsId:string){
     this._mdsId=mdsId;
-    this.invalidateMds();
   }
   public selection: Node[];
   private currentValues: any;
@@ -167,48 +169,6 @@ export class SearchComponent {
     private network : RestNetworkService,
     private temporaryStorageService: TemporaryStorageService
   ) {
-    this.searchService.init();
-    this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
-    this.connector.setRoute(this.activatedRoute).subscribe(()=> {
-      Translation.initialize(translate, this.config, this.storage, this.activatedRoute).subscribe(() => {
-        UIHelper.setTitle('SEARCH.TITLE', title, translate, config);
-        this.initalized = true;
-        this.printListener();
-        this.view = this.config.instant('searchViewType',temporaryStorageService.get('view', '1'));
-        this.groupResults=this.config.instant('searchGroupResults',false);
-        this.setViewType(this.view);
-
-        this.collectionsColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
-        this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
-        this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
-        this.updateActionbar(null);
-        setInterval(() => this.updateHasMore(), 1000);
-
-        this.network.getRepositories().subscribe((data: NetworkRepositories) => {
-          this.allRepositories=data.repositories;
-          this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
-          if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
-            console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+this.repositories[0].id);
-            console.log(this.repositories);
-            this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
-          }
-          if (this.repositories.length < 2) {
-            this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
-            this.repositories = null;
-            return;
-          }
-          let all = new Repository();
-          all.id = RestConstants.ALL;
-          all.title = this.translate.instant('SEARCH.REPOSITORY_ALL');
-          all.repositoryType = 'ALL';
-          this.repositories.splice(0, 0, all);
-          this.updateRepositoryOrder();
-        }, (error: any) => {
-          this.repositories = null;
-          this.repositoryIds = [];
-        });
-      });
-    });
   }
   public setRepository(repository:string){
     this.routeSearch(this.searchService.searchTerm,repository,null,null);
@@ -229,159 +189,79 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-     Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
-       this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
-         (param: any) => {
-           if(param['addToCollection']){
-             this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
-               this.addToCollection=data.collection;
-               this.refreshListOptions();
-               this.updateActionbar(null);
-             });
-           }this.mainnav=param['mainnav']=='false' ? false : true;
-           if(param['reurl']) {
-             this.searchService.reurl = param['reurl'];
-             this.applyMode=true;
-           }
+     this.searchService.init();
+     this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
+     this.connector.setRoute(this.activatedRoute).subscribe(()=> {
+         Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
+           UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
+           this.printListener();
+           this.view = this.config.instant('searchViewType',this.temporaryStorageService.get('view', '1'));
+           this.groupResults=this.config.instant('searchGroupResults',false);
+           this.setViewType(this.view);
 
-          if(param['query'])
-            this.searchService.searchTerm=param['query'];
-          if(param['repository']){
-            this.mdsSets=null;
-            if(this.currentRepository!=param['repository'])
-              this.mdsId=RestConstants.DEFAULT;
-            this.currentRepository=param['repository'];
-            this.updateRepositoryOrder();
-          }
-          if(param['savedQuery']){
-            this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
-              this.currentSavedSearch=data.node;
-              this.sidenavTab=1;
-            });
-          }
-          this.updateSelection([]);
-          this.mds.getSets(this.currentRepository).subscribe((data:MdsMetadatasets)=>{
-            console.log(data.metadatasets);
-            this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepository,data.metadatasets,this.config);
-            if(this.mdsSets){
-              UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
-              try {
-                this.mdsId = this.mdsSets[0].id;
-                if (param['mds'])
-                  this.mdsId = param['mds'];
-              }
-              catch(e){
-                console.warn("got invalid mds list from repository:");
-                console.warn(this.mdsSets);
-                console.warn("will continue with default mds");
-                this.mdsId=RestConstants.DEFAULT;
-              }
-              this.searchService.init();
-              this.prepare(param);
-            }
-          },(error:any)=>{
-            this.mdsId=RestConstants.DEFAULT;
-            this.searchService.init();
-            this.prepare(param);
-          });
-        });
-    });
+           this.collectionsColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
+           this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
+           this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
+           this.updateActionbar(null);
+           setInterval(() => this.updateHasMore(), 1000);
+
+           this.network.getRepositories().subscribe((data: NetworkRepositories) => {
+             this.allRepositories=Helper.deepCopy(data.repositories);
+             this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
+             if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
+               console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+this.repositories[0].id);
+               console.log(this.repositories);
+               this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
+             }
+             if (this.repositories.length < 2) {
+               this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
+               this.repositories = null;
+
+             }
+             this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
+             if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
+               this.currentRepository=this.currentRepositoryObject.id;
+             }
+
+             if(this.repositories) {
+               let all = new Repository();
+               all.id = RestConstants.ALL;
+               all.title = this.translate.instant('SEARCH.REPOSITORY_ALL');
+               all.repositoryType = 'ALL';
+               this.repositories.splice(0, 0, all);
+               this.updateRepositoryOrder();
+             }
+             this.initParams();
+
+           }, (error: any) => {
+             this.repositories = null;
+             this.repositoryIds = [];
+             this.initParams();
+           });
+       });
+     });
   }
 
-  /*AUTOCOMPLETE*/
-
-  addAutocompleteValue(data: any) {
-    if(typeof this.searchService.autocompleteData[data.id] == 'undefined')
-      this.searchService.autocompleteData[data.id] = [];
-    this.searchService.autocompleteData[data.id].push(data.item);
-    this.refresh();
-  }
-
-  removeAutoCompleteValue(data: any) {
-    for(var i = 0; i < this.searchService.autocompleteData[data.id].length; i++) {
-      if(this.searchService.autocompleteData[data.id][i].id == data.item.id) {
-        this.searchService.autocompleteData[data.id].splice(i, 1);
-        this.refresh();
-        return;
-      }
-    }
-
-  }
   public refresh(){
     this.getSearch(null,true);
   }
 
-  /* implement this for your autocomplete element */
-  /*
-      getAutocompleteSuggestions(data: any) {
-          if(data.id == 'keyword') {
-                  this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/lom/1.0}general_keyword', data.input).subscribe(
-                  md => {
-                      var ret:SuggestItem[] = [];
-                      for (var index = 0; index < md.values.length; index++) {
-                          ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', ''));
-                      }
-                      this.autocompleteSuggestions['keyword'] = ret;
-                  },
-                  error => console.log(error));
-          }
-
-          if(data.id == 'educationallearningresourcetype') {
-                  this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/1.0}educationallearningresourcetype', data.input).subscribe(
-                  md => {
-                      var ret:SuggestItem[] = [];
-                      for (var index = 0; index < md.values.length; index++) {
-                          ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', ''));
-                      }
-                      this.autocompleteSuggestions['educationallearningresourcetype'] = ret;
-                  },
-                  error => console.log(error));
-          }
-
-        if(data.id == 'taxonid') {
-          this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/1.0}taxonid', data.input).subscribe(
-            md => {
-              var ret:SuggestItem[] = [];
-              for (var index = 0; index < md.values.length; index++) {
-                ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', md.values[index]["key"]));
-              }
-              this.autocompleteSuggestions['taxonid'] = ret;
-            },
-            error => console.log(error));
-        }
-
-        if(data.id == 'educationalcontext') {
-          this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/1.0}educationalcontext', data.input).subscribe(
-            md => {
-              var ret:SuggestItem[] = [];
-              for (var index = 0; index < md.values.length; index++) {
-                ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', ''));
-              }
-              this.autocompleteSuggestions['educationalcontext'] = ret;
-            },
-            error => console.log(error));
-        }
-      }
-  */
-  /*AUTOCOMPLETE*/
-
-
-
-
   ngOnDestroy() {
-    this.queryParamsSubscription.unsubscribe();
+    if(this.queryParamsSubscription)
+      this.queryParamsSubscription.unsubscribe();
   }
 
-
+  scrollTo(y = 0){
+    this.winRef.getNativeWindow().scrollTo(0,y);
+  }
   handleFocus(event: Event) {
     if(this.innerWidth < this.breakpoint) {
-      this.winRef.getNativeWindow().scrollTo(0,0);
+      this.scrollTo();
     }
   }
 
   ngAfterViewInit() {
-
-    this.winRef.getNativeWindow().scrollTo(0, this.searchService.offset);
+    this.scrollTo(this.searchService.offset);
     this.innerWidth = this.winRef.getNativeWindow().innerWidth;
     this.setSidenavSettings();
     //this.autocompletesArray = this.autocompletes.toArray();
@@ -402,7 +282,6 @@ export class SearchComponent {
   }
   getMoreResults() {
     if(this.searchService.complete == false) {
-      //console.log("getMoreResults() "+this.searchService.skipcount+" "+this.searchService.searchResult.length);
       this.searchService.skipcount += this.connector.numberPerRequest;
       this.getSearch();
     }
@@ -427,7 +306,6 @@ export class SearchComponent {
     }
   }
   public routeSearchParameters(parameters:any){
-    console.log(JSON.stringify(parameters));
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
   public routeAndClearSearch(query:any) {
@@ -438,6 +316,8 @@ export class SearchComponent {
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
+    this.scrollTo();
+    this.searchService.init();
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
@@ -616,7 +496,7 @@ export class SearchComponent {
   }
   public updateMds(){
     this.currentValues=null;
-    this.routeSearch(this.searchService.searchTerm);
+    this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,null);
   }
 
   private checkFail() {
@@ -793,9 +673,17 @@ export class SearchComponent {
       this.addToStore(selection,position+1,errors+1)
     });
   }
-  private onMdsReady(mds:any){
+  private onMdsReady(mds:any=null){
     this.currentMdsSet=mds;
     this.updateColumns();
+    if (this.searchService.searchResult.length < 1) {
+      this.initalized = true;
+      if(!this.currentValues && this.mdsRef) {
+        this.currentValues = this.mdsRef.getValues();
+      }
+      this.getSearch(this.searchService.searchTerm, true,this.currentValues);
+    }
+    this.mainNavRef.refreshBanner();
   }
   private prepare(param:any) {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
@@ -812,19 +700,15 @@ export class SearchComponent {
         this.mdsExtended=param['mdsExtended']=='true';
       if(param['parameters']){
         this.currentValues=JSON.parse(param['parameters']);
-        this.invalidateMds();
       }
       else if(this.currentValues){
         this.currentValues=null;
-        this.invalidateMds();
       }
       if(param['reurl']) {
         this.hasCheckbox=false;
       }
       this.refreshListOptions();
-      if (this.searchService.searchResult.length < 1) {
-        this.getSearch(param['query'] ? param['query'] : '', true,this.currentValues);
-      }
+
     });
   }
   private getSourceIcon(repo:Repository){
@@ -1011,9 +895,74 @@ export class SearchComponent {
 
   private invalidateMds() {
     this.reloadMds=new Boolean(true);
+    // no mds for all, so invoke refresh manuall
+    if(this.currentRepository==RestConstants.ALL){
+      this.onMdsReady();
+    }
   }
 
   private isHomeRepository() {
    return RestNetworkService.isHomeRepo(this.currentRepository,this.allRepositories);
+  }
+
+  private initParams() {
+    this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
+      (param: any) => {
+        this.searchService.init();
+        if(param['addToCollection']){
+          this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
+            this.addToCollection=data.collection;
+            this.refreshListOptions();
+            this.updateActionbar(null);
+          });
+        }this.mainnav=param['mainnav']=='false' ? false : true;
+        if(param['reurl']) {
+          this.searchService.reurl = param['reurl'];
+          this.applyMode=true;
+        }
+
+        if(param['query'])
+          this.searchService.searchTerm=param['query'];
+        if(param['repository']){
+          this.mdsSets=null;
+          if(this.currentRepository!=param['repository']) {
+            this.mdsId = RestConstants.DEFAULT;
+          }
+          this.currentRepository=param['repository'];
+          this.updateRepositoryOrder();
+        }
+        if(param['savedQuery']){
+          this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
+            this.currentSavedSearch=data.node;
+            this.sidenavTab=1;
+          });
+        }
+        this.updateSelection([]);
+        this.mds.getSets(this.currentRepository).subscribe((data:MdsMetadatasets)=>{
+          this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepositoryObject ? this.currentRepositoryObject : this.currentRepository,data.metadatasets,this.config);
+          if(this.mdsSets){
+            UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
+            try {
+              this.mdsId = this.mdsSets[0].id;
+              if (param['mds'] && Helper.indexOfObjectArray(this.mdsSets,'id',param['mds'])!=-1)
+                this.mdsId = param['mds'];
+            }
+            catch(e){
+              console.warn("got invalid mds list from repository:");
+              console.warn(this.mdsSets);
+              console.warn("will continue with default mds");
+              this.mdsId=RestConstants.DEFAULT;
+            }
+            this.invalidateMds();
+            this.searchService.init();
+            this.prepare(param);
+          }
+        },(error:any)=>{
+          this.mdsId=RestConstants.DEFAULT;
+          this.invalidateMds();
+          this.searchService.init();
+          this.prepare(param);
+        });
+      });
   }
 }

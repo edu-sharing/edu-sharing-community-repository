@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ConfigurationService} from "../../services/configuration.service";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
 
@@ -13,11 +13,13 @@ import {ConfigurationHelper} from "../../rest/configuration-helper";
 })
 export class BannerComponent {
   @Input() scope:string;
+  @Output() onUpdate = new EventEmitter();
   public banner: any;
   constructor(private config:ConfigurationService) {
     this.banner = ConfigurationHelper.getBanner(this.config);
     this.config.getAll().subscribe(()=>{
       this.banner = ConfigurationHelper.getBanner(this.config);
+      this.onUpdate.emit(this.banner);
     });
   }
 }

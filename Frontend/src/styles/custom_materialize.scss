@@ -127,21 +127,6 @@ select,.select-wrapper .caret{
   .caret{
     color:transparent!important;
   }
-  /*
-  input{
-    border-bottom: none!important;
-  }
-  input:after{
-    content:"TEST";
-    background: #9e9e9e;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 100px;
-    width:calc(100% - 40px)!important;
-    z-index: 1000;
-  }
-  */
 }
 
 select:focus{

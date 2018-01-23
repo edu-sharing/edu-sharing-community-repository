@@ -18,18 +18,16 @@ import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIHelper} from "../ui-helper";
 import {RestHelper} from "../../rest/rest-helper";
 import {NodeHelper} from "../node-helper";
+import {RestLocatorService} from "../../rest/services/rest-locator.service";
 
 @Component({
   selector: 'mds',
   templateUrl: 'mds.component.html',
   styleUrls: ['mds.component.scss'],
 })
-/**
- * An edu-sharing file-picker modal dialog
- */
 export class MdsComponent{
   @Input() addWidget=false;
-  public embedded=false;
+  @Input() embedded=false;
   private activeAuthorType: number;
   private jumpmarksCount: number;
   public static TYPE_TOOLDEFINITION = "tool_definition";
@@ -61,6 +59,7 @@ export class MdsComponent{
   private static AUTHOR_TYPE_FREETEXT = 0;
   private static AUTHOR_TYPE_PERSON = 1;
   private lastMdsQuery: string;
+  private variables: string[];
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -77,7 +76,8 @@ export class MdsComponent{
     this._setId=setId;
   }
   @Input() set invalidate(invalidate:Boolean){
-    setTimeout(()=>this.loadMds(),5);
+    if(invalidate)
+      setTimeout(()=>this.loadMds(),5);
   }
 
   @Input() set groupId(groupId:string){
@@ -90,12 +90,14 @@ export class MdsComponent{
   private loadMdsFinal() {
     if(!this.mds)
       return;
-    this.onMdsLoaded.emit(this.mds);
     this.renderGroup(this._groupId,this.mds);
     this.isLoading=false;
     this.setValuesByProperty(this.mds,this._currentValues ? this._currentValues : {});
     this.applySuggestions();
-    setTimeout(()=>this.showExtended(this.extended),5);
+    setTimeout(()=>{
+      this.showExtended(this.extended);
+      this.onMdsLoaded.emit(this.mds);
+    },5);
   }
   private loadMds(){
     if(this.isLoading) {
@@ -105,11 +107,13 @@ export class MdsComponent{
     this.mds=null;
     this.rendered=null;
     this.renderedSuggestions=null;
-    this.embedded=true;
     this.isLoading=true;
     this.mdsService.getSet(this._setId,this._repository).subscribe((data:any)=>{
-      this.mds=data;
-      this.loadMdsFinal();
+      this.locator.getConfigVariables().subscribe((variables:string[])=>{
+        this.mds=data;
+        this.variables=variables;
+        this.loadMdsFinal();
+        },(error:any)=>this.toast.error(error));
       },(error:any)=>this.toast.error(error));
   }
 
@@ -129,7 +133,6 @@ export class MdsComponent{
 
   @Input() set nodeId(nodeId:string){
     this.currentNode=null;
-    this.embedded=false;
     if(nodeId==null)
       return;
     this.isLoading=true;
@@ -138,26 +141,27 @@ export class MdsComponent{
         // test a widget
         //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
         //data.views[0].html+="<test>";
-        this.mds=data;
-        this.currentNode=node.node;
-        for(let property in this.currentNode.properties){
-          this.properties.push(property);
-        }
-        this.properties.sort();
-        let nodeGroup=this.currentNode.isDirectory ? "map" : "io";
-        console.log(this.currentNode.aspects);
-        if(this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION)!=-1){
-          nodeGroup=MdsComponent.TYPE_TOOLDEFINITION;
-        }
-        if(this.currentNode.type==RestConstants.CCM_TYPE_TOOL_INSTANCE){
-          nodeGroup=MdsComponent.TYPE_TOOLINSTANCE;
-        }
-        if(this.currentNode.type==RestConstants.CCM_TYPE_SAVED_SEARCH){
-          nodeGroup=MdsComponent.TYPE_SAVED_SEARCH;
-        }
-        console.log("render node group "+nodeGroup);
-        this.renderGroup(nodeGroup,this.mds,this.currentNode);
-        this.isLoading=false;
+        this.locator.getConfigVariables().subscribe((variables:string[])=> {
+          this.mds = data;
+          this.variables=variables;
+          this.currentNode = node.node;
+          for (let property in this.currentNode.properties) {
+            this.properties.push(property);
+          }
+          this.properties.sort();
+          let nodeGroup = this.currentNode.isDirectory ? "map" : "io";
+          if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) != -1) {
+            nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
+          }
+          if (this.currentNode.type == RestConstants.CCM_TYPE_TOOL_INSTANCE) {
+            nodeGroup = MdsComponent.TYPE_TOOLINSTANCE;
+          }
+          if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
+            nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
+          }
+          this.renderGroup(nodeGroup, this.mds, this.currentNode);
+          this.isLoading = false;
+        });
       },(error:any)=>{
         this.toast.error(error);
         this.cancel();
@@ -212,6 +216,7 @@ export class MdsComponent{
               private node : RestNodeService,
               private tools : RestToolService,
               private toast : Toast,
+              private locator : RestLocatorService,
               private storage : SessionStorageService,
               private connector : RestConnectorService,
               private sanitizer: DomSanitizer,
@@ -268,7 +273,6 @@ export class MdsComponent{
       element.style.display = 'none';
       let caption=element.getAttribute('data-caption');
       let pos=-1;
-      console.log(caption);
 
       if(caption && search)
         pos=caption.toLowerCase().indexOf(searchField.value.toLowerCase());
@@ -278,7 +282,6 @@ export class MdsComponent{
       if(pos==-1) {
         continue;
       }
-      console.log("HIT: "+caption);
       if(hits>=MdsComponent.MAX_SUGGESTIONS && !showMore){
         moreCount++;
         continue;
@@ -548,9 +551,11 @@ export class MdsComponent{
         return;
       }
       if(this.isSearch()){
-        // don't send empty values to search
-        if(!props || props.length==1 && !props[0])
+        // don't send empty values to search -> this may not work with defaultvalues, so keep it
+        if(!props || props.length==1 && !props[0] && !widget.defaultvalue)
           continue;
+        if(props.length==1 && props[0]=="")
+          props=[];
       }
       properties[widget.id]=props;
     }
@@ -705,7 +710,6 @@ export class MdsComponent{
           }
           else if(widget.type=='singleoption'){
             element.value=props[0];
-            console.log("set option "+props[0]);
           }
           else {
             let caption=props[0];
@@ -799,6 +803,7 @@ export class MdsComponent{
       }
       if(this.isExtendedWidget(widget))
         extended[0]=true;
+      this.replaceVariables(widget);
       let attr=html.substring(start+search.length,end);
       let widgetData=this.renderWidget(widget,attr,template,node);
       if(!widgetData)
@@ -948,7 +953,6 @@ export class MdsComponent{
     if(event.code=="Escape"){
 
       for(let widget of this.currentWidgets){
-        console.log(widget);
         if(widget.type=='multivalueTree'){
           let element=document.getElementById(widget.id+'_tree');
           if(element && element.style.display==''){
@@ -1032,7 +1036,6 @@ export class MdsComponent{
                           var pos=(i+direction);
                           while(pos>0 && pos<elements.length && elements[pos].style.display=='none')
                             pos+=direction;
-                          console.log(pos);
                           if(pos==0) pos=elements.length-1;
                           if(pos==elements.length) pos=1;
                           elements[pos].focus();
@@ -1638,8 +1641,9 @@ export class MdsComponent{
     }
     else {
       let html = `<div class="mdsLicense">
-          <a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
-        this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>`;
+                    <a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
+                    this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>
+                  </div>`;
       return html;
     }
   }
@@ -1719,7 +1723,6 @@ export class MdsComponent{
           if (element) {
             element.style.display='';
             element.innerHTML = '';
-            console.log(values);
             for(let item of this._suggestions[property]) {
                 if (Helper.indexOfNoCase(values[property], item.id) == -1) {
                   element.innerHTML += this.getSuggestBadge(item.id, item.caption, property);
@@ -1818,5 +1821,30 @@ export class MdsComponent{
 
   private htmlEscape(caption: string) {
     return caption.split("\"").join("&quot;");
+  }
+
+  private replaceVariables(widget: any) {
+    if(this.variables==null)
+      return;
+    widget.caption=this.replaceVariableString(widget.caption,this.variables);
+    widget.placeholder=this.replaceVariableString(widget.placeholder,this.variables);
+    widget.icon=this.replaceVariableString(widget.icon,this.variables);
+    widget.defaultvalue=this.replaceVariableString(widget.defaultvalue,this.variables);
+  }
+
+  private replaceVariableString(string:string, variables: string[]) {
+    if(!string)
+      return string;
+    if(!string.match("\\${.+}")) {
+      return string;
+    }
+    for(let key in variables){
+      if("${"+key+"}"==string){
+        return variables[key];
+      }
+    }
+    console.warn("mds declared variable "+string+", but it was not found in the config variables. List of known variables below");
+    console.warn(variables);
+    return string;
   }
 }

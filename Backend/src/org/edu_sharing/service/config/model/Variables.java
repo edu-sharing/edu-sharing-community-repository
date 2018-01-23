@@ -6,8 +6,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlValue;
 
-public class Language{
-	@XmlAttribute public java.lang.String language;
-	@XmlElement public List<KeyValuePair> string;
-
+public class Variables{
+	@XmlElement public List<KeyValuePair> variable;
 }

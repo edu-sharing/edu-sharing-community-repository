@@ -6,9 +6,10 @@
 				<id>ccm:classification_purpose</id>
 				<caption>Klassifikation</caption>
 				<placeholder>z.B. Hochschule</placeholder>
-				<type>multivalueFixedBadges</type>
+				<type>singleoption</type>
 				<valuespaceClient>true</valuespaceClient>
-				<extended>true</extended>
+				<extended>false</extended>
+				<defaultvalue>${aha}</defaultvalue>
 				<values>
 					<value cap="Schule">school</value>
 					<value cap="Hochschule">university</value>
@@ -66,7 +67,7 @@
 				<id>search</id>
 				<html><![CDATA[
               <cclom:general_keyword>
-              <ccm:classification_purpose type="multivalueTree" extended="true">
+              <ccm:classification_purpose extended="false">
               <ccm:taxonid extended="true">
               <ccm:educationaltypicalagerange extended="true">
 				]]></html>
@@ -76,7 +77,7 @@
 				<caption>Erweitert</caption>
 				<icon>help_outline</icon>
 				<html><![CDATA[
-              <ccm:classification_purpose>
+              <ccm:classification_purpose defaultvalue="${test}">
               <ccm:taxonid>
               <ccm:educationaltypicalagerange extended="true">
               <version>

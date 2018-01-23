@@ -2,6 +2,7 @@
   *ngIf="showProfile"
   (onCancel)="showProfile=false"
 ></user-profile>
+<app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
 
 <div class="dialog darken" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
 

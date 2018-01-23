@@ -10,4 +10,5 @@ public class Config {
 	@XmlElement public Values values;
 	@XmlElement public Contexts contexts;
 	@XmlElement public List<Language> language;
+	@XmlElement public Variables variables;
 }
