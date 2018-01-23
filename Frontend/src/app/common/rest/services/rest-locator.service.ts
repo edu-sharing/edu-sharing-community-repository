@@ -39,8 +39,8 @@ export class RestLocatorService {
 
   constructor(private http : Http) {
   }
-  public getConfig() : Observable<Response>{
-    return new Observable<Response>((observer : Observer<Response>) => {
+  public getConfig() : Observable<any>{
+    return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {
         let query = RestLocatorService.createUrl("config/:version/values", null);
         this.http.get(this._endpointUrl + query, this.getRequestOptions())
@@ -56,14 +56,30 @@ export class RestLocatorService {
       });
     });
   }
-  public getConfigLanguage(lang:string) : Observable<Response>{
-    return new Observable<Response>((observer : Observer<Response>) => {
+  public getConfigVariables() : Observable<string[]>{
+    return new Observable<string[]>((observer : Observer<string[]>) => {
+      this.locateApi().subscribe(data => {
+        let query = RestLocatorService.createUrl("config/:version/variables", null);
+        this.http.get(this._endpointUrl + query, this.getRequestOptions("application/json"))
+          .map((response: Response) => response.json())
+          .subscribe(response => {
+            observer.next(response.current);
+            observer.complete();
+          },(error:any)=>{
+            observer.error(error);
+            observer.complete();
+          });
+      });
+    });
+  }
+  public getConfigLanguage(lang:string) : Observable<any>{
+    return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {
         let query = RestLocatorService.createUrl("config/:version/language", null);
         this.http.get(this._endpointUrl + query, this.getRequestOptions("application/json",null,null,lang))
           .map((response: Response) => response.json())
           .subscribe(response => {
-            observer.next(response);
+            observer.next(response.current);
             observer.complete();
           },(error:any)=>{
             observer.error(error);

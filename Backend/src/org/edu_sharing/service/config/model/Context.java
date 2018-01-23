@@ -9,5 +9,6 @@ public class Context {
 	@XmlElement	public String[] domain;
 	@XmlElement	public Values values;
 	@XmlElement	public List<Language> language;
+	@XmlElement	public Variables variables;
 
 }

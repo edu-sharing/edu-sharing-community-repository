@@ -4,6 +4,7 @@
 
 import {ConfigurationService} from "../services/configuration.service";
 import {MdsInfo, Repository} from "./data-object";
+import {RestConstants} from "./rest-constants";
 
 export class ConfigurationHelper {
   public static getBanner(config: ConfigurationService){
@@ -51,14 +52,14 @@ export class ConfigurationHelper {
     }
     return person[field];
   }
-  public static filterValidMds(repository:string,metadatasets: MdsInfo[], config: ConfigurationService) {
+  public static filterValidMds(repository:string|Repository,metadatasets: MdsInfo[], config: ConfigurationService) {
     let validMds=config.instant("availableMds");
     if(validMds && validMds.length){
       for(let mds of validMds){
-        if(mds.repository!=repository)
+        if(!(mds.repository==repository || mds.repository==RestConstants.HOME_REPOSITORY && (repository as Repository).isHomeRepo))
           continue;
         for(let i=0;i<metadatasets.length;i++){
-          if(validMds.indexOf(metadatasets[i].id)==-1){
+          if(mds.mds.indexOf(metadatasets[i].id)==-1){
             metadatasets.splice(i,1);
             i--;
           }

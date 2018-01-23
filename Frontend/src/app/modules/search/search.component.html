@@ -79,7 +79,7 @@
        </div>
      </div>
      <div *ngIf="sidenavTab==0">
-     <div *ngIf="currentRepository=='-all-'" class="repositoryList">
+     <div *ngIf="currentRepository=='-all-' && !groupResults" class="repositoryList">
        <label>{{'SEARCH.REPOSITORY_FILTER' | translate}}</label>
        <div *ngFor="let repo of repositoryIds">
          <input type="checkbox" class="filled-in" (change)="refresh()" [(ngModel)]="repo.enabled" [id]="repo.id"><label [for]="repo.id">{{repo.title}}</label>
@@ -88,10 +88,11 @@
 
 
       <mds #mds
-         *ngIf="currentRepository!='-all-' && initalized"
+         *ngIf="currentRepository!='-all-'"
         [groupId]="queryId"
         [repository]="currentRepository"
         [setId]="mdsId"
+        [embedded]="true"
         [currentValues]="currentValues"
         [suggestions]="mdsSuggestions"
         [invalidate]="reloadMds"
@@ -101,7 +102,7 @@
         (onDone)="applyParameters()"
       >
       </mds>
-       <div class="mdsSelect">
+       <div class="mdsSelect" *ngIf="initalized">
          <div *ngIf="mdsSets && mdsSets.length>1">
            <label for="mds">{{'SEARCH.METADATASET' | translate}}</label>
            <div>

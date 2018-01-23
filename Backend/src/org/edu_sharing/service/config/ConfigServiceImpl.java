@@ -27,8 +27,10 @@ import org.apache.commons.io.FileUtils;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.service.config.model.Config;
 import org.edu_sharing.service.config.model.Context;
+import org.edu_sharing.service.config.model.KeyValuePair;
 import org.edu_sharing.service.config.model.Language;
 import org.edu_sharing.service.config.model.Values;
+import org.edu_sharing.service.config.model.Variables;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -116,6 +118,8 @@ public class ConfigServiceImpl implements ConfigService{
 						overrideValues(config.values,context.values);
 						if(context.language!=null)
 							config.language=overrideLanguage(config.language,context.language);
+						if(context.variables!=null)
+							config.variables=overrideVariables(config.variables,context.variables);
 						return config;
 					}
 				}
@@ -124,7 +128,22 @@ public class ConfigServiceImpl implements ConfigService{
 		throw new IllegalArgumentException("Context with domain "+domain+" does not exists");
 		
 	}
-
+	private Variables overrideVariables(Variables values, Variables override) {
+		if(values==null)
+			return override;
+		if(override==null)
+			return values;
+		overrideList(values.variable,override.variable);	
+		return values;
+	}
+	private void overrideList(List<KeyValuePair> list, List<KeyValuePair> override) {
+		for(KeyValuePair obj : override) {
+			if(list.contains(obj)) {
+				list.remove(obj);
+			}
+			list.add(obj);
+		}
+	}
 	private List<Language> overrideLanguage(List<Language> values, List<Language> override) {
 		if(values==null)
 			return override;
@@ -133,12 +152,7 @@ public class ConfigServiceImpl implements ConfigService{
 		for(Language language : override) {
 			for(Language language2 : values) {
 				if(language.language.equals(language2.language)) {
-					for(Language.String string : language.string) {
-						if(language2.string.contains(string)) {
-							language2.string.remove(string);
-						}
-						language2.string.add(string);
-					}
+					overrideList(language2.string,language.string);
 				}
 			}
 		}

@@ -113,7 +113,7 @@ export class TranslationLoader implements TranslateLoader {
 
     }
     this.locator.getConfigLanguage(lang).subscribe((data:any)=>{
-      translations.push(data.current);
+      translations.push(data);
     });
 
     return new Observable<any>((observer : Observer<any>) => {
