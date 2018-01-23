@@ -250,7 +250,7 @@ export class SearchComponent {
   }
 
   scrollTo(y = 0){
-    this.winRef.getNativeWindow().scrollTo(0,0);
+    this.winRef.getNativeWindow().scrollTo(0,y);
   }
   handleFocus(event: Event) {
     if(this.innerWidth < this.breakpoint) {

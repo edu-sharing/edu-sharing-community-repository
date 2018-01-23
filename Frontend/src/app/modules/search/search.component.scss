@@ -116,7 +116,6 @@ $sidenavWidth:285px;
   text-align: center;
   margin: 0 10px;
   min-height: 100%;
-  overflow-x: hidden;
 }
 
 md-sidenav-container,.sidenav,#top {
@@ -307,6 +306,7 @@ small-collection{
     min-height: 1000px;
     display: inline-block;
     width: 100%;
+    overflow-x: hidden;
 }
 .resultsNoRepositories{
   margin-top: 155px;
