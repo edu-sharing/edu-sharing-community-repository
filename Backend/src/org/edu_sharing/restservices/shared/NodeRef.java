@@ -3,6 +3,8 @@ package org.edu_sharing.restservices.shared;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import org.edu_sharing.restservices.RepositoryDao;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @ApiModel(description = "")
@@ -18,6 +20,11 @@ public class NodeRef implements Comparable<NodeRef> {
 	public NodeRef(String repoId,String nodeId) {
 		repo=repoId;
 		id=nodeId;
+	}
+	public NodeRef(RepositoryDao repo,String nodeId) {
+		this.repo=repo.getId();
+		this.isHomeRepo=repo.isHomeRepo();
+		this.id=nodeId;
 	}
 
 	/**
