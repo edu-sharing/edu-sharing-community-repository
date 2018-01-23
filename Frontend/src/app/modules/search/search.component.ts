@@ -536,14 +536,14 @@ export class SearchComponent {
       this.switchToCollections(node.ref.id);
       return;
     }
-    if(!RestNetworkService.isFromHomeRepo(node,this.repositories)){
+    if(!RestNetworkService.isFromHomeRepo(node,this.allRepositories)){
       window.open(node.contentUrl);
       return;
     }
     this.renderedNode = node;
     this.render_options=[];
     let queryParams={
-      "repository" : RestNetworkService.isFromHomeRepo(node,this.repositories) ? null : node.ref.repo
+      "repository" : RestNetworkService.isFromHomeRepo(node,this.allRepositories) ? null : node.ref.repo
     };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
