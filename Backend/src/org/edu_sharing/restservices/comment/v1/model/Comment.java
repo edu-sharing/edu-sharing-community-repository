@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Comment {
 	@JsonProperty private NodeRef ref;
+	@JsonProperty private NodeRef replyTo;
 	@JsonProperty private UserSimple creator;
 	@JsonProperty private long created;
 	@JsonProperty private String comment;
@@ -20,6 +21,12 @@ public class Comment {
 	}
 	public void setRef(NodeRef ref) {
 		this.ref = ref;
+	}
+	public NodeRef getReplyTo() {
+		return replyTo;
+	}
+	public void setReplyTo(NodeRef replyTo) {
+		this.replyTo = replyTo;
 	}
 	public UserSimple getCreator() {
 		return creator;

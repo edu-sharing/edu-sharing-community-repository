@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.metadataset.v2.MetadataGroup;
 import org.edu_sharing.metadataset.v2.MetadataList;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
@@ -56,7 +57,12 @@ public class CommentDao {
 					PersonDao person=PersonDao.getPerson(repoDao, (String) node.getNativeProperties().get(CCConstants.CM_PROP_C_CREATOR));
 					comment.setCreator(person.asPersonSimple());
 				}catch(Throwable t) {}
-				
+				if(node.getNativeProperties().containsKey(CCConstants.CCM_PROP_COMMENT_REPLY)) {
+					comment.setReplyTo(
+						new org.edu_sharing.restservices.shared.NodeRef(repoDao,new NodeRef((String) node.getNativeProperties().get(CCConstants.CCM_PROP_COMMENT_REPLY)).getId())
+						);
+				}
+
 				comment.setCreated(node.getCreatedAt().getTime());
 				comment.setComment((String) node.getNativeProperties().get(CCConstants.CCM_PROP_COMMENT_CONTENT));
 				comments.add(comment);
