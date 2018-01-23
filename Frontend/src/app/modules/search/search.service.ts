@@ -23,6 +23,7 @@ export class SearchService {
      this.skipcount = 0;
      this.offset = 0;
      this.searchResult = [];
+     this.searchResultCollections = [];
      this.searchResultRepositories = [];
      this.complete = false;
      this.facettes = [];
