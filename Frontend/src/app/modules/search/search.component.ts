@@ -47,6 +47,7 @@ import {Action} from "rxjs/scheduler/Action";
 import {WorkspaceManagementDialogsComponent} from "../management-dialogs/management-dialogs.component";
 import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 import {MdsHelper} from "../../common/rest/mds-helper";
+import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 
 
 @Component({
@@ -64,6 +65,7 @@ import {MdsHelper} from "../../common/rest/mds-helper";
 export class SearchComponent {
   public initalized = false;
   @ViewChild('mds') mdsRef: MdsComponent;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('managementDialogs') managementDialogs : WorkspaceManagementDialogsComponent;
   public mdsSuggestions:any={}
   public mdsExtended=false;
@@ -681,6 +683,7 @@ export class SearchComponent {
       }
       this.getSearch(this.searchService.searchTerm, true,this.currentValues);
     }
+    this.mainNavRef.refreshBanner();
   }
   private prepare(param:any) {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {

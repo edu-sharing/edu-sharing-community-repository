@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../router/router.component";
@@ -42,6 +42,7 @@ import {UIAnimation} from "../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
 import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
+import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 
 // data class for breadcrumbs
 export class Breadcrumb {
@@ -57,7 +58,9 @@ export class Breadcrumb {
   providers: [GwtInterfaceService],
 })
 export class CollectionsMainComponent implements GwtEventListener {
-    public dialogTitle : string;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
+
+  public dialogTitle : string;
     public globalProgress=false;
     private dialogCancelable = false;
     private dialogMessage : string;
@@ -500,6 +503,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
             //this.sortCollectionContent();
             this.isLoading=false;
+            this.mainNavRef.refreshBanner();
             if(callback)
               callback();
         });

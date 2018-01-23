@@ -93,6 +93,7 @@ export class MainNavComponent {
   private scrollInitialPositions : any[]=[];
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
+    console.log("handle scroll");
     let y=0;
     try {
       let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
@@ -108,7 +109,7 @@ export class MainNavComponent {
     for(let i=0;i<elementsAlign.length;i++) {
       elements.push(elementsAlign[i]);
     }
-    if(/*this.scrollInitialPositions.length!=elements.length && */true) {
+    if(event==null) {
       this.scrollInitialPositions=[];
       for(let i=0;i<elements.length;i++) {
         let element: any = elements[i];
@@ -127,7 +128,9 @@ export class MainNavComponent {
         }
         if(element.className.indexOf('alignWithBanner')!=-1){
           element.style.position = 'relative';
-          element.style.top = y + 'px';
+          if(event==null) {
+            element.style.top = y + 'px';
+          }
         }
         else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
           element.style.position = 'fixed';
@@ -228,18 +231,27 @@ export class MainNavComponent {
     }
     return null;
   }
-  ngAfterViewInit() {
+  refreshBanner(){
+    console.log("refresh banner");
     this.handleScroll(null);
+    setTimeout(()=>this.handleScroll(null),10);
+  }
+  ngAfterViewInit() {
+    this.refreshBanner();
     /*
     for(let i=0;i<200;i++) {
       setTimeout(() => this.handleScroll(null), i * 50);
     }
     */
+
+    // too slow and buggy
+    /*
     if(MainNavComponent.bannerPositionInterval){
       clearInterval(MainNavComponent.bannerPositionInterval);
     }
     MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),100);
-  }
+    */
+    }
   private clearSearch(){
     this.searchQuery="";
     this.onSearch.emit({query:"",cleared:true});

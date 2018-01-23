@@ -1,6 +1,5 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
-  <app-banner [scope]="'search'"></app-banner>
-  <main-nav
+  <main-nav #mainNav
     [title]="'SEARCH.TITLE'"
     [currentScope]="'search'"
     [searchEnabled]="true"
