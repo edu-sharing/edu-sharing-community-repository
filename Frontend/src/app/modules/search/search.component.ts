@@ -100,6 +100,7 @@ export class SearchComponent {
   private viewToggle: OptionItem;
   public groupResults = false;
   public actionOptions:OptionItem[]=[];
+  public allRepositories: Repository[];
   public repositories: Repository[];
   public globalProgress = false;
   // Max items to fetch at all (afterwards no more infinite scroll)
@@ -183,6 +184,7 @@ export class SearchComponent {
         setInterval(() => this.updateHasMore(), 1000);
 
         this.network.getRepositories().subscribe((data: NetworkRepositories) => {
+          this.allRepositories=data.repositories;
           this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
           if(this.repositories.length && this.currentRepository!=RestConstants.ALL && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
             console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+this.repositories[0].id);
@@ -1012,6 +1014,6 @@ export class SearchComponent {
   }
 
   private isHomeRepository() {
-   return RestNetworkService.isHomeRepo(this.currentRepository,this.repositories);
+   return RestNetworkService.isHomeRepo(this.currentRepository,this.allRepositories);
   }
 }
