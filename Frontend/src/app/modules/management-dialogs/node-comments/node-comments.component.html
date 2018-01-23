@@ -6,6 +6,7 @@
 
         <div *ngIf="_node" class="group">
           <div class="comments" [class.commentsLong]="!canComment()">
+            <div *ngIf="comments && !comments.length" class="noComments">{{'NODE_COMMENTS.NO_COMMENTS' | translate}}</div>
             <div *ngFor="let comment of comments;let i=index" class="comment">
               <div class="top">
               <div class="left">

@@ -39,6 +39,7 @@
   "DAYS_AGO" : "{{ days }} days ago",
   "HOURS_AGO" : "{{ hours }} hours ago",
   "MINUTES_AGO" : "{{ minutes }} minutes ago",
+  "JUST_NOW" : "Just now",
   "CREATE" : "create",
   "LOGOUT" : "log out",
   "INVALID_OPERATION":"This feature is currently not supported",
@@ -152,6 +153,7 @@
   "NODE_COMMENTS":{
     "TITLE":"Comments",
     "NEW_COMMENT_PLACEHOLDER":"New comment...",
+    "NO_COMMENTS":"No comments yet",
     "OPTION_EDIT":"edit",
     "OPTION_DELETE":"delete",
     "DELETE_COMMENT":"Delete comment?",

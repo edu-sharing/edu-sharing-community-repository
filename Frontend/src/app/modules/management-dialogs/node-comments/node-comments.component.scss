@@ -15,8 +15,14 @@
   height:100%;
   flex-direction: column;
 }
+.noComments{
+  font-size: 120%;
+  text-align: center;
+  color: $textLight;
+}
 .new{
   display:flex;
+  background-color: #fff;
   flex-direction: row;
   margin:0 $cardPadding*-1;
   margin-top: $cardPadding;
@@ -56,13 +62,15 @@
     }
   }
 }
+.card{
+  background-color: $actionDialogBackground!important;
+}
 .comments {
   flex-grow: 1;
   max-height: calc(100% - 95px);
   overflow-y: auto;
   margin:-$cardPadding;
   padding:$cardPadding;
-  background-color: $backgroundColor;
   .comment {
     padding:10px;
     background-color: #fff;
