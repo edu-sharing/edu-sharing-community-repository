@@ -21,8 +21,10 @@ export class ActionbarComponent{
   /**
    * The amount of options which are not hidden inside an overflow menu
    * @type {number} (default: depending on mobile (1) or not (2))
+   * Also use numberOfAlwaysVisibleOptionsMobile to control the amount of mobile options visible
    */
   @Input() numberOfAlwaysVisibleOptions=2;
+  @Input() numberOfAlwaysVisibleOptionsMobile=1;
   public optionsAlways : OptionItem[] = [];
   public optionsMenu : OptionItem[] = [];
   public optionsToggle : OptionItem[] = [];
@@ -52,9 +54,9 @@ export class ActionbarComponent{
     }
     this.optionsToggle=OptionItem.filterToggleOptions(options,true);
 
-    this.optionsAlways=this.getActionOptions(OptionItem.filterToggleOptions(options,false)).slice(0,this.numberOfAlwaysVisibleOptions).reverse();
+    this.optionsAlways=this.getActionOptions(OptionItem.filterToggleOptions(options,false)).slice(0,this.getNumberOptions()).reverse();
     if(!this.optionsAlways.length){
-      this.optionsAlways=OptionItem.filterToggleOptions(options,false).slice(0,this.numberOfAlwaysVisibleOptions).reverse();
+      this.optionsAlways=OptionItem.filterToggleOptions(options,false).slice(0,this.getNumberOptions()).reverse();
     }
     this.optionsMenu=this.hideActionOptions(OptionItem.filterToggleOptions(options,false),this.optionsAlways);
 
@@ -62,11 +64,14 @@ export class ActionbarComponent{
 
   @ViewChild('menuElements') menuElements : ElementRef;
 
-
-  constructor(private ui : UIService, private translate : TranslateService) {
+  public getNumberOptions(){
     if(window.innerWidth<UIHelper.MOBILE_WIDTH){
-      this.numberOfAlwaysVisibleOptions = 1;
+      return this.numberOfAlwaysVisibleOptionsMobile;
     }
+    return this.numberOfAlwaysVisibleOptions;
+  }
+  constructor(private ui : UIService, private translate : TranslateService) {
+
   }
   private click(option : OptionItem){
     if(!option.isEnabled)
