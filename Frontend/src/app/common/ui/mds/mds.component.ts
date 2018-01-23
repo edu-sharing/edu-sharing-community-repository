@@ -551,9 +551,11 @@ export class MdsComponent{
         return;
       }
       if(this.isSearch()){
-        // don't send empty values to search
-        if(!props || props.length==1 && !props[0])
+        // don't send empty values to search -> this may not work with defaultvalues, so keep it
+        if(!props || props.length==1 && !props[0] && !widget.defaultvalue)
           continue;
+        if(props.length==1 && props[0]=="")
+          props=[];
       }
       properties[widget.id]=props;
     }

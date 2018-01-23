@@ -676,8 +676,9 @@ export class SearchComponent {
     this.updateColumns();
     if (this.searchService.searchResult.length < 1) {
       this.initalized = true;
-      if(!this.currentValues && this.mdsRef)
-        this.currentValues=this.mdsRef.getValues();
+      if(!this.currentValues && this.mdsRef) {
+        this.currentValues = this.mdsRef.getValues();
+      }
       this.getSearch(this.searchService.searchTerm, true,this.currentValues);
     }
   }
