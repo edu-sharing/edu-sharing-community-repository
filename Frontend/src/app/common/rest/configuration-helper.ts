@@ -12,7 +12,6 @@ export class ConfigurationHelper {
       banner={};
     if(!banner.components || !banner.components.length)
       banner.components=["search"];
-    console.log(banner);
     return banner;
   }
   public static hasMenuButton(config: ConfigurationService,button:string): boolean {
