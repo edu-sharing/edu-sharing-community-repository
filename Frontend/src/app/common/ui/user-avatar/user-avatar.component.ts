@@ -18,6 +18,8 @@ export class UserAvatarComponent {
    */
   @Input() size = 'large';
 
+  // random view id
+  public id=Math.random();
   public _customImage:any;
   @Input() set customImage(customImage:File){
     if(customImage==null){
