@@ -210,18 +210,29 @@
   </div>
 </div>
 <div *ngIf="tab=='TOOLKIT'" class="content toolkit">
+  <div class="heading"><i class="material-icons">refresh</i><span>{{'ADMIN.TOOLKIT.REFRESH_APP' | translate}}</span></div>
   <div class="group">
     <div class="info">{{'ADMIN.TOOLKIT.REFRESH_APP_INFO' | translate }}</div>
     <div class="btn-flat btn-shadow" (click)="refreshAppInfo()">{{'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</div>
   </div>
+  <div class="heading"><i class="material-icons">cached</i><span>{{'ADMIN.TOOLKIT.CACHE_INFO' | translate}}</span></div>
   <div class="group">
     <form (ngSubmit)="getCacheInfo()">
       <input type="text" name="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
       <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
     </form>
   </div>
+  <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
+  <div class="group">
+    <input #uploadTempSelect type="file" style="display:none" id="uploadTempSelect" (change)="updateUploadTempFile($event)">
+    <div class="inputGroup">
+      <a class="btn-flat btn-shadow" (click)="uploadTempSelect.click()">{{'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate}}</a>
+      <div class="file">{{ (uploadTempFile ? uploadTempFile.name : '') }}</div>
+    </div>
+    <a class="btn waves-effect waves-light" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</a>
+  </div>
+  <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
   <div class="group catalina">
-    <label for="catalina">{{'ADMIN.TOOLKIT.CATALINA' | translate}}</label>
     <div class="btn-flat btn-shadow" (click)="refreshCatalina()"><i class="material-icons">refresh</i></div>
     <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
   </div>
