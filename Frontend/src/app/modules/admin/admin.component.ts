@@ -56,6 +56,7 @@ export class AdminComponent {
   @ViewChild('excelSelect') excelSelect : ElementRef;
   private excelFile: File;
   private collectionsFile: File;
+  private uploadTempFile: File;
   public xmlAppKeys: string[];
   public currentApp: string;
   private currentAppXml: string;
@@ -119,6 +120,9 @@ export class AdminComponent {
   public updateExcelFile(event:any){
     this.excelFile=event.target.files[0];
   }
+  public updateUploadTempFile(event:any){
+    this.uploadTempFile=event.target.files[0];
+  }
   public updateCollectionsFile(event:any){
     this.collectionsFile=event.target.files[0];
   }
@@ -135,6 +139,22 @@ export class AdminComponent {
     this.admin.importCollections(this.collectionsFile,this.parentCollectionType=="root" ? RestConstants.ROOT : this.parentCollection.ref.id).subscribe((data:any)=>{
       this.toast.toast('ADMIN.IMPORT.COLLECTIONS_IMPORTED',{count:data.count});
       this.globalProgress=false;
+      this.collectionsFile=null;
+    },(error:any)=>{
+      this.toast.error(error);
+      this.globalProgress=false;
+    });
+  }
+  public startUploadTempFile(){
+    if(!this.uploadTempFile){
+      this.toast.error(null,'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP');
+      return;
+    }
+    this.globalProgress=true;
+    this.admin.uploadTempFile(this.uploadTempFile).subscribe((data:any)=>{
+      this.toast.toast('ADMIN.TOOLKIT.UPLOAD_TEMP_DONE',{filename:data.file});
+      this.globalProgress=false;
+      this.uploadTempFile=null;
     },(error:any)=>{
       this.toast.error(error);
       this.globalProgress=false;
@@ -151,8 +171,9 @@ export class AdminComponent {
     }
     this.globalProgress=true;
     this.admin.importExcel(this.excelFile,this.parentNode.ref.id).subscribe((data:any)=>{
-      this.toast.toast('ADMIN.IMPORT.CSV_IMPORTED',{rows:data.rows});
+      this.toast.toast('ADMIN.IMPORT.EXCEL_IMPORTED',{rows:data.rows});
       this.globalProgress=false;
+      this.excelFile=null;
     },(error:any)=>{
       this.toast.error(error);
       this.globalProgress=false;

@@ -73,5 +73,7 @@ public interface AdminService {
 	List<String> getCatalinaOut() throws IOException;
 
 	int importCollections(String parent, InputStream is) throws Throwable;
+
+	String uploadTemp(String name, InputStream is) throws Exception;
 	
 }

@@ -106,24 +106,24 @@
   padding-top: calc(#{$mainnavHeight} + 70px + 5%);
   max-width: 1000px;
 }
-.import{
-  max-width: 800px;
-  .inputGroup{
-    input[type="radio"]+label{
-      padding-right:20px;
-    }
-    padding:20px 0;
+.inputGroup{
+  input[type="radio"]+label{
+    padding-right:20px;
+  }
+  padding:20px 0;
+  display: flex;
+  align-items: center;
+  >a,>div{
     display: flex;
-    align-items: center;
-    >a,>div{
-      display: flex;
-    }
   }
   .file,.directory{
     display: inline-block;
     padding: 0 10px;
     vertical-align: middle;
   }
+}
+.import{
+  max-width: 800px;
   .collections,.csv,.oai{
     padding-bottom:50px;
   }
@@ -193,6 +193,12 @@
 }
 .toolkit{
   max-width: 900px;
+  a.btn{
+    float:right;
+  }
+  .group .inputGroup{
+    padding:0;
+  }
   .catalina{
     label{
       position: relative;
@@ -206,7 +212,9 @@
     }
   }
   .group{
-    padding:40px 0;
+    padding:20px 0;
+    float:left;
+    width:100%;
     .info{
       float:left;
       padding-top: 10px;

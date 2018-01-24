@@ -100,16 +100,20 @@
       "IMPORTS_REMOVED":"Imports removed",
       "PROPERTY_VALUESPACE":"Write Properties to Valuespacefile",
       "PROPERTY_NAME":"Property-Name (z.B. cm:name)",
-      "CSV_IMPORTED":"CSV-Datei importiert ({{ rows }} Zeilen importiert)",
+      "EXCEL_IMPORTED":"Excel-Datei importiert ({{ rows }} Zeilen importiert)",
       "COLLECTIONS_IMPORTED":"{{ count }} Sammlungen importiert"
     },
     "TOOLKIT":{
-      "REFRESH_APP":"Refresh Application Info",
+      "REFRESH_APP":"App Info neu laden",
       "REFRESH_APP_INFO":"Metadaten und Application-Info neu laden",
       "APP_INFO_REFRESHED":"Refresh Application Info done",
       "CACHE_INFO":"Cache Info",
       "CACHE_NAME":"Cache Name (ID/Bean Name)",
-      "CATALINA":"Catalina.out:"
+      "CATALINA":"Catalina.out:",
+      "UPLOAD_TEMP":"Dateien in temporäres Verzeichnis hochladen",
+      "CHOOSE_UPLOAD_TEMP":"Datei wählen",
+      "UPLOAD_TEMP_START":"Hochladen",
+      "UPLOAD_TEMP_DONE":"Datei wurde unter {{filename}} auf dem Server abgelegt"
     }
   }
 }
