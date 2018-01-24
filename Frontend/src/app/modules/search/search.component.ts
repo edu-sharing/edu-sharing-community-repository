@@ -176,7 +176,7 @@ export class SearchComponent {
     //this.getSearch(null,true);
   }
 
-  applyParameters(props:any){
+  applyParameters(props:any=null){
     this.currentValues=props;
     this.routeSearchParameters(props);
     //this.getSearch(null,true,props);

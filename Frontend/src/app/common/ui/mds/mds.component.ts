@@ -87,7 +87,7 @@ export class MdsComponent{
     return this._groupId!=null;
   }
 
-  private loadMdsFinal() {
+  private loadMdsFinal(callback:Function=null) {
     if(!this.mds)
       return;
     this.renderGroup(this._groupId,this.mds);
@@ -97,6 +97,7 @@ export class MdsComponent{
     setTimeout(()=>{
       this.showExtended(this.extended);
       this.onMdsLoaded.emit(this.mds);
+      if(callback) callback();
     },5);
   }
   private loadMds(){
@@ -192,7 +193,9 @@ export class MdsComponent{
   private suggestionsViaSearch = false;
   private resetValues(){
     this._currentValues=null;
-    this.onDone.emit(null);
+    this.loadMdsFinal(()=>{
+      this.onDone.emit(null);
+    });
   }
   private onAddWidget(){
     let values:any=[];

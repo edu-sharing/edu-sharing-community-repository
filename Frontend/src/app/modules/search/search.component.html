@@ -98,7 +98,7 @@
         [mode]="'search'"
         [(extended)]="mdsExtended"
         (onMdsLoaded)="onMdsReady($event)"
-        (onDone)="applyParameters()"
+        (onDone)="applyParameters($event)"
       >
       </mds>
        <div class="mdsSelect" *ngIf="initalized">
