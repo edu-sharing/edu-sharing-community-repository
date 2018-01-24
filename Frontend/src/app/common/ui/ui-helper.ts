@@ -220,4 +220,25 @@ export class UIHelper{
     });
   }
 
+  /**
+   * smoothly scroll to the given y offset
+   * @param {y} number
+   * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
+   */
+  static scrollSmooth(y: number=0,smoothness=1) {
+    let mode=window.scrollY>y;
+    let divider=3*smoothness;
+    let minSpeed=7/smoothness;
+    let interval=setInterval(()=>{
+      if(window.scrollY>y && mode){
+        window.scrollBy(0, -Math.max((window.scrollY-y)/divider,minSpeed));
+      }
+      else if(window.scrollY<y && !mode){
+        window.scrollBy(0, Math.max((y-window.scrollY)/divider,minSpeed));
+      }
+      else {
+        clearInterval(interval);
+      }
+    },16);
+  }
 }

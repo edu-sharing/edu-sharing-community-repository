@@ -327,15 +327,7 @@ export class MainNavComponent {
   }
 
   scrollToTop() {
-    let options:ScrollOptions;
-    let interval=setInterval(()=>{
-      if(window.scrollY>0){
-        window.scrollBy(0, -Math.max(window.scrollY/2,10));
-      }
-      else {
-        clearInterval(interval);
-      }
-    },16);
+    UIHelper.scrollSmooth(0);
     //window.scrollTo(0,0);
   }
   editProfile(){
