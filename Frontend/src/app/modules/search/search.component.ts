@@ -583,7 +583,7 @@ export class SearchComponent {
         return RestNetworkService.supportsImport(node.ref.repo, this.repositories) && !this.isGuest;
       });
       this.options.push(save);
-      if (!this.isGuest && this.currentRepository == RestConstants.HOME_REPOSITORY) {
+      if (!this.isGuest && this.isHomeRepository()) {
         let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node: Node) => {
           this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
         });
