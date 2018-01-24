@@ -580,7 +580,7 @@ export class SearchComponent {
         options.push(nodeStore);
       let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(node));
       save.showCallback = ((node: Node) => {
-        return RestNetworkService.supportsImport(node.ref.repo, this.repositories) && !this.isGuest;
+        return RestNetworkService.supportsImport(node.ref.repo, this.allRepositories) && !this.isGuest;
       });
       this.options.push(save);
       if (!this.isGuest && this.isHomeRepository()) {
@@ -604,17 +604,22 @@ export class SearchComponent {
         options.push(openFolder);
         */
       }
+
+      if(nodes.length==1){
+        if(!this.isGuest) {
+          let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(this.getCurrentNode(node)));
+          save.showCallback=(node:Node)=>{
+            return RestNetworkService.supportsImport(node.ref.repo, this.repositories);
+          }
+          options.push(save);
+        }
+      }
+
       let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,
         (node: Node) => NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
 
-      if(nodes.length==1 && !fromList){
-        if(RestNetworkService.supportsImport(nodes[0].ref.repo, this.repositories) && !this.isGuest) {
-          let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(this.getCurrentNode(node)));
-          options.push(save);
-        }
-      }
       if(nodes.length==1 && this.config.instant("nodeReport",false)){
         let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
         if(this.isHomeRepository())
