@@ -69,7 +69,7 @@ export class NodeRenderComponent {
   private fromLogin = false;
   public banner: any;
   private repository: string;
-  private nodeComments: Node;
+  public nodeComments: Node;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {

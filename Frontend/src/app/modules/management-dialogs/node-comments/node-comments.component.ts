@@ -22,9 +22,9 @@ import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.compone
 })
 export class NodeCommentsComponent  {
   public _node: Node;
-  private dialogTitle:string;
-  private dialogMessage:string;
-  private dialogButtons:DialogButton[];
+  public dialogTitle:string;
+  public dialogMessage:string;
+  public dialogButtons:DialogButton[];
   private isGuest: boolean;
   private user: User;
   private comments: Comment[];
