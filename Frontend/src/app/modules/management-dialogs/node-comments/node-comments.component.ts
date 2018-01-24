@@ -50,9 +50,12 @@ export class NodeCommentsComponent  {
       if(!data.isGuest){
         this.iam.getUser().subscribe((data)=>{
           this.user=data.person;
+          this.refresh();
         });
       }
-      this.refresh();
+      else {
+        this.refresh();
+      }
     });
   }
   private saveEditComment(){

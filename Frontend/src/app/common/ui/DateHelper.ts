@@ -67,7 +67,7 @@ export class DateHelper{
       let addDate=true;
       let timeFormat="HH:mm";
       if(timeDiff<3600*6 && useRelativeLabels){
-        if(timeDiff<60){
+        if(timeDiff<90){
           prefix=translation.instant("JUST_NOW",{seconds:timeDiff})
         }
         else if(timeDiff<60*100){
