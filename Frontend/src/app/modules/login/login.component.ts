@@ -76,14 +76,14 @@ export class LoginComponent  implements OnInit{
                 this.goToNext();
               }
             }
+            if(configService.instant("loginUrl") && data.statusCode!=RestConstants.STATUS_CODE_OK){
+              window.location.href=configService.instant("loginUrl");
+              return;
+            }
           });
           this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
           this.next=params['next'];
           this.mainnav=params['mainnav']=='false' ? false : true;
-          if(configService.instant("loginUrl") && data.statusCode!=RestConstants.STATUS_CODE_OK){
-            window.location.href=configService.instant("loginUrl");
-            return;
-          }
           if(this.scope==RestConstants.SAFE_SCOPE){
             this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
               if(data.statusCode!=RestConstants.STATUS_CODE_OK){
