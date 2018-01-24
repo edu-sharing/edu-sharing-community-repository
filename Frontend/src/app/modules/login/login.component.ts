@@ -59,10 +59,7 @@ export class LoginComponent  implements OnInit{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
         this.config=data;
-        if(configService.instant("loginUrl")){
-            window.location.href=configService.instant("loginUrl");
-            return;
-        }
+
         this.username=this.configService.instant("defaultUsername","");
         this.password=this.configService.instant("defaultPassword","");
         this.route.queryParams.forEach((params: Params) => {
@@ -83,6 +80,10 @@ export class LoginComponent  implements OnInit{
           this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
           this.next=params['next'];
           this.mainnav=params['mainnav']=='false' ? false : true;
+          if(configService.instant("loginUrl")){
+            window.location.href=configService.instant("loginUrl");
+            return;
+          }
           if(this.scope==RestConstants.SAFE_SCOPE){
             this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
               if(data.statusCode!=RestConstants.STATUS_CODE_OK){
