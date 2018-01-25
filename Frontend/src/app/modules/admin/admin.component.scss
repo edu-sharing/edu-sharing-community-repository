@@ -106,7 +106,8 @@
   padding-top: calc(#{$mainnavHeight} + 70px + 5%);
   max-width: 1000px;
 }
-.inputGroup{
+.toolkit .inputGroup,
+.import .inputGroup{
   input[type="radio"]+label{
     padding-right:20px;
   }
