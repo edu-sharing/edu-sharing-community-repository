@@ -283,7 +283,7 @@
   (onClose)="closeSaveSearchDialog()"
   (onSave)="saveSearch($event)"
 ></search-save-search>
-<modal-dialog *ngIf="dialogTitle"
+<modal-dialog
   [title]="dialogTitle"
   [message]="dialogMessage"
   [buttons]="dialogButtons"

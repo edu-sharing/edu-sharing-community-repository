@@ -3,13 +3,13 @@
   [currentScope]="'admin'"
   [searchEnabled]="false"
 ></main-nav>
-<modal-dialog *ngIf="showWarning"
-              [title]="'ADMIN.WARNING_TITLE'"
+<modal-dialog
+              [title]="showWarning ? 'ADMIN.WARNING_TITLE' : null"
               [message]="'ADMIN.WARNING_INFO'"
               [buttons]="warningButtons"
               [isCancelable]="false"
 ></modal-dialog>
-<modal-dialog *ngIf="dialogTitle"
+<modal-dialog
 [title]="dialogTitle"
 [message]="dialogMessage"
 [buttons]="dialogButtons"
