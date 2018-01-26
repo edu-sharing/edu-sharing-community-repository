@@ -309,7 +309,10 @@ export class SearchComponent {
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
   public routeAndClearSearch(query:any) {
-    let parameters=this.mdsRef.getValues();
+    let parameters:any=null;
+    if(this.mdsRef) {
+      parameters = this.mdsRef.getValues();
+    }
     if (query.cleared) {
       parameters = null;
     }
