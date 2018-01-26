@@ -48,6 +48,7 @@ export class WorkspaceExplorerComponent  {
   @Output() onSelectNode=new EventEmitter();
   @Output() onUpdateOptions=new EventEmitter();
   @Output() onDrop=new EventEmitter();
+  @Output() onReset=new EventEmitter();
   private path : Node[];
   public updateOptions(node : Node){
     this.onUpdateOptions.emit(node);
@@ -64,6 +65,7 @@ export class WorkspaceExplorerComponent  {
       this._nodes=[];
       this.onSelectionChanged.emit([]);
       this.onUpdateOptions.emit();
+      this.onReset.emit();
     }
     else if(!this.hasMoreToLoad){
       return;
@@ -281,7 +283,7 @@ export class WorkspaceExplorerComponent  {
       this._node=current.ref.id;
       this._searchQuery=null;
       this.load(true);
-    },10);
+    },5);
   }
 
   private setSearchQuery(query: string) {
