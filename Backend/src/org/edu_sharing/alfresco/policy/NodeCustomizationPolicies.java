@@ -172,8 +172,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			if(reader != null){
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_SIZE), reader.getContentData().getSize());	
 			}
-			
-			if(contentSize > 0 && mimetype != null){
+			if(contentSize > 0 && mimetype != null && !nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT), mimetype);
 			}
 			
