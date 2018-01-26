@@ -18,6 +18,10 @@ $toastLink:     #81A1B8;
   min-height:inherit!important;
   word-break: normal!important;
   transition: all $transitionNormal;
+
+  /* animation start */
+  opacity: 0;
+  transform: translateY(50%);
 }
 .toast a{
   color:$primaryMediumLight;
