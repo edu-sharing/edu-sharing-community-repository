@@ -18,11 +18,17 @@ import {AuthorityNamePipe} from "../../../common/ui/authority-name.pipe";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {ConfigurationService} from "../../../common/services/configuration.service";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'workspace-workflow',
   templateUrl: 'workflow.component.html',
-  styleUrls: ['workflow.component.scss']
+  styleUrls: ['workflow.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class WorkspaceWorkflowComponent  {
   private _nodeId: string;

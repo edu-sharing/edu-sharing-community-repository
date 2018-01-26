@@ -1,6 +1,5 @@
-
-<div class="dialog darken">
-  <div class="card center-card card-action card-high card-wide">
+<div class="dialog darken" [@fade]="this"></div>
+  <div class="card center-card card-action card-high card-wide" [@cardAnimation]="this">
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div class="card-title">{{'WORKSPACE.SHARE.TITLE' | translate }}</div>
@@ -191,7 +190,6 @@
       <a class="btn-flat" tabindex="0" (keyup.enter)="cancel()" (click)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
   </div>
- </div>
 <workspace-share-history
   *ngIf="history"
   [node]="history"

@@ -11,8 +11,8 @@ import {UIAnimation} from "../ui-animation";
   templateUrl: 'modal-dialog.component.html',
   styleUrls: ['modal-dialog.component.scss'],
   animations: [
-    trigger('dialogAnimation', UIAnimation.fade(UIAnimation.ANIMATION_TIME_NORMAL)),
-    trigger('cardAnimation', UIAnimation.cardAnimation(UIAnimation.ANIMATION_TIME_NORMAL))
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
 /**

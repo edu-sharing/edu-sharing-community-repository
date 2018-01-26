@@ -1,5 +1,5 @@
-<div class="dialog darken">
-  <div class="card center-card card-action">
+<div class="dialog darken" [@fade]="this"></div>
+  <div class="card center-card card-action" [@cardAnimation]="this">
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div class="card-title">{{'WORKSPACE.SHARE_LINK.TITLE' | translate:{name:_node ? _node.name : ''} }}</div>
@@ -58,4 +58,4 @@
       <a class="waves-effect waves-light btn" (keyup.enter)="cancel()" (click)="cancel()">{{'CLOSE' | translate }}</a>
     </div>
   </div>
-</div>
+
