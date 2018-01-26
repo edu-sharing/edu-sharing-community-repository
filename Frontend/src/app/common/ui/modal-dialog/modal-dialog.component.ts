@@ -64,6 +64,10 @@ export class ModalDialogComponent{
    */
   public _buttons : DialogButton[];
   @Input() set buttons (buttons :  DialogButton[]){
+    if(!buttons){
+      this._buttons=null;
+      return;
+    }
    this._buttons=buttons.reverse();
    setTimeout(()=> {
      if(this.buttonElements)
