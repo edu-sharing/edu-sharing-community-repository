@@ -285,7 +285,6 @@ export class SearchComponent {
     return false;
   }
   getMoreResults() {
-    console.log("complete "+this.searchService.complete);
     if(this.searchService.complete == false) {
       this.searchService.skipcount = this.searchService.searchResult.length;
       this.getSearch();
@@ -335,7 +334,6 @@ export class SearchComponent {
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
-    console.log("getSearch "+init);
     if(this.showspinner && init || this.repositoryIds==null){
       setTimeout(()=>this.getSearch(searchString,init,properties),100);
       return;
@@ -493,7 +491,6 @@ export class SearchComponent {
         this.searchService.facettes[0].values = this.searchService.facettes[0].values.slice(0, 20);
       }
     }
-    console.log(data.nodes.length+"<"+this.connector.numberPerRequest);
     if(this.searchService.searchResult.length == data.pagination.total)
       this.searchService.complete = true;
   }
