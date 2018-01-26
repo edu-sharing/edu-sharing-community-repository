@@ -533,7 +533,7 @@
 				<property name="ccm:commonlicense_key" />
 				<property name="ccm:educationallearningresourcetype" />
 				<property name="license">
-					<statement>@ccm\:commonlicense_key:"${value}*"</statement>
+					<statement>@ccm\:commonlicense_key:"${value}"</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
 				</property>

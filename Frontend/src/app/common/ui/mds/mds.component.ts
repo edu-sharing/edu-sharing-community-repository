@@ -1634,7 +1634,7 @@ export class MdsComponent{
     if(this.mode=='search'){
       widget.values=[
         {id:'CC_0',imageSrc:NodeHelper.getLicenseIconByString('CC_0',this.connector)},
-        {id:'CC_BY',imageSrc:NodeHelper.getLicenseIconByString('CC_BY',this.connector)},
+        {id:'CC_BY*',imageSrc:NodeHelper.getLicenseIconByString('CC_BY',this.connector)},
         {id:'PDM',imageSrc:NodeHelper.getLicenseIconByString('PDM',this.connector)},
         {id:'COPYRIGHT',imageSrc:NodeHelper.getLicenseIconByString('COPYRIGHT-FREE',this.connector)},
       ];
