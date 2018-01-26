@@ -1,20 +1,19 @@
-<div class="dialog darken">
-  <div class="card center-card card-action">
-    <div class="card-content">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
-      <span class="card-title">{{'WORKSPACE.ADD_FOLDER_TITLE' | translate }}</span>
-      <input type="text" #input [(ngModel)]="_folder" (keyup.enter)="addFolder()" (keyup)="setState($event)" (keypress)="setState($event)" placeholder="{{'WORKSPACE.FOLDER_PLACEHOLDER' | translate }}" autofocus>
-      <div *ngIf="mdsSets && mdsSets.length>1">
-        <label for="mdsSet">{{'WORKSPACE.ADD_FOLDER_METADATASET' | translate}}</label>
-        <select id="mdsSet" [(ngModel)]="mdsSet">
-          <option *ngFor="let mds of mdsSets" [value]="mds.id">{{mds.name}}</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="card-action">
-      <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="addFolder()">{{'CREATE' | translate }}</a>
-      <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
-    </div>
+<div class="dialog darken" [@fade]="this"></div>
+<div class="card center-card card-action" [@cardAnimation]="this">
+  <div class="card-content">
+    <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+    <span class="card-title">{{'WORKSPACE.ADD_FOLDER_TITLE' | translate }}</span>
+    <input type="text" #input [(ngModel)]="_folder" (keyup.enter)="addFolder()" (keyup)="setState($event)" (keypress)="setState($event)" placeholder="{{'WORKSPACE.FOLDER_PLACEHOLDER' | translate }}" autofocus>
+    <div *ngIf="mdsSets && mdsSets.length>1">
+      <label for="mdsSet">{{'WORKSPACE.ADD_FOLDER_METADATASET' | translate}}</label>
+      <select id="mdsSet" [(ngModel)]="mdsSet">
+        <option *ngFor="let mds of mdsSets" [value]="mds.id">{{mds.name}}</option>
+      </select>
     </div>
   </div>
+
+  <div class="card-action">
+    <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="addFolder()">{{'CREATE' | translate }}</a>
+    <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+  </div>
+</div>

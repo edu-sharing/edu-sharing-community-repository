@@ -19,11 +19,17 @@ import {UIHelper} from "../ui-helper";
 import {RestHelper} from "../../rest/rest-helper";
 import {NodeHelper} from "../node-helper";
 import {RestLocatorService} from "../../rest/services/rest-locator.service";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../ui-animation";
 
 @Component({
   selector: 'mds',
   templateUrl: 'mds.component.html',
   styleUrls: ['mds.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class MdsComponent{
   @Input() addWidget=false;
