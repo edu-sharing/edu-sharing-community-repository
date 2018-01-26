@@ -1,9 +1,10 @@
-<div class="dialog darken">
-  <div class="card center-card card-high card-action">
+<div class="dialog darken" [@fade]="this"></div>
+  <div class="card center-card card-high card-action" [@cardAnimation]="this">
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <span class="card-title ">{{'SEARCH.NODE_STORE.TITLE' | translate }}</span>
-      <div class="card-scroll">
+      <spinner *ngIf="loading"></spinner>
+      <div class="card-scroll" *ngIf="!loading">
         <actionbar class="actions"
                    [options]="actionOptions"
         ></actionbar>
@@ -33,5 +34,3 @@
       >{{'CLOSE' | translate}}</a>
     </div>
   </div>
-</div>
-<global-progress *ngIf="globalProgress"></global-progress>
