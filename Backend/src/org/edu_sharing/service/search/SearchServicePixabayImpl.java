@@ -188,6 +188,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 					"&editors_choice="+editorsChoice+
 					"&image_type="+imageType+
 					"&orientation="+orientation+
+					"&safesearch=true"+
 					"&per_page="+searchToken.getMaxResult()+
 					"&page="+page;
 			searchToken.setQueryString(uri);

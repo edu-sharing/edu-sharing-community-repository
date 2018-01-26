@@ -41,7 +41,7 @@
     <i class="material-icons">av_timer</i>
     {{ timeout }}
   </div>
-  <modal-dialog *ngIf="dialogTitle"
+  <modal-dialog
                 [title]="dialogTitle"
                 [isCancelable]="dialogCancelable"
                 (onCancel)="hideDialog()"
@@ -180,6 +180,7 @@
   (onSelectionChanged)="setSelection($event)"
   (onOpenNode)="openNode($event)"
   (onUpdateOptions)="updateOptions($event)"
+  (onReset)="resetWorkspace()"
 ></workspace-explorer>
 
 <workspace-management

@@ -262,7 +262,7 @@ $badgeWidth:200px;
 .list .row{
   width:100%;
   border-bottom:1px solid $textOnPrimary;
-  height:70px;
+  height:$listItemHeight;
   margin-bottom:0;
   background-color: #fff;
 }

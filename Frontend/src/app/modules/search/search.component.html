@@ -98,7 +98,7 @@
         [mode]="'search'"
         [(extended)]="mdsExtended"
         (onMdsLoaded)="onMdsReady($event)"
-        (onDone)="applyParameters()"
+        (onDone)="applyParameters($event)"
       >
       </mds>
        <div class="mdsSelect" *ngIf="initalized">
@@ -179,7 +179,7 @@
 
    </div>
 
-   <div class="content_wrapper" [class.contentSidenav]="sidenav_opened">
+   <div class="content_wrapper" [class.content_wrapper_grouped]="currentRepository=='-all-' && groupResults" [class.contentSidenav]="sidenav_opened">
     <div class="results alignWithBanner" [class.resultsNoRepositories]="!repositories" vocab="http://schema.org/" typeof="WebPage">
       <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0 && !addToCollection">
         <div class="collectionsHeading">
@@ -240,7 +240,7 @@
         <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
         <a class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
         <div class="noResults" *ngIf="searchService.searchResultRepositories[i] && !searchService.searchResultRepositories[i].length && !showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
-        <listTable *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
+        <listTable [class.list]="view==0" *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
           [nodes]="searchService.searchResultRepositories[i]"
           [columns]="columns"
           [hasIcon]="true"
@@ -283,7 +283,7 @@
   (onClose)="closeSaveSearchDialog()"
   (onSave)="saveSearch($event)"
 ></search-save-search>
-<modal-dialog *ngIf="dialogTitle"
+<modal-dialog
   [title]="dialogTitle"
   [message]="dialogMessage"
   [buttons]="dialogButtons"

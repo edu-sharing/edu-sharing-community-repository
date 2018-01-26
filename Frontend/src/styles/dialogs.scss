@@ -13,7 +13,10 @@
 .darken{
   @include darken();
 }
-
+.card{
+  z-index:121;
+  background-color: #fff!important;
+}
 .center-card{
   position:fixed!important;
   top:15%;
@@ -23,9 +26,7 @@
   margin-left:-250px!important;
   padding-bottom: $cardPadding;
 }
-.card{
-  background-color: #fff!important;
-}
+
 .card-content{
   height: calc(100% - 50px);
 }

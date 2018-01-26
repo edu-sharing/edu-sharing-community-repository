@@ -74,4 +74,19 @@ export class UIAnimation{
         animate(time, style({transform:'scaleY(0.5)',opacity:0}))      ])
     ];
   }
+  /**
+   * Useful animation for showing any modal cards
+   * @param time
+   * @returns {AnimationStateTransitionMetadata[]}
+   */
+  public static cardAnimation(time=UIAnimation.ANIMATION_TIME_NORMAL){
+    return  [transition(':enter', [
+      style({'transform-origin':'50% 0%',transform:'scaleY(0.5) translateY(-100%)',opacity:0}),
+      animate(time+"ms ease", style({transform:'scaleY(1) translateY(0)',opacity:1}))
+    ]),
+      transition(':leave', [
+        style({'transform-origin':'50% 0%',opacity:1}),
+        animate(time+"ms ease", style({opacity:0}))      ])
+    ];
+  }
 }

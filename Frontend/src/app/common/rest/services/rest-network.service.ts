@@ -26,7 +26,13 @@ export class RestNetworkService {
       }
       return false;
   }
-
+  static allFromHomeRepo(nodes: Node[],repositories:Repository[]) {
+    for(let node of nodes) {
+      if (!RestNetworkService.isHomeRepo(node.ref.repo, repositories))
+        return false;
+    }
+    return true;
+  }
   static isFromHomeRepo(node: Node,repositories:Repository[]) {
     return RestNetworkService.isHomeRepo(node.ref.repo,repositories);
   }

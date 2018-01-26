@@ -1,23 +1,22 @@
-<div class="dialog darken">
-  <div class="card center-card card-low" [class.card-action]="isCancelable" [class.card-high]="isScrollable">
-    <div class="card-content">
-      <div *ngIf="isCancelable" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
-      <span class="card-title ">{{title | translate }}</span>
-      <div [class.card-scroll]="isScrollable">
-        <p>{{message | translate:messageParameters }}</p>
-      </div>
+<div class="dialog darken" *ngIf="title" [@dialogAnimation]="title"></div>
+<div class="card center-card card-low" *ngIf="title" [@cardAnimation]="title" [class.card-action]="isCancelable" [class.card-high]="isScrollable">
+  <div class="card-content">
+    <div *ngIf="isCancelable" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+    <span class="card-title ">{{title | translate }}</span>
+    <div [class.card-scroll]="isScrollable">
+      <p>{{message | translate:messageParameters }}</p>
     </div>
-    <div class="card-action" *ngIf="_buttons">
-      <a *ngFor="let button of _buttons;let i=index" #buttonElements
-         [class.btn-flat]="button.type==2"
-         [class.waves-effect]="button.type==1"
-         [class.waves-light]="button.type==1"
-         [class.btn]="button.type==1"
-         tabindex="0"
-         (focus)="i==0"
-         (keyup.enter)="click(button)"
-         (click)="click(button)"
-      >{{button.name | translate}}</a>
-    </div>
+  </div>
+  <div class="card-action" *ngIf="_buttons">
+    <a *ngFor="let button of _buttons;let i=index" #buttonElements
+       [class.btn-flat]="button.type==2"
+       [class.waves-effect]="button.type==1"
+       [class.waves-light]="button.type==1"
+       [class.btn]="button.type==1"
+       tabindex="0"
+       (focus)="i==0"
+       (keyup.enter)="click(button)"
+       (click)="click(button)"
+    >{{button.name | translate}}</a>
   </div>
 </div>

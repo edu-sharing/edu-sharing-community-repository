@@ -149,7 +149,7 @@
       <a class="btn-flat" (click)="edit=null">{{'CANCEL' | translate }}</a>
     </div>
   </div>
-  <modal-dialog *ngIf="dialogTitle"
+  <modal-dialog
     [title]="dialogTitle"
     [message]="dialogMessage"
     [messageParameters]="dialogParameters"
