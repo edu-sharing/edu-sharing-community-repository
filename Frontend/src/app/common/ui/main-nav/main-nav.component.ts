@@ -93,7 +93,6 @@ export class MainNavComponent {
   private scrollInitialPositions : any[]=[];
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
-    console.log("handle scroll");
     let y=0;
     try {
       let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
