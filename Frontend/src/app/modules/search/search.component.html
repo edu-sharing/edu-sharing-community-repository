@@ -179,7 +179,7 @@
 
    </div>
 
-   <div class="content_wrapper" [class.contentSidenav]="sidenav_opened">
+   <div class="content_wrapper" [class.content_wrapper_grouped]="currentRepository=='-all-' && groupResults" [class.contentSidenav]="sidenav_opened">
     <div class="results alignWithBanner" [class.resultsNoRepositories]="!repositories" vocab="http://schema.org/" typeof="WebPage">
       <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0 && !addToCollection">
         <div class="collectionsHeading">

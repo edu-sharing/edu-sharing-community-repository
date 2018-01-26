@@ -411,6 +411,9 @@ listtable {
     min-width:50px;
   }
 }
+.content_wrapper_grouped{
+  margin-right: 0;
+}
 .searchGrouped{
   >div{
     float:left;
@@ -425,7 +428,7 @@ listtable {
     margin-bottom: 15px;
   }
   listTable.list{
-    width:100%;
+    width:calc(100% - 10px);
     height:$listItemHeight*5;
   }
   .noResults{
@@ -448,7 +451,7 @@ listtable {
     float:right;
     text-transform: uppercase;
     font-weight: bold;
-    margin-right: 10px;
+    margin-right: 20px;
   }
 }
 .sidenav{
