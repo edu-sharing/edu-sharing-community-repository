@@ -131,6 +131,8 @@ export class NodeCommentsComponent  {
       for(let comment of this.comments){
         this.options.push(this.getOptions(comment));
       }
+    },(error:any)=>{
+      this.toast.error(error);
     });
   }
 }
