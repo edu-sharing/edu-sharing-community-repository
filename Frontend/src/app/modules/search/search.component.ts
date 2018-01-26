@@ -573,24 +573,26 @@ export class SearchComponent {
       return options;
     }
     if(nodes && nodes.length) {
+      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node: Node) => {
+        this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
+      });
+      collection.showCallback = (node: Node) => {
+        return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node,this.allRepositories);
+      };
+      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
+        options.push(collection);
+
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));
       });
-      if(this.isHomeRepository())
+      nodeStore.showCallback=(node:Node)=>{
+        return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
+      };
+      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
         options.push(nodeStore);
-      let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(node));
-      save.showCallback = ((node: Node) => {
-        return RestNetworkService.supportsImport(node.ref.repo, this.allRepositories) && !this.isGuest;
-      });
-      this.options.push(save);
+
       if (!this.isGuest && this.isHomeRepository()) {
-        let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node: Node) => {
-          this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
-        });
-        collection.showCallback = (node: Node) => {
-          return this.addToCollection == null;
-        };
-        options.push(collection);
+
         /*
         let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', (node: Node) => {
           NodeHelper.goToWorkspace(this.nodeApi, this.router, this.connector.getCurrentLogin(), node);
@@ -606,11 +608,11 @@ export class SearchComponent {
       }
 
       if(nodes.length==1){
-        if(!this.isGuest) {
+        if(!this.isGuest && (fromList || RestNetworkService.supportsImport(nodes[0].ref.repo,this.allRepositories))) {
           let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(this.getCurrentNode(node)));
           save.showCallback=(node:Node)=>{
-            return RestNetworkService.supportsImport(node.ref.repo, this.repositories);
-          }
+            return RestNetworkService.supportsImport(node.ref.repo, this.allRepositories);
+          };
           options.push(save);
         }
       }
@@ -622,7 +624,10 @@ export class SearchComponent {
 
       if(nodes.length==1 && this.config.instant("nodeReport",false)){
         let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
-        if(this.isHomeRepository())
+        report.showCallback=(node:Node)=>{
+          return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
+        }
+        if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
           options.push(report);
       }
     }

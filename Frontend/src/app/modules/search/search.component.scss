@@ -424,6 +424,10 @@ listtable {
     margin-top: 10px;
     margin-bottom: 15px;
   }
+  listTable.list{
+    width:100%;
+    height:$listItemHeight*5;
+  }
   .noResults{
     width: 100%;
     height: auto;
