@@ -63,10 +63,10 @@ export class PermissionsAuthoritiesComponent {
   public loadingTitle:string;
   private loadingMessage:string;
   public dialogTitle:string;
-  private dialogMessage:string;
-  private dialogButtons : DialogButton[];
-  private dialogParameters : any;
-  private dialogCancelable : boolean;
+  public dialogMessage:string;
+  public dialogButtons : DialogButton[];
+  public dialogParameters : any;
+  public dialogCancelable : boolean;
   public addTo : any;
   private addToSelection : any;
   public globalProgress=false;

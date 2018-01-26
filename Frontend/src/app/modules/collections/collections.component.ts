@@ -62,9 +62,9 @@ export class CollectionsMainComponent implements GwtEventListener {
 
   public dialogTitle : string;
     public globalProgress=false;
-    private dialogCancelable = false;
-    private dialogMessage : string;
-    private dialogButtons : DialogButton[];
+    public dialogCancelable = false;
+    public dialogMessage : string;
+    public dialogButtons : DialogButton[];
 
     public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
     public isLoading:boolean = true;
@@ -732,7 +732,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       });
   }
 
-  private closeDialog() {
+  public closeDialog() {
     this.dialogTitle=null;
   }
 

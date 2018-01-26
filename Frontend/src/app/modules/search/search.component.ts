@@ -131,8 +131,8 @@ export class SearchComponent {
   private currentSavedSearch: Node;
   private login: LoginResult;
   public dialogTitle: string;
-  private dialogMessage: string;
-  private dialogButtons: DialogButton[];
+  public dialogMessage: string;
+  public dialogButtons: DialogButton[];
   private savedSearchOwn = true;
   public savedSearchLoading = false;
   public savedSearchQuery:string = null;
