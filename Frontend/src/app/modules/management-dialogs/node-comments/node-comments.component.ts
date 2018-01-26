@@ -14,11 +14,17 @@ import {RestCommentsService} from "../../../common/rest/services/rest-comments.s
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'node-comments',
   templateUrl: 'node-comments.component.html',
-  styleUrls: ['node-comments.component.scss']
+  styleUrls: ['node-comments.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class NodeCommentsComponent  {
   public _node: Node;

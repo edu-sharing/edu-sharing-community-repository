@@ -1,5 +1,5 @@
-<div class="dialog darken">
-  <div class="card center-card card-action card-high">
+<div class="dialog darken" [@fade]="this"></div>
+  <div class="card center-card card-action card-high" [@cardAnimation]="this">
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div class="card-title">{{'NODE_COMMENTS.TITLE' | translate }}</div>
@@ -62,7 +62,6 @@
       <a class="btn" (click)="cancel()">{{'CLOSE' | translate }}</a>
     </div>-->
   </div>
-</div>
 <modal-dialog *ngIf="dialogTitle"
               [title]="dialogTitle"
               [message]="dialogMessage"
