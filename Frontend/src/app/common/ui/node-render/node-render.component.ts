@@ -24,6 +24,7 @@ import {NodeHelper} from "../node-helper";
 import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIConstants} from "../ui-constants";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
+import {SearchService} from "../../../modules/search/search.service";
 
 declare var jQuery:any;
 declare var window: any;
@@ -131,6 +132,7 @@ export class NodeRenderComponent {
             this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
           }
           else {
+            this.searchService.reinit=false;
             NodeRenderComponent.close();
           }
         }
@@ -157,6 +159,7 @@ export class NodeRenderComponent {
     }
     constructor(
       private translate : TranslateService,
+      private searchService : SearchService,
       private connector : RestConnectorService,
       private connectors : RestConnectorsService,
       private nodeApi : RestNodeService,

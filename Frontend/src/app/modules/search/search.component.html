@@ -211,7 +211,7 @@
       <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
       <listTable
         [nodes]="searchService.searchResult"
-        [columns]="columns"
+        [columns]="searchService.columns"
         [hasIcon]="true"
         [selectedNodes]="selection"
         [options]="options"

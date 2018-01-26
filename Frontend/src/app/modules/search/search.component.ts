@@ -63,7 +63,7 @@ import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 
 
 export class SearchComponent {
-  public initalized = false;
+  public initalized:boolean;
   @ViewChild('mds') mdsRef: MdsComponent;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('managementDialogs') managementDialogs : WorkspaceManagementDialogsComponent;
@@ -82,7 +82,6 @@ export class SearchComponent {
   public currentRepositoryObject:Repository;
 
   public applyMode=false;
-  public columns : ListItem[]=[];
   public collectionsColumns : ListItem[]=[];
   public hasCheckbox=false;
   public showMoreRepositories=false;
@@ -107,7 +106,7 @@ export class SearchComponent {
   public repositories: Repository[];
   public globalProgress = false;
   // Max items to fetch at all (afterwards no more infinite scroll)
-  private static MAX_ITEMS_COUNT = 400;
+  private static MAX_ITEMS_COUNT = 300;
   private repositoryIds: any[];
   public addNodesToCollection: Node[];
   private mdsSets: MdsInfo[];
@@ -177,6 +176,7 @@ export class SearchComponent {
   }
 
   applyParameters(props:any=null){
+    this.searchService.reinit=true;
     this.currentValues=props;
     this.routeSearchParameters(props);
     //this.getSearch(null,true,props);
@@ -189,7 +189,11 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-     this.searchService.init();
+     this.initalized=true;
+    if(this.searchService.reinit){
+      this.searchService.init();
+      this.initalized=false;
+    }
      this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
      this.connector.setRoute(this.activatedRoute).subscribe(()=> {
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
@@ -281,8 +285,9 @@ export class SearchComponent {
     return false;
   }
   getMoreResults() {
+    console.log("complete "+this.searchService.complete);
     if(this.searchService.complete == false) {
-      this.searchService.skipcount += this.connector.numberPerRequest;
+      this.searchService.skipcount = this.searchService.searchResult.length;
       this.getSearch();
     }
   }
@@ -330,6 +335,7 @@ export class SearchComponent {
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
+    console.log("getSearch "+init);
     if(this.showspinner && init || this.repositoryIds==null){
       setTimeout(()=>this.getSearch(searchString,init,properties),100);
       return;
@@ -402,7 +408,7 @@ export class SearchComponent {
           sortAscending: [false,true,false]
         }, RestConstants.CONTENT_TYPE_COLLECTIONS,this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository,this.mdsId).subscribe(
           (data: NodeList) => {
-            this.searchService.searchResultCollections = data.nodes
+            this.searchService.searchResultCollections = data.nodes;
             this.resultCount.collections = data.pagination.total;
             this.checkFail();
           },
@@ -462,8 +468,6 @@ export class SearchComponent {
     this.updateActionbar(this.selection);
     if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
-      this.searchService.init();
-      this.searchService.complete = true;
       return;
     }
     if(init) {
@@ -489,7 +493,8 @@ export class SearchComponent {
         this.searchService.facettes[0].values = this.searchService.facettes[0].values.slice(0, 20);
       }
     }
-    if(data.nodes.length < this.connector.numberPerRequest)
+    console.log(data.nodes.length+"<"+this.connector.numberPerRequest);
+    if(this.searchService.searchResult.length == data.pagination.total)
       this.searchService.complete = true;
   }
   private updateHasMore() {
@@ -523,7 +528,7 @@ export class SearchComponent {
       }
     });
     */
-    this.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
+    this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
 
   }
 
@@ -694,15 +699,16 @@ export class SearchComponent {
       if(!this.currentValues && this.mdsRef) {
         this.currentValues = this.mdsRef.getValues();
       }
-      this.getSearch(this.searchService.searchTerm, true,this.currentValues);
+      if(this.searchService.reinit)
+        this.getSearch(this.searchService.searchTerm, true,this.currentValues);
     }
     this.mainNavRef.refreshBanner();
+    this.searchService.reinit=true;
   }
   private prepare(param:any) {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       this.login=data;
       this.updateColumns();
-      //if (data.isValidLogin && data.currentScope == null) {
       this.updateMdsActions();
       this.isGuest = data.isGuest;
       this.hasCheckbox=true;
@@ -969,6 +975,7 @@ export class SearchComponent {
             this.invalidateMds();
             this.searchService.init();
             this.prepare(param);
+
           }
         },(error:any)=>{
           this.mdsId=RestConstants.DEFAULT;
