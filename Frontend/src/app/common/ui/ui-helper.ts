@@ -229,11 +229,14 @@ export class UIHelper{
     let mode=window.scrollY>y;
     let divider=3*smoothness;
     let minSpeed=7/smoothness;
+    let lastY=y;
     let interval=setInterval(()=>{
-      if(window.scrollY>y && mode){
+      let yDiff=window.scrollY-lastY;
+      lastY=window.scrollY;
+      if(window.scrollY>y && mode && yDiff){
         window.scrollBy(0, -Math.max((window.scrollY-y)/divider,minSpeed));
       }
-      else if(window.scrollY<y && !mode){
+      else if(window.scrollY<y && !mode && yDiff){
         window.scrollBy(0, Math.max((y-window.scrollY)/divider,minSpeed));
       }
       else {
