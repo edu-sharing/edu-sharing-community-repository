@@ -171,6 +171,7 @@
       <div class="card-scroll">
         <mds #mds
           [groupId]="'collection_'+newCollectionType.toLowerCase()"
+          [embedded]="true"
           [currentValues]="properties"
           [invalidate]="reloadMds"
         ></mds>
