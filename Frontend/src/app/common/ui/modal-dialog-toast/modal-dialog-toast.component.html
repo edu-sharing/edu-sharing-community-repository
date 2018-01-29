@@ -1,5 +1,5 @@
-<div class="dialog darken" *ngIf="visible">
-  <div class="card center-card card-wide card-high modal-dialog-toast" [class.card-action]="isCancelable">
+<div class="dialog darken" [@fade]="visible" *ngIf="visible"></div>
+  <div class="card center-card card-wide card-high modal-dialog-toast" [class.card-action]="isCancelable" [@cardAnimation]="visible" *ngIf="visible">
     <div class="card-content">
       <div *ngIf="isCancelable" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div class="card-title ">{{title | translate }}</div>
@@ -23,4 +23,3 @@
       >{{'CLOSE' | translate}}</a>
     </div>
   </div>
-</div>

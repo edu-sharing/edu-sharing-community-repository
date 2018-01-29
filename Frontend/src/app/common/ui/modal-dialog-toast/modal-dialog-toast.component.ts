@@ -5,11 +5,17 @@ import {
 import {TranslateService} from "@ngx-translate/core";
 import {Toast} from "../toast";
 import {DialogButton} from "../modal-dialog/modal-dialog.component";
+import {UIAnimation} from "../ui-animation";
+import {trigger} from "@angular/animations";
 
 @Component({
   selector: 'modal-dialog-toast',
   templateUrl: 'modal-dialog-toast.component.html',
-  styleUrls: ['modal-dialog-toast.component.scss']
+  styleUrls: ['modal-dialog-toast.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class ModalDialogToastComponent{
   private buttons: DialogButton;
