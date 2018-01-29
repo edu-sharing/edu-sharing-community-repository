@@ -14,6 +14,8 @@ public class RenderInfoResult  implements java.io.Serializable {
 
     private java.lang.Boolean guestReadAllowed;
 
+    private java.lang.Boolean hasContentLicense;
+
     private org.edu_sharing.webservices.types.KeyValue[] labels;
 
     private java.lang.String mdsTemplate;
@@ -41,6 +43,7 @@ public class RenderInfoResult  implements java.io.Serializable {
            java.lang.String[] aspects,
            int contentHash,
            java.lang.Boolean guestReadAllowed,
+           java.lang.Boolean hasContentLicense,
            org.edu_sharing.webservices.types.KeyValue[] labels,
            java.lang.String mdsTemplate,
            java.lang.String mimeTypeUrl,
@@ -54,6 +57,7 @@ public class RenderInfoResult  implements java.io.Serializable {
            this.aspects = aspects;
            this.contentHash = contentHash;
            this.guestReadAllowed = guestReadAllowed;
+           this.hasContentLicense = hasContentLicense;
            this.labels = labels;
            this.mdsTemplate = mdsTemplate;
            this.mimeTypeUrl = mimeTypeUrl;
@@ -124,6 +128,26 @@ public class RenderInfoResult  implements java.io.Serializable {
      */
     public void setGuestReadAllowed(java.lang.Boolean guestReadAllowed) {
         this.guestReadAllowed = guestReadAllowed;
+    }
+
+
+    /**
+     * Gets the hasContentLicense value for this RenderInfoResult.
+     * 
+     * @return hasContentLicense
+     */
+    public java.lang.Boolean getHasContentLicense() {
+        return hasContentLicense;
+    }
+
+
+    /**
+     * Sets the hasContentLicense value for this RenderInfoResult.
+     * 
+     * @param hasContentLicense
+     */
+    public void setHasContentLicense(java.lang.Boolean hasContentLicense) {
+        this.hasContentLicense = hasContentLicense;
     }
 
 
@@ -345,6 +369,9 @@ public class RenderInfoResult  implements java.io.Serializable {
             ((this.guestReadAllowed==null && other.getGuestReadAllowed()==null) || 
              (this.guestReadAllowed!=null &&
               this.guestReadAllowed.equals(other.getGuestReadAllowed()))) &&
+            ((this.hasContentLicense==null && other.getHasContentLicense()==null) || 
+             (this.hasContentLicense!=null &&
+              this.hasContentLicense.equals(other.getHasContentLicense()))) &&
             ((this.labels==null && other.getLabels()==null) || 
              (this.labels!=null &&
               java.util.Arrays.equals(this.labels, other.getLabels()))) &&
@@ -400,6 +427,9 @@ public class RenderInfoResult  implements java.io.Serializable {
         _hashCode += getContentHash();
         if (getGuestReadAllowed() != null) {
             _hashCode += getGuestReadAllowed().hashCode();
+        }
+        if (getHasContentLicense() != null) {
+            _hashCode += getHasContentLicense().hashCode();
         }
         if (getLabels() != null) {
             for (int i=0;
@@ -489,6 +519,12 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("guestReadAllowed");
         elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "guestReadAllowed"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("hasContentLicense");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "hasContentLicense"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);

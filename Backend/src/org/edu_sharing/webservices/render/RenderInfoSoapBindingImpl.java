@@ -29,6 +29,8 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataTemplateRenderer;
+import org.edu_sharing.repository.client.rpc.ACE;
+import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.Theme;
@@ -172,7 +174,9 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		HashMap versionProps = null;
 		boolean collectionRefOriginalDeleted = false;
-		if (Arrays.asList(client.getAspects(nodeId)).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+		
+		String[] aspects =  client.getAspects(nodeId);
+		if (Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
 			
 			String refNodeId = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
 			
@@ -209,6 +213,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}else{
 			rir.setContentHash(client.getContentHash(nodeId,CCConstants.CM_PROP_CONTENT));
 		}
+		
 		
 		String locale = getHeaderValue("locale", MessageContext.getCurrentContext());
 
@@ -269,6 +274,32 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}
 		rir.setProperties(propsresult.toArray(new KeyValue[propsresult.size()]));	
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
+		
+		
+		/**
+		 * hasContentLicense: just check readPermissions for the user at the moment
+		 * 
+		 * maybe check mediacenter groupmembership when readContent vs readMetadata is important
+		 */
+		
+		//set default
+		rir.setHasContentLicense(true);
+		System.out.println("SETIING default hasContentLicense to TRUE!");
+		String cost = (String)props.get(CCConstants.LOM_PROP_RIGHTS_COST);
+		if(cost != null && new Boolean(cost)) {
+			
+			String permissionsNodeId = nodeId;
+			if (Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+				permissionsNodeId = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+							
+			}
+			if(!client.hasPermissions(permissionsNodeId, userName, new String[] {CCConstants.PERMISSION_READ})) {
+				System.out.println("SETIING hasContentLicense tu FALSE!");
+				rir.setHasContentLicense(false);
+			}	
+			
+		}
+		
 		
 		if(Arrays.asList(client.getAspects(nodeId)).contains(CCConstants.CCM_ASPECT_TOOL_OBJECT)) {
 			String toolInstanceNodeRef = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId, CCConstants.CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF);

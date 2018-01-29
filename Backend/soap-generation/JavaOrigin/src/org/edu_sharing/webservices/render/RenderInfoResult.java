@@ -20,11 +20,15 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	
 	Boolean userReadAllowed;
 	
+	Boolean hasContentLicense;
+	
 	UsageResult usage;
 	
 	int contentHash;
 	
 	KeyValue[] properties;
+	
+	KeyValue[] propertiesToolInstance;
 	
 	KeyValue[] labels;
 	
@@ -36,6 +40,8 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	String[] aspects;
 	
 	String mdsTemplate;
+	
+	private java.lang.String[] permissions;
 
 	public Boolean getGuestReadAllowed() {
 		return guestReadAllowed;
@@ -128,4 +134,55 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 		return mdsTemplate;
 	}
 	
+	/**
+     * Gets the permissions value for this RenderInfoResult.
+     * 
+     * @return permissions
+     */
+    public java.lang.String[] getPermissions() {
+        return permissions;
+    }
+    
+    /**
+     * Sets the permissions value for this RenderInfoResult.
+     * 
+     * @param permissions
+     */
+    public void setPermissions(java.lang.String[] permissions) {
+        this.permissions = permissions;
+    }
+    
+    /**
+     * Sets the propertiesToolInstance value for this RenderInfoResult.
+     * 
+     * @param propertiesToolInstance
+     */
+    public void setPropertiesToolInstance(org.edu_sharing.webservices.types.KeyValue[] propertiesToolInstance) {
+        this.propertiesToolInstance = propertiesToolInstance;
+    }
+    
+    /**
+     * Gets the propertiesToolInstance value for this RenderInfoResult.
+     * 
+     * @return propertiesToolInstance
+     */
+    public org.edu_sharing.webservices.types.KeyValue[] getPropertiesToolInstance() {
+        return propertiesToolInstance;
+    }
+    
+    public void setHasContentLicense(Boolean hasContentLicense) {
+		this.hasContentLicense = hasContentLicense;
+	}
+    public Boolean getHasContentLicense() {
+		return hasContentLicense;
+	}
+    
+    /**
+     * Sets the mdsTemplate value for this RenderInfoResult.
+     * 
+     * @param mdsTemplate
+     */
+    public void setMdsTemplate(java.lang.String mdsTemplate) {
+        this.mdsTemplate = mdsTemplate;
+    }
 }

@@ -100,8 +100,10 @@ public class LogoutNotificationSoapBindingStub extends org.apache.axis.client.St
                 java.lang.String key = (java.lang.String) keys.nextElement();
                 _call.setProperty(key, super.cachedProperties.get(key));
             }
-            // All the type mapping information is registered when the first call is made.
-            // The type mapping information is actually registered in the TypeMappingRegistry of the service, which
+            // All the type mapping information is registered
+            // when the first call is made.
+            // The type mapping information is actually registered in
+            // the TypeMappingRegistry of the service, which
             // is the reason why registration is only needed for the first call.
             synchronized (this) {
                 if (firstCall()) {
