@@ -37,6 +37,7 @@
   import {UserAvatarComponent} from "./common/ui/user-avatar/user-avatar.component";
   import {InfobarComponent} from "./common/ui/infobar/infobar.component";
   import {AuthorityColorPipe} from "./common/ui/authority-color.pipe";
+  import {TimePipe} from "./common/ui/time.pipe";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -51,6 +52,7 @@ export const DECLARATIONS = [
       DebugResultPipe,
       FormatSizePipe,
       NodeDatePipe,
+      TimePipe,
       PermissionNamePipe,
       AuthorityNamePipe,
       AuthorityColorPipe,

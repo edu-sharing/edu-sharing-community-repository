@@ -152,9 +152,13 @@ option {
 }
 .progress{
   background-color: $primaryLight;
-}
-.progress .indeterminate{
-  background-color: $primary;
+  .indeterminate,
+  .determinate{
+    background-color: $primary;
+  }
+  .determinate-finished{
+    background-color: $colorStatusPositive;
+  }
 }
 
 .md-input-wrapper input,

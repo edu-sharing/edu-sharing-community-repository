@@ -76,7 +76,7 @@ export class LoginComponent  implements OnInit{
                 this.goToNext();
               }
             }
-            if(configService.instant("loginUrl") && data.statusCode!=RestConstants.STATUS_CODE_OK){
+            if(params['local']!="true" && configService.instant("loginUrl") && data.statusCode!=RestConstants.STATUS_CODE_OK){
               window.location.href=configService.instant("loginUrl");
               return;
             }

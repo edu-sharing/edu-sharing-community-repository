@@ -433,6 +433,7 @@ export class RestNodeService {
                               file : File,
                      versionComment : string,
                      mimetype="auto",
+                     onProgress:Function=null,
                      repository=RestConstants.HOME_REPOSITORY) : Observable<XMLHttpRequest> => {
     if(mimetype=="auto")
       mimetype=RestHelper.guessMimeType(file);
@@ -444,7 +445,7 @@ export class RestNodeService {
       ]);
     let options=this.connector.getRequestOptions();
 
-    return this.connector.sendDataViaXHR(query,file);
+    return this.connector.sendDataViaXHR(query,file,'POST','file',onProgress);
     /*
     return this.http.post(query,"",this.connector.getRequestOptions())
       .map((response: Response) => response.json());

@@ -1,16 +1,76 @@
 @import "../../../../styles/variables.scss";
 
-.fileName{
-  padding:10px;
-  float:left;
-}
-.loading,.done,.done i{
-  float:right;
-  color:$primary;
-  font-size:35px;
+
+.loading{
+  margin:0 10px;
+  >div{
+    display:flex;
+  }
 }
 .group{
   width:100%;
-  height:52px;
-  display: table;
+  display: flex;
+  margin-bottom: 10px;
+  .icon{
+    color:$textVeryLight;
+    margin-top: 5px;
+  }
+  .center{
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: left;
+    .fileName{
+      word-break: break-all;
+      padding-bottom: 4px;
+      height: 1.5em;
+      overflow: hidden;
+    }
+    .fileName,.info{
+      padding-left: 10px;
+    }
+    .info{
+      font-size:8pt;
+      font-weight: bold;
+      padding-top: 2px;
+      .size{
+        font-weight: normal;
+        padding-left: 0.5em;
+        color:$textLight;
+      }
+    }
+  }
+  >div{
+    display: flex;
+  }
+  .right{
+    justify-content: flex-end;
+    align-items: center;
+    width: 50px;
+
+  }
+  .done{
+    color:$primary;
+  }
+  .success{
+    color:$colorStatusPositive;
+  }
+  .progress{
+    margin:0 10px;
+  }
+}
+.groupColumn{
+  flex-direction: column;
+}
+.scrollable{
+  overflow-x: hidden;
+  overflow-y: auto;
+  height:350px;
+  margin:$cardPadding*-1;
+  padding:$cardPadding;
+  margin-bottom: $cardPadding*-2;
+}
+@media screen and (max-height: ($mobileHeight)) {
+  .card .scrollable{
+    height:calc(100% + 60px);
+  }
 }
