@@ -284,7 +284,6 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		//set default
 		rir.setHasContentLicense(true);
-		System.out.println("SETIING default hasContentLicense to TRUE!");
 		String cost = (String)props.get(CCConstants.LOM_PROP_RIGHTS_COST);
 		if(cost != null && new Boolean(cost)) {
 			
@@ -294,7 +293,6 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 							
 			}
 			if(!client.hasPermissions(permissionsNodeId, userName, new String[] {CCConstants.PERMISSION_READ})) {
-				System.out.println("SETIING hasContentLicense tu FALSE!");
 				rir.setHasContentLicense(false);
 			}	
 			
