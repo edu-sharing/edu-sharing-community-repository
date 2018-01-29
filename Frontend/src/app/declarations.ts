@@ -35,6 +35,7 @@
   import {SmallCollectionComponent} from "./common/ui/small-collection/small-collection.component";
   import {CollectionChooserComponent} from "./common/ui/collection-chooser/collection-chooser.component";
   import {InfobarComponent} from "./common/ui/infobar/infobar.component";
+  import {TimePipe} from "./common/ui/time.pipe";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -49,6 +50,7 @@ export const DECLARATIONS = [
       DebugResultPipe,
       FormatSizePipe,
       NodeDatePipe,
+      TimePipe,
       PermissionNamePipe,
       AuthorityNamePipe,
       NodeTitlePipe,

@@ -253,12 +253,14 @@ export class RestConnectorService {
     return RestLocatorService.createUrlNoEscape(url,repository,urlParams);
   }
 
-  public sendDataViaXHR(url : string,file : File,method='POST',fieldName='file') : Observable<XMLHttpRequest>{
+  public sendDataViaXHR(url : string,file : File,method='POST',fieldName='file',onProgress:Function=null) : Observable<XMLHttpRequest>{
     return Observable.create( (observer:Observer<XMLHttpRequest>) => {
       try {
         var xhr: XMLHttpRequest = new XMLHttpRequest();
         xhr.onreadystatechange = () => {
           if (xhr.readyState === 4) {
+            if(onProgress)
+              onProgress({progress:1});
             if (xhr.status === 200) {
               observer.next(xhr);
               observer.complete();
@@ -276,6 +278,18 @@ export class RestConnectorService {
         }
         let formData = new FormData();
         formData.append(fieldName, file, file.name);
+        let progress:any={start:new Date().getTime()};
+        xhr.upload.addEventListener("progress",(event:any)=>{
+          if (event.lengthComputable) {
+            progress.progress=event.loaded / event.total;
+            progress.loaded=event.loaded;
+            progress.total=event.total;
+            progress.elapsed=(new Date().getTime()-progress.start)/1000;
+            progress.remaining=(event.total-event.loaded) * progress.elapsed / event.loaded;
+            if (onProgress)
+              onProgress(progress);
+          }
+        });
         xhr.send(formData);
         console.log("xhr send");
       }catch(e){

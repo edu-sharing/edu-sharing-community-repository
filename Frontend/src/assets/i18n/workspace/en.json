@@ -31,6 +31,8 @@
     "NO_SUB_NODES": "No more elements",
     "NO_NODES_IN_FOLDER": "This folder is empty.",
     "UPLOAD_TITLE": "Upload",
+    "UPLOAD_REMAINING": "{{time}} left",
+    "UPLOAD_FINISHING": "Almost done...",
     "ADD_FOLDER_TITLE":"Add new folder",
     "ADD_FOLDER_METADATASET":"Metadataset of folder",
     "FOLDER_PLACEHOLDER": "Foldername",
