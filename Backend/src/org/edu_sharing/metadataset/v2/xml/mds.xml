@@ -256,6 +256,27 @@
 			<widget>
 				<id>license</id>
 				<caption>ccm_prop_io_license</caption>
+				<type>license</type>
+				<values>
+					<entry cap="license_cap_OPEN" description="license_description_OPEN">OPEN</entry>
+					<entry cap="license_cap_CC_BY_OPEN" description="license_description_CC_BY_OPEN">CC_BY_OPEN</entry>
+					<entry cap="license_cap_CC_BY_RESTRICTED" description="license_description_CC_BY_RESTRICTED">CC_BY_RESTRICTED</entry>
+					<entry cap="license_cap_COPYRIGHT_OTHERS" description="license_description_COPYRIGHT_OTHERS">COPYRIGHT_OTHERS</entry>
+					<!-- 
+					<entry cap="license_cap_OER" description="license_description_OER">OER</entry>			
+					<entry cap="license_cap_OPEN" description="license_description_OPEN">OPEN</entry>
+					<entry cap="license_cap_CC_BY_OPEN" description="license_description_CC_BY_OPEN">CC_BY_OPEN</entry>
+					<entry cap="license_cap_CC_BY_ALL" description="license_description_CC_BY_ALL">CC_BY_ALL</entry>
+					<entry cap="CC-0">CC_0</entry>
+					<entry cap="PDM">PDM</entry>
+					<entry cap="CC-BY">CC_BY</entry>
+					<entry cap="CC-BY-SA">CC_BY_SA</entry>
+					<entry cap="CC-BY-ND">CC_BY_ND</entry>
+					<entry cap="CC-BY-NC">CC_BY_NC</entry>
+					<entry cap="CC-BY-NC-SA">CC_BY_NC_SA</entry>
+					<entry cap="CC-BY-NC-ND">CC_BY_NC_ND</entry>
+					 -->
+				</values>
 			</widget>
 			<widget>
 				<id>sys:node-uuid</id>
@@ -534,7 +555,12 @@
 				<property name="ccm:educationallearningresourcetype" />
 				<property name="license">
 					<statement>@ccm\:commonlicense_key:"${value}"</statement>
-					<statement value="CC_0">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"PDM"</statement>
+					<statement value="OPEN">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"PDM"</statement>
+					<statement value="OER">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"PDM" OR @ccm\:commonlicense_key:"CC_BY" OR @ccm\:commonlicense_key:"CC_BY_SA"</statement>
+					<statement value="CC_BY_OPEN">@ccm\:commonlicense_key:"CC_BY" OR @ccm\:commonlicense_key:"CC_BY_SA"</statement>
+					<statement value="CC_BY_RESTRICTED">@ccm\:commonlicense_key:"CC_BY_ND" OR @ccm\:commonlicense_key:"CC_BY_NC" OR @ccm\:commonlicense_key:"CC_BY_NC_SA" OR @ccm\:commonlicense_key:"CC_BY_NC_ND"</statement>
+					<statement value="CC_BY_ALL">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"CC_BY*"</statement>
+					<statement value="COPYRIGHT_OTHERS">@ccm\:commonlicense_key:"COPYRIGHT*" OR @ccm\:commonlicense_key:"SCHULFUNK"</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
 				</property>

@@ -445,9 +445,11 @@ export class MdsComponent{
     data.widgets.push({id:"preview"});
     data.widgets.push({id:"version"});
     data.widgets.push({id:"author",caption:this.translate.instant('MDS.AUTHOR_LABEL')});
-      data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
-      data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
-    data.widgets.push({id:"license",caption:this.translate.instant('MDS.LICENSE')});
+    data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
+    data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
+    if(this.getWidget("license",data.widgets)==null) {
+      data.widgets.push({id: "license", caption: this.translate.instant('MDS.LICENSE')});
+    }
     for(let group of data.groups){
       if(group.id==id){
         let result=this.renderList(group,data,node);
@@ -1383,7 +1385,10 @@ export class MdsComponent{
 
     for(let option of widget.values){
       let id=widget.id+"_"+option.id;
-      html+='<input type="checkbox" class="filled-in" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+(option.imageSrc ? '<img src="'+option.imageSrc+'">' : option.caption)+'</label>';
+      html+='<input type="checkbox" class="filled-in" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')
+        +'> <label for="'+id+'">'+(option.imageSrc ? '<img src="'+option.imageSrc+'">' : '')+(option.caption ? '<span class="caption">'+option.caption+'</span>' : '')
+        +(option.description ? '<span class="description">'+option.description+'</span>' : '')
+        +'</label>';
     }
     html+='</fieldset>';
     return html;
@@ -1638,12 +1643,14 @@ export class MdsComponent{
   }
   private renderLicense(widget: any) {
     if(this.mode=='search'){
-      widget.values=[
-        {id:'CC_0',imageSrc:NodeHelper.getLicenseIconByString('CC_0',this.connector)},
-        {id:'CC_BY*',imageSrc:NodeHelper.getLicenseIconByString('CC_BY',this.connector)},
-        {id:'PDM',imageSrc:NodeHelper.getLicenseIconByString('PDM',this.connector)},
-        {id:'COPYRIGHT',imageSrc:NodeHelper.getLicenseIconByString('COPYRIGHT-FREE',this.connector)},
-      ];
+      if(!widget.values){
+        return "widget 'license' does not have values connected, can't render it.";
+      }
+      for(let value of widget.values){
+        let image=NodeHelper.getLicenseIconByString(value.id, this.connector);;
+        if(image)
+          value.imageSrc = image;
+      }
       widget.type='checkboxVertical';
       let html = this.renderCheckboxWidget(widget,null,true);
       return html;
@@ -1749,8 +1756,8 @@ export class MdsComponent{
       , 10);
   }
 
-  private getWidget(id: string) {
-    for(let w of this.mds.widgets){
+  private getWidget(id: string,widgets=this.mds.widgets) {
+    for(let w of widgets){
       if(w.id==id)
         return w;
     }
