@@ -257,24 +257,25 @@
 				<id>license</id>
 				<caption>ccm_prop_io_license</caption>
 				<type>license</type>
+				<valuespace_i18n_prefix>license_cap_</valuespace_i18n_prefix>
 				<values>
-					<entry cap="license_cap_OPEN" description="license_description_OPEN">OPEN</entry>
-					<entry cap="license_cap_CC_BY_OPEN" description="license_description_CC_BY_OPEN">CC_BY_OPEN</entry>
-					<entry cap="license_cap_CC_BY_RESTRICTED" description="license_description_CC_BY_RESTRICTED">CC_BY_RESTRICTED</entry>
-					<entry cap="license_cap_COPYRIGHT_OTHERS" description="license_description_COPYRIGHT_OTHERS">COPYRIGHT_OTHERS</entry>
+					<entry description="license_description_OPEN">OPEN</entry>
+					<entry description="license_description_CC_BY_OPEN">CC_BY_OPEN</entry>
+					<entry description="license_description_CC_BY_RESTRICTED">CC_BY_RESTRICTED</entry>
+					<entry description="license_description_COPYRIGHT_OTHERS">COPYRIGHT_OTHERS</entry>
 					<!-- 
-					<entry cap="license_cap_OER" description="license_description_OER">OER</entry>			
-					<entry cap="license_cap_OPEN" description="license_description_OPEN">OPEN</entry>
-					<entry cap="license_cap_CC_BY_OPEN" description="license_description_CC_BY_OPEN">CC_BY_OPEN</entry>
-					<entry cap="license_cap_CC_BY_ALL" description="license_description_CC_BY_ALL">CC_BY_ALL</entry>
-					<entry cap="CC-0">CC_0</entry>
-					<entry cap="PDM">PDM</entry>
-					<entry cap="CC-BY">CC_BY</entry>
-					<entry cap="CC-BY-SA">CC_BY_SA</entry>
-					<entry cap="CC-BY-ND">CC_BY_ND</entry>
-					<entry cap="CC-BY-NC">CC_BY_NC</entry>
-					<entry cap="CC-BY-NC-SA">CC_BY_NC_SA</entry>
-					<entry cap="CC-BY-NC-ND">CC_BY_NC_ND</entry>
+					<entry description="license_description_OER">OER</entry>			
+					<entry description="license_description_OPEN">OPEN</entry>
+					<entry description="license_description_CC_BY_OPEN">CC_BY_OPEN</entry>
+					<entry description="license_description_CC_BY_ALL">CC_BY_ALL</entry>
+					<entry>CC_0</entry>
+					<entry>PDM</entry>
+					<entry>CC_BY</entry>
+					<entry>CC_BY_SA</entry>
+					<entry>CC_BY_ND</entry>
+					<entry>CC_BY_NC</entry>
+					<entry>CC_BY_NC_SA</entry>
+					<entry>CC_BY_NC_ND</entry>
 					 -->
 				</values>
 			</widget>
