@@ -15,8 +15,8 @@
             <div class="determinate" [class.determinate-finished]="item.progress.progress>=100" [style.width]="item.progress.progress+'%'"></div>
           </div>
           <div class="info" [style.visibility]="item.progress.loaded ? '' : 'hidden'">
-            <span *ngIf="item.progress.remaining>1">{{'WORKSPACE.UPLOAD_REMAINING' | translate:{time:formatTime(item.progress.remaining) } }}</span>
-            <span *ngIf="item.progress.remaining<=1">{{'WORKSPACE.UPLOAD_FINISHING' | translate}}</span>
+            <span *ngIf="item.progress.remaining>2">{{'WORKSPACE.UPLOAD_REMAINING' | translate:{time:formatTime(item.progress.remaining) } }}</span>
+            <span *ngIf="item.progress.remaining<=2">{{'WORKSPACE.UPLOAD_FINISHING' | translate}}</span>
             <span class="size">({{item.progress.loaded | formatSize}} / {{item.progress.total | formatSize}})</span>
           </div>
         </div>
