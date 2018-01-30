@@ -185,6 +185,13 @@ public class RenderingProxy extends HttpServlet {
 				contentUrl = UrlTool.setParam(contentUrl, "com",RenderingTool.COM_INTERNAL);
 			}
 			
+			/**
+			 * moodle stuff
+			 */
+			if(RenderingTool.DISPLAY_INLINE.equals(display)) {
+				contentUrl = homeRep.getContentUrlBackend();
+			}
+			
 			String com = req.getParameter("com");
 			if(com != null && com.equals(RenderingTool.COM_INTERNAL) && homeRep.getContentUrlBackend() != null) {
 				contentUrl = homeRep.getContentUrlBackend();
