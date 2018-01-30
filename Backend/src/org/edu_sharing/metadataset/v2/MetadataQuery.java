@@ -6,7 +6,7 @@ public class MetadataQuery {
 	private String id,join,basequery;
 	private List<MetadataQueryParameter> parameters;
 	private MetadataQueries parent;
-	private boolean applyBasequery;
+	private Boolean applyBasequery;
 	public MetadataQuery(MetadataQueries parent){
 		this.parent = parent;
 	}
@@ -16,10 +16,13 @@ public class MetadataQuery {
 	}
 
 	public boolean isApplyBasequery() {
+		if(applyBasequery==null)
+			return true;
+		
 		return applyBasequery;
 	}
 
-	public void setApplyBasequery(boolean applyBasequery) {
+	public void setApplyBasequery(Boolean applyBasequery) {
 		this.applyBasequery = applyBasequery;
 	}
 
@@ -73,6 +76,25 @@ public class MetadataQuery {
 
 	public void setParent(MetadataQueries parent) {
 		this.parent = parent;	
+	}
+
+	public void overrideWith(MetadataQuery query) {
+		this.parent=query.parent;
+		if(query.applyBasequery!=null)
+			this.applyBasequery=query.applyBasequery;
+		if(query.basequery!=null)
+			this.basequery=query.basequery;
+		if(query.join!=null)
+			this.join=query.join;
+		for(MetadataQueryParameter param : query.parameters) {
+			if(parameters.contains(param)) {
+				parameters.remove(param);
+				parameters.add(param);
+			}
+			else {
+				parameters.add(param);
+			}
+		}
 	}
 	
 }

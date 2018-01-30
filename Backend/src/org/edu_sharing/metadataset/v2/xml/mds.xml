@@ -534,6 +534,7 @@
 				<property name="ccm:educationallearningresourcetype" />
 				<property name="license">
 					<statement>@ccm\:commonlicense_key:"${value}"</statement>
+					<statement value="CC_0">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"PDM"</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
 				</property>

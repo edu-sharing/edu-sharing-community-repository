@@ -141,8 +141,6 @@ public class MetadataReaderV2 {
 			
 			if(nodeMap.getNamedItem("applyBasequery")!=null)
 				query.setApplyBasequery(nodeMap.getNamedItem("applyBasequery").getTextContent().equals("true"));
-			else
-				query.setApplyBasequery(true);
 			
 			List<MetadataQueryParameter> parameters=new ArrayList<>();
 
@@ -159,13 +157,15 @@ public class MetadataReaderV2 {
 				if(attributes==null || attributes.getNamedItem("name")==null)
 					continue;
 				parameter.setName(attributes.getNamedItem("name").getTextContent());
-
+				Map<String, String> statements = new HashMap<String,String>();
 				for(int k=0;k<list3.getLength();k++){
 					Node data=list3.item(k);
 					String name=data.getNodeName();
 					String value=data.getTextContent();
-					if(name.equals("statement"))
-						parameter.setStatement(value);
+					if(name.equals("statement")) {
+						Node key=data.getAttributes().getNamedItem("value");
+						statements.put(key==null ? null : key.getTextContent(), value);
+					}
 					if(name.equals("ignorable"))
 						parameter.setIgnorable(Integer.parseInt(value));
 					if(name.equals("exactMatching"))
@@ -175,6 +175,7 @@ public class MetadataReaderV2 {
 					if(name.equals("multiplejoin"))
 						parameter.setMultiplejoin(value);
 				}
+				parameter.setStatements(statements);
 				parameters.add(parameter);
 			}
 			query.setParameters(parameters);

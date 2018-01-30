@@ -1,8 +1,10 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.util.Map;
+
 public class MetadataQueryParameter {
 	private String name;
-	private String statement;
+	private Map<String,String> statements;
 	private boolean multiple;
 	private boolean exactMatching;
 	private String multiplejoin;
@@ -16,14 +18,32 @@ public class MetadataQueryParameter {
 		this.name = name;
 	}
 
-	public String getStatement() {
-		if(statement!=null)
-			return statement;
+	public Map<String, String> getStatements() {
+		return statements;
+	}
+	public String getStatement(String value) {
+		if(statements!=null) {
+			if(statements.containsKey(value))
+				return statements.get(value);
+			if(statements.get(null)!=null)
+				return statements.get(null);
+		}
+		return getDefaultStatement();
+	}
+	private String getDefaultStatement() {
 		return "@"+name.replace(":", "\\:")+":\"*${value}*\"";
 	}
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof MetadataQueryParameter){
+			MetadataQueryParameter other=(MetadataQueryParameter)obj;
+			return (other.name.equals(name));
+		}
+		return super.equals(obj);
+	}
 
-	public void setStatement(String statement) {
-		this.statement = statement;
+	public void setStatements(Map<String, String> statements) {
+		this.statements = statements;
 	}
 
 	public boolean isMultiple() {
@@ -57,7 +77,7 @@ public class MetadataQueryParameter {
 	public void setExactMatching(boolean exactMatching) {
 		this.exactMatching = exactMatching;
 	}
-	
+
 	
 	
 }
