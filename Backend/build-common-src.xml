@@ -23,6 +23,8 @@
 		<fileset dir="${app.server.tomcat.webapps.alfresco.lib}" includes="*.jar" />
 		<fileset dir="${project.lib.path}" includes="*.jar" />
 	</path>
+		
+	
 	
 	<target name="compile-gwt" description="GWT compile to JavaScript">
 		<echo message="source folders: ${src-gwt.path}"/>
@@ -66,6 +68,13 @@
 			
 			
 		</java>
+	</target>
+	
+	<target name="src-java-path">
+		<condition property="src-java.path" value="${src.dir}:${src-webservices.dir}:${extensions.path}${extension-name}/src" else="${src.dir}:${src-webservices.dir}">
+			<isset property="extension-name"/>
+		</condition>
+		<echo>current source path: ${src-java.path}</echo>
 	</target>
 	
 	<target name="compile-gwt-dev" description="GWT compile to JavaScript">
@@ -125,7 +134,7 @@
 
 
 
-	<target name="compile-java">
+	<target name="compile-java" depends="src-java-path">
 		<!--delete dir="${output.dir}"></delete-->
 		
 		<echo>Java Version via Ant: ${ant.java.version}</echo> 
@@ -216,8 +225,8 @@
 				</copy>
 				<antcall target="deploy-extension-css"></antcall>
 			</target>
-			<target name="deploy-extension-css" if="current.extension.propfile">
-				<echo>deploy extension css. extension is active: ${current.extension.propfile}</echo>
+			<target name="deploy-extension-css" if="extension-name">
+				<echo>deploy extension css. extension is active: ${extension-name}</echo>
 				
 				<!-- convert module package path to folder path -->
 				<loadresource property="module.gwt.path">
@@ -236,7 +245,9 @@
 				
 						
 	</target>
-	<target name="deploy-extension-public" if="current.extension.propfile">					
+	<target name="deploy-extension-public" if="extension-name">	
+		<echo>${extension-name}</echo>
+		<echo>${module.gwt.package}</echo>
 					<loadresource property="module.gwt.path">
 						<string value="${module.gwt.package}" />
 						<filterchain>
@@ -313,8 +324,8 @@
 	
 	
 	
-	<target name="copy_extension_resources" if="current.extension.propfile">
-		<echo>extension is active: ${current.extension.propfile}</echo>
+	<target name="copy_extension_resources" if="extension-name">
+		<echo>extension is active: ${extension-name}</echo>
 		<copy todir="${output.dir}" overwrite="true">
 			<fileset dir="${extensions.path}${extension-name}/src" includes="**/*.xml, **/*.properties">	
 			</fileset>
@@ -444,7 +455,7 @@
 		
 	
 	</target>
-	<target name="deploy-ng-extension" if="current.extension.propfile">
+	<target name="deploy-ng-extension" if="extension-name">
 				<!-- ng2 extension override, added 2017-02-01 -->
 				<copy failonerror="false" overwrite="true" todir="${app.server.deploy.dir}/${webapp.name}">
 					<fileset dir="${extensions.path}${extension-name}/ng"></fileset> 

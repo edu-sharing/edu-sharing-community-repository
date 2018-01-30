@@ -4,13 +4,14 @@
 	
 	
 	<!-- allow every developer to use his local build-properties -->
-	<property file="build.${user.name}.properties" />
+	<property file="build.${user.name}.properties"/>
 	
 	<!-- for extensions-->
-	<property file="${current.extension.propfile}"/>
+	<property file="${extensions.path}${extension-name}/build.properties"/>
 	
-	<!-- include global build-properties -->
-	<property file="build.properties" />
+	 <!--include global build-properties -->
+	<property file="build.properties"/>
+	
 	<property name="config.dir" value="config" />
 	<property name="lib.dir" value="lib" />
 	
@@ -21,8 +22,9 @@
 	<property name="index_dest_dir" value="index" />		
 
     <property name="swagger_src_dir" value="swagger" /> 
-    <property name="swagger_dest_dir" value="swagger" />        
-
+    <property name="swagger_dest_dir" value="swagger" />      
+	
+		
     <!-- Alfresco config files -->
 	<target name="prepare-alfresco-config">
 		<copy overwrite="true" todir="${webserver.home}/shared/classes/alfresco/extension">
@@ -35,10 +37,10 @@
 	<!-- 
 		just for development
 		- when release is build the config dir is merged by target release-extension-config
-		- when deploying an released version current.extension.propfile is not set
+		- when deploying an released version extension-name is not set
 		- does the same like prepare-alfresco-config
 	 -->
-	<target name="prepare-alfresco-config-extension" if="current.extension.propfile">
+	<target name="prepare-alfresco-config-extension" if="extension-name">
 			<echo>current extension is active will overwrite</echo>
 			
 			<copy overwrite="true" todir="${webserver.home}/shared/classes/alfresco/extension" failonerror="false">
@@ -139,7 +141,7 @@
 			    <unzip src="${app.server.deploy.dir}/solr4.war" dest="${app.server.deploy.dir}/solr4" />
 		</target>
 	
-	<target name="prepare-extension" if="current.extension.propfile">
+	<target name="prepare-extension" if="extension-name">
 			<echo>current extension is active will overwrite</echo>
 				
 			<copy failonerror="false" overwrite="true" file="${extensions.path}${extension-name}/config/web.xml" tofile="${app.server.deploy.dir}/${webapp.name}/WEB-INF/web.xml" />
@@ -175,7 +177,7 @@
 	
 	<target name="deploy-classes" depends="deploy-screenreader, deploy-swagger">
 			<copy todir="${webserver.home}/webapps/${webapp.name}/WEB-INF/classes">
-				<fileset dir="${output.dir}" includes="**/*.class, **/*.properties, org/edu_sharing/spring/**/*.xml, org/edu_sharing/repository/server/**/*.xml, **/*.xsd" excludes="org/alfresco/**/*.class, ${api_not_hotdeployable}, ${alfrescoclasses}, ${excludeclasses}, ${metadataset_files}, ${webservice.package} ${spring.package}">
+				<fileset dir="${output.dir}" includes="**/*.class, org/edu_sharing/service/**/*.xml, **/*.properties, org/edu_sharing/spring/**/*.xml, org/edu_sharing/repository/server/**/*.xml, **/*.xsd" excludes="org/alfresco/**/*.class, ${api_not_hotdeployable}, ${alfrescoclasses}, ${excludeclasses}, ${metadataset_files}, ${webservice.package} ${spring.package}">
 				</fileset>
 				<fileset dir="${config.dir}" includes="template.xsd">
 				</fileset>
@@ -332,7 +334,7 @@
 			<antcall target="copy-angular-app"></antcall>
 			<antcall target="copy-angular-app-extension"></antcall>
 		</target>
-		<target name="copy-angular-app" unless="current.extension.propfile">
+		<target name="copy-angular-app" unless="extension-name">
 		<echo>Copying dist to ng...</echo>
 			<delete dir="ng" />	
 			<mkdir  dir="ng" />
@@ -343,11 +345,7 @@
 			
 		</target>
 		
-		<target name="copy-angular-app-extension"  if="current.extension.propfile">
-			<script language="javascript">
-			    var module = project.getProperty("module.gwt.package");
-			    project.setProperty("module.gwt.package_path", module.replaceAll("\\.", "/"));
-			</script>
+		<target name="copy-angular-app-extension" if="extension-name">
 			<echo>Extension enabled: ${extensions.path}${extension-name}/ng</echo>
 				<delete dir="${extensions.path}${extension-name}/${extension-name}/ng" />	
 				<mkdir  dir="${extensions.path}${extension-name}/ng" />
