@@ -88,13 +88,13 @@ public class MetadataSearchHelper {
 	 */
 	private static String getStatmentForValue(MetadataQueryParameter parameter, String value) {
 		if(value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching())
-			return parameter.getStatement().replace("${value}", QueryParser.escape(value));
+			return parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
 		String[] words = value.split(" ");
 		String query="";
 		for(String word : words) {
 			if(!query.isEmpty())
 				query+=" AND ";
-			query+=parameter.getStatement().replace("${value}", QueryParser.escape(word));
+			query+=parameter.getStatement(value).replace("${value}", QueryParser.escape(word));
 		}
 		return query;
 	}
@@ -113,7 +113,7 @@ public class MetadataSearchHelper {
 	}
 	private static String getLuceneSuggestionQuery(MetadataQueryParameter parameter,String value){
 		//return "("+queries.getBasequery()+") AND ("+parameter.getStatement().replace("${value}","*"+QueryParser.escape(value)+"*")+")";
-		return parameter.getStatement().replace("${value}","*"+QueryParser.escape(value)+"*");		
+		return parameter.getStatement(value).replace("${value}","*"+QueryParser.escape(value)+"*");		
 	}
 	private static List<? extends  SuggestOracle.Suggestion> getSuggestionsSolr(MetadataQueryParameter parameter,MetadataWidget widget,String value)  {
 

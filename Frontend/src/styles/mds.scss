@@ -158,6 +158,26 @@ mds .mdsGroup{
     position: relative;
     top:35px;
   }
+  .checkboxVertical{
+    input+label:before,input+label:after {
+        top: 3px!important;
+    }
+    label{
+      height:auto;
+      img{
+        vertical-align: middle;
+      }
+      img,.caption{
+        padding-right: 5px;
+      }
+      .description{
+        float: left;
+        width: 100%;
+        font-size: 80%;
+        line-height: 1.75em;
+      }
+    }
+  }
   > label,
   .widget_checkbox,
   .mdsVersion{
@@ -169,6 +189,10 @@ mds .mdsGroup{
     height:95px;
   }
   .license{
+    .caption{
+      color:$textPrimary;
+      font-weight: bold;
+    }
     img{
       max-height:20px;
     }

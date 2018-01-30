@@ -141,8 +141,6 @@ public class MetadataReaderV2 {
 			
 			if(nodeMap.getNamedItem("applyBasequery")!=null)
 				query.setApplyBasequery(nodeMap.getNamedItem("applyBasequery").getTextContent().equals("true"));
-			else
-				query.setApplyBasequery(true);
 			
 			List<MetadataQueryParameter> parameters=new ArrayList<>();
 
@@ -159,13 +157,15 @@ public class MetadataReaderV2 {
 				if(attributes==null || attributes.getNamedItem("name")==null)
 					continue;
 				parameter.setName(attributes.getNamedItem("name").getTextContent());
-
+				Map<String, String> statements = new HashMap<String,String>();
 				for(int k=0;k<list3.getLength();k++){
 					Node data=list3.item(k);
 					String name=data.getNodeName();
 					String value=data.getTextContent();
-					if(name.equals("statement"))
-						parameter.setStatement(value);
+					if(name.equals("statement")) {
+						Node key=data.getAttributes().getNamedItem("value");
+						statements.put(key==null ? null : key.getTextContent(), value);
+					}
 					if(name.equals("ignorable"))
 						parameter.setIgnorable(Integer.parseInt(value));
 					if(name.equals("exactMatching"))
@@ -175,6 +175,7 @@ public class MetadataReaderV2 {
 					if(name.equals("multiplejoin"))
 						parameter.setMultiplejoin(value);
 				}
+				parameter.setStatements(statements);
 				parameters.add(parameter);
 			}
 			query.setParameters(parameters);
@@ -195,7 +196,9 @@ public class MetadataReaderV2 {
 	}
 	
 	private MetadataReaderV2(String name, String locale) throws Exception {
-		builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setIgnoringComments(true);
+		builder = factory.newDocumentBuilder();
 		InputStream is = getFile(name,Filetype.MDS);
 		doc = builder.parse(is);
 		is.close();
@@ -355,21 +358,25 @@ public class MetadataReaderV2 {
 		for(int i=0;i<keysNode.getLength();i++){
 			Node keyNode=keysNode.item(i);
 			NamedNodeMap attributes=keyNode.getAttributes();
-			String cap="";
+			String cap=null;
+			String description=null;
 			if(attributes!=null && attributes.getNamedItem("cap")!=null)
 				cap=attributes.getNamedItem("cap").getTextContent();
+			if(attributes!=null && attributes.getNamedItem("description")!=null)
+				description=attributes.getNamedItem("description").getTextContent();
 			if(cap==null) cap="";
+			if(description==null) description="";
 			if(keyNode.getTextContent().trim().isEmpty() && (cap.trim().isEmpty())) continue;
 			MetadataKey key=new MetadataKey();
 			key.setKey(keyNode.getTextContent());
 			key.setI18n(valuespaceI18n);
 			key.setI18nPrefix(valuespaceI18nPrefix);
-			if(attributes.getNamedItem("parent")!=null)
+			if(attributes!=null && attributes.getNamedItem("parent")!=null)
 					key.setParent(attributes.getNamedItem("parent").getTextContent());
 			String fallback=null;
 			if(!cap.isEmpty()) fallback=cap;
-			key.setI18nFallback(fallback);
-			key.setCaption(getTranslation(key,key.getKey()));
+			key.setCaption(getTranslation(key,cap,fallback));
+			key.setDescription(getTranslation(key,description));
 			keys.add(key);
 		}
 		return keys;
@@ -488,17 +495,19 @@ public class MetadataReaderV2 {
 		return lists;
 	}
 	
-	private String getTranslation(MetadataTranslatable translatable,String key){
-		return getTranslation(translatable,key,locale);
+	private String getTranslation(MetadataTranslatable translatable,String key,String fallback){
+		return getTranslation(translatable,key,fallback,locale);
 	}
-
-	private static String getTranslation(MetadataTranslatable translatable,String key,String locale){
+	private String getTranslation(MetadataTranslatable translatable,String key){
+		return getTranslation(translatable,key,null);
+	}
+	private static String getTranslation(MetadataTranslatable translatable,String key,String fallback,String locale){
 		try{
 			if(key==null)
 				return null;
 			if(translatable.getI18nPrefix()!=null)
 				key=translatable.getI18nPrefix()+key;
-			return getTranslation(translatable.getI18n(),key,translatable.getI18nFallback(),locale);
+			return getTranslation(translatable.getI18n(),key,fallback,locale);
 		}catch(Exception e){
 			logger.warn(e.toString());
 			return key;

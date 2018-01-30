@@ -2,8 +2,8 @@
      (onFileDrop)="onFileDrop($event)"
      (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !showUploadSelect">
   <div>
-    <i class="material-icons" *ngIf="!searchQuery && createAllowed">cloud_upload</i>
-    <i class="material-icons" *ngIf="!(!searchQuery && createAllowed)">cloud_off</i>
+    <i class="material-icons" *ngIf="!searchQuery && createAllowed && !filesToUpload">cloud_upload</i>
+    <i class="material-icons" *ngIf="!(!searchQuery && createAllowed && !filesToUpload)">cloud_off</i>
     <p *ngIf="!searchQuery && createAllowed">{{'WORKSPACE.DROP_FILES' |translate}}</p>
     <p *ngIf="!(!searchQuery  && createAllowed)">{{'WORKSPACE.DROP_FILES_DISABLED' |translate}}</p>
   </div>

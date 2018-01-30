@@ -25,7 +25,6 @@ public class FolderTemplateSoapBindingStub extends org.apache.axis.client.Stub i
         org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("process");
-    		// CLEANUP? die URL OK? Wenn nicht, dannnochmal gesondert danach suchen
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://foldertemplate.webservices.edu_sharing.org", "template"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://foldertemplate.webservices.edu_sharing.org", "group"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);

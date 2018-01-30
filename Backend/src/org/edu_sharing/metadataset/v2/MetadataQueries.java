@@ -32,9 +32,9 @@ public class MetadataQueries {
 			setBasequery(queries2.getBasequery());
 		for(MetadataQuery query: queries2.getQueries()){
 			query.setParent(this);
-			if(queries.contains(query)){
-				queries.remove(query);
-				queries.add(query);
+			int pos=queries.lastIndexOf(query);
+			if(pos!=-1){
+				queries.get(pos).overrideWith(query);
 			}
 			else{
 				queries.add(query);
