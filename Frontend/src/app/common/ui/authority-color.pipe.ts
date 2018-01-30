@@ -56,7 +56,6 @@ export class AuthorityColorPipe implements PipeTransform {
       c[2]*=1.5;
       colors.push(AuthorityColorPipe.rgbToHex(c));
     }
-    console.log(colors);
     return colors;
   }
 }
