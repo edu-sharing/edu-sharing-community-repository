@@ -544,6 +544,10 @@ export class WorkspaceMainComponent{
       this.toast.error(null,"WORKSPACE.TOAST.NO_WRITE_PERMISSION");
       return;
     }
+    if(this.filesToUpload){
+      this.toast.error(null,"WORKSPACE.TOAST.ONGOING_UPLOAD");
+      return;
+    }
     this.showUploadSelect=false;
     this.filesToUpload=files;
   }
