@@ -1,12 +1,9 @@
 package org.edu_sharing.service.version;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,14 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.spring.ApplicationContextFactory;
 import org.json.JSONObject;
-
-import com.gargoylesoftware.htmlunit.util.UrlUtils;
-import com.icegreen.greenmail.foedus.util.StreamUtils;
-
-import io.swagger.jaxrs.utils.ReaderUtils;
-import sun.net.util.URLUtil;
 
 
 public class VersionService {
