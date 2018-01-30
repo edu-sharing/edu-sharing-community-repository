@@ -402,6 +402,7 @@
 				<id>search</id>
 				<html><![CDATA[
               <cclom:general_keyword>
+              <license>
 				]]></html>
 			</template>
 			<template>
@@ -548,7 +549,6 @@
 					<statement>@cclom\:general_keyword:"${value}"</statement>
 					<multiple>true</multiple>
 					<multiplejoin>AND</multiplejoin>
-					<source>search|mds|db</source>
 				</property>
 				<property name="ccm:classification_purpose" />
 				<property name="ccm:commonlicense_key" />
