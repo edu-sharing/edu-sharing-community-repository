@@ -33,7 +33,7 @@
     "NO_NODES_IN_FOLDER": "Der Ordner enthält noch keine Elemente.",
     "UPLOAD_TITLE": "Hochladen",
     "UPLOAD_REMAINING": "Noch {{time}}",
-    "UPLOAD_FINISHING": "Noch wenige Sekunden",
+    "UPLOAD_FINISHING": "Fertigstellen...",
     "ADD_FOLDER_TITLE":"Neuen Ordner erstellen",
     "ADD_FOLDER_METADATASET":"Metadatenset für Ordner",
     "FOLDER_PLACEHOLDER": "Ordnername",

@@ -18,13 +18,13 @@ export class TimePipe implements PipeTransform {
     let seconds=Math.floor(value%60);
     let str="";
     if(hours>0){
-      str+=hours+" "+this.translate.instant("HOURS")+" ";
+      str+=hours+" "+this.translate.instant("HOUR"+(hours!=1 ? 'S' : ''))+" ";
     }
     if(minutes>0){
-      str+=minutes+" "+this.translate.instant("MINUTES")+" ";
+      str+=minutes+" "+this.translate.instant("MINUTE"+(minutes!=1 ? 'S' : ''))+" ";
     }
     if(seconds>0){
-      str+=seconds+" "+this.translate.instant("SECONDS")+" ";
+      str+=seconds+" "+this.translate.instant("SECOND"+(seconds!=1 ? 'S' : ''))+" ";
     }
     return str.trim();
   }
