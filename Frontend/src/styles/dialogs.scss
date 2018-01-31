@@ -9,7 +9,10 @@
    top:0;
    position:fixed;
    z-index:120;
- }
+}
+.globalProgress{
+  z-index:122;
+}
 .darken{
   @include darken();
 }
