@@ -1815,13 +1815,11 @@ export class MdsComponent{
   }
 
   private addAuthorValue(properties: any) {
-    if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_FREETEXT){
+    //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_FREETEXT)
       this.currentWidgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
-    }
-    if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_PERSON){
-      this.currentWidgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
-    }
 
+    //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_PERSON)
+      this.currentWidgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
   }
 
   private setRenderedHtml(html: string) {
