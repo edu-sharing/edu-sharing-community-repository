@@ -11,6 +11,7 @@ import {Router, ActivatedRoute} from "@angular/router";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {UIConstants} from "../../ui/ui-constants";
 import {ConfigurationService} from "../../services/configuration.service";
+import {CordovaService} from "../../services/cordova.service";
 import {RestLocatorService} from "./rest-locator.service";
 
 /**
@@ -78,7 +79,8 @@ export class RestConnectorService {
               private config: ConfigurationService,
               private locator: RestLocatorService,
               private storage : TemporaryStorageService,
-              private event:FrameEventsService) {
+              private event:FrameEventsService,
+              private cordova:CordovaService) {
     this.numberPerRequest=RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
     event.addListener(this);
   }
@@ -99,13 +101,13 @@ export class RestConnectorService {
   }
 
 
-  public getOAuthToken() : Observable<OAuthResult>{
+  public getOAuthToken(username:string="", password:string="") : Observable<OAuthResult>{
   let url=this.createUrl("../oauth2/token",null);
   //"grant_type=password&client_id=eduApp&client_secret=secret&username=admin&password=admin"
   return new Observable<OAuthResult>((observer : Observer<OAuthResult>)=>{
-    this.post(url,"client_id=eduApp&grant_type=client_credentials&client_secret=secret"
-      //"&username="+encodeURIComponent(username)+
-      //"&password="+encodeURIComponent(password)
+    this.post(url,"client_id=eduApp&grant_type=client_credentials&client_secret=secret"+
+      "&username="+encodeURIComponent(username)+
+      "&password="+encodeURIComponent(password)
       ,this.getRequestOptions("application/x-www-form-urlencoded")).map((response: Response) => response.json()).subscribe(
       (data:OAuthResult) => {
         observer.next(data);
@@ -185,49 +187,101 @@ export class RestConnectorService {
       }
     });
   }
+
   public login(username:string,password:string,scope:string=null) : Observable<string>{
 
-    let url = this.createUrl("authentication/:version/validateSession", null);
-    if(scope) {
-      url = this.createUrl("authentication/:version/loginToScope", null);
-    }
-    return new Observable<string>((observer : Observer<string>)=>{
-      if(scope){
-        this.post(url,JSON.stringify({
-          userName:username,
-          password:password,
-          scope:scope
-        }),this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
-          (data:LoginResult) => {
-            if(data.isValidLogin)
-              this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
-            this.storage.set(TemporaryStorageService.SESSION_INFO,data);
-            observer.next(data.statusCode);
-            observer.complete();
-          },
-          (error:any) =>{
-            console.log(error);
-            observer.error(error);
-            observer.complete();
-          });
-      }
-      else {
-        this.get(url, this.getRequestOptions("",username,password)).map((response: Response) => response.json()).subscribe(
-          (data: LoginResult) => {
-            if(data.isValidLogin)
-              this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
-            this.storage.set(TemporaryStorageService.SESSION_INFO,data);
-            observer.next(data.statusCode);
-            observer.complete();
-          },
-          (error: any) => {
-            console.log(error);
+    if (this.locator.oAuthActive) {
 
-            observer.error(error);
+      /*
+       *  OAUTH LOGIN
+       */ 
+
+       return new Observable<string>((observer : Observer<string>)=>{ 
+
+        this.getOAuthToken(username,password).subscribe((oauth: OAuthResult) => {
+
+          if (!oauth.access_token) {
+            // signal user/pass wrong
+            observer.next("INVALID_CREDENTIALS");
             observer.complete();
-          });
+            return;
+          }
+
+          // FRAGE: Wohin geht dieser Event? Ich finde keine Stelle im Code, wo EVENT_USER_LOGGED_IN empfangen wird?
+          // FRAGE: Und was passiert mit dem Data?
+          //this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
+
+          // TODO: Store these
+          console.log(oauth.access_token);
+          console.log(oauth.refresh_token);
+          console.log(oauth.expires_in);
+
+          alert("Running Cordova:"+this.cordova.isRunningCordova()+" and device is ready: "+this.cordova.isDeviceReady());
+
+          observer.error("TODO");
+          observer.complete();
+
+        },
+        (error: any) => {
+          observer.error(error);
+          observer.complete();
+        }
+      );
+
+       });
+
+    } else {
+
+      /*
+       *  SESSION LOGIN
+       */ 
+
+      let url = this.createUrl("authentication/:version/validateSession", null);
+      if(scope) {
+        url = this.createUrl("authentication/:version/loginToScope", null);
       }
-    });
+      return new Observable<string>((observer : Observer<string>)=>{
+        if(scope){
+          this.post(url,JSON.stringify({
+            userName:username,
+            password:password,
+            scope:scope
+          }),this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
+            (data:LoginResult) => {
+              if(data.isValidLogin)
+                this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
+              this.storage.set(TemporaryStorageService.SESSION_INFO,data);
+              observer.next(data.statusCode);
+              observer.complete();
+            },
+            (error:any) =>{
+              console.log(error);
+              observer.error(error);
+              observer.complete();
+            });
+        }
+        else {
+
+          this.get(url, this.getRequestOptions("",username,password)).map((response: Response) => response.json()).subscribe(
+            (data: LoginResult) => {
+              console.log("data",data);
+              if(data.isValidLogin)
+                this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
+              this.storage.set(TemporaryStorageService.SESSION_INFO,data);
+              observer.next(data.statusCode);
+              observer.complete();
+            },
+            (error: any) => {
+              console.log(error);
+              observer.error(error);
+              observer.complete();
+            });
+        }
+      });
+
+    }
+
+
 
   }
   public createRequestString(request : RequestObject){

@@ -1,6 +1,9 @@
 Internal/
 Edu-Sharing-Internal/
 Frontend/.editorconfig
+Frontend/node_modules
+node_modules/
+test/
 Backend/version.properties
 Backend/build.*.properties
 Backend/ng/
@@ -20,3 +23,7 @@ Backend/src/org/edu_sharing/repository/public/version.html
 edu-sharing-cluster/
 Backend/lib/edu-sharing_cifs.jar
 Backend/lib/edu-sharing-tomcat.jar
+.vscode/settings.json
+Frontend/package-lock.json
+package-lock.json
+.DS_Store
