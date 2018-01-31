@@ -554,7 +554,8 @@ export class SearchComponent {
       apply.enabledCallback=((node:Node)=> {
         return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
       });
-      options.push(apply);
+      if(fromList || (nodes && nodes.length==1))
+        options.push(apply);
       return options;
     }
     if (this.addToCollection) {
