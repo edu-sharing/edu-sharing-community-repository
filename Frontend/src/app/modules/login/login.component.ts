@@ -74,6 +74,10 @@ export class LoginComponent  implements OnInit{
                 this.goToNext();
               }
             }
+            if(params['local']!="true" && configService.instant("loginUrl") && data.statusCode!=RestConstants.STATUS_CODE_OK){
+              window.location.href=configService.instant("loginUrl");
+              return;
+            }
           });
           this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
           this.next=params['next'];
