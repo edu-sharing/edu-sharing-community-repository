@@ -27,9 +27,13 @@ hr{
 .link{
   width:100%;
   text-align: center;
+  i{
+    top: 7px;
+  }
 }
 .dropArea .btn-flat{
   float:none;
+  margin-top: 10px;
 }
 .location{
   padding:20px;

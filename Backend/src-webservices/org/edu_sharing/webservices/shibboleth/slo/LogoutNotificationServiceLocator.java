@@ -103,8 +103,7 @@ public class LogoutNotificationServiceLocator extends org.apache.axis.client.Ser
             return _stub;
         }
     }
-    
-    // CLEANUP? die URL OK? Wenn nicht, dannnochmal gesondert danach suchen
+
     public javax.xml.namespace.QName getServiceName() {
         return new javax.xml.namespace.QName("http://slo.shibboleth.webservices.edu_sharing.org", "LogoutNotificationService");
     }

@@ -29,7 +29,6 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
-import org.edu_sharing.repository.server.tools.BlowFish;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
@@ -159,6 +158,7 @@ public class RenderingProxy extends HttpServlet {
 				}
 			}else {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
+				return;
 			}
 			
 			String paramVersion=req.getParameter("version");

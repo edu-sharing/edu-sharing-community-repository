@@ -9,11 +9,17 @@ import {Translation} from "../../../common/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {DatepickerOptions} from "ng2-datepicker";
 import {DateHelper} from "../../../common/ui/DateHelper";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'workspace-contributor',
   templateUrl: 'contributor.component.html',
-  styleUrls: ['contributor.component.scss']
+  styleUrls: ['contributor.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class WorkspaceContributorComponent  {
   public contributorLifecycle:any={};

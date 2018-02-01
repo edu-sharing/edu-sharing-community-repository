@@ -22,6 +22,15 @@ export class RestAdminService {
     return this.connector.put(query,null,this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
+  public uploadTempFile = (file : File,filename=file.name) : Observable<any> => {
+    let query=this.connector.createUrl("admin/:version/upload/temp/:name",null,[
+      [":name",filename]
+    ]);
+    let options=this.connector.getRequestOptions();
+
+    return this.connector.sendDataViaXHR(query,file,"PUT")
+      .map((response:XMLHttpRequest) => {return JSON.parse(response.response)});
+  }
   public importExcel = (file : File,parent:string) : Observable<any> => {
     let query=this.connector.createUrl("admin/:version/import/excel?parent=:parent",null,[
       [":parent",parent]

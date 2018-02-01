@@ -97,9 +97,10 @@ $side:20px;
 .preview{
   width:calc(100% + 24px);
   margin-left:-13px;
-  height:auto;
+  height:200px;
   position: relative;
   top:-20px;
+  object-fit: cover;
 }
 .license{
   padding-top: 4px;

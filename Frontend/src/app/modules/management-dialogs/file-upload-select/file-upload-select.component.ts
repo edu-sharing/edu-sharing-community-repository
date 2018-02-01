@@ -2,11 +2,17 @@ import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@an
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {Node,NodeList} from "../../../common/rest/data-object";
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'workspace-file-upload-select',
   templateUrl: 'file-upload-select.component.html',
-  styleUrls: ['file-upload-select.component.scss']
+  styleUrls: ['file-upload-select.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class WorkspaceFileUploadSelectComponent  {
   public disabled=true;

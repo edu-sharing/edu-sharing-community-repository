@@ -17,11 +17,17 @@ import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {RestHelper} from "../../../common/rest/rest-helper";
 import {Helper} from "../../../common/helper";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'workspace-share',
   templateUrl: 'share.component.html',
-  styleUrls: ['share.component.scss']
+  styleUrls: ['share.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class WorkspaceShareComponent  {
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",

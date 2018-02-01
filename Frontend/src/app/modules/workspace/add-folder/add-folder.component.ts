@@ -6,11 +6,17 @@ import {ConfigurationService} from "../../../common/services/configuration.servi
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {ConfigurationHelper} from "../../../common/rest/configuration-helper";
 import {UIHelper} from "../../../common/ui/ui-helper";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'workspace-add-folder',
   templateUrl: 'add-folder.component.html',
-  styleUrls: ['add-folder.component.scss']
+  styleUrls: ['add-folder.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class WorkspaceAddFolder  {
   @ViewChild('input') input : ElementRef;

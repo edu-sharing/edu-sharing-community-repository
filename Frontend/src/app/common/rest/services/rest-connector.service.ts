@@ -21,17 +21,6 @@ import {RestLocatorService} from "./rest-locator.service";
 @Injectable()
 export class RestConnectorService {
   private static DEFAULT_NUMBER_PER_REQUEST = 25;
-  private static ENDPOINT_URLS=[
-    "rest/",
-    "http://localhost:8080/edu-sharing/rest/",
-    "http://localhost:8081/edu-sharing/rest/",
-    "http://edu41.edu-sharing.de/edu-sharing/rest/",
-    //"https://repository.oer-berlin.de/edu-sharing/rest/",
-    "http://alfresco5.vm:8080/edu-sharing/rest/"
-  ];
-  public static SESSION_INFO = "SESSION_INFO";
-  private _endpointUrl : string;
-  private _numberPerRequest = RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
   private _lastActionTime=0;
   private _currentRequestCount=0;
   private _logoutTimeout: number;
@@ -135,11 +124,6 @@ export class RestConnectorService {
   }
   public getCurrentLogin() : LoginResult{
     return this.storage.get(TemporaryStorageService.SESSION_INFO);
-  }
-  public getConfig() : Observable<any>{
-    let url=this.createUrl("config/:version/get",null);
-    return this.http.get(url,this.getRequestOptions())
-      .map((response: Response) => response.json());
   }
   public isLoggedIn() : Observable<LoginResult>{
     let url=this.createUrl("authentication/:version/validateSession",null);
@@ -269,12 +253,14 @@ export class RestConnectorService {
     return RestLocatorService.createUrlNoEscape(url,repository,urlParams);
   }
 
-  public sendDataViaXHR(url : string,file : File,method='POST',fieldName='file') : Observable<XMLHttpRequest>{
+  public sendDataViaXHR(url : string,file : File,method='POST',fieldName='file',onProgress:Function=null) : Observable<XMLHttpRequest>{
     return Observable.create( (observer:Observer<XMLHttpRequest>) => {
       try {
         var xhr: XMLHttpRequest = new XMLHttpRequest();
         xhr.onreadystatechange = () => {
           if (xhr.readyState === 4) {
+            if(onProgress)
+              onProgress({progress:1});
             if (xhr.status === 200) {
               observer.next(xhr);
               observer.complete();
@@ -292,6 +278,18 @@ export class RestConnectorService {
         }
         let formData = new FormData();
         formData.append(fieldName, file, file.name);
+        let progress:any={start:new Date().getTime()};
+        xhr.upload.addEventListener("progress",(event:any)=>{
+          if (event.lengthComputable) {
+            progress.progress=event.loaded / event.total;
+            progress.loaded=event.loaded;
+            progress.total=event.total;
+            progress.elapsed=(new Date().getTime()-progress.start)/1000;
+            progress.remaining=(event.total-event.loaded) * progress.elapsed / event.loaded;
+            if (onProgress)
+              onProgress(progress);
+          }
+        });
         xhr.send(formData);
         console.log("xhr send");
       }catch(e){

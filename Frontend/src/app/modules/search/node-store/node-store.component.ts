@@ -14,11 +14,17 @@ import {UIConstants} from "../../../common/ui/ui-constants";
 import {ListItem} from "../../../common/ui/list-item";
 import {TranslateService} from "@ngx-translate/core";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'search-node-store',
   templateUrl: 'node-store.component.html',
-  styleUrls: ['node-store.component.scss']
+  styleUrls: ['node-store.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class SearchNodeStoreComponent {
 
@@ -28,7 +34,7 @@ export class SearchNodeStoreComponent {
 
   public columns : ListItem[]=[];
   public options : OptionItem[]=[];
-  public globalProgress=true;
+  public loading=true;
   public actionOptions : OptionItem[]=[];
   public sortBy=RestConstants.CM_NAME;
   public sortAscending=true;
@@ -79,28 +85,28 @@ export class SearchNodeStoreComponent {
 
     }
     let custom=this.config.instant("nodeStoreOptions");
-    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.nodes, this.selected, this.actionOptions,(load:boolean)=>this.globalProgress=load);
+    NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.nodes, this.selected, this.actionOptions,(load:boolean)=>this.loading=load);
   }
 
   private deleteSelection(position=0) {
     if(position==this.selected.length){
       this.toast.toast('SEARCH.NODE_STORE.REMOVED_ITEMS',{count:position});
-      this.globalProgress=false;
+      this.loading=false;
       this.refresh();
       return;
     }
-    this.globalProgress=true;
+    this.loading=true;
     this.iam.removeNodeList(SearchNodeStoreComponent.LIST,this.selected[position].ref.id).subscribe(()=>{
       this.deleteSelection(position+1);
     });
   }
 
   private refresh() {
-    this.globalProgress=true;
+    this.loading=true;
     this.onSelection([]);
     this.iam.getNodeList(SearchNodeStoreComponent.LIST,{sortBy:[this.sortBy],sortAscending:this.sortAscending}).subscribe((data:NodeList)=>{
       this.nodes=data.nodes;
-      this.globalProgress=false;
+      this.loading=false;
     });
   }
 }

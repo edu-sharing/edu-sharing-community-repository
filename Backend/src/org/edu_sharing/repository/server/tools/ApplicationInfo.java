@@ -98,6 +98,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	public static final String KEY_IS_HOME_NODE = "is_home_node";
 	
+	public static final String KEY_CUSTOM_HTML_HEADERS = "custom_html_headers";
+	
 	public static final String KEY_METADATASETS = "metadatasets";
 	public static final String KEY_METADATASETS_V2 = "metadatasetsV2";
 	
@@ -125,7 +127,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	public static final String TYPE_CONNECTOR = "CONNECTOR";
 	
-	public static final String REPOSITORY_TYPE_ALFRESCO = "ALFRESCO";
+	public static final String REPOSITORY_TYPE_ALFRESCO = "ALFRESCO"; // a remote alfresco repository
+	
+	public static final String REPOSITORY_TYPE_LOCAL = "LOCAL"; // the local alfreso repository
 	
 	public static final String REPOSITORY_TYPE_EDUNEX = "EDUNEX";
 	
@@ -235,6 +239,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	 */
 	private String previewUrl = null;
 	
+	private String customHtmlHeaders = null;
+
 	private String logoutUrl = null;
 
 	private String nodeIdKey = null;
@@ -403,6 +409,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		previewUrl = PropertiesHelper.getProperty(KEY_PREVIEWURL, appFile, PropertiesHelper.XML);
 		
+		customHtmlHeaders = PropertiesHelper.getProperty(KEY_CUSTOM_HTML_HEADERS, appFile, PropertiesHelper.XML);
+
 		logoutUrl = PropertiesHelper.getProperty(KEY_LOGOUT_URL, appFile, PropertiesHelper.XML);
 		
 		nodeIdKey = PropertiesHelper.getProperty("nodeid_key", appFile, PropertiesHelper.XML);
@@ -673,7 +681,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		return previewUrl;
 	}
 	
-	
+	public String getCustomHtmlHeaders() {
+		return customHtmlHeaders;
+	}
+
 	public String getLogoutUrl() {
 		
 		if(logoutUrl == null || logoutUrl.trim().equals("")){

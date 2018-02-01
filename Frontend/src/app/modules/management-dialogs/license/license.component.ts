@@ -10,11 +10,17 @@ import {ConfigurationService} from "../../../common/services/configuration.servi
 import {RestHelper} from "../../../common/rest/rest-helper";
 import {VCard} from "../../../common/VCard";
 import {UIHelper} from "../../../common/ui/ui-helper";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'workspace-license',
   templateUrl: 'license.component.html',
-  styleUrls: ['license.component.scss']
+  styleUrls: ['license.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class WorkspaceLicenseComponent  {
   @ViewChild('contactCheckbox') contactCheckbox : ElementRef;

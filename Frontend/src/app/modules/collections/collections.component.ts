@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../router/router.component";
@@ -42,6 +42,7 @@ import {UIAnimation} from "../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
 import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
+import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 
 // data class for breadcrumbs
 export class Breadcrumb {
@@ -57,11 +58,13 @@ export class Breadcrumb {
   providers: [GwtInterfaceService],
 })
 export class CollectionsMainComponent implements GwtEventListener {
-    public dialogTitle : string;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
+
+  public dialogTitle : string;
     public globalProgress=false;
-    private dialogCancelable = false;
-    private dialogMessage : string;
-    private dialogButtons : DialogButton[];
+    public dialogCancelable = false;
+    public dialogMessage : string;
+    public dialogButtons : DialogButton[];
 
     public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
     public isLoading:boolean = true;
@@ -500,6 +503,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
             //this.sortCollectionContent();
             this.isLoading=false;
+            this.mainNavRef.refreshBanner();
             if(callback)
               callback();
         });
@@ -631,7 +635,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
   private renderBreadcrumbs() {
     this.path=[];
-    this.nodeService.getNodeParents(this.collectionContent.collection.ref.id).subscribe((data: EduData.NodeList) => {
+    this.nodeService.getNodeParents(this.collectionContent.collection.ref.id,false).subscribe((data: EduData.NodeList) => {
       this.path = data.nodes.reverse();
     });
   }
@@ -728,7 +732,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       });
   }
 
-  private closeDialog() {
+  public closeDialog() {
     this.dialogTitle=null;
   }
 

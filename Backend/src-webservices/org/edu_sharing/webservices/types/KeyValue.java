@@ -105,7 +105,6 @@ public class KeyValue  implements java.io.Serializable {
     private static org.apache.axis.description.TypeDesc typeDesc =
         new org.apache.axis.description.TypeDesc(KeyValue.class, true);
 
-    // CLEANUP? die URL OK? Wenn nicht, dannnochmal gesondert danach suchen
     static {
         typeDesc.setXmlType(new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "KeyValue"));
         org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();

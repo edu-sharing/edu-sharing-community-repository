@@ -2,6 +2,7 @@
   *ngIf="showProfile"
   (onCancel)="showProfile=false"
 ></user-profile>
+<app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
 
 <div class="dialog darken" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
 
@@ -26,7 +27,7 @@
 <div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [class.noUser]="!_showUser">
   <div class="menuButtonOuter">
     <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
-      <img class="material-icons eduImage" src="assets/images/edu-white-alpha.svg" alt="{{'EDU_LOGO_ALT' | translate}}"/>
+      <img class="material-icons eduImage" [src]="getIconSource()" alt="{{'EDU_LOGO_ALT' | translate}}"/>
       <i class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
       <span>{{title | translate}}</span>
       <i class="material-icons barIcon">keyboard_arrow_right</i>

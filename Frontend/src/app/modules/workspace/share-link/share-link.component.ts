@@ -10,11 +10,17 @@ import {TranslateService} from "@ngx-translate/core";
 import {Helper} from "../../../common/helper";
 import { DatepickerOptions } from 'ng2-datepicker';
 import {DateHelper} from "../../../common/ui/DateHelper";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'workspace-share-link',
   templateUrl: 'share-link.component.html',
-  styleUrls: ['share-link.component.scss']
+  styleUrls: ['share-link.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class WorkspaceShareLinkComponent  {
   public loading=true;

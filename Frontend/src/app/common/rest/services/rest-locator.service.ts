@@ -39,10 +39,10 @@ export class RestLocatorService {
 
   constructor(private http : Http) {
   }
-  public getConfig() : Observable<Response>{
-    return new Observable<Response>((observer : Observer<Response>) => {
+  public getConfig() : Observable<any>{
+    return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {
-        let query = RestLocatorService.createUrl("config/:version/get", null);
+        let query = RestLocatorService.createUrl("config/:version/values", null);
         this.http.get(this._endpointUrl + query, this.getRequestOptions())
           .map((response: Response) => response.json())
           .subscribe(response => {
@@ -56,12 +56,44 @@ export class RestLocatorService {
       });
     });
   }
-  public getRequestOptions(contentType="application/json",username:string = null,password:string = null) : RequestOptionsArgs{
+  public getConfigVariables() : Observable<string[]>{
+    return new Observable<string[]>((observer : Observer<string[]>) => {
+      this.locateApi().subscribe(data => {
+        let query = RestLocatorService.createUrl("config/:version/variables", null);
+        this.http.get(this._endpointUrl + query, this.getRequestOptions("application/json"))
+          .map((response: Response) => response.json())
+          .subscribe(response => {
+            observer.next(response.current);
+            observer.complete();
+          },(error:any)=>{
+            observer.error(error);
+            observer.complete();
+          });
+      });
+    });
+  }
+  public getConfigLanguage(lang:string) : Observable<any>{
+    return new Observable<any>((observer : Observer<any>) => {
+      this.locateApi().subscribe(data => {
+        let query = RestLocatorService.createUrl("config/:version/language", null);
+        this.http.get(this._endpointUrl + query, this.getRequestOptions("application/json",null,null,lang))
+          .map((response: Response) => response.json())
+          .subscribe(response => {
+            observer.next(response.current);
+            observer.complete();
+          },(error:any)=>{
+            observer.error(error);
+            observer.complete();
+          });
+      });
+    });
+  }
+  public getRequestOptions(contentType="application/json",username:string = null,password:string = null,locale=Translation.getISOLanguage()) : RequestOptionsArgs{
     let headers = new Headers();
     if(contentType)
       headers.append('Content-Type', contentType);
     headers.append('Accept', 'application/json');
-    headers.append('locale',Translation.getISOLanguage());
+    headers.append('locale',locale);
     if(username!=null) {
       headers.append('Authorization', "Basic " + btoa(username + ":" + password));
     }
