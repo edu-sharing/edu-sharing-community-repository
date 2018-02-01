@@ -27,3 +27,8 @@ Backend/lib/edu-sharing-tomcat.jar
 Frontend/package-lock.json
 package-lock.json
 .DS_Store
+Cordova/.editorconfig
+Cordova/node_modules
+Cordova/www
+Cordova/plugins
+Cordova/platforms
