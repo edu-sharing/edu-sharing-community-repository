@@ -134,7 +134,7 @@ public class SearchApi  {
 		    	pagination.setTotal(search.getCount());
 		    	
 		    	
-		    	SearchResult response = new SearchResult();
+		    	SearchResult<Node> response = new SearchResult<>();
 		    	response.setNodes(data);
 		    	response.setIgnored(search.getIgnored());
 		    	response.setPagination(pagination);	    	
@@ -266,7 +266,7 @@ public class SearchApi  {
 		    	pagination.setTotal(search.getCount());
 		    	
 		    	
-		    	SearchResult response = new SearchResult();
+		    	SearchResult<Node> response = new SearchResult<>();
 		    	response.setNodes(data);
 		    	response.setPagination(pagination);	    	
 		    	response.setFacettes(search.getFacettes());
@@ -351,7 +351,7 @@ public class SearchApi  {
 	    	pagination.setTotal(search.getCount());
 	    	
 	    	
-	    	SearchResult response = new SearchResult();
+	    	SearchResult<Node> response = new SearchResult<>();
 	    	response.setNodes(data);
 	    	response.setPagination(pagination);	    	
 	    	response.setFacettes(search.getFacettes());
@@ -470,7 +470,7 @@ public class SearchApi  {
 	    	pagination.setTotal(search.getCount());
 	    	
 	    	
-	    	SearchResult response = new SearchResult();
+	    	SearchResult<Node> response = new SearchResult<>();
 	    	response.setNodes(data);
 	    	response.setPagination(pagination);	    	
 	    	response.setFacettes(search.getFacettes());
