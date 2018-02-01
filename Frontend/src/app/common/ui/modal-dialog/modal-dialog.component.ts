@@ -3,11 +3,17 @@ import {
   QueryList
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../ui-animation";
 
 @Component({
   selector: 'modal-dialog',
   templateUrl: 'modal-dialog.component.html',
   styleUrls: ['modal-dialog.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 /**
  * An common edu-sharing modal dialog
@@ -35,6 +41,7 @@ export class ModalDialogComponent{
   @Input() isScrollable = false;
   /**
    * The title, will be translated automatically
+   * The dialog will only be visible if the title is not null
    */
   @Input() title : string;
   /**
@@ -57,6 +64,10 @@ export class ModalDialogComponent{
    */
   public _buttons : DialogButton[];
   @Input() set buttons (buttons :  DialogButton[]){
+    if(!buttons){
+      this._buttons=null;
+      return;
+    }
    this._buttons=buttons.reverse();
    setTimeout(()=> {
      if(this.buttonElements)

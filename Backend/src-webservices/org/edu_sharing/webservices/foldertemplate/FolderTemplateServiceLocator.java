@@ -104,14 +104,12 @@ public class FolderTemplateServiceLocator extends org.apache.axis.client.Service
         }
     }
 
-	// CLEANUP? die URL OK?
     public javax.xml.namespace.QName getServiceName() {
         return new javax.xml.namespace.QName("http://foldertemplate.webservices.edu_sharing.org", "FolderTemplateService");
     }
 
     private java.util.HashSet ports = null;
 
-	// CLEANUP? die URL OK? 
     public java.util.Iterator getPorts() {
         if (ports == null) {
             ports = new java.util.HashSet();

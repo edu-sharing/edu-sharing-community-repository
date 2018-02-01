@@ -10,6 +10,8 @@ import {
 import {Router} from "@angular/router";
 import {ConfigurationService} from "../services/configuration.service";
 import {UIConstants} from "../ui/ui-constants";
+import NumberFormat = Intl.NumberFormat;
+import NumberFormatOptions = Intl.NumberFormatOptions;
 
 export class RestHelper{
   public static getNodeIds(nodes : Node[]|Collection[]|CollectionReference[]): Array<string>{
@@ -188,6 +190,55 @@ export class RestHelper{
           node=node.reference;
         if (node.name) return node.name;
         return node.title;
+    }
+  public static getDurationInSeconds(node:any) : number {
+    // PT1H5M23S
+    //
+    let value = node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION];
+    if (!value)
+      return 0;
+    try {
+      let regexp = new RegExp("PT(\\d+H)?(\\d+M)?(\\d+S)?");
+      let result = regexp.exec(value[0]);
+      let h = result[1] ? parseInt(result[1]) : 0;
+      let m = result[2] ? parseInt(result[2]) : 0;
+      let s = result[3] ? parseInt(result[3]) : 0;
+      let time = h * 60 * 60 + m * 60 + s;
+      return time;
+    }catch(e){
+      return value;
+    }
+  }
+  public static getDurationFormatted(node:any) : string{
+      let time=RestHelper.getDurationInSeconds(node);
+      if(!time)
+        return "";
+      let h=Math.floor(time/60/60);
+      let m=Math.floor(Math.floor(time/60)%60);
+      let s=Math.floor(time%60);
+      let options:NumberFormatOptions={
+        minimumIntegerDigits:2,
+        maximumFractionDigits:0
+      };
+      let format=new NumberFormat([],options);
+      let str="";
+      /*
+      if(h>0) {
+        str = format.format(h) + "h";
+      }
+      if(m>0) {
+        if (str)
+          str += " ";
+        str += format.format(m) + "m";
+      }
+      if(s>0) {
+        if (str)
+          str += " ";
+        str += format.format(s) + "s";
+      }
+      */
+      str=format.format(h)+":"+format.format(m)+":"+format.format(s);
+      return str;
     }
     public static getTitle(node:any):string {
       if(node.reference) // for collection references

@@ -31,7 +31,6 @@ public class FolderTemplateSoapBindingSkeleton implements org.edu_sharing.webser
         org.apache.axis.description.FaultDesc _fault;
         org.apache.axis.description.ParameterDesc [] _params;
         _params = new org.apache.axis.description.ParameterDesc [] {
-        		// CLEANUP? die URL OK? Wenn nicht, dannnochmal gesondert danach suchen
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://foldertemplate.webservices.edu_sharing.org", "template"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://foldertemplate.webservices.edu_sharing.org", "group"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://foldertemplate.webservices.edu_sharing.org", "folderid"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 

@@ -688,12 +688,13 @@
       <!-- Angular Dynamic routing, added by Torsten 2016-11-02 --> 
 	<servlet>
       <servlet-name>ng-index</servlet-name>
-      <jsp-file>/index.html</jsp-file>
+      <servlet-class>org.edu_sharing.repository.server.NgServlet</servlet-class>
+      <!-- <jsp-file>/index.jsp</jsp-file> -->
     </servlet>
-    <!-- <servlet-mapping>
+    <servlet-mapping>
       <servlet-name>ng-index</servlet-name>
-      <url-pattern>/</url-pattern>
-    </servlet-mapping> -->
+      <url-pattern>/index.html</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
       <servlet-name>ng-index</servlet-name>
       <url-pattern>/components/*</url-pattern>

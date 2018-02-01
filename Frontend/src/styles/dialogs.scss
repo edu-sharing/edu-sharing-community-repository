@@ -9,11 +9,17 @@
    top:0;
    position:fixed;
    z-index:120;
- }
+}
+.globalProgress{
+  z-index:122;
+}
 .darken{
   @include darken();
 }
-
+.card{
+  z-index:121;
+  background-color: #fff!important;
+}
 .center-card{
   position:fixed!important;
   top:15%;
@@ -23,9 +29,7 @@
   margin-left:-250px!important;
   padding-bottom: 20px;
 }
-.card{
-  background-color: #fff!important;
-}
+
 .card-content{
   height: calc(100% - 50px);
 }
@@ -98,13 +102,6 @@ input[type=search]{
 .card-xwide{
   width:700px;
   margin-left:-350px!important;
-}
-.scrollable{
-  overflow-x: hidden;
-  overflow-y: auto;
-  height:250px;
-  margin:0 -20px;
-  padding: 0 20px;
 }
 .center-card .checkbox{
   padding-top:10px;

@@ -275,9 +275,13 @@ export class NodeHelper{
     let icon=string.replace(/_/g,"-").toLowerCase();
     if(icon=='')
       icon='none';
+    let LICENSE_ICONS=["cc-0","cc-by-nc","cc-by-nc-nd","cc-by-nc-sa","cc-by-nd",
+      "cc-by-sa","cc-by","copyright-free","copyright-license","custom",
+      "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk"];
+    if(LICENSE_ICONS.indexOf(icon)==-1)
+      return null;
     return rest.getAbsoluteEndpointUrl()+"../ccimages/licenses/"+icon+".svg";
   }
-
   /**
    * Return a translated name of a license name for a node
    * @param node
@@ -568,6 +572,10 @@ export class NodeHelper{
       }
     }
     return allFiles;
+  }
+
+  static hasAnimatedPreview(node: Node) {
+    return !node.preview.isIcon && (node.mediatype=="file-video" || node.mimetype=="image/gif");
   }
 }
 

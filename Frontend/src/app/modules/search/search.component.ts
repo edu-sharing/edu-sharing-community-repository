@@ -47,6 +47,7 @@ import {Action} from "rxjs/scheduler/Action";
 import {WorkspaceManagementDialogsComponent} from "../management-dialogs/management-dialogs.component";
 import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 import {MdsHelper} from "../../common/rest/mds-helper";
+import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 
 
 @Component({
@@ -62,8 +63,9 @@ import {MdsHelper} from "../../common/rest/mds-helper";
 
 
 export class SearchComponent {
-  public initalized = false;
+  public initalized:boolean;
   @ViewChild('mds') mdsRef: MdsComponent;
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('managementDialogs') managementDialogs : WorkspaceManagementDialogsComponent;
   public mdsSuggestions:any={}
   public mdsExtended=false;
@@ -77,9 +79,9 @@ export class SearchComponent {
   showspinner: boolean = false;
   public nodeReport: Node;
   public currentRepository:string=RestConstants.HOME_REPOSITORY;
+  public currentRepositoryObject:Repository;
 
   public applyMode=false;
-  public columns : ListItem[]=[];
   public collectionsColumns : ListItem[]=[];
   public hasCheckbox=false;
   public showMoreRepositories=false;
@@ -100,10 +102,11 @@ export class SearchComponent {
   private viewToggle: OptionItem;
   public groupResults = false;
   public actionOptions:OptionItem[]=[];
+  public allRepositories: Repository[];
   public repositories: Repository[];
   public globalProgress = false;
   // Max items to fetch at all (afterwards no more infinite scroll)
-  private static MAX_ITEMS_COUNT = 400;
+  private static MAX_ITEMS_COUNT = 300;
   private repositoryIds: any[];
   public addNodesToCollection: Node[];
   private mdsSets: MdsInfo[];
@@ -113,7 +116,6 @@ export class SearchComponent {
   }
   public set mdsId(mdsId:string){
     this._mdsId=mdsId;
-    this.invalidateMds();
   }
   public selection: Node[];
   private currentValues: any;
@@ -128,8 +130,8 @@ export class SearchComponent {
   private currentSavedSearch: Node;
   private login: LoginResult;
   public dialogTitle: string;
-  private dialogMessage: string;
-  private dialogButtons: DialogButton[];
+  public dialogMessage: string;
+  public dialogButtons: DialogButton[];
   private savedSearchOwn = true;
   public savedSearchLoading = false;
   public savedSearchQuery:string = null;
@@ -166,46 +168,6 @@ export class SearchComponent {
     private network : RestNetworkService,
     private temporaryStorageService: TemporaryStorageService
   ) {
-    this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
-    this.connector.setRoute(this.activatedRoute).subscribe(()=> {
-      Translation.initialize(translate, this.config, this.storage, this.activatedRoute).subscribe(() => {
-        UIHelper.setTitle('SEARCH.TITLE', title, translate, config);
-        this.initalized = true;
-        this.printListener();
-        this.view = this.config.instant('searchViewType',temporaryStorageService.get('view', '1'));
-        this.groupResults=this.config.instant('searchGroupResults',false);
-        this.setViewType(this.view);
-
-        this.collectionsColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
-        this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
-        this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
-        this.updateActionbar(null);
-        setInterval(() => this.updateHasMore(), 1000);
-
-        this.network.getRepositories().subscribe((data: NetworkRepositories) => {
-          this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
-          if(this.repositories.length && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
-            console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+this.repositories[0].id);
-            console.log(this.repositories);
-            this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
-          }
-          if (this.repositories.length < 2) {
-            this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
-            this.repositories = null;
-            return;
-          }
-          let all = new Repository();
-          all.id = RestConstants.ALL;
-          all.title = this.translate.instant('SEARCH.REPOSITORY_ALL');
-          all.repositoryType = 'ALL';
-          this.repositories.splice(0, 0, all);
-          this.updateRepositoryOrder();
-        }, (error: any) => {
-          this.repositories = null;
-          this.repositoryIds = [];
-        });
-      });
-    });
   }
   public setRepository(repository:string){
     this.routeSearch(this.searchService.searchTerm,repository,null,null);
@@ -213,7 +175,8 @@ export class SearchComponent {
     //this.getSearch(null,true);
   }
 
-  applyParameters(props:any){
+  applyParameters(props:any=null){
+    this.searchService.reinit=true;
     this.currentValues=props;
     this.routeSearchParameters(props);
     //this.getSearch(null,true,props);
@@ -226,159 +189,83 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-     Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
-       this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
-         (param: any) => {
-           if(param['addToCollection']){
-             this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
-               this.addToCollection=data.collection;
-               this.refreshListOptions();
-               this.updateActionbar(null);
-             });
-           }this.mainnav=param['mainnav']=='false' ? false : true;
-           if(param['reurl']) {
-             this.searchService.reurl = param['reurl'];
-             this.applyMode=true;
-           }
-
-          if(param['query'])
-            this.searchService.searchTerm=param['query'];
-          if(param['repository']){
-            this.mdsSets=null;
-            if(this.currentRepository!=param['repository'])
-              this.mdsId=RestConstants.DEFAULT;
-            this.currentRepository=param['repository'];
-            this.updateRepositoryOrder();
-          }
-          if(param['savedQuery']){
-            this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
-              this.currentSavedSearch=data.node;
-              this.sidenavTab=1;
-            });
-          }
-          this.updateSelection([]);
-          this.mds.getSets(this.currentRepository).subscribe((data:MdsMetadatasets)=>{
-            console.log(data.metadatasets);
-            this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepository,data.metadatasets,this.config);
-            if(this.mdsSets){
-              UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
-              try {
-                this.mdsId = this.mdsSets[0].id;
-                if (param['mds'])
-                  this.mdsId = param['mds'];
-              }
-              catch(e){
-                console.warn("got invalid mds list from repository:");
-                console.warn(this.mdsSets);
-                console.warn("will continue with default mds");
-                this.mdsId=RestConstants.DEFAULT;
-              }
-              this.searchService.init();
-              this.prepare(param);
-            }
-          },(error:any)=>{
-            this.mdsId=RestConstants.DEFAULT;
-            this.searchService.init();
-            this.prepare(param);
-          });
-        });
-    });
-  }
-
-  /*AUTOCOMPLETE*/
-
-  addAutocompleteValue(data: any) {
-    if(typeof this.searchService.autocompleteData[data.id] == 'undefined')
-      this.searchService.autocompleteData[data.id] = [];
-    this.searchService.autocompleteData[data.id].push(data.item);
-    this.refresh();
-  }
-
-  removeAutoCompleteValue(data: any) {
-    for(var i = 0; i < this.searchService.autocompleteData[data.id].length; i++) {
-      if(this.searchService.autocompleteData[data.id][i].id == data.item.id) {
-        this.searchService.autocompleteData[data.id].splice(i, 1);
-        this.refresh();
-        return;
-      }
+     this.initalized=true;
+    if(this.searchService.reinit){
+      this.searchService.init();
+      this.initalized=false;
     }
+     this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
+     this.connector.setRoute(this.activatedRoute).subscribe(()=> {
+         Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
+           UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
+           this.printListener();
+           this.view = this.config.instant('searchViewType',this.temporaryStorageService.get('view', '1'));
+           this.groupResults=this.config.instant('searchGroupResults',false);
+           this.setViewType(this.view);
 
+           this.collectionsColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
+           this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
+           this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
+           this.updateActionbar(null);
+           setInterval(() => this.updateHasMore(), 1000);
+
+           this.network.getRepositories().subscribe((data: NetworkRepositories) => {
+             this.allRepositories=Helper.deepCopy(data.repositories);
+             this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
+             if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
+               console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+this.repositories[0].id);
+               console.log(this.repositories);
+               this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
+             }
+             if (this.repositories.length < 2) {
+               this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
+               this.repositories = null;
+
+             }
+             this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
+             if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
+               this.currentRepository=this.currentRepositoryObject.id;
+             }
+
+             if(this.repositories) {
+               let all = new Repository();
+               all.id = RestConstants.ALL;
+               all.title = this.translate.instant('SEARCH.REPOSITORY_ALL');
+               all.repositoryType = 'ALL';
+               this.repositories.splice(0, 0, all);
+               this.updateRepositoryOrder();
+             }
+             this.initParams();
+
+           }, (error: any) => {
+             this.repositories = null;
+             this.repositoryIds = [];
+             this.initParams();
+           });
+       });
+     });
   }
+
   public refresh(){
     this.getSearch(null,true);
   }
 
-  /* implement this for your autocomplete element */
-  /*
-      getAutocompleteSuggestions(data: any) {
-          if(data.id == 'keyword') {
-                  this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/lom/1.0}general_keyword', data.input).subscribe(
-                  md => {
-                      var ret:SuggestItem[] = [];
-                      for (var index = 0; index < md.values.length; index++) {
-                          ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', ''));
-                      }
-                      this.autocompleteSuggestions['keyword'] = ret;
-                  },
-                  error => console.log(error));
-          }
-
-          if(data.id == 'educationallearningresourcetype') {
-                  this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/1.0}educationallearningresourcetype', data.input).subscribe(
-                  md => {
-                      var ret:SuggestItem[] = [];
-                      for (var index = 0; index < md.values.length; index++) {
-                          ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', ''));
-                      }
-                      this.autocompleteSuggestions['educationallearningresourcetype'] = ret;
-                  },
-                  error => console.log(error));
-          }
-
-        if(data.id == 'taxonid') {
-          this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/1.0}taxonid', data.input).subscribe(
-            md => {
-              var ret:SuggestItem[] = [];
-              for (var index = 0; index < md.values.length; index++) {
-                ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', md.values[index]["key"]));
-              }
-              this.autocompleteSuggestions['taxonid'] = ret;
-            },
-            error => console.log(error));
-        }
-
-        if(data.id == 'educationalcontext') {
-          this.RestMetadataService.getMetadataValues('-default-', this.queryId, '{http://www.campuscontent.de/model/1.0}educationalcontext', data.input).subscribe(
-            md => {
-              var ret:SuggestItem[] = [];
-              for (var index = 0; index < md.values.length; index++) {
-                ret.push(new SuggestItem(md.values[index]["displayString"], md.values[index]["displayString"], '', '', ''));
-              }
-              this.autocompleteSuggestions['educationalcontext'] = ret;
-            },
-            error => console.log(error));
-        }
-      }
-  */
-  /*AUTOCOMPLETE*/
-
-
-
-
   ngOnDestroy() {
-    this.queryParamsSubscription.unsubscribe();
+    if(this.queryParamsSubscription)
+      this.queryParamsSubscription.unsubscribe();
   }
 
-
+  scrollTo(y = 0){
+    this.winRef.getNativeWindow().scrollTo(0,y);
+  }
   handleFocus(event: Event) {
     if(this.innerWidth < this.breakpoint) {
-      this.winRef.getNativeWindow().scrollTo(0,0);
+      this.scrollTo();
     }
   }
 
   ngAfterViewInit() {
-
-    this.winRef.getNativeWindow().scrollTo(0, this.searchService.offset);
+    this.scrollTo(this.searchService.offset);
     this.innerWidth = this.winRef.getNativeWindow().innerWidth;
     this.setSidenavSettings();
     //this.autocompletesArray = this.autocompletes.toArray();
@@ -399,8 +286,7 @@ export class SearchComponent {
   }
   getMoreResults() {
     if(this.searchService.complete == false) {
-      //console.log("getMoreResults() "+this.searchService.skipcount+" "+this.searchService.searchResult.length);
-      this.searchService.skipcount += this.connector.numberPerRequest;
+      this.searchService.skipcount = this.searchService.searchResult.length;
       this.getSearch();
     }
   }
@@ -424,18 +310,21 @@ export class SearchComponent {
     }
   }
   public routeSearchParameters(parameters:any){
-    console.log(JSON.stringify(parameters));
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
   public routeAndClearSearch(query:any) {
-    let parameters=this.mdsRef.getValues();
+    let parameters:any=null;
+    if(this.mdsRef) {
+      parameters = this.mdsRef.getValues();
+    }
     if (query.cleared) {
       parameters = null;
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
-
+    this.scrollTo();
+    this.searchService.init();
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
@@ -507,7 +396,7 @@ export class SearchComponent {
 
     if(init) {
       this.searchService.searchResultCollections = [];
-      if(this.currentRepository==RestConstants.HOME_REPOSITORY || this.currentRepository==RestConstants.ALL) {
+      if(this.isHomeRepository() || this.currentRepository==RestConstants.ALL) {
         this.search.search(criterias, [], {
           sortBy: [
             RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
@@ -515,9 +404,9 @@ export class SearchComponent {
             RestConstants.CM_MODIFIED_DATE
           ],
           sortAscending: [false,true,false]
-        }, RestConstants.CONTENT_TYPE_COLLECTIONS,RestConstants.HOME_REPOSITORY,this.mdsId).subscribe(
+        }, RestConstants.CONTENT_TYPE_COLLECTIONS,this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository,this.mdsId).subscribe(
           (data: NodeList) => {
-            this.searchService.searchResultCollections = data.nodes
+            this.searchService.searchResultCollections = data.nodes;
             this.resultCount.collections = data.pagination.total;
             this.checkFail();
           },
@@ -534,14 +423,14 @@ export class SearchComponent {
       this.switchToCollections(node.ref.id);
       return;
     }
-    if(!RestNetworkService.isFromHomeRepo(node) && RestNetworkService.getRepositoryById(node.ref.repo,this.repositories).repositoryType!=RestConstants.REPOSITORY_TYPE_ALFRESCO){
+    if(!RestNetworkService.isFromHomeRepo(node,this.allRepositories)){
       window.open(node.contentUrl);
       return;
     }
     this.renderedNode = node;
     this.render_options=[];
     let queryParams={
-      "repository" : RestNetworkService.isFromHomeRepo(node) ? null : node.ref.repo
+      "repository" : RestNetworkService.isFromHomeRepo(node,this.allRepositories) ? null : node.ref.repo
     };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
@@ -577,8 +466,6 @@ export class SearchComponent {
     this.updateActionbar(this.selection);
     if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
-      this.searchService.init();
-      this.searchService.complete = true;
       return;
     }
     if(init) {
@@ -604,7 +491,7 @@ export class SearchComponent {
         this.searchService.facettes[0].values = this.searchService.facettes[0].values.slice(0, 20);
       }
     }
-    if(data.nodes.length < this.connector.numberPerRequest)
+    if(this.searchService.searchResult.length == data.pagination.total)
       this.searchService.complete = true;
   }
   private updateHasMore() {
@@ -614,7 +501,7 @@ export class SearchComponent {
   }
   public updateMds(){
     this.currentValues=null;
-    this.routeSearch(this.searchService.searchTerm);
+    this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,null);
   }
 
   private checkFail() {
@@ -638,9 +525,8 @@ export class SearchComponent {
       }
     });
     */
-    this.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
+    this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
 
-    console.warn("mds set is missing list 'search' for column rendering");
   }
 
   private importNode(node: Node) {
@@ -668,7 +554,8 @@ export class SearchComponent {
       apply.enabledCallback=((node:Node)=> {
         return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
       });
-      options.push(apply);
+      if(fromList || (nodes && nodes.length==1))
+        options.push(apply);
       return options;
     }
     if (this.addToCollection) {
@@ -692,24 +579,26 @@ export class SearchComponent {
       return options;
     }
     if(nodes && nodes.length) {
+      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node: Node) => {
+        this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
+      });
+      collection.showCallback = (node: Node) => {
+        return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node,this.allRepositories);
+      };
+      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
+        options.push(collection);
+
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));
       });
-      if(this.currentRepository==RestConstants.HOME_REPOSITORY)
+      nodeStore.showCallback=(node:Node)=>{
+        return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
+      };
+      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
         options.push(nodeStore);
-      let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(node));
-      save.showCallback = ((node: Node) => {
-        return RestNetworkService.supportsImport(node.ref.repo, this.repositories) && !this.isGuest;
-      });
-      this.options.push(save);
-      if (!this.isGuest && this.currentRepository == RestConstants.HOME_REPOSITORY) {
-        let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node: Node) => {
-          this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
-        });
-        collection.showCallback = (node: Node) => {
-          return this.addToCollection == null;
-        };
-        options.push(collection);
+
+      if (!this.isGuest && this.isHomeRepository()) {
+
         /*
         let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', (node: Node) => {
           NodeHelper.goToWorkspace(this.nodeApi, this.router, this.connector.getCurrentLogin(), node);
@@ -723,21 +612,29 @@ export class SearchComponent {
         options.push(openFolder);
         */
       }
+
+      if(nodes.length==1){
+        if(!this.isGuest && (fromList || RestNetworkService.supportsImport(nodes[0].ref.repo,this.allRepositories))) {
+          let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(this.getCurrentNode(node)));
+          save.showCallback=(node:Node)=>{
+            return RestNetworkService.supportsImport(node.ref.repo, this.allRepositories);
+          };
+          options.push(save);
+        }
+      }
+
       let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,
         (node: Node) => NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
 
-      if(nodes.length==1 && !fromList){
-        if(RestNetworkService.supportsImport(nodes[0].ref.repo, this.repositories) && !this.isGuest) {
-          let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(this.getCurrentNode(node)));
-          options.push(save);
-        }
-      }
       if(nodes.length==1 && this.config.instant("nodeReport",false)){
         let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
-        if(this.currentRepository==RestConstants.HOME_REPOSITORY)
-          this.actionOptions.push(report);
+        report.showCallback=(node:Node)=>{
+          return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
+        }
+        if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
+          options.push(report);
       }
     }
     let custom=this.config.instant("searchNodeOptions");
@@ -792,16 +689,24 @@ export class SearchComponent {
       this.addToStore(selection,position+1,errors+1)
     });
   }
-
+  private onMdsReady(mds:any=null){
+    this.currentMdsSet=mds;
+    this.updateColumns();
+    if (this.searchService.searchResult.length < 1) {
+      this.initalized = true;
+      if(!this.currentValues && this.mdsRef) {
+        this.currentValues = this.mdsRef.getValues();
+      }
+      if(this.searchService.reinit)
+        this.getSearch(this.searchService.searchTerm, true,this.currentValues);
+    }
+    this.mainNavRef.refreshBanner();
+    this.searchService.reinit=true;
+  }
   private prepare(param:any) {
-    console.log("prepare");
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       this.login=data;
-      //if (data.isValidLogin && data.currentScope == null) {
-      this.mds.getSet(this.mdsId,this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository).subscribe((data:any)=>{
-        this.currentMdsSet=data;
-        this.updateColumns();
-      });
+      this.updateColumns();
       this.updateMdsActions();
       this.isGuest = data.isGuest;
       this.hasCheckbox=true;
@@ -812,19 +717,15 @@ export class SearchComponent {
         this.mdsExtended=param['mdsExtended']=='true';
       if(param['parameters']){
         this.currentValues=JSON.parse(param['parameters']);
-        this.invalidateMds();
       }
       else if(this.currentValues){
         this.currentValues=null;
-        this.invalidateMds();
       }
       if(param['reurl']) {
         this.hasCheckbox=false;
       }
       this.refreshListOptions();
-      if (this.searchService.searchResult.length < 1) {
-        this.getSearch(param['query'] ? param['query'] : '', true,this.currentValues);
-      }
+
     });
   }
   private getSourceIcon(repo:Repository){
@@ -1011,5 +912,75 @@ export class SearchComponent {
 
   private invalidateMds() {
     this.reloadMds=new Boolean(true);
+    // no mds for all, so invoke refresh manuall
+    if(this.currentRepository==RestConstants.ALL){
+      this.onMdsReady();
+    }
+  }
+
+  private isHomeRepository() {
+   return RestNetworkService.isHomeRepo(this.currentRepository,this.allRepositories);
+  }
+
+  private initParams() {
+    this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
+      (param: any) => {
+        this.searchService.init();
+        if(param['addToCollection']){
+          this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
+            this.addToCollection=data.collection;
+            this.refreshListOptions();
+            this.updateActionbar(null);
+          });
+        }this.mainnav=param['mainnav']=='false' ? false : true;
+        if(param['reurl']) {
+          this.searchService.reurl = param['reurl'];
+          this.applyMode=true;
+        }
+
+        if(param['query'])
+          this.searchService.searchTerm=param['query'];
+        if(param['repository']){
+          this.mdsSets=null;
+          if(this.currentRepository!=param['repository']) {
+            this.mdsId = RestConstants.DEFAULT;
+          }
+          this.currentRepository=param['repository'];
+          this.updateRepositoryOrder();
+        }
+        if(param['savedQuery']){
+          this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
+            this.currentSavedSearch=data.node;
+            this.sidenavTab=1;
+          });
+        }
+        this.updateSelection([]);
+        this.mds.getSets(this.currentRepository).subscribe((data:MdsMetadatasets)=>{
+          this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepositoryObject ? this.currentRepositoryObject : this.currentRepository,data.metadatasets,this.config);
+          if(this.mdsSets){
+            UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
+            try {
+              this.mdsId = this.mdsSets[0].id;
+              if (param['mds'] && Helper.indexOfObjectArray(this.mdsSets,'id',param['mds'])!=-1)
+                this.mdsId = param['mds'];
+            }
+            catch(e){
+              console.warn("got invalid mds list from repository:");
+              console.warn(this.mdsSets);
+              console.warn("will continue with default mds");
+              this.mdsId=RestConstants.DEFAULT;
+            }
+            this.invalidateMds();
+            this.searchService.init();
+            this.prepare(param);
+
+          }
+        },(error:any)=>{
+          this.mdsId=RestConstants.DEFAULT;
+          this.invalidateMds();
+          this.searchService.init();
+          this.prepare(param);
+        });
+      });
   }
 }

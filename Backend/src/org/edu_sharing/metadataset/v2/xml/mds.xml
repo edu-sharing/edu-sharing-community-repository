@@ -256,6 +256,28 @@
 			<widget>
 				<id>license</id>
 				<caption>ccm_prop_io_license</caption>
+				<type>license</type>
+				<valuespace_i18n_prefix>license_info_</valuespace_i18n_prefix>
+				<values>
+					<entry description="description_OPEN">OPEN</entry>
+					<entry description="description_CC_BY_OPEN">CC_BY_OPEN</entry>
+					<entry description="description_CC_BY_RESTRICTED">CC_BY_RESTRICTED</entry>
+					<entry description="description_COPYRIGHT_OTHERS">COPYRIGHT_OTHERS</entry>
+					<!-- 
+					<entry description="description_OER">OER</entry>			
+					<entry description="description_OPEN">OPEN</entry>
+					<entry description="description_CC_BY_OPEN">CC_BY_OPEN</entry>
+					<entry description="description_CC_BY_ALL">CC_BY_ALL</entry>
+					<entry>CC_0</entry>
+					<entry>PDM</entry>
+					<entry>CC_BY</entry>
+					<entry>CC_BY_SA</entry>
+					<entry>CC_BY_ND</entry>
+					<entry>CC_BY_NC</entry>
+					<entry>CC_BY_NC_SA</entry>
+					<entry>CC_BY_NC_ND</entry>
+					 -->
+				</values>
 			</widget>
 			<widget>
 				<id>sys:node-uuid</id>
@@ -381,6 +403,7 @@
 				<id>search</id>
 				<html><![CDATA[
               <cclom:general_keyword>
+              <license>
 				]]></html>
 			</template>
 			<template>
@@ -527,13 +550,18 @@
 					<statement>@cclom\:general_keyword:"${value}"</statement>
 					<multiple>true</multiple>
 					<multiplejoin>AND</multiplejoin>
-					<source>search|mds|db</source>
 				</property>
 				<property name="ccm:classification_purpose" />
 				<property name="ccm:commonlicense_key" />
 				<property name="ccm:educationallearningresourcetype" />
 				<property name="license">
-					<statement>@ccm\:commonlicense_key:"${value}*"</statement>
+					<statement>@ccm\:commonlicense_key:"${value}"</statement>
+					<statement value="OPEN">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"PDM"</statement>
+					<statement value="OER">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"PDM" OR @ccm\:commonlicense_key:"CC_BY" OR @ccm\:commonlicense_key:"CC_BY_SA"</statement>
+					<statement value="CC_BY_OPEN">@ccm\:commonlicense_key:"CC_BY" OR @ccm\:commonlicense_key:"CC_BY_SA"</statement>
+					<statement value="CC_BY_RESTRICTED">@ccm\:commonlicense_key:"CC_BY_ND" OR @ccm\:commonlicense_key:"CC_BY_NC" OR @ccm\:commonlicense_key:"CC_BY_NC_SA" OR @ccm\:commonlicense_key:"CC_BY_NC_ND"</statement>
+					<statement value="CC_BY_ALL">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"CC_BY*"</statement>
+					<statement value="COPYRIGHT_OTHERS">@ccm\:commonlicense_key:"COPYRIGHT*" OR @ccm\:commonlicense_key:"SCHULFUNK"</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
 				</property>

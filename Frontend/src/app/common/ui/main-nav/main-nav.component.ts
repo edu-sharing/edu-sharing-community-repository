@@ -108,7 +108,7 @@ export class MainNavComponent {
     for(let i=0;i<elementsAlign.length;i++) {
       elements.push(elementsAlign[i]);
     }
-    if(/*this.scrollInitialPositions.length!=elements.length && */true) {
+    if(event==null) {
       this.scrollInitialPositions=[];
       for(let i=0;i<elements.length;i++) {
         let element: any = elements[i];
@@ -127,7 +127,9 @@ export class MainNavComponent {
         }
         if(element.className.indexOf('alignWithBanner')!=-1){
           element.style.position = 'relative';
-          element.style.top = y + 'px';
+          if(event==null) {
+            element.style.top = y + 'px';
+          }
         }
         else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
           element.style.position = 'fixed';
@@ -228,18 +230,27 @@ export class MainNavComponent {
     }
     return null;
   }
-  ngAfterViewInit() {
+  refreshBanner(){
+    console.log("refresh banner");
     this.handleScroll(null);
+    setTimeout(()=>this.handleScroll(null),10);
+  }
+  ngAfterViewInit() {
+    this.refreshBanner();
     /*
     for(let i=0;i<200;i++) {
       setTimeout(() => this.handleScroll(null), i * 50);
     }
     */
+
+    // too slow and buggy
+    /*
     if(MainNavComponent.bannerPositionInterval){
       clearInterval(MainNavComponent.bannerPositionInterval);
     }
     MainNavComponent.bannerPositionInterval=setInterval(()=>this.handleScroll(null),100);
-  }
+    */
+    }
   private clearSearch(){
     this.searchQuery="";
     this.onSearch.emit({query:"",cleared:true});
@@ -248,7 +259,7 @@ export class MainNavComponent {
               private connector : RestConnectorService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
-              private configServive : ConfigurationService,
+              private configService : ConfigurationService,
               private storage : TemporaryStorageService,
               private http : Http,
               private org : RestOrganizationService,
@@ -297,8 +308,8 @@ export class MainNavComponent {
         this._showUser=this.currentScope!='login' && this.showUser;
         this.iam.getUser().subscribe((user : IamUser) => {
           this.user=user;
-          this.configServive.getAll().subscribe(()=>{
-            this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configServive);
+          this.configService.getAll().subscribe(()=>{
+            this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
         });
         this.onInvalidNodeStore=new Boolean(true);
@@ -315,15 +326,7 @@ export class MainNavComponent {
   }
 
   scrollToTop() {
-    let options:ScrollOptions;
-    let interval=setInterval(()=>{
-      if(window.scrollY>0){
-        window.scrollBy(0, -Math.max(window.scrollY/2,10));
-      }
-      else {
-        clearInterval(interval);
-      }
-    },16);
+    UIHelper.scrollSmooth(0);
     //window.scrollTo(0,0);
   }
   editProfile(){
@@ -377,7 +380,7 @@ export class MainNavComponent {
     }
   }
   private login(reurl=false){
-    RestHelper.goToLogin(this.router,this.configServive,"",reurl?window.location.href:"")
+    RestHelper.goToLogin(this.router,this.configService,"",reurl?window.location.href:"")
   }
   private doSearch(value=this.search.nativeElement.value,broadcast=true){
     if(broadcast)
@@ -437,12 +440,12 @@ export class MainNavComponent {
     window.document.location.href=this.config.imprintUrl;
   }
   private checkConfig(buttons: any[]) {
-    this.configServive.getAll().subscribe((data:any)=>{
+    this.configService.getAll().subscribe((data:any)=>{
       this.config=data;
       this.editUrl=data["editProfileUrl"];
       this.showEditProfile=data["editProfile"];
-      this.helpUrl=this.configServive.instant("helpUrl",this.helpUrl);
-      this.whatsNewUrl=this.configServive.instant("whatsNewUrl",this.whatsNewUrl);
+      this.helpUrl=this.configService.instant("helpUrl",this.helpUrl);
+      this.whatsNewUrl=this.configService.instant("whatsNewUrl",this.whatsNewUrl);
       this.hideButtons(buttons);
       this.addButtons(buttons);
     },(error:any)=>this.hideButtons(buttons));
@@ -465,5 +468,8 @@ export class MainNavComponent {
       window.location.href=this.config.logout.next;
     else
       this.login(false);
+  }
+  getIconSource() {
+    return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
   }
 }

@@ -51,7 +51,7 @@ export class WorkspaceMainComponent{
   private homeDirectory : string;
   private sharedFolders : Node[]=[];
   private path : Node[]=[];
-  private selectedNode : String;
+  private parameterNode : Node;
   private metadataNode : String;
   private root = "MY_FILES";
   private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
@@ -288,7 +288,6 @@ export class WorkspaceMainComponent{
     UIHelper.openConnector(this.connectors,this.event,this.toast,this.connectorList,this.getNodeList(node)[0],type,win,connectorType);
   }
   private handleDrop(event:any){
-    console.log("handle drop "+event);
     for(let s of event.source) {
       if (event.target.ref.id == s.ref.id || event.target.ref.id==s.parent.id) {
         this.toast.error(null, "WORKSPACE.SOURCE_TARGET_IDENTICAL");
@@ -431,7 +430,8 @@ export class WorkspaceMainComponent{
 
                 if(params['file']){
                   this.node.getNodeMetadata(params['file']).subscribe((data:NodeWrapper)=>{
-                    this.setSelection([data.node])
+                    this.setSelection([data.node]);
+                    this.parameterNode=data.node;
                     this.metadataNode=params['file'];
                   });
                 }
@@ -460,7 +460,10 @@ export class WorkspaceMainComponent{
       });
     });
   }
-
+  public resetWorkspace(){
+    if(this.metadataNode)
+      this.setSelection([this.parameterNode]);
+  }
 
   public doSearch(query:string){
     this.routeTo(this.root,null,query);
@@ -539,6 +542,10 @@ export class WorkspaceMainComponent{
     }
     if(!this.createAllowed){
       this.toast.error(null,"WORKSPACE.TOAST.NO_WRITE_PERMISSION");
+      return;
+    }
+    if(this.filesToUpload){
+      this.toast.error(null,"WORKSPACE.TOAST.ONGOING_UPLOAD");
       return;
     }
     this.showUploadSelect=false;
@@ -727,7 +734,6 @@ export class WorkspaceMainComponent{
     let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
     if(this.currentFolder && !nodes && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed) {
       options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
-      console.log("add paste");
     }
     if (nodes && nodes.length == 1) {
       if(this.reurl && !nodes[0].isDirectory){

@@ -18,18 +18,22 @@ import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIHelper} from "../ui-helper";
 import {RestHelper} from "../../rest/rest-helper";
 import {NodeHelper} from "../node-helper";
+import {RestLocatorService} from "../../rest/services/rest-locator.service";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../ui-animation";
 
 @Component({
   selector: 'mds',
   templateUrl: 'mds.component.html',
   styleUrls: ['mds.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
-/**
- * An edu-sharing file-picker modal dialog
- */
 export class MdsComponent{
   @Input() addWidget=false;
-  public embedded=false;
+  @Input() embedded=false;
   private activeAuthorType: number;
   private jumpmarksCount: number;
   public static TYPE_TOOLDEFINITION = "tool_definition";
@@ -61,6 +65,7 @@ export class MdsComponent{
   private static AUTHOR_TYPE_FREETEXT = 0;
   private static AUTHOR_TYPE_PERSON = 1;
   private lastMdsQuery: string;
+  private variables: string[];
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -77,7 +82,8 @@ export class MdsComponent{
     this._setId=setId;
   }
   @Input() set invalidate(invalidate:Boolean){
-    setTimeout(()=>this.loadMds(),5);
+    if(invalidate)
+      setTimeout(()=>this.loadMds(),5);
   }
 
   @Input() set groupId(groupId:string){
@@ -87,14 +93,18 @@ export class MdsComponent{
     return this._groupId!=null;
   }
 
-  private loadMdsFinal() {
+  private loadMdsFinal(callback:Function=null) {
     if(!this.mds)
       return;
     this.renderGroup(this._groupId,this.mds);
     this.isLoading=false;
     this.setValuesByProperty(this.mds,this._currentValues ? this._currentValues : {});
     this.applySuggestions();
-    setTimeout(()=>this.showExtended(this.extended),5);
+    setTimeout(()=>{
+      this.showExtended(this.extended);
+      this.onMdsLoaded.emit(this.mds);
+      if(callback) callback();
+    },5);
   }
   private loadMds(){
     if(this.isLoading) {
@@ -104,11 +114,13 @@ export class MdsComponent{
     this.mds=null;
     this.rendered=null;
     this.renderedSuggestions=null;
-    this.embedded=true;
     this.isLoading=true;
     this.mdsService.getSet(this._setId,this._repository).subscribe((data:any)=>{
-      this.mds=data;
-      this.loadMdsFinal();
+      this.locator.getConfigVariables().subscribe((variables:string[])=>{
+        this.mds=data;
+        this.variables=variables;
+        this.loadMdsFinal();
+        },(error:any)=>this.toast.error(error));
       },(error:any)=>this.toast.error(error));
   }
 
@@ -128,7 +140,6 @@ export class MdsComponent{
 
   @Input() set nodeId(nodeId:string){
     this.currentNode=null;
-    this.embedded=false;
     if(nodeId==null)
       return;
     this.isLoading=true;
@@ -137,26 +148,27 @@ export class MdsComponent{
         // test a widget
         //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
         //data.views[0].html+="<test>";
-        this.mds=data;
-        this.currentNode=node.node;
-        for(let property in this.currentNode.properties){
-          this.properties.push(property);
-        }
-        this.properties.sort();
-        let nodeGroup=this.currentNode.isDirectory ? "map" : "io";
-        console.log(this.currentNode.aspects);
-        if(this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION)!=-1){
-          nodeGroup=MdsComponent.TYPE_TOOLDEFINITION;
-        }
-        if(this.currentNode.type==RestConstants.CCM_TYPE_TOOL_INSTANCE){
-          nodeGroup=MdsComponent.TYPE_TOOLINSTANCE;
-        }
-        if(this.currentNode.type==RestConstants.CCM_TYPE_SAVED_SEARCH){
-          nodeGroup=MdsComponent.TYPE_SAVED_SEARCH;
-        }
-        console.log("render node group "+nodeGroup);
-        this.renderGroup(nodeGroup,this.mds,this.currentNode);
-        this.isLoading=false;
+        this.locator.getConfigVariables().subscribe((variables:string[])=> {
+          this.mds = data;
+          this.variables=variables;
+          this.currentNode = node.node;
+          for (let property in this.currentNode.properties) {
+            this.properties.push(property);
+          }
+          this.properties.sort();
+          let nodeGroup = this.currentNode.isDirectory ? "map" : "io";
+          if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) != -1) {
+            nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
+          }
+          if (this.currentNode.type == RestConstants.CCM_TYPE_TOOL_INSTANCE) {
+            nodeGroup = MdsComponent.TYPE_TOOLINSTANCE;
+          }
+          if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
+            nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
+          }
+          this.renderGroup(nodeGroup, this.mds, this.currentNode);
+          this.isLoading = false;
+        });
       },(error:any)=>{
         this.toast.error(error);
         this.cancel();
@@ -170,6 +182,7 @@ export class MdsComponent{
   @Output() onDone=new EventEmitter();
   @Output() openLicense=new EventEmitter();
   @Output() openContributor=new EventEmitter();
+  @Output() onMdsLoaded=new EventEmitter();
   private rendered : SafeHtml;
   private renderedSuggestions : SafeHtml;
   private jumpmarks: SafeHtml;
@@ -186,7 +199,9 @@ export class MdsComponent{
   private suggestionsViaSearch = false;
   private resetValues(){
     this._currentValues=null;
-    this.onDone.emit(null);
+    this.loadMdsFinal(()=>{
+      this.onDone.emit(null);
+    });
   }
   private onAddWidget(){
     let values:any=[];
@@ -210,6 +225,7 @@ export class MdsComponent{
               private node : RestNodeService,
               private tools : RestToolService,
               private toast : Toast,
+              private locator : RestLocatorService,
               private storage : SessionStorageService,
               private connector : RestConnectorService,
               private sanitizer: DomSanitizer,
@@ -266,6 +282,7 @@ export class MdsComponent{
       element.style.display = 'none';
       let caption=element.getAttribute('data-caption');
       let pos=-1;
+
       if(caption && search)
         pos=caption.toLowerCase().indexOf(searchField.value.toLowerCase());
       else {
@@ -428,9 +445,11 @@ export class MdsComponent{
     data.widgets.push({id:"preview"});
     data.widgets.push({id:"version"});
     data.widgets.push({id:"author",caption:this.translate.instant('MDS.AUTHOR_LABEL')});
-      data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
-      data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
-    data.widgets.push({id:"license",caption:this.translate.instant('MDS.LICENSE')});
+    data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
+    data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
+    if(this.getWidget("license",data.widgets)==null) {
+      data.widgets.push({id: "license", caption: this.translate.instant('MDS.LICENSE')});
+    }
     for(let group of data.groups){
       if(group.id==id){
         let result=this.renderList(group,data,node);
@@ -543,9 +562,11 @@ export class MdsComponent{
         return;
       }
       if(this.isSearch()){
-        // don't send empty values to search
-        if(!props || props.length==1 && !props[0])
+        // don't send empty values to search -> this may not work with defaultvalues, so keep it
+        if(!props || props.length==1 && !props[0] && !widget.defaultvalue)
           continue;
+        if(props.length==1 && props[0]=="")
+          props=[];
       }
       properties[widget.id]=props;
     }
@@ -700,7 +721,6 @@ export class MdsComponent{
           }
           else if(widget.type=='singleoption'){
             element.value=props[0];
-            console.log("set option "+props[0]);
           }
           else {
             let caption=props[0];
@@ -794,6 +814,7 @@ export class MdsComponent{
       }
       if(this.isExtendedWidget(widget))
         extended[0]=true;
+      this.replaceVariables(widget);
       let attr=html.substring(start+search.length,end);
       let widgetData=this.renderWidget(widget,attr,template,node);
       if(!widgetData)
@@ -943,7 +964,6 @@ export class MdsComponent{
     if(event.code=="Escape"){
 
       for(let widget of this.currentWidgets){
-        console.log(widget);
         if(widget.type=='multivalueTree'){
           let element=document.getElementById(widget.id+'_tree');
           if(element && element.style.display==''){
@@ -1014,7 +1034,7 @@ export class MdsComponent{
     });
   }
   private getListEntry(id:string,key:string,caption:string,singleValue=false,searchString:string=null){
-    let html=`<a class="collection-item" tabindex="0" data-value="` + key + `" data-caption="` + caption + `" onkeydown="
+    let html=`<a class="collection-item" tabindex="0" data-value="` + key + `" data-caption="` + this.htmlEscape(caption) + `" onkeydown="
                 if(event.keyCode==13){ 
                     this.click();
                 }
@@ -1027,7 +1047,6 @@ export class MdsComponent{
                           var pos=(i+direction);
                           while(pos>0 && pos<elements.length && elements[pos].style.display=='none')
                             pos+=direction;
-                          console.log(pos);
                           if(pos==0) pos=elements.length-1;
                           if(pos==elements.length) pos=1;
                           elements[pos].focus();
@@ -1366,7 +1385,10 @@ export class MdsComponent{
 
     for(let option of widget.values){
       let id=widget.id+"_"+option.id;
-      html+='<input type="checkbox" class="filled-in" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+(option.imageSrc ? '<img src="'+option.imageSrc+'">' : option.caption)+'</label>';
+      html+='<input type="checkbox" class="filled-in" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')
+        +'> <label for="'+id+'">'+(option.imageSrc ? '<img src="'+option.imageSrc+'">' : '')+(option.caption ? '<span class="caption">'+option.caption+'</span>' : '')
+        +(option.description ? '<span class="description">'+option.description+'</span>' : '')
+        +'</label>';
     }
     html+='</fieldset>';
     return html;
@@ -1621,20 +1643,23 @@ export class MdsComponent{
   }
   private renderLicense(widget: any) {
     if(this.mode=='search'){
-      widget.values=[
-        {id:'CC_0',imageSrc:NodeHelper.getLicenseIconByString('CC_0',this.connector)},
-        {id:'CC_BY',imageSrc:NodeHelper.getLicenseIconByString('CC_BY',this.connector)},
-        {id:'PDM',imageSrc:NodeHelper.getLicenseIconByString('PDM',this.connector)},
-        {id:'COPYRIGHT',imageSrc:NodeHelper.getLicenseIconByString('COPYRIGHT-FREE',this.connector)},
-      ];
+      if(!widget.values){
+        return "widget 'license' does not have values connected, can't render it.";
+      }
+      for(let value of widget.values){
+        let image=NodeHelper.getLicenseIconByString(value.id, this.connector);;
+        if(image)
+          value.imageSrc = image;
+      }
       widget.type='checkboxVertical';
       let html = this.renderCheckboxWidget(widget,null,true);
       return html;
     }
     else {
       let html = `<div class="mdsLicense">
-          <a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
-        this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>`;
+                    <a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
+                    this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>
+                  </div>`;
       return html;
     }
   }
@@ -1658,7 +1683,7 @@ export class MdsComponent{
         setTimeout(()=>{
           //this.node.getNodeMetadata(node.ref.id).subscribe((data:NodeWrapper)=>{this.setPreview(data.node)});
           this.setPreview(node,counter*2);
-        },500*counter)
+        },Math.min(10000,500*counter));
       //}
     }
   }
@@ -1714,7 +1739,6 @@ export class MdsComponent{
           if (element) {
             element.style.display='';
             element.innerHTML = '';
-            console.log(values);
             for(let item of this._suggestions[property]) {
                 if (Helper.indexOfNoCase(values[property], item.id) == -1) {
                   element.innerHTML += this.getSuggestBadge(item.id, item.caption, property);
@@ -1732,8 +1756,8 @@ export class MdsComponent{
       , 10);
   }
 
-  private getWidget(id: string) {
-    for(let w of this.mds.widgets){
+  private getWidget(id: string,widgets=this.mds.widgets) {
+    for(let w of widgets){
       if(w.id==id)
         return w;
     }
@@ -1791,13 +1815,13 @@ export class MdsComponent{
   }
 
   private addAuthorValue(properties: any) {
-    if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_FREETEXT){
-      this.currentWidgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
-    }
-    if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_PERSON){
-      this.currentWidgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
-    }
+    if(document.getElementById(RestConstants.CCM_PROP_AUTHOR_FREETEXT) || document.getElementById(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR)) {
+      //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_FREETEXT)
+      this.currentWidgets.push({id: RestConstants.CCM_PROP_AUTHOR_FREETEXT, type: 'textarea'});
 
+      //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_PERSON)
+      this.currentWidgets.push({id: RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, type: 'vcard'});
+    }
   }
 
   private setRenderedHtml(html: string) {
@@ -1809,5 +1833,34 @@ export class MdsComponent{
 
   private isPrimitiveWidget(widget: any) {
     return widget.type=="text" || widget.type=="number" || widget.type=="email" || widget.type=="date" || widget.type=="month" || widget.type=="color"
+  }
+
+  private htmlEscape(caption: string) {
+    return caption.split("\"").join("&quot;");
+  }
+
+  private replaceVariables(widget: any) {
+    if(this.variables==null)
+      return;
+    widget.caption=this.replaceVariableString(widget.caption,this.variables);
+    widget.placeholder=this.replaceVariableString(widget.placeholder,this.variables);
+    widget.icon=this.replaceVariableString(widget.icon,this.variables);
+    widget.defaultvalue=this.replaceVariableString(widget.defaultvalue,this.variables);
+  }
+
+  private replaceVariableString(string:string, variables: string[]) {
+    if(!string)
+      return string;
+    if(!string.match("\\${.+}")) {
+      return string;
+    }
+    for(let key in variables){
+      if("${"+key+"}"==string){
+        return variables[key];
+      }
+    }
+    console.warn("mds declared variable "+string+", but it was not found in the config variables. List of known variables below");
+    console.warn(variables);
+    return string;
   }
 }

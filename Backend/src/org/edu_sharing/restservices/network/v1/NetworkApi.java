@@ -11,6 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.DAOMissingException;
 import org.edu_sharing.restservices.DAOSecurityException;
@@ -60,8 +61,8 @@ public class NetworkApi  {
 	    		Repo repo = new Repo();
 	    		
 	    		repo.setId(repository.getId());
-	    		if(repository.isHomeRepo())
-	    			repo.setId(RepositoryDao.HOME);
+	    		//if(repository.isHomeRepo())
+	    		//	repo.setId(RepositoryDao.HOME);
 	    		repo.setTitle(repository.getCaption());
 	    		repo.setIcon(repository.getIcon());
 	    		repo.setLogo(repository.getLogo());

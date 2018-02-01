@@ -1,5 +1,5 @@
-<div class="dialog darken">
-  <div class="card center-card card-high card-action">
+<div class="dialog darken" [@fade]="this"></div>
+  <div class="card center-card card-high card-action" [@cardAnimation]="this">
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div class="card-title">{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate:{name:node ? node.name : ''} }}</div>
@@ -149,7 +149,7 @@
       <a class="btn-flat" (click)="edit=null">{{'CANCEL' | translate }}</a>
     </div>
   </div>
-  <modal-dialog *ngIf="dialogTitle"
+  <modal-dialog
     [title]="dialogTitle"
     [message]="dialogMessage"
     [messageParameters]="dialogParameters"
@@ -157,4 +157,3 @@
     [isCancelable]="true"
     (onCancel)="dialogTitle=null"
   ></modal-dialog>
-  </div>

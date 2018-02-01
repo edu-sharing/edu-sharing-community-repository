@@ -38,6 +38,7 @@ import org.edu_sharing.restservices.admin.v1.model.AdminStatistics;
 import org.edu_sharing.restservices.admin.v1.model.CollectionsResult;
 import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
+import org.edu_sharing.restservices.admin.v1.model.UploadResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Group;
@@ -562,7 +563,7 @@ public class AdminApi {
 	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
 	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
-	public Response importCSV(
+	public Response importExcel(
 			@ApiParam(value = "parent", required = true) @QueryParam("parent") String parent,
 			@ApiParam(value = "Excel file to import",required=true) @FormDataParam("excel") InputStream is,
 			@Context HttpServletRequest req){
@@ -576,6 +577,30 @@ public class AdminApi {
 		}
 	}
 	
+	@PUT
+	@Path("/upload/temp/{name}")
+	
+	@ApiOperation(value = "Upload a file", notes = "Upload a file to tomcat temp directory, to use it on the server (e.g. an update)")
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UploadResult.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response uploadTemp(
+			@ApiParam(value = "filename",required=true) @PathParam("name") String name,
+			@ApiParam(value = "file to upload",required=true) @FormDataParam("file") InputStream is,
+			@Context HttpServletRequest req){
+		try {
+			String file=AdminServiceFactory.getInstance().uploadTemp(name,is);
+	    	return Response.ok().entity(new UploadResult(file)).build();	
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
 	@POST
 	@Path("/import/oai")
 	

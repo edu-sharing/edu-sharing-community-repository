@@ -3,14 +3,18 @@ package org.edu_sharing.restservices;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.connector.v1.ConnectorApi;
 import org.edu_sharing.restservices.connector.v1.model.Connector;
 import org.edu_sharing.restservices.connector.v1.model.ConnectorFileType;
 import org.edu_sharing.restservices.connector.v1.model.ConnectorList;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
 
 public class ConnectorDAO {
+	
+	private static Logger logger = Logger.getLogger(ConnectorDAO.class);
 	
 	public static ConnectorList getConnectorList() throws DAOException{
 		
@@ -20,7 +24,8 @@ public class ConnectorDAO {
 		
 		ApplicationInfo service = ApplicationInfoList.getRepositoryInfoByType(ApplicationInfo.TYPE_CONNECTOR);
 		if(service==null){
-			throw DAOException.mapping(new Exception("No connector registered, register a connector via admin tools first"));
+			logger.warn("No connector registered, register a connector via admin tools first");
+			return result;
 		}
 		result.setUrl(service.getContentUrl());
 		

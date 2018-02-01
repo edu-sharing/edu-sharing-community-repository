@@ -15,6 +15,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.version.VersionService;
 
 public class RenderingServiceImpl implements RenderingService{
 
@@ -57,10 +58,25 @@ public class RenderingServiceImpl implements RenderingService{
 		if(!this.client.hasPermissions(nodeId,new String[]{CCConstants.PERMISSION_READ})){
 			throw new InsufficientPermissionException("no read permission");
 		}
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(this.appInfo.getAppId());
-		String renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo, nodeId, AuthenticationUtil.getFullyAuthenticatedUser(),nodeVersion,parameters,RenderingTool.DISPLAY_DYNAMIC);
-		Logger.getLogger(this.getClass()).warn(renderingServiceUrl);
-		return new HttpQueryTool().query(renderingServiceUrl);
+		try {
+			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(this.appInfo.getAppId());
+			String renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo, nodeId, AuthenticationUtil.getFullyAuthenticatedUser(),nodeVersion,parameters,RenderingTool.DISPLAY_DYNAMIC);
+			Logger.getLogger(this.getClass()).info(renderingServiceUrl);
+			return new HttpQueryTool().query(renderingServiceUrl);
+		}catch(Throwable t) {
+			String repository=VersionService.getVersion(VersionService.Type.REPOSITORY);
+			String rs=VersionService.getVersion(VersionService.Type.RENDERSERVICE);
+			String info="Repository version "+repository+", Renderservice version "+rs;
+			if(repository.equals(rs)) {
+				logger.info(info);
+				throw t;
+			}
+			else {
+				info+=" do not match";
+				logger.warn(info);
+				throw new Exception(info,t);
+			}
+		}
 	
 	}
 }

@@ -23,7 +23,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/vcard4j-1_1_3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wsdl4j-1.5.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xalan.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/edu-sharing_custom-action.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlunit-2.13.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlunit-core-js-2.13.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/httpclient-4.3.1.jar"/>
@@ -365,8 +364,8 @@
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/javax.ws.rs-api-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/de.axelfaust.alfresco.simplecontentstores.repo-0.0.1.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/commons-validator-1.6.jar"/>
-	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/webapps/alfresco/WEB-INF/lib/pdfbox-1.8.10-alfresco-patched.jar"/>
 	<classpathentry kind="var" path="ALFRESCO_50d_TOMCAT_LIB"/>
 	<classpathentry kind="var" path="ALFRESCO_50d_WEBAPP_LIB"/>
+	<classpathentry kind="lib" path="lib/pdfbox-1.8.10-alfresco-patched.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

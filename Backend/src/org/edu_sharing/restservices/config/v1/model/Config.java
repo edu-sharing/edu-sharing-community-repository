@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices.config.v1.model;
 
+import org.edu_sharing.service.config.model.Language;
 import org.edu_sharing.service.config.model.Values;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Config {
 	@JsonProperty private Values current;
 	@JsonProperty private Values global;
+	@JsonProperty private Language language;
 	
 	public Values getCurrent() {
 		return current;
@@ -19,5 +21,12 @@ public class Config {
 	}
 	public void setGlobal(Values global) {
 		this.global = global;
+	}
+	public Language getLanguage() {
+		return language;
+	}
+	public void setLanguage(Language language) {
+		this.language = language;
 	}	
+	
 }

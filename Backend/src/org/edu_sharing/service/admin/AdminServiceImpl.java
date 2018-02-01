@@ -38,6 +38,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -689,6 +690,17 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public int importCollections(String parent, InputStream is) throws Throwable {
 		return new CollectionImporter().importFile(parent, is);
+	}
+
+	@Override
+	public String uploadTemp(String name, InputStream is) throws Exception{
+		String TMP_DIR = System.getProperty("java.io.tmpdir");
+		File upload=new File(TMP_DIR,new File(name).getName());
+		if(upload.exists()) {
+			throw new IllegalArgumentException("file "+upload.getAbsolutePath()+" already exists");
+		}
+		FileUtils.copyInputStreamToFile(is, upload);
+		return upload.getAbsolutePath();
 	}
 	
 }

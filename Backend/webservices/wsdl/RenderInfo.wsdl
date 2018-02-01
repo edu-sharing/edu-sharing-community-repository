@@ -37,11 +37,14 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element name="aspects" nillable="true" type="impl:ArrayOf_xsd_string"/>
      <element name="contentHash" type="xsd:int"/>
      <element name="guestReadAllowed" nillable="true" type="xsd:boolean"/>
+     <element name="hasContentLicense" nillable="true" type="xsd:boolean"/>
      <element name="labels" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
      <element name="mdsTemplate" nillable="true" type="xsd:string"/>
      <element name="mimeTypeUrl" nillable="true" type="xsd:string"/>
+     <element name="permissions" nillable="true" type="impl:ArrayOf_xsd_string"/>
      <element name="previewUrl" nillable="true" type="xsd:string"/>
      <element name="properties" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
+     <element name="propertiesToolInstance" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
      <element name="publishRight" nillable="true" type="xsd:boolean"/>
      <element name="usage" nillable="true" type="tns3:UsageResult"/>
      <element name="userReadAllowed" nillable="true" type="xsd:boolean"/>

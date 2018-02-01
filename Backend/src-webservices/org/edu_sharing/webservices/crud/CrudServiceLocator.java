@@ -110,7 +110,6 @@ public class CrudServiceLocator extends org.apache.axis.client.Service implement
 
     private java.util.HashSet ports = null;
 
-	// CLEANUP? die URL OK? Wenn nicht, dannnochmal gesondert danach suchen
     public java.util.Iterator getPorts() {
         if (ports == null) {
             ports = new java.util.HashSet();

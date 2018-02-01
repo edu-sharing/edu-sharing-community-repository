@@ -10,6 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @ApiModel(description = "")
 public class ServiceVersion  {
   
+  private String repository;
+  private String renderservice;
+  
   private int major = 0;
   private int minor = 0;
 
@@ -37,9 +40,21 @@ public class ServiceVersion  {
     this.minor = minor;
   }
 
-  
-
-  @Override
+  	@JsonProperty
+  	public String getRepository() {
+	  return repository;
+	}
+	public void setRepository(String repository) {
+		this.repository = repository;
+	}
+  	@JsonProperty
+  	public String getRenderservice() {
+		return renderservice;
+	}
+	public void setRenderservice(String renderservice) {
+		this.renderservice = renderservice;
+	}
+@Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class ServiceVersion {\n");

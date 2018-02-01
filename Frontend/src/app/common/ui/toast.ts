@@ -8,6 +8,7 @@ import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {DialogButton} from "./modal-dialog/modal-dialog.component";
 import {UIConstants} from "./ui-constants";
 import {TranslateService} from "@ngx-translate/core";
+import {UIAnimation} from "./ui-animation";
 
 @Injectable()
 export class Toast{
@@ -52,12 +53,23 @@ export class Toast{
   }
 
   private getToastOptions(text: string, options: any = null) {
+    let timeout=8000 + UIAnimation.ANIMATION_TIME_NORMAL;
     return {
       title: "",
       msg: text,
       showClose: true,
-      timeout: 8000,
+      animate:'scale',
+      timeout: timeout,
       onAdd: (toast:ToastData) => {
+        setTimeout(()=> {
+          let elements = document.getElementsByClassName("toasty-theme-default");
+          let element:any = elements[elements.length - 1];
+          element.style.opacity = 1;
+          element.style.transform = "translateY(0)";
+          setTimeout(()=>{
+            element.style.opacity=0;
+          },timeout-UIAnimation.ANIMATION_TIME_NORMAL);
+        },10);
       },
       onRemove: function(toast:ToastData) {
       }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -26,7 +27,10 @@ import org.apache.commons.io.FileUtils;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.service.config.model.Config;
 import org.edu_sharing.service.config.model.Context;
+import org.edu_sharing.service.config.model.KeyValuePair;
+import org.edu_sharing.service.config.model.Language;
 import org.edu_sharing.service.config.model.Values;
+import org.edu_sharing.service.config.model.Variables;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -85,7 +89,8 @@ public class ConfigServiceImpl implements ConfigService{
 		return copy;
 	}
 	*/
-	private Config getConfig() throws Exception {
+	@Override
+	public Config getConfig() throws Exception {
 		JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		InputStream is = getConfigInputStream();
@@ -102,11 +107,7 @@ public class ConfigServiceImpl implements ConfigService{
 		return classLoader.getResourceAsStream("/org/edu_sharing/service/config/client.config.xml");	
 	}
 	@Override
-	public Values getConfigValues() throws Exception {
-		return getConfig().values;
-	}
-	@Override
-	public Values getConfigValuesByDomain(String domain) throws Exception {
+	public Config getConfigByDomain(String domain) throws Exception {
 		Config config=getConfig();
 		if(config.contexts!=null && config.contexts.context!=null) {
 			for(Context context : config.contexts.context) {
@@ -115,7 +116,11 @@ public class ConfigServiceImpl implements ConfigService{
 				for(String cd : context.domain) {
 					if(cd.equals(domain)) {
 						overrideValues(config.values,context.values);
-						return config.values;
+						if(context.language!=null)
+							config.language=overrideLanguage(config.language,context.language);
+						if(context.variables!=null)
+							config.variables=overrideVariables(config.variables,context.variables);
+						return config;
 					}
 				}
 			}
@@ -123,7 +128,36 @@ public class ConfigServiceImpl implements ConfigService{
 		throw new IllegalArgumentException("Context with domain "+domain+" does not exists");
 		
 	}
-
+	private Variables overrideVariables(Variables values, Variables override) {
+		if(values==null)
+			return override;
+		if(override==null)
+			return values;
+		overrideList(values.variable,override.variable);	
+		return values;
+	}
+	private void overrideList(List<KeyValuePair> list, List<KeyValuePair> override) {
+		for(KeyValuePair obj : override) {
+			if(list.contains(obj)) {
+				list.remove(obj);
+			}
+			list.add(obj);
+		}
+	}
+	private List<Language> overrideLanguage(List<Language> values, List<Language> override) {
+		if(values==null)
+			return override;
+		if(override==null)
+			return values;
+		for(Language language : override) {
+			for(Language language2 : values) {
+				if(language.language.equals(language2.language)) {
+					overrideList(language2.string,language.string);
+				}
+			}
+		}
+		return values;
+	}
 	private void overrideValues(Values values, Values override) throws IllegalArgumentException, IllegalAccessException {
 		Class<?> c = override.getClass();
 		Field[] fields = c.getDeclaredFields();

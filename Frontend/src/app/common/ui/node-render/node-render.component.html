@@ -1,6 +1,5 @@
 <!-- dummy for banner-->
-<main-nav style="display:none"></main-nav>
-<app-banner [scope]="'render'"></app-banner>
+<main-nav [currentScope]="'render'"></main-nav>
 <div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
   <div class="displayBar">
     <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i class="material-icons">keyboard_arrow_left</i> {{'BACK' | translate}}</span>
@@ -12,6 +11,8 @@
                [@fadeFast]="options && options.length"
                [options]="options"
                [backgroundType]="'dark'"
+               [numberOfAlwaysVisibleOptions]="1"
+               [numberOfAlwaysVisibleOptionsMobile]="0"
     ></actionbar>
 
     </span>

@@ -2,7 +2,7 @@ package org.edu_sharing.metadataset.v2;
 
 public class MetadataKey extends MetadataTranslatable {
 	
-	private String key,caption,parent;
+	private String key,caption,description,parent;
 
 	public String getParent() {
 		return parent;
@@ -21,6 +21,14 @@ public class MetadataKey extends MetadataTranslatable {
 
 	public void setKey(String key) {
 		this.key = key;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public String getCaption() {

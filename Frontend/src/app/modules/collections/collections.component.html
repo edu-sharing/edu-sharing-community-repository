@@ -1,7 +1,6 @@
 <!-- <app-search-header></app-search-header> -->
 <global-progress *ngIf="globalProgress"></global-progress>
-<app-banner [scope]="'collections'"></app-banner>
-<main-nav *ngIf="mainnav"
+<main-nav *ngIf="mainnav" #mainNav
   [title]="'COLLECTIONS.TITLE'"
   [currentScope]="'collections'"
   [searchEnabled]="false"
@@ -160,7 +159,7 @@
 
 </div>
 
-  <modal-dialog *ngIf="dialogTitle"
+  <modal-dialog
                 [title]="dialogTitle"
                 [isCancelable]="dialogCancelable"
                 (onCancel)="closeDialog()"

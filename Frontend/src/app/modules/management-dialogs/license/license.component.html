@@ -1,5 +1,5 @@
-<div class="dialog darken">
-  <div class="card center-card card-action card-high card-wide">
+<div class="dialog darken" [@fade]="this"></div>
+  <div class="card center-card card-action card-high card-wide" [@cardAnimation]="this">
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div *ngIf="this._nodes && this._nodes.length==1" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:this._nodes[0].name} }}</div>
@@ -255,4 +255,3 @@
       <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
   </div>
-</div>
