@@ -257,17 +257,17 @@
 				<id>license</id>
 				<caption>ccm_prop_io_license</caption>
 				<type>license</type>
-				<valuespace_i18n_prefix>license_cap_</valuespace_i18n_prefix>
+				<valuespace_i18n_prefix>license_info_</valuespace_i18n_prefix>
 				<values>
-					<entry description="license_description_OPEN">OPEN</entry>
-					<entry description="license_description_CC_BY_OPEN">CC_BY_OPEN</entry>
-					<entry description="license_description_CC_BY_RESTRICTED">CC_BY_RESTRICTED</entry>
-					<entry description="license_description_COPYRIGHT_OTHERS">COPYRIGHT_OTHERS</entry>
+					<entry description="description_OPEN">OPEN</entry>
+					<entry description="description_CC_BY_OPEN">CC_BY_OPEN</entry>
+					<entry description="description_CC_BY_RESTRICTED">CC_BY_RESTRICTED</entry>
+					<entry description="description_COPYRIGHT_OTHERS">COPYRIGHT_OTHERS</entry>
 					<!-- 
-					<entry description="license_description_OER">OER</entry>			
-					<entry description="license_description_OPEN">OPEN</entry>
-					<entry description="license_description_CC_BY_OPEN">CC_BY_OPEN</entry>
-					<entry description="license_description_CC_BY_ALL">CC_BY_ALL</entry>
+					<entry description="description_OER">OER</entry>			
+					<entry description="description_OPEN">OPEN</entry>
+					<entry description="description_CC_BY_OPEN">CC_BY_OPEN</entry>
+					<entry description="description_CC_BY_ALL">CC_BY_ALL</entry>
 					<entry>CC_0</entry>
 					<entry>PDM</entry>
 					<entry>CC_BY</entry>
