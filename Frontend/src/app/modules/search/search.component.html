@@ -62,8 +62,7 @@
                  [options]="actionOptions"></actionbar>
   </div>
 <div class="sidenavContainer">
-
-   <div class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories" *ngIf="sidenav_opened"  [@fromLeft]="sidenav_opened">
+    <div #sidenav class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories" [class.sidenavHidden]="!sidenav_opened" [@fromLeft]="sidenav_opened">
      <div *ngIf="currentRepository=='-all-'" class="repositoryList">
        <label>{{'SEARCH.REPOSITORY_FILTER' | translate}}</label>
        <div *ngFor="let repo of repositoryIds">

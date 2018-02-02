@@ -273,6 +273,12 @@ a, a:hover, a:visited, a:active, button {
   padding-top: 10px;
   top:$mainnavHeight+110px;
   height: calc(100% - #{$mainnavHeight} - 110px);
+  transition: $transitionNormal all ease;
+  @include iosScrolling();
+}
+.sidenavHidden{
+  transform: translateX(-100%);
+  display: none;
 }
 .sidenavNoRepositories{
   top:$mainnavHeight+65px;

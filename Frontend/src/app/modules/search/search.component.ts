@@ -414,7 +414,7 @@ export class SearchComponent {
   public routeSearchParameters(parameters:any){
       this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
-  public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
+  public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef ? this.mdsRef.getValues() : []){
     console.log(parameters);
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{query:query,parameters:parameters ? JSON.stringify(parameters) : null,mds:mds,repository:repository,mdsExtended:this.mdsExtended,reurl:this.searchService.reurl,allowRemote:this.allowRemote}});
   }
