@@ -286,7 +286,12 @@ small-collection{
   padding-top: 0;
   top:$mainnavHeight+110px;
   height: calc(100% - #{$mainnavHeight} - 110px);
+  transition: $transitionNormal all ease;
   @include iosScrolling();
+}
+.sidenavHidden{
+  transform: translateX(-100%);
+  display: none;
 }
 .sidenavNoRepositories{
   top:$mainnavHeight+65px;

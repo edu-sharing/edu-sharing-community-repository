@@ -60,7 +60,7 @@
                  [options]="actionOptions"></actionbar>
   </div>
 <div class="sidenavContainer">
-   <div class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories" *ngIf="sidenav_opened"  [@fromLeft]="sidenav_opened">
+   <div #sidenav class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories" [class.sidenavHidden]="!sidenav_opened" [@fromLeft]="sidenav_opened">
      <div class="row tab-group" *ngIf="!isGuest">
        <div class="col s12">
          <ul class="tabs">
