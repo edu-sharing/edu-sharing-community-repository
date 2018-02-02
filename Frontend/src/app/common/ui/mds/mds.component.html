@@ -1,3 +1,4 @@
+<global-progress *ngIf="globalProgress && !embedded"></global-progress>
 <div class="dialog darken" *ngIf="!embedded" [@fade]="this"></div>
 <div *ngIf="!embedded">
   <div id="jumpmarks" class="card-jumpmarks" [innerHTML]="jumpmarks" *ngIf="(currentNode || createType) && jumpmarksCount>1">
@@ -30,4 +31,3 @@
     <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
   </div>
 </div>
-<div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress && !embedded"><spinner class="center"></spinner></div>

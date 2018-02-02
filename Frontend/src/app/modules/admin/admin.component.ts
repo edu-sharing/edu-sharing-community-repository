@@ -64,6 +64,9 @@ export class AdminComponent {
     {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
     {name:'CCMAIL',file:RestConstants.CCMAIL_APPLICATION_XML},
   ]
+  private static MULTILINE_PROPERTIES = [
+    "custom_html_headers","public_key"
+  ];
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -113,6 +116,11 @@ export class AdminComponent {
         });
       });
     });
+  }
+  public isMultilineProperty(key:string){
+    if(AdminComponent.MULTILINE_PROPERTIES.indexOf(key)!=-1)
+      return true;
+    return this.xmlAppProperties[key].indexOf("\n")!=-1;
   }
   public downloadApp(app:Application){
     Helper.downloadContent(app.file,app.xml);

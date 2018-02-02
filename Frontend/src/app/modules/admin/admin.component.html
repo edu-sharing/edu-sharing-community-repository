@@ -109,8 +109,8 @@
           <div *ngFor="let value of xmlAppKeys;let i=index;" class="appEditor">
             <div class="property">{{value}}</div>
             <div class="inputGroup">
-              <textarea *ngIf="xmlAppProperties[value].indexOf('\n')!=-1" class="materialize-textarea" [(ngModel)]="xmlAppProperties[value]"></textarea>
-              <input    *ngIf="xmlAppProperties[value].indexOf('\n')==-1" type="text" [(ngModel)]="xmlAppProperties[value]">
+              <textarea *ngIf="isMultilineProperty(value)" class="materialize-textarea" [(ngModel)]="xmlAppProperties[value]"></textarea>
+              <input    *ngIf="!isMultilineProperty(value)" type="text" [(ngModel)]="xmlAppProperties[value]">
               <!-- Api does currently not support deleting -->
               <i class="material-icons clickable" (click)="removeAppProperty(i)" *ngIf="false">delete</i>
             </div>

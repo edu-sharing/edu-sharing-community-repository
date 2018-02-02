@@ -946,7 +946,6 @@ export class WorkspaceMainComponent{
     this.actionOptions=this.getOptions(this.selection,false);
     let path=this.path;
     this.path=[null];
-    console.log(this.path);
     setTimeout(()=>{
       this.path=path;
       this.currentFolder=folder;

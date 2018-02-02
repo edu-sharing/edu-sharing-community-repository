@@ -375,7 +375,7 @@ public class MetadataReaderV2 {
 					key.setParent(attributes.getNamedItem("parent").getTextContent());
 			String fallback=null;
 			if(!cap.isEmpty()) fallback=cap;
-			key.setCaption(getTranslation(key,cap,fallback));
+			key.setCaption(getTranslation(key,key.getKey(),fallback));
 			key.setDescription(getTranslation(key,description));
 			keys.add(key);
 		}
