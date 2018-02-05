@@ -90,6 +90,7 @@ export class WorkspaceMainComponent{
   public isSafe = false;
   private isLoggedIn = false;
   public addNodesToCollection : Node[];
+  public addNodesStream : Node[];
   private dropdownPosition: string;
   private dropdownLeft: string;
   private dropdownRight: string;
@@ -767,11 +768,14 @@ export class WorkspaceMainComponent{
       if(edit.isEnabled)
         options.push(edit);
     }
-    if(nodes && nodes.length && allFiles) {
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node:Node)=>this.addToCollection(node));
-      if (collection && !this.isSafe)
-        options.push(collection);
-    }
+    let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node:Node)=>this.addToCollection(node));
+    if (collection && !this.isSafe)
+      options.push(collection);
+
+    let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,(node:Node)=>this.addToStream(node));
+    if (stream && !this.isSafe)
+      options.push(stream);
+
 
     if (nodes && nodes.length == 1) {
       let share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,(node: Node) => this.shareNode(node));
@@ -991,6 +995,10 @@ export class WorkspaceMainComponent{
   private addToCollection(node: Node) {
     let nodes=this.getNodeList(node);
     this.addNodesToCollection=nodes;
+  }
+  private addToStream(node: Node) {
+    let nodes=this.getNodeList(node);
+    this.addNodesStream=nodes;
   }
   private createContext(event:any=null){
     if(!this.createAllowed)

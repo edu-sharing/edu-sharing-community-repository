@@ -43,6 +43,8 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() nodeCommentChange = new EventEmitter();
   @Input() nodeReport : Node;
   @Output() nodeReportChange = new EventEmitter();
+  @Input() addNodesStream : Node[];
+  @Output() addNodesStreamChange = new EventEmitter();
   @Input() nodeMetadata : Node;
   @Input() nodeContributor : Node;
   @Output() nodeContributorChange = new EventEmitter();
@@ -239,7 +241,10 @@ export class WorkspaceManagementDialogsComponent  {
       win.close();
     });
   }
-
+  public closeStream() {
+    this.addNodesStream=null;
+    this.addNodesStreamChange.emit(null);
+  }
   public closeReport() {
     this.nodeReport=null;
     this.nodeReportChange.emit(null);

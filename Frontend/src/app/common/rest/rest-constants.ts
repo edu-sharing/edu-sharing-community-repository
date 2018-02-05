@@ -200,6 +200,7 @@ export class RestConstants {
     "PDM":"https://creativecommons.org/choose/mark/"
 
   }
+
   public static DEFAULT_QUERY_NAME="ngsearch";
 
   public static HTTP_UNAUTHORIZED = 401;

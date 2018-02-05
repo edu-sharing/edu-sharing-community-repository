@@ -3,6 +3,12 @@ import {RestConstants} from "./rest-constants";
  * All Object types returned by the rest service
  */
 
+export enum STREAM_STATUS {
+  OPEN,
+  PROGRESS,
+  DONE
+}
+
 export interface RestoreResult {
   archiveNodeId: string;
   nodeId: string;

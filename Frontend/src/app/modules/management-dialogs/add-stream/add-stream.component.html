@@ -1,0 +1,15 @@
+<div class="dialog darken"></div>
+<div class="card center-card card-action card-high">
+  <div class="card-content">
+    <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+    <div class="card-title">{{'ADD_STREAM.TITLE' | translate }}</div>
+    <form (ngSubmit)="save()">
+      TODO
+    </form>
+  </div>
+
+  <div class="card-action">
+    <a class="waves-effect waves-light btn" (click)="save()">{{'SAVE' | translate }}</a>
+    <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+  </div>
+</div>

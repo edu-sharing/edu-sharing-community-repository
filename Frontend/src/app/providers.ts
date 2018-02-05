@@ -20,6 +20,7 @@ import {RestNetworkService} from "./common/rest/services/rest-network.service";
 import {RestToolService} from "./common/rest/services/rest-tool.service";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 import {RestCommentsService} from "./common/rest/services/rest-comments.service";
+import {RestStreamService} from "./common/rest/services/rest-stream.service";
 
 
 export const PROVIDERS=[
@@ -36,6 +37,7 @@ export const PROVIDERS=[
   RestMdsService,
   RestNodeService,
   RestSearchService,
+  RestStreamService,
   RestUsageService,
   RestOrganizationService,
   RestCommentsService,

@@ -5,7 +5,12 @@
   (onCancel)="closeLicense()"
   (onDone)="updateLicense()"
 ></workspace-license>
-
+<add-stream
+  *ngIf="addNodesStream"
+  [nodes]="addNodesStream"
+  (onCancel)="closeStream()"
+  (onDone)="closeStream()"
+></add-stream>
 <node-report
   *ngIf="nodeReport"
   [node]="nodeReport"
