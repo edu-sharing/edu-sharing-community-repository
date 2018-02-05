@@ -34,6 +34,11 @@ export class ActionbarComponent{
    * @type {boolean}
    */
   @Input() backgroundType = 'bright';
+  /**
+   * Style, currently default or 'flat' if all always visible icons should get a flat look
+   * @type {string}
+   */
+  @Input() style = 'default';
   @Input() node:Node = null;
 
   /**

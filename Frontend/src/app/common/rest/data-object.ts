@@ -15,7 +15,15 @@ export interface RestoreResult {
 export class ArchiveRestore {
   public results: RestoreResult[];
 }
-
+export interface Comments {
+  comments: Comment[];
+}
+export interface Comment {
+  ref: Ref;
+  creator: UserSimple;
+  created: number;
+  comment: string;
+}
 export interface Parent {
   repo: string;
   id: string;
@@ -199,6 +207,14 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
+  avatar: string;
+  about: string;
+  skills: string[];
+}
+export interface UserStats {
+  nodeCount: number;
+  nodeCountCC: number;
+  collectionCount: number;
 }
 export interface UserCredentials {
   oldPassword: string;
@@ -215,6 +231,7 @@ export interface User {
   authorityType: string;
   userName: string;
   profile: UserProfile;
+  stats: UserStats;
   homeFolder: NodeRef;
   sharedFolders: NodeRef[];
 }
@@ -580,6 +597,7 @@ export interface Person {
   firstName: string;
   lastName: string;
   mailbox: string;
+  avatar: string;
 }
 
 export interface Access {

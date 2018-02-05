@@ -343,6 +343,20 @@
             <property name="cm:eduSchoolPrimaryAffiliation">
                <type>d:text</type>
             </property>
+            <!-- edu-sharing customization description/about the user -->
+            <property name="cm:personabout">
+               <type>d:text</type>
+            </property>
+            <!-- edu-sharing customization skills of the user -->
+            <property name="cm:personskills">
+               <type>d:text</type>
+               <multiple>true</multiple>
+			   <index enabled="true">
+                 	<atomic>true</atomic>
+                 	<stored>false</stored>
+                	<tokenised>both</tokenised>
+               </index>
+         	 </property>
             
          </properties>
          

@@ -1,6 +1,6 @@
 import {
   Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-  HostListener, ChangeDetectorRef, ApplicationRef
+  HostListener, ChangeDetectorRef, ApplicationRef, NgZone
 } from '@angular/core';
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";
@@ -70,6 +70,7 @@ export class NodeRenderComponent {
   private fromLogin = false;
   public banner: any;
   private repository: string;
+  public nodeComments: Node;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
@@ -171,7 +172,9 @@ export class NodeRenderComponent {
       private storage : SessionStorageService,
       private route : ActivatedRoute,
       private router : Router,
-      private temporaryStorageService: TemporaryStorageService) {
+      private temporaryStorageService: TemporaryStorageService,
+      private _ngZone: NgZone) {
+      (window as any)['nodeRenderComponentRef'] = {component: this, zone: _ngZone};
       Translation.initialize(translate,config,storage,route).subscribe(()=>{
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
@@ -197,7 +200,9 @@ export class NodeRenderComponent {
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
     }
-
+  ngOnDestroy() {
+    (window as any).nodeRenderComponentRef = null;
+  }
   public static close() {
     window.history.back();
   }
@@ -292,8 +297,17 @@ export class NodeRenderComponent {
       jQuery('.edusharing_rendering_content_wrapper').hide();
       jQuery('.showDetails').hide();
     }
+    jQuery('.edusharing_rendering_metadata_header').append(`
+      <div class="nodeDetails">
+        <div class="item" onclick="window.nodeRenderComponentRef.component.showComments()">
+          <i class="material-icons">message</i><div></div>
+        </div>
+      </div>
+    `);
   }
-
+  private showComments(){
+      this.nodeComments=this._node;
+  }
   private downloadCurrentNode() {
     NodeHelper.downloadNode(this._node,this.version);
   }

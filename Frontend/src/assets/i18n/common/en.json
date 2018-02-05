@@ -43,6 +43,9 @@
   "TODAY" : "today",
   "YESTERDAY" : "yesterday",
   "DAYS_AGO" : "{{ days }} days ago",
+  "HOURS_AGO" : "{{ hours }} hours ago",
+  "MINUTES_AGO" : "{{ minutes }} minutes ago",
+  "JUST_NOW" : "Just now",
   "CREATE" : "create",
   "LOGOUT" : "log out",
   "INVALID_OPERATION":"This feature is currently not supported",
@@ -152,6 +155,15 @@
       "INVALID_METADATA":"incorrect description",
       "OTHER":"none of the above"
     }
+  },
+  "NODE_COMMENTS":{
+    "TITLE":"Comments",
+    "NEW_COMMENT_PLACEHOLDER":"New comment...",
+    "NO_COMMENTS":"No comments yet",
+    "OPTION_EDIT":"edit",
+    "OPTION_DELETE":"delete",
+    "DELETE_COMMENT":"Delete comment?",
+    "DELETE_COMMENT_MESSAGE":"Are you sure you want to remove the selected comment?"
   },
   "COLLECTION":{
     "INFO_REFERENCES":"collection",

@@ -215,4 +215,24 @@ public class NodeServiceAdapter implements NodeService {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
+			HashMap<String, Object> _props) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID, String childType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getType(String nodeId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }

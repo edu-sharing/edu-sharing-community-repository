@@ -141,7 +141,7 @@ public class IamApi  {
     
     @ApiOperation(
     	value = "Get the user.", 
-    	notes = "Get the user. (To get foreign profiles, admin rights are required.)")
+    	notes = "Get the user. (Not all information are feteched for foreign profiles if current user is not an admin)")
 
     @ApiResponses(
     	value = { 

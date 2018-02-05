@@ -8,9 +8,12 @@
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
   <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
-  <div class="sidenavImage">
-    <img src="assets/images/layout/sidenav.jpg">
-    <div><i class="material-icons">account_circle</i>
+  <div class="sidenavImage" style.background-color="{{ (user ? user.person : null) | authorityColor }}">
+    <div class="profile-gradient"></div>
+    <img *ngIf="user && user.person.profile.avatar" class="profile-background" [src]="user.person.profile.avatar+'&crop=true&width=200&height=200'">
+    <div class="sidenavProfile">
+      <user-avatar *ngIf="user" [user]="user.person" [size]="'medium'" class="clickable" (click)="openProfile()"></user-avatar>
+      <!-- <i *ngIf="isGuest" class="material-icons">account_circle</i> -->
       <div *ngIf="user && !isGuest">{{userName}}</div>
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
     </div>
@@ -53,21 +56,17 @@
   </div>
 
   <div class="user clickable" *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
+      <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
       <div *ngIf="!isGuest">{{userName}}</div>
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
       <i class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
-      <i class="material-icons barIcon iconPerson">account_circle</i>
+      <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
     </div>
     <div class="dialog" *ngIf="userOpen" (click)="userOpen=false" (keyup.enter)="userOpen=false" tabindex="0"></div>
     <div class="userMenu collection" [@overlay]="userOpen" *ngIf="userOpen">
-      <a *ngIf="editUrl && !isGuest" class="collection-item"
-         (click)="editProfile()"
-         (keyup.enter)="editProfile()"
-         tabindex="0"
-         title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
-      <a *ngIf="showEditProfile && !isGuest" class="collection-item"
-         (click)="openProfileDialog()"
-         (keyup.enter)="openProfileDialog()"
+      <a *ngIf="!isGuest" class="collection-item"
+         (click)="openProfile()"
+         (keyup.enter)="openProfile()"
          tabindex="0"
          title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
 

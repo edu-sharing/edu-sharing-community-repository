@@ -12,6 +12,7 @@ public class PermissionServiceHelper {
 			 org.alfresco.service.cmr.security.PermissionService.READ,
 			 CCConstants.PERMISSION_READ_PREVIEW,
 			 CCConstants.PERMISSION_READ_ALL,
+			 CCConstants.PERMISSION_COMMENT,
 			 org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
 			 org.alfresco.service.cmr.security.PermissionService.READ_PERMISSIONS,
 			 org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,

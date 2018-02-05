@@ -34,7 +34,9 @@
   import {BannerComponent} from "./common/ui/banner/banner.component";
   import {SmallCollectionComponent} from "./common/ui/small-collection/small-collection.component";
   import {CollectionChooserComponent} from "./common/ui/collection-chooser/collection-chooser.component";
+  import {UserAvatarComponent} from "./common/ui/user-avatar/user-avatar.component";
   import {InfobarComponent} from "./common/ui/infobar/infobar.component";
+  import {AuthorityColorPipe} from "./common/ui/authority-color.pipe";
   import {TimePipe} from "./common/ui/time.pipe";
 
 export const DECLARATIONS = [
@@ -53,6 +55,7 @@ export const DECLARATIONS = [
       TimePipe,
       PermissionNamePipe,
       AuthorityNamePipe,
+      AuthorityColorPipe,
       NodeTitlePipe,
       FileComponent,
       SpinnerComponent,
@@ -64,6 +67,7 @@ export const DECLARATIONS = [
       SmallCollectionComponent,
       MainNavComponent,
       UserProfileComponent,
+      UserAvatarComponent,
       MdsComponent,
       RouterComponent,
       FileDropDirective,

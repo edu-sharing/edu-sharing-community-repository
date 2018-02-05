@@ -3,7 +3,6 @@ import {RestMdsService} from "./common/rest/services/rest-mds.service";
 import {RestIamService} from "./common/rest/services/rest-iam.service";
 import {RestArchiveService} from "./common/rest/services/rest-archive.service";
 import {RestConnectorService} from "./common/rest/services/rest-connector.service";
-import {GwtInterfaceService} from "./common/services/gwt-interface.service";
 import {RestSearchService} from "./common/rest/services/rest-search.service";
 import {Toast} from "./common/ui/toast";
 import {RestCollectionService} from "./common/rest/services/rest-collection.service";
@@ -20,12 +19,12 @@ import {RestAdminService} from "./common/rest/services/rest-admin.service";
 import {RestNetworkService} from "./common/rest/services/rest-network.service";
 import {RestToolService} from "./common/rest/services/rest-tool.service";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
+import {RestCommentsService} from "./common/rest/services/rest-comments.service";
 
 
 export const PROVIDERS=[
   FrameEventsService,
   Toast,
-  GwtInterfaceService,
   RestLocatorService,
   RestConnectorService,
   RestConnectorsService,
@@ -39,6 +38,7 @@ export const PROVIDERS=[
   RestSearchService,
   RestUsageService,
   RestOrganizationService,
+  RestCommentsService,
   RestToolService,
   TemporaryStorageService,
   RestMetadataService,

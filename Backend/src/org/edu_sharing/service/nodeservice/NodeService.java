@@ -20,6 +20,9 @@ public interface NodeService {
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation) throws Throwable;
 	
 	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props);
+	
+	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
+			HashMap<String, Object> _props);
 
 	public String findNodeByName(String parentId, String name );
 
@@ -40,6 +43,8 @@ public interface NodeService {
 	public String getOrCreateUserSavedSearch();
 	
 	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID);
+	
+	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID, String childType);
 	
 	public void createVersion(String nodeId, HashMap _properties) throws Exception;
 	
@@ -82,4 +87,8 @@ public interface NodeService {
 
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
 
+	public String getType(String nodeId);
+
+
+	
 }

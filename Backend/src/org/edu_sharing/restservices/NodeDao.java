@@ -929,7 +929,7 @@ public class NodeDao {
 		return (String) nodeProps.get(CCConstants.LOM_PROP_GENERAL_DESCRIPTION);
 	}
 
-	private Date getCreatedAt() {
+	public Date getCreatedAt() {
 
 		String key = CCConstants.CM_PROP_C_CREATED
 				+ CCConstants.LONG_DATE_SUFFIX;
@@ -938,17 +938,14 @@ public class NodeDao {
 				Long.parseLong((String) nodeProps.get(key))) : null;
 	}
 
-	private Person getCreatedBy() {
+	public Person getCreatedBy() {
 
 		Person ref = new Person();
-		ref.setFirstName((String) nodeProps
-				.get(CCConstants.NODECREATOR_FIRSTNAME));
 		ref.setFirstName((String) nodeProps
 				.get(CCConstants.NODECREATOR_FIRSTNAME));
 		ref.setLastName((String) nodeProps
 				.get(CCConstants.NODECREATOR_LASTNAME));
 		ref.setMailbox((String) nodeProps.get(CCConstants.NODECREATOR_EMAIL));
-
 		return ref;
 	}
 	

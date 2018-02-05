@@ -71,7 +71,7 @@ export class SearchComponent {
   public mdsExtended=false;
   public sidenavTab=0;
   public resultCount:any={};
-  sidenav_opened: boolean = true;
+  public sidenav_opened: boolean = false;
   public resultsRight=false;
   public collectionsMore=false;
   view = ListTableComponent.VIEW_TYPE_GRID;
@@ -136,7 +136,7 @@ export class SearchComponent {
   public savedSearchLoading = false;
   public savedSearchQuery:string = null;
   public savedSearchQueryModel:string = null;
-    public addToCollection: Collection;
+  public addToCollection: Collection;
 
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
@@ -198,6 +198,14 @@ export class SearchComponent {
      this.connector.setRoute(this.activatedRoute).subscribe(()=> {
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
+           this.setSidenavSettings();
+           let sidenavMode=this.config.instant("searchSidenavMode",);
+           if(sidenavMode=="never"){
+             this.sidenav_opened=false;
+           }
+           if(sidenavMode=="always"){
+             this.sidenav_opened=true;
+           }
            this.printListener();
            this.view = this.config.instant('searchViewType',this.temporaryStorageService.get('view', '1'));
            this.groupResults=this.config.instant('searchGroupResults',false);
@@ -267,7 +275,6 @@ export class SearchComponent {
   ngAfterViewInit() {
     this.scrollTo(this.searchService.offset);
     this.innerWidth = this.winRef.getNativeWindow().innerWidth;
-    this.setSidenavSettings();
     //this.autocompletesArray = this.autocompletes.toArray();
   }
 

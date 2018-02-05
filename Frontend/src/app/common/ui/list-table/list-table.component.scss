@@ -717,11 +717,6 @@ $orderAnimationTime:$animationTime*5;
       font-size: 10px;
     }
   }
-  .cardList{
-    .collection_info {
-      margin-top: 34px;
-    }
-  }
   .row .node_ccm_replicationsource  img,
   .row .node_ccm_commonlicense_key img{
       height:20px;
@@ -802,6 +797,13 @@ $orderAnimationTime:$animationTime*5;
   .cardList .row_3,
   .cardList .row_4{
     display:block!important;
+  }
+  .cardList{
+    .collection_info,.collection_scope {
+      float:initial;
+      display:flex!important;
+      margin:5px 0;
+    }
   }
 }
 @media all and (max-width: ($mobileWidth)) {
@@ -887,11 +889,6 @@ $orderAnimationTime:$animationTime*5;
     padding-top:12px!important;
     padding-bottom:0px!important;
     width:auto;
-  }
-
-  .cardList .row_2,
-  .cardList .row_3{
-    padding-top: 0 !important;
   }
 
   .cardList .row .column.node_ccm_replicationsource {

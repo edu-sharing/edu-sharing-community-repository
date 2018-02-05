@@ -13,6 +13,12 @@
   (onCancel)="closeReport()"
   (onDone)="closeReport()"
 ></node-report>
+<node-comments
+  *ngIf="nodeComment"
+  [node]="nodeComment"
+  (onLoading)="globalProgress=$event"
+  (onCancel)="closeComments()"
+></node-comments>
 <collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"

@@ -13,7 +13,7 @@ import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
 import {RestLocatorService} from "./rest/services/rest-locator.service";
 
-export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','stream','messages','override'];
+export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','stream','profiles','messages','override'];
 
 export class Translation  {
   private static language : string;

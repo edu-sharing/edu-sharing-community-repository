@@ -27,7 +27,7 @@
   left:50%;
   margin: auto!important;
   margin-left:-250px!important;
-  padding-bottom: 20px;
+  padding-bottom: $cardPadding;
 }
 
 .card-content{
@@ -69,16 +69,16 @@
   overflow-y: auto;
   overflow-x: hidden;
   @include iosScrolling();
-  padding-right: 20px;
-  margin-right: -20px;
-  padding-left: 20px;
-  margin-left: -20px;
+  padding-right: $cardPadding;
+  margin-right: $cardPadding*-1;
+  padding-left: $cardPadding;
+  margin-left: $cardPadding*-1;
   height: calc(100% - 8px);
 
-  top: -20px;
+  top: $cardPadding*-1;
   position: relative;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: $cardPadding;
+  padding-bottom: $cardPadding;
 }
 .card-actionbar .card-scroll{
   height: calc(100% - 68px);
@@ -127,8 +127,8 @@ input[type=search]{
   @include materialShadow();
   .title{
     padding-top:16px;
-    padding-left:20px;
-    padding-right:20px;
+    padding-left:$cardPadding;
+    padding-right:$cardPadding;
     font-size:110%;
     background-color: $workspaceMetadataBackground;
     word-break: break-all;

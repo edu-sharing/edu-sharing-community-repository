@@ -19,6 +19,7 @@ import {AdminComponent} from "../modules/admin/admin.component";
 import {MessagesComponent} from "../modules/messages/messages.component";
 import {UIConstants} from "../common/ui/ui-constants";
 import {StreamComponent} from "../modules/stream/stream.component";
+import {ProfilesComponent} from "../modules/profiles/profiles.component";
 
 
 
@@ -102,6 +103,8 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'oer', component: OerComponent },
     // stream
     { path: UIConstants.ROUTER_PREFIX+'stream', component: StreamComponent },
+    // profiles
+    { path: UIConstants.ROUTER_PREFIX+'profiles/:authority', component: ProfilesComponent },
 
     // messages
     { path: UIConstants.ROUTER_PREFIX+'messages/:message', component: MessagesComponent },

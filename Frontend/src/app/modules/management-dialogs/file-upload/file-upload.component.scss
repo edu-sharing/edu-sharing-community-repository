@@ -65,9 +65,9 @@
   overflow-x: hidden;
   overflow-y: auto;
   height:350px;
-  margin:-20px;
-  padding:20px;
-  margin-bottom: -40px;
+  margin:$cardPadding*-1;
+  padding:$cardPadding;
+  margin-bottom: $cardPadding*-2;
 }
 @media screen and (max-height: ($mobileHeight)) {
   .card .scrollable{
