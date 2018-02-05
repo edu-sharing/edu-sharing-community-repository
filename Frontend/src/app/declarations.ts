@@ -38,10 +38,14 @@
   import {InfobarComponent} from "./common/ui/infobar/infobar.component";
   import {AuthorityColorPipe} from "./common/ui/authority-color.pipe";
   import {TimePipe} from "./common/ui/time.pipe";
+  import {AutocompleteComponent} from "./common/ui/autocomplete/autocomplete.component";
+  import {AuthoritySearchInputComponent} from "./common/ui/authority-search-input/authority-search-input.component";
+  import {GlobalProgressComponent} from "./common/ui/global-progress/global-progress.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
       MdsTestComponent,
+      GlobalProgressComponent,
       RestNodeTestComponent,
       RestArchiveTestComponent,
       RestCollectionTestComponent,
@@ -55,6 +59,8 @@ export const DECLARATIONS = [
       TimePipe,
       PermissionNamePipe,
       AuthorityNamePipe,
+      AutocompleteComponent,
+      AuthoritySearchInputComponent,
       AuthorityColorPipe,
       NodeTitlePipe,
       FileComponent,

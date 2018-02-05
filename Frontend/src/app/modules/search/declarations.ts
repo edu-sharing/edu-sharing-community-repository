@@ -9,8 +9,6 @@ import {GlobalProgressComponent} from "../../common/ui/global-progress/global-pr
 export const DECLARATIONS_SEARCH = [
   SearchComponent,
   SearchHeaderComponent,
-  GlobalProgressComponent,
-  AutocompleteComponent,
   SearchNodeStoreComponent,
   SearchSortSelectionComponent,
   SearchSaveSearchComponent
