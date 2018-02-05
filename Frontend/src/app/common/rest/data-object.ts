@@ -4,9 +4,9 @@ import {RestConstants} from "./rest-constants";
  */
 
 export enum STREAM_STATUS {
-  OPEN,
-  PROGRESS,
-  DONE
+  OPEN = "OPEN",
+  PROGRESS = "PROGRESS",
+  DONE = "DONE"
 }
 
 export interface RestoreResult {

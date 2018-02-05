@@ -24,7 +24,9 @@ public interface StreamService {
 
 	StreamSearchResult search(StreamSearchRequest request) throws Exception;
 
-	Map<String, Number> getTopCategories() throws Exception;
+	Map<String, Number> getTopValues(String property) throws Exception;
 
 	ContentEntry getEntry(String entryId) throws Exception;
+
+	boolean canAccessNode(List<String> authorities, String nodeId) throws Exception;
 }

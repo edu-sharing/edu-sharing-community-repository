@@ -136,10 +136,18 @@ public class StreamDao {
 			return null;
 		return ContentEntry.Audience.STATUS.valueOf(status);
 	}
-	public static Map<String, Number> getCategories(RepositoryDao repoDao) throws DAOException{
+	public static boolean canAccessNode(String nodeId) throws DAOException{
 		try {
 			StreamService service=StreamServiceFactory.getStreamService();
-			return service.getTopCategories();
+			return service.canAccessNode(getCurrentAuthorities(), nodeId);
+		}catch(Exception e) {
+			throw DAOException.mapping(e);
+		}
+	}
+	public static Map<String, Number> getTopValues(RepositoryDao repoDao,String property) throws DAOException{
+		try {
+			StreamService service=StreamServiceFactory.getStreamService();
+			return service.getTopValues(property);
 		}catch(Exception e) {
 			throw DAOException.mapping(e);
 		}

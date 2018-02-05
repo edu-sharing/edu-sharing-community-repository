@@ -49,6 +49,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.sum.ParsedSum;
 import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.support.ValueType;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -169,7 +170,19 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		SearchResponse searchResult = client.searchScroll(searchScrollRequest);
 		return responseToStreamResult(searchResult);
 	}
-	private QueryBuilder getAuthorityQuery(List<String> authorities,ContentEntry.Audience.STATUS status) {
+	@Override
+	public boolean canAccessNode(List<String> authorities,String nodeId) throws Exception {
+		BoolQueryBuilder query = getAuthorityQuery(authorities, null);
+		query = query.must(QueryBuilders.matchQuery("nodeId.keyword", nodeId));
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		searchSourceBuilder.query(query);
+		searchSourceBuilder.size(0);
+		SearchRequest request = new SearchRequest().source(searchSourceBuilder);
+        request.indices(INDEX_NAME);
+		SearchResponse searchResult = client.search(request);
+		return searchResult.getHits().totalHits>0; 
+	}
+	private BoolQueryBuilder getAuthorityQuery(List<String> authorities,ContentEntry.Audience.STATUS status) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 	
 		query.minimumShouldMatch(1);
@@ -226,9 +239,9 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		searchSourceBuilder.query(nested);
 		SumAggregationBuilder aggregation = AggregationBuilders.sum("score").field("score");
-		searchSourceBuilder.aggregation(aggregation);        
+		searchSourceBuilder.aggregation(aggregation);     
+		searchSourceBuilder.size(0);
 		SearchRequest request = new SearchRequest().source(searchSourceBuilder);
-        request.scroll(SCROLL_TIME);
         request.indices(INDEX_NAME);
 		SearchResponse searchResult = client.search(request);
 		ScoreResult result=new ScoreResult();
@@ -300,14 +313,14 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		return result;
 	}
 	@Override
-	public Map<String, Number> getTopCategories() throws Exception {
+	public Map<String, Number> getTopValues(String property) throws Exception {
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		searchSourceBuilder.size(0);
-		TermsAggregationBuilder aggregation = AggregationBuilders.terms("category").field("category");
+		TermsAggregationBuilder aggregation = AggregationBuilders.terms("agg").field("properties."+property+".keyword").valueType(ValueType.STRING);
 		searchSourceBuilder.aggregation(aggregation);
         SearchRequest request = new SearchRequest().source(searchSourceBuilder);
         request.indices(INDEX_NAME);
-        List<? extends Bucket> buckets = ((ParsedTerms) client.search(request).getAggregations().get("category")).getBuckets();
+        List<? extends Bucket> buckets = ((ParsedTerms) client.search(request).getAggregations().get("agg")).getBuckets();
         Map<String, Number> result = new HashMap<>(buckets.size());
         for(Bucket bucket : buckets) {
         	result.put(bucket.getKeyAsString(), bucket.getDocCount());

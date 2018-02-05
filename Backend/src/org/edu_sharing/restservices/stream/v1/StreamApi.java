@@ -75,10 +75,10 @@ public class StreamApi {
 	 }
 	 
 	 @GET
-     @Path("/categories/{repository}")
+     @Path("/properties/{repository}/{property}")
 	        
      @ApiOperation(
-    	value = "Get the top categories"
+    	value = "Get top values for a property"
     	)
     
      @ApiResponses(
@@ -91,13 +91,44 @@ public class StreamApi {
     		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
 
-	    public Response getCategories(
+	    public Response getPropertyValues(
 	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = "The property to aggregate",required=true) @PathParam("property") String property,
 			@Context HttpServletRequest req) {
 	    	
 	    	try {
 	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    		Map<String, Number> response = StreamDao.getCategories(repoDao);
+	    		Map<String, Number> response = StreamDao.getTopValues(repoDao,property);
+		    	return Response.status(Response.Status.OK).entity(response).build();
+	    	}catch(Throwable t) {
+	    		return ErrorResponse.createResponse(t);
+	    	}
+	 }
+	 @GET
+     @Path("/access/{repository}/{node}")
+	        
+     @ApiOperation(
+    		 value = "test"
+    	)
+    
+     @ApiResponses(
+    		value = { 
+    		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),        
+    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+
+	    public Response canAccess(
+	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = "The property to aggregate",required=true) @PathParam("node") String node,
+			@Context HttpServletRequest req) {
+	    	
+	    	try {
+	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    		boolean response = StreamDao.canAccessNode(node);
 		    	return Response.status(Response.Status.OK).entity(response).build();
 	    	}catch(Throwable t) {
 	    		return ErrorResponse.createResponse(t);

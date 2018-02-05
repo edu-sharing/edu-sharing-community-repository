@@ -309,6 +309,25 @@
 				<valuespace>context.xml</valuespace>
 				<valuespace_i18n>valuespace_context_i18n</valuespace_i18n>
 			</widget>
+			<widget>
+				<id>add_to_stream_title</id>
+				<caption>cb_add_to_stream_title</caption>
+				<type>text</type>
+				<required>true</required>							
+			</widget>
+			<widget>
+				<id>add_to_stream_description</id>
+				<caption>cb_add_to_stream_description</caption>
+				<type>text</type>			
+			</widget>
+			<widget>
+				<id>add_to_stream_priority</id>
+				<caption>cb_add_to_stream_priority</caption>
+				<min>1</min>
+				<max>10</max>
+				<defaultvalue>5</defaultvalue>
+				<type>slider</type>		
+			</widget>
 		</widgets>
 		<templates>
 			<template>
@@ -471,6 +490,17 @@
 				]]></html>
 			</template>
 			<template>
+				<id>add_to_stream</id>
+				<caption>dialog_add_to_stream</caption>
+				<html><![CDATA[
+					<add_to_stream_title>
+					<add_to_stream_description>
+					<add_to_stream_priority>
+					<cclom:general_keyword>
+				]]>
+				</html>
+			</template>
+			<template>
 				<id>collection_editorial</id>
 				<caption>collection_editorial</caption>
 				<html><![CDATA[
@@ -532,6 +562,12 @@
 				<views>
 					<view>search</view>
 					<view>search_suggestions</view>
+				</views>
+			</group>
+			<group>
+				<id>add_to_stream</id>
+				<views>
+					<view>add_to_stream</view>
 				</views>
 			</group>
 		</groups>

@@ -40,7 +40,6 @@ export class ActionbarHelper{
       if (nodes && nodes.length && NodeHelper.allFiles(nodes)) {
         option = new OptionItem("WORKSPACE.OPTION.STREAM", "layers", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
-        option.showAsAction = true;
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelper.getNodes(nodes, node);
           return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH);

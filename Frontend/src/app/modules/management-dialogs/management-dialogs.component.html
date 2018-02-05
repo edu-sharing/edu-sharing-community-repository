@@ -8,6 +8,7 @@
 <add-stream
   *ngIf="addNodesStream"
   [nodes]="addNodesStream"
+  (onLoading)="globalProgress=$event"
   (onCancel)="closeStream()"
   (onDone)="closeStream()"
 ></add-stream>

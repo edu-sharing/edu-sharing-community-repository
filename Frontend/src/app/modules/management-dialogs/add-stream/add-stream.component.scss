@@ -1,2 +1,24 @@
 @import "../../../../styles/variables.scss";
 
+.wrapper {
+  display:flex;
+  flex-direction: column;
+  height: 100%;
+  >mds,>div{
+  }
+  mds{
+    flex-grow: 1;
+  }
+  .audience {
+    h4 {
+      font-size: 12pt;
+      width:100%;
+    }
+    margin: 0 $cardPadding*-1;
+    margin-bottom: -12px;
+    padding: 0 $cardPadding;
+    padding-bottom: 12px;
+    background-color: $actionDialogBackground;
+  }
+
+}
