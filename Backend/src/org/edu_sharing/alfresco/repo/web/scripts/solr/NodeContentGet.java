@@ -30,6 +30,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.content.transform.ContentTransformer;
 import org.alfresco.repo.content.transform.TransformerDebug;
+import org.alfresco.repo.content.transform.UnsupportedTransformationException;
 import org.alfresco.repo.domain.node.NodeDAO;
 import org.alfresco.repo.web.scripts.content.StreamContent;
 import org.alfresco.service.cmr.repository.AssociationRef;
@@ -228,11 +229,11 @@ public class NodeContentGet extends StreamContent
             try
             {
                 long start = System.currentTimeMillis();
-                transformer.transform(reader, writer);
+                transformer.transform(reader, writer, options);
                 long transformDuration = System.currentTimeMillis() - start;
                 res.setHeader(TRANSFORM_DURATION_HEADER, String.valueOf(transformDuration));
             }
-            catch (ContentIOException e)
+            catch (ContentIOException|UnsupportedTransformationException e)
             {
                 transformException = e;
             }

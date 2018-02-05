@@ -375,8 +375,9 @@
          <ref bean="storesToIgnorePolicies"/>
       </property>
       <property name="enableTimestampPropagation" value="${system.enableTimestampPropagation}" />
-   	  <property name="serviceRegistry">
-	  	<ref bean="ServiceRegistry" />
+   	  <!-- edu-sharing customization -->
+      <property name="serviceRegistry">
+			<ref bean="ServiceRegistry" />
 	  </property>
    </bean>
    
