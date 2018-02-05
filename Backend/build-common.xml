@@ -263,7 +263,10 @@
 	</target>	
 	
 	<target name="undeploy" depends="undeploy-classes, undeploy-alfresco-config">
-			<delete dir="${webserver.home}/webapps/${webapp.name}">
+			
+			<delete file="${webserver.home}/lib/edu-sharing_classloaderstuff.jar">
+			</delete>
+		    <delete dir="${webserver.home}/webapps/${webapp.name}">
 			</delete>
 		
 			<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-context.xml">
@@ -277,6 +280,9 @@
 			<!--delete dir="${webserver.home}/shared/classes" includes="${api_not_hotdeployable}"/-->
 			<delete dir="${webserver.home}/shared/classes/org/edu_sharing" />
 			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/edu_sharing" />
+			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/alfresco/repo/model" />
+			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/alfresco/repo/search" />
+			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/alfresco/repo/version" />
 			<delete dir="${webserver.home}/webapps/${webapp.name}/WEB-INF/classes/" />
 	</target>
 	
@@ -296,6 +302,8 @@
 		<delete dir="${webserver.home}/shared/classes/alfresco/extension/subsystems"></delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-opencmis-context.xml"></delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/edu-sharing-sso-context.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/edu-sharing*.xml"></delete>
+
 		
 		<!-- 
 			contentmodel stuff 
