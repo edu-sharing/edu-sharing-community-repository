@@ -35,7 +35,7 @@ public class VirtualEduGroupFolderTool {
 			String mapType = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
 			if(mapType != null && mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP)){
 				logger.debug("its a map with typ edugroup");
-				OwnableService ownableService = (OwnableService)AlfAppContextGate.getApplicationContext().getBean("ownableService");
+				OwnableService ownableService = (OwnableService)AlfAppContextGate.getApplicationContext().getBean("OwnableService");
 				String user = ownableService.getOwner(nodeRef);
 
 				Set<String> authorities = serviceRegistry.getAuthorityService().getContainingAuthorities(AuthorityType.GROUP, user, true);
