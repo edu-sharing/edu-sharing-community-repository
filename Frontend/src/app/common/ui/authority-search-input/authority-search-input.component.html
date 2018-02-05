@@ -1,0 +1,8 @@
+<autocomplete
+  [id]="'searchAuthority'"
+  [inputMinLength]="2"
+  (addItem)="addSuggestion($event)"
+  [placeholder]="'WORKSPACE.INVITE_FIELD'"
+  [suggestions]="authoritySuggestions"
+  (updateInput)="updateSuggestions($event)"
+></autocomplete>

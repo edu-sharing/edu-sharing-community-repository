@@ -22,15 +22,10 @@
       <div *ngIf="tab==INVITE" class="tabContent">
 
         <div class="group">
-          <autocomplete
-            [id]="searchAuthority"
-            [inputMinLength]="2"
-            (addItem)="addSuggestion($event)"
-            [placeholder]="'WORKSPACE.INVITE_FIELD'"
-            [suggestions]="authoritySuggestions"
-            (updateInput)="updateSuggestions($event)"
-            ></autocomplete>
-
+          <authority-search-input
+            [globalSearch]="globalSearch"
+            (onChooseAuthority)="addSuggestion($event)"
+          ></authority-search-input>
             <!-- <ng2-completer [(ngModel)]="searchStr" [clearSelected]="true" (selected)="addAuthority($event)" [dataService]="dataService" [minSearchLength]="2" class="search"></ng2-completer>-->
           <!-- <input type="text" id="inviteName" /> -->
           <div class="typeButton">
