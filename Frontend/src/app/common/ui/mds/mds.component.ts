@@ -1305,7 +1305,7 @@ export class MdsComponent{
               <div class="inputRange" id="`+widget.id+`"></div>
     `;
     setTimeout(()=>{
-      let values=widget.default!=null ? widget.default : widget.min;
+      let values=widget.defaultvalue!=null ? widget.defaultvalue : widget.min;
       if(widget.type=='range') {
         values = (widget.defaultMin != null ? widget.defaultMin : widget.min) + `,` +
                  (widget.defaultMax != null ? widget.defaultMax : widget.max);
