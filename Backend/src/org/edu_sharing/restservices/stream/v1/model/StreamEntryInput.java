@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StreamEntryInput {
 	@JsonProperty private String id;
+	@JsonProperty private String title;
 	@JsonProperty private String description;
 	@JsonProperty private List<String> nodes;
 	@JsonProperty private List<String> categories;
@@ -17,6 +18,12 @@ public class StreamEntryInput {
 	}
 	public void setId(String id) {
 		this.id = id;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
 	}
 	public String getDescription() {
 		return description;

@@ -367,5 +367,6 @@
 	<classpathentry kind="var" path="ALFRESCO_50d_TOMCAT_LIB"/>
 	<classpathentry kind="var" path="ALFRESCO_50d_WEBAPP_LIB"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.10-alfresco-patched.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Torsten/git/edu-sharing/Backend/lib/elasticsearch.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

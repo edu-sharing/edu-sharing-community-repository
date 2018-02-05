@@ -22,5 +22,6 @@ public class ContentEntry{
 	public String author;
 	public List<Audience> audience;
 	public String description;
+	public String title;
 	
 }

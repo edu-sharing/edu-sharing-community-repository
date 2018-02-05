@@ -18,9 +18,13 @@ public interface StreamService {
 
 	ScoreResult getScoreByAuthority(String authority, STATUS status) throws Exception;
 
+	STATUS getStatus(String id, List<String> list) throws Exception;
+	
 	void updateStatus(String id, String authority, STATUS status) throws Exception;
 
 	StreamSearchResult search(StreamSearchRequest request) throws Exception;
 
 	Map<String, Number> getTopCategories() throws Exception;
+
+	ContentEntry getEntry(String entryId) throws Exception;
 }
