@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2005-2015 Alfresco Software Limited.
- *
- * This file is part of Alfresco
- *
+ * #%L
+ * Alfresco Remote API
+ * %%
+ * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
+ * provided under the following open source license terms:
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.alfresco.repo.webdav;
 
@@ -31,7 +38,7 @@ import org.codehaus.jackson.map.ObjectMapper;
  * Class to represent a WebDAV lock info. Instances of this class are accessible
  * my multiple threads as they are kept in the {@link LockStore}. Clients of this
  * class are expected to synchronise externally using the provided
- * ReentrantReadWriteLock (use {@link #getRWLock()}).
+ * ReentrantReadWriteLock.
  * 
  * @author Ivan Rybnikov
  *
@@ -125,7 +132,7 @@ public class LockInfoImpl implements Serializable, LockInfo
     /**
      * Setter for lock scope.
      * 
-     * @param scope
+     * @param scope String
      */
     @Override
     public void setScope(String scope)
@@ -169,7 +176,6 @@ public class LockInfoImpl implements Serializable, LockInfo
     /**
      * Getter for sharedLockTokens list.
      * 
-     * @return LinkedList<String>
      */
     @Override
     public Set<String> getSharedLockTokens()
@@ -180,7 +186,6 @@ public class LockInfoImpl implements Serializable, LockInfo
     /**
      * Setter for sharedLockTokens list.
      * 
-     * @param sharedLockTokens
      */
     @Override
     public void setSharedLockTokens(Set<String> sharedLockTokens)
@@ -394,7 +399,7 @@ public class LockInfoImpl implements Serializable, LockInfo
      * Sets the expiry date/time to lockTimeout seconds into the future. Provide
      * a lockTimeout of WebDAV.TIMEOUT_INFINITY for never expires.
      * 
-     * @param lockTimeoutSecs
+     * @param lockTimeoutSecs int
      */
     @Override
     @JsonIgnore
@@ -417,7 +422,7 @@ public class LockInfoImpl implements Serializable, LockInfo
      * Sets the expiry date/time to lockTimeout minutes into the future. Provide
      * a lockTimeout of WebDAV.TIMEOUT_INFINITY for never expires.
      * 
-     * @param lockTimeoutMins
+     * @param lockTimeoutMins int
      */
     @Override
     @JsonIgnore

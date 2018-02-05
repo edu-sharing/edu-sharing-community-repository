@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationContext;
  */
 public class Edu_SharingUnlockMethod extends WebDAVMethod
 {
-    private String m_strLockToken = null;
+	private String m_strLockToken = null;
 
     /**
      * Default constructor

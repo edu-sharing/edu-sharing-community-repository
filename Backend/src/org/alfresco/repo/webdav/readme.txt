@@ -1,3 +1,11 @@
+alf5.2
+-----------
+Alle Klassen außer Webdavlockservice wurden kopiert von alfresco sourcen.
+Edu_SharingPutMethod erstmal nicht mehr verwendet evt. ist der bug von alfresco gefixt
+WebdavMethod wie beim vorgänger (keine Änderungen)
+
+alf5.0.d
+------------
 Alle Klassen außer Edu_Sharing*.java wurden kopiert von alfresco sourcen. Der Gund ist:
 Probleme gab es beim WebDavHelper dess Konstruktor protected ist. d.h. wenn man das gleiche package hat welches aber unter einem anderen classpath liegt
 gibt es eine IllegalAccessException.

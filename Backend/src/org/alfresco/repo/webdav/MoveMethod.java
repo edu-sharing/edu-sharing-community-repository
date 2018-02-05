@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2005-2013 Alfresco Software Limited.
- *
- * This file is part of Alfresco
- *
+ * #%L
+ * Alfresco Remote API
+ * %%
+ * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
+ * provided under the following open source license terms:
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.alfresco.repo.webdav;
 
@@ -23,7 +30,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.model.FileNotFoundException;
@@ -31,9 +39,6 @@ import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.dom4j.DocumentHelper;
-import org.dom4j.io.XMLWriter;
-import org.xml.sax.Attributes;
 
 /**
  * Implements the WebDAV MOVE method
@@ -192,9 +197,10 @@ public class MoveMethod extends HierarchicalMethod
                 throw new WebDAVServerException(HttpServletResponse.SC_NOT_FOUND);
             }
         }
+        LockInfo lockInfo = null;
         if (isMove)
         {
-            checkNode(sourceFileInfo);
+            lockInfo = checkNode(sourceFileInfo);
         }
         // ALF-7079 fix, if destination exists then its content is updated with source content and source is deleted if
         // this is a move
@@ -210,7 +216,7 @@ public class MoveMethod extends HierarchicalMethod
                     // don't delete source that is node with version history
                     fileFolderService.setHidden(sourceNodeRef, true);
                     // As per the WebDAV spec, we make sure the node is unlocked once moved
-                    getDAVHelper().getLockService().unlock(sourceNodeRef);
+                    unlock(sourceNodeRef, lockInfo);
                 }
                 else
                 {
@@ -243,7 +249,7 @@ public class MoveMethod extends HierarchicalMethod
             fileFolderService.setHidden(sourceNodeRef, true);
 
             // As per the WebDAV spec, we make sure the node is unlocked once moved
-            getDAVHelper().getLockService().unlock(sourceNodeRef);
+            unlock(sourceNodeRef, lockInfo);
         }
         else if (sourceParentNodeRef.equals(destParentNodeRef)) 
         { 
@@ -259,9 +265,16 @@ public class MoveMethod extends HierarchicalMethod
                fileFolderService.delete(destFileInfo.getNodeRef());
            }
            
-           fileFolderService.rename(sourceNodeRef, name);
+            fileFolderService.rename(sourceNodeRef, name);
+
+            // MNT-13144 WebDav does not correctly version CAD drawings correctly when saved using Windows mapped drive
+            if (!sourceFileInfo.isFolder() && getDAVHelper().isRenameShuffle(name))
+            {
+                fileFolderService.setHidden(sourceFileInfo.getNodeRef(), true);
+            }
+
            // As per the WebDAV spec, we make sure the node is unlocked once moved
-           getDAVHelper().getLockService().unlock(sourceNodeRef);
+           unlock(sourceNodeRef, lockInfo);
         }
         else
         {
@@ -280,7 +293,7 @@ public class MoveMethod extends HierarchicalMethod
             fileFolderService.moveFrom(sourceNodeRef, sourceParentNodeRef, destParentNodeRef, name);  
 
             // As per the WebDAV spec, we make sure the node is unlocked once moved
-            getDAVHelper().getLockService().unlock(sourceNodeRef);
+            unlock(sourceNodeRef, lockInfo);
         }
     }
     
@@ -302,6 +315,33 @@ public class MoveMethod extends HierarchicalMethod
         {
             ContentWriter contentWriter = contentService.getWriter(destFileInfo.getNodeRef(), ContentModel.PROP_CONTENT, true);
             contentWriter.putContent(reader);
+        }
+    }
+    
+    /**
+     * Unlock only if the node was locked in the first place.
+     */
+    private void unlock(final NodeRef nodeRef, LockInfo lockInfo)
+    {
+        if (lockInfo != null && lockInfo.isLocked())
+        {
+            if (lockInfo.isExpired())
+            {
+                // If the lock expired unlock as system user
+                AuthenticationUtil.runAs(new RunAsWork<Void>()
+                {
+                    public Void doWork() throws Exception
+                    {
+                        getDAVHelper().getLockService().unlock(nodeRef);
+                        return null;
+                    }
+                }, AuthenticationUtil.getSystemUserName());
+            }
+            // else unlock as current user
+            else
+            {
+                getDAVHelper().getLockService().unlock(nodeRef);
+            }
         }
     }
 }

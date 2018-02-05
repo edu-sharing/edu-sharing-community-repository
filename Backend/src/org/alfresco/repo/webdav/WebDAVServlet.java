@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2005-2012 Alfresco Software Limited.
- *
- * This file is part of Alfresco
- *
+ * #%L
+ * Alfresco Remote API
+ * %%
+ * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
+ * provided under the following open source license terms:
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.alfresco.repo.webdav;
 
@@ -94,6 +101,8 @@ public class WebDAVServlet extends HttpServlet
     private WebDAVHelper m_davHelper;
     private WebDAVActivityPoster activityPoster;
 
+    private WebDAVInitParameters initParams;
+
     /**
      * @see javax.servlet.http.HttpServlet#service(javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse)
@@ -101,8 +110,14 @@ public class WebDAVServlet extends HttpServlet
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
             IOException
     {
+        if (!initParams.getEnabled())
+        {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
         long startTime = 0;
-        if (logger.isInfoEnabled())
+        if (logger.isTraceEnabled())
         {
             startTime = System.currentTimeMillis();
         }
@@ -147,9 +162,9 @@ public class WebDAVServlet extends HttpServlet
         }
         finally
         {
-            if (logger.isInfoEnabled())
+            if (logger.isTraceEnabled())
             {
-                logger.info(request.getMethod() + " took " + (System.currentTimeMillis()-startTime) + "ms to execute ["+request.getRequestURI()+"]");
+                logger.trace(request.getMethod() + " took " + (System.currentTimeMillis()-startTime) + "ms to execute ["+request.getRequestURI()+"]");
             }
 
             FileFilterMode.clearClient();
@@ -240,12 +255,13 @@ public class WebDAVServlet extends HttpServlet
         
         // Get global configuration properties
         WebApplicationContext wc = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-        WebDAVInitParameters initParams = (WebDAVInitParameters) wc.getBean(BEAN_INIT_PARAMS);
+        initParams = (WebDAVInitParameters) wc.getBean(BEAN_INIT_PARAMS);
         
         // Render this servlet permanently unavailable if its enablement property is not set
         if (!initParams.getEnabled())
         {
-            throw new UnavailableException("WebDAV not enabled.");
+            logger.info("Marking servlet WebDAV as unavailable!");
+            return;
         }
         
         // Get root paths
@@ -304,14 +320,14 @@ public class WebDAVServlet extends HttpServlet
     
     
     /**
-     * @param storeValue
-     * @param rootPath
-     * @param context
-     * @param nodeService
-     * @param searchService
-     * @param namespaceService
-     * @param tenantService
-     * @param m_transactionService
+     * @param storeValue String
+     * @param rootPath String
+     * @param context WebApplicationContext
+     * @param nodeService NodeService
+     * @param searchService SearchService
+     * @param namespaceService NamespaceService
+     * @param tenantService TenantService
+     * @param m_transactionService TransactionService
      */
     private void initializeRootNode(String storeValue, String rootPath, WebApplicationContext context, NodeService nodeService, SearchService searchService,
             NamespaceService namespaceService, TenantService tenantService, TransactionService m_transactionService)
@@ -461,7 +477,7 @@ public class WebDAVServlet extends HttpServlet
         /**
          * See {@link #getUrlPathPrefix()}
          * 
-         * @param urlPathPrefix
+         * @param urlPathPrefix String
          */
         public void setUrlPathPrefix(String urlPathPrefix)
         {

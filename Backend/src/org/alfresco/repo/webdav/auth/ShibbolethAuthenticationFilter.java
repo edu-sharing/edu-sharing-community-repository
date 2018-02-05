@@ -30,7 +30,6 @@ import org.springframework.context.ApplicationContext;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HTMLParserListener;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlOption;
@@ -43,7 +42,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
  */
 public class ShibbolethAuthenticationFilter implements Filter {
 
-	private static final String RELEASE = "$Revision: 7283 $";
+	private static final String RELEASE = "$Revision: 2980 $";
 
 	private static final String WELCOME = "WebDAV Server";
 
@@ -73,9 +72,6 @@ public class ShibbolethAuthenticationFilter implements Filter {
 	private String defaultSelector;
 	private String redirectPath;
 	
-	boolean doAutoWAYF = false;
-	boolean usernameSplitOnMailDomain = false;
-	
 	
 	/**
 	 * Initialize the filter
@@ -95,8 +91,6 @@ public class ShibbolethAuthenticationFilter implements Filter {
 		this.defaultDomain = config.getInitParameter("defaultDomain");
 		this.defaultSelector = config.getInitParameter("defaultSelector");
 		this.redirectPath = config.getInitParameter("redirectPath");
-		this.doAutoWAYF = new Boolean(config.getInitParameter("doAutoWAYF"));
-		this.usernameSplitOnMailDomain = new Boolean(config.getInitParameter("usernameSplitOnMailDomain"));
 		
 		// Setup the authentication context
 
@@ -202,31 +196,16 @@ public class ShibbolethAuthenticationFilter implements Filter {
 							? new WebClient(BrowserVersion.getDefault(), proxyHost, Integer.parseInt(proxyPort))
 							: new WebClient();
 
-					webClient.setHTMLParserListener(HTMLParserListener.LOG_REPORTER);
-					
-					
-					//webClient.getOptions().setUseInsecureSSL(true);
-					//webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-					
-							
-					HtmlPage page = null;
-					
-					if(doAutoWAYF) {
-						page = doAutoLogin(
+					HtmlPage page = 
+							doAutoLogin(
 									doAutoWAYF(
 											(HtmlPage) webClient.getPage(this.protectedURL), 
 											domain,
 											this.defaultSelector), 
 									localname, 
 									password);
-					}else {
-						String authName = (usernameSplitOnMailDomain) ? localname : username;
-						page = doAutoLogin((HtmlPage) webClient.getPage(this.protectedURL), 
-								authName, 
-								password);
-					}
 
-					String content = page.asXml();
+					String content = page.asText();
 					page.cleanUp();
 					
 					webClient.closeAllWindows();
@@ -270,7 +249,7 @@ public class ShibbolethAuthenticationFilter implements Filter {
 							
 							// Clear the user object to signal authentication failure
 							user = null;
-							logger.error(e.getMessage(),e);
+							logger.error(e);
 							
 						} finally {
 							
@@ -293,7 +272,7 @@ public class ShibbolethAuthenticationFilter implements Filter {
 					}
 					
 				} catch (Exception e) {
-					logger.error(e.getMessage(),e);
+					logger.error(e);
 				}
 
 			}
@@ -506,7 +485,7 @@ public class ShibbolethAuthenticationFilter implements Filter {
 			result = button2.click();
 
 			page.cleanUp();
-			
+
 			logger.debug(result.asXml());
 			
 		} catch (Exception e) {
@@ -517,6 +496,8 @@ public class ShibbolethAuthenticationFilter implements Filter {
 	}
 
 	@Override
-	public void destroy() {		
+	public void destroy() {
+		// TODO Auto-generated method stub
+		
 	}	
 }
