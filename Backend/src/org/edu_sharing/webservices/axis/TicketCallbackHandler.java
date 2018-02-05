@@ -77,7 +77,6 @@ public class TicketCallbackHandler implements CallbackHandler
             
             if (logger.isDebugEnabled())
             {
-               logger.debug("Verifying ticket for: " + pc.getIdentifer());
                logger.debug("Ticket: " + ticket);
             }
 
