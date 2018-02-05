@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2005-2014 Alfresco Software Limited.
- *
- * This file is part of Alfresco
- *
+ * #%L
+ * Alfresco Repository
+ * %%
+ * Copyright (C) 2005 - 2016 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
+ * provided under the following open source license terms:
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
 package org.alfresco.repo.model.filefolder;
 
@@ -40,6 +47,9 @@ import org.alfresco.query.PagingRequest;
 import org.alfresco.query.PagingResults;
 import org.alfresco.repo.copy.AbstractBaseCopyService;
 import org.alfresco.repo.model.filefolder.HiddenAspect.Visibility;
+import org.alfresco.repo.model.filefolder.traitextender.FileFolderServiceExtension;
+import org.alfresco.repo.model.filefolder.traitextender.FileFolderServiceTrait;
+import org.alfresco.repo.node.getchildren.FilterProp;
 import org.alfresco.repo.node.getchildren.GetChildrenCannedQuery;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.QueryParameterDefImpl;
@@ -72,6 +82,11 @@ import org.alfresco.service.cmr.search.QueryParameterDefinition;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.traitextender.AJProxyTrait;
+import org.alfresco.traitextender.Extend;
+import org.alfresco.traitextender.ExtendedTrait;
+import org.alfresco.traitextender.Extensible;
+import org.alfresco.traitextender.Trait;
 import org.alfresco.util.FileFilterMode;
 import org.alfresco.util.FileFilterMode.Client;
 import org.alfresco.util.GUID;
@@ -89,7 +104,7 @@ import org.springframework.extensions.surf.util.I18NUtil;
  * 
  * @author Derek Hulley
  */
-public class FileFolderServiceImpl extends AbstractBaseCopyService implements FileFolderService
+public class FileFolderServiceImpl extends AbstractBaseCopyService implements FileFolderService, Extensible
 {
     private static final String CANNED_QUERY_FILEFOLDER_LIST = "fileFolderGetChildrenCannedQueryFactory";
     
@@ -144,6 +159,8 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     
     // default cutoff - applies to list "all" methods
     private int defaultListMaxResults = 5000;
+
+    private final ExtendedTrait<FileFolderServiceTrait> fileFolderTrait;
     
     /**
      * Default constructor
@@ -151,6 +168,8 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     public FileFolderServiceImpl()
     {
         super();
+        
+        fileFolderTrait=new ExtendedTrait<FileFolderServiceTrait>(AJProxyTrait.create(createFileFolderTrait(),FileFolderServiceTrait.class));
     }
 
     public void setNamespaceService(NamespaceService namespaceService)
@@ -226,6 +245,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     {
         return preserveAuditableData;
     }
+
 
     public void init()
     {
@@ -359,12 +379,12 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
      * @return
      */
     @Override
+    @Extend(traitAPI=FileFolderServiceTrait.class,extensionAPI=FileFolderServiceExtension.class)
     public List<FileInfo> list(NodeRef contextNodeRef)
     {
-    	
     	List<FileInfo> results = null;
     	
-    	// edu-sharing
+    	//edu-sharing stuff
     	if(QName.createQName(CCConstants.CCM_TYPE_MAP).equals(nodeService.getType(contextNodeRef))){
     		String mapType = (String)nodeService.getProperty(contextNodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
 			if(mapType != null && mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP)){
@@ -379,16 +399,18 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
 				results = toFileInfo(toTransform);
 				
 			}
-    		}
+    	}
     	
     	
-    		if(results == null){
-    			//default alfresco
-    			results = listSimple(contextNodeRef, true, true);
-    		}
+    	if(results == null){
     	
+    	//default alfresco stuff
+        // execute the query
+    		results = listSimple(contextNodeRef, true, true);
+    	}
         // done
-        if (logger.isTraceEnabled()) {
+        if (logger.isTraceEnabled())
+        {
             logger.trace("List files and folders: \n" +
                     "   context: " + contextNodeRef + "\n" +
                     "   results: " + results);
@@ -455,6 +477,8 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
      * @see org.alfresco.service.cmr.model.FileFolderService#list(org.alfresco.service.cmr.repository.NodeRef, boolean, boolean, java.util.Set, org.alfresco.service.cmr.model.PagingSortRequest)
      */
     @Auditable(parameters = {"contextNodeRef", "files", "folders", "ignoreQNames", "sortProps", "pagingRequest"})
+    @Override
+    @Extend(traitAPI = FileFolderServiceTrait.class, extensionAPI = FileFolderServiceExtension.class)
     public PagingResults<FileInfo> list(NodeRef contextNodeRef,
                                       boolean files,
                                       boolean folders,
@@ -475,6 +499,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     }
 
     @Override
+    @Extend(traitAPI=FileFolderServiceTrait.class,extensionAPI=FileFolderServiceExtension.class)
     public PagingResults<FileInfo> list(NodeRef contextNodeRef, boolean files, boolean folders, String pattern, Set<QName> ignoreQNames, List<Pair<QName, Boolean>> sortProps, PagingRequest pagingRequest)
     {
         ParameterCheck.mandatory("contextNodeRef", contextNodeRef);
@@ -491,9 +516,23 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     
    
     @Override
+    @Extend(traitAPI=FileFolderServiceTrait.class,extensionAPI=FileFolderServiceExtension.class)
     public PagingResults<FileInfo> list(NodeRef rootNodeRef, Set<QName> searchTypeQNames, Set<QName> ignoreAspectQNames, List<Pair<QName, Boolean>> sortProps, PagingRequest pagingRequest)
     {
         CannedQueryResults<NodeRef> results = listImpl(rootNodeRef, null,  searchTypeQNames, ignoreAspectQNames, sortProps, pagingRequest);
+        return getPagingResults(pagingRequest, results);
+    }
+
+    @Override
+    public PagingResults<FileInfo> list(NodeRef rootNodeRef,
+                                        Set<QName> assocTypeQNames,
+                                        Set<QName> searchTypeQNames,
+                                        Set<QName> ignoreAspectQNames,
+                                        List<Pair<QName, Boolean>> sortProps,
+                                        List<FilterProp> filterProps,
+                                        PagingRequest pagingRequest)
+    {
+        CannedQueryResults<NodeRef> results = listImpl(rootNodeRef, null,  assocTypeQNames, searchTypeQNames, ignoreAspectQNames, sortProps, filterProps, pagingRequest);
         return getPagingResults(pagingRequest, results);
     }
     
@@ -510,14 +549,30 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     
     // note: similar to getChildAssocs(contextNodeRef, searchTypeQNames) but enables paging features, including max items, sorting etc (with permissions per-applied)
 
+    /**
+     *
+     * @param contextNodeRef
+     * @param pattern
+     * @param searchTypeQNames
+     * @param ignoreAspectQNames
+     * @param sortProps
+     * @param pagingRequest
+     * @return
+     */
     private CannedQueryResults<NodeRef> listImpl(NodeRef contextNodeRef, String pattern,  Set<QName> searchTypeQNames, Set<QName> ignoreAspectQNames, List<Pair<QName, Boolean>> sortProps, PagingRequest pagingRequest)
+    {
+        return listImpl(contextNodeRef, pattern, Collections.singleton(ContentModel.ASSOC_CONTAINS), searchTypeQNames, ignoreAspectQNames, sortProps, null, pagingRequest);
+    }
+
+    private CannedQueryResults<NodeRef> listImpl(NodeRef contextNodeRef, String pattern, Set<QName> assocTypeQNames, Set<QName> searchTypeQNames, Set<QName> ignoreAspectQNames,
+                                                 List<Pair<QName, Boolean>> sortProps, List<FilterProp> filterProps, PagingRequest pagingRequest)
     {
         Long start = (logger.isDebugEnabled() ? System.currentTimeMillis() : null);
         
         // get canned query
         GetChildrenCannedQueryFactory getChildrenCannedQueryFactory = (GetChildrenCannedQueryFactory)cannedQueryRegistry.getNamedObject(CANNED_QUERY_FILEFOLDER_LIST);
 
-        GetChildrenCannedQuery cq = (GetChildrenCannedQuery)getChildrenCannedQueryFactory.getCannedQuery(contextNodeRef, pattern, Collections.singleton(ContentModel.ASSOC_CONTAINS), searchTypeQNames, ignoreAspectQNames, null, sortProps, pagingRequest);
+        GetChildrenCannedQuery cq = (GetChildrenCannedQuery)getChildrenCannedQueryFactory.getCannedQuery(contextNodeRef, pattern, assocTypeQNames, searchTypeQNames, ignoreAspectQNames, filterProps, sortProps, pagingRequest);
 
         // execute canned query
         CannedQueryResults<NodeRef> results = cq.execute();
@@ -638,6 +693,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
      * @see #search(NodeRef, String, boolean, boolean, boolean)
      */
     @Override
+    @Extend(traitAPI=FileFolderServiceTrait.class,extensionAPI=FileFolderServiceExtension.class)
     public List<FileInfo> search(NodeRef contextNodeRef, String namePattern, boolean includeSubFolders)
     {
         return search(contextNodeRef, namePattern, true, true, includeSubFolders);
@@ -649,6 +705,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
      * Full search with all options
      */
     @Override
+    @Extend(traitAPI=FileFolderServiceTrait.class,extensionAPI=FileFolderServiceExtension.class)
     public List<FileInfo> search(
             NodeRef contextNodeRef,
             String namePattern,
@@ -729,7 +786,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
         }
         else
         {
-            // TODO - we need to get rid of this xpath
+            // TODO - we need to get rid of this xpath stuff
             // if the name pattern is null, then we use the ANY pattern
             QueryParameterDefinition[] params = null;
             if (namePattern != null)
@@ -880,9 +937,9 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
      * then all its chidren are excluded as well.
      * 
      * @param contextNodeRef the starting point.
-     * @param folders return nodes of type folders.
      * @param files return nodes of type files.
-     * @param subfolder filter controls which folders to search.  If null then all subfolders are searched.
+     * @param folders return nodes of type folders.
+     * @param folderFilter filter controls which folders to search.  If null then all subfolders are searched.
      * @return list of node references
      */
    /* <p>
@@ -977,13 +1034,14 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
      * @see #move(NodeRef, NodeRef, String)
      */
     @Override
+    @Extend(traitAPI=FileFolderServiceTrait.class,extensionAPI=FileFolderServiceExtension.class)
     public FileInfo rename(NodeRef sourceNodeRef, String newName) throws FileExistsException, FileNotFoundException
     {
         return moveOrCopy(sourceNodeRef, null, null, newName, true);
     }
 
     /**
-     * @see #moveOrCopy(NodeRef, NodeRef, String, boolean)
+     * @see #moveOrCopy(NodeRef, NodeRef, NodeRef, String, boolean)
      */
     @Override
     public FileInfo move(NodeRef sourceNodeRef, NodeRef targetParentRef, String newName) throws FileExistsException, FileNotFoundException
@@ -992,7 +1050,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     }
     
     /**
-     * @see #moveOrCopy(NodeRef, NodeRef, String, boolean)
+     * @see #moveOrCopy(NodeRef, NodeRef, NodeRef, String, boolean)
      */
     @Override
     public FileInfo moveFrom(NodeRef sourceNodeRef, NodeRef sourceParentRef, NodeRef targetParentRef, String newName) throws FileExistsException, FileNotFoundException
@@ -1010,7 +1068,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     }
 
     /**
-     * @see #moveOrCopy(NodeRef, NodeRef, String, boolean)
+     * @see #moveOrCopy(NodeRef, NodeRef, NodeRef, String, boolean)
      */
     @Override
     public FileInfo copy(NodeRef sourceNodeRef, NodeRef targetParentRef, String newName) throws FileExistsException, FileNotFoundException
@@ -1256,7 +1314,7 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     {
         return createImpl(parentNodeRef, name, typeQName, assocQName);
     }
-    
+
     private FileInfo createImpl(NodeRef parentNodeRef, String name, QName typeQName, QName assocQName) throws FileExistsException
     {
         // set up initial properties
@@ -1692,5 +1750,119 @@ public class FileFolderServiceImpl extends AbstractBaseCopyService implements Fi
     {
         return hiddenAspect.getVisibility(FileFilterMode.getClient(), nodeRef) != Visibility.Visible;
     }
+    
+    @Override
+    public <M extends Trait> ExtendedTrait<M>  getTrait(Class<? extends M> traitAPI)
+    {
+        return (ExtendedTrait<M>) fileFolderTrait;
+    }
+    
+    private FileFolderServiceTrait createFileFolderTrait()
+    {
+        return new FileFolderServiceTraitImpl(this);
+    }
 
+    public static class FileFolderServiceTraitImpl implements FileFolderServiceTrait
+    {
+        private FileFolderServiceImpl thisService;
+
+        public FileFolderServiceTraitImpl(FileFolderServiceImpl fileFolderServiceImpl)
+        {
+            thisService = fileFolderServiceImpl;
+        }
+
+        @Override
+        public Pair<Set<QName>, Set<QName>> buildSearchTypesAndIgnoreAspects(boolean files, boolean folders,
+                    Set<QName> ignoreQNameTypes)
+        {
+            return thisService.buildSearchTypesAndIgnoreAspects(files,
+                                                                folders,
+                                                                ignoreQNameTypes);
+        }
+
+        @Override
+        public FileInfo createFileInfo(NodeRef nodeRef, QName typeQName, boolean isFolder, boolean isHidden,
+                    Map<QName, Serializable> properties)
+        {
+            return new FileInfoImpl(nodeRef,
+                                    typeQName,
+                                    isFolder,
+                                    isHidden,
+                                    properties);
+        }
+
+        @Override
+        public FileFolderServiceType getType(QName typeQName)
+        {
+            return thisService.getType(typeQName);
+        }
+
+        @Override
+        public List<FileInfo> list(final NodeRef contextNodeRef)
+        {
+
+            return thisService.list(contextNodeRef);
+        }
+
+        @Override
+        public PagingResults<FileInfo> list(final NodeRef contextNodeRef, final boolean files, final boolean folders,
+                    final String pattern, final Set<QName> ignoreQNames, final List<Pair<QName, Boolean>> sortProps,
+                    final PagingRequest pagingRequest)
+        {
+            return thisService.list(contextNodeRef,
+                                    files,
+                                    folders,
+                                    pattern,
+                                    ignoreQNames,
+                                    sortProps,
+                                    pagingRequest);
+        }
+
+        @Override
+        public PagingResults<FileInfo> list(final NodeRef rootNodeRef, final Set<QName> searchTypeQNames,
+                    final Set<QName> ignoreAspectQNames, final List<Pair<QName, Boolean>> sortProps,
+                    final PagingRequest pagingRequest)
+        {
+            return thisService.list(rootNodeRef,
+                                    searchTypeQNames,
+                                    ignoreAspectQNames,
+                                    sortProps,
+                                    pagingRequest);
+        }
+
+        @Override
+        public List<FileInfo> search(final NodeRef contextNodeRef, final String namePattern, final boolean fileSearch,
+                    final boolean folderSearch, final boolean includeSubFolders)
+        {
+            return thisService.search(contextNodeRef,
+                                      namePattern,
+                                      fileSearch,
+                                      folderSearch,
+                                      includeSubFolders);
+        }
+       
+        @Override
+        public FileInfo rename(final NodeRef sourceNodeRef, final String newName) throws FileExistsException, FileNotFoundException
+        {
+            
+            return thisService.rename(sourceNodeRef, newName);
+                                       
+        }
+
+        
+        public PagingResults<FileInfo> list(NodeRef contextNodeRef,
+                    boolean files,
+                    boolean folders,
+                    Set<QName> ignoreQNames,
+                    List<Pair<QName, Boolean>> sortProps,
+                    PagingRequest pagingRequest)
+        {
+            return thisService.list(contextNodeRef,
+                                    files,
+                                    folders,
+                                    ignoreQNames,
+                                    sortProps,
+                                    pagingRequest);
+        }
+    };
 }

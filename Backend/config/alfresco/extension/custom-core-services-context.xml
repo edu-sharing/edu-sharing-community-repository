@@ -190,7 +190,7 @@
         <property name="lockService">
         		<ref bean="lockService"/>
         </property>
-         <property name="thumbnailService">
+        <property name="thumbnailService">
         		<ref bean="thumbnailService"/>
         </property>
         <property name="policyBehaviourFilter">
@@ -361,40 +361,23 @@
  
  	 <alias name="dbNodeService" alias="dbNodeServiceImpl" />
    <bean id="dbNodeService" class="org.edu_sharing.alfresco.fixes.DbNodeServiceImpl" init-method="init" >
-      <property name="dictionaryService">
-         <ref bean="dictionaryService" />
-      </property>
-      <property name="transactionService">
-         <ref bean="transactionService" />
-      </property>
-      <property name="qnameDAO">
-         <ref bean="qnameDAO" />
-      </property>
-      <property name="nodeDAO">
-         <ref bean="nodeDAO" />
-      </property>
+   	  <property name="dictionaryService" ref="dictionaryService" />
+      <property name="transactionService" ref="transactionService" />
+      <property name="qnameDAO" ref="qnameDAO" />
+      <property name="nodeDAO" ref="nodeDAO" />
       <property name="permissionService" ref="permissionServiceImpl" />
-      
-      <property name="policyComponent">
-         <ref bean="policyComponent"/>
-      </property>
-      <property name="storeArchiveMap">
-         <ref bean="storeArchiveMap"/>
-      </property>
-      <property name="nodeIndexer">
-         <ref bean="nodeIndexer"/>
-      </property>
+      <property name="policyComponent" ref="policyComponent"/>
+      <property name="storeArchiveMap" ref="storeArchiveMap"/>
+      <property name="nodeIndexer" ref="nodeIndexer"/>
       <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
-      <property name="tenantService">
-         <ref bean="tenantService"/>
-      </property>
-     <property name="storesToIgnorePolicies">
+       <property name="tenantService" ref="tenantService"/>
+      <property name="storesToIgnorePolicies">
          <ref bean="storesToIgnorePolicies"/>
       </property>
       <property name="enableTimestampPropagation" value="${system.enableTimestampPropagation}" />
-      <property name="serviceRegistry">
-			<ref bean="ServiceRegistry" />
-		</property>
+   	  <property name="serviceRegistry">
+	  	<ref bean="ServiceRegistry" />
+	  </property>
    </bean>
    
     <bean id="alfrescoDefaultDbNodeService" class="org.alfresco.repo.node.db.DbNodeServiceImpl" init-method="init" >
@@ -407,11 +390,20 @@
       <property name="storeArchiveMap" ref="storeArchiveMap"/>
       <property name="nodeIndexer" ref="nodeIndexer"/>
       <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
-      <property name="tenantService" ref="tenantService"/>
+       <property name="tenantService" ref="tenantService"/>
       <property name="storesToIgnorePolicies">
          <ref bean="storesToIgnorePolicies"/>
       </property>
       <property name="enableTimestampPropagation" value="${system.enableTimestampPropagation}" />
+   </bean>
+   
+   <bean id="storesToIgnorePolicies" class="org.springframework.beans.factory.config.SetFactoryBean">
+      <property name="sourceSet">
+         <set>
+            <value>${spaces.archive.store}</value>
+            <value>${version.store.version2Store}</value>
+         </set>
+      </property>   
    </bean>
    
    
@@ -473,10 +465,10 @@
          <ref bean="transformerConfig" />
       </property>
       <property name="nodeService">
-    	   <ref bean="NodeService" />
+    	  	<ref bean="NodeService" />
       </property>
        <property name="transactionService">
-    	   <ref bean="TransactionService" />
+    	   	<ref bean="TransactionService" />
       </property>
     </bean>
     <bean id="transformer.ESVideoTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
@@ -535,7 +527,6 @@
          </list>
       </property>
    </bean>
-   
    
    <bean id="searchServiceInterceptor" class="org.edu_sharing.alfresco.workspace_administration.SearchServiceInterceptor">
    </bean>
@@ -603,69 +594,4 @@
         <property name="repositoryHelper" ref="repositoryHelper"/>
     </bean>
     
-    <!-- 
-     <bean id="CMISConnector" class="org.alfresco.opencmis.EduSharingCMISConnector" init-method="setup">
-        <property name="store"                  value="${opencmis.connector.default.store}" />
-        <property name="rootPath"               value="${opencmis.connector.default.rootPath}" />
-        <property name="typesDefaultMaxItems"   value="${opencmis.connector.default.typesDefaultMaxItems}" />
-        <property name="typesDefaultDepth"      value="${opencmis.connector.default.typesDefaultDepth}" />
-        <property name="objectsDefaultMaxItems" value="${opencmis.connector.default.objectsDefaultMaxItems}" />
-        <property name="objectsDefaultDepth"    value="${opencmis.connector.default.objectsDefaultDepth}" />
-        <property name="renditionKindMapping">
-            <map>
-                <entry key="cmis:thumbnail">
-                    <list>
-                        <value>doclib</value>
-                    </list>
-                </entry>
-                <entry key="alf:webpreview">
-                    <list>
-                        <value>webpreview</value>
-                        <value>imgpreview</value>
-                    </list>
-                </entry>
-            </map>
-        </property>
-        
-        <property name="openHttpSession"        value="${opencmis.connector.default.openHttpSession}" />
-
-        <property name="OpenCMISDictionaryService"   ref="OpenCMISDictionaryService" />
-        <property name="OpenCMISQueryService"        ref="OpenCMISQueryService" />     
-        <property name="OpenCMISDictionaryService11" ref="OpenCMISDictionaryService1.1" />
-        <property name="OpenCMISQueryService11"      ref="OpenCMISQueryService1.1" />     
-
-        <property name="activityPoster"         ref="cmisActivityPoster" />
-        <property name="hiddenAspect"           ref="hiddenAspect" />
-        <property name="siteService"            ref="SiteService" />
-        <property name="actionService"          ref="ActionService" />
-        <property name="objectFilter"           ref="objectFilter" />
-        <property name="descriptorService"      ref="DescriptorService" />
-        <property name="nodeService"            ref="NodeService" />
-        <property name="thumbnailService"       ref="ThumbnailService" />
-        <property name="serviceRegistry"        ref="ServiceRegistry" />
-        <property name="fileFolderService"      ref="FileFolderService" />
-        <property name="versionService"         ref="VersionService" />
-        <property name="checkOutCheckInService" ref="CheckoutCheckinService" />
-        <property name="lockService"            ref="LockService" />
-        <property name="contentService"         ref="ContentService" />
-        <property name="renditionService"       ref="RenditionService" />
-        <property name="tenantAdminService"     ref="tenantAdminService" />
-        <property name="singletonCache"         ref="immutableSingletonCache" />
-        <property name="transactionService"     ref="transactionService"/>
-        <property name="authenticationService"  ref="authenticationService" />
-        <property name="permissionService"      ref="PermissionService" />
-        <property name="permissionModelDao"     ref="permissionsModelDAO" />
-        <property name="mimetypeService"        ref="MimetypeService" />
-        <property name="auditService"           ref="auditService" />
-        <property name="namespaceService"       ref="namespaceService" />
-        <property name="searchService"          ref="SearchService" />
-        <property name="dictionaryService"      ref="DictionaryService" />
-        <property name="behaviourFilter"        ref="policyBehaviourFilter" />
-        <property name="eventPublisher"         ref="eventPublisher" />
-
-        <property name="bulkMaxItems"           value="${opencmis.bulkUpdateProperties.maxItemsSize}" />
-        <property name="bulkBatchSize"          value="${opencmis.bulkUpdateProperties.batchSize}" />
-        <property name="bulkWorkerThreads"      value="${opencmis.bulkUpdateProperties.workerThreads}" />
-    </bean>
-     -->
 </beans>

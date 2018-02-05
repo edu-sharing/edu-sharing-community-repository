@@ -11,8 +11,10 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityType;
+import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 
@@ -33,7 +35,9 @@ public class VirtualEduGroupFolderTool {
 			String mapType = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
 			if(mapType != null && mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP)){
 				logger.debug("its a map with typ edugroup");
-				String user = serviceRegistry.getOwnableService().getOwner(nodeRef);
+				OwnableService ownableService = (OwnableService)AlfAppContextGate.getApplicationContext().getBean("ownableService");
+				String user = ownableService.getOwner(nodeRef);
+
 				Set<String> authorities = serviceRegistry.getAuthorityService().getContainingAuthorities(AuthorityType.GROUP, user, true);
 				
 				Collection<NodeRef> eduGroupNodeRefs = getEduGroupNodeRefs();

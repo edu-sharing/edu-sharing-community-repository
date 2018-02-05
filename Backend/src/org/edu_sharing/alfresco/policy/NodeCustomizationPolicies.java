@@ -3,8 +3,6 @@ package org.edu_sharing.alfresco.policy;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,13 +46,13 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
+import org.apache.tika.io.TikaInputStream;
 import org.edu_sharing.alfresco.jobs.PreviewJob;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.quartz.JobDetail;
 import org.quartz.ObjectAlreadyExistsException;
@@ -68,6 +66,7 @@ import com.coremedia.iso.boxes.Box;
 import com.coremedia.iso.boxes.MovieBox;
 import com.coremedia.iso.boxes.TrackBox;
 import com.coremedia.iso.boxes.TrackHeaderBox;
+import com.googlecode.mp4parser.FileDataSourceImpl;
 
 /**
  * 
@@ -181,16 +180,18 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					&& (LockStatus.NO_LOCK.equals(lockStatus) || LockStatus.LOCK_EXPIRED.equals(lockStatus))
 					&& (reader!=null) && (reader.getContentData()!=null) && reader.getContentData().getSize() > 0){
 			
-				logger.debug("will do the thumbnail");
+logger.debug("will do the thumbnail stuff");
 				
 				if(reader.getMimetype().contains("video")){
 					
-					ReadableByteChannel rbc = null;
+					MovieBox moov =null;
+					IsoFile isoFile = null;
 					try{
 						
-						rbc = Channels.newChannel(reader.getContentInputStream());
-						IsoFile isoFile = new IsoFile(rbc);
-						MovieBox moov = isoFile.getMovieBox();
+						TikaInputStream tstream = TikaInputStream.get(reader.getContentInputStream());
+						isoFile = new IsoFile(new FileDataSourceImpl(tstream.getFile()));
+						moov = isoFile.getMovieBox();
+						
 						if(moov != null && moov.getBoxes() != null){
 							for(Box b : moov.getBoxes()) {
 							   
@@ -212,10 +213,17 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						logger.error(e.getMessage(), e);
 					}finally{
 						
-						if(rbc != null){
+						if(isoFile != null){
 							try{
-							
-								rbc.close();
+								isoFile.close();
+							}catch(IOException e){
+								logger.error(e.getMessage(), e);
+							}
+						}
+						
+						if(moov != null){
+							try{
+								moov.close();
 							}catch(IOException e){
 								logger.error(e.getMessage(), e);
 							}

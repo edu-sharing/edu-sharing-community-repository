@@ -76,7 +76,11 @@
             <property name="sys:versionProperties">
                <type>d:content</type>
                <multiple>false</multiple>
-            </property>               
+            </property>
+            <property name="sys:keyStore">
+               <type>d:content</type>
+               <multiple>false</multiple>
+            </property>         
          </properties>
       </type>      
 
@@ -246,6 +250,11 @@
          <title>Undeletable</title>
       </aspect>
       
+      <!-- aspect to tag nodes that are, by default, unmovable -->
+      <aspect name="sys:unmovable">
+         <title>Unmovable</title>
+      </aspect>  
+      
       <!-- aspect to tag nodes during delete operations -->
       <aspect name="sys:pendingDelete">
          <title>Pending Delete</title>
@@ -338,6 +347,34 @@
             </property>
          </properties>
       </aspect>
+      
+       <!--archived properties used to restore locked nodes-->
+      <aspect name="sys:archivedLockable">
+         <title>Archived Lockable</title>
+         <properties>
+            <property name="sys:archivedLockOwner">
+               <type>d:text</type>
+               <protected>true</protected>
+            </property>
+            <property name="sys:archivedLockType">
+               <type>d:text</type>
+               <protected>true</protected>
+            </property>
+            <property name="sys:archivedLockLifetime">
+               <type>d:text</type>
+               <protected>true</protected>
+            </property>
+            <property name="sys:archivedExpiryDate">
+               <type>d:date</type>
+               <protected>true</protected>
+               <mandatory>false</mandatory>
+            </property>
+            <property name="sys:archivedLockAdditionalInfo">
+               <type>d:text</type>
+               <protected>true</protected>
+            </property>
+         </properties>
+      </aspect>
 
       <!--
          Localization:
@@ -370,6 +407,45 @@
                <type>d:boolean</type>
                <mandatory>true</mandatory>
                <multiple>false</multiple>
+            </property>
+         </properties>
+      </aspect>
+      
+       <!-- Aspect to record the last transaction that requires a cascade update to index children (like move, rename, link and unlink) -->
+      <aspect name="sys:cascadeUpdate">
+         <title>Cascade update</title>
+         <properties>
+            <property name="sys:cascadeCRC">
+               <title>Cascade CRC</title>
+               <type>d:long</type>
+               <mandatory>false</mandatory>
+               <multiple>false</multiple>
+            </property>
+            <property name="sys:cascadeTx">
+               <title>Cascade Tx</title>
+               <type>d:long</type>
+               <mandatory>false</mandatory>
+               <multiple>false</multiple>
+            </property>
+         </properties>
+      </aspect>
+
+      <aspect name="sys:pendingFixAcl">
+         <title>Pending fix ACL</title>
+         <properties>
+            <property name="sys:sharedAclToReplace">
+               <title>Shared Acl To Replace</title>
+               <type>d:long</type>
+               <mandatory enforced="true">true</mandatory>
+               <multiple>false</multiple>
+               <index enabled="false"></index>
+            </property>
+            <property name="sys:inheritFromAcl">
+               <title>Inherit From</title>
+               <type>d:long</type>
+               <mandatory enforced="true">true</mandatory>
+               <multiple>false</multiple>
+               <index enabled="false"></index>
             </property>
          </properties>
       </aspect>

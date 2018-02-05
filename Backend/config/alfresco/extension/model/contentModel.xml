@@ -195,12 +195,6 @@
             </property>
             <property name="cm:email">
                <type>d:text</type>
-                <!-- edu-sharing customization: to make it unpossible to search for a part of an email also create an untokenized version -->
-               <index enabled="true">
-		           <atomic>true</atomic>
-		           <stored>false</stored>
-		           <tokenised>both</tokenised>
-		       </index>
             </property>
             <property name="cm:organizationId">
                <type>d:text</type>
@@ -322,28 +316,6 @@
                 <protected>true</protected>
             </property>
             
-               <!-- CampusContent Customization: holds information if it's an shadowuser -->
-            <property name="cm:isShadowUser">
-               <type>d:boolean</type>
-               <default>false</default>
-            </property>
-            <!-- CampusContent Customization: which repository is the home repository of the user -->
-            <property name="cm:repositoryId">
-               <type>d:text</type>
-            </property>
-            <!-- CampusContent Customization: guid an id that identifies a person in a UserDirectory environment -->
-            <property name="cm:guid">
-               <type>d:text</type>
-            </property>
-            <!-- edu-sharing customization: esuid that will be used for user creation in remote repositories  -->
-            <property name="cm:esuid">
-               <type>d:text</type>
-            </property>
-            <!-- edu-sharing customization eduSchoolPrimaryAffiliation -->
-            <property name="cm:eduSchoolPrimaryAffiliation">
-               <type>d:text</type>
-            </property>
-            
          </properties>
          
          <associations>
@@ -360,83 +332,8 @@
                   <many>false</many>
                </target>
             </association>
-            
-               <!-- CampusContent Customization: AccessList-->
-            <child-association name="cm:accesslist">
-            	 <title>Application accesslist for user</title>
-               <source>
-                  <mandatory>true</mandatory>
-                  <many>false</many>
-               </source>
-               <target>
-                  <class>cm:personaccesselement</class>
-                  <mandatory>false</mandatory>
-                  <many>true</many>
-               </target>
-               <duplicate>false</duplicate>
-            </child-association>
-            
-            <child-association name="cm:personScopes">
-            	<source>
-                  <mandatory>true</mandatory>
-                  <many>false</many>
-               </source>
-            	<target>
-            		<class>cm:personScope</class>
-            		<mandatory>false</mandatory>
-                    <many>true</many>
-            	</target>
-            </child-association>
          </associations>
       </type>
-      
-       <!-- CampusContent Customization AccessListElement for Person -->
-      
-      <type name="cm:personaccesselement">
-      	<title>Category Root</title>
-      	<parent>sys:base</parent>
-        <properties>
-        	<property name="cm:ccappid">
-        		<type>d:text</type>
-         		<mandatory>true</mandatory>
-       	  </property>
-        	<property name="cm:ccuserid">
-        		<type>d:text</type>
-          	<mandatory>true</mandatory>
-        	</property>
-        	<property name="cm:ccaccess">
-        		<type>d:boolean</type>
-          	<mandatory>true</mandatory>
-        	</property>
-        	<property name="cm:ccactivatekey">
-        		<type>d:text</type>
-          	<mandatory>false</mandatory>
-          	<!--it's simpler to watchout for the one that is activated. so multiple=false -->
-          	<multiple>false</multiple>
-        	</property>
-        </properties>
-      </type>
-      
-      <!-- edu-sharing person scope -->
-      <type name="cm:personScope">
-      	<title>Person scope</title>
-      	<parent>sys:base</parent>
-        <properties>
-           <property name="cm:personScopeName">
-        		<type>d:text</type>
-         		<mandatory>true</mandatory>
-       	   </property>
-       	   <property name="cm:personScopeHomeFolder">
-               <type>d:noderef</type>
-               <mandatory>true</mandatory>
-           </property>
-            <property name="cm:personScopeRole">
-        		<type>d:text</type>
-         		<mandatory>false</mandatory>
-       	   </property>
-       	 </properties>
-      </type>
-      
 
       <type name="cm:authorityContainer">
          <title>Alfresco Authority Type</title>
@@ -452,12 +349,6 @@
             </property>
             <property name="cm:authorityDisplayName">
                <type>d:text</type>
-                <!-- edu-sharing: for sorting in user invite panel disable tokenizing, tokenized props are not sortable-->
-               <index enabled="true">
-                 <atomic>true</atomic>
-                 <stored>false</stored>
-                 <tokenised>both</tokenised>
-              </index>
             </property>
          </properties>
          <associations>
@@ -1124,6 +1015,10 @@
          </mandatory-aspects>
       </aspect>
    
+      <aspect name="cm:cmisCreatedCheckedOut">
+         <title>CMIS Created Checked Out</title>
+      </aspect>
+   
       <aspect name="cm:versionable">
          <title>Versionable</title>
          <properties>
@@ -1146,20 +1041,17 @@
             <property name="cm:initialVersion">
                <title>Initial Version</title>
                <type>d:boolean</type>
-               <!--edusharing config set initialVersion default to false-->
-               <default>false</default>
+               <default>${version.store.initialVersion}|true</default>
             </property>
             <property name="cm:autoVersion">
                <title>Auto Version</title>
                <type>d:boolean</type>
-                <!--edusharing config set autoVersion default to false-->
-               <default>false</default>
+               <default>${version.store.enableAutoVersioning}|true</default>
             </property>
             <property name="cm:autoVersionOnUpdateProps">
                <title>Auto Version - on update properties only</title>
                <type>d:boolean</type>
-                <!--edusharing config set cm:autoVersionOnUpdateProps default to false-->
-               <default>false</default>
+               <default>${version.store.enableAutoVersionOnUpdateProps}|true</default>
             </property>
           </properties>
       </aspect>
@@ -1784,20 +1676,6 @@
       <!--                      -->
       <!--  DEPRECATED (end of) -->
       <!--                      -->
-      <!-- campuscontent metadataset aspect for persons, organisations, folder, io's -->
-      <aspect name="cm:metadataset">
-      		<title>The metadataset for maps, ios, organisations</title>
-      		<properties>
-      		   	<property name="cm:edu_metadataset">
-               		<type>d:text</type>
-               		<default>default</default>
-            	</property>
-            	<property name="cm:edu_forcemetadataset">
-            		<type>d:boolean</type>
-            		<default>false</default>
-            	</property>
-      		</properties>
-      </aspect>
       
    </aspects>
 
