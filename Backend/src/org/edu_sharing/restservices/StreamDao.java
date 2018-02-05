@@ -127,7 +127,8 @@ public class StreamDao {
 				return null;
 			}
 		});
-		authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
+		if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
+			authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
 		return authorities;
 	}
 	private static STATUS getStatus(String status) {
