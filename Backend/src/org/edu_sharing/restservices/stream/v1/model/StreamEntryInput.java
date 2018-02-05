@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.stream.v1.model;
 
 import java.util.List;
+import java.util.Map;
 
 import org.edu_sharing.restservices.shared.Node;
 
@@ -11,7 +12,7 @@ public class StreamEntryInput {
 	@JsonProperty private String title;
 	@JsonProperty private String description;
 	@JsonProperty private List<String> nodes;
-	@JsonProperty private List<String> categories;
+	@JsonProperty private Map<String,Object> properties;
 	@JsonProperty private int priority;
 	public String getId() {
 		return id;
@@ -37,11 +38,11 @@ public class StreamEntryInput {
 	public void setNodes(List<String> nodes) {
 		this.nodes = nodes;
 	}
-	public List<String> getCategories() {
-		return categories;
+	public Map<String, Object> getProperties() {
+		return properties;
 	}
-	public void setCategories(List<String> categories) {
-		this.categories = categories;
+	public void setProperties(Map<String, Object> properties) {
+		this.properties = properties;
 	}
 	public int getPriority() {
 		return priority;

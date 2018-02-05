@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.stream.v1.model;
 
 import java.util.List;
+import java.util.Map;
 
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.Person;
@@ -12,7 +13,7 @@ public class StreamEntry {
 	@JsonProperty private String id;
 	@JsonProperty private String description;
 	@JsonProperty private List<Node> nodes;
-	@JsonProperty private List<String> categories;
+	@JsonProperty private Map<String,Object> properties;
 	@JsonProperty private int priority;
 	@JsonProperty private UserSimple author;
 	@JsonProperty private long created;
@@ -36,17 +37,17 @@ public class StreamEntry {
 	public void setNodes(List<Node> nodes) {
 		this.nodes = nodes;
 	}
-	public List<String> getCategories() {
-		return categories;
-	}
-	public void setCategories(List<String> categories) {
-		this.categories = categories;
-	}
 	public int getPriority() {
 		return priority;
 	}
 	public void setPriority(int priority) {
 		this.priority = priority;
+	}
+	public Map<String, Object> getProperties() {
+		return properties;
+	}
+	public void setProperties(Map<String, Object> properties) {
+		this.properties = properties;
 	}
 	public UserSimple getAuthor() {
 		return author;

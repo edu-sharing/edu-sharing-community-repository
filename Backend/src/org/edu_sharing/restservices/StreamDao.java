@@ -70,12 +70,12 @@ public class StreamDao {
 		entry.created=System.currentTimeMillis();
 		entry.modified=System.currentTimeMillis();
 		entry.nodeId=newEntry.getNodes();
-		entry.category=newEntry.getCategories();
+		entry.properties=newEntry.getProperties();
 		entry.priority=newEntry.getPriority();
 		return entry;
 	}
 
-	public static StreamList search(RepositoryDao repoDao,String status,String category, String query, int offset, int maxItems) throws DAOException{
+	public static StreamList search(RepositoryDao repoDao,String status,Map<String,String> property, String query, int offset, int maxItems) throws DAOException{
 		try {
 			StreamService service=StreamServiceFactory.getStreamService();
 			StreamList result=new StreamList();
@@ -83,8 +83,8 @@ public class StreamDao {
 			StreamSearchRequest request = new StreamSearchRequest(getCurrentAuthorities(),getStatus(status));
 			request.offset=offset;
 			request.size=maxItems;
-			if(category!=null && !category.isEmpty())
-				request.category=category;
+			if(property!=null && !property.isEmpty())
+				request.properties=property;
 			if(query!=null && !query.isEmpty())
 				request.search=query;
 			StreamSearchResult response = service.search(request);
@@ -98,7 +98,7 @@ public class StreamDao {
 				entry.setNodes(nodes);
 				entry.setId(contentEntry.id);
 				entry.setAuthor(new PersonDao(repoDao, contentEntry.author).asPersonSimple());
-				entry.setCategories(contentEntry.category);
+				entry.setProperties(contentEntry.properties);
 				entry.setCreated((long) contentEntry.created);
 				entry.setModified((long) contentEntry.modified);
 				list.add(entry);

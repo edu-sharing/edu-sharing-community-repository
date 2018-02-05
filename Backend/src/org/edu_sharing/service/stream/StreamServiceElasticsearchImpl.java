@@ -62,7 +62,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 			entry.description=(String) source.get("description");
 			entry.priority=(Number) source.get("priority");
 			entry.nodeId=(List<String>)source.get("nodeId");
-			entry.category=(List<String>)source.get("category");
+			entry.properties=(Map<String,Object>)source.get("properties");
 			entry.created=(Number) source.get("created");
 			entry.modified=(Number) source.get("modified");
 			entry.author=(String) source.get("author");
@@ -81,7 +81,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 			XContentBuilder builder = jsonBuilder().startObject()
 					.field("priority",entry.priority)
 					.field("nodeId",entry.nodeId)
-					.field("category", entry.category)
+					.field("properties", entry.properties)
 					.field("title", entry.title)
 					.field("description", entry.description)
 					.field("created",entry.created)
@@ -269,10 +269,13 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 				);*/
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.must(getAuthorityQuery(request.authority, request.status));
-		if(request.category!=null)
-			query.must(QueryBuilders.matchQuery("category", request.category));
+		if(request.properties!=null) {
+			for(String key : request.properties.keySet()) {
+				query.must(QueryBuilders.matchQuery("properties."+key, request.properties.get(key)));
+			}
+		}
 		if(request.search!=null)
-			query.must(QueryBuilders.multiMatchQuery(request.search,"description","category"));
+			query.must(QueryBuilders.multiMatchQuery(request.search,"description","title"));
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		searchSourceBuilder.query(query);
 		searchSourceBuilder.sort("priority", SortOrder.DESC);

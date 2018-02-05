@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -38,7 +39,7 @@ public class StreamApi {
 
 	private static Logger logger = Logger.getLogger(StreamApi.class);
 	
-	 @GET
+	 @POST
      @Path("/search/{repository}")
 	        
      @ApiOperation(
@@ -58,15 +59,15 @@ public class StreamApi {
 	    public Response search(
 	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = "Stream object status to search for",required=false ) @QueryParam("status") String status,
-	    	@ApiParam(value = "category to search for",required=false ) @QueryParam("category") String category,
-	    	@ApiParam(value = "generic text to search for (in category or description)",required=false ) @QueryParam("query") String query,
+	    	@ApiParam(value = "generic text to search for (in title or description)",required=false ) @QueryParam("query") String query,
 		    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
 		    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
+		    @ApiParam(value = "map with property + value to search", defaultValue="0") Map<String,String> properties,
 			@Context HttpServletRequest req) {
 	    	
 	    	try {
 	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    		StreamList response = StreamDao.search(repoDao,status,category,query, skipCount,maxItems);
+	    		StreamList response = StreamDao.search(repoDao,status,properties,query, skipCount,maxItems);
 		    	return Response.status(Response.Status.OK).entity(response).build();
 	    	}catch(Throwable t) {
 	    		return ErrorResponse.createResponse(t);
