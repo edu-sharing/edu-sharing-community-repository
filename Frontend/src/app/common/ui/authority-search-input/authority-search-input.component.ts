@@ -7,13 +7,16 @@ import {RestIamService} from "../../rest/services/rest-iam.service";
 
 @Component({
   selector: 'authority-search-input',
-  templateUrl: 'authority-search-input.component.html'
+  templateUrl: 'authority-search-input.component.html',
+  styleUrls: ['authority-search-input.component.scss']
 })
 
 
 export class AuthoritySearchInputComponent{
-  private authoritySuggestions : SuggestItem[];
+  public authoritySuggestions : SuggestItem[];
   @Input() globalSearch = false;
+  @Input() disabled = false;
+  @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
   @Output() onChooseAuthority = new EventEmitter();
   private lastSuggestionSearch: string;
   private addSuggestion(data: any) {
