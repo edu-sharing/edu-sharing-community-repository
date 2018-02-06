@@ -275,7 +275,7 @@ export class NodeRenderComponent {
       success:function(data: any) {
         if (!data.detailsSnippet) {
           console.error(data);
-          parent.toast.error(null,"error while reaching render service. Please check your server configuration or report this error.");
+          parent.toast.error(null,"RENDERSERVICE_API_ERROR");
         }
         else {
           jQuery('#nodeRenderContent').html(data.detailsSnippet);

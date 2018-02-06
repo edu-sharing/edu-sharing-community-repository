@@ -9,7 +9,7 @@
        (dragover)="allowDrag($event,node)" (drop)="drop($event,node)"
        [class.homeIsIcon]="!home" class="folder"
        [class.clickable]="clickable"
-       [class.selected]="dragHover==node"
+       [class.selected]="node && dragHover==node"
        (click)="openBreadcrumb(i+1)"
        (keyup.enter)="openBreadcrumb(i+1)"> &rsaquo; {{node ? node.name : ''}}</div>
 </div>

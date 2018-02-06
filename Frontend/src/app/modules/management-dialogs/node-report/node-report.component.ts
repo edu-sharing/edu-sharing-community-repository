@@ -10,11 +10,17 @@ import {ConfigurationService} from "../../../common/services/configuration.servi
 import {UIHelper} from "../../../common/ui/ui-helper";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {TranslateService} from "@ngx-translate/core";
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../../common/ui/ui-animation";
 
 @Component({
   selector: 'node-report',
   templateUrl: 'node-report.component.html',
-  styleUrls: ['node-report.component.scss']
+  styleUrls: ['node-report.component.scss'],
+  animations: [
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class NodeReportComponent  {
   public reasons = [

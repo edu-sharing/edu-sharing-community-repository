@@ -28,6 +28,7 @@ export class WorkspaceTreeComponent  {
   private _selectedPath : string[]=[];
   private _current : string;
   public dragHover: string;
+  @Input() selectedNode:string;
   @Input() set path (path : Node[]){
     if(path.length==0)
       return;
@@ -40,12 +41,12 @@ export class WorkspaceTreeComponent  {
     this._selectedPath=this._path[0];
   }
 
-  @Input() set current (current : Node){
+  @Input() set current (current : string){
     // TODO: Using this fixes bug for AddDirectory, but constantly refreshes
     //this.homeDirectory=new String(this.homeDirectory);
     if(!current)
       return;
-    this._current=current.ref.id;
+    this._current=current;
   }
   @Input() options : OptionItem[]=[];
   @Output() onOpenNode = new EventEmitter();

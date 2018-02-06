@@ -1,4 +1,5 @@
-<div *ngIf="_nodes && _nodes.length">
+<div class="sub-tree-wrapper">
+<div *ngIf="_nodes && _nodes.length" [@open]="_nodes && _nodes.length">
   <div class="dialog" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
   <div class="moreOpen collection"
        *ngIf="dropdown && _options && _options.length"
@@ -43,6 +44,7 @@
                       [node]="node.ref.id"
                       [openPath]="openPath"
                       [selectedPath]="selectedPath"
+                      [selectedNode]="selectedNode"
                       [options]="_options"
                       [parentPath]="getFullPath(node)"
                       (onUpdateOptions)="updateOptions($event)"
@@ -54,7 +56,8 @@
   ></workspace-sub-tree>
 </div>
 </div>
-<spinner *ngIf="loading"></spinner>
+<spinner-small *ngIf="loading"></spinner-small>
+</div>
 <!--
 <div [style.paddingLeft.px]="depth*20" *ngIf="!loading && (!_nodes || !_nodes.length)" class="empty">
   {{ 'WORKSPACE.NO_SUB_NODES' | translate }}
