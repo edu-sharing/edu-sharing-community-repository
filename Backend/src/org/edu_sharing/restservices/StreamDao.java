@@ -32,6 +32,9 @@ public class StreamDao {
 			ContentEntry entry=convertStreamEntry(newEntry);
 			for(String node : newEntry.getNodes()) {
 				NodeDao nodeDao=NodeDao.getNode(repoDao, node);
+				if(!nodeDao.getAccessAsString().contains(CCConstants.PERMISSION_CC_PUBLISH)) {
+					throw new AccessDeniedException("No "+CCConstants.PERMISSION_CC_PUBLISH+" for node "+node);
+				}
 				// TODO: We need to set an usage to these node so they can be accessed from the stream user
 				//new Usage2Service().getUsage(lmsId, courseId, parentNodeId, resourceId)
 			}
@@ -46,7 +49,19 @@ public class StreamDao {
 		StreamService service=StreamServiceFactory.getStreamService();
 		return service.getStatus(entryId, getCurrentAuthorities());
 	}
-
+	public static void deleteEntry(RepositoryDao repoDao,String entryId) throws DAOException{
+		try {
+			StreamService service=StreamServiceFactory.getStreamService();
+			if(!AuthorityServiceFactory.getLocalService().isGlobalAdmin()  && !service.getEntry(entryId).author.equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
+				throw new AccessDeniedException("No permissions to delete stream entry "+entryId);
+			}
+			// simply check if the given authority is valid (does not work for special groups)
+			//PersonDao.getPerson(repoDao, authority);
+			service.delete(entryId);
+		}catch(Exception e) {
+			throw DAOException.mapping(e);
+		}
+	}
 	public static void updateStatus(RepositoryDao repoDao,String entryId,String authority,String status) throws DAOException{
 		try {
 			StreamService service=StreamServiceFactory.getStreamService();
@@ -93,7 +108,16 @@ public class StreamDao {
 				StreamEntry entry=new StreamEntry();
 				List<Node> nodes=new ArrayList<>();
 				for(String nodeId : contentEntry.nodeId) {
-					nodes.add(NodeDao.getNode(repoDao, nodeId).asNode());
+					// TODO: Is this correct?
+					// When an item is visible in the stream, allow fully access to the user who has access to the stream entity
+					AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+
+						@Override
+						public Void doWork() throws Exception {
+							nodes.add(NodeDao.getNode(repoDao, nodeId).asNode());
+							return null;
+						}
+					});
 				}
 				entry.setNodes(nodes);
 				entry.setId(contentEntry.id);

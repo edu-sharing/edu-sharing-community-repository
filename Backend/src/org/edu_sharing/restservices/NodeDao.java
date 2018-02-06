@@ -1072,7 +1072,7 @@ public class NodeDao {
 		return result;
 	}
 	
-	private List<String> getAccessAsString() {
+	public List<String> getAccessAsString() {
 		return PermissionServiceHelper.getPermissionsAsString(hasPermissions);
 	}
 	

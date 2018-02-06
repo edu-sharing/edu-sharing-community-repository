@@ -1,5 +1,5 @@
-<div class="dialog darken"></div>
-<div class="card center-card card-action card-high">
+<div class="dialog darken" [@fade]="this"></div>
+<div class="card center-card card-action card-high" [@cardAnimation]="this">
   <div class="card-content">
     <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
     <div class="card-title">{{'ADD_TO_STREAM.TITLE' | translate }}</div>

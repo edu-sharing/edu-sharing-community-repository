@@ -1,5 +1,8 @@
 @import "../../../../styles/variables.scss";
 
+:host /deep/ .mdsEmbeddedGroup{
+
+}
 .wrapper {
   display:flex;
   flex-direction: column;

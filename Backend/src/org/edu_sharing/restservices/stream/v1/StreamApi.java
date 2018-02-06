@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -125,9 +126,7 @@ public class StreamApi {
 	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = "The property to aggregate",required=true) @PathParam("node") String node,
 			@Context HttpServletRequest req) {
-	    	
 	    	try {
-	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    		boolean response = StreamDao.canAccessNode(node);
 		    	return Response.status(Response.Status.OK).entity(response).build();
 	    	}catch(Throwable t) {
@@ -191,6 +190,35 @@ public class StreamApi {
 	    	try {
 	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    		StreamDao.updateStatus(repoDao, entryId, authority, status);
+		    	return Response.status(Response.Status.OK).build();
+	    	}catch(Throwable t) {
+	    		return ErrorResponse.createResponse(t);
+	    	}
+	 }
+	 @DELETE
+     @Path("/delete/{repository}/{entry}")
+	        
+     @ApiOperation(
+    	value = "delete a stream object",
+    	notes = "the current user must be author of the given stream object"
+    	)
+    
+     @ApiResponses(
+    		value = { 
+    		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+    		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+    		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+    		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+    		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+    		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	    public Response deleteEntry(
+	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = "entry id to delete",required=true ) @PathParam("entry") String entryId,
+			@Context HttpServletRequest req) {
+	    	try {
+	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    		StreamDao.deleteEntry(repoDao, entryId);
 		    	return Response.status(Response.Status.OK).build();
 	    	}catch(Throwable t) {
 	    		return ErrorResponse.createResponse(t);

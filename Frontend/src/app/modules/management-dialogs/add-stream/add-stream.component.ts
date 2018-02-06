@@ -22,7 +22,9 @@ import {RestHelper} from "../../../common/rest/rest-helper";
   templateUrl: 'add-stream.component.html',
   styleUrls: ['add-stream.component.scss'],
   animations: [
-    trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
+    trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
+    trigger('fade', UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
 export class AddStreamComponent  {

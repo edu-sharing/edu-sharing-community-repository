@@ -22,6 +22,7 @@ import org.edu_sharing.service.stream.model.ScoreResult;
 import org.edu_sharing.service.stream.model.StreamSearchRequest;
 import org.edu_sharing.service.stream.model.StreamSearchResult;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
@@ -247,6 +248,14 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		ScoreResult result=new ScoreResult();
 		result.score=(long) ((ParsedSum)searchResult.getAggregations().get("score")).getValue();
 		return result;
+	}
+	@Override
+	public void delete(String id) throws Exception {
+		DeleteRequest request = new DeleteRequest();
+		request.index(INDEX_NAME);
+		request.type(TYPE_NAME);
+		request.id(id);
+		client.delete(request);
 	}
 	@Override
 	public void updateStatus(String id,String authority,ContentEntry.Audience.STATUS status) throws Exception {

@@ -29,4 +29,6 @@ public interface StreamService {
 	ContentEntry getEntry(String entryId) throws Exception;
 
 	boolean canAccessNode(List<String> authorities, String nodeId) throws Exception;
+
+	void delete(String id) throws Exception;
 }
