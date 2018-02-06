@@ -38,7 +38,6 @@ export class WorkspaceWorkflowComponent  {
   public dialogButtons:DialogButton[];
   public loading=true;
   public node: Node;
-  public authoritySuggestions : SuggestItem[];
   public receivers:UserSimple[]=[];
   public status=RestConstants.WORKFLOW_STATUS_UNCHECKED;
   public initialStatus=RestConstants.WORKFLOW_STATUS_UNCHECKED;
@@ -74,20 +73,6 @@ export class WorkspaceWorkflowComponent  {
   @Output() onDone=new EventEmitter();
   @Output() onClose=new EventEmitter();
   @Output() onLoading=new EventEmitter();
-  private updateSuggestions(event : any){
-    console.log("search "+event.input);
-    this.iam.searchUsers(event.input,this.globalSearch).subscribe(
-      (users:IamUsers) => {
-        var ret:SuggestItem[] = [];
-        for (let user of users.users){
-          let item=new SuggestItem(user.authorityName,user.profile.firstName+" "+user.profile.lastName, 'person', '');
-          item.originalObject=user;
-          ret.push(item);
-        }
-        this.authoritySuggestions=ret;
-      },
-      error => console.log(error));
-  }
   public isAllowedAsNext(status:WorkflowDefinition){
     if(!this.initialStatus.next)
       return true;
@@ -102,10 +87,10 @@ export class WorkspaceWorkflowComponent  {
     this.status=status;
     this.chooseStatus=false;
   }
-  private addSuggestion(data: any) {
+  private addSuggestion(data: UserSimple) {
     /*if(this.receivers.indexOf(data.item.id)==-1)
       this.receivers.push(data.item.id);*/
-    this.receivers=[data.item.originalObject];
+    this.receivers=[data];
   }
   public getWorkflowForId(id:string){
     return NodeHelper.getWorkflowStatusById(this.config,id);
