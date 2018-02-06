@@ -71,6 +71,10 @@ export class AddStreamComponent  {
     if(!values) {
       return;
     }
+    if(this.audienceMode==this.AUDIENCE_MODE_CUSTOM && this.invite.length==0){
+      this.toast.error(null,'ADD_TO_STREAM.ERROR_NO_PERSON_INIVITED');
+      return;
+    }
     this.onLoading.emit(true);
     this.streamEntry.title=values['add_to_stream_title'][0];
     this.streamEntry.priority=values['add_to_stream_priority'][0];

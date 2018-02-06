@@ -16,6 +16,7 @@
       <div class="audienceSearch" *ngIf="audienceMode==1" [@overlay]="audienceMode==AUDIENCE_MODE_CUSTOM">
         <div class="search"><authority-search-input
           [globalSearch]="false"
+          [maxSuggestions]="5"
           (onChooseAuthority)="addInvite($event)"
         ></authority-search-input>
         </div>
