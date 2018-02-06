@@ -1,7 +1,9 @@
 @import "../../../../styles/variables.scss";
 
-:host /deep/ .mdsEmbeddedGroup{
-
+:host /deep/{
+  .edusharing-autocomplete-wrapper{
+    margin-bottom: 0;
+  }
 }
 .wrapper {
   display:flex;
@@ -22,6 +24,12 @@
     padding: 0 $cardPadding;
     padding-bottom: 12px;
     background-color: $actionDialogBackground;
+    .audienceSearch{
+      padding-top: 20px;
+      .badge{
+        background-color: #fff;
+      }
+    }
   }
 
 }

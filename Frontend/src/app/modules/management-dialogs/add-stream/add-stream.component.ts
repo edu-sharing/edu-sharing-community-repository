@@ -4,7 +4,7 @@ import {Toast} from "../../../common/ui/toast";
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
   NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
-  LoginResult, View, STREAM_STATUS
+  LoginResult, View, STREAM_STATUS, IamUser, AuthorityProfile
 } from "../../../common/rest/data-object";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {UIHelper} from "../../../common/ui/ui-helper";
@@ -35,6 +35,7 @@ export class AddStreamComponent  {
   private AUDIENCE_MODE_CUSTOM="1";
   private audienceMode=this.AUDIENCE_MODE_EVERYONE;
   private _nodes: any;
+  private invite: AuthorityProfile[]=[];
   @Input() set nodes(nodes : Node[]){
     this._nodes=nodes;
   }
@@ -58,6 +59,13 @@ export class AddStreamComponent  {
   public done(){
     this.onDone.emit();
   }
+  public addInvite(event:AuthorityProfile){
+    console.log(event);
+    this.invite.push(event);
+  }
+  public removeInvite(event:AuthorityProfile){
+    this.invite.splice(this.invite.indexOf(event),1);
+  }
   public save(){
     let values=this.mdsRef.getValues();
     if(!values) {
@@ -77,11 +85,25 @@ export class AddStreamComponent  {
         this.streamApi.updateStatus(id,RestConstants.AUTHORITY_EVERYONE,STREAM_STATUS.OPEN).subscribe(()=>{
           this.onLoading.emit(false);
           this.onDone.emit();
-        })
+        });
+      }
+      else{
+        this.invitePersons(id);
       }
     },(error:any)=>{
       this.onLoading.emit(false);
       this.toast.error(error);
+    });
+  }
+
+  private invitePersons(id: string,position = 0) {
+    if(position==this.invite.length){
+      this.onLoading.emit(false);
+      this.onDone.emit();
+      return;
+    }
+    this.streamApi.updateStatus(id,this.invite[position].authorityName,STREAM_STATUS.OPEN).subscribe(()=>{
+      this.invitePersons(id,position+1);
     });
   }
 }
