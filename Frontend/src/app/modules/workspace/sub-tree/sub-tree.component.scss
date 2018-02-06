@@ -16,15 +16,29 @@
     height:14px;
   }
 }
-spinner-small{
+.spinner{
   position: absolute;
-  top:-32px;
-  right:10px;
+  top:-40px;
+  right:0;
   z-index: 10;
-
+  padding:10px;
 }
 i.arrow{
   width:20px;
+}
+@mixin fadeRight($color){
+    background: linear-gradient(to right,rgba(red($color),green($color),blue($color),0.001) 0,$color 70%);
+}
+.fade-right{
+  position: absolute;
+  right:0;
+  width:60px;
+  height:34px;
+  z-index: 9;
+  @include fadeRight($workspaceTreeBackground);
+}
+.fade-right-selected{
+  @include fadeRight($workspaceTreeSelectedBackground);
 }
 .moreOpen{
   left:($workspaceSidebarWidth - $contextMenuWidth)/2;
@@ -32,6 +46,9 @@ i.arrow{
 }
 .node:hover{
   background-color: $workspaceTreeSelectedBackground;
+  .fade-right{
+    @include fadeRight($workspaceTreeSelectedBackground);
+  }
 }
 .nodeSelected{
   background-color: $workspaceTreeSelectedBackground!important;
