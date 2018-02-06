@@ -99,6 +99,7 @@
     <plugin name="cordova-plugin-filepath" spec="^1.1.0" />
     <plugin name="cordova-plugin-screen-orientation" spec="^3.0.1" />
     <plugin name="com.borismus.webintent" spec="https://github.com/cordova-misc/cordova-webintent.git" />
+    <plugin name="cordova-plugin-nativestorage" spec="^2.2.2" />
     <engine name="android" spec="^7.0.0" />
-    <engine name="ios" spec="~4.5.4" />
+    <engine name="ios" spec="^4.5.4" />
 </widget>

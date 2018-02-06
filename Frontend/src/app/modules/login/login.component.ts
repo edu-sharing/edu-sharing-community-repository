@@ -17,6 +17,8 @@ import {UIConstants} from "../../common/ui/ui-constants";
 import {Helper} from "../../common/helper";
 import {RestHelper} from "../../common/rest/rest-helper";
 
+import {CordovaService} from "../../common/services/cordova.service";
+
 @Component({
   selector: 'workspace-login',
   templateUrl: 'login.component.html',
@@ -54,7 +56,22 @@ export class LoginComponent  implements OnInit{
               private configService:ConfigurationService,
               private title:Title,
               private storage : SessionStorageService,
-              private route : ActivatedRoute){
+              private route : ActivatedRoute,
+              private cordova: CordovaService
+            ){
+
+    // special cordova stuff
+    if (this.cordova.isRunningCordova()) {
+
+      this.cordova.setDeviceReadyCallback(()=>{
+        this.cordova.getPermanentStorage("test", (value:any) => {
+          alert("TEST VALUE: "+value);
+          this.cordova.setPermanentStorage("test","test8");
+        });
+      });
+
+    }
+
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
