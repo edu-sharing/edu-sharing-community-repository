@@ -41,6 +41,7 @@
   import {AutocompleteComponent} from "./common/ui/autocomplete/autocomplete.component";
   import {AuthoritySearchInputComponent} from "./common/ui/authority-search-input/authority-search-input.component";
   import {GlobalProgressComponent} from "./common/ui/global-progress/global-progress.component";
+  import {SpinnerSmallComponent} from "./common/ui/spinner-small/spinner-small.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -65,6 +66,7 @@ export const DECLARATIONS = [
       NodeTitlePipe,
       FileComponent,
       SpinnerComponent,
+      SpinnerSmallComponent,
       ListTableComponent,
       FileChooserComponent,
       CollectionChooserComponent,

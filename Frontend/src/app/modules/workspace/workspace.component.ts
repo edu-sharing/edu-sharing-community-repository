@@ -85,6 +85,7 @@ export class WorkspaceMainComponent{
   private nodeDisplayedVersion : string;
   private createAllowed : boolean;
   private currentFolder : any|Node;
+  private currentFolderRef : any|string;
   private user : IamUser;
   public searchQuery : string;
   public isSafe = false;
@@ -113,6 +114,7 @@ export class WorkspaceMainComponent{
   private mdsParentNode: Node;
   public showLtiTools=false;
   private oldParams: Params;
+  private selectedNodeTree: string;
   private hideDialog() : void{
     this.dialogTitle=null;
   }
@@ -870,11 +872,13 @@ export class WorkspaceMainComponent{
         return;
     }
     else{
+      this.selectedNodeTree=id;
       this.node.getNodeParents(id).subscribe((data : NodeList)=>{
         this.path = data.nodes.reverse();
+        this.selectedNodeTree=null;
       },(error:any)=>{
+        this.selectedNodeTree=null;
         this.path=[];
-        this.globalProgress=false;
       });
     }
 
@@ -884,6 +888,7 @@ export class WorkspaceMainComponent{
     console.log("root "+this.isRootFolder+" "+id);
     if(!this.isRootFolder) {
       console.log("open path: "+id);
+      this.currentFolderRef=id;
       this.node.getNodeMetadata(id).subscribe((data: NodeWrapper) => {
         this.currentFolder = data.node;
         this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
@@ -901,6 +906,7 @@ export class WorkspaceMainComponent{
         this.createAllowed = true;
       }
       this.currentFolder = {ref: {id: id}};
+      this.currentFolderRef = id;
       this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
       this.searchQuery = null;
     }
@@ -941,18 +947,22 @@ export class WorkspaceMainComponent{
     this.openDirectory(id);
   }
 
-  private refresh() {
+  private refresh(refreshPath=true) {
     let search=this.searchQuery;
     let folder=this.currentFolder;
+    let ref=this.currentFolderRef;
     this.currentFolder=null;
+    this.currentFolderRef=null;
     this.searchQuery=null;
     this.selection=[];
     this.actionOptions=this.getOptions(this.selection,false);
     let path=this.path;
-    this.path=[null];
+    if(refreshPath)
+      this.path=[null];
     setTimeout(()=>{
       this.path=path;
       this.currentFolder=folder;
+      this.currentFolderRef=ref;
       this.searchQuery=search;
     },10);
   }
@@ -979,7 +989,7 @@ export class WorkspaceMainComponent{
     this.router.navigate(["./"],{queryParams:{root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav},relativeTo:this.route})
       .then((result:boolean)=>{
         if(!result){
-          this.refresh();
+          this.refresh(false);
         }
       });
   }

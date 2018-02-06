@@ -16,6 +16,7 @@ import {trigger} from "@angular/animations";
   styleUrls: ['sub-tree.component.scss'],
   animations: [
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
+    trigger('open', UIAnimation.openOverlay()),
   ]
 })
 export class WorkspaceSubTreeComponent  {
@@ -46,6 +47,7 @@ export class WorkspaceSubTreeComponent  {
   @Input() selectedPath : string[]=[];
   @Input() parentPath : string[]=[];
   @Input() depth = 1;
+  @Input() selectedNode:string;
   @Output() onClick = new EventEmitter();
   @Output() onToggleTree = new EventEmitter();
   @Output() onDrop = new EventEmitter();
@@ -143,7 +145,7 @@ export class WorkspaceSubTreeComponent  {
     this.onDrop.emit({target:target,source:data,event:event});
   }
   private isSelected(node : Node){
-    return this.isOpen(node) && this.selectedPath[this.selectedPath.length-1]==node.ref.id;
+    return this.selectedNode==node.ref.id || (this.isOpen(node) && this.selectedPath[this.selectedPath.length-1]==node.ref.id && this.selectedNode==null);
   }
   private getFullPath(node : Node) : string[]{
     let path=this.parentPath.slice();

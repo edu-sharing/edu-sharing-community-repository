@@ -35,6 +35,9 @@ input[type=date]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   display: none;
 }
+.spinner-blue, .spinner-blue-only{
+  border-color: $primary;
+}
 /* for some reason they need to be declared seperately */
 @mixin sliderThumb(){
   background-color: $primary;

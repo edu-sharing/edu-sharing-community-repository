@@ -143,7 +143,6 @@ export class RestNodeService {
                         renameIfExists = false,
                         versionComment = "",
                         repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
-    console.log(properties);
     let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository/:parent/children/?type=:type&renameIfExists=:rename&versionComment=:versionComment&:aspects",repository,
       [
         [":parent",encodeURIComponent(parent)],
