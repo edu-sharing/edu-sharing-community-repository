@@ -295,16 +295,27 @@
 		</delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/ccauthentication-services-context.xml"></delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-permissionDefinitions.xml"></delete>
-		<delete file="${webserver.home}/shared/classes/alfresco/extension/model/ccContentModel.xml"></delete>
+		<delete>
+			<fileset dir="${webserver.home}/shared/classes/alfresco/extension/model">
+			</fileset>
+		</delete>
+		<delete>
+			<fileset dir="${webserver.home}/shared/classes/alfresco/extension/" includes="mimetype*.xml">
+			</fileset>
+		</delete>
+		
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-core-services-context.xml"></delete>	
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/es-caches.properties"></delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-cache-context.xml"></delete>
 		<delete dir="${webserver.home}/shared/classes/alfresco/extension/subsystems"></delete>
 		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-opencmis-context.xml"></delete>
-		<delete file="${webserver.home}/shared/classes/alfresco/extension/edu-sharing-sso-context.xml"></delete>
-		<delete file="${webserver.home}/shared/classes/alfresco/extension/edu-sharing*.xml"></delete>
-
-		
+		<delete>
+			<fileset dir="${webserver.home}/shared/classes/alfresco/extension/" includes="edu-sharing*.xml">
+			</fileset>
+		</delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-ressourceinfo-action-context.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-pdf-action-context.xml"></delete>
+		<delete file="${webserver.home}/shared/classes/alfresco/extension/custom-web-context.xml"></delete>
 		<!-- 
 			contentmodel stuff 
 		-->
