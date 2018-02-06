@@ -29,14 +29,21 @@ export class WorkspaceExplorerComponent  {
 
   private loading=false;
   public showLoading=false;
+
+  @Input() set showProgress(showProgress:boolean){
+    this.showLoading=showProgress;
+    if(showProgress){
+      this._nodes=[];
+    }
+  }
   public _searchQuery : string = null;
   private _node : string;
   public hasMoreToLoad :boolean ;
   private offset : number;
   private lastRequestSearch : boolean;
   @Input() selection : Node[];
-  @Input() set current(current : Node){
-   this.setNode(current);
+  @Input() set current(current : string){
+   this.setNodeId(current);
 
   }
   @Input() set searchQuery(query : string){
@@ -265,7 +272,7 @@ export class WorkspaceExplorerComponent  {
   }
 
 
-  private setNode(current: Node) {
+  private setNodeId(current: string) {
     setTimeout(()=>{
       if(this._searchQuery)
         return;
@@ -274,13 +281,13 @@ export class WorkspaceExplorerComponent  {
         return;
       }
       if(this.loading){
-        setTimeout(()=>this.setNode(current),10);
+        setTimeout(()=>this.setNodeId(current),10);
         return;
       }
-      if(this._node==current.ref.id)
+      if(this._node==current)
         return;
 
-      this._node=current.ref.id;
+      this._node=current;
       this._searchQuery=null;
       this.load(true);
     },5);

@@ -140,8 +140,9 @@
 
 
   <workspace-tree class="tree" *ngIf="isLoggedIn"
-  [current]="currentFolder"
+  [current]="currentFolderRef"
                   [path]="path"
+                  [selectedNode]="selectedNodeTree"
                   [root]="root"
                   [isSafe]="isSafe"
                   [options]="explorerOptions"
@@ -169,7 +170,7 @@
              [options]="actionOptions"
 ></actionbar>
   <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'" (contextmenu)="createContext($event)"
-  [current]="currentFolder"
+  [current]="currentFolderRef"
   [selection]="selection"
   [searchQuery]="searchQuery"
   [options]="explorerOptions"
