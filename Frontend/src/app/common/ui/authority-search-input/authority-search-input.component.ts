@@ -19,13 +19,13 @@ export class AuthoritySearchInputComponent{
   @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
   @Output() onChooseAuthority = new EventEmitter();
   private lastSuggestionSearch: string;
-  private addSuggestion(data: any) {
+  public addSuggestion(data: any) {
     this.onChooseAuthority.emit(data.item.originalObject)
   }
   constructor(private iam : RestIamService){
 
   }
-  private updateSuggestions(event : any){
+  public updateSuggestions(event : any){
     this.lastSuggestionSearch = event.input;
     this.iam.searchAuthorities(event.input,this.globalSearch).subscribe(
       (authorities:IamAuthorities)=>{
