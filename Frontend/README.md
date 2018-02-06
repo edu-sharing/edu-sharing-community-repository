@@ -2,7 +2,7 @@
 
 This folder contains the frontend part of edu-sharing.
 
-The frontend uses Angular 4 and TypeScript and uses [angular-cli](https://github.com/angular/angular-cli).
+The frontend uses Angular 5 and TypeScript and builds via [angular-cli](https://github.com/angular/angular-cli).
 
 Run "npm install" inside the project folder after checking out the project to fetch all dependencies.
 
