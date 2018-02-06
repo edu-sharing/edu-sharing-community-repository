@@ -902,6 +902,7 @@ export class WorkspaceMainComponent{
         this.createAllowed = true;
       }
       this.currentFolder = {ref: {id: id}};
+      this.currentFolderRef = id;
       this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
       this.searchQuery = null;
     }

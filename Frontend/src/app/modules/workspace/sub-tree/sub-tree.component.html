@@ -3,7 +3,7 @@
   <div class="dialog" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
   <div class="moreOpen collection"
        *ngIf="dropdown && _options && _options.length"
-       [@openOverlay]="dropdown==node && dropdownBottom==null"
+       [@openOverlay]="dropdown && _options && _options.length"
        [style.position]="dropdownPosition"
        [style.left]="dropdownLeft"
        [style.top]="dropdownTop"
