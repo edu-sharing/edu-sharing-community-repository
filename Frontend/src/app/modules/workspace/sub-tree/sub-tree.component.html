@@ -29,6 +29,7 @@
 >
 
   <div [style.paddingLeft.px]="depth*20" class="node waves-effect" [class.nodeSelected]="isSelected(node)" [class.hover]="dragHover==node">
+    <div class="fade-right" [class.fade-right-selected]="isSelected(node)"></div>
   <i *ngIf="!isOpen(node)" class="arrow material-icons" (click)="openOrCloseTree(node)">
     keyboard_arrow_right
   </i>
@@ -56,7 +57,9 @@
   ></workspace-sub-tree>
 </div>
 </div>
-<spinner-small *ngIf="loading"></spinner-small>
+  <div class="spinner" *ngIf="loading">
+    <spinner-small></spinner-small>
+  </div>
 </div>
 <!--
 <div [style.paddingLeft.px]="depth*20" *ngIf="!loading && (!_nodes || !_nodes.length)" class="empty">

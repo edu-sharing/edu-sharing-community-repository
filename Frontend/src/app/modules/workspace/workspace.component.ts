@@ -946,7 +946,9 @@ export class WorkspaceMainComponent{
   private refresh(refreshPath=true) {
     let search=this.searchQuery;
     let folder=this.currentFolder;
+    let ref=this.currentFolderRef;
     this.currentFolder=null;
+    this.currentFolderRef=null;
     this.searchQuery=null;
     this.selection=[];
     this.actionOptions=this.getOptions(this.selection,false);
@@ -956,6 +958,7 @@ export class WorkspaceMainComponent{
     setTimeout(()=>{
       this.path=path;
       this.currentFolder=folder;
+      this.currentFolderRef=ref;
       this.searchQuery=search;
     },10);
   }

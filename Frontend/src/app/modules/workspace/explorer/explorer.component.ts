@@ -192,7 +192,6 @@ export class WorkspaceExplorerComponent  {
     defaultColumns.push(license);
     defaultColumns.push(wfStatus);
 
-    console.log(configColumns);
     if(configColumns){
       let configList:ListItem[]=[];
       for(let col of defaultColumns){
