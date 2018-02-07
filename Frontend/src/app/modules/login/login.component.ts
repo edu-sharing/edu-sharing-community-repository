@@ -60,18 +60,6 @@ export class LoginComponent  implements OnInit{
               private cordova: CordovaService
             ){
 
-    // special cordova stuff
-    if (this.cordova.isRunningCordova()) {
-
-      this.cordova.setDeviceReadyCallback(()=>{
-        this.cordova.getPermanentStorage("test", (value:any) => {
-          alert("TEST VALUE: "+value);
-          this.cordova.setPermanentStorage("test","test8");
-        });
-      });
-
-    }
-
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
@@ -150,25 +138,48 @@ export class LoginComponent  implements OnInit{
 
   }
   private login(){
+    
     this.isLoading=true;
-    this.connector.login(this.username,this.password,this.scope).subscribe(
-      (data:string) => {
-        if(data==RestConstants.STATUS_CODE_OK) {
-          this.goToNext();
-        }
-        else if(data==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
-          this.toast.error(null,"LOGIN.SAFE_PREVIOUS");
-          this.isLoading=false;
-        }
-        else{
-          this.toast.error(null,"LOGIN.ERROR");
-          this.isLoading=false;
-        }
-      },
-      (error:any)=>{
-        this.toast.error(error);
+
+    if (this.cordova.isRunningCordova()) {
+
+      // APP: oAuth Login
+      this.connector.loginOAuth(this.username,this.password).subscribe((oauthTokens:OAuthResult)=>{
+
+        console.log("oAUTH WIN",oauthTokens);
         this.isLoading=false;
+
+      },(error:any)=>{
+
+        console.log("oAUTH FAIL",error);
+        this.isLoading=false;
+
       });
+
+    } else {
+
+      // DESKTOP: Session login
+      this.connector.login(this.username,this.password,this.scope).subscribe(
+        (data:string) => {
+          if(data==RestConstants.STATUS_CODE_OK) {
+            this.goToNext();
+          }
+          else if(data==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
+            this.toast.error(null,"LOGIN.SAFE_PREVIOUS");
+            this.isLoading=false;
+          }
+          else{
+            this.toast.error(null,"LOGIN.ERROR");
+            this.isLoading=false;
+          }
+        },
+        (error:any)=>{
+          this.toast.error(error);
+          this.isLoading=false;
+        });
+
+    }
+
   }
 
   private goToNext() {

@@ -11,7 +11,6 @@ import {Router, ActivatedRoute} from "@angular/router";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {UIConstants} from "../../ui/ui-constants";
 import {ConfigurationService} from "../../services/configuration.service";
-import {CordovaService} from "../../services/cordova.service";
 import {RestLocatorService} from "./rest-locator.service";
 
 /**
@@ -68,8 +67,7 @@ export class RestConnectorService {
               private config: ConfigurationService,
               private locator: RestLocatorService,
               private storage : TemporaryStorageService,
-              private event:FrameEventsService,
-              private cordova:CordovaService) {
+              private event:FrameEventsService) {
     this.numberPerRequest=RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
     event.addListener(this);
   }
@@ -89,31 +87,12 @@ export class RestConnectorService {
     }
   }
 
-
-  public getOAuthToken(username:string="", password:string="") : Observable<OAuthResult>{
-  let url=this.createUrl("../oauth2/token",null);
-  //"grant_type=password&client_id=eduApp&client_secret=secret&username=admin&password=admin"
-  return new Observable<OAuthResult>((observer : Observer<OAuthResult>)=>{
-    this.post(url,"client_id=eduApp&grant_type=client_credentials&client_secret=secret"+
-      "&username="+encodeURIComponent(username)+
-      "&password="+encodeURIComponent(password)
-      ,this.getRequestOptions("application/x-www-form-urlencoded")).map((response: Response) => response.json()).subscribe(
-      (data:OAuthResult) => {
-        observer.next(data);
-        observer.complete();
-      },
-      (error:any) =>{
-        observer.error(error);
-        observer.complete();
-      });
-  });
-
-}
   public logout() : Observable<Response>{
     let url=this.createUrl("authentication/:version/destroySession",null);
     this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_OUT);
     return this.get(url,this.getRequestOptions());
   }
+
   public logoutSync() : any{
     let url=this.createUrl("authentication/:version/destroySession",null);
     let xhr = new XMLHttpRequest();
@@ -124,9 +103,11 @@ export class RestConnectorService {
     this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_OUT);
     return result;
   }
+
   public getCurrentLogin() : LoginResult{
     return this.storage.get(TemporaryStorageService.SESSION_INFO);
   }
+
   public isLoggedIn() : Observable<LoginResult>{
     let url=this.createUrl("authentication/:version/validateSession",null);
     return new Observable<LoginResult>((observer : Observer<LoginResult>)=>{
@@ -146,16 +127,19 @@ export class RestConnectorService {
       );
     });
   }
+
   public hasAccessToScope(scope:string) : Observable<AccessScope>{
     let url=this.createUrl("authentication/:version/hasAccessToScope/?scope=:scope",null,[[":scope",scope]]);
     return this.get(url,this.getRequestOptions()).map((response: Response) => response.json());
   }
+
   private toolPermissions: string[];
   public hasToolPermissionInstant(permission:string){
     if(this.toolPermissions)
       return this.toolPermissions.indexOf(permission) != -1;
     return false;
   }
+
   public hasToolPermission(permission:string){
     console.log(this.toolPermissions);
     return new Observable<boolean>((observer : Observer<boolean>) => {
@@ -172,53 +156,57 @@ export class RestConnectorService {
     });
   }
 
-  public login(username:string,password:string,scope:string=null) : Observable<string>{
+  // oAuth login that is used when running as mobile app
+  public loginOAuth(username:string="", password:string="") : Observable<OAuthResult>{
 
-    if (this.locator.oAuthActive) {
+    let url = this.createUrl("../oauth2/token",null);
 
-      /*
-       *  OAUTH LOGIN
-       */ 
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/x-www-form-urlencoded');
+    headers.append('Accept', '*/*');
+    let options  = { headers:headers, withCredentials:false }
 
-       return new Observable<string>((observer : Observer<string>)=>{ 
+    // TODO: Check getRequestOptions ... maybe remember last auth method and switch withCredentials on/off or add token barear
+    console.log("Options", options);
+    
+    //"grant_type=password&client_id=eduApp&client_secret=secret&username=admin&password=admin"
+    return new Observable<OAuthResult>((observer : Observer<OAuthResult>)=>{
+      this.post(url,"client_id=eduApp&grant_type=password&client_secret=secret"+
+        "&username="+encodeURIComponent(username)+
+        "&password="+encodeURIComponent(password)
+        ,options).map((response: Response) => response.json()).subscribe(
+        (oauth:OAuthResult) => {
 
-        this.getOAuthToken(username,password).subscribe((oauth: OAuthResult) => {
-
-          if (!oauth.access_token) {
-            // signal user/pass wrong
-            observer.next("INVALID_CREDENTIALS");
-            observer.complete();
-            return;
-          }
-
-          // FRAGE: Wohin geht dieser Event? Ich finde keine Stelle im Code, wo EVENT_USER_LOGGED_IN empfangen wird?
-          // FRAGE: Und was passiert mit dem Data?
-          //this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
-
-          // TODO: Store these
-          console.log(oauth.access_token);
-          console.log(oauth.refresh_token);
-          console.log(oauth.expires_in);
-
-          alert("Running Cordova:"+this.cordova.isRunningCordova()+" and device is ready: "+this.cordova.isDeviceReady());
-
-          observer.error("TODO");
+        // signal user/pass wrong
+        if (!oauth.access_token) {
+          observer.error("INVALID_CREDENTIALS");
           observer.complete();
+          return;
+        }
 
+        // FRAGE: Wohin geht dieser Event? Ich finde keine Stelle im Code, wo EVENT_USER_LOGGED_IN empfangen wird?
+        // FRAGE: Und was passiert mit dem Data?
+        //this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
+
+        // TODO: Store these
+        console.log(oauth.access_token);
+        console.log(oauth.refresh_token);
+        console.log(oauth.expires_in);
+
+        observer.error("TODO");
+        observer.complete();
+
+          observer.next(oauth);
+          observer.complete();
         },
-        (error: any) => {
+        (error:any) =>{
           observer.error(error);
           observer.complete();
-        }
-      );
+        });
+    });
+  }
 
-       });
-
-    } else {
-
-      /*
-       *  SESSION LOGIN
-       */ 
+  public login(username:string,password:string,scope:string=null) : Observable<string>{
 
       let url = this.createUrl("authentication/:version/validateSession", null);
       if(scope) {
@@ -263,11 +251,8 @@ export class RestConnectorService {
         }
       });
 
-    }
-
-
-
   }
+
   public createRequestString(request : RequestObject){
     let str="skipCount="+(request && request.offset ? request.offset : 0)+
       "&maxItems="+(request && request.count!=null ?  request.count : this.numberPerRequest);

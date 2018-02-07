@@ -8,6 +8,9 @@ import { setTimeout } from "core-js/library/web/timers";
 @Injectable()
 export class CordovaService {
 
+  // change this during development for testing true, but false is default
+  private forceCordovaMode: boolean = true;
+
   private deviceIsReady: boolean = false;
   private deviceReadyCallback : Function = null;
 
@@ -16,9 +19,7 @@ export class CordovaService {
    */
   constructor() {
 
-    //adding listener for CordovaReady
-    document.addEventListener('deviceready', ()=>{
-
+    let whenDeviceIsReady = () => {
       // flag that device is ready
       this.deviceIsReady = true;
 
@@ -33,8 +34,16 @@ export class CordovaService {
 
       // call listener if set
       if (this.deviceReadyCallback!=null) this.deviceReadyCallback();
+    };
 
-    }, false);
+    //adding listener for CordovaReady
+    document.addEventListener('deviceready', whenDeviceIsReady, false);
+
+    // just for simulation on forced cordova mode
+    if (this.forceCordovaMode) {
+      console.log("SIMULATED deviceready event in FORCED CORDOVA MODE (just use during development)");
+      setTimeout(whenDeviceIsReady,3000);
+    }
 
   }
 
@@ -48,6 +57,7 @@ export class CordovaService {
    * Use to check if angular is running in a cordova environment.
    */
   isRunningCordova():boolean {
+    if (this.forceCordovaMode) return true;
     return (typeof (window as any).cordova != "undefined");
   }
 
