@@ -246,7 +246,11 @@ export class SearchComponent {
              this.initParams();
 
            }, (error: any) => {
+             console.warn("could not fetch repository list. Remote repositories can not be shown. Some features might not work properly. Please check the error and re-configure the repository");
              this.repositories = null;
+             this.allRepositories=[];
+             let home:any={id:'local',isHomeRepo:true};
+             this.allRepositories.push(home);
              this.repositoryIds = [];
              this.initParams();
            });

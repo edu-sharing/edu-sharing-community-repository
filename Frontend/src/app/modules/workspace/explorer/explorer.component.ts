@@ -192,7 +192,7 @@ export class WorkspaceExplorerComponent  {
     defaultColumns.push(license);
     defaultColumns.push(wfStatus);
 
-    if(configColumns){
+    if(Array.isArray(configColumns)){
       let configList:ListItem[]=[];
       for(let col of defaultColumns){
         if(configColumns.indexOf(col.name)!=-1){
@@ -208,7 +208,7 @@ export class WorkspaceExplorerComponent  {
       }
       defaultColumns=configList;
     }
-    if(customColumns){
+    if(Array.isArray(customColumns)){
       for(let column of defaultColumns){
         let add=true;
         for(let column2 of customColumns){

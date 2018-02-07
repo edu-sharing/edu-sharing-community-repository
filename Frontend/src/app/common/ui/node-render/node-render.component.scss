@@ -113,15 +113,15 @@ a.edusharing_rendering_content{
 }
 :host /deep/ {
   .nodeDetails {
-    margin:10px;
+    margin:15px;
     color: $primary;
     display: flex;
     align-items:center;
     .item {
       display: flex;
       @include clickable();
-      i{
-        padding-right: 5px;
+      >div{
+        padding-left: 5px;
       }
     }
   }
