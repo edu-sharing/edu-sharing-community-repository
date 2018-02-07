@@ -16,6 +16,7 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
 import {RestStreamService} from "../../../common/rest/services/rest-stream.service";
 import {RestHelper} from "../../../common/rest/rest-helper";
+import {Helper} from "../../../common/helper";
 
 @Component({
   selector: 'add-stream',
@@ -60,8 +61,8 @@ export class AddStreamComponent  {
     this.onDone.emit();
   }
   public addInvite(event:AuthorityProfile){
-    console.log(event);
-    this.invite.push(event);
+    if(Helper.indexOfObjectArray(this.invite,'authorityName',event.authorityName)==-1)
+      this.invite.push(event);
   }
   public removeInvite(event:AuthorityProfile){
     this.invite.splice(this.invite.indexOf(event),1);

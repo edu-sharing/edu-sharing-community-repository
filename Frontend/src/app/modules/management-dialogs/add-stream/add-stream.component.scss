@@ -4,6 +4,11 @@
   .edusharing-autocomplete-wrapper{
     margin-bottom: 0;
   }
+  .mdsEmbedded{
+    #add_to_stream_title_container{
+      font-weight: bold;
+    }
+  }
 }
 .wrapper {
   display:flex;
@@ -24,13 +29,16 @@
     padding: 0 $cardPadding;
     padding-bottom: 12px;
     background-color: $actionDialogBackground;
+    input[type=radio]+label{
+      width:100%;
+    }
     .audienceSearch{
       padding-top: 20px;
       .badge{
         background-color: #fff;
       }
       .toInvite{
-        min-height: 160px;
+        min-height: 170px;
       }
     }
   }

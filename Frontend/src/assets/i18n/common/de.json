@@ -298,6 +298,12 @@
     "API_FORBIDDEN":"Keine Rechte, um auf diesen Inhalt zuzugreifen",
     "API_FORBIDDEN_LOGIN":"Bitte anmelden, um auf diesen Bereich zuzugreifen"
   },
+  "ADD_TO_STREAM":{
+    "TITLE":"Zur Pipeline hinzufügen",
+    "AUDIENCE_TYPE":"Auf Pipeline von...",
+    "AUDIENCE_EVERYONE":"Allen",
+    "AUDIENCE_CUSTOM":"Einzelnen Personen oder Gruppen"
+  },
   "VCARD":{
     "Givenname":"Vorname",
     "Surname":"Nachname",
