@@ -13,13 +13,18 @@ export class CordovaService {
 
   private deviceIsReady: boolean = false;
   private deviceReadyCallback : Function = null;
+  private devicePauseCallback : Function = null;
+  private deviceResumeCallback : Function = null;
 
   /**
    * CONSTRUCTOR
    */
   constructor() {
 
+    // CORDOVA EVENT: Device is Ready (on App StartUp)
     let whenDeviceIsReady = () => {
+      console.log("CordovaService: App is Ready");
+
       // flag that device is ready
       this.deviceIsReady = true;
 
@@ -36,8 +41,25 @@ export class CordovaService {
       if (this.deviceReadyCallback!=null) this.deviceReadyCallback();
     };
 
-    //adding listener for CordovaReady
+    // CORDOVA EVENT: Pause (App is put into Background)
+    let whenDeviceGoesBackground = () => {
+      console.log("CordovaService: App goes into Background");
+      // call listener if set
+      if (this.devicePauseCallback!=null) this.devicePauseCallback();
+    };
+
+    // CORDOVA EVENT: Resume (App comes back from Background)
+    // always consider that app could have been in background for days
+    let whenDeviceGoesForeground = () => {
+      console.log("CordovaService: App comes back from Background");
+      // call listener if set
+      if (this.deviceResumeCallback!=null) this.deviceResumeCallback();
+    };
+
+    //adding listener for cordova events
     document.addEventListener('deviceready', whenDeviceIsReady, false);
+    document.addEventListener('pause', whenDeviceGoesBackground, false);
+    document.addEventListener('resume', whenDeviceGoesForeground, false);
 
     // just for simulation on forced cordova mode
     if (this.forceCordovaMode) {
@@ -83,6 +105,22 @@ export class CordovaService {
     }  
   }
 
+  /**
+   * Set a callback function to be called then device is paused.
+   * @param callback callback function (with void parameter)
+   */
+  setDevicePauseCallback(callback:Function) {
+      this.devicePauseCallback = callback;
+  }  
+
+  /**
+   * Set a callback function to be called then device resumes from pause.
+   * @param callback callback function (with void parameter)
+   */
+  setDeviceResumeCallback(callback:Function) {
+    this.deviceResumeCallback = callback;
+}  
+
 
   /**********************************************************
    * APP SIDE PRESISTENCE 
@@ -92,6 +130,11 @@ export class CordovaService {
    * .. just in case that for example on iOS the HTML5 local storage gets ereased:
    * https://stackoverflow.com/questions/7750857/how-permanent-is-local-storage-on-android-and-ios
    */
+
+  /*
+   * KEYS FOR STORAGE
+   */
+  public STORAGE_OAUTHTOKENS:string = "oauth";
 
   /**
    * load permanent key/value 

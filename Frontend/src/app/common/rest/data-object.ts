@@ -656,12 +656,15 @@ export class LocalPermissionsResult {
   permissions: Permission[];
 }
 export interface  OAuthResult{
+
+  // set by server
   access_token:string;
   refresh_token:string;
   expires_in:number;
 
+  // for local use
+  expires_ts?:number;
 }
-
 
 export interface Permissions {
   localPermissions: LocalPermissionsResult;

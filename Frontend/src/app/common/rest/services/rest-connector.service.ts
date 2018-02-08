@@ -108,10 +108,23 @@ export class RestConnectorService {
     return this.storage.get(TemporaryStorageService.SESSION_INFO);
   }
 
-  public isLoggedIn() : Observable<LoginResult>{
-    let url=this.createUrl("authentication/:version/validateSession",null);
+  // also works optional with oAuth tokens for authentication
+  public isLoggedIn(oauth:OAuthResult=null) : Observable<LoginResult>{
+
+    let url = this.createUrl("authentication/:version/validateSession",null);
+    let options:any = null;
+    if (oauth==null) {
+      options = this.getRequestOptions();
+    } else {
+      // build oAuth Auth headers
+      let headers = new Headers();
+      headers.append('Accept', 'application/json');
+      headers.append('Authorization', 'Bearer ' + oauth.access_token);
+      options  = { headers:headers, withCredentials:false }
+    }
+
     return new Observable<LoginResult>((observer : Observer<LoginResult>)=>{
-      this.get(url,this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
+      this.get(url,options).map((response: Response) => response.json()).subscribe(
         (data:LoginResult)=>{
           this.toolPermissions=data.toolPermissions;
           this.event.broadcastEvent(FrameEventsService.EVENT_UPDATE_LOGIN_STATE,data);
@@ -160,50 +173,170 @@ export class RestConnectorService {
   public loginOAuth(username:string="", password:string="") : Observable<OAuthResult>{
 
     let url = this.createUrl("../oauth2/token",null);
-
     let headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
     headers.append('Accept', '*/*');
     let options  = { headers:headers, withCredentials:false }
-
-    // TODO: Check getRequestOptions ... maybe remember last auth method and switch withCredentials on/off or add token barear
-    console.log("Options", options);
     
-    //"grant_type=password&client_id=eduApp&client_secret=secret&username=admin&password=admin"
+    let data = "client_id=eduApp&grant_type=password&client_secret=secret"+
+    "&username="+encodeURIComponent(username)+
+    "&password="+encodeURIComponent(password);
+
     return new Observable<OAuthResult>((observer : Observer<OAuthResult>)=>{
-      this.post(url,"client_id=eduApp&grant_type=password&client_secret=secret"+
-        "&username="+encodeURIComponent(username)+
-        "&password="+encodeURIComponent(password)
-        ,options).map((response: Response) => response.json()).subscribe(
+      this.post(url,data,options).map((response: Response) => response.json()).subscribe(
         (oauth:OAuthResult) => {
 
-        // signal user/pass wrong
-        if (!oauth.access_token) {
-          observer.error("INVALID_CREDENTIALS");
-          observer.complete();
-          return;
-        }
+          if (oauth==null) {
+            observer.error("INVALID_CREDENTIALS");"LOGIN.ERROR"
+            observer.complete();
+            return;
+          }
 
-        // FRAGE: Wohin geht dieser Event? Ich finde keine Stelle im Code, wo EVENT_USER_LOGGED_IN empfangen wird?
-        // FRAGE: Und was passiert mit dem Data?
-        //this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
-
-        // TODO: Store these
-        console.log(oauth.access_token);
-        console.log(oauth.refresh_token);
-        console.log(oauth.expires_in);
-
-        observer.error("TODO");
-        observer.complete();
+          // set local expire ts on token
+          oauth.expires_ts = Date.now() + (oauth.expires_in * 1000);
 
           observer.next(oauth);
           observer.complete();
+
         },
         (error:any) =>{
+
+          if (error.status==401) {
+            observer.error("LOGIN.ERROR");
+            observer.complete();
+            return;
+          }
+
           observer.error(error);
           observer.complete();
         });
     });
+  }
+
+  // oAuth refresh tokens
+  public refreshOAuth(oauth:OAuthResult) : Observable<OAuthResult> {
+
+      let url = this.createUrl("../oauth2/token",null);
+      let headers = new Headers();
+      headers.append('Content-Type', 'application/x-www-form-urlencoded');
+      headers.append('Accept', '*/*');
+      let options  = { headers:headers, withCredentials:false }
+  
+      let data = "grant_type=refresh_token&client_id=eduApp&client_secret=secret"+
+      "&refresh_token="+encodeURIComponent(oauth.refresh_token);
+          
+      return new Observable<OAuthResult>((observer : Observer<OAuthResult>)=>{
+        this.post(url, data, options).map((response: Response) => response.json()).subscribe(
+          (oauthNew:OAuthResult) => {
+  
+            // set local expire ts on token
+            oauthNew.expires_ts = Date.now() + (oauth.expires_in * 1000);
+  
+            observer.next(oauthNew);
+            observer.complete();
+  
+          },
+          (error:any) =>{  
+            observer.error(error);
+            observer.complete();
+          });
+      });  
+  }  
+
+  /**
+  * If the user has a set of oAuth tokens (after login or when starting the app again)
+  * then use this method to get a cookie/session and subscribe on refreshes on oAuth tokens.
+  * When the Observable an error mit "INVALID" - oAuth tokens are outdated and new login is needed. 
+  */
+  public initOAuthSession(oauth:OAuthResult) : Observable<OAuthResult> {
+
+    return new Observable<OAuthResult>((observer : Observer<OAuthResult>)=>{
+
+      let localErrorHandling = (error:any, tag:string="") => {
+        if ((typeof error != "string") && (error.status==401)) {
+          // oauth tokens are invalid
+          console.log("INVALID initOAuthSession "+tag);
+          observer.error("INVALID");
+          observer.complete();
+        } else {
+          // on all other errors (server, internet, etc)
+          console.log("ERROR initOAuthSession "+tag,error);
+          observer.error(error);
+          observer.complete();
+        }
+      };
+
+      // make getting session from backend available from multiple points in this method
+      let getSessionFromBackend = (firstTry:boolean=true) =>{
+        // check with backend
+        this.isLoggedIn(oauth).subscribe(
+          (win)=>{
+
+            // you now have a valid session cookie that will work
+            // on following request --> FINAL WIN
+            observer.next(oauth);
+            observer.complete();
+
+          }, 
+          (error)=>{
+
+            // just in case oauth is invalid and its first try - try to refresh on time
+            // this is for scenarios where expire date of oauth access token is still valid,
+            // but in case of a server restart got invalid early
+            if ((typeof error != "string") && (error.status==401)) {
+
+              if (firstTry) {
+
+                // on first try of init session - try the refresh
+                console.log("initOAuthSession --> Doing EXCEPTION OAUTH REFRESH");
+                this.refreshOAuth(oauth).subscribe(
+                  (win)=>{
+                    oauth = win;
+                    getSessionFromBackend(false);
+                  },
+                  (error)=>{
+                    localErrorHandling(error, "(on exception refresh)")
+                  }
+                ); 
+
+              } else {
+
+                // on second try - give up - oAuth is invalid
+                observer.error("INVALID");
+                observer.complete();
+
+              }
+              return;
+            }
+
+            localErrorHandling(error, "(on isLoggedIn firstTry="+firstTry+")");
+          }
+        );
+      };
+
+      // check if oauth needs refresh (by timestamp)
+      if ((Date.now()+60000) > oauth.expires_ts) {
+        // oAuth needs refresh first
+        console.log("initOAuthSession --> Doing PLANNED OAUTH REFRESH");
+        this.refreshOAuth(oauth).subscribe(
+          (win)=>{
+
+            // now oauth is fresh - continue with init session
+            oauth = win;
+            console.log("FRESH OAUTH",oauth);
+            getSessionFromBackend();
+          
+          },
+          (error)=>{
+            localErrorHandling(error, "(on planned refresh)");
+          }
+        ); 
+      } else {
+        getSessionFromBackend();
+      }
+
+    });
+
   }
 
   public login(username:string,password:string,scope:string=null) : Observable<string>{

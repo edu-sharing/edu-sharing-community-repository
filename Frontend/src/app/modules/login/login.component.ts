@@ -143,22 +143,49 @@ export class LoginComponent  implements OnInit{
 
     if (this.cordova.isRunningCordova()) {
 
+      /**
+       * APP LOGIN -> oAuth
+       */
+
       // APP: oAuth Login
       this.connector.loginOAuth(this.username,this.password).subscribe((oauthTokens:OAuthResult)=>{
 
-        console.log("oAUTH WIN",oauthTokens);
-        this.isLoading=false;
+        // init session with ne tokens
+        this.connector.initOAuthSession(oauthTokens).subscribe(
+          (win)=>{
+
+            // store oAuth tokens
+            this.cordova.setPermanentStorage(this.cordova.STORAGE_OAUTHTOKENS,JSON.stringify(oauthTokens));
+
+            this.isLoading=false;
+            alert("WIN INIT SESSION / TODO: NOW START APP AND CHECK OAUTH ON RESTART");            
+
+          },
+          (error)=>{
+
+            this.isLoading=false;
+            this.toast.error(null,"LOGIN.ERROR");
+ 
+          }
+        );
 
       },(error:any)=>{
 
-        console.log("oAUTH FAIL",error);
         this.isLoading=false;
+        if (typeof error == "string") {
+          this.toast.error(null, error);
+        } else {
+          this.toast.error(null,"LOGIN.ERROR");
+        } 
 
       });
 
     } else {
 
-      // DESKTOP: Session login
+       /**
+       * DESKTOP LOGIN -> Session
+       */
+
       this.connector.login(this.username,this.password,this.scope).subscribe(
         (data:string) => {
           if(data==RestConstants.STATUS_CODE_OK) {
