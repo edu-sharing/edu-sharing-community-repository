@@ -1,0 +1,34 @@
+
+<div class="dialog darken valign-wrapper">
+
+    <spinner *ngIf="isLoading" class="center"></spinner>
+    <div *ngIf="!isLoading">
+    <div class="card center-card">
+      <div class="card-content">
+      <div class="card-title">{{caption | translate}}</div>
+        <div class="branding" *ngIf="config.branding"><img src="assets/images/logo.svg"></div>
+        <div class="card-scroll ">
+        <form (ngSubmit)="login()" #loginForm>
+        <div *ngIf="showUsername">
+          <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
+          <input #usernameInput type="text" requried name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
+        </div>
+        <div>
+          <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
+        <input #passwordInput requried type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/>
+        </div>
+        </form>
+        <div class="register" *ngIf="config.registerUrl">
+          {{'LOGIN.REGISTER_TEXT' | translate}}
+          <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
+        </div>
+        </div>
+      </div>
+        <div class="card-action">
+          <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+          <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
+        </div>
+    </div>
+    </div>
+    </div>
+

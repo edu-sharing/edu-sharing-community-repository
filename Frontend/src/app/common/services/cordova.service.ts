@@ -1,6 +1,11 @@
 
 import { Injectable } from "@angular/core";
 import { setTimeout } from "core-js/library/web/timers";
+import { Observable, Observer } from "rxjs";
+import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
+
+import { OAuthResult, LoginResult } from "../rest/data-object";
+import { RestLocatorService } from "./../rest/services/rest-locator.service";
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -19,7 +24,10 @@ export class CordovaService {
   /**
    * CONSTRUCTOR
    */
-  constructor() {
+  constructor(
+    private http : Http,
+    private locator : RestLocatorService
+  ) {
 
     // CORDOVA EVENT: Device is Ready (on App StartUp)
     let whenDeviceIsReady = () => {
@@ -213,6 +221,248 @@ export class CordovaService {
       console.error("Plugin Fail",e);
     }
 
+  }
+
+  /**********************************************************
+   * OAUTH Server Communication
+   **********************************************************
+   * The REST-Services depend on Configuration Service that already need config from a fixed server.
+   * To seperate the app login from those dependencies .. the cordova service provides all the HTTP
+   * tools to select a server, make oAuth logins/management, get JSession .. from there on the
+   * regular REST-Services can handle all the communication. 
+   */
+
+  // errors results that can result when testing a server url
+  public static TEST_ERROR_NOTFOUND:string = "APINOTFOUND";
+  public static TEST_ERROR_NOINTERNET:string = "NOINTERNET";
+  public static TEST_ERROR_INCORRECTVERSION:string = "INCORRECTVERSION";
+  public static TEST_ERROR_UNKNOWN:string = "UNKOWN";
+
+  // success results that can result when testing a server url
+  public static TEST_WARNING_NOHTTPS:string = "NOHTTPS";
+  public static TEST_TESTSKIPPED:string = "TESTSKIPPED";
+  public static TEST_OK:string = "OK";
+
+  public setServerURL(url:string, doTesting:boolean): Observable<string> {
+    return new Observable<string>((observer: Observer<string>) => {
+
+      if (doTesting) {
+
+        // test URL TO API
+        
+        alert("TODO: TESTING OF URL NEEDED");
+        observer.error(CordovaService.TEST_ERROR_UNKNOWN);
+        observer.complete();
+
+      } else {
+      
+        // simply set API URL and OK
+        this.locator.endpointUrl = url;
+        observer.next(CordovaService.TEST_TESTSKIPPED);
+        observer.complete();
+      
+      }
+
+    });
+  }
+
+  // oAuth login that is used when running as mobile app
+  public loginOAuth(username: string = "", password: string = ""): Observable<OAuthResult> {
+
+    let url = this.locator.endpointUrl + RestLocatorService.createUrl("../oauth2/token", null);
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/x-www-form-urlencoded');
+    headers.append('Accept', '*/*');
+    let options = { headers: headers, withCredentials: false }
+
+    let data = "client_id=eduApp&grant_type=password&client_secret=secret" +
+      "&username=" + encodeURIComponent(username) +
+      "&password=" + encodeURIComponent(password);
+
+    return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
+      this.http.post(url, data, options).map((response: Response) => response.json()).subscribe(
+        (oauth: OAuthResult) => {
+
+          if (oauth == null) {
+            observer.error("INVALID_CREDENTIALS"); "LOGIN.ERROR"
+            observer.complete();
+            return;
+          }
+
+          // set local expire ts on token
+          oauth.expires_ts = Date.now() + (oauth.expires_in * 1000);
+
+          observer.next(oauth);
+          observer.complete();
+
+        },
+        (error: any) => {
+
+          if (error.status == 401) {
+            observer.error("LOGIN.ERROR");
+            observer.complete();
+            return;
+          }
+
+          observer.error(error);
+          observer.complete();
+        });
+    });
+  }
+
+  // oAuth refresh tokens
+  public refreshOAuth(oauth: OAuthResult): Observable<OAuthResult> {
+
+    let url = this.locator.endpointUrl + RestLocatorService.createUrl("../oauth2/token", null);
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/x-www-form-urlencoded');
+    headers.append('Accept', '*/*');
+    let options = { headers: headers, withCredentials: false }
+
+    let data = "grant_type=refresh_token&client_id=eduApp&client_secret=secret" +
+      "&refresh_token=" + encodeURIComponent(oauth.refresh_token);
+
+    return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
+      this.http.post(url, data, options).map((response: Response) => response.json()).subscribe(
+        (oauthNew: OAuthResult) => {
+
+          // set local expire ts on token
+          oauthNew.expires_ts = Date.now() + (oauth.expires_in * 1000);
+
+          observer.next(oauthNew);
+          observer.complete();
+
+        },
+        (error: any) => {
+          observer.error(error);
+          observer.complete();
+        });
+    });
+  }
+
+  /**
+  * If the user has a set of oAuth tokens (after login or when starting the app again)
+  * then use this method to get a cookie/session and subscribe on refreshes on oAuth tokens.
+  * When the Observable an error mit "INVALID" - oAuth tokens are outdated and new login is needed. 
+  */
+  public initOAuthSession(oauth: OAuthResult): Observable<OAuthResult> {
+
+    return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
+
+      let localErrorHandling = (error: any, tag: string = "") => {
+        if ((typeof error != "string") && (error.status == 401)) {
+          // oauth tokens are invalid
+          console.log("INVALID initOAuthSession " + tag);
+          observer.error("INVALID");
+          observer.complete();
+        } else {
+          // on all other errors (server, internet, etc)
+          console.log("ERROR initOAuthSession " + tag, error);
+          observer.error(error);
+          observer.complete();
+        }
+      };
+
+      // make getting session from backend available from multiple points in this method
+      let getSessionFromBackend = (firstTry: boolean = true) => {
+        // check with backend
+        this.isLoggedIn(oauth).subscribe(
+          (win) => {
+
+            // you now have a valid session cookie that will work
+            // on following request --> FINAL WIN
+            observer.next(oauth);
+            observer.complete();
+
+          },
+          (error) => {
+
+            // just in case oauth is invalid and its first try - try to refresh on time
+            // this is for scenarios where expire date of oauth access token is still valid,
+            // but in case of a server restart got invalid early
+            if ((typeof error != "string") && (error.status == 401)) {
+
+              if (firstTry) {
+
+                // on first try of init session - try the refresh
+                console.log("initOAuthSession --> Doing EXCEPTION OAUTH REFRESH");
+                this.refreshOAuth(oauth).subscribe(
+                  (win) => {
+                    oauth = win;
+                    getSessionFromBackend(false);
+                  },
+                  (error) => {
+                    localErrorHandling(error, "(on exception refresh)")
+                  }
+                );
+
+              } else {
+
+                // on second try - give up - oAuth is invalid
+                observer.error("INVALID");
+                observer.complete();
+
+              }
+              return;
+            }
+
+            localErrorHandling(error, "(on isLoggedIn firstTry=" + firstTry + ")");
+          }
+        );
+      };
+
+      // check if oauth needs refresh (by timestamp)
+      if ((Date.now() + 60000) > oauth.expires_ts) {
+        // oAuth needs refresh first
+        console.log("initOAuthSession --> Doing PLANNED OAUTH REFRESH");
+        this.refreshOAuth(oauth).subscribe(
+          (win) => {
+
+            // now oauth is fresh - continue with init session
+            oauth = win;
+            console.log("FRESH OAUTH", oauth);
+            getSessionFromBackend();
+
+          },
+          (error) => {
+            localErrorHandling(error, "(on planned refresh)");
+          }
+        );
+      } else {
+        getSessionFromBackend();
+      }
+
+    });
+
+  }
+
+  // also works optional with oAuth tokens for authentication
+  public isLoggedIn(oauth: OAuthResult = null): Observable<LoginResult> {
+
+    let url = this.locator.endpointUrl + RestLocatorService.createUrl("authentication/:version/validateSession", null);
+    let headers = new Headers();
+    headers.append('Accept', 'application/json');
+    headers.append('Authorization', 'Bearer ' + oauth.access_token);
+    let options: any = { headers: headers, withCredentials: true }
+
+    return new Observable<LoginResult>((observer: Observer<LoginResult>) => {
+      this.http.get(url, options).map((response: Response) => response.json()).subscribe(
+        (data: LoginResult) => {
+          /*
+          this.toolPermissions=data.toolPermissions;
+          this.event.broadcastEvent(FrameEventsService.EVENT_UPDATE_LOGIN_STATE,data);
+          this.storage.set(TemporaryStorageService.SESSION_INFO,data);
+          this._logoutTimeout=data.sessionTimeout;
+          */
+          observer.next(data);
+          observer.complete();
+        },
+        (error: any) => {
+          observer.error(error);
+          observer.complete();
+        }
+      );
+    });
   }
 
 

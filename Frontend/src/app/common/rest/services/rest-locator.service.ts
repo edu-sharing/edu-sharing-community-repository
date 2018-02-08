@@ -10,18 +10,11 @@ import {subscribeOn} from "rxjs/operator/subscribeOn";
 @Injectable()
 export class RestLocatorService {
 
-  // Christian: Hardcoded force to use oAuth for testing
-  public oAuthActive = true;
-
-  // TODO: Christian: Detect if runnig on real device thwn work with 
-  // server directory like old app
   private static ENDPOINT_URLS = [
-    //"rest/",
-    //"http://localhost:8080/edu-sharing/rest/",
-    //"http://localhost:8081/edu-sharing/rest/",
-    "http://edu41.edu-sharing.de/edu-sharing/rest/",
-    //"https://repository.oer-berlin.de/edu-sharing/rest/",
-    //"http://alfresco5.vm:8080/edu-sharing/rest/"
+    "rest/",
+    "http://localhost:8080/edu-sharing/rest/",
+    "http://localhost:8081/edu-sharing/rest/",
+    "http://alfresco5.vm:8080/edu-sharing/rest/"
   ];
   private static DEFAULT_NUMBER_PER_REQUEST = 25;
   public numberPerRequest = RestLocatorService.DEFAULT_NUMBER_PER_REQUEST;
@@ -31,9 +24,11 @@ export class RestLocatorService {
   private ticket: string;
   private themesUrl: any;
   private isLocating = false;
+  
   get endpointUrl(): string {
     return this._endpointUrl;
   }
+  
   get apiVersion(): number {
     return this._apiVersion;
   }
@@ -44,6 +39,7 @@ export class RestLocatorService {
 
   constructor(private http : Http) {
   }
+
   public getConfig() : Observable<any>{
     return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {

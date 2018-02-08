@@ -10,6 +10,7 @@ import {TasksMainComponent} from "../modules/node-list/tasks/tasks.component";
 import {CollectionNewComponent} from "../modules/collections/collection-new/collection-new.component";
 import {CollectionsMainComponent} from "../modules/collections/collections.component";
 import {LoginComponent} from "../modules/login/login.component";
+import {LoginAppComponent} from "../modules/login-app/login-app.component";
 import {PermissionsRoutingComponent} from "../modules/permissions/permissions-routing.component";
 import {PermissionsMainComponent} from "../modules/permissions/permissions.component";
 import {OerComponent} from "../modules/oer/oer.component";
@@ -69,7 +70,7 @@ export class RouterComponent {
 // Due to ahead of time, we need to create all routes manuall
 export var ROUTES=[
   // global
-    { path: '', component: LoginComponent },
+    { path: '', component: LoginAppComponent },
     { path: UIConstants.ROUTER_PREFIX+'test/mds',component: MdsTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'test/rest',component: RestTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node', component: NodeRenderComponent},
