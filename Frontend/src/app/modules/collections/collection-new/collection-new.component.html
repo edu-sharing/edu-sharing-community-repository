@@ -124,12 +124,12 @@
                             <label for="test2">{{ 'collectionNew_setAccessMyOrgaNA' | translate }}</label>
                         </span>
             <div *ngIf="shareToAll">
-            <input name="group1" type="radio" id="test3" [(ngModel)]="newCollectionScope" (change)="setScopeCustom()" [value]="'EDU_ALL'" />
+            <input name="group1" type="radio" id="test3" [(ngModel)]="newCollectionScope" [value]="'EDU_ALL'" />
             <label for="test3">{{ 'collectionNew_setAccessPublic' | translate }}</label>
             </div>
             <br>
         </div>
-        <input name="group1" type="radio" id="test4" [(ngModel)]="newCollectionScope" [value]="'CUSTOM'" />
+        <input name="group1" type="radio" id="test4" [(ngModel)]="newCollectionScope" (change)="setScopeCustom()" [value]="'CUSTOM'" />
         <label for="test4">{{'COLLECTIONS.EXTENDED_PERMISSIONS' | translate}}</label>
         <div class="dialog-basic-area permissionsBtn">
           <a class="btn-flat btn-shadow btn-icon" tabindex="0" (keyup.enter)="editPermissions()" (click)="editPermissions()"><i class="material-icons">person_add</i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</a>

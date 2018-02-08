@@ -23,6 +23,7 @@ import {RestConnectorService} from "../../../common/rest/services/rest-connector
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {SessionStorageService} from "../../../common/services/session-storage.service";
 import {UIConstants} from "../../../common/ui/ui-constants";
+import {NodePermissions} from "../../../common/rest/data-object";
 
 // component class
 @Component({
@@ -304,6 +305,8 @@ export class CollectionNewComponent {
                 collectionWrapper.collection.scope=this.newCollectionScope;
                 // null fields that should ne ignored
                 collectionWrapper.collection.owner = null;
+              this.nodeService.getNodePermissions(this.editId).subscribe((data:NodePermissions)=>{
+                this.permissions=data.permissions.localPermissions;
 
                 this.collectionService.updateCollection(collectionWrapper.collection).subscribe( result => {
 
@@ -319,7 +322,7 @@ export class CollectionNewComponent {
                   this.handleError(error);
                   this.isLoading=false;
                 });
-
+              });
             });
 
 
