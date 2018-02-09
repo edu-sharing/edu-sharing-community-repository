@@ -321,7 +321,18 @@ export class WorkspaceShareComponent  {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);
     });
   }
-
+  private updatePermissionInfo(){
+    let type:string[];
+    for(let permission of this.newPermissions){
+      if(type && !Helper.arrayEquals(type,permission.permissions)){
+        this.currentType=[];
+        return;
+      }
+      type=permission.permissions;
+    }
+    if(type)
+      this.currentType=type;
+  }
   private removePermissions(permissions:Permission[], remove : string) {
     for(let i=0;i<remove.length;i++){
       if(permissions[i] && permissions[i].authority.authorityType==remove){

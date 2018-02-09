@@ -10,6 +10,48 @@
   float:left;
   width:25%;
 }
+.card .row{
+  background-color: $actionDialogBackground;
+  margin: 0 -20px;
+  padding:0 20px;
+  margin-top: -20px;
+  padding-top:10px;
+}
+.group{
+  width:100%;
+  padding:10px 20px;
+  position: relative;
+}
+.groupInvite {
+  padding: 10px 30px;
+  padding-top: 20px;
+  background-color: $actionDialogBackground;
+  flex-direction: column;
+  .global {
+    margin-left: 8px;
+  }
+}
+.searchIcon{
+  position: absolute;
+  color:$textLight;
+  left:37px;
+  top:27px;
+}
+.invited{
+  padding:0 20px;
+}
+:host /deep/{
+  .edusharing-autocomplete-wrapper{
+    margin-bottom: 0!important;
+    input{
+      padding-left: 40px;
+      width: calc(100% - 40px);
+      border:1px solid $searchInputBorderColor;
+      background-color: #fff;
+      border-radius: 2px;
+    }
+  }
+}
 h2{
   color:$textLight;
   text-align: center;
@@ -41,6 +83,9 @@ a.active{
   color:#000!important;
   background: linear-gradient(to top, $primary 0%,$primary 5px,transparent 5px,transparent 5%)
 }
+.groupMessage{
+  padding:0 20px;
+}
 .publish{
   margin: 20px -20px;
   padding:20px 20px;
@@ -55,6 +100,7 @@ a.active{
   .type{
     color: $textLight;
     float: right;
+    padding-right: 20px;
     span{
       position: relative;
       top: -3px;
@@ -72,26 +118,41 @@ a.active{
   }
 }
 .group{
-  display:table;
+  display:flex;
   width:100%;
   margin-bottom: -25px;
 }
 .global{
   margin-bottom: 20px;
 }
+.groupToInvite{
+  display:flex;
+  margin-top: 35px;
+  padding-bottom:45px;
+  padding-right: 20px;
+  align-items: center;
+  .toInvite{
+    overflow: hidden;
+    display:flex;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .typeButton{
+    display: flex;
+    .material-icons{
+    }
+    .btn-flat {
+      height: 40px;
+    }
+    .right{
+      width:0;
+      left:0;
+    }
+  }
+}
 .crossed{
   text-decoration: line-through;
 }
-.group .btn-flat{
-  position:relative;
-  left:18px;
-  top:18px;
-  padding-right:12px;
-}
-.group div,.group input{
-  display:table-cell;
-}
-
 .groupEntry{
   width:100%;
   display:table;
@@ -148,16 +209,15 @@ img.inherit{
   margin-bottom: 0;
 }
 .tabContent{
-  height: calc(100% - 76px);
+  padding-top: 20px;
+  height: calc(100% - 68px);
+  margin:0 -20px;
   overflow: auto;
   overflow-x: hidden;
-  padding: 0 20px;
-  margin: 0 -20px;
-  padding-top: 20px;
   @include iosScrolling();
 }
-.right{
-  float:right;
+.tabContentInvite{
+  padding-top: 0;
 }
 .inheritCheck{
   float:left;
@@ -176,19 +236,11 @@ img.inherit{
   width:210px;
   float:none;
 }
-.typeButton{
-  width:230px;
-}
 .typeAdd{
   position:absolute;
   right: 20px;
   width: 280px!important;
-  top: 160px;
-}
-.toInvite{
-  margin-top: -10px;
-  padding-bottom:45px;
-  overflow: hidden;
+  top: -60px;
 }
 label.notify{
   color:$textPrimary;
@@ -198,11 +250,8 @@ label.notify p{
 }
 
 @media screen and (max-width: $mobileWidth) {
-  .typeButton {
-    width: 110px;
-    .btn-flat{
-      width: 90px;
-    }
+  .typeButton .btn-flat{
+    width: 86px;
     span {
       display: none;
     }
