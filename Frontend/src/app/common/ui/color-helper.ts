@@ -1,4 +1,5 @@
 export class ColorHelper{
+  public static BRIGHTNESS_THRESHOLD_COLLECTIONS = 0.6;
   public static cssColorToRgb(color:string) : number[] {
     color=color.trim();
     if(color.startsWith("rgb")){

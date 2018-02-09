@@ -416,7 +416,7 @@ export class CollectionNewComponent {
     }
   }
     public isBrightColor(){
-        return ColorHelper.getColorBrightness(this.currentCollection.color)>0.5;
+        return ColorHelper.getColorBrightness(this.currentCollection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
     }
     private save3(collection:Collection){
     if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){

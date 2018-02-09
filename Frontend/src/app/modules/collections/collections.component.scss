@@ -205,13 +205,16 @@ table, div {
 
 .collections-header  {
     background-color: $primary;
-    color: #ffffff;
+    color: #fff;
     left: 0;
     height: 110%;
     width: 250px;
     position: fixed;
     overflow-y: auto;
     top:$mainnavHeight;
+}
+.dark-color{
+  color: #000;
 }
 .collections-master-div-notabs {
     padding-left:300px;

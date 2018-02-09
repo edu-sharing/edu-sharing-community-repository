@@ -43,6 +43,7 @@ import {trigger} from "@angular/animations";
 import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
+import {ColorHelper} from '../../common/ui/color-helper';
 
 // data class for breadcrumbs
 export class Breadcrumb {
@@ -349,6 +350,9 @@ export class CollectionsMainComponent implements GwtEventListener {
         //ApplyToLmsComponent.navigateToSearchUsingReurl(this.router);
         this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
       }
+    }
+    public isBrightColor(){
+        return ColorHelper.getColorBrightness(this.collectionContent.collection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
     }
     getScopeInfo(){
       return NodeHelper.getCollectionScopeInfo(this.collectionContent.collection);
