@@ -196,7 +196,6 @@ $imagePath: '../../../../assets/images/collections/';
   float:none;
 }
 .title{
-  color:#fff;
   font-size:120%;
 }
 .collectionShadow{
@@ -209,11 +208,20 @@ $imagePath: '../../../../assets/images/collections/';
 }
 
 .collection-new-preview-infoarea {
-    min-height: 120px;
-    padding: 16px;
-    color: white;
+  min-height: 120px;
+  padding: 16px;
+  color: #fff;
+  transition: $transitionNormal all;
+  @include placeholder {
+    color: #ccc;
+  }
 }
-
+.dark-color{
+  color:#000;
+  @include placeholder {
+    color: #333;
+  }
+}
 .collection-new-preview-headline {
     font-size: 200%;
 }
