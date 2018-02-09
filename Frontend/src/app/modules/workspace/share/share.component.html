@@ -178,7 +178,7 @@
         ></workspace-share-permission>
         -->
       </div>
-      <div *ngIf="tab==ADVANCED && permissionsUser && permissionsGroup" class="tabContent">
+      <div *ngIf="tab==ADVANCED && permissionsUser && permissionsGroup" class="tabContent advanced">
         <h2 *ngIf="permissionsUser.length+permissionsGroup.length==0">
           {{'WORKSPACE.SHARE.NO_PERMISSIONS' | translate}}
         </h2>

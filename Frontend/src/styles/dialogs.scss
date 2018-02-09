@@ -118,13 +118,21 @@ input[type=search]{
   padding-top: 10px;
   @include clickable();
 }
+@mixin fullsizeCard(){
+  position:fixed;
+  width:100%;
+  padding-bottom: 25px;
+  left:0%;
+  margin-left:0!important;
+}
+@media screen and (max-width: ($mobileWidth)) {
+  .card-wide{
+   @include fullsizeCard();
+  }
+}
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
   .center-card{
-    position:fixed;
-    width:100%;
-    padding-bottom: 25px;
-    left:0%;
-    margin-left:0!important;
+    @include fullsizeCard();
   }
   .card-low{
     width:90%;
