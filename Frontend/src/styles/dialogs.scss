@@ -3,12 +3,12 @@
 
 
 .dialog{
-   width:100%;
-   height:100%;
-   left:0;
-   top:0;
-   position:fixed;
-   z-index:120;
+  width:100%;
+  height:100%;
+  left:0;
+  top:0;
+  position:fixed;
+  z-index:120;
 }
 .globalProgress{
   z-index:122;
@@ -163,13 +163,21 @@ input[type=search]{
     overflow-y: auto;
   }
 }
+@mixin fullsizeCard(){
+  position:fixed;
+  width:100%;
+  padding-bottom: 25px;
+  left:0%;
+  margin-left:0!important;
+}
+@media screen and (max-width: ($mobileWidth)) {
+  .card-wide{
+    @include fullsizeCard();
+  }
+}
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
   .center-card{
-    position:fixed;
-    width:100%;
-    padding-bottom: 25px;
-    left:0%;
-    margin-left:0!important;
+    @include fullsizeCard();
   }
   .card-low{
     width:90%;
@@ -177,11 +185,11 @@ input[type=search]{
   }
 }
 @media screen and (max-height: ($mobileHeight)) {
- .card:not(.card-low), .card-high {
+  .card:not(.card-low), .card-high {
     top: 0;
     bottom: 0;
-   .scrollable{
-     height:100%;
-   }
+    .scrollable{
+      height:100%;
+    }
   }
 }

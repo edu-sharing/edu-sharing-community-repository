@@ -1,12 +1,17 @@
 @import "../../../../../styles/variables.scss";
 
 
-.container div{
-  display:table-cell;
+.container{
+  display: flex;
+  >div {
+    display: flex;
+    overflow: hidden;
+    padding: 1px 0;
+    align-items: center;
+  }
 }
 .publish{
-  width:50px;
-  padding-right: 5px;
+  padding: 0 5px;
 }
 .container{
   width:100%;
@@ -14,13 +19,20 @@
 .readOnly{
   color: $textLight;
 }
-.permission div{
-  width:140px;
-  float:left;
-}
-.permission span{
-  position: relative;
-  top:-2px;
+.permission{
+  justify-content: flex-end;
+  >div{
+    display: flex;
+    justify-content: flex-end;
+    padding:0 5px;
+    >div{
+      display:flex;
+      align-items: center;
+      span{
+        padding-left:3px;
+      }
+    }
+  }
 }
 .icon{
   padding-right:5px;
@@ -30,9 +42,8 @@
   top: -2px;
 }
 .name{
-  width:100%;
-  position: relative;
-  top:-7px;
+  flex-grow: 1;
+  @include shortenText();
 }
 .typeAdd{
   position:absolute;
@@ -40,10 +51,23 @@
   width: 280px!important;
   top: 160px;
 }
-.align{
-  position:relative;
-  top:6px;
+.select{
+  width:25px;
+  display: inline-block;
+  padding:0 2px;
+  i{
+    position: relative;
+    top:3px;
+  }
+}
+.icon,.remove{
+  min-width: 24px;
 }
 .remove i,.type{
   color:$textLight;
+}
+@media screen and (max-width: $mobileWidth) {
+  .permission >div >div span{
+    display: none;
+  }
 }
