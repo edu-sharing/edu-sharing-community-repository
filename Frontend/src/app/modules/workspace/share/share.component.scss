@@ -37,7 +37,7 @@
   left:37px;
   top:27px;
 }
-.invited{
+.invited,.advanced{
   padding:0 20px;
 }
 :host /deep/{
@@ -155,16 +155,21 @@ a.active{
 }
 .groupEntry{
   width:100%;
-  display:table;
+  display:flex;
   background: #eee;
   width: 100%;
   border-radius: 15px;
-  padding: 0 15px;
+  padding-left: 15px;
+  padding-right: 5px;
   margin-bottom: 6px;
+  workspace-share-permission{
+    width: 100%;
+  }
+  border:2px dashed transparent;
 }
 .added{
   background: transparent;
-  border:2px dashed $workspaceInheritColor;
+  border-color:$workspaceInheritColor;
 }
 .inherit{
   color:$textLight;
@@ -255,5 +260,8 @@ label.notify p{
     span {
       display: none;
     }
+  }
+  .advancedPermission{
+    width:50%;
   }
 }
