@@ -90,6 +90,7 @@ export class AddStreamComponent  {
         this.streamApi.updateStatus(id,RestConstants.AUTHORITY_EVERYONE,STREAM_STATUS.OPEN).subscribe(()=>{
           this.onLoading.emit(false);
           this.onDone.emit();
+          this.toast.toast('ADD_TO_STREAM.SUCCESSFUL');
         });
       }
       else{

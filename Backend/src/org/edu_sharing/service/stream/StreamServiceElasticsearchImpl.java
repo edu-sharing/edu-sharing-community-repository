@@ -111,7 +111,8 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 					startObject(TYPE_NAME).
 					startObject("properties").
 					startObject("created").field("type", "date").endObject().
-					startObject("priority").field("type", "long").endObject().
+					startObject("modified").field("type", "date").endObject().
+					startObject("priority").field("type", "integer").endObject().
 					startObject("audience").field("type", "nested").
 						startObject("properties").
 						startObject("authority").field("type","keyword").endObject().
@@ -153,7 +154,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		}
 		return hosts;
 	}
-	private static String INDEX_NAME="entry_index20";
+	private static String INDEX_NAME="entry_index22";
 	private static String TYPE_NAME="entry";
 	private static TimeValue SCROLL_TIME=TimeValue.timeValueMinutes(1);
 	private RestHighLevelClient client;

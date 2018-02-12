@@ -125,6 +125,7 @@ public class StreamDao {
 				entry.setProperties(contentEntry.properties);
 				entry.setCreated((long) contentEntry.created);
 				entry.setModified((long) contentEntry.modified);
+				entry.setPriority((int) contentEntry.priority);
 				list.add(entry);
 			}
 			result.setStream(list);
