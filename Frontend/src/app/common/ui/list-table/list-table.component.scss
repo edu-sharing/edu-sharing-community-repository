@@ -445,6 +445,11 @@ $orderAnimationTime:$animationTime*5;
   max-height:1.5rem;
   overflow: hidden;
 }
+.cardSmallList .rowInner{
+  max-height: 3.15rem;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
 .node_ccm_commonlicense_key .rowInner,
 .cardList .rowInner{
   max-height: none;
@@ -579,7 +584,6 @@ $orderAnimationTime:$animationTime*5;
 .cardSmallList .row_1{
   top: 5px;
   font-size: 110%;
-  height: 56px;
   overflow: hidden;
 }
 .cardSmallList .row_2{
