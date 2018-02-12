@@ -312,12 +312,14 @@
 			<widget>
 				<id>add_to_stream_title</id>
 				<caption>cb_add_to_stream_title</caption>
+				<placeholder>cb_add_to_stream_title_placeholder</placeholder>
 				<type>text</type>
 				<required>true</required>							
 			</widget>
 			<widget>
 				<id>add_to_stream_description</id>
 				<caption>cb_add_to_stream_description</caption>
+				<placeholder>cb_add_to_stream_description_placeholder</placeholder>
 				<type>text</type>			
 			</widget>
 			<widget>

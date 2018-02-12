@@ -302,7 +302,8 @@
     "TITLE":"Zur Pipeline hinzufügen",
     "AUDIENCE_TYPE":"Auf Pipeline von...",
     "AUDIENCE_EVERYONE":"Allen",
-    "AUDIENCE_CUSTOM":"Einzelnen Personen oder Gruppen"
+    "AUDIENCE_CUSTOM":"Einzelnen Personen oder Gruppen",
+    "SUCCESSFUL":"Element(e) wurden den Stream hinzugefügt"
   },
   "VCARD":{
     "Givenname":"Vorname",
