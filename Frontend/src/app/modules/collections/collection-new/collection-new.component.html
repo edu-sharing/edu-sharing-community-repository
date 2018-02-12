@@ -121,7 +121,7 @@
 
           </div>
 
-          <div class="collection-new-preview-infoarea" [style.background-color]="currentCollection.color" >
+          <div class="collection-new-preview-infoarea" [style.background-color]="currentCollection.color" [class.dark-color]="isBrightColor()">
 
             <div class="dialog-basic-area" style="padding-top: 0; padding-bottom:0;">
               <input type="text" id="input1" class="title" [(ngModel)]="currentCollection.title"  placeholder="{{'collectionNew_placeholderTitle' | translate }}" autofocus>

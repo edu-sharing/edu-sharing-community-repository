@@ -447,7 +447,7 @@ export class MdsComponent{
     data.widgets.push({id:"author",caption:this.translate.instant('MDS.AUTHOR_LABEL')});
     data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
     data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
-    if(this.getWidget("license",data.widgets)==null) {
+    if(this.getWidget("license",null,data.widgets)==null) {
       data.widgets.push({id: "license", caption: this.translate.instant('MDS.LICENSE')});
     }
     for(let group of data.groups){
@@ -664,7 +664,15 @@ export class MdsComponent{
           continue;
         let props=properties[widget.id];
         let element=(document.getElementById(widget.id) as any);
-
+        // try to resolve proper template widget if exists to exchange valuespace
+        try {
+          let template = element.parentNode.getAttribute('data-template');
+          if(template!=null) {
+            let tplWidget = this.getWidget(widget.id, template);
+            if(tplWidget)
+              widget=tplWidget;
+          }
+        }catch(e){}
         if(widget.id=='author'){
           /*if(properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]){
             this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_PERSON);
@@ -1422,7 +1430,7 @@ export class MdsComponent{
     if(widget.type!='checkbox')
       html+=caption;
 
-    html+='<div class="mdsWidget widget_'+widget.type+' '+id.replace(":","_")+'"'+attr+'>';
+    html+='<div class="mdsWidget widget_'+widget.type+' '+id.replace(":","_")+'"'+attr+' data-template="'+template.id+'">';
     if(template.rel=='suggestions'){
       html+=`<div id="`+widget.id+`_badgeSuggestions" style="display:none" class="multivalueBadges"></div>`;
     }
@@ -1756,10 +1764,13 @@ export class MdsComponent{
       , 10);
   }
 
-  private getWidget(id: string,widgets=this.mds.widgets) {
+  private getWidget(id: string,template:string=null,widgets=this.mds.widgets) {
     for(let w of widgets){
-      if(w.id==id)
-        return w;
+      if(w.id==id){
+        if(template==null || w.template==template){
+          return w;
+        }
+      }
     }
     return null;
   }

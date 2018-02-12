@@ -120,6 +120,7 @@ export class Node {
   mimetype: string;
   licenseURL: string;
   size: number;
+  commentCount: number;
   preview: Preview;
   owner: Person;
   metadataset: string;

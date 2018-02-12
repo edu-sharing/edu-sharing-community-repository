@@ -175,7 +175,10 @@
 </div>
 </div>
 <!-- collection header -->
-<div *ngIf="(!isRootLevelCollection()) && (!isLoading) && isReady && (tabSelected.length>=-1)" class="collections-header scrollWithBanner" [style.background-color]="collectionContent.collection.color">
+<div *ngIf="(!isRootLevelCollection()) && (!isLoading) && isReady && (tabSelected.length>=-1)"
+     class="collections-header scrollWithBanner"
+     [class.dark-color]="isBrightColor()"
+     [style.background-color]="collectionContent.collection.color">
 
   <div class="card-collection-image-container" style="width:100%;">
 

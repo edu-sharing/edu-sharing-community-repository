@@ -32,7 +32,9 @@ export class UIHelper{
       this.setTitleNoTranslation(name,title,config);
     });
   }
+  public static getBlackWhiteContrast(color:string){
 
+  }
   static changeQueryParameter(router: Router,route:ActivatedRoute, name: string, value: any) {
     route.queryParams.subscribe((data:any)=>{
       let queryParams:any={};

@@ -50,6 +50,7 @@ public class Node {
 	private boolean isDirectory;
 	private Collection collection;
 	private Person owner;
+	private int commentCount;
 
 	/**
    **/
@@ -80,6 +81,17 @@ public class Node {
 	public void setParent(NodeRef parent) {
 		this.parent = parent;
 	}
+	
+	@JsonProperty
+	public int getCommentCount() {
+		return commentCount;
+	}
+
+
+	public void setCommentCount(int commentCount) {
+		this.commentCount = commentCount;
+	}
+
 
 	/**
    **/

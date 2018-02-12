@@ -55,6 +55,8 @@ import org.edu_sharing.restservices.shared.Preview;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.comment.CommentService;
+import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -298,6 +300,7 @@ public class NodeDao {
 	private final String storeId;
 	
 	NodeService nodeService;
+	CommentService commentService;
 	
 	Filter filter;
 
@@ -333,6 +336,17 @@ public class NodeDao {
 	
 	private NodeDao(RepositoryDao repoDao, String storeProtocol, String storeId, String nodeId, Filter filter) throws DAOException {
 		this(repoDao,new org.edu_sharing.service.model.NodeRefImpl(repoDao.getId(),storeProtocol,storeId,nodeId),filter);
+	}
+	private int getCommentCount(){
+		if(repoDao.isHomeRepo()) {
+			try {
+				CommentService commentService = CommentServiceFactory.getCommentService();
+				return commentService.getComments(nodeId).size();
+			}catch(Exception e) {
+				
+			}
+		}
+		return 0;
 	}
 	
 	private NodeDao(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef, Filter filter) throws DAOException {
@@ -670,6 +684,7 @@ public class NodeDao {
 		data.setMimetype(getMimetype());
 		data.setMediatype(getMediatype());
 		data.setIconURL(getIconURL());
+		data.setCommentCount(getCommentCount());
 		data.setLicenseURL(getLicenseURL());
 		data.setSize(getSize());
 		data.setPreview(getPreview());

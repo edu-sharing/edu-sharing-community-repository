@@ -30,6 +30,12 @@
   /* ios scrolling fix */
   -webkit-overflow-scrolling: touch;
 }
+@mixin placeholder {
+  ::-webkit-input-placeholder {@content}
+  :-moz-placeholder           {@content}
+  ::-moz-placeholder          {@content}
+  :-ms-input-placeholder      {@content}
+}
 @mixin setGlobalInsetFocus(){
   //respect element border radius
   @include removeDefaultFocus();

@@ -1,5 +1,6 @@
 import {Pipe, PipeTransform} from "@angular/core";
 import {Helper} from "../helper";
+import {ColorHelper} from "./color-helper";
 @Pipe({name: 'authorityColor'})
 export class AuthorityColorPipe implements PipeTransform {
   public static COLORS=['#48708e','#975B5D','#6A9663','#62998F','#769CB6','#968758'];
@@ -25,36 +26,19 @@ export class AuthorityColorPipe implements PipeTransform {
     }
     return hash;
   }
-  private static hexToRgb(hex:string) : number[] {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? [
-      parseInt(result[1], 16),
-      parseInt(result[2], 16),
-      parseInt(result[3], 16)
-    ] : null;
-  }
-  private static componentToHex(c:number) {
-    var hex = Math.max(0,Math.min(Math.round(c),255)).toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
-  }
-
-  private static rgbToHex(rgb:number[]) : string {
-    return "#" + AuthorityColorPipe.componentToHex(rgb[0]) + AuthorityColorPipe.componentToHex(rgb[1]) + AuthorityColorPipe.componentToHex(rgb[2]);
-  }
-
   private static getColors() {
     let colors=Helper.deepCopy(AuthorityColorPipe.COLORS);
     for(let color of AuthorityColorPipe.COLORS){
-      let c=AuthorityColorPipe.hexToRgb(color);
+      let c=ColorHelper.cssColorToRgb(color);
       c[0]*=0.75;
       c[1]*=0.75;
       c[2]*=0.75;
-      colors.push(AuthorityColorPipe.rgbToHex(c));
-      c=AuthorityColorPipe.hexToRgb(color);
+      colors.push(ColorHelper.rgbToHex(c));
+      c=ColorHelper.cssColorToRgb(color);
       c[0]*=1.5;
       c[1]*=1.5;
       c[2]*=1.5;
-      colors.push(AuthorityColorPipe.rgbToHex(c));
+      colors.push(ColorHelper.rgbToHex(c));
     }
     return colors;
   }

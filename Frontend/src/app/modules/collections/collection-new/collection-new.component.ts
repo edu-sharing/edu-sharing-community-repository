@@ -25,6 +25,7 @@ import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {ListItem} from "../../../common/ui/list-item";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
+import {ColorHelper} from '../../../common/ui/color-helper';
 
 // component class
 @Component({
@@ -412,7 +413,10 @@ export class CollectionNewComponent {
       this.save3(collection);
     }
   }
-  private save3(collection:Collection){
+    public isBrightColor(){
+        return ColorHelper.getColorBrightness(this.currentCollection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
+    }
+    private save3(collection:Collection){
     if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
       this.permissions=this.getEditorialGroupPermissions();
     }
