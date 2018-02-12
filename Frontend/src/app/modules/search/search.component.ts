@@ -835,7 +835,8 @@ export class SearchComponent {
       this.saveSearchDialog=true;
     });
     save.showName=false;
-    this.mdsActions.push(save);
+    if(!this.isGuest)
+      this.mdsActions.push(save);
   }
   private closeSaveSearchDialog(){
     this.saveSearchDialog=false;
