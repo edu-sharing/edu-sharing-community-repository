@@ -21,6 +21,7 @@ import {ListItem} from "../list-item";
 import {UIHelper} from "../ui-helper";
 import {Helper} from "../../helper";
 import {RestNetworkService} from "../../rest/services/rest-network.service";
+import {ColorHelper} from '../color-helper';
 
 @Component({
   selector: 'listTable',
@@ -342,6 +343,9 @@ export class ListTableComponent implements EventListener{
   public delete(node:any){
     this.onDelete.emit(node);
   }
+    public isBrightColorCollection(color : string){
+        return ColorHelper.getColorBrightness(color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
+    }
   public toggleAll(){
     if(this.selectedNodes.length==this._nodes.length){
       this.selectedNodes=[];

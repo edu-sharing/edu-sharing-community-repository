@@ -47,7 +47,7 @@ public class ConfigApi {
 	    	
 	    	config.setGlobal(ConfigServiceFactory.getConfigService().getConfig().values);
 	    	try {
-	    		config.setCurrent(ConfigServiceFactory.getConfigService().getConfigByDomain(Context.getCurrentInstance().getRequest().getServerName()).values);
+	    		config.setCurrent(ConfigServiceFactory.getConfigService().getConfigByDomain(ConfigServiceFactory.getCurrentDomain()).values);
 	    	}catch(IllegalArgumentException e) {
 	    		logger.info(e.getMessage());
 	    		// context for domain does not exist -> use default
@@ -77,7 +77,7 @@ public class ConfigApi {
 
 	    	language.setGlobal(getActiveLanguage(ConfigServiceFactory.getConfigService().getConfig().language));
 	    	try {
-	    		language.setCurrent(getActiveLanguage(ConfigServiceFactory.getConfigService().getConfigByDomain(Context.getCurrentInstance().getRequest().getServerName()).language));
+	    		language.setCurrent(getActiveLanguage(ConfigServiceFactory.getConfigService().getConfigByDomain(ConfigServiceFactory.getCurrentDomain()).language));
 	    	}catch(IllegalArgumentException e) {
 	    		logger.info(e.getMessage());
 	    		language.setCurrent(language.getGlobal());
@@ -106,7 +106,7 @@ public class ConfigApi {
 
 	    	variables.setGlobal(convertVariables(ConfigServiceFactory.getConfigService().getConfig().variables));
 	    	try {
-	    		variables.setCurrent(convertVariables(ConfigServiceFactory.getConfigService().getConfigByDomain(Context.getCurrentInstance().getRequest().getServerName()).variables));
+	    		variables.setCurrent(convertVariables(ConfigServiceFactory.getConfigService().getConfigByDomain(ConfigServiceFactory.getCurrentDomain()).variables));
 	    	}catch(IllegalArgumentException e) {
 	    		logger.info(e.getMessage());
 	    		variables.setCurrent(variables.getGlobal());
