@@ -477,6 +477,7 @@ export class SearchComponent {
     this.updateActionbar(this.selection);
     if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
+      this.searchService.complete = true;
       return;
     }
     if(init) {
@@ -967,11 +968,17 @@ export class SearchComponent {
           });
         }
         this.updateSelection([]);
-        this.mds.getSets(this.currentRepository).subscribe((data:MdsMetadatasets)=>{
-          this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepositoryObject ? this.currentRepositoryObject : this.currentRepository,data.metadatasets,this.config);
+        let repo=this.currentRepository;
+        this.mds.getSets(repo).subscribe((data:MdsMetadatasets)=>{
+          if(repo!=this.currentRepository){
+              return;
+          }
+          this.mdsSets=ConfigurationHelper.filterValidMds(repo,data.metadatasets,this.config);
           if(this.mdsSets){
             UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
             try {
+              console.log("mds for current repo " +this.currentRepository);
+              console.log(this.mdsSets);
               this.mdsId = this.mdsSets[0].id;
               if (param['mds'] && Helper.indexOfObjectArray(this.mdsSets,'id',param['mds'])!=-1)
                 this.mdsId = param['mds'];
