@@ -2,16 +2,12 @@ package org.edu_sharing.service.stream;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.join.ScoreMode;
@@ -24,7 +20,6 @@ import org.edu_sharing.service.stream.model.StreamSearchResult;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -35,11 +30,9 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.script.Script;
@@ -47,11 +40,11 @@ import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.sum.ParsedSum;
 import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
 import org.elasticsearch.search.aggregations.support.ValueType;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
@@ -111,10 +104,29 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		RestClientBuilder restClient = RestClient.builder(
                 hosts.toArray(new HttpHost[0]));
 		client=new RestHighLevelClient(restClient);
-		
-		CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
-		//indices create is comming in 6.2.0!
-				//client.indices().
+		try {
+			CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
+			indexRequest.mapping(TYPE_NAME, jsonBuilder().
+					startObject().
+					startObject(TYPE_NAME).
+					startObject("properties").
+					startObject("created").field("type", "date").endObject().
+					startObject("priority").field("type", "long").endObject().
+					startObject("audience").field("type", "nested").
+						startObject("properties").
+						startObject("authority").field("type","keyword").endObject().
+						startObject("status").field("type","keyword").endObject().
+						endObject().
+					endObject().
+					endObject().
+					endObject().
+					endObject()
+					);
+			client.indices().create(indexRequest);
+		}catch(Exception e) {
+			// index already exists
+			// throw new RuntimeException("Elastic search init failed",e);
+		}
 		
 	}
 	private List<HttpHost> getConfiguredHosts() {
@@ -141,7 +153,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		}
 		return hosts;
 	}
-	private static String INDEX_NAME="entry_index19";
+	private static String INDEX_NAME="entry_index20";
 	private static String TYPE_NAME="entry";
 	private static TimeValue SCROLL_TIME=TimeValue.timeValueMinutes(1);
 	private RestHighLevelClient client;
