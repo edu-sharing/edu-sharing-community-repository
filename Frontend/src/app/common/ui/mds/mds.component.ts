@@ -525,7 +525,7 @@ export class MdsComponent{
         let valueClean = [];
         for (let v of Array.isArray(value) ? value : [value]) {
             let split = (v+"").split("</label>");
-            v = split[split.length - 1];
+            v = split[split.length - 1].trim();
             if(widget.unit)
               v = v.replace(widget.unit,"").trim();
             valueClean.push(v);
