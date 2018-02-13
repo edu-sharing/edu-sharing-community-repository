@@ -3,7 +3,7 @@
     "TITLE":"Admin-Tools",
     "UNDERSTAND":"Understand, Continue",
     "WARNING_TITLE":"Administration Area",
-    "WARNING_INFO":"This section is only meant for administer the repository.\nWrong settings can lead fo errors or even data lost. \n\nDon't run any operations which you're not sure about!",
+    "WARNING_INFO":"This section is only meant for administer the repository.\nWrong settings can lead to errors or even data lost. \n\nDon't run any operations which you're not sure about!",
     "TAB":{
       "INFO":"Info",
       "APPLICATIONS":"Applications",
