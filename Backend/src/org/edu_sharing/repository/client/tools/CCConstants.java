@@ -1261,6 +1261,8 @@ public class CCConstants {
 	public final static String PERMISSION_ALL =	"All";
 	
 	public final static String LICENSE_NO_LICENSE = "no-license";
+	
+	public final static String LICENSE_SCHULFUNK = "SCHULFUNK";
 
 	
 	/**
