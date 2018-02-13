@@ -102,7 +102,7 @@
           [hasIcon]="true"
           [selectedNodes]="selectedMembers"
           [hasHeading]="false"
-          [selectOnClick]="false"
+          [selectOnClick]="addMembers ? true : false"
           [isClickable]="true"
           (onSelectionChanged)="updateSelectedMembers($event)"
        ></listTable>

@@ -162,6 +162,8 @@ a.active{
   padding-left: 15px;
   padding-right: 5px;
   margin-bottom: 6px;
+  height: 35px;
+  align-items: center;
   workspace-share-permission{
     width: 100%;
   }
@@ -192,7 +194,8 @@ a.active{
   padding-bottom:5px;
   float:left;
 }
-.inheritDisabled{
+.inheritDisabled,
+.inheritEmpty{
   font-size:90%;
   color:$textLight;
   padding-left:10px;
@@ -200,6 +203,7 @@ a.active{
   width: 100%;
   text-align: center;
   float: left;
+  white-space: pre-wrap;
 }
 img.inherit{
   position: relative;

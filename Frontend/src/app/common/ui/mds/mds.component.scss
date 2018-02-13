@@ -24,7 +24,7 @@
 }
 .card-jumpmarks{
   position:fixed;
-  z-index: 121;
+  z-index: $dialogZIndex+1;
   top:10%;
   left:50%;
   width:200px;

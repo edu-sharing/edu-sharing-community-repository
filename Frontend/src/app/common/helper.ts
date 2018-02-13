@@ -110,4 +110,17 @@ export class Helper {
   public static deepCopy(data: any) {
     return JSON.parse(JSON.stringify(data));
   }
+
+  /**
+   * init an array with a given length and all values set to the init value
+   * @param {number} length
+   * @param value
+   */
+  static initArray(length: number, value: any=null) {
+    let array:any=[];
+    for(let i=0;i<length;i++){
+      array.push(value);
+    }
+    return array;
+  }
 }

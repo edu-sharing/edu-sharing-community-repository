@@ -35,7 +35,7 @@
   position:absolute;
   background: white;
   text-align: left;
-  z-index: 121;
+  z-index: $dialogZIndex+1;
   margin-top: -20px;
   padding-left: 0;
   margin-right: 2px;
