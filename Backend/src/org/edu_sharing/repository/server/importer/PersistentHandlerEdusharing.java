@@ -52,6 +52,7 @@ import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -78,10 +79,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 	public PersistentHandlerEdusharing() throws Throwable {
-		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
-		AuthenticationTool authTool = RepoFactory.getAuthenticationToolInstance(homeRep.getAppId());
-		HashMap<String, String> authInfo = authTool.createNewSession(homeRep.getUsername(), homeRep.getPassword());
-		mcAlfrescoBaseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(homeRep.getAppId(), authInfo);
+		mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 	}
 
 	public void removeAllImportedObjects() throws Throwable {
