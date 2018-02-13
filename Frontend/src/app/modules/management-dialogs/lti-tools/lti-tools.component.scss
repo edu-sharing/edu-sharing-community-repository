@@ -15,7 +15,7 @@
   }
   .createList{
     position: absolute;
-    z-index: 121;
+    z-index: $dialogZIndex+1;
     right: 55px;
     width: 230px;
     top: 25px;

@@ -1,9 +1,9 @@
 @import "../../../../../styles/variables.scss";
 .dialog{
-  z-index: 121;
+  z-index: $dialogZIndex+1;
 }
 .card{
-  z-index: 122;
+  z-index: $dialogZIndex+2;
 }
 .heading{
   padding:10px;
