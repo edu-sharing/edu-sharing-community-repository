@@ -112,7 +112,7 @@ export class Helper {
   }
 
   /**
-   * init an array with a given length an all values set to the init value
+   * init an array with a given length and all values set to the init value
    * @param {number} length
    * @param value
    */
