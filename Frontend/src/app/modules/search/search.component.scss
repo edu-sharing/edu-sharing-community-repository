@@ -60,8 +60,8 @@ $sidenavWidth:300px;
   margin-left: 15px;
 }
 .collections{
-  min-height: $cardSmallHeight+10px;
-  max-height: $cardSmallHeight+10px;
+  min-height: $listCardSmallHeight+10px;
+  max-height: $listCardSmallHeight+10px;
   overflow: hidden;
   margin-bottom:25px;
 }

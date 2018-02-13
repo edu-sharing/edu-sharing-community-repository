@@ -558,7 +558,7 @@ $orderAnimationTime:$animationTime*5;
 .cardSmallList{
   display:block;
   width:$cardWidth;
-  height:$cardSmallHeight;
+  height: $listCardSmallHeight;
   @include materialShadow();
   float:left;
   margin:6px;
