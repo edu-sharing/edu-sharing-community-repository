@@ -90,6 +90,7 @@
       }
     },
     "INHERIT_DISABLED":"Rechtevererbung ist aktuell ausgeschaltet",
+    "INHERIT_EMPTY":"Es sind aktuell keine Berechtigungen am übergeordneten Ordner.\nSobald der übergeordnete Ordner Berechtigungen erhält, werden diese auf das Objekt angewendet.",
     "PERMISSION_AUTHORITY_EXISTS":"Der gewählte Nutzer/Gruppe hat bereits Zugriff. Überprüfen Sie die Berechtigungen unter \"Schon Eingeladen\"",
     "PERMISSIONS_UPDATED":"Freigaben wurden aktualisiert",
 
