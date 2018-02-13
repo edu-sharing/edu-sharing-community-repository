@@ -3,22 +3,9 @@
           [currentScope]="'collections'"
           [searchEnabled]="false"
 ></main-nav>
-<workspace-share *ngIf="showPermissions"
-[nodeId]="editPermissionsId"
-[node]="editPermissionsDummy"
-[sendMessages]="false"
-[sendToApi]="false"
-[disableInherition]="true"
-[currentPermissions]="permissions"
-(onClose)="setPermissions($event)"
->
-</workspace-share>
 <div class="collections-master-div" [class.collections-master-div-mainnav]="mainnav">
 
-<!-- spinner if loading -->
-<section *ngIf="isLoading" class="collections-loading-div">
-  <spinner></spinner>
-</section>
+<global-progress *ngIf="isLoading"></global-progress>
 
 <div *ngIf="!isLoading" class="createContainer">
   <div class="createProgress" *ngIf="newCollectionStep!=STEP_NEW">
@@ -206,7 +193,7 @@
       <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
     </div>
   </section>
-  <section *ngIf="newCollectionStep==STEP_PERMISSIONS" class="card center-card card-action collectionShadow">
+  <section *ngIf="newCollectionStep==STEP_PERMISSIONS" class="card center-card card-low card-action collectionShadow">
     <div class="card-content">
       <div class="card-title">
         <span>{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}</span>
@@ -225,3 +212,13 @@
 </div>
 
 </div>
+<workspace-share *ngIf="showPermissions"
+                 [nodeId]="editPermissionsId"
+                 [node]="editPermissionsDummy"
+                 [sendMessages]="false"
+                 [sendToApi]="false"
+                 [disableInherition]="true"
+                 [currentPermissions]="permissions"
+                 (onClose)="setPermissions($event)"
+>
+</workspace-share>

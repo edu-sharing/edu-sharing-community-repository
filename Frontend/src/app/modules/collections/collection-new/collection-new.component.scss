@@ -78,14 +78,12 @@ $imagePath: '../../../../assets/images/collections/';
 }
 
 .collections-master-div {
-  height:100%;
+  min-height: 100%;
   margin:auto;
   max-width:600px;
-  display:table;
-  padding: 20px 0px;
-  margin-top: $mainnavHeight;
-}
-.collections-master-div-mainnav{
+  display:flex;
+  align-items: center;
+  padding-top: $mainnavHeight;
 }
 .createCollection{
   background-color: #fff;
@@ -151,22 +149,17 @@ $imagePath: '../../../../assets/images/collections/';
   }
 }
 .collection-new-container {
-  display:table-cell;
-  vertical-align: middle;
-    margin: 0px auto;
-    max-width: 600px;
-    min-width: 300px;
+  display:flex;
+  flex-direction: column;
+  margin: 0px auto;
+  max-width: 600px;
+  min-width: 300px;
   width:100%;
-    /*
-    -webkit-box-shadow: 0px 4px 5px 0px rgba(0,0,0,0.5);
-    -moz-box-shadow: 0px 4px 5px 0px rgba(0,0,0,0.5);
-    box-shadow: 0px 4px 5px 0px rgba(0,0,0,0.5);
-    */
 }
 .collection-basic{
   width: 350px;
   margin-left: -175px!important;
-  left:auto;
+  left:50%;
   .card-scroll{
     padding-top:0;
     padding-left:0;
@@ -404,8 +397,8 @@ input[type="radio"] {
 
 /* für schmale Screens */
 
-@media screen and (max-height: $mobileHeight){
-  .card:not(.card-low), .card-high {
+@media screen and (max-height: $mobileHeight+$mobileStage*2){
+  .card, .card-high {
     top:$mainnavHeight+75px;
   }
 }
