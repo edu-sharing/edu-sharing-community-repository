@@ -67,7 +67,7 @@
       "PUBLISHER":"darf veröffentlichen",
       "MESSAGE":"Nachricht hinzufügen",
       "MESSAGE_PLACEHOLDER":"Nachricht eingeben...",
-      "INHERIT":"Rechte vom Ordner erben",
+      "INHERIT":"Rechte vom übergeordneten Ordner erben",
       "INHERIT_HINT":"Diese Berechtigung wird vom übergeordneten Ordner geerbt",
       "GLOBAL_SEARCH":"Auch außerhalb meiner Organisation suchen",
       "SHOW_HISTORY":"Historie anzeigen",
