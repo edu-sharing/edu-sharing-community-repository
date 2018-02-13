@@ -56,6 +56,8 @@ import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.Constants;
+import org.springframework.context.ApplicationContext;
 
 public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
@@ -70,6 +72,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	HashMap<String, String> replIdTimestampMap = null;
 
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
+	
+	
+	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 	public PersistentHandlerEdusharing() throws Throwable {
 		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
@@ -256,6 +262,12 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			logger.info("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
 			try{			
 				nodeId=createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
+				
+				//toSafeMap.put(CCConstants.LOM_PROP_RIGHTS_COST, rightsCostValueBool);
+				if((Boolean)newNodeProps.get(CCConstants.LOM_PROP_RIGHTS_COST) == false) {
+					serviceRegistry.getPermissionService().setPermission(new NodeRef(Constants.storeRef,nodeId),CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER, true);
+				}
+			
 			}catch(org.alfresco.service.cmr.repository.DuplicateChildNodeNameException e){
 				String name = (String)newNodeProps.get(CCConstants.CM_NAME);
 				name = name + System.currentTimeMillis();
