@@ -11,11 +11,17 @@ import {RestConstants} from "../../../../common/rest/rest-constants";
 import {Helper} from "../../../../common/helper";
 import {RestHelper} from "../../../../common/rest/rest-helper";
 import {DateHelper} from "../../../../common/ui/DateHelper";
+import {UIAnimation} from '../../../../common/ui/ui-animation';
+import {trigger} from '@angular/animations';
 
 @Component({
   selector: 'workspace-share-history',
   templateUrl: 'history.component.html',
-  styleUrls: ['history.component.scss']
+  styleUrls: ['history.component.scss'],
+  animations: [
+      trigger('fade', UIAnimation.fade()),
+      trigger('cardAnimation', UIAnimation.cardAnimation())
+  ]
 })
 export class WorkspaceHistoryComponent {
   public history:any;

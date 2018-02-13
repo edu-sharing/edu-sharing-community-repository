@@ -220,14 +220,9 @@ export class SearchComponent {
            this.network.getRepositories().subscribe((data: NetworkRepositories) => {
              this.allRepositories=Helper.deepCopy(data.repositories);
              this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
-             if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && Helper.indexOfObjectArray(this.repositories,'id',this.currentRepository)==-1){
-               console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+this.repositories[0].id);
-               console.log(this.repositories);
-               this.routeSearch(this.searchService.searchTerm,this.repositories[0].id,RestConstants.DEFAULT);
-             }
              if (this.repositories.length < 2) {
                this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
-               this.repositories = null;
+               /*this.repositories = null;*/
 
              }
              this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
@@ -243,11 +238,11 @@ export class SearchComponent {
                this.repositories.splice(0, 0, all);
                this.updateRepositoryOrder();
              }
-             this.initParams();
+               this.initParams();
 
            }, (error: any) => {
              console.warn("could not fetch repository list. Remote repositories can not be shown. Some features might not work properly. Please check the error and re-configure the repository");
-             this.repositories = null;
+             this.repositories = [({id:'local',isHomeRepo:true} as any)];
              this.allRepositories=[];
              let home:any={id:'local',isHomeRepo:true};
              this.allRepositories.push(home);
@@ -477,6 +472,7 @@ export class SearchComponent {
     this.updateActionbar(this.selection);
     if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
+      this.searchService.complete = true;
       return;
     }
     if(init) {
@@ -835,7 +831,8 @@ export class SearchComponent {
       this.saveSearchDialog=true;
     });
     save.showName=false;
-    this.mdsActions.push(save);
+    if(!this.isGuest)
+      this.mdsActions.push(save);
   }
   private closeSaveSearchDialog(){
     this.saveSearchDialog=false;
@@ -959,6 +956,14 @@ export class SearchComponent {
           this.currentRepository=param['repository'];
           this.updateRepositoryOrder();
         }
+        console.log(this.repositories);
+        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
+          let use=this.config.instant("availableRepositories")[0];
+          console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+use.id);
+          console.log(this.repositories);
+          this.routeSearch(this.searchService.searchTerm,use.id,RestConstants.DEFAULT);
+        }
+
         if(param['savedQuery']){
           this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
             this.currentSavedSearch=data.node;
@@ -966,11 +971,17 @@ export class SearchComponent {
           });
         }
         this.updateSelection([]);
-        this.mds.getSets(this.currentRepository).subscribe((data:MdsMetadatasets)=>{
-          this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepositoryObject ? this.currentRepositoryObject : this.currentRepository,data.metadatasets,this.config);
+        let repo=this.currentRepository;
+        this.mds.getSets(repo).subscribe((data:MdsMetadatasets)=>{
+          if(repo!=this.currentRepository){
+              return;
+          }
+          this.mdsSets=ConfigurationHelper.filterValidMds(repo,data.metadatasets,this.config);
           if(this.mdsSets){
             UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
             try {
+              console.log("mds for current repo " +this.currentRepository);
+              console.log(this.mdsSets);
               this.mdsId = this.mdsSets[0].id;
               if (param['mds'] && Helper.indexOfObjectArray(this.mdsSets,'id',param['mds'])!=-1)
                 this.mdsId = param['mds'];

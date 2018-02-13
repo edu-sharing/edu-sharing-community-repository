@@ -8,16 +8,16 @@
   left:0;
   top:0;
   position:fixed;
-  z-index:120;
+  z-index:$dialogZIndex;
 }
 .globalProgress{
-  z-index:122;
+  z-index:$dialogZIndex+2;
 }
 .darken{
   @include darken();
 }
 .card{
-  z-index:121;
+  z-index:$dialogZIndex+1;
   background-color: #fff!important;
 }
 .center-card{
