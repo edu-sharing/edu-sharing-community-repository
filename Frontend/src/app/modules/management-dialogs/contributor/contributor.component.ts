@@ -18,7 +18,8 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
   styleUrls: ['contributor.component.scss'],
   animations: [
     trigger('fade', UIAnimation.fade()),
-    trigger('cardAnimation', UIAnimation.cardAnimation())
+    trigger('cardAnimation', UIAnimation.cardAnimation()),
+    trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
 export class WorkspaceContributorComponent  {
