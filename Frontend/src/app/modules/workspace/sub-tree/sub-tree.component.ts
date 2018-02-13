@@ -9,6 +9,7 @@ import {OptionItem} from '../../../common/ui/actionbar/option-item';
 import {UIService} from '../../../common/services/ui.service';
 import {UIAnimation} from '../../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
+import {Helper} from '../../../common/helper';
 
 @Component({
   selector: 'workspace-sub-tree',
@@ -24,8 +25,6 @@ export class WorkspaceSubTreeComponent  {
   public loading = true;
   public _nodes : Node[];
   private dragHover : Node;
-  // the node which has the focus
-  private openNodes : Node[]=[];
 
   private _options : OptionItem[];
   private loadingStates:boolean[] = [];
@@ -60,9 +59,9 @@ export class WorkspaceSubTreeComponent  {
     if(node==null) {
         return;
     }
-    this.onLoading.emit(true);
     this.nodeApi.getChildren(node,[RestConstants.FILTER_FOLDERS],{count:RestConstants.COUNT_UNLIMITED}).subscribe((data : NodeList) => {
       this._nodes=data.nodes;
+      this.loadingStates=Helper.initArray(this._nodes.length,true);
       this.hasChilds.emit(this._nodes && this._nodes.length);
       this.onLoading.emit(false);
       this.loading=false;
@@ -70,9 +69,9 @@ export class WorkspaceSubTreeComponent  {
   }
   constructor(private ui : UIService,private nodeApi : RestNodeService,private storage : TemporaryStorageService) {
   }
-    setLoadingState(state:boolean,pos:number){
+  setLoadingState(state:boolean,pos:number){
     this.loadingStates[pos]=state;
-    }
+  }
   private contextMenu(event:any,node : Node){
     event.preventDefault();
     event.stopPropagation();
