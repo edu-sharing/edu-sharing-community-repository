@@ -1,5 +1,10 @@
 @import "../../../../../styles/variables.scss";
-
+.dialog{
+  z-index: 121;
+}
+.card{
+  z-index: 122;
+}
 .heading{
   padding:10px;
   border-bottom: 1px solid #aaa;
