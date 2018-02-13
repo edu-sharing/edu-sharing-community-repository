@@ -66,7 +66,7 @@
       "PUBLISHER":"can publish",
       "MESSAGE":"Add message",
       "MESSAGE_PLACEHOLDER":"Enter message...",
-      "INHERIT":"Inherit permissions from folder",
+      "INHERIT":"Inherit permissions from parent folder",
       "INHERIT_HINT":"This permission is inherit from the parent folder",
       "GLOBAL_SEARCH":"Search beyond my organization",
       "SHOW_HISTORY":"View history",
