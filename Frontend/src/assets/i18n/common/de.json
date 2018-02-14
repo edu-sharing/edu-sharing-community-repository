@@ -64,7 +64,7 @@
   "RENDERSERVICE_API_ERROR":"Fehler beim Verbinden mit dem Renderservice. Bitte überprüfen Sie die Serverkonfiguration oder melden Sie diesen Fehler einen Administrator",
   "SYSTEM_FOLDER_DELETE_ERROR":"Dieser Ordner wurde vom System erstellt und kann nicht gelöscht werden",
   "TOOLPERMISSION_ERROR":"Ihnen fehlt für diesen Vorgang die notwendige Berechtigung",
-  "TOOLPERMISSION_ERROR_TITLE":"Fehlende Berechtiung",
+  "TOOLPERMISSION_ERROR_TITLE":"Fehlende Berechtigung",
   "TOOLPERMISSION_ERROR_HEADER":"Folgende Berechtigung ist für Ihren aktuellen Nutzer nicht freigegeben:",
   "TOOLPERMISSION_ERROR_FOOTER":"Falls Sie dies für einen Fehler halten, kontaktieren Sie den Administrator und fragen Sie nach Freigabe der Berechtigung {{permission}}",
   "TOOLPERMISSION":{
