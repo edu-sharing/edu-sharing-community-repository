@@ -958,10 +958,10 @@ export class SearchComponent {
         }
         console.log(this.repositories);
         if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
-          let use=this.config.instant("availableRepositories")[0];
-          console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+use.id);
+          let use=this.config.instant("availableRepositories");
+          console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+use);
           console.log(this.repositories);
-          this.routeSearch(this.searchService.searchTerm,use.id,RestConstants.DEFAULT);
+          this.routeSearch(this.searchService.searchTerm,use,RestConstants.DEFAULT);
         }
 
         if(param['savedQuery']){
