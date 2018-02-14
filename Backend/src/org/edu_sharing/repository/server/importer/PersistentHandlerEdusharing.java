@@ -262,7 +262,8 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				nodeId=createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
 				
 				//toSafeMap.put(CCConstants.LOM_PROP_RIGHTS_COST, rightsCostValueBool);
-				if((Boolean)newNodeProps.get(CCConstants.LOM_PROP_RIGHTS_COST) == false) {
+				if(newNodeProps.get(CCConstants.LOM_PROP_RIGHTS_COST) == null ||
+						(Boolean)newNodeProps.get(CCConstants.LOM_PROP_RIGHTS_COST) == false) {
 					serviceRegistry.getPermissionService().setPermission(new NodeRef(Constants.storeRef,nodeId),CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER, true);
 				}
 			
