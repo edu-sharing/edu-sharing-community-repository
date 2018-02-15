@@ -1390,6 +1390,14 @@ public class CCConstants {
 	public final static String LICENSE_NO_LICENSE = "no-license";
 	
 	public final static String LICENSE_SCHULFUNK = "SCHULFUNK";
+	
+	public final static String LICENSE_PDM = "PDM";
+	
+	public final static String LICENSE_COPYRIGHT_FREE = "COPYRIGHT_FREE";
+	
+	public final static String LICENSE_COPYRIGHT_LICENSE = "COPYRIGHT_LICENSE";
+	
+	public final static String LICENSE_NONE = "COPYRIGHT_NONE";
 
 	
 	/**
