@@ -66,6 +66,7 @@ export class MdsComponent{
   private static AUTHOR_TYPE_PERSON = 1;
   private lastMdsQuery: string;
   private variables: string[];
+    private currentWidgetSuggestion: string;
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -268,13 +269,12 @@ export class MdsComponent{
     let more=elements[elements.length-1];
     more.style.display='none';
 
-    let dialog=document.getElementById(id+'_dialog');
     list.style.display='none';
-    dialog.style.display='none';
+
     if(searchField.value.length<2 && search)
       return;
+    this.currentWidgetSuggestion=id;
     list.style.display='';
-    dialog.style.display='';
     let hits=0;
     let moreCount=0;
     for(let i=1;i<elements.length-1;i++){
@@ -1156,12 +1156,7 @@ export class MdsComponent{
       html+=`"><i class="material-icons">arrow_drop_down</i></a>`;
 
     }
-    html+=`
-              <div id="`+widget.id+`_dialog" class="dialog" style="display:none;" onclick="
-              document.getElementById('`+widget.id+`_suggestions').style.display='none';
-              document.getElementById('`+widget.id+`_dialog').style.display='none';
-              "></div>
-              <div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
+    html+=`<div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
     html+=`<a class="collection-item suggestionNoMatches"  onclick="
               document.getElementById('`+widget.id+`_suggestions').style.display='none';
               document.getElementById('`+widget.id+`_dialog').style.display='none';
@@ -1186,6 +1181,10 @@ export class MdsComponent{
       html+='<div class="hint">'+this.translate.instant("WORKSPACE.EDITOR.HINT_ENTER")+'</div>';
     }
     return html;
+  }
+  private closeDialog(){
+    document.getElementById(this.currentWidgetSuggestion+'_suggestions').style.display='none';
+    this.currentWidgetSuggestion=null;
   }
   private renderTreeWidget(widget:any,attr:string){
     let html=this.autoSuggestField(widget)+`<div class="btn-flat suggestOpen" onclick="

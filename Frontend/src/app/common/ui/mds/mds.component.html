@@ -13,6 +13,7 @@
       <div class="card-title" *ngIf="currentNode">{{currentNode.name}}</div>
       <div class="card-title" *ngIf="!currentNode">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
       <div class="card-scroll mdsCard" id="mdsScrollContainer">
+        <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()"></div>
         <div [innerHTML]="rendered"></div>
 
       </div>
@@ -26,6 +27,7 @@
 </div>
 <div *ngIf="embedded">
   <div class="mdsEmbeddedGroup">
+    <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()"></div>
     <div [innerHTML]="rendered"></div>
     <div class="reset" *ngIf="mode=='search' && rendered" (click)="resetValues()">{{'CLEAR_FILTERS' | translate}}</div>
     <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
