@@ -41,8 +41,7 @@ public class BeforeMapDeletePolicy implements BeforeDeleteNodePolicy {
 		
 		if(mapType != null && (mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_DOCUMENTS) 
 				|| mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP) 
-				|| mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE)
-				|| mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX))){
+				|| mapType.equals(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE))){
 			
 			ChildAssociationRef childAssocRef = nodeService.getPrimaryParent(nodeRef);
 			NodeRef currentPersonNodeRef = personService.getPerson(authenticationService.getCurrentUserName());

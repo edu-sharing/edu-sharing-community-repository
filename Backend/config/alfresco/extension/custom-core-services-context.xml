@@ -341,7 +341,14 @@
             <ref bean="NodeService" />
         </property>
    	 </bean>
-   	 
+   	 <bean id="onCopyMapPolicy" class="org.edu_sharing.alfresco.policy.OnCopyMapPolicy" init-method="init">
+   	 	<property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+          <property name="nodeService">
+            <ref bean="NodeService" />
+        </property>
+   	 </bean>
    	 <bean id="onCopyCollectionRefSubNodesPolicy" class="org.edu_sharing.alfresco.policy.OnCopyCollectionRefSubNodesPolicy" init-method="init">
    	 	<property name="policyComponent">
             <ref bean="policyComponent"/>
