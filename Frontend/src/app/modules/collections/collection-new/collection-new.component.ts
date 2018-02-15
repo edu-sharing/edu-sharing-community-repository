@@ -334,8 +334,8 @@ export class CollectionNewComponent {
             /*
              *  CREATE
              */
-            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>{
-              if(!has)
+            let inviteAll=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
+              if(!inviteAll)
                 this.newCollectionScope=RestConstants.COLLECTIONSCOPE_MY;
               this.isLoading = true;
 
@@ -360,7 +360,6 @@ export class CollectionNewComponent {
                 this.isLoading=false;
                 this.handleError(error);
               });
-            });
 
 
         }
