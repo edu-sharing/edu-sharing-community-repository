@@ -91,6 +91,7 @@
     </div>
       <div class="row waves-effect"
            [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
+           [class.noPermissions]="noPermissions(node)"
            [class.selected]="getSelectedPos(node)!=-1"
            [title]="viewType==0 ? '' : getTitle(node)"
            [draggable]="dragDrop"
@@ -112,7 +113,7 @@
           <img *ngIf="node.preview.url && !(node.collection && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
                src="{{(!node.collection || !node.preview.isIcon) ? node.preview.url+(node.ref.repo=='local' || node.ref.isHomeRepo ? '&crop=true&width=200&height=150' : '') : null}}"
                [attr.role]="presentation"
-               [class.blurred]="applyMode && node.access.indexOf('CCPublish')==-1"
+               [class.blurred]="noPermissions(node) || (applyMode && node.access.indexOf('CCPublish')==-1)"
                alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{ node.title }}"/>
           <div class="previewCollectionContainer" *ngIf="node.collection && node.preview.isIcon && viewType!=2">
             <div class="previewCollection" [style.backgroundColor]="node.collection.color">
@@ -126,6 +127,12 @@
               <a *ngIf="node.properties['ccm:questionsallowed'] && node.properties['ccm:questionsallowed'][0]=='true'"
                  (click)="askCCPublish($event,node)"
               ><i class="material-icons">message</i> {{ 'ASK_CC_PUBLISH' | translate}}</a>
+            </div>
+          </div>
+          <div class="permissionsMissing" *ngIf="noPermissions(node)">
+            <div>
+              <i class="material-icons">security</i>
+              <div>{{validatePermissions(node).message | translate }}</div>
             </div>
           </div>
         </div>

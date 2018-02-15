@@ -49,6 +49,10 @@ export class FileChooserComponent implements OnInit{
    */
   @Input() filterElements : string[]=[];
   /**
+   * Set true if the user nees write permissions to the target file
+  */
+  @Input() writeRequired = false;
+    /**
    * Set true if the user should pick a collection, not a regular node
    * @param collections
    */
@@ -118,6 +122,12 @@ export class FileChooserComponent implements OnInit{
 
     this.viewDirectory(this.homeDirectory);
 
+  }
+  private hasWritePermissions(node:any){
+      if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){
+          return {status:false,message:'NO_WRITE_PERMISSIONS'};
+      }
+      return {status:true};
   }
   private setHome(home: string) {
     this.homeDirectory=home;

@@ -52,7 +52,8 @@
   color:$textVeryLight!important;
   cursor: default;
 }
-.noCCPublish > div{
+.noCCPublish > div,
+.noPermissions > div{
   opacity:0.5;
 }
 .blurred{
@@ -61,12 +62,13 @@
   left: 2px;
   right: 2px;
 }
-.ccPublishMissing{
+.ccPublishMissing,.permissionsMissing{
   width: 100%;
   height: 100%;
   background-color:rgba(255,255,255,0.65);
   position: absolute;
   left:0;
+  top:0;
   text-align: center;
   padding-top: 40px;
   div{
