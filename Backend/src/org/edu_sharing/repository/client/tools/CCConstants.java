@@ -1,4 +1,4 @@
-/**
+﻿/**
  *
  *  
  * 
@@ -555,6 +555,69 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR = "{http://www.campuscontent.de/model/1.0}metadatacontributer_creator";
 	public final static String CCM_PROP_IO_REPL_METADATACONTRIBUTER_PROVIDER = "{http://www.campuscontent.de/model/1.0}metadatacontributer_provider";
 	public final static String CCM_PROP_IO_REPL_METADATACONTRIBUTER_VALIDATOR = "{http://www.campuscontent.de/model/1.0}metadatacontributer_validator";
+
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_ANIMATION= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_animation";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_ARCHIV= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_archiv";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUFNAHMELEITUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_aufnahmeleitung";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUFNAHMETEAM= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_aufnahmeteam";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUSSTATTUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_ausstattung";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTOR= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_autor";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BALLETT= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_ballett";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BEARBEITETE_FASSUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_bearbeitete_fassung";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BILDENDE_KUNST= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_bildende_kunst";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BILDSCHNITT= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_bildschnitt";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BUCH= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_buch";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CHOR= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_chor";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CHOREOGRAPHIE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_choreographie";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DARSTELLER= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_darsteller";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DESIGN= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_design";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DIRIGENT= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_dirigent";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DVD_GRAFIK_UND_DESIGN= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_dvd-grafik_und_design";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DVD_PREMASTERING= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_dvd-premastering";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_ENSEMBLE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_ensemble";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_FACHBERATUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_fachberatung";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_FOTO= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_foto";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_GRAFIK= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_grafik";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_IDEE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_idee";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_INTERPRET= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_interpret";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_INTERVIEW= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_interview";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_KAMERA= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_kamera";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_KOMMENTAR= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_kommentar";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_KOMPONIST= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_komponist";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_KONZEPTION= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_konzeption";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_LIBRETTO= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_libretto";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_LITERARISCHE_VORLAGE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_literarische_vorlage";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MAZ_BEARBEITUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_maz-bearbeitung";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MITWIRKENDE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_mitwirkende";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MODERATION= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_moderation";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MUSIK= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_musik";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MUSIKALISCHE_LEITUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_musikalische_leitung";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MUSIKALISCHE_VORLAGE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_musikalische_vorlage";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MUSIKGRUPPE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_musikgruppe";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_ORCHESTER= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_orchester";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PAEDAGOGISCHER_SACHBEARBEITER_EXTERN= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_paedagogischer_sachbearbeiter_extern";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PRODUKTIONSLEITUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_produktionsleitung";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PROJEKTGRUPPE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_projektgruppe";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PROJEKTLEITUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_projektleitung";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_REALISATION= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_realisation";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_REDAKTION= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_redaktion";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_REGIE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_regie";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SCHNITT= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_schnitt";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SCREEN_DESIGN= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_screen-design";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SPEZIALEFFEKTE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_spezialeffekte";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SPRECHER= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_sprecher";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_STUDIO= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_studio";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SYNCHRONISATION= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_synchronisation";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SYNCHRONREGIE= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_synchronregie";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SYNCHRONSPRECHER= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_synchronsprecher";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TANZ= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_tanz";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TEXT= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_text";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TON= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_ton";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TRICK= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_trick";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_VIDEOTECHNIK= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_videotechnik";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UEBERSETZUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_uebersetzung";
+	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UEBERTRAGUNG= "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_uebertragung";
+	
 	
 	public final static String CCM_PROP_IO_REPL_GENERAL_IDENTIFIER = "{http://www.campuscontent.de/model/1.0}general_identifier";
 	
@@ -697,7 +760,71 @@ public class CCConstants {
 			lifecycleContributerPropsMap.put("script_writer", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SCRIPT_WRITER);
 			lifecycleContributerPropsMap.put("instructional_designer", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_INSTRUCTIONAL_DESIGNER);
 			lifecycleContributerPropsMap.put("subject_matter_expert", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SUBJECT_MATTER_EXPERT);
-		}
+
+			lifecycleContributerPropsMap.put("Animation", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_ANIMATION);
+			lifecycleContributerPropsMap.put("Archiv", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_ARCHIV);
+			lifecycleContributerPropsMap.put("Aufnahmeleitung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUFNAHMELEITUNG);
+			lifecycleContributerPropsMap.put("Aufnahmeteam", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUFNAHMETEAM);
+			lifecycleContributerPropsMap.put("Ausstattung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUSSTATTUNG);
+			lifecycleContributerPropsMap.put("Autor", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTOR);
+			lifecycleContributerPropsMap.put("Ballett", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BALLETT);
+			lifecycleContributerPropsMap.put("Bearbeitete Fassung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BEARBEITETE_FASSUNG);
+			lifecycleContributerPropsMap.put("Bildende Kunst", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BILDENDE_KUNST);
+			lifecycleContributerPropsMap.put("Bildschnitt", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BILDSCHNITT);
+			lifecycleContributerPropsMap.put("Buch", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_BUCH);
+			lifecycleContributerPropsMap.put("Chor", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CHOR);
+			lifecycleContributerPropsMap.put("Choreographie", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CHOREOGRAPHIE);
+			lifecycleContributerPropsMap.put("Darsteller", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DARSTELLER);
+			lifecycleContributerPropsMap.put("Design", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DESIGN);
+			lifecycleContributerPropsMap.put("Dirigent", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DIRIGENT);
+			lifecycleContributerPropsMap.put("DVD-Grafik und Design", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DVD_GRAFIK_UND_DESIGN);
+			lifecycleContributerPropsMap.put("DVD-Premastering", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_DVD_PREMASTERING);
+			lifecycleContributerPropsMap.put("Ensemble", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_ENSEMBLE);
+			lifecycleContributerPropsMap.put("Fachberatung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_FACHBERATUNG);
+			lifecycleContributerPropsMap.put("Foto", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_FOTO);
+			lifecycleContributerPropsMap.put("Grafik", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_GRAFIK);
+			lifecycleContributerPropsMap.put("Idee", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_IDEE);
+			lifecycleContributerPropsMap.put("Interpret (...)", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_INTERPRET);
+			lifecycleContributerPropsMap.put("Interview", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_INTERVIEW);
+			lifecycleContributerPropsMap.put("Kamera", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_KAMERA);
+			lifecycleContributerPropsMap.put("Kommentar", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_KOMMENTAR);
+			lifecycleContributerPropsMap.put("Komponist", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_KOMPONIST);
+			lifecycleContributerPropsMap.put("Konzeption", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_KONZEPTION);
+			lifecycleContributerPropsMap.put("Libretto", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_LIBRETTO);
+			lifecycleContributerPropsMap.put("Literarische Vorlage", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_LITERARISCHE_VORLAGE);
+			lifecycleContributerPropsMap.put("MAZ-Bearbeitung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MAZ_BEARBEITUNG);
+			lifecycleContributerPropsMap.put("Mitwirkende", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MITWIRKENDE);
+			lifecycleContributerPropsMap.put("Moderation", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MODERATION);
+			lifecycleContributerPropsMap.put("Musik", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MUSIK);
+			lifecycleContributerPropsMap.put("Musikalische Leitung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MUSIKALISCHE_LEITUNG);
+			lifecycleContributerPropsMap.put("Musikalische Vorlage", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MUSIKALISCHE_VORLAGE);
+			lifecycleContributerPropsMap.put("Musikgruppe", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MUSIKGRUPPE);
+			lifecycleContributerPropsMap.put("Orchester", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_ORCHESTER);
+			lifecycleContributerPropsMap.put("Pädagogischer Sachbearbeiter (extern)", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PAEDAGOGISCHER_SACHBEARBEITER_EXTERN);
+			lifecycleContributerPropsMap.put("Produktionsleitung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PRODUKTIONSLEITUNG);
+			lifecycleContributerPropsMap.put("Projektgruppe", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PROJEKTGRUPPE);
+			lifecycleContributerPropsMap.put("Projektleitung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PROJEKTLEITUNG);
+			lifecycleContributerPropsMap.put("Realisation", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_REALISATION);
+			lifecycleContributerPropsMap.put("Redaktion", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_REDAKTION);
+			lifecycleContributerPropsMap.put("Regie", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_REGIE);
+			lifecycleContributerPropsMap.put("Schnitt", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SCHNITT);
+			lifecycleContributerPropsMap.put("Screen-Design", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SCREEN_DESIGN);
+			lifecycleContributerPropsMap.put("Spezialeffekte", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SPEZIALEFFEKTE);
+			lifecycleContributerPropsMap.put("Sprecher", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SPRECHER);
+			lifecycleContributerPropsMap.put("Studio", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_STUDIO);
+			lifecycleContributerPropsMap.put("Synchronisation", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SYNCHRONISATION);
+			lifecycleContributerPropsMap.put("Synchronregie", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SYNCHRONREGIE);
+			lifecycleContributerPropsMap.put("Synchronsprecher", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SYNCHRONSPRECHER);
+			lifecycleContributerPropsMap.put("Tanz", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TANZ);
+			lifecycleContributerPropsMap.put("Text", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TEXT);
+			lifecycleContributerPropsMap.put("Ton", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TON);
+			lifecycleContributerPropsMap.put("Trick", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TRICK);
+			lifecycleContributerPropsMap.put("Videotechnik", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_VIDEOTECHNIK);
+			lifecycleContributerPropsMap.put("Übersetzung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UEBERSETZUNG);
+			lifecycleContributerPropsMap.put("Übertragung", CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UEBERTRAGUNG);
+
+
+			}
 		return lifecycleContributerPropsMap;
 	}
 	
