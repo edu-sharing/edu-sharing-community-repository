@@ -264,7 +264,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				//toSafeMap.put(CCConstants.LOM_PROP_RIGHTS_COST, rightsCostValueBool);
 				if(newNodeProps.get(CCConstants.LOM_PROP_RIGHTS_COST) == null ||
 						(Boolean)newNodeProps.get(CCConstants.LOM_PROP_RIGHTS_COST) == false) {
-					serviceRegistry.getPermissionService().setPermission(new NodeRef(Constants.storeRef,nodeId),CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER, true);
+					serviceRegistry.
+						getPermissionService().
+							setPermission(new NodeRef(Constants.storeRef,nodeId),CCConstants.AUTHORITY_GROUP_EVERYONE, CCConstants.PERMISSION_CONSUMER, true);
 				}
 			
 			}catch(org.alfresco.service.cmr.repository.DuplicateChildNodeNameException e){
