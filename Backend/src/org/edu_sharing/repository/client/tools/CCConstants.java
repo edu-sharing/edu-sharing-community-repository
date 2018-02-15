@@ -1,31 +1,4 @@
-﻿/**
- * 
- *  
- * 
- * 
- *	
- *
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- *
- */
-package org.edu_sharing.repository.client.tools;
+﻿package org.edu_sharing.repository.client.tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
