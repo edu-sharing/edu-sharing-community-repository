@@ -236,14 +236,38 @@ export class UIHelper{
       let yDiff=window.scrollY-lastY;
       lastY=window.scrollY;
       if(window.scrollY>y && mode && yDiff){
-        window.scrollBy(0, -Math.max((window.scrollY-y)/divider,minSpeed));
+          window.scrollBy(0, -Math.max((window.scrollY-y)/divider,minSpeed));
       }
       else if(window.scrollY<y && !mode && yDiff){
-        window.scrollBy(0, Math.max((y-window.scrollY)/divider,minSpeed));
+          window.scrollBy(0, Math.max((y-window.scrollY)/divider,minSpeed));
       }
       else {
         clearInterval(interval);
       }
     },16);
   }
+    /**
+     * smoothly scroll to the given y offset inside an element (use offsetTop on the child to determine this position)
+     * @param {y} number
+     * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
+     */
+    static scrollSmoothElement(y: number=0,element:Element,smoothness=1) {
+        let mode=element.scrollTop>y;
+        let divider=3*smoothness;
+        let minSpeed=7/smoothness;
+        let lastY=y;
+        let interval=setInterval(()=>{
+            let yDiff=element.scrollTop-lastY;
+            lastY=element.scrollTop;
+            if(element.scrollTop>y && mode && yDiff){
+                element.scrollTop-=Math.max((element.scrollTop-y)/divider,minSpeed);
+            }
+            else if(element.scrollTop<y && !mode && yDiff){
+                element.scrollTop+=Math.max((y-element.scrollTop)/divider,minSpeed);
+            }
+            else {
+                clearInterval(interval);
+            }
+        },16);
+    }
 }

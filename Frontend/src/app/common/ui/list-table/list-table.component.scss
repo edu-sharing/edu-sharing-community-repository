@@ -47,8 +47,9 @@ $borderRadius:2px;
   color:$textVeryLight!important;
   cursor: default;
 }
-.noCCPublish > div{
-  opacity:0.5;
+.noCCPublish > div,
+.noPermissions > div{
+  /*opacity:0.5;*/
 }
 .blurred{
   @include imageDisabledBlur();
@@ -56,12 +57,14 @@ $borderRadius:2px;
   left: 2px;
   right: 2px;
 }
-.ccPublishMissing{
+.ccPublishMissing,.permissionsMissing{
   width: 100%;
   height: 100%;
   background-color:rgba(255,255,255,0.65);
   position: absolute;
   left:0;
+  top:0;
+  z-index: 110;
   text-align: center;
   padding-top: 40px;
   div{
@@ -74,6 +77,11 @@ $borderRadius:2px;
       position:relative;
       top:7px;
     }
+  }
+}
+.cardSmallList{
+  .ccPublishMissing,.permissionsMissing{
+    padding-top:20px;
   }
 }
 $badgeWidth:200px;

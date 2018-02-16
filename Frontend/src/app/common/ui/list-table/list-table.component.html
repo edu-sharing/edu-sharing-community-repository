@@ -2,189 +2,195 @@
 <div #drag class="dragBadge" [style.top]="(id*-9999999)+'px'"><div>{{currentDrag}}</div><div class="count">{{currentDragCount}}</div></div>
 
 <div class="dialog darken" *ngIf="reorderDialog">
-  <div class="card center-card card-action">
-    <div class="card-content">
-      <div class="card-cancel" (click)="closeReorder(false)"><i class="material-icons">close</i></div>
-      <span class="card-title ">{{'LIST.REORDER_TITLE' | translate }}</span>
-      <div class="hint">{{'LIST.REORDER_DRAG_DROP' | translate }}</div>
-      <div *ngFor="let item of columnsAll;let i=index;"
-           class="checkbox"
-           [draggable]="i>0"
-           (dragend)="currentDragColumn=null"
-           (dragover)="allowDragColumn($event,i,item)" (drop)="dropColumn($event,i,item)"
-           (dragstart)="dragStartColumn($event,i,item)"
-      >
-        <input type="checkbox" class="filled-in" id="{{item.name}}" disabled="{{i==0}}" [(ngModel)]="item.visible"><label for="{{item.name}}">{{item.type+"."+item.name | translate}}</label>
-      </div>
+    <div class="card center-card card-action">
+        <div class="card-content">
+            <div class="card-cancel" (click)="closeReorder(false)"><i class="material-icons">close</i></div>
+            <span class="card-title ">{{'LIST.REORDER_TITLE' | translate }}</span>
+            <div class="hint">{{'LIST.REORDER_DRAG_DROP' | translate }}</div>
+            <div *ngFor="let item of columnsAll;let i=index;"
+                 class="checkbox"
+                 [draggable]="i>0"
+                 (dragend)="currentDragColumn=null"
+                 (dragover)="allowDragColumn($event,i,item)" (drop)="dropColumn($event,i,item)"
+                 (dragstart)="dragStartColumn($event,i,item)"
+            >
+                <input type="checkbox" class="filled-in" id="{{item.name}}" disabled="{{i==0}}" [(ngModel)]="item.visible"><label for="{{item.name}}">{{item.type+"."+item.name | translate}}</label>
+            </div>
+        </div>
+        <div class="card-action">
+            <a class="btn"
+               tabindex="0"
+               (keyup.enter)="closeReorder(true)"
+               (click)="closeReorder(true)"
+            >{{'SAVE' | translate}}</a>
+            <a class="btn-flat"
+               tabindex="0"
+               (keyup.enter)="closeReorder(false)"
+               (click)="closeReorder(false)"
+            >{{'CANCEL' | translate}}</a>
+        </div>
     </div>
-    <div class="card-action">
-      <a class="btn"
-         tabindex="0"
-         (keyup.enter)="closeReorder(true)"
-         (click)="closeReorder(true)"
-      >{{'SAVE' | translate}}</a>
-      <a class="btn-flat"
-         tabindex="0"
-         (keyup.enter)="closeReorder(false)"
-         (click)="closeReorder(false)"
-      >{{'CANCEL' | translate}}</a>
-    </div>
-  </div>
 </div>
 <div class="dialog dialogMore" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
 <div [className]="'list '+listClass" infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="100" [scrollWindow]="scrollWindow" (scrolled)="scroll()">
-  <div class="heading" *ngIf="hasHeading && viewType==0">
-    <div class="checkbox" *ngIf="hasCheckbox">
-      <input *ngIf="_nodes.length" id="selectAll" (click)="toggleAll()" type="checkbox" class="filled-in" [checked]="selectedNodes.length==_nodes.length"/>
-      <label for="selectAll">&nbsp;</label>
-    </div>
-    <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>
-    <div class="icon" *ngIf="hasIcon">&nbsp;</div>
-    <div *ngFor="let item of columnsVisible;let i = index"
-         class="{{getItemCssClass(item)}} row_{{i+1}}">
-      <a class="text" [class.clickable]="canBeSorted(item.name)" (click)="setSorting(item.name)">{{item.type+"."+item.name | translate}}</a>
-      <div *ngIf="sortBy" class="sorting" (click)="setSorting(item.name)">
-        <a class="" *ngIf="sortBy==item.name && sortAscending"><i class="material-icons">arrow_drop_up</i></a>
-        <a class="" *ngIf="sortBy==item.name && !sortAscending"><i class="material-icons">arrow_drop_down</i></a>
-      </div>
-    </div>
-    <div *ngFor="let option of optionsAlways"  class="more moreAlways" > </div>
-    <div class="more" *ngIf="_options && _options.length">&nbsp;</div>
-    <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
-         (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
-    ><i class="material-icons">delete</i></div>
-    <div class="editColumns clickable" *ngIf="!currentDragColumn && reorderColumns && columnsVisible && columnsVisible.length"
-         (click)="reorderDialog=true"
-    ><i class="material-icons">settings</i></div>
-  </div>
-  <div [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
-    <div *ngIf="addElement" class="addElement clickable" (click)="addElementClicked()"
-         [class.tableList]="viewType==0"
-         [class.cardList]="viewType==1"
-         [class.cardSmallList]="viewType==2"
-    >
-      <div>
-        <i class="material-icons">{{addElement.icon}}</i>
-        <div class="label">{{addElement.label | translate}}</div>
-      </div>
-    </div>
-    <div *ngFor="let node of _nodes; let i = index" class="collection-item rowFrame"
-         [class.order-animation]="orderElementsActive"
-         [class.nodeCollection]="isCollection(node)"
-         [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
-         [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
-         [class.dark-color]="isCollection(node) && getCollection(node).preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
-         [class.tableList]="viewType==0"
-         [class.cardList]="viewType==1"
-         [class.cardSmallList]="viewType==2"
-         [class.hover]="dragHover==node">
-  <div class="collectionContainer"
-     *ngIf="dropdown==node && _options && _options.length"
-     (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"
-  >
-      <div class="moreOpen collection"
-           #dropdown
-           *ngIf="dropdown==node && _options && _options.length"
-           [@openOverlay]="dropdown==node && dropdownBottom==null"
-           [style.position]="dropdownPosition"
-           [style.left]="dropdownLeft"
-           [style.top]="dropdownTop"
-           [style.bottom]="dropdownBottom"
-      >
-        <a class="collection-item"
-           [class.collection-item-seperate-bottom]="option.isSeperateBottom && i"
-           [class.collection-item-seperate]="option.isSeperate && i"
-           *ngFor="let option of _options;let i=index"
-           [class.disabled]="!optionIsValid(option,node)"
-           [style.display]="optionIsShown(option,node) ? '' : 'none'"
-           (contextmenu)="callOption(option,node);$event.preventDefault();$event.stopPropagation();"
-           (click)="callOption(option,node)">
-          <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
-      </div>
-    </div>
-      <div class="row waves-effect"
-           [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
-           [class.selected]="getSelectedPos(node)!=-1"
-           [title]="viewType==0 ? '' : getTitle(node)"
-           [draggable]="dragDrop"
-           (dragend)="dragHover=null"
-           (dragexit)="dragHover=null"
-           (dragleave)="dragHover=null"
-           (contextmenu)="contextMenu($event,node)"
-           (dragover)="allowDrag($event,node)" (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
-        <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
-          <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
+    <div class="heading" *ngIf="hasHeading && viewType==0">
+        <div class="checkbox" *ngIf="hasCheckbox">
+            <input *ngIf="_nodes.length" id="selectAll" (click)="toggleAll()" type="checkbox" class="filled-in" [checked]="selectedNodes.length==_nodes.length"/>
+            <label for="selectAll">&nbsp;</label>
         </div>
-        <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
-        <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><custom-icon iconId="pin"></custom-icon></div>
-        <div class="checkbox column" *ngIf="hasCheckbox">
-          <input (click)="select(node,true)" type="checkbox" class="filled-in" [attr.id]="id+'select'+i"
-                 checked="{{getSelectedPos(node)!=-1 ? 'checked' : ''}}"/>
-          <label [attr.for]="id+'select'+i">&nbsp;</label>
-        </div>
-        <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
-
-        <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)" >
-          <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
-               src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&width=200&height=150' : '') : null}}"
-               [attr.role]="'presentation'"
-               (mouseenter)="animateIcon(node,true)"
-               (mouseleave)="animateIcon(node,false)"
-               [class.blurred]="isDeleted(node) || applyMode && node.access.indexOf('CCPublish')==-1"
-               alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{ node.title }}"/>
-          <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
-            <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
-              <i class="material-icons">layers</i>
+        <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>
+        <div class="icon" *ngIf="hasIcon">&nbsp;</div>
+        <div *ngFor="let item of columnsVisible;let i = index"
+             class="{{getItemCssClass(item)}} row_{{i+1}}">
+            <a class="text" [class.clickable]="canBeSorted(item.name)" (click)="setSorting(item.name)">{{item.type+"."+item.name | translate}}</a>
+            <div *ngIf="sortBy" class="sorting" (click)="setSorting(item.name)">
+                <a class="" *ngIf="sortBy==item.name && sortAscending"><i class="material-icons">arrow_drop_up</i></a>
+                <a class="" *ngIf="sortBy==item.name && !sortAscending"><i class="material-icons">arrow_drop_down</i></a>
             </div>
-          </div>
-          <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
+        </div>
+        <div *ngFor="let option of optionsAlways"  class="more moreAlways" > </div>
+        <div class="more" *ngIf="_options && _options.length">&nbsp;</div>
+        <div class="removeColumn" *ngIf="currentDragColumn && reorderColumns"
+             (dragover)="allowDeleteColumn($event)" (drop)="deleteColumn($event)"
+        ><i class="material-icons">delete</i></div>
+        <div class="editColumns clickable" *ngIf="!currentDragColumn && reorderColumns && columnsVisible && columnsVisible.length"
+             (click)="reorderDialog=true"
+        ><i class="material-icons">settings</i></div>
+    </div>
+    <div [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
+        <div *ngIf="addElement" class="addElement clickable" (click)="addElementClicked()"
+             [class.tableList]="viewType==0"
+             [class.cardList]="viewType==1"
+             [class.cardSmallList]="viewType==2"
+        >
             <div>
-              <i class="material-icons">security</i>
-              <div>{{'NO_CC_PUBLISH' | translate }}</div>
-              <a *ngIf="node.properties['ccm:questionsallowed'] && node.properties['ccm:questionsallowed'][0]=='true'"
-                 (click)="askCCPublish($event,node)"
-              ><i class="material-icons">message</i> {{ 'ASK_CC_PUBLISH' | translate}}</a>
+                <i class="material-icons">{{addElement.icon}}</i>
+                <div class="label">{{addElement.label | translate}}</div>
             </div>
-          </div>
         </div>
+        <div *ngFor="let node of _nodes; let i = index" class="collection-item rowFrame"
+             [class.order-animation]="orderElementsActive"
+             [class.nodeCollection]="isCollection(node)"
+             [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
+             [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
+             [class.dark-color]="isCollection(node) && getCollection(node).preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
+             [class.tableList]="viewType==0"
+             [class.cardList]="viewType==1"
+             [class.cardSmallList]="viewType==2"
+             [class.hover]="dragHover==node">
+            <div class="collectionContainer"
+                 *ngIf="dropdown==node && _options && _options.length"
+                 (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"
+            >
+                <div class="moreOpen collection"
+                     #dropdown
+                     *ngIf="dropdown==node && _options && _options.length"
+                     [@openOverlay]="dropdown==node && dropdownBottom==null"
+                     [style.position]="dropdownPosition"
+                     [style.left]="dropdownLeft"
+                     [style.top]="dropdownTop"
+                     [style.bottom]="dropdownBottom"
+                >
+                    <a class="collection-item"
+                       [class.collection-item-seperate-bottom]="option.isSeperateBottom && i"
+                       [class.collection-item-seperate]="option.isSeperate && i"
+                       *ngFor="let option of _options;let i=index"
+                       [class.disabled]="!optionIsValid(option,node)"
+                       [style.display]="optionIsShown(option,node) ? '' : 'none'"
+                       (contextmenu)="callOption(option,node);$event.preventDefault();$event.stopPropagation();"
+                       (click)="callOption(option,node)">
+                        <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
+                </div>
+            </div>
+            <div class="row waves-effect"
+                 [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
+                 [class.noPermissions]="noPermissions(node)"
+                 [class.selected]="getSelectedPos(node)!=-1"
+                 [title]="viewType==0 ? '' : getTitle(node)"
+                 [draggable]="dragDrop"
+                 (dragend)="dragHover=null"
+                 (dragexit)="dragHover=null"
+                 (dragleave)="dragHover=null"
+                 (contextmenu)="contextMenu($event,node)"
+                 (dragover)="allowDrag($event,node)" (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
+                <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
+                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
+                </div>
+                <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
+                <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><custom-icon iconId="pin"></custom-icon></div>
+                <div class="checkbox column" *ngIf="hasCheckbox">
+                    <input (click)="select(node,true)" type="checkbox" class="filled-in" [attr.id]="id+'select'+i"
+                           checked="{{getSelectedPos(node)!=-1 ? 'checked' : ''}}"/>
+                    <label [attr.for]="id+'select'+i">&nbsp;</label>
+                </div>
+                <div class="checkboxDummy column" *ngIf="!hasCheckbox"></div>
+                <div class="ccPublishMissing" *ngIf="applyMode && node.access.indexOf('CCPublish')==-1">
+                    <div>
+                        <i class="material-icons">security</i>
+                        <div>{{'NO_CC_PUBLISH' | translate }}</div>
+                        <a *ngIf="node.properties['ccm:questionsallowed'] && node.properties['ccm:questionsallowed'][0]=='true'"
+                           (click)="askCCPublish($event,node)"
+                        ><i class="material-icons">message</i> {{ 'ASK_CC_PUBLISH' | translate}}</a>
+                    </div>
+                </div>
+                <div class="permissionsMissing" *ngIf="noPermissions(node)">
+                    <div>
+                        <i class="material-icons">security</i>
+                        <div>{{validatePermissions(node).message | translate }}</div>
+                    </div>
+                </div>
+                <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)" >
+                    <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
+                         src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&width=200&height=150' : '') : null}}"
+                         [attr.role]="'presentation'"
+                         (mouseenter)="animateIcon(node,true)"
+                         (mouseleave)="animateIcon(node,false)"
+                         [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
+                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{ node.title }}"/>
+                    <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
+                        <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
+                            <i class="material-icons">layers</i>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="nodeDeleted" *ngIf="isDeleted(node)" (click)="select(node,false)">
-          <div>
-            <i class="material-icons">delete</i>
-            <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
-            <div class="subline">{{'ORIGINAL_DELETED_INFO' | translate }}</div>
-            <a
-              (click)="delete(node); $event.stopPropagation();" *ngIf="canDelete ? canDelete(node) : false"
-            >{{ 'ORIGINAL_DELETE' | translate}}</a>
-          </div>
-        </div>
+                <div class="nodeDeleted" *ngIf="isDeleted(node)" (click)="select(node,false)">
+                    <div>
+                        <i class="material-icons">delete</i>
+                        <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
+                        <div class="subline">{{'ORIGINAL_DELETED_INFO' | translate }}</div>
+                        <a
+                                (click)="delete(node); $event.stopPropagation();" *ngIf="canDelete ? canDelete(node) : false"
+                        >{{ 'ORIGINAL_DELETE' | translate}}</a>
+                    </div>
+                </div>
 
-        <div class="icon column" *ngIf="hasIcon && viewType==0" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)">
-          <div class="icon-bg">
-            <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title}}"/>
-            <i *ngIf="!isCollection(node) && icon" class="material-icons">{{icon}}</i>
-            <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
-          </div>
-        </div>
-        <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)">
-          <div class="hiddendiv" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
-          <div class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
-        </div>
-        <div *ngFor="let option of optionsAlways"
-             class="more moreAlways column"
-             [style.opacity]="optionIsShown(option,node) ? 1 : 0"
-             (click)="optionIsShown(option,node) ? callOption(option,node) : null">
-          <i class="material-icons">{{option.icon}}</i>
-        </div>
+                <div class="icon column" *ngIf="hasIcon && viewType==0" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)">
+                    <div class="icon-bg">
+                        <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title}}"/>
+                        <i *ngIf="!isCollection(node) && icon" class="material-icons">{{icon}}</i>
+                        <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
+                    </div>
+                </div>
+                <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)">
+                    <div class="hiddendiv" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
+                    <div class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
+                </div>
+                <div *ngFor="let option of optionsAlways"
+                     class="more moreAlways column"
+                     [style.opacity]="optionIsShown(option,node) ? 1 : 0"
+                     (click)="optionIsShown(option,node) ? callOption(option,node) : null">
+                    <i class="material-icons">{{option.icon}}</i>
+                </div>
 
-        <div class="more column" *ngIf="_options && _options.length>1"><a (click)="showDropdown(node)"><i class="material-icons">more_vert</i></a></div>
-        <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)"><a [class.disabled]="!optionIsValid(_options[0],node)" (click)="callOption(_options[0],node)"><i class="material-icons">{{_options[0].icon}}</i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
-      </div>
+                <div class="more column" *ngIf="_options && _options.length>1"><a (click)="showDropdown(node)"><i class="material-icons">more_vert</i></a></div>
+                <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)"><a [class.disabled]="!optionIsValid(_options[0],node)" (click)="callOption(_options[0],node)"><i class="material-icons">{{_options[0].icon}}</i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
+            </div>
+        </div>
+        <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll()">
+            <i class="material-icons">refresh</i>
+            <div>{{'LOAD_MORE' | translate}}</div>
+        </div>
+        <spinner *ngIf="isLoading"></spinner>
     </div>
-    <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll()">
-      <i class="material-icons">refresh</i>
-      <div>{{'LOAD_MORE' | translate}}</div>
-    </div>
-    <spinner *ngIf="isLoading"></spinner>
-  </div>
 </div>
