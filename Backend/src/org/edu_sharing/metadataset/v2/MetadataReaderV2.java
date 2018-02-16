@@ -77,10 +77,10 @@ public class MetadataReaderV2 {
 				throw new IllegalArgumentException("Invalid mds set "+mdsSet+", was not found in the list of mds sets of appid "+appId.getAppId());
 			}
 		}
-		String id=appId.getAppId()+mdsName+"_"+locale;
+		String id=appId.getAppId()+"_"+mdsName+"_"+locale;
 		if(mdsCache.containsKey(id))
 			return mdsCache.get(id);
-		
+		logger.info("Loading mds for id "+id);
 		reader=new MetadataReaderV2(mdsNameDefault+".xml",locale);
 		mds=reader.getMetadatasetForFile(mdsNameDefault);
 		mds.setRepositoryId(appId.getAppId());
@@ -109,6 +109,7 @@ public class MetadataReaderV2 {
 		}
 		catch(IOException e){
 		}
+		logger.info("Loading mds for id "+id+" completed");
 		mdsCache.put(id, mds);
 		return mds;
 	}
