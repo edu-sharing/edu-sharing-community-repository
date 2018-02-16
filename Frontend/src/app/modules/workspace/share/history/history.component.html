@@ -1,44 +1,43 @@
-<div class="dialog darken">
-  <div class="card center-card card-action card-high">
-    <div class="card-content">
-      <div class="card-cancel" (click)="close()"><i class="material-icons">close</i></div>
-      <div class="card-title">{{'WORKSPACE.SHARE.HISTORY.TITLE' | translate }}</div>
-      <div class="card-scroll historyCard">
-        <spinner *ngIf="loading"></spinner>
-        <div *ngIf="(!history || !history.length) && !loading" class="empty">
-          {{'WORKSPACE.SHARE.HISTORY.EMPTY' | translate }}
+<div class="dialog darken" [@fade]="this"></div>
+<div class="card center-card card-action card-high" [@cardAnimation]="this">
+  <div class="card-content">
+    <div class="card-cancel" (click)="close()"><i class="material-icons">close</i></div>
+    <div class="card-title">{{'WORKSPACE.SHARE.HISTORY.TITLE' | translate }}</div>
+    <div class="card-scroll historyCard">
+      <spinner *ngIf="loading"></spinner>
+      <div *ngIf="(!history || !history.length) && !loading" class="empty">
+        {{'WORKSPACE.SHARE.HISTORY.EMPTY' | translate }}
+      </div>
+      <div *ngFor="let entry of history">
+        <div class="heading">
+          <div class="name"><i class="material-icons">person</i> {{entry.user}}</div>
+          <div class="date">{{entry.date}}</div>
         </div>
-        <div *ngFor="let entry of history">
-          <div class="heading">
-            <div class="name"><i class="material-icons">person</i> {{entry.user}}</div>
-            <div class="date">{{entry.date}}</div>
-          </div>
-          <div class="content">
-          <div class="group added" *ngIf="entry.added.length">
-            <div class="type"><i class="material-icons">add_circle_outline</i> {{'WORKSPACE.SHARE.HISTORY.ADDED' | translate}}</div>
-            <div *ngFor="let add of entry.added" class="entry">
-              <span class="name">{{ add.name }}</span> <span class="permissions">({{add.permissions}})</span>
-            </div>
-          </div>
-          <div class="group changed" *ngIf="entry.modified.length">
-            <div class="type"><i class="material-icons">autorenew</i> {{'WORKSPACE.SHARE.HISTORY.CHANGED' | translate}}</div>
-            <div *ngFor="let changed of entry.modified" class="entry">
-              <span class="name">{{ changed.name }}</span> <span class="permissionsOld">({{changed.oldPermissions}})</span> <span class="permissions">({{changed.permissions}})</span>
-            </div>
-          </div>
-          <div class="group removed" *ngIf="entry.removed.length">
-            <div class="type"><i class="material-icons">remove_circle_outline</i> {{'WORKSPACE.SHARE.HISTORY.REMOVED' | translate}}</div>
-            <div *ngFor="let remove of entry.removed" class="entry">
-              <span class="name">{{ remove.name }}</span> <span class="permissions">({{remove.permissions}})</span>
-            </div>
-          </div>
+        <div class="content">
+        <div class="group added" *ngIf="entry.added.length">
+          <div class="type"><i class="material-icons">add_circle_outline</i> {{'WORKSPACE.SHARE.HISTORY.ADDED' | translate}}</div>
+          <div *ngFor="let add of entry.added" class="entry">
+            <span class="name">{{ add.name }}</span> <span class="permissions">({{add.permissions}})</span>
           </div>
         </div>
+        <div class="group changed" *ngIf="entry.modified.length">
+          <div class="type"><i class="material-icons">autorenew</i> {{'WORKSPACE.SHARE.HISTORY.CHANGED' | translate}}</div>
+          <div *ngFor="let changed of entry.modified" class="entry">
+            <span class="name">{{ changed.name }}</span> <span class="permissionsOld">({{changed.oldPermissions}})</span> <span class="permissions">({{changed.permissions}})</span>
+          </div>
+        </div>
+        <div class="group removed" *ngIf="entry.removed.length">
+          <div class="type"><i class="material-icons">remove_circle_outline</i> {{'WORKSPACE.SHARE.HISTORY.REMOVED' | translate}}</div>
+          <div *ngFor="let remove of entry.removed" class="entry">
+            <span class="name">{{ remove.name }}</span> <span class="permissions">({{remove.permissions}})</span>
+          </div>
+        </div>
+        </div>
+      </div>
 
-      </div>
     </div>
-    <div class="card-action">
-        <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="close()" (click)="close()">{{'CLOSE' | translate }}</a>
-      </div>
   </div>
+  <div class="card-action">
+      <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="close()" (click)="close()">{{'CLOSE' | translate }}</a>
+    </div>
 </div>

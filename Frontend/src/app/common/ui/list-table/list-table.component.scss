@@ -47,8 +47,9 @@ $borderRadius:2px;
   color:$textVeryLight!important;
   cursor: default;
 }
-.noCCPublish > div{
-  opacity:0.5;
+.noCCPublish > div,
+.noPermissions > div{
+  /*opacity:0.5;*/
 }
 .blurred{
   @include imageDisabledBlur();
@@ -56,12 +57,14 @@ $borderRadius:2px;
   left: 2px;
   right: 2px;
 }
-.ccPublishMissing{
+.ccPublishMissing,.permissionsMissing{
   width: 100%;
   height: 100%;
   background-color:rgba(255,255,255,0.65);
   position: absolute;
   left:0;
+  top:0;
+  z-index: 110;
   text-align: center;
   padding-top: 40px;
   div{
@@ -74,6 +77,11 @@ $borderRadius:2px;
       position:relative;
       top:7px;
     }
+  }
+}
+.cardSmallList{
+  .ccPublishMissing,.permissionsMissing{
+    padding-top:20px;
   }
 }
 $badgeWidth:200px;
@@ -338,7 +346,8 @@ $badgeWidth:200px;
     }
   }
 }
-.list .cardSmallList.dark-color{
+.list .cardSmallList.dark-color,
+.list .cardList.dark-color{
   .row_1,.row_2,.row_3,.row_4,.row_5,.row_6 {
     color: #000 !important;
   }
@@ -443,6 +452,11 @@ $orderAnimationTime:$animationTime*5;
 .rowInner{
   max-height:1.5rem;
   overflow: hidden;
+}
+.cardSmallList .rowInner{
+  max-height: 3.15rem;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 .node_ccm_commonlicense_key .rowInner,
 .cardList .rowInner{
@@ -552,7 +566,7 @@ $orderAnimationTime:$animationTime*5;
 .cardSmallList{
   display:block;
   width:$cardWidth;
-  height:$cardSmallHeight;
+  height: $listCardSmallHeight;
   @include materialShadow();
   float:left;
   margin:6px;
@@ -578,7 +592,6 @@ $orderAnimationTime:$animationTime*5;
 .cardSmallList .row_1{
   top: 5px;
   font-size: 110%;
-  height: 56px;
   overflow: hidden;
 }
 .cardSmallList .row_2{

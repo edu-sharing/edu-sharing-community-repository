@@ -35,6 +35,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -612,6 +613,8 @@ public class AdminServiceImpl implements AdminService  {
 		if(binaryHandlerClassName != null && !binaryHandlerClassName.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_BINARYHANDLER,binaryHandlerClassName);
 		}
+		
+		paramsMap.put(OAIConst.PARAM_USERNAME, AuthenticationUtil.getFullyAuthenticatedUser());
 		
 		Class importerClass = null;
 		for(JobConfig jobConfig : JobHandler.getInstance().getJobConfigList()){

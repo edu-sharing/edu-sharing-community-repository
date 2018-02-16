@@ -16,6 +16,14 @@
   position: relative;
   top:50px;
 }
+.dialogMds{
+  position: absolute;
+  left:0;
+  top:0;
+  width: 100%;
+  height: 100%;
+  z-index: $dialogZIndex;
+}
 .reset{
   text-transform: uppercase;
   color: $primary;
@@ -24,7 +32,7 @@
 }
 .card-jumpmarks{
   position:fixed;
-  z-index: 121;
+  z-index: $dialogZIndex+1;
   top:10%;
   left:50%;
   width:200px;

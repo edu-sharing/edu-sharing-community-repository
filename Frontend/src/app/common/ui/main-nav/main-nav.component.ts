@@ -108,13 +108,19 @@ export class MainNavComponent {
     for(let i=0;i<elementsAlign.length;i++) {
       elements.push(elementsAlign[i]);
     }
+    let ATTRIBUTE_NAME='data-banner-id';
     if(event==null) {
-      this.scrollInitialPositions=[];
+      /*this.scrollInitialPositions=[];*/
       for(let i=0;i<elements.length;i++) {
         let element: any = elements[i];
         element.style.position = null;
         element.style.top = null;
-        this.scrollInitialPositions.push(window.getComputedStyle(element).getPropertyValue('top'));
+        if(!element.getAttribute(ATTRIBUTE_NAME)){
+            element.setAttribute(ATTRIBUTE_NAME,Math.random());
+        }
+        if(this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)])
+          continue;
+        this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=window.getComputedStyle(element).getPropertyValue('top');
       }
     }
     if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
@@ -133,10 +139,10 @@ export class MainNavComponent {
         }
         else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
           element.style.position = 'fixed';
-          element.style.top = this.scrollInitialPositions[i];
+          element.style.top = this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)];
         } else {
           element.style.position = 'absolute';
-          element.style.top = Number.parseInt(this.scrollInitialPositions[i])+y + 'px';
+          element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)])+y + 'px';
         }
       }
     }

@@ -94,7 +94,7 @@
         <i class="material-icons" *ngIf="!more">keyboard_arrow_right</i>
         <span>{{'WORKSPACE.CONTRIBUTOR.MORE' | translate}}</span>
       </a>
-      <div *ngIf="more" class="moreOpen">
+      <div *ngIf="more" [@overlay]="more" class="moreOpen">
         <h2>{{'WORKSPACE.CONTRIBUTOR.ORG_INFO' | translate}}</h2>
         <div class="table">
           <div>

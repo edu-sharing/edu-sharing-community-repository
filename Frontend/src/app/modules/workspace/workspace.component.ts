@@ -586,9 +586,8 @@ export class WorkspaceMainComponent{
 
   private pasteNode(position=0){
     let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-    if(this.searchQuery)
+    if(this.searchQuery || this.isRootFolder)
       return;
-
     if(!clip || !clip.nodes.length)
       return;
     if(clip.sourceNode && clip.sourceNode.ref.id==this.currentFolder.ref.id && !clip.copy){
@@ -609,6 +608,7 @@ export class WorkspaceMainComponent{
     }
     this.globalProgress=true;
     let target=this.currentFolder.ref.id;
+    console.log(this.currentFolder);
     let source=clip.nodes[position].ref.id;
     if(clip.copy)
       this.node.copyNode(target,source).subscribe(
@@ -885,9 +885,9 @@ export class WorkspaceMainComponent{
 
     this.searchQuery=null;
     this.currentFolder=null;
-    this.isRootFolder=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
-    console.log("root "+this.isRootFolder+" "+id);
-    if(!this.isRootFolder) {
+    let root=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
+    if(!root || id==RestConstants.USERHOME) {
+      this.isRootFolder=false;
       console.log("open path: "+id);
       this.currentFolderRef=id;
       this.node.getNodeMetadata(id).subscribe((data: NodeWrapper) => {
@@ -902,7 +902,8 @@ export class WorkspaceMainComponent{
       });
     }
     else{
-      console.log("open root path "+id);
+        this.isRootFolder=true;
+        console.log("open root path "+id);
       if(id==RestConstants.USERHOME){
         this.createAllowed = true;
       }

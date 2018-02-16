@@ -106,7 +106,6 @@ public class MetadataReaderV2 {
 			mds.overrideWith(mdsOverride);
 		}
 		catch(IOException e){
-			e.printStackTrace();
 		}
 		mdsCache.put(id, mds);
 		return mds;

@@ -28,11 +28,12 @@ $noResultsColor: #999;
 $darkenColor:rgba(0,0,0,.75);
 $colorStatusPositive:#40BF8E;
 $focusColor: $primaryMediumLight;
+$placeholderColor: #999;
 $focusWidth: 1px;
 $cardWidth: 200px;
 $cardHeight: 300px;
 $listItemHeight: 70px;
-$cardSmallHeight: 90px;
+$listCardSmallHeight: 100px;
 $cardPadding:20px;
 $animationTime: 0.25s;
 $transitionNormal: .2s;
@@ -40,6 +41,7 @@ $mobileWidth:   700px;
 $mobileHeight:   750px;
 // this factor should be multiplied by a natural number, e.g. *3 means stage 3 (relatively early)
 $mobileStage:   100px;
+$dialogZIndex: 120;
 
 // for variable overrides, include it again
 @import "branding";

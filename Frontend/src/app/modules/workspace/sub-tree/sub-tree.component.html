@@ -19,7 +19,7 @@
   </div>
 
 
-  <div *ngFor="let node of _nodes"
+  <div *ngFor="let node of _nodes;let i=index;"
      (dragend)="dragHover=null"
      (dragexit)="dragHover=null"
      (dragleave)="dragHover=null"
@@ -29,7 +29,7 @@
 >
 
   <div [style.paddingLeft.px]="depth*20" class="node waves-effect" [class.nodeSelected]="isSelected(node)" [class.hover]="dragHover==node">
-    <div class="fade-right" [class.fade-right-selected]="isSelected(node)"></div>
+    <div class="fade-right" *ngIf="loadingStates[i]" [class.fade-right-selected]="isSelected(node)"></div>
   <i *ngIf="!isOpen(node)" class="arrow material-icons" (click)="openOrCloseTree(node)">
     keyboard_arrow_right
   </i>
@@ -47,6 +47,7 @@
                       [selectedPath]="selectedPath"
                       [selectedNode]="selectedNode"
                       [options]="_options"
+                      (onLoading)="setLoadingState($event,i)"
                       [parentPath]="getFullPath(node)"
                       (onUpdateOptions)="updateOptions($event)"
                       (hasChilds)="_hasChilds[getPathOpen(node)]=$event"

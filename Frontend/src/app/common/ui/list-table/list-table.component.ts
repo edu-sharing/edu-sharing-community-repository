@@ -147,6 +147,12 @@ export class ListTableComponent implements EventListener{
    */
   @Input() isClickable : boolean;
   /**
+   *  a custom function to validate if a given node has permissions or should be displayed as "disabled"
+   *  Function will get the node object as a parameter and should return
+   *  {status:boolean, message:string}
+   */
+  @Input() validatePermissions : Function;
+  /**
    * Hint that the "apply node" mode is active (when reurl is used)
    */
   @Input() applyMode = false;
@@ -383,6 +389,9 @@ export class ListTableComponent implements EventListener{
       this.dragHover = target;
     }
 
+  }
+  private noPermissions(node:any){
+    return this.validatePermissions!=null && this.validatePermissions(node).status==false;
   }
   private closeReorder(save:boolean){
     this.reorderDialog=false;
