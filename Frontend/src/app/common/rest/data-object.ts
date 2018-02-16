@@ -211,6 +211,7 @@ export interface UserProfile {
   avatar: string;
   about: string;
   skills: string[];
+  types: string[];
 }
 export interface UserStats {
   nodeCount: number;

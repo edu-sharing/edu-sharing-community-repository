@@ -15,6 +15,20 @@
   height:100%;
   flex-direction: column;
 }
+.editorial-badge{
+  position: relative;
+  margin-left: 15px;
+  float: left;
+  font-size:26pt;
+  color: #d7bd00;
+  >i{
+    position:absolute;
+    left:10px;
+    top:6px;
+    font-size:11pt;
+    color:#fff;
+  }
+}
 .noComments{
   font-size: 120%;
   text-align: center;
