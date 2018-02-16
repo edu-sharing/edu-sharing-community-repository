@@ -528,58 +528,63 @@ public class MetadataReaderV2 {
 				key=translatable.getI18nPrefix()+key;
 			return getTranslation(translatable.getI18n(),key,fallback,locale);
 		}catch(Exception e){
+			e.printStackTrace();
 			logger.warn(e.toString());
 			return key;
 		}
 	}
-	
+	private static Map<String,ResourceBundle> translationBundles=new HashMap<>();
+	private static ResourceBundle getTranslationCache(String i18nFile) throws IOException{
+		if(translationBundles.containsKey(i18nFile))
+			return translationBundles.get(i18nFile);
+		InputStream isLocale=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18nFile+".properties");
+		PropertyResourceBundle bundle = new PropertyResourceBundle(isLocale);
+		translationBundles.put(i18nFile, bundle);
+		return bundle;
+	}
+
 	private static String getTranslation(String i18n,String key,String fallback,String locale){
-		
 		String defaultValue=key;
 		if(fallback!=null)
 			defaultValue=fallback;
 		
-		InputStream isDefaultOverride=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/mds_override.properties");
-		InputStream isLocaleOverride=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/mds_override_"+locale+".properties");
-		InputStream isDefault=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18n+".properties");
-		InputStream isLocale=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18n+"_"+locale+".properties");
-		
+		ResourceBundle defaultResourceBundleGlobal=null;
+		ResourceBundle defaultResourceBundleLocal=null;
+		ResourceBundle defaultResourceBundleGlobalOverride=null;
+		ResourceBundle defaultResourceBundleLocalOverride=null;
+
 		if(key!=null)
 			key=key.replace(" ","_");
 		
 		try{
-			ResourceBundle defaultResourceBundle =  new PropertyResourceBundle(isDefault);
-			if(defaultResourceBundle.containsKey(key))
-				defaultValue=defaultResourceBundle.getString(key);
-			if(isDefaultOverride!=null){
-				ResourceBundle resourceBundle =  new PropertyResourceBundle(isDefaultOverride);
-				if(resourceBundle!=null && resourceBundle.containsKey(key))
-					defaultValue=resourceBundle.getString(key);
-			}
-			
+			defaultResourceBundleLocal=getTranslationCache(i18n+"_"+locale);
+			try {
+				defaultResourceBundleLocalOverride=getTranslationCache(i18n+"_override_"+locale);
+				if(defaultResourceBundleLocalOverride.containsKey(key))
+					return defaultResourceBundleLocalOverride.getString(key);
+			}catch(Throwable t) {}
+			if(defaultResourceBundleLocal.containsKey(key))
+				return defaultResourceBundleLocal.getString(key);
+		}catch(Throwable t){
+		}
+		try{
+			defaultResourceBundleGlobal=getTranslationCache(i18n);
+			try {
+				defaultResourceBundleGlobalOverride=getTranslationCache(i18n+"_override");
+				if(defaultResourceBundleGlobalOverride.containsKey(key))
+					return defaultResourceBundleGlobalOverride.getString(key);
+			}catch(Throwable t) {}
+			if(defaultResourceBundleGlobal.containsKey(key))
+				defaultValue=defaultResourceBundleGlobal.getString(key);			
 		}catch(Throwable t){
 			logger.warn("No translation file "+i18n+" found while looking for "+key);
 		}
-		try{
-			if(isLocale!=null){
-				if(isLocaleOverride!=null){
-					ResourceBundle resourceBundle =  new PropertyResourceBundle(isLocaleOverride);
-					if(resourceBundle!=null && resourceBundle.containsKey(key))
-						return resourceBundle.getString(key);
-				}
-				ResourceBundle resourceBundle =  new PropertyResourceBundle(isLocale);
-				if(resourceBundle!=null && resourceBundle.containsKey(key))
-					return resourceBundle.getString(key);
-			}
-		}catch(IOException e){
-			e.printStackTrace();
-		}
 		return defaultValue;
-
 	}
 	
 	public static void refresh() {
 		mdsCache.clear();
+		translationBundles=new HashMap<>();
 		prepareMetadatasets();
 	}
 	
