@@ -459,7 +459,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			
 			logger.info("---> UPDATE/CREATE THUMBNAIL FOR LINK("+afterURL+") ON NODE("+nodeRef.getId()+")");
 			
-			String previewImageBase64 = getPreviewFromURL(afterURL);
+			String technicalFormat = (String)after.get(QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
+			String previewImageBase64 = (technicalFormat != null && technicalFormat.trim().toLowerCase().equals("text/html")) ? getPreviewFromURL(afterURL) : null;
 			if (previewImageBase64!=null) {
 
 				logger.info("---> GOT PREVIEW IMAGE BASE64: "+previewImageBase64.substring(21, 256)+" ...");

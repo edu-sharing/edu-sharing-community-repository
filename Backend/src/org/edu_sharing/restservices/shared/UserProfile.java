@@ -19,6 +19,7 @@ public class UserProfile  {
   private String avatar = null;
   private String about = null;
   private String[] skills = null;
+  private String[] types = null;
 
   public UserProfile(){
 	  
@@ -81,22 +82,18 @@ public class UserProfile  {
 	public void setAbout(String about) {
 		this.about = about;
 	}
-	@JsonProperty("skills")
+	@JsonProperty
 	public String[] getSkills() {
 		return skills;
 	}
 	public void setSkills(String[] skills) {
 		this.skills = skills;
 	}
-@Override
-  public String toString()  {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class UserProfile {\n");
-    
-    sb.append("  firstName: ").append(firstName).append("\n");
-    sb.append("  lastName: ").append(lastName).append("\n");
-    sb.append("  email: ").append(email).append("\n");
-    sb.append("}\n");
-    return sb.toString();
-  }
+	@JsonProperty
+	public String[] getTypes() {
+		return types;
+	}
+	public void setType(String[] types) {
+		this.types = types;
+	}
 }

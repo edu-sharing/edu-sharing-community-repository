@@ -32,7 +32,8 @@
                 </div>
               </div>
               </div>
-              <div class="actions" [class.actionsAvailable]="options[i] && options[i].length">
+              <div class="actions" [class.actionsAvailable]="true || (options[i] && options[i].length)">
+                <i class="editorial-badge material-icons" *ngIf="isEditorialComment(comment)">bookmark<i class="material-icons">star</i></i>
                 <actionbar
                   [numberOfAlwaysVisibleOptions]="1"
                   [options]="options[i]"

@@ -1414,16 +1414,24 @@ export class MdsComponent{
     let html='';
     let caption='';
 
-    if(widget.condition && node){
-        let negate=widget.condition.startsWith('!');
-        let condition=widget.condition;
-        if(negate){
-          condition=widget.condition.substring(1);
-        }
-        console.log('condition '+condition+' negate '+negate);
-        if(!node.properties[condition] && !negate || node.properties[condition] && negate){
+    if(widget.condition){
+      let condition=widget.condition;
+      console.log('condition:');
+      console.log(condition);
+      if(condition.type=='PROPERTY' && node) {
+          if (!node.properties[condition.value] && !condition.negate || node.properties[condition.value] && condition.negate) {
+              return null;
+          }
+      }
+      if(condition.type=='TOOLPERMISSION'){
+        let tp=this.connector.hasToolPermissionInstant(condition.value);
+        console.log(condition.value);
+        console.log(tp);
+        if(tp==condition.negate){
           return null;
         }
+      }
+      console.log("condition is true, will display widget");
     }
 
     if(hasCaption) {

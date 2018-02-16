@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.GroupProfile;
@@ -164,6 +165,7 @@ public class GroupDao {
 				@Override
 				public Void doWork() throws Exception {
 					((MCAlfrescoAPIClient)baseClient).addMemberships(groupName, new String[]{member});
+					PersonCache.reset(member);
 					return null;
 				}
 			});
@@ -193,6 +195,7 @@ public class GroupDao {
 				@Override
 				public Void doWork() throws Exception {
 					((MCAlfrescoAPIClient)baseClient).removeMemberships(groupName, new String[]{member});
+					PersonCache.reset(member);
 					return null;
 				}
 			});
@@ -247,7 +250,7 @@ public class GroupDao {
     	return data;
 	}
 	
-	private String getGroupType() {
+	public String getGroupType() {
 		return this.groupType;
 	}
 
