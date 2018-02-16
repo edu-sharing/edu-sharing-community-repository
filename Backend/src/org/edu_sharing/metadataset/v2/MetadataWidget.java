@@ -1,5 +1,6 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,7 @@ public class MetadataWidget extends MetadataTranslatable{
 			"multioption"
 	};
 	
-	public static class Condition{
+	public static class Condition implements Serializable{
 		public Condition(String value, CONDITION_TYPE type, boolean negate) {
 			this.value = value;
 			this.type = type;
