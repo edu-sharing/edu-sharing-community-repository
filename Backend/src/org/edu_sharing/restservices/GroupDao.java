@@ -247,7 +247,7 @@ public class GroupDao {
     	return data;
 	}
 	
-	private String getGroupType() {
+	public String getGroupType() {
 		return this.groupType;
 	}
 

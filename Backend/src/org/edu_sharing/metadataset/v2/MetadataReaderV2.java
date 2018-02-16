@@ -19,6 +19,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataWidget.Condition;
+import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -292,8 +294,25 @@ public class MetadataReaderV2 {
 					widget.setFormat(value); 
 				if(name.equals("type"))
 					widget.setType(value);
-				if(name.equals("condition"))
-					widget.setCondition(value);
+				if(name.equals("condition")) {
+					boolean negate=false;
+					NamedNodeMap attr = data.getAttributes();
+					CONDITION_TYPE type=CONDITION_TYPE.PROPERTY;
+					if(attr!=null && attr.getNamedItem("type")!=null) {
+						try {
+							type=CONDITION_TYPE.valueOf(attr.getNamedItem("type").getTextContent());
+						}catch(Throwable t) {
+							logger.warn("Widget "+widget.getId()+" has condition, but the given type "+attr.getNamedItem("type").getTextContent()+" is invalid. Will use default type "+type);
+						}
+					}
+					else {
+						logger.warn("Widget "+widget.getId()+" has condition, but no type for condition was specified. Using default type "+type);
+					}
+					if(attr!=null && attr.getNamedItem("negate")!=null && attr.getNamedItem("negate").getTextContent().equals("true")) {
+						negate=true;
+					}
+					widget.setCondition(new MetadataWidget.Condition(value,type,negate));
+				}
 				if(name.equals("suggestionSource"))
 					widget.setSuggestionSource(value);
 				if(name.equals("suggestionQuery"))

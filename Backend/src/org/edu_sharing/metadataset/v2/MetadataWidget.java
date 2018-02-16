@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
+
 public class MetadataWidget extends MetadataTranslatable{
 	private static String[] MULTIVALUE_WIDGETS=new String[]{
 			"vcard",
@@ -14,13 +16,47 @@ public class MetadataWidget extends MetadataTranslatable{
 			"multivalueSuggestBadges",
 			"multioption"
 	};
+	
+	public static class Condition{
+		public Condition(String value, CONDITION_TYPE type, boolean negate) {
+			this.value = value;
+			this.type = type;
+			this.negate = negate;
+		}
+		public static enum CONDITION_TYPE{
+			PROPERTY,
+			TOOLPERMISSION
+		};
+		private String value;
+		private CONDITION_TYPE type;
+		private boolean negate;
+		public String getValue() {
+			return value;
+		}
+		public void setValue(String value) {
+			this.value = value;
+		}
+		public CONDITION_TYPE getType() {
+			return type;
+		}
+		public void setType(CONDITION_TYPE type) {
+			this.type = type;
+		}
+		public boolean isNegate() {
+			return negate;
+		}
+		public void setNegate(boolean negate) {
+			this.negate = negate;
+		}
+		
+	}
 	private String id,type,caption,bottomCaption,icon,
-					placeholder,defaultvalue,template,condition,
+					placeholder,defaultvalue,template,
 					suggestionSource,suggestionQuery,unit,format;
 	private Integer min,max,defaultValue,defaultMin,defaultMax,step;
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty;
 	private List<MetadataKey> values;
-
+	private Condition condition;
 	public String getSuggestionQuery() {
 		return suggestionQuery;
 	}
@@ -54,10 +90,10 @@ public class MetadataWidget extends MetadataTranslatable{
 	public boolean isMultivalue(){
 		return Arrays.asList(MULTIVALUE_WIDGETS).contains(type);
 	}
-	public String getCondition() {
+	public Condition getCondition() {
 		return condition;
 	}
-	public void setCondition(String condition) {
+	public void setCondition(Condition condition) {
 		this.condition = condition;
 	}
 	public String getTemplate() {

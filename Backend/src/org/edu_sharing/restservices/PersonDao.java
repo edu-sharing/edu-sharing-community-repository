@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 
@@ -19,6 +20,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -27,6 +29,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.User;
@@ -40,6 +43,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.SearchServiceImpl;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +52,8 @@ import org.json.JSONObject;
 import com.oracle.jrockit.jfr.ContentType;
 
 public class PersonDao {
+
+	Logger logger = Logger.getLogger(PersonDao.class);
 
 	public static final String ME = "-me-";
 	
@@ -291,6 +297,7 @@ public class PersonDao {
     	profile.setAvatar(getAvatar());
     	profile.setAbout(getAbout());
     	profile.setSkills(getSkills());
+    	profile.setType(getType());
     	return profile;
 	}
 	private UserStats getStats() {
@@ -394,6 +401,31 @@ public class PersonDao {
 	public String getFirstName() {
 		
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
+	}
+	
+	public String getType() {
+		return AuthenticationUtil.runAsSystem(new RunAsWork<String>() {
+			@Override
+			public String doWork() throws Exception {
+				 PersonCache.get(getAuthorityName(),PersonCache.TYPE);
+				if(PersonCache.contains(getAuthorityName(),PersonCache.TYPE)) {
+					logger.info("using person cache for "+getAuthorityName());
+					return (String) PersonCache.get(getAuthorityName(),PersonCache.TYPE);
+				}
+				String type=null;
+				Set<String> groups = authorityService.getMemberships(getAuthorityName());
+				for(String group : groups) {
+					try {
+						if(CCConstants.EDITORIAL_GROUP_TYPE.equals(GroupDao.getGroup(repoDao, group).getGroupType())) {
+							type=CCConstants.EDITORIAL_GROUP_TYPE;
+							break;
+						}
+					}catch(Throwable t) {}
+				}
+				PersonCache.put(getAuthorityName(),PersonCache.TYPE, type);
+				return type;
+			}
+		});		
 	}
 	
 	public String getLastName() {

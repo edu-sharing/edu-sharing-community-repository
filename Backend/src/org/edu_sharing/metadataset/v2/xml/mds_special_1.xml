@@ -4,12 +4,13 @@
 		<widgets>
 			<widget>
 				<id>ccm:classification_purpose</id>
-				<caption>Klassifikation</caption>
+				<caption>Klassifikation (TOOLPERMISSION_CONFIDENTIAL existiert)</caption>
 				<placeholder>z.B. Hochschule</placeholder>
 				<type>singleoption</type>
 				<valuespaceClient>true</valuespaceClient>
 				<extended>false</extended>
-				<defaultvalue>${aha}</defaultvalue>
+				<defaultvalue>${test}</defaultvalue>
+				<condition type="TOOLPERMISSION">TOOLPERMISSION_CONFIDENTAL</condition>
 				<values>
 					<value cap="Schule">school</value>
 					<value cap="Hochschule">university</value>
