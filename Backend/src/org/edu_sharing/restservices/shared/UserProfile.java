@@ -19,7 +19,7 @@ public class UserProfile  {
   private String avatar = null;
   private String about = null;
   private String[] skills = null;
-  private String type = null;
+  private String[] types = null;
 
   public UserProfile(){
 	  
@@ -90,10 +90,10 @@ public class UserProfile  {
 		this.skills = skills;
 	}
 	@JsonProperty
-	public String getType() {
-		return type;
+	public String[] getTypes() {
+		return types;
 	}
-	public void setType(String type) {
-		this.type = type;
+	public void setType(String[] types) {
+		this.types = types;
 	}
 }

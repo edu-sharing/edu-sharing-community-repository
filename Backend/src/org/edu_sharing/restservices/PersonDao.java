@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -403,27 +404,28 @@ public class PersonDao {
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
 	}
 	
-	public String getType() {
-		return AuthenticationUtil.runAsSystem(new RunAsWork<String>() {
+	public String[] getType() {
+		return AuthenticationUtil.runAsSystem(new RunAsWork<String[]>() {
 			@Override
-			public String doWork() throws Exception {
+			public String[] doWork() throws Exception {
 				 PersonCache.get(getAuthorityName(),PersonCache.TYPE);
 				if(PersonCache.contains(getAuthorityName(),PersonCache.TYPE)) {
 					logger.info("using person cache for "+getAuthorityName());
-					return (String) PersonCache.get(getAuthorityName(),PersonCache.TYPE);
+					return (String[]) PersonCache.get(getAuthorityName(),PersonCache.TYPE);
 				}
-				String type=null;
+				Set<String> types=new HashSet<>();
 				Set<String> groups = authorityService.getMemberships(getAuthorityName());
 				for(String group : groups) {
 					try {
-						if(CCConstants.EDITORIAL_GROUP_TYPE.equals(GroupDao.getGroup(repoDao, group).getGroupType())) {
-							type=CCConstants.EDITORIAL_GROUP_TYPE;
-							break;
-						}
+						String type=GroupDao.getGroup(repoDao, group).getGroupType();
+						if(type!=null)
+							types.add(type);
+							
 					}catch(Throwable t) {}
 				}
-				PersonCache.put(getAuthorityName(),PersonCache.TYPE, type);
-				return type;
+				String[] typesArray = types.toArray(new String[0]);
+				PersonCache.put(getAuthorityName(),PersonCache.TYPE, typesArray);
+				return typesArray;
 			}
 		});		
 	}
