@@ -894,12 +894,6 @@
 					<multiple>true</multiple>
 				</property>
 <!--  new Values LOM - DE   -->
-
-				<property name="ccm:lifecyclecontributer_subject_matter_expert">
-					<type>d:text</type>
-					<multiple>true</multiple>
-				</property>
-
 				<property name="ccm:lifecyclecontributer_animation">
 					<type>d:text</type>
 					<multiple>true</multiple>
