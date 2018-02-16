@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="17px" height="22px" viewBox="0 0 17 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 48.2 (47327) - http://www.bohemiancoding.com/sketch -->
+    <title>Redaktionsmarkierung</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M1,0 L16,0 L12.1227679,6.5 L16,13 L1,13 C0.44771525,13 6.76353751e-17,12.5522847 0,12 L0,1 C-6.76353751e-17,0.44771525 0.44771525,1.01453063e-16 1,0 Z" id="path-1"></path>
+    </defs>
+    <g id="Kommentar-Copy-3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(-46.000000, -126.000000)">
+        <g id="Kommentar" transform="translate(10.000000, 85.000000)">
+            <g id="Redaktionsmarkierung" transform="translate(44.500000, 51.000000) rotate(90.000000) translate(-44.500000, -51.000000) translate(36.500000, 44.500000)">
+                <g id="Rectangle-8">
+                    <use fill="#F0B70E" fill-rule="evenodd" xlink:href="#path-1"></use>
+                    <path stroke="#FFFFFF" stroke-width="2" d="M13.28716,6.5 L17.7608894,14 L1,14 C-0.1045695,14 -1,13.1045695 -1,12 L-1,1 C-1,-0.1045695 -0.1045695,-1 1,-1 L17.7608894,-1 L13.28716,6.5 Z"></path>
+                </g>
+                <polygon id="Shape" fill="#FFFFFF" fill-rule="nonzero" transform="translate(6.486842, 6.312500) rotate(-90.000000) translate(-6.486842, -6.312500) " points="6.48684211 8.5626102 8.89683882 10.0171875 8.25729276 7.27571875 10.3865132 5.43117434 7.58264967 5.19329441 6.48684211 2.6078125 5.39103454 5.19329441 2.58717105 5.43117434 4.71639145 7.27571875 4.07684539 10.0171875"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

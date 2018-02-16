@@ -4,7 +4,8 @@
 
 import {Component, Input} from '@angular/core';
 import {ConfigurationService} from "../../services/configuration.service";
-import {Person, UserProfile, UserSimple} from "../../rest/data-object";
+import {Comment, Person, UserProfile, UserSimple} from '../../rest/data-object';
+import {RestConstants} from '../../rest/rest-constants';
 
 @Component({
   selector: 'user-avatar',
@@ -33,5 +34,8 @@ export class UserAvatarComponent {
     reader.readAsDataURL(customImage);
   };
   constructor() {
+  }
+  private isEditorialUser(comment:Comment){
+      return this.user.profile && this.user.profile.types && this.user.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL)!=-1;
   }
 }
