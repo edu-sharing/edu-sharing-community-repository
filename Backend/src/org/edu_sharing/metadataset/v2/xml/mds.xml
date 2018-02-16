@@ -19,7 +19,7 @@
 				<bottomCaption>cm_title_bottom</bottomCaption>
 				<type>text</type>
 				<hideIfEmpty>true</hideIfEmpty>
-				<condition>!ccm:wwwurl</condition>
+				<condition negate="true">ccm:wwwurl</condition>
 			</widget>
 			<widget>
 				<id>cclom:title</id>

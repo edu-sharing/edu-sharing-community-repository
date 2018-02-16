@@ -154,6 +154,9 @@ export class RestConnectorService {
       return this.toolPermissions.indexOf(permission) != -1;
     return false;
   }
+  public prepareToolpermissions(){
+    return this.hasToolPermission(null);
+  }
   public hasToolPermission(permission:string){
     console.log(this.toolPermissions);
     return new Observable<boolean>((observer : Observer<boolean>) => {

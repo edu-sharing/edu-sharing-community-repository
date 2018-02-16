@@ -12,7 +12,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 @ApiModel(description = "")
 public class WidgetV2 {
-		private String id,caption,bottomCaption,icon,type,template,condition;
+	public static class Condition{
+		private String value,type;
+		private boolean negate;
+		@JsonProperty
+		public String getValue() {
+			return value;
+		}
+		public void setValue(String value) {
+			this.value = value;
+		}
+		@JsonProperty
+		public String getType() {
+			return type;
+		}
+		public void setType(String type) {
+			this.type = type;
+		}
+		@JsonProperty
+		public boolean isNegate() {
+			return negate;
+		}
+		public void setNegate(boolean negate) {
+			this.negate = negate;
+		}
+		
+	}
+		private String id,caption,bottomCaption,icon,type,template;
 		private List<ValueV2> values;
 		private String placeholder;
 		private String unit;
@@ -25,6 +51,7 @@ public class WidgetV2 {
 		private boolean isRequired;
 		private boolean allowempty;
 		private String defaultvalue;
+		private Condition condition;
 		
 		public WidgetV2(){}
 		public WidgetV2(MetadataWidget widget) {
@@ -45,7 +72,12 @@ public class WidgetV2 {
 			this.isExtended=widget.isExtended();
 			this.isRequired=widget.isRequired();
 			this.allowempty=widget.isAllowempty();
-			this.condition=widget.getCondition();
+			if(widget.getCondition()!=null) {
+				this.condition=new Condition();
+				this.condition.setValue(widget.getCondition().getValue());
+				this.condition.setType(widget.getCondition().getType().name());
+				this.condition.setNegate(widget.getCondition().isNegate());
+			}
 			if(widget.getValues()!=null && widget.isValuespaceClient()){
 				values=new ArrayList<ValueV2>();
 				for(MetadataKey key : widget.getValues()){
@@ -54,11 +86,11 @@ public class WidgetV2 {
 			}
 			
 		}
-		@JsonProperty("condition")
-		public String getCondition() {
+		@JsonProperty
+		public Condition getCondition() {
 			return condition;
 		}
-		public void setCondition(String condition) {
+		public void setCondition(Condition condition) {
 			this.condition = condition;
 		}
 		@JsonProperty("bottomCaption")
