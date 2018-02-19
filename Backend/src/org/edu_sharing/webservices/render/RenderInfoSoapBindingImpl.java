@@ -7,6 +7,7 @@
 
 package org.edu_sharing.webservices.render;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,15 +57,13 @@ import org.edu_sharing.webservices.usage.UsageResult;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.render.RenderInfo{
+public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.render.RenderInfo,Serializable{
 	
 	public static String EXCEPTION_NODE_DOES_NOT_EXISTS = "EXCEPTION_NODE_DOES_NOT_EXISTS";
 	public static String EXCEPTION_VERSION_DOES_NOT_EXISTS = "EXCEPTION_VERSION_DOES_NOT_EXISTS";
 	public static String EXCEPTION_USER_DOES_NOT_EXISTS = "EXCEPTION_USER_DOES_NOT_EXISTS";
 	
 	private static Logger logger = Logger.getLogger(RenderInfoSoapBindingImpl.class);
-	private NodeService nodeService;
-	private org.edu_sharing.service.permission.PermissionService permissionService;
 
 	@Override
 	public RenderInfoResult getRenderInfoLMS(String userName, String nodeId, String lmsId, String courseId, String resourceId, String version)
@@ -78,8 +77,6 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			
 			ticket = authTool.createNewSession(homeAppInfo.getUsername(), homeAppInfo.getPassword()).get(CCConstants.AUTH_TICKET);
 			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
-			nodeService = NodeServiceFactory.getLocalService();
-			permissionService = PermissionServiceFactory.getLocalService();
 			RenderInfoResult result = getBaseData(userName, nodeId, version, client);
 			UsageDAO usageDao = new AlfServicesWrapper();
 			HashMap<String, Object> usageMap =  usageDao.getUsage(lmsId, courseId, nodeId, resourceId);
