@@ -49,7 +49,7 @@ public class ConfigApi {
 	    	try {
 	    		config.setCurrent(ConfigServiceFactory.getConfigService().getConfigByDomain(ConfigServiceFactory.getCurrentDomain()).values);
 	    	}catch(IllegalArgumentException e) {
-	    		logger.info(e.getMessage());
+	    		logger.debug(e.getMessage());
 	    		// context for domain does not exist -> use default
 	    		config.setCurrent(config.getGlobal());
 	    	}
@@ -79,7 +79,7 @@ public class ConfigApi {
 	    	try {
 	    		language.setCurrent(getActiveLanguage(ConfigServiceFactory.getConfigService().getConfigByDomain(ConfigServiceFactory.getCurrentDomain()).language));
 	    	}catch(IllegalArgumentException e) {
-	    		logger.info(e.getMessage());
+	    		logger.debug(e.getMessage());
 	    		language.setCurrent(language.getGlobal());
 
 	    	}
@@ -108,7 +108,7 @@ public class ConfigApi {
 	    	try {
 	    		variables.setCurrent(convertVariables(ConfigServiceFactory.getConfigService().getConfigByDomain(ConfigServiceFactory.getCurrentDomain()).variables));
 	    	}catch(IllegalArgumentException e) {
-	    		logger.info(e.getMessage());
+	    		logger.debug(e.getMessage());
 	    		variables.setCurrent(variables.getGlobal());
 
 	    	}
@@ -137,7 +137,7 @@ public class ConfigApi {
 				if(entry.language.equalsIgnoreCase(language))
 					return convertKeyValue(entry.string);
 			}
-			logger.info("no language override entries found in config for language "+language);
+			logger.debug("no language override entries found in config for language "+language);
 		}
 		return null;
 	}

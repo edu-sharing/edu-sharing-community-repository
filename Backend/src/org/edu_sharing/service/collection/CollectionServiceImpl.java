@@ -109,7 +109,7 @@ public class CollectionServiceImpl implements CollectionService{
 			
 			//fix for running in runas user mode
 			if((AuthenticationUtil.isRunAsUserTheSystemUser() || "admin".equals(AuthenticationUtil.getRunAsUser())) ) {
-				logger.info("starting in runas user mode");
+				logger.debug("starting in runas user mode");
 				this.authInfo = new HashMap<String,String>();
 				this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());
 			}else {
