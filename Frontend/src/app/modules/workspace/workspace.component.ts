@@ -975,7 +975,10 @@ export class WorkspaceMainComponent{
   }
   private routeTo(root: string,node : string=null,search="") {
     console.log("update route "+root+" "+node);
-    this.router.navigate(["./"],{queryParams:{root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav},relativeTo:this.route});
+    let params:any={root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav};
+    if(this.reurl)
+      params.reurl=this.reurl;
+    this.router.navigate(["./"],{queryParams:params,relativeTo:this.route});
   }
 
   private showAlpha() {
