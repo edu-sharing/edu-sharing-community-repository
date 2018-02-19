@@ -500,7 +500,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
   private renderBreadcrumbs() {
     this.path=[];
-    this.nodeService.getNodeParents(this.collectionContent.collection.ref.id).subscribe((data: EduData.NodeList) => {
+    this.nodeService.getNodeParents(this.collectionContent.collection.ref.id,false).subscribe((data: EduData.NodeList) => {
       console.log(data);
       this.path = data.nodes.reverse();
     });
