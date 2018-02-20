@@ -78,7 +78,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 				
 				Tika tika = new Tika();
 				String type = tika.detect(is);
-				System.out.println("type:" + type);
+				logger.info("type:" + type);
 				
 				if(type == null) {
 					return;
