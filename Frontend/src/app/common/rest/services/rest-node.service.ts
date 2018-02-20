@@ -518,9 +518,9 @@ export class RestNodeService {
       [":nodeVersion",version ? version : "-1"]
     ]);
   }
-  public getNodeRenderSnippet(node:string,version:string="-1",repository=RestConstants.HOME_REPOSITORY) : Observable<RenderDetails>{
+  public getNodeRenderSnippet(node:string,version:string="-1",parameters:any=null,repository=RestConstants.HOME_REPOSITORY) : Observable<RenderDetails>{
 
-    return this.connector.get(this.getNodeRenderSnippetUrl(node,version,repository),this.connector.getRequestOptions())
+    return this.connector.post(this.getNodeRenderSnippetUrl(node,version,repository),JSON.stringify(parameters),this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
 }
