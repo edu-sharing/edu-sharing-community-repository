@@ -868,8 +868,9 @@ export class MdsComponent{
       this.replaceVariables(widget);
       let attr=html.substring(start+search.length,end);
       let widgetData=this.renderWidget(widget,attr,template,node);
-      if(!widgetData)
-        continue;
+      if(!widgetData) {
+          widgetData="";
+      }
       html=first+widgetData+second;
     }
     html+='</div>';
