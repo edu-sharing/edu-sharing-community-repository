@@ -1,4 +1,3 @@
-
 <div class="dialog darken" *ngIf="!embedded">
   <div id="jumpmarks" class="card-jumpmarks" [innerHTML]="jumpmarks" *ngIf="(currentNode || createType) && jumpmarksCount>1">
 
@@ -27,3 +26,11 @@
   <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
 </div>
 <div class="globalProgress dialog darken valign-wrapper" *ngIf="globalProgress"><spinner class="center"></spinner></div>
+<modal-dialog *ngIf="dialogTitle"
+              [title]="dialogTitle"
+              [message]="dialogMessage"
+              [isCancelable]="true"
+              [messageParameters]="dialogParameters"
+              [buttons]="dialogButtons"
+              (onCancel)="dialogTitle=null"
+></modal-dialog>
