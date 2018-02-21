@@ -213,7 +213,6 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		if(locale == null){
 			Object localeObj = nodeService.getProperty(personService.getPerson(authenticationService.getCurrentUserName()), ContentModel.PROP_LOCALE);
 			if(localeObj != null){
-				System.out.println("SETTING LOCALE:" + localeObj.toString());
 				session.setAttribute(CCConstants.AUTH_LOCALE, localeObj.toString());
 			}
 		}

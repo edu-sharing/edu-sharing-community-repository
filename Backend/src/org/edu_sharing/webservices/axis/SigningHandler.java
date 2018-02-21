@@ -50,7 +50,7 @@ public class SigningHandler extends BasicHandler{
 			
 			SOAPHeaderElement ele =  (SOAPHeaderElement)node;
 			
-			System.out.println(node.getNodeName()+" "+ node.getNodeValue()+ " node.getLocalName(): "+node.getLocalName()+ " she:"+ele.getValue());
+			//System.out.println(node.getNodeName()+" "+ node.getNodeValue()+ " node.getLocalName(): "+node.getLocalName()+ " she:"+ele.getValue());
 			
 			
 			

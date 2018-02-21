@@ -33,16 +33,16 @@ public class Edu_SharingAuthoritiesUpdate extends UpdateAbstract {
 	
 	@Override
 	public void execute() {
-		logInfo("starting excecute");
+		logDebug("starting excecute");
 		doIt(false);
-		logInfo("finished excecute");
+		logDebug("finished excecute");
 	}
 
 	@Override
 	public void test() {
-		logInfo("starting test");
+		logDebug("starting test");
 		doIt(true);
-		logInfo("finished test");
+		logDebug("finished test");
 	}
 	
 	public void doIt(boolean test){
@@ -65,7 +65,7 @@ public class Edu_SharingAuthoritiesUpdate extends UpdateAbstract {
 					protocol.writeSysUpdateEntry(this.getId());
 				}
 			}else{
-				logInfo("update" +this.getId()+ " already done at "+updateInfo.get(CCConstants.CCM_PROP_SYSUPDATE_DATE));
+				logDebug("update" +this.getId()+ " already done at "+updateInfo.get(CCConstants.CCM_PROP_SYSUPDATE_DATE));
 			}
 			
 		}catch(Throwable e){
@@ -86,7 +86,7 @@ public class Edu_SharingAuthoritiesUpdate extends UpdateAbstract {
 			}
 			counter++;
 			if((counter % 100) == 0){
-				logger.info("processed "+ counter +" persons");
+				logger.debug("processed "+ counter +" persons");
 			}
 		}
 	}

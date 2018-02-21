@@ -54,15 +54,14 @@ public class GuestFilter implements javax.servlet.Filter {
 				if (guestLogin != null && guestPW != null && !guestLogin.isEmpty() && !guestPW.isEmpty()) {
 					Config config = ConfigServiceFactory.getCurrentConfig();
 					if(config!=null && config.values.guest!=null && !config.values.guest.enabled) {
-						logger.info("guest filter disabled for context "+ConfigServiceFactory.getCurrentDomain());
+						logger.debug("guest filter disabled for context "+ConfigServiceFactory.getCurrentDomain());
 					}
 					else {
-						logger.info("doing guest login");
 						HashMap<String, String> authInfoGuest = authTool.createNewSession(guestLogin, guestPW);
 						authTool.storeAuthInfoInSession(authInfoGuest.get(CCConstants.AUTH_USERNAME), authInfoGuest.get(CCConstants.AUTH_TICKET),CCConstants.AUTH_TYPE_DEFAULT, session);
 					}
 				}else{
-					logger.info("no guest defined");
+					logger.debug("no guest defined");
 				}
 			}
 		} catch (Throwable e) {

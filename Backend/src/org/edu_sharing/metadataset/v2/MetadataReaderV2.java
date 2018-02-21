@@ -78,9 +78,8 @@ public class MetadataReaderV2 {
 			}
 		}
 		String id=appId.getAppId()+"_"+mdsName+"_"+locale;
-		if(mdsCache.containsKey(id))
+		if(mdsCache.containsKey(id) && !"true".equals(ApplicationInfoList.getHomeRepository().getDevmode()))
 			return mdsCache.get(id);
-		logger.info("Loading mds for id "+id);
 		reader=new MetadataReaderV2(mdsNameDefault+".xml",locale);
 		mds=reader.getMetadatasetForFile(mdsNameDefault);
 		mds.setRepositoryId(appId.getAppId());
@@ -109,7 +108,6 @@ public class MetadataReaderV2 {
 		}
 		catch(IOException e){
 		}
-		logger.info("Loading mds for id "+id+" completed");
 		mdsCache.put(id, mds);
 		return mds;
 	}
@@ -534,11 +532,15 @@ public class MetadataReaderV2 {
 		}
 	}
 	private static Map<String,ResourceBundle> translationBundles=new HashMap<>();
-	private static ResourceBundle getTranslationCache(String i18nFile) throws IOException{
+	private static ResourceBundle getTranslationCache(String i18nFile) {
 		if(translationBundles.containsKey(i18nFile))
 			return translationBundles.get(i18nFile);
-		InputStream isLocale=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18nFile+".properties");
-		PropertyResourceBundle bundle = new PropertyResourceBundle(isLocale);
+		PropertyResourceBundle bundle = null;
+		try {
+			InputStream isLocale=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18nFile+".properties");
+			bundle = new PropertyResourceBundle(isLocale);
+		}catch(Throwable t) {
+		}
 		translationBundles.put(i18nFile, bundle);
 		return bundle;
 	}
