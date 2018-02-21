@@ -21,6 +21,7 @@ import {NodeHelper} from '../node-helper';
 import {RestLocatorService} from '../../rest/services/rest-locator.service';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../ui-animation';
+import {DialogButton} from '../modal-dialog/modal-dialog.component';
 
 @Component({
   selector: 'mds',
@@ -67,6 +68,10 @@ export class MdsComponent{
   private static AUTHOR_TYPE_FREETEXT = 0;
   private static AUTHOR_TYPE_PERSON = 1;
   private lastMdsQuery: string;
+  private dialogTitle: string;
+  private dialogMessage: string;
+  private dialogParameters: any;
+  private dialogButtons: DialogButton[];
   private variables: string[];
     private currentWidgetSuggestion: string;
   @Input() set suggestions(suggestions:any){
@@ -580,7 +585,32 @@ export class MdsComponent{
     }
     return properties;
   }
-  public saveValues(callback:Function=null){
+  private checkFileExtension(callback:Function=null,values:any){
+    let ext1=this.currentNode.name.split(".");
+    let ext2=values[RestConstants.CM_NAME][0].split(".");
+    let extV1=ext1[ext1.length-1];
+    let extV2=ext2[ext2.length-1];
+    if(extV1!=extV2){
+      this.dialogTitle='EXTENSION_NOT_MATCH';
+      this.dialogMessage='EXTENSION_NOT_MATCH_INFO';
+      this.dialogParameters={
+        extensionOld:ext1.length>1 ? extV1 : this.translate.instant('EXTENSION_NO_EXTENSION'),
+        extensionNew:ext2.length>1 ? extV2 : this.translate.instant('EXTENSION_NO_EXTENSION')
+      };
+      this.dialogButtons=[
+          new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{
+              this.dialogTitle=null;
+          }),
+          new DialogButton('EXTENSION_CHANGE',DialogButton.TYPE_PRIMARY,()=>{
+            this.dialogTitle=null;
+            this.saveValues(callback,true);
+          }),
+      ];
+      return false;
+    }
+    return true;
+  }
+  public saveValues(callback:Function=null,force=false){
     if(this.embedded){
       this.onDone.emit(this.getValues());
       return this.getValues();
@@ -591,6 +621,11 @@ export class MdsComponent{
     let values=this.getValues(properties);
     if(values==null)
       return;
+    if(!force){
+      if(!this.checkFileExtension(callback,values)){
+        return;
+      }
+    }
     for(var key in values){
       properties[key]=values[key];
     }

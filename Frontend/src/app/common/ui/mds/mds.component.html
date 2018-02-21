@@ -33,3 +33,12 @@
     <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
   </div>
 </div>
+<modal-dialog
+              [priority]="1"
+              [title]="dialogTitle"
+              [message]="dialogMessage"
+              [isCancelable]="true"
+              [messageParameters]="dialogParameters"
+              [buttons]="dialogButtons"
+              (onCancel)="dialogTitle=null"
+></modal-dialog>
