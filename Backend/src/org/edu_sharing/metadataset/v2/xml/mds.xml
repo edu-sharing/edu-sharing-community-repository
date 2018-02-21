@@ -29,6 +29,14 @@
 				<condition type="PROPERTY">ccm:wwwurl</condition>
 			</widget>
 			<widget>
+				<id>ccm:wwwurl</id>
+				<caption>cm_wwwurl</caption>
+				<placeholder>cm_wwwurl_placeholder</placeholder>
+				<type>text</type>
+				<required>true</required>
+				<condition type="PROPERTY">ccm:wwwurl</condition>
+			</widget>
+			<widget>
 				<id>cclom:general_description</id>
 				<type>text</type>
 				<caption>lom_prop_educational_description</caption>
@@ -317,6 +325,7 @@
 				<icon>description</icon>
 				<html><![CDATA[
 			  <preview>
+              <ccm:wwwurl>
               <cm:name>
               <cclom:title>
               <cclom:general_keyword>
