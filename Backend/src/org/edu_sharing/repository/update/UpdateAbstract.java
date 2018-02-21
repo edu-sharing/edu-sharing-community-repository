@@ -17,7 +17,12 @@ public abstract class UpdateAbstract implements Update {
 			out.println(message);
 		}
 	}
-	
+	protected void logDebug(String message){
+		logger.debug(message);
+		if(out != null){
+			out.println(message);
+		}
+	}
 	protected void logError(String message, Throwable e){
 		logger.error(message,e);
 		if(out != null){
