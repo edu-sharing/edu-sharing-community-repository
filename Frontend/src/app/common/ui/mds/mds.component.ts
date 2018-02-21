@@ -530,18 +530,27 @@ export class MdsComponent{
     let ext2=values[RestConstants.CM_NAME][0].split(".");
     let extV1=ext1[ext1.length-1];
     let extV2=ext2[ext2.length-1];
+    if(ext1.length==1 && ext2.length==1)
+      return true;
     if(extV1!=extV2){
       this.dialogTitle='EXTENSION_NOT_MATCH';
       this.dialogMessage='EXTENSION_NOT_MATCH_INFO';
+      if(ext1.length==1){
+          this.dialogMessage='EXTENSION_NOT_MATCH_INFO_NEW';
+      }
+      if(ext2.length==1){
+          this.dialogMessage='EXTENSION_NOT_MATCH_INFO_OLD';
+      }
       this.dialogParameters={
-        extensionOld:ext1.length>1 ? extV1 : this.translate.instant('EXTENSION_NO_EXTENSION'),
-        extensionNew:ext2.length>1 ? extV2 : this.translate.instant('EXTENSION_NO_EXTENSION')
+        extensionOld:extV1,
+        extensionNew:extV2,
+        warning:this.translate.instant('EXTENSION_NOT_MATCH_WARNING')
       };
       this.dialogButtons=[
           new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{
               this.dialogTitle=null;
           }),
-          new DialogButton('EXTENSION_CHANGE',DialogButton.TYPE_PRIMARY,()=>{
+          new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>{
             this.dialogTitle=null;
             this.saveValues(callback,true);
           }),
