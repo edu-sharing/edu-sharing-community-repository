@@ -38,7 +38,7 @@ export class ActionbarHelper{
     }
     if(type=='ADD_TO_STREAM') {
       if (nodes && nodes.length && NodeHelper.allFiles(nodes)) {
-        option = new OptionItem("WORKSPACE.OPTION.STREAM", "layers", callback);
+        option = new OptionItem("WORKSPACE.OPTION.STREAM", "line_weight", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelper.getNodes(nodes, node);

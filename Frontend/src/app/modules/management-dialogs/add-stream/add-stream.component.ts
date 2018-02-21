@@ -73,7 +73,7 @@ export class AddStreamComponent  {
       return;
     }
     if(this.audienceMode==this.AUDIENCE_MODE_CUSTOM && this.invite.length==0){
-      this.toast.error(null,'ADD_TO_STREAM.ERROR_NO_PERSON_INIVITED');
+      this.toast.error(null,'ADD_TO_STREAM.ERROR.NO_PERSON_INVITED');
       return;
     }
     this.onLoading.emit(true);

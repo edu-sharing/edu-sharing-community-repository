@@ -13,7 +13,10 @@
       <h4>{{'ADD_TO_STREAM.AUDIENCE_TYPE' | translate}}</h4>
       <input type="radio" name="audienceType" id="audienceTypeEveryone" [(ngModel)]="audienceMode" value="0"><label for="audienceTypeEveryone">{{'ADD_TO_STREAM.AUDIENCE_EVERYONE' | translate}}</label>
       <input type="radio" name="audienceType" id="audienceTypeCustom" [(ngModel)]="audienceMode" value="1"><label for="audienceTypeCustom">{{'ADD_TO_STREAM.AUDIENCE_CUSTOM' | translate}}</label>
-      <div class="audienceSearch" *ngIf="audienceMode==1" [@overlay]="audienceMode==AUDIENCE_MODE_CUSTOM">
+      <div class="audienceEveryone" *ngIf="audienceMode==AUDIENCE_MODE_EVERYONE">
+        {{'ADD_TO_STREAM.AUDIENCE_EVERYONE_INFO' | translate}}
+      </div>
+      <div class="audienceSearch" *ngIf="audienceMode==AUDIENCE_MODE_CUSTOM">
         <div class="search"><authority-search-input
           [globalSearch]="false"
           [maxSuggestions]="5"

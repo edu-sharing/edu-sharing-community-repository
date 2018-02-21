@@ -35,6 +35,15 @@
     input[type=radio]+label{
       width:100%;
     }
+    .audienceEveryone,.audienceSearch{
+      min-height: 270px;
+    }
+    .audienceEveryone{
+      text-align: center;
+      font-size:120%;
+      color:$textLight;
+      padding-top: 40px;
+    }
     .audienceSearch{
       padding-top: 20px;
       .badge{
