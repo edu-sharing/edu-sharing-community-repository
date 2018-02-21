@@ -68,10 +68,10 @@ export class MdsComponent{
   private static AUTHOR_TYPE_FREETEXT = 0;
   private static AUTHOR_TYPE_PERSON = 1;
   private lastMdsQuery: string;
-  private dialogTitle: string;
-  private dialogMessage: string;
-  private dialogParameters: any;
-  private dialogButtons: DialogButton[];
+  dialogTitle: string;
+  dialogMessage: string;
+  dialogParameters: any;
+  dialogButtons: DialogButton[];
   private variables: string[];
     private currentWidgetSuggestion: string;
   @Input() set suggestions(suggestions:any){
