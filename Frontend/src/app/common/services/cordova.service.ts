@@ -155,7 +155,7 @@ export class CordovaService {
     let value = window.localStorage.getItem(key);
 
     //just iun case - check if backup is available from nativestorage plugin
-    if ((typeof value == 'undefined') || (value==null)) {
+    if (((typeof value == 'undefined') || (value==null)) && ((window as any).NativeStorage)) {
       try {
         //window['NativeStorage'].getItem("reference_to_value",<success-callback>, <error-callback>);
         (window as any).NativeStorage.getItem(key,(valueNative:any)=>{

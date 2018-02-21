@@ -65,6 +65,8 @@ export class LoginAppComponent  implements OnInit{
 
               if (oauthStr!=null) {
 
+                if (confirm('Found existing oAuth tokens - wanna try?')) {
+
                 // get oAuth object from JSON string
                 let oauth:OAuthResult = null;
                 try {
@@ -100,6 +102,10 @@ export class LoginAppComponent  implements OnInit{
                     return;
                   }
                 );
+
+                } else {
+                  this.isLoading=false;
+                }
 
               } else {
 
@@ -144,7 +150,7 @@ export class LoginAppComponent  implements OnInit{
 
             // store oAuth tokens
             this.cordova.setPermanentStorage(this.cordova.STORAGE_OAUTHTOKENS,JSON.stringify(oauthTokens));
-            
+
             // continue to within the app
             this.goToWorkspace();
 
