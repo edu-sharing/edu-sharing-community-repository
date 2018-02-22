@@ -68,10 +68,10 @@ export class MdsComponent{
   private static AUTHOR_TYPE_FREETEXT = 0;
   private static AUTHOR_TYPE_PERSON = 1;
   private lastMdsQuery: string;
-  private dialogTitle: string;
-  private dialogMessage: string;
-  private dialogParameters: any;
-  private dialogButtons: DialogButton[];
+  dialogTitle: string;
+  dialogMessage: string;
+  dialogParameters: any;
+  dialogButtons: DialogButton[];
   private variables: string[];
     private currentWidgetSuggestion: string;
   @Input() set suggestions(suggestions:any){
@@ -839,7 +839,7 @@ export class MdsComponent{
       return '';
     }
     let html='<div class="mdsGroup'+(this.embedded?' mdsEmbedded':'')+'">'+template.html;
-
+    let removeWidgets:any=[];
     for(let widget of data.widgets){
       if(!widget.template){
         for(let w2 of data.widgets){
@@ -878,9 +878,13 @@ export class MdsComponent{
       let attr=html.substring(start+search.length,end);
       let widgetData=this.renderWidget(widget,attr,template,node);
       if(!widgetData) {
-          widgetData="";
+        removeWidgets.push(widget);
+        continue;
       }
       html=first+widgetData+second;
+    }
+    for(let remove of removeWidgets){
+      html=html.replace(new RegExp("<"+remove.id+"*>"),'');
     }
     html+='</div>';
     return html;
