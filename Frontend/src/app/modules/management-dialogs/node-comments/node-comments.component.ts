@@ -75,9 +75,6 @@ export class NodeCommentsComponent  {
       this.onLoading.emit(false);
     })
   }
-  private isEditorialComment(comment:Comment){
-    return comment.creator.profile.types && comment.creator.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL)!=-1;
-  }
   private getOptions(comment:Comment){
     let options:OptionItem[]=[];
     let isAuthor=this.user && this.user.authorityName==comment.creator.authorityName;

@@ -1,50 +1,88 @@
 @import "../../../../styles/variables.scss";
 
-.avatarOuter{
+.avatarCircle{
   border-radius: 50%;
   border:3px solid #fff;
   overflow: hidden;
   display:inline-block;
-  img,svg{
+  .userImage, svg {
     overflow: hidden;
     border-radius: 50%;
     object-fit: cover;
     position: relative;
-    top:-3px;
-    left:-3px;
+    top: -3px;
+    left: -3px;
   }
 }
-.size_large,.size_large img,.size_large svg{
-  width:120px;
-  height:120px;
-  @include materialShadow();
+.avatarOuter{
+  display: inline;
+  position: relative;
+  .editorial-badge{
+    position: absolute;
+    bottom:0;
+    right:0;
+    width:30px;
+    height:auto;
+  }
 }
-.size_medium,.size_medium img,.size_medium svg{
-  width:70px;
-  height:70px;
-  @include materialShadow();
-  border-width: 2px;
+
+.size_large {
+  .avatarCircle{
+    @include materialShadow();
+  }
+  .avatarCircle,.userImage, svg {
+    width: 120px;
+    height: 120px;
+  }
 }
-.size_medium img,.size_medium svg{
-  left: -2px;
-  top: -2px;
+.size_medium {
+  .avatarCircle {
+    @include materialShadow();
+  }
+  .avatarCircle, .userImage, svg {
+    width: 70px;
+    height: 70px;
+
+    border-width: 2px;
+  }
+  .userImage, svg {
+    left: -2px;
+    top: -2px;
+  }
+  .editorial-badge {
+    width: 25px;
+  }
 }
-.size_small,.size_small img,.size_small svg{
-  width:40px;
-  height:40px;
-  @include materialShadow();
-  border-width: 2px;
+.size_small {
+  .avatarCircle {
+    @include materialShadow();
+  }
+  .avatarCircle,.userImage, svg {
+    width: 40px;
+    height: 40px;
+
+    border-width: 2px;
+  }
+  .userImage, svg {
+    left: -2px;
+    top: -2px;
+  }
+  .editorial-badge {
+    width: 16px;
+  }
 }
-.size_small img,.size_small svg{
-  left: -2px;
-  top: -2px;
-}
-.size_xsmall,.size_xsmall img,.size_xsmall svg{
-  width:20px;
-  height:20px;
-  border-width: 1px;
-}
-.size_xsmall img,.size_xsmall svg{
-  left: -1px;
-  top: -1px;
+
+.size_xsmall{
+  .avatarCircle,.userImage,svg{
+      width:20px;
+      height:20px;
+      border-width: 1px;
+  }
+  .userImage, svg {
+    left: -1px;
+    top: -1px;
+  }
+  .editorial-badge {
+    width: 8px;
+  }
 }
