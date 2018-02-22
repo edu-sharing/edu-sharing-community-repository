@@ -16,6 +16,7 @@ public class MetadataSetV2 {
 	private List<MetadataGroup> groups;
 	private List<MetadataList> lists;
 	private MetadataQueries queries;
+	private MetadataCreate create;
 	public String getId() {
 		return id;
 	}
@@ -84,7 +85,12 @@ public class MetadataSetV2 {
 	public void setQueries(MetadataQueries queries) {
 		this.queries = queries;
 	}
-	
+	public MetadataCreate getCreate() {
+		return create;
+	}
+	public void setCreate(MetadataCreate create) {
+		this.create = create;
+	}
 	public List<MetadataList> getLists() {
 		return lists;
 	}
@@ -131,6 +137,9 @@ public class MetadataSetV2 {
 			else{
 				lists.add(list);
 			}
+		}
+		if(mdsOverride.getCreate()!=null) {
+			setCreate(mdsOverride.getCreate());
 		}
 		queries.overrideWith(mdsOverride.getQueries());
 	}

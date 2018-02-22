@@ -583,6 +583,9 @@ export class MdsComponent{
       }
       properties[widget.id]=props;
     }
+    if(!properties[RestConstants.CM_NAME]){
+      properties[RestConstants.CM_NAME]=properties[RestConstants.LOM_PROP_TITLE];
+    }
     return properties;
   }
   private checkFileExtension(callback:Function=null,values:any){

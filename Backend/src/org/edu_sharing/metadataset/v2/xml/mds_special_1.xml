@@ -1,6 +1,9 @@
 <metadataset id="default" label="default" hidden="false">
 		<name>Sample MDS</name>
 		<i18n>mds</i18n>
+		<create>
+			<onlyMetadata>true</onlyMetadata>
+		</create>
 		<widgets>
 			<widget>
 				<id>ccm:classification_purpose</id>
@@ -74,6 +77,17 @@
 				]]></html>
 			</template>
 			<template>
+				<id>node_general</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+				<ccm:wwwurl>
+              <cclom:title>
+			  <preview>
+              <cclom:general_description>
+				]]></html>
+			</template>
+			<template>
 				<id>node_extended</id>
 				<caption>Erweitert</caption>
 				<icon>help_outline</icon>
@@ -81,7 +95,6 @@
               <ccm:classification_purpose defaultvalue="${test}">
               <ccm:taxonid>
               <ccm:educationaltypicalagerange extended="true">
-              <version>
 				]]></html>
 			</template>
 		</templates>

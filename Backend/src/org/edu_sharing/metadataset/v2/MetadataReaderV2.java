@@ -78,7 +78,7 @@ public class MetadataReaderV2 {
 			}
 		}
 		String id=appId.getAppId()+"_"+mdsName+"_"+locale;
-		if(mdsCache.containsKey(id) && !"true".equals(ApplicationInfoList.getHomeRepository().getDevmode()))
+		if(mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
 			return mdsCache.get(id);
 		reader=new MetadataReaderV2(mdsNameDefault+".xml",locale);
 		mds=reader.getMetadatasetForFile(mdsNameDefault);
@@ -244,6 +244,7 @@ public class MetadataReaderV2 {
 		mds.setI18n(i18n.getTextContent());
 		mds.setLabel(label);
 		
+		mds.setCreate(getCreate());
 		mds.setWidgets(getWidgets());
 		mds.setTemplates(getTemplates());
 		mds.setGroups(getGroups());
@@ -252,7 +253,20 @@ public class MetadataReaderV2 {
 		
 		return mds;
 	}
-	
+	private MetadataCreate getCreate() throws Exception {
+		Node createNode = (Node) xpath.evaluate("/metadataset/create", doc, XPathConstants.NODE);
+		if(createNode==null)
+			return null;
+		MetadataCreate create=new MetadataCreate();
+		for(int i=0;i<createNode.getChildNodes().getLength();i++) {
+			Node node = createNode.getChildNodes().item(i);
+			if(node.getNodeName().equals("onlyMetadata")) {
+				create.setOnlyMetadata(node.getTextContent().equalsIgnoreCase("true"));
+			}
+		}
+		return create;
+	}
+
 	private List<MetadataWidget> getWidgets() throws Exception {
 		List<MetadataWidget> widgets=new ArrayList<>();
 		NodeList widgetsNode = (NodeList) xpath.evaluate("/metadataset/widgets/widget", doc, XPathConstants.NODESET);
@@ -307,7 +321,7 @@ public class MetadataReaderV2 {
 					else {
 						logger.warn("Widget "+widget.getId()+" has condition, but no type for condition was specified. Using default type "+type);
 					}
-					if(attr!=null && attr.getNamedItem("negate")!=null && attr.getNamedItem("negate").getTextContent().equals("true")) {
+					if(attr!=null && attr.getNamedItem("negate")!=null && attr.getNamedItem("negate").getTextContent().equalsIgnoreCase("true")) {
 						negate=true;
 					}
 					widget.setCondition(new MetadataWidget.Condition(value,type,negate));
@@ -496,7 +510,7 @@ public class MetadataReaderV2 {
 							if(attributes!=null){
 								Node showDefault = attributes.getNamedItem("showDefault");
 								if(showDefault!=null)
-									col.setShowDefault(showDefault.getTextContent().equals("true"));
+									col.setShowDefault(showDefault.getTextContent().equalsIgnoreCase("true"));
 								Node format = attributes.getNamedItem("format");
 								if(format!=null)
 									col.setFormat(format.getTextContent());
