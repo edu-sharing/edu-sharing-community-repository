@@ -84,24 +84,27 @@ $borderRadius:2px;
     padding-top:20px;
   }
 }
-$badgeWidth:200px;
+$badgeWidth:250px;
 .dragBadge{
-  border:2px solid $primary;
-  background-color: $primaryLight;
   width:$badgeWidth;
-  padding:10px;
-  height: 44px;
-  border-radius: 4px;
-  position:absolute;
+  height:54px;
+  position:fixed;
   left:-999px;
   top:-999px;
-  div{
+  .badge{
+    position: absolute;
+    width:100%;
+    top:7px;
+    border:2px solid $primary;
+    background-color: $primaryLight;
+    padding:10px;
+    border-radius: 4px;
     @include shortenText();
   }
   .count{
-    position:relative;
-    left: $badgeWidth - 23px;
-    top: -40px;
+    position:absolute;
+    right: -10px;
+    top:0;
     text-align: center;
     border-radius:50%;
     background-color: #E6B247;
