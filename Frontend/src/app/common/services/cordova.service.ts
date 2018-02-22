@@ -224,6 +224,25 @@ export class CordovaService {
   }
 
   /**********************************************************
+   * Camera Plugin
+   **********************************************************
+   * https://github.com/apache/cordova-plugin-camera
+   */
+
+  testcam():void {
+    try {
+      (navigator as any).camera.getPicture(()=>{
+        alert("WIM");
+      },()=>{
+        alert("FAIL");
+      }, {});
+    } catch(e) {
+      console.log("ERROR",e);
+      alert("FAIL");
+    }
+  }
+
+  /**********************************************************
    * OAUTH Server Communication
    **********************************************************
    * The REST-Services depend on Configuration Service that already need config from a fixed server.

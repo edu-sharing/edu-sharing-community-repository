@@ -1,34 +1,206 @@
+<div style="
+background-color: #333; 
+padding: 16px;
+padding-top: 32px;
+color: white;
+width: 100%; 
+height: 100%;">
 
-<div class="dialog darken valign-wrapper">
+  <!--------------------
+     STATE: SERVERLIST 
+    ------------------- -->
+  <div *ngIf="state==0">
 
-    <spinner *ngIf="isLoading" class="center"></spinner>
-    <div *ngIf="!isLoading">
-    <div class="card center-card">
-      <div class="card-content">
-      <div class="card-title">{{caption | translate}}</div>
-        <div class="branding" *ngIf="config.branding"><img src="assets/images/logo.svg"></div>
-        <div class="card-scroll ">
-        <form (ngSubmit)="login()" #loginForm>
-        <div *ngIf="showUsername">
-          <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-          <input #usernameInput type="text" requried name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
+    <div style="
+      font-size:28px;
+      font-weight: bold;
+    ">
+      Wo möchtest Du hin?
+    </div>
+
+    <div style="color:lightgray;">
+      Wähle den Server aus, mit dem du dich verbinden möchtest.
+    </div>
+
+    <button (click)="buttonSelectServer()">Zum Login</button>
+
+    <button (click)="buttonEnterServer()">Eigenen Server eingeben</button>
+
+  </div>
+
+  <!--------------------
+     STATE: SERVERURL
+    ------------------- -->
+  <div *ngIf="state==2">
+
+    <div style="
+          font-size:28px;
+          font-weight: bold;
+        ">
+      Eigenen Server angeben
+    </div>
+
+    <div style="color:lightgray;">
+      Gib den Link zum Server an, mit dem du dich verbinden möchtest. 
+    </div>
+
+    <div style="
+      background-color: white;
+      color: black;
+      border-radius: 3px;
+      margin-top: 12px;
+      padding-bottom:4px;
+    ">
+
+      <div (click)="buttonServerList()" style="
+      border-radius: 3px;
+      background-color: lightgray;
+      font-weight: bold;
+      padding: 8px;
+      ">
+
+        <div style="
+        display: inline-block;
+        position: relative;
+        top: 2px;
+        ">
+          <i class="material-icons" style="color:#48708e;">arrow_back</i>
         </div>
-        <div>
-          <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
-        <input #passwordInput requried type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/>
+        <div style="
+        display: inline-block;
+        position: relative;
+        top: -4px;
+        font-size: 120%;
+        ">
+          Serverauswahl
         </div>
-        </form>
-        <div class="register" *ngIf="config.registerUrl">
-          {{'LOGIN.REGISTER_TEXT' | translate}}
-          <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
-        </div>
-        </div>
+
       </div>
-        <div class="card-action">
-          <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-          <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
+
+      <div style="
+        padding: 16px;
+        color: darkgray;
+      ">
+
+        <div>
+          <label for="username">Serveradresse</label>
+          <input type="text" [(ngModel)]="serverurl" name="serverurl" id="serverurl" (focus)="textInputFokus()" style="height: 41px;"
+          />
         </div>
-    </div>
-    </div>
+
+        <div style="
+        display:inline-block;
+        text-align: center;
+        width: 100%;
+        ">
+          <a class="waves-effect waves-light btn" (click)="buttonTestServer()" style="width:100%;">Weiter</a>
+        </div>
+
+      </div>
+
     </div>
 
+  </div>
+
+  <!--------------------
+     STATE: LOGIN 
+    ------------------- -->
+  <div *ngIf="state==1">
+
+    <div style="
+      font-size:28px;
+      font-weight: bold;
+    ">
+      Anmelden
+    </div>
+
+    <div style="color:lightgray;">
+      Melde dich mit deinen Daten auf dem gewählten Server an.
+    </div>
+
+    <div style="
+      background-color: white;
+      color: black;
+      border-radius: 3px;
+      margin-top: 12px;
+      padding-bottom:4px;
+    ">
+
+      <div (click)="buttonLoginBack()" style="
+      border-radius: 3px;
+      background-color: lightgray;
+      font-weight: bold;
+      padding: 8px;
+      ">
+
+        <div style="
+        display: inline-block;
+        position: relative;
+        top: 2px;
+        ">
+          <i class="material-icons" style="color:#48708e;">arrow_back</i>
+        </div>
+        <div style="
+        display: inline-block;
+        position: relative;
+        top: 2px;
+        ">
+          <img src="assets/images/logo.svg" style="height:20px;">
+        </div>
+        <div style="
+        display: inline-block;
+        position: relative;
+        top: -4px;
+        font-size: 120%;
+        ">
+          Virtueller Campus RLP
+        </div>
+
+      </div>
+
+      <div style="
+        padding: 16px;
+        color: darkgray;
+      ">
+
+        <div>
+          <label for="username">Nutzername</label>
+          <input type="text" [(ngModel)]="username" name="username" id="username" (focus)="textInputFokus()" style="height: 41px;"
+          />
+        </div>
+
+        <div>
+          <label for="password">Passwort</label>
+          <input type="password" [(ngModel)]="password" name="password" id="password" (focus)="textInputFokus()" (keydown.enter)="login()"
+          />
+        </div>
+
+        <div style="
+        display:inline-block;
+        width:48%;
+        ">
+          <a class="btn-flat" (click)="buttonRegister()" style="text-align: center;">Registrieren</a>
+        </div>
+        <div style="
+        display:inline-block;
+        width:48%;
+        text-align: center
+        ">
+          <a class="waves-effect waves-light btn" (click)="login()">Anmelden</a>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div style="
+    margin-top: 10px;
+    text-align: center;
+    opacity: 0.5;
+    ">
+      powered by edu-sharing
+    </div>
+
+  </div>
+
+</div>

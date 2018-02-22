@@ -1,13 +1,16 @@
-import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
-import {Toast} from "../../common/ui/toast";
-import {Router, Route } from "@angular/router";
-import {OAuthResult, LoginResult, AccessScope} from "../../common/rest/data-object";
-import {RestConstants} from "../../common/rest/rest-constants";
-import {UIConstants} from "../../common/ui/ui-constants";
-import {Helper} from "../../common/helper";
-import {RestHelper} from "../../common/rest/rest-helper";
+import { 
+  Component,
+  OnInit
+} from '@angular/core';
 
-import {CordovaService} from "../../common/services/cordova.service";
+import { Toast } from "../../common/ui/toast";
+import { Router, Route } from "@angular/router";
+import { OAuthResult, LoginResult, AccessScope } from "../../common/rest/data-object";
+import { UIConstants } from "../../common/ui/ui-constants";
+import { CordovaService } from "../../common/services/cordova.service";
+
+// possible states this UI component can be in
+enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2};
 
 @Component({
   selector: 'app-login',
@@ -16,30 +19,18 @@ import {CordovaService} from "../../common/services/cordova.service";
 })
 export class LoginAppComponent  implements OnInit{
 
-  @ViewChild('passwordInput') passwordInput : ElementRef;
-  @ViewChild('usernameInput') usernameInput : ElementRef;
-  @ViewChild('loginForm') loginForm : ElementRef;
+  private state:StateUI = StateUI.LOGIN;
 
   public isLoading=true;
-  private disabled=false;
-  private showUsername=true;
   private username="";
   private password="";
-  private scope="";
-  private next="";
-  public mainnav=true;
-  private caption="LOGIN.TITLE";
-  private config: any={};
-
-  private checkConditions(){
-    this.disabled=!this.username;
-  }
+  private serverurl="https://";
 
   constructor(
-              private toast:Toast,
-              private router:Router,
-              private cordova: CordovaService
-            ){
+    private toast:Toast,
+    private router:Router,
+    private cordova: CordovaService
+  ){
 
     this.isLoading=true;
 
@@ -129,7 +120,6 @@ export class LoginAppComponent  implements OnInit{
 
       });
 
-
     }
 
   }
@@ -137,8 +127,37 @@ export class LoginAppComponent  implements OnInit{
   ngOnInit() {
   }
 
+  private buttonLoginBack() : void {
+    this.state = StateUI.SERVERLIST;
+  }
+
+  private buttonEnterServer() : void {
+    this.state = StateUI.SERVERURL;
+  }
+
+  private buttonSelectServer() : void {
+    this.state = StateUI.LOGIN;
+  }
+
+  private buttonServerList() : void {
+    this.state = StateUI.SERVERLIST;
+  }
+
+  private buttonTestServer() : void {
+    alert("TODO");
+  }
+
+  private textInputFokus() : void {
+  }
+
+  private buttonRegister() {
+    alert("TODO");
+  }
+  
   private login(){
     
+    alert("user("+this.username+") pass("+this.password+")");
+
     this.isLoading=true;
 
       // APP: oAuth Login
@@ -179,7 +198,5 @@ export class LoginAppComponent  implements OnInit{
   private goToWorkspace() {
     this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace']);
   }
-
-
 
 }

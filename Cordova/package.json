@@ -11,7 +11,6 @@
     "license": "Apache-2.0",
     "cordova": {
         "platforms": [
-            "android",
             "ios"
         ],
         "plugins": {
@@ -19,18 +18,17 @@
             "cordova-plugin-splashscreen": {},
             "cordova-plugin-x-toast": {},
             "cordova-plugin-device": {},
-            "cordova-plugin-camera": {},
             "cordova-plugin-file": {},
             "cordova-plugin-file-transfer": {},
             "cordova-plugin-filepath": {},
             "cordova-plugin-screen-orientation": {},
             "com.borismus.webintent": {},
-            "cordova-plugin-nativestorage": {}
+            "cordova-plugin-nativestorage": {},
+            "cordova-plugin-camera": {}
         }
     },
     "dependencies": {
         "com.borismus.webintent": "https://github.com/cordova-misc/cordova-webintent.git",
-        "cordova-android": "^7.0.0",
         "cordova-ios": "^4.5.4",
         "cordova-plugin-camera": "^4.0.2",
         "cordova-plugin-device": "^2.0.1",
