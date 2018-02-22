@@ -31,10 +31,10 @@ import {Helper} from "../../../common/helper";
 export class AddStreamComponent  {
   @ViewChild('mds') mdsRef : MdsComponent;
   private streamEntry:any={};
-  private reloadMds = new Boolean(true);
-  private AUDIENCE_MODE_EVERYONE="0";
-  private AUDIENCE_MODE_CUSTOM="1";
-  private audienceMode=this.AUDIENCE_MODE_EVERYONE;
+  reloadMds = new Boolean(true);
+  AUDIENCE_MODE_EVERYONE="0";
+  AUDIENCE_MODE_CUSTOM="1";
+  audienceMode=this.AUDIENCE_MODE_EVERYONE;
   private _nodes: any;
   private invite: AuthorityProfile[]=[];
   @Input() set nodes(nodes : Node[]){
