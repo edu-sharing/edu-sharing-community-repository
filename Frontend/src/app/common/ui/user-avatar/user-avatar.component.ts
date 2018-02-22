@@ -35,7 +35,7 @@ export class UserAvatarComponent {
   };
   constructor() {
   }
-  private isEditorialUser(comment:Comment){
+  isEditorialUser(){
       return this.user.profile && this.user.profile.types && this.user.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL)!=-1;
   }
 }
