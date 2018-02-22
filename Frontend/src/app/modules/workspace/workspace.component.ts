@@ -925,7 +925,7 @@ export class WorkspaceMainComponent{
   public createEmptyNode(){
     this.globalProgress=true;
     let prop=RestHelper.createNameProperty(DateHelper.formatDateByPattern(new Date().getTime(),"y-M-d"));
-    this.node.createNode(this.currentFolder.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true).subscribe((data:NodeWrapper)=>{
+    this.node.createNode(this.currentFolder.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe((data:NodeWrapper)=>{
       this.editNodeMetadata=data.node;
       this.editNodeDeleteOnCancel=true;
       this.globalProgress=false;
