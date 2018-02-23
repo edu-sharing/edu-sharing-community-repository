@@ -1,4 +1,3 @@
-
 import { Component, ViewChild, HostListener} from '@angular/core';
 import 'rxjs/add/operator/map';
 import { SearchService } from './search.service';
@@ -99,7 +98,7 @@ export class SearchComponent {
     private static MAX_ITEMS_COUNT = 250;
     private repositoryIds: any[];
     public addNodesToCollection: Node[];
-    private mdsSets: MdsInfo[];
+    public mdsSets: MdsInfo[];
     public mdsId: string;
     public selection: Node[];
     private currentValues: any;
