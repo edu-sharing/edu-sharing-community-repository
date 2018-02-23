@@ -1266,7 +1266,7 @@ export class MdsComponent{
                      }
                   }
               "><i class="material-icons">arrow_forward</i></div>
-              <div class="dialog darken" style="display:none;" id="`+widget.id+`_tree">
+              <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+widget.id+`_tree').style.display='none';"><i class="material-icons">close</i></div>
