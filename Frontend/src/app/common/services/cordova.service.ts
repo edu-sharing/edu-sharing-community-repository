@@ -27,7 +27,11 @@ export class CordovaService {
   }
   set oauth(oauth: OAuthResult){
     this._oauth=oauth;
-    this._oauth.expires_ts = Date.now() + (oauth.expires_in * 1000);
+    if(oauth) {
+        this._oauth.expires_ts = Date.now() + (oauth.expires_in * 1000);
+        this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,JSON.stringify(this._oauth));
+    }
+
   }
 
   /**
@@ -349,8 +353,22 @@ export class CordovaService {
     });
   }
 
+  /**
+   * called when the current status is logged out
+   * Cordova needs to refresh tokens
+   */
+  private reiniting=false;
+  public reinitStatus(){
+    if(this.reiniting)
+      return;
+    this.reiniting=true;
+      this.refreshOAuth(this.oauth).subscribe(()=>{
+          this.reiniting=false;
+          window.location.reload();
+      });
+  }
   // oAuth refresh tokens
-  public refreshOAuth(oauth: OAuthResult): Observable<OAuthResult> {
+  private refreshOAuth(oauth: OAuthResult): Observable<OAuthResult> {
 
     let url = this.endpointUrl + "../oauth2/token";
     let headers = new Headers();
@@ -408,8 +426,9 @@ export class CordovaService {
               (win) => {
 
                   // now oauth is fresh - continue with init session
-                  oauth = win;
-                  console.log("FRESH OAUTH", oauth);
+                  this.oauth = win;
+                  observer.next(this.oauth);
+                  observer.complete();
 
               },
               (error) => {

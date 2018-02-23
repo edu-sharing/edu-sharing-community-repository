@@ -48,7 +48,7 @@ export class LoginAppComponent  implements OnInit{
 
         // 2. Check if server is already set
         // SET AND TEST API URL BY CORDOVA SERVICE - later make select dialog
-        this.cordova.setServerURL("http://edu41.edu-sharing.de/edu-sharing/rest/", false).subscribe(
+        this.cordova.setServerURL("http://localhost:8080/edu-sharing/rest/", false).subscribe(
           (win)=>{
 
             // 3. Check if oAuth tokens are available
@@ -71,11 +71,6 @@ export class LoginAppComponent  implements OnInit{
                 // got oauth token --> try to login with these
                 this.cordova.initOAuthSession(oauth).subscribe(
                   (updatedOAuthTokens)=>{
-
-                    // store oAuth tokens (becuase maybe refreshed)
-                    this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,JSON.stringify(updatedOAuthTokens));
-                    
-                    // continue to within the app
                     this.goToWorkspace();
 
                   },
@@ -155,8 +150,6 @@ export class LoginAppComponent  implements OnInit{
   }
   
   private login(){
-    
-    alert("user("+this.username+") pass("+this.password+")");
 
     this.isLoading=true;
 

@@ -59,6 +59,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		}
 				
 		HttpSession session = httpReq.getSession(true);
+		session.setMaxInactiveInterval(10);
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 		HashMap<String, String> validatedAuth = authTool.validateAuthentication(session);
 		
@@ -102,7 +103,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 					
 				} else if (authHdr.length() > 6 && authHdr.substring(0, 6).equalsIgnoreCase("Bearer")) {
 					
-					logger.info("auth is OAuth");
+					logger.debug("auth is OAuth");
 					
 					String accessToken = authHdr.substring(6).trim();
 					
@@ -110,7 +111,8 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 						HashMap<String, String> currentAuth = authTool.validateAuthentication(session);
 						if(currentAuth==null) {
 							Token token = tokenService.getToken(accessToken);
-							
+							logger.info("oAuth token valid: "+(token!=null));
+
 							if (token != null) {
 								logger.info("oAuthToken:"+ token.getAccessToken() +" alfresco ticket:"+ token.getTicket());
 								
@@ -125,6 +127,9 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 								
 								validatedAuth = authTool.validateAuthentication(session);							
 							}	
+						}
+						else {
+							logger.info("oauth exists but valid session found, will use session");
 						}
 					} catch (Exception ex) {
 						

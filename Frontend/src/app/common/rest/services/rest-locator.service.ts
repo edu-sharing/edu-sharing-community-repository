@@ -43,6 +43,9 @@ export class RestLocatorService {
 
   constructor(private http : Http,private cordova:CordovaService) {
   }
+  public getCordova(){
+    return this.cordova;
+  }
   public getConfig() : Observable<any>{
     return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {

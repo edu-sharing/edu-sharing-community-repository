@@ -12,6 +12,7 @@ import {ConfigurationService} from "../services/configuration.service";
 import {UIConstants} from "../ui/ui-constants";
 import NumberFormat = Intl.NumberFormat;
 import NumberFormatOptions = Intl.NumberFormatOptions;
+import {CordovaService} from '../services/cordova.service';
 
 export class RestHelper{
   public static getNodeIds(nodes : Node[]|Collection[]|CollectionReference[]): Array<string>{
@@ -282,6 +283,10 @@ export class RestHelper{
     return perm;
   }
   public static goToLogin(router : Router,config:ConfigurationService,scope="",next=window.location.href) {
+      if(config.getLocator().getCordova().isRunningCordova()){
+          config.getLocator().getCordova().reinitStatus();
+          return;
+      }
     config.get("loginUrl").subscribe((url:string)=> {
       if(url && !scope){
         window.location.href=url;
