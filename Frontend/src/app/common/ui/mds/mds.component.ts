@@ -1,26 +1,27 @@
-import {Component, Input, Output, EventEmitter, OnInit, NgZone, group, HostListener} from '@angular/core';
-import {TranslateService} from "@ngx-translate/core";
-import {RestMdsService} from "../../rest/services/rest-mds.service";
-import {MdsMetadataset, View, Type, Node, NodeList, NodeWrapper, MdsValueList} from "../../rest/data-object";
-import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
-import {RestNodeService} from "../../rest/services/rest-node.service";
-import {RestConstants} from "../../rest/rest-constants";
-import {Translation} from "../../translation";
-import {HtmlParser} from "@angular/compiler";
-import {ActivatedRoute} from "@angular/router";
-import {Toast} from "../toast";
-import {VCard} from "../../VCard";
-import {Helper} from "../../helper";
-import {ConfigurationService} from "../../services/configuration.service";
-import {SessionStorageService} from "../../services/session-storage.service";
-import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {RestToolService} from "../../rest/services/rest-tool.service";
-import {UIHelper} from "../ui-helper";
-import {RestHelper} from "../../rest/rest-helper";
-import {NodeHelper} from "../node-helper";
-import {RestLocatorService} from "../../rest/services/rest-locator.service";
-import {trigger} from "@angular/animations";
-import {UIAnimation} from "../ui-animation";
+import {Component, Input, Output, EventEmitter, OnInit, NgZone, group, HostListener, ViewChild, ElementRef} from '@angular/core';
+import {TranslateService} from '@ngx-translate/core';
+import {RestMdsService} from '../../rest/services/rest-mds.service';
+import {MdsMetadataset, View, Type, Node, NodeList, NodeWrapper, MdsValueList} from '../../rest/data-object';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {RestNodeService} from '../../rest/services/rest-node.service';
+import {RestConstants} from '../../rest/rest-constants';
+import {Translation} from '../../translation';
+import {HtmlParser} from '@angular/compiler';
+import {ActivatedRoute} from '@angular/router';
+import {Toast} from '../toast';
+import {VCard} from '../../VCard';
+import {Helper} from '../../helper';
+import {ConfigurationService} from '../../services/configuration.service';
+import {SessionStorageService} from '../../services/session-storage.service';
+import {RestConnectorService} from '../../rest/services/rest-connector.service';
+import {RestToolService} from '../../rest/services/rest-tool.service';
+import {UIHelper} from '../ui-helper';
+import {RestHelper} from '../../rest/rest-helper';
+import {NodeHelper} from '../node-helper';
+import {RestLocatorService} from '../../rest/services/rest-locator.service';
+import {trigger} from '@angular/animations';
+import {UIAnimation} from '../ui-animation';
+import {DialogButton} from '../modal-dialog/modal-dialog.component';
 
 @Component({
   selector: 'mds',
@@ -32,14 +33,16 @@ import {UIAnimation} from "../ui-animation";
   ]
 })
 export class MdsComponent{
+  @ViewChild('mdsScrollContainer') mdsScrollContainer: ElementRef;
+
   @Input() addWidget=false;
   @Input() embedded=false;
   private activeAuthorType: number;
   private jumpmarksCount: number;
-  public static TYPE_TOOLDEFINITION = "tool_definition";
-  public static TYPE_TOOLINSTANCE = "tool_instance";
-  public static TYPE_SAVED_SEARCH = "saved_search";
-  private static VCARD_FIELDS=["Surname","Givenname"];
+  public static TYPE_TOOLDEFINITION = 'tool_definition';
+  public static TYPE_TOOLINSTANCE = 'tool_instance';
+  public static TYPE_SAVED_SEARCH = 'saved_search';
+  private static VCARD_FIELDS=['Surname','Givenname'];
   /**
    * Can the node content be replaced?
    */
@@ -65,7 +68,12 @@ export class MdsComponent{
   private static AUTHOR_TYPE_FREETEXT = 0;
   private static AUTHOR_TYPE_PERSON = 1;
   private lastMdsQuery: string;
+  dialogTitle: string;
+  dialogMessage: string;
+  dialogParameters: any;
+  dialogButtons: DialogButton[];
   private variables: string[];
+    private currentWidgetSuggestion: string;
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -156,7 +164,7 @@ export class MdsComponent{
             this.properties.push(property);
           }
           this.properties.sort();
-          let nodeGroup = this.currentNode.isDirectory ? "map" : "io";
+          let nodeGroup = this.currentNode.isDirectory ? 'map' : 'io';
           if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) != -1) {
             nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
           }
@@ -188,8 +196,8 @@ export class MdsComponent{
   private jumpmarks: SafeHtml;
   private isLoading = false;
 
-  private widgetName="cclom:general_keyword";
-  private widgetType="multivalueFixedBadges";
+  private widgetName='cclom:general_keyword';
+  private widgetType='multivalueFixedBadges';
   private currentNode: Node;
   public globalProgress=false;
   private properties: string[]=[];
@@ -206,7 +214,7 @@ export class MdsComponent{
   private onAddWidget(){
     let values:any=[];
     for(let i=0;i<100;i++){
-      values[i]={id:"Test"+i,caption:"Test Caption "+i,disabled:Math.random()<0.2,parent:i>10 ? "Test"+Math.round(Math.random()*100) : null};
+      values[i]={id:'Test'+i,caption:'Test Caption '+i,disabled:Math.random()<0.2,parent:i>10 ? 'Test'+Math.round(Math.random()*100) : null};
     }
     /*
     let data={widgets:[
@@ -256,9 +264,9 @@ export class MdsComponent{
       }
     }
     let list=document.getElementById(id+'_suggestions');
-    list.className=list.className.replace("suggestionListAll","").trim();
+    list.className=list.className.replace('suggestionListAll','').trim();
     if(showMore){
-      list.className+=" suggestionListAll";
+      list.className+=' suggestionListAll';
     }
     let elements=list.getElementsByTagName('a');
     if(event && event.keyCode==40){
@@ -268,13 +276,12 @@ export class MdsComponent{
     let more=elements[elements.length-1];
     more.style.display='none';
 
-    let dialog=document.getElementById(id+'_dialog');
     list.style.display='none';
-    dialog.style.display='none';
+
     if(searchField.value.length<2 && search)
       return;
+    this.currentWidgetSuggestion=id;
     list.style.display='';
-    dialog.style.display='';
     let hits=0;
     let moreCount=0;
     for(let i=1;i<elements.length-1;i++){
@@ -304,7 +311,7 @@ export class MdsComponent{
     }
     if(moreCount){
       more.style.display='';
-      more.innerHTML=moreCount+' '+this.translate.instant("MORE_SELECTBOX");
+      more.innerHTML=moreCount+' '+this.translate.instant('MORE_SELECTBOX');
     }
     // Commented part fetches from repo, however this won't work for all mds properly
     if(!widgetValues)
@@ -345,14 +352,14 @@ export class MdsComponent{
     let content='';
     let i=0;
     let hasExtended=[false];
-    let result:any={main:""};
+    let result:any={main:''};
     for(let viewId of group.views){
       let viewFound=false;
       for(let view of data.views){
         if(view.id==viewId) {
           viewFound = true;
           if (!this.embedded && view.caption)
-            result.main += `<div class="mdsViewHeader" id=""><a name="` + view.id + `"></a><i class="material-icons">` + view.icon + `</i>` + view.caption + `</div>`;
+            result.main += `<div class="mdsViewHeader" id="`+view.id+`_header"><i class="material-icons">` + view.icon + `</i>` + view.caption + `</div>`;
           if (view.rel) {
           if(!result[view.rel])
             result[view.rel]='';
@@ -366,7 +373,7 @@ export class MdsComponent{
         }
       }
       if(!viewFound){
-        result.main+='View '+viewId+" was not found in the list of known views.";
+        result.main+='View '+viewId+' was not found in the list of known views.';
     }
 
     }
@@ -399,13 +406,19 @@ export class MdsComponent{
       elements[i].style.display=display;
     }
   }
+
+  private scrollSmooth(id:string){
+    console.log(id);
+    let pos=document.getElementById(id+'_header').offsetTop;
+    UIHelper.scrollSmoothElement(pos,this.mdsScrollContainer.nativeElement,2);
+  }
   private renderJumpmarks(group:any,data:any) : string{
     let html='';
     let i=0;
     for(let viewId of group.views){
       for(let view of data.views){
         if(view.id==viewId){
-          html+=`<a href="`+window.location.href.split("#")[0]+`#`+view.id+`"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
+          html+=`<a onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
           i++;
           break;
         }
@@ -442,13 +455,13 @@ export class MdsComponent{
     this.currentWidgets=[];
 
     // add the default widgets
-    data.widgets.push({id:"preview"});
-    data.widgets.push({id:"version"});
-    data.widgets.push({id:"author",caption:this.translate.instant('MDS.AUTHOR_LABEL')});
+    data.widgets.push({id:'preview'});
+    data.widgets.push({id:'version'});
+    data.widgets.push({id:'author',caption:this.translate.instant('MDS.AUTHOR_LABEL')});
     data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
     data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
-    if(this.getWidget("license",data.widgets)==null) {
-      data.widgets.push({id: "license", caption: this.translate.instant('MDS.LICENSE')});
+    if(this.getWidget('license',null,data.widgets)==null) {
+      data.widgets.push({id: 'license', caption: this.translate.instant('MDS.LICENSE')});
     }
     for(let group of data.groups){
       if(group.id==id){
@@ -463,7 +476,7 @@ export class MdsComponent{
         return;
       }
     }
-    let html="Group '"+id+"' was not found in the mds";
+    let html='Group \''+id+'\' was not found in the mds';
     this.setRenderedHtml(html);
   }
   public getValues(propertiesIn:any={},showError=true){
@@ -482,7 +495,7 @@ export class MdsComponent{
 
         let vcard=new VCard(propertiesIn[widget.id][0]);
         for(let field of MdsComponent.VCARD_FIELDS){
-          let element=(document.getElementById(widget.id+"_"+field) as any);
+          let element=(document.getElementById(widget.id+'_'+field) as any);
           if(!element)
             continue;
           vcard.set(field,element.value);
@@ -514,7 +527,7 @@ export class MdsComponent{
         }
         continue;
       }
-      element.className=element.className.replace("invalid","").trim();
+      element.className=element.className.replace('invalid','').trim();
       let v=element.value;
       if(element.getAttribute('data-value') && !this.isPrimitiveWidget(widget)){
         v=element.getAttribute('data-value');
@@ -524,19 +537,19 @@ export class MdsComponent{
         let value = element.noUiSlider.get();
         let valueClean = [];
         for (let v of Array.isArray(value) ? value : [value]) {
-            let split = (v+"").split("</label>");
-            v = split[split.length - 1];
+            let split = (v+'').split('</label>');
+            v = split[split.length - 1].trim();
             if(widget.unit)
-              v = v.replace(widget.unit,"").trim();
+              v = v.replace(widget.unit,'').trim();
             valueClean.push(v);
           }
 
-        if(widget.type=="duration") {
+        if(widget.type=='duration') {
           valueClean[0] *= 60000;
         }
-        if(widget.type=="range"){
-          properties[widget.id+"_from"]=[valueClean[0]];
-          properties[widget.id+"_to"]=[valueClean[1]];
+        if(widget.type=='range'){
+          properties[widget.id+'_from']=[valueClean[0]];
+          properties[widget.id+'_to']=[valueClean[1]];
           continue;
         }
           if (Array.isArray(valueClean))
@@ -548,16 +561,16 @@ export class MdsComponent{
         props=[];
         for(let i=0;i<element.childNodes.length;i++){
           var e=(element.childNodes.item(i) as HTMLElement);
-          props.push(e.getAttribute("data-value"));
+          props.push(e.getAttribute('data-value'));
         }
       }
-      else if(widget.type=="checkbox"){
+      else if(widget.type=='checkbox'){
         props=[(element as any).checked];
       }
-      if(widget.isRequired && (!props.length || props[0]=="")){
+      if(widget.isRequired && (!props.length || props[0]=='')){
         if(showError) {
-          element.className += "invalid";
-          this.toast.error(null, "TOAST.FIELD_REQUIRED", {name: widget.caption});
+          element.className += 'invalid';
+          this.toast.error(null, 'TOAST.FIELD_REQUIRED', {name: widget.caption});
         }
         return;
       }
@@ -565,14 +578,51 @@ export class MdsComponent{
         // don't send empty values to search -> this may not work with defaultvalues, so keep it
         if(!props || props.length==1 && !props[0] && !widget.defaultvalue)
           continue;
-        if(props.length==1 && props[0]=="")
+        if(props.length==1 && props[0]=='')
           props=[];
       }
       properties[widget.id]=props;
     }
+    if(!properties[RestConstants.CM_NAME]){
+      properties[RestConstants.CM_NAME]=properties[RestConstants.LOM_PROP_TITLE];
+    }
     return properties;
   }
-  public saveValues(callback:Function=null){
+  private checkFileExtension(callback:Function=null,values:any){
+    let ext1=this.currentNode.name.split(".");
+    let ext2=values[RestConstants.CM_NAME][0].split(".");
+    let extV1=ext1[ext1.length-1];
+    let extV2=ext2[ext2.length-1];
+    if(ext1.length==1 && ext2.length==1)
+      return true;
+    if(extV1!=extV2){
+      this.dialogTitle='EXTENSION_NOT_MATCH';
+      this.dialogMessage='EXTENSION_NOT_MATCH_INFO';
+      if(ext1.length==1){
+          this.dialogMessage='EXTENSION_NOT_MATCH_INFO_NEW';
+      }
+      if(ext2.length==1){
+          this.dialogMessage='EXTENSION_NOT_MATCH_INFO_OLD';
+      }
+      this.dialogParameters={
+        extensionOld:extV1,
+        extensionNew:extV2,
+        warning:this.translate.instant('EXTENSION_NOT_MATCH_WARNING')
+      };
+      this.dialogButtons=[
+          new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{
+              this.dialogTitle=null;
+          }),
+          new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>{
+            this.dialogTitle=null;
+            this.saveValues(callback,true);
+          }),
+      ];
+      return false;
+    }
+    return true;
+  }
+  public saveValues(callback:Function=null,force=false){
     if(this.embedded){
       this.onDone.emit(this.getValues());
       return this.getValues();
@@ -583,6 +633,11 @@ export class MdsComponent{
     let values=this.getValues(properties);
     if(values==null)
       return;
+    if(!force){
+      if(!this.checkFileExtension(callback,values)){
+        return;
+      }
+    }
     for(var key in values){
       properties[key]=values[key];
     }
@@ -591,15 +646,15 @@ export class MdsComponent{
     let version='';
     let files:File[]=[];
     try {
-      let comment=(document.getElementById("comment") as any);
+      let comment=(document.getElementById('comment') as any);
       version = comment.value;
-      files = (document.getElementById("fileSelect") as any).files;
+      files = (document.getElementById('fileSelect') as any).files;
       let display = document.getElementById('versionGroup').style.display;
       if (version && display == 'none')
         version = '';
       if(display!='none' && !version){
         comment.className+=' invalid';
-        this.toast.error(null,"TOAST.FIELD_REQUIRED",{name:this.translate.instant('VERSION_COMMENT')});
+        this.toast.error(null,'TOAST.FIELD_REQUIRED',{name:this.translate.instant('VERSION_COMMENT')});
         return;
       }
     }catch (e){}
@@ -664,7 +719,15 @@ export class MdsComponent{
           continue;
         let props=properties[widget.id];
         let element=(document.getElementById(widget.id) as any);
-
+        // try to resolve proper template widget if exists to exchange valuespace
+        try {
+          let template = element.parentNode.getAttribute('data-template');
+          if(template!=null) {
+            let tplWidget = this.getWidget(widget.id, template);
+            if(tplWidget)
+              widget=tplWidget;
+          }
+        }catch(e){}
         if(widget.id=='author'){
           /*if(properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]){
             this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_PERSON);
@@ -680,7 +743,7 @@ export class MdsComponent{
 
           let vcard=new VCard(props[0]);
           for(let field of MdsComponent.VCARD_FIELDS){
-            let element=(document.getElementById(widget.id+"_"+field) as any);
+            let element=(document.getElementById(widget.id+'_'+field) as any);
             if(element){
               element.value=vcard.get(field);
             }
@@ -688,14 +751,14 @@ export class MdsComponent{
         }
         else if(element) {
           if(this.isSliderWidget(widget)){
-            if(widget.type=="range" && properties[widget.id+"_from"] && properties[widget.id+"_to"]){
-              let from=properties[widget.id+"_from"][0];
-              let to=properties[widget.id+"_to"][0];
+            if(widget.type=='range' && properties[widget.id+'_from'] && properties[widget.id+'_to']){
+              let from=properties[widget.id+'_from'][0];
+              let to=properties[widget.id+'_to'][0];
               element.noUiSlider.set([from,to]);
             }
             if(!props)
               continue;
-            if(widget.type=="duration") {
+            if(widget.type=='duration') {
               props[0] /= 60000;
             }
             element.noUiSlider.set(props);
@@ -705,7 +768,7 @@ export class MdsComponent{
 
           if (this.isMultivalueWidget(widget)){
             for(let v of props){
-              if(v!="") {
+              if(v!='') {
                 let caption=this.getValueCaption(widget, v);
                 element.innerHTML += this.getMultivalueBadge(v, caption);
               }
@@ -749,9 +812,9 @@ export class MdsComponent{
           if(!props)
             continue;
           for(let v of props){
-            let element=(document.getElementById(widget.id+"_"+v) as any);
+            let element=(document.getElementById(widget.id+'_'+v) as any);
             if(element) {
-              if (element.type == "checkbox" || element.type=="radio")
+              if (element.type == 'checkbox' || element.type=='radio')
                 element.checked = true;
             }
           }
@@ -776,10 +839,10 @@ export class MdsComponent{
   }
   private renderTemplate(template : any,data:any,extended:boolean[],node:Node) {
     if(!template.html || !template.html.trim()){
-      return "";
+      return '';
     }
-    let html='<div class="mdsGroup'+(this.embedded?" mdsEmbedded":"")+'">'+template.html;
-
+    let html='<div class="mdsGroup'+(this.embedded?' mdsEmbedded':'')+'">'+template.html;
+    let removeWidgets:any=[];
     for(let widget of data.widgets){
       if(!widget.template){
         for(let w2 of data.widgets){
@@ -792,11 +855,11 @@ export class MdsComponent{
       else{
         continue; // already processed!
       }
-      let search="<"+widget.id+">";
+      let search='<'+widget.id+'>';
       let start=html.indexOf(search);
       let end=start+search.length;
       if(start<0){
-        search="<"+widget.id+" ";
+        search='<'+widget.id+' ';
         start=html.indexOf(search);
         end=-1;
       }
@@ -804,7 +867,7 @@ export class MdsComponent{
         continue;
       this.currentWidgets.push(widget);
       if(end==-1)
-        end=html.indexOf(">",start);
+        end=html.indexOf('>',start);
 
       let first=html.substring(0,start);
       let second=html.substring(end+1);
@@ -817,15 +880,20 @@ export class MdsComponent{
       this.replaceVariables(widget);
       let attr=html.substring(start+search.length,end);
       let widgetData=this.renderWidget(widget,attr,template,node);
-      if(!widgetData)
+      if(!widgetData) {
+        removeWidgets.push(widget);
         continue;
+      }
       html=first+widgetData+second;
+    }
+    for(let remove of removeWidgets){
+      html=html.replace(new RegExp("<"+remove.id+"*>"),'');
     }
     html+='</div>';
     return html;
 
     }
-  private renderPrimitiveWidget(widget:any,attr:string,type:string,css=""){
+  private renderPrimitiveWidget(widget:any,attr:string,type:string,css=''){
     let html='<div class="inputTable">';
     if(widget.icon){
       html+='<i class="inputIcon material-icons">'+widget.icon+'</i>';
@@ -860,8 +928,8 @@ export class MdsComponent{
     let html='';
     let i=0;
     for(let field of [MdsComponent.VCARD_FIELDS[1],MdsComponent.VCARD_FIELDS[0]]) {
-      let id = widget.id + "_" + field;
-      let caption = this.translate.instant("VCARD." + field);
+      let id = widget.id + '_' + field;
+      let caption = this.translate.instant('VCARD.' + field);
       html += `<div class="vcardGroup"><label for="` + id + `">` + caption + `</label>
                <input type="text" class="vcard_`+field+(i==0?' vcardFirstInput':'')+`" id="` + id + `">`;
       if(i==0){
@@ -893,7 +961,7 @@ export class MdsComponent{
     return html;
   }
   private renderSubTree(widget:any,parent:string=null){
-    let html='<div id="'+widget.id+"_group_"+parent+'" class="treeGroup"';
+    let html='<div id="'+widget.id+'_group_'+parent+'" class="treeGroup"';
     if(parent!=null){
       html+=' style="display:none;"';
     }
@@ -903,7 +971,7 @@ export class MdsComponent{
       for (let value of widget.values) {
         if (value.parent != parent)
           continue;
-        let id = widget.id + "_" + value.id;
+        let id = widget.id + '_' + value.id;
         let sub = this.renderSubTree(widget, value.id);
         html += '<div><div id="'+id+'_bg"><div class="treeIcon">';
         if (sub) {
@@ -915,7 +983,7 @@ export class MdsComponent{
                   ">keyboard_arrow_right</i>`;
         }
         else
-          html += "&nbsp;";
+          html += '&nbsp;';
         html += '</div>'
         html += `<input type="checkbox" id="` + id + `" class="filled-in" onchange="window.mdsComponentRef.component.changeTreeItem(this,'`+widget.id+`')"`;
         if (value.disabled) {
@@ -961,7 +1029,7 @@ export class MdsComponent{
     }
   }
   public handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.code=="Escape"){
+    if(event.code=='Escape'){
 
       for(let widget of this.currentWidgets){
         if(widget.type=='multivalueTree'){
@@ -981,10 +1049,10 @@ export class MdsComponent{
     let list=document.getElementById(id+'_suggestions');
     let element:any=document.getElementById(id+'_suggestionsInput');
     let dialog=document.getElementById(id+'_dialog');
-    let elements=list.getElementsByTagName("a");
+    let elements=list.getElementsByTagName('a');
     let widget=this.getWidget(id);
     if(showMore){
-      list.className+=" suggestionListAll";
+      list.className+=' suggestionListAll';
     }
     elements.item(0).style.display='none';
     list.style.display='none';
@@ -1002,7 +1070,7 @@ export class MdsComponent{
       for(let i=1;i<elements.length;){
         list.removeChild(elements.item(i));
       }
-      list.className=list.className.replace("suggestionListAll","").trim();
+      list.className=list.className.replace('suggestionListAll','').trim();
 
       list.style.display='';
       dialog.style.display='';
@@ -1026,11 +1094,11 @@ export class MdsComponent{
         dialog.style.display='none';
       }
       if(moreCount){
-        list.innerHTML+='<a class="collection-item suggestionMoreItems" onclick="window.mdsComponentRef.component.mdsUpdateSuggests(\''+id+'\',true)">'+moreCount+' '+this.translate.instant("MORE_SELECTBOX")+'</a>';
+        list.innerHTML+='<a class="collection-item suggestionMoreItems" onclick="window.mdsComponentRef.component.mdsUpdateSuggests(\''+id+'\',true)">'+moreCount+' '+this.translate.instant('MORE_SELECTBOX')+'</a>';
       }
       //elements.item(0).style.display=data.values ? 'none' : '';
     },(error:any)=>{
-      console.warn("invalid suggestions result for "+this._groupId+" "+id);
+      console.warn('invalid suggestions result for '+this._groupId+' '+id);
     });
   }
   private getListEntry(id:string,key:string,caption:string,singleValue=false,searchString:string=null){
@@ -1080,17 +1148,17 @@ export class MdsComponent{
     html+=`">` + (searchString ? this.highlightSearch(caption,searchString) : caption) + `</a>`;
     return html;
   }
-  private autoSuggestField(widget:any,css="",allowCustom=false,showOpen=false,singleValue=false){
+  private autoSuggestField(widget:any,css='',allowCustom=false,showOpen=false,singleValue=false){
     if(widget.values==null/* || this._groupId*/)
       showOpen=false;
     if(!showOpen && widget.type!='multivalueTree' && widget.type!='singlevalueTree')
-      css+=" suggestInputNoOpen";
+      css+=' suggestInputNoOpen';
     let postfix='_suggestionsInput';
     if(singleValue)
-      postfix="";
+      postfix='';
     let html=`<input type="text" id="`+widget.id+postfix+`" `
     if(singleValue)
-      html+="readonly ";
+      html+='readonly ';
     html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`" 
             onkeyup="window.mdsComponentRef.component.openSuggestions('`+widget.id+`',event,`+allowCustom+`,`+(widget.values ? true  : false)+`,false,true)">`;
     if(widget.type=='singleoption' && !widget.allowempty){
@@ -1148,16 +1216,11 @@ export class MdsComponent{
       html+=`"><i class="material-icons">arrow_drop_down</i></a>`;
 
     }
-    html+=`
-              <div id="`+widget.id+`_dialog" class="dialog" style="display:none;" onclick="
-              document.getElementById('`+widget.id+`_suggestions').style.display='none';
-              document.getElementById('`+widget.id+`_dialog').style.display='none';
-              "></div>
-              <div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
+    html+=`<div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
     html+=`<a class="collection-item suggestionNoMatches"  onclick="
               document.getElementById('`+widget.id+`_suggestions').style.display='none';
               document.getElementById('`+widget.id+`_dialog').style.display='none';
-              ">`+this.translate.instant("NO_MATCHES")+`</a>`;
+              ">`+this.translate.instant('NO_MATCHES')+`</a>`;
     if(widget.allowempty==true){
       html += this.getListEntry(widget.id,'','',singleValue);
     }
@@ -1175,9 +1238,13 @@ export class MdsComponent{
               ">...</a>`;
     html+=`</div>`;
     if(allowCustom && !showOpen && !this.isSearch()){
-      html+='<div class="hint">'+this.translate.instant("WORKSPACE.EDITOR.HINT_ENTER")+'</div>';
+      html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;
+  }
+  private closeDialog(){
+    document.getElementById(this.currentWidgetSuggestion+'_suggestions').style.display='none';
+    this.currentWidgetSuggestion=null;
   }
   private renderTreeWidget(widget:any,attr:string){
     let html=this.autoSuggestField(widget)+`<div class="btn-flat suggestOpen" onclick="
@@ -1209,20 +1276,20 @@ export class MdsComponent{
                     </div>
                   </div>
                   <div class="card-action">
-                       <a class="waves-effect waves-light btn" onclick="window.mdsComponentRef.component.saveTree('` + widget.id + `')">`+this.translate.instant("SAVE")+`</a>
+                       <a class="waves-effect waves-light btn" onclick="window.mdsComponentRef.component.saveTree('` + widget.id + `')">`+this.translate.instant('SAVE')+`</a>
                      </div>
                 </div>
               </div>
               <div id="`+widget.id+`" class="multivalueBadges"></div>`;
     // delete existing tree from document
     try{
-      document.getElementsByTagName("body")[0].removeChild(document.getElementById(widget.id+'_tree'));
+      document.getElementsByTagName('body')[0].removeChild(document.getElementById(widget.id+'_tree'));
     }catch(e){}
     // dirty hack: In search, the tree is inside the sidebar which does not render correctly. So we need to append it to the main body and delete any existing trees
     setTimeout(()=> {
       try {
         let id = widget.id + '_tree';
-        document.getElementsByTagName("body")[0].appendChild(document.getElementById(id));
+        document.getElementsByTagName('body')[0].appendChild(document.getElementById(id));
       }catch(e){}
     },5);
     return html;
@@ -1253,7 +1320,7 @@ export class MdsComponent{
   }
   private renderDurationWidget(widget:any,attr:string){
     let html=`
-              <div class="inputField"><label for="`+widget.id+`_hours">`+this.translate.instant("INPUT_HOURS")+`</label>
+              <div class="inputField"><label for="`+widget.id+`_hours">`+this.translate.instant('INPUT_HOURS')+`</label>
               <input type="number" min="0" max="9" id="`+widget.id+`_hours" onchange="
               document.getElementById('`+widget.id+`').noUiSlider.set(
               document.getElementById('`+widget.id+`_hours').value*60+
@@ -1262,7 +1329,7 @@ export class MdsComponent{
               </div>
               <div class="inputField"><span>:</span></div>
               <div class="inputField">
-              <label for="`+widget.id+`_minutes">`+this.translate.instant("INPUT_MINUTES")+`</label>
+              <label for="`+widget.id+`_minutes">`+this.translate.instant('INPUT_MINUTES')+`</label>
               <input type="number" min="0" max="60" id="`+widget.id+`_minutes" onchange="
               document.getElementById('`+widget.id+`').noUiSlider.set(
               document.getElementById('`+widget.id+`_hours').value*60+
@@ -1310,7 +1377,7 @@ export class MdsComponent{
         values = (widget.defaultMin != null ? widget.defaultMin : widget.min) + `,` +
                  (widget.defaultMax != null ? widget.defaultMax : widget.max);
       }
-      let unit=widget.unit ? widget.unit : "";
+      let unit=widget.unit ? widget.unit : '';
       eval(`
                 var slider = document.getElementById('`+widget.id+`');
                           noUiSlider.create(slider, {
@@ -1338,7 +1405,7 @@ export class MdsComponent{
 
   private renderSingleoptionWidget(widget:any,attr:string){
     if(widget.values==null)
-      return "Error at "+widget.id+": No values for a singleOption widget is not possible";
+      return 'Error at '+widget.id+': No values for a singleOption widget is not possible';
     let html='<select id="'+widget.id+'">';
     if(widget.allowempty==true){
       html+='<option value=""></option>';
@@ -1346,7 +1413,7 @@ export class MdsComponent{
     for(let option of widget.values){
       html+='<option value="'+option.id+'"';
       if(widget.defaultvalue && option.id==widget.defaultvalue){
-       html+=" selected";
+       html+=' selected';
       }
       html+='>'+option.caption+'</option>';
     }
@@ -1371,20 +1438,20 @@ export class MdsComponent{
     return html;
   }
   private renderRadioWidget(widget:any,attr:string,vertical:boolean){
-    let html='<fieldset class="'+(vertical ? "radioVertical" : "radioHorizontal")+'">';
+    let html='<fieldset class="'+(vertical ? 'radioVertical' : 'radioHorizontal')+'">';
 
     for(let option of widget.values){
-      let id=widget.id+"_"+option.id;
+      let id=widget.id+'_'+option.id;
       html+='<input type="radio" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.id==widget.defaultvalue ? ' checked' : '')+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+option.caption+'</label>';
     }
     html+='</fieldset>';
     return html;
   }
   private renderCheckboxWidget(widget:any,attr:string,vertical:boolean){
-    let html='<fieldset id="'+widget.id+'" class="'+(vertical ? "checkboxVertical" : "checkboxHorizontal")+'">';
+    let html='<fieldset id="'+widget.id+'" class="'+(vertical ? 'checkboxVertical' : 'checkboxHorizontal')+'">';
 
     for(let option of widget.values){
-      let id=widget.id+"_"+option.id;
+      let id=widget.id+'_'+option.id;
       html+='<input type="checkbox" class="filled-in" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')
         +'> <label for="'+id+'">'+(option.imageSrc ? '<img src="'+option.imageSrc+'">' : '')+(option.caption ? '<span class="caption">'+option.caption+'</span>' : '')
         +(option.description ? '<span class="description">'+option.description+'</span>' : '')
@@ -1399,16 +1466,24 @@ export class MdsComponent{
     let html='';
     let caption='';
 
-    if(widget.condition && node){
-        let negate=widget.condition.startsWith("!");
-        let condition=widget.condition;
-        if(negate){
-          condition=widget.condition.substring(1);
-        }
-        console.log("condition "+condition+" negate "+negate);
-        if(!node.properties[condition] && !negate || node.properties[condition] && negate){
+    if(widget.condition){
+      let condition=widget.condition;
+      console.log('condition:');
+      console.log(condition);
+      if(condition.type=='PROPERTY' && node) {
+          if (!node.properties[condition.value] && !condition.negate || node.properties[condition.value] && condition.negate) {
+              return null;
+          }
+      }
+      if(condition.type=='TOOLPERMISSION'){
+        let tp=this.connector.hasToolPermissionInstant(condition.value);
+        console.log(condition.value);
+        console.log(tp);
+        if(tp==condition.negate){
           return null;
         }
+      }
+      console.log("condition is true, will display widget");
     }
 
     if(hasCaption) {
@@ -1422,47 +1497,47 @@ export class MdsComponent{
     if(widget.type!='checkbox')
       html+=caption;
 
-    html+='<div class="mdsWidget widget_'+widget.type+' '+id.replace(":","_")+'"'+attr+'>';
+    html+='<div class="mdsWidget widget_'+widget.type+' '+id.replace(':','_')+'"'+attr+' data-template="'+template.id+'">';
     if(template.rel=='suggestions'){
       html+=`<div id="`+widget.id+`_badgeSuggestions" style="display:none" class="multivalueBadges"></div>`;
     }
     else if(this.isPrimitiveWidget(widget)){
       html+=this.renderPrimitiveWidget(widget,attr,widget.type);
     }
-    else if(widget.type=="textarea"){
+    else if(widget.type=='textarea'){
       html+=this.renderTextareaWidget(widget,attr);
     }
-    else if(widget.type=="duration"){
+    else if(widget.type=='duration'){
       html+=this.renderDurationWidget(widget,attr);
     }
-    else if(widget.type=="range" || widget.type=="slider"){
+    else if(widget.type=='range' || widget.type=='slider'){
       html+=this.renderRangeWidget(widget,attr);
     }
-    else if(widget.type=="singleoption"){
+    else if(widget.type=='singleoption'){
       html+=this.renderSingleoptionWidget(widget,attr);
       //html+=this.autoSuggestField(widget,'',false,true,true);
     }
-    else if(widget.type=="multioption"){
+    else if(widget.type=='multioption'){
       html+=this.renderMultioptionWidget(widget,attr);
     }
-    else if(widget.type=="radioHorizontal" || widget.type=="radioVertical"){
-      html+=this.renderRadioWidget(widget,attr,widget.type=="radioVertical");
+    else if(widget.type=='radioHorizontal' || widget.type=='radioVertical'){
+      html+=this.renderRadioWidget(widget,attr,widget.type=='radioVertical');
     }
-    else if(widget.type=="checkboxHorizontal" || widget.type=="checkboxVertical"){
-      html+=this.renderCheckboxWidget(widget,attr,widget.type=="checkboxVertical");
+    else if(widget.type=='checkboxHorizontal' || widget.type=='checkboxVertical'){
+      html+=this.renderCheckboxWidget(widget,attr,widget.type=='checkboxVertical');
     }
-    else if(widget.type=="multivalueBadges"){
+    else if(widget.type=='multivalueBadges'){
       //html+=this.renderMultivalueBadgesWidget(widget,attr);
       html+=this.renderSuggestBadgesWidget(widget,attr,true);
     }
-    else if(widget.type=="multivalueSuggestBadges" || widget.type=="multivalueFixedBadges"){
-      html+=this.renderSuggestBadgesWidget(widget,attr,widget.type=="multivalueSuggestBadges");
+    else if(widget.type=='multivalueSuggestBadges' || widget.type=='multivalueFixedBadges'){
+      html+=this.renderSuggestBadgesWidget(widget,attr,widget.type=='multivalueSuggestBadges');
     }
-    else if(widget.type=="multivalueTree" || widget.type=="singlevalueTree") {
+    else if(widget.type=='multivalueTree' || widget.type=='singlevalueTree') {
       html += this.renderTreeWidget(widget, attr);
     }
     else if(widget.type=='checkbox') {
-      html+=this.renderPrimitiveWidget(widget,attr,widget.type,"filled-in");
+      html+=this.renderPrimitiveWidget(widget,attr,widget.type,'filled-in');
     }
     else if(widget.type=='vcard') {
       html+=this.renderVCardWidget(widget,attr);
@@ -1480,7 +1555,7 @@ export class MdsComponent{
       html+=this.renderLicense(widget);
     }
     else{
-      html+="Unknown widget type '"+widget.type+"' at id '"+widget.id+"'";
+      html+='Unknown widget type \''+widget.type+'\' at id \''+widget.id+'\'';
     }
 
     html+='</div></div>';
@@ -1490,7 +1565,7 @@ export class MdsComponent{
   private getCaption(widget: any) {
     let caption = '<label for="' + widget.id + '"> ' + widget.caption;
     if(widget.required)
-      caption+= ' ('+this.translate.instant("FIELD_REQUIRED")+')';
+      caption+= ' ('+this.translate.instant('FIELD_REQUIRED')+')';
     caption +=  '</label>';
     return caption;
   }
@@ -1499,21 +1574,21 @@ export class MdsComponent{
     let attributes:any={};
     let str=element;
     while(true){
-      str=str.substring(str.indexOf(" ")+1);
-      let pos=str.indexOf("=");
+      str=str.substring(str.indexOf(' ')+1);
+      let pos=str.indexOf('=');
       if(pos==-1) {
         return attributes;
       }
       let name=str.substring(0,pos).trim();
       str=str.substring(pos+1);
-      let search=" ";
-      if(str.startsWith("'")){
-        search="'";
+      let search=' ';
+      if(str.startsWith('\'')){
+        search='\'';
       }
       if(str.startsWith('"')){
         search='"';
       }
-      if(search!=" ")
+      if(search!=' ')
         str=str.substring(1);
       let end=str.indexOf(search);
       let value=str.substring(0,end);
@@ -1523,17 +1598,17 @@ export class MdsComponent{
  }
 
   private isMultivalueWidget(widget: any) {
-    return widget.type == "multivalueBadges"
-    || widget.type=="multioption"
-    || widget.type=="multivalueFixedBadges"
-    || widget.type=="multivalueSuggestBadges"
-    || widget.type=="singlevalueTree" // it basically uses the tree so all functions relay on multivalue stuff
-    || widget.type=="multivalueTree"
+    return widget.type == 'multivalueBadges'
+    || widget.type=='multioption'
+    || widget.type=='multivalueFixedBadges'
+    || widget.type=='multivalueSuggestBadges'
+    || widget.type=='singlevalueTree' // it basically uses the tree so all functions relay on multivalue stuff
+    || widget.type=='multivalueTree'
   }
   private isSliderWidget(widget: any) {
-    return widget.type == "duration"
-      || widget.type == "range"
-      || widget.type == "slider";
+    return widget.type == 'duration'
+      || widget.type == 'range'
+      || widget.type == 'slider';
   }
   private addBottomCaption(widget: any) {
     if(widget.bottomCaption){
@@ -1644,7 +1719,7 @@ export class MdsComponent{
   private renderLicense(widget: any) {
     if(this.mode=='search'){
       if(!widget.values){
-        return "widget 'license' does not have values connected, can't render it.";
+        return 'widget \'license\' does not have values connected, can\'t render it.';
       }
       for(let value of widget.values){
         let image=NodeHelper.getLicenseIconByString(value.id, this.connector);;
@@ -1665,7 +1740,7 @@ export class MdsComponent{
   }
 
   private setPreview(node: Node,counter=1) {
-    let preview:any=document.getElementById("preview");
+    let preview:any=document.getElementById('preview');
     if(preview){
       if(!node){
         if(this.createType==MdsComponent.TYPE_TOOLDEFINITION){
@@ -1678,7 +1753,7 @@ export class MdsComponent{
       }
       if(preview.src && !preview.src.startsWith(node.preview.url))
         return;
-      preview.src=node.preview.url+"&crop=true&width=400&height=300&dontcache="+new Date().getMilliseconds();
+      preview.src=node.preview.url+'&crop=true&width=400&height=300&dontcache='+new Date().getMilliseconds();
       //if(node.preview.isIcon){
         setTimeout(()=>{
           //this.node.getNodeMetadata(node.ref.id).subscribe((data:NodeWrapper)=>{this.setPreview(data.node)});
@@ -1697,11 +1772,11 @@ export class MdsComponent{
   private onUpdatePreview(callback:Function=null) {
     let preview=null;
     try{
-      preview = (document.getElementById("previewSelect") as any).files[0];
+      preview = (document.getElementById('previewSelect') as any).files[0];
     }catch(e){}
     if(preview){
       this.node.uploadNodePreview(this.currentNode.ref.id,preview).subscribe(()=>{
-        this.toast.toast("WORKSPACE.EDITOR.UPDATED");
+        this.toast.toast('WORKSPACE.EDITOR.UPDATED');
         if(callback)
           callback();
         this.onDone.emit(this.currentNode);
@@ -1714,7 +1789,7 @@ export class MdsComponent{
     }
     else {
       this.globalProgress=false;
-      this.toast.toast("WORKSPACE.EDITOR.UPDATED");
+      this.toast.toast('WORKSPACE.EDITOR.UPDATED');
       if(callback)
         callback();
       this.onDone.emit(this.currentNode);
@@ -1735,7 +1810,7 @@ export class MdsComponent{
             if (w.id == property)
               widget = w;
           }
-          let element = document.getElementById(property + "_badgeSuggestions");
+          let element = document.getElementById(property + '_badgeSuggestions');
           if (element) {
             element.style.display='';
             element.innerHTML = '';
@@ -1756,10 +1831,13 @@ export class MdsComponent{
       , 10);
   }
 
-  private getWidget(id: string,widgets=this.mds.widgets) {
+  private getWidget(id: string,template:string=null,widgets=this.mds.widgets) {
     for(let w of widgets){
-      if(w.id==id)
-        return w;
+      if(w.id==id){
+        if(template==null || w.template==template){
+          return w;
+        }
+      }
     }
     return null;
   }
@@ -1781,7 +1859,7 @@ export class MdsComponent{
   }
 
   private isExtendedWidget(widget: any) {
-    return widget.isExtended==true || widget.extended==true || widget.isExtended=="true" || widget.extended=="true";
+    return widget.isExtended==true || widget.extended==true || widget.isExtended=='true' || widget.extended=='true';
   }
 
   private highlightSearch(caption: string, searchString: string) :string {
@@ -1803,9 +1881,9 @@ export class MdsComponent{
     freetext.style.display='none';
     person.style.display='none';
     for(let i=0;i<tabs.length;i++){
-      tabs[i].getElementsByTagName('a')[0].className=tabs[i].getElementsByTagName('a')[0].className.replace("active","").trim();
+      tabs[i].getElementsByTagName('a')[0].className=tabs[i].getElementsByTagName('a')[0].className.replace('active','').trim();
     }
-    tabs[type].getElementsByTagName('a')[0].className+=" active";
+    tabs[type].getElementsByTagName('a')[0].className+=' active';
     if(type==MdsComponent.AUTHOR_TYPE_FREETEXT){
       freetext.style.display='';
     }
@@ -1832,11 +1910,11 @@ export class MdsComponent{
   }
 
   private isPrimitiveWidget(widget: any) {
-    return widget.type=="text" || widget.type=="number" || widget.type=="email" || widget.type=="date" || widget.type=="month" || widget.type=="color"
+    return widget.type=='text' || widget.type=='number' || widget.type=='email' || widget.type=='date' || widget.type=='month' || widget.type=='color'
   }
 
   private htmlEscape(caption: string) {
-    return caption.split("\"").join("&quot;");
+    return caption.split('"').join('&quot;');
   }
 
   private replaceVariables(widget: any) {
@@ -1851,15 +1929,15 @@ export class MdsComponent{
   private replaceVariableString(string:string, variables: string[]) {
     if(!string)
       return string;
-    if(!string.match("\\${.+}")) {
+    if(!string.match('\\${.+}')) {
       return string;
     }
     for(let key in variables){
-      if("${"+key+"}"==string){
+      if('${'+key+'}'==string){
         return variables[key];
       }
     }
-    console.warn("mds declared variable "+string+", but it was not found in the config variables. List of known variables below");
+    console.warn('mds declared variable '+string+', but it was not found in the config variables. List of known variables below');
     console.warn(variables);
     return string;
   }

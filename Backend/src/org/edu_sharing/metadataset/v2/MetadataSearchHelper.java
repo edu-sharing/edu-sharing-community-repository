@@ -87,6 +87,9 @@ public class MetadataSearchHelper {
 	 * @return
 	 */
 	private static String getStatmentForValue(MetadataQueryParameter parameter, String value) {
+		if(value==null) {
+			throw new java.lang.IllegalArgumentException("null value for "+parameter.getName()+" given, null values are not allowed");
+		}
 		if(value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching())
 			return parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
 		String[] words = value.split(" ");

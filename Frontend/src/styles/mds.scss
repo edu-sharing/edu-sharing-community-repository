@@ -282,7 +282,8 @@ mds .mdsGroup{
     }
     img{
       width:40%;
-      max-height: 175px;
+      height: 175px;
+      object-fit: cover;
     }
   }
 }

@@ -6,29 +6,33 @@ import {Translation} from "../../translation";
 import {ActivatedRoute} from "@angular/router";
 import {Injectable} from "@angular/core";
 import {subscribeOn} from "rxjs/operator/subscribeOn";
+import {CordovaService} from '../../services/cordova.service';
 
 @Injectable()
 export class RestLocatorService {
-
   private static ENDPOINT_URLS = [
     "rest/",
     "http://localhost:8080/edu-sharing/rest/",
     "http://localhost:8081/edu-sharing/rest/",
+    "http://edu41.edu-sharing.de/edu-sharing/rest/",
+    //"https://repository.oer-berlin.de/edu-sharing/rest/",
     "http://alfresco5.vm:8080/edu-sharing/rest/"
   ];
   private static DEFAULT_NUMBER_PER_REQUEST = 25;
   public numberPerRequest = RestLocatorService.DEFAULT_NUMBER_PER_REQUEST;
+
 
   private _endpointUrl : string;
   private _apiVersion=-1;
   private ticket: string;
   private themesUrl: any;
   private isLocating = false;
-  
+
   get endpointUrl(): string {
+    if(this.cordova.isRunningCordova())
+      return this.cordova.endpointUrl;
     return this._endpointUrl;
   }
-  
   get apiVersion(): number {
     return this._apiVersion;
   }
@@ -37,14 +41,13 @@ export class RestLocatorService {
     this._endpointUrl = value;
   }
 
-  constructor(private http : Http) {
+  constructor(private http : Http,private cordova:CordovaService) {
   }
-
   public getConfig() : Observable<any>{
     return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {
         let query = RestLocatorService.createUrl("config/:version/values", null);
-        this.http.get(this._endpointUrl + query, this.getRequestOptions())
+        this.http.get(this.endpointUrl + query, this.getRequestOptions())
           .map((response: Response) => response.json())
           .subscribe(response => {
              this.setConfigValues(response.current);
@@ -61,7 +64,7 @@ export class RestLocatorService {
     return new Observable<string[]>((observer : Observer<string[]>) => {
       this.locateApi().subscribe(data => {
         let query = RestLocatorService.createUrl("config/:version/variables", null);
-        this.http.get(this._endpointUrl + query, this.getRequestOptions("application/json"))
+        this.http.get(this.endpointUrl + query, this.getRequestOptions("application/json"))
           .map((response: Response) => response.json())
           .subscribe(response => {
             observer.next(response.current);
@@ -77,7 +80,7 @@ export class RestLocatorService {
     return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {
         let query = RestLocatorService.createUrl("config/:version/language", null);
-        this.http.get(this._endpointUrl + query, this.getRequestOptions("application/json",null,null,lang))
+        this.http.get(this.endpointUrl + query, this.getRequestOptions("application/json",null,null,lang))
           .map((response: Response) => response.json())
           .subscribe(response => {
             observer.next(response.current);
@@ -102,13 +105,27 @@ export class RestLocatorService {
       headers.append('Authorization', "EDU-TICKET " + this.ticket);
       this.ticket=null;
     }
+    else if(this.cordova.oauth!=null){
+      headers.append('Authorization', "Bearer " + this.cordova.oauth.access_token);
+    }
     else{
       headers.append('Authorization',"");
     }
 
     return {headers:headers,withCredentials:true}; // Warn: withCredentials true will ignore a Bearer from OAuth!
   }
-  private testApi(pos : number,observer : Observer<void>) : void{
+    private testApiCordova(observer : Observer<void>) : void {
+      setTimeout(()=>{
+        if(this.cordova.endpointUrl==null){
+          this.testApiCordova(observer);
+          return;
+        }
+        this.isLocating=false;
+        observer.next(null);
+        observer.complete();
+      },100);
+    }
+    private testApi(pos : number,observer : Observer<void>) : void{
     if(pos==RestLocatorService.ENDPOINT_URLS.length)
       return;
 
@@ -146,13 +163,19 @@ export class RestLocatorService {
         },20);
       });
     }
-    if (this._endpointUrl != null) {
+    if (this.endpointUrl != null) {
       return new Observable<void>((observer: Observer<void>) => {
         observer.next(null);
         observer.complete()
       });
     }
     this.isLocating=true;
+    if(this.cordova.isRunningCordova()){
+      console.log("locate via cordova");
+      return new Observable<void>((observer: Observer<void>) => {
+          this.testApiCordova(observer);
+      });
+    }
     return new Observable<void>((observer: Observer<void>) => {
       this.testApi(0,observer);
     });

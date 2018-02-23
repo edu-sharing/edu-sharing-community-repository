@@ -5,7 +5,6 @@ import { Observable, Observer } from "rxjs";
 import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
 
 import { OAuthResult, LoginResult } from "../rest/data-object";
-import { RestLocatorService } from "./../rest/services/rest-locator.service";
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -21,18 +20,26 @@ export class CordovaService {
   private devicePauseCallback : Function = null;
   private deviceResumeCallback : Function = null;
 
+  private _oauth:OAuthResult;
+  public endpointUrl:string;
+  get oauth(){
+    return this._oauth;
+  }
+  set oauth(oauth: OAuthResult){
+    this._oauth=oauth;
+    this._oauth.expires_ts = Date.now() + (oauth.expires_in * 1000);
+  }
+
   /**
    * CONSTRUCTOR
    */
   constructor(
-    private http : Http,
-    private locator : RestLocatorService
+    private http : Http
   ) {
-
     // CORDOVA EVENT: Device is Ready (on App StartUp)
     let whenDeviceIsReady = () => {
       console.log("CordovaService: App is Ready");
-
+      this.loadStorage();
       // flag that device is ready
       this.deviceIsReady = true;
 
@@ -107,12 +114,24 @@ export class CordovaService {
     if (this.deviceIsReady) {
       // cordova already signaled that it is ready - call on the spot
       callback();
+
     } else {
       // remember callback and call when ready
       this.deviceReadyCallback = callback;
     }  
   }
 
+  /**
+   * after init, load the stored info from the cordova storage and save it as class members for access of other services
+   */
+  loadStorage(){
+      this.getPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,(data:string)=>{
+          this.oauth=JSON.parse(data);
+          this.getPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,(data:string)=>{
+              this.endpointUrl=data;
+          });
+      });
+  }
   /**
    * Set a callback function to be called then device is paused.
    * @param callback callback function (with void parameter)
@@ -142,7 +161,8 @@ export class CordovaService {
   /*
    * KEYS FOR STORAGE
    */
-  public STORAGE_OAUTHTOKENS:string = "oauth";
+  public static STORAGE_OAUTHTOKENS:string = "oauth";
+  public static STORAGE_SERVER_ENDPOINT:string = "server_endpoint";
 
   /**
    * load permanent key/value 
@@ -276,7 +296,8 @@ export class CordovaService {
       } else {
       
         // simply set API URL and OK
-        this.locator.endpointUrl = url;
+        this.setPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,url);
+        this.endpointUrl=url;
         observer.next(CordovaService.TEST_TESTSKIPPED);
         observer.complete();
       
@@ -288,11 +309,11 @@ export class CordovaService {
   // oAuth login that is used when running as mobile app
   public loginOAuth(username: string = "", password: string = ""): Observable<OAuthResult> {
 
-    let url = this.locator.endpointUrl + RestLocatorService.createUrl("../oauth2/token", null);
+    let url = this.endpointUrl + "../oauth2/token";
     let headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
     headers.append('Accept', '*/*');
-    let options = { headers: headers, withCredentials: false }
+    let options = { headers: headers, withCredentials: false };
 
     let data = "client_id=eduApp&grant_type=password&client_secret=secret" +
       "&username=" + encodeURIComponent(username) +
@@ -309,9 +330,8 @@ export class CordovaService {
           }
 
           // set local expire ts on token
-          oauth.expires_ts = Date.now() + (oauth.expires_in * 1000);
-
-          observer.next(oauth);
+          this.oauth=oauth;
+          observer.next(this.oauth);
           observer.complete();
 
         },
@@ -332,7 +352,7 @@ export class CordovaService {
   // oAuth refresh tokens
   public refreshOAuth(oauth: OAuthResult): Observable<OAuthResult> {
 
-    let url = this.locator.endpointUrl + RestLocatorService.createUrl("../oauth2/token", null);
+    let url = this.endpointUrl + "../oauth2/token";
     let headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
     headers.append('Accept', '*/*');
@@ -346,9 +366,9 @@ export class CordovaService {
         (oauthNew: OAuthResult) => {
 
           // set local expire ts on token
-          oauthNew.expires_ts = Date.now() + (oauth.expires_in * 1000);
+          this.oauth=oauthNew;
 
-          observer.next(oauthNew);
+          observer.next(this.oauth);
           observer.complete();
 
         },
@@ -381,109 +401,23 @@ export class CordovaService {
           observer.complete();
         }
       };
+      if ((Date.now() + 60000) > oauth.expires_ts || true) {
+          // oAuth needs refresh first
+          console.log("initOAuthSession --> Doing PLANNED OAUTH REFRESH");
+          this.refreshOAuth(oauth).subscribe(
+              (win) => {
 
-      // make getting session from backend available from multiple points in this method
-      let getSessionFromBackend = (firstTry: boolean = true) => {
-        // check with backend
-        this.isLoggedIn(oauth).subscribe(
-          (win) => {
+                  // now oauth is fresh - continue with init session
+                  oauth = win;
+                  console.log("FRESH OAUTH", oauth);
 
-            // you now have a valid session cookie that will work
-            // on following request --> FINAL WIN
-            observer.next(oauth);
-            observer.complete();
-
-          },
-          (error) => {
-
-            // just in case oauth is invalid and its first try - try to refresh on time
-            // this is for scenarios where expire date of oauth access token is still valid,
-            // but in case of a server restart got invalid early
-            if ((typeof error != "string") && (error.status == 401)) {
-
-              if (firstTry) {
-
-                // on first try of init session - try the refresh
-                console.log("initOAuthSession --> Doing EXCEPTION OAUTH REFRESH");
-                this.refreshOAuth(oauth).subscribe(
-                  (win) => {
-                    oauth = win;
-                    getSessionFromBackend(false);
-                  },
-                  (error) => {
-                    localErrorHandling(error, "(on exception refresh)")
-                  }
-                );
-
-              } else {
-
-                // on second try - give up - oAuth is invalid
-                observer.error("INVALID");
-                observer.complete();
-
+              },
+              (error) => {
+                  localErrorHandling(error, "(on planned refresh)");
               }
-              return;
-            }
-
-            localErrorHandling(error, "(on isLoggedIn firstTry=" + firstTry + ")");
-          }
-        );
-      };
-
-      // check if oauth needs refresh (by timestamp)
-      if ((Date.now() + 60000) > oauth.expires_ts) {
-        // oAuth needs refresh first
-        console.log("initOAuthSession --> Doing PLANNED OAUTH REFRESH");
-        this.refreshOAuth(oauth).subscribe(
-          (win) => {
-
-            // now oauth is fresh - continue with init session
-            oauth = win;
-            console.log("FRESH OAUTH", oauth);
-            getSessionFromBackend();
-
-          },
-          (error) => {
-            localErrorHandling(error, "(on planned refresh)");
-          }
-        );
-      } else {
-        getSessionFromBackend();
+          );
       }
-
     });
 
   }
-
-  // also works optional with oAuth tokens for authentication
-  public isLoggedIn(oauth: OAuthResult = null): Observable<LoginResult> {
-
-    let url = this.locator.endpointUrl + RestLocatorService.createUrl("authentication/:version/validateSession", null);
-    let headers = new Headers();
-    headers.append('Accept', 'application/json');
-    headers.append('Authorization', 'Bearer ' + oauth.access_token);
-    let options: any = { headers: headers, withCredentials: true }
-
-    return new Observable<LoginResult>((observer: Observer<LoginResult>) => {
-      this.http.get(url, options).map((response: Response) => response.json()).subscribe(
-        (data: LoginResult) => {
-          /*
-          this.toolPermissions=data.toolPermissions;
-          this.event.broadcastEvent(FrameEventsService.EVENT_UPDATE_LOGIN_STATE,data);
-          this.storage.set(TemporaryStorageService.SESSION_INFO,data);
-          this._logoutTimeout=data.sessionTimeout;
-          */
-          observer.next(data);
-          observer.complete();
-        },
-        (error: any) => {
-          observer.error(error);
-          observer.complete();
-        }
-      );
-    });
-  }
-
-
-
 }

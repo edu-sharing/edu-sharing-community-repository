@@ -66,7 +66,8 @@ export class WorkspaceManagementDialogsComponent  {
   public dialogButtons:DialogButton[];
   private currentLtiTool: Node;
   private ltiToolRefresh: Boolean;
-  private nodeDeleteOnCancel: boolean;
+  @Input() nodeDeleteOnCancel: boolean;
+  @Output() nodeDeleteOnCancelChange = new EventEmitter();
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -133,6 +134,7 @@ export class WorkspaceManagementDialogsComponent  {
       this.nodeMetadata=event[0];
       this.nodeMetadataAllowReplace=false;
       this.nodeDeleteOnCancel=true;
+      this.nodeDeleteOnCancelChange.emit(true);
     }
     if(this.config.instant('licenseDialogOnUpload',false)){
       this.nodeLicense=event;
@@ -154,6 +156,7 @@ export class WorkspaceManagementDialogsComponent  {
       (data:NodeWrapper)=>{
         this.globalProgress=false;
         this.nodeDeleteOnCancel=true;
+        this.nodeDeleteOnCancelChange.emit(true);
         this.nodeMetadata=data.node;
         this.nodeMetadataAllowReplace=true;
         this.onRefresh.emit();
@@ -188,12 +191,14 @@ export class WorkspaceManagementDialogsComponent  {
       this.globalProgress=true;
       this.nodeService.deleteNode(this.nodeMetadata.ref.id,false).subscribe(()=>{
         this.nodeDeleteOnCancel=false;
+        this.nodeDeleteOnCancelChange.emit(false);
         this.globalProgress=false;
         this.closeEditor(true);
       });
       return;
     }
     this.nodeDeleteOnCancel=false;
+    this.nodeDeleteOnCancelChange.emit(false);
     this.nodeMetadata=null;
     this.nodeMetadataChange.emit(null);
     this.createMetadata=null;

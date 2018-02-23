@@ -60,8 +60,8 @@ $sidenavWidth:300px;
   margin-left: 15px;
 }
 .collections{
-  min-height: $cardSmallHeight+10px;
-  max-height: $cardSmallHeight+10px;
+  min-height: $listCardSmallHeight+10px;
+  max-height: $listCardSmallHeight+10px;
   overflow: hidden;
   margin-bottom:25px;
 }
@@ -286,7 +286,12 @@ small-collection{
   padding-top: 0;
   top:$mainnavHeight+110px;
   height: calc(100% - #{$mainnavHeight} - 110px);
+  transition: $transitionNormal all ease;
   @include iosScrolling();
+}
+.sidenavHidden{
+  transform: translateX(-100%);
+  display: none;
 }
 .sidenavNoRepositories{
   top:$mainnavHeight+65px;

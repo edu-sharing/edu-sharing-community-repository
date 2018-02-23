@@ -68,11 +68,9 @@ export class RestConnectorService {
               private locator: RestLocatorService,
               private storage : TemporaryStorageService,
               private event:FrameEventsService) {
-
     this.numberPerRequest=RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
     event.addListener(this);
   }
-
   public onEvent(event:string,request:any){
     if(event==FrameEventsService.EVENT_UPDATE_SESSION_TIMEOUT) {
       this._lastActionTime=new Date().getTime();
@@ -89,12 +87,31 @@ export class RestConnectorService {
     }
   }
 
+
+  public getOAuthToken() : Observable<OAuthResult>{
+  let url=this.createUrl("../oauth2/token",null);
+  //"grant_type=password&client_id=eduApp&client_secret=secret&username=admin&password=admin"
+  return new Observable<OAuthResult>((observer : Observer<OAuthResult>)=>{
+    this.post(url,"client_id=eduApp&grant_type=client_credentials&client_secret=secret"
+      //"&username="+encodeURIComponent(username)+
+      //"&password="+encodeURIComponent(password)
+      ,this.getRequestOptions("application/x-www-form-urlencoded")).map((response: Response) => response.json()).subscribe(
+      (data:OAuthResult) => {
+        observer.next(data);
+        observer.complete();
+      },
+      (error:any) =>{
+        observer.error(error);
+        observer.complete();
+      });
+  });
+
+}
   public logout() : Observable<Response>{
     let url=this.createUrl("authentication/:version/destroySession",null);
     this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_OUT);
     return this.get(url,this.getRequestOptions());
   }
-
   public logoutSync() : any{
     let url=this.createUrl("authentication/:version/destroySession",null);
     let xhr = new XMLHttpRequest();
@@ -105,18 +122,13 @@ export class RestConnectorService {
     this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_OUT);
     return result;
   }
-
   public getCurrentLogin() : LoginResult{
     return this.storage.get(TemporaryStorageService.SESSION_INFO);
   }
-
   public isLoggedIn() : Observable<LoginResult>{
-
-    let url = this.createUrl("authentication/:version/validateSession",null);
-    let options:any = this.getRequestOptions();
-
+    let url=this.createUrl("authentication/:version/validateSession",null);
     return new Observable<LoginResult>((observer : Observer<LoginResult>)=>{
-      this.get(url,options).map((response: Response) => response.json()).subscribe(
+      this.get(url,this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
         (data:LoginResult)=>{
           this.toolPermissions=data.toolPermissions;
           this.event.broadcastEvent(FrameEventsService.EVENT_UPDATE_LOGIN_STATE,data);
@@ -132,19 +144,19 @@ export class RestConnectorService {
       );
     });
   }
-
   public hasAccessToScope(scope:string) : Observable<AccessScope>{
     let url=this.createUrl("authentication/:version/hasAccessToScope/?scope=:scope",null,[[":scope",scope]]);
     return this.get(url,this.getRequestOptions()).map((response: Response) => response.json());
   }
-
   private toolPermissions: string[];
   public hasToolPermissionInstant(permission:string){
     if(this.toolPermissions)
       return this.toolPermissions.indexOf(permission) != -1;
     return false;
   }
-
+  public prepareToolpermissions(){
+    return this.hasToolPermission(null);
+  }
   public hasToolPermission(permission:string){
     console.log(this.toolPermissions);
     return new Observable<boolean>((observer : Observer<boolean>) => {
@@ -160,54 +172,51 @@ export class RestConnectorService {
       }
     });
   }
-
   public login(username:string,password:string,scope:string=null) : Observable<string>{
 
-      let url = this.createUrl("authentication/:version/validateSession", null);
-      if(scope) {
-        url = this.createUrl("authentication/:version/loginToScope", null);
+    let url = this.createUrl("authentication/:version/validateSession", null);
+    if(scope) {
+      url = this.createUrl("authentication/:version/loginToScope", null);
+    }
+    return new Observable<string>((observer : Observer<string>)=>{
+      if(scope){
+        this.post(url,JSON.stringify({
+          userName:username,
+          password:password,
+          scope:scope
+        }),this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
+          (data:LoginResult) => {
+            if(data.isValidLogin)
+              this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
+            this.storage.set(TemporaryStorageService.SESSION_INFO,data);
+            observer.next(data.statusCode);
+            observer.complete();
+          },
+          (error:any) =>{
+            console.log(error);
+            observer.error(error);
+            observer.complete();
+          });
       }
-      return new Observable<string>((observer : Observer<string>)=>{
-        if(scope){
-          this.post(url,JSON.stringify({
-            userName:username,
-            password:password,
-            scope:scope
-          }),this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
-            (data:LoginResult) => {
-              if(data.isValidLogin)
-                this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
-              this.storage.set(TemporaryStorageService.SESSION_INFO,data);
-              observer.next(data.statusCode);
-              observer.complete();
-            },
-            (error:any) =>{
-              console.log(error);
-              observer.error(error);
-              observer.complete();
-            });
-        }
-        else {
+      else {
+        this.get(url, this.getRequestOptions("",username,password)).map((response: Response) => response.json()).subscribe(
+          (data: LoginResult) => {
+            if(data.isValidLogin)
+              this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
+            this.storage.set(TemporaryStorageService.SESSION_INFO,data);
+            observer.next(data.statusCode);
+            observer.complete();
+          },
+          (error: any) => {
+            console.log(error);
 
-          this.get(url, this.getRequestOptions("",username,password)).map((response: Response) => response.json()).subscribe(
-            (data: LoginResult) => {
-              console.log("data",data);
-              if(data.isValidLogin)
-                this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
-              this.storage.set(TemporaryStorageService.SESSION_INFO,data);
-              observer.next(data.statusCode);
-              observer.complete();
-            },
-            (error: any) => {
-              console.log(error);
-              observer.error(error);
-              observer.complete();
-            });
-        }
-      });
+            observer.error(error);
+            observer.complete();
+          });
+      }
+    });
 
   }
-
   public createRequestString(request : RequestObject){
     let str="skipCount="+(request && request.offset ? request.offset : 0)+
       "&maxItems="+(request && request.count!=null ?  request.count : this.numberPerRequest);

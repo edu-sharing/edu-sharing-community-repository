@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import {TranslateService, TranslateLoader} from "@ngx-translate/core";
-import { Http, Response, Headers } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
 import 'rxjs/add/observable/forkJoin';
@@ -12,6 +11,7 @@ import {ActivatedRoute} from "@angular/router";
 import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
 import {RestLocatorService} from "./rest/services/rest-locator.service";
+import {HttpClient, HttpClientModule} from "@angular/common/http";
 
 export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','override'];
 
@@ -91,11 +91,11 @@ export class Translation  {
     */
   }
 }
-export function createTranslateLoader(http: Http,locator:RestLocatorService) {
+export function createTranslateLoader(http: HttpClient,locator:RestLocatorService) {
   return new TranslationLoader(http,locator);
 }
 export class TranslationLoader implements TranslateLoader {
-  constructor(private http: Http,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
+  constructor(private http: HttpClient,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
   /**
    * Gets the translations from the server
    * @param lang
@@ -109,7 +109,7 @@ export class TranslationLoader implements TranslateLoader {
     var results=0;
     for (let translation of TRANSLATION_LIST) {
       this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
-        .map((res: Response) => res.json()).subscribe((data : any) => translations.push(data));
+        .subscribe((data : any) => translations.push(data));
 
     }
     this.locator.getConfigLanguage(lang).subscribe((data:any)=>{

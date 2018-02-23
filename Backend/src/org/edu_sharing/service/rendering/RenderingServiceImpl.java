@@ -37,7 +37,7 @@ public class RenderingServiceImpl implements RenderingService{
 			this.authTool = RepoFactory.getAuthenticationToolInstance(appId);
 			
 			if((AuthenticationUtil.isRunAsUserTheSystemUser() || "admin".equals(AuthenticationUtil.getRunAsUser())) ) {
-				logger.info("starting in runas user mode");
+				logger.debug("starting in runas user mode");
 				this.authInfo = new HashMap<String,String>();
 				this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());
 				this.client = new MCAlfrescoAPIClient();
@@ -61,7 +61,7 @@ public class RenderingServiceImpl implements RenderingService{
 		try {
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(this.appInfo.getAppId());
 			String renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo, nodeId, AuthenticationUtil.getFullyAuthenticatedUser(),nodeVersion,parameters,RenderingTool.DISPLAY_DYNAMIC);
-			Logger.getLogger(this.getClass()).info(renderingServiceUrl);
+			logger.debug(renderingServiceUrl);
 			return new HttpQueryTool().query(renderingServiceUrl);
 		}catch(Throwable t) {
 			String repository=VersionService.getVersion(VersionService.Type.REPOSITORY);

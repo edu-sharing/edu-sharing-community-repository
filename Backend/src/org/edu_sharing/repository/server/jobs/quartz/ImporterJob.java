@@ -33,7 +33,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.BinaryHandler;
 import org.edu_sharing.repository.server.importer.Importer;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
@@ -51,7 +55,27 @@ public class ImporterJob extends AbstractJob {
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
+		Map jobDataMap = context.getJobDetail().getJobDataMap();
+		String username = (String) jobDataMap.get(OAIConst.PARAM_USERNAME);
 		
+		if(username == null || username.trim().equals("")) {
+			throw new JobExecutionException("no user provided");
+		}
+		
+		RunAsWork<Void> runAs = new RunAsWork<Void>() {
+			
+			@Override
+			public Void doWork() throws Exception {
+				start(context);
+				return null;
+			}
+			
+		}; 
+		AuthenticationUtil.runAs(runAs, username);
+		
+	}
+	
+	private void start(JobExecutionContext context) {
 		logger.info("starting");
 		Map jobDataMap = context.getJobDetail().getJobDataMap();
 
@@ -85,6 +109,10 @@ public class ImporterJob extends AbstractJob {
 		String binaryHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_BINARYHANDLER);
 
 		String importerClass = (String) jobDataMap.get(OAIConst.PARAM_IMPORTERCLASS);
+		
+		
+		
+		
 		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass);
 		logger.info("returns");
 	}

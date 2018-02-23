@@ -104,9 +104,10 @@
        [style.top]="dropdownTop"
        [style.bottom]="dropdownBottom"
        *ngIf="showAddDesktop">
-    <a class="collection-item" (click)="showAddDesktop=false;showUploadSelect=true"><i class="material-icons">cloud_upload</i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</a>
+    <a *ngIf="allowBinary" class="collection-item" (click)="showAddDesktop=false;showUploadSelect=true"><i class="material-icons">cloud_upload</i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</a>
+    <a *ngIf="!allowBinary" class="collection-item" (click)="showAddDesktop=false;createEmptyNode()"><i class="material-icons">description</i> {{ 'WORKSPACE.ADD_EMPTY_OBJECT' | translate}}</a>
     <a class="collection-item" (click)="showAddDesktop=false;addFolderName=''"><i class="material-icons">create_new_folder</i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</a>
-    <a *ngFor="let connector of connectorList ? connectorList.connectors : null;let i=index"
+    <a *ngFor="let connector of (connectorList && allowBinary) ? connectorList.connectors : null;let i=index"
        class="collection-item"
        [class.collection-item-seperate]="!i"
        (click)="showAddDesktop=false;createConnectorName='';createConnectorType=connector">
@@ -140,8 +141,9 @@
 
 
   <workspace-tree class="tree" *ngIf="isLoggedIn"
-  [current]="currentFolder"
+  [current]="currentFolderRef"
                   [path]="path"
+                  [selectedNode]="selectedNodeTree"
                   [root]="root"
                   [isSafe]="isSafe"
                   [options]="explorerOptions"
@@ -169,7 +171,7 @@
              [options]="actionOptions"
 ></actionbar>
   <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'" (contextmenu)="createContext($event)"
-  [current]="currentFolder"
+  [current]="currentFolderRef"
   [selection]="selection"
   [searchQuery]="searchQuery"
   [options]="explorerOptions"
@@ -188,6 +190,7 @@
 [(addToCollection)]="addNodesToCollection"
 [(nodeLicense)]="editNodeLicense"
 [(nodeMetadata)]="editNodeMetadata"
+[(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
 [(filesToUpload)]="filesToUpload"
 [fileIsOver]="fileIsOver"
 [(showUploadSelect)]="showUploadSelect"

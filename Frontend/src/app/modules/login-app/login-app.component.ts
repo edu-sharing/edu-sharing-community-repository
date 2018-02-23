@@ -52,7 +52,7 @@ export class LoginAppComponent  implements OnInit{
           (win)=>{
 
             // 3. Check if oAuth tokens are available
-            this.cordova.getPermanentStorage(this.cordova.STORAGE_OAUTHTOKENS,(oauthStr:string)=>{
+            this.cordova.getPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,(oauthStr:string)=>{
 
               if (oauthStr!=null) {
 
@@ -73,7 +73,7 @@ export class LoginAppComponent  implements OnInit{
                   (updatedOAuthTokens)=>{
 
                     // store oAuth tokens (becuase maybe refreshed)
-                    this.cordova.setPermanentStorage(this.cordova.STORAGE_OAUTHTOKENS,JSON.stringify(updatedOAuthTokens));
+                    this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,JSON.stringify(updatedOAuthTokens));
                     
                     // continue to within the app
                     this.goToWorkspace();
@@ -162,28 +162,11 @@ export class LoginAppComponent  implements OnInit{
 
       // APP: oAuth Login
       this.cordova.loginOAuth(this.username,this.password).subscribe((oauthTokens:OAuthResult)=>{
-
-        // init session with ne tokens
-        this.cordova.initOAuthSession(oauthTokens).subscribe(
-          (win)=>{
-
-            // store oAuth tokens
-            this.cordova.setPermanentStorage(this.cordova.STORAGE_OAUTHTOKENS,JSON.stringify(oauthTokens));
-
-            // continue to within the app
-            this.goToWorkspace();
-
+        this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,JSON.stringify(oauthTokens));
+        // continue to within the app
+        this.goToWorkspace();
           },
           (error)=>{
-
-            this.isLoading=false;
-            this.toast.error(null,"LOGIN.ERROR");
- 
-          }
-        );
-
-      },(error:any)=>{
-
         this.isLoading=false;
         if (typeof error == "string") {
           this.toast.error(null, error);

@@ -11,6 +11,7 @@
     "MY_FILES": "Meine Inhalte",
     "ADD": "Neu",
     "ADD_OBJECT": "Neues Material",
+    "ADD_EMPTY_OBJECT": "Neues Objekt",
     "ADD_OBJECT_TITLE": "Neues Objekt erstellen",
     "ADD_OBJECT_MESSAGE": "Materialien hier ablegen",
     "SELECT_COLLECTION": "Sammlung wählen",
@@ -67,7 +68,7 @@
       "PUBLISHER":"darf veröffentlichen",
       "MESSAGE":"Nachricht hinzufügen",
       "MESSAGE_PLACEHOLDER":"Nachricht eingeben...",
-      "INHERIT":"Rechte vom Ordner erben",
+      "INHERIT":"Rechte vom übergeordneten Ordner erben",
       "INHERIT_HINT":"Diese Berechtigung wird vom übergeordneten Ordner geerbt",
       "GLOBAL_SEARCH":"Auch außerhalb meiner Organisation suchen",
       "SHOW_HISTORY":"Historie anzeigen",
@@ -90,6 +91,7 @@
       }
     },
     "INHERIT_DISABLED":"Rechtevererbung ist aktuell ausgeschaltet",
+    "INHERIT_EMPTY":"Es sind aktuell keine Berechtigungen am übergeordneten Ordner.\nSobald der übergeordnete Ordner Berechtigungen erhält, werden diese auf das Objekt angewendet.",
     "PERMISSION_AUTHORITY_EXISTS":"Der gewählte Nutzer/Gruppe hat bereits Zugriff. Überprüfen Sie die Berechtigungen unter \"Schon Eingeladen\"",
     "PERMISSIONS_UPDATED":"Freigaben wurden aktualisiert",
 

@@ -21,6 +21,7 @@ import {ListItem} from "../list-item";
 import {UIHelper} from "../ui-helper";
 import {Helper} from "../../helper";
 import {RestNetworkService} from "../../rest/services/rest-network.service";
+import {ColorHelper} from '../color-helper';
 
 @Component({
   selector: 'listTable',
@@ -145,6 +146,12 @@ export class ListTableComponent implements EventListener{
    * Can an individual item be clicked
    */
   @Input() isClickable : boolean;
+  /**
+   *  a custom function to validate if a given node has permissions or should be displayed as "disabled"
+   *  Function will get the node object as a parameter and should return
+   *  {status:boolean, message:string}
+   */
+  @Input() validatePermissions : Function;
   /**
    * Hint that the "apply node" mode is active (when reurl is used)
    */
@@ -342,6 +349,9 @@ export class ListTableComponent implements EventListener{
   public delete(node:any){
     this.onDelete.emit(node);
   }
+    public isBrightColorCollection(color : string){
+        return ColorHelper.getColorBrightness(color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
+    }
   public toggleAll(){
     if(this.selectedNodes.length==this._nodes.length){
       this.selectedNodes=[];
@@ -379,6 +389,9 @@ export class ListTableComponent implements EventListener{
       this.dragHover = target;
     }
 
+  }
+  private noPermissions(node:any){
+    return this.validatePermissions!=null && this.validatePermissions(node).status==false;
   }
   private closeReorder(save:boolean){
     this.reorderDialog=false;

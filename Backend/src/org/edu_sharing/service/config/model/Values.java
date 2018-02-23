@@ -37,4 +37,6 @@ public class Values{
 	@XmlElement	public String loginDefaultLocation;
 	@XmlElement	public Boolean searchGroupResults;
 	@XmlElement	public Mainnav mainnav;
+	@XmlElement	public String searchSidenavMode;
+	@XmlElement	public Guest guest;
 }

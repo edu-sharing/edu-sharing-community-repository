@@ -35,12 +35,18 @@ input[type=date]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   display: none;
 }
+.spinner-blue, .spinner-blue-only{
+  border-color: $primary;
+}
 /* for some reason they need to be declared seperately */
 @mixin sliderThumb(){
   background-color: $primary;
   border:1px solid #fff;
   position: relative;
   top: -1px;
+}
+@include placeholder {
+  color: $placeholderColor;
 }
 input[type="range"]::-webkit-slider-thumb{
   @include sliderThumb();

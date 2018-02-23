@@ -30,8 +30,6 @@ export class WorkspacePermissionComponent  {
     if(check.indexOf(RestConstants.ACCESS_CC_PUBLISH)!=-1){
       check.splice(check.indexOf(RestConstants.ACCESS_CC_PUBLISH),1);
     }
-
-    console.log(check);
     this.invalidPermission=check.length!=1 ||
       (check[0]!=RestConstants.PERMISSION_CONSUMER && check[0]!=RestConstants.PERMISSION_COLLABORATOR && check[0]!=RestConstants.PERMISSION_COORDINATOR);
   }

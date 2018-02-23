@@ -68,6 +68,12 @@ export class CollectionChooserComponent implements OnInit{
   public createCollection(){
     this.router.navigate([UIConstants.ROUTER_PREFIX+"collections/collection","new",RestConstants.ROOT]);
   }
+  private hasWritePermissions(node:any){
+      if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){
+          return {status:false,message:'NO_WRITE_PERMISSIONS'};
+      }
+      return {status:true};
+  }
   private clickCollection(node:Collection){
     if(!this.checkPermissions(node)){
       return;

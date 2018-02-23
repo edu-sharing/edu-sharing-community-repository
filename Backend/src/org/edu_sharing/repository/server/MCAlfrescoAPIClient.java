@@ -3993,8 +3993,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 				HashMap<String,Object> props = getPropertiesSimple(version.getFrozenStateNodeRef().getStoreRef(), version.getFrozenStateNodeRef().getId());
 
-				logger.info(" version prop UID:" + props.get(CCConstants.SYS_PROP_NODE_UID));
-				logger.info(" version NodeID:" + props.get(CCConstants.NODEID));
+				logger.debug(" version prop UID:" + props.get(CCConstants.SYS_PROP_NODE_UID));
+				logger.debug(" version NodeID:" + props.get(CCConstants.NODEID));
 
 				// contenturl
 				String redirectServletLink = this.getRedirectServletLink(repId, nodeId);

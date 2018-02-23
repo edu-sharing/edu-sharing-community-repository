@@ -66,7 +66,6 @@ export class WorkspaceShareComponent  {
   private _node : Node;
 
   private searchStr: string;
-  private authoritySuggestions : SuggestItem[];
   private inheritAllowed=false;
   private globalSearch=false;
   private globalAllowed=false;
@@ -79,46 +78,7 @@ export class WorkspaceShareComponent  {
   public publishActive: boolean;
   private originalPermissions: LocalPermissions;
   private isSafe = false;
-  private lastSuggestionSearch:string;
-  private updateSuggestions(event : any){
-    this.lastSuggestionSearch = event.input;
-    console.log("search "+event.input);
-    this.iam.searchAuthorities(event.input,this.globalSearch).subscribe(
-      (authorities:IamAuthorities)=>{
-        if(this.lastSuggestionSearch!=event.input)
-          return;
-        var ret:SuggestItem[] = [];
-        for (let user of authorities.authorities) {
-          let group = user.profile.displayName != null;
-          let item = new SuggestItem(user.authorityName, group ? user.profile.displayName : NodeHelper.getUserDisplayName(user), group ? 'group' : 'person', '');
-          item.originalObject = user;
-          ret.push(item);
-        }
-        this.authoritySuggestions=ret;
-      });
-    /*
-        this.iam.searchUsers(event.input,this.globalSearch).subscribe(
-          (users:IamUsers) => {
-            var ret:SuggestItem[] = [];
-            for (let user of users.users){
-              let item=new SuggestItem(user.authorityName,user.profile.firstName+" "+user.profile.lastName, 'person', '');
-              item.originalObject=user;
-              ret.push(item);
-            }
-            this.iam.searchGroups(event.input,this.globalSearch).subscribe(
-              (groups:IamGroups) => {
-                for (let group of groups.groups){
-                  let item=new SuggestItem(group.authorityName,group.profile.displayName, 'group', '');
-                  item.originalObject=group;
-                  ret.push(item);
-                }
-                this.authoritySuggestions=ret;
-              });
-          },
-          error => console.log(error));
-          */
 
-  }
   public isCollection(){
     if(this._node==null)
       return true;
@@ -128,8 +88,7 @@ export class WorkspaceShareComponent  {
     this.linkNode=this._node;
   }
   private addSuggestion(data: any) {
-    console.log(data);
-    this.addAuthority(data.item.originalObject)
+    this.addAuthority(data);
   }
   @Input() sendMessages=true;
   @Input() sendToApi=true;
@@ -339,7 +298,18 @@ export class WorkspaceShareComponent  {
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);
     });
   }
-
+  private updatePermissionInfo(){
+    let type:string[];
+    for(let permission of this.newPermissions){
+      if(type && !Helper.arrayEquals(type,permission.permissions)){
+        this.currentType=[];
+        return;
+      }
+      type=permission.permissions;
+    }
+    if(type)
+      this.currentType=type;
+  }
   private removePermissions(permissions:Permission[], remove : string) {
     for(let i=0;i<remove.length;i++){
       if(permissions[i] && permissions[i].authority.authorityType==remove){

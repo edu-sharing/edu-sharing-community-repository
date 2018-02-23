@@ -16,6 +16,7 @@ public class MetadataSetV2 {
 	private List<MetadataGroup> groups;
 	private List<MetadataList> lists;
 	private MetadataQueries queries;
+	private MetadataCreate create;
 	public String getId() {
 		return id;
 	}
@@ -84,7 +85,12 @@ public class MetadataSetV2 {
 	public void setQueries(MetadataQueries queries) {
 		this.queries = queries;
 	}
-	
+	public MetadataCreate getCreate() {
+		return create;
+	}
+	public void setCreate(MetadataCreate create) {
+		this.create = create;
+	}
 	public List<MetadataList> getLists() {
 		return lists;
 	}
@@ -99,38 +105,41 @@ public class MetadataSetV2 {
 		for(MetadataWidget widget : mdsOverride.getWidgets()){
 			if(widgets.contains(widget)){
 				widgets.remove(widget);
-				widgets.add(widget);
+				widgets.add(0,widget);
 			}
 			else{
-				widgets.add(widget);
+				widgets.add(0,widget);
 			}
 		}
 		for(MetadataTemplate template : mdsOverride.getTemplates()){
 			if(templates.contains(template)){
 				templates.remove(template);
-				templates.add(template);
+				templates.add(0,template);
 			}
 			else{
-				templates.add(template);
+				templates.add(0,template);
 			}
 		}
 		for(MetadataGroup group : mdsOverride.getGroups()){
 			if(groups.contains(group)){
 				groups.remove(group);
-				groups.add(group);
+				groups.add(0,group);
 			}
 			else{
-				groups.add(group);
+				groups.add(0,group);
 			}
 		}
 		for(MetadataList list : mdsOverride.getLists()){
 			if(lists.contains(list)){
 				lists.remove(list);
-				lists.add(list);
+				lists.add(0,list);
 			}
 			else{
-				lists.add(list);
+				lists.add(0,list);
 			}
+		}
+		if(mdsOverride.getCreate()!=null) {
+			setCreate(mdsOverride.getCreate());
 		}
 		queries.overrideWith(mdsOverride.getQueries());
 	}

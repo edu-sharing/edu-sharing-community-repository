@@ -1,31 +1,30 @@
-<div class="dialog darken">
-  <div class="card center-card card-action card-wide">
-    <div class="card-content">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
-      <div class="card-title">{{'NODE_REPORT.TITLE' | translate }}</div>
-      <form (ngSubmit)="report()">
-        <div *ngIf="_node">
-          <h4>{{'NODE_REPORT.REPORT_INFO' | translate:{name:(_node | nodeTitle) } }}</h4>
-          <div class="report">
-            <div *ngFor="let reason of reasons">
-              <input type="radio" [name]="reason" [id]="reason" [(ngModel)]="selectedReason" [value]="reason"><label [for]="reason">{{'NODE_REPORT.REASONS.'+reason | translate}}</label>
-            </div>
-          </div>
-          <div>
-            <label for="reportComment">{{'NODE_REPORT.COMMENT' | translate}}</label>
-            <textarea name="reportComment" id="reportComment" class="materialize-textarea" [(ngModel)]="comment" placeholder="{{'NODE_REPORT.COMMENT_PLACEHOLDER' | translate}}"></textarea>
-          </div>
-          <div>
-            <label for="reportMail">{{'NODE_REPORT.EMAIL' | translate}}</label>
-            <input type="email" [disabled]="!isGuest" name="reportMail" id="reportMail" [(ngModel)]="email" placeholder="{{'NODE_REPORT.EMAIL_PLACEHOLDER' | translate}}">
+<div class="dialog darken" [@fade]="this"></div>
+<div class="card center-card card-action card-wide" [@cardAnimation]="this">
+  <div class="card-content">
+    <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+    <div class="card-title">{{'NODE_REPORT.TITLE' | translate }}</div>
+    <form (ngSubmit)="report()">
+      <div *ngIf="_node">
+        <h4>{{'NODE_REPORT.REPORT_INFO' | translate:{name:(_node | nodeTitle) } }}</h4>
+        <div class="report">
+          <div *ngFor="let reason of reasons">
+            <input type="radio" [name]="reason" [id]="reason" [(ngModel)]="selectedReason" [value]="reason"><label [for]="reason">{{'NODE_REPORT.REASONS.'+reason | translate}}</label>
           </div>
         </div>
-      </form>
-    </div>
+        <div>
+          <label for="reportComment">{{'NODE_REPORT.COMMENT' | translate}}</label>
+          <textarea name="reportComment" id="reportComment" class="materialize-textarea" [(ngModel)]="comment" placeholder="{{'NODE_REPORT.COMMENT_PLACEHOLDER' | translate}}"></textarea>
+        </div>
+        <div>
+          <label for="reportMail">{{'NODE_REPORT.EMAIL' | translate}}</label>
+          <input type="email" [disabled]="!isGuest" name="reportMail" id="reportMail" [(ngModel)]="email" placeholder="{{'NODE_REPORT.EMAIL_PLACEHOLDER' | translate}}">
+        </div>
+      </div>
+    </form>
+  </div>
 
-    <div class="card-action">
-      <a class="waves-effect waves-light btn" (click)="report()">{{'NODE_REPORT.REPORT' | translate }}</a>
-      <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
-    </div>
+  <div class="card-action">
+    <a class="waves-effect waves-light btn" (click)="report()">{{'NODE_REPORT.REPORT' | translate }}</a>
+    <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
   </div>
 </div>

@@ -28,4 +28,8 @@ public class SearchServiceFactory {
 		
 		return searchService;
 	}
+
+	public static SearchService getLocalService() {
+		return new SearchServiceImpl(ApplicationInfoList.getHomeRepository().getAppId());
+	}
 }

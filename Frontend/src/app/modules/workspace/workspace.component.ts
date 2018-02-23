@@ -33,6 +33,8 @@ import {UIConstants} from "../../common/ui/ui-constants";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
 import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {Helper} from "../../common/helper";
+import {RestMdsService} from '../../common/rest/services/rest-mds.service';
+import {DateHelper} from '../../common/ui/DateHelper';
 
 @Component({
   selector: 'workspace-main',
@@ -76,15 +78,18 @@ export class WorkspaceMainComponent{
   private createConnectorType : Connector;
   private addFolderName : string;
 
+  public allowBinary = true;
   private filesToUpload : FileList;
   public globalProgress = false;
   public editNodeMetadata : Node;
+  public editNodeDeleteOnCancel = false;
   private createMds : string;
   private editNodeLicense : Node[];
   private editNodeAllowReplace : boolean;
   private nodeDisplayedVersion : string;
   private createAllowed : boolean;
   private currentFolder : any|Node;
+  private currentFolderRef : any|string;
   private user : IamUser;
   public searchQuery : string;
   public isSafe = false;
@@ -112,6 +117,7 @@ export class WorkspaceMainComponent{
   private mdsParentNode: Node;
   public showLtiTools=false;
   private oldParams: Params;
+  private selectedNodeTree: string;
   private hideDialog() : void{
     this.dialogTitle=null;
   }
@@ -212,6 +218,7 @@ export class WorkspaceMainComponent{
               private toolService : RestToolService,
               private session : SessionStorageService,
               private iam : RestIamService,
+              private mds : RestMdsService,
               private node : RestNodeService,
               private ui : UIService,
               private title : Title,
@@ -582,9 +589,8 @@ export class WorkspaceMainComponent{
 
   private pasteNode(position=0){
     let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-    if(this.searchQuery)
+    if(this.searchQuery || this.isRootFolder)
       return;
-
     if(!clip || !clip.nodes.length)
       return;
     if(clip.sourceNode && clip.sourceNode.ref.id==this.currentFolder.ref.id && !clip.copy){
@@ -605,6 +611,7 @@ export class WorkspaceMainComponent{
     }
     this.globalProgress=true;
     let target=this.currentFolder.ref.id;
+    console.log(this.currentFolder);
     let source=clip.nodes[position].ref.id;
     if(clip.copy)
       this.node.copyNode(target,source).subscribe(
@@ -866,21 +873,32 @@ export class WorkspaceMainComponent{
         return;
     }
     else{
+      this.selectedNodeTree=id;
       this.node.getNodeParents(id).subscribe((data : NodeList)=>{
         this.path = data.nodes.reverse();
+        this.selectedNodeTree=null;
       },(error:any)=>{
+        this.selectedNodeTree=null;
         this.path=[];
-        this.globalProgress=false;
       });
     }
 
     this.searchQuery=null;
     this.currentFolder=null;
-    this.isRootFolder=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
-    console.log("root "+this.isRootFolder+" "+id);
-    if(!this.isRootFolder) {
+    this.allowBinary=true;
+    let root=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
+    if(!root || id==RestConstants.USERHOME) {
+      this.isRootFolder=false;
       console.log("open path: "+id);
+      this.currentFolderRef=id;
       this.node.getNodeMetadata(id).subscribe((data: NodeWrapper) => {
+        this.mds.getSet(data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT).subscribe((mds:any)=>{
+          if(mds.create) {
+            this.allowBinary = !mds.create.onlyMetadata;
+            if(!this.allowBinary)
+              console.log("mds does not allow binary files, will switch mode");
+          }
+        });
         this.currentFolder = data.node;
         this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
         this.createAllowed = NodeHelper.getNodesRight([this.currentFolder], RestConstants.ACCESS_ADD_CHILDREN);
@@ -892,15 +910,26 @@ export class WorkspaceMainComponent{
       });
     }
     else{
-      console.log("open root path "+id);
+        this.isRootFolder=true;
+        console.log("open root path "+id);
       if(id==RestConstants.USERHOME){
         this.createAllowed = true;
       }
       this.currentFolder = {ref: {id: id}};
+      this.currentFolderRef = id;
       this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
       this.searchQuery = null;
     }
 
+  }
+  public createEmptyNode(){
+    this.globalProgress=true;
+    let prop=RestHelper.createNameProperty(DateHelper.formatDateByPattern(new Date().getTime(),"y-M-d"));
+    this.node.createNode(this.currentFolder.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe((data:NodeWrapper)=>{
+      this.editNodeMetadata=data.node;
+      this.editNodeDeleteOnCancel=true;
+      this.globalProgress=false;
+    });
   }
   private openNode(node : Node,useConnector=true) {
     if(!node.isDirectory){
@@ -937,19 +966,22 @@ export class WorkspaceMainComponent{
     this.openDirectory(id);
   }
 
-  private refresh() {
+  private refresh(refreshPath=true) {
     let search=this.searchQuery;
     let folder=this.currentFolder;
+    let ref=this.currentFolderRef;
     this.currentFolder=null;
+    this.currentFolderRef=null;
     this.searchQuery=null;
     this.selection=[];
     this.actionOptions=this.getOptions(this.selection,false);
     let path=this.path;
-    this.path=[null];
-    console.log(this.path);
+    if(refreshPath)
+      this.path=[null];
     setTimeout(()=>{
       this.path=path;
       this.currentFolder=folder;
+      this.currentFolderRef=ref;
       this.searchQuery=search;
     },10);
   }
@@ -973,10 +1005,13 @@ export class WorkspaceMainComponent{
   }
   private routeTo(root: string,node : string=null,search="") {
     console.log("update route "+root+" "+node);
-    this.router.navigate(["./"],{queryParams:{root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav},relativeTo:this.route})
+    let params:any={root:root,id:node?node:"",viewType:this.viewType,query:search,mainnav:this.mainnav};
+    if(this.reurl)
+        params.reurl=this.reurl;
+      this.router.navigate(["./"],{queryParams:params,relativeTo:this.route})
       .then((result:boolean)=>{
         if(!result){
-          this.refresh();
+          this.refresh(false);
         }
       });
   }
