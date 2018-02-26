@@ -779,9 +779,9 @@ export class WorkspaceMainComponent{
       if (collection && !this.isSafe)
         options.push(collection);
     }
-
+    let share:OptionItem;
     if (nodes && nodes.length == 1) {
-      let share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,(node: Node) => this.shareNode(node));
+      share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,(node: Node) => this.shareNode(node));
       if(share) {
         share.isEnabled = share.isEnabled && (
           (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
@@ -807,7 +807,7 @@ export class WorkspaceMainComponent{
       if(nodes && !nodes[0].isDirectory && !this.isSafe)
         options.push(contributor);
       let workflow=new OptionItem("WORKSPACE.OPTION.WORKFLOW","swap_calls",(node:Node)=>this.manageWorkflowNode(node));
-      workflow.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
+      workflow.isEnabled=share.isEnabled;
       if(nodes && !nodes[0].isDirectory && this.supportsWorkflow())
         options.push(workflow);
 
