@@ -766,9 +766,9 @@ export class WorkspaceMainComponent{
       if (!this.isSafe)
         options.push(collection);
     }
-
+    let share:OptionItem;
     if (nodes && nodes.length == 1) {
-      let share = new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", (node: Node) => this.shareNode(node));
+      share = new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", (node: Node) => this.shareNode(node));
       share.isSeperate = allFiles;
       share.showAsAction = true;
       share.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS) && (
@@ -797,7 +797,7 @@ export class WorkspaceMainComponent{
       if(nodes && !nodes[0].isDirectory && !this.isSafe)
         options.push(contributor);
       let workflow=new OptionItem("WORKSPACE.OPTION.WORKFLOW","swap_calls",(node:Node)=>this.manageWorkflowNode(node));
-      workflow.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
+      workflow.isEnabled=share.isEnabled;
       if(nodes && !nodes[0].isDirectory && this.supportsWorkflow())
         options.push(workflow);
 
