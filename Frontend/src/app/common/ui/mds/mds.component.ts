@@ -211,22 +211,6 @@ export class MdsComponent{
       this.onDone.emit(null);
     });
   }
-  private onAddWidget(){
-    let values:any=[];
-    for(let i=0;i<100;i++){
-      values[i]={id:'Test'+i,caption:'Test Caption '+i,disabled:Math.random()<0.2,parent:i>10 ? 'Test'+Math.round(Math.random()*100) : null};
-    }
-    /*
-    let data={widgets:[
-      {type:this.widgetType,label:this.widgetName,id:this.widgetName,values:values}
-    ]};*/
-    let data=this.mds;
-    this.mds.widgets[this.widgetName].widget=this.widgetType;
-    let html='<'+this.widgetName+'>';
-    this.currentWidgets=[];
-    this.setRenderedHtml(this.renderTemplate(html,data,null,null));
-    this.readValues(data,this.currentNode);
-  }
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
               private route : ActivatedRoute,
@@ -408,7 +392,6 @@ export class MdsComponent{
   }
 
   private scrollSmooth(id:string){
-    console.log(id);
     let pos=document.getElementById(id+'_header').offsetTop;
     UIHelper.scrollSmoothElement(pos,this.mdsScrollContainer.nativeElement,2);
   }
@@ -453,7 +436,6 @@ export class MdsComponent{
     if(!id)
       return;
     this.currentWidgets=[];
-
     // add the default widgets
     data.widgets.push({id:'preview'});
     data.widgets.push({id:'version'});
@@ -865,7 +847,6 @@ export class MdsComponent{
       }
       if(start<0)
         continue;
-      this.currentWidgets.push(widget);
       if(end==-1)
         end=html.indexOf('>',start);
 
@@ -878,6 +859,7 @@ export class MdsComponent{
       if(this.isExtendedWidget(widget))
         extended[0]=true;
       this.replaceVariables(widget);
+      this.currentWidgets.push(widget);
       let attr=html.substring(start+search.length,end);
       let widgetData=this.renderWidget(widget,attr,template,node);
       if(!widgetData) {
@@ -1048,7 +1030,6 @@ export class MdsComponent{
   private mdsUpdateSuggests(id:string,showMore=false){
     let list=document.getElementById(id+'_suggestions');
     let element:any=document.getElementById(id+'_suggestionsInput');
-    let dialog=document.getElementById(id+'_dialog');
     let elements=list.getElementsByTagName('a');
     let widget=this.getWidget(id);
     if(showMore){
@@ -1056,7 +1037,6 @@ export class MdsComponent{
     }
     elements.item(0).style.display='none';
     list.style.display='none';
-    dialog.style.display='none';
     let values=this.getValues([],false);
     let group=this._groupId;
     if(!group){
@@ -1073,7 +1053,6 @@ export class MdsComponent{
       list.className=list.className.replace('suggestionListAll','').trim();
 
       list.style.display='';
-      dialog.style.display='';
       let i=0;
       let moreCount=0;
       for(let value of data.values){
@@ -1091,7 +1070,6 @@ export class MdsComponent{
       }
       if(i==0){
         list.style.display='none';
-        dialog.style.display='none';
       }
       if(moreCount){
         list.innerHTML+='<a class="collection-item suggestionMoreItems" onclick="window.mdsComponentRef.component.mdsUpdateSuggests(\''+id+'\',true)">'+moreCount+' '+this.translate.instant('MORE_SELECTBOX')+'</a>';
@@ -1477,8 +1455,6 @@ export class MdsComponent{
       }
       if(condition.type=='TOOLPERMISSION'){
         let tp=this.connector.hasToolPermissionInstant(condition.value);
-        console.log(condition.value);
-        console.log(tp);
         if(tp==condition.negate){
           return null;
         }
@@ -1895,10 +1871,13 @@ export class MdsComponent{
   private addAuthorValue(properties: any) {
     if(document.getElementById(RestConstants.CCM_PROP_AUTHOR_FREETEXT) || document.getElementById(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR)) {
       //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_FREETEXT)
-      this.currentWidgets.push({id: RestConstants.CCM_PROP_AUTHOR_FREETEXT, type: 'textarea'});
-
+      if(Helper.indexOfObjectArray(this.currentWidgets,'id',RestConstants.CCM_PROP_AUTHOR_FREETEXT)==-1) {
+          this.currentWidgets.push({id: RestConstants.CCM_PROP_AUTHOR_FREETEXT, type: 'textarea'});
+      }
       //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_PERSON)
-      this.currentWidgets.push({id: RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, type: 'vcard'});
+      if(Helper.indexOfObjectArray(this.currentWidgets,'id',RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR)==-1) {
+          this.currentWidgets.push({id: RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, type: 'vcard'});
+      }
     }
   }
 
