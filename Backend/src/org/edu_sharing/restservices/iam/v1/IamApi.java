@@ -1,6 +1,8 @@
 package org.edu_sharing.restservices.iam.v1;
 
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -101,7 +103,8 @@ public class IamApi  {
 	    					global==null ? true : global,
 	    					skipCount!=null ? skipCount : 0,
 	    	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
-	    					new SortDefinition(CCConstants.NAMESPACE_CM,sortProperties,sortAscending)				
+	    					new SortDefinition(CCConstants.NAMESPACE_CM,sortProperties,sortAscending),
+	    					null
 	    			);
 
 	    	List<UserSimple> result = new ArrayList<UserSimple>();
@@ -646,7 +649,8 @@ public class IamApi  {
     	    					global==null ? true : global, 
     	    					skipCount!=null ? skipCount : 0,
     	    					maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
-    	    					new SortDefinition(sortProperties,sortAscending)				
+    	    					new SortDefinition(sortProperties,sortAscending),
+    	    					null
     	    			);
 
     	    	List<Group> result = new ArrayList<Group>();

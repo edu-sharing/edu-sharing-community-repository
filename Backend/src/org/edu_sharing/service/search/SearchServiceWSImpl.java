@@ -119,12 +119,6 @@ public class SearchServiceWSImpl implements SearchService {
 	}
 	
 	@Override
-	public SearchResult<String> searchAuthorities(AuthorityType type, String pattern, boolean globalSearch,
-			int skipCount, int maxValues, SortDefinition sort) {
-		return null;
-	}
-	
-	@Override
 	public SearchResult<String> searchGroupMembers(String groupName, String pattern, String authorityType,
 			int skipCount, int maxValues, SortDefinition sort) {
 		return null;
@@ -133,12 +127,6 @@ public class SearchServiceWSImpl implements SearchService {
 	@Override
 	public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort,boolean scoped)
 			throws Throwable {
-		return null;
-	}
-	
-	@Override
-	public SearchResult<String> searchUsers(String pattern, boolean globalSearch, int skipCount, int maxValues,
-			SortDefinition sort) {
 		return null;
 	}
 	
@@ -165,6 +153,20 @@ public class SearchServiceWSImpl implements SearchService {
 	@Override
 	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
 			SearchToken searchToken) throws Throwable {
+		return null;
+	}
+
+	@Override
+	public SearchResult<String> searchAuthorities(AuthorityType type, String _pattern, boolean globalSearch,
+			int _skipCount, int _maxValues, SortDefinition sort, Map<String, String> customProperties) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
+			SortDefinition sort, Map<String, String> customProperties) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

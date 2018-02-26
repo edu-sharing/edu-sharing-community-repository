@@ -326,7 +326,7 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
-			SortDefinition sort) {
+			SortDefinition sort,Map<String,String> customProperties) {
 
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
 
@@ -370,7 +370,7 @@ public class SearchServiceImpl implements SearchService {
 							return new SearchResult<String>(result, skipCount, peopleReq.getTotalResultCount());
 
 						} else {
-							return searchEduGroupContext(pattern, skipCount, maxValues, sort, true);
+							return searchAuthoritiesSolr(pattern, skipCount, maxValues, sort, AuthorityType.USER,false,customProperties);
 						}
 
 					}
@@ -380,7 +380,7 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResult<String> searchAuthorities(AuthorityType type, String _pattern, boolean globalSearch,
-			int _skipCount, int _maxValues, SortDefinition sort) {
+			int _skipCount, int _maxValues, SortDefinition sort,Map<String,String> customProperties) {
 		
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
 
@@ -401,9 +401,9 @@ public class SearchServiceImpl implements SearchService {
 							maxValues = 10;
 						}
 						
-						if (!globalSearch)
-							return searchEduGroupContext(pattern, skipCount, maxValues, sort,
-									type.equals(AuthorityType.USER) ? true : false);
+						return searchAuthoritiesSolr(pattern, skipCount, maxValues, sort,
+								type,globalSearch,customProperties);
+							/*
 						checkGlobalSearchPermission();
 						AuthorityService authorityService = serviceRegistry.getAuthorityService();
 						PagingRequest paging = new PagingRequest(skipCount, maxValues);
@@ -420,6 +420,7 @@ public class SearchServiceImpl implements SearchService {
 							// No results found
 						}
 						return new SearchResult<String>(result, skipCount, groupReq.getTotalResultCount());
+						*/
 					}
 				}, true);
 	}
@@ -485,48 +486,50 @@ public class SearchServiceImpl implements SearchService {
 		}
 	}
 
-	/**
-	 * @param skipCount
-	 * @param maxValues
-	 * @param result
-	 * @param users true => users, false => groups
-	 * @return
-	 * @throws Throwable
-	 */
-	private SearchResult<String> searchEduGroupContext(String pattern, int skipCount, int maxValues,
-			SortDefinition sort, boolean users) throws Throwable {
+
+	private SearchResult<String> searchAuthoritiesSolr(String pattern, int skipCount, int maxValues,
+			SortDefinition sort, AuthorityType authorityType,boolean globalContext,Map<String,String> customProperties) throws Throwable {
 		List<String> result = new ArrayList<>();
 		NodeService nodeService = serviceRegistry.getNodeService();
 		SearchToken token = new SearchToken();
 		String query = "TYPE:cm\\:";
-		if (users)
+		if (authorityType.equals(AuthorityType.USER))
 			query += "person";
 		else
 			query += "authorityContainer";
+		if(customProperties!=null){
+			for(Map.Entry<String, String> entry : customProperties.entrySet()){
+				query+=" AND @"+entry.getKey().replace(":", "\\:")+":\""+QueryParser.escape(entry.getValue())+"\"";
+			}
+		}
 		query += " AND (@cm\\:authorityName:\"*" + QueryParser.escape(pattern) + "*\" "+
 				 "OR @cm\\:userName:\"*" + QueryParser.escape(pattern) + "*\" "+
 				 "OR @cm\\:firstName:\"*" + QueryParser.escape(pattern) + "*\" "+
 				 "OR @cm\\:lastName:\"*" + QueryParser.escape(pattern) + "*\" "+
 				 "OR @cm\\:email:\"*" + QueryParser.escape(pattern) + "*\")";
 
-		List<EduGroup> organisations = getAllOrganizations(true).getData();
-
-		if (organisations != null && organisations.size() > 0) {
-			query += " AND (";
-
-			int i = 0;
-			for (EduGroup entry : organisations) {
-				if (i > 0)
-					query += " OR ";
-				String ref = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE + "/" + entry.getGroupId();
-				// query+="PARENT:"+QueryParser.escape(ref);
-				query += "PATH:\""
-						+ QueryParser.escape("sys:system/sys:authorities/cm:" + ISO9075.encode(entry.getGroupname()))
-						+ "//.\"";
-				query += " OR ID:" + QueryParser.escape(ref);
-				i++;
+		if(globalContext){
+			checkGlobalSearchPermission();
+		}
+		else{
+			List<EduGroup> organisations = getAllOrganizations(true).getData();
+			if (organisations != null && organisations.size() > 0) {
+				query += " AND (";
+	
+				int i = 0;
+				for (EduGroup entry : organisations) {
+					if (i > 0)
+						query += " OR ";
+					String ref = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE + "/" + entry.getGroupId();
+					// query+="PARENT:"+QueryParser.escape(ref);
+					query += "PATH:\""
+							+ QueryParser.escape("sys:system/sys:authorities/cm:" + ISO9075.encode(entry.getGroupname()))
+							+ "//.\"";
+					query += " OR ID:" + QueryParser.escape(ref);
+					i++;
+				}
+				query += ")";
 			}
-			query += ")";
 		}
 		token.setLuceneString(query);
 		token.setFrom(skipCount);

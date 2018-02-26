@@ -30,10 +30,6 @@ public interface SearchService {
 		AND,
 		OR
 	};
-	SearchResult<String> searchAuthorities(AuthorityType type, String pattern,boolean globalSearch, int skipCount, int maxValues,
-			SortDefinition sort);
-
-
 
 	public SearchResultNodeRef search(MdsDao mdsDao, String query, List<MdsQueryCriteria> criterias, SearchToken token) throws Throwable;
 
@@ -45,9 +41,6 @@ public interface SearchService {
 	List<NodeRef> getFilesSharedToMe() throws Exception;
 	
 	List<NodeRef> getWorkflowReceive(String fullyAuthenticatedUser);
-
-	SearchResult<String> searchUsers(String pattern, boolean globalSearch, int skipCount, int maxValues,
-			SortDefinition sort);
 
 	SearchResult<String> searchGroupMembers(String groupName, String pattern,
 			String authorityType, int skipCount, int maxValues, SortDefinition sort);
@@ -75,4 +68,12 @@ public interface SearchService {
  	 * @throws InsufficientPermissionException 
       */
 	SearchResult<String> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults) throws InsufficientPermissionException;
+
+
+
+	SearchResult<String> searchAuthorities(AuthorityType type, String _pattern, boolean globalSearch, int _skipCount,
+			int _maxValues, SortDefinition sort, Map<String, String> customProperties);
+
+	SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
+			SortDefinition sort, Map<String, String> customProperties);
 }

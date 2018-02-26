@@ -18,12 +18,6 @@ import org.edu_sharing.service.search.model.SortDefinition;
 public class SearchServiceAdapter implements SearchService {
 
 	@Override
-	public SearchResult<String> searchAuthorities(AuthorityType type, String pattern, boolean globalSearch,
-			int skipCount, int maxValues, SortDefinition sort) {
-		return null;
-	}
-
-	@Override
 	public SearchResultNodeRef search(MdsDao mdsDao, String query, List<MdsQueryCriteria> criterias, SearchToken token)
 			throws Throwable {
 		return null;
@@ -41,12 +35,6 @@ public class SearchServiceAdapter implements SearchService {
 
 	@Override
 	public List<NodeRef> getFilesSharedToMe() throws Exception {
-		return null;
-	}
-
-	@Override
-	public SearchResult<String> searchUsers(String pattern, boolean globalSearch, int skipCount, int maxValues,
-			SortDefinition sort) {
 		return null;
 	}
 
@@ -85,6 +73,20 @@ public class SearchServiceAdapter implements SearchService {
 	@Override
 	public SearchResult<String> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults)
 			throws InsufficientPermissionException {
+		return null;
+	}
+
+	@Override
+	public SearchResult<String> searchAuthorities(AuthorityType type, String _pattern, boolean globalSearch,
+			int _skipCount, int _maxValues, SortDefinition sort, Map<String, String> customProperties) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
+			SortDefinition sort, Map<String, String> customProperties) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 	
