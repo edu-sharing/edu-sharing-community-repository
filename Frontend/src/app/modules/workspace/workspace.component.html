@@ -127,7 +127,7 @@
     <a class="collection-item" [class.rootSelected]="root=='SHARED_FILES'" (click)="showSelectRoot=false;setRoot('SHARED_FILES')"><i class="material-icons">group</i> {{ 'WORKSPACE.SHARED_FILES' | translate}}</a>
     <a *ngIf="!isSafe" class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i class="material-icons">share</i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
     <a *ngIf="!isSafe" class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i class="material-icons">send</i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
-    <a *ngIf="!isSafe && supportsWorkflow()" class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i class="material-icons">inbox</i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
+    <a *ngIf="supportsWorkflow()" class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i class="material-icons">inbox</i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i class="material-icons">delete</i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
 
