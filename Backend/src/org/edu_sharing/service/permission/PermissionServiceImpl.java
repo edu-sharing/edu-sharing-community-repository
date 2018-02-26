@@ -983,6 +983,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			if(!hasToolPermission){
 				return null;
 			}
+			addGlobalAuthoritySearchQuery(searchQuery);
 		}else{
 			
 			Set<String> groupsOfUser = authorityService.getAuthorities();
