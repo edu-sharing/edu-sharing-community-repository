@@ -552,9 +552,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	private void checkCanManagePermissions(String nodeId,ACE[] aces) throws Exception{
-		if(NodeServiceInterceptor.getEduSharingScope()!=null){
-			throw new Exception("Setting Permissions in scope is not allowed");
-		}
 		boolean hasUsers=false,hasAll=false;
 		if(aces!=null){
 			for (ACE ace : aces) {
@@ -568,6 +565,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 		boolean shared=isSharedNode(nodeId);
+		if(!shared && NodeServiceInterceptor.getEduSharingScope()!=null){
+			throw new Exception("Setting Permissions for private files in scope is not allowed");
+		}
+		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE) && NodeServiceInterceptor.getEduSharingScope()!=null){
+			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE);
+		}
 		if(!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES) && hasAll){
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
 		}
