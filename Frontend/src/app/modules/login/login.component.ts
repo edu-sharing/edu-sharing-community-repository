@@ -168,7 +168,7 @@ export class LoginComponent  implements OnInit{
       window.location.assign(this.next);
     }
     else {
-      UIHelper.goToDefaultLocation(this.router);
+      UIHelper.goToDefaultLocation(this.router,this.configService);
     }
   }
 }
