@@ -188,7 +188,7 @@ export class WorkspaceWorkflowComponent  {
     this.nodeService.getNodePermissions(this._nodeId).subscribe((data:NodePermissions)=>{
       let permission=new Permission();
       permission.authority={authorityName:authority,authorityType:RestConstants.AUTHORITY_TYPE_USER};
-      permission.permissions=[RestConstants.PERMISSION_COLLABORATOR];
+      permission.permissions=[RestConstants.PERMISSION_COORDINATOR];
       data.permissions.localPermissions.permissions.push(permission);
       let permissions=RestHelper.copyAndCleanPermissions(data.permissions.localPermissions.permissions,data.permissions.localPermissions.inherited);
       this.nodeService.setNodePermissions(this._nodeId,permissions,false).subscribe(()=>{
