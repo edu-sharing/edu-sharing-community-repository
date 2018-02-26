@@ -129,21 +129,23 @@ export class RestConnectorService {
   }
   public isLoggedIn() : Observable<LoginResult>{
     let url=this.createUrl("authentication/:version/validateSession",null);
-    return new Observable<LoginResult>((observer : Observer<LoginResult>)=>{
-      this.get(url,this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
-        (data:LoginResult)=>{
-          this.toolPermissions=data.toolPermissions;
-          this.event.broadcastEvent(FrameEventsService.EVENT_UPDATE_LOGIN_STATE,data);
-          this.storage.set(TemporaryStorageService.SESSION_INFO,data);
-          this._logoutTimeout=data.sessionTimeout;
-          observer.next(data);
-          observer.complete();
-        },
-        (error:any)=>{
-          observer.error(error);
-          observer.complete();
-        }
-      );
+    return new Observable<LoginResult>((observer : Observer<LoginResult>)=> {
+        this.locator.locateApi().subscribe(() => {
+            this.get(url, this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
+                (data: LoginResult) => {
+                    this.toolPermissions = data.toolPermissions;
+                    this.event.broadcastEvent(FrameEventsService.EVENT_UPDATE_LOGIN_STATE, data);
+                    this.storage.set(TemporaryStorageService.SESSION_INFO, data);
+                    this._logoutTimeout = data.sessionTimeout;
+                    observer.next(data);
+                    observer.complete();
+                },
+                (error: any) => {
+                    observer.error(error);
+                    observer.complete();
+                }
+            );
+        });
     });
   }
   public hasAccessToScope(scope:string) : Observable<AccessScope>{

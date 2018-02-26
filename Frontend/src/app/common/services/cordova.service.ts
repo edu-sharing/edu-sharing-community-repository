@@ -5,6 +5,7 @@ import { Observable, Observer } from "rxjs";
 import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
 
 import { OAuthResult, LoginResult } from "../rest/data-object";
+import {Router} from '@angular/router';
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -38,7 +39,8 @@ export class CordovaService {
    * CONSTRUCTOR
    */
   constructor(
-    private http : Http
+    private http : Http,
+    private router : Router
   ) {
     // CORDOVA EVENT: Device is Ready (on App StartUp)
     let whenDeviceIsReady = () => {
@@ -83,7 +85,7 @@ export class CordovaService {
     // just for simulation on forced cordova mode
     if (this.forceCordovaMode) {
       console.log("SIMULATED deviceready event in FORCED CORDOVA MODE (just use during development)");
-      setTimeout(whenDeviceIsReady,3000);
+      setTimeout(whenDeviceIsReady,500+Math.random()*1000);
     }
 
   }
@@ -130,8 +132,12 @@ export class CordovaService {
    */
   loadStorage(){
       this.getPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,(data:string)=>{
-          this.oauth=JSON.parse(data);
+          this._oauth=JSON.parse(data);
           this.getPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,(data:string)=>{
+            console.log(data);
+            if(data==null){
+                this.goToAppStart();
+            }
               this.endpointUrl=data;
           });
       });
@@ -361,10 +367,15 @@ export class CordovaService {
   public reinitStatus(){
     if(this.reiniting)
       return;
+    console.log("cordova: refresh oAuth");
     this.reiniting=true;
       this.refreshOAuth(this.oauth).subscribe(()=>{
           this.reiniting=false;
           window.location.reload();
+      },(error:any)=>{
+        this.clearPermanentStorage();
+        console.warn("cordova: invalid oauth, go back to server selection");
+        this.goToAppStart();
       });
   }
   // oAuth refresh tokens
@@ -385,7 +396,7 @@ export class CordovaService {
 
           // set local expire ts on token
           this.oauth=oauthNew;
-
+          console.log(oauthNew);
           observer.next(this.oauth);
           observer.complete();
 
@@ -439,4 +450,8 @@ export class CordovaService {
     });
 
   }
+
+    private goToAppStart() {
+        this.router.navigate(['']);
+    }
 }
