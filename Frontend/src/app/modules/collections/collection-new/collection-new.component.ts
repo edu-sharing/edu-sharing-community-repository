@@ -130,6 +130,9 @@ export class CollectionNewComponent {
                     this.newCollectionType=this.getTypeForCollection(this.currentCollection);
                     this.hasCustomScope=false;
                     this.newCollectionStep = this.STEP_GENERAL;
+                    if(this.currentCollection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
+                        this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+                    }
                     this.updateAvailableSteps();
                     this.isLoading=false;
                   });
