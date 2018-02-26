@@ -334,7 +334,7 @@ export class SearchComponent {
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
-      parameters:parameters ? JSON.stringify(parameters) : null,
+      parameters:parameters && Object.keys(parameters) ? JSON.stringify(parameters) : null,
       mds:mds,repository:repository,
       mdsExtended:this.mdsExtended,
       reurl:this.searchService.reurl}});
@@ -697,6 +697,9 @@ export class SearchComponent {
     });
   }
   private onMdsReady(mds:any=null){
+      console.log("mds ready");
+      console.log(this.currentValues);
+      console.log(this.mdsRef.getValues());
     this.currentMdsSet=mds;
     this.updateColumns();
     if (this.searchService.searchResult.length < 1) {
@@ -957,7 +960,7 @@ export class SearchComponent {
           this.updateRepositoryOrder();
         }
         console.log(this.repositories);
-        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
+        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories)==null){
           let use=this.config.instant("availableRepositories");
           console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+use);
           console.log(this.repositories);

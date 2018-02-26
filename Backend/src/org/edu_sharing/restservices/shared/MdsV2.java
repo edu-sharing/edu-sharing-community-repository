@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
+import org.edu_sharing.metadataset.v2.MetadataCreate;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.restservices.mds.v1.model.GroupV2;
 import org.edu_sharing.restservices.mds.v1.model.ListV2;
@@ -16,7 +17,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @ApiModel(description = "")
 public class MdsV2 {
 		
+	public static class Create {
+		private boolean onlyMetadata;
+
+		public boolean isOnlyMetadata() {
+			return onlyMetadata;
+		}
+
+		public void setOnlyMetadata(boolean onlyMetadata) {
+			this.onlyMetadata = onlyMetadata;
+		}
+		public Create(MetadataCreate create) {
+			this.onlyMetadata=create.isOnlyMetadata();
+		}
+	}
 	private String name = null;
+	private Create create = null;
 	private List<WidgetV2> widgets = null;
 	private List<ViewV2> views;
 	private List<GroupV2> groups;
@@ -29,6 +45,13 @@ public class MdsV2 {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	@JsonProperty
+	public Create getCreate() {
+		return create;
+	}
+	public void setCreate(Create create) {
+		this.create = create;
 	}
 	@JsonProperty("widgets")
 	public List<WidgetV2> getWidgets() {

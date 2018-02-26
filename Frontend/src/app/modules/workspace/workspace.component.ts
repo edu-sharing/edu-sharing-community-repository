@@ -33,6 +33,8 @@ import {UIConstants} from "../../common/ui/ui-constants";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
 import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {Helper} from "../../common/helper";
+import {RestMdsService} from '../../common/rest/services/rest-mds.service';
+import {DateHelper} from '../../common/ui/DateHelper';
 
 @Component({
   selector: 'workspace-main',
@@ -76,9 +78,11 @@ export class WorkspaceMainComponent{
   private createConnectorType : Connector;
   private addFolderName : string;
 
+  public allowBinary = true;
   private filesToUpload : FileList;
   public globalProgress = false;
   public editNodeMetadata : Node;
+  public editNodeDeleteOnCancel = false;
   private createMds : string;
   private editNodeLicense : Node[];
   private editNodeAllowReplace : boolean;
@@ -214,6 +218,7 @@ export class WorkspaceMainComponent{
               private toolService : RestToolService,
               private session : SessionStorageService,
               private iam : RestIamService,
+              private mds : RestMdsService,
               private node : RestNodeService,
               private ui : UIService,
               private title : Title,
@@ -774,9 +779,9 @@ export class WorkspaceMainComponent{
       if (collection && !this.isSafe)
         options.push(collection);
     }
-
+    let share:OptionItem;
     if (nodes && nodes.length == 1) {
-      let share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,(node: Node) => this.shareNode(node));
+      share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,(node: Node) => this.shareNode(node));
       if(share) {
         share.isEnabled = share.isEnabled && (
           (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
@@ -802,7 +807,7 @@ export class WorkspaceMainComponent{
       if(nodes && !nodes[0].isDirectory && !this.isSafe)
         options.push(contributor);
       let workflow=new OptionItem("WORKSPACE.OPTION.WORKFLOW","swap_calls",(node:Node)=>this.manageWorkflowNode(node));
-      workflow.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
+      workflow.isEnabled=share.isEnabled;
       if(nodes && !nodes[0].isDirectory && this.supportsWorkflow())
         options.push(workflow);
 
@@ -880,12 +885,20 @@ export class WorkspaceMainComponent{
 
     this.searchQuery=null;
     this.currentFolder=null;
+    this.allowBinary=true;
     let root=WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id)!=-1;
     if(!root || id==RestConstants.USERHOME) {
       this.isRootFolder=false;
       console.log("open path: "+id);
       this.currentFolderRef=id;
       this.node.getNodeMetadata(id).subscribe((data: NodeWrapper) => {
+        this.mds.getSet(data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT).subscribe((mds:any)=>{
+          if(mds.create) {
+            this.allowBinary = !mds.create.onlyMetadata;
+            if(!this.allowBinary)
+              console.log("mds does not allow binary files, will switch mode");
+          }
+        });
         this.currentFolder = data.node;
         this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
         this.createAllowed = NodeHelper.getNodesRight([this.currentFolder], RestConstants.ACCESS_ADD_CHILDREN);
@@ -908,6 +921,15 @@ export class WorkspaceMainComponent{
       this.searchQuery = null;
     }
 
+  }
+  public createEmptyNode(){
+    this.globalProgress=true;
+    let prop=RestHelper.createNameProperty(DateHelper.formatDateByPattern(new Date().getTime(),"y-M-d"));
+    this.node.createNode(this.currentFolder.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe((data:NodeWrapper)=>{
+      this.editNodeMetadata=data.node;
+      this.editNodeDeleteOnCancel=true;
+      this.globalProgress=false;
+    });
   }
   private openNode(node : Node,useConnector=true) {
     if(!node.isDirectory){

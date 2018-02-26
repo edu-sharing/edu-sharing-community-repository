@@ -89,6 +89,7 @@ public class MdsDaoV2 {
     	MdsV2 data = new MdsV2();
     	
     	data.setName(mds.getName());
+    	data.setCreate(mds.getCreate()!=null ? new MdsV2.Create(mds.getCreate()) : null);
     	data.setWidgets(getWidgets());
     	data.setViews(getViews());
     	data.setGroups(getGroups());
