@@ -728,7 +728,6 @@ public class SearchServiceImpl implements SearchService {
 	}
 	@Override
 	public List<NodeRef> getWorkflowReceive(String user) {
-		org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry.getSearchService();
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
