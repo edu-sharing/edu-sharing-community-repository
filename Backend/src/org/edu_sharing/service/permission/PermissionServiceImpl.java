@@ -768,7 +768,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			return;
 		try {
 		// fetch all groups which are allowed to acces confidential and 
-		String nodeId=tps.getToolPermissionNodeId(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
+		String nodeId=toolPermission.getToolPermissionNodeId(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
 		StringBuffer groupPathQuery=new StringBuffer();
 		// user may not has ReadPermissions on ToolPermission, so fetch as admin
 		ACL permissions=AuthenticationUtil.runAsSystem(new RunAsWork<ACL>() {
