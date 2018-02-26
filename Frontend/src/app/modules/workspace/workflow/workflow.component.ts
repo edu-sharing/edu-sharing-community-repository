@@ -192,7 +192,7 @@ export class WorkspaceWorkflowComponent  {
     this.nodeService.getNodePermissions(this._nodeId).subscribe((data:NodePermissions)=>{
       let permission=new Permission();
       permission.authority={authorityName:authority,authorityType:RestConstants.AUTHORITY_TYPE_USER};
-      permission.permissions=[RestConstants.PERMISSION_COLLABORATOR];
+      permission.permissions=[RestConstants.PERMISSION_COORDINATOR];
       data.permissions.localPermissions.permissions.push(permission);
       this.nodeService.setNodePermissions(this._nodeId,data.permissions.localPermissions,false).subscribe(()=>{
         this.saveWorkflow();
