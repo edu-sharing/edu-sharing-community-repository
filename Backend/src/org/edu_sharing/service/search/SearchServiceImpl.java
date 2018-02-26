@@ -404,8 +404,8 @@ public class SearchServiceImpl implements SearchService {
 						//if (!globalSearch)
 							return searchAuthoritiesSolr(pattern, skipCount, maxValues, sort,
 									type,globalSearch,customProperties);
-								
-						/*	
+
+						/*
 						checkGlobalSearchPermission();
 						AuthorityService authorityService = serviceRegistry.getAuthorityService();
 						PagingRequest paging = new PagingRequest(skipCount, maxValues);
@@ -626,7 +626,7 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public SearchToken getLastSearchToken() throws Throwable {
 		return (SearchToken) org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKEN);
-		
+
 	}
 	public SearchResultNodeRef search(SearchToken searchToken) {
 		return search(searchToken, true);
@@ -733,7 +733,6 @@ public class SearchServiceImpl implements SearchService {
 	}
 	@Override
 	public List<NodeRef> getWorkflowReceive(String user) {
-		org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry.getSearchService();
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
