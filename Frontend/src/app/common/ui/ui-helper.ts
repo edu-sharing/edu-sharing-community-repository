@@ -268,4 +268,8 @@ export class UIHelper{
             }
         },16);
     }
+
+    static goToDefaultLocation(router: Router,configService : ConfigurationService) {
+        return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")]);
+    }
 }

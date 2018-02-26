@@ -454,4 +454,8 @@ export class CordovaService {
     private goToAppStart() {
         this.router.navigate(['']);
     }
+
+    hasValidConfig() {
+        return this._oauth && this.endpointUrl;
+    }
 }

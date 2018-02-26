@@ -19,6 +19,7 @@ import {ConfigurationService} from "../common/services/configuration.service";
 import {AdminComponent} from "../modules/admin/admin.component";
 import {MessagesComponent} from "../modules/messages/messages.component";
 import {UIConstants} from "../common/ui/ui-constants";
+import {StartupComponent} from '../modules/startup/startup.component';
 
 
 
@@ -70,7 +71,8 @@ export class RouterComponent {
 // Due to ahead of time, we need to create all routes manuall
 export var ROUTES=[
   // global
-    { path: '', component: LoginAppComponent },
+    { path: '', component: StartupComponent },
+    { path: 'app', component: LoginAppComponent },
     { path: UIConstants.ROUTER_PREFIX+'test/mds',component: MdsTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'test/rest',component: RestTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node', component: NodeRenderComponent},

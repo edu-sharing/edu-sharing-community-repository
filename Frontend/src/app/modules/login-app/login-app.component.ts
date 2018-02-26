@@ -8,6 +8,8 @@ import { Router, Route } from "@angular/router";
 import { OAuthResult, LoginResult, AccessScope } from "../../common/rest/data-object";
 import { UIConstants } from "../../common/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
+import {ConfigurationService} from '../../common/services/configuration.service';
+import {UIHelper} from '../../common/ui/ui-helper';
 
 // possible states this UI component can be in
 enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2};
@@ -19,7 +21,7 @@ enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2};
 })
 export class LoginAppComponent  implements OnInit{
 
-  private state:StateUI = StateUI.LOGIN;
+  private state:StateUI = StateUI.SERVERLIST;
 
   public isLoading=true;
   private username="";
@@ -29,7 +31,8 @@ export class LoginAppComponent  implements OnInit{
   constructor(
     private toast:Toast,
     private router:Router,
-    private cordova: CordovaService
+    private cordova: CordovaService,
+    private config : ConfigurationService
   ){
 
     this.isLoading=true;
@@ -41,11 +44,15 @@ export class LoginAppComponent  implements OnInit{
 
       /*
        * APP Start Setup
-       */ 
+       */
 
       // 1. Wait until Cordova is Ready
       this.cordova.setDeviceReadyCallback(()=>{
-
+        // app startup, cordova has valid data ? -> go to login from desktop and decide what to do
+        if(this.cordova.hasValidConfig()){
+            UIHelper.goToDefaultLocation(this.router,this.config);
+            return;
+        }
         // 2. Check if server is already set
         // SET AND TEST API URL BY CORDOVA SERVICE - later make select dialog
         this.cordova.setServerURL("http://localhost:8080/edu-sharing/rest/", false).subscribe(

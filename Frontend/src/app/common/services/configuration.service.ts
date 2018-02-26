@@ -14,7 +14,7 @@ export class ConfigurationService {
   private data : any=null;
 
   constructor(private http : Http,private toast:Toast,private locator : RestLocatorService) {
-    this.getAll().subscribe(()=>{});
+    //this.getAll().subscribe(()=>{});
   }
   public getLocator(){
     return this.locator;

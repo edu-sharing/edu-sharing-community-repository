@@ -168,7 +168,7 @@ export class LoginComponent  implements OnInit{
       window.location.assign(this.next);
     }
     else {
-      this.router.navigate([UIConstants.ROUTER_PREFIX + this.configService.instant("loginDefaultLocation","workspace")]);
+      UIHelper.goToDefaultLocation(this.router);
     }
   }
 }
