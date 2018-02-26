@@ -112,7 +112,7 @@ export class WorkspaceWorkflowComponent  {
     let receivers=this.status.hasReceiver ? this.receivers : [];
     if(receivers.length){
       this.nodeService.getNodePermissionsForUser(this._nodeId,receivers[0].authorityName).subscribe((data:string[])=>{
-        if(data.indexOf(RestConstants.PERMISSION_COLLABORATOR)==-1 && data.indexOf(RestConstants.PERMISSION_COORDINATOR)==-1){
+        if(data.indexOf(RestConstants.PERMISSION_COORDINATOR)==-1){
           this.dialogTitle='WORKSPACE.WORKFLOW.USER_NO_PERMISSION';
           this.dialogMessage='WORKSPACE.WORKFLOW.USER_NO_PERMISSION_INFO';
           this.dialogMessageParameters={user:new AuthorityNamePipe().transform(receivers[0],null)};
