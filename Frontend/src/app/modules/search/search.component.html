@@ -15,6 +15,7 @@
   <file-chooser *ngIf="addNodesToCollection"
                 [collections]="true"
                 [isCancelable]="true"
+                [writeRequired]="true"
                 [title]="'WORKSPACE.SELECT_COLLECTION'"
                 (onCancel)="addNodesToCollection=null"
                 (onChoose)="addToCollectionList($event)"
