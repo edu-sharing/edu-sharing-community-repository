@@ -14,7 +14,7 @@ import {RestHelper} from "../../../common/rest/rest-helper";
 import {GwtInterfaceService} from "../../../common/services/gwt-interface.service";
 import {Toast} from "../../../common/ui/toast";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {Group, IamGroups, IamUser, NodeRef, Permission} from "../../../common/rest/data-object";
+import {Group, IamGroups, IamUser, LoginResult, NodeRef, Permission} from '../../../common/rest/data-object';
 import {User} from "../../../common/rest/data-object";
 import {LocalPermissions} from "../../../common/rest/data-object";
 import {Collection} from "../../../common/rest/data-object";
@@ -104,53 +104,59 @@ export class CollectionNewComponent {
         private config : ConfigurationService,
         private translationService:TranslateService) {
         Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
-          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>this.canInvite=has);
-          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has)=>this.shareToAll=has);
-          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL).subscribe((has)=>this.createEditorial=has);
-          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM).subscribe((has)=>this.createCurriculum=has);
-          this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
-          this.route.queryParams.subscribe(params => {
-            this.mainnav=params['mainnav']!='false';
-          });
-          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
-            this.editorialGroups=data.groups;
-          });
-          this.route.params.subscribe(params => {
-            // get mode from route and validate input data
-            let mode = params['mode'];
-            let id = params['id'];
-            if (mode=="edit") {
-              this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
-                this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
-                  this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
-                    this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
-                    this.editId=id;
-                    this.currentCollection=data.collection;
-                    this.properties=node.node.properties;
-                    this.newCollectionType=this.getTypeForCollection(this.currentCollection);
-                    this.hasCustomScope=false;
-                    this.newCollectionStep = this.STEP_GENERAL;
-                    if(this.currentCollection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
-                        this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
-                    }
-                    this.updateAvailableSteps();
-                    this.isLoading=false;
+          this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+            if(data.statusCode!=RestConstants.STATUS_CODE_OK){
+              this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"]);
+              return;
+            }
+            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>this.canInvite=has);
+            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has)=>this.shareToAll=has);
+            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL).subscribe((has)=>this.createEditorial=has);
+            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM).subscribe((has)=>this.createCurriculum=has);
+            this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
+            this.route.queryParams.subscribe(params => {
+              this.mainnav=params['mainnav']!='false';
+            });
+            this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
+              this.editorialGroups=data.groups;
+            });
+            this.route.params.subscribe(params => {
+              // get mode from route and validate input data
+              let mode = params['mode'];
+              let id = params['id'];
+              if (mode=="edit") {
+                this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
+                  this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
+                    this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
+                      this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
+                      this.editId=id;
+                      this.currentCollection=data.collection;
+                      this.properties=node.node.properties;
+                      this.newCollectionType=this.getTypeForCollection(this.currentCollection);
+                      this.hasCustomScope=false;
+                      this.newCollectionStep = this.STEP_GENERAL;
+                      if(this.currentCollection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
+                          this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+                      }
+                      this.updateAvailableSteps();
+                      this.isLoading=false;
+                    });
                   });
                 });
-              });
-            } else {
-              if(id==RestConstants.ROOT){
-                this.setParent(id,null);
-                return;
+              } else {
+                if(id==RestConstants.ROOT){
+                  this.setParent(id,null);
+                  return;
+                }
+                this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
+                  this.setParent(id,data.collection);
+                },(error:any)=>{
+                  this.setParent(id,null);
+                });
               }
-              this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
-                this.setParent(id,data.collection);
-              },(error:any)=>{
-                this.setParent(id,null);
-              });
-            }
-          });
+            });
 
+          });
         });
         // subscribe to paramter
 
