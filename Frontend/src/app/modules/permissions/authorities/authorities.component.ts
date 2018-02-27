@@ -146,23 +146,23 @@ export class PermissionsAuthoritiesComponent {
     return options;
   }
 
-  private getColumns(mode : string,onlyFirst=false){
+  private getColumns(mode : string,fromDialog=false){
     let columns : ListItem[]=[];
     if(mode=='USER'){
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_NAME));
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_FIRSTNAME));
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_LASTNAME));
-      columns.push(new ListItem(mode, RestConstants.AUTHORITY_EMAIL));
+      if(!fromDialog)
+        columns.push(new ListItem(mode, RestConstants.AUTHORITY_EMAIL));
     }
     else if(mode=='GROUP'){
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_DISPLAYNAME));
-      columns.push(new ListItem(mode, RestConstants.AUTHORITY_GROUPTYPE));
+      if(!fromDialog)
+        columns.push(new ListItem(mode, RestConstants.AUTHORITY_GROUPTYPE));
     }
     else {
       columns.push(new ListItem(mode, RestConstants.AUTHORITY_DISPLAYNAME));
     }
-    if(onlyFirst)
-      return [columns[0]];
     return columns;
   }
   constructor(private toast: Toast,
