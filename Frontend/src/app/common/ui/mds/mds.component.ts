@@ -1104,7 +1104,7 @@ export class MdsComponent{
                 }
                 " onclick="
                 document.getElementById('` + id + `_suggestions').style.display='none';
-                document.getElementById('` + id + `_dialog').style.display='none';`;
+                window.mdsComponentRef.component.currentWidgetSuggestion=null;`;
 
     if(singleValue){
       html+=`   document.getElementById('` + id + `').value=this.getAttribute('data-caption');
