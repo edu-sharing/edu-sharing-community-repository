@@ -188,7 +188,7 @@
       "NO_COMMENT":"Bitte geben Sie einen Kommentar für diesen Vorgang an",
       "NO_HISTORY":"Es wurden noch keine Workflow-Einträge vorgenommen",
       "USER_NO_PERMISSION":"Zuständige(n) als Mitarbeiter einladen",
-      "USER_NO_PERMISSION_INFO":"Die von Ihnen gewählte zuständige Person {{user}} hat aktuell keine Berechtigung das Objekt zu bearbeiten. Möchten Sie sie als Mitarbeiter zulassen?",
+      "USER_NO_PERMISSION_INFO":"Die von Ihnen gewählte zuständige Person {{user}} hat aktuell keine Berechtigung das Objekt zu bearbeiten. Möchten Sie sie als Koordinator zulassen?\n\nKoordinatoren dürfen das Material bearbeiten und weiteren Personen Zugriff gewähren.",
       "PROCEED":"Ja, Zulassen"
     },
     "CONTRIBUTOR":{

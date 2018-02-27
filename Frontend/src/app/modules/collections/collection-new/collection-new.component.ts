@@ -128,12 +128,19 @@ export class CollectionNewComponent {
                     this.newCollectionType=this.getTypeForCollection(this.currentCollection);
                     this.hasCustomScope=false;
                     this.newCollectionStep = this.STEP_GENERAL;
+                    if(this.currentCollection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
+                        this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+                    }
                     this.updateAvailableSteps();
                     this.isLoading=false;
                   });
                 });
               });
             } else {
+              if(id==RestConstants.ROOT){
+                this.setParent(id,null);
+                return;
+              }
               this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
                 this.setParent(id,data.collection);
               },(error:any)=>{
@@ -155,27 +162,17 @@ export class CollectionNewComponent {
          //this.toast.error(error)
        });
     }
-    private updatePermissions(){
-      this.isLoading=true;
-      if(this.permissions){
-        this.nodeService.setNodePermissions(this.currentCollection.ref.id,this.permissions).subscribe(()=>{
-          this.permissions=null;
-          this.saveCollection();
-        },(error:any)=>{
-          this.toast.error(error);
-          this.isLoading=false;
-        });
-        return;
-      }
-      this.saveCollection();
-
-    }
     private setPermissions(permissions : LocalPermissions){
       if(permissions) {
         this.permissions = permissions;
         this.permissions.inherited=false;
         if(this.permissions.permissions && this.permissions.permissions.length){
           this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+          for(let permission of this.permissions.permissions){
+            if(!permission.hasOwnProperty('editable')){
+              permission.editable=true;
+            }
+          }
         }
       }
       this.showPermissions=false;
@@ -421,7 +418,8 @@ export class CollectionNewComponent {
       this.permissions=this.getEditorialGroupPermissions();
     }
     if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
-      this.nodeService.setNodePermissions(collection.ref.id,this.permissions).subscribe(()=>{
+      let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,false);
+      this.nodeService.setNodePermissions(collection.ref.id,permissions).subscribe(()=>{
         this.saveImage(collection);
       });
     }
