@@ -549,7 +549,7 @@ export class MdsComponent{
       else if(widget.type=='checkbox'){
         props=[(element as any).checked];
       }
-      if(widget.isRequired && (!props.length || props[0]=='')){
+      if(this.isRequiredWidget(widget) && (!props.length || props[0]=='')){
         if(showError) {
           element.className += 'invalid';
           this.toast.error(null, 'TOAST.FIELD_REQUIRED', {name: widget.caption});
@@ -1837,7 +1837,9 @@ export class MdsComponent{
   private isExtendedWidget(widget: any) {
     return widget.isExtended==true || widget.extended==true || widget.isExtended=='true' || widget.extended=='true';
   }
-
+  private isRequiredWidget(widget: any) {
+        return widget.isRequired==true || widget.required==true || widget.isRequired=='true' || widget.required=='true';
+  }
   private highlightSearch(caption: string, searchString: string) :string {
     let pos=caption.toLowerCase().indexOf(searchString.toLowerCase());
     if(pos==-1)
