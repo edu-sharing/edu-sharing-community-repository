@@ -92,6 +92,10 @@ public class ShibbolethServlet extends HttpServlet {
 				
 				logger.info("end session for user:" + validAuthInfo.get(CCConstants.AUTH_USERNAME));
 				authTool.logout(validAuthInfo.get(CCConstants.AUTH_TICKET));
+				if(req.getSession(false) != null) {
+					req.getSession(false).invalidate();
+				}
+				req.getSession(true);
 				
 			}
 		}
