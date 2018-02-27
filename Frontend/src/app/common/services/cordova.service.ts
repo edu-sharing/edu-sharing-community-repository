@@ -234,7 +234,7 @@ export class CordovaService {
   /**
    * erase all permanent data
    */
-  clearPermanentStorage() : void {
+  clearPermanentStorage(goToStart=false) : void {
 
     // clear HTML5 local storage
     window.localStorage.clear();
@@ -242,8 +242,13 @@ export class CordovaService {
     // clear native storage 
     try {
       (window as any).NativeStorage.clear(()=>{
-        // WIN - thats OK
+          if(goToStart){
+              this.goToAppStart();
+          }
       }, (error:any)=>{
+          if(goToStart){
+              this.goToAppStart();
+          }
         // FAIL
         console.error("Fail NativeStorage.clear",error);
       });
@@ -457,5 +462,13 @@ export class CordovaService {
 
     hasValidConfig() {
         return this._oauth && this.endpointUrl;
+    }
+
+    getLanguage() {
+      return new Observable<string>((observer: Observer<string>) => {
+          // TODO: get device language
+          observer.next("de");
+          observer.complete();
+      });
     }
 }

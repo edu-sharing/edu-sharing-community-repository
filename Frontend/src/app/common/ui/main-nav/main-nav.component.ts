@@ -22,6 +22,7 @@ import {Http} from "@angular/http";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
+import {CordovaService} from '../../services/cordova.service';
 
 @Component({
   selector: 'main-nav',
@@ -263,6 +264,7 @@ export class MainNavComponent {
   }
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
+              private cordova : CordovaService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
               private configService : ConfigurationService,
@@ -360,6 +362,10 @@ export class MainNavComponent {
     window.open(url);
   }
   private logout(){
+    if(this.cordova.isRunningCordova()){
+      this.cordova.clearPermanentStorage(true);
+      return;
+    }
     if(this.config.logout) {
       if(this.config.logout.ajax){
         this.http.get(this.config.logout.url).subscribe(()=>{

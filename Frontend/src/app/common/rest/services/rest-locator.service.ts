@@ -112,7 +112,7 @@ export class RestLocatorService {
       headers.append('Authorization', "Bearer " + this.cordova.oauth.access_token);
     }
     else if(this.cordova.isRunningCordova()){
-      throw new Error("something is wrong, cordova is not ready yet. Check if your code is calling 'locateApi'!");
+      throw new Error("cordova is not ready yet (or has no oauth). Check if your code is calling 'locateApi'!");
     }
     else{
       headers.append('Authorization',"");
