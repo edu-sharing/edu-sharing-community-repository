@@ -63,7 +63,19 @@
   word-break: break-all;
   max-height: 48px;
   overflow: hidden;
-  @unselectableText();
+  display:flex;
+  align-items:center;
+  @include unselectableText();
+  .card-title-back{
+    color: $primary;
+    @include clickable();
+    margin-right:15px;
+  }
+  .card-title-image{
+    width:auto;
+    height:25px;
+    margin-right:15px;
+  }
 }
 .center-card .card-scroll{
   overflow-y: auto;
