@@ -170,7 +170,7 @@
       "NO_COMMENT":"Please enter a comment for workflow activity.",
       "NO_HISTORY":"No entries for workflow activites have been made yet.",
       "USER_NO_PERMISSION":"Missing permissions",
-      "USER_NO_PERMISSION_INFO":"The user in charge '{{user}}' has currently no permission to access this document.\n\nIf you proceed, the user will gain editing permissions for this document.",
+      "USER_NO_PERMISSION_INFO":"The user in charge '{{user}}' has currently no permission to access this document.\n\nIf you proceed, the user will gain editing and sharing permissions for this document.",
       "PROCEED":"Proceed"
     },
     "CONTRIBUTOR":{

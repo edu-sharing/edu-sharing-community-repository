@@ -14,6 +14,9 @@
   justify-content: space-between;
   align-items: center;
 }
+.dialog{
+  z-index:$dialogZIndex+5;
+}
 user-profile{
   display:inherit!important;
 }
