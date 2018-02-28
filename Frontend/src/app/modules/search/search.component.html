@@ -183,13 +183,13 @@
     <div class="results alignWithBanner" [class.resultsNoRepositories]="!repositories" vocab="http://schema.org/" typeof="WebPage">
       <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0 && !addToCollection">
         <div class="collectionsHeading">
-          <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{resultCount.collections}})<a *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
+          <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})<a *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
         </div>
         <div class="collections" [class.collectionsMore]="collectionsMore" id="collections">
         <listTable
           class="collections"
           [nodes]="searchService.searchResultCollections"
-          [columns]="collectionsColumns"
+          [columns]="searchService.collectionsColumns"
           [hasIcon]="true"
           [dragDrop]="false"
           [hasCheckbox]="false"
@@ -207,7 +207,7 @@
           <i class="material-icons">search</i>
           {{'SEARCH.QUERY_NO_RESULT' | translate}}
         </div>
-        <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} <span *ngIf="resultCount.materials">({{resultCount.materials}})</span></div>
+        <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} <span *ngIf="searchService.resultCount.materials">({{searchService.resultCount.materials}})</span></div>
       <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
       <listTable
         [nodes]="searchService.searchResult"

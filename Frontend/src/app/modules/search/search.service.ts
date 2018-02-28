@@ -10,6 +10,7 @@ export class SearchService {
   searchResultRepositories: Node[][] = [];
   searchResultCollections: Node[] = [];
   columns : ListItem[]=[];
+  collectionsColumns : ListItem[]=[];
   ignored: Array<string> = [];
   reurl: string;
   facettes: Array<any> = [];
@@ -20,6 +21,7 @@ export class SearchService {
   complete: boolean = false;
   showchosenfilters: boolean = false;
   reinit = true;
+  resultCount:any={};
 
   constructor() {}
 
