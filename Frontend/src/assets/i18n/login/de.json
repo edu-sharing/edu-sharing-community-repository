@@ -12,5 +12,11 @@
     "REGISTER_LINK":"Jetzt erstellen",
     "SAFE_PREVIOUS":"Um sich im geschützten Bereich anzumelden, melden Sie sich bitte zuerst im Workspace an",
     "NO_ACCESS":"Keine Berechtigungen für diesen Bereich"
+  },
+  "LOGIN_APP":{
+    "SERVERLIST":"Wo möchtest du hin?",
+    "SERVERLIST_INFO":"Wähle den Server aus, mit dem du dich verbinden möchtest",
+    "LOGIN":"Anmelden",
+    "LOGIN_INFO":"Melde dich mit deinen Daten auf dem gewählten Server an"
   }
 }
