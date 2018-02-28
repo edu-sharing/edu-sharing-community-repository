@@ -62,6 +62,11 @@ export class MainNavComponent {
   @HostListener('window:resize', ['$event'])
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
+    if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
+        this.scrolltotop.nativeElement.style.display = 'block';
+    } else {
+        this.scrolltotop.nativeElement.style.display = 'none';
+    }
     let y=0;
     try {
       let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
@@ -103,12 +108,6 @@ export class MainNavComponent {
           element.style.top = Number.parseInt(this.scrollInitialPositions[i])+y + 'px';
         }
       }
-    }
-
-    if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
-      this.scrolltotop.nativeElement.style.display = 'block';
-    } else {
-      this.scrolltotop.nativeElement.style.display = 'none';
     }
   }
 
