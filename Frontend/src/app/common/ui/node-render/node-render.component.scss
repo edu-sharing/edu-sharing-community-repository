@@ -33,7 +33,8 @@ a, a:hover, a:visited, a:active {
   .topBar-render{
     display: none!important;
   }
-  a.edusharing_rendering_content{
+  a.edusharing_rendering_content,
+  #edusharing_scrolltotop{
     background-color: $primary;
   }
 }
