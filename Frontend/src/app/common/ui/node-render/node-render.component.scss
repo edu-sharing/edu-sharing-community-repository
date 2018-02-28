@@ -29,6 +29,14 @@ a, a:hover, a:visited, a:active {
   font-size: 30px;
   color:#fff;
 }
+:host /deep/{
+  .topBar-render{
+    display: none!important;
+  }
+  a.edusharing_rendering_content{
+    background-color: $primary;
+  }
+}
 .topBar{
   background:#383838;
   color: #ffffff;
