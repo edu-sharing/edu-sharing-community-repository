@@ -401,34 +401,36 @@ export class MdsComponent{
     for(let viewId of group.views){
       for(let view of data.views){
         if(view.id==viewId){
-          html+=`<a onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
+          html+=`<a class="clickable" onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
           i++;
           break;
         }
       }
     }
     this.jumpmarksCount=i;
-    eval(`setInterval(function(){
-      var jump=document.getElementById("jumpmarks");
-      if(!jump)
-        return;
-      var elements=jump.getElementsByTagName("a");
-      var scroll=document.getElementsByClassName("mdsViewHeader");
-      var pos=document.getElementById("mdsScrollContainer").scrollTop - 100;
-      var closest=999999;
-      var active=elements[0];
-      for(var i=0;i<elements.length;i++){
-        elements[i].className=elements[i].className.replace("active","").trim();
-        if(!scroll[i])
-          continue;
-        var top=scroll[i].getBoundingClientRect().top;
-        if(Math.abs(top-pos)<closest){
-          closest=Math.abs(top-pos);
-          active=elements[i];
+    setInterval(function(){
+        let jump=document.getElementById("jumpmarks");
+        if(!jump)
+            return;
+        let elements=jump.getElementsByTagName("a");
+        let scroll=document.getElementsByClassName("mdsViewHeader");
+        let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
+        console.log(height);
+        let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
+        let closest=999999;
+        let active=elements[0];
+        for(let i=0;i<elements.length;i++){
+            elements[i].className=elements[i].className.replace("active","").trim();
+            if(!scroll[i])
+                continue;
+            let top=scroll[i].getBoundingClientRect().top;
+            if(Math.abs(top-pos)<closest){
+                closest=Math.abs(top-pos);
+                active=elements[i];
+            }
         }
-      }
-      active.className+=" active";
-      },200);`)
+        active.className+=" active";
+    },200);
     return html;
   }
 
