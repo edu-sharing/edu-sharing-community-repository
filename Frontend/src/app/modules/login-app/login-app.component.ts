@@ -12,6 +12,7 @@ import {ConfigurationService} from '../../common/services/configuration.service'
 import {UIHelper} from '../../common/ui/ui-helper';
 import {Translation} from '../../common/translation';
 import {TranslateService} from '@ngx-translate/core';
+import {RestHelper} from '../../common/rest/rest-helper';
 
 // possible states this UI component can be in
 enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2};
@@ -49,6 +50,11 @@ export class LoginAppComponent  implements OnInit{
             this.cordova.getPublicServerList().subscribe((servers:any)=>{
                 this.servers=servers;
                 console.log(servers);
+                for(let server of servers){
+                    this.cordova.getServerAbout(server.url).subscribe((about:any)=>{
+                        server.version=RestHelper.getRepositoryVersionFromAbout(about);
+                    });
+                }
                 // WHEN RUNNING ON DESKTOP --> FORWARD TO BASIC LOGIN PAGE
 
 
@@ -71,7 +77,7 @@ export class LoginAppComponent  implements OnInit{
 
     }
     getServerIcon(server:any){
-        return server.url+'assets/images/logo.svg';
+        return server.url+'assets/images/app-icon.svg';
     }
     ngOnInit() {
     }
@@ -97,9 +103,6 @@ export class LoginAppComponent  implements OnInit{
         this.currentServer=server;
         this.state=StateUI.LOGIN;
     }
-    private textInputFokus() : void {
-    }
-
     private buttonRegister() {
         alert("TODO");
     }

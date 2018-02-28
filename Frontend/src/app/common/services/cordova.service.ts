@@ -90,7 +90,19 @@ export class CordovaService {
     }
 
   }
-
+    getServerAbout(server:string) {
+      /* // not working - access control error
+        let url=server+"version.html";
+        return this.http.get(url)
+            .map((response: Response) => response.text());
+      */
+        let url=server+'rest/_about'
+        let headers=new Headers();
+        headers.set('Accept','application/json');
+        let options={headers:headers};
+        return this.http.get(url,options)
+            .map((response: Response) => response.json());
+    }
     public getPublicServerList() : Observable<any>{
       let url='http://app-registry.edu-sharing.com/public-server-directory.php';
       let headers=new Headers();

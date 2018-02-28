@@ -16,18 +16,18 @@
             <div class="icon">
               <img [src]="getServerIcon(server)">
             </div>
-            <div>
+            <div class="info">
               <div class="name">{{server.name}}</div>
-              <div class="url">{{server.url}}</div>
+              <div class="url"><div class="urlText">{{server.url}}</div><div class="version" [class.versionUnknown]="!server.version">{{server.version ? server.version : "?"}}</div></div>
             </div>
             <div class="right"><i class="material-icons">keyboard_arrow_right</i></div>
           </div>
           <div class="server clickable" (click)="chooseServer(null)">
             <div class="icon">
-              <img src="assets/images/edu-color.svg">
+              <img src="assets/images/app-icon-custom.svg">
             </div>
-            <div>
-              <div class="name">{{'SERVERLIST_OWN' | translate}}</div>
+            <div class="info">
+              <div class="name">{{'LOGIN_APP.SERVERLIST_OWN' | translate}}</div>
               <div class="url">https://</div>
             </div>
             <div class="right"><i class="material-icons">keyboard_arrow_right</i></div>
@@ -99,7 +99,7 @@
 
         <div>
           <label for="username">Serveradresse</label>
-          <input type="text" [(ngModel)]="serverurl" name="serverurl" id="serverurl" (focus)="textInputFokus()" style="height: 41px;"
+          <input type="text" [(ngModel)]="serverurl" name="serverurl" id="serverurl" style="height: 41px;"
           />
         </div>
 

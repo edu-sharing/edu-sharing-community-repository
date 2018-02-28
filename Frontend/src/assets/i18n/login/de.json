@@ -14,6 +14,7 @@
     "NO_ACCESS":"Keine Berechtigungen für diesen Bereich"
   },
   "LOGIN_APP":{
+    "SERVERLIST_OWN":"Eigenen Server angeben",
     "SERVERLIST":"Wo möchtest du hin?",
     "SERVERLIST_INFO":"Wähle den Server aus, mit dem du dich verbinden möchtest",
     "LOGIN":"Anmelden",
