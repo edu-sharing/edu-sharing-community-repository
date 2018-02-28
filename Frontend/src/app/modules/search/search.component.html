@@ -43,7 +43,7 @@
       </ul>
     </div>
   </div>
-  <div class="top scrollWithBanner" [class.topNoRepositories]="!repositories">
+  <div class="top scrollWithBanner" [class.topNoRepositories]="!(repositories && repositories.length>2)">
     <div class="extendedSearch">
         <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="sidenav_opened=!sidenav_opened" (click)="sidenav_opened=!sidenav_opened" class="pointed filtertoggler">{{'SEARCH.EXPANDED_SEARCH' | translate}} <i class="material-icons">{{sidenav_opened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
     </div>
