@@ -149,7 +149,7 @@ export class ListTableComponent implements EventListener{
   /**
    *  a custom function to validate if a given node has permissions or should be displayed as "disabled"
    *  Function will get the node object as a parameter and should return
-   *  {status:boolean, message:string}
+   *  {status:boolean, message:string[,button:{click:function,caption:string,icon:string]}
    */
   @Input() validatePermissions : Function;
   /**
@@ -640,7 +640,6 @@ export class ListTableComponent implements EventListener{
     this.onSelectionChanged.emit(this.selectedNodes);
     this.changes.detectChanges();
 
-
   }
   private getAttribute(data : any,item : ListItem) : SafeHtml{
     return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
@@ -672,9 +671,7 @@ export class ListTableComponent implements EventListener{
     this.onAddElement.emit();
   }
   public askCCPublish(event:any,node : Node){
-    let mail=node.createdBy.firstName+" "+node.createdBy.lastName+"<"+node.createdBy.mailbox+">";
-    let subject=this.translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
-    window.location.href="mailto:"+mail+"?subject="+encodeURIComponent(subject);
+    NodeHelper.askCCPublish(this.translate,node);
     event.preventDefault();
     event.stopPropagation();
   }

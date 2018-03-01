@@ -70,7 +70,6 @@ export class SearchComponent {
   public mdsSuggestions:any={}
   public mdsExtended=false;
   public sidenavTab=0;
-  public resultCount:any={};
   public sidenav_opened: boolean = false;
   public resultsRight=false;
   public collectionsMore=false;
@@ -82,7 +81,6 @@ export class SearchComponent {
   public currentRepositoryObject:Repository;
 
   public applyMode=false;
-  public collectionsColumns : ListItem[]=[];
   public hasCheckbox=false;
   public showMoreRepositories=false;
   innerWidth: number = 0;
@@ -211,9 +209,10 @@ export class SearchComponent {
            this.groupResults=this.config.instant('searchGroupResults',false);
            this.setViewType(this.view);
 
-           this.collectionsColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
-           this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
-           this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
+           this.searchService.collectionsColumns=[];
+           this.searchService.collectionsColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
+           this.searchService.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
+           this.searchService.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
            this.updateActionbar(null);
            setInterval(() => this.updateHasMore(), 1000);
 
@@ -413,7 +412,7 @@ export class SearchComponent {
         }, RestConstants.CONTENT_TYPE_COLLECTIONS,this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository,this.mdsId).subscribe(
           (data: NodeList) => {
             this.searchService.searchResultCollections = data.nodes;
-            this.resultCount.collections = data.pagination.total;
+            this.searchService.resultCount.collections = data.pagination.total;
             this.checkFail();
           },
           (error: any) => {
@@ -745,7 +744,22 @@ export class SearchComponent {
   private getCurrentNode(node: Node) {
     return node ? node : this.selection[0];
   }
-
+  permissionAddToCollection(node: Node){
+    if(node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH)==-1) {
+      let button:any=null;
+      if(node.properties[RestConstants.CCM_PROP_QUESTIONSALLOWED] && node.properties[RestConstants.CCM_PROP_QUESTIONSALLOWED][0]=='true'){
+        button={
+          icon:'message',
+          caption:'ASK_CC_PUBLISH',
+          click:()=>{
+              NodeHelper.askCCPublish(this.translate,node);
+          }
+        }
+      }
+        return {status: false, message: 'NO_CC_PUBLISH',button:button};
+    }
+    return {status:true};
+  }
   private searchRepository(repos: Repository[],criterias:any,init:boolean,position=0,count=0) {
     if(position>0 && position>=repos.length) {
       this.searchService.numberofresults = count;
@@ -782,7 +796,7 @@ export class SearchComponent {
       this.mdsId
     ).subscribe(
       (data: SearchList) => {
-        this.resultCount.materials = data.pagination.total;
+        this.searchService.resultCount.materials = data.pagination.total;
         this.processSearchResult(data,init);
         this.searchService.showchosenfilters = true;
         this.searchRepository(repos,criterias,init,position+1,count+data.pagination.total);

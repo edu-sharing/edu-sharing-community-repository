@@ -1779,4 +1779,6 @@ public class CCConstants {
 
 	public static final String COLLECTION_ORDER_MODE_CUSTOM = "custom";
 
+	public static final String ISO8601_SUFFIX = "ISO8601";
+
 }

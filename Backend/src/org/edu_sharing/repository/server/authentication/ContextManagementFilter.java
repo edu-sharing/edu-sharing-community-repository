@@ -60,13 +60,6 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			 */
 			HttpServletRequest request = (HttpServletRequest)req;
 			
-			HttpSession session = request.getSession(false);
-			if(session != null){
-				String authType = (String)session.getAttribute(CCConstants.AUTH_TYPE);
-				if(authType != null && authType.equals(CCConstants.AUTH_TYPE_OAUTH)){
-					session.invalidate();
-				}
-			}
 			
 			Context.getCurrentInstance().release();
 			

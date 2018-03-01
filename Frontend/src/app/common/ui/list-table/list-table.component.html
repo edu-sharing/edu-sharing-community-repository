@@ -137,6 +137,9 @@
                     <div>
                         <i class="material-icons">security</i>
                         <div>{{validatePermissions(node).message | translate }}</div>
+                        <a *ngIf="validatePermissions(node).button"
+                           (click)="validatePermissions(node).button.click();$event.preventDefault();$event.stopPropagation();"
+                        ><i class="material-icons">{{validatePermissions(node).button.icon}}</i> {{ validatePermissions(node).button.caption | translate}}</a>
                     </div>
                 </div>
                 <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)" >
