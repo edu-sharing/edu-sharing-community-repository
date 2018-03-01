@@ -29,9 +29,9 @@
        tabindex="0"
        (keyup.enter)="showDropdown(true)"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.drawButtonMore]="drawButton" *ngIf="optionsMenu.length"><a><i class="material-icons">more_vert</i></a></div>
+       *ngIf="optionsMenu.length"><a><i class="material-icons">more_vert</i></a></div>
 
-  <div *ngFor="let option of optionsAlways;let i=index;"
+  <div *ngFor="let option of optionsAlways.reverse();let i=index;"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
        [class.disabled]="!option.isEnabled"
