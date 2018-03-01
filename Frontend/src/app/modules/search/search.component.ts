@@ -134,7 +134,7 @@ export class SearchComponent {
   public savedSearchLoading = false;
   public savedSearchQuery:string = null;
   public savedSearchQueryModel:string = null;
-    public addToCollection: Collection;
+  public addToCollection: Collection;
 
   @HostListener('window:scroll', ['$event'])
   handleScroll(event: Event) {
@@ -744,7 +744,22 @@ export class SearchComponent {
   private getCurrentNode(node: Node) {
     return node ? node : this.selection[0];
   }
-
+  permissionAddToCollection(node: Node){
+    if(node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH)==-1) {
+      let button:any=null;
+      if(node.properties[RestConstants.CCM_PROP_QUESTIONSALLOWED] && node.properties[RestConstants.CCM_PROP_QUESTIONSALLOWED][0]=='true'){
+        button={
+          icon:'message',
+          caption:'ASK_CC_PUBLISH',
+          click:()=>{
+              NodeHelper.askCCPublish(this.translate,node);
+          }
+        }
+      }
+        return {status: false, message: 'NO_CC_PUBLISH',button:button};
+    }
+    return {status:true};
+  }
   private searchRepository(repos: Repository[],criterias:any,init:boolean,position=0,count=0) {
     if(position>0 && position>=repos.length) {
       this.searchService.numberofresults = count;

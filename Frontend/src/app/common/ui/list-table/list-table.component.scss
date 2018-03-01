@@ -66,13 +66,14 @@ $borderRadius:2px;
   top:0;
   z-index: 110;
   text-align: center;
-  padding-top: 40px;
+  padding-top: 35px;
   div{
     color:$textPrimary!important;
     opacity: 1;
     padding-bottom: 7px;
   }
   a{
+    text-shadow:0 0 15px #fff;
     i{
       position:relative;
       top:7px;
