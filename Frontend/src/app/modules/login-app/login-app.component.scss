@@ -11,7 +11,8 @@
 }
 $serverItemHeight:50px;
 .server{
-  margin:15px 0;
+  padding:15px 20px;
+  margin:0 -20px;
   display:flex;
   vertical-align: center;
   >div{
@@ -26,7 +27,7 @@ $serverItemHeight:50px;
     align-items: center;
     height:$serverItemHeight;
     color:$textVeryLight;
-    background: linear-gradient(to right,rgba(255,255,255,0.0001) 0,#fff 50%);
+    /*background: linear-gradient(to right,rgba(255,255,255,0.0001) 0,#fff 50%);*/
   }
   .info{
     width: 100%;
@@ -73,6 +74,9 @@ $serverItemHeight:50px;
       border-radius: 8px;
     }
   }
+}
+.server:hover,.server:focus{
+  background-color: $workspaceSelectedBackground;
 }
 .infoTop{
   position: absolute;

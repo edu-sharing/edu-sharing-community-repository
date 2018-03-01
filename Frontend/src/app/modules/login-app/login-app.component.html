@@ -12,7 +12,7 @@
     <div class="card center-card card-high">
       <div class="card-content">
         <div class="card-scroll ">
-          <div class="server clickable" *ngFor="let server of servers" (click)="chooseServer(server)">
+          <div class="server clickable" *ngFor="let server of servers" (click)="chooseServer(server)" tabindex="0">
             <div class="icon">
               <img [src]="getServerIcon(server)">
             </div>
