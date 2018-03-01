@@ -90,27 +90,6 @@ export class CordovaService {
     }
 
   }
-    getServerAbout(server:string) {
-      /* // not working - access control error
-        let url=server+"version.html";
-        return this.http.get(url)
-            .map((response: Response) => response.text());
-      */
-        let url=server+'rest/_about'
-        let headers=new Headers();
-        headers.set('Accept','application/json');
-        let options={headers:headers};
-        return this.http.get(url,options)
-            .map((response: Response) => response.json());
-    }
-    public getPublicServerList() : Observable<any>{
-      let url='http://app-registry.edu-sharing.com/public-server-directory.php';
-      let headers=new Headers();
-      headers.set('Accept','application/json');
-      let options={headers:headers};
-      return this.http.get(url,options)
-          .map((response: Response) => response.json());
-    }
 
   /**********************************************************
    * BASIC CORDOVA
@@ -297,6 +276,36 @@ export class CordovaService {
       console.log("ERROR",e);
       alert("FAIL");
     }
+  }
+
+  /**********************************************************
+   * Basic Server Communication
+   **********************************************************
+   * Before app starts as app it needs to set server config.
+   * To manage this, some basic HTTP requests are needed.
+   * These are part of the cordova service, so that it can
+   * run seperate from the rest of the app, that needs this
+   * config before starting up.
+   */
+
+  // get the metadata about what servers that are part of the public listing
+  public getPublicServerList() : Observable<any> {
+    let url='http://app-registry.edu-sharing.com/public-server-directory.php';
+    let headers=new Headers();
+    headers.set('Accept','application/json');
+    let options={headers:headers};
+    return this.http.get(url,options)
+        .map((response: Response) => response.json());
+  }
+
+  // check connection to server
+  public getServerAbout(server:string) : Observable<any> {
+      let url=server+'rest/_about'
+      let headers=new Headers();
+      headers.set('Accept','application/json');
+      let options={headers:headers};
+      return this.http.get(url,options)
+          .map((response: Response) => response.json());
   }
 
   /**********************************************************

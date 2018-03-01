@@ -5,7 +5,7 @@
      STATE: SERVERLIST 
     ------------------- -->
   <div *ngIf="state==0">
-    <div class="infoTop">
+    <div class="infoTop" style="margin-top: -10px;">
       <h1>{{'LOGIN_APP.SERVERLIST' | translate}}</h1>
       <div>{{'LOGIN_APP.SERVERLIST_INFO' | translate}}</div>
     </div>
@@ -14,11 +14,15 @@
         <div class="card-scroll ">
           <div class="server clickable" *ngFor="let server of servers" (click)="chooseServer(server)" tabindex="0">
             <div class="icon">
-              <img [src]="getServerIcon(server)">
+              <img 
+              [src]="getServerIcon(server)" 
+              onerror="this.src = 'assets/images/app-icon.svg';" >
             </div>
             <div class="info">
               <div class="name">{{server.name}}</div>
-              <div class="url"><div class="urlText">{{server.url}}</div><div class="version" [class.versionUnknown]="!server.version">{{server.version ? server.version : "?"}}</div></div>
+              <div class="url"><div class="urlText">{{server.url}}</div>
+              <div class="version" [class.versionUnknown]="!server.version">{{server.version ? server.version : "?"}}</div>
+            </div>
             </div>
             <div class="right"><i class="material-icons">keyboard_arrow_right</i></div>
           </div>
@@ -48,15 +52,44 @@
     ------------------- -->
   <div *ngIf="state==2">
 
+    <div class="infoTop" style="margin-top: -10px;">
+      <h1>Eigenen Server angeben</h1>
+      <div>Gib den Link zum Server an, mit dem du dich verbinden möchtest.</div>
+    </div>
+    <div class="card center-card card-action">
+      <div class="card-content" style="max-height:230px;">
+        <div class="card-title"><i class="material-icons card-title-back" (click)="buttonLoginBack()">arrow_back</i>
+          Zurück
+        </div>
+        <div class="card-scroll">
+          <form (ngSubmit)="login()" #loginForm>
+            <div>
+              <label for="username">Serveradresse</label>
+              <input #urlInput type="text" requried name="url" id="url" (keyup)="checkUrl()" [(ngModel)]="serverurl" autofocus/>
+            </div>
+          </form>
+          <div style="min-height: 20px;">
+            <div *ngIf="errorURL!=null">
+              {{errorURL}}
+            </div>  
+          </div>
+        </div>
+      </div>
+      <div class="card-action" style="border-color: white;">
+        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="buttonServerUrl()">Weiter</a>
+      </div>
+    </div>
+
+    <!--
     <div style="
           font-size:28px;
           font-weight: bold;
         ">
-      Eigenen Server angeben
+      
     </div>
 
     <div style="color:lightgray;">
-      Gib den Link zum Server an, mit dem du dich verbinden möchtest. 
+      
     </div>
 
     <div style="
@@ -114,6 +147,7 @@
       </div>
 
     </div>
+  -->
 
   </div>
 
@@ -121,18 +155,23 @@
      STATE: LOGIN 
     ------------------- -->
   <div *ngIf="state==1">
-    <div class="infoTop">
+    <div class="infoTop" style="margin-top: -10px;">
       <h1>{{'LOGIN_APP.LOGIN' | translate}}</h1>
       <div>{{'LOGIN_APP.LOGIN_INFO' | translate}}</div>
     </div>
     <div class="card center-card card-action">
-      <div class="card-content">
-        <div class="card-title"><i class="material-icons card-title-back" (click)="buttonLoginBack()">arrow_back</i><img class="card-title-image" [src]="getServerIcon(currentServer)">{{currentServer.name}}</div>
+      <div class="card-content" style="max-height:230px;">
+        <div class="card-title"><i class="material-icons card-title-back" (click)="buttonLoginBack()">arrow_back</i>
+          <img class="card-title-image" 
+          [src]="getServerIcon(currentServer)"
+          onerror="this.src = 'assets/images/app-icon.svg';"
+          >
+          {{currentServer.name}}</div>
         <div class="card-scroll">
           <form (ngSubmit)="login()" #loginForm>
             <div>
               <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-              <input #usernameInput type="text" requried name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
+              <input #usernameInput type="text" requried name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username"/>
             </div>
             <div>
               <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
@@ -147,7 +186,7 @@
           -->
         </div>
       </div>
-      <div class="card-action">
+      <div class="card-action" style="border-color: white;">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>

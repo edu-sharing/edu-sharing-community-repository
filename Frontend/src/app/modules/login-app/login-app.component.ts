@@ -16,13 +16,14 @@ import {RestHelper} from '../../common/rest/rest-helper';
 
 // possible states this UI component can be in
 enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2};
+enum ErrorURL { OK = 0, UNKOWN = 1, NOINTERNET = 2, NOSERVER = 3};
 
 @Component({
     selector: 'app-login',
     templateUrl: 'login-app.component.html',
     styleUrls: ['login-app.component.scss']
 })
-export class LoginAppComponent  implements OnInit{
+export class LoginAppComponent  implements OnInit {
 
     private state:StateUI = StateUI.SERVERLIST;
 
@@ -30,9 +31,14 @@ export class LoginAppComponent  implements OnInit{
     public disabled=true;
     private username="";
     private password="";
-    private serverurl="https://";
+    private serverurl="https://";   
+    
+    errorURL:string = null;
+
     servers: any;
     currentServer: any;
+
+
 
     constructor(
         private toast:Toast,
@@ -76,14 +82,47 @@ export class LoginAppComponent  implements OnInit{
 
 
     }
+
     getServerIcon(server:any){
         return server.url+'assets/images/app-icon.svg';
     }
+
     ngOnInit() {
     }
-    private checkConditions(){
+
+    private checkConditions() :void  {
         this.disabled=!this.username;// || !this.password;
     }
+
+    private checkUrl() : void {
+        this.errorURL = null;
+        this.disabled = true;
+        this.serverurl = this.serverurl.trim();
+
+        // FORMAT ERRORS
+        if (this.serverurl.length<3) {
+            this.errorURL = "URL is too Short";
+            return;
+        }
+
+        // JUST WARNINGS
+        this.disabled = false;
+        if (this.serverurl.startsWith('http:')) {
+            this.errorURL = "No HTTPS is not Secure.";
+            return;
+        }
+
+    }
+
+    private chooseServer(server:any) : void {
+        if (server==null) {
+            this.state=StateUI.SERVERURL;
+        } else {
+            this.currentServer=server;
+            this.state=StateUI.LOGIN;
+        }
+    }
+
     private buttonLoginBack() : void {
         this.state = StateUI.SERVERLIST;
     }
@@ -99,12 +138,32 @@ export class LoginAppComponent  implements OnInit{
     private buttonTestServer() : void {
         alert("TODO");
     }
-    chooseServer(server:any){
-        this.currentServer=server;
-        this.state=StateUI.LOGIN;
-    }
-    private buttonRegister() {
+
+    private buttonRegister() : void {
         alert("TODO");
+    }
+
+    private buttonServerUrl() : void {
+        alert('NEW');
+        let url2check = this.serverurl;
+
+        // TODO try to auto correct on URL
+        // Example for valid URL: http://edu41.edu-sharing.de/edu-sharing/
+
+        this.isLoading = true;
+        this.cordova.getServerAbout(url2check).subscribe(
+        (win) => {
+            this.currentServer =     {
+                "name" : "Eigener Server",
+                "url"  : url2check
+            };
+            this.state=StateUI.LOGIN;
+            this.isLoading = false;
+        },  
+        (error) => {
+            this.isLoading = false;
+            this.toast.error(null, "LOGIN.ERROR");
+        });
     }
 
     private login(){
