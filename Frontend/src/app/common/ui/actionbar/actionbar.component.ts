@@ -49,11 +49,15 @@ export class ActionbarComponent{
     }
     this.optionsToggle=OptionItem.filterToggleOptions(options,true);
 
-    this.optionsAlways=this.getActionOptions(OptionItem.filterToggleOptions(options,false)).slice(0,this.getNumberOptions()).reverse();
+    this.optionsAlways=this.getActionOptions(OptionItem.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
     if(!this.optionsAlways.length){
-      this.optionsAlways=OptionItem.filterToggleOptions(options,false).slice(0,this.getNumberOptions()).reverse();
+      this.optionsAlways=OptionItem.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
     }
     this.optionsMenu=this.hideActionOptions(OptionItem.filterToggleOptions(options,false),this.optionsAlways);
+    if(this.optionsMenu.length<2){
+      this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
+      this.optionsMenu=[];
+    }
 
   }
 
