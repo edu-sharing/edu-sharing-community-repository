@@ -11,6 +11,7 @@
               <div class="top">
               <div class="left">
                 <user-avatar
+                  [link]="true"
                   [size]="'small'"
                   [user]="comment.creator"
                 ></user-avatar>
@@ -62,7 +63,7 @@
       <a class="btn" (click)="cancel()">{{'CLOSE' | translate }}</a>
     </div>-->
   </div>
-<modal-dialog *ngIf="dialogTitle"
+<modal-dialog [priority]="1"
               [title]="dialogTitle"
               [message]="dialogMessage"
               [buttons]="dialogButtons"

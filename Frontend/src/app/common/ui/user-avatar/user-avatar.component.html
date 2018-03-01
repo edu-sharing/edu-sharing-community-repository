@@ -1,5 +1,5 @@
 <div class="avatarOuter size_{{size}}">
-  <div class="avatarCircle">
+  <div class="avatarCircle" [class.clickable]="link" (click)="link ? openProfile() : null">
     <div *ngIf="_customImage">
       <img [src]="_customImage" class="userImage">
     </div>
