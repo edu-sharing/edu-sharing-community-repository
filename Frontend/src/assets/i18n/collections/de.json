@@ -66,7 +66,7 @@
     "ORIGINAL_MISSING_INFO" : "Das Orginal wurde gelöscht und steht nicht mehr zur Verfügung. Sie können die Referenz öffnen, um die Metadaten anzuzeigen.",
     "CONFIRM_DELETE" : "Sammlung wirklich löschen?",
     "CONFIRM_DELETE_INFO" : "Sammlung wirklich löschen? Bei vielen Untersammlungen kann dies einige Zeit dauern.",
-    "REMOVED_FROM_COLLECTION":"Element wurde von Sammlung entfernt",
+    "REMOVED_FROM_COLLECTION":"Element(e) wurde von Sammlung entfernt",
     "EXTENDED_PERMISSIONS":"einzelne Personen oder Gruppen (sehen, mitarbeiten oder koordinieren)",
     "EXTENDED_PERMISSIONS_BUTTON":"Einladen",
     "TOAST":{

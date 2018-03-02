@@ -62,7 +62,7 @@
     "ORIGINAL_MISSING_INFO" : "The original has been deleted and can not be accessed anymore. You can open the reference to view the metadata.",
     "CONFIRM_DELETE" : "Do you really want to delete the collection?",
     "CONFIRM_DELETE_INFO" : "Do you really want to delete the collection? This can take some time for folders with lots of subordinate objects.",
-    "REMOVED_FROM_COLLECTION":"The element has been removed from the selection",
+    "REMOVED_FROM_COLLECTION":"The element(s) have been removed from the collection",
     "EXTENDED_PERMISSIONS":"Individual persons or groups (view, collaborate or coordinate)",
     "EXTENDED_PERMISSIONS_BUTTON":"Invite",
     "TOAST":{

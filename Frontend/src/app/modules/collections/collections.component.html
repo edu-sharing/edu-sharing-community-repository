@@ -114,6 +114,10 @@
                       </label>
                     </div>
                   </div>
+        <actionbar class="actionbarMaterials"
+            [options]="optionsMaterials"
+            [numberOfAlwaysVisibleOptions]="1"
+        ></actionbar>
                 </div>
 
                 <listTable
@@ -127,6 +131,8 @@
                   [columns]="referencesColumns"
                   [options]="listOptions"
                   [isClickable]="true"
+                  (onSelectionChanged)="onSelection($event)"
+                  [hasCheckbox]="true"
                   [canDrop]="canDropOnRef"
                   (clickRow)="onContentClick($event)"
                   (onAddElement)="switchToSearch()"
