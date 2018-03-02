@@ -568,7 +568,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 		boolean shared=isSharedNode(nodeId);
 		if(!shared && NodeServiceInterceptor.getEduSharingScope()!=null){
-			throw new Exception("Setting Permissions for private files in scope is not allowed");
+			if(QName.createQName(CCConstants.CCM_TYPE_NOTIFY).equals(nodeService.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)))){
+				// allow notify objects to share
+			}
+			else {
+				throw new Exception("Setting Permissions for private files in scope is not allowed");
+			}
 		}
 		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE) && NodeServiceInterceptor.getEduSharingScope()!=null){
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE);
