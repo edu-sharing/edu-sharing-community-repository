@@ -31,7 +31,7 @@
         </div>
     </div>
 </div>
-<div class="dialog dialogMore" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
+<div class="dialog dialogOptions" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
 <div [className]="'list '+listClass" infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="100" [scrollWindow]="scrollWindow" (scrolled)="scroll()">
     <div class="heading" *ngIf="hasHeading && viewType==0">
         <div class="checkbox" *ngIf="hasCheckbox">

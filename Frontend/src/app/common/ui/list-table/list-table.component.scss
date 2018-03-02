@@ -826,11 +826,6 @@ $orderAnimationTime:$animationTime*5;
   }
 }
 @media all and (max-width: ($mobileWidth)) {
-  .dialogMore{
-    overflow: scroll;
-    @include darken();
-    background: linear-gradient(to bottom, $darkenColor 0%,$darkenColor 75%,#ffffff 75%,#ffffff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  }
   .cardList{
     width:100%;
     height:160px;
