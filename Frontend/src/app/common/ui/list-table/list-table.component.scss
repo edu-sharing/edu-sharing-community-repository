@@ -826,7 +826,12 @@ $orderAnimationTime:$animationTime*5;
   }
 }
 @media all and (max-width: ($mobileWidth)) {
-  .cardList{
+  .nodeCollection {
+    .collectionEditorial {
+      top:20px;
+    }
+  }
+    .cardList{
     width:100%;
     height:160px;
     box-shadow: none;
