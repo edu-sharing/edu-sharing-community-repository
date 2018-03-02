@@ -98,7 +98,6 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public List<NodeRef> getFilesSharedByMe() throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
-		org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry.getSearchService();
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
@@ -133,7 +132,6 @@ public class SearchServiceImpl implements SearchService {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		String homeFolder = baseClient.getHomeFolderID(username);
 
-		org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry.getSearchService();
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
