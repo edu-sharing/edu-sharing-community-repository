@@ -780,13 +780,17 @@ export class MdsComponent{
               }
             }
             element.value=caption;
-            let event = new KeyboardEvent('keyup', {
-              'view': window,
-              'bubbles': true,
-              'cancelable': true
-            });
-            // simulate event for materialize
-            element.dispatchEvent(event);
+            try {
+                let event = new KeyboardEvent('keyup', {
+                    'view': window,
+                    'bubbles': true,
+                    'cancelable': true
+                });
+                // simulate event for materialize
+                element.dispatchEvent(event);
+            }catch(e){
+              // fails in ie11
+            }
             if(element.value!=props[0]) {
               element.setAttribute('data-value', props[0]);
             }

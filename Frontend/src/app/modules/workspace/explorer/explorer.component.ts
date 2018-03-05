@@ -164,6 +164,8 @@ export class WorkspaceExplorerComponent  {
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_CREATOR));
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
+    let title = new ListItem("NODE", RestConstants.LOM_PROP_TITLE);
+    title.visible = false;
     let size = new ListItem("NODE", RestConstants.SIZE);
     size.visible = false;
     let created = new ListItem("NODE", RestConstants.CM_PROP_C_CREATED);
@@ -182,6 +184,7 @@ export class WorkspaceExplorerComponent  {
     license.visible = false;
     let wfStatus = new ListItem("NODE", RestConstants.CCM_PROP_WF_STATUS);
     wfStatus.visible = false;
+    defaultColumns.push(title);
     defaultColumns.push(size);
     defaultColumns.push(created);
     defaultColumns.push(mediatype);

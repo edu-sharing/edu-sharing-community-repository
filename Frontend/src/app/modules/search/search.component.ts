@@ -715,9 +715,9 @@ export class SearchComponent {
   private prepare(param:any) {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       this.login=data;
+      this.isGuest = data.isGuest;
       this.updateColumns();
       this.updateMdsActions();
-      this.isGuest = data.isGuest;
       this.hasCheckbox=true;
       this.options=[];
       this.mdsExtended=false;
