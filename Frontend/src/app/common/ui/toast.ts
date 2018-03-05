@@ -87,8 +87,9 @@ export class Toast{
       jsonParse=errorObject._body;
     if(!jsonParse && errorObject)
       jsonParse=errorObject.response;
+    let json:any;
     try {
-      let json=JSON.parse(jsonParse);
+      json=JSON.parse(jsonParse);
       error=json.error+": "+json.message;
     }catch(e){}
     this.dialogTitle=dialogTitle;
@@ -107,7 +108,7 @@ export class Toast{
         if (json.error.indexOf("DAOToolPermissionException") != -1) {
           this.dialogTitle = 'TOOLPERMISSION_ERROR_TITLE';
           message = 'TOOLPERMISSION_ERROR';
-          let permission = error.split(' ')[0];
+          let permission = (json ? json.message : error).split(' ')[0];
           this.dialogMessage = this.translate.instant('TOOLPERMISSION_ERROR_HEADER') + "\n- " +
             this.translate.instant('TOOLPERMISSION.' + permission) + "\n\n" +
             this.translate.instant('TOOLPERMISSION_ERROR_FOOTER', {permission: permission});

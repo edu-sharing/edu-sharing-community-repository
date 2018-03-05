@@ -1,4 +1,4 @@
-<div class="dialog" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false"></div>
+<div class="dialog dialogOptions" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false"></div>
 <div class="collectionContainer" [@openOverlay]="dropdown" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false">
   <div [@openOverlay]="dropdown" class="moreOpen collection" (keydown.escape)="dropdown=false;$event.preventDefault();$event.stopPropagation();">
     <a class="collection-item waves-effect"
@@ -29,9 +29,9 @@
        tabindex="0"
        (keyup.enter)="showDropdown(true)"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       [class.drawButtonMore]="drawButton" *ngIf="optionsMenu.length"><a><i class="material-icons">more_vert</i></a></div>
+       *ngIf="optionsMenu.length"><a><i class="material-icons">more_vert</i></a></div>
 
-  <div *ngFor="let option of optionsAlways;let i=index;"
+  <div *ngFor="let option of optionsAlways.reverse();let i=index;"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
        [class.disabled]="!option.isEnabled"

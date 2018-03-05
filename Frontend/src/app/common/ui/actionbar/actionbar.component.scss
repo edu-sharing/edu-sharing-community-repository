@@ -44,14 +44,6 @@
 .more i{
   font-size:1.5rem;
 }
-.drawButtonMore{
-  position:relative;
-  top:-4px;
-  left:10px;
-}
-.drawButtonMore a{
-  color:#fff;
-}
 .actionAlways{
   text-transform: uppercase;
 }
@@ -93,13 +85,6 @@
 .actionToggle a:focus{
   @include removeDefaultFocus();
   color: $primary;
-}
-@media screen and (max-width: ($mobileWidth)) {
-  .dialog{
-    @include darken();
-    background: linear-gradient(to bottom, $darkenColor 0%,$darkenColor 75%,#ffffff 75%,#ffffff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-
-  }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*4)){
   .actionAlwaysCaption{

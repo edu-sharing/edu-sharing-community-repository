@@ -107,28 +107,25 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 					String accessToken = authHdr.substring(6).trim();
 					
 					try {
-						
-						Token token = tokenService.getToken(accessToken);
-						
-						
-						
-						if (token != null) {
-							logger.info("oAuthToken:"+ token.getAccessToken() +" alfresco ticket:"+ token.getTicket());
+						HashMap<String, String> currentAuth = authTool.validateAuthentication(session);
+						if(currentAuth==null) {
+							Token token = tokenService.getToken(accessToken);
 							
-							//validate and set current user
-							authTool.storeAuthInfoInSession(
-									token.getUsername(), 
-									token.getTicket(),
-									CCConstants.AUTH_TYPE_OAUTH,
-									session);
-							
-							session.setAttribute(CCConstants.AUTH_ACCESS_TOKEN, token.getAccessToken());
-							
-							validatedAuth = authTool.validateAuthentication(session);
-							
-							
-							
-						}										
+							if (token != null) {
+								logger.info("oAuthToken:"+ token.getAccessToken() +" alfresco ticket:"+ token.getTicket());
+								
+								//validate and set current user
+								authTool.storeAuthInfoInSession(
+										token.getUsername(), 
+										token.getTicket(),
+										CCConstants.AUTH_TYPE_OAUTH,
+										session);
+								
+								session.setAttribute(CCConstants.AUTH_ACCESS_TOKEN, token.getAccessToken());
+								
+								validatedAuth = authTool.validateAuthentication(session);							
+							}	
+						}
 					} catch (Exception ex) {
 						
 						logger.error(ex.getMessage(), ex);

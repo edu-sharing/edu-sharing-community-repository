@@ -380,7 +380,7 @@ label:active{
     @include iosScrolling();
     > div {
       position: absolute !important;
-      top: 70% !important;
+      top: calc(100% - 128px) !important;
       bottom: auto !important;
       left: 0!important;
       width: 100%!important;

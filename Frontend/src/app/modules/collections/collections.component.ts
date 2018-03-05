@@ -106,7 +106,8 @@ export class CollectionsMainComponent {
   public createCollectionReference = new AddElement("COLLECTIONS.ADD_MATERIAL","redo");
   private listOptions: OptionItem[];
   private _orderActive: boolean;
-  // default hides the tabs
+  optionsMaterials:OptionItem[];
+    // default hides the tabs
 
   // inject services
   constructor(
@@ -175,10 +176,11 @@ export class CollectionsMainComponent {
       });
     }
 
-  }
-  public set orderActive(orderActive:boolean){
-    this._orderActive=orderActive;
-    this.collectionContent.collection.orderMode=orderActive ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM : null;
+    }
+
+    public set orderActive(orderActive:boolean){
+      this._orderActive=orderActive;
+      this.collectionContent.collection.orderMode=orderActive ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM : null;
 
     if(this._orderActive){
       this.infoTitle='COLLECTIONS.ORDER_ELEMENTS';
@@ -349,30 +351,56 @@ export class CollectionsMainComponent {
     public isBrightColor(){
         return ColorHelper.getColorBrightness(this.collectionContent.collection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
     }
-  getScopeInfo(){
-    return NodeHelper.getCollectionScopeInfo(this.collectionContent.collection);
-  }
-  getOptions(nodes:Node[]=null,fromList:boolean) {
-    if(fromList && (!nodes || !nodes.length)){
-      nodes=[new Node()];
+    getScopeInfo(){
+      return NodeHelper.getCollectionScopeInfo(this.collectionContent.collection);
     }
-    let options:OptionItem[]=[];
-    let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,
-      (node:Node)=>this.addToOtherCollection(node));
-    if (collection) {
-      collection.name='COLLECTIONS.DETAIL.ADD_TO_OTHER';
-      options.push(collection);
+    public onSelection(nodes:EduData.Node[]){
+        this.optionsMaterials=this.getOptions(nodes,false);
     }
-    let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,
-      (node:Node)=>NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
-    if (download)
-      options.push(download);
-    let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node:Node) => this.deleteReference(ActionbarHelper.getNodes(nodes,node)[0]));      remove.showCallback=(node:Node)=>{return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes,node),RestConstants.ACCESS_DELETE)};
-    options.push(remove);
-    if (this.config.instant("nodeReport", false)) {
-      let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes,node)[0]);
-      options.push(report);
-    }
+    getOptions(nodes:Node[]=null,fromList:boolean) {
+      if(fromList && (!nodes || !nodes.length)){
+        nodes=[new Node()];
+      }
+      let options:OptionItem[]=[];
+      if(!fromList){
+          if(nodes && nodes.length) {
+              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
+                  let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
+                  options.push(collection);
+              }
+              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
+                  let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE','remove_circle_outline',(node: Node)=>{
+                      this.deleteMultiple(ActionbarHelper.getNodes(nodes,node));
+                  });
+                  options.push(remove);
+              }
+          }
+      }
+      if(fromList) {
+          let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,
+              (node: Node) => this.addToOtherCollection(node));
+          if (collection) {
+              collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
+              options.push(collection);
+          }
+      }
+      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,
+        (node:Node)=>NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
+      if (download)
+        options.push(download);
+      if(fromList) {
+          let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
+          remove.showCallback = (node: Node) => {
+              return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
+          };
+          options.push(remove);
+      }
+      if(fromList || nodes && nodes.length==1) {
+          if (this.config.instant("nodeReport", false)) {
+              let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes, node)[0]);
+              options.push(report);
+          }
+      }
 
     return options;
   }
@@ -725,7 +753,24 @@ export class CollectionsMainComponent {
       this.toast.error(error);
     });
   }
+    private deleteMultiple(nodes:Node[],position=0,error=false){
+            if(position==nodes.length){
+                if(!error) {
+                    this.toast.toast("COLLECTIONS.REMOVED_FROM_COLLECTION");
+                }
+                this.globalProgress=false;
+                this.refreshContent();
+                return;
+            }
+        this.globalProgress=true;
+        this.collectionService.removeFromCollection(nodes[position].ref.id,this.collectionContent.collection.ref.id).subscribe(()=>{
+            this.deleteMultiple(nodes,position+1,error);
 
+        },(error:any)=>{
+            this.toast.error(error);
+            this.deleteMultiple(nodes,position+1,true);
+        });
+    }
   public closeDialog() {
     this.dialogTitle=null;
   }

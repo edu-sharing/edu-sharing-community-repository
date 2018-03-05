@@ -71,8 +71,8 @@ table, div {
 
 .section-headline {
     color: #5F5F5F;
-    padding-top: 10px;
-    padding-bottom: 8px;
+    padding-top: 18px;
+    padding-bottom: 18px;
 }
 
 .collections-breadcrumb {
@@ -263,6 +263,10 @@ table, div {
   }
   .custom-order {
     padding-left: 10px;
+  }
+  .actionbarMaterials{
+    position: absolute;
+    right:20px;
   }
 }
 :host /deep/{

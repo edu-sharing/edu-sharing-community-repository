@@ -7,8 +7,8 @@ md-input{
   text-align: center;
   width: 100%;
   position:fixed;
-  top:calc(15% + 470px);
-  color: #fff;
+  top:calc(15% + 490px);
+  color: $textVeryLight;
 }
 .branding{
   width:100%;
@@ -22,6 +22,9 @@ md-input{
 @media only screen and (max-width: $mobileWidth+$mobileStage*1) {
   .card-title{
     margin-bottom: 15px;
+  }
+  .powered{
+    top:calc(15% + 410px);
   }
   .branding{
     position: absolute;

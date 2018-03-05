@@ -211,22 +211,6 @@ export class MdsComponent{
       this.onDone.emit(null);
     });
   }
-  private onAddWidget(){
-    let values:any=[];
-    for(let i=0;i<100;i++){
-      values[i]={id:'Test'+i,caption:'Test Caption '+i,disabled:Math.random()<0.2,parent:i>10 ? 'Test'+Math.round(Math.random()*100) : null};
-    }
-    /*
-    let data={widgets:[
-      {type:this.widgetType,label:this.widgetName,id:this.widgetName,values:values}
-    ]};*/
-    let data=this.mds;
-    this.mds.widgets[this.widgetName].widget=this.widgetType;
-    let html='<'+this.widgetName+'>';
-    this.currentWidgets=[];
-    this.setRenderedHtml(this.renderTemplate(html,data,null,null));
-    this.readValues(data,this.currentNode);
-  }
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
               private route : ActivatedRoute,
@@ -408,7 +392,6 @@ export class MdsComponent{
   }
 
   private scrollSmooth(id:string){
-    console.log(id);
     let pos=document.getElementById(id+'_header').offsetTop;
     UIHelper.scrollSmoothElement(pos,this.mdsScrollContainer.nativeElement,2);
   }
@@ -418,34 +401,36 @@ export class MdsComponent{
     for(let viewId of group.views){
       for(let view of data.views){
         if(view.id==viewId){
-          html+=`<a onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
+          html+=`<a class="clickable" onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
           i++;
           break;
         }
       }
     }
     this.jumpmarksCount=i;
-    eval(`setInterval(function(){
-      var jump=document.getElementById("jumpmarks");
-      if(!jump)
-        return;
-      var elements=jump.getElementsByTagName("a");
-      var scroll=document.getElementsByClassName("mdsViewHeader");
-      var pos=document.getElementById("mdsScrollContainer").scrollTop - 100;
-      var closest=999999;
-      var active=elements[0];
-      for(var i=0;i<elements.length;i++){
-        elements[i].className=elements[i].className.replace("active","").trim();
-        if(!scroll[i])
-          continue;
-        var top=scroll[i].getBoundingClientRect().top;
-        if(Math.abs(top-pos)<closest){
-          closest=Math.abs(top-pos);
-          active=elements[i];
+    setInterval(function(){
+        let jump=document.getElementById("jumpmarks");
+        if(!jump)
+            return;
+        let elements=jump.getElementsByTagName("a");
+        let scroll=document.getElementsByClassName("mdsViewHeader");
+        let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
+        console.log(height);
+        let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
+        let closest=999999;
+        let active=elements[0];
+        for(let i=0;i<elements.length;i++){
+            elements[i].className=elements[i].className.replace("active","").trim();
+            if(!scroll[i])
+                continue;
+            let top=scroll[i].getBoundingClientRect().top;
+            if(Math.abs(top-pos)<closest){
+                closest=Math.abs(top-pos);
+                active=elements[i];
+            }
         }
-      }
-      active.className+=" active";
-      },200);`)
+        active.className+=" active";
+    },200);
     return html;
   }
 
@@ -453,7 +438,6 @@ export class MdsComponent{
     if(!id)
       return;
     this.currentWidgets=[];
-
     // add the default widgets
     data.widgets.push({id:'preview'});
     data.widgets.push({id:'version'});
@@ -567,7 +551,7 @@ export class MdsComponent{
       else if(widget.type=='checkbox'){
         props=[(element as any).checked];
       }
-      if(widget.isRequired && (!props.length || props[0]=='')){
+      if(this.isRequiredWidget(widget) && (!props.length || props[0]=='')){
         if(showError) {
           element.className += 'invalid';
           this.toast.error(null, 'TOAST.FIELD_REQUIRED', {name: widget.caption});
@@ -582,6 +566,9 @@ export class MdsComponent{
           props=[];
       }
       properties[widget.id]=props;
+    }
+    if(!properties[RestConstants.CM_NAME]){
+      properties[RestConstants.CM_NAME]=properties[RestConstants.LOM_PROP_TITLE];
     }
     return properties;
   }
@@ -793,13 +780,17 @@ export class MdsComponent{
               }
             }
             element.value=caption;
-            let event = new KeyboardEvent('keyup', {
-              'view': window,
-              'bubbles': true,
-              'cancelable': true
-            });
-            // simulate event for materialize
-            element.dispatchEvent(event);
+            try {
+                let event = new KeyboardEvent('keyup', {
+                    'view': window,
+                    'bubbles': true,
+                    'cancelable': true
+                });
+                // simulate event for materialize
+                element.dispatchEvent(event);
+            }catch(e){
+              // fails in ie11
+            }
             if(element.value!=props[0]) {
               element.setAttribute('data-value', props[0]);
             }
@@ -862,7 +853,6 @@ export class MdsComponent{
       }
       if(start<0)
         continue;
-      this.currentWidgets.push(widget);
       if(end==-1)
         end=html.indexOf('>',start);
 
@@ -875,6 +865,7 @@ export class MdsComponent{
       if(this.isExtendedWidget(widget))
         extended[0]=true;
       this.replaceVariables(widget);
+      this.currentWidgets.push(widget);
       let attr=html.substring(start+search.length,end);
       let widgetData=this.renderWidget(widget,attr,template,node);
       if(!widgetData) {
@@ -1045,7 +1036,6 @@ export class MdsComponent{
   private mdsUpdateSuggests(id:string,showMore=false){
     let list=document.getElementById(id+'_suggestions');
     let element:any=document.getElementById(id+'_suggestionsInput');
-    let dialog=document.getElementById(id+'_dialog');
     let elements=list.getElementsByTagName('a');
     let widget=this.getWidget(id);
     if(showMore){
@@ -1053,7 +1043,6 @@ export class MdsComponent{
     }
     elements.item(0).style.display='none';
     list.style.display='none';
-    dialog.style.display='none';
     let values=this.getValues([],false);
     let group=this._groupId;
     if(!group){
@@ -1070,7 +1059,6 @@ export class MdsComponent{
       list.className=list.className.replace('suggestionListAll','').trim();
 
       list.style.display='';
-      dialog.style.display='';
       let i=0;
       let moreCount=0;
       for(let value of data.values){
@@ -1088,7 +1076,6 @@ export class MdsComponent{
       }
       if(i==0){
         list.style.display='none';
-        dialog.style.display='none';
       }
       if(moreCount){
         list.innerHTML+='<a class="collection-item suggestionMoreItems" onclick="window.mdsComponentRef.component.mdsUpdateSuggests(\''+id+'\',true)">'+moreCount+' '+this.translate.instant('MORE_SELECTBOX')+'</a>';
@@ -1123,7 +1110,7 @@ export class MdsComponent{
                 }
                 " onclick="
                 document.getElementById('` + id + `_suggestions').style.display='none';
-                document.getElementById('` + id + `_dialog').style.display='none';`;
+                window.mdsComponentRef.component.currentWidgetSuggestion=null;`;
 
     if(singleValue){
       html+=`   document.getElementById('` + id + `').value=this.getAttribute('data-caption');
@@ -1263,7 +1250,7 @@ export class MdsComponent{
                      }
                   }
               "><i class="material-icons">arrow_forward</i></div>
-              <div class="dialog darken" style="display:none;" id="`+widget.id+`_tree">
+              <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+widget.id+`_tree').style.display='none';"><i class="material-icons">close</i></div>
@@ -1474,8 +1461,6 @@ export class MdsComponent{
       }
       if(condition.type=='TOOLPERMISSION'){
         let tp=this.connector.hasToolPermissionInstant(condition.value);
-        console.log(condition.value);
-        console.log(tp);
         if(tp==condition.negate){
           return null;
         }
@@ -1858,7 +1843,9 @@ export class MdsComponent{
   private isExtendedWidget(widget: any) {
     return widget.isExtended==true || widget.extended==true || widget.isExtended=='true' || widget.extended=='true';
   }
-
+  private isRequiredWidget(widget: any) {
+        return widget.isRequired==true || widget.required==true || widget.isRequired=='true' || widget.required=='true';
+  }
   private highlightSearch(caption: string, searchString: string) :string {
     let pos=caption.toLowerCase().indexOf(searchString.toLowerCase());
     if(pos==-1)
@@ -1892,10 +1879,13 @@ export class MdsComponent{
   private addAuthorValue(properties: any) {
     if(document.getElementById(RestConstants.CCM_PROP_AUTHOR_FREETEXT) || document.getElementById(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR)) {
       //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_FREETEXT)
-      this.currentWidgets.push({id: RestConstants.CCM_PROP_AUTHOR_FREETEXT, type: 'textarea'});
-
+      if(Helper.indexOfObjectArray(this.currentWidgets,'id',RestConstants.CCM_PROP_AUTHOR_FREETEXT)==-1) {
+          this.currentWidgets.push({id: RestConstants.CCM_PROP_AUTHOR_FREETEXT, type: 'textarea'});
+      }
       //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_PERSON)
-      this.currentWidgets.push({id: RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, type: 'vcard'});
+      if(Helper.indexOfObjectArray(this.currentWidgets,'id',RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR)==-1) {
+          this.currentWidgets.push({id: RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, type: 'vcard'});
+      }
     }
   }
 

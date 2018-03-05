@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,6 +19,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -98,19 +100,22 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public List<NodeRef> getFilesSharedByMe() throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
-		org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry.getSearchService();
 		SearchParameters parameters = new SearchParameters();
+		String postfix="";
+		if(NodeServiceInterceptor.getEduSharingScope()!=null) {
+			postfix+="_"+NodeServiceInterceptor.getEduSharingScope();
+		}
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR " + "TYPE:\"" + CCConstants.CCM_TYPE_MAP
-				+ "\") AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify//.\" AND NOT ASPECT:\""
-				+ CCConstants.CCM_ASPECT_COLLECTION + "\" AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
+		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
+				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
-		List<NodeRef> refs = new ArrayList<>();
-		for (NodeRef node : resultSet.getNodeRefs()) {
-			if (refs.contains(node))
+		List<NodeRef> refs = convertNotifysToObjects(resultSet.getNodeRefs());
+		List<NodeRef> result = new ArrayList<>(); 
+		for (NodeRef node : refs) {
+			if (result.contains(node))
 				continue;
 			ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
 			if (permissions != null && permissions.length > 0) {
@@ -122,35 +127,72 @@ public class SearchServiceImpl implements SearchService {
 					break;
 				}
 				if (add)
-					refs.add(node);
+					result.add(node);
 			}
 		}
-		return refs;
+		
+		return result;
+	}
+
+	private List<NodeRef> convertNotifysToObjects(List<NodeRef> nodeRefs) {
+		List<NodeRef> result=new ArrayList<NodeRef>();
+
+		HashSet<QName> types = new HashSet<QName>();
+		types.add(QName.createQName(CCConstants.CCM_TYPE_IO));
+		types.add(QName.createQName(CCConstants.CCM_TYPE_MAP));
+
+		for (NodeRef nodeRef : nodeRefs) {
+
+			if (nodeRef.getId().contains("missing")) {
+				continue;
+			}
+
+			List<ChildAssociationRef> childsOfNotify = null;
+
+			try {
+				childsOfNotify = serviceRegistry.getNodeService().getChildAssocs(nodeRef, types);
+			} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
+				logger.error(e.getMessage() + " while calling nodeService.getChildAssocs for " + nodeRef);
+				continue;
+			}
+			if (childsOfNotify != null && childsOfNotify.size() > 0) {
+				NodeRef ref = childsOfNotify.get(0).getChildRef();
+				QName type = serviceRegistry.getNodeService().getType(ref);
+				if(types.contains(type)) {
+					if(!serviceRegistry.getNodeService().hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) && !result.contains(ref))
+						result.add(ref);
+				}
+			}
+		}
+		return result;
+
 	}
 
 	@Override
 	public List<NodeRef> getFilesSharedToMe() throws Exception {
 		String username = AuthenticationUtil.getFullyAuthenticatedUser();
 		String homeFolder = baseClient.getHomeFolderID(username);
+		String postfix="";
+		if(NodeServiceInterceptor.getEduSharingScope()!=null) {
+			postfix+="_"+NodeServiceInterceptor.getEduSharingScope();
+		}
 
-		org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry.getSearchService();
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 		// TODO: The amount of files seems to be HUGE, we need a better query for filtering!
-		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\" OR " + "TYPE:\"" + CCConstants.CCM_TYPE_MAP
-				+ "\") AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify//.\" AND NOT ASPECT:\""
-				+ CCConstants.CCM_ASPECT_COLLECTION + "\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username)
-				+ "\"");
+		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
+				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
+		List<NodeRef> result = convertNotifysToObjects(resultSet.getNodeRefs());
 
 		return AuthenticationUtil.runAsSystem(new RunAsWork<List<NodeRef>>() {
 			@Override
 			public List<NodeRef> doWork() throws Exception {
-				List<NodeRef> refs = new ArrayList<>(resultSet.getNodeRefs().size());
-				for (NodeRef node : resultSet.getNodeRefs()) {
+				List<NodeRef> refs = new ArrayList<>(result.size());
+				for (NodeRef node : result) {
 					if (refs.contains(node))
 						continue;
 					if (node.getId().equals(homeFolder))
@@ -404,8 +446,8 @@ public class SearchServiceImpl implements SearchService {
 						//if (!globalSearch)
 							return searchAuthoritiesSolr(pattern, skipCount, maxValues, sort,
 									type,globalSearch,customProperties);
-								
-						/*	
+
+						/*
 						checkGlobalSearchPermission();
 						AuthorityService authorityService = serviceRegistry.getAuthorityService();
 						PagingRequest paging = new PagingRequest(skipCount, maxValues);
@@ -626,7 +668,7 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public SearchToken getLastSearchToken() throws Throwable {
 		return (SearchToken) org.edu_sharing.repository.server.authentication.Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.SESSION_LAST_SEARCH_TOKEN);
-		
+
 	}
 	public SearchResultNodeRef search(SearchToken searchToken) {
 		return search(searchToken, true);
@@ -733,7 +775,6 @@ public class SearchServiceImpl implements SearchService {
 	}
 	@Override
 	public List<NodeRef> getWorkflowReceive(String user) {
-		org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry.getSearchService();
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);

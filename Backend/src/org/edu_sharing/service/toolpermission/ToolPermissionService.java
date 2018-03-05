@@ -137,7 +137,7 @@ public class ToolPermissionService {
 		return (0 == accessStatus.compareTo(AccessStatus.ALLOWED));
 	}
 	
-	private String getToolPermissionNodeId(String toolPermission) throws Throwable{
+	public String getToolPermissionNodeId(String toolPermission) throws Throwable{
 		String systemFolderId = getEdu_SharingToolPermissionsFolder();
 		
 		

@@ -577,5 +577,11 @@ export class NodeHelper{
   static hasAnimatedPreview(node: Node) {
     return !node.preview.isIcon && (node.mediatype=="file-video" || node.mimetype=="image/gif");
   }
+
+  static askCCPublish(translate:TranslateService,node: Node) {
+      let mail=node.createdBy.firstName+" "+node.createdBy.lastName+"<"+node.createdBy.mailbox+">";
+      let subject=translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
+      window.location.href="mailto:"+mail+"?subject="+encodeURIComponent(subject);
+  }
 }
 

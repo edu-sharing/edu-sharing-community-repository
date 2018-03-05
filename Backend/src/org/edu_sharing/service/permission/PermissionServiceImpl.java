@@ -554,9 +554,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	private void checkCanManagePermissions(String nodeId,ACE[] aces) throws Exception{
-		if(NodeServiceInterceptor.getEduSharingScope()!=null){
-			throw new Exception("Setting Permissions in scope is not allowed");
-		}
 		boolean hasUsers=false,hasAll=false;
 		if(aces!=null){
 			for (ACE ace : aces) {
@@ -570,6 +567,17 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 		boolean shared=isSharedNode(nodeId);
+		if(!shared && NodeServiceInterceptor.getEduSharingScope()!=null){
+			if(QName.createQName(CCConstants.CCM_TYPE_NOTIFY).equals(nodeService.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)))){
+				// allow notify objects to share
+			}
+			else {
+				throw new Exception("Setting Permissions for private files in scope is not allowed");
+			}
+		}
+		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE) && NodeServiceInterceptor.getEduSharingScope()!=null){
+			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE);
+		}
 		if(!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES) && hasAll){
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
 		}
@@ -762,7 +770,32 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 	}
-	
+	private void addGlobalAuthoritySearchQuery(StringBuffer searchQuery){
+		if(NodeServiceInterceptor.getEduSharingScope()==null)
+			return;
+		try {
+		// fetch all groups which are allowed to acces confidential and 
+		String nodeId=toolPermission.getToolPermissionNodeId(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
+		StringBuffer groupPathQuery=new StringBuffer();
+		// user may not has ReadPermissions on ToolPermission, so fetch as admin
+		ACL permissions=AuthenticationUtil.runAsSystem(new RunAsWork<ACL>() {
+			@Override
+			public ACL doWork() throws Exception {
+				return getPermissions(nodeId);
+			}
+		});
+		for(ACE ace : permissions.getAces()) {
+			if(groupPathQuery.length() != 0){
+				groupPathQuery.append(" OR ");
+			}
+			groupPathQuery.append("PATH:\"").append("/").append("sys\\:system").append("/").append("sys\\:authorities").append("/")
+			.append("cm\\:").append(ISO9075.encode(ace.getAuthority())).append("//.").append("\"");
+		}
+		searchQuery.append(" AND ("+groupPathQuery+")");
+		}catch(Throwable t) {
+			throw new RuntimeException(t);
+		}
+	}
 	public StringBuffer getFindUsersSearchString(HashMap<String,String> propVals, boolean globalContext){
 		String fuzzyUserSearchProp = RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_FUZZY_USERSEARCH);
 
@@ -851,7 +884,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			if(!hasToolPermission){
 				return null;
 			}
-			
+			addGlobalAuthoritySearchQuery(searchQuery);
+
 		}else{
 			
 			Set<String> groupsOfUser = authorityService.getAuthorities();
@@ -873,6 +907,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				if(!hasToolPermission){
 					return null;
 				}
+				addGlobalAuthoritySearchQuery(searchQuery);
 			}
 			
 			StringBuffer groupPathQuery = new StringBuffer();
@@ -955,6 +990,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			if(!hasToolPermission){
 				return null;
 			}
+			addGlobalAuthoritySearchQuery(searchQuery);
 		}else{
 			
 			Set<String> groupsOfUser = authorityService.getAuthorities();
@@ -1290,7 +1326,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 			}
 		}
-		
+
 		if(!authorityService.authorityExists(authorityId)){
 			throw new IllegalArgumentException("Authority "+authorityId+" does not exist");
 		}
@@ -1310,7 +1346,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}, authorityId);
 	}
-	
+
 	@Override
 	public void setPermission(String nodeId, String authority, String permission) {
 		permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId), authority, permission, true);

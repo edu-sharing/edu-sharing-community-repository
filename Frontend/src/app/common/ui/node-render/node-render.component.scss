@@ -33,6 +33,9 @@ a, a:hover, a:visited, a:active {
   .topBar-render{
     display: none!important;
   }
+  a.edusharing_rendering_content{
+    background-color: $primary;
+  }
 }
 .topBar{
   background:#383838;

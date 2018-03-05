@@ -13,7 +13,7 @@
       <div class="card-title" *ngIf="currentNode">{{currentNode.name}}</div>
       <div class="card-title" *ngIf="!currentNode">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
       <div class="card-scroll mdsCard" id="mdsScrollContainer" #mdsScrollContainer>
-        <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()"></div>
+        <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()" [style.top]="mdsScrollContainer.scrollTop+'px'"></div>
         <div [innerHTML]="rendered"></div>
 
       </div>

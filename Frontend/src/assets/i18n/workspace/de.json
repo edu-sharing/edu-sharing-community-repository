@@ -11,6 +11,7 @@
     "MY_FILES": "Meine Inhalte",
     "ADD": "Neu",
     "ADD_OBJECT": "Neues Material",
+    "ADD_EMPTY_OBJECT": "Neues Objekt",
     "ADD_OBJECT_TITLE": "Neues Objekt erstellen",
     "ADD_OBJECT_MESSAGE": "Materialien hier ablegen",
     "SELECT_COLLECTION": "Sammlung wählen",
@@ -187,8 +188,8 @@
       "HISTORY":"Protokoll der bisherigen Workflow-Aktivitäten",
       "NO_COMMENT":"Bitte geben Sie einen Kommentar für diesen Vorgang an",
       "NO_HISTORY":"Es wurden noch keine Workflow-Einträge vorgenommen",
-      "USER_NO_PERMISSION":"Zuständige(n) als Mitarbeiter einladen",
-      "USER_NO_PERMISSION_INFO":"Die von Ihnen gewählte zuständige Person {{user}} hat aktuell keine Berechtigung das Objekt zu bearbeiten. Möchten Sie sie als Mitarbeiter zulassen?",
+      "USER_NO_PERMISSION":"Zuständige(n) als Koordinator einladen",
+      "USER_NO_PERMISSION_INFO":"Die von Ihnen gewählte zuständige Person {{user}} hat aktuell keine Berechtigung das Objekt zu bearbeiten. Möchten Sie sie als Koordinator zulassen?\n\nKoordinatoren dürfen das Material bearbeiten und weiteren Personen Zugriff gewähren.",
       "PROCEED":"Ja, Zulassen"
     },
     "CONTRIBUTOR":{
