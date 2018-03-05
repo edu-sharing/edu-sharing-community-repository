@@ -112,8 +112,9 @@ public class SearchServiceImpl implements SearchService {
 				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
 		List<NodeRef> refs = convertNotifysToObjects(resultSet.getNodeRefs());
-		for (NodeRef node : resultSet.getNodeRefs()) {
-			if (refs.contains(node))
+		List<NodeRef> result = new ArrayList<>();
+		for (NodeRef node : refs) {
+			if (result.contains(node))
 				continue;
 			ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
 			if (permissions != null && permissions.length > 0) {
@@ -125,19 +126,20 @@ public class SearchServiceImpl implements SearchService {
 					break;
 				}
 				if (add)
-					refs.add(node);
+					result.add(node);
 			}
 		}
-		return refs;
+
+		return result;
 	}
 
 	private List<NodeRef> convertNotifysToObjects(List<NodeRef> nodeRefs) {
-		List<NodeRef> result=new ArrayList<NodeRef>(); 
-		
+		List<NodeRef> result=new ArrayList<NodeRef>();
+
 		HashSet<QName> types = new HashSet<QName>();
 		types.add(QName.createQName(CCConstants.CCM_TYPE_IO));
 		types.add(QName.createQName(CCConstants.CCM_TYPE_MAP));
-		
+
 		for (NodeRef nodeRef : nodeRefs) {
 
 			if (nodeRef.getId().contains("missing")) {
@@ -154,8 +156,11 @@ public class SearchServiceImpl implements SearchService {
 			}
 			if (childsOfNotify != null && childsOfNotify.size() > 0) {
 				NodeRef ref = childsOfNotify.get(0).getChildRef();
-				if(!serviceRegistry.getNodeService().hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) && !result.contains(ref))
-					result.add(ref);
+				QName type = serviceRegistry.getNodeService().getType(ref);
+				if(types.contains(type)) {
+					if(!serviceRegistry.getNodeService().hasAspect(ref,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)) && !result.contains(ref))
+						result.add(ref);
+				}
 			}
 		}
 		return result;
@@ -418,7 +423,7 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public SearchResult<String> searchAuthorities(AuthorityType type, String _pattern, boolean globalSearch,
 			int _skipCount, int _maxValues, SortDefinition sort,Map<String,String> customProperties) {
-		
+
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
 
 				new RetryingTransactionCallback<SearchResult<String>>() {
