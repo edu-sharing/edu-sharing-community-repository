@@ -1302,6 +1302,10 @@ public class CCConstants {
 	public final static String PERMISSION_READ = "Read";
 
 	/**
+	 * Deny Permission (if set, will revoke all other permissions)
+	 */
+	public final static String PERMISSION_DENY = "Deny";
+	/**
 	 * Write Permission
 	 */
 	public final static String PERMISSION_WRITE = "Write";

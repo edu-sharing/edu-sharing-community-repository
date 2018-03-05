@@ -33,7 +33,7 @@ export class WorkspaceShareComponent  {
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
-    "Publisher","ReadPermissions","ChangePermissions","CCPublish"];
+    "Publisher","ReadPermissions","ChangePermissions","CCPublish","Deny"];
   public PERMISSIONS_FORCES:any= [
     ["Read",["ConsumerMetadata"]],
     ["Read",["Consumer"]],
