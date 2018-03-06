@@ -91,6 +91,7 @@ import org.edu_sharing.repository.update.Update;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.admin.model.ToolPermission;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
 import org.edu_sharing.service.permission.PermissionService;
@@ -144,8 +145,12 @@ public class AdminServiceImpl implements AdminService  {
 	
 	@Override
 	public Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable {
+		
 		ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
 		PermissionService permissionService = PermissionServiceFactory.getLocalService();
+		if(AuthorityServiceFactory.getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
+			throw new IllegalArgumentException("Toolpermissions are not supported for members of "+CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
+		}
 		Map<String,ToolPermission> toolpermissions=new HashMap<>();
 		for(String tp : ToolPermissionServiceFactory.getAllToolPermissions()) {
 			String nodeId=tpService.getToolPermissionNodeId(tp);
@@ -173,6 +178,9 @@ public class AdminServiceImpl implements AdminService  {
 	public void setToolpermissions(String authority,Map<String, ToolPermission.Status> toolpermissions) throws Throwable {
 		ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
 		PermissionService permissionService = PermissionServiceFactory.getLocalService();
+		if(AuthorityServiceFactory.getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
+			throw new IllegalArgumentException("Toolpermissions are not supported for members of "+CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
+		}
 		for(String tp : ToolPermissionServiceFactory.getAllToolPermissions()) {
 			ToolPermission.Status status = toolpermissions.get(tp);
 			String nodeId=tpService.getToolPermissionNodeId(tp);
