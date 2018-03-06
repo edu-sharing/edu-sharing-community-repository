@@ -22,7 +22,11 @@ export class ModalDialogComponent{
       return;
     }
   }
-
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   */
+  @Input() priority = 0;
   /**
    * Wether or not this dialog can be closed using escape or the icon
    * @type {boolean}
