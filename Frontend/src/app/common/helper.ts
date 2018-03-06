@@ -111,6 +111,8 @@ export class Helper {
     return JSON.parse(JSON.stringify(data));
   }
   public static deepCopyArray(data: any[]) {
+    if(!Array.isArray(data))
+      return data;
     return data.slice();
   }
 
