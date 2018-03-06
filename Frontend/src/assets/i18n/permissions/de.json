@@ -11,6 +11,7 @@
     "MENU_CREATE_GROUP":"Gruppe erstellen",
     "MENU_EDIT":"Bearbeiten",
     "MENU_DELETE":"Löschen",
+    "MENU_TOOLPERMISSIONS":"Berechtigungen",
     "MANAGE_GROUP":"Gruppe {{group}} verwalten",
     "ADD_MEMBER_TO_GROUP":"Nutzer zu {{group}} hinzufügen",
     "EXPORT_MEMBER":"Nutzer exportieren",
@@ -65,6 +66,29 @@
     "NO_ORG":"Alles anzeigen",
     "INTERNAL_NAME":"Systemname",
     "CURRENT_MEMBERS":"Aktuelle Mitglieder in Gruppe {{group}}:",
-    "DOWNLOAD_MEMBER_FILENAME":"Nutzer.csv"
+    "DOWNLOAD_MEMBER_FILENAME":"Nutzer.csv",
+    "TOOLPERMISSIONS":{
+      "TITLE":"Berechtigungen festlegen für {{name}}",
+      "MEMBERS_ALLOWED":"Gilt für alle Mitglieder",
+      "USER_ALLOWED":"Gilt für gewählten Benutzer",
+      "ALLOW":"Erlauben",
+      "DENY":"Verbieten",
+      "RESULT":"Ergebnis",
+      "INHERIT":"Von einer Gruppe oder globalen Berechtigung geerbt",
+      "INHERIT_UNKNOWN":"Zustand ist unbekannt. Speichern Sie die Berechtigungen, um den geerbten Zustand zu sehen",
+      "STATUS_ALLOWED":"Erlaubt",
+      "STATUS_DENIED":"Verboten",
+      "STATUS_UNDEFINED":"Ungesetzt\n(Verboten)",
+      "STATUS_UNKNOWN":"Unbekannt",
+      "SAVED":"Berechtigungen wurden aktualisiert",
+      "GROUP":{
+        "SHARING":"Freigaben",
+        "LICENSING":"Lizenzierung & Veröffentlichung",
+        "DATA_MANAGEMENT":"Dateimanagement",
+        "SAFE":"Gesicherter Bereich (Safe)",
+        "COLLECTIONS":"Sammlungen",
+        "OTHER":"Andere / Nicht kategorisiert"
+      }
+    }
   }
 }

@@ -1,0 +1,93 @@
+@import "../../../../styles/variables.scss";
+
+:host /deep/{
+  .table .inherit svg{
+    width:14px;
+    height:auto;
+    margin-top:5px;
+  }
+  .table .allowed #Mask{
+    fill:$colorStatusPositive;
+  }
+  .table .denied #Mask{
+    fill:$colorStatusNegative;
+  }
+}
+.card-scroll{
+  top:0;
+  height:calc(100% - 48px);
+}
+.fade{
+  position: absolute;
+  z-index: 100;
+  left:0;
+  top:108px;
+  width: 100%;
+  height:20px;
+  background: linear-gradient(to bottom,#fff 15%,rgba(255,255,255,0.0001));
+}
+.heading,.groupTable{
+  display:flex;
+}
+.heading{
+  font-weight: bold;
+  color: $textLight;
+  margin:0 $cardPadding;
+}
+.table{
+  display:flex;
+  flex-direction: column;
+  width:100%;
+  margin-top: -10px;
+}
+.groupName{
+  color:$textLight;
+  font-weight: bold;
+  text-align: left;
+  padding: 10px 20px;
+}
+.name{
+  flex-grow: 1;
+  text-align:left;
+  align-self: center;
+  padding:10px 0;
+  word-break: break-word;
+  .technicalName{
+    font-size:80%;
+    word-break: break-all;
+    color:$textVeryLight;
+    font-style: italic;
+  }
+}
+.checkboxDiv{
+  width:75px;
+  min-width:75px;
+  align-self: center;
+}
+.checkboxInput{
+  padding-top: 7px;
+}
+.checkboxDiv,.result{
+  text-align: center;
+}
+.result{
+  width: 130px;
+  min-width: 130px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .text{
+    white-space: pre-wrap;
+  }
+  .inherit{
+    cursor:default;
+    padding-left:10px;
+    font-size:14px;
+  }
+}
+.allowed{
+  color:$colorStatusPositive;
+}
+.denied{
+  color:$colorStatusNegative;
+}
