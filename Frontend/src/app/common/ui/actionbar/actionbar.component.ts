@@ -5,6 +5,7 @@ import {UIService} from "../../services/ui.service";
 import {trigger} from "@angular/animations";
 import {UIHelper} from "../ui-helper";
 import {OptionItem} from "./option-item";
+import {Helper} from '../../helper';
 
 @Component({
   selector: 'actionbar',
@@ -41,7 +42,7 @@ export class ActionbarComponent{
    * @param options
    */
   @Input() set options(options : OptionItem[]){
-    options=OptionItem.filterValidOptions(this.ui,options);
+    options=OptionItem.filterValidOptions(this.ui,Helper.deepCopyArray(options));
     if(options==null){
       this.optionsAlways=[];
       this.optionsMenu=[];
