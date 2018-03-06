@@ -106,4 +106,10 @@ public class PermissionServiceAdapter implements PermissionService {
 		
 	}
 
+	@Override
+	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

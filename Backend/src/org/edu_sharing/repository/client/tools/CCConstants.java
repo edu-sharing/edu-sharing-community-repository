@@ -1504,7 +1504,7 @@ public class CCConstants {
 
 	public static ArrayList<String> getPermissionList(){
 		if(permission == null){
-			permission = new ArrayList();
+			permission = new ArrayList<>();
 			permission.add(PERMISSION_ALL);
 			permission.add(PERMISSION_READ);
 			permission.add(PERMISSION_READ_PREVIEW);
@@ -1524,6 +1524,7 @@ public class CCConstants {
 			permission.add(PERMISSION_CC_PUBLISH);
 			permission.add(PERMISSION_READPERMISSIONS);
 			permission.add(PERMISSION_CHANGEPERMISSIONS);
+			permission.add(PERMISSION_DENY);
 		}
 		return permission;
 	}
@@ -1531,7 +1532,7 @@ public class CCConstants {
 	private static ArrayList minimalPermissions = null;
 	public static ArrayList getMinimalPermissions(){
 		if(minimalPermissions == null){
-			minimalPermissions = new ArrayList();
+			minimalPermissions = new ArrayList<>();
 			minimalPermissions.add(PERMISSION_CONSUMER);
 			minimalPermissions.add(PERMISSION_COLLABORATOR);
 			minimalPermissions.add(PERMISSION_COORDINATOR);

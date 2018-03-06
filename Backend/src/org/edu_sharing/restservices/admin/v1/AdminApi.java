@@ -47,6 +47,7 @@ import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
+import org.edu_sharing.service.admin.model.ToolPermission;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
@@ -82,6 +83,53 @@ public class AdminApi {
 		try {
 			AdminServiceFactory.getInstance().refreshApplicationInfo();
 	    	return Response.ok().build();		
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@GET
+	@Path("/toolpermissions/{authority}")
+	
+	@ApiOperation(value = "get all toolpermissions for an authority", notes="Returns explicit (rights set for this authority) + effective (resulting rights for this authority) toolpermission")
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response getAllToolpermissions(
+			@ApiParam(value = "Authority to load (user or group)",required=true) @PathParam("authority") String authority,
+			@Context HttpServletRequest req){
+		try {
+			Map<String, ToolPermission> result = AdminServiceFactory.getInstance().getToolpermissions(authority);
+	    	return Response.ok().entity(result).build();		
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@PUT
+	@Path("/toolpermissions/{authority}")
+	
+	@ApiOperation(value = "set toolpermissions for an authority", notes="If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority")
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response setToolpermissions(
+			@ApiParam(value = "Authority to set (user or group)",required=true) @PathParam("authority") String authority,
+			Map<String,ToolPermission.Status> permissions,
+			@Context HttpServletRequest req){
+		try {
+			AdminServiceFactory.getInstance().setToolpermissions(authority,permissions);
+	    	return Response.ok().build();	
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}

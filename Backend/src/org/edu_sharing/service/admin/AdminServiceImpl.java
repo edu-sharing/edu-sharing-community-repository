@@ -45,6 +45,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.exception.CCException;
+import org.edu_sharing.repository.client.rpc.ACE;
+import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -88,14 +90,20 @@ import org.edu_sharing.repository.update.SystemFolderNameToDisplayName;
 import org.edu_sharing.repository.update.Update;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
+import org.edu_sharing.service.admin.model.ToolPermission;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
+import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.io.Files;
 import com.sun.star.uno.RuntimeException;
+import jdk.net.SocketFlow.Status;
 
 public class AdminServiceImpl implements AdminService  {
 	
@@ -134,6 +142,77 @@ public class AdminServiceImpl implements AdminService  {
 		return result;
 	}
 	
+	@Override
+	public Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable {
+		ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
+		PermissionService permissionService = PermissionServiceFactory.getLocalService();
+		Map<String,ToolPermission> toolpermissions=new HashMap<>();
+		for(String tp : ToolPermissionServiceFactory.getAllToolPermissions()) {
+			String nodeId=tpService.getToolPermissionNodeId(tp);
+			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,authority);
+			List<String> permissions = permissionService.getPermissionsForAuthority(nodeId, authority);
+			ToolPermission status=new ToolPermission();
+		
+			if(permissionsExplicit.contains(CCConstants.PERMISSION_DENY)) {
+				status.setExplicit(ToolPermission.Status.DENIED);
+			}
+			else if(permissionsExplicit.contains(CCConstants.PERMISSION_READ)) {
+				status.setExplicit(ToolPermission.Status.ALLOWED);
+			}
+			if(permissions.contains(CCConstants.PERMISSION_DENY)) {
+				status.setEffective(ToolPermission.Status.DENIED);
+			}
+			else if(permissions.contains(CCConstants.PERMISSION_READ)) {
+				status.setEffective(ToolPermission.Status.ALLOWED);
+			}
+			toolpermissions.put(tp,status);
+		}
+		return toolpermissions;
+	}
+	@Override
+	public void setToolpermissions(String authority,Map<String, ToolPermission.Status> toolpermissions) throws Throwable {
+		ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
+		PermissionService permissionService = PermissionServiceFactory.getLocalService();
+		for(String tp : ToolPermissionServiceFactory.getAllToolPermissions()) {
+			ToolPermission.Status status = toolpermissions.get(tp);
+			String nodeId=tpService.getToolPermissionNodeId(tp);
+			ACL acl = permissionService.getPermissions(nodeId);
+			boolean add=true;
+			List<ACE> newAce=new ArrayList<>();
+			for(ACE ace : acl.getAces()) {
+				if(ace.getAuthority().equals(authority)) {
+					add=false;
+					if(status!=null && status.equals(ToolPermission.Status.ALLOWED)) {
+						ace.setPermission(CCConstants.PERMISSION_READ);
+					}
+					else if(status!=null && status.equals(ToolPermission.Status.DENIED)) {
+						ace.setPermission(CCConstants.PERMISSION_DENY);
+					}
+					else {
+						continue;
+					}
+				}
+				newAce.add(ace);
+			}
+			if(add) {
+				ACE ace=new ACE();
+				ace.setAuthority(authority);
+				if(status!=null && status.equals(ToolPermission.Status.ALLOWED)) {
+					ace.setPermission(CCConstants.PERMISSION_READ);
+				}
+				else if(status!=null && status.equals(ToolPermission.Status.DENIED)) {
+					ace.setPermission(CCConstants.PERMISSION_DENY);
+				}
+				else {
+					ace=null;
+				}
+				if(ace!=null)
+					newAce.add(ace);
+			}
+			permissionService.setPermissions(nodeId, newAce.toArray(new ACE[0]));
+		}
+	}
+
 	@Override
 	public void writePublisherToMDSXml(String vcardProps, String valueSpaceProp, String ignoreValues, String filePath, HashMap authInfo) throws Throwable {
 		File file = new File(filePath);
