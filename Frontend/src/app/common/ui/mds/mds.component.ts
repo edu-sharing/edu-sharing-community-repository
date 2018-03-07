@@ -343,7 +343,7 @@ export class MdsComponent{
         if(view.id==viewId) {
           viewFound = true;
           if (!this.embedded && view.caption)
-            result.main += `<div class="mdsViewHeader" id="`+view.id+`_header"><i class="material-icons">` + view.icon + `</i>` + view.caption + `</div>`;
+            result.main += `<div class="card-title-element" id="`+view.id+`_header"><i class="material-icons">` + view.icon + `</i>` + view.caption + `</div>`;
           if (view.rel) {
           if(!result[view.rel])
             result[view.rel]='';
@@ -413,7 +413,7 @@ export class MdsComponent{
         if(!jump)
             return;
         let elements=jump.getElementsByTagName("a");
-        let scroll=document.getElementsByClassName("mdsViewHeader");
+        let scroll=document.getElementsByClassName("card-title-element");
         let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
         console.log(height);
         let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
