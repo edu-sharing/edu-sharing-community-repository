@@ -12,6 +12,7 @@
     "MENU_EDIT":"Bearbeiten",
     "MENU_DELETE":"Löschen",
     "MENU_TOOLPERMISSIONS":"Berechtigungen",
+    "MENU_TOOLPERMISSIONS_GLOBAL":"Globale Berecht.",
     "MANAGE_GROUP":"Gruppe {{group}} verwalten",
     "ADD_MEMBER_TO_GROUP":"Nutzer zu {{group}} hinzufügen",
     "EXPORT_MEMBER":"Nutzer exportieren",
@@ -69,6 +70,7 @@
     "DOWNLOAD_MEMBER_FILENAME":"Nutzer.csv",
     "TOOLPERMISSIONS":{
       "TITLE":"Berechtigungen festlegen für {{name}}",
+      "EVERYONE_ALLOWED":"Ausgangswert für alle Gruppen & Nutzer",
       "MEMBERS_ALLOWED":"Gilt für alle Mitglieder",
       "USER_ALLOWED":"Gilt für gewählten Benutzer",
       "ALLOW":"Erlauben",

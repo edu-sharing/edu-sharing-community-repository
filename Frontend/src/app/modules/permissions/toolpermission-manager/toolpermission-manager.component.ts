@@ -95,7 +95,7 @@ export class ToolpermissionManagerComponent {
       return;
     this._authority=authority;
     this.isLoading=true;
-    this.name=new AuthorityNamePipe().transform(authority,null);
+    this.name=new AuthorityNamePipe(this.translate).transform(authority,null);
     this.refresh();
   }
   @Output() onClose = new EventEmitter();
@@ -107,6 +107,7 @@ export class ToolpermissionManagerComponent {
 
   constructor(private toast: Toast,
               private admin : RestAdminService,
+              private translate : TranslateService,
               private iam: RestIamService) {
 
   }
@@ -144,8 +145,11 @@ export class ToolpermissionManagerComponent {
     return this.permissions[key].effective;
   }
   isImplicit(key:string) {
+    if(this._authority.authorityType==RestConstants.AUTHORITY_TYPE_EVERYONE){
+        return false;
+    }
     if(this.getEffective(key)==ToolpermissionManagerComponent.STATUS_UNKNOWN)
-      return false;
+        return false;
     if(this.deny[key]){
         return false;
     }

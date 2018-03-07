@@ -61,7 +61,7 @@ export class ProfilesComponent {
     this.globalProgress=true;
     this.iamService.getUser(authority).subscribe((profile:IamUser)=>{
       this.user=profile.person;
-      let name=new AuthorityNamePipe().transform(this.user,null);
+      let name=new AuthorityNamePipe(this.translate).transform(this.user,null);
       UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config,{name:name});
       this.globalProgress=false;
       this.iamService.getUser().subscribe((profile:IamUser)=>{

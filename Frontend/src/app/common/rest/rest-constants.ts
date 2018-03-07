@@ -23,6 +23,9 @@ export class RestConstants {
   public static AUTHORITY_TYPE_OWNER = "OWNER";
   public static AUTHORITY_TYPE_EVERYONE = "EVERYONE";
   public static AUTHORITY_EVERYONE = "GROUP_EVERYONE";
+  public static getAuthorityEveryone(){
+    return {authorityName:RestConstants.AUTHORITY_EVERYONE,authorityType:RestConstants.AUTHORITY_TYPE_EVERYONE};
+  }
   public static PERMISSION_CONSUMER = "Consumer";
   public static PERMISSION_COLLABORATOR = "Collaborator";
   public static PERMISSION_COORDINATOR = "Coordinator";
