@@ -38,48 +38,48 @@ export class ToolpermissionManagerComponent {
   static STATUS_DENIED="DENIED";
   static STATUS_UNDEFINED="UNDEFINED";
   static STATUS_UNKNOWN="UNKNOWN";
-  static GROUPS:any={
-    "SHARING":[
+  static GROUPS:any=[{name:"SHARING",icon:"share",permissions:[
         RestConstants.TOOLPERMISSION_INVITE,
         RestConstants.TOOLPERMISSION_INVITE_SHARE,
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE,
         RestConstants.TOOLPERMISSION_INVITE_HISTORY,
         RestConstants.TOOLPERMISSION_INVITED,
-    ],
-    "LICENSING":[
+    ]},
+    {name:"LICENSING",icon:"share",permissions:[
         RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
         RestConstants.TOOLPERMISSION_LICENSE,
-    ],
-    "DATA_MANAGEMENT":[
+    ]},
+    {name:"DATA_MANAGEMENT",icon:"share",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
         RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT
-    ],
-    "SAFE":[
+    ]},
+    {name:"SAFE",icon:"lock",permissions:[
         RestConstants.TOOLPERMISSION_CONFIDENTAL,
         RestConstants.TOOLPERMISSION_INVITE_SAFE,
         RestConstants.TOOLPERMISSION_INVITE_SHARE_SAFE,
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE,
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE,
-    ],
-    "COLLECTIONS":[
-        RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
+    ]},
+    {name:"COLLECTIONS",icon:"layers",permissions:[
+      RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
         RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM,
         RestConstants.TOOLPERMISSION_COLLECTION_PINNING,
-    ],
-    "OTHER":null
-  }
+    ]},
+    {name:"OTHER",icon:"help"}
+  ];
+  changing: string[]=[];
   getGroups(){
     return ToolpermissionManagerComponent.GROUPS;
   }
-  getToolpermissionsForGroup(group:string){
-    if(ToolpermissionManagerComponent.GROUPS[group]){
-      return ToolpermissionManagerComponent.GROUPS[group];
+  getToolpermissionsForGroup(group:any){
+    if(group.permissions){
+      return group.permissions;
     }
     let permissions=Object.keys(this.permissions);
-    for(let group in ToolpermissionManagerComponent.GROUPS){
-      if(ToolpermissionManagerComponent.GROUPS[group]){
-        for(let tp of ToolpermissionManagerComponent.GROUPS[group]){
+    for(let group of ToolpermissionManagerComponent.GROUPS){
+      if(group.permissions){
+        for(let tp of group.permissions){
           let pos=permissions.indexOf(tp);
           if(pos!=-1) {
               permissions.splice(pos, 1);
@@ -94,25 +94,10 @@ export class ToolpermissionManagerComponent {
   @Input() set authority(authority:any){
     if(authority==null)
       return;
-    this.name=new AuthorityNamePipe().transform(authority,null);
-    this.isLoading=true;
     this._authority=authority;
-    this.admin.getToolpermissions(authority.authorityName).subscribe((data:any)=>{
-        this.isLoading=false;
-        this.permissions=data;
-        this.allow={};
-        this.deny={};
-        for(let key in this.permissions){
-          let value=this.permissions[key].explicit;
-          this.allow[key]=value==ToolpermissionManagerComponent.STATUS_ALLOWED;
-          this.deny[key]=value==ToolpermissionManagerComponent.STATUS_DENIED;
-        }
-        this.allowInit=Helper.deepCopy(this.allow);
-        this.denyInit=Helper.deepCopy(this.deny);
-    },(error:any)=>{
-        this.toast.error(error);
-        this.close();
-    });
+    this.isLoading=true;
+    this.name=new AuthorityNamePipe().transform(authority,null);
+    this.refresh();
   }
   @Output() onClose = new EventEmitter();
   permissions: any;
@@ -129,12 +114,19 @@ export class ToolpermissionManagerComponent {
   close(){
     this.onClose.emit();
   }
-  save(){
-    this.isLoading=true;
+  change(key:string){
+    this.changing.push(key);
     this.admin.setToolpermissions(this._authority.authorityName,this.getPermissions()).subscribe(()=>{
-        this.isLoading=false;
-        this.toast.toast('PERMISSIONS.TOOLPERMISSIONS.SAVED');
-        this.close();
+        /*this.toast.toast('PERMISSIONS.TOOLPERMISSIONS.SAVED');
+        this.close();*/
+        this.refresh(()=>{
+            let i=this.changing.indexOf(key);
+            if(i!=-1){
+                this.changing.splice(i,1);
+            }
+        });
+    },(error:any)=>{
+        this.toast.error(error);
     });
   }
   getEffective(key:string) {
@@ -176,4 +168,24 @@ export class ToolpermissionManagerComponent {
       }
       return result;
   }
+
+    private refresh(callback:Function=null) {
+        this.admin.getToolpermissions(this._authority.authorityName).subscribe((data:any)=>{
+            this.isLoading=false;
+            this.permissions=data;
+            this.allow={};
+            this.deny={};
+            for(let key in this.permissions){
+                let value=this.permissions[key].explicit;
+                this.allow[key]=value==ToolpermissionManagerComponent.STATUS_ALLOWED;
+                this.deny[key]=value==ToolpermissionManagerComponent.STATUS_DENIED;
+            }
+            this.allowInit=Helper.deepCopy(this.allow);
+            this.denyInit=Helper.deepCopy(this.deny);
+            if(callback) callback();
+        },(error:any)=>{
+            this.toast.error(error);
+            this.close();
+        });
+    }
 }

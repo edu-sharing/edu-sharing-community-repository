@@ -26,6 +26,10 @@
   height:20px;
   background: linear-gradient(to bottom,#fff 15%,rgba(255,255,255,0.0001));
 }
+.card-title-element{
+  margin-left:$cardPadding*-1;
+  width:calc(100% + #{$cardPadding*2});
+}
 .heading,.groupTable{
   display:flex;
 }
@@ -39,6 +43,10 @@
   flex-direction: column;
   width:100%;
   margin-top: -10px;
+}
+.group{
+  display:flex;
+  flex-direction: column;
 }
 .groupName{
   color:$textLight;
@@ -70,19 +78,28 @@
 .checkboxDiv,.result{
   text-align: center;
 }
+:host /deep/{
+  .result spinner-small .preloader-wrapper.small{
+    width:20px;
+    height:20px;
+  }
+}
 .result{
   width: 130px;
   min-width: 130px;
-  display: flex;
-  justify-content: center;
+  display:flex;
   align-items: center;
-  .text{
-    white-space: pre-wrap;
-  }
-  .inherit{
-    cursor:default;
-    padding-left:10px;
-    font-size:14px;
+  justify-content: center;
+  >div {
+    display: flex;
+    .text {
+      white-space: pre-wrap;
+    }
+    .inherit {
+      cursor: default;
+      padding-left: 10px;
+      font-size: 14px;
+    }
   }
 }
 .allowed{

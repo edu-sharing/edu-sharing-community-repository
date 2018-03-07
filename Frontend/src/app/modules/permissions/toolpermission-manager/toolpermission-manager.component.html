@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
 <div class="card center-card card-action card-xwide card-high" [@cardAnimation]="this">
   <div class="card-content">
-      <div class="card-cancel" (click)="close()"><i class="material-icons">close</i></div>
+      <div class="card-cancel" (click)="close()" *ngIf="changing.length==0"><i class="material-icons">close</i></div>
       <span class="card-title">{{'PERMISSIONS.TOOLPERMISSIONS.TITLE' | translate:{name:name} }}</span>
       <div class="heading" *ngIf="!isLoading">
         <div class="name">{{(_authority.authorityType=='GROUP' ? 'PERMISSIONS.TOOLPERMISSIONS.MEMBERS_ALLOWED' : 'PERMISSIONS.TOOLPERMISSIONS.USER_ALLOWED') | translate}}:</div>
@@ -14,16 +14,19 @@
         <form (submit)="save()">
         <spinner *ngIf="isLoading"></spinner>
         <div class="table" *ngIf="!isLoading">
-          <div *ngFor="let group of getGroups() | keys" class="group">
-            <div class="groupName">{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.'+group | translate}}</div>
+          <div *ngFor="let group of getGroups()" class="group">
+            <div class="card-title-element"><i class="material-icons">{{group.icon}}</i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.'+group.name | translate}}</div>
             <div class="groupTable" *ngFor="let key of getToolpermissionsForGroup(group)">
               <div class="name">{{'TOOLPERMISSION.'+key | translate}}<div class="technicalName">{{key}}</div></div>
-              <div class="checkboxDiv checkboxInput"><input type="checkbox" class="filled-in" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false" id="allow{{key}}"><label for="allow{{key}}"></label></div>
-              <div class="checkboxDiv checkboxInput"><input type="checkbox" class="filled-in" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false" id="deny{{key}}"><label for="deny{{key}}"></label></div>
+              <div class="checkboxDiv checkboxInput"><input type="checkbox" class="filled-in" [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)" id="allow{{key}}"><label for="allow{{key}}"></label></div>
+              <div class="checkboxDiv checkboxInput"><input type="checkbox" class="filled-in" [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)" id="deny{{key}}"><label for="deny{{key}}"></label></div>
               <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">
-                <div class="text">{{'PERMISSIONS.TOOLPERMISSIONS.STATUS_'+getEffective(key) | translate}}</div>
-                <custom-icon *ngIf="isImplicit(key)" [iconId]="'inherit'"class="inherit" title="{{'PERMISSIONS.TOOLPERMISSIONS.INHERIT' | translate}}"></custom-icon>
-                <i *ngIf="getEffective(key)=='UNKNOWN'" class="inherit material-icons" title="{{'PERMISSIONS.TOOLPERMISSIONS.INHERIT_UNKNOWN' | translate}}">warning</i>
+                <div *ngIf="changing.indexOf(key)!=-1"><spinner-small></spinner-small></div>
+                <div *ngIf="changing.indexOf(key)==-1">
+                    <div class="text">{{'PERMISSIONS.TOOLPERMISSIONS.STATUS_'+getEffective(key) | translate}}</div>
+                    <custom-icon *ngIf="isImplicit(key)" [iconId]="'inherit'"class="inherit" title="{{'PERMISSIONS.TOOLPERMISSIONS.INHERIT' | translate}}"></custom-icon>
+                    <i *ngIf="getEffective(key)=='UNKNOWN'" class="inherit material-icons" title="{{'PERMISSIONS.TOOLPERMISSIONS.INHERIT_UNKNOWN' | translate}}">warning</i>
+                </div>
               </div>
             </div>
           </div>
@@ -33,7 +36,6 @@
   </div>
 
   <div class="card-action">
-    <a class="waves-effect waves-light btn" (click)="save()">{{'SAVE' | translate }}</a>
-    <a class="btn-flat" (click)="close()">{{'CANCEL' | translate }}</a>
+    <a class="btn waves-effect waves-light" [class.disabled]="changing.length" (click)="close()">{{'CLOSE' | translate }}</a>
   </div>
 </div>
