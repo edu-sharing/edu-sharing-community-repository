@@ -75,7 +75,6 @@
   "TOOLPERMISSION":{
     "TOOLPERMISSION_INVITE":"Die Berechtigung zum Freigeben von Materialien",
     "TOOLPERMISSION_INVITE_HISTORY":"Die Berechtigung zum Anzeigen der Freigabe-Historie",
-    "TOOLPERMISSION_INVITED":"Die Berechtigung zum Abrufen gesetzter Freigaben von Materialien",
     "TOOLPERMISSION_INVITE_SHARE":"Die Berechtigung zum Freigeben von Materialien in gemeinsamen Ordnern",
     "TOOLPERMISSION_INVITE_ALLAUTHORITIES":"Die Berechtigung zum Freigeben von Materialien an alle Nutzer",
     "TOOLPERMISSION_COLLECTION_EDITORIAL":"Redaktionelle Sammlungen erstellen",
