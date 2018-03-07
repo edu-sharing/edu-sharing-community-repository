@@ -300,7 +300,7 @@ export class NodeRenderComponent {
     jQuery('.edusharing_rendering_metadata_header').append(`
       <div class="nodeDetails">
         <div class="item" onclick="window.nodeRenderComponentRef.component.showComments()">
-          <i class="material-icons">message</i><div>`+this._node.commentCount+`</div>
+          <div>`+this._node.commentCount+`</div><i class="material-icons">message</i>
         </div>
       </div>
     `);
