@@ -120,6 +120,10 @@ export class ListTableComponent implements EventListener{
    */
   @Input() hasIcon : boolean;
   /**
+   * total item count, when used, the header of the table will display it
+   */
+  @Input() totalCount : number;
+  /**
    * is it possible to load more items? (Otherwise, the icon to laod more is hidden)
    */
   @Input() hasMore : boolean;
