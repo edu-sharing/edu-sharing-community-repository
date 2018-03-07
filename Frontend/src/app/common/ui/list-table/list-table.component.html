@@ -33,7 +33,10 @@
 </div>
 <div class="dialog dialogOptions" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
 <div [className]="'list '+listClass" infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="100" [scrollWindow]="scrollWindow" (scrolled)="scroll()">
-    <div class="heading" *ngIf="hasHeading && viewType==0">
+    <div class="headingGroup" *ngIf="hasHeading && viewType==0">
+        <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
+
+        <div class="heading">
         <div class="checkbox" *ngIf="hasCheckbox">
             <input *ngIf="_nodes.length" id="selectAll" (click)="toggleAll()" type="checkbox" class="filled-in" [checked]="selectedNodes.length==_nodes.length"/>
             <label for="selectAll">&nbsp;</label>
@@ -56,6 +59,7 @@
         <div class="editColumns clickable" *ngIf="!currentDragColumn && reorderColumns && columnsVisible && columnsVisible.length"
              (click)="reorderDialog=true"
         ><i class="material-icons">settings</i></div>
+        </div>
     </div>
     <div [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
         <div *ngIf="addElement" class="addElement clickable" (click)="addElementClicked()"

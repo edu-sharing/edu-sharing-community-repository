@@ -224,8 +224,17 @@ $badgeWidth:250px;
   display:table-cell;
   padding:0px 5px;
   padding-top:12px;
-  color:$textLight;
   vertical-align: middle;
+  color:$textLight;
+}
+.headingGroup {
+  position: relative;
+  .totalCount {
+    position: absolute;
+    left: 56px;
+    top: 14px;
+    color:$textLight;
+  }
 }
 .row .icon{
   padding-top:20px;

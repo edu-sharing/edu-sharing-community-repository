@@ -29,6 +29,7 @@ export class WorkspaceExplorerComponent  {
 
   private loading=false;
   public showLoading=false;
+  totalCount: number;
 
   @Input() set showProgress(showProgress:boolean){
     this.showLoading=showProgress;
@@ -131,6 +132,7 @@ export class WorkspaceExplorerComponent  {
       let i=0;
       console.log(data);
       if(data && data.nodes) {
+        this.totalCount=data.pagination.total;
         for (let node of data.nodes) {
           this._nodes.push(node);
           i++;
