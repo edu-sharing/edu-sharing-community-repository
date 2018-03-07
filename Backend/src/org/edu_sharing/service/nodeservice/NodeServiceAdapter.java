@@ -234,5 +234,11 @@ public class NodeServiceAdapter implements NodeService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean exists(String protocol, String store, String nodeId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 }
