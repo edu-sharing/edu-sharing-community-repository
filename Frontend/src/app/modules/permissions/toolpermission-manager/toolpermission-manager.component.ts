@@ -44,7 +44,6 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE,
         RestConstants.TOOLPERMISSION_INVITE_HISTORY,
-        RestConstants.TOOLPERMISSION_INVITED,
     ]},
     {name:"LICENSING",icon:"copyright",permissions:[
         RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
