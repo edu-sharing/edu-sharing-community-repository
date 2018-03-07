@@ -46,11 +46,11 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_INVITE_HISTORY,
         RestConstants.TOOLPERMISSION_INVITED,
     ]},
-    {name:"LICENSING",icon:"share",permissions:[
+    {name:"LICENSING",icon:"copyright",permissions:[
         RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
         RestConstants.TOOLPERMISSION_LICENSE,
     ]},
-    {name:"DATA_MANAGEMENT",icon:"share",permissions:[
+    {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
         RestConstants.TOOLPERMISSION_WORKSPACE,
         RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT
     ]},
