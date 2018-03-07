@@ -707,4 +707,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void removeNode(String protocol, String store, String nodeId) {
 		apiClient.removeNode(new StoreRef(protocol, store), nodeId);		
 	}
+	@Override
+	public boolean exists(String protocol, String store, String nodeId) {
+		return nodeService.exists(new NodeRef(new StoreRef(protocol, store), nodeId));
+	}
 }
