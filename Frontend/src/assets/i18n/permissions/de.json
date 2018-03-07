@@ -73,7 +73,7 @@
       "USER_ALLOWED":"Gilt für gewählten Benutzer",
       "ALLOW":"Erlauben",
       "DENY":"Verbieten",
-      "RESULT":"Ergebnis",
+      "RESULT":"Status",
       "INHERIT":"Von einer Gruppe oder globalen Berechtigung geerbt",
       "INHERIT_UNKNOWN":"Zustand ist unbekannt. Speichern Sie die Berechtigungen, um den geerbten Zustand zu sehen",
       "STATUS_ALLOWED":"Erlaubt",

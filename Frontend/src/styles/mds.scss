@@ -13,23 +13,6 @@
     float: left;
   }
 }
-.mdsViewHeader{
-  font-size:140%;
-  font-weight:bold;
-  border-bottom: 1px solid #000;
-  padding-bottom:10px;
-  padding-top:8px;
-  float:left;
-  width:100%;
-  background-color: $workspaceMetadataBackground;
-  i{
-    margin-left:10px;
-    margin-right:10px;
-    color:#666;
-    position: relative;
-    top:5px;
-  }
-}
 .mdsMainCard .mdsGroup{
   background-color: #fff;
 }
