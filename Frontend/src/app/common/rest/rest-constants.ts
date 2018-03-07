@@ -189,6 +189,7 @@ export class RestConstants {
   public static WORKFLOW_STATUS_CHECKED:WorkflowDefinition={id:'400_checked',color:"#42A053",hasReceiver:false,next:null};
 
   public static POSSIBLE_SORT_BY_FIELDS=[RestConstants.CM_NAME,
+    RestConstants.LOM_PROP_TITLE,
     RestConstants.CM_MODIFIED_DATE,
     RestConstants.CM_PROP_C_CREATED,
     RestConstants.CM_CREATOR,
