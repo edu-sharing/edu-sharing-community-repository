@@ -72,6 +72,8 @@
       <div class="licenseName">{{data.licenseName}}</div>
     </div>
     <div *ngIf="isAdmin">
+      <div class="description">{{'Aspects'}}</div>
+      <div class="value"><div class="aspect" *ngFor="let aspect of data.aspects">{{aspect}}</div></div>
       <div *ngFor="let property of data.properties">
         <div class="description">{{property[0]}}</div>
         <div class="value">{{property[1]}}</div>
