@@ -1379,6 +1379,12 @@ public class CCConstants {
 	public final static String COMMON_LICENSE_CC_ZERO = "CC_0";
 
 
+	/**
+	 * Public Domain Mark
+	 */
+	public final static String COMMON_LICENSE_PDM = "PDM";
+
+	
 	/******************************************************************
 	 * Common Licenses
 	 ******************************************************************/
@@ -1482,6 +1488,8 @@ public class CCConstants {
 		list.add(COMMON_LICENSE_CC_BY_NC);
 		list.add(COMMON_LICENSE_CC_BY_NC_SA);
 		list.add(COMMON_LICENSE_CC_BY_NC_ND);
+		list.add(COMMON_LICENSE_CC_ZERO);
+		list.add(COMMON_LICENSE_PDM);
 		list.add(COMMON_LICENSE_EDU_P_NR);
 		list.add(COMMON_LICENSE_EDU_P_NR_ND);
 		list.add(COMMON_LICENSE_EDU_NC_ND);
