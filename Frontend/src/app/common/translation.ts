@@ -65,7 +65,7 @@ export class Translation  {
     });
   }
   public static initializeCordova(translate : TranslateService,cordova:CordovaService) {
-      return new Observable<string>((observer: Observer<string>) => {
+     return new Observable<string>((observer: Observer<string>) => {
           translate.addLangs(Translation.DEFAULT_SUPPORTED_LANGUAGES);
           let language=Translation.DEFAULT_SUPPORTED_LANGUAGES[0];
           translate.setDefaultLang(language);
@@ -78,7 +78,6 @@ export class Translation  {
               translate.use(language);
               Translation.setLanguage(language);
               translate.getTranslation(language).subscribe(()=>{
-                  console.log(language);
                   Translation.languageLoaded=true;
                   observer.next(language);
                   observer.complete();

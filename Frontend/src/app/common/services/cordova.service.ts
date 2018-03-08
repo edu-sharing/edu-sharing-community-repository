@@ -1,12 +1,11 @@
-
-import { Injectable } from "@angular/core";
+import { Injectable, HostListener } from "@angular/core";
 import { setTimeout } from "core-js/library/web/timers";
-import { Observable, Observer } from "rxjs";
+import { Observable, Observer, ConnectableObservable } from "rxjs";
 import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
 
-import {OAuthResult, LoginResult, NodeRef} from '../rest/data-object';
-import {Router} from '@angular/router';
-import {RestConstants} from '../rest/rest-constants';
+import { OAuthResult, LoginResult, NodeRef } from '../rest/data-object';
+import { Router } from '@angular/router';
+import { RestConstants } from '../rest/rest-constants';
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -15,12 +14,17 @@ import {RestConstants} from '../rest/rest-constants';
 export class CordovaService {
 
   // change this during development for testing true, but false is default
-  private forceCordovaMode: boolean = true;
+  private forceCordovaMode: boolean = false;
 
   private deviceIsReady: boolean = false;
+
   private deviceReadyCallback : Function = null;
   private devicePauseCallback : Function = null;
   private deviceResumeCallback : Function = null;
+
+  private observerDeviceReady : Observer<void> = null;
+
+  private deviceReadyObservable: ConnectableObservable<{}>;
 
   private _oauth:OAuthResult;
   public endpointUrl:string;
@@ -43,25 +47,8 @@ export class CordovaService {
     private http : Http,
     private router : Router
   ) {
-    // CORDOVA EVENT: Device is Ready (on App StartUp)
-    let whenDeviceIsReady = () => {
-      console.log("CordovaService: App is Ready");
-      this.loadStorage();
-      // flag that device is ready
-      this.deviceIsReady = true;
 
-      // hide the splashscreen (if still showing)
-      setTimeout(()=>{
-        try {
-          (navigator as any).splashscreen.hide();
-        } catch (e) {
-          console.error('CordovaService: FAILED to call splashscreen.hide() - is plugin cordova-plugin-splashscreen installed?');
-        }
-      },1500);
-
-      // call listener if set
-      if (this.deviceReadyCallback!=null) this.deviceReadyCallback();
-    };
+    console.log("CONSTRUCTOR CordovaService");
 
     // CORDOVA EVENT: Pause (App is put into Background)
     let whenDeviceGoesBackground = () => {
@@ -79,17 +66,40 @@ export class CordovaService {
     };
 
     //adding listener for cordova events
-    document.addEventListener('deviceready', whenDeviceIsReady, false);
+    document.addEventListener('deviceready', this.whenDeviceIsReady, false);
     document.addEventListener('pause', whenDeviceGoesBackground, false);
     document.addEventListener('resume', whenDeviceGoesForeground, false);
 
     // just for simulation on forced cordova mode
-    if (this.forceCordovaMode) {
+    if ((this.forceCordovaMode) && (!this.isReallyRunningCordova())) {
       console.log("SIMULATED deviceready event in FORCED CORDOVA MODE (just use during development)");
-      setTimeout(whenDeviceIsReady,500+Math.random()*1000);
+      setTimeout(this.whenDeviceIsReady,500+Math.random()*1000);
     }
 
   }
+
+  // CORDOVA EVENT: Device is Ready (on App StartUp)
+  private whenDeviceIsReady = () => {
+
+      console.log("CordovaService: App is Ready");
+
+      // load basic data from storage
+      this.loadStorage();
+
+      // hide the splashscreen (if still showing)
+      setTimeout(()=>{
+        try {
+          (navigator as any).splashscreen.hide();
+        } catch (e) {
+          console.error('CordovaService: FAILED to call splashscreen.hide() - is plugin cordova-plugin-splashscreen installed?');
+        }
+      },1500);
+
+      // flag that device is ready
+      this.deviceIsReady = true;
+      console.log("this.deviceIsReady",this.deviceIsReady);
+
+    };
 
   /**********************************************************
    * BASIC CORDOVA
@@ -102,6 +112,11 @@ export class CordovaService {
    */
   isRunningCordova():boolean {
     if (this.forceCordovaMode) return true;
+    return this.isReallyRunningCordova();
+  }
+
+  // just for internal use
+  private isReallyRunningCordova() : boolean {
     return (typeof (window as any).cordova != "undefined");
   }
 
@@ -113,19 +128,40 @@ export class CordovaService {
     return this.deviceIsReady;
   }
 
-  /**
-   * Set a callback function to be called then device is ready for codrova action.
-   * @param callback callback function (with void parameter)
-   */
-  setDeviceReadyCallback(callback:Function) {
-    if (this.deviceIsReady) {
-      // cordova already signaled that it is ready - call on the spot
-      callback();
+  /*  
+    * Set a callback function to be called then device is ready for codrova action.
+    */
+  subscribeDeviceReady() : Observable<void> {
+    console.log("subscribeDeviceReady() OUTER");
+    return new Observable<void>((observer: Observer<void>) => {
+      console.log("subscribeDeviceReady() INNER");
 
-    } else {
-      // remember callback and call when ready
-      this.deviceReadyCallback = callback;
-    }  
+      if (this.deviceIsReady) {
+
+        // cordova already signaled that it is ready - call on the spot
+        console.log("setDeviceReadyCallback A");
+        observer.next(null);
+        observer.complete();
+  
+      } else {
+  
+        console.log("no rteady yet ... go loop");
+
+        let waitLoop = () => {
+          if (this.deviceIsReady) {
+            console.log("setDeviceReadyCallback B");
+            observer.next(null);
+            observer.complete();
+          } else {
+            console.log("Waiting for Device Ready .. waitloop");
+            setTimeout(waitLoop,200);
+          }
+        };
+        waitLoop();
+  
+      } 
+
+    });
   }
 
   /**
@@ -133,16 +169,13 @@ export class CordovaService {
    */
   loadStorage(){
       this.getPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,(data:string)=>{
-          this._oauth=JSON.parse(data);
+          this._oauth = (data!=null) ? JSON.parse(data) : null;
           this.getPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,(data:string)=>{
-            console.log(data);
-            if(data==null){
-                this.goToAppStart();
-            }
               this.endpointUrl=data;
           });
       });
   }
+
   /**
    * Set a callback function to be called then device is paused.
    * @param callback callback function (with void parameter)
@@ -157,7 +190,18 @@ export class CordovaService {
    */
   setDeviceResumeCallback(callback:Function) {
     this.deviceResumeCallback = callback;
-}  
+  }
+  
+  /**
+   * Closes the App when running as real app.
+   */
+  exitApp() {
+    try{
+      (navigator as any)['app'].exitApp();
+    } catch(e) {
+      console.log("FAIL EXIT APP",e);
+    }
+  }
 
 
   /**********************************************************
@@ -174,6 +218,7 @@ export class CordovaService {
    */
   public static STORAGE_OAUTHTOKENS:string = "oauth";
   public static STORAGE_SERVER_ENDPOINT:string = "server_endpoint";
+  public static STORAGE_SERVER_OWN:string = "server_own";
 
   /**
    * load permanent key/value 
@@ -194,8 +239,7 @@ export class CordovaService {
           if (typeof valueNative == "undefined") valueNative = null;
           callback(valueNative);
         },(error:any)=>{
-          // FAIL
-          console.error("Fail NativeStorage.setItem",error);
+          // FAIL (also when key not available)
           callback(null);
         });
       } catch (e) {
@@ -268,7 +312,7 @@ export class CordovaService {
   testcam():void {
     try {
       (navigator as any).camera.getPicture(()=>{
-        alert("WIM");
+        alert("WIN");
       },()=>{
         alert("FAIL");
       }, {});
@@ -489,6 +533,7 @@ export class CordovaService {
   }
 
     private goToAppStart() {
+        console.log("GO TO START");
         this.router.navigate(['']);
     }
 

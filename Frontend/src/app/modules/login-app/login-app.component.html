@@ -32,7 +32,7 @@
             </div>
             <div class="info">
               <div class="name">{{'LOGIN_APP.SERVERLIST_OWN' | translate}}</div>
-              <div class="url">https://</div>
+              <div class="url">{{serverurl}}</div>
             </div>
             <div class="right"><i class="material-icons">keyboard_arrow_right</i></div>
           </div>
@@ -53,30 +53,30 @@
   <div *ngIf="state==2">
 
     <div class="infoTop" style="margin-top: -10px;">
-      <h1>Eigenen Server angeben</h1>
-      <div>Gib den Link zum Server an, mit dem du dich verbinden möchtest.</div>
+      <h1>{{ 'LOGIN_APP.SERVERURL'| translate}}</h1>
+      <div>{{ 'LOGIN_APP.SERVERURL_INFO'| translate}}</div>
     </div>
     <div class="card center-card card-action">
       <div class="card-content" style="max-height:230px;">
         <div class="card-title"><i class="material-icons card-title-back" (click)="buttonLoginBack()">arrow_back</i>
-          Zurück
+          {{ 'LOGIN_APP.SERVERURL_BACK'| translate}}
         </div>
         <div class="card-scroll">
           <form (ngSubmit)="login()" #loginForm>
             <div>
-              <label for="username">Serveradresse</label>
+              <label for="username">{{ 'LOGIN_APP.SERVERURL_ADDRESS'| translate}}</label>
               <input #urlInput type="text" requried name="url" id="url" (keyup)="checkUrl()" [(ngModel)]="serverurl" autofocus/>
             </div>
           </form>
           <div style="min-height: 20px;">
             <div *ngIf="errorURL!=null">
-              {{errorURL}}
+                {{ errorURL| translate}}
             </div>  
           </div>
         </div>
       </div>
       <div class="card-action" style="border-color: white;">
-        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="buttonServerUrl()">Weiter</a>
+        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="buttonServerUrl()">{{ 'LOGIN_APP.SERVERURL_CONTINUE'| translate}}</a>
       </div>
     </div>
 
@@ -191,8 +191,31 @@
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
     </div>
-
   </div>
+
+  <!--------------------
+     STATE: NO INTERNET 
+    ------------------- -->
+    <div *ngIf="state==3">
+        <div class="infoTop" style="margin-top: -10px;">
+          <h1>{{'LOGIN_APP.NOTINTERNET' | translate }}</h1>
+          <div>{{'LOGIN_APP.NOTINTERNET_SUB' | translate }}</div>
+        </div>
+        <div class="card center-card card-action">
+          <div class="card-content" style="max-height:160px;">
+              <div class="card-title"><i class="material-icons card-title-back">warning</i>
+                {{'LOGIN_APP.NOTINTERNET_INFO' | translate }}
+              </div>
+              <div class="card-scroll">
+                  {{'LOGIN_APP.NOTINTERNET_TEXT' | translate }}
+              </div>
+          </div>
+          <div class="card-action" style="border-color: white;">
+            <a class="waves-effect waves-light btn" (click)="getServerList()">{{'LOGIN_APP.NOTINTERNET_RETRY' | translate }}</a>
+            <a class="btn-flat" (click)="buttonExitApp()">{{'LOGIN_APP.NOTINTERNET_EXIT' | translate }}</a>
+          </div>
+        </div>
+      </div>
 
   <div class="powered center" *ngIf="config.branding">
     {{ 'LOGIN.POWERED_BY' | translate}}

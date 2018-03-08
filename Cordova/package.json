@@ -5,13 +5,15 @@
     "description": "A sample Apache Cordova application that responds to the deviceready event.",
     "main": "index.js",
     "scripts": {
-        "start": "cd ./../Frontend && ng build --prod --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova build"
+        "start": "cd ./../Frontend && ng build --prod --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova build",
+        "restart": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova"
     },
     "author": "Apache Cordova Team",
     "license": "Apache-2.0",
     "cordova": {
         "platforms": [
-            "ios"
+            "ios",
+            "android"
         ],
         "plugins": {
             "cordova-plugin-whitelist": {},
@@ -29,6 +31,7 @@
     },
     "dependencies": {
         "com.borismus.webintent": "https://github.com/cordova-misc/cordova-webintent.git",
+        "cordova-android": "^7.0.0",
         "cordova-ios": "^4.5.4",
         "cordova-plugin-camera": "^4.0.2",
         "cordova-plugin-device": "^2.0.1",

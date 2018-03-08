@@ -8,15 +8,16 @@ import { Router, Route } from "@angular/router";
 import { OAuthResult, LoginResult, AccessScope } from "../../common/rest/data-object";
 import { UIConstants } from "../../common/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
-import {ConfigurationService} from '../../common/services/configuration.service';
-import {UIHelper} from '../../common/ui/ui-helper';
-import {Translation} from '../../common/translation';
-import {TranslateService} from '@ngx-translate/core';
-import {RestHelper} from '../../common/rest/rest-helper';
+import { ConfigurationService } from '../../common/services/configuration.service';
+import { UIHelper } from '../../common/ui/ui-helper';
+import { Translation } from '../../common/translation';
+import { TranslateService } from '@ngx-translate/core';
+import { RestHelper } from '../../common/rest/rest-helper';
+import { AnimationKeyframesSequenceMetadata } from '@angular/core/src/animation/dsl';
+import { STATUS_CODES } from 'http';
 
 // possible states this UI component can be in
-enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2};
-enum ErrorURL { OK = 0, UNKOWN = 1, NOINTERNET = 2, NOSERVER = 3};
+enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3};
 
 @Component({
     selector: 'app-login',
@@ -25,20 +26,20 @@ enum ErrorURL { OK = 0, UNKOWN = 1, NOINTERNET = 2, NOSERVER = 3};
 })
 export class LoginAppComponent  implements OnInit {
 
-    private state:StateUI = StateUI.SERVERLIST;
+    private state:StateUI = StateUI.NOINTERNET;
+
+    private instanceTS:number = null;
 
     public isLoading=true;
     public disabled=true;
     private username="";
     private password="";
-    private serverurl="https://";   
+    private serverurl = "https://";   
     
     errorURL:string = null;
 
     servers: any;
     currentServer: any;
-
-
 
     constructor(
         private toast:Toast,
@@ -47,40 +48,73 @@ export class LoginAppComponent  implements OnInit {
         private cordova: CordovaService,
         private config : ConfigurationService
     ){
+
+        this.instanceTS = Date.now();
+        console.log("CONSTRUCTOR LoginAppComponent",this.instanceTS);
+
         this.isLoading=true;
+
+        // WHEN RUNNING ON DESKTOP --> FORWARD TO BASIC LOGIN PAGE
         if (!this.cordova.isRunningCordova()) {
+            console.log("Not Cordova -> Forward to normal LOGIN");
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'login']);
             return;
         }
-        Translation.initializeCordova(this.translation,this.cordova).subscribe(()=>{
-            this.cordova.getPublicServerList().subscribe((servers:any)=>{
-                this.servers=servers;
-                console.log(servers);
-                for(let server of servers){
-                    this.cordova.getServerAbout(server.url).subscribe((about:any)=>{
-                        server.version=RestHelper.getRepositoryVersionFromAbout(about);
-                    });
+
+        // 1. Wait until Cordova is Ready
+        this.cordova.subscribeDeviceReady().subscribe(()=>{
+
+            // app startup, cordova has valid data ? 
+            // -> go to default location (this will check oauth)
+            if (this.cordova.hasValidConfig()) {
+                console.log("VALID Configuration --> directly go to default");
+                UIHelper.goToDefaultLocation(this.router,this.config);
+                return;
+            }
+
+            // set the self set server url if available from persistence
+            // for this value its no problem that result is async
+            this.cordova.getPermanentStorage(CordovaService.STORAGE_SERVER_OWN,(value:string)=>{
+                if (value!=null) {
+                    this.serverurl = value;
+                    this.checkUrl();
                 }
-                // WHEN RUNNING ON DESKTOP --> FORWARD TO BASIC LOGIN PAGE
+            });
 
-
-                /*
-                 * APP Start Setup
-                 */
-
-                // 1. Wait until Cordova is Ready
-                this.cordova.setDeviceReadyCallback(()=>{
-                    // app startup, cordova has valid data ? -> go to default location (this will check oauth)
-                    if(this.cordova.hasValidConfig()){
-                        UIHelper.goToDefaultLocation(this.router,this.config);
-                        return;
-                    }
-                    this.isLoading=false;
-                });
+            // init translation service
+            console.log("INIT TranslationService .. START");
+            Translation.initializeCordova(this.translation,this.cordova).subscribe(()=>{
+                console.log("INIT TranslationService .. OK");
+                this.getServerList();
             });
         });
+        
+    }
 
+    private getServerList() : void {
+        this.isLoading = true;
+        this.cordova.getPublicServerList().subscribe((servers:any)=>{
+            console.log("OK getServerList()", servers);
+            this.servers=servers;
+            for (let server of servers) {
+                this.cordova.getServerAbout(server.url).subscribe((about:any)=>{
+                    server.version=RestHelper.getRepositoryVersionFromAbout(about);
+                }, (error) => {
+                    console.log("HTTP FAIL getting about from "+server.url, error);
+                });
+            }
+            this.state = StateUI.SERVERLIST;
+            this.isLoading=false;
+            console.log("ALL OK - loading is ",this.isLoading);
+        }, (error)=> {
+            this.isLoading=false;
+            this.state = StateUI.NOINTERNET;
+            console.log("FAILED getServerList()", this.isLoading);
+        });
+    }
 
+    buttonExitApp() :void {
+        this.cordova.exitApp();
     }
 
     getServerIcon(server:any){
@@ -101,14 +135,14 @@ export class LoginAppComponent  implements OnInit {
 
         // FORMAT ERRORS
         if (this.serverurl.length<3) {
-            this.errorURL = "URL is too Short";
+            this.errorURL = "LOGIN_APP.SERVERURL_TOOSHORT";
             return;
         }
 
         // JUST WARNINGS
         this.disabled = false;
         if (this.serverurl.startsWith('http:')) {
-            this.errorURL = "No HTTPS is not Secure.";
+            this.errorURL = "LOGIN_APP.SERVERURL_NOHTTPS";
             return;
         }
 
@@ -144,29 +178,62 @@ export class LoginAppComponent  implements OnInit {
     }
 
     private buttonServerUrl() : void {
-        alert('NEW');
+
+        this.serverurl = this.serverurl.trim();
         let url2check = this.serverurl;
+        if (url2check.toLowerCase().indexOf('http')<0) url2check = "https://" + url2check;
 
-        // TODO try to auto correct on URL
-        // Example for valid URL: http://edu41.edu-sharing.de/edu-sharing/
+        let whenUrlIsWorking:Function = (win:any) => {
 
-        this.isLoading = true;
-        this.cordova.getServerAbout(url2check).subscribe(
-        (win) => {
+            console.log("WIN",win);
             this.currentServer =     {
                 "name" : "Eigener Server",
                 "url"  : url2check
             };
+
+            // remember this url
+            this.cordova.setPermanentStorage(CordovaService.STORAGE_SERVER_OWN,url2check);
+
             this.state=StateUI.LOGIN;
             this.isLoading = false;
+        };
+
+        this.isLoading = true;
+        this.cordova.getServerAbout(url2check).subscribe(
+        (win) => {
+            whenUrlIsWorking(win);
         },  
         (error) => {
-            this.isLoading = false;
-            this.toast.error(null, "LOGIN.ERROR");
+
+            //console.log("URL was not working: "+url2check);
+            //console.log("Try to fix format of URL and try again ..");
+
+            // try to fix url a bit more
+            if (url2check.indexOf('/edusharing')>10) url2check = url2check.replace("/edusharing", "/edu-sharing");
+            if (url2check.endsWith("/edu-sharing")) url2check = url2check + "/";
+            if ((url2check.endsWith("/")) && (!url2check.endsWith("edu-sharing/"))) url2check = url2check + "edu-sharing/";
+            if (!url2check.endsWith("/edu-sharing/")) url2check = url2check + "/edu-sharing/";
+
+            this.cordova.getServerAbout(url2check).subscribe(
+                (win) => {
+                    whenUrlIsWorking(win);
+                },
+                (error) => {
+                    this.isLoading = false;
+                    this.toast.error(null, "LOGIN.ERROR");
+                }
+            );
+
         });
     }
 
     private login(){
+
+        if (this.currentServer==null) {
+            this.state=StateUI.SERVERURL;
+            return;
+        }
+
         this.isLoading=true;
         this.cordova.setServerURL(this.currentServer.url+"rest",true).subscribe(()=> {
 

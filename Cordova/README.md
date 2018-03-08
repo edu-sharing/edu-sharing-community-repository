@@ -8,8 +8,7 @@ Minimum Requirements:
 
 ## Setup
 
-Check that you did all setup for the edu-sharing angular app in the FRONTEND folder and the `ng build` is running
-with no problems in that project.  
+Check that you did all setup for the edu-sharing angular app in the FRONTEND folder and the `ng build` is running with no problems in that project.  
 
 To build the mobile app make sure basic framework is installed:
 
@@ -42,4 +41,8 @@ Just run the node package script:
 
 It will make a fresh production build of the angular edu-sharing app and copy it into the www directory of this cordova project. Then Android and iOS projects gets build.
 
+NOTE: This will compile the edu-sharing app code with the --prod flag, what includes the AOT option.
+
 If this runs without errors, you are ready to run all the rest of the possible cordova commands. For example to run the app on a connected android development phone just run `cordova run android` or open the `./platforms/ios/edu-sharing.xcodeproj` file in XCode to run it for iOS.
+
+NOTE: If you want to build the app for development and testing, instead of `npm start` you can use `npm restart` to skip AOT and make a quicker build.

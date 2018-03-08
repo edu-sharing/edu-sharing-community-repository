@@ -18,6 +18,19 @@
     "SERVERLIST":"Wo möchtest du hin?",
     "SERVERLIST_INFO":"Wähle den Server aus, mit dem du dich verbinden möchtest",
     "LOGIN":"Anmelden",
-    "LOGIN_INFO":"Melde dich mit deinen Daten auf dem gewählten Server an"
+    "LOGIN_INFO":"Melde dich mit deinen Daten auf dem gewählten Server an",
+    "SERVERURL" : "Eigenen Server angeben",
+    "SERVERURL_INFO" : "Gib den Link zum Server an, mit dem du dich verbinden möchtest.",
+    "SERVERURL_ADDRESS" : "Serveradresse",
+    "SERVERURL_BACK" : "Zurück",
+    "SERVERURL_CONTINUE" : "Weiter",
+    "SERVERURL_TOOSHORT": "Adresse ist zu kurz.",
+    "SERVERURL_NOHTTPS": "HTTP anstatt von HTTPS ist nicht sicher.",
+    "NOTINTERNET" : "Kein Internet",
+    "NOTINTERNET_SUB" : "Serverliste kann nicht geladen werden.",
+    "NOTINTERNET_INFO" : "Hinweis",
+    "NOTINTERNET_TEXT" : "Bitte die Verbindung zum Internet überprüfen. Dann kannst du es noch einmal probieren. Falls es gar nicht klappt, bitte die App beenden.",
+    "NOTINTERNET_EXIT" : "Beenden",
+    "NOTINTERNET_RETRY" : "Nochmal"
   }
 }
