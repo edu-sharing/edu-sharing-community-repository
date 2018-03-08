@@ -158,7 +158,9 @@ export class WorkspaceMetadataComponent  {
     data["licenseName"]=NodeHelper.getLicenseName(node,this.translate);
 
     data["properties"]=[];
-    for(let k in node.properties) {
+    data["aspects"]=node.aspects.sort();
+
+    for(let k of Object.keys(node.properties).sort()) {
       data["properties"].push([k, node.properties[k].join(", ")]);
     }
     return data;
