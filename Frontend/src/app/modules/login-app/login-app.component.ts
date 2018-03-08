@@ -96,6 +96,7 @@ export class LoginAppComponent  implements OnInit {
         this.cordova.getPublicServerList().subscribe((servers:any)=>{
             console.log("OK getServerList()", servers);
             this.servers=servers;
+            /*
             for (let server of servers) {
                 this.cordova.getServerAbout(server.url).subscribe((about:any)=>{
                     server.version=RestHelper.getRepositoryVersionFromAbout(about);
@@ -103,6 +104,7 @@ export class LoginAppComponent  implements OnInit {
                     console.log("HTTP FAIL getting about from "+server.url, error);
                 });
             }
+            */
             this.state = StateUI.SERVERLIST;
             this.isLoading=false;
             console.log("ALL OK - loading is ",this.isLoading);
@@ -235,7 +237,7 @@ export class LoginAppComponent  implements OnInit {
         }
 
         this.isLoading=true;
-        this.cordova.setServerURL(this.currentServer.url+"rest",true).subscribe(()=> {
+        this.cordova.setServerURL(this.currentServer.url+"rest/",true).subscribe(()=> {
 
             // APP: oAuth Login
             this.cordova.loginOAuth(this.username, this.password).subscribe((oauthTokens: OAuthResult) => {

@@ -459,6 +459,7 @@ export class CordovaService {
         this.goToAppStart();
       });
   }
+
   // oAuth refresh tokens
   private refreshOAuth(oauth: OAuthResult): Observable<OAuthResult> {
 
