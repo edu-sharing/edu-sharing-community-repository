@@ -246,7 +246,6 @@ small-collection{
 .mdsSelect{
   float:left;
   width:calc(100% + 40px);
-  margin-bottom: 56px;
   >div {
     width: 100%;
     padding: 10px 10px;
@@ -285,7 +284,7 @@ small-collection{
   width: $sidenavWidth;
   padding-top: 0;
   top:$mainnavHeight+110px;
-  height: calc(100% - #{$mainnavHeight} - 110px);
+  height: calc(100% - #{$mainnavHeight} - 110px - 70px);
   transition: $transitionNormal all ease;
   @include iosScrolling();
 }
@@ -295,7 +294,7 @@ small-collection{
 }
 .sidenavNoRepositories{
   top:$mainnavHeight+65px;
-  height: calc(100% - #{$mainnavHeight} - 65px);
+  height: calc(100% - #{$mainnavHeight} - 65px - 70px);
 }
 .contentSidenav{
   margin-left: $sidenavWidth;
@@ -459,14 +458,8 @@ listtable {
     margin-right: 20px;
   }
 }
-.sidenav{
-  .empty{
-    margin-top:20px;
-    text-align: center;
-    color: $textLight;
-    width:100%;
-  }
-  .apply, .manageSavedSearch {
+.sidenavContainer{
+  .apply{
     position: fixed;
     background-color: $backgroundColor;
     width:$sidenavWidth;
@@ -474,10 +467,30 @@ listtable {
     left:0;
     bottom:0;
     padding:20px 8px;
-    z-index: 1;
+    z-index: 25;
     actionbar,a{
       position: relative;
       top: 5px;
+    }
+  }
+}
+.sidenav{
+  .empty{
+    margin-top:20px;
+    text-align: center;
+    color: $textLight;
+    width:100%;
+  }
+  .savedSearch {
+    display:flex;
+    flex-direction: column;
+    listtable{
+      flex-grow: 1;
+    }
+    .manageSavedSearch {
+      background-color: $backgroundColor;
+      width: 100%;
+      text-align: center;
     }
   }
   input[type=search]{
@@ -501,7 +514,7 @@ div.dialog.darken {
 :host /deep/{
   .sidenav .list > div{
     margin:0 -20px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
   }
   .sidenav .actionAlwaysCaption{
     display: inline-block!important;
