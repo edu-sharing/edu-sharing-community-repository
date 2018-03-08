@@ -85,6 +85,9 @@ $side:20px;
   float:left;
   padding-bottom:20px;
 }
+.aspect:not(:last-child){
+  padding-bottom: 4px;
+}
 .valueFreetext{
   white-space: pre-line;
 }
