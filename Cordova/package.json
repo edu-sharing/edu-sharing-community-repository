@@ -26,7 +26,8 @@
             "cordova-plugin-screen-orientation": {},
             "com.borismus.webintent": {},
             "cordova-plugin-nativestorage": {},
-            "cordova-plugin-camera": {}
+            "cordova-plugin-camera": {},
+            "cordova-plugin-globalization": {}
         }
     },
     "dependencies": {
@@ -38,6 +39,7 @@
         "cordova-plugin-file": "^6.0.1",
         "cordova-plugin-file-transfer": "^1.7.1",
         "cordova-plugin-filepath": "^1.1.0",
+        "cordova-plugin-globalization": "^1.0.9",
         "cordova-plugin-nativestorage": "^2.2.2",
         "cordova-plugin-screen-orientation": "^3.0.1",
         "cordova-plugin-splashscreen": "^5.0.1",

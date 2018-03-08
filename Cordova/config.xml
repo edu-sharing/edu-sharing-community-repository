@@ -101,6 +101,7 @@
     <plugin name="com.borismus.webintent" spec="https://github.com/cordova-misc/cordova-webintent.git" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.2.2" />
     <plugin name="cordova-plugin-camera" spec="^4.0.2" />
+    <plugin name="cordova-plugin-globalization" spec="^1.0.9" />
     <engine name="ios" spec="^4.5.4" />
     <engine name="android" spec="^7.0.0" />
 </widget>

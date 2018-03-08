@@ -132,24 +132,18 @@ export class CordovaService {
     * Set a callback function to be called then device is ready for codrova action.
     */
   subscribeDeviceReady() : Observable<void> {
-    console.log("subscribeDeviceReady() OUTER");
     return new Observable<void>((observer: Observer<void>) => {
-      console.log("subscribeDeviceReady() INNER");
 
       if (this.deviceIsReady) {
 
         // cordova already signaled that it is ready - call on the spot
-        console.log("setDeviceReadyCallback A");
         observer.next(null);
         observer.complete();
   
       } else {
-  
-        console.log("no rteady yet ... go loop");
 
         let waitLoop = () => {
           if (this.deviceIsReady) {
-            console.log("setDeviceReadyCallback B");
             observer.next(null);
             observer.complete();
           } else {
@@ -544,9 +538,27 @@ export class CordovaService {
 
     getLanguage() {
       return new Observable<string>((observer: Observer<string>) => {
-          // TODO: get device language
+
+        try {
+          (navigator as any).globalization.getPreferredLanguage(
+            (lang:any)=>{
+              // WIN
+              let code = (lang.value as string).substr(0,2);
+              console.log("OK getLanguage()", code);
+              observer.next(code);
+              observer.complete();
+          },(error:any)=>{
+              // ERROR - go with default
+              console.log("FAIL getLanguage() ---> go with default 'de'",error);
+              observer.next("de");
+              observer.complete();
+          });
+        } catch(e) {
+          console.log("EXCEPTION getLanguage() ---> go with default 'de'");
           observer.next("de");
           observer.complete();
+        }
+
       });
     }
 }
