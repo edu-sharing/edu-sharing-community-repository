@@ -71,7 +71,6 @@ export class SearchComponent {
   public mdsExtended=false;
   public sidenavTab=0;
   public sidenav_opened: boolean = false;
-  public resultsRight=false;
   public collectionsMore=false;
   view = ListTableComponent.VIEW_TYPE_GRID;
   searchFail: boolean = false;
@@ -120,7 +119,6 @@ export class SearchComponent {
   private currentValues: any;
   private reloadMds: Boolean;
   private currentMdsSet: any;
-  private sidenavSet=false;
   public extendedRepositorySelected = false;
   public savedSearch : Node[]=[];
   public savedSearchColumns : ListItem[]=[];
@@ -199,13 +197,14 @@ export class SearchComponent {
          this.showspinner=true;
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
-           this.setSidenavSettings();
-           let sidenavMode=this.config.instant("searchSidenavMode",);
-           if(sidenavMode=="never"){
-             this.sidenav_opened=false;
-           }
-           if(sidenavMode=="always"){
-             this.sidenav_opened=true;
+           if(this.setSidenavSettings()) {
+             let sidenavMode = this.config.instant("searchSidenavMode",);
+             if (sidenavMode == "never") {
+               this.sidenav_opened = false;
+             }
+             if (sidenavMode == "always") {
+               this.sidenav_opened = true;
+             }
            }
            this.printListener();
            this.view = this.config.instant('searchViewType',this.temporaryStorageService.get('view', '1'));
@@ -279,15 +278,6 @@ export class SearchComponent {
     //this.autocompletesArray = this.autocompletes.toArray();
   }
 
-  setFilterIndicator(status: string) {
-    if(status == 'opened') {
-      this.resultsRight=false;
-    }
-    else {
-      this.resultsRight=true;
-    }
-  }
-
   isMdsLoading(){
     return !this.mdsRef || this.mdsRef.isLoading;
   }
@@ -308,16 +298,16 @@ export class SearchComponent {
 
 
   setSidenavSettings() {
-    if(this.sidenavSet)
-      return;
-    this.sidenavSet=true;
+    if(this.searchService.sidenavSet)
+      return false;
+    console.log("update sidenav");
+    this.searchService.sidenavSet=true;
     if(this.innerWidth < this.breakpoint) {
       this.sidenav_opened = false;
-      this.resultsRight=true;
     } else {
       this.sidenav_opened = true;
-      this.resultsRight=false;
     }
+    return true;
   }
   public routeSearchParameters(parameters:any){
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);

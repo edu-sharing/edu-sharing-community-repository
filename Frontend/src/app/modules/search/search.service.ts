@@ -22,7 +22,7 @@ export class SearchService {
   showchosenfilters: boolean = false;
   reinit = true;
   resultCount:any={};
-
+  sidenavSet = false;
   constructor() {}
   clear(){
     this.searchTerm="";
