@@ -194,7 +194,7 @@ export class MdsComponent{
   private rendered : SafeHtml;
   private renderedSuggestions : SafeHtml;
   private jumpmarks: SafeHtml;
-  private isLoading = false;
+  isLoading = false;
 
   private widgetName='cclom:general_keyword';
   private widgetType='multivalueFixedBadges';
