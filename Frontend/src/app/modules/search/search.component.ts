@@ -561,7 +561,7 @@ export class SearchComponent {
     }
     let options=[];
     if(this.searchService.reurl) {
-      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl));
+      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelper.getNodes(this.selection,node)[0],this.searchService.reurl));
       apply.enabledCallback=((node:Node)=> {
         return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
       });
