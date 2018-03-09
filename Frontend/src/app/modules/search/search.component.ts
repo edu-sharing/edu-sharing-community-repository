@@ -324,9 +324,6 @@ export class SearchComponent {
     if(this.mdsRef) {
       parameters = this.mdsRef.getValues();
     }
-    if (query.cleared) {
-      parameters = null;
-    }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
