@@ -285,6 +285,7 @@ export class MainNavComponent {
     }
   private clearSearch(){
     this.searchQuery="";
+    this.searchQueryChange.emit("");
     this.onSearch.emit({query:"",cleared:true});
   }
   constructor(private iam : RestIamService,

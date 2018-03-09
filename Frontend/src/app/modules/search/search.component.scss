@@ -516,10 +516,10 @@ div.dialog.darken {
     margin:0 -20px;
     margin-bottom: 20px;
   }
-  .sidenav .actionAlwaysCaption{
+  .sidenavContainer .actionAlwaysCaption{
     display: inline-block!important;
   }
-  .sidenav actionbar .moreOpen{
+  .sidenavContainer actionbar .moreOpen{
     left: 0px;
     top: -56px;
     width: 220px;
@@ -570,9 +570,7 @@ div.dialog.darken {
     .moreRepositories .collection-item{
       text-align: center;
     }
-    .sidenav{
-      @include materialShadow();
-    }
+
     .content_wrapper {
         margin: 0;
     }
