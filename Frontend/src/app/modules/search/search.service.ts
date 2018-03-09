@@ -24,7 +24,9 @@ export class SearchService {
   resultCount:any={};
 
   constructor() {}
-
+  clear(){
+    this.searchTerm="";
+  }
    init() {
     if(!this.reinit)
       return;

@@ -188,7 +188,8 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-     this.initalized=true;
+    this.searchService.clear();
+    this.initalized=true;
     if(this.searchService.reinit){
       this.searchService.init();
       this.initalized=false;
