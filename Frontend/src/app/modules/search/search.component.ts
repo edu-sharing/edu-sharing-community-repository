@@ -109,6 +109,7 @@ export class SearchComponent {
   public addNodesToCollection: Node[];
   private mdsSets: MdsInfo[];
   private _mdsId: string;
+  private isSearching = false;
   public get mdsId(){
     return this._mdsId;
   }
@@ -187,13 +188,15 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-     this.initalized=true;
+    this.searchService.clear();
+    this.initalized=true;
     if(this.searchService.reinit){
       this.searchService.init();
       this.initalized=false;
     }
      this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
      this.connector.setRoute(this.activatedRoute).subscribe(()=> {
+         this.showspinner=true;
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
            this.setSidenavSettings();
@@ -324,9 +327,6 @@ export class SearchComponent {
     if(this.mdsRef) {
       parameters = this.mdsRef.getValues();
     }
-    if (query.cleared) {
-      parameters = null;
-    }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
@@ -341,13 +341,14 @@ export class SearchComponent {
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
-    if(this.showspinner && init || this.repositoryIds==null){
+    if(this.isSearching && init || this.repositoryIds==null){
       setTimeout(()=>this.getSearch(searchString,init,properties),100);
       return;
     }
-    if(this.showspinner && !init){
+    if(this.isSearching && !init){
       return;
     }
+    this.isSearching=true;
     this.showspinner = true;
     if(searchString==null)
       searchString = this.searchService.searchTerm;
@@ -359,6 +360,7 @@ export class SearchComponent {
     }
     else if(this.searchService.searchResult.length>SearchComponent.MAX_ITEMS_COUNT){
       this.showspinner=false;
+      this.isSearching=false;
       return;
     }
 
@@ -473,6 +475,7 @@ export class SearchComponent {
     this.updateActionbar(this.selection);
     if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
+      this.isSearching=false;
       this.searchService.complete = true;
       return;
     }
@@ -766,6 +769,7 @@ export class SearchComponent {
     if(position>0 && position>=repos.length) {
       this.searchService.numberofresults = count;
       this.showspinner = false;
+      this.isSearching=false;
       return;
     }
 
