@@ -6,6 +6,11 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StatisticsGlobal {
+	public static class Repository{
+		@JsonProperty public String name;
+		@JsonProperty public String domain;
+		@JsonProperty public Long queryTime;
+	}
 	public static class Materials{
 		@JsonProperty
 		public List<License> licenses;
@@ -24,6 +29,8 @@ public class StatisticsGlobal {
 		@JsonProperty public int count;
 	}
 	@JsonProperty
+	private Repository repository;
+	@JsonProperty
 	private Materials materials;
 	@JsonProperty
 	private User user;
@@ -40,8 +47,11 @@ public class StatisticsGlobal {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
-	
-	
-	
+	public Repository getRepository() {
+		return repository;
+	}
+	public void setRepository(Repository repository) {
+		this.repository = repository;
+	}
+		
 }

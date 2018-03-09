@@ -39,6 +39,11 @@ public class StatisticDao {
 			}
 			properties.add(CCConstants.getValidLocalName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
 			StatisticsGlobal statistics=new StatisticsGlobal();
+			StatisticsGlobal.Repository repository=new StatisticsGlobal.Repository();
+			repository.name=ApplicationInfoList.getHomeRepository().getAppCaption();
+			repository.domain=ApplicationInfoList.getHomeRepository().getDomain();
+			repository.queryTime=System.currentTimeMillis()/1000;
+			statistics.setRepository(repository);
 			StatisticsGlobal.User user=new StatisticsGlobal.User();
 			user.count=countUser(null);
 			statistics.setUser(user);			
