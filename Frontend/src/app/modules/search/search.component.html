@@ -60,6 +60,7 @@
                  [options]="actionOptions"></actionbar>
   </div>
 <div class="sidenavContainer">
+  <div class="apply" *ngIf="sidenav_opened && !isMdsLoading()"><actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar><a *ngIf="rendered" class="btn" tabindex="0" (keyup.enter)="saveValues()" (click)="saveValues()">{{'SEARCH.APPLY_FILTER' | translate}}</a></div>
   <div #sidenav class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories" [class.sidenavHidden]="!sidenav_opened" [@fromLeft]="sidenav_opened">
      <div class="row tab-group" *ngIf="!isGuest">
        <div class="col s12">
@@ -263,8 +264,7 @@
       </div>
     </div>
    </div>
-  <div class="apply" *ngIf="!mds.isLoading && sidenav_opened"><actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar><a *ngIf="rendered" class="btn" tabindex="0" (keyup.enter)="saveValues()" (click)="saveValues()">{{'SEARCH.APPLY_FILTER' | translate}}</a></div>
-</div>
+ </div>
 </div>
 <workspace-management #managementDialogs
   [(nodeReport)]="nodeReport"

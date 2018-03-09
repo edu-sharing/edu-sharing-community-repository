@@ -150,7 +150,7 @@ export class SearchComponent {
     private http : Http,
     private connector:RestConnectorService,
     private RestNodeService: RestNodeService,
-    private mds:RestMdsService,
+    private mdsService:RestMdsService,
     private iam:RestIamService,
     private search: RestSearchService,
     private collectionApi : RestCollectionService,
@@ -285,7 +285,9 @@ export class SearchComponent {
     }
   }
 
-
+  isMdsLoading(){
+    return !this.mdsRef || this.mdsRef.isLoading;
+  }
   canDrop(){
     return false;
   }
@@ -989,7 +991,7 @@ export class SearchComponent {
         }
         this.updateSelection([]);
         let repo=this.currentRepository;
-        this.mds.getSets(repo).subscribe((data:MdsMetadatasets)=>{
+        this.mdsService.getSets(repo).subscribe((data:MdsMetadatasets)=>{
           if(repo!=this.currentRepository){
               return;
           }
