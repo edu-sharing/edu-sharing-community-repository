@@ -108,6 +108,8 @@ export class WorkspaceExplorerComponent  {
     this.search.search(criterias,[],request,RestConstants.CONTENT_TYPE_ALL,RestConstants.HOME_REPOSITORY,
       RestConstants.DEFAULT,[],'workspace').subscribe((data:NodeList)=>{
       this.addNodes(data,true);
+    },(error:any)=>{
+        this.handleError(error);
     });
 		//this.nodeApi.searchNodes(query,[],request).subscribe((data : NodeList) => this.addNodes(data,true));
 	}
@@ -116,16 +118,20 @@ export class WorkspaceExplorerComponent  {
     console.log(this._node);
     this.nodeApi.getChildren(this._node,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
       (error:any) => {
-        if (error.status == 404)
-          this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
-        else
-          this.toast.error(error);
-
-        this.loading=false;
-        this.showLoading=false;
+        this.handleError(error);
       });
 	}
   }
+
+    private handleError(error: any) {
+        if (error.status == 404)
+            this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
+        else
+            this.toast.error(error);
+
+        this.loading=false;
+        this.showLoading=false;
+    }
   private addNodes(data : NodeList,wasSearch:boolean){
     if(this.lastRequestSearch!=wasSearch)
       return;
