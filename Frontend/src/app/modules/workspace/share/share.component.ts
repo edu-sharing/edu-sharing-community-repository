@@ -4,9 +4,9 @@ import {
 } from '@angular/core';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
-  Node, NodeList, NodePermissions, Permission, Permissions, LocalPermissions,
-  NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority
-} from "../../../common/rest/data-object";
+    Node, NodeList, NodePermissions, Permission, Permissions, LocalPermissions,
+    NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority, Collection
+} from '../../../common/rest/data-object';
 import {Toast} from "../../../common/ui/toast";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {Subject} from "rxjs";
@@ -19,6 +19,8 @@ import {RestHelper} from "../../../common/rest/rest-helper";
 import {Helper} from "../../../common/helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
+import {RestUsageService} from '../../../common/rest/services/rest-usage.service';
+import {UIHelper} from '../../../common/ui/ui-helper';
 
 @Component({
   selector: 'workspace-share',
@@ -78,6 +80,9 @@ export class WorkspaceShareComponent  {
   public publishActive: boolean;
   private originalPermissions: LocalPermissions;
   private isSafe = false;
+  collectionColumns=UIHelper.getDefaultCollectionColumns();
+  collections: Collection[];
+  showCollections = false;
 
   public isCollection(){
     if(this._node==null)
@@ -124,6 +129,9 @@ export class WorkspaceShareComponent  {
           this.updatePublishState();
         }
       },(error:any)=>this.toast.error(error));
+      this.usageApi.getNodeUsagesCollection(node.ref.id).subscribe((data:Collection[])=>{
+        this.collections=data;
+      });
     }
     if(node.parent && node.parent.id) {
       this.nodeApi.getNodePermissions(node.parent.id).subscribe((data: NodePermissions) => {
@@ -175,6 +183,10 @@ export class WorkspaceShareComponent  {
       event.preventDefault();
       if(this.history){
         this.history=null;
+        return;
+      }
+      if(this.showCollections){
+        this.showCollections=false;
         return;
       }
       if(this.linkNode){
@@ -281,6 +293,7 @@ export class WorkspaceShareComponent  {
               private translate : TranslateService,
               private applicationRef : ApplicationRef,
               private toast : Toast,
+              private usageApi : RestUsageService,
               private iam : RestIamService,
               private connector:RestConnectorService){
     //this.dataService=new SearchData(iam);
