@@ -169,7 +169,7 @@
         <div class="collections" *ngIf="collections && collections.length">
           <div class="title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</div>
           <div class="info">{{'WORKSPACE.SHARE.COLLECTIONS.INFO' | translate }}</div>
-          <div class="link" (click)="showCollections=true"><i class="material-icons">layers</i><div>{{'WORKSPACE.SHARE.COLLECTIONS.LINK' | translate }}</div><i class="material-icons">arrow_forward</i></div>
+          <div class="link" (click)="showCollections=true;reloadCollections()"><i class="material-icons">layers</i><div>{{'WORKSPACE.SHARE.COLLECTIONS.LINK' | translate }}</div><i class="material-icons">arrow_forward</i></div>
         </div>
         <!--
         <workspace-share-permission *ngIf="showLink && !link"
@@ -221,7 +221,9 @@
     <div class="card-cancel" (click)="showCollections=false"><i class="material-icons">close</i></div>
     <span class="card-title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</span>
     <listTable
+      (clickRow)="openCollection($event)"
       [nodes]="collections"
+      [isClickable]="true"
       [columns]="collectionColumns"
       [viewType]="2"
     ></listTable>
