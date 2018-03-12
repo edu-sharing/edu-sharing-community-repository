@@ -62,7 +62,10 @@
         </div>
     </div>
     <div [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
-        <div *ngIf="addElement" class="addElement clickable" (click)="addElementClicked()"
+        <div *ngIf="addElement" class="addElement clickable"
+             tabindex="0"
+             (keyup.enter)="addElementClicked()"
+             (click)="addElementClicked()"
              [class.tableList]="viewType==0"
              [class.cardList]="viewType==1"
              [class.cardSmallList]="viewType==2"
