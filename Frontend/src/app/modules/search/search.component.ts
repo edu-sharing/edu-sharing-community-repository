@@ -70,7 +70,6 @@ export class SearchComponent {
   public mdsSuggestions:any={}
   public mdsExtended=false;
   public sidenavTab=0;
-  public sidenav_opened: boolean = false;
   public collectionsMore=false;
   view = ListTableComponent.VIEW_TYPE_GRID;
   searchFail: boolean = false;
@@ -198,12 +197,12 @@ export class SearchComponent {
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
            if(this.setSidenavSettings()) {
-             let sidenavMode = this.config.instant("searchSidenavMode",);
+             let sidenavMode = this.config.instant("searchSidenavMode","auto");
              if (sidenavMode == "never") {
-               this.sidenav_opened = false;
+               this.searchService.sidenavOpened = false;
              }
              if (sidenavMode == "always") {
-               this.sidenav_opened = true;
+               this.searchService.sidenavOpened = true;
              }
            }
            this.printListener();
@@ -303,9 +302,9 @@ export class SearchComponent {
     console.log("update sidenav");
     this.searchService.sidenavSet=true;
     if(this.innerWidth < this.breakpoint) {
-      this.sidenav_opened = false;
+      this.searchService.sidenavOpened = false;
     } else {
-      this.sidenav_opened = true;
+      this.searchService.sidenavOpened = true;
     }
     return true;
   }
