@@ -646,8 +646,7 @@ export class ListTableComponent implements EventListener{
 
   }
   private getAttribute(data : any,item : ListItem) : SafeHtml{
-    //return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
-      return "test";
+    return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
   }
   private getLRMIAttribute(data : any,item : ListItem) : string{
     return NodeHelper.getLRMIAttribute(this.translate,this.config,data,item);
