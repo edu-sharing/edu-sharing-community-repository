@@ -88,6 +88,11 @@
         "CHANGED":"Geändert",
         "REMOVED":"Entfernt",
         "EMPTY":"Es wurden noch keine Freigaben angepasst"
+      },
+      "COLLECTIONS":{
+        "TITLE":"Zugriff über Sammlungen",
+        "INFO":"Dat Material ist zusätzlich über öffentliche oder freigebene Sammlungen für Andere sichtbar.",
+        "LINK":"Sammlungen zeigen"
       }
     },
     "INHERIT_DISABLED":"Rechtevererbung ist aktuell ausgeschaltet",

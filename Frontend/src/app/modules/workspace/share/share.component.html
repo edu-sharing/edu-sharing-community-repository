@@ -166,6 +166,11 @@
                                     [readOnly]="true"
                                     [showDelete]="false"
         ></workspace-share-permission>
+        <div class="collections" *ngIf="collections && collections.length">
+          <div class="title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</div>
+          <div class="info">{{'WORKSPACE.SHARE.COLLECTIONS.INFO' | translate }}</div>
+          <div class="link" (click)="showCollections=true"><i class="material-icons">layers</i><div>{{'WORKSPACE.SHARE.COLLECTIONS.LINK' | translate }}</div><i class="material-icons">arrow_forward</i></div>
+        </div>
         <!--
         <workspace-share-permission *ngIf="showLink && !link"
                                     class="groupEntry link"
@@ -209,3 +214,16 @@
   [node]="linkNode"
   (onClose)="updateNodeLink();linkNode=null"
 ></workspace-share-link>
+
+<div class="dialog darken dialog-collections" [@fade]="showCollections" *ngIf="showCollections"></div>
+<div class="card center-card card-action card-high card-collections" [@cardAnimation]="showCollections" *ngIf="showCollections">
+  <div class="card-content">
+    <div class="card-cancel" (click)="showCollections=false"><i class="material-icons">close</i></div>
+    <span class="card-title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</span>
+    <listTable
+      [nodes]="collections"
+      [columns]="collectionColumns"
+      [viewType]="2"
+    ></listTable>
+  </div>
+</div>

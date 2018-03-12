@@ -15,6 +15,7 @@ import {NodeHelper} from "./node-helper";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {FrameEventsService} from "../services/frame-events.service";
+import {ListItem} from './list-item';
 export class UIHelper{
   static MOBILE_WIDTH = 600;
 
@@ -269,5 +270,13 @@ export class UIHelper{
                 clearInterval(interval);
             }
         },16);
+    }
+
+    static getDefaultCollectionColumns() {
+        let columns=[];
+        columns.push(new ListItem("COLLECTION","title"));
+        columns.push(new ListItem("COLLECTION","info"));
+        columns.push(new ListItem("COLLECTION","scope"));
+        return columns;
     }
 }

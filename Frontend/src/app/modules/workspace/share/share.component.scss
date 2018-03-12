@@ -10,6 +10,12 @@
   float:left;
   width:33.33%;
 }
+.dialog-collections{
+  z-index: $dialogZIndex+1;
+}
+.card-collections{
+  z-index: $dialogZIndex+2;
+}
 .card .row{
   background-color: $actionDialogBackground;
   margin: 0 -20px;
@@ -224,6 +230,28 @@ img.inherit{
   overflow: auto;
   overflow-x: hidden;
   @include iosScrolling();
+  .collections{
+    background-color:$actionDialogBackground;
+    margin: 0 -20px;
+    margin-top: 30px;
+    padding: 20px 40px;
+    .title{
+      font-weight: bold;
+      padding-bottom: 5px;
+    }
+    .link{
+      padding-top: 15px;
+      color:$primary;
+      text-transform: uppercase;
+      font-weight: bold;
+      align-items: center;
+      @include clickable();
+      display:flex;
+      div{
+        padding:0 7px;
+      }
+    }
+  }
 }
 .tabContentInvite{
   padding-top: 0;
