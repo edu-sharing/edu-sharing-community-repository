@@ -2,6 +2,7 @@ package org.edu_sharing.repository.client.tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CCConstants {
@@ -1393,6 +1394,12 @@ public class CCConstants {
 	public final static String COMMON_LICENSE_CC_ZERO = "CC_0";
 
 
+	/**
+	 * Public Domain Mark
+	 */
+	public final static String COMMON_LICENSE_PDM = "PDM";
+
+	
 	/******************************************************************
 	 * Common Licenses
 	 ******************************************************************/
@@ -1487,6 +1494,24 @@ public class CCConstants {
 	 * the user can set an own license in a custom field
 	 */
 	public final static String COMMON_LICENSE_CUSTOM = "CUSTOM";
+	
+	public static List<String> getAllLicenseKeys(){
+		List<String> list=new ArrayList<>();
+		list.add(COMMON_LICENSE_CC_BY);
+		list.add(COMMON_LICENSE_CC_BY_SA);
+		list.add(COMMON_LICENSE_CC_BY_ND);
+		list.add(COMMON_LICENSE_CC_BY_NC);
+		list.add(COMMON_LICENSE_CC_BY_NC_SA);
+		list.add(COMMON_LICENSE_CC_BY_NC_ND);
+		list.add(COMMON_LICENSE_CC_ZERO);
+		list.add(COMMON_LICENSE_PDM);
+		list.add(COMMON_LICENSE_EDU_P_NR);
+		list.add(COMMON_LICENSE_EDU_P_NR_ND);
+		list.add(COMMON_LICENSE_EDU_NC_ND);
+		list.add(COMMON_LICENSE_EDU_NC);
+		list.add(COMMON_LICENSE_CUSTOM);
+		return list;
+	}
 
 	public final static String COMMON_LICENSE_CC_ZERO_LINK = "https://creativecommons.org/publicdomain/zero/1.0/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/deed.en";

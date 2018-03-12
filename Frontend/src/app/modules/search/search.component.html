@@ -60,7 +60,8 @@
                  [options]="actionOptions"></actionbar>
   </div>
 <div class="sidenavContainer">
-   <div #sidenav class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories" [class.sidenavHidden]="!sidenav_opened" [@fromLeft]="sidenav_opened">
+  <div class="apply" *ngIf="sidenav_opened && !isMdsLoading()"><actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar><a *ngIf="rendered" class="btn" tabindex="0" (keyup.enter)="saveValues()" (click)="saveValues()">{{'SEARCH.APPLY_FILTER' | translate}}</a></div>
+  <div #sidenav class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories || repositories.length<=2" [class.sidenavHidden]="!sidenav_opened" [@fromLeft]="sidenav_opened">
      <div class="row tab-group" *ngIf="!isGuest">
        <div class="col s12">
          <ul class="tabs">
@@ -113,7 +114,6 @@
            </div>
          </div>
        </div>
-     <div class="apply" *ngIf="!mds.isLoading"><actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar><a *ngIf="rendered" class="btn" tabindex="0" (keyup.enter)="saveValues()" (click)="saveValues()">{{'SEARCH.APPLY_FILTER' | translate}}</a></div>
      </div>
      <div *ngIf="sidenavTab==1">
        <div class="switch">
@@ -133,21 +133,23 @@
        <div class="empty" *ngIf="!savedSearch.length && !savedSearchLoading && savedSearchQuery">
          {{'SEARCH.NO_SAVED_SEARCH_FOUND' | translate}}
        </div>
-      <listTable
-        [hasHeading]="false"
-        [selectOnClick]="false"
-        [isClickable]="true"
-        [nodes]="savedSearch"
-        [hasIcon]="true"
-        [viewType]="0"
-        [options]="savedSearchOptions"
-        [isLoading]="savedSearchLoading"
-        [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
-        [columns]="savedSearchColumns"
-        (clickRow)="loadSavedSearchNode($event)"
-      ></listTable>
-       <div class="manageSavedSearch" *ngIf="savedSearch.length">
-         <a (click)="goToSaveSearchWorkspace()" class="clickable">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</a>
+       <div class="savedSearch">
+        <listTable
+          [hasHeading]="false"
+          [selectOnClick]="false"
+          [isClickable]="true"
+          [nodes]="savedSearch"
+          [hasIcon]="true"
+          [viewType]="0"
+          [options]="savedSearchOptions"
+          [isLoading]="savedSearchLoading"
+          [selectedNodes]="currentSavedSearch ? [currentSavedSearch] : null"
+          [columns]="savedSearchColumns"
+          (clickRow)="loadSavedSearchNode($event)"
+        ></listTable>
+         <div class="manageSavedSearch" *ngIf="savedSearch.length && savedSearchOwn">
+           <a (click)="goToSaveSearchWorkspace()" class="clickable">{{'SEARCH.MANAGE_SAVED_SEARCH' | translate}}</a>
+         </div>
        </div>
      </div>
      <!--
@@ -180,7 +182,7 @@
    </div>
 
    <div class="content_wrapper" [class.content_wrapper_grouped]="currentRepository=='-all-' && groupResults" [class.contentSidenav]="sidenav_opened">
-    <div class="results alignWithBanner" [class.resultsNoRepositories]="!repositories" vocab="http://schema.org/" typeof="WebPage">
+    <div class="results alignWithBanner" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
       <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0 && !addToCollection">
         <div class="collectionsHeading">
           <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})<a *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>

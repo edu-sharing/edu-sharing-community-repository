@@ -71,8 +71,7 @@ table, div {
 
 .section-headline {
     color: #5F5F5F;
-    padding-top: 18px;
-    padding-bottom: 18px;
+    padding: 18px 15px;
 }
 
 .collections-breadcrumb {
@@ -217,7 +216,7 @@ table, div {
   color: #000;
 }
 .collections-master-div-notabs {
-    padding-left:300px;
+    padding-left:285px;
     padding-right: 16px;
 }
 
@@ -293,6 +292,9 @@ table, div {
         margin-top: 240px+$mainnavHeight;
       }
     }
+  .section-headline{
+    padding: 18px 0;
+  }
   .collection-new-preview-headline{
     overflow-wrap: break-word;
     display: -webkit-box;

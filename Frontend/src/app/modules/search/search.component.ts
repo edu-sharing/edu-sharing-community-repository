@@ -71,7 +71,6 @@ export class SearchComponent {
   public mdsExtended=false;
   public sidenavTab=0;
   public sidenav_opened: boolean = false;
-  public resultsRight=false;
   public collectionsMore=false;
   view = ListTableComponent.VIEW_TYPE_GRID;
   searchFail: boolean = false;
@@ -109,6 +108,7 @@ export class SearchComponent {
   public addNodesToCollection: Node[];
   private mdsSets: MdsInfo[];
   private _mdsId: string;
+  private isSearching = false;
   public get mdsId(){
     return this._mdsId;
   }
@@ -119,7 +119,6 @@ export class SearchComponent {
   private currentValues: any;
   private reloadMds: Boolean;
   private currentMdsSet: any;
-  private sidenavSet=false;
   public extendedRepositorySelected = false;
   public savedSearch : Node[]=[];
   public savedSearchColumns : ListItem[]=[];
@@ -150,7 +149,7 @@ export class SearchComponent {
     private http : Http,
     private connector:RestConnectorService,
     private RestNodeService: RestNodeService,
-    private mds:RestMdsService,
+    private mdsService:RestMdsService,
     private iam:RestIamService,
     private search: RestSearchService,
     private collectionApi : RestCollectionService,
@@ -187,22 +186,25 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-     this.initalized=true;
+    this.searchService.clear();
+    this.initalized=true;
     if(this.searchService.reinit){
       this.searchService.init();
       this.initalized=false;
     }
      this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
      this.connector.setRoute(this.activatedRoute).subscribe(()=> {
+         this.showspinner=true;
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
-           this.setSidenavSettings();
-           let sidenavMode=this.config.instant("searchSidenavMode",);
-           if(sidenavMode=="never"){
-             this.sidenav_opened=false;
-           }
-           if(sidenavMode=="always"){
-             this.sidenav_opened=true;
+           if(this.setSidenavSettings()) {
+             let sidenavMode = this.config.instant("searchSidenavMode",);
+             if (sidenavMode == "never") {
+               this.sidenav_opened = false;
+             }
+             if (sidenavMode == "always") {
+               this.sidenav_opened = true;
+             }
            }
            this.printListener();
            this.view = this.config.instant('searchViewType',this.temporaryStorageService.get('view', '1'));
@@ -276,16 +278,9 @@ export class SearchComponent {
     //this.autocompletesArray = this.autocompletes.toArray();
   }
 
-  setFilterIndicator(status: string) {
-    if(status == 'opened') {
-      this.resultsRight=false;
-    }
-    else {
-      this.resultsRight=true;
-    }
+  isMdsLoading(){
+    return !this.mdsRef || this.mdsRef.isLoading;
   }
-
-
   canDrop(){
     return false;
   }
@@ -303,16 +298,16 @@ export class SearchComponent {
 
 
   setSidenavSettings() {
-    if(this.sidenavSet)
-      return;
-    this.sidenavSet=true;
+    if(this.searchService.sidenavSet)
+      return false;
+    console.log("update sidenav");
+    this.searchService.sidenavSet=true;
     if(this.innerWidth < this.breakpoint) {
       this.sidenav_opened = false;
-      this.resultsRight=true;
     } else {
       this.sidenav_opened = true;
-      this.resultsRight=false;
     }
+    return true;
   }
   public routeSearchParameters(parameters:any){
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
@@ -321,9 +316,6 @@ export class SearchComponent {
     let parameters:any=null;
     if(this.mdsRef) {
       parameters = this.mdsRef.getValues();
-    }
-    if (query.cleared) {
-      parameters = null;
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
@@ -339,13 +331,14 @@ export class SearchComponent {
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
-    if(this.showspinner && init || this.repositoryIds==null){
+    if(this.isSearching && init || this.repositoryIds==null){
       setTimeout(()=>this.getSearch(searchString,init,properties),100);
       return;
     }
-    if(this.showspinner && !init){
+    if(this.isSearching && !init){
       return;
     }
+    this.isSearching=true;
     this.showspinner = true;
     if(searchString==null)
       searchString = this.searchService.searchTerm;
@@ -357,6 +350,7 @@ export class SearchComponent {
     }
     else if(this.searchService.searchResult.length>SearchComponent.MAX_ITEMS_COUNT){
       this.showspinner=false;
+      this.isSearching=false;
       return;
     }
 
@@ -471,6 +465,7 @@ export class SearchComponent {
     this.updateActionbar(this.selection);
     if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
+      this.isSearching=false;
       this.searchService.complete = true;
       return;
     }
@@ -556,7 +551,7 @@ export class SearchComponent {
     }
     let options=[];
     if(this.searchService.reurl) {
-      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl));
+      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelper.getNodes(this.selection,node)[0],this.searchService.reurl));
       apply.enabledCallback=((node:Node)=> {
         return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
       });
@@ -764,6 +759,7 @@ export class SearchComponent {
     if(position>0 && position>=repos.length) {
       this.searchService.numberofresults = count;
       this.showspinner = false;
+      this.isSearching=false;
       return;
     }
 
@@ -989,7 +985,7 @@ export class SearchComponent {
         }
         this.updateSelection([]);
         let repo=this.currentRepository;
-        this.mds.getSets(repo).subscribe((data:MdsMetadatasets)=>{
+        this.mdsService.getSets(repo).subscribe((data:MdsMetadatasets)=>{
           if(repo!=this.currentRepository){
               return;
           }
