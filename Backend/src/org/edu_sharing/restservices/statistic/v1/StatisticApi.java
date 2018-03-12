@@ -68,11 +68,11 @@ public class StatisticApi {
 		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    	})
 
-	    public Response getGlobalStatistics() {
+	    public Response getGlobalStatistics(
+				@ApiParam(value = "additional properties to build facettes and count values", required = false) @QueryParam("properties") List<String> properties) {
 
 	    	try {
-		    	StatisticsGlobal statistics=StatisticDao.getGlobal();
-		    	
+		    	StatisticsGlobal statistics=StatisticDao.getGlobal(properties);
 		    	return Response.status(Response.Status.OK).entity(statistics).build();
 		    	
 			} catch (Throwable t) {
