@@ -1,7 +1,7 @@
   <div class="title">{{ title | translate}}
    <i class="material-icons close clickable" (click)="cancel()">close</i>
   </div>
-  <div class="content">
+  <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadData()">
     <listTable
       [viewType]="2"
       [hasHeading]="false"
@@ -26,13 +26,11 @@
         [viewType]="2"
         [isLoading]="isLoading"
         [validatePermissions]="hasWritePermissions"
-        [scrollWindow]="false"
         [sortBy]="sortBy"
         [sortAscending]="sortAscending"
         [listClass]=""
         (onDrop)="drop($event)"
-        (clickRow)="clickCollection($event)"
-        (loadMore)="loadData()"></listTable>
+        (clickRow)="clickCollection($event)"></listTable>
     <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery==''">{{'NO_MORE_ELEMENTS' | translate }}</h5>
     <h5 class="noElements" *ngIf="!isLoading && !list.length && searchQuery!=''">{{'NO_MATCHES' | translate }}</h5>
   </div>

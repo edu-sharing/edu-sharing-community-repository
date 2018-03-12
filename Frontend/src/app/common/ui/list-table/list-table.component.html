@@ -32,7 +32,7 @@
     </div>
 </div>
 <div class="dialog dialogOptions" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
-<div [className]="'list '+listClass" infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="100" [scrollWindow]="scrollWindow" (scrolled)="scroll()">
+<div [className]="'list '+listClass" infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll()">
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
 
