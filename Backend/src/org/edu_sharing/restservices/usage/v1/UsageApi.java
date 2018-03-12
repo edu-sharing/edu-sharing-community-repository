@@ -1,5 +1,7 @@
 package org.edu_sharing.restservices.usage.v1;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -17,6 +19,7 @@ import org.edu_sharing.restservices.DAOSecurityException;
 import org.edu_sharing.restservices.DAOValidationException;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.UsageDao;
+import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
 
@@ -176,5 +179,30 @@ public class UsageApi {
 	public Response options3() {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS,  GET").build();
 	}
+	
+	@GET
+	@Path("/usages/node/{nodeId}/collections")
+
+	@ApiOperation(value = "Get all collections where this node is used.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK.", response = Collection[].class),
+			@ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) })
+
+	public Response getUsagesByNodeCollections(
+			@ApiParam(value = "ID of node", required = true) @PathParam("nodeId") String nodeId,
+			@Context HttpServletRequest req) {
+		try {
+			List<Collection> collections = new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).getUsagesByNodeCollection(nodeId);
+			return Response.status(Response.Status.OK).entity(collections).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+
+		}
+	}
+
 
 }
