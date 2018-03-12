@@ -19,7 +19,7 @@ md-input{
   color:$textLight;
 }
 
-@media only screen and (max-width: $mobileWidth+$mobileStage*1) {
+@media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .card-title{
     margin-bottom: 15px;
   }
@@ -41,5 +41,10 @@ md-input{
 @media screen and (max-height: ($mobileHeight)) {
   .card{
     top: $mainnavHeight;
+  }
+}
+@media screen and (max-height: $mobileHeightWithKeyboard) {
+  .card{
+    top: 0;
   }
 }
