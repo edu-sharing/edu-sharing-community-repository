@@ -59,8 +59,6 @@ export class ListTableComponent implements EventListener{
   private optionsAlways:OptionItem[]=[];
 
   private _nodes : any[];
-  private lastScroll: number;
-  private static MIN_SCROLL_TIME=1000;
   private animateNode: Node;
   private repositories: Repository[];
 
@@ -519,9 +517,6 @@ export class ListTableComponent implements EventListener{
     this.dropdown=null;
   }
   public scroll(){
-    if(Date.now()-this.lastScroll<ListTableComponent.MIN_SCROLL_TIME)
-      return;
-    this.lastScroll=Date.now();
     this.loadMore.emit();
   }
   private contextMenu(event:any,node : Node){

@@ -25,7 +25,7 @@
       <div class="headline">{{'COLLECTIONS.CREATE_TYPE' | translate}}
         <i class="material-icons clickable" (click)="newCollectionCancel()">close</i>
       </div>
-      <div class="collection-item clickable" (click)="setCollectionType('MY')">
+      <div class="collection-item clickable" tabindex="0" (keyup.enter)="setCollectionType('MY')" (click)="setCollectionType('MY')">
         <div class="iconLeft"><i class="material-icons" style="color:#995b5b;">lock</i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.PRIVATE' | translate}}</div>
@@ -33,7 +33,7 @@
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
       </div>
-      <div class="collection-item clickable" *ngIf="canInvite" (click)="setCollectionType('CUSTOM')">
+      <div class="collection-item clickable" *ngIf="canInvite" tabindex="0" (keyup.enter)="setCollectionType('CUSTOM    ')" (click)="setCollectionType('CUSTOM')">
         <div class="iconLeft"><i class="material-icons" style="color:#4F7899;">group</i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.SHARED' | translate}}</div>
@@ -41,7 +41,7 @@
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
       </div>
-      <div class="collection-item clickable" *ngIf="shareToAll" (click)="setCollectionType('EDU_ALL')">
+      <div class="collection-item clickable" *ngIf="shareToAll" tabindex="0" (keyup.enter)="setCollectionType('EDU_ALL')" (click)="setCollectionType('EDU_ALL')">
         <div class="iconLeft"> <i class="material-icons" style="color:#5C998F;">public</i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.PUBLIC' | translate}}</div>
@@ -50,7 +50,7 @@
         <i class="material-icons next">keyboard_arrow_right</i>
       </div>
       <div class="group" *ngIf="createEditorial || createCurriculum">
-        <div class="collection-item clickable" *ngIf="createEditorial" (click)="setCollectionType('EDITORIAL')">
+        <div class="collection-item clickable" *ngIf="createEditorial" tabindex="0" (keyup.enter)="setCollectionType('EDITORIAL')" (click)="setCollectionType('EDITORIAL')">
           <div class="iconLeft"><i class="material-icons" style="color:#E9B42A;">star</i></div>
           <div class="content">
             <div class="title">{{'COLLECTIONS.CREATE.EDITORIAL' | translate}}</div>

@@ -43,6 +43,7 @@
   import {GlobalProgressComponent} from "./common/ui/global-progress/global-progress.component";
   import {SpinnerSmallComponent} from "./common/ui/spinner-small/spinner-small.component";
   import {KeysPipe} from './common/keys.pipe';
+  import {InfiniteScrollDirective} from './common/ui/infinite-scroll.directive';
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -89,5 +90,6 @@ export const DECLARATIONS = [
       ToolListComponent,
       ToucheventDirective,
       BannerComponent,
+      InfiniteScrollDirective,
       KeysPipe
     ];

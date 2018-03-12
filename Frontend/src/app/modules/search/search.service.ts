@@ -23,6 +23,7 @@ export class SearchService {
   reinit = true;
   resultCount:any={};
   sidenavSet = false;
+  sidenavOpened = false;
   constructor() {}
   clear(){
     this.searchTerm="";

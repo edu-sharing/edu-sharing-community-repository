@@ -21,6 +21,7 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {RestUsageService} from '../../../common/rest/services/rest-usage.service';
 import {UIHelper} from '../../../common/ui/ui-helper';
+import {UIConstants} from '../../../common/ui/ui-constants';
 
 @Component({
   selector: 'workspace-share',
@@ -129,9 +130,7 @@ export class WorkspaceShareComponent  {
           this.updatePublishState();
         }
       },(error:any)=>this.toast.error(error));
-      this.usageApi.getNodeUsagesCollection(node.ref.id).subscribe((data:Collection[])=>{
-        this.collections=data;
-      });
+      this.reloadCollections();
     }
     if(node.parent && node.parent.id) {
       this.nodeApi.getNodePermissions(node.parent.id).subscribe((data: NodePermissions) => {
@@ -422,6 +421,15 @@ export class WorkspaceShareComponent  {
     }
     this.setPermissions(this.permissions);
     this.updatePublishState();
+  }
+
+  reloadCollections() {
+    this.usageApi.getNodeUsagesCollection(this._node.ref.id).subscribe((data:Collection[])=>{
+        this.collections=data;
+    });
+  }
+  openCollection(collection:Collection){
+    window.open(UIConstants.ROUTER_PREFIX+"collections?id="+collection.ref.id);
   }
 }
 /*
