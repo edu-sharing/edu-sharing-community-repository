@@ -291,6 +291,7 @@ export class ListTableComponent implements EventListener{
   private dropdownLeft : string;
   private dropdownTop : string;
   private dropdownBottom : string;
+  private dropdownRight : string;
   @ViewChild('dropdown') dropdownElement : ElementRef;
 
 
@@ -539,8 +540,12 @@ export class ListTableComponent implements EventListener{
       if(!this.dropdownElement || !this.dropdownElement.nativeElement)
         return;
       let y=this.dropdownElement.nativeElement.getBoundingClientRect().bottom;
+      let right=this.dropdownElement.nativeElement.getBoundingClientRect().right;
+      if(right>window.innerWidth){
+        this.dropdownRight="0";
+        this.dropdownLeft="auto";
+      }
       if(y>window.innerHeight){
-        //this.dropdownBottom=window.innerHeight-event.clientY+"px";
         this.dropdownBottom="0";
         this.dropdownTop="auto";
       }
@@ -578,6 +583,7 @@ export class ListTableComponent implements EventListener{
     this.dropdownLeft=null;
     this.dropdownTop=null;
     this.dropdownBottom=null;
+    this.dropdownRight=null;
     if(this.dropdown==node)
       this.dropdown=null;
     else {
