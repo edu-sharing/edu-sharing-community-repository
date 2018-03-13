@@ -111,7 +111,6 @@
                  [class.noPermissions]="noPermissions(node)"
                  [class.selected]="getSelectedPos(node)!=-1"
                  [title]="viewType==0 ? '' : getTitle(node)"
-                 (click)="hasCheckbox ? null : select(node,false)"
                  [draggable]="dragDrop"
                  (dragend)="dragHover=null"
                  (dragexit)="dragHover=null"
