@@ -317,6 +317,7 @@ export class ListTableComponent implements EventListener{
 
     this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
       this.repositories=data.repositories;
+      this.cd.detectChanges();
     });
   }
   onEvent(event:string,data:any){
