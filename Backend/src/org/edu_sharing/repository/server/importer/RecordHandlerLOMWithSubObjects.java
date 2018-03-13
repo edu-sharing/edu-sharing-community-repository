@@ -280,8 +280,10 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 							
 							if(date != null){
 								ArrayList<HashMap<String, Object>> vards = VCardConverter.vcardToHashMap(entity);
-								vards.get(0).put(CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE, date);
-								entity = VCardTool.hashMap2VCard((HashMap)vards.get(0));
+								if(vards != null && vards.size() > 0) {
+									vards.get(0).put(CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE, date);
+									entity = VCardTool.hashMap2VCard((HashMap)vards.get(0));
+								}
 							}	
 							
 							tmpLCList.add(entity);
