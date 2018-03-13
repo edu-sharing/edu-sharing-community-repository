@@ -164,7 +164,7 @@
     "TITLE":"Problem melden",
     "OPTION":"Problem melden",
     "REPORT":"Melden",
-    "REPORT_INFO":"Problem mit {{name}} melden",
+    "REPORT_INFO":"Problem mit \"{{name}}\" melden",
     "COMMENT":"Bitte nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
     "COMMENT_PLACEHOLDER":"Details angeben...",
     "EMAIL":"Ihre E-Mail-Adresse",
