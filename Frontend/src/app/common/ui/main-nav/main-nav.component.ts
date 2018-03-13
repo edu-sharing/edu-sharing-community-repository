@@ -258,7 +258,6 @@ export class MainNavComponent {
     return null;
   }
   refreshBanner(){
-    console.log("refresh banner");
     this.handleScroll(null);
     setTimeout(()=>this.handleScroll(null),10);
   }
