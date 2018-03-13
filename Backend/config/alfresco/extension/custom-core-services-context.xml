@@ -543,6 +543,7 @@
       </property>
    </bean>
    
+   
    <bean id="searchServiceInterceptor" class="org.edu_sharing.alfresco.workspace_administration.SearchServiceInterceptor">
    </bean>
     
@@ -561,61 +562,6 @@
          	</list>
       </property>
     </bean>
-    
-   <!-- Permission service interceptor to check Deny permissions -->
-   <bean id="eduPermissionServiceInterceptor" class="org.edu_sharing.alfresco.permission.PermissionServiceInterceptor" init-method="init">
-      <property name="permissionService">
-         <ref bean="permissionService" />
-      </property>
-      <property name="nodeService">
-         <ref bean="NodeService" />
-      </property>
-   </bean>
-   <!-- AuditMethodInterceptor -->
-
-   <bean id="AuditMethodInterceptor" class="org.alfresco.repo.audit.AuditMethodInterceptor">
-       <property name="beanIdentifier">
-           <ref bean="beanIdentifier"/>
-       </property>
-       <property name="auditComponent">
-           <ref bean="auditComponent"/>
-       </property>
-       <property name="transactionService">
-           <ref bean="transactionService"/>
-       </property>
-       <property name="threadPoolExecutor">
-           <ref bean="auditThreadPool"/>
-       </property>
-   </bean>
-   <bean id="PermissionService_transaction" class="org.springframework.transaction.interceptor.TransactionInterceptor">
-        <property name="transactionManager">
-            <ref bean="transactionManager"/>
-        </property>
-        <property name="transactionAttributes">
-            <props>
-                <prop key="*">${server.transaction.mode.default}</prop>
-            </props>
-        </property>
-    </bean>
-    <bean id="exceptionTranslator" class="org.alfresco.repo.security.permissions.impl.ExceptionTranslatorMethodInterceptor"/>    
-    <bean id="PermissionService" class="org.springframework.aop.framework.ProxyFactoryBean">
-        <property name="proxyInterfaces">
-            <value>org.alfresco.service.cmr.security.PermissionService</value>
-        </property>
-        <property name="target">
-            <ref bean="permissionService"/>
-        </property>
-        <property name="interceptorNames">
-            <list>
-                <idref local="PermissionService_transaction"/>
-                <idref local="AuditMethodInterceptor"/>
-                <idref local="exceptionTranslator"/>
-                <idref bean="PermissionService_security"/>
-                <idref bean="eduPermissionServiceInterceptor"/>        
-            </list>
-        </property>
-    </bean>
-   
     
     <!-- Preview Job -->
      <bean id="tempFileCleanerTrigger" class="org.alfresco.util.CronTriggerBean">
