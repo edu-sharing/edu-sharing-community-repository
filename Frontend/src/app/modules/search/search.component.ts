@@ -491,7 +491,7 @@ export class SearchComponent {
         this.searchService.facettes[0].values = this.searchService.facettes[0].values.slice(0, 20);
       }
     }
-    if(this.searchService.searchResult.length == data.pagination.total)
+    if(this.searchService.searchResult.length == data.pagination.total && this.currentRepository!=RestConstants.ALL)
       this.searchService.complete = true;
   }
   private updateHasMore() {
@@ -690,9 +690,7 @@ export class SearchComponent {
     });
   }
   private onMdsReady(mds:any=null){
-      console.log("mds ready");
-      console.log(this.currentValues);
-      console.log(this.mdsRef.getValues());
+    console.log("mds ready");
     this.currentMdsSet=mds;
     this.updateColumns();
     if (this.searchService.searchResult.length < 1) {
@@ -931,10 +929,13 @@ export class SearchComponent {
   }
 
   private invalidateMds() {
-    this.reloadMds=new Boolean(true);
-    // no mds for all, so invoke refresh manuall
     if(this.currentRepository==RestConstants.ALL){
+      console.log("all repositories, invalidate manually");
       this.onMdsReady();
+    }
+    else{
+      console.log("invalidate mds");
+      this.reloadMds=new Boolean(true);
     }
   }
 
