@@ -23,10 +23,9 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 
 	private String repositoryId;
 	private String APIKey;
-	private ConcurrentMap<String,HashMap<String, Object>> propertyCache;
+	private static ConcurrentMap<String,HashMap<String, Object>> propertyCache=new MapMaker().expiration(60, TimeUnit.MINUTES).makeMap();
 	public NodeServicePixabayImpl(String appId) {
 		super(appId);
-		propertyCache=new MapMaker().expiration(60, TimeUnit.MINUTES).makeMap();
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();		
 		APIKey = appInfo.getApiKey(); 
@@ -41,11 +40,15 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 		connection.connect();
 		return connection.getInputStream();
 	}
-
+	public static void updateCache(String id,HashMap<String,Object> properties) {
+		propertyCache.put(id, properties);
+	}
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		if(propertyCache.containsKey(nodeId))
 			return propertyCache.get(nodeId);
+		// Querying by "id" is no longer supported.
+		/*
 		try{
 			SearchResultNodeRef list = SearchServicePixabayImpl.searchPixabay(repositoryId, APIKey, "&id="+nodeId);
 			if(list.getData()!=null && list.getData().size()>0){
@@ -55,7 +58,8 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 		}
 		catch(Throwable t){
 		}
-		throw new Exception("Node "+nodeId+" was not found or problem reaching pixabay");
+		*/
+		throw new Exception("Node "+nodeId+" was not found (cache expired)");
 	}
 
 	@Override

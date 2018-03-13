@@ -32,6 +32,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.nodeservice.NodeServicePixabayImpl;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -150,6 +151,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 					Constants.storeRef.getProtocol(),
 					Constants.storeRef.getIdentifier(),properties);
 			data.add(ref);
+			NodeServicePixabayImpl.updateCache(json.getString("id"), properties);
 		}
 		return searchResultNodeRef;
 
