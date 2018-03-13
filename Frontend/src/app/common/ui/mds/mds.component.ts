@@ -571,7 +571,7 @@ export class MdsComponent{
     if(values==null)
       return;
     if(!force){
-      if(!this.checkFileExtension(callback,values)){
+      if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.checkFileExtension(callback,values)){
         return;
       }
     }
