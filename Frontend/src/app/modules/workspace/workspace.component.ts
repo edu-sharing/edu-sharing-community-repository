@@ -147,7 +147,7 @@ export class WorkspaceMainComponent{
     }
     let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
     let fromInputField=KeyEvents.eventFromInputField(event);
-    let hasOpenWindow=this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
+    let hasOpenWindow=this.hasOpenWindows();
     if(event.code=="KeyX" && (event.ctrlKey || this.appleCmd) && this.selection.length && !hasOpenWindow && !fromInputField){
       this.cutCopyNode(null,false);
       event.preventDefault();
@@ -1101,6 +1101,10 @@ export class WorkspaceMainComponent{
     this.showLtiTools=true;
     this.showAddDesktop=false;
     this.showAddMobile=false;
+  }
+
+  private hasOpenWindows() {
+    return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
   }
 }
 interface ClipboardObject{

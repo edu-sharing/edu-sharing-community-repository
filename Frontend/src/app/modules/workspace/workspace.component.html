@@ -177,6 +177,7 @@
   [searchQuery]="searchQuery"
   [options]="explorerOptions"
   [viewType]="viewType"
+  [preventKeyevents]="hasOpenWindows()"
   (onDrop)="handleDrop($event)"
   (onSelectNode)="clickNode($event)"
   (onListChange)="updateList($event)"

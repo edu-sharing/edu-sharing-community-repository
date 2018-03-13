@@ -229,6 +229,11 @@ export class ListTableComponent implements EventListener{
    *  Called with same parameters as onDrop event
    */
   @Input() canDrop:Function=()=>{return true};
+  /**
+   *  Prevent key events (like when the parent has open windows)
+   */
+  @Input() preventKeyevents=false;
+
   // Callbacks
 
   /**
@@ -328,7 +333,7 @@ export class ListTableComponent implements EventListener{
   }
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.code=="KeyA" && (event.ctrlKey || this.ui.isAppleCmd()) && !KeyEvents.eventFromInputField(event)){
+    if(event.code=="KeyA" && (event.ctrlKey || this.ui.isAppleCmd()) && !KeyEvents.eventFromInputField(event) && !this.preventKeyevents){
       this.toggleAll();
       event.preventDefault();
       event.stopPropagation();
