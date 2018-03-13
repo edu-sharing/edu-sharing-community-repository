@@ -54,6 +54,7 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 			}
 		}
 		catch(Throwable t){
+			t.printStackTrace();
 		}
 		throw new Exception("Node "+nodeId+" was not found or problem reaching pixabay");
 	}
