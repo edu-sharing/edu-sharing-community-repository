@@ -105,7 +105,8 @@ a{
   color:$textLight;
   font-size: 0.8em;
 }
-:focus {
+a:focus,
+.clickable:focus {
   @include setGlobalInsetFocus();
 }
 
