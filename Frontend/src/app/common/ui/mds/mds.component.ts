@@ -415,7 +415,6 @@ export class MdsComponent{
         let elements=jump.getElementsByTagName("a");
         let scroll=document.getElementsByClassName("card-title-element");
         let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
-        console.log(height);
         let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
         let closest=999999;
         let active=elements[0];
