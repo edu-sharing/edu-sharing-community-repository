@@ -694,7 +694,6 @@ export class CollectionsMainComponent implements GwtEventListener {
       // set app to ready state
       this.gwtInterface.addListenerOfGwtEvents(this);
       this.isReady = true;
-
       // subscribe to parameters of url
       this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
         console.log(params);
@@ -705,8 +704,10 @@ export class CollectionsMainComponent implements GwtEventListener {
         if(params['mainnav'])
           this.mainnav=params['mainnav']!='false';
 
+        this._orderActive = false;
+        this.infoTitle = null;
         // get id from route and validate input data
-        var id = params['id'] || '-root-';
+        let id = params['id'] || '-root-';
         if (id==":id") id = "-root-";
         if (id=="") id = "-root-";
         if(params['addToOther']){
