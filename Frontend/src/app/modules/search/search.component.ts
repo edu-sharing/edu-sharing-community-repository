@@ -285,7 +285,7 @@ export class SearchComponent {
   }
   getMoreResults() {
     if(this.searchService.complete == false) {
-      this.searchService.skipcount = this.searchService.searchResult.length;
+      //this.searchService.skipcount = this.searchService.searchResult.length;
       this.getSearch();
     }
   }
@@ -780,7 +780,7 @@ export class SearchComponent {
         sortAscending: false,
         count:this.currentRepository==RestConstants.ALL && !this.groupResults ?
           Math.max(5,Math.round(this.connector.numberPerRequest/(this.repositories.length-1))) : null,
-        offset: this.searchService.skipcount,
+        offset: this.searchService.skipcount[position],
         propertyFilter: [
           properties]
       },
@@ -789,6 +789,9 @@ export class SearchComponent {
       this.mdsId
     ).subscribe(
       (data: SearchList) => {
+        if(!this.searchService.skipcount[position])
+          this.searchService.skipcount[position]=0;
+        this.searchService.skipcount[position] += data.nodes.length;
         this.searchService.resultCount.materials = data.pagination.total;
         this.processSearchResult(data,init);
         this.searchService.showchosenfilters = true;
