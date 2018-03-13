@@ -828,6 +828,7 @@ public class CCConstants {
 
 	//commonlicense
 	public final static String CCM_PROP_IO_COMMONLICENSE_KEY = "{http://www.campuscontent.de/model/1.0}commonlicense_key";
+	public final static String CCM_PROP_IO_CUSTOM_LICENSE_KEY = "{http://www.campuscontent.de/model/1.0}customlicense_key";
 	public final static String CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED = "{http://www.campuscontent.de/model/1.0}questionsallowed";
 	public final static String CCM_PROP_IO_COMMONLICENSE_CC_VERSION = "{http://www.campuscontent.de/model/1.0}commonlicense_cc_version";
 	public final static String CCM_PROP_IO_COMMONLICENSE_CC_LOCALE = "{http://www.campuscontent.de/model/1.0}commonlicense_cc_locale";

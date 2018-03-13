@@ -1261,7 +1261,15 @@
 				<property name="ccm:license_profile_url">
 					<type>d:text</type>
 				</property>
-
+				<property name="ccm:customlicense_key">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>false</tokenised>
+	         		</index>
+				</property>
 			</properties>
 		</aspect>
 
