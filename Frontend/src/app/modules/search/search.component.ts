@@ -973,7 +973,7 @@ export class SearchComponent {
           this.updateRepositoryOrder();
         }
         console.log(this.repositories);
-        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories)==null){
+        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
           let use=this.config.instant("availableRepositories");
           console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+use);
           console.log(this.repositories);
