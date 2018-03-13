@@ -135,7 +135,7 @@ export class UIHelper{
       */
     if(event.ctrlKey || ui.isShiftCmd())
       event.dataTransfer.dropEffect='copy';
-    //if(event.dataTransfer.getData("node"))
+    //if(event.dataTransfer.getData("text"))
     event.preventDefault();
     event.stopPropagation();
     return true;
@@ -143,9 +143,9 @@ export class UIHelper{
 
   static handleDropEvent(storage: TemporaryStorageService, ui: UIService, event: any, target: Node, onDrop: EventEmitter<any>) {
     storage.remove(TemporaryStorageService.LIST_DRAG_DATA);
-    if(!event.dataTransfer.getData("node"))
+    if(!event.dataTransfer.getData("text"))
       return;
-    let data=(JSON.parse(event.dataTransfer.getData("node")) as Node[]);
+    let data=(JSON.parse(event.dataTransfer.getData("text")) as Node[]);
     event.preventDefault();
     event.stopPropagation();
     if(!data) {

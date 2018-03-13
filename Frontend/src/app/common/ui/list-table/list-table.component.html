@@ -116,7 +116,9 @@
                  (dragexit)="dragHover=null"
                  (dragleave)="dragHover=null"
                  (contextmenu)="contextMenu($event,node)"
-                 (dragover)="allowDrag($event,node)" (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
+                 (dragover)="allowDrag($event,node)"
+                 (dragenter)="allowDrag($event,node)"
+                 (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
                     <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
                 </div>
