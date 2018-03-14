@@ -106,6 +106,8 @@ a{
   font-size: 0.8em;
 }
 a:focus,
+.btn:focus,
+.btn-flat:focus,
 .clickable:focus {
   @include setGlobalInsetFocus();
 }
