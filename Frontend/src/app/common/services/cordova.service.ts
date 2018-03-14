@@ -26,6 +26,8 @@ export class CordovaService {
 
   private deviceReadyObservable: ConnectableObservable<{}>;
 
+  private appGoneBackgroundTS : number = null;
+
   private _oauth:OAuthResult;
   public endpointUrl:string;
   get oauth(){
@@ -52,15 +54,23 @@ export class CordovaService {
 
     // CORDOVA EVENT: Pause (App is put into Background)
     let whenDeviceGoesBackground = () => {
-      console.log("CordovaService: App goes into Background");
-      // call listener if set
-      if (this.devicePauseCallback!=null) this.devicePauseCallback();
+      // rember time when app went into background
+      this.appGoneBackgroundTS = Date.now();
     };
 
     // CORDOVA EVENT: Resume (App comes back from Background)
-    // always consider that app could have been in background for days
     let whenDeviceGoesForeground = () => {
+
+      /*
+       * ignore pauses under 1 minute that appear when going into
+       * a plugin (camera) or you get a permission request from the OS
+       */
+      if (this.appGoneBackgroundTS==null) return;
+      if ((Date.now()-this.appGoneBackgroundTS)<(60*1000)) return;
+
+      // OK - real pasuse detected
       console.log("CordovaService: App comes back from Background");
+
       // call listener if set
       if (this.deviceResumeCallback!=null) this.deviceResumeCallback();
     };
@@ -121,6 +131,36 @@ export class CordovaService {
   }
 
   /**
+   * Check if app is running on a iOS device.
+   * https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-device/index.html
+   */
+  isIOS() : boolean {
+    try {
+      let device:any = (window as any).device;
+      console.log("cordova-plugin-device", device);
+      return device.platform=="iOS";
+    } catch (e) {
+      console.log("FAIL on Plugin cordova-plugin-device", e);
+      return false;
+    }
+  }
+
+  /**
+   * Check if app is running on a Android device.
+   * https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-device/index.html
+   */
+  isAnroid() : boolean {
+    try {
+      let device:any = (window as any).device;
+      console.log("cordova-plugin-device", device);
+      return device.platform=="Android";
+    } catch (e) {
+      console.log("FAIL on Plugin cordova-plugin-device", e);
+      return false;
+    }
+  }
+
+  /**
    * Use to check if cordova plugins are ready to use.
    * If angular is running in a cordova environment - make sure that device is ready befor using plugin tools.
    */
@@ -171,15 +211,8 @@ export class CordovaService {
   }
 
   /**
-   * Set a callback function to be called then device is paused.
-   * @param callback callback function (with void parameter)
-   */
-  setDevicePauseCallback(callback:Function) {
-      this.devicePauseCallback = callback;
-  }  
-
-  /**
    * Set a callback function to be called then device resumes from pause.
+   * > 1 Minute in Background
    * @param callback callback function (with void parameter)
    */
   setDeviceResumeCallback(callback:Function) {
@@ -205,6 +238,7 @@ export class CordovaService {
    * https://www.npmjs.com/package/cordova-plugin-nativestorage
    * .. just in case that for example on iOS the HTML5 local storage gets ereased:
    * https://stackoverflow.com/questions/7750857/how-permanent-is-local-storage-on-android-and-ios
+   * Dont use plugin on Android to avoid starting the app with a permission request.
    */
 
   /*
@@ -225,9 +259,9 @@ export class CordovaService {
     let value = window.localStorage.getItem(key);
 
     //just iun case - check if backup is available from nativestorage plugin
-    if (((typeof value == 'undefined') || (value==null)) && ((window as any).NativeStorage)) {
+    if (((typeof value == 'undefined') || (value==null)) && (this.isIOS) && ((window as any).NativeStorage)) {
       try {
-        //window['NativeStorage'].getItem("reference_to_value",<success-callback>, <error-callback>);
+        // window['NativeStorage'].getItem("reference_to_value",<success-callback>, <error-callback>);
         (window as any).NativeStorage.getItem(key,(valueNative:any)=>{
           // WIN 
           if (typeof valueNative == "undefined") valueNative = null;
@@ -257,15 +291,17 @@ export class CordovaService {
     window.localStorage.setItem(key, value);
 
     // as backup set on native storage
-    try {
-      (window as any).NativeStorage.setItem(key, value, ()=>{
-        // WIN - thats OK
-      }, (error:any)=>{
-        // FAIL
-        console.error("Fail NativeStorage.setItem",error);
-      });
-    } catch (e) {
-      console.error("Plugin Fail",e);
+    if (this.isIOS) {
+      try {
+        (window as any).NativeStorage.setItem(key, value, ()=>{
+          // WIN - thats OK
+        }, (error:any)=>{
+          // FAIL
+          console.error("Fail NativeStorage.setItem",error);
+        });
+      } catch (e) {
+        console.error("Plugin Fail",e);
+      }
     }
 
   }
@@ -279,20 +315,22 @@ export class CordovaService {
     window.localStorage.clear();
 
     // clear native storage 
-    try {
-      (window as any).NativeStorage.clear(()=>{
-          if(goToStart){
-              this.goToAppStart();
+    if (this.isIOS) {
+      try {
+        (window as any).NativeStorage.clear(() => {
+          if (goToStart) {
+            this.goToAppStart();
           }
-      }, (error:any)=>{
-          if(goToStart){
-              this.goToAppStart();
+        }, (error: any) => {
+          if (goToStart) {
+            this.goToAppStart();
           }
-        // FAIL
-        console.error("Fail NativeStorage.clear",error);
-      });
-    } catch (e) {
-      console.error("Plugin Fail",e);
+          // FAIL
+          console.error("Fail NativeStorage.clear", error);
+        });
+      } catch (e) {
+        console.error("Plugin Fail", e);
+      }
     }
 
   }
@@ -300,20 +338,71 @@ export class CordovaService {
   /**********************************************************
    * Camera Plugin
    **********************************************************
-   * https://github.com/apache/cordova-plugin-camera
    */
 
   testcam():void {
     try {
-      (navigator as any).camera.getPicture(()=>{
-        alert("WIN");
-      },()=>{
-        alert("FAIL");
-      }, {});
+
+      // Camera PlugIn
+      // https://github.com/apache/cordova-plugin-camera
+      let runPlugIn:Function = () => {
+        (navigator as any).camera.getPicture(()=>{
+          alert("WIN");
+        },(error:any)=>{
+          console.log("FAIL",error);
+          alert("FAIL 2");
+        }, {});
+      }
+
+      // Permissions PlugIn
+      // https://github.com/NeoLSN/cordova-plugin-android-permissions
+      let permissions = (window as any).cordova.plugins.permissions;
+      permissions.checkPermission(permissions.CAMERA, (status:any) => {
+
+        console.log("status",status);
+
+        // check result
+        if( status.hasPermission ) {
+
+          alert("OK Permission");
+          runPlugIn();
+
+        } else {
+
+          alert("No Permission");
+
+          // try to get permission by request
+          permissions.requestPermission(permissions.CAMERA, (response:any) => {
+
+            console.log("response", response);
+
+            if ( response.hasPermission ) {
+
+              alert("GOT Permission");
+              runPlugIn();
+
+            } else {
+
+              alert("DENIED Permission");
+              
+            }
+
+          }, () => {
+            alert("ERROR on requesting Permission");
+          });
+
+        }
+
+      }, () => {
+        alert("ERROR on checking Permission");
+      });
+
     } catch(e) {
-      console.log("ERROR",e);
+      console.log("ERROR as Exception",e);
       alert("FAIL");
     }
+
+
   }
 
   /**********************************************************
