@@ -903,13 +903,13 @@ export class MdsComponent{
             ">add_circle</i></div>`;
   }
   private getMultivalueBadge(value:string,caption:string=value){
-    return '<div class="badge" data-value="'+value+'"><span>'+caption+`</span><i class="material-icons clickable" onclick="
+    return '<div class="badge" data-value="'+value+'"><span>'+caption+`</span><i class="material-icons clickable" tabindex="0" onkeyup="if(event.keyCode==13){this.click()}" onclick="
     this.parentNode.parentNode.removeChild(this.parentNode);
     window.mdsComponentRef.component.applySuggestions();
     ">cancel</i></div>`;
   }
   private getMultivalueBadgeEmbedded(label='this.value',value='this.value'){
-    return `<div class=\\'badge\\' data-value=\\''+`+value+`+'\\'><span>'+`+label+`+'</span><i class=\\'material-icons clickable\\' onclick=\\'this.parentNode.parentNode.removeChild(this.parentNode);window.mdsComponentRef.component.applySuggestions();\\'>cancel</i></div>`;
+    return `<div class=\\'badge\\' data-value=\\''+`+value+`+'\\'><span>'+`+label+`+'</span><i class=\\'material-icons clickable\\' tabindex=\\'0\\' onkeyup=\\'if(event.keyCode==13){this.click()}\\' onclick=\\'this.parentNode.parentNode.removeChild(this.parentNode);window.mdsComponentRef.component.applySuggestions();\\'>cancel</i></div>`;
   }
   private renderVCardWidget(widget: any, attr: string) {
     let html='';
