@@ -97,6 +97,7 @@
                      [style.left]="dropdownLeft"
                      [style.top]="dropdownTop"
                      [style.bottom]="dropdownBottom"
+                     [style.right]="dropdownRight"
                 >
                     <a class="collection-item"
                        [class.collection-item-seperate-bottom]="option.isSeperateBottom && i"
@@ -105,6 +106,8 @@
                        [class.disabled]="!optionIsValid(option,node)"
                        [style.display]="optionIsShown(option,node) ? '' : 'none'"
                        (contextmenu)="callOption(option,node);$event.preventDefault();$event.stopPropagation();"
+                       tabindex="0"
+                       (keyup.enter)="callOption(option,node)"
                        (click)="callOption(option,node)">
                         <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
                 </div>
@@ -114,13 +117,14 @@
                  [class.noPermissions]="noPermissions(node)"
                  [class.selected]="getSelectedPos(node)!=-1"
                  [title]="viewType==0 ? '' : getTitle(node)"
-                 (click)="hasCheckbox ? null : select(node,false)"
                  [draggable]="dragDrop"
                  (dragend)="dragHover=null"
                  (dragexit)="dragHover=null"
                  (dragleave)="dragHover=null"
                  (contextmenu)="contextMenu($event,node)"
-                 (dragover)="allowDrag($event,node)" (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
+                 (dragover)="allowDrag($event,node)"
+                 (dragenter)="allowDrag($event,node)"
+                 (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
                     <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
                 </div>

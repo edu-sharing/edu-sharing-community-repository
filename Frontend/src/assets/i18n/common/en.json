@@ -145,7 +145,7 @@
     "TITLE":"report problem",
     "OPTION":"report problem",
     "REPORT":"report",
-    "REPORT_INFO":"Problem mit {{name}} melden",
+    "REPORT_INFO":"Report problem with \"{{name}}\"",
     "COMMENT":"Please provide additional information about the problem that has occurred.",
     "COMMENT_PLACEHOLDER":"provide details...",
     "EMAIL":"your e-mail-address",

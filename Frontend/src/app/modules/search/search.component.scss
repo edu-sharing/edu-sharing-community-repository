@@ -66,8 +66,8 @@ $sidenavWidth:300px;
   margin-bottom:25px;
 }
 .collectionsMore{
-  min-height: unset;
-  max-height: unset;
+  min-height: auto;
+  max-height: none;
 }
 .extendedSearch a, .switchToCollections a, .switchToSearch a{
   padding: 5px;

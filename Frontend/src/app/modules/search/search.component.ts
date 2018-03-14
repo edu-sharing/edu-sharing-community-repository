@@ -285,7 +285,7 @@ export class SearchComponent {
   }
   getMoreResults() {
     if(this.searchService.complete == false) {
-      this.searchService.skipcount = this.searchService.searchResult.length;
+      //this.searchService.skipcount = this.searchService.searchResult.length;
       this.getSearch();
     }
   }
@@ -579,7 +579,7 @@ export class SearchComponent {
       return options;
     }
     if(nodes && nodes.length) {
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node: Node) => {
+      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
         this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
       });
       collection.showCallback = (node: Node) => {
@@ -623,7 +623,7 @@ export class SearchComponent {
         }
       }
 
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,
+      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,this.connector,
         (node: Node) => NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
@@ -780,7 +780,7 @@ export class SearchComponent {
         sortAscending: false,
         count:this.currentRepository==RestConstants.ALL && !this.groupResults ?
           Math.max(5,Math.round(this.connector.numberPerRequest/(this.repositories.length-1))) : null,
-        offset: this.searchService.skipcount,
+        offset: this.searchService.skipcount[position],
         propertyFilter: [
           properties]
       },
@@ -789,6 +789,9 @@ export class SearchComponent {
       this.mdsId
     ).subscribe(
       (data: SearchList) => {
+        if(!this.searchService.skipcount[position])
+          this.searchService.skipcount[position]=0;
+        this.searchService.skipcount[position] += data.nodes.length;
         this.searchService.resultCount.materials = data.pagination.total;
         this.processSearchResult(data,init);
         this.searchService.showchosenfilters = true;
@@ -970,7 +973,7 @@ export class SearchComponent {
           this.updateRepositoryOrder();
         }
         console.log(this.repositories);
-        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories)==null){
+        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
           let use=this.config.instant("availableRepositories");
           console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+use);
           console.log(this.repositories);

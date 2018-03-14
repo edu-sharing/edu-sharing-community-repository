@@ -98,8 +98,9 @@
     <i class="material-icons">add_circle_outline</i><span>{{ 'WORKSPACE.ADD' | translate }}</span>
   </div>
 
-  <div class="dialog" *ngIf="showAddDesktop" (click)="showAddDesktop=false" (contextmenu)="showAddDesktop=false;$event.preventDefault();$event.stopPropagation();"></div>
+  <div class="dialog dialogAddDesktop" *ngIf="showAddDesktop" (click)="showAddDesktop=false" (contextmenu)="showAddDesktop=false;$event.preventDefault();$event.stopPropagation();"></div>
   <div class="addDesktopMenu collection"
+       #dropdown
        [@overlay]="showAddDesktop"
        [style.position]="dropdownPosition"
        [style.left]="dropdownLeft"
@@ -181,6 +182,7 @@
   [searchQuery]="searchQuery"
   [options]="explorerOptions"
   [viewType]="viewType"
+  [preventKeyevents]="hasOpenWindows()"
   (onDrop)="handleDrop($event)"
   (onSelectNode)="clickNode($event)"
   (onListChange)="updateList($event)"

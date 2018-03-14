@@ -2,6 +2,7 @@ import {NodeHelper} from "../node-helper";
 import { Node} from "../../rest/data-object";
 import {RestConstants} from "../../rest/rest-constants";
 import {OptionItem} from "./option-item";
+import {RestConnectorService} from "../../rest/services/rest-connector.service";
 export class ActionbarHelper{
   /**
    * Add a given option for a specified type and checks the rights if possible
@@ -11,7 +12,7 @@ export class ActionbarHelper{
    * @param {Function} callback
    * @returns {any}
    */
-  static createOptionIfPossible(type:string,nodes:Node[],callback:Function){
+  static createOptionIfPossible(type:string,nodes:Node[],connector:RestConnectorService,callback:Function){
     let option:OptionItem=null;
     if(type=='DOWNLOAD') {
       if (nodes && nodes.length && NodeHelper.allFiles(nodes)) {
@@ -47,7 +48,7 @@ export class ActionbarHelper{
     if(type=='SHARE_LINK'){
       if(nodes && !nodes[0].isDirectory) {
         option = new OptionItem("WORKSPACE.OPTION.SHARE_LINK", "link", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
+        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE) && connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
       }
     }
     return option;

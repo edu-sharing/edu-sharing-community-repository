@@ -41,7 +41,7 @@
           <div class="toInvite">
             <div class="badge" *ngFor="let permission of newPermissions">
               <span>{{permission | permissionName}}</span>
-                <i class="material-icons clickable" (click)="removePermission(permission)">cancel</i>
+                <i class="material-icons clickable" tabindex="0" (keyup.enter)="removePermission(permission)" (click)="removePermission(permission)">cancel</i>
               </div>
           </div>
           <div class="typeButton" *ngIf="newPermissions && newPermissions.length">

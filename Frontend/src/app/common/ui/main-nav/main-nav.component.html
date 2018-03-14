@@ -44,7 +44,7 @@
   </form>
   </div>
   <div class="imprint" *ngIf="config.imprintUrl"><a class="clickable" (click)="openImprint()">{{ 'IMPRINT' | translate }}</a></div>
-  <div *ngIf="user && _currentScope=='search'" #nodeStoreRef class="nodeStore" class="clickable nodeStore" (click)="setNodeStore(true)">
+  <div *ngIf="user && _currentScope=='search'" #nodeStoreRef class="nodeStore" class="clickable nodeStore" (click)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
     <i class="material-icons barIcon">bookmark_border</i>
     <div class="nodeStoreCount">{{nodeStoreCount}}</div>
     <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">

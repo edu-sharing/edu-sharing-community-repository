@@ -25,6 +25,7 @@ export class WorkspaceExplorerComponent  {
   public columns : ListItem[]=[];
   @Input() options : OptionItem[]=[];
   @Input() viewType = 0;
+  @Input() preventKeyevents:boolean;
 
 
   private loading=false;
