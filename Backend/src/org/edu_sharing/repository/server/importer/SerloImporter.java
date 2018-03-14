@@ -317,4 +317,9 @@ public class SerloImporter implements Importer{
 		
 	}
 	
+	@Override
+	public void startImport(String[] oaiIDs, String set) {
+		logger.error("not implemented yet");
+	}
+	
 }

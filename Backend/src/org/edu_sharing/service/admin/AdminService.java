@@ -37,7 +37,7 @@ public interface AdminService {
 	List<GlobalGroup> getGlobalGroups() throws Throwable;
 
 	void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-			String importerJobClassName, String importerClassName, String recordHandlerClassName,String binaryHandlerClassName) throws Exception;
+			String importerJobClassName, String importerClassName, String recordHandlerClassName,String binaryHandlerClassName, String oaiIds) throws Exception;
 
 	List<String> getImporterClasses() throws Exception;
 
@@ -75,5 +75,7 @@ public interface AdminService {
 	int importCollections(String parent, InputStream is) throws Throwable;
 
 	String uploadTemp(String name, InputStream is) throws Exception;
+
+	
 	
 }
