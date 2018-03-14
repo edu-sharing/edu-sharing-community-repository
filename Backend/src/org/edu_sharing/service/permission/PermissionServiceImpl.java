@@ -795,12 +795,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 	}
 	public StringBuffer getFindUsersSearchString(HashMap<String,String> propVals, boolean globalContext){
-		String fuzzyUserSearchProp = RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_FUZZY_USERSEARCH);
 
-		boolean fuzzyUserSearch = true;
-		if (fuzzyUserSearchProp != null) {
-			fuzzyUserSearch = new Boolean(fuzzyUserSearchProp);
-		}
+		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:person");
 
@@ -863,7 +859,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 
 				if (token.length() > 0) {
-					subQuery.append("@cm\\:email.__.u:").append("\"").append(token.toLowerCase()).append("\"");
+					subQuery.append("=@cm:email:").append("\"").append(token).append("\"");
 				}
 			}
 

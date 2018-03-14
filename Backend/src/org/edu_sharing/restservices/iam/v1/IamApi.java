@@ -643,7 +643,7 @@ public class IamApi  {
         	try {
         		
     	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-    	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).searchAuthorities(
+    	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
     	    					AuthorityType.GROUP,
     	    					pattern,
     	    					global==null ? true : global, 
@@ -1118,10 +1118,13 @@ public class IamApi  {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
+	    					null,
 	    					pattern,
 	    					global==null ? true : global,
 	    					skipCount!=null ? skipCount : 0,
-	    	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS
+	    	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
+	    					null,
+	    					null
 	    					
 	    			);
 

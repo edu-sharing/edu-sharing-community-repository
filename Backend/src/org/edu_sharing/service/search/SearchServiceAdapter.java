@@ -71,23 +71,17 @@ public class SearchServiceAdapter implements SearchService {
 	}
 
 	@Override
-	public SearchResult<String> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults)
-			throws InsufficientPermissionException {
-		return null;
-	}
-
-	@Override
-	public SearchResult<String> searchAuthorities(AuthorityType type, String _pattern, boolean globalSearch,
-			int _skipCount, int _maxValues, SortDefinition sort, Map<String, String> customProperties) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
 			SortDefinition sort, Map<String, String> customProperties) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
+	@Override
+	public SearchResult<String> findAuthorities(AuthorityType user, String searchWord, boolean globalContext, int from,
+			int nrOfResults, SortDefinition sort, Map<String, String> customProperties)
+			throws InsufficientPermissionException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
