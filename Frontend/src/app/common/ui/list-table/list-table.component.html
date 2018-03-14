@@ -103,6 +103,8 @@
                        [class.disabled]="!optionIsValid(option,node)"
                        [style.display]="optionIsShown(option,node) ? '' : 'none'"
                        (contextmenu)="callOption(option,node);$event.preventDefault();$event.stopPropagation();"
+                       tabindex="0"
+                       (keyup.enter)="callOption(option,node)"
                        (click)="callOption(option,node)">
                         <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
                 </div>

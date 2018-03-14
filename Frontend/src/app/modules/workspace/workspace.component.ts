@@ -1,4 +1,4 @@
-import {Component, HostListener} from '@angular/core';
+import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {RestNodeService} from "../../common/rest/services/rest-node.service";
@@ -95,6 +95,7 @@ export class WorkspaceMainComponent{
   public isSafe = false;
   private isLoggedIn = false;
   public addNodesToCollection : Node[];
+  @ViewChild('dropdown') dropdownElement : ElementRef;
   private dropdownPosition: string;
   private dropdownLeft: string;
   private dropdownRight: string;
@@ -1050,6 +1051,7 @@ export class WorkspaceMainComponent{
         this.dropdownTop = event.clientY + "px";
       }
     }
+    setTimeout(()=>UIHelper.setFocusOnDropdown(this.dropdownElement));
   }
   private createMobile(){
     if(!this.createAllowed)

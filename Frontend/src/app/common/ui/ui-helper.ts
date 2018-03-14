@@ -268,4 +268,12 @@ export class UIHelper{
             }
         },16);
     }
+
+  static setFocusOnDropdown(ref: ElementRef) {
+    // the first element(s) might be currently invisible, so try to focus from bottom to top
+    let elements=ref.nativeElement.getElementsByTagName("a");
+    for(let i=elements.length-1;i>=0;i--){
+      elements[i].focus();
+    }
+  }
 }

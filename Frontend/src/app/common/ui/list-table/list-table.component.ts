@@ -594,6 +594,9 @@ export class ListTableComponent implements EventListener{
     else {
       this.dropdown = node;
       this.onUpdateOptions.emit(node);
+      setTimeout(()=>{
+        UIHelper.setFocusOnDropdown(this.dropdownElement);
+      });
     }
 
     /*
