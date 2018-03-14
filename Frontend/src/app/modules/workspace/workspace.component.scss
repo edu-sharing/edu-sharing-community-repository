@@ -79,6 +79,9 @@
   left: 50px;
   top: 13px+$mainnavHeight;
 }
+.dialogAddDesktop{
+  z-index:100;
+}
 .addDesktopMenu{
   top:42px+$mainnavHeight;
   z-index:105;

@@ -65,12 +65,12 @@
      <div class="row tab-group" *ngIf="!isGuest">
        <div class="col s12">
          <ul class="tabs">
-           <li class="clickable tab col s6" (click)="sidenavTab=0">
+           <li class="clickable tab col s6" tabindex="0" (keyup.enter)="sidenavTab=0" (click)="sidenavTab=0">
              <a [class.active]="sidenavTab==0">
                <i class="material-icons">tune</i>{{'SEARCH.TAB_FILTER' | translate}}
              </a>
            </li>
-           <li class="clickable tab col s6" (click)="sidenavTab=1">
+           <li class="clickable tab col s6" tabindex="0" (keyup.enter)="sidenavTab=1" (click)="sidenavTab=1">
              <a [class.active]="sidenavTab==1">
                <i class="material-icons">favorite</i>{{'SEARCH.TAB_SAVED' | translate}}
              </a>
