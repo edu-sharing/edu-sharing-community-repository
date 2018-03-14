@@ -231,6 +231,17 @@ export class LoginAppComponent  implements OnInit {
 
     private login(){
 
+        /*
+        this.cordova.getPhotoFromCamera(
+        (win:any)=>{
+            console.log("CAMERA WIN",win);
+        }, 
+        (error:any, info:any)=>{
+            console.log("CAMERA FAIL", error);
+            console.dir(info);
+        });
+        */
+
         if (this.currentServer==null) {
             this.state=StateUI.SERVERURL;
             return;
@@ -255,6 +266,7 @@ export class LoginAppComponent  implements OnInit {
 
                 });
         });
+
     }
 
     private goToWorkspace() {

@@ -232,7 +232,7 @@ export class CordovaService {
 
 
   /**********************************************************
-   * APP SIDE PRESISTENCE 
+   * APP PRESISTENCE 
    **********************************************************
    * Uses HTML5 storage as a base, but also backups thru the following plugin-in ...
    * https://www.npmjs.com/package/cordova-plugin-nativestorage
@@ -336,72 +336,102 @@ export class CordovaService {
   }
 
   /**********************************************************
-   * Camera Plugin
+   * Permissions Plugin
    **********************************************************
+   * Use to wrapp the use of plugin functions, that need certain permissions.
+   * https://github.com/NeoLSN/cordova-plugin-android-permissions
    */
 
-  testcam():void {
+  // for 'permission' user values like in this side 
+  // https://developer.android.com/reference/android/Manifest.permission.html
+  private makeSurePermission(permission:string, successCallback:Function, errorCallback:Function): void {
+        
     try {
 
-      // Camera PlugIn
-      // https://github.com/apache/cordova-plugin-camera
-      let runPlugIn:Function = () => {
-        (navigator as any).camera.getPicture(()=>{
-          alert("WIN");
-        },(error:any)=>{
-          console.log("FAIL",error);
-          alert("FAIL 2");
-        }, {});
-      }
-
-      // Permissions PlugIn
-      // https://github.com/NeoLSN/cordova-plugin-android-permissions
       let permissions = (window as any).cordova.plugins.permissions;
-      permissions.checkPermission(permissions.CAMERA, (status:any) => {
+      let permissionString:string = permissions[permission] as string;
+
+      console.log("permissions",permissions);
+      console.log("permissionString",permissionString);
+
+      permissions.checkPermission(permissionString, (status:any) => {
 
         console.log("status",status);
 
-        // check result
         if( status.hasPermission ) {
 
-          alert("OK Permission");
-          runPlugIn();
-
+          // permission is available
+          successCallback();
+      
         } else {
 
-          alert("No Permission");
-
           // try to get permission by request
-          permissions.requestPermission(permissions.CAMERA, (response:any) => {
+          permissions.requestPermission(permissionString, (response:any) => {
 
-            console.log("response", response);
+            console.log("response",response);
 
             if ( response.hasPermission ) {
 
-              alert("GOT Permission");
-              runPlugIn();
+              // permission is granted
+              successCallback();
 
             } else {
 
-              alert("DENIED Permission");
-              
+              // permission denied
+              errorCallback("FAIL-PERMISSION-1","permission not granted by user");
+            
             }
 
-          }, () => {
-            alert("ERROR on requesting Permission");
+          }, (error:any) => {
+            errorCallback("FAIL-PERMISSION-2",error);
           });
 
         }
 
-      }, () => {
-        alert("ERROR on checking Permission");
+      }, (error:any) => {
+        errorCallback("FAIL-PERMISSION-3",error);
       });
 
-    } catch(e) {
-      console.log("ERROR as Exception",e);
-      alert("FAIL");
+    } catch(error) {
+      errorCallback("FAIL-EXCEPTION",error);
     }
 
+  }
+
+  /**********************************************************
+   * Camera Plugin
+   **********************************************************
+   * https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-camera
+   */
+
+  getPhotoFromCamera(successCallback:Function, errorCallback:Function, options:any=null ):void {
+    try {
+
+      // Default Options
+      if (options==null) options = {
+        correctOrientation: true,
+        destinationType: 0, //Camera.DestinationType.DATA_URL
+        sourceType: 1, // Camera.PictureSourceType.CAMERA
+        encodingType: 0 //Camera.EncodingType.JPEG
+      };
+
+      // Camera PlugIn
+      // https://github.com/apache/cordova-plugin-camera
+      let runPlugIn:Function = () => {
+        (navigator as any).camera.getPicture((result:any)=>{
+          successCallback(result);
+        },(error:any)=>{
+          errorCallback("FAIL-PLUGIN",error);
+        }, options);
+      }
+
+      // Permissions PlugIn
+      // https://github.com/NeoLSN/cordova-plugin-android-permissions
+      this.makeSurePermission("CAMERA",runPlugIn, errorCallback);
+
+    } catch(error) {
+      console.log("FAIL-EXCEPTION",error);
+    }
 
   }
 
