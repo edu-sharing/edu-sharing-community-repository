@@ -365,7 +365,7 @@ export class CollectionsMainComponent {
       if(!fromList){
           if(nodes && nodes.length) {
               if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
-                  let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
+                  let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
                   options.push(collection);
               }
               if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
@@ -377,14 +377,14 @@ export class CollectionsMainComponent {
           }
       }
       if(fromList) {
-          let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,
+          let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector,
               (node: Node) => this.addToOtherCollection(node));
           if (collection) {
               collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
               options.push(collection);
           }
       }
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,
+      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,
         (node:Node)=>NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
@@ -683,7 +683,6 @@ export class CollectionsMainComponent {
       this.person = iamUser.person;
 
       this.isReady = true;
-
       // subscribe to parameters of url
       this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
         console.log(params);
@@ -694,8 +693,10 @@ export class CollectionsMainComponent {
         if(params['mainnav'])
           this.mainnav=params['mainnav']!='false';
 
+        this._orderActive = false;
+        this.infoTitle = null;
         // get id from route and validate input data
-        var id = params['id'] || '-root-';
+        let id = params['id'] || '-root-';
         if (id==":id") id = "-root-";
         if (id=="") id = "-root-";
         if(params['addToOther']){

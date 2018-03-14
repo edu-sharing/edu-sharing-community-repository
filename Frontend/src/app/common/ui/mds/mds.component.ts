@@ -415,7 +415,6 @@ export class MdsComponent{
         let elements=jump.getElementsByTagName("a");
         let scroll=document.getElementsByClassName("card-title-element");
         let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
-        console.log(height);
         let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
         let closest=999999;
         let active=elements[0];
@@ -618,7 +617,7 @@ export class MdsComponent{
     if(values==null)
       return;
     if(!force){
-      if(!this.checkFileExtension(callback,values)){
+      if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.checkFileExtension(callback,values)){
         return;
       }
     }
@@ -904,13 +903,13 @@ export class MdsComponent{
             ">add_circle</i></div>`;
   }
   private getMultivalueBadge(value:string,caption:string=value){
-    return '<div class="badge" data-value="'+value+'"><span>'+caption+`</span><i class="material-icons clickable" onclick="
+    return '<div class="badge" data-value="'+value+'"><span>'+caption+`</span><i class="material-icons clickable" tabindex="0" onkeyup="if(event.keyCode==13){this.click()}" onclick="
     this.parentNode.parentNode.removeChild(this.parentNode);
     window.mdsComponentRef.component.applySuggestions();
     ">cancel</i></div>`;
   }
   private getMultivalueBadgeEmbedded(label='this.value',value='this.value'){
-    return `<div class=\\'badge\\' data-value=\\''+`+value+`+'\\'><span>'+`+label+`+'</span><i class=\\'material-icons clickable\\' onclick=\\'this.parentNode.parentNode.removeChild(this.parentNode);window.mdsComponentRef.component.applySuggestions();\\'>cancel</i></div>`;
+    return `<div class=\\'badge\\' data-value=\\''+`+value+`+'\\'><span>'+`+label+`+'</span><i class=\\'material-icons clickable\\' tabindex=\\'0\\' onkeyup=\\'if(event.keyCode==13){this.click()}\\' onclick=\\'this.parentNode.parentNode.removeChild(this.parentNode);window.mdsComponentRef.component.applySuggestions();\\'>cancel</i></div>`;
   }
   private renderVCardWidget(widget: any, attr: string) {
     let html='';

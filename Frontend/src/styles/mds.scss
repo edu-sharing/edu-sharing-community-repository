@@ -224,17 +224,17 @@ mds .mdsGroup{
     width: 100%;
   }
   .inputTable{
-    display:table;
+    display:flex;
     width: 100%;
+    align-items: center;
   }
   .inputTable input{
-    display:table-cell;
+    display:flex;
   }
   .inputIcon{
-    display:table-cell;
-    padding-right:10px;
-    position: relative;
-    top:10px;
+    display:flex;
+    margin-top: -14px;
+    margin-right:10px;
     color:#666;
   }
   .mdsAuthor{
