@@ -775,13 +775,13 @@ export class WorkspaceMainComponent{
         options.push(edit);
     }
     if(nodes && nodes.length && allFiles) {
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node:Node)=>this.addToCollection(node));
+      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,this.connector,(node:Node)=>this.addToCollection(node));
       if (collection && !this.isSafe)
         options.push(collection);
     }
     let share:OptionItem;
     if (nodes && nodes.length == 1) {
-      share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,(node: Node) => this.shareNode(node));
+      share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,this.connector,(node: Node) => this.shareNode(node));
       if(share) {
         share.isEnabled = share.isEnabled && (
           (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
@@ -791,7 +791,7 @@ export class WorkspaceMainComponent{
           share.isEnabled = false;
         options.push(share);
       }
-      let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,(node: Node) => this.setShareLinkNode(node));
+      let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
       if (shareLink && !this.isSafe)
         options.push(shareLink);
     }
@@ -820,7 +820,7 @@ export class WorkspaceMainComponent{
 
 
     }
-    let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,(node: Node) => this.downloadNode(node));
+    let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,(node: Node) => this.downloadNode(node));
     if(download)
       options.push(download);
     if (nodes && nodes.length) {

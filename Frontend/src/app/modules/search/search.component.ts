@@ -579,7 +579,7 @@ export class SearchComponent {
       return options;
     }
     if(nodes && nodes.length) {
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node: Node) => {
+      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
         this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
       });
       collection.showCallback = (node: Node) => {
@@ -623,7 +623,7 @@ export class SearchComponent {
         }
       }
 
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,
+      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,this.connector,
         (node: Node) => NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
