@@ -100,6 +100,7 @@
 
   <div class="dialog" *ngIf="showAddDesktop" (click)="showAddDesktop=false" (contextmenu)="showAddDesktop=false;$event.preventDefault();$event.stopPropagation();"></div>
   <div class="addDesktopMenu collection"
+       #dropdown
        [@overlay]="showAddDesktop"
        [style.position]="dropdownPosition"
        [style.left]="dropdownLeft"
