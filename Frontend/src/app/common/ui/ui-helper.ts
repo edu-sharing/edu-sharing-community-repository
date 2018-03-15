@@ -37,4 +37,11 @@ export class UIHelper{
   static materializeSelect() {
     eval("$('select').css('display','none');$('select').material_select()");
   }
+
+  static addHttpIfRequired(link: string) {
+      if(link.indexOf("://")==-1){
+        return "http://"+link;
+      }
+      return link;
+  }
 }
