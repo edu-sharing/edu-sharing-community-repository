@@ -363,7 +363,9 @@ export class MainNavComponent {
   }
   private logout(){
     if(this.cordova.isRunningCordova()){
-      this.cordova.clearPermanentStorage(true);
+      this.cordova.clearAllCookies();
+      this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
+      this.cordova.restartCordova();
       return;
     }
     if(this.config.logout) {

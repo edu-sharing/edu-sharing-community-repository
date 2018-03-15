@@ -14,7 +14,7 @@ import { RestConstants } from '../rest/rest-constants';
 export class CordovaService {
 
   // change this during development for testing true, but false is default
-  private forceCordovaMode: boolean = true;
+  private forceCordovaMode: boolean = false;
 
   private deviceIsReady: boolean = false;
 
@@ -30,9 +30,12 @@ export class CordovaService {
 
   private _oauth:OAuthResult;
   public endpointUrl:string;
+
+
   get oauth(){
     return this._oauth;
   }
+
   set oauth(oauth: OAuthResult){
     this._oauth=oauth;
     if(oauth) {
@@ -42,6 +45,8 @@ export class CordovaService {
 
   }
 
+  initialHref:string;
+
   /**
    * CONSTRUCTOR
    */
@@ -50,7 +55,8 @@ export class CordovaService {
     private router : Router
   ) {
 
-    console.log("CONSTRUCTOR CordovaService");
+    this.initialHref = window.location.href;
+    console.log("CONSTRUCTOR CordovaService",this.initialHref);
 
     // CORDOVA EVENT: Pause (App is put into Background)
     let whenDeviceGoesBackground = () => {
@@ -140,7 +146,7 @@ export class CordovaService {
       console.log("cordova-plugin-device", device);
       return device.platform=="iOS";
     } catch (e) {
-      console.log("FAIL on Plugin cordova-plugin-device", e);
+      console.log("FAIL on Plugin cordova-plugin-device (1)");
       return false;
     }
   }
@@ -155,8 +161,8 @@ export class CordovaService {
       console.log("cordova-plugin-device", device);
       return device.platform=="Android";
     } catch (e) {
-      console.log("FAIL on Plugin cordova-plugin-device", e);
-      return false;
+      console.log("FAIL on Plugin cordova-plugin-device (2)");
+      return true;
     }
   }
 
@@ -199,18 +205,6 @@ export class CordovaService {
   }
 
   /**
-   * after init, load the stored info from the cordova storage and save it as class members for access of other services
-   */
-  loadStorage(){
-      this.getPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,(data:string)=>{
-          this._oauth = (data!=null) ? JSON.parse(data) : null;
-          this.getPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,(data:string)=>{
-              this.endpointUrl=data;
-          });
-      });
-  }
-
-  /**
    * Set a callback function to be called then device resumes from pause.
    * > 1 Minute in Background
    * @param callback callback function (with void parameter)
@@ -228,6 +222,13 @@ export class CordovaService {
     } catch(e) {
       console.log("FAIL EXIT APP",e);
     }
+  }
+
+  restartCordova():void {
+    try {
+      (navigator as any).splashscreen.show();
+    } catch (e) {}
+    document.location.href = this.initialHref;
   }
 
 
@@ -259,7 +260,7 @@ export class CordovaService {
     let value = window.localStorage.getItem(key);
 
     //just iun case - check if backup is available from nativestorage plugin
-    if (((typeof value == 'undefined') || (value==null)) && (this.isIOS) && ((window as any).NativeStorage)) {
+    if (((typeof value == 'undefined') || (value==null)) && (this.isIOS()) && ((window as any).NativeStorage)) {
       try {
         // window['NativeStorage'].getItem("reference_to_value",<success-callback>, <error-callback>);
         (window as any).NativeStorage.getItem(key,(valueNative:any)=>{
@@ -291,7 +292,7 @@ export class CordovaService {
     window.localStorage.setItem(key, value);
 
     // as backup set on native storage
-    if (this.isIOS) {
+    if (this.isIOS()) {
       try {
         (window as any).NativeStorage.setItem(key, value, ()=>{
           // WIN - thats OK
@@ -309,22 +310,16 @@ export class CordovaService {
   /**
    * erase all permanent data
    */
-  clearPermanentStorage(goToStart=false) : void {
+  clearPermanentStorage() : void {
 
     // clear HTML5 local storage
     window.localStorage.clear();
 
     // clear native storage 
-    if (this.isIOS) {
+    if (this.isIOS()) {
       try {
         (window as any).NativeStorage.clear(() => {
-          if (goToStart) {
-            this.goToAppStart();
-          }
         }, (error: any) => {
-          if (goToStart) {
-            this.goToAppStart();
-          }
           // FAIL
           console.error("Fail NativeStorage.clear", error);
         });
@@ -332,7 +327,28 @@ export class CordovaService {
         console.error("Plugin Fail", e);
       }
     }
+  }
 
+  /**
+   * after init, load the stored info from the cordova storage and save it as class members for access of other services
+   */
+  loadStorage(){
+    this.getPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,(data:string)=>{
+        this._oauth = (data!=null) ? JSON.parse(data) : null;
+        this.getPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,(data:string)=>{
+            this.endpointUrl=data;
+        });
+    });
+  }
+
+  clearAllCookies() : void {
+    let cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i];
+        let eqPos = cookie.indexOf("=");
+        let name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
   }
 
   /**********************************************************
@@ -560,17 +576,19 @@ export class CordovaService {
    */
   private reiniting=false;
   public reinitStatus(){
-    if(this.reiniting)
-      return;
+    console.info("cordova: reinit");
+    if(this.reiniting) return;
     console.log("cordova: refresh oAuth");
     this.reiniting=true;
       this.refreshOAuth(this.oauth).subscribe(()=>{
+          console.info("cordova: oauth OK, do reload");
           this.reiniting=false;
           window.location.reload();
       },(error:any)=>{
-        this.clearPermanentStorage();
+        this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
+        this.clearAllCookies();
         console.warn("cordova: invalid oauth, go back to server selection");
-        this.goToAppStart();
+        this.restartCordova();
       });
   }
 
@@ -646,11 +664,6 @@ export class CordovaService {
     });
 
   }
-
-    private goToAppStart() {
-        console.log("GO TO START");
-        this.router.navigate(['']);
-    }
 
     hasValidConfig() {
         return this._oauth && this.endpointUrl;

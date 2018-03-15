@@ -282,11 +282,14 @@ export class RestHelper{
     perm.authority={authorityName:RestConstants.AUTHORITY_EVERYONE,authorityType:RestConstants.AUTHORITY_TYPE_EVERYONE};
     return perm;
   }
+
   public static goToLogin(router : Router,config:ConfigurationService,scope="",next=window.location.href) {
-      if(config.getLocator().getCordova().isRunningCordova()){
+      
+    if(config.getLocator().getCordova().isRunningCordova()){
           config.getLocator().getCordova().reinitStatus();
           return;
-      }
+    }
+
     config.get("loginUrl").subscribe((url:string)=> {
       if(url && !scope){
         window.location.href=url;
