@@ -26,6 +26,7 @@ export class RestConstants {
   public static PERMISSION_CONSUMER = "Consumer";
   public static PERMISSION_COLLABORATOR = "Collaborator";
   public static PERMISSION_COORDINATOR = "Coordinator";
+  public static PERMISSION_ALL = "All";
 
   public static COLLECTIONSCOPE_MY = "MY";
   public static COLLECTIONSCOPE_ORGA = "EDU_GROUPS";
