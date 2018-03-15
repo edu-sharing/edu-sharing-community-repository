@@ -285,4 +285,11 @@ export class UIHelper{
       elements[i].focus();
     }
   }
+
+  static addHttpIfRequired(link: string) {
+      if(link.indexOf("://")==-1){
+        return "http://"+link;
+      }
+      return link;
+  }
 }
