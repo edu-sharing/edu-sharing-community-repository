@@ -464,7 +464,7 @@ export class SearchComponent {
     this.searchService.ignored = data.ignored;
     this.checkFail();
     this.updateActionbar(this.selection);
-    if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
+    if(data.nodes.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
       this.isSearching=false;
       this.searchService.complete = true;

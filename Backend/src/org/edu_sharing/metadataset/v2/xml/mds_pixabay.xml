@@ -1,34 +1,36 @@
 <metadataset id="default" label="default" hidden="false">
-		<name>Core Metadataset</name>
+		<name>Pixabay Metadataset</name>
 		<inherit>mds</inherit>
-		<i18n>mds</i18n>
+		<i18n>mds_pixabay</i18n>
 		<widgets>
 			<widget>
 				<id>editors_choice</id>
-				<caption>Editors Choice</caption>
+				<caption>editors_choice</caption>
 				<type>checkbox</type>
 			</widget>
 			<widget>
 				<id>image_type</id>
-				<caption>Typ</caption>
+				<caption>image_type</caption>
 				<type>radioVertical</type>
 				<defaultvalue>all</defaultvalue>
+				<valuespace_i18n_prefix>type_</valuespace_i18n_prefix>
 				<values>
-					<value cap="Alle">all</value>
-					<value cap="Foto">photo</value>
-					<value cap="Illustration">illustration</value>
-					<value cap="Vektor">vector</value>
+					<value>all</value>
+					<value>photo</value>
+					<value>illustration</value>
+					<value>vector</value>
 				</values>
 			</widget>
 			<widget>
 				<id>orientation</id>
-				<caption>Ausrichtung</caption>
+				<caption>orientation</caption>
 				<type>radioVertical</type>
 				<defaultvalue>all</defaultvalue>
+				<valuespace_i18n_prefix>type_</valuespace_i18n_prefix>
 				<values>
-					<value cap="Alle">all</value>
-					<value cap="Querformat">horizontal</value>
-					<value cap="Hochformat">vertical</value>
+					<value>all</value>
+					<value>horizontal</value>
+					<value>vertical</value>
 				</values>
 			</widget>
 		</widgets>
