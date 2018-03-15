@@ -9,6 +9,7 @@ import {RestHelper} from "../../common/rest/rest-helper";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {ConfigurationService} from "../../common/services/configuration.service";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
+import {UIHelper} from '../../common/ui/ui-helper';
 
 @Component({
   selector: 'workspace-management',
