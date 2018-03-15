@@ -1,5 +1,5 @@
 <global-progress *ngIf="globalProgress && !embedded"></global-progress>
-<div class="dialog darken" *ngIf="!embedded" [@fade]="this"></div>
+<div class="dialog dialogMdsGlobal darken" *ngIf="!embedded" [@fade]="this"></div>
 <div *ngIf="!embedded">
   <div id="jumpmarks" class="card-jumpmarks" [innerHTML]="jumpmarks" *ngIf="(currentNode || createType) && jumpmarksCount>1">
 
@@ -34,7 +34,7 @@
   </div>
 </div>
 <modal-dialog
-              [priority]="1"
+              [priority]="2"
               [title]="dialogTitle"
               [message]="dialogMessage"
               [isCancelable]="true"
