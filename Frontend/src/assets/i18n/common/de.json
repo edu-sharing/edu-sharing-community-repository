@@ -137,6 +137,7 @@
     "size": "Größe",
     "mediatype":"Dateityp",
     "ccm:commonlicense_key":"Lizenz",
+    "sys:node-uuid":"Node-ID",
     "dimensions": "Bildgröße",
     "exif:dateTimeOriginal":"Aufnahmedatum",
     "cm:modified": "zuletzt geändert",
