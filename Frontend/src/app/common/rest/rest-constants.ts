@@ -189,6 +189,7 @@ export class RestConstants {
     RestConstants.CM_MODIFIED_DATE,
     RestConstants.CM_PROP_C_CREATED,
     RestConstants.CM_CREATOR,
+    RestConstants.NODE_ID,
     RestConstants.CCM_PROP_WF_STATUS,
     RestConstants.CM_ARCHIVED_DATE,
     RestConstants.LOM_PROP_GENERAL_KEYWORD,
