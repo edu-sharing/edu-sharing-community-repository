@@ -9,8 +9,8 @@
       <h1>{{'LOGIN_APP.SERVERLIST' | translate}}</h1>
       <div>{{'LOGIN_APP.SERVERLIST_INFO' | translate}}</div>
     </div>
-    <div class="card center-card card-high">
-      <div class="card-content">
+    <div class="card center-card card-high" style="padding-bottom: 0px;">
+      <div class="card-content" style="padding-bottom: 0px; height: 100%;">
         <div class="card-scroll ">
           <div class="server clickable" *ngFor="let server of servers" (click)="chooseServer(server)" tabindex="0">
             <div class="icon">

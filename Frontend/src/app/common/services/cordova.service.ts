@@ -14,7 +14,7 @@ import { RestConstants } from '../rest/rest-constants';
 export class CordovaService {
 
   // change this during development for testing true, but false is default
-  private forceCordovaMode: boolean = false;
+  private forceCordovaMode: boolean = true;
 
   private deviceIsReady: boolean = false;
 
