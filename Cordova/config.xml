@@ -26,11 +26,13 @@
         </comment>
         <preference name="android-targetSdkVersion" value="26" />
         <preference name="android-minSdkVersion" value="19" />
-        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest">
+        <comment>
+            Add here all permissions that dont get automatically get added by plugins.
+            https://developer.android.com/reference/android/Manifest.permission.html
+        </comment>
+        <config-file mode="merge" parent="/*" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.CAMERA" />
-            <uses-feature android:name="android.hardware.camera" />
-            <uses-feature android:name="android.hardware.camera.autofocus" />
-        </edit-config>
+        </config-file>
         <icon density="ldpi" src="resources/android/icon/drawable-ldpi-icon.png" />
         <icon density="mdpi" src="resources/android/icon/drawable-mdpi-icon.png" />
         <icon density="hdpi" src="resources/android/icon/drawable-hdpi-icon.png" />

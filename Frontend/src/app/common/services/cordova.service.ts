@@ -378,7 +378,7 @@ export class CordovaService {
             } else {
 
               // permission denied
-              errorCallback("FAIL-PERMISSION-1","permission not granted by user");
+              errorCallback("FAIL-PERMISSION-1","permission not granted by user or not part of config.xml");
             
             }
 
@@ -427,6 +427,7 @@ export class CordovaService {
 
       // Permissions PlugIn
       // https://github.com/NeoLSN/cordova-plugin-android-permissions
+      // TODO: check that the app just asks for photo permission
       this.makeSurePermission("CAMERA",runPlugIn, errorCallback);
 
     } catch(error) {
@@ -554,7 +555,7 @@ export class CordovaService {
   }
 
   /**
-   * called when the current status is logged out
+   * Called when the current status is logged out
    * Cordova needs to refresh tokens
    */
   private reiniting=false;
