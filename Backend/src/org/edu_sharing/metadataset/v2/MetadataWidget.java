@@ -9,6 +9,18 @@ import java.util.Map;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
 
 public class MetadataWidget extends MetadataTranslatable{
+	public static class Subwidget {
+		private String id;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+	}
 	private static String[] MULTIVALUE_WIDGETS=new String[]{
 			"vcard",
 			"multivalueTree",
@@ -17,7 +29,7 @@ public class MetadataWidget extends MetadataTranslatable{
 			"multivalueSuggestBadges",
 			"multioption"
 	};
-	
+
 	public static class Condition implements Serializable{
 		public Condition(String value, CONDITION_TYPE type, boolean negate) {
 			this.value = value;
@@ -49,7 +61,7 @@ public class MetadataWidget extends MetadataTranslatable{
 		public void setNegate(boolean negate) {
 			this.negate = negate;
 		}
-		
+
 	}
 	private String id,type,caption,bottomCaption,icon,
 					placeholder,defaultvalue,template,
@@ -57,6 +69,9 @@ public class MetadataWidget extends MetadataTranslatable{
 	private Integer min,max,defaultValue,defaultMin,defaultMax,step;
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty;
 	private List<MetadataKey> values;
+	private List<Subwidget> subwidgets;
+
+	
 	private Condition condition;
 	public String getSuggestionQuery() {
 		return suggestionQuery;
@@ -215,6 +230,12 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public void setBottomCaption(String bottomCaption) {
 		this.bottomCaption = bottomCaption;
+	}
+	public List<Subwidget> getSubwidgets() {
+		return subwidgets;
+	}
+	public void setSubwidgets(List<Subwidget> subwidgets) {
+		this.subwidgets = subwidgets;
 	}
 	@Override
 	public boolean equals(Object obj) {

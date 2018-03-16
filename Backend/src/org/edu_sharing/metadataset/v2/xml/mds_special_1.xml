@@ -6,6 +6,14 @@
 		</create>
 		<widgets>
 			<widget>
+				<id>ccm:group_test</id>
+				<type>group</type>
+				<subwidgets>
+					<widget>ccm:classification_purpose</widget>
+					<widget>ccm:taxonid</widget>
+				</subwidgets>
+			</widget>
+			<widget>
 				<id>ccm:classification_purpose</id>
 				<caption>Klassifikation (TOOLPERMISSION_CONFIDENTIAL existiert)</caption>
 				<placeholder>z.B. Hochschule</placeholder>
