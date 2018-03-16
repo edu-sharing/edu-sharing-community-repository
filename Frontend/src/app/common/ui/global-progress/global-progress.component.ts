@@ -8,6 +8,7 @@ import {ConfigurationService} from "../../services/configuration.service";
 @Component({
   selector: 'global-progress',
   templateUrl: 'global-progress.component.html',
+  styleUrls: ['global-progress.component.scss']
 })
 export class GlobalProgressComponent {
   constructor() {
