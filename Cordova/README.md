@@ -18,6 +18,8 @@ To build the mobile app make sure basic framework is installed:
 
 On first time building run a:
 
+`mkdir www` and a
+
 `cordova prepare`
 
 Now all platform and plugin data will get loaded and added into your project.
