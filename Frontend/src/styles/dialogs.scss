@@ -63,7 +63,7 @@
   word-break: break-all;
   max-height: 48px;
   overflow: hidden;
-  @unselectableText();
+  @include unselectableText();
 }
 .center-card .card-scroll{
   overflow-y: auto;
@@ -191,6 +191,7 @@ input[type=search]{
   .dialogOptions{
     overflow: scroll;
     @include darken();
+    z-index:151;
     background: linear-gradient(to top, #ffffff 0,#ffffff 128px,$darkenColor 128px,$darkenColor 100%);
   }
   .card-wide{
