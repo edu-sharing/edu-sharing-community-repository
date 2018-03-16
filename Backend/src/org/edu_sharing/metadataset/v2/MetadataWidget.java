@@ -24,6 +24,7 @@ public class MetadataWidget extends MetadataTranslatable{
 			"multivalueBadges",
 			"multivalueFixedBadges",
 			"multivalueSuggestBadges",
+			"multivalueGroup",
 			"multioption"
 	};
 	private String id,type,caption,bottomCaption,icon,
