@@ -2,6 +2,7 @@ package org.edu_sharing.repository.client.tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CCConstants {
@@ -644,8 +645,6 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_INVITE_SHARE_SAFE = "TOOLPERMISSION_INVITE_SHARE_SAFE";
 
-	public final static String CCM_VALUE_TOOLPERMISSION_INVITED = "TOOLPERMISSION_INVITED";
-
 	public final static String CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY = "TOOLPERMISSION_INVITE_HISTORY";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_LICENSE = "TOOLPERMISSION_LICENSE";
@@ -657,6 +656,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_WORKSPACE = "TOOLPERMISSION_WORKSPACE";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE";
 
@@ -823,6 +824,7 @@ public class CCConstants {
 
 	//commonlicense
 	public final static String CCM_PROP_IO_COMMONLICENSE_KEY = "{http://www.campuscontent.de/model/1.0}commonlicense_key";
+	public final static String CCM_PROP_IO_CUSTOM_LICENSE_KEY = "{http://www.campuscontent.de/model/1.0}customlicense_key";
 	public final static String CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED = "{http://www.campuscontent.de/model/1.0}questionsallowed";
 	public final static String CCM_PROP_IO_COMMONLICENSE_CC_VERSION = "{http://www.campuscontent.de/model/1.0}commonlicense_cc_version";
 	public final static String CCM_PROP_IO_COMMONLICENSE_CC_LOCALE = "{http://www.campuscontent.de/model/1.0}commonlicense_cc_locale";
@@ -1380,6 +1382,12 @@ public class CCConstants {
 	public final static String COMMON_LICENSE_CC_ZERO = "CC_0";
 
 
+	/**
+	 * Public Domain Mark
+	 */
+	public final static String COMMON_LICENSE_PDM = "PDM";
+
+
 	/******************************************************************
 	 * Common Licenses
 	 ******************************************************************/
@@ -1474,6 +1482,24 @@ public class CCConstants {
 	 * the user can set an own license in a custom field
 	 */
 	public final static String COMMON_LICENSE_CUSTOM = "CUSTOM";
+	
+	public static List<String> getAllLicenseKeys(){
+		List<String> list=new ArrayList<>();
+		list.add(COMMON_LICENSE_CC_BY);
+		list.add(COMMON_LICENSE_CC_BY_SA);
+		list.add(COMMON_LICENSE_CC_BY_ND);
+		list.add(COMMON_LICENSE_CC_BY_NC);
+		list.add(COMMON_LICENSE_CC_BY_NC_SA);
+		list.add(COMMON_LICENSE_CC_BY_NC_ND);
+		list.add(COMMON_LICENSE_CC_ZERO);
+		list.add(COMMON_LICENSE_PDM);
+		list.add(COMMON_LICENSE_EDU_P_NR);
+		list.add(COMMON_LICENSE_EDU_P_NR_ND);
+		list.add(COMMON_LICENSE_EDU_NC_ND);
+		list.add(COMMON_LICENSE_EDU_NC);
+		list.add(COMMON_LICENSE_CUSTOM);
+		return list;
+	}
 
 	public final static String COMMON_LICENSE_CC_ZERO_LINK = "https://creativecommons.org/publicdomain/zero/1.0/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/deed.en";
@@ -1763,5 +1789,7 @@ public class CCConstants {
 	public static final String SESSION_LAST_SEARCH_TOKEN = "LAST_SEARCH_TOKEN";
 
 	public static final String COLLECTION_ORDER_MODE_CUSTOM = "custom";
+
+	public static final String ISO8601_SUFFIX = "ISO8601";
 
 }

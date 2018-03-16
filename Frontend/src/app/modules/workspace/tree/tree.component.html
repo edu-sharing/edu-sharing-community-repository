@@ -33,7 +33,7 @@
     (onClick)="openNode($event)"
   ></workspace-sub-tree>
 </div>
-<div class="rootNode" *ngIf="!isSafe" [class.rootNodeSelected]="root==MY_SHARED_FILES" (click)="setRoot(MY_SHARED_FILES)">
+<div class="rootNode" [class.rootNodeSelected]="root==MY_SHARED_FILES" (click)="setRoot(MY_SHARED_FILES)">
   <i class="material-icons typeIcon">share</i>{{'WORKSPACE.MY_SHARED_FILES' | translate}}
   <i class="material-icons" *ngIf="root==MY_SHARED_FILES">keyboard_arrow_down</i>
   <i class="arrow" class="material-icons" *ngIf="root!=MY_SHARED_FILES">keyboard_arrow_right</i>
@@ -50,7 +50,7 @@
   (onClick)="openNode($event)"
 ></workspace-sub-tree>
 </div>
-<div class="rootNode" *ngIf="!isSafe" [class.rootNodeSelected]="root==TO_ME_SHARED_FILES" (click)="setRoot(TO_ME_SHARED_FILES)">
+<div class="rootNode" [class.rootNodeSelected]="root==TO_ME_SHARED_FILES" (click)="setRoot(TO_ME_SHARED_FILES)">
   <i class="material-icons typeIcon">send</i>{{'WORKSPACE.TO_ME_SHARED_FILES' | translate}}
   <i class="material-icons" *ngIf="root==TO_ME_SHARED_FILES">keyboard_arrow_down</i>
   <i class="arrow" class="material-icons" *ngIf="root!=TO_ME_SHARED_FILES">keyboard_arrow_right</i>

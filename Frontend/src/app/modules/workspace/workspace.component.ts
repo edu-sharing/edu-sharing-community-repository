@@ -1,4 +1,4 @@
-import {Component, HostListener} from '@angular/core';
+import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {RestNodeService} from "../../common/rest/services/rest-node.service";
@@ -95,6 +95,7 @@ export class WorkspaceMainComponent{
   public isSafe = false;
   private isLoggedIn = false;
   public addNodesToCollection : Node[];
+  @ViewChild('dropdown') dropdownElement : ElementRef;
   private dropdownPosition: string;
   private dropdownLeft: string;
   private dropdownRight: string;
@@ -147,7 +148,7 @@ export class WorkspaceMainComponent{
     }
     let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
     let fromInputField=KeyEvents.eventFromInputField(event);
-    let hasOpenWindow=this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
+    let hasOpenWindow=this.hasOpenWindows();
     if(event.code=="KeyX" && (event.ctrlKey || this.appleCmd) && this.selection.length && !hasOpenWindow && !fromInputField){
       this.cutCopyNode(null,false);
       event.preventDefault();
@@ -181,30 +182,27 @@ export class WorkspaceMainComponent{
     if(event.key=="Escape"){
       if(this.shareLinkNode!=null){
         this.shareLinkNode=null;
-        return;
       }
-      if(this.workflowNode!=null){
+      else if(this.workflowNode!=null){
         this.workflowNode=null;
-        return;
       }
-
-      if(this.addFolderName!=null){
+      else if(this.addFolderName!=null){
         this.addFolderName=null;
-        return;
       }
-      if(this.showUploadSelect){
+      else if(this.showUploadSelect){
         this.showUploadSelect=false;
-        return;
       }
-      if(this.createConnectorName!=null){
+      else if(this.createConnectorName!=null){
         this.createConnectorName=null;
-        return;
       }
-      if(this.metadataNode!=null){
+      else if(this.metadataNode!=null){
         this.closeMetadata();
+      }
+      else{
         return;
       }
-
+      event.preventDefault();
+      event.stopPropagation();
     }
   }
   constructor(private toast : Toast,
@@ -775,13 +773,13 @@ export class WorkspaceMainComponent{
         options.push(edit);
     }
     if(nodes && nodes.length && allFiles) {
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node:Node)=>this.addToCollection(node));
+      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,this.connector,(node:Node)=>this.addToCollection(node));
       if (collection && !this.isSafe)
         options.push(collection);
     }
     let share:OptionItem;
     if (nodes && nodes.length == 1) {
-      share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,(node: Node) => this.shareNode(node));
+      share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,this.connector,(node: Node) => this.shareNode(node));
       if(share) {
         share.isEnabled = share.isEnabled && (
           (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
@@ -791,7 +789,7 @@ export class WorkspaceMainComponent{
           share.isEnabled = false;
         options.push(share);
       }
-      let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,(node: Node) => this.setShareLinkNode(node));
+      let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
       if (shareLink && !this.isSafe)
         options.push(shareLink);
     }
@@ -820,7 +818,7 @@ export class WorkspaceMainComponent{
 
 
     }
-    let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,(node: Node) => this.downloadNode(node));
+    let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,(node: Node) => this.downloadNode(node));
     if(download)
       options.push(download);
     if (nodes && nodes.length) {
@@ -1050,6 +1048,7 @@ export class WorkspaceMainComponent{
         this.dropdownTop = event.clientY + "px";
       }
     }
+    setTimeout(()=>UIHelper.setFocusOnDropdown(this.dropdownElement));
   }
   private createMobile(){
     if(!this.createAllowed)
@@ -1101,6 +1100,10 @@ export class WorkspaceMainComponent{
     this.showLtiTools=true;
     this.showAddDesktop=false;
     this.showAddMobile=false;
+  }
+
+  private hasOpenWindows() {
+    return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
   }
 }
 interface ClipboardObject{

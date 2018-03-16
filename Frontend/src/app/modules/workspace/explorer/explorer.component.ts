@@ -25,10 +25,12 @@ export class WorkspaceExplorerComponent  {
   public columns : ListItem[]=[];
   @Input() options : OptionItem[]=[];
   @Input() viewType = 0;
+  @Input() preventKeyevents:boolean;
 
 
   private loading=false;
   public showLoading=false;
+  totalCount: number;
 
   @Input() set showProgress(showProgress:boolean){
     this.showLoading=showProgress;
@@ -107,6 +109,8 @@ export class WorkspaceExplorerComponent  {
     this.search.search(criterias,[],request,RestConstants.CONTENT_TYPE_ALL,RestConstants.HOME_REPOSITORY,
       RestConstants.DEFAULT,[],'workspace').subscribe((data:NodeList)=>{
       this.addNodes(data,true);
+    },(error:any)=>{
+        this.handleError(error);
     });
 		//this.nodeApi.searchNodes(query,[],request).subscribe((data : NodeList) => this.addNodes(data,true));
 	}
@@ -115,22 +119,27 @@ export class WorkspaceExplorerComponent  {
     console.log(this._node);
     this.nodeApi.getChildren(this._node,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
       (error:any) => {
-        if (error.status == 404)
-          this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
-        else
-          this.toast.error(error);
-
-        this.loading=false;
-        this.showLoading=false;
+        this.handleError(error);
       });
 	}
   }
+
+    private handleError(error: any) {
+        if (error.status == 404)
+            this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
+        else
+            this.toast.error(error);
+
+        this.loading=false;
+        this.showLoading=false;
+    }
   private addNodes(data : NodeList,wasSearch:boolean){
     if(this.lastRequestSearch!=wasSearch)
       return;
       let i=0;
       console.log(data);
       if(data && data.nodes) {
+        this.totalCount=data.pagination.total;
         for (let node of data.nodes) {
           this._nodes.push(node);
           i++;
@@ -155,15 +164,20 @@ export class WorkspaceExplorerComponent  {
     private nodeApi : RestNodeService) {
     this.config.get("workspaceColumns").subscribe((data:string[])=> {
       this.storage.get("workspaceColumns").subscribe((columns:any[])=>{
-        this.columns = WorkspaceExplorerComponent.getColumns(columns, data);
+        this.columns = this.getColumns(columns, data);
       });
     });
   }
-  public static getColumns(customColumns:any[],configColumns:string[]){
+  public getColumns(customColumns:any[],configColumns:string[]){
     let defaultColumns:ListItem[]=[];
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_CREATOR));
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
+    if(this.connector.getCurrentLogin() ? this.connector.getCurrentLogin().isAdmin : false){
+        defaultColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
+    }
+    let title = new ListItem("NODE", RestConstants.LOM_PROP_TITLE);
+    title.visible = false;
     let size = new ListItem("NODE", RestConstants.SIZE);
     size.visible = false;
     let created = new ListItem("NODE", RestConstants.CM_PROP_C_CREATED);
@@ -182,6 +196,7 @@ export class WorkspaceExplorerComponent  {
     license.visible = false;
     let wfStatus = new ListItem("NODE", RestConstants.CCM_PROP_WF_STATUS);
     wfStatus.visible = false;
+    defaultColumns.push(title);
     defaultColumns.push(size);
     defaultColumns.push(created);
     defaultColumns.push(mediatype);

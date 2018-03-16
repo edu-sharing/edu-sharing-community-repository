@@ -47,10 +47,11 @@ public class GuestFilter implements javax.servlet.Filter {
 			HashMap<String, String> authentication = authTool.validateAuthentication(session);
 
 			String guestFilterdisabled = req.getParameter(CCConstants.REQUEST_PARAM_DISABLE_GUESTFILTER);
-			if("true".equalsIgnoreCase(((HttpServletRequest)req).getHeader("DisableGuest"))){
-				logger.info("Guest filter disabled via header 'DisableGuest'");
+			String guestFilterHeader=((HttpServletRequest)req).getHeader("DisableGuest");
+			if(guestFilterHeader!=null && new Boolean(guestFilterHeader)) {
+				logger.info("Guest Filter disabled via header");
 			}
-			else if (authentication == null && !new Boolean(guestFilterdisabled)) {
+			if (authentication == null && !new Boolean(guestFilterdisabled)) {
 				String guestLogin = ApplicationInfoList.getHomeRepository().getGuest_username();
 				String guestPW = ApplicationInfoList.getHomeRepository().getGuest_password();
 				if (guestLogin != null && guestPW != null && !guestLogin.isEmpty() && !guestPW.isEmpty()) {

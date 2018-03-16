@@ -5,6 +5,7 @@ import {UIService} from "../../services/ui.service";
 import {trigger} from "@angular/animations";
 import {UIHelper} from "../ui-helper";
 import {OptionItem} from "./option-item";
+import {Helper} from '../../helper';
 
 @Component({
   selector: 'actionbar',
@@ -41,7 +42,7 @@ export class ActionbarComponent{
    * @param options
    */
   @Input() set options(options : OptionItem[]){
-    options=OptionItem.filterValidOptions(this.ui,options);
+    options=OptionItem.filterValidOptions(this.ui,Helper.deepCopyArray(options));
     if(options==null){
       this.optionsAlways=[];
       this.optionsMenu=[];
@@ -49,11 +50,15 @@ export class ActionbarComponent{
     }
     this.optionsToggle=OptionItem.filterToggleOptions(options,true);
 
-    this.optionsAlways=this.getActionOptions(OptionItem.filterToggleOptions(options,false)).slice(0,this.getNumberOptions()).reverse();
+    this.optionsAlways=this.getActionOptions(OptionItem.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
     if(!this.optionsAlways.length){
-      this.optionsAlways=OptionItem.filterToggleOptions(options,false).slice(0,this.getNumberOptions()).reverse();
+      this.optionsAlways=OptionItem.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
     }
     this.optionsMenu=this.hideActionOptions(OptionItem.filterToggleOptions(options,false),this.optionsAlways);
+    if(this.optionsMenu.length<2){
+      this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
+      this.optionsMenu=[];
+    }
 
   }
 

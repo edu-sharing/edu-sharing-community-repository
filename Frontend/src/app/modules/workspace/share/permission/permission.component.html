@@ -6,9 +6,11 @@
     <i class="material-icons" *ngIf="_permission.permissions.indexOf('Coordinator')>-1 || _permission.permissions.indexOf('CCPublish')>-1" title="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate}}">public</i>
   </div>
   <div *ngIf="invalidPermission" title="{{'WORKSPACE.SHARE.TYPE_UNKNOWN_DESCRIPTION'|translate:{permissions:_permission.permissions.join(', ')} }}">
-    <i class="material-icons align">help_outline</i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
-    <div class="select"></div>
+    <div>
+      <i class="material-icons align">help_outline</i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
+      <div class="select"></div>
     </div>
+  </div>
   <div *ngIf="!invalidPermission">
     <div *ngIf="_permission.permissions.indexOf('Owner')>-1" (click)="chooseType()"><i class="material-icons align">home</i> <span>{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</span>
       <div class="select"></div>

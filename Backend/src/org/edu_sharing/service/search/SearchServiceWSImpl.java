@@ -19,6 +19,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -139,11 +140,6 @@ public class SearchServiceWSImpl implements SearchService {
 		searchToken.setRepositoryId(appId);
 		return null;
 	}
-	
-	@Override
-	public SearchResult<String> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults) {
-		return null;
-	}
 
 	@Override
 	public List<NodeRef> getWorkflowReceive(String fullyAuthenticatedUser) {
@@ -157,19 +153,23 @@ public class SearchServiceWSImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResult<String> searchAuthorities(AuthorityType type, String pattern, boolean globalSearch,
-			int skipCount, int maxValues, SortDefinition sort, Map<String, String> customProperties) {
+	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
+			SortDefinition sort, Map<String, String> customProperties) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public SearchResult<String> searchUsers(String pattern, boolean globalSearch, int skipCount, int maxValues,
-			SortDefinition sort, Map<String, String> customProperties) {
+	public SearchResult<String> findAuthorities(AuthorityType user, String searchWord, boolean globalContext, int from,
+			int nrOfResults, SortDefinition sort, Map<String, String> customProperties)
+			throws InsufficientPermissionException {
+		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public SearchToken getLastSearchToken() throws Throwable {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

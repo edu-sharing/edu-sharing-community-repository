@@ -1445,7 +1445,11 @@ public class NodeDao {
 							
 						prop1=o1props.get(property);
 						prop2=o2props.get(property);
-							
+						if(o1props.containsKey(property+CCConstants.ISO8601_SUFFIX)) {
+							prop1=o1props.get(property+CCConstants.ISO8601_SUFFIX);
+							prop2=o2props.get(property+CCConstants.ISO8601_SUFFIX);
+						}
+						
 						// TODO: Use Node and nodeProps to get values for sorting!
 						
 						if(prop1==null || prop2==null){

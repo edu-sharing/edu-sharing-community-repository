@@ -110,6 +110,11 @@ export class Helper {
   public static deepCopy(data: any) {
     return JSON.parse(JSON.stringify(data));
   }
+  public static deepCopyArray(data: any[]) {
+    if(!Array.isArray(data))
+      return data;
+    return data.slice();
+  }
 
   /**
    * init an array with a given length and all values set to the init value

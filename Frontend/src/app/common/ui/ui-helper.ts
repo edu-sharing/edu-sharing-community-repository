@@ -135,7 +135,7 @@ export class UIHelper{
       */
     if(event.ctrlKey || ui.isShiftCmd())
       event.dataTransfer.dropEffect='copy';
-    //if(event.dataTransfer.getData("node"))
+    //if(event.dataTransfer.getData("text"))
     event.preventDefault();
     event.stopPropagation();
     return true;
@@ -143,9 +143,9 @@ export class UIHelper{
 
   static handleDropEvent(storage: TemporaryStorageService, ui: UIService, event: any, target: Node, onDrop: EventEmitter<any>) {
     storage.remove(TemporaryStorageService.LIST_DRAG_DATA);
-    if(!event.dataTransfer.getData("node"))
+    if(!event.dataTransfer.getData("text"))
       return;
-    let data=(JSON.parse(event.dataTransfer.getData("node")) as Node[]);
+    let data=(JSON.parse(event.dataTransfer.getData("text")) as Node[]);
     event.preventDefault();
     event.stopPropagation();
     if(!data) {
@@ -268,8 +268,32 @@ export class UIHelper{
             }
         },16);
     }
-
-    static goToDefaultLocation(router: Router,configService : ConfigurationService) {
-        return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")]);
+  static setFocusOnCard() {
+    let elements=document.getElementsByClassName("card")[0].getElementsByTagName("*");
+    this.focusElements(elements);
+  }
+  static setFocusOnDropdown(ref: ElementRef) {
+    // the first element(s) might be currently invisible, so try to focus from bottom to top
+    if(ref && ref.nativeElement) {
+      let elements = ref.nativeElement.getElementsByTagName("a");
+      this.focusElements(elements);
     }
+  }
+
+  private static focusElements(elements: any) {
+    for(let i=elements.length-1;i>=0;i--){
+      elements[i].focus();
+    }
+  }
+
+  static addHttpIfRequired(link: string) {
+      if(link.indexOf("://")==-1){
+        return "http://"+link;
+      }
+      return link;
+  }
+
+  static goToDefaultLocation(router: Router,configService : ConfigurationService) {
+      return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")]);
+  }
 }

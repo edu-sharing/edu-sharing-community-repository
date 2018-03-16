@@ -238,7 +238,6 @@ export class MainNavComponent {
     return null;
   }
   refreshBanner(){
-    console.log("refresh banner");
     this.handleScroll(null);
     setTimeout(()=>this.handleScroll(null),10);
   }
@@ -260,6 +259,7 @@ export class MainNavComponent {
     }
   private clearSearch(){
     this.searchQuery="";
+    this.searchQueryChange.emit("");
     this.onSearch.emit({query:"",cleared:true});
   }
   constructor(private iam : RestIamService,

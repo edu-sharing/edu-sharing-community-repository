@@ -109,6 +109,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     public createCollectionReference = new AddElement("COLLECTIONS.ADD_MATERIAL","redo");
     private listOptions: OptionItem[];
     private _orderActive: boolean;
+    optionsMaterials:OptionItem[];
   // default hides the tabs
 
     // inject services
@@ -181,6 +182,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       }
 
     }
+
     public set orderActive(orderActive:boolean){
       this._orderActive=orderActive;
       this.collectionContent.collection.orderMode=orderActive ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM : null;
@@ -357,26 +359,52 @@ export class CollectionsMainComponent implements GwtEventListener {
     getScopeInfo(){
       return NodeHelper.getCollectionScopeInfo(this.collectionContent.collection);
     }
+    public onSelection(nodes:EduData.Node[]){
+        this.optionsMaterials=this.getOptions(nodes,false);
+    }
     getOptions(nodes:Node[]=null,fromList:boolean) {
       if(fromList && (!nodes || !nodes.length)){
         nodes=[new Node()];
       }
       let options:OptionItem[]=[];
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,
-        (node:Node)=>this.addToOtherCollection(node));
-      if (collection) {
-        collection.name='COLLECTIONS.DETAIL.ADD_TO_OTHER';
-        options.push(collection);
+      if(!fromList){
+          if(nodes && nodes.length) {
+              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
+                  let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
+                  options.push(collection);
+              }
+              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
+                  let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE','remove_circle_outline',(node: Node)=>{
+                      this.deleteMultiple(ActionbarHelper.getNodes(nodes,node));
+                  });
+                  options.push(remove);
+              }
+          }
       }
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,
+      if(fromList) {
+          let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector,
+              (node: Node) => this.addToOtherCollection(node));
+          if (collection) {
+              collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
+              options.push(collection);
+          }
+      }
+      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,
         (node:Node)=>NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
-      let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node:Node) => this.deleteReference(ActionbarHelper.getNodes(nodes,node)[0]));      remove.showCallback=(node:Node)=>{return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes,node),RestConstants.ACCESS_DELETE)};
-      options.push(remove);
-      if (this.config.instant("nodeReport", false)) {
-        let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes,node)[0]);
-        options.push(report);
+      if(fromList) {
+          let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
+          remove.showCallback = (node: Node) => {
+              return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
+          };
+          options.push(remove);
+      }
+      if(fromList || nodes && nodes.length==1) {
+          if (this.config.instant("nodeReport", false)) {
+              let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes, node)[0]);
+              options.push(report);
+          }
       }
 
       return options;
@@ -474,6 +502,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     refreshContent(callback:Function=null) : void {
         if (!this.isReady) return;
         this.isLoading=true;
+        this.onSelection([]);
         // clear search field in GWT top area
         if (this.clearSearchOnNextStateChange) {
             this.clearSearchOnNextStateChange=false;
@@ -665,7 +694,6 @@ export class CollectionsMainComponent implements GwtEventListener {
       // set app to ready state
       this.gwtInterface.addListenerOfGwtEvents(this);
       this.isReady = true;
-
       // subscribe to parameters of url
       this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
         console.log(params);
@@ -676,8 +704,10 @@ export class CollectionsMainComponent implements GwtEventListener {
         if(params['mainnav'])
           this.mainnav=params['mainnav']!='false';
 
+        this._orderActive = false;
+        this.infoTitle = null;
         // get id from route and validate input data
-        var id = params['id'] || '-root-';
+        let id = params['id'] || '-root-';
         if (id==":id") id = "-root-";
         if (id=="") id = "-root-";
         if(params['addToOther']){
@@ -735,7 +765,24 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.toast.error(error);
       });
   }
+    private deleteMultiple(nodes:Node[],position=0,error=false){
+            if(position==nodes.length){
+                if(!error) {
+                    this.toast.toast("COLLECTIONS.REMOVED_FROM_COLLECTION");
+                }
+                this.globalProgress=false;
+                this.refreshContent();
+                return;
+            }
+        this.globalProgress=true;
+        this.collectionService.removeFromCollection(nodes[position].ref.id,this.collectionContent.collection.ref.id).subscribe(()=>{
+            this.deleteMultiple(nodes,position+1,error);
 
+        },(error:any)=>{
+            this.toast.error(error);
+            this.deleteMultiple(nodes,position+1,true);
+        });
+    }
   public closeDialog() {
     this.dialogTitle=null;
   }

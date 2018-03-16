@@ -2,6 +2,11 @@
 .clickable{
   @include clickable();
 }
+/**
+  ios fix for wrong positioned input cursor
+ */
+html,body{ @include iosScrolling(); }
+
 html,body,md-card{
   height:100%;
   font-family:'open_sansregular',sans-serif!important;
@@ -100,7 +105,10 @@ a{
   color:$textLight;
   font-size: 0.8em;
 }
-:focus {
+a:focus,
+.btn:focus,
+.btn-flat:focus,
+.clickable:focus {
   @include setGlobalInsetFocus();
 }
 

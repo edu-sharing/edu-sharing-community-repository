@@ -194,7 +194,7 @@ export class MdsComponent{
   private rendered : SafeHtml;
   private renderedSuggestions : SafeHtml;
   private jumpmarks: SafeHtml;
-  private isLoading = false;
+  isLoading = false;
 
   private widgetName='cclom:general_keyword';
   private widgetType='multivalueFixedBadges';
@@ -343,7 +343,7 @@ export class MdsComponent{
         if(view.id==viewId) {
           viewFound = true;
           if (!this.embedded && view.caption)
-            result.main += `<div class="mdsViewHeader" id="`+view.id+`_header"><i class="material-icons">` + view.icon + `</i>` + view.caption + `</div>`;
+            result.main += `<div class="card-title-element" id="`+view.id+`_header"><i class="material-icons">` + view.icon + `</i>` + view.caption + `</div>`;
           if (view.rel) {
           if(!result[view.rel])
             result[view.rel]='';
@@ -413,9 +413,8 @@ export class MdsComponent{
         if(!jump)
             return;
         let elements=jump.getElementsByTagName("a");
-        let scroll=document.getElementsByClassName("mdsViewHeader");
+        let scroll=document.getElementsByClassName("card-title-element");
         let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
-        console.log(height);
         let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
         let closest=999999;
         let active=elements[0];
@@ -618,7 +617,7 @@ export class MdsComponent{
     if(values==null)
       return;
     if(!force){
-      if(!this.checkFileExtension(callback,values)){
+      if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.checkFileExtension(callback,values)){
         return;
       }
     }
@@ -780,13 +779,17 @@ export class MdsComponent{
               }
             }
             element.value=caption;
-            let event = new KeyboardEvent('keyup', {
-              'view': window,
-              'bubbles': true,
-              'cancelable': true
-            });
-            // simulate event for materialize
-            element.dispatchEvent(event);
+            try {
+                let event = new KeyboardEvent('keyup', {
+                    'view': window,
+                    'bubbles': true,
+                    'cancelable': true
+                });
+                // simulate event for materialize
+                element.dispatchEvent(event);
+            }catch(e){
+              // fails in ie11
+            }
             if(element.value!=props[0]) {
               element.setAttribute('data-value', props[0]);
             }
@@ -900,13 +903,13 @@ export class MdsComponent{
             ">add_circle</i></div>`;
   }
   private getMultivalueBadge(value:string,caption:string=value){
-    return '<div class="badge" data-value="'+value+'"><span>'+caption+`</span><i class="material-icons clickable" onclick="
+    return '<div class="badge" data-value="'+value+'"><span>'+caption+`</span><i class="material-icons clickable" tabindex="0" onkeyup="if(event.keyCode==13){this.click()}" onclick="
     this.parentNode.parentNode.removeChild(this.parentNode);
     window.mdsComponentRef.component.applySuggestions();
     ">cancel</i></div>`;
   }
   private getMultivalueBadgeEmbedded(label='this.value',value='this.value'){
-    return `<div class=\\'badge\\' data-value=\\''+`+value+`+'\\'><span>'+`+label+`+'</span><i class=\\'material-icons clickable\\' onclick=\\'this.parentNode.parentNode.removeChild(this.parentNode);window.mdsComponentRef.component.applySuggestions();\\'>cancel</i></div>`;
+    return `<div class=\\'badge\\' data-value=\\''+`+value+`+'\\'><span>'+`+label+`+'</span><i class=\\'material-icons clickable\\' tabindex=\\'0\\' onkeyup=\\'if(event.keyCode==13){this.click()}\\' onclick=\\'this.parentNode.parentNode.removeChild(this.parentNode);window.mdsComponentRef.component.applySuggestions();\\'>cancel</i></div>`;
   }
   private renderVCardWidget(widget: any, attr: string) {
     let html='';

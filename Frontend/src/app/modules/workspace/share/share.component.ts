@@ -1,6 +1,6 @@
 import {
   Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener,
-  ApplicationRef
+  ApplicationRef, AfterViewInit
 } from '@angular/core';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
@@ -19,6 +19,7 @@ import {RestHelper} from "../../../common/rest/rest-helper";
 import {Helper} from "../../../common/helper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
+import {UIHelper} from "../../../common/ui/ui-helper";
 
 @Component({
   selector: 'workspace-share',
@@ -29,7 +30,10 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class WorkspaceShareComponent  {
+export class WorkspaceShareComponent implements AfterViewInit{
+  ngAfterViewInit(): void {
+    UIHelper.setFocusOnCard();
+  }
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",

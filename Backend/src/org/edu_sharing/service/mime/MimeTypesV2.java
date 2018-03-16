@@ -3,6 +3,7 @@ package org.edu_sharing.service.mime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.Theme;
@@ -152,49 +153,53 @@ public class MimeTypesV2 {
 		boolean isLink=properties.containsKey(CCConstants.CCM_PROP_IO_WWWURL);
 		if(isLink)
 			fallback="link";
-		String mimetype=getMimeType(properties);
-		if(mimetype==null)
-			return fallback;
-		
-		if(WORD.contains(mimetype))
-			return "file-word";
-		if(EXCEL.contains(mimetype))
-			return "file-excel";
-		if(POWERPOINT.contains(mimetype))
-			return "file-powerpoint";
-		if(COMPRESSED.contains(mimetype)){
-			String ccressourcetype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
+		return getTypeFromMimetype(getMimeType(properties),properties,fallback);	
+	}
+	public static String getTypeFromMimetype(String mimetype) {
+		return getTypeFromMimetype(mimetype,null,"file");
+	}
+	private static String getTypeFromMimetype(String mimetype,Map<String,Object> properties,String fallback) {
+	if(mimetype==null)
+		return fallback;
+	
+	if(WORD.contains(mimetype))
+		return "file-word";
+	if(EXCEL.contains(mimetype))
+		return "file-excel";
+	if(POWERPOINT.contains(mimetype))
+		return "file-powerpoint";
+	if(COMPRESSED.contains(mimetype)){
+		if(properties!=null) {
+		String ccressourcetype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
 			if("imsqti".equals(ccressourcetype))
 				return "file-qti";
-			
-			return "file-zip";
 		}
-		if(SCRIPT.contains(mimetype))
-			return "file-script";
-		
-		if(mimetype.equals("text/xml"))
-			return "file-xml";
-		if(mimetype.equals("application/pdf"))
-			return "file-pdf";
-		if(mimetype.equals("imsqti"))
-			return "file-qti";
-		if(mimetype.equals("moodle"))
-			return "file-moodle";
-		if(mimetype.equals("scorm") || mimetype.equals("ADL SCORM"))
-			return "file-scorm";
-		
-		if(mimetype.startsWith("image"))
-			return "file-image";
-		if(mimetype.startsWith("audio"))
-			return "file-audio";
-		if(mimetype.startsWith("video"))
-			return "file-video";
-		if(mimetype.startsWith("text"))
-			return "file-txt";
-		
-		return fallback;
-		
+		return "file-zip";
+	}
+	if(SCRIPT.contains(mimetype))
+		return "file-script";
 	
+	if(mimetype.equals("text/xml"))
+		return "file-xml";
+	if(mimetype.equals("application/pdf"))
+		return "file-pdf";
+	if(mimetype.equals("imsqti"))
+		return "file-qti";
+	if(mimetype.equals("moodle"))
+		return "file-moodle";
+	if(mimetype.equals("scorm") || mimetype.equals("ADL SCORM"))
+		return "file-scorm";
+	
+	if(mimetype.startsWith("image"))
+		return "file-image";
+	if(mimetype.startsWith("audio"))
+		return "file-audio";
+	if(mimetype.startsWith("video"))
+		return "file-video";
+	if(mimetype.startsWith("text"))
+		return "file-txt";
+	
+	return fallback;
 	}
 private static boolean isLtiDefinition(List<String> aspects) {
 		if(aspects==null)

@@ -41,7 +41,7 @@
           <div class="toInvite">
             <div class="badge" *ngFor="let permission of newPermissions">
               <span>{{permission | permissionName}}</span>
-                <i class="material-icons clickable" (click)="removePermission(permission)">cancel</i>
+                <i class="material-icons clickable" tabindex="0" (keyup.enter)="removePermission(permission)" (click)="removePermission(permission)">cancel</i>
               </div>
           </div>
           <div class="typeButton" *ngIf="newPermissions && newPermissions.length">
@@ -100,11 +100,13 @@
           [showDelete]="false"
         ></workspace-share-permission>
         <div *ngIf="inheritAllowed || !disableInherition">
-          <div class="groupName">{{'WORKSPACE.SHARE.GROUP_INHERIT' | translate}}</div>
-          <div class="inheritCheck">
-            <input type="checkbox" [(ngModel)]="inherited" (change)="updatePublishState()" class="filled-in" id="inherit"> <label for="inherit">{{'WORKSPACE.SHARE.INHERIT' | translate}}
-            <!-- <img class="inherit" src="assets/images/inherit.svg" /> -->
-          </label></div>
+          <div class="groupHeading">
+            <div class="groupName">{{'WORKSPACE.SHARE.GROUP_INHERIT' | translate}}</div>
+            <div class="inheritCheck">
+              <input type="checkbox" [(ngModel)]="inherited" (change)="updatePublishState()" class="filled-in" id="inherit"> <label for="inherit">{{'WORKSPACE.SHARE.INHERIT' | translate}}
+              <!-- <img class="inherit" src="assets/images/inherit.svg" /> -->
+            </label></div>
+          </div>
           <div class="inherit" [class.crossed]="!inherited" *ngIf="inherited">
             <div *ngFor="let permission of inherit" class="groupEntry">
               <workspace-share-permission

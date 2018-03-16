@@ -10,6 +10,7 @@
     "KEYWORD":"Schlüsselwort",
     "SEARCH_STUFF": "Suchen ...",
     "EXPANDED_SEARCH": "Erweiterte Suche",
+    "EXPANDED_SEARCH_SHORT": "Filter",
     "METADATASET":"Metadaten-Set wählen",
     "METADATASET_INFO":"Nach anderen Suchkriterien filtern",
     "APPLY": "Übernehmen",
@@ -33,6 +34,7 @@
       "BACK_TO_SEARCH":"Zurück zur Suche"
     },
     "ADD_INTO_COLLECTION":"In Sammlung \"{{title}}\" einsortieren",
+    "ADD_INTO_COLLECTION_SHORT":"In Sammlung",
     "NODE_IMPORTED":"Objekt wurde importiert<br><a href='{{link}}'>Anzeigen</a>",
     "ADD_TO_COLLECTION":"In Sammlung hinzufügen",
     "ADD_TO_COLLECTION_SHORT":"In Sammlung",

@@ -45,7 +45,7 @@ user-profile{
 
 .topBarSearch {
   flex: auto;
-  padding: 18px 20px 0 20px;
+  padding: 18px 20px 0 10px;
 }
 
 .menuButton .barIcon, .menuButton img {
@@ -58,8 +58,6 @@ user-profile{
   */
   margin-left: 0px;
   width: 35px;
-
-  height: auto;
 }
 
 .sidenavClose{
@@ -320,6 +318,7 @@ user-profile{
 
   .menuButton {
     width: auto;
+    min-width: 65px;
     margin-bottom: 3px;
   }
 }

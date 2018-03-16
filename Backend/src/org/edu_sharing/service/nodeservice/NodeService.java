@@ -40,7 +40,7 @@ public interface NodeService {
 	public String getOrCreateUserSavedSearch();
 	
 	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID);
-	
+
 	public void createVersion(String nodeId, HashMap _properties) throws Exception;
 	
 	public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
@@ -82,4 +82,10 @@ public interface NodeService {
 
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
 
+	public String getType(String nodeId);
+
+	public boolean exists(String protocol, String store, String nodeId);
+
+
+	
 }

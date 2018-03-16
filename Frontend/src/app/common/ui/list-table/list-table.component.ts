@@ -60,8 +60,6 @@ export class ListTableComponent implements EventListener{
   private optionsAlways:OptionItem[]=[];
 
   private _nodes : any[];
-  private lastScroll: number;
-  private static MIN_SCROLL_TIME=1000;
   private animateNode: Node;
   private repositories: Repository[];
 
@@ -121,6 +119,10 @@ export class ListTableComponent implements EventListener{
    */
   @Input() hasIcon : boolean;
   /**
+   * total item count, when used, the header of the table will display it
+   */
+  @Input() totalCount : number;
+  /**
    * is it possible to load more items? (Otherwise, the icon to laod more is hidden)
    */
   @Input() hasMore : boolean;
@@ -150,7 +152,7 @@ export class ListTableComponent implements EventListener{
   /**
    *  a custom function to validate if a given node has permissions or should be displayed as "disabled"
    *  Function will get the node object as a parameter and should return
-   *  {status:boolean, message:string}
+   *  {status:boolean, message:string[,button:{click:function,caption:string,icon:string]}
    */
   @Input() validatePermissions : Function;
   /**
@@ -228,6 +230,11 @@ export class ListTableComponent implements EventListener{
    *  Called with same parameters as onDrop event
    */
   @Input() canDrop:Function=()=>{return true};
+  /**
+   *  Prevent key events (like when the parent has open windows)
+   */
+  @Input() preventKeyevents=false;
+
   // Callbacks
 
   /**
@@ -290,6 +297,7 @@ export class ListTableComponent implements EventListener{
   private dropdownLeft : string;
   private dropdownTop : string;
   private dropdownBottom : string;
+  private dropdownRight : string;
   @ViewChild('dropdown') dropdownElement : ElementRef;
 
 
@@ -317,6 +325,7 @@ export class ListTableComponent implements EventListener{
     this.locator.locateApi().subscribe(()=>{
       this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
         this.repositories=data.repositories;
+        this.cd.detectChanges();
       });
     });
   }
@@ -327,7 +336,7 @@ export class ListTableComponent implements EventListener{
   }
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.code=="KeyA" && (event.ctrlKey || this.ui.isAppleCmd()) && !KeyEvents.eventFromInputField(event)){
+    if(event.code=="KeyA" && (event.ctrlKey || this.ui.isAppleCmd()) && !KeyEvents.eventFromInputField(event) && !this.preventKeyevents){
       this.toggleAll();
       event.preventDefault();
       event.stopPropagation();
@@ -379,19 +388,19 @@ export class ListTableComponent implements EventListener{
     this._nodes.splice(i2,1,node1);
   }
   private allowDrag(event:any,target:Node){
+    event.preventDefault();
     if(this.orderElements){
       let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
-      if(source.view==this.id && source.nodes.length==1 && source.nodes[0].ref.id!=target.ref.id){
+      if(source.view==this.id && source.node.ref.id!=target.ref.id){
         this.orderElementsActive=true;
         this.orderElementsActiveChange.emit(true);
-        this.exchange(source.nodes[0],target);
+        this.exchange(source.node,target);
         return;
       }
     }
     if(UIHelper.handleAllowDragEvent(this.storage,this.ui,event,target,this.canDrop)) {
       this.dragHover = target;
     }
-
   }
   private noPermissions(node:any){
     return this.validatePermissions!=null && this.validatePermissions(node).status==false;
@@ -462,6 +471,7 @@ export class ListTableComponent implements EventListener{
     }
   }
   private dragStart(event:any,node : Node){
+
     if(!this.dragDrop)
       return;
     if(this.getSelectedPos(node)==-1) {
@@ -471,7 +481,8 @@ export class ListTableComponent implements EventListener{
         this.selectedNodes=[node];
     }
     let nodes=this.selectedNodes.length ? this.selectedNodes : [node];
-    event.dataTransfer.setData("node",JSON.stringify(nodes));
+
+    event.dataTransfer.setData("text",JSON.stringify(nodes));
     event.dataTransfer.effectAllowed = 'all';
     let name="";
     for(let node of nodes){
@@ -481,14 +492,16 @@ export class ListTableComponent implements EventListener{
     }
     this.currentDrag=name;
     this.currentDragCount=this.selectedNodes.length ? this.selectedNodes.length : 1;
-    event.dataTransfer.setDragImage(this.drag.nativeElement,100,20);
-    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,{nodes:nodes,view:this.id});
+    try {
+      event.dataTransfer.setDragImage(this.drag.nativeElement, 100, 20);
+    }catch(e){}
+    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,{node:node,nodes:nodes,view:this.id});
     this.onSelectionChanged.emit(this.selectedNodes);
   }
   private dragStartColumn(event:any,index:number,column : ListItem){
     if(!this.allowDragColumn || index==0)
       return;
-    event.dataTransfer.setData("column",index);
+    event.dataTransfer.setData("text",index);
     event.dataTransfer.effectAllowed = 'all';
     this.currentDragColumn=column;
   }
@@ -518,9 +531,6 @@ export class ListTableComponent implements EventListener{
     this.dropdown=null;
   }
   public scroll(){
-    if(Date.now()-this.lastScroll<ListTableComponent.MIN_SCROLL_TIME)
-      return;
-    this.lastScroll=Date.now();
     this.loadMore.emit();
   }
   private contextMenu(event:any,node : Node){
@@ -538,8 +548,12 @@ export class ListTableComponent implements EventListener{
       if(!this.dropdownElement || !this.dropdownElement.nativeElement)
         return;
       let y=this.dropdownElement.nativeElement.getBoundingClientRect().bottom;
+      let right=this.dropdownElement.nativeElement.getBoundingClientRect().right;
+      if(right>window.innerWidth){
+        this.dropdownRight="0";
+        this.dropdownLeft="auto";
+      }
       if(y>window.innerHeight){
-        //this.dropdownBottom=window.innerHeight-event.clientY+"px";
         this.dropdownBottom="0";
         this.dropdownTop="auto";
       }
@@ -577,11 +591,15 @@ export class ListTableComponent implements EventListener{
     this.dropdownLeft=null;
     this.dropdownTop=null;
     this.dropdownBottom=null;
+    this.dropdownRight=null;
     if(this.dropdown==node)
       this.dropdown=null;
     else {
       this.dropdown = node;
       this.onUpdateOptions.emit(node);
+      setTimeout(()=>{
+        UIHelper.setFocusOnDropdown(this.dropdownElement);
+      });
     }
 
     /*
@@ -643,7 +661,6 @@ export class ListTableComponent implements EventListener{
     this.onSelectionChanged.emit(this.selectedNodes);
     this.changes.detectChanges();
 
-
   }
   private getAttribute(data : any,item : ListItem) : SafeHtml{
     return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
@@ -675,9 +692,7 @@ export class ListTableComponent implements EventListener{
     this.onAddElement.emit();
   }
   public askCCPublish(event:any,node : Node){
-    let mail=node.createdBy.firstName+" "+node.createdBy.lastName+"<"+node.createdBy.mailbox+">";
-    let subject=this.translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
-    window.location.href="mailto:"+mail+"?subject="+encodeURIComponent(subject);
+    NodeHelper.askCCPublish(this.translate,node);
     event.preventDefault();
     event.stopPropagation();
   }

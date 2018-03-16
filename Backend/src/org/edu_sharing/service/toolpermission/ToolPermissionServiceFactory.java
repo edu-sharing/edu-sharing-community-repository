@@ -19,6 +19,7 @@ public class ToolPermissionServiceFactory {
 		// @TODO Torsten: wouldn't it be much easier if we just return/copy an instance of ToolPermissionService.validToolPermissions?
 		List<String> toInit=new ArrayList<String>();
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE);
@@ -30,7 +31,6 @@ public class ToolPermissionServiceFactory {
 		
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY);
-		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITED);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_LICENSE);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_UNCHECKEDCONTENT);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_WORKSPACE);

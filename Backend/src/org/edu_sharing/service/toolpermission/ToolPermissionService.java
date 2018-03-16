@@ -3,6 +3,7 @@ package org.edu_sharing.service.toolpermission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpSession;
@@ -11,6 +12,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -35,6 +37,7 @@ public class ToolPermissionService {
 	
 	static String[] validToolPermissions = new String[]{
 			CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
+			CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY,
 			CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE,
 			CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE,
 			CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE,
@@ -43,7 +46,7 @@ public class ToolPermissionService {
 			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE,
 			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE_SAFE,
 			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES, 
-			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY,CCConstants.CCM_VALUE_TOOLPERMISSION_INVITED,
+			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY,
 			CCConstants.CCM_VALUE_TOOLPERMISSION_LICENSE,CCConstants.CCM_VALUE_TOOLPERMISSION_UNCHECKEDCONTENT,
 			CCConstants.CCM_VALUE_TOOLPERMISSION_WORKSPACE, CCConstants.CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX, 
 			CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL, CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM, 
@@ -136,8 +139,14 @@ public class ToolPermissionService {
 		AccessStatus accessStatus = permissionService.hasPermission(new NodeRef(Constants.storeRef, toolNodeId), PermissionService.READ);
 		return (0 == accessStatus.compareTo(AccessStatus.ALLOWED));
 	}
-	
+	static Map<String,String> toolPermissionNodeCache = new HashMap<>();
 	public String getToolPermissionNodeId(String toolPermission) throws Throwable{
+		if(toolPermissionNodeCache.containsKey(toolPermission)) {
+			String nodeId=toolPermissionNodeCache.get(toolPermission);
+			// validate that the cached node is not deleted
+			if(eduNodeService.exists(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId))
+				return nodeId;
+		}
 		String systemFolderId = getEdu_SharingToolPermissionsFolder();
 		
 		
@@ -170,7 +179,9 @@ public class ToolPermissionService {
 			return result;
 			
 		}else{
-			return (String)sysObject.get(CCConstants.SYS_PROP_NODE_UID);
+			String nodeId=(String)sysObject.get(CCConstants.SYS_PROP_NODE_UID);
+			toolPermissionNodeCache.put(toolPermission, nodeId);
+			return nodeId;
 		}
 	}
 	

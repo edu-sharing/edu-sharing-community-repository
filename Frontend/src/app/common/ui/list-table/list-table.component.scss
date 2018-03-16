@@ -66,13 +66,14 @@ $borderRadius:2px;
   top:0;
   z-index: 110;
   text-align: center;
-  padding-top: 40px;
+  padding-top: 35px;
   div{
     color:$textPrimary!important;
     opacity: 1;
     padding-bottom: 7px;
   }
   a{
+    text-shadow:0 0 15px #fff;
     i{
       position:relative;
       top:7px;
@@ -169,12 +170,19 @@ $badgeWidth:250px;
 .node_dimensions{
   min-width:110px;
 }
+.node_cclom_title{
+  min-width: 160px;
+  word-break: break-all;
+}
 .node_cclom_general_keyword{
   min-width: 160px;
   word-break: break-all;
 }
 .node_cclom_version{
   min-width: 60px;
+}
+.node_sys_node-uuid{
+  min-width: 250px;
 }
 .node_virtual_usagecount{
   min-width: 150px;
@@ -219,8 +227,17 @@ $badgeWidth:250px;
   display:table-cell;
   padding:0px 5px;
   padding-top:12px;
-  color:$textLight;
   vertical-align: middle;
+  color:$textLight;
+}
+.headingGroup {
+  position: relative;
+  .totalCount {
+    position: absolute;
+    left: 56px;
+    top: 14px;
+    color:$textLight;
+  }
 }
 .row .icon{
   padding-top:20px;
@@ -825,12 +842,12 @@ $orderAnimationTime:$animationTime*5;
   }
 }
 @media all and (max-width: ($mobileWidth)) {
-  .dialogMore{
-    overflow: scroll;
-    @include darken();
-    background: linear-gradient(to bottom, $darkenColor 0%,$darkenColor 75%,#ffffff 75%,#ffffff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  .nodeCollection {
+    .collectionEditorial {
+      top:20px;
+    }
   }
-  .cardList{
+    .cardList{
     width:100%;
     height:160px;
     box-shadow: none;
