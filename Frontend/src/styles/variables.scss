@@ -27,6 +27,7 @@ $commentsActionsSeperatorLineColor: $backgroundColor;
 $noResultsColor: #999;
 $darkenColor:rgba(0,0,0,.75);
 $colorStatusPositive:#40BF8E;
+$colorStatusNegative:$warning;
 $focusColor: $primaryMediumLight;
 $placeholderColor: #999;
 $focusWidth: 1px;
@@ -39,6 +40,7 @@ $animationTime: 0.25s;
 $transitionNormal: .2s;
 $mobileWidth:   700px;
 $mobileHeight:   750px;
+$mobileHeightWithKeyboard:   550px;
 // this factor should be multiplied by a natural number, e.g. *3 means stage 3 (relatively early)
 $mobileStage:   100px;
 $dialogZIndex: 120;

@@ -74,6 +74,7 @@ export class OerComponent {
 
     this.columns[this.COLLECTIONS].push(new ListItem("NODE",RestConstants.CM_NAME));
     this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'info'));
+    this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'scope'));
     this.mdsService.getSet().subscribe((mds:any)=>{
       this.columns[this.MATERIALS]=MdsHelper.getColumns(mds,'search');
     });
@@ -151,7 +152,7 @@ export class OerComponent {
      criterias.push({'property': 'ngsearchword', 'values': [string]});
 
 
-     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.COLLECTIONS]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
+     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.COLLECTIONS],propertyFilter:[RestConstants.ALL]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
        (data : NodeList) => {
          if(this.currentQuery!=originalQuery)
            return;
@@ -163,7 +164,7 @@ export class OerComponent {
        }
      );
 
-     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.MATERIALS],propertyFilter:[RestConstants.CM_MODIFIED_DATE,RestConstants.CM_CREATOR,RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR_FN,RestConstants.CCM_PROP_METADATACONTRIBUTER_CREATOR_FN,RestConstants.CCM_PROP_LICENSE,RestConstants.CCM_PROP_REPLICATIONSOURCE]}).subscribe(
+     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.MATERIALS],propertyFilter:[RestConstants.ALL]}).subscribe(
        (data : NodeList) => {
          if(this.currentQuery!=originalQuery)
            return;

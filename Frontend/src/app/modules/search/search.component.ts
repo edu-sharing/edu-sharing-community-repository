@@ -70,8 +70,6 @@ export class SearchComponent {
   public mdsSuggestions:any={}
   public mdsExtended=false;
   public sidenavTab=0;
-  public sidenav_opened: boolean = false;
-  public resultsRight=false;
   public collectionsMore=false;
   view = ListTableComponent.VIEW_TYPE_GRID;
   searchFail: boolean = false;
@@ -109,6 +107,7 @@ export class SearchComponent {
   public addNodesToCollection: Node[];
   private mdsSets: MdsInfo[];
   private _mdsId: string;
+  private isSearching = false;
   public get mdsId(){
     return this._mdsId;
   }
@@ -119,7 +118,6 @@ export class SearchComponent {
   private currentValues: any;
   private reloadMds: Boolean;
   private currentMdsSet: any;
-  private sidenavSet=false;
   public extendedRepositorySelected = false;
   public savedSearch : Node[]=[];
   public savedSearchColumns : ListItem[]=[];
@@ -150,7 +148,7 @@ export class SearchComponent {
     private http : Http,
     private connector:RestConnectorService,
     private RestNodeService: RestNodeService,
-    private mds:RestMdsService,
+    private mdsService:RestMdsService,
     private iam:RestIamService,
     private search: RestSearchService,
     private collectionApi : RestCollectionService,
@@ -187,22 +185,25 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-     this.initalized=true;
+    this.searchService.clear();
+    this.initalized=true;
     if(this.searchService.reinit){
       this.searchService.init();
       this.initalized=false;
     }
      this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
      this.connector.setRoute(this.activatedRoute).subscribe(()=> {
+         this.showspinner=true;
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
-           this.setSidenavSettings();
-           let sidenavMode=this.config.instant("searchSidenavMode",);
-           if(sidenavMode=="never"){
-             this.sidenav_opened=false;
-           }
-           if(sidenavMode=="always"){
-             this.sidenav_opened=true;
+           if(this.setSidenavSettings()) {
+             let sidenavMode = this.config.instant("searchSidenavMode","auto");
+             if (sidenavMode == "never") {
+               this.searchService.sidenavOpened = false;
+             }
+             if (sidenavMode == "always") {
+               this.searchService.sidenavOpened = true;
+             }
            }
            this.printListener();
            this.view = this.config.instant('searchViewType',this.temporaryStorageService.get('view', '1'));
@@ -276,22 +277,15 @@ export class SearchComponent {
     //this.autocompletesArray = this.autocompletes.toArray();
   }
 
-  setFilterIndicator(status: string) {
-    if(status == 'opened') {
-      this.resultsRight=false;
-    }
-    else {
-      this.resultsRight=true;
-    }
+  isMdsLoading(){
+    return !this.mdsRef || this.mdsRef.isLoading;
   }
-
-
   canDrop(){
     return false;
   }
   getMoreResults() {
     if(this.searchService.complete == false) {
-      this.searchService.skipcount = this.searchService.searchResult.length;
+      //this.searchService.skipcount = this.searchService.searchResult.length;
       this.getSearch();
     }
   }
@@ -303,16 +297,16 @@ export class SearchComponent {
 
 
   setSidenavSettings() {
-    if(this.sidenavSet)
-      return;
-    this.sidenavSet=true;
+    if(this.searchService.sidenavSet)
+      return false;
+    console.log("update sidenav");
+    this.searchService.sidenavSet=true;
     if(this.innerWidth < this.breakpoint) {
-      this.sidenav_opened = false;
-      this.resultsRight=true;
+      this.searchService.sidenavOpened = false;
     } else {
-      this.sidenav_opened = true;
-      this.resultsRight=false;
+      this.searchService.sidenavOpened = true;
     }
+    return true;
   }
   public routeSearchParameters(parameters:any){
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
@@ -321,9 +315,6 @@ export class SearchComponent {
     let parameters:any=null;
     if(this.mdsRef) {
       parameters = this.mdsRef.getValues();
-    }
-    if (query.cleared) {
-      parameters = null;
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
@@ -339,13 +330,14 @@ export class SearchComponent {
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
-    if(this.showspinner && init || this.repositoryIds==null){
+    if(this.isSearching && init || this.repositoryIds==null){
       setTimeout(()=>this.getSearch(searchString,init,properties),100);
       return;
     }
-    if(this.showspinner && !init){
+    if(this.isSearching && !init){
       return;
     }
+    this.isSearching=true;
     this.showspinner = true;
     if(searchString==null)
       searchString = this.searchService.searchTerm;
@@ -357,6 +349,7 @@ export class SearchComponent {
     }
     else if(this.searchService.searchResult.length>SearchComponent.MAX_ITEMS_COUNT){
       this.showspinner=false;
+      this.isSearching=false;
       return;
     }
 
@@ -428,7 +421,9 @@ export class SearchComponent {
       this.switchToCollections(node.ref.id);
       return;
     }
-    if(!RestNetworkService.isFromHomeRepo(node,this.allRepositories)){
+    let useRender=RestNetworkService.isFromHomeRepo(node,this.allRepositories) ||
+      RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories) && RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories).repositoryType==RestConstants.REPOSITORY_TYPE_ALFRESCO;
+    if(!useRender){
       window.open(node.contentUrl);
       return;
     }
@@ -469,8 +464,9 @@ export class SearchComponent {
     this.searchService.ignored = data.ignored;
     this.checkFail();
     this.updateActionbar(this.selection);
-    if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
+    if(data.nodes.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
+      this.isSearching=false;
       this.searchService.complete = true;
       return;
     }
@@ -497,7 +493,7 @@ export class SearchComponent {
         this.searchService.facettes[0].values = this.searchService.facettes[0].values.slice(0, 20);
       }
     }
-    if(this.searchService.searchResult.length == data.pagination.total)
+    if(this.searchService.searchResult.length == data.pagination.total && this.currentRepository!=RestConstants.ALL)
       this.searchService.complete = true;
   }
   private updateHasMore() {
@@ -556,7 +552,7 @@ export class SearchComponent {
     }
     let options=[];
     if(this.searchService.reurl) {
-      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl));
+      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelper.getNodes(this.selection,node)[0],this.searchService.reurl));
       apply.enabledCallback=((node:Node)=> {
         return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
       });
@@ -585,7 +581,7 @@ export class SearchComponent {
       return options;
     }
     if(nodes && nodes.length) {
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,(node: Node) => {
+      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
         this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
       });
       collection.showCallback = (node: Node) => {
@@ -629,7 +625,7 @@ export class SearchComponent {
         }
       }
 
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,
+      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,this.connector,
         (node: Node) => NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
@@ -696,9 +692,7 @@ export class SearchComponent {
     });
   }
   private onMdsReady(mds:any=null){
-      console.log("mds ready");
-      console.log(this.currentValues);
-      console.log(this.mdsRef.getValues());
+    console.log("mds ready");
     this.currentMdsSet=mds;
     this.updateColumns();
     if (this.searchService.searchResult.length < 1) {
@@ -716,7 +710,6 @@ export class SearchComponent {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       this.login=data;
       this.isGuest = data.isGuest;
-      this.updateColumns();
       this.updateMdsActions();
       this.hasCheckbox=true;
       this.options=[];
@@ -764,6 +757,7 @@ export class SearchComponent {
     if(position>0 && position>=repos.length) {
       this.searchService.numberofresults = count;
       this.showspinner = false;
+      this.isSearching=false;
       return;
     }
 
@@ -787,7 +781,7 @@ export class SearchComponent {
         sortAscending: false,
         count:this.currentRepository==RestConstants.ALL && !this.groupResults ?
           Math.max(5,Math.round(this.connector.numberPerRequest/(this.repositories.length-1))) : null,
-        offset: this.searchService.skipcount,
+        offset: this.searchService.skipcount[position],
         propertyFilter: [
           properties]
       },
@@ -796,6 +790,9 @@ export class SearchComponent {
       this.mdsId
     ).subscribe(
       (data: SearchList) => {
+        if(!this.searchService.skipcount[position])
+          this.searchService.skipcount[position]=0;
+        this.searchService.skipcount[position] += data.nodes.length;
         this.searchService.resultCount.materials = data.pagination.total;
         this.processSearchResult(data,init);
         this.searchService.showchosenfilters = true;
@@ -936,10 +933,13 @@ export class SearchComponent {
   }
 
   private invalidateMds() {
-    this.reloadMds=new Boolean(true);
-    // no mds for all, so invoke refresh manuall
     if(this.currentRepository==RestConstants.ALL){
+      console.log("all repositories, invalidate manually");
       this.onMdsReady();
+    }
+    else{
+      console.log("invalidate mds");
+      this.reloadMds=new Boolean(true);
     }
   }
 
@@ -974,7 +974,7 @@ export class SearchComponent {
           this.updateRepositoryOrder();
         }
         console.log(this.repositories);
-        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories)==null){
+        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
           let use=this.config.instant("availableRepositories");
           console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+use);
           console.log(this.repositories);
@@ -989,7 +989,7 @@ export class SearchComponent {
         }
         this.updateSelection([]);
         let repo=this.currentRepository;
-        this.mds.getSets(repo).subscribe((data:MdsMetadatasets)=>{
+        this.mdsService.getSets(repo).subscribe((data:MdsMetadatasets)=>{
           if(repo!=this.currentRepository){
               return;
           }

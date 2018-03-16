@@ -797,12 +797,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 	}
 	public StringBuffer getFindUsersSearchString(HashMap<String,String> propVals, boolean globalContext){
-		String fuzzyUserSearchProp = RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_FUZZY_USERSEARCH);
 
-		boolean fuzzyUserSearch = true;
-		if (fuzzyUserSearchProp != null) {
-			fuzzyUserSearch = new Boolean(fuzzyUserSearchProp);
-		}
+		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:person");
 
@@ -865,7 +861,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 
 				if (token.length() > 0) {
-					subQuery.append("@cm\\:email.__.u:").append("\"").append(token.toLowerCase()).append("\"");
+					subQuery.append("=@cm:email:").append("\"").append(token).append("\"");
 				}
 			}
 
@@ -1346,7 +1342,39 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}, authorityId);
 	}
+	/**
+	 * return explicitly set permissions for this node
+	 * Inherited or permissions from groups are ignored
+	 * @param nodeId
+	 * @param authorityId
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+		if(!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
+			if(!AuthenticationUtil.getFullyAuthenticatedUser().equals(AuthenticationUtil.SYSTEM_USER_NAME)) {
+				if(!getPermissionsForAuthority(nodeId, AuthenticationUtil.getFullyAuthenticatedUser())
+						.contains(PermissionService.READ_PERMISSIONS)) {
+					throw new InsufficientPermissionException("Current user is missing "+PermissionService.READ_PERMISSIONS+" for this node");
+				}
+			}
+		}
 
+		if(!authorityService.authorityExists(authorityId)){
+			throw new IllegalArgumentException("Authority "+authorityId+" does not exist");
+		}
+		NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+		List<String> result=new ArrayList<>();
+		Set<AccessPermission> permissions = permissionService.getAllSetPermissions(nodeRef);
+		for(AccessPermission permission:permissions) {
+			if(permission.getAuthority().equals(authorityId) && 
+					CCConstants.getPermissionList().contains(permission.getPermission())){
+				result.add(permission.getPermission());
+			}
+		}
+		return result;
+	}
 	@Override
 	public void setPermission(String nodeId, String authority, String permission) {
 		permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId), authority, permission, true);

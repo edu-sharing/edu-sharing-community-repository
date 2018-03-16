@@ -8,6 +8,7 @@ import {RestConstants} from "../../rest/rest-constants";
 import {RestCollectionService} from "../../rest/services/rest-collection.service";
 import {Toast} from "../toast";
 import {ListItem} from "../list-item";
+import {UIHelper} from '../ui-helper';
 
 @Component({
   selector: 'file-chooser',
@@ -65,10 +66,7 @@ export class FileChooserComponent implements OnInit{
     this.icon='layers';
     this.searchMode=true;
     this.searchQuery="";
-    this.columns=[];
-    this.columns.push(new ListItem("COLLECTION","title"));
-    this.columns.push(new ListItem("COLLECTION","info"));
-    this.columns.push(new ListItem("COLLECTION","scope"));
+    this.columns=UIHelper.getDefaultCollectionColumns();
     this.sortBy=RestConstants.CM_MODIFIED_DATE;
     this.sortAscending=false;
   }

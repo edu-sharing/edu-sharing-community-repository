@@ -6,7 +6,7 @@ edu sharing repository
 <br/>
 build.number: 24<br/> 
 build.date: 2018-01-05<br/>
-version.main: 4.1.0 <br/>
+version.main: 5.0.0 <br/>
 version.extension: Extension<br/>
 git.commit: 2018-01-05-bd7c1eb<br/>
 git.extension.commit: no-extension<br/>

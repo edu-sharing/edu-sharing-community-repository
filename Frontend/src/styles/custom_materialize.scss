@@ -73,6 +73,10 @@ input[type="checkbox"].filled-in:checked+label:after{
   background-color:$primary;
   border-color:$primary;
 }
+input[type="checkbox"].filled-in.tabbed:checked:focus+label:after{
+  background-color:$primaryDark;
+  border-color:$primaryDark;
+}
 input[type="checkbox"].filled-in:checked+label:before{
   border-right-color: $textOnPrimary;
   border-bottom-color: $textOnPrimary;
@@ -374,7 +378,7 @@ label:active{
     left: 0;
     width: 100%;
     height: auto;
-    z-index: 130;
+    z-index: 151;
     min-height: 100%;
     overflow: auto;
     @include iosScrolling();

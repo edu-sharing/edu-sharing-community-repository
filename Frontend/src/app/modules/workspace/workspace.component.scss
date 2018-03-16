@@ -69,7 +69,7 @@
 .addMobile{
   z-index:85;
   position:fixed;
-  right:50px;
+  right:25px;
   bottom:25px;
   display:none;
 }
@@ -79,9 +79,12 @@
   left: 50px;
   top: 13px+$mainnavHeight;
 }
+.dialogAddDesktop{
+  z-index:100;
+}
 .addDesktopMenu{
   top:42px+$mainnavHeight;
-  z-index:125;
+  z-index:105;
   .connectorBeta{
     height: auto;
     float: right;
@@ -224,6 +227,11 @@
   }
   .timeout {
     display: none;
+  }
+  :host /deep/{
+    workspace-explorer .list{
+      margin-bottom:80px;
+    }
   }
 }
 

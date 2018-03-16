@@ -8,7 +8,7 @@
       <div *ngIf="(!history || !history.length) && !loading" class="empty">
         {{'WORKSPACE.SHARE.HISTORY.EMPTY' | translate }}
       </div>
-      <div *ngFor="let entry of history">
+      <div *ngFor="let entry of history" class="groupHistory">
         <div class="heading">
           <div class="name"><i class="material-icons">person</i> {{entry.user}}</div>
           <div class="date">{{entry.date}}</div>

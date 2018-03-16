@@ -1,14 +1,14 @@
 <div class="dialog" (click)="cancel()"></div>
-<div class="moreOpen collection">
-  <a class="collection-item" (click)="setType('Consumer')">
+<div class="moreOpen collection" #dropdown>
+  <a class="collection-item" tabindex="0" (keyup.enter)="setType('Consumer')" (click)="setType('Consumer')">
     <i class="material-icons">remove_red_eye</i> {{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}
     <i class="material-icons selected" *ngIf="contains('Consumer')">check</i>
     <p>{{'WORKSPACE.SHARE.TYPE_VIEWER_DESCRIPTION' | translate}}</p></a>
-  <a class="collection-item" (click)="setType('Collaborator')">
+  <a class="collection-item" tabindex="0" (keyup.enter)="setType('Collaborator')" (click)="setType('Collaborator')">
     <i class="material-icons">edit</i> {{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}
     <i class="material-icons selected" *ngIf="contains('Collaborator')">check</i>
     <p>{{'WORKSPACE.SHARE.TYPE_COWORKER_DESCRIPTION' | translate}}</p></a>
-  <a class="collection-item" (click)="setType('Coordinator')">
+  <a class="collection-item" tabindex="0" (keyup.enter)="setType('Coordinator')" (click)="setType('Coordinator')">
     <i class="material-icons">work</i> {{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}
     <i class="material-icons selected" *ngIf="contains('Coordinator')">check</i>
     <p>{{'WORKSPACE.SHARE.TYPE_COORDINATOR_DESCRIPTION' | translate}}</p></a>

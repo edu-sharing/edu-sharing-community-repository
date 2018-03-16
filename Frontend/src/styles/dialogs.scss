@@ -63,7 +63,7 @@
   word-break: break-all;
   max-height: 48px;
   overflow: hidden;
-  @unselectableText();
+  @include unselectableText();
 }
 .center-card .card-scroll{
   overflow-y: auto;
@@ -105,6 +105,23 @@ input[type=search]{
 }
 .center-card .checkbox{
   padding-top:10px;
+}
+.card-title-element{
+  font-size:140%;
+  font-weight:bold;
+  border-bottom: 1px solid #000;
+  padding-bottom:10px;
+  padding-top:8px;
+  float:left;
+  width:100%;
+  background-color: $workspaceMetadataBackground;
+  i{
+    margin-left:10px;
+    margin-right:10px;
+    color:#666;
+    position: relative;
+    top:5px;
+  }
 }
 .center-card .btn,
 .center-card .btn-flat{
@@ -174,6 +191,7 @@ input[type=search]{
   .dialogOptions{
     overflow: scroll;
     @include darken();
+    z-index:151;
     background: linear-gradient(to top, #ffffff 0,#ffffff 128px,$darkenColor 128px,$darkenColor 100%);
   }
   .card-wide{

@@ -1,10 +1,12 @@
 package org.edu_sharing.restservices;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 
@@ -120,5 +122,17 @@ public class UsageDao {
 		}catch(Throwable e){
 			throw DAOException.mapping(e);
 		}
+	}
+
+	public List<Collection> getUsagesByNodeCollection(String nodeId) throws DAOException {
+		List<Collection> collections = new ArrayList<>();
+		for(Usage usage : getUsagesByNode(nodeId)) {
+			if(usage.getCourseId()==null)
+				continue;
+			try {
+				collections.add(CollectionDao.getCollection(repoDao, usage.getCourseId()).asCollection());
+			}catch(Throwable t) {}
+		}
+		return collections;
 	}
 }

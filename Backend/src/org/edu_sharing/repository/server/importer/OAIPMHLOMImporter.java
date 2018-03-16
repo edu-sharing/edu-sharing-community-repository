@@ -215,7 +215,7 @@ public class OAIPMHLOMImporter implements Importer{
 			
 			handleIdentifierList(doc,cursor,set);
 			//&& completeListSize != null && cursor != null &&  (new Integer(completeListSize) > new Integer(cursor))
-			
+		
 			if(token != null && token.trim().length() > 0 ){
 				try{
 					//int countAllRecords = new Integer(completeListSize);
@@ -223,7 +223,7 @@ public class OAIPMHLOMImporter implements Importer{
 					
 					String urlNext = this.oai_base_url+"?verb=ListIdentifiers&resumptionToken="+token;
 					//logger.info("starting the next resumption! set:"+set+" cursor:"+cursor+" completeListSize:"+completeListSize +" token:"+token);
-					System.out.println("starting the next resumption! set:"+set+" cursor:"+cursor+" completeListSize:"+completeListSize +" token:"+token);
+					
 					if(nrOfResumptions > -1){
 						Integer cursorAsNumber = new Integer(cursor);
 						int actualNrOfResumption = cursorAsNumber / 100;
@@ -279,6 +279,17 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 	}
 	
+	public void startImport(String[] oaiIDs, String set) {
+		for(String oaiID : oaiIDs) {
+			String url = oai_base_url+"?verb=GetRecord"+"&identifier="+oaiID+"&metadataPrefix="+metadataPrefix;
+			logger.info("url record:"+url);
+			String result = new HttpQueryTool().query(url);
+			if(result != null && !result.trim().equals("")){
+				handleGetRecordStuff(result, "IDList",set,oaiID);				
+			}
+		}
+	}
+	
 	public static final int MAX_PER_RESUMPTION = 5000;
 	
 	protected void handleGetRecordStuff(String result, String cursor, String set, String identifier){
@@ -290,10 +301,12 @@ public class OAIPMHLOMImporter implements Importer{
 				Node nodeRecord = (Node)xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
 				recordHandler.handleRecord(nodeRecord, cursor, set);
 				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
-				if(binaryHandler != null){
-					binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
+				if(nodeId != null) {
+					if(binaryHandler != null){
+						binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
+					}
+					new MCAlfrescoAPIClient().createVersion(nodeId,null);
 				}
-				new MCAlfrescoAPIClient().createVersion(nodeId,null);
 			}else{
 				logger.error(errorcode);
 			}
