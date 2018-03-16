@@ -421,7 +421,9 @@ export class SearchComponent {
       this.switchToCollections(node.ref.id);
       return;
     }
-    if(!RestNetworkService.isFromHomeRepo(node,this.allRepositories)){
+    let useRender=RestNetworkService.isFromHomeRepo(node,this.allRepositories) ||
+      RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories) && RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories).repositoryType==RestConstants.REPOSITORY_TYPE_ALFRESCO;
+    if(!useRender){
       window.open(node.contentUrl);
       return;
     }
@@ -462,7 +464,7 @@ export class SearchComponent {
     this.searchService.ignored = data.ignored;
     this.checkFail();
     this.updateActionbar(this.selection);
-    if(this.searchService.searchResult.length < 1 && this.currentRepository!=RestConstants.ALL){
+    if(data.nodes.length < 1 && this.currentRepository!=RestConstants.ALL){
       this.showspinner = false;
       this.isSearching=false;
       this.searchService.complete = true;
@@ -708,7 +710,6 @@ export class SearchComponent {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
       this.login=data;
       this.isGuest = data.isGuest;
-      this.updateColumns();
       this.updateMdsActions();
       this.hasCheckbox=true;
       this.options=[];

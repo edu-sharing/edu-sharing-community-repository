@@ -110,15 +110,16 @@ public class ImporterJob extends AbstractJob {
 
 		String importerClass = (String) jobDataMap.get(OAIConst.PARAM_IMPORTERCLASS);
 		
+		String oaiIds = (String) jobDataMap.get(OAIConst.PARAM_OAI_IDS);
 		
+		String[] idArr = (oaiIds != null) ? oaiIds.split(",") : null;
 		
-		
-		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass);
+		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass,idArr);
 		logger.info("returns");
 	}
 
 	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-			String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass) {
+			String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList) {
 		try {
 
 			Importer importer = null;
@@ -164,6 +165,11 @@ public class ImporterJob extends AbstractJob {
 				RecordHandlerLOM recordHandlerLom = new RecordHandlerLOM(null);
 				((OAIPMHLOMImporter)importer).importOAIObjectsFromFile(urlImport, recordHandlerLom);
 				new RefreshCacheExecuter().excecute(null, true, null);
+				return;
+			}
+			
+			if(idList != null && idList.length > 0) {
+				importer.startImport(idList, sets[0]);
 				return;
 			}
 

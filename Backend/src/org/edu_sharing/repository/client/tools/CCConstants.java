@@ -663,6 +663,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY";
+
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE = "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE";
@@ -1400,7 +1402,7 @@ public class CCConstants {
 	 */
 	public final static String COMMON_LICENSE_PDM = "PDM";
 
-	
+
 	/******************************************************************
 	 * Common Licenses
 	 ******************************************************************/

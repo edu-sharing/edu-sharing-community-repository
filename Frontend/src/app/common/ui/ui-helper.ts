@@ -296,4 +296,11 @@ export class UIHelper{
       columns.push(new ListItem("COLLECTION","scope"));
       return columns;
   }
+
+  static addHttpIfRequired(link: string) {
+      if(link.indexOf("://")==-1){
+        return "http://"+link;
+      }
+      return link;
+  }
 }

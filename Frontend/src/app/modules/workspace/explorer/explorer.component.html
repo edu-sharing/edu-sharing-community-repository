@@ -26,5 +26,5 @@
   (doubleClickRow)="doubleClick($event)"
   (columnsChanged)="columnsChanged($event)"
   (loadMore)="load(false)"></listTable>
-<h5 class="noElementsInfo" *ngIf="!showLoading && !_nodes.length && !(_searchQuery==null || searchQuery=='')">{{'WORKSPACE.NO_NODES_IN_FOLDER' | translate }}</h5>
-<h5 class="noElementsInfo" *ngIf="!showLoading && !_nodes.length && (_searchQuery==null || searchQuery=='')">{{'WORKSPACE.NO_MATCHING_ITEMS' | translate }}</h5>
+<h5 class="noElementsInfo" *ngIf="!showLoading && !_nodes.length && (_searchQuery==null || _searchQuery=='')">{{'WORKSPACE.NO_NODES_IN_FOLDER' | translate }}</h5>
+<h5 class="noElementsInfo" *ngIf="!showLoading && !_nodes.length && !(_searchQuery==null || _searchQuery=='')">{{'WORKSPACE.NO_MATCHING_ITEMS' | translate }}</h5>

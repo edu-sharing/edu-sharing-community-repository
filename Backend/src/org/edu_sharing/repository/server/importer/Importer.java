@@ -20,4 +20,6 @@ public interface Importer {
 	
 	public void startImport() throws Throwable;
 	
+	public void startImport(String[] oaiIDs, String set);
+	
 }

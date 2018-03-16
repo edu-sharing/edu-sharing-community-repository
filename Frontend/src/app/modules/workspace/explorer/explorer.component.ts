@@ -164,15 +164,18 @@ export class WorkspaceExplorerComponent  {
     private nodeApi : RestNodeService) {
     this.config.get("workspaceColumns").subscribe((data:string[])=> {
       this.storage.get("workspaceColumns").subscribe((columns:any[])=>{
-        this.columns = WorkspaceExplorerComponent.getColumns(columns, data);
+        this.columns = this.getColumns(columns, data);
       });
     });
   }
-  public static getColumns(customColumns:any[],configColumns:string[]){
+  public getColumns(customColumns:any[],configColumns:string[]){
     let defaultColumns:ListItem[]=[];
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_CREATOR));
     defaultColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
+    if(this.connector.getCurrentLogin() ? this.connector.getCurrentLogin().isAdmin : false){
+        defaultColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
+    }
     let title = new ListItem("NODE", RestConstants.LOM_PROP_TITLE);
     title.visible = false;
     let size = new ListItem("NODE", RestConstants.SIZE);

@@ -29,6 +29,7 @@ export class RestConstants {
   public static PERMISSION_CONSUMER = "Consumer";
   public static PERMISSION_COLLABORATOR = "Collaborator";
   public static PERMISSION_COORDINATOR = "Coordinator";
+  public static PERMISSION_ALL = "All";
 
   public static COLLECTIONSCOPE_MY = "MY";
   public static COLLECTIONSCOPE_ORGA = "EDU_GROUPS";
@@ -193,6 +194,7 @@ export class RestConstants {
     RestConstants.CM_MODIFIED_DATE,
     RestConstants.CM_PROP_C_CREATED,
     RestConstants.CM_CREATOR,
+    RestConstants.NODE_ID,
     RestConstants.CCM_PROP_WF_STATUS,
     RestConstants.CM_ARCHIVED_DATE,
     RestConstants.LOM_PROP_GENERAL_KEYWORD,

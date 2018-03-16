@@ -523,6 +523,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		List<String> lomReplicationLearningresourceTypeList = new ArrayList<String>();
 		List lomReplicationEducationalContextList = new ArrayList();
 		List lomReplicationIntendedEndUserList = new ArrayList();
+		List lomReplicationTypicalAgeRangeList = new ArrayList();
 		
 		for (int eduIdx = 0; eduIdx < nodeEducationalList.getLength(); eduIdx++) {
 			HashMap eduCationalToSafe = new HashMap();
@@ -561,7 +562,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 				// @TODO contexteSource
 			}
 
-			List typicalAgeRangeList = getMultivalue(nodeEducational, "typicalAgeRange");
+			lomReplicationTypicalAgeRangeList = getMultivalue(nodeEducational, "typicalAgeRange");
 			String educationalLanguage = (String) xpath.evaluate("language", nodeEducational, XPathConstants.STRING);
 
 			// SAFE PART
@@ -569,7 +570,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_INTENDED_ENDUSERROLE, intendedEndUserRoleToSafeList);
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_CONTEXT, contextToSafeList);
 
-			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_TYPICALAGERANGE, typicalAgeRangeList);
+			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_TYPICALAGERANGE, lomReplicationTypicalAgeRangeList);
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LANGUAGE, educationalLanguage);
 			educationalToSafeList.add(eduCationalToSafe);
 		}
@@ -595,6 +596,12 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE, null);
 		}
 
+		if(lomReplicationTypicalAgeRangeList != null && lomReplicationTypicalAgeRangeList.size() > 0) {
+			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE, lomReplicationTypicalAgeRangeList);
+		}else {
+			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE, null);
+		}
+		
 		/**
 		 * classification
 		 */

@@ -279,6 +279,17 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 	}
 	
+	public void startImport(String[] oaiIDs, String set) {
+		for(String oaiID : oaiIDs) {
+			String url = oai_base_url+"?verb=GetRecord"+"&identifier="+oaiID+"&metadataPrefix="+metadataPrefix;
+			logger.info("url record:"+url);
+			String result = new HttpQueryTool().query(url);
+			if(result != null && !result.trim().equals("")){
+				handleGetRecordStuff(result, "IDList",set,oaiID);				
+			}
+		}
+	}
+	
 	public static final int MAX_PER_RESUMPTION = 5000;
 	
 	protected void handleGetRecordStuff(String result, String cursor, String set, String identifier){
