@@ -7,10 +7,10 @@
 		<widgets>
 			<widget>
 				<id>ccm:group_test</id>
-				<type>group</type>
+				<type>multivalueGroup</type>
 				<subwidgets>
 					<widget>ccm:classification_purpose</widget>
-					<widget>ccm:taxonid</widget>
+					<widget>ccm:classification_purpose2</widget>
 				</subwidgets>
 			</widget>
 			<widget>
@@ -100,8 +100,7 @@
 				<caption>Erweitert</caption>
 				<icon>help_outline</icon>
 				<html><![CDATA[
-              <ccm:classification_purpose defaultvalue="${test}">
-              <ccm:taxonid>
+              <ccm:group_test>
               <ccm:educationaltypicalagerange extended="true">
 				]]></html>
 			</template>
