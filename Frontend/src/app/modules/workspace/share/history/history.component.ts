@@ -13,6 +13,7 @@ import {RestHelper} from "../../../../common/rest/rest-helper";
 import {DateHelper} from "../../../../common/ui/DateHelper";
 import {UIAnimation} from '../../../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
+import {CollectionChooserComponent} from '../../../../common/ui/collection-chooser/collection-chooser.component';
 
 @Component({
   selector: 'workspace-share-history',
@@ -130,6 +131,8 @@ export class WorkspaceHistoryComponent {
     else{
       object.name=p.authority.authorityName;
     }
+    p.permissions=this.cleanupPermissions(p.permissions);
+    oldPermissions=this.cleanupPermissions(oldPermissions);
     let list:string[]=[];
     for(let perm of p.permissions){
       list.push(this.translation.instant("PERMISSION_TYPE."+perm));
@@ -145,4 +148,27 @@ export class WorkspaceHistoryComponent {
     return object;
 
   }
+
+    private cleanupPermissions(permissions: string[]) {
+        if(permissions==null)
+          return permissions;
+        let all=permissions.indexOf(RestConstants.PERMISSION_ALL);
+        if(all!=-1){
+          permissions.splice(all,1,RestConstants.PERMISSION_COORDINATOR);
+        }
+        let coord=permissions.indexOf(RestConstants.PERMISSION_COORDINATOR);
+        let collab=permissions.indexOf(RestConstants.PERMISSION_COLLABORATOR);
+        let consumer=permissions.indexOf(RestConstants.PERMISSION_CONSUMER);
+        if(coord!=-1){
+          if(collab!=-1)
+            permissions.splice(collab,1);
+          if(consumer!=-1)
+            permissions.splice(consumer,1);
+        }
+        else if(collab!=-1){
+          if(consumer!=-1)
+            permissions.splice(consumer,1);
+        }
+        return permissions;
+    }
 }

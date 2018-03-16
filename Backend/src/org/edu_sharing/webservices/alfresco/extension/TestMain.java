@@ -51,19 +51,52 @@ public static void main(String[] args){
 		
 		try{
 
-		Authentication auth = EduWebServiceFactory.getAuthenticationServiceByEndpointAddress("http://localhost:8080/edu-sharing/services/authentication");
+		Authentication auth = EduWebServiceFactory.getAuthenticationServiceByEndpointAddress("http://localhost/edu-sharing/services/authentication");
 		
-		AuthenticationResult authResult =  auth.authenticate("usr", "pw");
+		AuthenticationResult authResult =  auth.authenticate("admin", "admin");
 		
 		AuthenticationUtils.setAuthenticationDetails(new AuthenticationDetails(authResult.getUsername(), authResult.getTicket(), authResult.getSessionid()));
 		
-		final NativeAlfrescoWrapper  naw = new NativeAlfrescoWrapperServiceLocator(AuthenticationUtils.getEngineConfiguration()).getNativeAlfrescoWrapper(new URL("http://localhost:8080/edu-sharing/services/NativeAlfrescoWrapper?wsdl"));
+		final NativeAlfrescoWrapper  naw = new NativeAlfrescoWrapperServiceLocator(AuthenticationUtils.getEngineConfiguration()).getNativeAlfrescoWrapper(new URL("https://localhost/edu-sharing/services/NativeAlfrescoWrapper?wsdl"));
 		
-		testThread();
+		int counterDatabase = 0;
+		int counterSolr = 0;
+		HashMap<String,Object> nrFolders = naw.getChildren("8fbbf231-8bfe-4495-b374-6fe5463a1171", CCConstants.CCM_TYPE_MAP);
+		for(Map.Entry<String,Object> entry : nrFolders.entrySet()) {
+			Map<String,Object> nrFolder = (Map<String,Object>)entry.getValue();
+			System.out.println("nrfolder:" + nrFolder.get(CCConstants.CM_NAME));
+			HashMap<String,Object> ios = naw.getChildren(entry.getKey(), CCConstants.CCM_TYPE_IO);
+			for(Map.Entry<String, Object> ioEntry : ios.entrySet()) {
+				counterDatabase++;
+				Map<String,Object> ioProps = (Map<String,Object>)ioEntry.getValue();
+				String replicationSourceId = (String)ioProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
+				if(replicationSourceId == null) {
+					System.out.println("No Replication Source Id for:" + ioEntry.getKey());
+				}else {
+					SearchResult sr = naw.searchSolr("@ccm\\:replicationsourceid:" + replicationSourceId.trim(), 0, 1, new String[] {CCConstants.LOM_PROP_GENERAL_KEYWORD}, 1, 1);
+					if(sr.getData() != null && sr.getData().length > 0) {
+						if(!ioEntry.getKey().equals(sr.getData()[0].getNodeId())){
+							System.out.println("search delivered wrong nodeid for " + ioEntry.getKey() + " " + sr.getData()[0].getNodeId() + " replicationsourceid:" + replicationSourceId);
+						}else {
+							counterSolr++;
+						}
+					}else {
+						System.out.println("Node not found in solr: "+ ioEntry.getKey() + " replicationSourceId:" + replicationSourceId);
+					}
+				}
+			}
+			if(counterDatabase % 100 == 0) {
+				System.out.println("counterDatabase:" + counterDatabase+ " counterSolr" + counterSolr);
+			}
+		}
 		
+
 		if(true) {
 			return;
 		}
+		
+		testThread();
+		
 		
 		naw.deleteUser(new String[] {"testuser"});
 		if(true) return;

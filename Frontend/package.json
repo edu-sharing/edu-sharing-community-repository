@@ -12,7 +12,8 @@
     "test": "ng test",
     "pree2e": "webdriver-manager update",
     "e2e": "protractor",
-    "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src"
+    "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
+    "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh"
   },
   "private": true,
   "dependencies": {

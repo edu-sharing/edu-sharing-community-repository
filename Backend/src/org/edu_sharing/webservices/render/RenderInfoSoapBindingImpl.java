@@ -281,7 +281,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		//set default
 		rir.setHasContentLicense(true);
-		String cost = (String)props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
+		String cost = (String)props.get(CCConstants.CCM_PROP_IO_CUSTOM_LICENSE_KEY);
 		if(cost != null && cost.contains("license_rp") && cost.contains("license_none")) {
 			
 			String permissionsNodeId = nodeId;

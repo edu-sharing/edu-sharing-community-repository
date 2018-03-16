@@ -149,6 +149,7 @@ export class WorkspaceManagementDialogsComponent  {
  }
   private createUrlLink(link : string){
     let prop:any={};
+    link=UIHelper.addHttpIfRequired(link);
     prop[RestConstants.CCM_PROP_IO_WWWURL]=[link];
     this.closeUploadSelect();
     this.globalProgress=true;

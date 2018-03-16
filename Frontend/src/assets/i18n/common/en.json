@@ -126,6 +126,7 @@
     "size": "size",
     "mediatype":"file type",
     "ccm:commonlicense_key":"License",
+    "sys:node-uuid":"Node-ID",
     "dimensions": "image size",
     "exif:dateTimeOriginal":"recording date",
     "cm:modified": "last change",

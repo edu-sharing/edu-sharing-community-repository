@@ -126,7 +126,6 @@ export class PermissionsAuthoritiesComponent {
   }
   @Input() set mode(mode : string){
    this._mode=mode;
-   let name=mode=='USER' ? "authorityName" : "displayName";
    if(mode=='USER'){
      this.sortBy="firstName";
 
@@ -343,7 +342,7 @@ export class PermissionsAuthoritiesComponent {
     if(this._mode=='ORG')
       sort=RestConstants.CM_PROP_AUTHORITY_AUTHORITYNAME;
     if(this._mode=='GROUP' && !this.org)
-      sort="displayName";
+      sort="authorityName";
     if(this._mode=='USER' && !this.org)
       sort="firstName";
 

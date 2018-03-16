@@ -33,6 +33,7 @@
       "BACK_TO_SEARCH": "Back to search"
     },
     "ADD_INTO_COLLECTION": "Add to collection \"{{title}}\"",
+    "ADD_INTO_COLLECTION_SHORT": "Add to collection",
     "NODE_IMPORTED": "Object imported<br><a href='{{link}}'>View</a>",
     "ADD_TO_COLLECTION": "Add to collection",
     "ADD_TO_COLLECTION_SHORT": "Add",
