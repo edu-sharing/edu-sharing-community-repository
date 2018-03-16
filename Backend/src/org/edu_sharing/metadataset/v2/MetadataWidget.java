@@ -6,6 +6,18 @@ import java.util.List;
 import java.util.Map;
 
 public class MetadataWidget extends MetadataTranslatable{
+	public static class Subwidget {
+		private String id;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+		
+	}
 	private static String[] MULTIVALUE_WIDGETS=new String[]{
 			"vcard",
 			"multivalueTree",
@@ -20,6 +32,7 @@ public class MetadataWidget extends MetadataTranslatable{
 	private Integer min,max,defaultValue,defaultMin,defaultMax,step;
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty;
 	private List<MetadataKey> values;
+	private List<Subwidget> subwidgets;
 
 	
 	public String getSuggestionQuery() {
@@ -173,6 +186,12 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public void setBottomCaption(String bottomCaption) {
 		this.bottomCaption = bottomCaption;
+	}
+	public List<Subwidget> getSubwidgets() {
+		return subwidgets;
+	}
+	public void setSubwidgets(List<Subwidget> subwidgets) {
+		this.subwidgets = subwidgets;
 	}
 	@Override
 	public boolean equals(Object obj) {

@@ -3,6 +3,14 @@
 		<i18n>mds_translation</i18n>
 		<widgets>
 			<widget>
+				<id>ccm:group_test</id>
+				<type>group</type>
+				<subwidgets>
+					<widget>ccm:classification_purpose</widget>
+					<widget>ccm:taxonid</widget>
+				</subwidgets>
+			</widget>
+			<widget>
 				<id>ccm:classification_purpose</id>
 				<caption>Klassifikation</caption>
 				<placeholder>z.B. Hochschule</placeholder>
@@ -66,8 +74,7 @@
 				<id>search</id>
 				<html><![CDATA[
               <cclom:general_keyword>
-              <ccm:classification_purpose type="multivalueTree" extended="true">
-              <ccm:taxonid extended="true">
+              <ccm:group_test>
               <ccm:educationaltypicalagerange extended="true">
 				]]></html>
 			</template>

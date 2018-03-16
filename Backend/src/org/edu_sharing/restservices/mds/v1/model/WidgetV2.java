@@ -12,8 +12,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 @ApiModel(description = "")
 public class WidgetV2 {
+		public static class Subwidget{
+			private String id;
+
+			public Subwidget(org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget key) {
+				this.id = key.getId();
+			}
+
+			public String getId() {
+				return id;
+			}
+
+			public void setId(String id) {
+				this.id = id;
+			}
+			
+		}
 		private String id,caption,bottomCaption,icon,type,template,condition;
 		private List<ValueV2> values;
+		private List<Subwidget> subwidgets;
 		private String placeholder;
 		private String unit;
 		private Integer min;
@@ -50,6 +67,12 @@ public class WidgetV2 {
 				values=new ArrayList<ValueV2>();
 				for(MetadataKey key : widget.getValues()){
 					values.add(new ValueV2(key));
+				}
+			}
+			if(widget.getSubwidgets()!=null){
+				subwidgets=new ArrayList<Subwidget>();
+				for(MetadataWidget.Subwidget key : widget.getSubwidgets()){
+					subwidgets.add(new Subwidget(key));
 				}
 			}
 			
@@ -187,7 +210,12 @@ public class WidgetV2 {
 		public void setUnit(String unit) {
 			this.unit = unit;
 		}
-		
-		
+		@JsonProperty
+		public List<Subwidget> getSubwidgets() {
+			return subwidgets;
+		}
+		public void setSubwidgets(List<Subwidget> subwidgets) {
+			this.subwidgets = subwidgets;
+		}		
 	}
 

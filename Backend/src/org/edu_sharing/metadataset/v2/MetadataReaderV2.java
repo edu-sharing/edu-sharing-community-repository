@@ -311,6 +311,8 @@ public class MetadataReaderV2 {
 					widget.setValues(getValuespace(value,widget.getId(),valuespaceI18n,valuespaceI18nPrefix));
 				if(name.equals("values"))
 					widget.setValues(getValues(data.getChildNodes(),valuespaceI18n,valuespaceI18nPrefix));
+				if(name.equals("subwidgets"))
+					widget.setSubwidgets(getSubwidgets(data.getChildNodes()));
 			}
 			widgets.add(widget);
 		}
@@ -350,6 +352,17 @@ public class MetadataReaderV2 {
 			keys.add(key);
 		}
 		return keys;
+	}
+	private List<MetadataWidget.Subwidget> getSubwidgets(NodeList keysNode) throws IOException {
+		List<MetadataWidget.Subwidget> widgets=new ArrayList<>();
+		for(int i=0;i<keysNode.getLength();i++){
+			Node keyNode=keysNode.item(i);
+			if(keyNode.getTextContent().trim().isEmpty()) continue;
+			MetadataWidget.Subwidget widget=new MetadataWidget.Subwidget();
+			widget.setId(keyNode.getTextContent());
+			widgets.add(widget);
+		}
+		return widgets;
 	}
 	
 	private List<MetadataTemplate> getTemplates() throws XPathExpressionException, IOException {
