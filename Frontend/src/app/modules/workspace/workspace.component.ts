@@ -182,30 +182,27 @@ export class WorkspaceMainComponent{
     if(event.key=="Escape"){
       if(this.shareLinkNode!=null){
         this.shareLinkNode=null;
-        return;
       }
-      if(this.workflowNode!=null){
+      else if(this.workflowNode!=null){
         this.workflowNode=null;
-        return;
       }
-
-      if(this.addFolderName!=null){
+      else if(this.addFolderName!=null){
         this.addFolderName=null;
-        return;
       }
-      if(this.showUploadSelect){
+      else if(this.showUploadSelect){
         this.showUploadSelect=false;
-        return;
       }
-      if(this.createConnectorName!=null){
+      else if(this.createConnectorName!=null){
         this.createConnectorName=null;
-        return;
       }
-      if(this.metadataNode!=null){
+      else if(this.metadataNode!=null){
         this.closeMetadata();
+      }
+      else{
         return;
       }
-
+      event.preventDefault();
+      event.stopPropagation();
     }
   }
   constructor(private toast : Toast,

@@ -72,6 +72,11 @@ $sidenavWidth:300px;
 .extendedSearch a, .switchToCollections a, .switchToSearch a{
   padding: 5px;
 }
+.extendedSearch{
+  .mobile{
+    display:none;
+  }
+}
 .noResults,.noResultsMatched{
   color: $noResultsColor;
   text-align: center;
@@ -541,6 +546,14 @@ div.dialog.darken {
 @media all and (max-width: $mobileWidth) {
   .switchToCollections{
     display: none;
+  }
+  .extendedSearch{
+    span{
+      display:none
+    }
+    .mobile{
+      display:inline-block;
+    }
   }
 }
 @media (pointer: coarse) {
