@@ -854,27 +854,28 @@ export class MdsComponent{
       let search='<'+widget.id+'>';
       let start=html.indexOf(search);
       let end=start+search.length;
+      let attr="";
       if(start<0){
         search='<'+widget.id+' ';
         start=html.indexOf(search);
-        end=-1;
+        end=html.indexOf('>',start)+1;
+        attr=html.substring(start+search.length,end-1);
+        let attributes=this.getAttributes(html.substring(start,end-1));
+        for(var k in attributes){
+            widget[k]=attributes[k];
+        }
       }
       if(start<0)
         continue;
-      if(end==-1)
-        end=html.indexOf('>',start);
 
       let first=html.substring(0,start);
-      let second=html.substring(end+1);
-      let attributes=this.getAttributes(html.substring(start,end));
-      for(var k in attributes){
-        widget[k]=attributes[k];
-      }
+      let second=html.substring(end);
+
       if(this.isExtendedWidget(widget))
         extended[0]=true;
       this.replaceVariables(widget);
       this.currentWidgets.push(widget);
-      let attr=html.substring(start+search.length,end);
+      console.log(attr);
       let widgetData=this.renderWidget(widget,attr,template,node);
       if(!widgetData) {
         removeWidgets.push(widget);
@@ -1536,7 +1537,7 @@ export class MdsComponent{
         html+=this.renderGroupWidget(widget,attr,template,node);
     }
     else if(widget.id=='preview'){
-      html+=this.renderPreview(widget);
+      html+=this.renderPreview(widget,attr);
     }
     else if(widget.id=='author'){
       html+=this.renderAuthor(widget);
@@ -1638,7 +1639,7 @@ export class MdsComponent{
     `;
     return author;
   }
-  private renderPreview(widget: any) {
+  private renderPreview(widget: any,attr:string) {
     let preview=`<div class="mdsPreview">`;
 
     preview+=`<input type="file" style="display:none" id="previewSelect" accept="image/*" onchange="
@@ -1656,7 +1657,7 @@ export class MdsComponent{
     if(this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0) {
       preview += `<div onclick="document.getElementById('previewSelect').click()" class="changePreview clickable">` + this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') + `</div>`;
     }
-    preview+=`<div class="previewImage"><img id="preview"></div>
+    preview+=`<div class="previewImage"><img id="preview" `+attr+`></div>
             </div>`;
     return preview;
   }
