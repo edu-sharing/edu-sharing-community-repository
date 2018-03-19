@@ -358,7 +358,7 @@
 				<caption></caption>
 				<html><![CDATA[
 				<div style="width:40%;float:left;padding-right:30px;min-height:130px;">
-				  	<preview>
+				  	<preview style="width:100%;">
 		        </div>
 		        <div style="padding-top:40px;width:60%;float:left;font-weight:bold;">
               		<cm:name caption="{{cm_toolname}}" placeholder="{{cm_toolname_placeholder}}" bottomCaption="" icon="build">
