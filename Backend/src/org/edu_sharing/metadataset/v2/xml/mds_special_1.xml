@@ -9,7 +9,7 @@
 				<id>ccm:group_test</id>
 				<caption>Gruppentest</caption>
 				<type>multivalueGroup</type>
-				<subwidgets>[(#)]
+				<subwidgets>
 					<widget>ccm:classification_purpose</widget>
 					<widget>ccm:classification_purpose2</widget>
 				</subwidgets>
