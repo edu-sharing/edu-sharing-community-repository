@@ -197,7 +197,7 @@ public class MetadataTemplateRenderer {
 	private String formatGroupValue(String value,MetadataWidget widget) {
 		if(value==null)
 			return null;
-		String[] splitted = StringUtils.split(value,MetadataTemplateRenderer.GROUP_MULTIVALUE_DELIMITER);
+		String[] splitted = StringUtils.splitByWholeSeparatorPreserveAllTokens(value,MetadataTemplateRenderer.GROUP_MULTIVALUE_DELIMITER);
 		String result="";
 		int i=0;
 		for(String s : splitted) {
