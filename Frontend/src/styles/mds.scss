@@ -125,6 +125,18 @@ mds .mdsGroup{
     width: 100%;
     float: left;
   }
+  .widget_multivalueGroup{
+    .widgetGroup{
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      padding:10px 0;
+      >div{
+        flex-grow:1;
+        padding:0 10px;
+      }
+    }
+  }
   .widget_duration div.inputField{
     padding-top: 5px;
     width:40px;

@@ -3,6 +3,7 @@ package org.edu_sharing.metadataset.v2;
 import java.text.NumberFormat;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.Metadata;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -19,6 +20,7 @@ import org.edu_sharing.service.license.LicenseService;
  */
 public class MetadataTemplateRenderer {
 
+	private static final String GROUP_MULTIVALUE_DELIMITER = "[+]";
 	private MetadataSetV2 mds;
 	private Map<String, String[]> properties;
 
@@ -109,6 +111,9 @@ public class MetadataTemplateRenderer {
 						}catch(Throwable t){
 						}
 					}
+					if(widget.getType().equals("multivalueGroup")) {
+						value=formatGroupValue(value,widget);
+					}
 				}
 				if(valuesMap.containsKey(value))
 					value=valuesMap.get(value);
@@ -129,6 +134,26 @@ public class MetadataTemplateRenderer {
 		html+=content;
 		html+="</div></div>";
 		return html;
+	}
+
+	private String formatGroupValue(String value,MetadataWidget widget) {
+		if(value==null)
+			return null;
+		String[] splitted = StringUtils.split(value,MetadataTemplateRenderer.GROUP_MULTIVALUE_DELIMITER);
+		String result="";
+		int i=0;
+		for(String s : splitted) {
+			Map<String, String> valuesMap = mds.findWidget(widget.getSubwidgets().get(i).getId()).getValuesAsMap();
+			if(!s.isEmpty()) {
+				if(!result.isEmpty())
+					result+=", ";
+				if(valuesMap.containsKey(s))
+					s=valuesMap.get(s);
+				result+=s;
+			}
+			i++;
+		}
+		return result;
 	}
 
 	private String formatFileSize(long size) {

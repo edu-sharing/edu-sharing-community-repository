@@ -1639,17 +1639,23 @@ export class MdsComponent{
       return;
     let result="";
     let i=0;
+    let hasValue=false;
     for(let sub of widget.subwidgets){
-        if(values[sub.id]){
+        if(values[sub.id] && values[sub.id][0]){
+          hasValue=true;
           result+=values[sub.id][0];
         }
         if(i++<widget.subwidgets.length-1)
           result+=MdsComponent.GROUP_MULTIVALUE_DELIMITER;
     }
+    if(!hasValue){
+      return;
+    }
     let badges=document.getElementById(widget.id);
     let elements:any=badges.childNodes;
     let add=true;
     for(let i=0;i<elements.length;i++){
+        console.log(elements[i]);
         if(elements[i].getAttribute('data-value')==result){
             return;
         }
@@ -1662,8 +1668,6 @@ export class MdsComponent{
       return "Widget "+widget.id+" is a group widget, but has no subwidgets attached";
     }
     let html='<div class="widgetGroup">'
-    if(widget.caption)
-      html+=this.getCaption(widget);
     for(let sub of widget.subwidgets){
       let subwidget=this.getWidget(sub.id);
       if(this.isMultivalueWidget(subwidget)){
@@ -1673,9 +1677,8 @@ export class MdsComponent{
           html += this.renderWidget(subwidget, null, template, node);
       }
     }
-    html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('SAVE')+`</div></div>
-            <div id="`+widget.id+`" class="multivalueBadges"></div>`
-    html+='</div>';
+    html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
+            <div id="`+widget.id+`" class="multivalueBadges"></div>`;
     return html;
   }
   private renderLicense(widget: any) {
