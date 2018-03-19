@@ -40,10 +40,16 @@ public class MetadataTemplateRenderer {
 	private String render(MetadataGroup group) {
 		String html="";
 		for(String view : group.getViews()){
+			boolean found=false;
 			for(MetadataTemplate template : mds.getTemplates()){
 				if(template.getId().equals(view)){
 					html += renderTemplate(template);
+					found=true;
+					break;
 				}
+			}
+			if(!found) {
+				html += "Error: View "+view+" was included in group "+group.getId()+" but not found in template list";
 			}
 		}
 		return html;
