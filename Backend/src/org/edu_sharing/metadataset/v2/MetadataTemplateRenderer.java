@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.Metadata;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -33,6 +34,7 @@ import java.lang.IllegalArgumentException;
  */
 public class MetadataTemplateRenderer {
 
+	private static final String GROUP_MULTIVALUE_DELIMITER = "[+]";
 	private MetadataSetV2 mds;
 	private Map<String, String[]> properties;
 
@@ -166,7 +168,10 @@ public class MetadataTemplateRenderer {
 							}catch(Throwable t){
 							}
 						}
-					}
+						if(widget.getType().equals("multivalueGroup")) {
+                            value=formatGroupValue(value,widget);
+                        }
+                    }
 					if(valuesMap.containsKey(value))
 						value=valuesMap.get(value).getCaption();
 					widgetHtml+="<div>";
@@ -189,8 +194,32 @@ public class MetadataTemplateRenderer {
 		return html;
 	}
 
+	private String formatGroupValue(String value,MetadataWidget widget) {
+		if(value==null)
+			return null;
+		String[] splitted = StringUtils.split(value,MetadataTemplateRenderer.GROUP_MULTIVALUE_DELIMITER);
+		String result="";
+		int i=0;
+		for(String s : splitted) {
+			Map<String, MetadataKey> valuesMap = mds.findWidget(widget.getSubwidgets().get(i).getId()).getValuesAsMap();
+			if(!s.isEmpty()) {
+				if(!result.isEmpty())
+					result+=", ";
+				if(valuesMap.containsKey(s))
+					s=valuesMap.get(s).getCaption();
+				result+=s;
+			}
+			i++;
+		}
+		return result;
+	}
+
 	private MetadataWidget applyAttributes(MetadataWidget widget, String str) throws IllegalArgumentException {
-		widget=widget.copyInstance();
+		try {
+			widget=widget.copyInstance();
+		}catch(Throwable t) {
+			throw new RuntimeException("Failed to serialize MetadataWidget class, check if all attributes are serializable",t);
+		}
 	    while(true){
 	      str=str.substring(str.indexOf(" ")+1);
 	      int pos=str.indexOf("=");
