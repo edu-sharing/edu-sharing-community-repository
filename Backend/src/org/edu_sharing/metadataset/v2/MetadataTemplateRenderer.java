@@ -52,10 +52,16 @@ public class MetadataTemplateRenderer {
 	private String render(MetadataGroup group) throws IllegalArgumentException {
 		String html="";
 		for(String view : group.getViews()){
+			boolean found=false;
 			for(MetadataTemplate template : mds.getTemplates()){
 				if(template.getId().equals(view)){
 					html += renderTemplate(template);
+					found=true;
+					break;
 				}
+			}
+			if(!found) {
+				html += "Error: View "+view+" was included in group "+group.getId()+" but not found in template list";
 			}
 		}
 		return html;
@@ -112,7 +118,7 @@ public class MetadataTemplateRenderer {
 						i++;
 					}
 					widgetHtml+="</div>";
-										
+
 				}
 			}
 			else {
@@ -122,8 +128,8 @@ public class MetadataTemplateRenderer {
 								   properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY))[0] : null;
 						String licenseVersion=properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)) ?
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION))[0] : null;
-										   
-					   
+
+
 						LicenseService license=new LicenseService();
 						String link=license.getLicenseUrl(licenseName,mds.getI18n(), licenseVersion);
 						value="";
@@ -134,7 +140,7 @@ public class MetadataTemplateRenderer {
 								"'>";
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
-							value+="<div class='licenseDescription'>"+StringEscapeUtils.escapeHtml(licenseDescription)+"</div>";							
+							value+="<div class='licenseDescription'>"+StringEscapeUtils.escapeHtml(licenseDescription)+"</div>";
 						}
 						if(link!=null)
 							value+="</a>";
@@ -152,7 +158,7 @@ public class MetadataTemplateRenderer {
 								}
 							}catch(Throwable t){
 								// wrong data or text
-							}		
+							}
 						}
 						if(widget.getType().equals("filesize")){
 							try{
@@ -211,7 +217,7 @@ public class MetadataTemplateRenderer {
 	    		field.set(widget, value);
 	    	}catch(Throwable t){
 	    		throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
-	    	}	    
+	    	}
 	      }
 	    return widget;
 	}
