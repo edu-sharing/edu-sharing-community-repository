@@ -260,9 +260,9 @@
   "LICENSE":{
     "NONE":"No or unknown license",
     "MULTI":"Multiple licenses",
-    "COPYRIGHT_FREE":"Copyright, freier Zugang",
-    "COPYRIGHT_LICENSE":"Copyright, lizenzpflichtig",
-    "SCHULFUNK":"Schulfunk (§47 UrhG)",
+    "COPYRIGHT_FREE":"Copyright, free access",
+    "COPYRIGHT_LICENSE":"Copyright, subject to licensing",
+    "SCHULFUNK":"German educational radio/television license (§47 UrhG)",
     "CUSTOM":"Custom license"
   },
   "LIST":{
