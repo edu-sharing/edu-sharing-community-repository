@@ -115,6 +115,14 @@ public class ShibbolethServlet extends HttpServlet {
 				ssoMap.put(ssoKey, getShibValue(ssoKey,req));
 			}
 			
+			//additional attributes
+			for(String ssoKey : ssoMapper.getAdditionalAttributes()) {
+				String val = getShibValue(ssoKey, req);
+				if(val != null && !val.trim().isEmpty()) {
+					ssoMap.put(ssoKey, getShibValue(ssoKey,req));
+				}
+			}
+			
 			/**
 			 * overwrite user name with the remoteUser when set
 			 */
