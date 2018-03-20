@@ -50,7 +50,7 @@
   "YESTERDAY" : "yesterday",
   "DAYS_AGO" : "{{ days }} days ago",
   "CREATE" : "create",
-  "LOGOUT" : "log out",
+  "LOGOUT" : "Log out",
   "INVALID_OPERATION":"This feature is currently not supported",
   "SHOW_IN_FOLDER":"Open storage location",
   "CLEAR_FILTERS":"Clear all filters",
