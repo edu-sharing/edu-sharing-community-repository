@@ -126,19 +126,12 @@
                       {{ 'collectionNew_setColor' | translate }}
                   </div>
 
-                  <div style="text-align: center;margin-top: 8px;">
-                      <div *ngFor="let color of COLORS1"(click)="setColor(color)"
+                  <div class="color-group" style="text-align: center;margin-top: 8px;">
+                      <div *ngFor="let color of COLORS"(click)="setColor(color)"
                            class="color-option"
                            [ngClass]="{'color-selected': (currentCollection.color==color)}"
                            [style.background-color]="color">&nbsp;</div>
                   </div>
-                  <div style="text-align: center;margin-top: 8px;">
-                    <div *ngFor="let color of COLORS2"(click)="setColor(color)"
-                         class="color-option"
-                         [ngClass]="{'color-selected': (currentCollection.color==color)}"
-                         [style.background-color]="color">&nbsp;</div>
-                  </div>
-
               </div>
           </div>
         </div>
