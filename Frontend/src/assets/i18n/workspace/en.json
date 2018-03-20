@@ -221,7 +221,7 @@
     "DRAG_DROP_MOVE":"move",
     "FEATURE_NOT_IMPLEMENTED":"This feature is currently not available",
     "LICENSE":{
-      "TITLE":"License of {{ name }}",
+      "TITLE":"License of \"{{ name }}\" ",
       "TYPE":"Choose license",
       "NONE_NAME":"No license chosen",
       "COPYRIGHT_NAME":"protected by copyright law",
