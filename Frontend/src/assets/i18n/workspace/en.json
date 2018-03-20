@@ -72,7 +72,7 @@
       "GLOBAL_SEARCH":"Search beyond my organization",
       "SHOW_HISTORY":"View history",
       "LINK":"Shared link",
-      "LINK_ENABLED_INFO":"Link sharing is active. Everyone can access via link",
+      "LINK_ENABLED_INFO":"Link sharing is active. Everyone with the link can access the material.",
       "LINK_DISABLED_INFO":"Link sharing is diabled",
       "MANAGE_LINK":"Manage",
       "PUBLISH":"Publish",
