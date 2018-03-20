@@ -466,7 +466,7 @@ export class WorkspaceMainComponent{
     });
   }
   public resetWorkspace(){
-    if(this.metadataNode)
+    if(this.metadataNode && this.parameterNode)
       this.setSelection([this.parameterNode]);
   }
 
