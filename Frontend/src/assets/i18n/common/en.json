@@ -105,11 +105,11 @@
   "GOTO":"go to",
   "SIDEBAR":{
     "WORKSPACE_OLD":"old workspace",
-    "WORKSPACE":"workspace",
-    "SEARCH":"search",
-    "COLLECTIONS":"collections",
-    "SECURE":"safe",
-    "PERMISSIONS":"permissions",
+    "WORKSPACE":"Workspace",
+    "SEARCH":"Search",
+    "COLLECTIONS":"Collections",
+    "SECURE":"Safe",
+    "PERMISSIONS":"Permissions",
     "LOGIN":"Login",
     "ADMIN":"Admin-Tools"
   },
