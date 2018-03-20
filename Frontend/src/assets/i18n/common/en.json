@@ -117,7 +117,7 @@
     "100_unchecked":"No status",
     "200_tocheck":"To check",
     "300_hasflaws":"Has flaws",
-    "400_checked":"checked"
+    "400_checked":"Checked"
   },
   "NODE" : {
     "cm:name": "filename",
