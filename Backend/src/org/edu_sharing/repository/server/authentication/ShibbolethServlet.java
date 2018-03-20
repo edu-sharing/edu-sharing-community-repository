@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -71,6 +72,8 @@ public class ShibbolethServlet extends HttpServlet {
 		ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 		
 		SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper)eduApplicationContext.getBean("ssoAuthorityMapper");
+		
+		List<String> additionalAttributes = (List<String>)eduApplicationContext.getBean("additionalAttributes");
 		
 		String headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 		
@@ -116,10 +119,12 @@ public class ShibbolethServlet extends HttpServlet {
 			}
 			
 			//additional attributes
-			for(String ssoKey : ssoMapper.getAdditionalAttributes()) {
-				String val = getShibValue(ssoKey, req);
-				if(val != null && !val.trim().isEmpty()) {
-					ssoMap.put(ssoKey, getShibValue(ssoKey,req));
+			if(additionalAttributes != null) {
+				for(String ssoKey : additionalAttributes) {
+					String val = getShibValue(ssoKey, req);
+					if(val != null && !val.trim().isEmpty()) {
+						ssoMap.put(ssoKey, getShibValue(ssoKey,req));
+					}
 				}
 			}
 			

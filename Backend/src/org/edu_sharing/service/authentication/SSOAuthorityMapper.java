@@ -655,15 +655,4 @@ public class SSOAuthorityMapper {
 		return mappingGroupBuilderClass;
 	}
 	
-	public void setAdditionalAttributes(List<String> additionalAttributes) {
-		this.additionalAttributes = additionalAttributes;
-	}
-	
-	/**
-	 * for sso auth (Shibboleth etc.) add to sso attributes
-	 * ajp attributes are not available over req.getAttributeNames
-	 */
-	public List<String> getAdditionalAttributes() {
-		return additionalAttributes;
-	}
 }
