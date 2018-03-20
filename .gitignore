@@ -33,3 +33,5 @@ Cordova/www
 Cordova/plugins
 Cordova/platforms
 Frontend/gitlog.html
+Cordova/npm-debug.log
+Cordova/.gradle/

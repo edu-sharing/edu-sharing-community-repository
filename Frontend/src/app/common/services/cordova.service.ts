@@ -256,6 +256,59 @@ export class CordovaService {
    */
   getPermanentStorage(key:string, callback:Function) : void {
 
+    // callback - to sync with ios sharescreen
+    let callbackWrapper:Function = (val:any) => {
+      if (this.isReallyRunningCordova() && this.isIOS()) {
+        if (key==CordovaService.STORAGE_OAUTHTOKENS) {
+
+          // see what was the last ios share oauth expire date
+          this.iosShareScreenLoadValue(CordovaService.IOSSHARE_EXPIRES, (shareExpire:any) => {
+
+            // if there is no value continue with local
+            if (shareExpire==null) {
+              callback(val);
+            } else {
+
+              // check if expire is newer in share then local
+              try {
+                let oAuthLocal:any = null;
+                if (val!=null) oAuthLocal = JSON.parse(val);
+                if ((oAuthLocal==null) || (+shareExpire>oAuthLocal.expires_ts)) {
+
+                  // OK share has more up to date oauth 
+                  // --> update local from share
+                  oAuthLocal.expires_ts = +shareExpire;
+                  this.iosShareScreenLoadValue(CordovaService.IOSSHARE_ACCESS,(shareAccess:string)=>{
+                    oAuthLocal.access_token = shareAccess;
+                    this.iosShareScreenLoadValue(CordovaService.IOSSHARE_REFRESH, (shareRefresh:string)=>{
+                      oAuthLocal.refresh_token = shareRefresh;
+                      let oAuthLocalJSON = JSON.stringify(oAuthLocal);
+                      this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, oAuthLocalJSON);
+                      callback(oAuthLocalJSON);
+                    });
+                  });
+                
+                } else {
+                  callback(val);
+                }
+
+              } catch (e) {
+                console.error("EXCEPTION on sync with ios share extension", e);
+                callback(val);
+              }
+
+            }
+
+          });
+
+        } else {
+          callback(val);
+        }
+      } else {
+        callback(val);
+      }
+    } 
+
     // get value from HTML5 local storage
     let value = window.localStorage.getItem(key);
 
@@ -266,17 +319,17 @@ export class CordovaService {
         (window as any).NativeStorage.getItem(key,(valueNative:any)=>{
           // WIN 
           if (typeof valueNative == "undefined") valueNative = null;
-          callback(valueNative);
+          callbackWrapper(valueNative);
         },(error:any)=>{
           // FAIL (also when key not available)
-          callback(null);
+          callbackWrapper(null);
         });
       } catch (e) {
         console.error("Plugin Fail",e);
-        callback(null);
+        callbackWrapper(null);
       }
     } else {
-      callback(value);
+      callbackWrapper(value);
     }
 
   }
@@ -305,6 +358,27 @@ export class CordovaService {
       }
     }
 
+    // if a oauth relevant key - sync with sharescreen
+    if (key==CordovaService.STORAGE_OAUTHTOKENS) {
+      try {
+        let oauthData:any = JSON.parse(value);
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_ACCESS,oauthData.access_token);
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_REFRESH,oauthData.refresh_token);
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_EXPIRES,oauthData.expires_ts);
+      } catch (e) {
+        console.error("EXCEPTION on storing oauth data for ios sharescreen ",e);
+      }
+    }
+
+    // if server address - sync with sharescreen
+    if (key==CordovaService.STORAGE_SERVER_OWN) {
+      try {
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_SERVER,value);
+      } catch (e) {
+        console.error("EXCEPTION on storing server data for ios sharescreen ",e);
+      }
+    }
+
   }
 
   /**
@@ -327,6 +401,16 @@ export class CordovaService {
         console.error("Plugin Fail", e);
       }
     }
+
+    // clear oauth sync with ios share screen
+    try {
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_ACCESS,"");
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_REFRESH,"");
+        this.iosShareScreenStoreValue(CordovaService.IOSSHARE_EXPIRES, (new Date).getTime()+"");
+    } catch (e) {
+        console.error("EXCEPTION on storing oauth data for ios sharescreen ",e);
+    }
+
   }
 
   /**
@@ -350,6 +434,71 @@ export class CordovaService {
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
   }
+
+  /**********************************************************
+   * Sync with iOS Share Screen thru NSUserdefaults Plugin
+   **********************************************************
+   * Server and oAuth Token need to be synced with the iOS share
+   * screen thru the NSUserdefaults storage ny using the following plugin:
+   * https://github.com/rootzoll/cordova-plugin-nsuserdefaults-for-app-groups.git
+   */
+
+   // keys used to exchange data with ios share extension
+   public static IOSSHARE_ACCESS:string = "access_token";
+   public static IOSSHARE_REFRESH:string = "refresh_token";
+   public static IOSSHARE_EXPIRES:string = "expires_in";
+   public static IOSSHARE_SERVER:string = "eduserver";
+
+   /**
+    * Use internally every time a value gets loaded from local storage
+    * that also needs to be in sync with the iOS share screen.
+    * @param key 
+    * @param callback returns with string value or null
+    */
+   private iosShareScreenLoadValue(key:string, callback:Function) : void {
+    try {
+      if (this.isReallyRunningCordova() && this.isIOS) {
+        (window as any).AppGroupsUserDefaults.save({
+            suite: "group.edusharing",
+            key: key
+          }, function(value:any) {
+            console.log("PLUGIN OK info.protonet.appgroupsuserdefaults: Key '"+key+"' loaded");
+            if (typeof value == "undefined") value = null;
+            callback(value);
+          }, function(fail:any) {
+            console.error("PLUGIN FAIL info.protonet.appgroupsuserdefaults LOAD: ",fail);
+            callback(null);
+          });
+      }
+    } catch (e) {
+      console.error("PLUGIN EXCEPTION info.protonet.appgroupsuserdefaults LOAD: ",e);
+    }    
+   } 
+
+   /**
+    * Use internally every time a value gets stored to local storage
+    * that also needs to be in sync with the iOS share screen.
+    * @param key 
+    * @param value 
+    */
+   private iosShareScreenStoreValue(key:string, value:string) :void {
+    try {
+      if (this.isReallyRunningCordova() && this.isIOS) {
+        (window as any).AppGroupsUserDefaults.save({
+            suite: "group.edusharing",
+            key: key,
+            value: value
+          }, function(win:any) {
+            console.log("PLUGIN OK info.protonet.appgroupsuserdefaults: Key '"+key+"' stored");
+          }, function(fail:any) {
+            console.error("PLUGIN FAIL info.protonet.appgroupsuserdefaults SAVE: ",fail);
+          });
+      }
+    } catch (e) {
+      console.error("PLUGIN EXCEPTION info.protonet.appgroupsuserdefaults SAVE: ",e);
+    }
+   }
+
 
   /**********************************************************
    * Permissions Plugin
