@@ -93,7 +93,7 @@ export class WorkspaceContributorComponent  {
 
   }
   public addVCard(mode:string) {
-    this.date=new Date();
+    this.date=null;
     this.editType='person';
     this.editMode=mode;
     this.edit=new VCard();
