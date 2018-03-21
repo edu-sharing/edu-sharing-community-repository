@@ -78,29 +78,29 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	private PersonService personService;
 	private ApplicationInfo appInfo;
 	private ToolPermissionService toolPermission;
-	
+
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	AuthorityService authorityService = serviceRegistry.getAuthorityService();
-	MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient(); 
+	MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
 	Logger logger = Logger.getLogger(PermissionServiceImpl.class);
 	private PermissionService permissionService;
-	
-	public PermissionServiceImpl(String appId){
+
+	public PermissionServiceImpl(String appId) {
 		appInfo = ApplicationInfoList.getHomeRepository();
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext
+				.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 		nodeService = serviceRegistry.getNodeService();
 		permissionService = serviceRegistry.getPermissionService();
 
 		personService = serviceRegistry.getPersonService();
-		toolPermission=ToolPermissionServiceFactory.getInstance();
-		
+		toolPermission = ToolPermissionServiceFactory.getInstance();
+
 	}
-	
+
 	/**
 	 * @TODO Thread safe / blocking for multiple users
 	 * 
@@ -111,75 +111,76 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param sendMail
 	 * @param sendCopy
 	 */
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail, Boolean sendCopy) throws Throwable{
-		
+	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
+			Boolean sendCopy) throws Throwable {
+
 		ACL currentACL = repoClient.getPermissions(nodeId);
-		
+
 		/**
 		 * remove the inherited from the old and new
 		 */
 		List<ACE> acesNew = new ArrayList<ACE>(Arrays.asList(aces));
 		Iterator<ACE> acesNewIter = acesNew.iterator();
-		while(acesNewIter.hasNext()){
+		while (acesNewIter.hasNext()) {
 			ACE ace = acesNewIter.next();
-			if(ace.isInherited()){
+			if (ace.isInherited()) {
 				acesNewIter.remove();
 			}
 		}
-		
+
 		List<ACE> acesOld = new ArrayList<ACE>(Arrays.asList(currentACL.getAces()));
 		Iterator<ACE> acesOldIter = acesOld.iterator();
-		while(acesOldIter.hasNext()){
+		while (acesOldIter.hasNext()) {
 			ACE ace = acesOldIter.next();
-			if(ace.isInherited()){
+			if (ace.isInherited()) {
 				acesOldIter.remove();
 			}
 		}
-		
+
 		List<ACE> acesToAdd = new ArrayList<ACE>();
 		List<ACE> acesToUpdate = new ArrayList<ACE>();
 		List<ACE> acesToRemove = new ArrayList<ACE>();
 		List<ACE> acesNotChanged = new ArrayList<ACE>();
-		
+
 		/**
 		 * remove the ones that are already set (didn't change)
 		 */
 		Iterator<ACE> iteratorNew = acesNew.iterator();
-		while(iteratorNew.hasNext()){
+		while (iteratorNew.hasNext()) {
 			ACE ace = iteratorNew.next();
-			if(acesOld.contains(ace)){
+			if (acesOld.contains(ace)) {
 				acesNotChanged.add(ace);
 				iteratorNew.remove();
 			}
 		}
-		
+
 		List<String> aceOldAuthorityList = new ArrayList<String>();
-		for(ACE aceOld : acesOld){
+		for (ACE aceOld : acesOld) {
 			aceOldAuthorityList.add(aceOld.getAuthority());
 		}
-		for(ACE aceNew : acesNew){
-			if(aceOldAuthorityList.contains(aceNew.getAuthority())){
+		for (ACE aceNew : acesNew) {
+			if (aceOldAuthorityList.contains(aceNew.getAuthority())) {
 				acesToUpdate.add(aceNew);
-			}else{
+			} else {
 				acesToAdd.add(aceNew);
 			}
 		}
-		
-		for(ACE aceOld : acesOld){
-			if(!acesToUpdate.contains(aceOld) && !acesNotChanged.contains(aceOld)){
+
+		for (ACE aceOld : acesOld) {
+			if (!acesToUpdate.contains(aceOld) && !acesNotChanged.contains(aceOld)) {
 				acesToRemove.add(aceOld);
 			}
 		}
-		
-		boolean createNotify=false;
-		if(acesToAdd.size() > 0){
-			HashMap<String,String[]> authPermissions = new HashMap<String,String[]>();
-			for(ACE toAdd : acesToAdd){
+
+		boolean createNotify = false;
+		if (acesToAdd.size() > 0) {
+			HashMap<String, String[]> authPermissions = new HashMap<String, String[]>();
+			for (ACE toAdd : acesToAdd) {
 				String[] permissions = authPermissions.get(toAdd.getAuthority());
-				if(permissions == null){
-					permissions = new String[]{toAdd.getPermission()};
-				}else{
-					ArrayList<String> plist =  new ArrayList<String>(Arrays.asList(permissions));
+				if (permissions == null) {
+					permissions = new String[] { toAdd.getPermission() };
+				} else {
+					ArrayList<String> plist = new ArrayList<String>(Arrays.asList(permissions));
 					plist.add(toAdd.getPermission());
 					permissions = plist.toArray(new String[plist.size()]);
 				}
@@ -187,172 +188,171 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 			addPermissions(nodeId, authPermissions, inheritPermissions, mailText, sendMail, sendCopy);
 		}
-		
-		if(acesToUpdate.size() > 0){
-			for(ACE toUpdate : acesToUpdate){
-				setPermissions(nodeId, toUpdate.getAuthority(), new String[]{toUpdate.getPermission()}, null);
+
+		if (acesToUpdate.size() > 0) {
+			for (ACE toUpdate : acesToUpdate) {
+				setPermissions(nodeId, toUpdate.getAuthority(), new String[] { toUpdate.getPermission() }, null);
 			}
-			createNotify=true;
+			createNotify = true;
 		}
-		
-		if(acesToRemove.size() > 0){
-			for(ACE toRemove : acesToRemove){
-				removePermissions(nodeId, toRemove.getAuthority(), new String[]{toRemove.getPermission()});
+
+		if (acesToRemove.size() > 0) {
+			for (ACE toRemove : acesToRemove) {
+				removePermissions(nodeId, toRemove.getAuthority(), new String[] { toRemove.getPermission() });
 			}
-			createNotify=true;
+			createNotify = true;
 		}
-		
-		if(inheritPermissions != null && inheritPermissions.booleanValue() != repoClient.getPermissions(nodeId).isInherited()){
+
+		if (inheritPermissions != null
+				&& inheritPermissions.booleanValue() != repoClient.getPermissions(nodeId).isInherited()) {
 			setPermissions(nodeId, null, null, inheritPermissions);
-			createNotify=true;
+			createNotify = true;
 		}
-		
-		if(createNotify){
-			createNotifyObject(nodeId, new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION, CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
+
+		if (createNotify) {
+			createNotifyObject(nodeId, new AuthenticationToolAPI().getCurrentUser(),
+					CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
+					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
 		}
 
 	}
-	
+
 	@Override
-	public void addPermissions(String _nodeId, 
-			HashMap<String, String[]> _authPerm, 
-			Boolean _inheritPermissions, 
-			String _mailText, Boolean _sendMail, 
-			Boolean _sendCopy) throws Throwable {
-		
-			EmailValidator mailValidator = EmailValidator.getInstance(true,true);
-			
-			String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
-		
-			// used for sending copy to user
-			String copyMailText = "";
-			
-			String senderName = null;
-			String senderFirstName = null,senderLastName=null;
+	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
+			String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
 
-			String user = new AuthenticationToolAPI().getCurrentUser();
-			HashMap<String, String> senderInfo = repoClient.getUserInfo(user);
-			if(senderInfo != null){
-				senderFirstName = senderInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-				senderLastName = senderInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-				if(senderFirstName != null && senderLastName != null ){
-					senderName = senderFirstName+" "+senderLastName;
-				}else{
-					senderName = user;
+		EmailValidator mailValidator = EmailValidator.getInstance(true, true);
+
+		String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+
+		// used for sending copy to user
+		String copyMailText = "";
+
+		String senderName = null;
+		String senderFirstName = null, senderLastName = null;
+
+		String user = new AuthenticationToolAPI().getCurrentUser();
+		HashMap<String, String> senderInfo = repoClient.getUserInfo(user);
+		if (senderInfo != null) {
+			senderFirstName = senderInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
+			senderLastName = senderInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
+			if (senderFirstName != null && senderLastName != null) {
+				senderName = senderFirstName + " " + senderLastName;
+			} else {
+				senderName = user;
+			}
+		}
+
+		String subject = I18nServer.getTranslationDefaultResourcebundle("dialog_inviteusers_mailtext_subject_default",
+				currentLocale);
+		subject = subject.replace("{user}", senderName);
+
+		for (String authority : _authPerm.keySet()) {
+			String[] permissions = _authPerm.get(authority);
+			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
+
+			String emailaddress = null;
+			String receiverName = null;
+			String receiverFirstName = null, receiverLastName = null;
+
+			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
+
+			if (AuthorityType.USER.equals(authorityType)) {
+				HashMap<String, String> personInfo = repoClient.getUserInfo(authority);
+
+				if (personInfo != null) {
+					receiverFirstName = personInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
+					receiverLastName = personInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
+					receiverName = receiverFirstName + " " + receiverLastName;
+					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
 				}
 			}
-			
-			String subject = I18nServer.getTranslationDefaultResourcebundle("dialog_inviteusers_mailtext_subject_default", currentLocale);
-			subject = subject.replace("{user}", senderName);
-			
-			for (String authority : _authPerm.keySet()) {
-				String[] permissions = _authPerm.get(authority);
-				setPermissions(_nodeId, authority, permissions,_inheritPermissions);
 
-				String emailaddress = null;
-				String receiverName = null;
-				String receiverFirstName = null,receiverLastName=null;
-				
-				AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
-				
-				if(AuthorityType.USER.equals(authorityType)) {
-					HashMap<String, String> personInfo = repoClient.getUserInfo(authority);
-					
-					if(personInfo != null){
-						receiverFirstName = personInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-						receiverLastName = personInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-						receiverName = receiverFirstName+" "+receiverLastName;
-						emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-					}
-				}
-				
-				if (mailValidator.isValid(emailaddress) && _sendMail) {
-					Mail mail = new Mail();
-					HashMap<String, Object> props = repoClient.getProperties(_nodeId);
-					String nodeType = (String) props.get(CCConstants.NODETYPE);
-
-					String name = null;
-					if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
-						name = (String) props.get(CCConstants.LOM_PROP_GENERAL_TITLE);
-						name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
-					} else {
-						name = (String) props.get(CCConstants.CM_PROP_C_TITLE);
-						name = (name == null || name.trim().isEmpty()) ? (String)props.get(CCConstants.CM_NAME) : name;
-					}
-					
-					String permText = "";
-					for (String perm : permissions) {
-
-						String i18nPerm = I18nServer.getTranslationDefaultResourcebundle(I18nServer.getPermissionCaption(perm), "en_EN");
-						String i18nPermDesc = I18nServer.getTranslationDefaultResourcebundle(I18nServer.getPermissionDescription(perm), currentLocale);
-						
-						if(i18nPermDesc != null){
-							if(!permText.isEmpty())
-								permText+="\n";
-							permText+=i18nPermDesc;
-						}
-					
-					}
-					
-					String linkText = I18nServer.getTranslationDefaultResourcebundle("dialog_inviteusers_mailtext_link", currentLocale);	
-					String localeStr = currentLocale;
-					if(localeStr == null || localeStr.equals("default")){
-							localeStr = "de_DE";
-					}
-						
-					ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
-					Map<String,String> replace=new HashMap<>();
-					replace.put("inviterFirstName", senderFirstName.trim());
-					replace.put("inviterLastName", senderFirstName.trim());
-					replace.put("firstName", receiverFirstName.trim());
-					replace.put("lastName", receiverLastName.trim());
-					replace.put("name", name.trim());
-					replace.put("message",_mailText.trim());
-					replace.put("permissions",permText.trim());
-					replace.put("link", MailTemplate.generateContentLink(appInfo,_nodeId));
-					mail.sendMailHtml(
-							context,
-							senderName,emailaddress,
-							MailTemplate.getSubject("invited",currentLocale),
-							MailTemplate.getContent("invited",currentLocale,true),
-							replace);
-
-				} else {
-					logger.info("username/authority: "+authority + " has no valid emailaddress:"+ emailaddress);
-				}
-
-			}
-			
-			if (_sendMail && _sendCopy) {
+			if (mailValidator.isValid(emailaddress) && _sendMail) {
 				Mail mail = new Mail();
-				String emailaddress = null;
-				try{
-					HashMap<String, String> personInfo = repoClient.getUserInfo(user);
-					if(personInfo != null){
-						emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
+				HashMap<String, Object> props = repoClient.getProperties(_nodeId);
+				String nodeType = (String) props.get(CCConstants.NODETYPE);
+
+				String name = null;
+				if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
+					name = (String) props.get(CCConstants.LOM_PROP_GENERAL_TITLE);
+					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
+				} else {
+					name = (String) props.get(CCConstants.CM_PROP_C_TITLE);
+					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
+				}
+
+				String permText = "";
+				for (String perm : permissions) {
+
+					String i18nPerm = I18nServer
+							.getTranslationDefaultResourcebundle(I18nServer.getPermissionCaption(perm), "en_EN");
+					String i18nPermDesc = I18nServer.getTranslationDefaultResourcebundle(
+							I18nServer.getPermissionDescription(perm), currentLocale);
+
+					if (i18nPermDesc != null) {
+						if (!permText.isEmpty())
+							permText += "\n";
+						permText += i18nPermDesc;
 					}
-				}catch(Exception e){
-					//do nothing: user has no valid email
+
 				}
-				
-				if(mailValidator.isValid(emailaddress)){
-					mail.sendMail(senderName,emailaddress, subject, copyMailText);
-				}else {
-					logger.info("username: " + _sendMail + " has no valid emailaddress:"+ emailaddress);
+
+				String linkText = I18nServer.getTranslationDefaultResourcebundle("dialog_inviteusers_mailtext_link",
+						currentLocale);
+				String localeStr = currentLocale;
+				if (localeStr == null || localeStr.equals("default")) {
+					localeStr = "de_DE";
 				}
+
+				ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+				Map<String, String> replace = new HashMap<>();
+				replace.put("inviterFirstName", senderFirstName.trim());
+				replace.put("inviterLastName", senderFirstName.trim());
+				replace.put("firstName", receiverFirstName.trim());
+				replace.put("lastName", receiverLastName.trim());
+				replace.put("name", name.trim());
+				replace.put("message", _mailText.trim());
+				replace.put("permissions", permText.trim());
+				replace.put("link", MailTemplate.generateContentLink(appInfo, _nodeId));
+				mail.sendMailHtml(context, senderName, emailaddress, MailTemplate.getSubject("invited", currentLocale),
+						MailTemplate.getContent("invited", currentLocale, true), replace);
+
+			} else {
+				logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
 			}
-			
-			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
-			
-			permissionService.createNotifyObject(_nodeId, 
-					user, 
-					CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION, 
-					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+
+		}
+
+		if (_sendMail && _sendCopy) {
+			Mail mail = new Mail();
+			String emailaddress = null;
+			try {
+				HashMap<String, String> personInfo = repoClient.getUserInfo(user);
+				if (personInfo != null) {
+					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
+				}
+			} catch (Exception e) {
+				// do nothing: user has no valid email
+			}
+
+			if (mailValidator.isValid(emailaddress)) {
+				mail.sendMail(senderName, emailaddress, subject, copyMailText);
+			} else {
+				logger.info("username: " + _sendMail + " has no valid emailaddress:" + emailaddress);
+			}
+		}
+
+		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory
+				.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
+
+		permissionService.createNotifyObject(_nodeId, user, CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
+				CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 	}
-	
+
 	@Override
 	public List<Notify> getNotifyList(final String nodeId) throws Throwable {
-		if(!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY)){
+		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY)) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY);
 		}
 		AuthenticationUtil.RunAsWork<List<Notify>> runsWork = new AuthenticationUtil.RunAsWork<List<Notify>>() {
@@ -363,7 +363,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				Comparator c = new Comparator<Notify>() {
 					@Override
 					public int compare(Notify o1, Notify o2) {
-						
+
 						if (o1.getCreated().getTime() == o2.getCreated().getTime()) {
 							return 0;
 						} else if (o1.getCreated().getTime() > o2.getCreated().getTime()) {
@@ -393,12 +393,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					if (CCConstants.CCM_TYPE_NOTIFY.equals(properties.get(CCConstants.NODETYPE))) {
 
 						Notify notify = new Notify();
-						notify.setAcl(repoClient.getPermissions((String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
+						notify.setAcl(
+								repoClient.getPermissions((String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
 
 						String modified = (String) properties.get(CCConstants.CM_PROP_C_CREATED);
 						if (modified != null && !modified.trim().equals("")) {
 							notify.setCreated(new Date(new Long(modified)));
-							notify.setCreatedFormated(new DateTool().formatDate(new Long(modified), DateFormat.LONG, DateFormat.SHORT));
+							notify.setCreatedFormated(
+									new DateTool().formatDate(new Long(modified), DateFormat.LONG, DateFormat.SHORT));
 
 						}
 						notify.setNotifyTarget(nodeId);
@@ -406,8 +408,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						notify.setNotifyAction((String) properties.get(CCConstants.CCM_PROP_NOTIFY_ACTION));
 						notify.setNotifyEvent((String) properties.get(CCConstants.CCM_PROP_NOTIFY_EVENT));
 						notify.setNotifyUser((String) properties.get(CCConstants.CCM_PROP_NOTIFY_USER));
-						
-						NodeRef personNodeRef = personService.getPerson((String) properties.get(CCConstants.CCM_PROP_NOTIFY_USER));
+
+						NodeRef personNodeRef = personService
+								.getPerson((String) properties.get(CCConstants.CCM_PROP_NOTIFY_USER));
 						Map<QName, Serializable> personProps = nodeService.getProperties(personNodeRef);
 						User user = new User(Edu_SharingProperties.instance.isFuzzyUserSearch());
 						user.setUsername((String) personProps.get(ContentModel.PROP_USERNAME));
@@ -417,7 +420,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						user.setGivenName((String) personProps.get(ContentModel.PROP_FIRSTNAME));
 						user.setSurname((String) personProps.get(ContentModel.PROP_LASTNAME));
 						notify.setUser(user);
-						
+
 						notifyList.add(notify);
 
 					}
@@ -425,104 +428,106 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 
 				Collections.sort(notifyList, c);
-				
-				System.out.println("NOTIFYLIST:"+notifyList.size());
+
+				System.out.println("NOTIFYLIST:" + notifyList.size());
 				return notifyList;
 			}
 		};
 
 		return AuthenticationUtil.runAs(runsWork, appInfo.getUsername());
 	}
-	
+
 	public void setPermissions(String nodeId, ACE[] aces) throws Exception {
 		setPermissions(nodeId, aces, null);
 	}
-	
+
 	/**
-	 * set's all local permissions contained in the aces array, 
-	 * removes all permissions that are not in the ace array
+	 * set's all local permissions contained in the aces array, removes all
+	 * permissions that are not in the ace array
+	 *
 	 * @param nodeId
 	 * @param aces
 	 * @param inheritPermission
 	 * @throws Exception
 	 */
 	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermission) throws Exception {
-		
-		if(inheritPermission != null){
-			boolean shared=isSharedNode(nodeId);
-			if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && !shared){
+
+		if (inheritPermission != null) {
+			boolean shared = isSharedNode(nodeId);
+			if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && !shared) {
 				throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
-			}	
-			if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE) && shared){
+			}
+			if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE) && shared) {
 				throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE);
-			}	
+			}
 		}
-		
-		checkCanManagePermissions(nodeId,aces);
-		
+
+		checkCanManagePermissions(nodeId, aces);
+
 		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
-		
+
 		String authorityAdministrator = getAdminAuthority(nodeRef);
-		
+
 		PermissionService permissionsService = this.serviceRegistry.getPermissionService();
-		
-		if(aces!=null){
+
+		if (aces != null) {
 			for (ACE ace : aces) {
-				
-				if(!this.serviceRegistry.getAuthorityService().authorityExists(ace.getAuthority())
-						&& !"GROUP_EVERYONE".equals(ace.getAuthority())){
-					throw new Exception("authority "+ ace.getAuthority()+" does not exist!");
+
+				if (!this.serviceRegistry.getAuthorityService().authorityExists(ace.getAuthority())
+						&& !"GROUP_EVERYONE".equals(ace.getAuthority())) {
+					throw new Exception("authority " + ace.getAuthority() + " does not exist!");
 				}
 				String permission = ace.getPermission();
-				//prevent authorityAdministrator ace is changed
-				if (!ace.isInherited() 
-						&& (authorityAdministrator == null ||
-								!authorityAdministrator.equals(ace.getAuthority()))){
+				// prevent authorityAdministrator ace is changed
+				if (!ace.isInherited()
+						&& (authorityAdministrator == null || !authorityAdministrator.equals(ace.getAuthority()))) {
 					permissionsService.setPermission(nodeRef, ace.getAuthority(), permission, true);
 				}
 			}
 		}
-		
+
 		ArrayList<AccessPermission> toRemove = new ArrayList<AccessPermission>();
-		Set<AccessPermission>  allSetPerm = permissionsService.getAllSetPermissions(nodeRef);
-		
-		for(AccessPermission accessPerm : allSetPerm){
-			if(accessPerm.isInherited()){
+		Set<AccessPermission> allSetPerm = permissionsService.getAllSetPermissions(nodeRef);
+
+		for (AccessPermission accessPerm : allSetPerm) {
+			if (accessPerm.isInherited()) {
 				continue;
 			}
-			if(!containslocalPerm(aces,accessPerm.getAuthority(),accessPerm.getPermission())){
-				if(authorityAdministrator == null ||
-						!(authorityAdministrator.equals(accessPerm.getAuthority()) 
-								&& PermissionService.COORDINATOR.equals(accessPerm.getPermission())) ) {
+			if (!containslocalPerm(aces, accessPerm.getAuthority(), accessPerm.getPermission())) {
+				if (authorityAdministrator == null || !(authorityAdministrator.equals(accessPerm.getAuthority())
+						&& PermissionService.COORDINATOR.equals(accessPerm.getPermission()))) {
 					toRemove.add(accessPerm);
 				}
 			}
 		}
-		
-		for(AccessPermission accessPerm : toRemove){
-			permissionsService.deletePermission(nodeRef,accessPerm.getAuthority() ,accessPerm.getPermission());
+
+		for (AccessPermission accessPerm : toRemove) {
+			permissionsService.deletePermission(nodeRef, accessPerm.getAuthority(), accessPerm.getPermission());
 		}
-	
+
 		if (inheritPermission != null) {
 			logger.info("setInheritParentPermissions " + inheritPermission);
 			permissionsService.setInheritParentPermissions(nodeRef, inheritPermission);
 		}
 	}
-	
+
 	/**
 	 * returns admin authority if context is an edugroup
+	 *
 	 * @param nodeRef
 	 * @return
 	 */
 	String getAdminAuthority(NodeRef nodeRef) {
 		String authorityAdministrator = null;
-		if(isSharedNode(nodeRef.getId())){
-			Set<AccessPermission> allSetPermissions = serviceRegistry.getPermissionService().getAllSetPermissions(nodeRef);
-			for(AccessPermission ap : allSetPermissions) {
+		if (isSharedNode(nodeRef.getId())) {
+			Set<AccessPermission> allSetPermissions = serviceRegistry.getPermissionService()
+					.getAllSetPermissions(nodeRef);
+			for (AccessPermission ap : allSetPermissions) {
 				NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(ap.getAuthority());
-				if(authorityNodeRef != null) {
-					String groupType = (String)nodeService.getProperty(authorityNodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
-					if(groupType != null && CCConstants.ADMINISTRATORS_GROUP_TYPE.equals(groupType) 
+				if (authorityNodeRef != null) {
+					String groupType = (String) nodeService.getProperty(authorityNodeRef,
+							QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
+					if (groupType != null && CCConstants.ADMINISTRATORS_GROUP_TYPE.equals(groupType)
 							&& ap.getPermission().equals(PermissionService.COORDINATOR)) {
 						authorityAdministrator = ap.getAuthority();
 					}
@@ -531,187 +536,193 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 		return authorityAdministrator;
 	}
-	
-	private boolean containslocalPerm(ACE[] aces, String eduAuthority, String eduPermission){
-		logger.info("eduAuthority:"+eduAuthority+ " eduPermission:"+eduPermission);
-		if(aces==null) return false;
-		for(ACE ace : aces){
-			if(ace.isInherited()){
+
+	private boolean containslocalPerm(ACE[] aces, String eduAuthority, String eduPermission) {
+		logger.info("eduAuthority:" + eduAuthority + " eduPermission:" + eduPermission);
+		if (aces == null)
+			return false;
+		for (ACE ace : aces) {
+			if (ace.isInherited()) {
 				continue;
 			}
-			logger.info("ace.getAuthority():"+ace.getAuthority()+" ace.getPermission():"+ace.getPermission());
-			if(ace.getAuthority().equals(eduAuthority) && ace.getPermission().equals(eduPermission)){
+			logger.info("ace.getAuthority():" + ace.getAuthority() + " ace.getPermission():" + ace.getPermission());
+			if (ace.getAuthority().equals(eduAuthority) && ace.getPermission().equals(eduPermission)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	private void checkCanManagePermissions(String node,String authority) throws Exception {
-		ACE ace=new ACE();
+
+	private void checkCanManagePermissions(String node, String authority) throws Exception {
+		ACE ace = new ACE();
 		ace.setAuthority(authority);
-		checkCanManagePermissions(node,new ACE[]{ace});
+		checkCanManagePermissions(node, new ACE[] { ace });
 	}
 
-	private void checkCanManagePermissions(String nodeId,ACE[] aces) throws Exception{
-		boolean hasUsers=false,hasAll=false;
-		if(aces!=null){
+	private void checkCanManagePermissions(String nodeId, ACE[] aces) throws Exception {
+		boolean hasUsers = false, hasAll = false;
+		if (aces != null) {
 			for (ACE ace : aces) {
-				
-				if(ace.getAuthority() != null && ace.getAuthority().equals("GROUP_EVERYONE")){
-					hasAll=true;
-				}
-				else{
-					hasUsers=true;
+
+				if (ace.getAuthority() != null && ace.getAuthority().equals("GROUP_EVERYONE")) {
+					hasAll = true;
+				} else {
+					hasUsers = true;
 				}
 			}
 		}
-		boolean shared=isSharedNode(nodeId);
-		if(!shared && NodeServiceInterceptor.getEduSharingScope()!=null){
-			if(QName.createQName(CCConstants.CCM_TYPE_NOTIFY).equals(nodeService.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)))){
-				// allow notify objects to share
-			}
-			else {
-				throw new Exception("Setting Permissions for private files in scope is not allowed");
-			}
-		}
-		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE) && NodeServiceInterceptor.getEduSharingScope()!=null){
+		boolean shared = isSharedNode(nodeId);
+
+		// not required anymore, also private files can be shared in scope
+		/*
+		 * if(!shared && NodeServiceInterceptor.getEduSharingScope()!=null){
+		 * if(QName.createQName(CCConstants.CCM_TYPE_NOTIFY).equals(nodeService.getType(
+		 * new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)))){ // allow
+		 * notify objects to share } else { throw new
+		 * Exception("Setting Permissions for private files in scope is not allowed"); }
+		 * }
+		 */
+
+		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE)
+				&& NodeServiceInterceptor.getEduSharingScope() != null) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE);
 		}
-		if(!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES) && hasAll){
+		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES) && hasAll) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
 		}
-		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && hasUsers && !shared){
+		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && hasUsers && !shared) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
-		}	
-		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE) && hasUsers && shared){
+		}
+		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE) && hasUsers
+				&& shared) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE);
-		}	
+		}
 	}
-	
-	/** true if this node is in a shared context ("My shared files"), false if it's in users home
+
+	/**
+	 * true if this node is in a shared context ("My shared files"), false if it's
+	 * in users home
 	 * 
 	 * @param nodeId
 	 * @return
-	 * @throws Throwable 
+	 * @throws Throwable
 	 */
 	private boolean isSharedNode(String nodeId) {
-		try{
+		try {
 			String groupFolderId = repoClient.getGroupFolderId(AuthenticationUtil.getFullyAuthenticatedUser());
-			List<String> sharedFolderIds=new ArrayList<>();
-	
+			List<String> sharedFolderIds = new ArrayList<>();
+
 			if (groupFolderId != null) {
 				HashMap<String, HashMap<String, Object>> children = repoClient.getChildren(groupFolderId);
 				for (Object key : children.keySet()) {
 					sharedFolderIds.add(key.toString());
-				}				
+				}
 			}
-			if(sharedFolderIds.size()==0)
+			if (sharedFolderIds.size() == 0)
 				return false;
-			
-			NodeRef last=new NodeRef(Constants.storeRef,nodeId);
-			while(true){
-	    		if(last==null)
-	    			break;
-	    		if(sharedFolderIds.contains(last.getId()))
-	    				return true;
-	    		last=repoClient.getParent(last).getParentRef();
-	    	}
-		}catch(Throwable t){
+
+			NodeRef last = new NodeRef(Constants.storeRef, nodeId);
+			while (true) {
+				if (last == null)
+					break;
+				if (sharedFolderIds.contains(last.getId()))
+					return true;
+				last = repoClient.getParent(last).getParentRef();
+			}
+		} catch (Throwable t) {
 			logger.warn(t.getMessage());
 		}
 		return false;
 	}
-	
+
 	public void addPermissions(String nodeId, ACE[] aces) throws Exception {
-		
+
 		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-			new RetryingTransactionCallback<Void>() {
-				
-                    public Void execute() throws Throwable {   
-                    	
-                    	checkCanManagePermissions(nodeId,aces);                    
-                		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
-                		PermissionService permissionsService = serviceRegistry.getPermissionService();
-                		
-                		for (ACE ace : aces) {
-                			
+
+				new RetryingTransactionCallback<Void>() {
+
+					public Void execute() throws Throwable {
+
+						checkCanManagePermissions(nodeId, aces);
+						NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
+						PermissionService permissionsService = serviceRegistry.getPermissionService();
+
+						for (ACE ace : aces) {
+
 							if (ace == null) {
 								continue;
 							}
-							
-                			if(!serviceRegistry.getAuthorityService().authorityExists(ace.getAuthority())
-                					&& !"GROUP_EVERYONE".equals(ace.getAuthority())){
-                				throw new Exception("authority "+ ace.getAuthority()+" does not exist!");
-                			}
 
-                			String permission = ace.getPermission();
+							if (!serviceRegistry.getAuthorityService().authorityExists(ace.getAuthority())
+									&& !"GROUP_EVERYONE".equals(ace.getAuthority())) {
+								throw new Exception("authority " + ace.getAuthority() + " does not exist!");
+							}
 
-                			if (!ace.isInherited()){
-                				permissionsService.setPermission(nodeRef, ace.getAuthority(), permission, true);
-                			}
-                		}
-                		
-                		return null;
-                    }
-                    
-            }, false); 
-		
+							String permission = ace.getPermission();
+
+							if (!ace.isInherited()) {
+								permissionsService.setPermission(nodeRef, ace.getAuthority(), permission, true);
+							}
+						}
+
+						return null;
+					}
+
+				}, false);
+
 	}
-	
+
 	public void removePermissions(String nodeId, ACE[] aces) throws Exception {
 
 		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-                new RetryingTransactionCallback<Void>()
-                {
-                    public Void execute() throws Throwable
-                    {
-              
-						checkCanManagePermissions(nodeId,aces);
-				
+
+				new RetryingTransactionCallback<Void>() {
+					public Void execute() throws Throwable {
+
+						checkCanManagePermissions(nodeId, aces);
+
 						NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 						PermissionService permissionsService = serviceRegistry.getPermissionService();
-						
+
 						String adminAuthority = getAdminAuthority(nodeRef);
-						
+
 						for (ACE ace : aces) {
-							
+
 							if (ace == null) {
 								continue;
 							}
-							
-							if(!authorityService.authorityExists(ace.getAuthority())
-									&& !"GROUP_EVERYONE".equals(ace.getAuthority())){
-								throw new Exception("authority "+ ace.getAuthority()+" does not exist!");
+
+							if (!authorityService.authorityExists(ace.getAuthority())
+									&& !"GROUP_EVERYONE".equals(ace.getAuthority())) {
+								throw new Exception("authority " + ace.getAuthority() + " does not exist!");
 							}
-							
-							if(adminAuthority != null 
-									&& !adminAuthority.trim().equals("") && adminAuthority.equals(ace.getAuthority())
+
+							if (adminAuthority != null && !adminAuthority.trim().equals("")
+									&& adminAuthority.equals(ace.getAuthority())
 									&& PermissionService.COORDINATOR.equals(ace.getPermission())) {
 								continue;
 							}
-				
+
 							String permission = ace.getPermission();
-							
-				
-							if (!ace.isInherited()){
+
+							if (!ace.isInherited()) {
 								permissionsService.deletePermission(nodeRef, ace.getAuthority(), permission);
 							}
 						}
-		
-				return null;
-		    }
-                    
-		}, false); 
+
+						return null;
+					}
+
+				}, false);
 	}
-	
+
 	/**
-	 * set's permission for one authority, leaves permissions already set for the authority
+	 * set's permission for one authority, leaves permissions already set for the
+	 * authority
 	 */
-	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception {
-		checkCanManagePermissions(nodeId,authority);
+	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission)
+			throws Exception {
+		checkCanManagePermissions(nodeId, authority);
 
 		PermissionService permissionsService = this.serviceRegistry.getPermissionService();
 		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
@@ -719,33 +730,32 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			logger.info("setInheritParentPermissions " + inheritPermission);
 			permissionsService.setInheritParentPermissions(nodeRef, inheritPermission);
 		}
-		
+
 		String adminAuthority = getAdminAuthority(nodeRef);
 
 		if (permissions != null) {
 			for (String permission : permissions) {
-				
-				if(adminAuthority != null 
-						&& !adminAuthority.trim().equals("") && adminAuthority.equals(authority)
+
+				if (adminAuthority != null && !adminAuthority.trim().equals("") && adminAuthority.equals(authority)
 						&& PermissionService.COORDINATOR.equals(permission)) {
 					continue;
 				}
-				
+
 				permissionsService.setPermission(new NodeRef(Constants.storeRef, nodeId), authority, permission, true);
 			}
 		}
 
 	}
-	
+
 	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception {
-		
-		checkCanManagePermissions(nodeId,authority);
+
+		checkCanManagePermissions(nodeId, authority);
 
 		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 		PermissionService permissionsService = this.serviceRegistry.getPermissionService();
-		
+
 		String adminAuthority = getAdminAuthority(nodeRef);
-		
+
 		if (_permissions != null && _permissions.length > 0) {
 			Set<AccessPermission> permSet = permissionsService.getAllSetPermissions(nodeRef);
 
@@ -755,14 +765,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				// only if Permission exists and authority is the same
 				while (iter.hasNext()) {
 					AccessPermission ace = iter.next();
-					
-					if(adminAuthority != null 
-							&& !adminAuthority.trim().equals("") && adminAuthority.equals(ace.getAuthority())
-										&& PermissionService.COORDINATOR.equals(ace.getPermission())) {
+
+					if (adminAuthority != null && !adminAuthority.trim().equals("")
+							&& adminAuthority.equals(ace.getAuthority())
+							&& PermissionService.COORDINATOR.equals(ace.getPermission())) {
 						continue;
 					}
-					
-					// logger.info("ace.getAuthority():"+ace.getAuthority()+" ace.getPermission():"+ace.getPermission());
+
+					// logger.info("ace.getAuthority():"+ace.getAuthority()+"
+					// ace.getPermission():"+ace.getPermission());
 					if (ace.getAuthority().equals(authority) && ace.getPermission().equals(permission)) {
 						permissionsService.deletePermission(nodeRef, authority, permission);
 					}
@@ -770,35 +781,42 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		}
 	}
-	private void addGlobalAuthoritySearchQuery(StringBuffer searchQuery){
-		if(NodeServiceInterceptor.getEduSharingScope()==null)
+
+	private void addGlobalAuthoritySearchQuery(StringBuffer searchQuery) {
+		if (NodeServiceInterceptor.getEduSharingScope() == null)
 			return;
 		try {
-		// fetch all groups which are allowed to acces confidential and 
-		String nodeId=toolPermission.getToolPermissionNodeId(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
-		StringBuffer groupPathQuery=new StringBuffer();
-		// user may not has ReadPermissions on ToolPermission, so fetch as admin
-		ACL permissions=AuthenticationUtil.runAsSystem(new RunAsWork<ACL>() {
-			@Override
-			public ACL doWork() throws Exception {
-				return getPermissions(nodeId);
+			// fetch all groups which are allowed to acces confidential and
+			String nodeId = toolPermission.getToolPermissionNodeId(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
+			StringBuffer groupPathQuery = new StringBuffer();
+			// user may not has ReadPermissions on ToolPermission, so fetch as admin
+			ACL permissions = AuthenticationUtil.runAsSystem(new RunAsWork<ACL>() {
+				@Override
+				public ACL doWork() throws Exception {
+					return getPermissions(nodeId);
+				}
+			});
+			for (ACE ace : permissions.getAces()) {
+				if (groupPathQuery.length() != 0) {
+					groupPathQuery.append(" OR ");
+				}
+				groupPathQuery.append("PATH:\"").append("/").append("sys\\:system").append("/")
+						.append("sys\\:authorities").append("/").append("cm\\:")
+						.append(ISO9075.encode(ace.getAuthority())).append("//.").append("\"");
 			}
-		});
-		for(ACE ace : permissions.getAces()) {
-			if(groupPathQuery.length() != 0){
-				groupPathQuery.append(" OR ");
+			if(groupPathQuery.toString().equals("")) {
+				throw new IllegalArgumentException("Global search failed for scope, there were no groups found on the toolpermission "+CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
 			}
-			groupPathQuery.append("PATH:\"").append("/").append("sys\\:system").append("/").append("sys\\:authorities").append("/")
-			.append("cm\\:").append(ISO9075.encode(ace.getAuthority())).append("//.").append("\"");
-		}
-		searchQuery.append(" AND ("+groupPathQuery+")");
-		}catch(Throwable t) {
+			searchQuery.append(" AND (" + groupPathQuery + ")");
+		} catch (Throwable t) {
 			throw new RuntimeException(t);
 		}
 	}
-	public StringBuffer getFindUsersSearchString(HashMap<String,String> propVals, boolean globalContext){
 
-		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
+	public StringBuffer getFindUsersSearchString(HashMap<String, String> propVals, boolean globalContext) {
+
+		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
+				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
 
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:person");
 
@@ -833,8 +851,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 						if (token.length() > 0) {
 
-							subQuery.append(subQuery.length() > 0 ? " OR " : "")
-							.append("@cm\\:").append(property).append(":").append("\"").append(token).append("\"");
+							subQuery.append(subQuery.length() > 0 ? " OR " : "").append("@cm\\:").append(property)
+									.append(":").append("\"").append(token).append("\"");
 
 						}
 					}
@@ -843,7 +861,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		} else {
 
-			// when no fuzzy search remove "*" from searchstring and remove all params except email
+			// when no fuzzy search remove "*" from searchstring and remove all params
+			// except email
 
 			String emailValue = propVals.get("email");
 
@@ -870,14 +889,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				return null;
 			}
 		}
-		
+
 		/**
 		 * global / groupcontext search
 		 */
-		boolean hasToolPermission = toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
-		if(globalContext){
-			
-			if(!hasToolPermission){
+		boolean hasToolPermission = toolPermission
+				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
+		if (globalContext) {
+
+			if (!hasToolPermission) {
 				return null;
 			}
 			addGlobalAuthoritySearchQuery(searchQuery);
@@ -885,53 +905,57 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}else{
 			
 			Set<String> groupsOfUser = authorityService.getAuthorities();
-			
+
 			List<String> eduGroupAuthorityNames = new ArrayList<String>();
-			
-			for(NodeRef eduGroupNodeRef : EduGroupCache.getKeys()){
+
+			for (NodeRef eduGroupNodeRef : EduGroupCache.getKeys()) {
 				Map<QName, Serializable> eduGroupProps = EduGroupCache.get(eduGroupNodeRef);
-				String eduGroupAuthorityName = (String)eduGroupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-				if(groupsOfUser.contains(eduGroupAuthorityName)){
+				String eduGroupAuthorityName = (String) eduGroupProps
+						.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+				if (groupsOfUser.contains(eduGroupAuthorityName)) {
 					eduGroupAuthorityNames.add(eduGroupAuthorityName);
 				}
 			}
-			
+
 			/**
-			 * if there are no edugroups you you are not allowed to search global return nothing
+			 * if there are no edugroups you you are not allowed to search global return
+			 * nothing
 			 */
-			if(eduGroupAuthorityNames.size() == 0){
-				if(!hasToolPermission){
+			if (eduGroupAuthorityNames.size() == 0) {
+				if (!hasToolPermission) {
 					return null;
 				}
-				addGlobalAuthoritySearchQuery(searchQuery);
+				return getFindUsersSearchString(propVals, true);
 			}
-			
+
 			StringBuffer groupPathQuery = new StringBuffer();
-			for(String eduGroup : eduGroupAuthorityNames){
-				if(groupPathQuery.length() == 0){
-					groupPathQuery.append("PATH:\"").append("/").append("sys\\:system").append("/").append("sys\\:authorities").append("/")
-					.append("cm\\:").append(ISO9075.encode(eduGroup)).append("//.").append("\"");
-				}else{
-					groupPathQuery.append(" OR ").append("PATH:\"").append("/").append("sys\\:system").append("/").append("sys\\:authorities").append("/")
-					.append("cm\\:").append(ISO9075.encode(eduGroup)).append("//.").append("\"");
+			for (String eduGroup : eduGroupAuthorityNames) {
+				if (groupPathQuery.length() == 0) {
+					groupPathQuery.append("PATH:\"").append("/").append("sys\\:system").append("/")
+							.append("sys\\:authorities").append("/").append("cm\\:").append(ISO9075.encode(eduGroup))
+							.append("//.").append("\"");
+				} else {
+					groupPathQuery.append(" OR ").append("PATH:\"").append("/").append("sys\\:system").append("/")
+							.append("sys\\:authorities").append("/").append("cm\\:").append(ISO9075.encode(eduGroup))
+							.append("//.").append("\"");
 				}
 			}
-			
-			if(groupPathQuery.length() > 0){
+
+			if (groupPathQuery.length() > 0) {
 				searchQuery.append(" AND (").append(groupPathQuery).append(")");
 			}
 		}
-		
+
 		if (subQuery.length() > 0) {
 			searchQuery.append(" AND (").append(subQuery).append(")");
 		}
 
 		logger.info("findUsers: " + searchQuery);
-		
+
 		return searchQuery;
 	}
-	
-	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext){
+
+	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:authorityContainer AND NOT @ccm\\:scopetype:system");
 
 		searchWord = searchWord != null ? searchWord.trim() : "";
@@ -966,9 +990,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				if (token.length() > 0) {
 
 					boolean furtherToken = (subQuery.length() > 0);
-					subQuery.append((furtherToken ? " AND( " : "("))
-					.append("@cm\\:authorityName:").append("\"").append(token).append("\"")
-					.append(" OR @cm\\:authorityDisplayName:").append("\"").append(token).append("\"");
+					subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
+							.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
+							.append(token).append("\"");
 					subQuery.append(")");
 
 				}
@@ -979,70 +1003,76 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 
 		}
-		
-		boolean hasToolPermission = toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
 
-		if(globalContext){
-			if(!hasToolPermission){
+		boolean hasToolPermission = toolPermission
+				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
+
+		if (globalContext) {
+			if (!hasToolPermission) {
 				return null;
 			}
 			addGlobalAuthoritySearchQuery(searchQuery);
-		}else{
-			
+		} else {
+
 			Set<String> groupsOfUser = authorityService.getAuthorities();
-			
+
 			List<String> eduGroupAuthorityNames = new ArrayList<String>();
-			
-			for(NodeRef eduGroupNodeRef : EduGroupCache.getKeys()){
-				
+
+			for (NodeRef eduGroupNodeRef : EduGroupCache.getKeys()) {
+
 				Map<QName, Serializable> eduGroupProps = EduGroupCache.get(eduGroupNodeRef);
-				String eduGroupAuthorityName = (String)eduGroupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-				if(groupsOfUser.contains(eduGroupAuthorityName)){
+				String eduGroupAuthorityName = (String) eduGroupProps
+						.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+				if (groupsOfUser.contains(eduGroupAuthorityName)) {
 					eduGroupAuthorityNames.add(eduGroupAuthorityName);
 				}
 			}
-			
+
 			/**
-			 * if there are no edugroups you you are not allowed to search global return nothing
+			 * if there are no edugroups you you are not allowed to search global return
+			 * nothing
 			 */
-			if(eduGroupAuthorityNames.size() == 0){
-				if(!hasToolPermission){
+			if (eduGroupAuthorityNames.size() == 0) {
+				if (!hasToolPermission) {
 					return null;
 				}
 			}
-			
+
 			StringBuffer groupPathQuery = new StringBuffer();
-			for(String eduGroup : eduGroupAuthorityNames){
-				if(groupPathQuery.length() == 0){
-					groupPathQuery.append("PATH:\"").append("/").append("sys\\:system").append("/").append("sys\\:authorities").append("/")
-					.append("cm\\:").append(ISO9075.encode(eduGroup)).append("//.").append("\"");
-				}else{
-					groupPathQuery.append(" OR ").append("PATH:\"").append("/").append("sys\\:system").append("/").append("sys\\:authorities").append("/")
-					.append("cm\\:").append(ISO9075.encode(eduGroup)).append("//.").append("\"");
+			for (String eduGroup : eduGroupAuthorityNames) {
+				if (groupPathQuery.length() == 0) {
+					groupPathQuery.append("PATH:\"").append("/").append("sys\\:system").append("/")
+							.append("sys\\:authorities").append("/").append("cm\\:").append(ISO9075.encode(eduGroup))
+							.append("//.").append("\"");
+				} else {
+					groupPathQuery.append(" OR ").append("PATH:\"").append("/").append("sys\\:system").append("/")
+							.append("sys\\:authorities").append("/").append("cm\\:").append(ISO9075.encode(eduGroup))
+							.append("//.").append("\"");
 				}
 			}
-			
-			if(groupPathQuery.length() > 0){
+
+			if (groupPathQuery.length() > 0) {
 				searchQuery.append(" AND (").append(groupPathQuery).append(")");
 			}
 		}
-		
-		searchQuery.append(" AND NOT (@cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS + " or @cm\\:authorityName:"
-				+ CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS + ")");
+
+		searchQuery.append(" AND NOT (@cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS
+				+ " or @cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS + ")");
 
 		logger.info("findGroups: " + searchQuery);
-		
+
 		return searchQuery;
 	}
-	
+
 	@Override
-	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from, int nrOfResults) {
+	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from,
+			int nrOfResults) {
 
 		StringBuffer searchQuery = null;
 		searchQuery = getFindUsersSearchString(propVals, globalContext);
-		
-		if(searchQuery == null){
-			return new  Result<List<User>>();
+
+		if (searchQuery == null) {
+			return new Result<List<User>>();
 		}
 
 		SearchService searchService = serviceRegistry.getSearchService();
@@ -1060,12 +1090,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			User user = new User(Edu_SharingProperties.instance.isFuzzyUserSearch());
 			user.setEmail((String) nodeService.getProperty(nodeRef, ContentModel.PROP_EMAIL));
 			user.setGivenName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_FIRSTNAME));
-			
 
-			String repository = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.PROP_USER_REPOSITORYID));
-			if(repository == null || repository.trim().equals("")) repository = appInfo.getAppId();
+			String repository = (String) nodeService.getProperty(nodeRef,
+					QName.createQName(CCConstants.PROP_USER_REPOSITORYID));
+			if (repository == null || repository.trim().equals(""))
+				repository = appInfo.getAppId();
 			user.setRepositoryId(repository);
-			
+
 			user.setSurname((String) nodeService.getProperty(nodeRef, ContentModel.PROP_LASTNAME));
 			user.setNodeId(nodeRef.getId());
 			user.setUsername((String) nodeService.getProperty(nodeRef, ContentModel.PROP_USERNAME));
@@ -1074,54 +1105,56 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		Result<List<User>> result = new Result<List<User>>();
 		result.setData(data);
-		
-		if(resultSet instanceof SolrJSONResultSet){
-			result.setNodeCount((int)((SolrJSONResultSet)resultSet).getNumberFound());
-			result.setStartIDX(((SolrJSONResultSet)resultSet).getStart());
-		}else if(resultSet instanceof FilteringResultSet){
+
+		if (resultSet instanceof SolrJSONResultSet) {
+			result.setNodeCount((int) ((SolrJSONResultSet) resultSet).getNumberFound());
+			result.setStartIDX(((SolrJSONResultSet) resultSet).getStart());
+		} else if (resultSet instanceof FilteringResultSet) {
 			result.setNodeCount(resultSet.length());
-			//alf4.2.f FilteringResultSet throws java.lang.UnsupportedOperationException when calling getStart
-			//so we take the from param
+			// alf4.2.f FilteringResultSet throws java.lang.UnsupportedOperationException
+			// when calling getStart
+			// so we take the from param
 			result.setStartIDX(from);
-		}else{
+		} else {
 			result.setNodeCount(resultSet.length());
 			result.setStartIDX(resultSet.getStart());
 		}
 
-		logger.info("nodecount:" + result.getNodeCount() + " startidx:" + result.getStartIDX() + " count:" + result.getData().size());
+		logger.info("nodecount:" + result.getNodeCount() + " startidx:" + result.getStartIDX() + " count:"
+				+ result.getData().size());
 
 		return result;
 	}
-	
 
 	@Override
-	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults){
-		
+	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from,
+			int nrOfResults) {
+
 		HashMap<String, String> toSearch = new HashMap<String, String>();
-		
+
 		// fields to search in - not using username
 		toSearch.put("email", searchWord);
 		toSearch.put("firstName", searchWord);
-		toSearch.put("lastName", searchWord);	
-		
+		toSearch.put("lastName", searchWord);
+
 		StringBuffer findUsersQuery = getFindUsersSearchString(toSearch, globalContext);
 		StringBuffer findGroupsQuery = getFindGroupsSearchString(searchWord, globalContext);
-		
+
 		/**
 		 * don't find groups of scopes when no scope is provided
 		 */
-		if(NodeServiceInterceptor.getEduSharingScope() == null){
-			
+		if (NodeServiceInterceptor.getEduSharingScope() == null) {
+
 			/**
 			 * groups arent initialized with eduscope aspect and eduscopename null
 			 */
 			findGroupsQuery.append(" AND NOT @ccm\\:eduscopename:\"*\"");
 		}
-		
+
 		StringBuffer finalQuery = findUsersQuery.insert(0, "(").append(") OR (").append(findGroupsQuery).append(")");
-		
+
 		System.out.println("finalQuery:" + finalQuery);
-		
+
 		List<Authority> data = new ArrayList<Authority>();
 
 		SearchParameters searchParameters = new SearchParameters();
@@ -1130,35 +1163,39 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		searchParameters.setQuery(finalQuery.toString());
 		searchParameters.setSkipCount(from);
 		searchParameters.setMaxItems(nrOfResults);
-		
+
 		searchParameters.addSort("@" + CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME, true);
 		searchParameters.addSort("@" + CCConstants.PROP_USER_FIRSTNAME, true);
-		
-		//dont use scopeed search service
+
+		// dont use scopeed search service
 		SearchService searchService = serviceRegistry.getSearchService();
 		ResultSet resultSet = searchService.query(searchParameters);
 
 		for (NodeRef nodeRef : resultSet.getNodeRefs()) {
 
 			String authorityName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_AUTHORITY_NAME);
-			if(authorityName != null){
+			if (authorityName != null) {
 				Group group = new Group();
 				group.setName(authorityName);
-				group.setDisplayName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME));
+				group.setDisplayName(
+						(String) nodeService.getProperty(nodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME));
 				group.setRepositoryId(appInfo.getAppId());
 				group.setNodeId(nodeRef.getId());
 				group.setAuthorityType(AuthorityType.getAuthorityType(group.getName()).name());
-				group.setScope((String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE)));
+				group.setScope(
+						(String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE)));
 				data.add(group);
-			}else{
+			} else {
 				User user = new User(Edu_SharingProperties.instance.isFuzzyUserSearch());
 				user.setEmail((String) nodeService.getProperty(nodeRef, ContentModel.PROP_EMAIL));
 				user.setGivenName((String) nodeService.getProperty(nodeRef, ContentModel.PROP_FIRSTNAME));
-				
-				String repository = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.PROP_USER_REPOSITORYID));
-				if(repository == null || repository.trim().equals("")) repository = appInfo.getAppId();
+
+				String repository = (String) nodeService.getProperty(nodeRef,
+						QName.createQName(CCConstants.PROP_USER_REPOSITORYID));
+				if (repository == null || repository.trim().equals(""))
+					repository = appInfo.getAppId();
 				user.setRepositoryId(repository);
-				
+
 				user.setSurname((String) nodeService.getProperty(nodeRef, ContentModel.PROP_LASTNAME));
 				user.setNodeId(nodeRef.getId());
 				user.setUsername((String) nodeService.getProperty(nodeRef, ContentModel.PROP_USERNAME));
@@ -1168,31 +1205,33 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		Result<List<Authority>> result = new Result<List<Authority>>();
 		result.setData(data);
-		
-		if(resultSet instanceof SolrJSONResultSet){
-			result.setNodeCount((int)((SolrJSONResultSet)resultSet).getNumberFound());
-			result.setStartIDX(((SolrJSONResultSet)resultSet).getStart());
-		}else if(resultSet instanceof FilteringResultSet){
+
+		if (resultSet instanceof SolrJSONResultSet) {
+			result.setNodeCount((int) ((SolrJSONResultSet) resultSet).getNumberFound());
+			result.setStartIDX(((SolrJSONResultSet) resultSet).getStart());
+		} else if (resultSet instanceof FilteringResultSet) {
 			result.setNodeCount(resultSet.length());
-			//alf4.2.f FilteringResultSet throws java.lang.UnsupportedOperationException when calling getStart
-			//so we take the from param
+			// alf4.2.f FilteringResultSet throws java.lang.UnsupportedOperationException
+			// when calling getStart
+			// so we take the from param
 			result.setStartIDX(from);
-		}else{
+		} else {
 			result.setNodeCount(resultSet.length());
 			result.setStartIDX(resultSet.getStart());
 		}
 
-		logger.info("nodecount:" + result.getNodeCount() + " startidx:" + result.getStartIDX() + " count:" + result.getData().size());
+		logger.info("nodecount:" + result.getNodeCount() + " startidx:" + result.getStartIDX() + " count:"
+				+ result.getData().size());
 		return result;
 	}
-	
+
 	@Override
 	public Result<List<Group>> findGroups(String searchWord, boolean globalContext, int from, int nrOfResults) {
 
 		StringBuffer searchQuery = getFindGroupsSearchString(searchWord, globalContext);
-		
-		if(searchQuery == null){
-			return new  Result<List<Group>>();
+
+		if (searchQuery == null) {
+			return new Result<List<Group>>();
 		}
 
 		List<Group> data = new ArrayList<Group>();
@@ -1216,32 +1255,35 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			group.setRepositoryId(appInfo.getAppId());
 			group.setNodeId(nodeRef.getId());
 			group.setAuthorityType(AuthorityType.getAuthorityType(group.getName()).name());
-			group.setScope((String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE)));
+			group.setScope(
+					(String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE)));
 			data.add(group);
 		}
 
 		Result<List<Group>> result = new Result<List<Group>>();
 		result.setData(data);
-		
-		if(resultSet instanceof SolrJSONResultSet){
-			result.setNodeCount((int)((SolrJSONResultSet)resultSet).getNumberFound());
-			result.setStartIDX(((SolrJSONResultSet)resultSet).getStart());
-		}else if(resultSet instanceof FilteringResultSet){
+
+		if (resultSet instanceof SolrJSONResultSet) {
+			result.setNodeCount((int) ((SolrJSONResultSet) resultSet).getNumberFound());
+			result.setStartIDX(((SolrJSONResultSet) resultSet).getStart());
+		} else if (resultSet instanceof FilteringResultSet) {
 			result.setNodeCount(resultSet.length());
-			//alf4.2.f FilteringResultSet throws java.lang.UnsupportedOperationException when calling getStart
-			//so we take the from param
+			// alf4.2.f FilteringResultSet throws java.lang.UnsupportedOperationException
+			// when calling getStart
+			// so we take the from param
 			result.setStartIDX(from);
-		}else{
+		} else {
 			result.setNodeCount(resultSet.length());
 			result.setStartIDX(resultSet.getStart());
 		}
 
-		logger.info("nodecount:" + result.getNodeCount() + " startidx:" + result.getStartIDX() + " count:" + result.getData().size());
+		logger.info("nodecount:" + result.getNodeCount() + " startidx:" + result.getStartIDX() + " count:"
+				+ result.getData().size());
 		return result;
 	}
-	
+
 	public void createNotifyObject(final String nodeId, final String user, final String event, final String action) {
-				
+
 		AuthenticationUtil.RunAsWork<Void> work = new AuthenticationUtil.RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
@@ -1252,22 +1294,28 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					notifyProps.put(CCConstants.CCM_PROP_NOTIFY_ACTION, action);
 					notifyProps.put(CCConstants.CCM_PROP_NOTIFY_USER, user);
 
-					String notifyFolder = new UserEnvironmentTool(AuthenticationUtil.getRunAsUser()).getEdu_SharingNotifyFolderToSafe();
+					String notifyFolder = new UserEnvironmentTool(AuthenticationUtil.getRunAsUser())
+							.getEdu_SharingNotifyFolderToSafe();
 
-					// create new repo client so that current admin authinfo from the runAs thread is used
+					// create new repo client so that current admin authinfo from the runAs thread
+					// is used
 					MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
-					org.edu_sharing.service.permission.PermissionService permissionService = new PermissionServiceImpl(ApplicationInfoList.getHomeRepository().getAppId());
+					org.edu_sharing.service.permission.PermissionService permissionService = new PermissionServiceImpl(
+							ApplicationInfoList.getHomeRepository().getAppId());
 					String notifyId = repoClient.createNode(notifyFolder, CCConstants.CCM_TYPE_NOTIFY, notifyProps);
 
 					String nameInvitedObj = repoClient.getProperty(Constants.storeRef, nodeId, CCConstants.CM_NAME);
 
-					repoClient.createChildAssociation(notifyId, nodeId, CCConstants.CCM_ASSOC_NOTIFY_NODES, nameInvitedObj);
+					repoClient.createChildAssociation(notifyId, nodeId, CCConstants.CCM_ASSOC_NOTIFY_NODES,
+							nameInvitedObj);
 
 					ACL aclToCopy = repoClient.getPermissions(nodeId);
-					
+
 					for (ACE ace : aclToCopy.getAces()) {
-						// set inherited to false so that no permissions from the parent systemfolder are inherited
-						permissionService.setPermissions(notifyId, ace.getAuthority(), new String[] { ace.getPermission() }, false);
+						// set inherited to false so that no permissions from the parent systemfolder
+						// are inherited
+						permissionService.setPermissions(notifyId, ace.getAuthority(),
+								new String[] { ace.getPermission() }, false);
 					}
 
 				} catch (Throwable e) {
@@ -1278,18 +1326,20 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 		};
 
-		// run as admin cause notify objects will be created in system folder auth problem uncomment when it works
+		// run as admin cause notify objects will be created in system folder auth
+		// problem uncomment when it works
 		AuthenticationUtil.runAs(work, appInfo.getUsername());
 	}
-	
+
 	@Override
-	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions) {
+	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
+			String[] permissions) {
 		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 		String guestName = appInfo.getGuest_username();
-		boolean guest=guestName!=null && guestName.equals(AuthenticationUtil.getFullyAuthenticatedUser());
+		boolean guest = guestName != null && guestName.equals(AuthenticationUtil.getFullyAuthenticatedUser());
 		PermissionService permissionService = serviceRegistry.getPermissionService();
 		HashMap<String, Boolean> result = new HashMap<String, Boolean>();
-		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId), nodeId);
+		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if (permissions != null && permissions.length > 0) {
 			for (String permission : permissions) {
 				AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
@@ -1306,7 +1356,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 		return result;
 	}
-	
+
 	@Override
 	public ACL getPermissions(String nodeId) throws Exception {
 		return repoClient.getPermissions(nodeId);
@@ -1330,11 +1380,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 			@Override
 			public List<String> doWork() throws Exception {
-				List<String> result=new ArrayList<>();
-				NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
-				
-				for(String permission : CCConstants.getPermissionList()){
-					if(permissionService.hasPermission(nodeRef, permission).equals(AccessStatus.ALLOWED)){
+				List<String> result = new ArrayList<>();
+				NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+
+				for (String permission : CCConstants.getPermissionList()) {
+					if (permissionService.hasPermission(nodeRef, permission).equals(AccessStatus.ALLOWED)) {
 						result.add(permission);
 					}
 				}
