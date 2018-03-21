@@ -755,8 +755,8 @@ $orderAnimationTime:$animationTime*5;
     }
   }
   .cardList{
-    .collection_info {
-      margin-top: 34px;
+    .collection_info,.collection_scope {
+      margin-top: 20px;
     }
   }
   .row .node_ccm_replicationsource  img,
@@ -841,20 +841,23 @@ $orderAnimationTime:$animationTime*5;
     display:block!important;
   }
 }
-@media all and (max-width: ($mobileWidth)) {
-  .nodeCollection {
-    .collectionEditorial {
-      top:20px;
-    }
+@media all and (max-width: ($cardWidth*3)) {
+  .cardSmallList{
+    width:calc(100% - 10px);
   }
-    .cardList{
-    width:100%;
-    height:160px;
-    box-shadow: none;
-    border-top:1px solid $cardSeperatorLineColor;
-    .typeicon{
-      display:none!important;
+}
+@media all and (max-width: ($mobileWidth)) {
+    .cardList.nodeCollection .collectionEditorial {
+      top: 20px;
     }
+    .cardList{
+      width:100%;
+      height:160px;
+      box-shadow: none;
+      border-top:1px solid $cardSeperatorLineColor;
+      .typeicon{
+        display:none!important;
+      }
   }
   .cardList.addElement{
     height:90px;

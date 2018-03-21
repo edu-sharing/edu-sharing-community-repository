@@ -993,7 +993,7 @@ export class SearchComponent {
           if(repo!=this.currentRepository){
               return;
           }
-          this.mdsSets=ConfigurationHelper.filterValidMds(repo,data.metadatasets,this.config);
+          this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepositoryObject ? this.currentRepositoryObject : this.currentRepository,data.metadatasets,this.config);
           if(this.mdsSets){
             UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
             try {
