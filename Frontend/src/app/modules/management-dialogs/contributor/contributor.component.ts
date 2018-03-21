@@ -11,7 +11,7 @@ import {DatepickerOptions} from "ng2-datepicker";
 import {DateHelper} from "../../../common/ui/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {NgDatepickerComponent} from "ng2-datepicker/src/ng-datepicker/ng-datepicker.component";
+import {NgDatepickerComponent} from "ng2-datepicker";
 
 @Component({
   selector: 'workspace-contributor',
