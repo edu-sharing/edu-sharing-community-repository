@@ -775,8 +775,8 @@ export class WorkspaceMainComponent{
         (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
         || (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_SAFE) && this.isSafe)
       );
-      if (this.isSafe && this.root!='SHARED_FILES')
-        share.isEnabled=false;
+      //if (this.isSafe && this.root!='SHARED_FILES')
+      //  share.isEnabled=false;
       options.push(share);
       let shareLink = new OptionItem("WORKSPACE.OPTION.SHARE_LINK", "link", (node: Node) => this.setShareLinkNode(node));
       shareLink.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
