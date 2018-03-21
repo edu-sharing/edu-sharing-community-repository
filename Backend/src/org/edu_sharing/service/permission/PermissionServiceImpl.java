@@ -43,6 +43,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.Authority;
+import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Result;
@@ -65,6 +66,7 @@ import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -904,17 +906,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		}else{
 			
-			Set<String> groupsOfUser = authorityService.getAuthorities();
-
 			List<String> eduGroupAuthorityNames = new ArrayList<String>();
-
-			for (NodeRef eduGroupNodeRef : EduGroupCache.getKeys()) {
-				Map<QName, Serializable> eduGroupProps = EduGroupCache.get(eduGroupNodeRef);
-				String eduGroupAuthorityName = (String) eduGroupProps
-						.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-				if (groupsOfUser.contains(eduGroupAuthorityName)) {
-					eduGroupAuthorityNames.add(eduGroupAuthorityName);
+			try {
+				for (EduGroup eduGroup : SearchServiceFactory.getLocalService().getAllOrganizations(true).getData()) {
+						eduGroupAuthorityNames.add(eduGroup.getGroupname());
 				}
+			}catch(Throwable t) {
+				t.printStackTrace();
 			}
 
 			/**
@@ -1014,18 +1012,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			addGlobalAuthoritySearchQuery(searchQuery);
 		} else {
 
-			Set<String> groupsOfUser = authorityService.getAuthorities();
-
 			List<String> eduGroupAuthorityNames = new ArrayList<String>();
-
-			for (NodeRef eduGroupNodeRef : EduGroupCache.getKeys()) {
-
-				Map<QName, Serializable> eduGroupProps = EduGroupCache.get(eduGroupNodeRef);
-				String eduGroupAuthorityName = (String) eduGroupProps
-						.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
-				if (groupsOfUser.contains(eduGroupAuthorityName)) {
-					eduGroupAuthorityNames.add(eduGroupAuthorityName);
+			try {
+				for (EduGroup eduGroup : SearchServiceFactory.getLocalService().getAllOrganizations(true).getData()) {
+						eduGroupAuthorityNames.add(eduGroup.getGroupname());
 				}
+			}catch(Throwable t) {
+				t.printStackTrace();
 			}
 
 			/**
