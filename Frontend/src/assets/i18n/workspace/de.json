@@ -204,6 +204,7 @@
       "METADATACONTRIBUTOR":"Beteiligte an Metadaten",
       "SCOPE":"tätig als",
       "DATE":"tätig am (Optional)",
+      "CHOOSE_DATE":"Datum wählen",
       "MORE":"weitere Daten angeben",
       "ORG_INFO":"Organisation des Beteiligten (Optional)",
       "ADDRESS_INFO":"Adresse des Beteiligten (Optional)",

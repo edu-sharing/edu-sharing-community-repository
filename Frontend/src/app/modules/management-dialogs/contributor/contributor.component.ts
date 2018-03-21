@@ -11,6 +11,7 @@ import {DatepickerOptions} from "ng2-datepicker";
 import {DateHelper} from "../../../common/ui/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
+import {NgDatepickerComponent} from "ng2-datepicker/src/ng-datepicker/ng-datepicker.component";
 
 @Component({
   selector: 'workspace-contributor',
@@ -23,6 +24,7 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
   ]
 })
 export class WorkspaceContributorComponent  {
+  @ViewChild('datepicker') datepicker : NgDatepickerComponent;
   public contributorLifecycle:any={};
   public contributorMetadata:any={};
   public rolesLifecycle=["publisher","author","unknown","initiator","terminator","validator",
@@ -91,7 +93,7 @@ export class WorkspaceContributorComponent  {
 
   }
   public addVCard(mode:string) {
-    this.date=new Date();
+    this.date=null;
     this.editType='person';
     this.editMode=mode;
     this.edit=new VCard();
@@ -99,6 +101,10 @@ export class WorkspaceContributorComponent  {
     this.editScopeOld=null;
     this.editScopeNew=this.editMode=='lifecycle' ? this.rolesLifecycle[0] : this.rolesMetadata[0];
 
+  }
+  openDatepicker(){
+      this.date=new Date();
+      setTimeout(()=>this.datepicker.toggle());
   }
   public editVCard(mode:string,vcard : VCard,scope:string){
     this.editMode=mode;
@@ -109,6 +115,7 @@ export class WorkspaceContributorComponent  {
     this.editType=vcard.givenname||vcard.surname ? 'person' : 'org';
     this.date=null;
     let contributeDate=vcard.contributeDate;
+    console.log(contributeDate);
     if(contributeDate) {
       //this.date.formatted=contributeDate;
       //this.dateOptions.initialDate=new Date(contributeDate);
@@ -120,7 +127,6 @@ export class WorkspaceContributorComponent  {
         this.dateOptions.initialDate=new Date(parseInt(split[0]),parseInt(split[1]),parseInt(split[2]),0,0,0,0);
       }
       */
-
     }
   }
   public saveEdits(){
@@ -137,7 +143,7 @@ export class WorkspaceContributorComponent  {
       this.edit.surname='';
       this.edit.title='';
     }
-    this.edit.contributeDate=DateHelper.getDateFromDatepicker(this.date).toISOString();
+    this.edit.contributeDate=this.date ? DateHelper.getDateFromDatepicker(this.date).toISOString() : null;
     let array=this.editMode=='lifecycle' ? this.contributorLifecycle : this.contributorMetadata;
     if(this.editScopeOld) {
       let pos = array[this.editScopeOld].indexOf(this.editOriginal);

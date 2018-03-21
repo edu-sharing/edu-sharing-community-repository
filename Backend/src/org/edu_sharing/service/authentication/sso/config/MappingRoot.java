@@ -9,7 +9,7 @@ public class MappingRoot {
 	HashMap<String,String> personMapping;
 	Condition personMappingCondition;
 	
-	List<MappingGroup> groupMappings;
+	List<MappingGroup> groupMappings = new ArrayList<MappingGroup>();
 	
 	public MappingRoot() {
 	}

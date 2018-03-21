@@ -441,6 +441,9 @@ export class CollectionNewComponent {
     if(collection.type==RestConstants.GROUP_TYPE_EDITORIAL){
       return collection.type;
     }
+    if(collection.scope==RestConstants.COLLECTIONSCOPE_MY && !this.canInvite){
+      return RestConstants.COLLECTIONSCOPE_MY;
+    }
     if(collection.scope==RestConstants.COLLECTIONSCOPE_MY || collection.scope==RestConstants.COLLECTIONSCOPE_ORGA || collection.scope==RestConstants.COLLECTIONSCOPE_ALL || collection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC)
       return RestConstants.COLLECTIONSCOPE_CUSTOM;
     return collection.scope;
