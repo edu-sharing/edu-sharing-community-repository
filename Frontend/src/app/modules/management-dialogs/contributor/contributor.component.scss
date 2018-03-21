@@ -35,10 +35,31 @@ h2{
     width:42.5%;
   }
 
-  div{
+  >div{
     display: table-cell;
     padding:0 10px;
     width:50%;
+  }
+  .datePicker{
+    display:flex;
+    width: 100%;
+    align-items: start;
+    .clickable{
+      color:$textLight;
+    }
+    >div{
+      display:flex;
+      align-items: center;
+      width:100%;
+      padding-top:6px;
+      justify-content: center;
+      >i{
+        margin-right: 5px;
+      }
+    }
+    ng-datepicker{
+      flex-grow: 1;
+    }
   }
 }
 .btnAdd{
@@ -61,5 +82,8 @@ h2{
   }
   .ngx-datepicker-calendar-container{
     left: -80px!important;
+  }
+  .ngx-datepicker-input{
+    width:165px!important;
   }
 }
