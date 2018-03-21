@@ -21,10 +21,16 @@ import org.htmlparser.util.NodeList;
 
 public class ClientUtilsService {
 	public static WebsiteInformation getWebsiteInformation(String url) {
-
+		WebsiteInformation info = new WebsiteInformation();
+		String page = url;
+		if (page.startsWith("http://"))
+			page = page.substring(7);
+		if (page.startsWith("https://"))
+			page = page.substring(8);
+		info.setPage(page);
 		boolean resolveWebsites = Boolean.parseBoolean(RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE));
 		if (!resolveWebsites) {
-			return null;
+			return info;
 		}
 		try {
 			new URL(url);
@@ -33,8 +39,7 @@ public class ClientUtilsService {
 			if (result == null)
 				return null;
 			Parser parser = new Parser(new Lexer(result));
-			WebsiteInformation info = new WebsiteInformation();
-
+			
 			NodeFilter filter = new NodeClassFilter(TitleTag.class);
 
 			NodeList list = parser.parse(filter);
@@ -47,14 +52,9 @@ public class ClientUtilsService {
 					if (title != null)
 						title = StringEscapeUtils.unescapeHtml(title.trim());
 					else
-						title = "";
-					String page = url;
-					if (page.startsWith("http://"))
-						page = page.substring(7);
-					if (page.startsWith("https://"))
-						page = page.substring(8);
+						title = null;
 					info.setTitle(title);
-					info.setPage(page);
+					
 				}
 			}
 

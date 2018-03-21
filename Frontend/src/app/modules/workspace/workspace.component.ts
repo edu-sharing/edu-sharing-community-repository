@@ -466,7 +466,7 @@ export class WorkspaceMainComponent{
     });
   }
   public resetWorkspace(){
-    if(this.metadataNode)
+    if(this.metadataNode && this.parameterNode)
       this.setSelection([this.parameterNode]);
   }
 
@@ -556,24 +556,41 @@ export class WorkspaceMainComponent{
     this.showUploadSelect=false;
     this.filesToUpload=files;
   }
-  private deleteConfirmed(nodes : Node[],position=0,error=false) : void{
-    if(position>=nodes.length){
-      this.globalProgress=false;
-      this.metadataNode=null;
+  private deleteConfirmed(nodes : Node[],position=0,error=false) : void {
+    if (position >= nodes.length) {
+      this.globalProgress = false;
+      this.metadataNode = null;
       this.refresh();
-      if(!error)
+      if (!error)
         this.toast.toast("WORKSPACE.TOAST.DELETE_FINISHED");
-      this.selection=[];
+      this.selection = [];
       return;
     }
     this.hideDialog();
-    this.globalProgress=true;
-    this.node.deleteNode(nodes[position].ref.id).subscribe(data => this.deleteConfirmed(nodes,position+1,error),
-      (error:any)=>{
-        this.toast.error(error);
-        this.deleteConfirmed(nodes,position+1,true);
-      });
+    this.globalProgress = true;
+    this.node.deleteNode(nodes[position].ref.id).subscribe(data => {
+      this.removeNodeFromClipboard(nodes[position]);
+      this.deleteConfirmed(nodes, position + 1, error);
+    }, (error: any) => {
+      this.toast.error(error);
+      this.deleteConfirmed(nodes, position + 1, true);
+    });
   }
+  private removeNodeFromClipboard(node: Node) {
+    let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
+    if(clip==null)
+      return;
+
+    for(let n of clip.nodes){
+      if(n.ref.id==node.ref.id){
+        clip.nodes.splice(clip.nodes.indexOf(n),1);
+      }
+      if(clip.nodes.length==0){
+        console.log("all items in clipboard removed");
+        this.storage.remove("workspace_clipboard");
+      }
+  }
+}
   private deleteNode(node: Node=null) {
     let list=this.getNodeList(node);
     if(list==null)

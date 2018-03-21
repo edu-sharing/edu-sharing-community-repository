@@ -26,6 +26,7 @@ export class RestConstants {
   public static getAuthorityEveryone(){
     return {authorityName:RestConstants.AUTHORITY_EVERYONE,authorityType:RestConstants.AUTHORITY_TYPE_EVERYONE};
   }
+  public static PERMISSION_OWNER = "Owner";
   public static PERMISSION_CONSUMER = "Consumer";
   public static PERMISSION_COLLABORATOR = "Collaborator";
   public static PERMISSION_COORDINATOR = "Coordinator";

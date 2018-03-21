@@ -73,7 +73,8 @@ export class MdsComponent{
   dialogParameters: any;
   dialogButtons: DialogButton[];
   private variables: string[];
-    private currentWidgetSuggestion: string;
+  private currentWidgetSuggestion: string;
+  private static GROUP_MULTIVALUE_DELIMITER="[+]";
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -462,13 +463,13 @@ export class MdsComponent{
     let html='Group \''+id+'\' was not found in the mds';
     this.setRenderedHtml(html);
   }
-  public getValues(propertiesIn:any={},showError=true){
+  public getValues(propertiesIn:any={},showError=true,widgets=this.currentWidgets){
     let properties:any={};
     // add author data
     this.addAuthorValue(properties);
-    if(!this.currentWidgets)
+    if(!widgets)
       return properties;
-    for(let widget of this.currentWidgets){
+    for(let widget of widgets){
       if(widget.id=='preview' || widget.id=='author'){
         continue;
       }
@@ -749,7 +750,15 @@ export class MdsComponent{
           if(!props)
             continue;
 
-          if (this.isMultivalueWidget(widget)){
+          if(widget.type=='multivalueGroup'){
+              for(let v of props){
+                  if(v!="") {
+                    let caption=this.getGroupValueCaption(v,widget);
+                    element.innerHTML += this.getMultivalueBadge(v, caption);
+                  }
+              }
+          }
+          else if (this.isMultivalueWidget(widget)){
             for(let v of props){
               if(v!='') {
                 let caption=this.getValueCaption(widget, v);
@@ -845,27 +854,28 @@ export class MdsComponent{
       let search='<'+widget.id+'>';
       let start=html.indexOf(search);
       let end=start+search.length;
+      let attr="";
       if(start<0){
         search='<'+widget.id+' ';
         start=html.indexOf(search);
-        end=-1;
+        end=html.indexOf('>',start)+1;
+        attr=html.substring(start+search.length,end-1);
+        let attributes=this.getAttributes(html.substring(start,end-1));
+        for(var k in attributes){
+            widget[k]=attributes[k];
+        }
       }
       if(start<0)
         continue;
-      if(end==-1)
-        end=html.indexOf('>',start);
 
       let first=html.substring(0,start);
-      let second=html.substring(end+1);
-      let attributes=this.getAttributes(html.substring(start,end));
-      for(var k in attributes){
-        widget[k]=attributes[k];
-      }
+      let second=html.substring(end);
+
       if(this.isExtendedWidget(widget))
         extended[0]=true;
       this.replaceVariables(widget);
       this.currentWidgets.push(widget);
-      let attr=html.substring(start+search.length,end);
+      console.log(attr);
       let widgetData=this.renderWidget(widget,attr,template,node);
       if(!widgetData) {
         removeWidgets.push(widget);
@@ -1523,8 +1533,11 @@ export class MdsComponent{
     else if(widget.type=='vcard') {
       html+=this.renderVCardWidget(widget,attr);
     }
+    else if(widget.type=='multivalueGroup'){
+        html+=this.renderGroupWidget(widget,attr,template,node);
+    }
     else if(widget.id=='preview'){
-      html+=this.renderPreview(widget);
+      html+=this.renderPreview(widget,attr);
     }
     else if(widget.id=='author'){
       html+=this.renderAuthor(widget);
@@ -1579,12 +1592,13 @@ export class MdsComponent{
  }
 
   private isMultivalueWidget(widget: any) {
-    return widget.type == 'multivalueBadges'
-    || widget.type=='multioption'
-    || widget.type=='multivalueFixedBadges'
-    || widget.type=='multivalueSuggestBadges'
-    || widget.type=='singlevalueTree' // it basically uses the tree so all functions relay on multivalue stuff
-    || widget.type=='multivalueTree'
+    return widget.type == "multivalueBadges"
+    || widget.type=="multioption"
+    || widget.type=="multivalueFixedBadges"
+    || widget.type=="multivalueSuggestBadges"
+    || widget.type=="singlevalueTree" // it basically uses the tree so all functions relay on multivalue stuff
+    || widget.type=="multivalueTree"
+    || widget.type=="multivalueGroup"
   }
   private isSliderWidget(widget: any) {
     return widget.type == 'duration'
@@ -1625,7 +1639,7 @@ export class MdsComponent{
     `;
     return author;
   }
-  private renderPreview(widget: any) {
+  private renderPreview(widget: any,attr:string) {
     let preview=`<div class="mdsPreview">`;
 
     preview+=`<input type="file" style="display:none" id="previewSelect" accept="image/*" onchange="
@@ -1643,7 +1657,7 @@ export class MdsComponent{
     if(this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0) {
       preview += `<div onclick="document.getElementById('previewSelect').click()" class="changePreview clickable">` + this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') + `</div>`;
     }
-    preview+=`<div class="previewImage"><img id="preview"></div>
+    preview+=`<div class="previewImage"><img id="preview" `+attr+`></div>
             </div>`;
     return preview;
   }
@@ -1696,6 +1710,73 @@ export class MdsComponent{
     this.saveValues(()=>{
       this.openContributor.emit();
     })
+  }
+  private getGroupValueCaption(value:string,widget:any){
+    let values=value.split(MdsComponent.GROUP_MULTIVALUE_DELIMITER);
+    let caption="";
+    let i=0;
+    for(let sub of widget.subwidgets){
+      let v=values[i++];
+      if(!v)
+        continue;
+      if(caption!=""){
+        caption+=", ";
+      }
+      caption+=this.getValueCaption(this.getWidget(sub.id),v);
+    }
+    return caption;
+  }
+  private addGroupValues(id:string){
+    let widget=this.getWidget(id);
+    let widgets=[];
+    for(let sub of widget.subwidgets){
+      widgets.push(this.getWidget(sub.id));
+    }
+    let values=this.getValues([],true,widgets);
+    if(!values)
+      return;
+    let result="";
+    let i=0;
+    let hasValue=false;
+    for(let sub of widget.subwidgets){
+        if(values[sub.id] && values[sub.id][0]){
+          hasValue=true;
+          result+=values[sub.id][0];
+        }
+        if(i++<widget.subwidgets.length-1)
+          result+=MdsComponent.GROUP_MULTIVALUE_DELIMITER;
+    }
+    if(!hasValue){
+      return;
+    }
+    let badges=document.getElementById(widget.id);
+    let elements:any=badges.childNodes;
+    let add=true;
+    for(let i=0;i<elements.length;i++){
+        if(elements[i].getAttribute('data-value')==result){
+            return;
+        }
+    }
+    let caption=this.getGroupValueCaption(result,widget);
+    document.getElementById(id).innerHTML+=this.getMultivalueBadge(result,caption);
+  }
+  private renderGroupWidget(widget: any,attr:string,template:any,node:Node){
+    if(!widget.subwidgets || !widget.subwidgets.length){
+      return "Widget "+widget.id+" is a group widget, but has no subwidgets attached";
+    }
+    let html='<div class="widgetGroup">'
+    for(let sub of widget.subwidgets){
+      let subwidget=this.getWidget(sub.id);
+      if(this.isMultivalueWidget(subwidget)){
+        html+='Widget '+subwidget.id+" is a multivalue widget. This is not supported for groups";
+      }
+      else {
+          html += this.renderWidget(subwidget, null, template, node);
+      }
+    }
+    html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
+            <div id="`+widget.id+`" class="multivalueBadges"></div>`;
+    return html;
   }
   private renderLicense(widget: any) {
     if(this.mode=='search'){

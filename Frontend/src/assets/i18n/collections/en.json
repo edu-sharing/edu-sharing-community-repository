@@ -1,7 +1,7 @@
 {
 
   "COLLECTIONS": {
-    "TITLE": "collections",
+    "TITLE": "Collections",
     "CREATE_COLLECTION" : "Create\ncollection",
     "ADD_MATERIAL" : "Add\nmaterial",
     "ERROR_DELETE": "An error occurred while deleting the collection.",
