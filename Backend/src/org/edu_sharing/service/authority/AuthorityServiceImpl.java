@@ -350,7 +350,7 @@ public EduGroup getEduGroup(String authority){
 									String groupname = (String)nodeService.getProperty(containedAuthorityNodeRef, QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
 									groupname = groupname.replace(AuthorityType.GROUP.getPrefixString(), "");
 									String groupDisplayName = (String)nodeService.getProperty(containedAuthorityNodeRef, QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
-									String groupAdministrators = authorityService.createAuthority(AuthorityType.GROUP, groupname + "_" + eduGroup.getScope() , groupDisplayName + " "  + eduGroup.getScope(), authorityService.getDefaultZones());
+									String groupAdministrators = authorityService.createAuthority(AuthorityType.GROUP, groupname + "_" + eduGroup.getScope() , groupDisplayName + "_"  + eduGroup.getScope(), authorityService.getDefaultZones());
 									NodeRef groupAdministratorsNodeRef = authorityService.getAuthorityNodeRef(groupAdministrators);
 									nodeService.setProperty(groupAdministratorsNodeRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), ADMINISTRATORS_GROUP_TYPE);
 									//scope
