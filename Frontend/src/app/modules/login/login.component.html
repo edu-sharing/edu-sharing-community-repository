@@ -20,7 +20,7 @@
       </div>
       <div>
         <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
-      <input #passwordInput requried type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/>
+      <input #passwordInput requried type="password" [autocomplete]="showUsername ? 'on' : 'off'" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/>
       </div>
       </form>
       <div class="register" *ngIf="config.registerUrl">
