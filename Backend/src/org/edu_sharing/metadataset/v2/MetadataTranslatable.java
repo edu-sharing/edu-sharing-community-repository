@@ -26,8 +26,9 @@ public abstract class MetadataTranslatable implements Serializable{
 	/**
 	 * deep copy the current object instance
 	 * @return
+	 * @throws Throwable 
 	 */
-		public <T extends MetadataTranslatable> T copyInstance() {
+		public <T extends MetadataTranslatable> T copyInstance() throws Throwable {
 			T obj = null;
 	        try {
 	            // Write the object out to a byte array
@@ -43,11 +44,8 @@ public abstract class MetadataTranslatable implements Serializable{
 	                new ByteArrayInputStream(bos.toByteArray()));
 	            obj = (T) in.readObject();
 	        }
-	        catch(IOException e) {
-	            e.printStackTrace();
-	        }
-	        catch(ClassNotFoundException cnfe) {
-	            cnfe.printStackTrace();
+	        catch(Throwable t) {
+	        	throw t;
 	        }
 	        return obj;
 		}

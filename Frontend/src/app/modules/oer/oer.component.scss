@@ -50,7 +50,11 @@
       display: none;
     }
   }
-
+  @media screen and (max-width: ($mobileWidth+$mobileStage*1)) {
+    .searchInputGroup{
+      width: 100%!important;
+    }
+  }
 
   @media screen and (max-width: ($mobileWidth)) {
     .topBarSearch form {
@@ -135,7 +139,17 @@
   text-align: center;
   padding-top:20px;
 }
-@media all and (max-width: $mobileWidth+$mobileStage*1) {
+@media (pointer: coarse) {
+  :host /deep/ .collections {
+    width: 100%;
+    overflow-x: auto;
+    .list {
+      width: max-content;
+    }
+  }
+}
+
+@media all and (max-width: $mobileWidth+$mobileStage*2) {
   :host /deep/ .collections {
     .list {
       width: max-content;
@@ -145,14 +159,5 @@
     overflow-x: auto;
     width: calc(100% + 40px);
     margin:10px -20px;
-  }
-}
-@media (pointer: coarse) {
-  :host /deep/ .collections {
-    width: 100%;
-    overflow-x: auto;
-    .list {
-      width: max-content;
-    }
   }
 }

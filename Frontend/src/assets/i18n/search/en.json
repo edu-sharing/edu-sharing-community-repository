@@ -38,15 +38,15 @@
     "NODE_IMPORTED": "Object imported<br><a href='{{link}}'>View</a>",
     "ADD_TO_COLLECTION": "Add to collection",
     "ADD_TO_COLLECTION_SHORT": "Add",
-    "SHOW_NODE_STORE": "Merkliste",
-    "ADD_NODE_STORE": "Auf Merkliste",
-    "ADDED_TO_NODE_STORE": "{{count}} Element(s) have been bookmarked",
+    "SHOW_NODE_STORE": "bookmark list",
+    "ADD_NODE_STORE": "Add to bookmark list",
+    "ADDED_TO_NODE_STORE": "{{count}} Element(s) have been bookmarked.",
     "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} is already bookmarked",
     "NODE_STORE": {
       "TITLE": "Bookmarks",
       "LIST_EMPTY": "Bookmarks are empty",
       "REMOVE_ITEM": "Remove",
-      "REMOVED_ITEMS": "{{count}} Element(s) have been removed from bookmarks"
+      "REMOVED_ITEMS": "{{count}} Element(s) have been removed from bookmarks."
     },
     "APPLY_FILTER": "Apply",
     "TAB_FILTER": "filter",

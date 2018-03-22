@@ -755,8 +755,8 @@ $orderAnimationTime:$animationTime*5;
     }
   }
   .cardList{
-    .collection_info {
-      margin-top: 34px;
+    .collection_info,.collection_scope {
+      margin-top: 20px;
     }
   }
   .row .node_ccm_replicationsource  img,
@@ -842,19 +842,17 @@ $orderAnimationTime:$animationTime*5;
   }
 }
 @media all and (max-width: ($mobileWidth)) {
-  .nodeCollection {
-    .collectionEditorial {
-      top:20px;
+    .cardList.nodeCollection .collectionEditorial {
+      top: 20px;
     }
-  }
     .cardList{
-    width:100%;
-    height:160px;
-    box-shadow: none;
-    border-top:1px solid $cardSeperatorLineColor;
-    .typeicon{
-      display:none!important;
-    }
+      width:100%;
+      height:160px;
+      box-shadow: none;
+      border-top:1px solid $cardSeperatorLineColor;
+      .typeicon{
+        display:none!important;
+      }
   }
   .cardList.addElement{
     height:90px;
@@ -909,6 +907,7 @@ $orderAnimationTime:$animationTime*5;
     position: absolute;
     top: 25px;
     left: 120px;
+    max-width: 50px;
   }
   .cardList .actionText{
     display:none;

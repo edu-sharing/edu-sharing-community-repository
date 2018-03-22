@@ -13,6 +13,7 @@ import 'rxjs/add/operator/first'
 import {RestLocatorService} from "./rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {CordovaService} from './services/cordova.service';
+import * as moment from 'moment';
 
 export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','override'];
 
@@ -106,6 +107,8 @@ export class Translation  {
   static applyToDateOptions(translate:TranslateService,dateOptions: DatepickerOptions) {
     //dateOptions.locale=moment.localeData(this.getLanguage());
     dateOptions.displayFormat=Translation.getDateFormat();
+    dateOptions.firstCalendarDay=1;
+    dateOptions.locale=(moment.locale(this.getLanguage()) as any);
     /*
     dateOptions.todayText=translate.instant("TODAY");
     dateOptions.clearText=translate.instant("DATE_CLEAR");
