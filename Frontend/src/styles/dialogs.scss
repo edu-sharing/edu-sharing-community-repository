@@ -68,6 +68,7 @@
 .card-title{
   word-break: break-all;
   max-height: 48px;
+  align-items: start;
   overflow: hidden;
   @include unselectableText();
 }
