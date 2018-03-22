@@ -130,8 +130,8 @@
   "WORKFLOW":{
     "100_unchecked":"Kein Status",
     "200_tocheck":"Zu prüfen",
-    "300_hasflaws":"hat Mängel",
-    "400_checked":"geprüft"
+    "300_hasflaws":"Hat Mängel",
+    "400_checked":"Geprüft"
   },
   "NODE" : {
     "cm:name": "Dateiname",

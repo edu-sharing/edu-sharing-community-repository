@@ -36,8 +36,8 @@ import {ColorHelper} from '../../../common/ui/color-helper';
 export class CollectionNewComponent {
   @ViewChild('mds') mds : MdsComponent;
   public hasCustomScope: boolean;
-  public COLORS1=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A'];
-  public COLORS2=['#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
+  public COLORS:string[];
+  public DEFAULT_COLORS:string[]=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A','#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
   public isLoading:boolean = true;
   public showPermissions = false;
   private currentCollection:Collection;
@@ -103,6 +103,7 @@ export class CollectionNewComponent {
         private translationService:TranslateService) {
         Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
           this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+            this.COLORS=this.config.instant('collections.colors',this.DEFAULT_COLORS);
             if(data.statusCode!=RestConstants.STATUS_CODE_OK){
               this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"]);
               return;
@@ -438,6 +439,9 @@ export class CollectionNewComponent {
     if(collection.type==RestConstants.GROUP_TYPE_EDITORIAL){
       return collection.type;
     }
+    if(collection.scope==RestConstants.COLLECTIONSCOPE_MY && !this.canInvite){
+      return RestConstants.COLLECTIONSCOPE_MY;
+    }
     if(collection.scope==RestConstants.COLLECTIONSCOPE_MY || collection.scope==RestConstants.COLLECTIONSCOPE_ORGA || collection.scope==RestConstants.COLLECTIONSCOPE_ALL || collection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC)
       return RestConstants.COLLECTIONSCOPE_CUSTOM;
     return collection.scope;
@@ -484,7 +488,7 @@ export class CollectionNewComponent {
     this.currentCollection=new Collection();
     this.currentCollection.title="";
     this.currentCollection.description="";
-    this.currentCollection.color=this.COLORS1[0];
+    this.currentCollection.color=this.COLORS[0];
     this.updateAvailableSteps();
     this.isLoading=false;
   }

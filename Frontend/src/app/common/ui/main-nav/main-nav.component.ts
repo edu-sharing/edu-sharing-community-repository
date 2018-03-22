@@ -255,7 +255,8 @@ export class MainNavComponent {
   public getCurrentScopeIcon(){
     if(this._currentScope=='login' || this._currentScope=='profiles')
       return 'person';
-
+    if(this._currentScope=='oer')
+        return 'public'
     for(let button of this.sidebarButtons){
       if(button.scope==this._currentScope)
         return button.icon;

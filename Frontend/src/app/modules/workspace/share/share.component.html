@@ -79,11 +79,11 @@
               {{ 'WORKSPACE.SHARE.PUBLISH' | translate}}
             </label>
           </div>
-          <div *ngIf="!publishPermission" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
-          <div *ngIf="publishActive">
-            <div *ngIf="publishPermission && publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
-            <div *ngIf="!(publishPermission && publishInherit)" class="publishInfo">
-              {{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? "COLLECTION" : _node.isDirectory ? "DIRECTORY" : "DOCUMENT")) | translate}}
+          <div *ngIf="!publishPermission && !publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
+          <div>
+            <div *ngIf="publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
+            <div *ngIf="publishPermission && !publishInherit" class="publishInfo"
+                 innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
             </div>
           </div>
           </div>

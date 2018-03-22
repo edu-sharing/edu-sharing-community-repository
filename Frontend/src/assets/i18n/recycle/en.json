@@ -18,7 +18,7 @@
       "LIST_DUPLICATE_NAMES": "The title is already in use:",
       "LIST_PARENT_FOLDER_MISSING": "The original storage location is not available:",
       "UNDERSTAND": "okey dokey",
-      "FALLBACK_PARENT_NOT_EXISTS": "has been moved to documents",
+      "FALLBACK_PARENT_NOT_EXISTS": "has been moved to the documents folder.",
       "DUPLICATENAME": "has been renamed",
       "FINE": "Ok"
     },

@@ -97,6 +97,7 @@
 		<zip destfile="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" basedir="." includes="${release.foldername}/**">
 		</zip>
 		<copy file="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" todir="release"> </copy>
+				<checksum file="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" todir="release" algorithm="SHA"></checksum>
 		
 		<!--clean up version tmp file -->
 		<delete file="version_tmp.properties"></delete>

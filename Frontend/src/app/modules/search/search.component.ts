@@ -320,7 +320,7 @@ export class SearchComponent {
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
     this.scrollTo();
-    this.searchService.init();
+    //this.searchService.init();
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
@@ -993,7 +993,7 @@ export class SearchComponent {
           if(repo!=this.currentRepository){
               return;
           }
-          this.mdsSets=ConfigurationHelper.filterValidMds(repo,data.metadatasets,this.config);
+          this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepositoryObject ? this.currentRepositoryObject : this.currentRepository,data.metadatasets,this.config);
           if(this.mdsSets){
             UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
             try {

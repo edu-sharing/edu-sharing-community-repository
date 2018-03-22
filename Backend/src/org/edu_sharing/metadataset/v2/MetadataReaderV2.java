@@ -138,10 +138,10 @@ public class MetadataReaderV2 {
 				query.setJoin(nodeMap.getNamedItem("join").getTextContent());
 			else
 				query.setJoin("AND");
-			
+
 			if(nodeMap.getNamedItem("applyBasequery")!=null)
 				query.setApplyBasequery(nodeMap.getNamedItem("applyBasequery").getTextContent().equals("true"));
-			
+
 			List<MetadataQueryParameter> parameters=new ArrayList<>();
 
 			NodeList list2=node.getChildNodes();
@@ -304,7 +304,7 @@ public class MetadataReaderV2 {
 				if(name.equals("defaultvalue"))
 					widget.setDefaultvalue(value); 
 				if(name.equals("format"))
-					widget.setFormat(value); 
+					widget.setFormat(value);
 				if(name.equals("type"))
 					widget.setType(value);
 				if(name.equals("condition")) {
@@ -368,6 +368,8 @@ public class MetadataReaderV2 {
 					widget.setValues(getValuespace(value,widget.getId(),valuespaceI18n,valuespaceI18nPrefix));
 				if(name.equals("values"))
 					widget.setValues(getValues(data.getChildNodes(),valuespaceI18n,valuespaceI18nPrefix));
+				if(name.equals("subwidgets"))
+					widget.setSubwidgets(getSubwidgets(data.getChildNodes()));
 			}
 			widgets.add(widget);
 		}
@@ -412,7 +414,18 @@ public class MetadataReaderV2 {
 		}
 		return keys;
 	}
-	
+	private List<MetadataWidget.Subwidget> getSubwidgets(NodeList keysNode) throws IOException {
+		List<MetadataWidget.Subwidget> widgets=new ArrayList<>();
+		for(int i=0;i<keysNode.getLength();i++){
+			Node keyNode=keysNode.item(i);
+			if(keyNode.getTextContent().trim().isEmpty()) continue;
+			MetadataWidget.Subwidget widget=new MetadataWidget.Subwidget();
+			widget.setId(keyNode.getTextContent());
+			widgets.add(widget);
+		}
+		return widgets;
+	}
+
 	private List<MetadataTemplate> getTemplates() throws XPathExpressionException, IOException {
 		List<MetadataTemplate> templates=new ArrayList<>();
 		NodeList templatesNode = (NodeList) xpath.evaluate("/metadataset/templates/template", doc, XPathConstants.NODESET);
@@ -591,7 +604,7 @@ public class MetadataReaderV2 {
 					return defaultResourceBundleGlobalOverride.getString(key);
 			}catch(Throwable t) {}
 			if(defaultResourceBundleGlobal.containsKey(key))
-				defaultValue=defaultResourceBundleGlobal.getString(key);			
+				defaultValue=defaultResourceBundleGlobal.getString(key);
 		}catch(Throwable t){
 			logger.warn("No translation file "+i18n+" found while looking for "+key);
 		}
