@@ -62,7 +62,8 @@ export class ActionbarComponent{
 
   }
 
-  @ViewChild('menuElements') menuElements : ElementRef;
+  @ViewChild('dropdownRef') dropdownElement : ElementRef;
+  @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
   public getNumberOptions(){
     if(window.innerWidth<UIHelper.MOBILE_WIDTH){
@@ -85,9 +86,9 @@ export class ActionbarComponent{
       return;
 
     setTimeout(()=> {
-      if (this.menuElements)
-        this.menuElements.nativeElement.focus();
-    },10);
+      UIHelper.setFocusOnDropdown(this.dropdownElement);
+      UIHelper.scrollSmoothElement(0,this.dropdownContainerElement.nativeElement);
+    });
   }
 
 
