@@ -192,7 +192,7 @@ input[type=search]{
     overflow: scroll;
     @include darken();
     z-index:151;
-    background: linear-gradient(to top, #ffffff 0,#ffffff 128px,$darkenColor 128px,$darkenColor 100%);
+    background: linear-gradient(to top, #ffffff 0,#ffffff 120px,$darkenColor 120px,$darkenColor 100%);
   }
   .card-wide{
     @include fullsizeCard();
