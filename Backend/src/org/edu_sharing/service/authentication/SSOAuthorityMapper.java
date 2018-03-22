@@ -279,7 +279,7 @@ public class SSOAuthorityMapper {
 				}
 
 				// group memberships
-				List<MappingGroup> mappingGroups = mappingConfig.getGroupMapping();
+				List<MappingGroup> mappingGroups = new ArrayList<MappingGroup>(mappingConfig.getGroupMapping());
 				
 				/**
 				 * add moodle global groups
