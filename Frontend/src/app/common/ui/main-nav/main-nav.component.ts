@@ -162,6 +162,8 @@ export class MainNavComponent {
     let horizontalRelative=horizontal/window.innerWidth;
     if(Math.abs(horizontal)/Math.abs(vertical)<5)
       return;
+    if(this._currentScope=='render')
+      return;
     if(this.touchStart.changedTouches[0].clientX<window.innerWidth/7){
       if(horizontalRelative>0.2){
         this.displaySidebar=true;

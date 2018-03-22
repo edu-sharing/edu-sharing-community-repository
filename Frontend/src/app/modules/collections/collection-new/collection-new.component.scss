@@ -397,14 +397,11 @@ input[type="radio"] {
     color: #FFFFFF;
 }
 
-/* für schmale Screens */
-
 @media screen and (max-height: $mobileHeight+$mobileStage*2){
   .card, .card-high {
     top:$mainnavHeight+75px;
   }
 }
-
 @media screen and (max-width: $mobileWidth+$mobileStage*3){
   .card-high{
     top:15%;
@@ -439,5 +436,10 @@ input[type="radio"] {
         justify-content: center;
       }
     }
+  }
+}
+@media screen and (max-width: $mobileWidth+$mobileStage*3) and (max-height: $mobileHeight+$mobileStage*2) {
+  .createContainer .createProgress{
+    display: none;
   }
 }
