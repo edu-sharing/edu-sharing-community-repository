@@ -54,7 +54,8 @@ public class OrganisationService {
 			permissionService.setInheritParentPermissions(shared, false);
 		}
 
-		NodeRef orgFolder = createNode(shared, CCConstants.CCM_TYPE_MAP, orgName);
+		String orgFolderName = (groupDisplayName != null && !groupDisplayName.trim().isEmpty()) ? groupDisplayName : orgName;
+		NodeRef orgFolder = createNode(shared, CCConstants.CCM_TYPE_MAP, orgFolderName);
 
 		bindEduGroupFolder(groupName, orgFolder);
 
