@@ -291,7 +291,8 @@ label.notify p{
 
 @media screen and (max-width: $mobileWidth) {
   .typeButton .btn-flat{
-    width: 86px;
+    min-width: auto;
+    width: 76px;
     span {
       display: none;
     }
