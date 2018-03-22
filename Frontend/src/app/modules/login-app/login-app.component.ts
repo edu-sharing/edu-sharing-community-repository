@@ -1,6 +1,7 @@
 import {
     Component,
-    OnInit
+    OnInit,
+    //ApplicationRef 
 } from '@angular/core';
 
 import { Toast } from "../../common/ui/toast";
@@ -46,7 +47,8 @@ export class LoginAppComponent  implements OnInit {
         private router:Router,
         private translation: TranslateService,
         private cordova: CordovaService,
-        private config : ConfigurationService
+        private config : ConfigurationService,
+        //private applicationRef: ApplicationRef
     ){
 
         this.instanceTS = Date.now();
@@ -63,6 +65,8 @@ export class LoginAppComponent  implements OnInit {
 
         // 1. Wait until Cordova is Ready
         this.cordova.subscribeDeviceReady().subscribe(()=>{
+
+            console.log("Cordova: Device is READY");
 
             // app startup, cordova has valid data ? 
             // -> go to default location (this will check oauth)
@@ -107,7 +111,9 @@ export class LoginAppComponent  implements OnInit {
             */
             this.state = StateUI.SERVERLIST;
             this.isLoading=false;
+            console.log("Is iOS ",this.cordova.isIOS());
             console.log("ALL OK - loading is ",this.isLoading);
+            //this.applicationRef.tick();
         }, (error)=> {
             this.isLoading=false;
             this.state = StateUI.NOINTERNET;
@@ -233,6 +239,7 @@ export class LoginAppComponent  implements OnInit {
 
        
         /*
+        // test camera
         this.cordova.getPhotoFromCamera(
         (win:any)=>{
             console.log("CAMERA WIN",win);
@@ -241,6 +248,18 @@ export class LoginAppComponent  implements OnInit {
             console.log("CAMERA FAIL", error);
             console.dir(info);
         });
+        if (1==1) return;
+        */
+
+        /*
+        // test file download
+        this.cordova.downloadContent("http://www.tagesschau.de/resources/framework/img/tagesschau/banner/logo_base.png", "tagesschau_de.png",(win:any)=>{
+            alert("OK "+win);
+        }, (text:string,error:any) => {
+            console.error(text, error);
+            alert("FAIL: "+text);
+        });
+        if (1==1) return;
         */
     
         if (this.currentServer==null) {

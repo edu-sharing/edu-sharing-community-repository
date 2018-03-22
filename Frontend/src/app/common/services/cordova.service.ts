@@ -82,7 +82,9 @@ export class CordovaService {
     };
 
     //adding listener for cordova events
-    document.addEventListener('deviceready', this.whenDeviceIsReady, false);
+    document.addEventListener('deviceready', () => {
+      this.deviceIsReady = true;
+    }, false);
     document.addEventListener('pause', whenDeviceGoesBackground, false);
     document.addEventListener('resume', whenDeviceGoesForeground, false);
 
@@ -90,8 +92,21 @@ export class CordovaService {
     if ((this.forceCordovaMode) && (!this.isReallyRunningCordova())) {
       console.log("SIMULATED deviceready event in FORCED CORDOVA MODE (just use during development)");
       setTimeout(this.whenDeviceIsReady,500+Math.random()*1000);
+    } else {
+      this.deviceReadyLoop(1);
     }
 
+  }
+
+  private deviceReadyLoop(counter:number) : void {
+    console.log("deviceReadyLoop("+counter+")");
+    setTimeout(()=>{
+      if (this.deviceIsReady) {
+        this.whenDeviceIsReady();
+      } else {
+        this.deviceReadyLoop(++counter);
+      }
+    },250);
   }
 
   // CORDOVA EVENT: Device is Ready (on App StartUp)
@@ -511,13 +526,18 @@ export class CordovaService {
   // https://developer.android.com/reference/android/Manifest.permission.html
   private makeSurePermission(permission:string, successCallback:Function, errorCallback:Function): void {
         
+    if (this.isIOS()) {
+      successCallback();
+      return;
+    }
+
     try {
 
       let permissions = (window as any).cordova.plugins.permissions;
       let permissionString:string = permissions[permission] as string;
 
-      console.log("permissions",permissions);
-      console.log("permissionString",permissionString);
+      // console.log("permissions",permissions);
+      // console.log("permissionString",permissionString);
 
       permissions.checkPermission(permissionString, (status:any) => {
 
@@ -600,6 +620,100 @@ export class CordovaService {
     }
 
   }
+
+   /**********************************************************
+   * Download PlugIn
+   **********************************************************
+   * Make it possible to download content to the mobile device.
+   * Make sure that the URL given will authenticate the user.
+   * https://github.com/SpiderOak/FileViewerPlugin
+   */
+
+   downloadContent(downloadURL:string, fileName:string, winCallback:Function, failCallback:Function) : void {
+
+     try {
+
+       this.makeSurePermission("WRITE_EXTERNAL_STORAGE", (win: any) => {
+
+         console.log("Got Permission");
+
+         // add oauth token if not alreafy in URL
+         if ((downloadURL.indexOf('accessToken=') < 0) && (this._oauth != null)) {
+           if (downloadURL.indexOf('?') < 0) {
+             downloadURL = downloadURL + "?accessToken=" + this._oauth.access_token;
+           } else {
+             downloadURL = downloadURL + "&accessToken=" + this._oauth.access_token;
+           }
+         }
+
+         if (this.isIOS()) {
+
+           // iOS: following redirects works automatically - so go direct
+           console.log("downloadContent IOS URL: " + downloadURL);
+           this.startContentDownload(downloadURL, fileName, winCallback, failCallback);
+
+         } else {
+
+           // Android: resolve redirect (because plugin download can not follow redirect)
+           console.log("resolving redirects for downloadContent URL ANDROID: " + downloadURL);
+           (window as any).CordovaHttpPlugin.get(downloadURL, {}, {}, (response: any) => {
+             console.log("200 NOT A REDIRECT URL - use original: " + downloadURL);
+             this.startContentDownload(downloadURL, fileName, winCallback, failCallback);
+           }, (response: any) => {
+             if (response.status == 302) {
+               let redirectURL = decodeURIComponent(response.headers.Location);
+               console.log("302 Redirect Resolved to: " + redirectURL);
+               this.startContentDownload(redirectURL, fileName, winCallback, failCallback);
+             } else {
+               failCallback("FAIL on redirect resolution", response);
+             }
+           });
+
+         }
+
+       }, (error: any) => {
+         failCallback("FAIL No Permission: WRITE_EXTERNAL_STORAGE", error);
+       });
+
+
+     } catch (e) {
+       failCallback("EXCEPTION on downloadContent", e);
+     }
+
+   } 
+
+   private startContentDownload(downloadURL:string, fileName:string, winCallback:Function, failCallback:Function) : void {
+
+     // set path to store on device
+     var targetPath = (window as any).cordova.file.externalRootDirectory + "Download/";
+     if (this.isIOS()) targetPath = (window as any).cordova.file.documentsDirectory;
+     var filePath = encodeURI(targetPath + fileName);
+
+     if (this.isIOS()) {
+
+       // iOS
+       var fileTransfer:any = new (window as any).FileTransfer();
+       fileTransfer.download(downloadURL, filePath, (result:any)=>{
+        winCallback(filePath);
+       }, (err:any) => {
+        failCallback("FAIL startContentDownload IOS", err);
+       }, true, {});
+       
+     } else {
+
+       // Android
+       (window as any).cordovaHTTP.acceptAllCerts(true, () => {
+         (window as any).CordovaHttpPlugin.downloadFile(downloadURL, {}, {}, filePath, function (result: any) {
+           winCallback(filePath);
+         }, function (response: any) {
+           failCallback("FAIL startContentDownload ANDROID", response);
+         });
+       }, (error: any) => {
+         failCallback("FAIL accepting all certs", error);
+       });
+
+     }
+   }
 
   /**********************************************************
    * Basic Server Communication

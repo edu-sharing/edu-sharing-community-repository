@@ -26,17 +26,25 @@
             "cordova-plugin-globalization": {},
             "cordova-plugin-android-permissions": {},
             "cordova-plugin-nativestorage": {},
-            "info.protonet.appgroupsuserdefaults": {}
+            "info.protonet.appgroupsuserdefaults": {},
+            "com.spideroak.fileviewerplugin": {},
+            "cordova-plugin-http": {},
+            "cordova-plugin-file-transfer": {}
         }
     },
     "dependencies": {
+        "@types/cordova-plugin-file": "^4.3.2",
         "com.borismus.webintent": "https://github.com/cordova-misc/cordova-webintent.git",
         "cordova-android": "7.1.0",
         "cordova-ios": "^4.5.4",
         "cordova-plugin-android-permissions": "^1.0.0",
         "cordova-plugin-camera": "^4.0.2",
         "cordova-plugin-device": "^2.0.1",
+        "cordova-plugin-file": "^6.0.1",
+        "cordova-plugin-file-transfer": "^1.7.1",
+        "cordova-plugin-fileviewer": "git+https://github.com/SpiderOak/FileViewerPlugin.git",
         "cordova-plugin-globalization": "^1.0.9",
+        "cordova-plugin-http": "^1.2.0",
         "cordova-plugin-nativestorage": "^2.3.1",
         "cordova-plugin-screen-orientation": "^3.0.1",
         "cordova-plugin-splashscreen": "^5.0.1",
