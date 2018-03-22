@@ -841,11 +841,6 @@ $orderAnimationTime:$animationTime*5;
     display:block!important;
   }
 }
-@media all and (max-width: ($cardWidth*3)) {
-  .cardSmallList{
-    width:calc(100% - 10px);
-  }
-}
 @media all and (max-width: ($mobileWidth)) {
     .cardList.nodeCollection .collectionEditorial {
       top: 20px;

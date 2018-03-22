@@ -285,7 +285,11 @@ table, div {
     }
 
 }
-
+@media all and (max-width: ($cardWidth*3)) {
+  :host /deep/ .cardSmallList{
+    width:calc(100% - 10px);
+  }
+}
 @media only screen and (max-width: $mobileWidth) {
     :host /deep/{
       .collections-master-div-notabs .subcollections{
