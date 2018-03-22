@@ -165,6 +165,19 @@ public class IamApi  {
 	    	
 	    	UserEntry response = new UserEntry();
 	    	response.setPerson(personDao.asPerson());
+	    	
+	    	org.edu_sharing.repository.server.authentication.Context context =  org.edu_sharing.repository.server.authentication.Context.getCurrentInstance();
+	    String username = context.getSessionAttribute(CCConstants.AUTH_USERNAME);
+	    	String authType = context.getAuthType();
+		if(person.equals("-me-") || person.equals(username)) {
+		 	if(authType != null 
+		 			&& authType.equals(CCConstants.AUTH_TYPE_SHIBBOLETH)) {
+		 		response.setEditProfile(false);
+			}else {
+				response.setEditProfile(true);
+			}
+		}
+	   
 	    		    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	    	
