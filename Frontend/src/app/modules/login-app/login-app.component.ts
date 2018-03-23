@@ -253,8 +253,14 @@ export class LoginAppComponent  implements OnInit {
 
         /*
         // test file download
-        this.cordova.downloadContent("http://www.tagesschau.de/resources/framework/img/tagesschau/banner/logo_base.png", "tagesschau_de.png",(win:any)=>{
+        this.cordova.downloadContent("http://sample-videos.com/video/mp4/240/big_buck_bunny_240p_20mb.mp4", "test.mp4",(win:any)=>{
             alert("OK "+win);
+            this.cordova.openContentNative(win,()=>{
+                alert("OK Open");
+            }, (text:string, error:any) => {
+                console.log(text, error);
+                alert("FAIL open");
+            });
         }, (text:string,error:any) => {
             console.error(text, error);
             alert("FAIL: "+text);

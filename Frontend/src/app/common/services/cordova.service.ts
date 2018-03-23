@@ -128,9 +128,65 @@ export class CordovaService {
 
       // flag that device is ready
       this.deviceIsReady = true;
-      console.log("this.deviceIsReady",this.deviceIsReady);
+
+      // check if app got started 
+      this.subscribeSharedContent((win:any) => {
+        alert("TODO: GOT DATA");
+      }, (text:string, error:any) => {
+        console.log(text, error);
+        alert("FAIL SHARED DATA: "+text);
+      });
 
     };
+
+  /**********************************************************
+   * Plugin: WebIntent (for Android)
+   **********************************************************
+   * To receive share content from other apps.
+   * https://github.com/cordova-misc/cordova-webintent
+   */
+
+   subscribeSharedContent(callbackIfSharedContent:Function, errorCallback:Function) : void {
+
+     if (this.isAnroid() && this.isReallyRunningCordova()) {
+
+      try {
+
+       // process WebIntent when available --> LINK
+       (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_TEXT,
+         (has:boolean) => {
+            if (has) this.processSharedContent(callbackIfSharedContent, errorCallback);
+         }, (error:any) => {
+           errorCallback("FAIL on subscribeSharedContent - check text data", error);
+         }
+       );
+
+       // process WebIntent when available --> IMAGE
+       (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_STREAM,
+         (has:boolean) => {
+           if (has) this.processSharedContent(callbackIfSharedContent, errorCallback);
+         }, (error:any) => {
+            errorCallback("FAIL on subscribeSharedContent - check image data", error);
+         }
+       );
+
+       // process WebIntent when occuring while app is running
+       (window as any).plugins.webintent.onNewIntent(()=>{
+          this.processSharedContent(callbackIfSharedContent, errorCallback);
+       });
+
+      } catch (e) {
+        console.log("EXCEPTION on whenSharedContentIsAvailable",e);
+      } 
+
+     }
+
+   }
+
+   private processSharedContent(callbackIfSharedContent:Function, errorCallback:Function) : void {
+    alert("TODO: Process Shared Content");
+   }
+
 
   /**********************************************************
    * BASIC CORDOVA
@@ -158,7 +214,6 @@ export class CordovaService {
   isIOS() : boolean {
     try {
       let device:any = (window as any).device;
-      console.log("cordova-plugin-device", device);
       return device.platform=="iOS";
     } catch (e) {
       console.log("FAIL on Plugin cordova-plugin-device (1)");
@@ -626,7 +681,8 @@ export class CordovaService {
    **********************************************************
    * Make it possible to download content to the mobile device.
    * Make sure that the URL given will authenticate the user.
-   * https://github.com/SpiderOak/FileViewerPlugin
+   * iOS: https://github.com/apache/cordova-plugin-file-transfer
+   * Android: https://github.com/wymsee/cordova-HTTP
    */
 
    downloadContent(downloadURL:string, fileName:string, winCallback:Function, failCallback:Function) : void {
@@ -656,7 +712,7 @@ export class CordovaService {
 
            // Android: resolve redirect (because plugin download can not follow redirect)
            console.log("resolving redirects for downloadContent URL ANDROID: " + downloadURL);
-           (window as any).CordovaHttpPlugin.get(downloadURL, {}, {}, (response: any) => {
+           (window as any).CordovaHttpPlugin.head(downloadURL, {}, {}, (response: any) => {
              console.log("200 NOT A REDIRECT URL - use original: " + downloadURL);
              this.startContentDownload(downloadURL, fileName, winCallback, failCallback);
            }, (response: any) => {
@@ -713,6 +769,34 @@ export class CordovaService {
        });
 
      }
+   }
+
+   /**********************************************************
+   * FileViewer PlugIn
+   **********************************************************
+   * To open content native on the app - e.g. after download
+   * use this plugin
+   * https://github.com/SpiderOak/FileViewerPlugin
+   */
+
+   openContentNative(filePath:string, successCallback:Function, failCallback:Function) : void {
+    try {
+      (window as any).FileViewerPlugin.view({
+              action: (window as any).FileViewerPlugin.ACTION_VIEW,
+              url: filePath
+          },
+          () => {
+            // WIN
+            successCallback();
+          },
+          (error:any) => {
+            // FAIL
+            failCallback("FAIL on openContentNative",error);
+          }
+      );
+    } catch (e) {
+      failCallback("EXCEPTION on openContentNative",e);
+    }
    }
 
   /**********************************************************
