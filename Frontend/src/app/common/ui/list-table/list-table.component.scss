@@ -756,7 +756,7 @@ $orderAnimationTime:$animationTime*5;
   }
   .cardList{
     .collection_info,.collection_scope {
-      margin-top: 20px;
+      margin-top: 15px;
     }
   }
   .row .node_ccm_replicationsource  img,
@@ -839,11 +839,6 @@ $orderAnimationTime:$animationTime*5;
   .cardList .row_3,
   .cardList .row_4{
     display:block!important;
-  }
-}
-@media all and (max-width: ($cardWidth*3)) {
-  .cardSmallList{
-    width:calc(100% - 10px);
   }
 }
 @media all and (max-width: ($mobileWidth)) {

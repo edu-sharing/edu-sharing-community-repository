@@ -16,11 +16,11 @@
     float:left;
     color:$primary;
     padding:2px 4px;
-    font-size:70%;
-    max-height: 1.25em;
+    font-size: 9pt;
+    max-height: 20px;
   }
   .homeIsIcon{
-    margin-top: -2px;
+    margin-top: -4px;
   }
   .homeIcon{
     margin-top: 0;
@@ -38,12 +38,12 @@
 }
 .breadcrumbMobile{
   display:none;
-  margin-top: -4px;
 }
 @media screen and (max-width: $mobileWidth) {
   .breadcrumbMobile{
     display:flex;
     align-items: center;
+    margin-top: -2px;
   }
   .breadcrumbDesktop{
     display:none;

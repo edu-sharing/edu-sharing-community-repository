@@ -152,6 +152,29 @@ export class MainNavComponent {
       this.scrolltotop.nativeElement.style.display = 'none';
     }
   }
+  private touchStart : any;
+  @HostListener('document:touchstart',['$event']) onTouchStart(event:any) {
+    this.touchStart=event;
+  }
+  @HostListener('document:touchend',['$event']) onTouchEnd(event:any) {
+    let horizontal=event.changedTouches[0].clientX-this.touchStart.changedTouches[0].clientX;
+    let vertical=event.changedTouches[0].clientY-this.touchStart.changedTouches[0].clientY;
+    let horizontalRelative=horizontal/window.innerWidth;
+    if(Math.abs(horizontal)/Math.abs(vertical)<5)
+      return;
+    if(this._currentScope=='render')
+      return;
+    if(this.touchStart.changedTouches[0].clientX<window.innerWidth/7){
+      if(horizontalRelative>0.2){
+        this.displaySidebar=true;
+      }
+    }
+    if(this.touchStart.changedTouches[0].clientX>window.innerWidth/7){
+      if(horizontalRelative<-0.2){
+        this.displaySidebar=false;
+      }
+    }
+  }
 
   private sidebarButtons : any=[];
   public displaySidebar=false;
@@ -229,7 +252,8 @@ export class MainNavComponent {
   public getCurrentScopeIcon(){
     if(this._currentScope=='login')
       return 'person';
-
+    if(this._currentScope=='oer')
+        return 'public'
     for(let button of this.sidebarButtons){
       if(button.scope==this._currentScope)
         return button.icon;
