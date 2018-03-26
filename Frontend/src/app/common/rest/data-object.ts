@@ -21,6 +21,11 @@ export interface Parent {
   id: string;
   archived: boolean;
 }
+export interface NodeTextContent{
+  text:string;
+  html:string;
+  raw:string;
+}
 export interface ServerUpdate {
   id:string;
   description:string;

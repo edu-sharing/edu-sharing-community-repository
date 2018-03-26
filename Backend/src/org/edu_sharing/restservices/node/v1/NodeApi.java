@@ -368,7 +368,9 @@ public class NodeApi  {
 	    		response.setHtml(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getNodeTextContent(node,MimetypeMap.MIMETYPE_HTML));
 	    	}catch(Throwable t){}
 	    	try{
-	    		response.setRaw(IOUtils.toString(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getContent(node)));
+	    		InputStream is=((MCAlfrescoAPIClient)repoDao.getBaseClient()).getContent(node);
+	    		if(is.available()<1024*1024*5)
+	    			response.setRaw(IOUtils.toString(is));
 	    	}catch(Throwable t){}
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
