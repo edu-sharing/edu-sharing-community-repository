@@ -117,6 +117,8 @@ public class CCConstants {
 	public final static String AUTH_TYPE_CAS = "AUTH_TYPE_CAS";
 
 	public final static String AUTH_TYPE_OAUTH = "AUTH_TYPE_OAUTH";
+	
+	public final static String AUTH_TYPE_TICKET = "AUTH_TYPE_TICKET";
 
 	public final static String AUTH_ACCESS_TOKEN = "AUTH_ACCESS_TOKEN";
 

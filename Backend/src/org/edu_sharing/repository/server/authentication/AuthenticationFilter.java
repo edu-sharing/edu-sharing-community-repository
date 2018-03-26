@@ -98,7 +98,13 @@ public class AuthenticationFilter implements javax.servlet.Filter {
   				
   				if(authTool.validateTicket(ticket)){
   					//if its APIClient user name is ignored and is figured out with authentication service
-  					authTool.storeAuthInfoInSession(user, ticket, CCConstants.AUTH_TYPE_DEFAULT, httpReq.getSession());
+  					
+  					/**
+  					 * auth type ticket means no profile editing allowed, 
+  					 * authenticated by an lms or other connected system that
+  					 * manages the users
+  					 */
+  					authTool.storeAuthInfoInSession(user, ticket, CCConstants.AUTH_TYPE_TICKET, httpReq.getSession());
   					chain.doFilter(req,res);
   					return;
   				}
