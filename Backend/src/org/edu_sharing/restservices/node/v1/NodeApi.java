@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -365,6 +366,9 @@ public class NodeApi  {
 	    	response.setText(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getNodeTextContent(node,MimetypeMap.MIMETYPE_TEXT_PLAIN));
 	    	try{
 	    		response.setHtml(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getNodeTextContent(node,MimetypeMap.MIMETYPE_HTML));
+	    	}catch(Throwable t){}
+	    	try{
+	    		response.setRaw(IOUtils.toString(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getContent(node)));
 	    	}catch(Throwable t){}
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
