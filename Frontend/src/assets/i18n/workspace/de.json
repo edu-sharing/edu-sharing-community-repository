@@ -79,6 +79,7 @@
       "PUBLISH_ACTIVE_DOCUMENT":"Das Dokument ist öffentlich im Internet sichtbar",
       "PUBLISH_ACTIVE_COLLECTION":"Die Sammlung ist öffentlich im Internet sichtbar",
       "PUBLISH_ACTIVE_DIRECTORY":"Alle Materialien in diesem Ordner sind öffentlich im Internet sichtbar",
+      "NO_FUZZY":"Geben Sie die vollständige E-Mail-Adresse ein, um Personen hinzuzufügen",
       "HISTORY":{
         "TITLE":"Freigabe-Historie",
         "ADDED":"Hinzugefügt",
