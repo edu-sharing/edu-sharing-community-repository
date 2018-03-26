@@ -1,7 +1,10 @@
 import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../services/configuration.service";
-import {Collection, Connector, ConnectorList, Filetype, MdsInfo, Node, NodeLock} from "../rest/data-object";
+import {
+    Collection, Connector, ConnectorList, Filetype, LoginResult, MdsInfo, Node,
+    NodeLock, ParentList
+} from "../rest/data-object";
 import {ActivatedRoute, Router} from "@angular/router";
 import {UIConstants} from "./ui-constants";
 import {ElementRef, EventEmitter, HostListener} from "@angular/core";
@@ -15,6 +18,8 @@ import {NodeHelper} from "./node-helper";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {FrameEventsService} from "../services/frame-events.service";
+import {RestNodeService} from "../rest/services/rest-node.service";
+import {PlatformLocation} from "@angular/common";
 export class UIHelper{
   static MOBILE_WIDTH = 600;
 
@@ -84,6 +89,30 @@ export class UIHelper{
     let converted=UIHelper.convertSearchParameters(node);
     router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{query:converted.query,savedQuery:node.ref.id,repository:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],mds:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],parameters:JSON.stringify(converted.parameters)}});
   }
+    /**
+     * Navigate to the workspace
+     * @param nodeService instance of NodeService
+     * @param router instance of Router
+     * @param login a result of the isValidLogin method
+     * @param node The node to open and show
+     */
+    public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node) {
+        nodeService.getNodeParents(node.ref.id).subscribe((data:ParentList)=>{
+            router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
+                {queryParams:{id:node.parent.id,file:node.ref.id,root:data.scope}});
+        });
+    }
+    /**
+     * Navigate to the workspace
+     * @param nodeService instance of NodeService
+     * @param router instance of Router
+     * @param login a result of the isValidLogin method
+     * @param folder The folder id to open
+     */
+    public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
+        router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
+            {queryParams:{id:folder}});
+    }
   static convertSearchParameters(node: Node) {
     let parameters=JSON.parse(node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS]);
     let result:any={parameters:{},query:null};
@@ -292,4 +321,23 @@ export class UIHelper{
       }
       return link;
   }
+
+    /**
+     * try to navigate to given url using angular routing
+     */
+    static navigateToAbsoluteUrl(platformLocation: PlatformLocation,router:Router,url: string,replaceUrl=false) {
+        let cleanUrl=url.replace((platformLocation as any).location.origin+platformLocation.getBaseHrefFromDOM(),"");
+        let parsed=router.parseUrl(cleanUrl);
+        let segments:string[]=[];
+        for(let segment of parsed.root.children.primary.segments){
+            segments.push(segment.path);
+        }
+        router.navigate(segments, {queryParams: parsed.queryParams, replaceUrl: replaceUrl}).catch((error:any)=>{
+          console.warn(error);
+          if(replaceUrl)
+              window.location.replace(url);
+          else
+              window.location.assign(url)
+        });
+    }
 }
