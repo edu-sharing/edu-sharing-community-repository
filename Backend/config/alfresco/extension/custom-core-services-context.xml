@@ -212,7 +212,7 @@
   	</bean>
   	 -->
   	  	<!-- inherit permissions to false for maps and folders in safe-->  	
-  	 <bean id="onCreateInheritPermFalsePolicy" class="org.edu_sharing.alfresco.policy.OnCreateInheritPermFalsePolicy" init-method="initForFoldersAndContentSafe">
+  	 <bean id="onCreateInheritPermFalsePolicy" class="org.edu_sharing.alfresco.policy.OnCreateInheritPermFalsePolicy" init-method="initForFoldersSafe">
   		<property name="policyComponent">
             <ref bean="policyComponent"/>
         </property>
