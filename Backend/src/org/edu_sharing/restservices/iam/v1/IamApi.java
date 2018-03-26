@@ -170,8 +170,7 @@ public class IamApi  {
 	    String username = context.getSessionAttribute(CCConstants.AUTH_USERNAME);
 	    	String authType = context.getAuthType();
 		if(person.equals("-me-") || person.equals(username)) {
-		 	if(authType != null 
-		 			&& authType.equals(CCConstants.AUTH_TYPE_SHIBBOLETH)) {
+		 	if(authType != null && !authType.equals(CCConstants.AUTH_TYPE_DEFAULT)) {
 		 		response.setEditProfile(false);
 			}else {
 				response.setEditProfile(true);

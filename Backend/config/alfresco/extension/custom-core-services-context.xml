@@ -675,4 +675,18 @@
         <property name="bulkWorkerThreads"      value="${opencmis.bulkUpdateProperties.workerThreads}" />
     </bean>
      -->
+     
+       <!-- for remembering current authentication method -->
+     <bean id="authenticationService"
+        class="org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService">
+        <property name="sysAdminParams">
+            <ref bean="sysAdminParams" />
+        </property>
+        <property name="applicationContextManager">
+            <ref bean="Authentication" />
+        </property>
+        <property name="sourceBeanName">
+            <value>localAuthenticationService</value>
+        </property>
+    </bean>
 </beans>
