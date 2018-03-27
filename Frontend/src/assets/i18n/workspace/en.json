@@ -23,7 +23,7 @@
     "AUTOLOGOUT_INFO":"Your session was automatically closed for your safety, because you have been inactive for at least {{ minutes }} minutes. Please login again.",
     "ADD_FOLDER": "Add folder",
     "SHARED_FILES": "Shared content",
-    "MY_SHARED_FILES": "My shared content",
+    "MY_SHARED_FILES": "Shared by me",
     "TO_ME_SHARED_FILES": "Shared with me",
     "WORKFLOW_RECEIVE": "Assigned to me",
     "RECYCLE": "Recycle",
