@@ -9,7 +9,7 @@ import java.util.Map;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
 
 public class MetadataWidget extends MetadataTranslatable{
-	public static class Subwidget {
+	public static class Subwidget implements Serializable {
 		private String id;
 
 		public String getId() {

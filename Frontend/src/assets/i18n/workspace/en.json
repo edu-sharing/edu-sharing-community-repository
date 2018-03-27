@@ -64,7 +64,8 @@
       "TYPE_COORDINATOR_DESCRIPTION":"can see, edit, delete, view and edit permissions, add and remove elements and publish",
       "TYPE_UNKNOWN":"Individual",
       "TYPE_UNKNOWN_DESCRIPTION":"Individual permissions have been set by admin: {{permissions}}",
-      "PUBLISHER":"can publish",
+      "PUBLISHER":"... and may publish",
+      "PUBLISHER_TOOLTIP":"Can use and publish the material in collections and attached systems (i.e. moodle)",
       "MESSAGE":"Add message",
       "MESSAGE_PLACEHOLDER":"Enter message...",
       "INHERIT":"Inherit permissions from parent folder",
@@ -72,7 +73,7 @@
       "GLOBAL_SEARCH":"Search beyond my organization",
       "SHOW_HISTORY":"View history",
       "LINK":"Shared link",
-      "LINK_ENABLED_INFO":"Link sharing is active. Everyone can access via link",
+      "LINK_ENABLED_INFO":"Link sharing is active. Everyone with the link can access the material.",
       "LINK_DISABLED_INFO":"Link sharing is diabled",
       "MANAGE_LINK":"Manage",
       "PUBLISH":"Publish",
@@ -81,6 +82,7 @@
       "PUBLISH_ACTIVE_DOCUMENT":"The document is made publicly available on the Internet",
       "PUBLISH_ACTIVE_COLLECTION":"The collection is made publicly available on the Internet",
       "PUBLISH_ACTIVE_DIRECTORY":"All documents of this folder are made publicly available on the Internet",
+      "NO_FUZZY":"Enter the full e-mail address to add users",
       "HISTORY":{
         "TITLE":"Sharing-History",
         "ADDED":"Added",
@@ -140,7 +142,7 @@
       "PASTE":"Paste",
       "METADATA":"Details",
       "COLLECTION":"Add To collection",
-      "LICENSE":"assign a license",
+      "LICENSE":"Assign a license",
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",
       "WORKFLOW":"Workflow"
@@ -181,6 +183,7 @@
       "METADATACONTRIBUTOR":"Contributors of metadata",
       "SCOPE":"role",
       "DATE":"date  (optional)",
+      "CHOOSE_DATE":"Choose date",
       "MORE":"Add more data",
       "ORG_INFO":"Organization of contributor (optional)",
       "ADDRESS_INFO":"Address of contributor (optional)",
@@ -221,7 +224,7 @@
     "DRAG_DROP_MOVE":"move",
     "FEATURE_NOT_IMPLEMENTED":"This feature is currently not available",
     "LICENSE":{
-      "TITLE":"License of {{ name }}",
+      "TITLE":"License of \"{{ name }}\" ",
       "TYPE":"Choose license",
       "NONE_NAME":"No license chosen",
       "COPYRIGHT_NAME":"protected by copyright law",
@@ -279,12 +282,13 @@
         "CC_0":"This work is dedicated to the public domain.<br /> You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission.",
         "COPYRIGHT_FREE":"The work is accessible free of charge.<br />Use and attribution according to the generally applicable legal regulations.",
         "COPYRIGHT_LICENSE":"The work may only be used by the licensed user group according to the conditions stipulated in the license agreement.<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices.",
-        "SCHULFUNK":"Access-restricted and time-limited offering for school radio according to ยง47 UrhG (German Act on Copyright and Related Rights).<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices."
+        "SCHULFUNK":"Access-restricted and time-limited offering for school radio according to §47 UrhG (German Act on Copyright and Related Rights).<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices."
       }
     },
     "TOAST":{
       "FOLDER_ADDED":"Folder added",
       "NODE_EXISTS_IN_COLLECTION":"The collection already contains the element {{name}}",
+      "VIEW_COLLECTION":"View collection",
       "ADDED_TO_COLLECTION_MY":"{{count}} element(s) have been added to collection {{collection}} and is visible for you",
       "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to collection {{collection}} and are visible to all invited persons",
       "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to collection {{collection}} and are visible to everyone",

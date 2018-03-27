@@ -298,6 +298,7 @@ export class ListTableComponent implements EventListener{
   private dropdownBottom : string;
   private dropdownRight : string;
   @ViewChild('dropdown') dropdownElement : ElementRef;
+  @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
 
 
@@ -385,8 +386,8 @@ export class ListTableComponent implements EventListener{
     this._nodes.splice(i2,1,node1);
   }
   private allowDrag(event:any,target:Node){
-    event.preventDefault();
     if(this.orderElements){
+      event.preventDefault();
       let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
       if(source.view==this.id && source.node.ref.id!=target.ref.id){
         this.orderElementsActive=true;
@@ -396,6 +397,7 @@ export class ListTableComponent implements EventListener{
       }
     }
     if(UIHelper.handleAllowDragEvent(this.storage,this.ui,event,target,this.canDrop)) {
+      event.preventDefault();
       this.dragHover = target;
     }
   }
@@ -596,6 +598,7 @@ export class ListTableComponent implements EventListener{
       this.onUpdateOptions.emit(node);
       setTimeout(()=>{
         UIHelper.setFocusOnDropdown(this.dropdownElement);
+        UIHelper.scrollSmoothElement(0,this.dropdownContainerElement.nativeElement);
       });
     }
 

@@ -73,6 +73,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private inheritAllowed=false;
   private globalSearch=false;
   private globalAllowed=false;
+  private fuzzyAllowed=false;
   public history: Node;
   public linkNode: Node;
   public showLink: boolean;
@@ -299,6 +300,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       this.isSafe=data.currentScope!=null;
       this.connector.hasToolPermission(this.isSafe ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
+      this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY).subscribe((has:boolean)=>this.fuzzyAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);
     });
   }

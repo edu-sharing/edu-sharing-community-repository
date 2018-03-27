@@ -117,6 +117,8 @@ public class CCConstants {
 	public final static String AUTH_TYPE_CAS = "AUTH_TYPE_CAS";
 
 	public final static String AUTH_TYPE_OAUTH = "AUTH_TYPE_OAUTH";
+	
+	public final static String AUTH_TYPE_TICKET = "AUTH_TYPE_TICKET";
 
 	public final static String AUTH_ACCESS_TOKEN = "AUTH_ACCESS_TOKEN";
 
@@ -288,6 +290,8 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_HOME_FOLDER = "{http://www.alfresco.org/model/content/1.0}homeFolder";
 
 	public final static String CM_PROP_PERSON_USERNAME = "{http://www.alfresco.org/model/content/1.0}userName";
+	
+	public final static String CM_PROP_PERSON_ESORIGINALUID = "{http://www.alfresco.org/model/content/1.0}esoriginaluid";
 
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
 

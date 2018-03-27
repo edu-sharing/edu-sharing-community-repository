@@ -39,4 +39,5 @@ public class Values{
 	@XmlElement	public Mainnav mainnav;
 	@XmlElement	public String searchSidenavMode;
 	@XmlElement	public Guest guest;
+	@XmlElement	public LicenseAgreement licenseAgreement;
 }

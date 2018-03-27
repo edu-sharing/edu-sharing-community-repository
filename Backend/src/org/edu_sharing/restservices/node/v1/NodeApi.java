@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -365,6 +366,11 @@ public class NodeApi  {
 	    	response.setText(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getNodeTextContent(node,MimetypeMap.MIMETYPE_TEXT_PLAIN));
 	    	try{
 	    		response.setHtml(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getNodeTextContent(node,MimetypeMap.MIMETYPE_HTML));
+	    	}catch(Throwable t){}
+	    	try{
+	    		InputStream is=((MCAlfrescoAPIClient)repoDao.getBaseClient()).getContent(node);
+	    		if(is.available()<1024*1024*5)
+	    			response.setRaw(IOUtils.toString(is));
 	    	}catch(Throwable t){}
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
@@ -1016,7 +1022,10 @@ public class NodeApi  {
 		     properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),url);
 			 return;
 		 }
-    	String[] name = new String[]{info.getTitle()+" - "+info.getPage()};
+		 String title=info.getTitle()+" - "+info.getPage();
+		 if(info.getTitle()==null)
+			 title=info.getPage();
+    	String[] name = new String[]{title};
 	    properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),name);
 	    properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),name);
 	    if(info.getDescription()!=null)

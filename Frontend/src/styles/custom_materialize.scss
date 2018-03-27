@@ -14,6 +14,9 @@
   color:$primary;
   background: #fff;
 }
+.btn,.btn-flat{
+  overflow-y: hidden;
+}
 .card .btn-flat{
   color:$primary!important;
 }
@@ -80,9 +83,6 @@ input[type="checkbox"].filled-in.tabbed:checked:focus+label:after{
 input[type="checkbox"].filled-in:checked+label:before{
   border-right-color: $textOnPrimary;
   border-bottom-color: $textOnPrimary;
-}
-.datepicker-input{
-  border-bottom: 1px solid #9e9e9e!important;
 }
 .datepicker-calendar{
   left:-30px;
@@ -316,7 +316,7 @@ label:active{
   border:none!important;
   padding-top: 0!important;
   padding-bottom: 0!important;
-  border-bottom: 1px solid #ccc!important;
+  border-bottom: 1px solid #9e9e9e!important;
 }
 
 /* material angular2 */

@@ -127,8 +127,8 @@
   "WORKFLOW":{
     "100_unchecked":"Kein Status",
     "200_tocheck":"Zu prüfen",
-    "300_hasflaws":"hat Mängel",
-    "400_checked":"geprüft"
+    "300_hasflaws":"Hat Mängel",
+    "400_checked":"Geprüft"
   },
   "NODE" : {
     "cm:name": "Dateiname",
@@ -297,6 +297,11 @@
     "LICENSE":"Lizenz",
     "LICENSE_LINK":"Lizenz verwalten",
     "CONTRIBUTOR_LINK":"Weitere Beteiligte"
+  },
+  "LICENSE_AGREEMENT":{
+    "TITLE":"Nutzungsbedingungen",
+    "CHECKBOX":"Ich habe die oben genannten Bedingungen gelesen und akzeptiere diese",
+    "ACCEPT":"Akzeptieren & Fortfahren"
   },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",

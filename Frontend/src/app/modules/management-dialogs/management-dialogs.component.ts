@@ -14,6 +14,7 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'workspace-management',
@@ -68,6 +69,7 @@ export class WorkspaceManagementDialogsComponent  {
   private ltiToolRefresh: Boolean;
   @Input() nodeDeleteOnCancel: boolean;
   @Output() nodeDeleteOnCancelChange = new EventEmitter();
+  private nodeLicenseOnUpload = false;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -119,6 +121,7 @@ export class WorkspaceManagementDialogsComponent  {
     private config:ConfigurationService,
     private searchService:RestSearchService,
     private toast:Toast,
+    private router:Router,
   ){
    }
    private closeAddToCollection(){
@@ -130,15 +133,14 @@ export class WorkspaceManagementDialogsComponent  {
     this.ltiToolRefresh=new Boolean();
  }
  public uploadDone(event : Node[]){
-    if(this.filesToUpload.length==1){
-      this.nodeMetadata=event[0];
-      this.nodeMetadataAllowReplace=false;
-      this.nodeDeleteOnCancel=true;
-      this.nodeDeleteOnCancelChange.emit(true);
-    }
     if(this.config.instant('licenseDialogOnUpload',false)){
-      this.nodeLicense=event;
+         this.nodeLicense=event;
+         this.nodeLicenseOnUpload=true;
     }
+    else if(this.filesToUpload.length==1){
+        this.showMetadataAfterUpload(event);
+    }
+
     this.filesToUpload=null;
     this.filesToUploadChange.emit(null);
 
@@ -179,7 +181,11 @@ export class WorkspaceManagementDialogsComponent  {
     this.showLtiToolsChange.emit(false);
   }
   private closeLicense() {
+    if(this.nodeLicenseOnUpload && this.nodeLicense.length==1){
+      this.showMetadataAfterUpload(this.nodeLicense);
+    }
     this.nodeLicense=null;
+    this.nodeLicenseOnUpload=false;
     this.nodeLicenseChange.emit(null);
   }
   private updateLicense(){
@@ -272,11 +278,17 @@ export class WorkspaceManagementDialogsComponent  {
       this.dialogTitle=null;
     }
     this.globalProgress=true;
-    UIHelper.addToCollection(this.collectionService,this.toast,collection,list,()=>{
+    UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,list,()=>{
       this.globalProgress=false;
       if(callback)
         callback();
     });
   }
 
+    private showMetadataAfterUpload(event: Node[]) {
+        this.nodeMetadata=event[0];
+        this.nodeMetadataAllowReplace=false;
+        this.nodeDeleteOnCancel=true;
+        this.nodeDeleteOnCancelChange.emit(true);
+    }
 }

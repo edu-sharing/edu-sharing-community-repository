@@ -10,6 +10,12 @@
   float:left;
   width:33.33%;
 }
+.hintNoFuzzy{
+  margin-top: -10px;
+  margin-bottom: 10px;
+  padding:0 10px;
+  color:$textLight;
+}
 .card .row{
   background-color: $actionDialogBackground;
   margin: 0 -20px;
@@ -251,7 +257,7 @@ img.inherit{
 .typeAdd{
   position:absolute;
   right: 20px;
-  width: 280px!important;
+  width: 310px!important;
   top: -60px;
 }
 label.notify{
@@ -263,7 +269,8 @@ label.notify p{
 
 @media screen and (max-width: $mobileWidth) {
   .typeButton .btn-flat{
-    width: 86px;
+    min-width: auto;
+    width: 76px;
     span {
       display: none;
     }

@@ -22,6 +22,7 @@ import {RestLocatorService} from '../../rest/services/rest-locator.service';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../ui-animation';
 import {DialogButton} from '../modal-dialog/modal-dialog.component';
+import {UIService} from '../../services/ui.service';
 
 @Component({
   selector: 'mds',
@@ -215,6 +216,7 @@ export class MdsComponent{
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
               private route : ActivatedRoute,
+              private uiService : UIService,
               private node : RestNodeService,
               private tools : RestToolService,
               private toast : Toast,
@@ -1127,9 +1129,10 @@ export class MdsComponent{
     }
     else {
       html += `
-                document.getElementById('` + id + `_suggestionsInput').value='';
-                document.getElementById('` + id + `_suggestionsInput').focus();
-                var badges=document.getElementById('` + id + `');
+                document.getElementById('` + id + `_suggestionsInput').value='';`;
+      if(!this.uiService.isMobile())
+        html += `document.getElementById('` + id + `_suggestionsInput').focus();`;
+      html += `var badges=document.getElementById('` + id + `');
                 var elements=badges.childNodes;
                 for(var i=0;i<elements.length;i++){
                     if(elements[i].getAttribute('data-value')==this.getAttribute('data-value')){
@@ -1230,7 +1233,7 @@ export class MdsComponent{
               window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
-    if(allowCustom && !showOpen && !this.isSearch()){
+    if(allowCustom && !showOpen){
       html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;
@@ -1737,12 +1740,17 @@ export class MdsComponent{
       return;
     let result="";
     let i=0;
+    let hasValue=false;
     for(let sub of widget.subwidgets){
-        if(values[sub.id]){
+        if(values[sub.id] && values[sub.id][0]){
+          hasValue=true;
           result+=values[sub.id][0];
         }
         if(i++<widget.subwidgets.length-1)
           result+=MdsComponent.GROUP_MULTIVALUE_DELIMITER;
+    }
+    if(!hasValue){
+      return;
     }
     let badges=document.getElementById(widget.id);
     let elements:any=badges.childNodes;
@@ -1760,8 +1768,6 @@ export class MdsComponent{
       return "Widget "+widget.id+" is a group widget, but has no subwidgets attached";
     }
     let html='<div class="widgetGroup">'
-    if(widget.caption)
-      html+=this.getCaption(widget);
     for(let sub of widget.subwidgets){
       let subwidget=this.getWidget(sub.id);
       if(this.isMultivalueWidget(subwidget)){
@@ -1771,9 +1777,8 @@ export class MdsComponent{
           html += this.renderWidget(subwidget, null, template, node);
       }
     }
-    html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('SAVE')+`</div></div>
-            <div id="`+widget.id+`" class="multivalueBadges"></div>`
-    html+='</div>';
+    html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
+            <div id="`+widget.id+`" class="multivalueBadges"></div>`;
     return html;
   }
   private renderLicense(widget: any) {

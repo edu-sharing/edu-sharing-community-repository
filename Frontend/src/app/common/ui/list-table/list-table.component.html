@@ -86,6 +86,7 @@
              [class.cardSmallList]="viewType==2"
              [class.hover]="dragHover==node">
             <div class="collectionContainer"
+                 #dropdownContainer
                  *ngIf="dropdown==node && _options && _options.length"
                  (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"
             >
