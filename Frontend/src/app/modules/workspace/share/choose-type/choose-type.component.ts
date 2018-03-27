@@ -1,13 +1,18 @@
-import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
+import {UIHelper} from "../../../../common/ui/ui-helper";
 
 @Component({
   selector: 'workspace-share-choose-type',
   templateUrl: 'choose-type.component.html',
   styleUrls: ['choose-type.component.scss']
 })
-export class WorkspaceShareChooseTypeComponent  {
+export class WorkspaceShareChooseTypeComponent implements AfterViewInit {
+  ngAfterViewInit(): void {
+    setTimeout(()=>UIHelper.setFocusOnDropdown(this.dropdownElement));
+  }
   private _selected : string[];
   @ViewChild('publish') publish : ElementRef;
+  @ViewChild('dropdown') dropdownElement : ElementRef;
   @Input() set selected (selected : string[]){
     this._selected=selected;
     setTimeout(()=>this.checkPublish(),10);

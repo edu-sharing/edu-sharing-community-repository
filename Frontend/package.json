@@ -12,7 +12,8 @@
     "test": "ng test",
     "pree2e": "webdriver-manager update",
     "e2e": "protractor",
-    "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src"
+    "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
+    "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh"
   },
   "private": true,
   "dependencies": {
@@ -33,7 +34,6 @@
     "materialize-css": "^0.97.8",
     "ng2-datepicker": "2.1.6",
     "ng2-toasty": "~4.0.3",
-    "ngx-infinite-scroll": "~0.7.2",
     "rxjs": "^5.5.6",
     "zone.js": "^0.8.5"
   },

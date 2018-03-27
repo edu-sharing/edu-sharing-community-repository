@@ -32,8 +32,11 @@
     </div>
 </div>
 <div class="dialog dialogOptions" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
-<div [className]="'list '+listClass" infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="100" [scrollWindow]="scrollWindow" (scrolled)="scroll()">
-    <div class="heading" *ngIf="hasHeading && viewType==0">
+<div [className]="'list '+listClass" infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll()">
+    <div class="headingGroup" *ngIf="hasHeading && viewType==0">
+        <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
+
+        <div class="heading">
         <div class="checkbox" *ngIf="hasCheckbox">
             <input *ngIf="_nodes.length" id="selectAll" (click)="toggleAll()" type="checkbox" class="filled-in" [checked]="selectedNodes.length==_nodes.length"/>
             <label for="selectAll">&nbsp;</label>
@@ -56,9 +59,13 @@
         <div class="editColumns clickable" *ngIf="!currentDragColumn && reorderColumns && columnsVisible && columnsVisible.length"
              (click)="reorderDialog=true"
         ><i class="material-icons">settings</i></div>
+        </div>
     </div>
     <div [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
-        <div *ngIf="addElement" class="addElement clickable" (click)="addElementClicked()"
+        <div *ngIf="addElement" class="addElement clickable"
+             tabindex="0"
+             (keyup.enter)="addElementClicked()"
+             (click)="addElementClicked()"
              [class.tableList]="viewType==0"
              [class.cardList]="viewType==1"
              [class.cardSmallList]="viewType==2"
@@ -90,6 +97,7 @@
                      [style.left]="dropdownLeft"
                      [style.top]="dropdownTop"
                      [style.bottom]="dropdownBottom"
+                     [style.right]="dropdownRight"
                 >
                     <a class="collection-item"
                        [class.collection-item-seperate-bottom]="option.isSeperateBottom && i"
@@ -98,6 +106,8 @@
                        [class.disabled]="!optionIsValid(option,node)"
                        [style.display]="optionIsShown(option,node) ? '' : 'none'"
                        (contextmenu)="callOption(option,node);$event.preventDefault();$event.stopPropagation();"
+                       tabindex="0"
+                       (keyup.enter)="callOption(option,node)"
                        (click)="callOption(option,node)">
                         <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
                 </div>
@@ -112,7 +122,9 @@
                  (dragexit)="dragHover=null"
                  (dragleave)="dragHover=null"
                  (contextmenu)="contextMenu($event,node)"
-                 (dragover)="allowDrag($event,node)" (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
+                 (dragover)="allowDrag($event,node)"
+                 (dragenter)="allowDrag($event,node)"
+                 (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
                     <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
                 </div>

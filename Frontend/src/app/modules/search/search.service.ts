@@ -15,20 +15,23 @@ export class SearchService {
   reurl: string;
   facettes: Array<any> = [];
   autocompleteData:any = [];
-  skipcount: number = 0;
+  skipcount: number[] = [];
   numberofresults:number = 0;
   offset: number = 0;
   complete: boolean = false;
   showchosenfilters: boolean = false;
   reinit = true;
   resultCount:any={};
-
+  sidenavSet = false;
+  sidenavOpened = false;
   constructor() {}
-
+  clear(){
+    this.searchTerm="";
+  }
    init() {
     if(!this.reinit)
       return;
-     this.skipcount = 0;
+     this.skipcount = [];
      this.offset = 0;
      this.searchResult = [];
      this.searchResultCollections = [];

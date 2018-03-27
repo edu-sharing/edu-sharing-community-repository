@@ -34,6 +34,8 @@ export class RestNetworkService {
     return true;
   }
   static isFromHomeRepo(node: Node,repositories:Repository[]) {
+    if(node.ref && node.ref.isHomeRepo)
+      return true;
     return RestNetworkService.isHomeRepo(node.ref.repo,repositories);
   }
 

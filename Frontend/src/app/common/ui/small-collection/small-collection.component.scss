@@ -43,3 +43,14 @@
     }
   }
 }
+.titleMobile{
+  display:none;
+}
+@media screen and (max-width: ($mobileWidth)) {
+  .title{
+    display:none;
+  }
+  .titleMobile{
+    display:block;
+  }
+}

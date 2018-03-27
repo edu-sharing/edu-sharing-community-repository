@@ -113,6 +113,10 @@ public class ContentServlet extends HttpServlet{
 			
 			if (nodeRef != null) {
 				ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
+				if(reader == null) {
+					return;
+				}
+				
 				String mimetype = reader.getMimetype();
 	
 				resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");

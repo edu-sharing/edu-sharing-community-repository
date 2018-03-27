@@ -22,19 +22,19 @@
 <div class="row tab-group row-dark scrollWithBanner" *ngIf="isRootLevelCollection() && !isGuest">
   <div class="col s12">
     <ul class="tabs tabs-fixed-width">
-      <li class="clickable tab col s3" (click)="selectTabMyCollections()">
+      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyCollections()" (click)="selectTabMyCollections()">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY' | translate }}</a>
         <a class="table-tab-title-short" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY_SHORT' | translate }}</a>
       </li>
-      <li class="clickable tab col s3" (click)="selectTabMyOrganizations()" *ngIf="hasOrganizations">
+      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyOrganizations()" (click)="selectTabMyOrganizations()" *ngIf="hasOrganizations">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</a>
         <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS_SHORT' | translate }}</a>
       </li>
-      <li class="clickable tab col s3" (click)="selectTab('TYPE_EDITORIAL')" *ngIf="hasEditorial">
+      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTab('TYPE_EDITORIAL')" (click)="selectTab('TYPE_EDITORIAL')" *ngIf="hasEditorial">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='TYPE_EDITORIAL')">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</a>
         <a class="table-tab-title-short" [class.active]="(tabSelected==='TYPE_EDITORIAL')">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL_SHORT' | translate }}</a>
       </li>
-      <li class="clickable tab col s3" (click)="selectTabAllCollections()">
+      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabAllCollections()" (click)="selectTabAllCollections()">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</a>
         <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_ALL')">{{ 'COLLECTIONS.TAB.EDU_ALL_SHORT' | translate }}</a>
       </li>
@@ -85,6 +85,7 @@
                   [columns]="collectionsColumns"
                   [isClickable]="true"
                   (clickRow)="onCollectionsClick($event)"
+                  (doubleClickRow)="onCollectionsClick($event)"
                   (onAddElement)="onCreateCollection()"
                   [nodes]="collectionContent.collections"
                 ></listTable>

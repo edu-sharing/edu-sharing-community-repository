@@ -89,6 +89,8 @@ public interface NodeService {
 
 	public String getType(String nodeId);
 
+	public boolean exists(String protocol, String store, String nodeId);
+
 
 	
 }

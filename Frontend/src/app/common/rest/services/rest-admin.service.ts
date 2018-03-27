@@ -15,6 +15,23 @@ import {Observer} from "rxjs";
 export class RestAdminService {
   constructor(private connector : RestConnectorService) {}
 
+  public getToolpermissions = (authority:string) : Observable<any> => {
+      let query=this.connector.createUrl("admin/:version/toolpermissions/:authority",null,[
+          [":authority",authority]
+      ]);
+      let options=this.connector.getRequestOptions();
+
+      return this.connector.get(query,options)
+          .map((response: Response) => response.json());
+  }
+  public setToolpermissions = (authority:string,permissions:any) : Observable<Response> => {
+        let query=this.connector.createUrl("admin/:version/toolpermissions/:authority",null,[
+            [":authority",authority]
+        ]);
+        let options=this.connector.getRequestOptions();
+
+        return this.connector.put(query,JSON.stringify(permissions),options);
+    }
   public addApplication = (url:string): Observable<any> => {
     let query=this.connector.createUrl("admin/:version/applications?url=:url",null,[
       [":url",url],

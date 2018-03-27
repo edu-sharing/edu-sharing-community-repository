@@ -113,7 +113,7 @@ public class SearchServiceImpl implements SearchService {
 				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
 		List<NodeRef> refs = convertNotifysToObjects(resultSet.getNodeRefs());
-		List<NodeRef> result = new ArrayList<>(); 
+		List<NodeRef> result = new ArrayList<>();
 		for (NodeRef node : refs) {
 			if (result.contains(node))
 				continue;
@@ -130,7 +130,7 @@ public class SearchServiceImpl implements SearchService {
 					result.add(node);
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -369,8 +369,9 @@ public class SearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
-			SortDefinition sort,Map<String,String> customProperties) {
-
+			SortDefinition sort,Map<String,String> customProperties) throws Exception {
+			return findAuthorities(AuthorityType.USER,_pattern, globalSearch, _skipCount, _maxValues, sort, customProperties);
+		/*
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
 
 				new RetryingTransactionCallback<SearchResult<String>>() {
@@ -419,56 +420,9 @@ public class SearchServiceImpl implements SearchService {
 					}
 
 				}, true);
+				*/
 	}
 
-	@Override
-	public SearchResult<String> searchAuthorities(AuthorityType type, String _pattern, boolean globalSearch,
-			int _skipCount, int _maxValues, SortDefinition sort,Map<String,String> customProperties) {
-		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-
-				new RetryingTransactionCallback<SearchResult<String>>() {
-					public SearchResult<String> execute() throws Throwable {
-						
-						String pattern = _pattern;
-						int skipCount = _skipCount;
-						int maxValues = _maxValues;
-						
-						if(restrictAuthoritySearch()) {
-							if(pattern != null 
-									&& pattern.contains("*") 
-									&& pattern.trim().replaceAll(" ", "").replaceAll("\\*", "").length() == 0 ) {
-								pattern = pattern.replaceAll("\\*", "");
-							}
-							skipCount = 0;
-							maxValues = 10;
-						}
-						
-						//if (!globalSearch)
-							return searchAuthoritiesSolr(pattern, skipCount, maxValues, sort,
-									type,globalSearch,customProperties);
-
-						/*
-						checkGlobalSearchPermission();
-						AuthorityService authorityService = serviceRegistry.getAuthorityService();
-						PagingRequest paging = new PagingRequest(skipCount, maxValues);
-						paging.setRequestTotalCountMax(Integer.MAX_VALUE);
-						PagingResults<AuthorityInfo> groupReq = authorityService.getAuthoritiesInfo(type,
-								null, "*"+pattern+"*", sort.getFirstSortBy(), sort.getFirstSortAscending(), paging);
-
-						List<String> result = new ArrayList<String>();
-						try {
-							for (AuthorityInfo authorityInfo : groupReq.getPage()) {
-								result.add(authorityInfo.getAuthorityName());
-							}
-						} catch (IllegalStateException e) {
-							// No results found
-						}
-						return new SearchResult<String>(result, skipCount, groupReq.getTotalResultCount());
-						*/
-					}
-				}, true);
-	}
-	
 	boolean restrictAuthoritySearch() {
 		
 		if(AuthenticationUtil.isRunAsUserTheSystemUser() 
@@ -786,7 +740,7 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResult<String> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults) throws InsufficientPermissionException {
+	public SearchResult<String> findAuthorities(AuthorityType type,String searchWord, boolean globalContext, int from, int nrOfResults,SortDefinition sort,Map<String,String> customProperties) throws InsufficientPermissionException {
 		if(globalContext)
 			checkGlobalSearchPermission();
 		HashMap<String, String> toSearch = new HashMap<String, String>();
@@ -813,7 +767,25 @@ public class SearchServiceImpl implements SearchService {
 			findGroupsQuery.append(" AND NOT @ccm\\:eduscopename:\"*\"");
 		}
 
-		StringBuffer finalQuery = findUsersQuery.insert(0, "(").append(") OR (").append(findGroupsQuery).append(")");
+		String finalQuery;
+		if(type==null) {
+			finalQuery="("+findUsersQuery+") OR ("+findGroupsQuery+")";
+		}
+		else if(type.equals(AuthorityType.USER)) {
+			finalQuery=findUsersQuery.toString();
+		}
+		else if(type.equals(AuthorityType.GROUP)) {
+			finalQuery=findGroupsQuery.toString();
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported authority type "+type);
+		}
+
+		if(customProperties!=null){
+			for(Map.Entry<String, String> entry : customProperties.entrySet()){
+				finalQuery+=(" AND @"+entry.getKey().replace(":", "\\:")+":\""+QueryParser.escape(entry.getValue())+"\"");
+			}
+		}
 
 		System.out.println("finalQuery:" + finalQuery);
 
@@ -822,14 +794,17 @@ public class SearchServiceImpl implements SearchService {
 		SearchParameters searchParameters = new SearchParameters();
 		searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
 
-		searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
+		searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_FTS_ALFRESCO);
 		searchParameters.setQuery(finalQuery.toString());
 		searchParameters.setSkipCount(from);
 		searchParameters.setMaxItems(nrOfResults);
-
+		if(sort==null || !sort.hasContent()) {
 		searchParameters.addSort("@" + CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME, true);
 		searchParameters.addSort("@" + CCConstants.PROP_USER_FIRSTNAME, true);
-		
+		}
+		else {
+			sort.applyToSearchParameters(searchParameters);
+		}
 		// dont use scopeed search service
 		org.alfresco.service.cmr.search.SearchService searchService = serviceRegistry.getSearchService();
 		ResultSet resultSet = searchService.query(searchParameters);

@@ -22,6 +22,11 @@ export class SmallCollectionComponent{
    * @type {string}
    */
   @Input() titleLabel:string;
+  /**
+   * Custom title rendering for mobile / small layout. Use {{title}}in your string to replace it with the title
+   * @type {string}
+   */
+  @Input() titleLabelShort:string;
   @Input() set collectionId(collectionId : string){
     this.collectionService.getCollection(collectionId).subscribe((data:CollectionWrapper)=>{
       this._collection=data.collection;

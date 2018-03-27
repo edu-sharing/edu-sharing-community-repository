@@ -217,4 +217,10 @@ public class PermissionServiceWSImpl implements PermissionService {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

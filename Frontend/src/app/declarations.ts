@@ -42,6 +42,8 @@
   import {AuthoritySearchInputComponent} from "./common/ui/authority-search-input/authority-search-input.component";
   import {GlobalProgressComponent} from "./common/ui/global-progress/global-progress.component";
   import {SpinnerSmallComponent} from "./common/ui/spinner-small/spinner-small.component";
+  import {KeysPipe} from './common/keys.pipe';
+  import {InfiniteScrollDirective} from './common/ui/infinite-scroll.directive';
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -87,5 +89,7 @@ export const DECLARATIONS = [
       ModalDialogToastComponent,
       ToolListComponent,
       ToucheventDirective,
-      BannerComponent
+      BannerComponent,
+      InfiniteScrollDirective,
+      KeysPipe
     ];
