@@ -77,6 +77,22 @@
 		]]>
 		</style>
 	</template>
+	<template name="invited">
+		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zu einem Material eingeladen.</subject>
+		<message><![CDATA[
+			<h1>Hallo Frau/Herr {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} hat "{{name}}" für Sie freigegeben.</h2>
+			Ihnen wurden die folgenden Rechte zugeteilt:<br>
+			<div class="rights">{{permissions}}</div>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Zum Material</a></div>
+			<br><br>
+			{{if message}}Nachricht vom Nutzer:<br>
+				{{message}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
 	<template name="nodeIssue">
 		<subject>{{reporterEmail}} hat ein Problem gemeldet</subject>
 		<message><![CDATA[
