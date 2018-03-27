@@ -21,14 +21,31 @@ hr{
 .dropArea i{
   font-size:60px;
 }
-.linkTitle{
-  color:$textLight;
-}
+
 .link{
   width:100%;
-  text-align: center;
+  .linkLabel{
+    text-align: center;
+  }
+  .linkTitle{
+    color:$textLight;
+  }
   i{
     top: 7px;
+  }
+  .lti{
+    display: flex;
+    flex-direction: column;
+  }
+  .toolInfo{
+    display:flex;
+    padding: 15px 20px;
+    img{
+      padding-right:15px;
+    }
+    .title{
+      font-weight: bold;
+    }
   }
 }
 .dropArea .btn-flat{
