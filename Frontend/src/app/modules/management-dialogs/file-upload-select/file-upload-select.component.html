@@ -12,7 +12,7 @@
             </div>
             <hr>
             <div class="link"><div class="linkLabel"><i class="material-icons align-icon">link</i> <span class="linkTitle">{{ 'WORKSPACE.SELECT_LINK' | translate}}</span></div>
-                <input #link type="text" (keyup.enter)="setLink()" (keyup)="setState($event)" (keypress)="setState($event)" placeholder="http://">
+                <input type="text" [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://">
                 <div class="lti">
                     <div class="switch">
                         <label>

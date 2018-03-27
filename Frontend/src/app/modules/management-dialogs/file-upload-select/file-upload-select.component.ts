@@ -19,13 +19,13 @@ export class WorkspaceFileUploadSelectComponent  {
   public disabled=true;
   public chooseParent=false;
   @ViewChild('fileSelect') file : ElementRef;
-  @ViewChild('link') link : ElementRef;
   @Input() isFileOver=false;
   @Input() showPicker=false;
   private breadcrumbs: Node[];
   private ltiAllowed:boolean;
   private ltiActivated:boolean;
   private ltiTool: Node;
+    private _link: string;
   @Input() set parent(parent:string){
     if(parent==RestConstants.USERHOME){
       this.breadcrumbs=[];
@@ -50,10 +50,17 @@ export class WorkspaceFileUploadSelectComponent  {
     this.onFileSelected.emit(event.target.files);
   }
   public setLink(){
-    this.onLinkSelected.emit(this.link.nativeElement.value);
+    this.onLinkSelected.emit(this._link);
   }
-  public setState(event: any){
-    let link=this.link.nativeElement.value.trim();
+  public get link(){
+    return this._link;
+  }
+  public set link(link:string){
+    this._link=link;
+    this.setState(link);
+  }
+  public setState(link: string){
+    link=link.trim();
     this.disabled=!link;
     this.ltiAllowed=false;
     if(this.cleanupUrlForLti(link)) {
