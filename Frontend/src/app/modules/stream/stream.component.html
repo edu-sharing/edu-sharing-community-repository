@@ -1,3 +1,32 @@
 <h5>
-  TODO: This component is not implemented yet
+  <div class="stream-header">
+      <div class="stream-header-left">
+          <div class="stream-title">Heute </div>
+          <span class="stream-title-date">Dienstag, 06 August 2018 </span>
+      </div>
+      <div class="stream-header-right">
+          <div class="stream-uppericon"> <i class="material-icons fix-up " >shuffle</i>  </div> <div (click)="sortieren()" class="stream-uppertext">Sortieren</div>
+      </div>
+  </div>
+  
+  <!-- This could be a directive : -->
+
 </h5>
+
+<div class="stream-box" *ngFor="let strm of streams" >
+    <div class="stream-box-main">
+      <div class="stream-box-title">{{ strm.nodes[0].title || 'Schon gewusst?' }} </div>
+      <div class="stream-box-desc">{{ strm.nodes[0].description || 'lorem ipsum dolor sit amet, consectetur' }} </div>
+    </div>
+    <div class="stream-box-main-vert">
+        <i class="material-icons " >more_vert</i>
+    </div>
+    <div class="stream-box-kompetenzen"></div>
+    <div class="stream-box-image"></div>
+    <div class="stream-box-footer">
+        <div class="stream-box-imgname">{{ strm.nodes[0].name }}</div><div class="stream-box-rating"><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i></div><div class="stream-box-comment"> {{ strm.nodes[0].commentCount }} <i class="material-icons stic" >chat</i> </div> 
+    </div>   
+</div>
+
+
+

@@ -1,1 +1,97 @@
 @import "../../../styles/variables.scss";
+
+
+.stream-box{
+    border: 2px solid black;
+    margin: 15px 0px;
+}
+
+.stream-title-date{
+    font-size: 10px;
+    color: grey;
+}
+
+.stream-title{
+    font-weight: bold;
+    font-size: 28px;
+}
+
+.stream-box-title{
+    padding: 15px 15px 0px 15px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.stream-box-main{
+    width: 94%;
+    display: inline-block;
+}
+.stream-box-main-vert{
+   
+    display: inline-block;
+}
+
+.stream-box-desc{
+    padding-left: 15px;
+    
+}
+
+.stream-box-kompetenzen{
+    padding: 15px;
+    
+}
+
+.stream-box-image{
+    padding: 15px;
+    
+}
+
+.stream-box-footer{
+    border-top: 2px solid black;
+    padding: 5px 15px 5px 15px;
+}
+
+.stream-box-comment{
+    width: 8%;
+    display: inline-block;
+    font-size: 18px;
+}
+
+.stream-box-imgname{
+    width: 60%;
+    display: inline-block;
+}
+
+.stream-box-rating{
+    width: 32%;
+    display: inline-block;
+}
+
+.stic{
+    font-size: 18px;
+}
+
+.stream-header-left{
+    width: 70%;
+    display: inline-block;    
+}
+
+.stream-header-right{
+    display: inline-block;
+}
+
+.stream-uppericon{
+    font-size: 19px;
+    display: inline-block;
+}
+
+.stream-uppertext{
+    font-size: 19px;
+    padding-left: 10px;
+    display: inline-block;
+    text-decoration: underline;
+}
+
+.fix-up{
+    padding-top: 10px;
+}

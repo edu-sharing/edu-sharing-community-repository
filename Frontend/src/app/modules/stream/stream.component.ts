@@ -2,6 +2,7 @@
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
 import 'rxjs/add/operator/map';
 import { HttpModule } from '@angular/http';
+import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
@@ -22,6 +23,7 @@ import {RestMdsService} from "../../common/rest/services/rest-mds.service";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {ListItem} from "../../common/ui/list-item";
 import {MdsHelper} from "../../common/rest/mds-helper";
+import {Observable} from 'rxjs/Rx';
 
 
 
@@ -34,6 +36,9 @@ import {MdsHelper} from "../../common/rest/mds-helper";
 
 
 export class StreamComponent {
+  test = 'sdsd';
+  streams: any;
+
   constructor(
     private router : Router,
     private route : ActivatedRoute,
@@ -46,9 +51,32 @@ export class StreamComponent {
     private session : SessionStorageService,
     private title : Title,
     private config : ConfigurationService,
+    private http: Http,
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
       });
+      this.getJSON().subscribe(data => this.streams = data['stream'], error => console.log(error));
   }
+
+  sortieren() {
+    // here is going to be the sorting functionality: 
+
+   // let temp = this.other['stream'].shift();
+    //this.other['stream'].push(temp);
+  }
+
+  // the way of doing the post request will be changed:
+  public getJSON(): Observable<any> {
+    const httpOptions = {
+      headers: new Headers({
+        'Content-Type':  'application/json'
+      })
+    };
+    return this.http.post('http://edu50.edu-sharing.de/edu-sharing/rest/stream/v1/search/-home-?maxItems=10&skipCount=0', {}, httpOptions )
+                    .map((res:any) => res.json())
+
+}
+
+
 }
