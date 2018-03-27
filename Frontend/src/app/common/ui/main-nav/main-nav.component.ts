@@ -81,6 +81,7 @@ export class MainNavComponent {
   acceptLicenseAgreement: boolean;
   licenseAgreement: boolean;
   licenseAgreementHTML: string;
+  canEditProfile: boolean;
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
   }
@@ -350,6 +351,7 @@ export class MainNavComponent {
         this._showUser=this.currentScope!='login' && this.showUser;
         this.iam.getUser().subscribe((user : IamUser) => {
           this.user=user;
+          this.canEditProfile=user.editProfile;
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });

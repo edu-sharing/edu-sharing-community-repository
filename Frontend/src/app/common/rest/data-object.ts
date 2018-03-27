@@ -231,6 +231,7 @@ export interface UserSimple {
 }
 export interface IamUser {
   person : User;
+  editProfile : boolean;
 }
 export interface IamPreferences {
   preferences : string;
