@@ -10,7 +10,7 @@
 	<template name="invited">
 		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zu einem Material eingeladen.</subject>
 		<message><![CDATA[
-			<h1>Hallo Frau/Herr {{lastName}}</h1>
+			<h1>Hallo {{firstName}} {{lastName}}</h1>
 			<h2>{{inviterFirstName}} {{inviterLastName}} hat "{{name}}" für Sie freigegeben.</h2>
 			Ihnen wurden die folgenden Rechte zugeteilt:<br>
 			<div class="rights">{{permissions}}</div>
