@@ -8,11 +8,11 @@
 		</message>
 	</template>
 	<template name="invited">
-		<subject>{{inviterFirstName}} hat dich eingeladen</subject>
+		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zu einem Material eingeladen.</subject>
 		<message><![CDATA[
-			<h1>Hallo {{firstName}}</h1>
-			<h2>{{inviterFirstName}} hat "{{name}}" für dich freigegeben</h2>
-			Dir wurden folgende Rechte zugeteilt:<br>
+			<h1>Hallo Frau/Herr {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} hat "{{name}}" für Sie freigegeben.</h2>
+			Ihnen wurden die folgenden Rechte zugeteilt:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
 			<div class="center"><a class="btn" href="{{link}}">Zum Material</a></div>
