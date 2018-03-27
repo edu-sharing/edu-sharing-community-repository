@@ -27,7 +27,8 @@
             [globalSearch]="globalSearch"
             (onChooseAuthority)="addSuggestion($event)"
           ></authority-search-input>
-            <!-- <ng2-completer [(ngModel)]="searchStr" [clearSelected]="true" (selected)="addAuthority($event)" [dataService]="dataService" [minSearchLength]="2" class="search"></ng2-completer>-->
+          <div class="hintNoFuzzy" *ngIf="globalSearch && !fuzzyAllowed">{{'WORKSPACE.SHARE.NO_FUZZY' | translate}}</div>
+          <!-- <ng2-completer [(ngModel)]="searchStr" [clearSelected]="true" (selected)="addAuthority($event)" [dataService]="dataService" [minSearchLength]="2" class="search"></ng2-completer>-->
           <!-- <input type="text" id="inviteName" /> -->
 
 

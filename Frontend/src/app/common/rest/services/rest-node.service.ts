@@ -6,8 +6,9 @@ import {RestConnectorService} from "./rest-connector.service";
 import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {
-  NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList, NodePermissionsHistory,
-  NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper
+    NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList,
+    NodePermissionsHistory,
+    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent
 } from "../data-object";
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
@@ -522,5 +523,13 @@ export class RestNodeService {
 
     return this.connector.post(this.getNodeRenderSnippetUrl(node,version,repository),JSON.stringify(parameters),this.connector.getRequestOptions())
       .map((response: Response) => response.json());
+  }
+
+  public getNodeTextContent(node:string,repository=RestConstants.HOME_REPOSITORY) : Observable<NodeTextContent>{
+      let query=this.connector.createUrl("node/:version/nodes/:repository/:node/textContent",repository,[
+          [":node",node],
+      ]);
+      return this.connector.get(query,this.connector.getRequestOptions())
+          .map((response: Response) => response.json());
   }
 }

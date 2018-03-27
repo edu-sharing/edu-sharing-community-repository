@@ -29,6 +29,11 @@ export interface Parent {
   id: string;
   archived: boolean;
 }
+export interface NodeTextContent{
+  text:string;
+  html:string;
+  raw:string;
+}
 export interface ServerUpdate {
   id:string;
   description:string;
@@ -245,6 +250,7 @@ export interface UserSimple {
 }
 export interface IamUser {
   person : User;
+  editProfile : boolean;
 }
 export interface IamPreferences {
   preferences : string;

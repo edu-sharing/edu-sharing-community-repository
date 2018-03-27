@@ -40,4 +40,5 @@ public class Values{
 	@XmlElement	public String searchSidenavMode;
 	@XmlElement	public Guest guest;
 	@XmlElement	public Collections collections;
+	@XmlElement	public LicenseAgreement licenseAgreement;
 }

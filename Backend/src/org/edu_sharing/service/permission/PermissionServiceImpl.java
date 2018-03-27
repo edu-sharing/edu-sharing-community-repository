@@ -954,54 +954,81 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
+		boolean fuzzyGroupSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
+				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
+		
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:authorityContainer AND NOT @ccm\\:scopetype:system");
 
 		searchWord = searchWord != null ? searchWord.trim() : "";
-
-		if (("*").equals(searchWord)) {
-			searchWord = "";
+	
+		StringBuffer subQuery = new StringBuffer();
+		
+		if(fuzzyGroupSearch) {
+			if (("*").equals(searchWord)) {
+				searchWord = "";
+			}
+			if (searchWord.length() > 0) {
+	
+	
+				for (String token : StringTool.getPhrases(searchWord)) {
+	
+					boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
+	
+					if (isPhrase) {
+	
+						token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
+	
+					} else {
+	
+						if (!(token.startsWith("*") || token.startsWith("?"))) {
+							token = "*" + token;
+						}
+	
+						if (!(token.endsWith("*") || token.endsWith("?"))) {
+							token = token + "*";
+						}
+					}
+	
+					if (token.length() > 0) {
+	
+						boolean furtherToken = (subQuery.length() > 0);
+						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
+								.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
+								.append(token).append("\"");
+						subQuery.append(")");
+	
+					}
+				}	
+			}
 		}
+		else {
 
-		if (searchWord.length() > 0) {
-
-			StringBuffer subQuery = new StringBuffer();
-
+			// remove wildcards (*,?)
+			if (searchWord != null) {
+				searchWord = searchWord.replaceAll("[\\*\\?]", "");
+			}
+			
 			for (String token : StringTool.getPhrases(searchWord)) {
 
 				boolean isPhrase = token.startsWith("\"") && token.endsWith("\"");
 
 				if (isPhrase) {
-
 					token = (token.length() > 2) ? token.substring(1, token.length() - 1) : "";
-
-				} else {
-
-					if (!(token.startsWith("*") || token.startsWith("?"))) {
-						token = "*" + token;
-					}
-
-					if (!(token.endsWith("*") || token.endsWith("?"))) {
-						token = token + "*";
-					}
 				}
 
 				if (token.length() > 0) {
-
-					boolean furtherToken = (subQuery.length() > 0);
-					subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
-							.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
-							.append(token).append("\"");
-					subQuery.append(")");
-
+					subQuery.append("=@cm:authorityDisplayName:").append("\"").append(token).append("\"");
 				}
 			}
 
-			if (subQuery.length() > 0) {
-				searchQuery.append(" AND (").append(subQuery).append(")");
+			// if not fuzzy and no value for email return empty result
+			if (subQuery.length() == 0) {
+				return null;
 			}
-
 		}
-
+		if (subQuery.length() > 0) {
+			searchQuery.append(" AND (").append(subQuery).append(")");
+		}
 		boolean hasToolPermission = toolPermission
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
 

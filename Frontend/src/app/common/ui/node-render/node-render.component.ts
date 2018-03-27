@@ -382,7 +382,7 @@ export class NodeRenderComponent {
   }
 
   private goToWorkspace(login:LoginResult,node:Node) {
-      NodeHelper.goToWorkspace(this.nodeApi,this.router,login,node);
+      UIHelper.goToWorkspace(this.nodeApi,this.router,login,node);
   }
 
   private isCollectionRef() {

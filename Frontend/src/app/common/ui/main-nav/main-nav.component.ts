@@ -5,7 +5,10 @@ import {
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
 import {RestIamService} from "../../rest/services/rest-iam.service";
-import {IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList} from "../../rest/data-object";
+import {
+    IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList,
+    NodeTextContent
+} from "../../rest/data-object";
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../../router/router.component";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
@@ -22,6 +25,9 @@ import {Http} from "@angular/http";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
+import {SessionStorageService} from "../../services/session-storage.service";
+import {RestNodeService} from "../../rest/services/rest-node.service";
+import {Translation} from "../../translation";
 
 @Component({
   selector: 'main-nav',
@@ -30,6 +36,7 @@ import {ConfigurationHelper} from "../../rest/configuration-helper";
   animations: [
     trigger('fromLeft', UIAnimation.fromLeft()),
     trigger('overlay', UIAnimation.openOverlay()),
+    trigger('cardAnimation', UIAnimation.cardAnimation()),
     trigger('fade', UIAnimation.fade()),
     trigger('nodeStore', [
       transition(':enter', [
@@ -71,6 +78,10 @@ export class MainNavComponent {
   public showNodeStore=false;
   private nodeStoreCount = 0;
   private static bannerPositionInterval: any;
+  acceptLicenseAgreement: boolean;
+  licenseAgreement: boolean;
+  licenseAgreementHTML: string;
+  canEditProfile: boolean;
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
   }
@@ -294,8 +305,10 @@ export class MainNavComponent {
               private connector : RestConnectorService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
+              private nodeService : RestNodeService,
               private configService : ConfigurationService,
               private storage : TemporaryStorageService,
+              private session : SessionStorageService,
               private http : Http,
               private org : RestOrganizationService,
               private router : Router,
@@ -343,6 +356,7 @@ export class MainNavComponent {
         this._showUser=this.currentScope!='login' && this.showUser;
         this.iam.getUser().subscribe((user : IamUser) => {
           this.user=user;
+          this.canEditProfile=user.editProfile;
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
@@ -483,6 +497,7 @@ export class MainNavComponent {
       this.whatsNewUrl=this.configService.instant("whatsNewUrl",this.whatsNewUrl);
       this.hideButtons(buttons);
       this.addButtons(buttons);
+      this.showLicenseAgreement();
     },(error:any)=>this.hideButtons(buttons));
   }
 
@@ -506,5 +521,34 @@ export class MainNavComponent {
   }
   getIconSource() {
     return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
+  }
+  saveLicenseAgreement(){
+    this.licenseAgreement=false;
+    this.session.set('licenseAgreement',true);
+  }
+  private showLicenseAgreement() {
+    if(!this.config.licenseAgreement || this.isGuest)
+      return;
+    this.session.get('licenseAgreement',false).subscribe((checked:boolean)=>{
+      if(checked)
+        return;
+      this.licenseAgreement=true;
+      this.licenseAgreementHTML=null;
+      let nodeId:string=null;
+      for(let node of this.config.licenseAgreement.nodeId) {
+        if(node.language==null)
+          nodeId=node.value;
+        if(node.language==Translation.getLanguage()){
+          nodeId=node.value;
+          break;
+        }
+      }
+      this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
+          this.licenseAgreementHTML = data.html ? data.html : data.raw;
+      }, (error: any) => {
+          this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
+      });
+    });
+
   }
 }

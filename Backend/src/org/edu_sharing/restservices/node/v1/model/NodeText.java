@@ -10,21 +10,29 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(description = "")
 public class NodeText  {
   
-  private String text,html;
+  private String text,html,raw;
 
-  @JsonProperty("text")
+  @JsonProperty
   public String getText() {
 	return text;
 }
 public void setText(String text) {
 	this.text = text;
 }
-@JsonProperty("html")
+@JsonProperty
 public String getHtml() {
 	return html;
 }
 public void setHtml(String html) {
 	this.html = html;
 }
+@JsonProperty
+public String getRaw() {
+	return raw;
+}
+public void setRaw(String raw) {
+	this.raw = raw;
+}
+
 
 }

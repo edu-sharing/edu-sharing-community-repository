@@ -1,7 +1,10 @@
 import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../services/configuration.service";
-import {Collection, Connector, ConnectorList, Filetype, MdsInfo, Node, NodeLock} from "../rest/data-object";
+import {
+    Collection, Connector, ConnectorList, Filetype, LoginResult, MdsInfo, Node,
+    NodeLock, ParentList
+} from "../rest/data-object";
 import {ActivatedRoute, Router} from "@angular/router";
 import {UIConstants} from "./ui-constants";
 import {ElementRef, EventEmitter, HostListener} from "@angular/core";
@@ -15,6 +18,8 @@ import {NodeHelper} from "./node-helper";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {FrameEventsService} from "../services/frame-events.service";
+import {RestNodeService} from "../rest/services/rest-node.service";
+import {PlatformLocation} from "@angular/common";
 import {ListItem} from './list-item';
 export class UIHelper{
   static MOBILE_WIDTH = 600;
@@ -87,6 +92,34 @@ export class UIHelper{
     let converted=UIHelper.convertSearchParameters(node);
     router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{query:converted.query,savedQuery:node.ref.id,repository:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],mds:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],parameters:JSON.stringify(converted.parameters)}});
   }
+    public static goToCollection(router:Router,node:Node) {
+        router.navigate([UIConstants.ROUTER_PREFIX+"collections"],
+            {queryParams:{id:node.ref.id}});
+    }
+    /**
+     * Navigate to the workspace
+     * @param nodeService instance of NodeService
+     * @param router instance of Router
+     * @param login a result of the isValidLogin method
+     * @param node The node to open and show
+     */
+    public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node) {
+        nodeService.getNodeParents(node.ref.id).subscribe((data:ParentList)=>{
+            router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
+                {queryParams:{id:node.parent.id,file:node.ref.id,root:data.scope}});
+        });
+    }
+    /**
+     * Navigate to the workspace
+     * @param nodeService instance of NodeService
+     * @param router instance of Router
+     * @param login a result of the isValidLogin method
+     * @param folder The folder id to open
+     */
+    public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
+        router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
+            {queryParams:{id:folder}});
+    }
   static convertSearchParameters(node: Node) {
     let parameters=JSON.parse(node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS]);
     let result:any={parameters:{},query:null};
@@ -107,7 +140,7 @@ export class UIHelper{
     eval("$('select').css('display','none');$('select').material_select()");
   }
 
-  static showAddedToCollectionToast(toast:Toast,node: any,count:number) {
+  static showAddedToCollectionToast(toast:Toast,router:Router,node: any,count:number) {
     let scope=node.collection ? node.collection.scope : node.scope;
     let type=node.collection ? node.collection.type : node.type;
     if(scope==RestConstants.COLLECTIONSCOPE_MY){
@@ -122,7 +155,12 @@ export class UIHelper{
     else if(type==RestConstants.COLLECTIONTYPE_EDITORIAL){
       scope='PUBLIC';
     }
-    toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)});
+    toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)},null,null,{
+      link:{
+        caption:'WORKSPACE.TOAST.VIEW_COLLECTION',
+        callback:()=>UIHelper.goToCollection(router,node)
+      }
+    });
   }
 
 
@@ -169,17 +207,17 @@ export class UIHelper{
         mdsSets[i].name=translate.instant('DEFAULT_METADATASET');
     }
   }
-  static addToCollection(collectionService:RestCollectionService,toast:Toast,collection:Node|Collection,nodes:Node[],callback:Function=null,position=0,error=false){
+  static addToCollection(collectionService:RestCollectionService,router:Router,toast:Toast,collection:Node|Collection,nodes:Node[],callback:Function=null,position=0,error=false){
     if(position>=nodes.length){
       if(!error)
-        UIHelper.showAddedToCollectionToast(toast,collection,nodes.length);
+        UIHelper.showAddedToCollectionToast(toast,router,collection,nodes.length);
       if(callback)
         callback(error);
       return;
     }
 
     collectionService.addNodeToCollection(collection.ref.id,nodes[position].ref.id).subscribe(()=>{
-        UIHelper.addToCollection(collectionService,toast,collection,nodes,callback,position+1,error);
+        UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,error);
       },
       (error:any)=>{
         if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
@@ -187,7 +225,7 @@ export class UIHelper{
         }
         else
           NodeHelper.handleNodeError(toast,RestHelper.getTitle(nodes[position]),error);
-        UIHelper.addToCollection(collectionService,toast,collection,nodes,callback,position+1,true);
+        UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,true);
       });
   }
   static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,connectorList:ConnectorList,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
@@ -303,4 +341,23 @@ export class UIHelper{
       }
       return link;
   }
+
+    /**
+     * try to navigate to given url using angular routing
+     */
+    static navigateToAbsoluteUrl(platformLocation: PlatformLocation,router:Router,url: string,replaceUrl=false) {
+        let cleanUrl=url.replace((platformLocation as any).location.origin+platformLocation.getBaseHrefFromDOM(),"");
+        let parsed=router.parseUrl(cleanUrl);
+        let segments:string[]=[];
+        for(let segment of parsed.root.children.primary.segments){
+            segments.push(segment.path);
+        }
+        router.navigate(segments, {queryParams: parsed.queryParams, replaceUrl: replaceUrl}).catch((error:any)=>{
+          console.warn(error);
+          if(replaceUrl)
+              window.location.replace(url);
+          else
+              window.location.assign(url)
+        });
+    }
 }

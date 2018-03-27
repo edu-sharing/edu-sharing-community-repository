@@ -159,6 +159,7 @@ public class NodeServiceAdapter implements NodeService {
 			mimetype=props.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT)[0];
 		InputStream content=getContent(nodeId);
 		NodeService service=NodeServiceFactory.getLocalService();
+		props.remove(CCConstants.SYS_PROP_NODE_UID);
 		props.remove(CCConstants.CM_PROP_C_CREATED);
 		props.remove(CCConstants.CM_PROP_C_MODIFIED);
 		String localNode=service.createNode(localParent, CCConstants.CCM_TYPE_IO,props);
@@ -240,5 +241,5 @@ public class NodeServiceAdapter implements NodeService {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
+
 }
