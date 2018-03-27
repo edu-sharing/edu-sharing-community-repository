@@ -43,7 +43,7 @@ export class Toast{
       if(dialogTitle){
         text+='<br /><a onclick="window[\'toastComponent\'].openDetails()">'+this.translate.instant("DETAILS")+'</a>';
       }
-      if(additional.link){
+      if(additional && additional.link){
           text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.translate.instant(additional.link.caption)+'</a>';
       }
       this.dialogParameters=parameters;
