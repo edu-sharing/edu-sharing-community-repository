@@ -45,11 +45,11 @@ export class Toast{
       }
       if(additional && additional.link){
           text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.translate.instant(additional.link.caption)+'</a>';
+          this.linkCallback=additional.link.callback;
       }
       this.dialogParameters=parameters;
       this.toasty.info(this.getToastOptions(text));
       this.dialogTitle=dialogTitle;
-      this.linkCallback=additional.link.callback;
       this.dialogMessage=dialogMessage;
     });
   }
