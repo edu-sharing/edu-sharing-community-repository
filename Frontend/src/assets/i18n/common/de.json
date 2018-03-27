@@ -141,7 +141,7 @@
     "dimensions": "Bildgröße",
     "exif:dateTimeOriginal":"Aufnahmedatum",
     "cm:modified": "zuletzt geändert",
-    "cm:created": "erstellt",
+    "cm:created": "Erstellungsdatum",
     "cm:creator": "erstellt von",
     "cclom:title": "Titel",
     "cclom:general_keyword": "Schlagwörter",
