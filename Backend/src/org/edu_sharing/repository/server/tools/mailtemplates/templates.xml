@@ -78,32 +78,32 @@
 		</style>
 	</template>
 	<template name="invited">
-		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zu einem Material eingeladen.</subject>
+		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a material.</subject>
 		<message><![CDATA[
-			<h1>Hallo Frau/Herr {{lastName}}</h1>
-			<h2>{{inviterFirstName}} {{inviterLastName}} hat "{{name}}" für Sie freigegeben.</h2>
-			Ihnen wurden die folgenden Rechte zugeteilt:<br>
+			<h1>Hello {{firstName}} {{lastName}}</h1>
+			<h2>{{inviterFirstName}} {{inviterLastName}} invited you to: "{{name}}".</h2>
+			Your access rights are:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
-			<div class="center"><a class="btn" href="{{link}}">Zum Material</a></div>
+			<div class="center"><a class="btn" href="{{link}}">Link to the material</a></div>
 			<br><br>
-			{{if message}}Nachricht vom Nutzer:<br>
+			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
 				{{message}}
 			{{endif}}
 		]]>
 		</message>
 	</template>
 	<template name="nodeIssue">
-		<subject>{{reporterEmail}} hat ein Problem gemeldet</subject>
+		<subject>{{reporterEmail}} reported a problem</subject>
 		<message><![CDATA[
 			<h1>Hallo!</h1>
-			<h2>{{reporterEmail}} hat ein Problem mit dem Element "{{name}}" ({{id}}) gemeldet.</h2>
-			Die Begründung der Meldung: {{reason}}<br><br><br>
-			{{if userComment}}Weitere Informationen vom Nutzer:<br>
+			<h2>{{reporterEmail}} has reported a problem with the material \"{{name}}\" ({{id}}).</h2>
+			Reason: {{reason}}<br><br><br>
+			{{if userComment}}additional information provided by the user:<br>
 				{{userComment}}
 				<br><br><br>
 			{{endif}}
-			<div class="center"><a class="btn" href="{{link}}">Zum gemeldeten Material</a></div>
+			<div class="center"><a class="btn" href="{{link}}">Link to the material in question</a></div>
 			<br><br>		
 		]]>
 		</message>
