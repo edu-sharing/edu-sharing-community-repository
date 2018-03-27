@@ -7,8 +7,8 @@ import {UIAnimation} from "../ui-animation";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {
     IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList,
-    NodeTextContent
-} from "../../rest/data-object";
+    NodeTextContent, NodeWrapper, Node
+} from '../../rest/data-object';
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../../router/router.component";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
@@ -82,6 +82,7 @@ export class MainNavComponent {
   licenseAgreement: boolean;
   licenseAgreementHTML: string;
   canEditProfile: boolean;
+  private licenseAgreementNode: Node;
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
   }
@@ -519,15 +520,13 @@ export class MainNavComponent {
   }
   saveLicenseAgreement(){
     this.licenseAgreement=false;
-    this.session.set('licenseAgreement',true);
+    if(this.licenseAgreementNode)
+      this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
   }
   private showLicenseAgreement() {
     if(!this.config.licenseAgreement || this.isGuest)
       return;
-    this.session.get('licenseAgreement',false).subscribe((checked:boolean)=>{
-      if(checked)
-        return;
-      this.licenseAgreement=true;
+    this.session.get('licenseAgreement',false).subscribe((version:string)=>{
       this.licenseAgreementHTML=null;
       let nodeId:string=null;
       for(let node of this.config.licenseAgreement.nodeId) {
@@ -538,11 +537,22 @@ export class MainNavComponent {
           break;
         }
       }
-      this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
-          this.licenseAgreementHTML = data.html ? data.html : data.raw;
-      }, (error: any) => {
-          this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
-      });
+      this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
+        this.licenseAgreementNode=data.node;
+        console.log(data.node);
+        if(version==data.node.contentVersion)
+          return;
+        this.licenseAgreement=true;
+        this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
+            this.licenseAgreementHTML = data.html ? data.html : data.raw ? data.raw : data.text;
+        }, (error: any) => {
+            this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
+        });
+      },(error:any)=>{
+          this.licenseAgreement=true;
+          this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
+      })
+
     });
 
   }
