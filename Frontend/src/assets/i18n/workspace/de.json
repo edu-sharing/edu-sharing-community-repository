@@ -308,6 +308,7 @@
     "TOAST":{
       "FOLDER_ADDED":"Ordner wurde erstellt",
       "NODE_EXISTS_IN_COLLECTION":"Das Element {{name}} ist bereits in der Sammlung enthalten",
+      "VIEW_COLLECTION":"Sammlung anzeigen",
       "ADDED_TO_COLLECTION_MY":"{{count}} Material(ien) in {{collection}} hinzugefügt und darin nur für Sie sichtbar",
       "ADDED_TO_COLLECTION_SHARED":"{{count}} Material(ien) in {{collection}} hinzugefügt und darin für eingeladene Personen sichtbar",
       "ADDED_TO_COLLECTION_PUBLIC":"{{count}} Material(ien) in {{collection}} hinzugefügt und darin öffentlich sichtbar",
