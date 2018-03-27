@@ -387,6 +387,9 @@
          			<type>d:text</type>	
          		</property>
          	</properties>
+         	<mandatory-aspects>
+    			<aspect>ccm:eduscope</aspect>
+   			</mandatory-aspects>
        </type>
 	</types>
 

@@ -366,7 +366,7 @@
 				  	<preview style="width:100%;">
 		        </div>
 		        <div style="padding-top:40px;width:60%;float:left;font-weight:bold;">
-              		<cm:name caption="{{cm_toolname}}" placeholder="{{cm_toolname_placeholder}}" bottomCaption="" icon="build">
+              		<cclom:title caption="{{cm_toolname}}" placeholder="{{cm_toolname_placeholder}}" bottomCaption="" icon="build">
               	</div>
               	<div style="width:100%;float:left;">
               		<cclom:general_description type="textarea" placeholder="{{lom_prop_tool_description_placeholder}}">
@@ -592,6 +592,12 @@
 					<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 					<multiple>true</multiple>
 					<multiplejoin>AND</multiplejoin>
+				</property>	
+			</query>
+			<query join="AND"  id="tool_instances">
+				<basequery>TYPE:"ccm:tool_instance"</basequery>
+				<property name="url">
+					<statement>@ccm\:tool_instance_provider_url:"*${value}*"</statement>
 				</property>	
 			</query>
 			<query join="AND"  id="workspace">
