@@ -4,6 +4,21 @@
 ></user-profile>
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
 
+<div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
+<div class="card center-card card-scroll card-high card-wide card-action" *ngIf="licenseAgreement" [@cardAnimation]="licenseAgreement">
+  <div class="card-content">
+    <div class="card-title">{{'LICENSE_AGREEMENT.TITLE' | translate }}</div>
+    <div class="agreementGroup card-scroll">
+        <div class="agreement" [innerHTML]="licenseAgreementHTML"></div>
+    </div>
+    <div *ngIf="licenseAgreementHTML">
+      <input type="checkbox" class="filled-in" id="acceptLicenseAgreement" [(ngModel)]="acceptLicenseAgreement"><label for="acceptLicenseAgreement">{{'LICENSE_AGREEMENT.CHECKBOX' | translate}}</label>
+    </div>
+  </div>
+  <div class="card-action">
+    <a class="waves-effect waves-light btn" [class.disabled]="!acceptLicenseAgreement" (keyup.enter)="saveLicenseAgreement()" (click)="saveLicenseAgreement()">{{'LICENSE_AGREEMENT.ACCEPT' | translate }}</a>
+  </div>
+</div>
 <div class="dialog darken" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
@@ -65,7 +80,7 @@
          (keyup.enter)="editProfile()"
          tabindex="0"
          title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
-      <a *ngIf="showEditProfile && !editUrl && !isGuest" class="collection-item"
+      <a *ngIf="showEditProfile && canEditProfile && !editUrl && !isGuest" class="collection-item"
          (click)="openProfileDialog()"
          (keyup.enter)="openProfileDialog()"
          tabindex="0"

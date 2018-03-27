@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
 import {Toast} from "../../common/ui/toast";
-import {Router, Route, Params, ActivatedRoute} from "@angular/router";
+import {Router, Route, Params, ActivatedRoute, UrlSerializer} from "@angular/router";
 import {OAuthResult, LoginResult, AccessScope} from "../../common/rest/data-object";
 import {RouterComponent} from "../../router/router.component";
 import {TranslateService} from "@ngx-translate/core";
@@ -16,6 +16,7 @@ import {Scope} from "@angular/core/src/profile/wtf_impl";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {Helper} from "../../common/helper";
 import {RestHelper} from "../../common/rest/rest-helper";
+import {PlatformLocation} from "@angular/common";
 
 @Component({
   selector: 'workspace-login',
@@ -49,6 +50,8 @@ export class LoginComponent  implements OnInit{
   }
   constructor(private connector : RestConnectorService,
               private toast:Toast,
+              private platformLocation: PlatformLocation,
+              private urlSerializer:UrlSerializer,
               private router:Router,
               private translate:TranslateService,
               private configService:ConfigurationService,
@@ -158,7 +161,8 @@ export class LoginComponent  implements OnInit{
   private goToNext() {
     if(this.next){
       this.next=Helper.addGetParameter("fromLogin","true",this.next);
-      window.location.assign(this.next);
+      UIHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,this.next);
+      //window.location.assign(this.next);
     }
     else {
       this.router.navigate([UIConstants.ROUTER_PREFIX + this.configService.instant("loginDefaultLocation","workspace")]);
