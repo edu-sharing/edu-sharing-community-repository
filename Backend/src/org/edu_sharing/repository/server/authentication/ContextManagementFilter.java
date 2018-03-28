@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -54,6 +55,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			log.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" cleaning up");
 			
 			NodeServiceInterceptor.setEduSharingScope((String)null);
+			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod((String)null);
 			
 			/**
 			 * OAuth kill Session

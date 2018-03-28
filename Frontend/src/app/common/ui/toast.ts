@@ -21,6 +21,7 @@ export class Toast{
   private lastToastError: string;
   private lastToastErrorTime: number;
   private static MIN_TIME_BETWEEN_TOAST = 2000;
+  private linkCallback: Function;
   constructor(private toasty : ToastyService,
               private router : Router,
               private storage : TemporaryStorageService,
@@ -30,9 +31,10 @@ export class Toast{
   /**
    * Generates a toast message
    * @param message Translation-String of message
-   * @param parameters Additional parameter bindings for translation
+   * @param parameters Parameter bindings for translation
+   * @param additional: additional parameter objects {link:{caption:string,callback:Function}}
    */
-  public toast(message : string,parameters : Object = null,dialogTitle:string=null,dialogMessage:string=null,options : any = null) : void {
+  public toast(message : string,parameters : Object = null,dialogTitle:string=null,dialogMessage:string=null,additional : any = null) : void {
     if(this.lastToastMessage==message && (Date.now()-this.lastToastMessageTime)<Toast.MIN_TIME_BETWEEN_TOAST)
       return;
     this.lastToastMessage=message;
@@ -41,18 +43,21 @@ export class Toast{
       if(dialogTitle){
         text+='<br /><a onclick="window[\'toastComponent\'].openDetails()">'+this.translate.instant("DETAILS")+'</a>';
       }
+      if(additional && additional.link){
+          text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.translate.instant(additional.link.caption)+'</a>';
+          this.linkCallback=additional.link.callback;
+      }
       this.dialogParameters=parameters;
-      this.toasty.info(this.getToastOptions(text,options));
+      this.toasty.info(this.getToastOptions(text));
       this.dialogTitle=dialogTitle;
       this.dialogMessage=dialogMessage;
     });
   }
-
   private openDetails(buttons:DialogButton[]=null){
     this.onShowModal({title:this.dialogTitle,message:this.dialogMessage,translation:this.dialogParameters,buttons:buttons});
   }
 
-  private getToastOptions(text: string, options: any = null) {
+  private getToastOptions(text: string) {
     let timeout=8000 + UIAnimation.ANIMATION_TIME_NORMAL;
     return {
       title: "",

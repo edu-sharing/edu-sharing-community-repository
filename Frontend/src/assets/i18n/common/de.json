@@ -141,7 +141,7 @@
     "dimensions": "Bildgröße",
     "exif:dateTimeOriginal":"Aufnahmedatum",
     "cm:modified": "zuletzt geändert",
-    "cm:created": "erstellt",
+    "cm:created": "Erstellungsdatum",
     "cm:creator": "erstellt von",
     "cclom:title": "Titel",
     "cclom:general_keyword": "Schlagwörter",
@@ -296,7 +296,14 @@
     "AUTHOR_PERSON":"Autor & Beteiligte",
     "LICENSE":"Lizenz",
     "LICENSE_LINK":"Lizenz verwalten",
-    "CONTRIBUTOR_LINK":"Weitere Beteiligte"
+    "CONTRIBUTOR_LINK":"Weitere Beteiligte",
+    "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
+    "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern"
+  },
+  "LICENSE_AGREEMENT":{
+    "TITLE":"Nutzungsbedingungen",
+    "CHECKBOX":"Ich habe die oben genannten Bedingungen gelesen und akzeptiere diese",
+    "ACCEPT":"Akzeptieren & Fortfahren"
   },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",

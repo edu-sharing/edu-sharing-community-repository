@@ -126,30 +126,6 @@ export class NodeHelper{
     return error.status;
   }
 
-  /**
-   * Navigate to the workspace
-   * @param nodeService instance of NodeService
-   * @param router instance of Router
-   * @param login a result of the isValidLogin method
-   * @param node The node to open and show
-   */
-  public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node) {
-    nodeService.getNodeParents(node.ref.id).subscribe((data:ParentList)=>{
-      router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
-        {queryParams:{id:node.parent.id,file:node.ref.id,root:data.scope}});
-    });
-  }
-  /**
-   * Navigate to the workspace
-   * @param nodeService instance of NodeService
-   * @param router instance of Router
-   * @param login a result of the isValidLogin method
-   * @param folder The folder id to open
-   */
-  public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
-    router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
-      {queryParams:{id:folder}});
-  }
   public static getCollectionScopeInfo(collection : any) : any{
     let scope=collection.scope;
     let icon="help";
