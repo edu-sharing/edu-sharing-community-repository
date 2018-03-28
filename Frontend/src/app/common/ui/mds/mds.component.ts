@@ -1682,10 +1682,16 @@ export class MdsComponent{
     return html;
   }
   private renderLicense(widget: any) {
-
-    let html=`<div class="mdsLicense">
-          <a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">`+
-      this.translate.instant('MDS.LICENSE_LINK')+` <i class="material-icons">arrow_forward</i></a>`;
+    let html=`<div class="mdsLicense">`
+    let isSafe=this.connector.getCurrentLogin() && this.connector.getCurrentLogin().currentScope!=null;
+    if(isSafe || !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE)){
+        html+=`<div class="mdsNoPermissions">`+this.translate.instant('MDS.LICENSE_NO_PERMISSIONS'+(isSafe ? '_SAFE' : ''))+`</div>`;
+    }
+    else {
+        html += `<a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
+            this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>`;
+    }
+    html+=`</div>`;
     return html;
   }
 

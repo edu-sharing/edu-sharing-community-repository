@@ -239,7 +239,9 @@
     "AUTHOR_PERSON":"Autor & Beteiligte",
     "LICENSE":"Lizenz",
     "LICENSE_LINK":"Lizenz verwalten",
-    "CONTRIBUTOR_LINK":"Weitere Beteiligte"
+    "CONTRIBUTOR_LINK":"Weitere Beteiligte",
+    "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
+    "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern"
   },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",

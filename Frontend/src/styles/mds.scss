@@ -49,6 +49,12 @@ mds .mdsGroup{
     padding: 0!important;
     padding-bottom: 20px!important;
   }
+  .mdsNoPermissions{
+    color:$textLight;
+    font-size: 90%;
+    padding-top: 10px;
+    font-style: italic;
+  }
   .radioVertical label,
   .checkboxVertical label{
     width: 100%;
