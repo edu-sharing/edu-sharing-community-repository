@@ -1,6 +1,6 @@
 import {
-  Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-  HostListener, ChangeDetectorRef, ApplicationRef
+    Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
+    HostListener, ChangeDetectorRef, ApplicationRef, NgZone
 } from '@angular/core';
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";
@@ -70,6 +70,8 @@ export class NodeRenderComponent {
   private fromLogin = false;
   public banner: any;
   private repository: string;
+  private downloadButton: OptionItem;
+  private downloadUrl: string;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
@@ -172,6 +174,7 @@ export class NodeRenderComponent {
       private route : ActivatedRoute,
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
+      (window as any).ngRender = {setDownloadUrl:(url:string)=>{this.setDownloadUrl(url)}};
       Translation.initialize(translate,config,storage,route).subscribe(()=>{
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
@@ -196,6 +199,9 @@ export class NodeRenderComponent {
 
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
+    }
+    ngOnDestroy() {
+        (window as any).ngRender = null;
     }
 
   public static close() {
@@ -231,7 +237,6 @@ export class NodeRenderComponent {
       opt.push(o);
     }
     this.options=opt;
-    console.log(this._node);
     let download=new OptionItem('DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
     if(this.isCollectionRef()){
@@ -295,7 +300,10 @@ export class NodeRenderComponent {
   }
 
   private downloadCurrentNode() {
-    NodeHelper.downloadNode(this._node,this.version);
+    if(this.downloadUrl)
+      window.open(this.downloadUrl);
+    else
+      NodeHelper.downloadNode(this._node,this.version);
   }
 
   private openConnector(list:ConnectorList,newWindow=true) {
@@ -376,10 +384,15 @@ export class NodeRenderComponent {
   }
 
   private addDownloadButton(download: OptionItem) {
+    this.downloadButton=download;
     this.options.splice(0,0,download);
     this.checkConnector();
 
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
     this.isLoading=true;
+  }
+  setDownloadUrl(url:string){
+      this.downloadButton.isEnabled=url!=null;
+      this.downloadUrl=url;
   }
 }
