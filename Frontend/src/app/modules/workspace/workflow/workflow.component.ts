@@ -2,8 +2,8 @@ import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@an
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {
-  NodeWrapper, Node, IamUsers, WorkflowEntry, NodePermissions,
-  Permission, UserSimple
+    NodeWrapper, Node, IamUsers, WorkflowEntry, NodePermissions,
+    Permission, UserSimple, LoginResult
 } from "../../../common/rest/data-object";
 import {VCard} from "../../../common/VCard";
 import {Toast} from "../../../common/ui/toast";
@@ -163,7 +163,9 @@ export class WorkspaceWorkflowComponent  {
     private connector:RestConnectorService,
     private toast:Toast,
   ){
-    this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
+    this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+        this.connector.hasToolPermission(data.currentScope==null ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE).subscribe((has:boolean)=>this.globalAllowed=has);
+    })
   }
   private receiversChanged(){
       let prop=this.node.properties[RestConstants.CCM_PROP_WF_RECEIVER];
