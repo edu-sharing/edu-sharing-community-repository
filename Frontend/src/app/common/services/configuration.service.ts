@@ -38,7 +38,7 @@ export class ConfigurationService {
         observer.complete();
       },(error:any)=>{
         // no language available, so use a fixed string
-        this.toast.error(null,'Error fetching configuration data. Please contact administrator.<br />Fehler beim Abrufen der Konfigurationsdaten. Bitte Administrator kontaktieren.');
+        this.toast.error(error,'Error fetching configuration data. Please contact administrator.<br />Fehler beim Abrufen der Konfigurationsdaten. Bitte Administrator kontaktieren.');
         console.warn(error)
       });
     });

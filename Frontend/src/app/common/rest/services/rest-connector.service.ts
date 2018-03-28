@@ -305,86 +305,79 @@ export class RestConnectorService {
       }
     });
   }
+  private request(method:string,url:string,body:any,options:RequestOptionsArgs,appendUrl=true){
+      return new Observable<Response>((observer : Observer<Response>) => {
+          this.locator.locateApi().subscribe(data => {
+              this._lastActionTime=new Date().getTime();
+              this._currentRequestCount++;
+              let requestUrl=(appendUrl ? this.endpointUrl : '') + url;
+              let call=null;
+              if(method=='GET'){
+                call=this.http.get(requestUrl, options);
+              }
+              else if(method=='POST'){
+                  call=this.http.post(requestUrl,body, options);
+              }
+              else if(method=='PUT'){
+                  call=this.http.put(requestUrl,body, options);
+              }
+              else if(method=='DELETE'){
+                  call=this.http.delete(requestUrl, options);
+              }
+              else{
+                throw new Error("Unknown request method "+method);
+              }
+              call.subscribe(response => {
+                      this._currentRequestCount--;
+                      this.checkHeaders(response);
+                      observer.next(response);
+                      observer.complete();
+                  },
+                  error => {
+                      this._currentRequestCount--;
 
-  public get(url:string,options:RequestOptionsArgs,appendUrl=true) : Observable<Response>{
-    return new Observable<Response>((observer : Observer<Response>) => {
-      this.locator.locateApi().subscribe(data => {
-        this._lastActionTime=new Date().getTime();
-        this._currentRequestCount++;
-        this.http.get((appendUrl ? this.endpointUrl : '') + url, options).subscribe(response => {
-            this._currentRequestCount--;
-            this.checkHeaders(response);
-            observer.next(response);
-            observer.complete();
-        },
-        error => {
-          this._currentRequestCount--;
-          this.checkLogin(error);
-          observer.error(error);
-          observer.complete();
-        });
+                      if (!this._autoLogin) {
+
+                      }else if (error.status == RestConstants.HTTP_UNAUTHORIZED) {
+                          if(this.cordova.isRunningCordova() && options.headers.has('Authorization')){
+                            this.cordova.reinitStatus().subscribe(()=>{
+                              options.headers.set('Authorization','Bearer '+this.cordova.oauth.access_token);
+                              this.request(method,url,body,options,appendUrl).subscribe((data:Response)=>{
+                                console.log("reinit request succeeded");
+                                  observer.next(data);
+                                  observer.complete();
+                              },(error:any)=>{
+                                this.goToLogin();
+                                console.log("reinit request failed");
+                                observer.error(error);
+                                observer.complete();
+                              });
+                            });
+                            return;
+                          }
+                          else {
+                              this.goToLogin();
+                          }
+                      }
+
+
+                      observer.error(error);
+                      observer.complete();
+                  });
+          });
       });
-    });
+  }
+  public get(url:string,options:RequestOptionsArgs,appendUrl=true) : Observable<Response>{
+    return this.request('GET',url,null,options,appendUrl);
   }
   public post(url:string,body : any,options:RequestOptionsArgs) : Observable<Response>{
-    return new Observable<Response>((observer : Observer<Response>) => {
-      this.locator.locateApi().subscribe(data => {
-        this._lastActionTime=new Date().getTime();
-        this._currentRequestCount++;
-        this.http.post(this.endpointUrl + url,body, options).subscribe(response => {
-            this._currentRequestCount--;
-            this.checkHeaders(response);
-            observer.next(response);
-            observer.complete();
-          },
-        error => {
-          this._currentRequestCount--;
-          this.checkLogin(error);
-          observer.error(error);
-          observer.complete();
-        })
-      });
-    });
+    return this.request('POST',url,body,options);
   }
   public put(url:string,body : any,options:RequestOptionsArgs) : Observable<Response>{
-    return new Observable<Response>((observer : Observer<Response>) => {
-      this.locator.locateApi().subscribe(data => {
-        this._lastActionTime=new Date().getTime();
-        this._currentRequestCount++;
-        this.http.put(this.endpointUrl + url,body, options).subscribe(response => {
-            this._currentRequestCount--;
-            this.checkHeaders(response);
-            observer.next(response);
-            observer.complete();
-        },
-          error => {
-            this._currentRequestCount--;
-            this.checkLogin(error);
-            observer.error(error);
-            observer.complete();
-          });
-      });
-    });
+      return this.request('PUT',url,body,options);
   }
   public delete(url:string,options:RequestOptionsArgs) : Observable<Response>{
-    return new Observable<Response>((observer : Observer<Response>) => {
-      this.locator.locateApi().subscribe(data => {
-        this._lastActionTime=new Date().getTime();
-        this._currentRequestCount++;
-        this.http.delete(this.endpointUrl + url, options).subscribe(response => {
-            this._currentRequestCount--;
-            this.checkHeaders(response);
-            observer.next(response);
-            observer.complete();
-        },
-          error => {
-            this._currentRequestCount--;
-            this.checkLogin(error);
-            observer.error(error);
-            observer.complete();
-          });
-      });
-    });
+      return this.request('DELETE',url,null,options);
   }
 
   /**
@@ -438,22 +431,6 @@ export class RestConnectorService {
       baseURL+="/";
     return baseURL+this.endpointUrl;
   }
-
-  /**
-   * Check if login is invalid and redirect to login page
-   * @param error
-   * @returns {boolean} true if not logged in and redirected
-   */
-  private checkLogin(error: any) {
-    if (!this._autoLogin)
-      return false;
-    if (error.status == RestConstants.HTTP_UNAUTHORIZED) {
-      this.goToLogin();
-      return true;
-    }
-    return false;
-  }
-
   private notifyFrame(data: any,request:any, success : boolean) {
     let result={request:request,response:data,success:success};
     console.log(result);

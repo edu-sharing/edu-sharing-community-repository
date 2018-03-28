@@ -4,8 +4,10 @@ import { Observable, Observer, ConnectableObservable } from "rxjs";
 import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
 
 import { OAuthResult, LoginResult, NodeRef } from '../rest/data-object';
-import { Router } from '@angular/router';
 import { RestConstants } from '../rest/rest-constants';
+import {PlatformLocation} from "@angular/common";
+import {Helper} from "../helper";
+import {UIConstants} from "../ui/ui-constants";
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -51,8 +53,7 @@ export class CordovaService {
    * CONSTRUCTOR
    */
   constructor(
-    private http : Http,
-    private router : Router
+    private http : Http
   ) {
 
     this.initialHref = window.location.href;
@@ -922,20 +923,37 @@ export class CordovaService {
    * Cordova needs to refresh tokens
    */
   private reiniting=false;
-  public reinitStatus(){
-    console.info("cordova: reinit");
-    if(this.reiniting) return;
-    console.log("cordova: refresh oAuth");
-    this.reiniting=true;
-      this.refreshOAuth(this.oauth).subscribe(()=>{
-          console.info("cordova: oauth OK, do reload");
-          this.reiniting=false;
-          window.location.reload();
-      },(error:any)=>{
-        this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
-        this.clearAllCookies();
-        console.warn("cordova: invalid oauth, go back to server selection");
-        this.restartCordova();
+  public reinitStatus():Observable<void>{
+      return new Observable<void>((observer: Observer<void>) => {
+
+          console.info("cordova: reinit");
+
+          if(this.reiniting) {
+              let interval=setInterval(()=>{
+                  console.log("cordova: wait for reinit finish");
+                  if(!this.reiniting){
+                      clearInterval(interval);
+                      observer.next(null);
+                      observer.complete();
+                  }
+              },50);
+              return;
+          }
+          console.log("cordova: refresh oAuth");
+          this.reiniting = true;
+          this.refreshOAuth(this.oauth).subscribe(() => {
+              console.info("cordova: oauth OK");
+              this.reiniting = false;
+              observer.next(null);
+              observer.complete();
+          }, (error: any) => {
+              observer.error(null);
+              observer.complete();
+              this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
+              this.clearAllCookies();
+              console.warn("cordova: invalid oauth, go back to server selection");
+              this.restartCordova();
+          });
       });
   }
 
