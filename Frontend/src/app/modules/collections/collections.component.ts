@@ -46,12 +46,6 @@ import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
 
-// data class for breadcrumbs
-export class Breadcrumb {
-    ref:EduData.Reference;
-    name:string;
-}
-
 // component class
 @Component({
   selector: 'app-collections',
@@ -558,11 +552,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
         // remember actual collection as breadcrumb
         if (!this.isRootLevelCollection()) {
-
-            let crumb = new Breadcrumb();
-            crumb.ref = this.collectionContent.collection.ref;
-            crumb.name =this.collectionContent.collection.title;
-            this.parentCollectionId = crumb.ref;
+            this.parentCollectionId = this.collectionContent.collection.ref;
         }
 
         // set thru router so that browser back button can work
