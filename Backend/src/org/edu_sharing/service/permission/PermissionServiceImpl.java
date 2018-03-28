@@ -590,6 +590,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES) && hasAll) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
 		}
+		if (NodeServiceInterceptor.getEduSharingScope()!=null && hasAll) {
+			throw new SecurityException("Inviting of "+CCConstants.AUTHORITY_GROUP_EVERYONE+" is not allowed in scope "+NodeServiceInterceptor.getEduSharingScope());
+		}
 		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && hasUsers && !shared) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
 		}
