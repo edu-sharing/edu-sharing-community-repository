@@ -430,7 +430,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       }
       else {
         this.collectionService.addNodeToCollection(target.ref.id, source.ref.id).subscribe(() => {
-          UIHelper.showAddedToCollectionToast(this.toast, target, 1);
+          UIHelper.showAddedToCollectionToast(this.toast,this.router, target, 1);
           if (event.type == 'copy') {
             this.globalProgress = false;
             this.refreshContent();

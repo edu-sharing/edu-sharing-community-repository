@@ -535,7 +535,13 @@ export class SearchComponent {
     this.globalProgress=true;
     this.nodeApi.importNode(node.ref.repo,node.ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
       this.globalProgress=false;
-      this.toast.toast('SEARCH.NODE_IMPORTED',{link:this.getWorkspaceUrl(data.node)});
+      this.toast.toast('SEARCH.NODE_IMPORTED',null,null,null,
+          {link:
+                        {caption:'SEARCH.NODE_IMPORTED_VIEW',
+                         callback:()=>{
+                            UIHelper.goToWorkspace(this.nodeApi,this.router,this.login,data.node);
+                        }}
+      });
     },(error:any)=>{
       this.toast.error(error);
       this.globalProgress=false;
@@ -708,6 +714,10 @@ export class SearchComponent {
   }
   private prepare(param:any) {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
+      if (data.isValidLogin && data.currentScope != null) {
+          RestHelper.goToLogin(this.router,this.config);
+          return;
+      }
       this.login=data;
       this.isGuest = data.isGuest;
       this.updateMdsActions();
@@ -896,7 +906,7 @@ export class SearchComponent {
   }
   private goToSaveSearchWorkspace() {
     this.nodeApi.getNodeMetadata(RestConstants.SAVED_SEARCH).subscribe((data:NodeWrapper)=>{
-      NodeHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.login,data.node.ref.id);
+      UIHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.login,data.node.ref.id);
     });
   }
   private loadSavedSearch() {

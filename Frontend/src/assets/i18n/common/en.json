@@ -130,7 +130,7 @@
     "dimensions": "Image size",
     "exif:dateTimeOriginal":"Recording date",
     "cm:modified": "Last change",
-    "cm:created": "Created",
+    "cm:created": "Creation date",
     "cm:creator": "Created by",
     "cclom:title": "Title",
     "cclom:general_keyword": "Key words",
@@ -284,7 +284,14 @@
     "AUTHOR_PERSON":"Author & Contributors",
     "LICENSE":"License",
     "LICENSE_LINK":"Manage license",
-    "CONTRIBUTOR_LINK":"Additional Contributors"
+    "CONTRIBUTOR_LINK":"Additional Contributors",
+    "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
+    "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment"
+  },
+  "LICENSE_AGREEMENT":{
+    "TITLE":"License agreement",
+    "CHECKBOX":"I read the license agreement and accept it",
+    "ACCEPT":"Accept & Continue"
   },
   "TOAST":{
     "NODE_LOCKED":"The document is currently used by an other user and can not be opened",

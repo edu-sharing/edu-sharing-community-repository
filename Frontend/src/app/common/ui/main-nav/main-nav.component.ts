@@ -5,7 +5,10 @@ import {
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
 import {RestIamService} from "../../rest/services/rest-iam.service";
-import {IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList} from "../../rest/data-object";
+import {
+    IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList,
+    NodeTextContent, NodeWrapper, Node
+} from '../../rest/data-object';
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../../router/router.component";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
@@ -23,6 +26,9 @@ import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {CordovaService} from '../../services/cordova.service';
+import {SessionStorageService} from "../../services/session-storage.service";
+import {RestNodeService} from "../../rest/services/rest-node.service";
+import {Translation} from "../../translation";
 
 @Component({
   selector: 'main-nav',
@@ -31,6 +37,7 @@ import {CordovaService} from '../../services/cordova.service';
   animations: [
     trigger('fromLeft', UIAnimation.fromLeft()),
     trigger('overlay', UIAnimation.openOverlay()),
+    trigger('cardAnimation', UIAnimation.cardAnimation()),
     trigger('fade', UIAnimation.fade()),
     trigger('nodeStore', [
       transition(':enter', [
@@ -72,6 +79,11 @@ export class MainNavComponent {
   public showNodeStore=false;
   private nodeStoreCount = 0;
   private static bannerPositionInterval: any;
+  acceptLicenseAgreement: boolean;
+  licenseAgreement: boolean;
+  licenseAgreementHTML: string;
+  canEditProfile: boolean;
+  private licenseAgreementNode: Node;
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
   }
@@ -162,6 +174,8 @@ export class MainNavComponent {
     let vertical=event.changedTouches[0].clientY-this.touchStart.changedTouches[0].clientY;
     let horizontalRelative=horizontal/window.innerWidth;
     if(Math.abs(horizontal)/Math.abs(vertical)<5)
+      return;
+    if(this._currentScope=='render')
       return;
     if(this.touchStart.changedTouches[0].clientX<window.innerWidth/7){
       if(horizontalRelative>0.2){
@@ -289,8 +303,10 @@ export class MainNavComponent {
               private cordova : CordovaService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
+              private nodeService : RestNodeService,
               private configService : ConfigurationService,
               private storage : TemporaryStorageService,
+              private session : SessionStorageService,
               private http : Http,
               private org : RestOrganizationService,
               private router : Router,
@@ -338,6 +354,7 @@ export class MainNavComponent {
         this._showUser=this.currentScope!='login' && this.showUser;
         this.iam.getUser().subscribe((user : IamUser) => {
           this.user=user;
+          this.canEditProfile=user.editProfile;
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
@@ -484,6 +501,7 @@ export class MainNavComponent {
       this.whatsNewUrl=this.configService.instant("whatsNewUrl",this.whatsNewUrl);
       this.hideButtons(buttons);
       this.addButtons(buttons);
+      this.showLicenseAgreement();
     },(error:any)=>this.hideButtons(buttons));
   }
 
@@ -507,5 +525,43 @@ export class MainNavComponent {
   }
   getIconSource() {
     return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
+  }
+  saveLicenseAgreement(){
+    this.licenseAgreement=false;
+    if(this.licenseAgreementNode)
+      this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
+  }
+  private showLicenseAgreement() {
+    if(!this.config.licenseAgreement || this.isGuest)
+      return;
+    this.session.get('licenseAgreement',false).subscribe((version:string)=>{
+      this.licenseAgreementHTML=null;
+      let nodeId:string=null;
+      for(let node of this.config.licenseAgreement.nodeId) {
+        if(node.language==null)
+          nodeId=node.value;
+        if(node.language==Translation.getLanguage()){
+          nodeId=node.value;
+          break;
+        }
+      }
+      this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
+        this.licenseAgreementNode=data.node;
+        console.log(data.node);
+        if(version==data.node.contentVersion)
+          return;
+        this.licenseAgreement=true;
+        this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
+            this.licenseAgreementHTML = data.html ? data.html : data.raw ? data.raw : data.text;
+        }, (error: any) => {
+            this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
+        });
+      },(error:any)=>{
+          this.licenseAgreement=true;
+          this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
+      })
+
+    });
+
   }
 }

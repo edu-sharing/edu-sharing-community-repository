@@ -299,6 +299,7 @@ export class ListTableComponent implements EventListener{
   private dropdownBottom : string;
   private dropdownRight : string;
   @ViewChild('dropdown') dropdownElement : ElementRef;
+  @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
 
 
@@ -600,6 +601,7 @@ export class ListTableComponent implements EventListener{
       this.onUpdateOptions.emit(node);
       setTimeout(()=>{
         UIHelper.setFocusOnDropdown(this.dropdownElement);
+        UIHelper.scrollSmoothElement(0,this.dropdownContainerElement.nativeElement);
       });
     }
 

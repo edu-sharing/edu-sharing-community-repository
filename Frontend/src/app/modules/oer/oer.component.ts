@@ -65,53 +65,54 @@ export class OerComponent {
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('SEARCH.TITLE',title,translate,config);
+          for(let i=0;i<this.TYPE_COUNT;i++) {
+              this.columns.push([]);
+              this.updateOptions(i)
+              this.nodes.push([]);
+          }
+
+          this.columns[this.COLLECTIONS].push(new ListItem("NODE",RestConstants.CM_NAME));
+          this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'info'));
+          this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'scope'));
+          this.mdsService.getSet().subscribe((mds:any)=>{
+              this.columns[this.MATERIALS]=MdsHelper.getColumns(mds,'search');
+          });
+          /*
+          this.config.get("searchColumns").subscribe((data:any)=>{
+            this.columns[this.MATERIALS]=[];
+            if(data && data.length){
+              for(let item of data){
+                this.columns[this.MATERIALS].push(new ListItem("NODE",item));
+              }
+            }
+            else{
+              this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CM_NAME));
+              this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
+              this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_LICENSE));
+              this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
+            }
+          });
+          //this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
+          */
+          this.columns[this.TOOLS].push(new ListItem("NODE",RestConstants.CM_NAME));
+          this.columns[this.TOOLS].push(new ListItem("NODE",RestConstants.LOM_PROP_DESCRIPTION));
+
+          this.connector.numberPerRequest=20;
+          for(let i=0;i<this.TYPE_COUNT;i++){
+              this.offsets[i]=0;
+              this.nodes[i]=[];
+              this.showMore[i]=false;
+              this.hasMore[i]=false;
+          }
+
+          this.route.queryParams.forEach((params: Params) => {
+              for (let i = 0; i < this.TYPE_COUNT; i++) {
+                  this.showMore[i] = params['showMore' + i]=='true';
+              }
+              this.search(params["query"]?params["query"]:"");
+          });
       });
-      for(let i=0;i<this.TYPE_COUNT;i++) {
-        this.columns.push([]);
-        this.updateOptions(i)
-        this.nodes.push([]);
-      }
 
-    this.columns[this.COLLECTIONS].push(new ListItem("NODE",RestConstants.CM_NAME));
-    this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'info'));
-    this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'scope'));
-    this.mdsService.getSet().subscribe((mds:any)=>{
-      this.columns[this.MATERIALS]=MdsHelper.getColumns(mds,'search');
-    });
-    /*
-    this.config.get("searchColumns").subscribe((data:any)=>{
-      this.columns[this.MATERIALS]=[];
-      if(data && data.length){
-        for(let item of data){
-          this.columns[this.MATERIALS].push(new ListItem("NODE",item));
-        }
-      }
-      else{
-        this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CM_NAME));
-        this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
-        this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_LICENSE));
-        this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
-      }
-    });
-    //this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
-    */
-    this.columns[this.TOOLS].push(new ListItem("NODE",RestConstants.CM_NAME));
-    this.columns[this.TOOLS].push(new ListItem("NODE",RestConstants.LOM_PROP_DESCRIPTION));
-
-    this.connector.numberPerRequest=20;
-      for(let i=0;i<this.TYPE_COUNT;i++){
-        this.offsets[i]=0;
-        this.nodes[i]=[];
-        this.showMore[i]=false;
-        this.hasMore[i]=false;
-      }
-
-    this.route.queryParams.forEach((params: Params) => {
-      for (let i = 0; i < this.TYPE_COUNT; i++) {
-          this.showMore[i] = params['showMore' + i]=='true';
-      }
-      this.search(params["query"]?params["query"]:"");
-    });
     setInterval(()=>this.updateHasMore(),1000);
    }
    private goToCollections(){

@@ -1,6 +1,6 @@
 @import "./variables";
 
-
+$cardActionHeight:77px;
 
 .dialog{
   width:100%;
@@ -27,16 +27,17 @@
   left:50%;
   margin: auto!important;
   margin-left:-250px!important;
-  padding-bottom: 20px;
 }
 
-.card-content{
-  height: calc(100% - 50px);
+.card .card-content{
+  height: calc(100% - #{$cardActionHeight});
+  margin-bottom: 0;
 }
 .card .card-action {
   display: flex;
   align-items: end;
   justify-items: right;
+  min-height: $cardActionHeight;
   /* justify-content: space-between; */
   flex-direction: row-reverse;
   a {
@@ -69,6 +70,7 @@
 .card-title{
   word-break: break-all;
   max-height: 48px;
+  align-items: start;
   overflow: hidden;
   display:flex;
   align-items:center;
@@ -106,9 +108,6 @@ input[type=search]{
   background: #fff;
   border:1px solid $searchInputBorderColor;
   padding:0 10px;
-}
-.card-high .card-content{
-  height:calc(100% - 55px);
 }
 .card-high{
   top:10%;
@@ -202,7 +201,6 @@ input[type=search]{
 @mixin fullsizeCard(){
   position:fixed;
   width:100%;
-  padding-bottom: 25px;
   left:0%;
   margin-left:0!important;
 }

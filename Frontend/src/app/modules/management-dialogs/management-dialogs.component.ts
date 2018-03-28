@@ -14,6 +14,7 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'workspace-management',
@@ -120,6 +121,7 @@ export class WorkspaceManagementDialogsComponent  {
     private config:ConfigurationService,
     private searchService:RestSearchService,
     private toast:Toast,
+    private router:Router,
   ){
    }
    private closeAddToCollection(){
@@ -276,7 +278,7 @@ export class WorkspaceManagementDialogsComponent  {
       this.dialogTitle=null;
     }
     this.globalProgress=true;
-    UIHelper.addToCollection(this.collectionService,this.toast,collection,list,()=>{
+    UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,list,()=>{
       this.globalProgress=false;
       if(callback)
         callback();
