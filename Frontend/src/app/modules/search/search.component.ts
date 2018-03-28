@@ -714,6 +714,10 @@ export class SearchComponent {
   }
   private prepare(param:any) {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
+      if (data.isValidLogin && data.currentScope != null) {
+          RestHelper.goToLogin(this.router,this.config);
+          return;
+      }
       this.login=data;
       this.isGuest = data.isGuest;
       this.updateMdsActions();
