@@ -40,6 +40,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
+import {Location} from "@angular/common";
 import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
@@ -117,6 +118,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       public gwtInterface:GwtInterfaceService,
       private frame : FrameEventsService,
       private temporaryStorageService : TemporaryStorageService,
+        private location : Location,
         private collectionService : RestCollectionService,
         private nodeService : RestNodeService,
         private organizationService : RestOrganizationService,
@@ -597,7 +599,7 @@ export class CollectionsMainComponent implements GwtEventListener {
          */
         if(data.node.access.indexOf(RestConstants.ACCESS_DELETE)!=-1) {
           this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
-            NodeRenderComponent.close();
+            NodeRenderComponent.close(this.location);
           })));
         }
         // set content for being displayed in detail

@@ -20,6 +20,7 @@ import {Title} from "@angular/platform-browser";
 import {SessionStorageService} from "../../services/session-storage.service";
 import {RestConnectorsService} from "../../rest/services/rest-connectors.service";
 import {trigger} from "@angular/animations";
+import {Location} from "@angular/common";
 import {NodeHelper} from "../node-helper";
 import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIConstants} from "../ui-constants";
@@ -135,7 +136,7 @@ export class NodeRenderComponent {
           }
           else {
             this.searchService.reinit=false;
-            NodeRenderComponent.close();
+            NodeRenderComponent.close(this.location);
           }
         }
       }
@@ -161,6 +162,7 @@ export class NodeRenderComponent {
     }
     constructor(
       private translate : TranslateService,
+      private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
       private connectors : RestConnectorsService,
@@ -204,8 +206,8 @@ export class NodeRenderComponent {
         (window as any).ngRender = null;
     }
 
-  public static close() {
-    window.history.back();
+  public static close(location:Location) {
+    location.back();
   }
   public switchPosition(pos:number){
     //this.router.navigate([UIConstants.ROUTER_PREFIX+"render",this.list[pos].ref.id]);
