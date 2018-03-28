@@ -116,17 +116,22 @@ public class SearchServiceImpl implements SearchService {
 		for (NodeRef node : refs) {
 			if (result.contains(node))
 				continue;
-			ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
-			if (permissions != null && permissions.length > 0) {
-				boolean add = false;
-				for (ACE perm : permissions) {
-					if (perm.isInherited())
-						continue;
-					add = true;
-					break;
+			try {
+				ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
+				if (permissions != null && permissions.length > 0) {
+					boolean add = false;
+					for (ACE perm : permissions) {
+						if (perm.isInherited())
+							continue;
+						add = true;
+						break;
+					}
+					if (add)
+						result.add(node);
 				}
-				if (add)
-					result.add(node);
+			}catch(Throwable t) {
+				logger.info("Error fetching permissions for node "+node.getId()+". It's may deleted or the user has no more permissions");
+				t.printStackTrace();
 			}
 		}
 
@@ -186,7 +191,10 @@ public class SearchServiceImpl implements SearchService {
 				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
 		List<NodeRef> result = convertNotifysToObjects(resultSet.getNodeRefs());
-
+		Set<String> memberships = new HashSet<>();
+		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
+		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+		
 		return AuthenticationUtil.runAsSystem(new RunAsWork<List<NodeRef>>() {
 			@Override
 			public List<NodeRef> doWork() throws Exception {
@@ -196,17 +204,22 @@ public class SearchServiceImpl implements SearchService {
 						continue;
 					if (node.getId().equals(homeFolder))
 						continue;
-					ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
-					if (permissions != null && permissions.length > 0) {
-						boolean add = false;
-						for (ACE perm : permissions) {
-							if (!perm.isInherited() && perm.getAuthority().equals(username)) {
-								add = true;
-								break;
+					try {
+						ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
+						if (permissions != null && permissions.length > 0) {
+							boolean add = false;
+							for (ACE perm : permissions) {
+								if (!perm.isInherited() && (perm.getAuthority().equals(username) || memberships.contains(perm.getAuthority()))) {
+									add = true;
+									break;
+								}
 							}
+							if (add)
+								refs.add(node);
 						}
-						if (add)
-							refs.add(node);
+					}catch(Throwable t) {
+						logger.info("Error fetching permissions for node "+node.getId()+". It's may deleted or the user has no more permissions");
+						t.printStackTrace();
 					}
 				}
 				return refs;
