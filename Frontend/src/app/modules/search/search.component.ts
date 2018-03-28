@@ -722,11 +722,14 @@ export class SearchComponent {
 
   private prepare(param:any) {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
-      //if (data.isValidLogin && data.currentScope == null) {
+      if (data.isValidLogin && data.currentScope != null) {
+          UIHelper.goToLogin(this.router,this.config);
+          return;
+      }
       this.mds.getSet(this.mdsId,this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository).subscribe((data:any)=>{
         this.currentMdsSet=data;
         this.updateColumns();
-      })
+      });
       this.isGuest = data.isGuest;
       this.hasCheckbox=!this.isGuest;
       this.options=[];
