@@ -228,10 +228,10 @@ export class WorkspaceMainComponent{
     ) {
         Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
             UIHelper.setTitle('WORKSPACE.TITLE',title,translate,config);
+            this.initialize();
         });
         this.connector.setRoute(this.route);
         this.globalProgress=true;
-        this.initialize();
         this.explorerOptions=this.getOptions([new Node()],true);
         //this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }

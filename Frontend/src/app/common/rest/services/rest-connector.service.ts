@@ -73,6 +73,9 @@ export class RestConnectorService {
     this.numberPerRequest=RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
     event.addListener(this);
   }
+  public getCordovaService(){
+    return this.cordova;
+  }
   public onEvent(event:string,request:any){
     if(event==FrameEventsService.EVENT_UPDATE_SESSION_TIMEOUT) {
       this._lastActionTime=new Date().getTime();
@@ -137,6 +140,21 @@ export class RestConnectorService {
                     this.event.broadcastEvent(FrameEventsService.EVENT_UPDATE_LOGIN_STATE, data);
                     this.storage.set(TemporaryStorageService.SESSION_INFO, data);
                     this._logoutTimeout = data.sessionTimeout;
+                    if(data.statusCode!=RestConstants.STATUS_CODE_OK && this.cordova.isRunningCordova()){
+                      this.cordova.reinitStatus().subscribe(()=>{
+                        this.isLoggedIn().subscribe((data:LoginResult)=>{
+                                observer.next(data);
+                                observer.complete();
+                            },(error:any)=>{
+                                observer.error(error);
+                                observer.complete();
+                            });
+                      },(error:any)=>{
+                          observer.error(error);
+                          observer.complete();
+                      });
+                      return;
+                    }
                     observer.next(data);
                     observer.complete();
                 },
