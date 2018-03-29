@@ -45,10 +45,7 @@ export class Toast{
       if(dialogTitle){
         text+='<br /><a onclick="window[\'toastComponent\'].openDetails()">'+this.translate.instant("DETAILS")+'</a>';
       }
-      if(additional && additional.link){
-          text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.translate.instant(additional.link.caption)+'</a>';
-          this.linkCallback=additional.link.callback;
-      }
+      text=this.handleAdditional(text,additional);
       this.dialogParameters=parameters;
       this.toasty.info(this.getToastOptions(text));
       this.dialogTitle=dialogTitle;
@@ -86,7 +83,7 @@ export class Toast{
   /**
    * Generates a toast error message
    */
-  public error(errorObject : any,message="COMMON_API_ERROR",parameters: any = null,dialogTitle='',dialogMessage='') : void {
+  public error(errorObject : any,message="COMMON_API_ERROR",parameters: any = null,dialogTitle='',dialogMessage='',additional : any = null) : void {
     let errorInfo="";
     let error=errorObject;
     let jsonParse=null;
@@ -196,6 +193,7 @@ export class Toast{
       if (this.dialogTitle) {
         text += '<br /><a onclick="window[\'toastComponent\'].openDetails()">' + this.translate.instant("DETAILS") + '</a>';
       }
+      text=this.handleAdditional(text,additional);
       this.toasty.error(this.getToastOptions(text))
     });
 
@@ -205,5 +203,13 @@ export class Toast{
   }
   onShowModalDialog(param:Function) {
     this.onShowModal=param;
+  }
+
+  private handleAdditional(text:string,additional: any) {
+      if(additional && additional.link){
+          text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.translate.instant(additional.link.caption)+'</a>';
+          this.linkCallback=additional.link.callback;
+      }
+      return text;
   }
 }
