@@ -308,6 +308,7 @@
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",
     "FIELD_REQUIRED":"Das Feld {{ name }} muss ausgefüllt sein",
+    "NO_CONNECTION":"Instabile Internetverbindung, Inhalt konnte nicht geladen werden. Bitte später erneut versuchen",
     "API_FORBIDDEN":"Keine Rechte, um auf diesen Inhalt zuzugreifen",
     "API_FORBIDDEN_LOGIN":"Bitte anmelden, um auf diesen Bereich zuzugreifen"
   },

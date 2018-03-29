@@ -4,8 +4,10 @@ import { Observable, Observer, ConnectableObservable } from "rxjs";
 import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
 
 import { OAuthResult, LoginResult, NodeRef } from '../rest/data-object';
-import { Router } from '@angular/router';
 import { RestConstants } from '../rest/rest-constants';
+import {PlatformLocation} from "@angular/common";
+import {Helper} from "../helper";
+import {UIConstants} from "../ui/ui-constants";
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -31,6 +33,7 @@ export class CordovaService {
 
   private _oauth:OAuthResult;
   public endpointUrl:string;
+  private serviceIsReady = false;
 
   private lastShareTS:number = 0;
 
@@ -53,8 +56,7 @@ export class CordovaService {
    * CONSTRUCTOR
    */
   constructor(
-    private http : Http,
-    private router : Router
+    private http : Http
   ) {
 
     this.initialHref = window.location.href;
@@ -94,7 +96,7 @@ export class CordovaService {
     if ((this.forceCordovaMode) && (!this.isReallyRunningCordova())) {
       console.log("SIMULATED deviceready event in FORCED CORDOVA MODE (just use during development)");
       setTimeout(this.whenDeviceIsReady,500+Math.random()*1000);
-    } else {
+    } else if(this.isReallyRunningCordova()) {
       this.deviceReadyLoop(1);
     }
 
@@ -418,12 +420,12 @@ export class CordovaService {
   }
 
   /*  
-    * Set a callback function to be called then device is ready for codrova action.
+    * Set a callback function to be called then device is ready for cordova service action.
     */
-  subscribeDeviceReady() : Observable<void> {
+  subscribeServiceReady() : Observable<void> {
     return new Observable<void>((observer: Observer<void>) => {
 
-      if (this.deviceIsReady) {
+      if (this.serviceIsReady) {
 
         // cordova already signaled that it is ready - call on the spot
         observer.next(null);
@@ -432,7 +434,7 @@ export class CordovaService {
       } else {
 
         let waitLoop = () => {
-          if (this.deviceIsReady) {
+          if (this.serviceIsReady) {
             observer.next(null);
             observer.complete();
           } else {
@@ -664,6 +666,7 @@ export class CordovaService {
         this._oauth = (data!=null) ? JSON.parse(data) : null;
         this.getPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,(data:string)=>{
             this.endpointUrl=data;
+            this.serviceIsReady=true;
         });
     });
   }
@@ -858,7 +861,7 @@ export class CordovaService {
    * Android: https://github.com/wymsee/cordova-HTTP
    */
 
-   downloadContent(downloadURL:string, fileName:string, winCallback:Function, failCallback:Function) : void {
+   downloadContent(downloadURL:string, fileName:string, winCallback:Function=null, failCallback:Function=null) : void {
 
      try {
 
@@ -894,19 +897,19 @@ export class CordovaService {
                console.log("302 Redirect Resolved to: " + redirectURL);
                this.startContentDownload(redirectURL, fileName, winCallback, failCallback);
              } else {
-               failCallback("FAIL on redirect resolution", response);
+               if(failCallback) failCallback("FAIL on redirect resolution", response);
              }
            });
 
          }
 
        }, (error: any) => {
-         failCallback("FAIL No Permission: WRITE_EXTERNAL_STORAGE", error);
+           if(failCallback) failCallback("FAIL No Permission: WRITE_EXTERNAL_STORAGE", error);
        });
 
 
      } catch (e) {
-       failCallback("EXCEPTION on downloadContent", e);
+       if(failCallback) failCallback("EXCEPTION on downloadContent", e);
      }
 
    } 
@@ -923,9 +926,9 @@ export class CordovaService {
        // iOS
        var fileTransfer:any = new (window as any).FileTransfer();
        fileTransfer.download(downloadURL, filePath, (result:any)=>{
-        winCallback(filePath);
+        if(winCallback) winCallback(filePath);
        }, (err:any) => {
-        failCallback("FAIL startContentDownload IOS", err);
+        if(failCallback) failCallback("FAIL startContentDownload IOS", err);
        }, true, {});
        
      } else {
@@ -933,12 +936,12 @@ export class CordovaService {
        // Android
        (window as any).cordovaHTTP.acceptAllCerts(true, () => {
          (window as any).CordovaHttpPlugin.downloadFile(downloadURL, {}, {}, filePath, function (result: any) {
-           winCallback(filePath);
+           if(winCallback) winCallback(filePath);
          }, function (response: any) {
-           failCallback("FAIL startContentDownload ANDROID", response);
+           if(failCallback) failCallback("FAIL startContentDownload ANDROID", response);
          });
        }, (error: any) => {
-         failCallback("FAIL accepting all certs", error);
+         if(failCallback) failCallback("FAIL accepting all certs", error);
        });
 
      }
@@ -1095,20 +1098,37 @@ export class CordovaService {
    * Cordova needs to refresh tokens
    */
   private reiniting=false;
-  public reinitStatus(){
-    console.info("cordova: reinit");
-    if(this.reiniting) return;
-    console.log("cordova: refresh oAuth");
-    this.reiniting=true;
-      this.refreshOAuth(this.oauth).subscribe(()=>{
-          console.info("cordova: oauth OK, do reload");
-          this.reiniting=false;
-          window.location.reload();
-      },(error:any)=>{
-        this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
-        this.clearAllCookies();
-        console.warn("cordova: invalid oauth, go back to server selection");
-        this.restartCordova();
+  public reinitStatus():Observable<void>{
+      return new Observable<void>((observer: Observer<void>) => {
+
+          console.info("cordova: reinit");
+
+          if(this.reiniting) {
+              let interval=setInterval(()=>{
+                  console.log("cordova: wait for reinit finish");
+                  if(!this.reiniting){
+                      clearInterval(interval);
+                      observer.next(null);
+                      observer.complete();
+                  }
+              },50);
+              return;
+          }
+          console.log("cordova: refresh oAuth");
+          this.reiniting = true;
+          this.refreshOAuth(this.oauth).subscribe(() => {
+              console.info("cordova: oauth OK");
+              this.reiniting = false;
+              observer.next(null);
+              observer.complete();
+          }, (error: any) => {
+              observer.error(null);
+              observer.complete();
+              this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
+              this.clearAllCookies();
+              console.warn("cordova: invalid oauth, go back to server selection");
+              this.restartCordova();
+          });
       });
   }
 

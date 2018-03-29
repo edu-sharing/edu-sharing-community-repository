@@ -9,6 +9,7 @@ import {DialogButton} from "./modal-dialog/modal-dialog.component";
 import {UIConstants} from "./ui-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "./ui-animation";
+import {CordovaService} from "../services/cordova.service";
 
 @Injectable()
 export class Toast{
@@ -25,6 +26,7 @@ export class Toast{
   constructor(private toasty : ToastyService,
               private router : Router,
               private storage : TemporaryStorageService,
+              private cordova : CordovaService,
               private translate : TranslateService){
     (window as any)['toastComponent']=this;
   }
@@ -161,7 +163,7 @@ export class Toast{
       }
       else if (errorObject.status == RestConstants.HTTP_FORBIDDEN) {
         message = "TOAST.API_FORBIDDEN";
-        this.dialogTitle = '';
+        this.dialogTitle = null;
 
         let login=this.storage.get(TemporaryStorageService.SESSION_INFO);
         if(login && login.isGuest){
@@ -181,6 +183,10 @@ export class Toast{
           parameters = {};
         parameters["error"] = error;
       }
+    }
+    if(error && error.status==0 && this.cordova.isRunningCordova()){
+        message='TOAST.NO_CONNECTION';
+        this.dialogTitle = null;
     }
     if(this.lastToastError==message && (Date.now()-this.lastToastErrorTime)<Toast.MIN_TIME_BETWEEN_TOAST)
       return;

@@ -64,9 +64,9 @@ export class LoginAppComponent  implements OnInit {
         }
 
         // 1. Wait until Cordova is Ready
-        this.cordova.subscribeDeviceReady().subscribe(()=>{
+        this.cordova.subscribeServiceReady().subscribe(()=>{
 
-            console.log("Cordova: Device is READY");
+            console.log("Cordova: Service is READY");
 
             // app startup, cordova has valid data ? 
             // -> go to default location (this will check oauth)
@@ -227,6 +227,7 @@ export class LoginAppComponent  implements OnInit {
                     whenUrlIsWorking(win);
                 },
                 (error) => {
+                    console.log("url check failed for "+url2check);
                     this.isLoading = false;
                     this.toast.error(null, "LOGIN.ERROR");
                 }
