@@ -186,9 +186,19 @@ export class NodeHelper{
     return collection[item];
   }
 
-  public static downloadUrl(cordova:CordovaService,url:string,fileName="download"){
+  public static downloadUrl(toast:Toast,cordova:CordovaService,url:string,fileName="download"){
     if(cordova.isRunningCordova()){
-        cordova.downloadContent(url,fileName);
+        toast.toast('TOAST.DOWNLOAD_STARTED',{name:fileName});
+        cordova.downloadContent(url,fileName,(deviceFileName:string)=>{
+            toast.toast('TOAST.DOWNLOAD_FINISHED',{name:fileName});
+        },()=>{
+            toast.error(null,'TOAST.DOWNLOAD_FAILED',{name:fileName},null,null,{
+              link:{
+                caption:'TOAST.DOWNLOAD_TRY_AGAIN',
+                callback:()=>{this.downloadUrl(toast,cordova,url,fileName)}
+              }
+            });
+        });
     }
     else{
         window.open(url);
@@ -198,10 +208,10 @@ export class NodeHelper{
    * Download (a single) node
    * @param node
    */
-  public static downloadNode(cordova:CordovaService,node:any,version=RestConstants.NODE_VERSION_CURRENT) {
+  public static downloadNode(toast:Toast,cordova:CordovaService,node:any,version=RestConstants.NODE_VERSION_CURRENT) {
     if(node.reference)
       node=node.reference;
-    this.downloadUrl(cordova,node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""),node.name);
+    this.downloadUrl(toast,cordova,node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""),node.name);
   }
 
 
@@ -469,15 +479,15 @@ export class NodeHelper{
    * Download one or multiple nodes
    * @param node
    */
-  static downloadNodes(connector:RestConnectorService,nodes: Node[]) {
+  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[]) {
     if(nodes.length==1)
-      return this.downloadNode(connector.getCordovaService(),nodes[0]);
+      return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
 
     let nodesString=RestHelper.getNodeIds(nodes).join(",");
-      this.downloadUrl(connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
+      this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
       "../eduservlet/download?appId="+
       encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString));
+      "&nodeIds="+encodeURIComponent(nodesString),"download.zip");
   }
 
   static getLRMIProperty(data: any, item: ListItem) {

@@ -632,7 +632,7 @@ export class SearchComponent {
       }
 
       let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,this.connector,
-        (node: Node) => NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
+        (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
 

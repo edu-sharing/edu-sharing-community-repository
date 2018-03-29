@@ -659,7 +659,7 @@ export class WorkspaceMainComponent{
     }
     private downloadNode(node: Node) {
         let list = this.getNodeList(node);
-        NodeHelper.downloadNodes(this.connector,list);
+        NodeHelper.downloadNodes(this.toast,this.connector,list);
     }
     private displayNode(event:Node){
         let list = this.getNodeList(event);

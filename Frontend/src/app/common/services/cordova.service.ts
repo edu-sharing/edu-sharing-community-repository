@@ -862,9 +862,8 @@ export class CordovaService {
    */
 
    downloadContent(downloadURL:string, fileName:string, winCallback:Function=null, failCallback:Function=null) : void {
-
+     let status=0;
      try {
-
        this.makeSurePermission("WRITE_EXTERNAL_STORAGE", (win: any) => {
 
          console.log("Got Permission");
@@ -882,54 +881,66 @@ export class CordovaService {
 
            // iOS: following redirects works automatically - so go direct
            console.log("downloadContent IOS URL: " + downloadURL);
-           this.startContentDownload(downloadURL, fileName, winCallback, failCallback);
+           this.startContentDownload(downloadURL, fileName, ()=>status=1, ()=>status=-1);
 
          } else {
 
            // Android: resolve redirect (because plugin download can not follow redirect)
-           console.log("resolving redirects for downloadContent URL ANDROID: " + downloadURL);
+           /*console.log("resolving redirects for downloadContent URL ANDROID: " + downloadURL);
            (window as any).CordovaHttpPlugin.head(downloadURL, {}, {}, (response: any) => {
-             console.log("200 NOT A REDIRECT URL - use original: " + downloadURL);
-             this.startContentDownload(downloadURL, fileName, winCallback, failCallback);
-           }, (response: any) => {
+             console.log("200 NOT A REDIRECT URL - use original: " + downloadURL);*/
+             this.startContentDownload(downloadURL, fileName,()=>status=1, ()=>status=-1);
+           /*}, (response: any) => {
              if (response.status == 302) {
                let redirectURL = decodeURIComponent(response.headers.Location);
                console.log("302 Redirect Resolved to: " + redirectURL);
-               this.startContentDownload(redirectURL, fileName, winCallback, failCallback);
+               this.startContentDownload(redirectURL, fileName,()=>status=1, ()=>status=-1);
              } else {
-               if(failCallback) failCallback("FAIL on redirect resolution", response);
+               status=-1;
              }
-           });
+           });*/
 
          }
 
        }, (error: any) => {
-           if(failCallback) failCallback("FAIL No Permission: WRITE_EXTERNAL_STORAGE", error);
+           status=-1;
        });
 
 
      } catch (e) {
-       if(failCallback) failCallback("EXCEPTION on downloadContent", e);
+       console.warn(e);
+       status=-1;
      }
-
+     let interval=setInterval(()=>{
+       if(status==0)
+         return;
+       clearInterval(interval);
+       if(status==1 && winCallback)
+         winCallback();
+       if(status==-1 && failCallback)
+         failCallback();
+     },100);
    } 
 
    private startContentDownload(downloadURL:string, fileName:string, winCallback:Function, failCallback:Function) : void {
-
+     console.log("cordova start download "+downloadURL);
      // set path to store on device
-     var targetPath = (window as any).cordova.file.externalRootDirectory + "Download/";
+     let targetPath = (window as any).cordova.file.externalRootDirectory + "Download/";
      if (this.isIOS()) targetPath = (window as any).cordova.file.documentsDirectory;
-     var filePath = encodeURI(targetPath + fileName);
+     let filePath = encodeURI(targetPath + fileName);
 
+     // iOS
+     let fileTransfer:any = new (window as any).FileTransfer();
+     fileTransfer.download(downloadURL, filePath, (result:any)=>{
+         winCallback(filePath);
+     }, (err:any) => {
+         console.log("FAIL startContentDownload");
+         failCallback("FAIL startContentDownload", err);
+     }, true, {});
+       /*
      if (this.isIOS()) {
 
-       // iOS
-       var fileTransfer:any = new (window as any).FileTransfer();
-       fileTransfer.download(downloadURL, filePath, (result:any)=>{
-        if(winCallback) winCallback(filePath);
-       }, (err:any) => {
-        if(failCallback) failCallback("FAIL startContentDownload IOS", err);
-       }, true, {});
+
        
      } else {
 
@@ -938,13 +949,14 @@ export class CordovaService {
          (window as any).CordovaHttpPlugin.downloadFile(downloadURL, {}, {}, filePath, function (result: any) {
            if(winCallback) winCallback(filePath);
          }, function (response: any) {
-           if(failCallback) failCallback("FAIL startContentDownload ANDROID", response);
+           console.log("FAIL startContentDownload");
+           failCallback("FAIL startContentDownload ANDROID", response);
          });
        }, (error: any) => {
-         if(failCallback) failCallback("FAIL accepting all certs", error);
+         failCallback("FAIL accepting all certs", error);
        });
 
-     }
+     }*/
    }
 
    /**********************************************************

@@ -75,7 +75,7 @@ export class SearchNodeStoreComponent {
     this.actionOptions=[];
     if(this.selected && this.selected.length){
       let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download",
-        (node: Node) => NodeHelper.downloadNodes(this.connector,node ? [node] : this.selected));
+        (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
       this.actionOptions.push(download);
       this.actionOptions.push(new OptionItem("SEARCH.NODE_STORE.REMOVE_ITEM","delete",()=>{
         this.deleteSelection();

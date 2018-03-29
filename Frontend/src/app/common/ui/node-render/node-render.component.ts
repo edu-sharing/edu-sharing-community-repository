@@ -273,7 +273,7 @@ export class NodeRenderComponent {
   }
 
   private downloadCurrentNode() {
-    NodeHelper.downloadNode(this.connector.getCordovaService(),this._node,this.version);
+    NodeHelper.downloadNode(this.toast,this.connector.getCordovaService(),this._node,this.version);
   }
 
   private openConnector(list:ConnectorList,newWindow=true) {
