@@ -18,7 +18,7 @@ export class StartupComponent {
         if (this.cordova.isRunningCordova()){
 
             // wait until cordova device init is ready
-            this.cordova.subscribeDeviceReady().subscribe(()=>{
+            this.cordova.subscribeServiceReady().subscribe(()=>{
 
                 // per default go to app
                 this.router.navigate(['app']);
