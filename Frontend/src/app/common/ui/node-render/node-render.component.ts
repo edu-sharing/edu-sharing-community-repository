@@ -250,41 +250,30 @@ export class NodeRenderComponent {
     this.addDownloadButton(download);
   }
   private loadRenderData(){
-    let parent=this;
     let url=this.connector.endpointUrl + this.nodeApi.getNodeRenderSnippetUrl(this._node.ref.id,this.version ? this.version : "-1");
 
     let parameters={
       showDownloadButton:false,
       showDownloadAdvice:!this.isOpenable
     };
-    jQuery.ajax({
-      url: url,
-      method:this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0 ? 'POST' : 'GET',
-      contentType: "application/json",
-      data:JSON.stringify(parameters),
-      dataType: 'json',
-      crossDomain : true,
-      xhrFields: {
-        withCredentials: true
-      },
-      success:function(data: any) {
-        if (!data.detailsSnippet) {
-          console.error(data);
-          parent.toast.error(null,"RENDERSERVICE_API_ERROR");
-        }
-        else {
-          jQuery('#nodeRenderContent').html(data.detailsSnippet);
-          parent.postprocessHtml();
-        }
-        parent.isLoading = false;
-      },
-      error:function(data : any) {
-        //jQuery('#nodeRenderContent').html('Error fetching ' + url);
-        console.log(data);
-        parent.toast.error(JSON.parse(data.responseText).message);
-        parent.isLoading = false;
-      }
-    });
+    this.connector.post(this.nodeApi.getNodeRenderSnippetUrl(this._node.ref.id,this.version ? this.version : "-1"),
+        JSON.stringify(parameters),this.connector.getRequestOptions())
+        .map(response=>response.json())
+        .subscribe((data:any)=>{
+            if (!data.detailsSnippet) {
+                console.error(data);
+                this.toast.error(null,"RENDERSERVICE_API_ERROR");
+            }
+            else {
+                jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                this.postprocessHtml();
+            }
+            this.isLoading = false;
+        },(error:any)=>{
+            console.log(error);
+            this.toast.error(error);
+            this.isLoading = false;
+        })
   }
 
   private postprocessHtml() {
@@ -295,7 +284,7 @@ export class NodeRenderComponent {
   }
 
   private downloadCurrentNode() {
-    NodeHelper.downloadNode(this._node,this.version);
+    NodeHelper.downloadNode(this.connector.getCordovaService(),this._node,this.version);
   }
 
   private openConnector(list:ConnectorList,newWindow=true) {
