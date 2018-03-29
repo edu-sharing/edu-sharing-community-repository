@@ -184,7 +184,7 @@ export class Toast{
         parameters["error"] = error;
       }
     }
-    if(error.status==0 && this.cordova.isRunningCordova()){
+    if(error && error.status==0 && this.cordova.isRunningCordova()){
         message='TOAST.NO_CONNECTION';
         this.dialogTitle = null;
     }
