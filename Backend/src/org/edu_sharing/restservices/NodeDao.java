@@ -22,6 +22,7 @@ import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ImageTool;
@@ -417,7 +418,8 @@ public class NodeDao {
 
 		try {
 			nodeService.copyNode(sourceId, nodeId, withChildren);
-	
+			permissionService.createNotifyObject(sourceId, new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
+					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 			return new NodeDao(repoDao, sourceId);
 			
 		} catch (Throwable t) {
