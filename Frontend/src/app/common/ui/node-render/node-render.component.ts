@@ -25,6 +25,7 @@ import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIConstants} from "../ui-constants";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {SearchService} from "../../../modules/search/search.service";
+import {Helper} from "../../helper";
 
 declare var jQuery:any;
 declare var window: any;
@@ -104,22 +105,11 @@ export class NodeRenderComponent {
 
   }
     private _node : Node;
+    private _nodeId : string;
     @Input() set node(node: Node|string){
       let id=(node as Node).ref ? (node as Node).ref.id : (node as string);
-      if((node as Node).ref && (node as Node).name) {
-        this._node = (node as Node);
-      }else{
-        this.nodeApi.getNodeRenderSnippet(id).subscribe((data:NodeWrapper)=>{
-          this._node=data.node;
-          this.loadNode();
-        },(error:any)=>{
-          if(error.status==401)
-            return;
-          this.toast.error(error);
-        });
-        return;
-      }
-      this.loadNode();
+      this._nodeId=id;
+      this.loadRenderData();
     }
     @Output() onClose=new EventEmitter();
     private close(){
@@ -166,6 +156,7 @@ export class NodeRenderComponent {
       private toolService: RestToolService,
       private frame : FrameEventsService,
       private toast : Toast,
+      private cd: ChangeDetectorRef,
       private title : Title,
       private config : ConfigurationService,
       private storage : SessionStorageService,
@@ -217,12 +208,12 @@ export class NodeRenderComponent {
     this.nodeMetadata=null;
   }
   public refresh(){
-    this.loadNode();
-
+    this.isLoading=true;
+    this.node=this._nodeId;
   }
   private loadNode() {
-      if(!this._node)
-        return;
+    if(!this._node)
+      return;
 
     let input=this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS);
     if(!input) input=[];
@@ -250,23 +241,21 @@ export class NodeRenderComponent {
     this.addDownloadButton(download);
   }
   private loadRenderData(){
-    let url=this.connector.endpointUrl + this.nodeApi.getNodeRenderSnippetUrl(this._node.ref.id,this.version ? this.version : "-1");
-
     let parameters={
       showDownloadButton:false,
       showDownloadAdvice:!this.isOpenable
     };
-    this.connector.post(this.nodeApi.getNodeRenderSnippetUrl(this._node.ref.id,this.version ? this.version : "-1"),
-        JSON.stringify(parameters),this.connector.getRequestOptions())
-        .map(response=>response.json())
+    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
                 console.error(data);
                 this.toast.error(null,"RENDERSERVICE_API_ERROR");
             }
             else {
+                this._node=data.node;
                 jQuery('#nodeRenderContent').html(data.detailsSnippet);
                 this.postprocessHtml();
+                this.loadNode();
             }
             this.isLoading = false;
         },(error:any)=>{
@@ -341,18 +330,15 @@ export class NodeRenderComponent {
           let view=new OptionItem("WORKSPACE.OPTION.VIEW", "launch",()=>this.openConnector(data,true));
           //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
           this.options.splice(0,0,view);
-          this.options=this.options.slice();
+          this.options=Helper.deepCopyArray(this.options);
           this.isOpenable=true;
           if(this.editor && RestConnectorsService.connectorSupportsEdit(data,this._node).id==this.editor){
             this.openConnector(data,false);
           }
         }
-        this.loadRenderData();
       },(error:any)=>{
-        this.loadRenderData();
       });
-
-
+      this.options=Helper.deepCopyArray(this.options);
     });
   }
 
