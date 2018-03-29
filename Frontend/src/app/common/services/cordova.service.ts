@@ -23,6 +23,7 @@ export class CordovaService {
   private deviceResumeCallback : Function = null;
 
   private observerDeviceReady : Observer<void> = null;
+  private observerShareContent : Observer<string> = null; 
 
   private deviceReadyObservable: ConnectableObservable<{}>;
 
@@ -31,6 +32,7 @@ export class CordovaService {
   private _oauth:OAuthResult;
   public endpointUrl:string;
 
+  private lastShareTS:number = 0;
 
   get oauth(){
     return this._oauth;
@@ -129,13 +131,8 @@ export class CordovaService {
       // flag that device is ready
       this.deviceIsReady = true;
 
-      // check if app got started 
-      this.subscribeSharedContent((win:any) => {
-        alert("TODO: GOT DATA");
-      }, (text:string, error:any) => {
-        console.log(text, error);
-        alert("FAIL SHARED DATA: "+text);
-      });
+      // check if to register on share events
+      if (this.observerShareContent!=null) this.registerOnShareContent();
 
     };
 
@@ -146,33 +143,45 @@ export class CordovaService {
    * https://github.com/cordova-misc/cordova-webintent
    */
 
-   subscribeSharedContent(callbackIfSharedContent:Function, errorCallback:Function) : void {
+   onNewShareContent() : Observable<string> {
+    return new Observable<string>((observer: Observer<string>) => {
+      this.observerShareContent = observer;
+
+      // if device is already ready -> register now, otherwise wait
+      if (this.deviceIsReady) this.registerOnShareContent();
+
+    });  
+   }
+
+   private registerOnShareContent() : void {
 
      if (this.isAnroid() && this.isReallyRunningCordova()) {
 
       try {
 
-       // process WebIntent when available --> LINK
+       // detect WebIntent when available --> LINK
        (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_TEXT,
          (has:boolean) => {
-            if (has) this.processSharedContent(callbackIfSharedContent, errorCallback);
+            if (has) this.processSharedContent();
          }, (error:any) => {
-           errorCallback("FAIL on subscribeSharedContent - check text data", error);
+           console.error("FAIL on subscribeSharedContent - check text data", error);
+           this.observerShareContent.error(error);
          }
        );
 
-       // process WebIntent when available --> IMAGE
+       // detect WebIntent when available --> IMAGE
        (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_STREAM,
          (has:boolean) => {
-           if (has) this.processSharedContent(callbackIfSharedContent, errorCallback);
+           if (has) this.processSharedContent();
          }, (error:any) => {
-            errorCallback("FAIL on subscribeSharedContent - check image data", error);
+          console.error("FAIL on subscribeSharedContent - check image data", error);
+          this.observerShareContent.error(error);
          }
        );
 
        // process WebIntent when occuring while app is running
-       (window as any).plugins.webintent.onNewIntent(()=>{
-          this.processSharedContent(callbackIfSharedContent, errorCallback);
+       (window as any).plugins.webintent.onNewIntent((data:any)=>{
+          this.processSharedContent();
        });
 
       } catch (e) {
@@ -183,8 +192,172 @@ export class CordovaService {
 
    }
 
-   private processSharedContent(callbackIfSharedContent:Function, errorCallback:Function) : void {
-    alert("TODO: Process Shared Content");
+   private deliverShareContent(URI:string) : void {
+      // just allow one share every 5 seconds to prevent double calling
+      if ((new Date().getTime() - this.lastShareTS) < 5000) {
+        console.log("BLOCK Share Event - just one per 5 seconds");
+        return;
+      }
+      this.lastShareTS = new Date().getTime();
+      this.observerShareContent.next(URI);
+   }
+
+   private processSharedContent() : void {
+
+    // process WebIntent if --> LINK
+    (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_TEXT,
+    (has:boolean) => {
+      if (has) {
+        (window as any).plugins.webintent.getExtra((window as any).plugins.webintent.EXTRA_TEXT,
+        (extra:string) => {
+          // return the web URL
+          this.deliverShareContent(extra);
+        },
+        (error:any) => {
+          console.error("FAIL processSharedContent getExtra EXTRA_TEXT", error);
+          this.observerShareContent.error(error);
+        });
+      }
+    }, (error:any) => {
+      console.error("FAIL processSharedContent hasExtra EXTRA_TEXT", error);
+      this.observerShareContent.error(error);
+    });
+
+    // process WebIntent if --> IMAGE
+    (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_STREAM,
+    (has:boolean) => {
+      if (has) {
+        (window as any).plugins.webintent.getExtra((window as any).plugins.webintent.EXTRA_STREAM,
+        (extra:any) => {
+          // return the file/content URI
+          this.deliverShareContent(extra);
+        },
+        (error:any) => {
+          console.error("FAIL processSharedContent getExtra EXTRA_IMAGE", error);
+          this.observerShareContent.error(error);
+        });
+    
+      }
+    }, (error:any) => {
+      console.error("FAIL processSharedContent hasExtra EXTRA_IMAGE", error);
+      this.observerShareContent.error(error);
+    });
+  
+      /* 
+      var processFileURI = function (fileUri) {
+
+          try {
+
+              if ((typeof fileUri !== "undefined") && (fileUri !== null)) {
+
+                  if (fileUri.indexOf("file://")===0) {
+
+                      // lets resolve to native path
+                      window.FilePath.resolveNativePath(fileUri, function (localFileUri) {
+
+                          webIntent.extra = localFileUri;
+                          System.pushWebIntent(webIntent);
+
+                          // route to account
+                          $timeout(function () {
+                              $state.go('app.intro');
+                              //$location.path("/app/intro");
+                          }, 300);
+
+                      }, function(e){
+                          $ionicPopup.alert({
+                              title: 'Hinweis',
+                              template: 'Das Teilen dieses Bildes ist nicht möglich.<br><small style="color:#D3D3D3;">'+fileUri+'</small>'
+                          }).then(function () {ionic.Platform.exitApp();});
+                          console.log("ERROR(1): "+JSON.stringify(e));
+                      });
+
+                  } else
+
+                  if (fileUri.indexOf("content://")===0) {
+
+                      // try to resolve CONTENT-URL: https://developer.android.com/guide/topics/providers/content-providers.html
+                      window.FilePath.resolveNativePath(fileUri, function(win){
+
+                          console.log("Resolved ContentURL("+fileUri+") to FileURL("+win+")");
+                          processFileURI(win);
+
+                      }, function(fail){
+
+                          $ionicPopup.alert({
+                              title: 'Hinweis',
+                              template: 'Es handelt sich um einen Inhalt der nicht auf dem Gerät speichert ist. Es kann daher (noch) nicht mit edu-sharing geteilt werden.'
+                          }).then(function () {ionic.Platform.exitApp();});
+                          console.log("FAILED to resolve ContentURL("+fileUri+")",fail);
+
+                      });
+                  }
+
+                  else {
+                      alert("ImageShare ERROR: fileUri unkown " + fileUri);
+                  }
+
+
+              } else {
+                  alert("ImageShare ERROR: fileUri undefined or NULL");
+              }
+
+          } catch (e) {
+              alert("FAIL: "+JSON.stringify(e));
+              console.dir(e);
+          }
+          
+      };
+
+      window.plugins.webintent.getExtra(window.plugins.webintent.EXTRA_STREAM,processFileURI,$log.error);
+     
+    }); */
+
+   }
+
+   private resolveFileUri(URI:string, callbackResult:Function) : void {
+
+     try {
+
+       if ((typeof URI !== "undefined") && (URI !== null)) {
+
+         if (URI.indexOf("file://") === 0) {
+
+           // lets resolve to native path
+           (window as any).FilePath.resolveNativePath(URI, (localFileUri: string) => {
+             callbackResult(localFileUri)
+           }, (e: any) => {
+             alert("FAILED to resolve ContentURL(" + URI + ")");
+           });
+
+         }
+
+         if (URI.indexOf("content://") === 0) {
+
+           // try to resolve CONTENT-URL: https://developer.android.com/guide/topics/providers/content-providers.html
+           (window as any).FilePath.resolveNativePath(URI, (win: string) => {
+
+             console.log("Resolved ContentURL(" + URI + ") to FileURL(" + win + ") - go again");
+             this.resolveFileUri(win, callbackResult);
+
+           }, (error: any) => {
+             alert("FAILED to resolve ContentURL(" + URI + ")");
+           });
+         }
+
+         else {
+           alert("ImageShare ERROR: fileUri unkown " + URI);
+         }
+
+       } else {
+         alert("ERROR: fileUri undefined or NULL");
+       }
+
+     } catch (e) {
+       console.error("EXCEPTION resolveFileUri", e);
+       callbackResult(URI);
+     }
+
    }
 
 
