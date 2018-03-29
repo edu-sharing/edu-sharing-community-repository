@@ -22,6 +22,7 @@ import {ApplyToLmsComponent} from "./apply-to-lms/apply-to-lms.component";
 import {ListItem} from "./list-item";
 import {Helper} from "../helper";
 import {ConfigurationHelper} from "../rest/configuration-helper";
+import {CordovaService} from "../services/cordova.service";
 
 export class NodeHelper{
   /**
@@ -185,14 +186,22 @@ export class NodeHelper{
     return collection[item];
   }
 
+  public static downloadUrl(cordova:CordovaService,url:string,fileName="download"){
+    if(cordova.isRunningCordova()){
+        cordova.downloadContent(url,fileName);
+    }
+    else{
+        window.open(url);
+    }
+  }
   /**
    * Download (a single) node
    * @param node
    */
-  public static downloadNode(node:any,version=RestConstants.NODE_VERSION_CURRENT) {
+  public static downloadNode(cordova:CordovaService,node:any,version=RestConstants.NODE_VERSION_CURRENT) {
     if(node.reference)
       node=node.reference;
-    window.open(node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""));
+    this.downloadUrl(cordova,node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""),node.name);
   }
 
 
@@ -462,9 +471,10 @@ export class NodeHelper{
    */
   static downloadNodes(connector:RestConnectorService,nodes: Node[]) {
     if(nodes.length==1)
-      return this.downloadNode(nodes[0]);
+      return this.downloadNode(connector.getCordovaService(),nodes[0]);
+
     let nodesString=RestHelper.getNodeIds(nodes).join(",");
-      window.open(connector.getAbsoluteEndpointUrl()+
+      this.downloadUrl(connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
       "../eduservlet/download?appId="+
       encodeURIComponent(nodes[0].ref.repo)+
       "&nodeIds="+encodeURIComponent(nodesString));

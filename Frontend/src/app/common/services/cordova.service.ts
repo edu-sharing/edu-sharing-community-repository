@@ -32,6 +32,7 @@ export class CordovaService {
 
   private _oauth:OAuthResult;
   public endpointUrl:string;
+  private serviceIsReady = false;
 
 
   get oauth(){
@@ -93,7 +94,7 @@ export class CordovaService {
     if ((this.forceCordovaMode) && (!this.isReallyRunningCordova())) {
       console.log("SIMULATED deviceready event in FORCED CORDOVA MODE (just use during development)");
       setTimeout(this.whenDeviceIsReady,500+Math.random()*1000);
-    } else {
+    } else if(this.isReallyRunningCordova()) {
       this.deviceReadyLoop(1);
     }
 
@@ -246,12 +247,12 @@ export class CordovaService {
   }
 
   /*  
-    * Set a callback function to be called then device is ready for codrova action.
+    * Set a callback function to be called then device is ready for cordova service action.
     */
-  subscribeDeviceReady() : Observable<void> {
+  subscribeServiceReady() : Observable<void> {
     return new Observable<void>((observer: Observer<void>) => {
 
-      if (this.deviceIsReady) {
+      if (this.serviceIsReady) {
 
         // cordova already signaled that it is ready - call on the spot
         observer.next(null);
@@ -260,7 +261,7 @@ export class CordovaService {
       } else {
 
         let waitLoop = () => {
-          if (this.deviceIsReady) {
+          if (this.serviceIsReady) {
             observer.next(null);
             observer.complete();
           } else {
@@ -492,6 +493,7 @@ export class CordovaService {
         this._oauth = (data!=null) ? JSON.parse(data) : null;
         this.getPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,(data:string)=>{
             this.endpointUrl=data;
+            this.serviceIsReady=true;
         });
     });
   }
@@ -686,7 +688,7 @@ export class CordovaService {
    * Android: https://github.com/wymsee/cordova-HTTP
    */
 
-   downloadContent(downloadURL:string, fileName:string, winCallback:Function, failCallback:Function) : void {
+   downloadContent(downloadURL:string, fileName:string, winCallback:Function=null, failCallback:Function=null) : void {
 
      try {
 
@@ -722,19 +724,19 @@ export class CordovaService {
                console.log("302 Redirect Resolved to: " + redirectURL);
                this.startContentDownload(redirectURL, fileName, winCallback, failCallback);
              } else {
-               failCallback("FAIL on redirect resolution", response);
+               if(failCallback) failCallback("FAIL on redirect resolution", response);
              }
            });
 
          }
 
        }, (error: any) => {
-         failCallback("FAIL No Permission: WRITE_EXTERNAL_STORAGE", error);
+           if(failCallback) failCallback("FAIL No Permission: WRITE_EXTERNAL_STORAGE", error);
        });
 
 
      } catch (e) {
-       failCallback("EXCEPTION on downloadContent", e);
+       if(failCallback) failCallback("EXCEPTION on downloadContent", e);
      }
 
    } 
@@ -751,9 +753,9 @@ export class CordovaService {
        // iOS
        var fileTransfer:any = new (window as any).FileTransfer();
        fileTransfer.download(downloadURL, filePath, (result:any)=>{
-        winCallback(filePath);
+        if(winCallback) winCallback(filePath);
        }, (err:any) => {
-        failCallback("FAIL startContentDownload IOS", err);
+        if(failCallback) failCallback("FAIL startContentDownload IOS", err);
        }, true, {});
        
      } else {
@@ -761,12 +763,12 @@ export class CordovaService {
        // Android
        (window as any).cordovaHTTP.acceptAllCerts(true, () => {
          (window as any).CordovaHttpPlugin.downloadFile(downloadURL, {}, {}, filePath, function (result: any) {
-           winCallback(filePath);
+           if(winCallback) winCallback(filePath);
          }, function (response: any) {
-           failCallback("FAIL startContentDownload ANDROID", response);
+           if(failCallback) failCallback("FAIL startContentDownload ANDROID", response);
          });
        }, (error: any) => {
-         failCallback("FAIL accepting all certs", error);
+         if(failCallback) failCallback("FAIL accepting all certs", error);
        });
 
      }
