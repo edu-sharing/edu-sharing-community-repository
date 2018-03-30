@@ -417,8 +417,8 @@ public class NodeDao {
 			throws DAOException {
 
 		try {
-			nodeService.copyNode(sourceId, nodeId, withChildren);
-			permissionService.createNotifyObject(sourceId, new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
+			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, withChildren);
+			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
 					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 			return new NodeDao(repoDao, sourceId);
 			
