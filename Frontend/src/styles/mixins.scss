@@ -16,6 +16,15 @@
 @mixin materialShadowLarge($important: false){
   box-shadow:0px 10px 200px rgba(0, 0, 0, 0.15) if($important,!important,null);
 }
+@mixin limitLineCount($N){
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $N; /* number of lines to show */
+  line-height: $N+'em';        /* fallback */
+  max-height: $N*2+'em';       /* fallback */
+}
 @mixin unselectableText(){
   cursor: default;
   user-select: none;
