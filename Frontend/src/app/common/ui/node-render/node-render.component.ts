@@ -263,6 +263,7 @@ export class NodeRenderComponent {
                 jQuery('#nodeRenderContent').html(data.detailsSnippet);
                 this.postprocessHtml();
                 this.loadNode();
+                this.isLoading = false;
             }
             this.isLoading = false;
         },(error:any)=>{
@@ -366,7 +367,6 @@ export class NodeRenderComponent {
     this.checkConnector();
 
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
-    this.isLoading=true;
   }
   setDownloadUrl(url:string){
       if(this.downloadButton!=null)
