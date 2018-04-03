@@ -394,7 +394,8 @@ export class NodeRenderComponent {
     this.isLoading=true;
   }
   setDownloadUrl(url:string){
-      this.downloadButton.isEnabled=url!=null;
+      if(this.downloadButton!=null)
+        this.downloadButton.isEnabled=url!=null;
       this.downloadUrl=url;
   }
 }
