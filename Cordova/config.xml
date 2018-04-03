@@ -12,6 +12,7 @@
     <preference name="SplashScreenDelay" value="10000" />
     <preference name="loadUrlTimeoutValue" value="700000" />
     <preference name="SplashMaintainAspectRatio" value="true" />
+    <preference name="AndroidLaunchMode" value="singleTask" />
     <access origin="*" />
     <allow-navigation href="*" />
     <allow-intent href="*" />
@@ -128,6 +129,7 @@
     <plugin name="cordova-plugin-file-transfer" spec="^1.7.1" />
     <plugin name="com.spideroak.fileviewerplugin" spec="https://github.com/SpiderOak/FileViewerPlugin" />
     <plugin name="info.protonet.appgroupsuserdefaults" spec="https://github.com/rootzoll/cordova-plugin-nsuserdefaults-for-app-groups.git" />
+    <plugin name="com.napolitano.cordova.plugin.intent" spec="https://github.com/napolitano/cordova-plugin-intent" />
     <engine name="android" spec="7.1.0" />
     <engine name="ios" spec="^4.5.4" />
 </widget>

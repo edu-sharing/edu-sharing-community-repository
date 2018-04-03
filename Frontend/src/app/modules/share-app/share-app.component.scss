@@ -9,8 +9,11 @@
     display:flex;
     padding-bottom:10px;
     img{
-      width:90px;
-      height: 90px;
+      $imgSize:90px;
+      width: $imgSize;
+      height: $imgSize;
+      min-width: $imgSize;
+      min-height: $imgSize;
       object-fit: cover;
     }
     .info {

@@ -21,6 +21,7 @@ import {RestUtilitiesService} from "../../common/rest/services/rest-utilities.se
 import {RestNodeService} from "../../common/rest/services/rest-node.service";
 import {ListItem} from "../../common/ui/list-item";
 import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
+import {RestHelper} from "../../common/rest/rest-helper";
 @Component({
   selector: 'share-app',
   templateUrl: 'share-app.component.html',
@@ -40,6 +41,7 @@ export class ShareAppComponent {
     private inbox: Node;
     private columns:ListItem[]=[];
     private collections: Collection[];
+    private mimetype: string;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -57,6 +59,7 @@ export class ShareAppComponent {
           this.previewUrl=this.connector.getThemeMimePreview('link.svg');
           this.route.queryParams.subscribe((params:any)=>{
               this.uri=params['uri'];
+              this.mimetype=params['mimetype'];
               console.log(this.uri);
               this.collectionApi.search("",{
                   sortBy:[RestConstants.CM_MODIFIED_DATE],
@@ -66,20 +69,31 @@ export class ShareAppComponent {
               }).subscribe((data:CollectionContent)=>{
                   this.collections=data.collections;
               });
+              this.node.getNodeParents(RestConstants.INBOX, false).subscribe((data: ParentList) => {
+                  this.inboxPath = data.nodes;
+                  this.inbox=data.nodes[0];
+              });
               if(this.isLink()) {
-                  this.node.getNodeParents(RestConstants.INBOX, false).subscribe((data: ParentList) => {
-                      this.inboxPath = data.nodes;
-                      this.inbox=data.nodes[0];
-                      this.utilities.getWebsiteInformation(this.uri).subscribe((data: any) => {
-                          this.title = data.title;
-                          this.description = data.description;
-                          this.globalProgress=false;
-                      });
+                  this.utilities.getWebsiteInformation(this.uri).subscribe((data: any) => {
+                      this.title = data.title;
+                      this.description = data.description;
+                      this.globalProgress=false;
                   });
+              }
+              else{
+                  let split=this.uri.split("/");
+                  this.title=split[split.length-1];
+                  this.previewUrl=this.uri;
+                  this.globalProgress=false;
               }
           })
       });
   }
+    getType(){
+      if(this.isLink())
+          return "link";
+      return "file-"+this.mimetype.split("/")[0];
+    }
     saveInternal(callback:Function){
         if(this.isLink()){
             let prop:any={};
@@ -89,6 +103,14 @@ export class ShareAppComponent {
                 callback(data.node);
             });
         }
+        else {
+            let prop: any = RestHelper.createNameProperty(this.uri);
+            this.node.createNode(this.inbox.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true).subscribe((data: NodeWrapper) => {
+                this.node.uploadNodeContentCordova(data.node.ref.id, this.uri, RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(() => {
+                    callback(data.node);
+                });
+            });
+        }
     }
     saveFile(){
         this.saveInternal(()=>this.goToInbox());
@@ -96,7 +118,7 @@ export class ShareAppComponent {
     private saveToCollection(collection:Node){
       this.saveInternal((node:Node)=>{
           this.collectionApi.addNodeToCollection(collection.ref.id,node.ref.id).subscribe(()=>{
-              UIHelper.goToCollection(this.router,collection);
+              UIHelper.goToCollection(this.router,collection,{replaceUrl:true});
           });
       });
     }
@@ -105,7 +127,7 @@ export class ShareAppComponent {
     }
 
     private goToInbox() {
-        UIHelper.goToWorkspaceFolder(this.node,this.router,null,this.inbox.ref.id);
+        UIHelper.goToWorkspaceFolder(this.node,this.router,null,this.inbox.ref.id,{replaceUrl:true});
     }
     private hasWritePermissions(node:any){
         if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){

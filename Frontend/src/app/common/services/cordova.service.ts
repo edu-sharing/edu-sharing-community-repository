@@ -25,7 +25,7 @@ export class CordovaService {
   private deviceResumeCallback : Function = null;
 
   private observerDeviceReady : Observer<void> = null;
-  private observerShareContent : Observer<string> = null; 
+  private observerShareContent : Observer<any> = null;
 
   private deviceReadyObservable: ConnectableObservable<{}>;
 
@@ -145,8 +145,8 @@ export class CordovaService {
    * https://github.com/cordova-misc/cordova-webintent
    */
 
-   onNewShareContent() : Observable<string> {
-    return new Observable<string>((observer: Observer<string>) => {
+   onNewShareContent() : Observable<any> {
+    return new Observable<any>((observer: Observer<any>) => {
       this.observerShareContent = observer;
 
       // if device is already ready -> register now, otherwise wait
@@ -156,42 +156,39 @@ export class CordovaService {
    }
 
    private registerOnShareContent() : void {
+       if (this.isAnroid()) {
+           console.log("register on share intent");
+           let handleIntent=(intent:any)=> {
+               // Do things
+               console.log(intent);
+               if(intent && intent.extras){
+                   let uri=intent.extras["android.intent.extra.TEXT"];
+                   if(!uri)
+                       uri=intent.extras["android.intent.extra.STREAM"];
+                   if(uri){
+                       this.observerShareContent.next({uri:uri,mimetype:intent.type});
+                   }
+               }
+           };
+           (window as any).plugins.intent.getCordovaIntent(handleIntent);
+           (window as any).plugins.intent.setNewIntentHandler(handleIntent);
+           /*
+           (window as any).plugins.webintent.onNewIntent((uri:string)=> {
+               (window as any).plugins.webintent.getExtra((window as any).plugins.webintent.EXTRA_TEXT,
+                   (extra:string)=> {
+                       console.log("new intent " + extra+" "+uri);
+                       this.observerShareContent.next(extra);
+                   },(error:any)=>{
+                       console.error(error);
+                       (window as any).plugins.webintent.getExtra((window as any).plugins.webintent.EXTRA_STREAM,
+                       (extra:string)=> {
+                           console.log("new intent " + extra+" "+uri);
+                           this.observerShareContent.next(extra);
+                       },(error:any)=>{console.error(error);});
+               });
 
-     if (this.isAnroid() && this.isReallyRunningCordova()) {
-
-      try {
-
-       // detect WebIntent when available --> LINK
-       (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_TEXT,
-         (has:boolean) => {
-            if (has) this.processSharedContent();
-         }, (error:any) => {
-           console.error("FAIL on subscribeSharedContent - check text data", error);
-           this.observerShareContent.error(error);
-         }
-       );
-
-       // detect WebIntent when available --> IMAGE
-       (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_STREAM,
-         (has:boolean) => {
-           if (has) this.processSharedContent();
-         }, (error:any) => {
-          console.error("FAIL on subscribeSharedContent - check image data", error);
-          this.observerShareContent.error(error);
-         }
-       );
-
-       // process WebIntent when occuring while app is running
-       (window as any).plugins.webintent.onNewIntent((data:any)=>{
-          this.processSharedContent();
-       });
-
-      } catch (e) {
-        console.log("EXCEPTION on whenSharedContentIsAvailable",e);
-      } 
-
-     }
-
+           });*/
+       }
    }
 
    private deliverShareContent(URI:string) : void {
@@ -204,119 +201,6 @@ export class CordovaService {
       this.observerShareContent.next(URI);
    }
 
-   private processSharedContent() : void {
-
-    // process WebIntent if --> LINK
-    (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_TEXT,
-    (has:boolean) => {
-      if (has) {
-        (window as any).plugins.webintent.getExtra((window as any).plugins.webintent.EXTRA_TEXT,
-        (extra:string) => {
-          // return the web URL
-          console.log(extra);
-          this.deliverShareContent(extra);
-        },
-        (error:any) => {
-          console.error("FAIL processSharedContent getExtra EXTRA_TEXT", error);
-          this.observerShareContent.error(error);
-        });
-      }
-    }, (error:any) => {
-      console.error("FAIL processSharedContent hasExtra EXTRA_TEXT", error);
-      this.observerShareContent.error(error);
-    });
-
-    // process WebIntent if --> IMAGE
-    (window as any).plugins.webintent.hasExtra((window as any).plugins.webintent.EXTRA_STREAM,
-    (has:boolean) => {
-      if (has) {
-        (window as any).plugins.webintent.getExtra((window as any).plugins.webintent.EXTRA_STREAM,
-        (extra:any) => {
-          // return the file/content URI
-          this.deliverShareContent(extra);
-        },
-        (error:any) => {
-          console.error("FAIL processSharedContent getExtra EXTRA_IMAGE", error);
-          this.observerShareContent.error(error);
-        });
-    
-      }
-    }, (error:any) => {
-      console.error("FAIL processSharedContent hasExtra EXTRA_IMAGE", error);
-      this.observerShareContent.error(error);
-    });
-  
-      /* 
-      var processFileURI = function (fileUri) {
-
-          try {
-
-              if ((typeof fileUri !== "undefined") && (fileUri !== null)) {
-
-                  if (fileUri.indexOf("file://")===0) {
-
-                      // lets resolve to native path
-                      window.FilePath.resolveNativePath(fileUri, function (localFileUri) {
-
-                          webIntent.extra = localFileUri;
-                          System.pushWebIntent(webIntent);
-
-                          // route to account
-                          $timeout(function () {
-                              $state.go('app.intro');
-                              //$location.path("/app/intro");
-                          }, 300);
-
-                      }, function(e){
-                          $ionicPopup.alert({
-                              title: 'Hinweis',
-                              template: 'Das Teilen dieses Bildes ist nicht möglich.<br><small style="color:#D3D3D3;">'+fileUri+'</small>'
-                          }).then(function () {ionic.Platform.exitApp();});
-                          console.log("ERROR(1): "+JSON.stringify(e));
-                      });
-
-                  } else
-
-                  if (fileUri.indexOf("content://")===0) {
-
-                      // try to resolve CONTENT-URL: https://developer.android.com/guide/topics/providers/content-providers.html
-                      window.FilePath.resolveNativePath(fileUri, function(win){
-
-                          console.log("Resolved ContentURL("+fileUri+") to FileURL("+win+")");
-                          processFileURI(win);
-
-                      }, function(fail){
-
-                          $ionicPopup.alert({
-                              title: 'Hinweis',
-                              template: 'Es handelt sich um einen Inhalt der nicht auf dem Gerät speichert ist. Es kann daher (noch) nicht mit edu-sharing geteilt werden.'
-                          }).then(function () {ionic.Platform.exitApp();});
-                          console.log("FAILED to resolve ContentURL("+fileUri+")",fail);
-
-                      });
-                  }
-
-                  else {
-                      alert("ImageShare ERROR: fileUri unkown " + fileUri);
-                  }
-
-
-              } else {
-                  alert("ImageShare ERROR: fileUri undefined or NULL");
-              }
-
-          } catch (e) {
-              alert("FAIL: "+JSON.stringify(e));
-              console.dir(e);
-          }
-          
-      };
-
-      window.plugins.webintent.getExtra(window.plugins.webintent.EXTRA_STREAM,processFileURI,$log.error);
-     
-    }); */
-
-   }
 
    private resolveFileUri(URI:string, callbackResult:Function) : void {
 
@@ -851,6 +735,19 @@ export class CordovaService {
       console.log("FAIL-EXCEPTION",error);
     }
 
+  }
+
+  public uploadLocalContent(uri:string,endpointUrl:string,headers:any) : Observable<any>{
+      return new Observable<string>((observer: Observer<any>) => {
+          let fileTransfer: any = new (window as any).FileTransfer();
+          fileTransfer.upload(uri, endpointUrl, (result: any) => {
+              observer.next(result);
+              observer.complete();
+          },(error:any)=>{
+              observer.error(error);
+              observer.complete();
+          },{headers:headers});
+      });
   }
 
    /**********************************************************

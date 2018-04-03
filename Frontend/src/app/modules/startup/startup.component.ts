@@ -25,10 +25,10 @@ export class StartupComponent {
 
                 // when new share contet - go to share screen
                 this.cordova.onNewShareContent().subscribe(
-                   (URI:string) => {
+                   (data:any) => {
                     // TODO: take URI and processes on share screen
                     // this.router.navigate(['share', URI]);
-                    this.router.navigate(['app','share'],{queryParams:{uri:URI}});
+                    this.router.navigate(['app','share'],{queryParams:data});
                 }, (error) => {
                     console.log("ERROR on new share event",error);
                 });
