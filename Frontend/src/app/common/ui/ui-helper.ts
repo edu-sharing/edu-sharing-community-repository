@@ -89,9 +89,9 @@ export class UIHelper{
     let converted=UIHelper.convertSearchParameters(node);
     router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{query:converted.query,savedQuery:node.ref.id,repository:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],mds:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],parameters:JSON.stringify(converted.parameters)}});
   }
-    public static goToCollection(router:Router,node:Node) {
-        router.navigate([UIConstants.ROUTER_PREFIX+"collections"],
-            {queryParams:{id:node.ref.id}});
+    public static goToCollection(router:Router,node:Node,extras:any={}) {
+        extras.queryParams={id:node.ref.id};
+        router.navigate([UIConstants.ROUTER_PREFIX+"collections"],extras);
     }
     /**
      * Navigate to the workspace
@@ -100,10 +100,11 @@ export class UIHelper{
      * @param login a result of the isValidLogin method
      * @param node The node to open and show
      */
-    public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node) {
+    public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node,extras:any={}) {
         nodeService.getNodeParents(node.ref.id).subscribe((data:ParentList)=>{
+            extras.queryParams={id:node.parent.id,file:node.ref.id,root:data.scope};
             router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
-                {queryParams:{id:node.parent.id,file:node.ref.id,root:data.scope}});
+                extras);
         });
     }
     /**
@@ -113,9 +114,10 @@ export class UIHelper{
      * @param login a result of the isValidLogin method
      * @param folder The folder id to open
      */
-    public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
-        router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login && login.currentScope ? login.currentScope : "files")],
-            {queryParams:{id:folder}});
+    public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string,extras:any={}) {
+      extras.queryParams={id:folder};
+      router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login && login.currentScope ? login.currentScope : "files")],
+          extras);
     }
   static convertSearchParameters(node: Node) {
     let parameters=JSON.parse(node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS]);
