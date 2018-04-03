@@ -27,7 +27,7 @@ export class RestConnectorService {
   private _logoutTimeout: number;
   private _autoLogin = true;
   public _scope: string;
-  private themesUrl: any;
+  private themesUrl="../themes/default/";
 
   get autoLogin(): boolean {
     return this._autoLogin;
@@ -477,10 +477,10 @@ export class RestConnectorService {
     return window.location.href.indexOf("components/login")!=-1;
   }
   public getThemeMimeIconSvg(name:string){
-    return this.themesUrl+"images/common/mime-types/svg/"+name;
+    return this.getAbsoluteEndpointUrl()+this.themesUrl+"images/common/mime-types/svg/"+name;
   }
   public getThemeMimePreview(name:string){
-    return this.themesUrl+"images/common/mime-types/previews/"+name;
+    return this.getAbsoluteEndpointUrl()+this.themesUrl+"images/common/mime-types/previews/"+name;
   }
 
 

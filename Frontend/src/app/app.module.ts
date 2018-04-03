@@ -17,6 +17,7 @@ import {DECLARATIONS_MANAGEMENT_DIALOGS} from "./modules/management-dialogs/decl
 import {DECLARATIONS_MESSAGES} from "./modules/messages/declarations";
 import {DECLARATIONS_UPLOAD} from "./modules/upload/declarations";
 import {DECLARATIONS_STARTUP} from './modules/startup/declarations';
+import {DECLARATIONS_SHARE_APP} from "./modules/share-app/declarations";
 
 
 
@@ -39,7 +40,8 @@ import {DECLARATIONS_STARTUP} from './modules/startup/declarations';
     DECLARATIONS_MANAGEMENT_DIALOGS,
     DECLARATIONS_ADMIN,
     DECLARATIONS_UPLOAD,
-    DECLARATIONS_MESSAGES
+    DECLARATIONS_MESSAGES,
+    DECLARATIONS_SHARE_APP
   ],
   imports: [
     IMPORTS,

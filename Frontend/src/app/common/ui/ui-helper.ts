@@ -114,7 +114,7 @@ export class UIHelper{
      * @param folder The folder id to open
      */
     public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
-        router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
+        router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login && login.currentScope ? login.currentScope : "files")],
             {queryParams:{id:folder}});
     }
   static convertSearchParameters(node: Node) {

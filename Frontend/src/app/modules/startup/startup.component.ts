@@ -28,7 +28,7 @@ export class StartupComponent {
                    (URI:string) => {
                     // TODO: take URI and processes on share screen
                     // this.router.navigate(['share', URI]);
-                    alert("TODO: startup.component.ts --> Got new Share Event: "+URI);   
+                    this.router.navigate(['app','share'],{queryParams:{uri:URI}});
                 }, (error) => {
                     console.log("ERROR on new share event",error);
                 });

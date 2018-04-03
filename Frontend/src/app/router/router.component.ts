@@ -20,6 +20,7 @@ import {AdminComponent} from "../modules/admin/admin.component";
 import {MessagesComponent} from "../modules/messages/messages.component";
 import {UIConstants} from "../common/ui/ui-constants";
 import {StartupComponent} from '../modules/startup/startup.component';
+import {ShareAppComponent} from "../modules/share-app/share-app.component";
 
 
 
@@ -73,6 +74,7 @@ export var ROUTES=[
   // global
     { path: '', component: StartupComponent },
     { path: 'app', component: LoginAppComponent },
+    { path: 'app/share', component: ShareAppComponent },
     { path: UIConstants.ROUTER_PREFIX+'test/mds',component: MdsTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'test/rest',component: RestTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node', component: NodeRenderComponent},
