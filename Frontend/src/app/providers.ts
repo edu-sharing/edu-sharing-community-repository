@@ -21,6 +21,7 @@ import {RestAdminService} from "./common/rest/services/rest-admin.service";
 import {RestNetworkService} from "./common/rest/services/rest-network.service";
 import {RestToolService} from "./common/rest/services/rest-tool.service";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
+import {RestUtilitiesService} from "./common/rest/services/rest-utilities.service";
 
 
 export const PROVIDERS=[
@@ -41,6 +42,7 @@ export const PROVIDERS=[
   RestUsageService,
   RestOrganizationService,
   RestToolService,
+  RestUtilitiesService,
   TemporaryStorageService,
   RestMetadataService,
   SessionStorageService,
