@@ -213,6 +213,7 @@ export class CordovaService {
         (window as any).plugins.webintent.getExtra((window as any).plugins.webintent.EXTRA_TEXT,
         (extra:string) => {
           // return the web URL
+          console.log(extra);
           this.deliverShareContent(extra);
         },
         (error:any) => {

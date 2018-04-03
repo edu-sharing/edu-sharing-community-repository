@@ -6,7 +6,8 @@
     "main": "index.js",
     "scripts": {
         "start": "cd ./../Frontend && ng build --prod --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova build",
-        "restart": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova"
+        "restart": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova",
+        "debug-android": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova run android"
     },
     "author": "Apache Cordova Team",
     "license": "Apache-2.0",
