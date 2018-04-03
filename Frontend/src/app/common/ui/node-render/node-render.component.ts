@@ -1,6 +1,6 @@
 import {
-  Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-  HostListener, ChangeDetectorRef, ApplicationRef
+    Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
+    HostListener, ChangeDetectorRef, ApplicationRef, NgZone
 } from '@angular/core';
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";
@@ -20,6 +20,7 @@ import {Title} from "@angular/platform-browser";
 import {SessionStorageService} from "../../services/session-storage.service";
 import {RestConnectorsService} from "../../rest/services/rest-connectors.service";
 import {trigger} from "@angular/animations";
+import {Location} from "@angular/common";
 import {NodeHelper} from "../node-helper";
 import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIConstants} from "../ui-constants";
@@ -71,6 +72,8 @@ export class NodeRenderComponent {
   private fromLogin = false;
   public banner: any;
   private repository: string;
+  private downloadButton: OptionItem;
+  private downloadUrl: string;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
@@ -123,7 +126,7 @@ export class NodeRenderComponent {
           }
           else {
             this.searchService.reinit=false;
-            NodeRenderComponent.close();
+            NodeRenderComponent.close(this.location);
           }
         }
       }
@@ -149,6 +152,7 @@ export class NodeRenderComponent {
     }
     constructor(
       private translate : TranslateService,
+      private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
       private connectors : RestConnectorsService,
@@ -163,6 +167,7 @@ export class NodeRenderComponent {
       private route : ActivatedRoute,
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
+      (window as any).ngRender = {setDownloadUrl:(url:string)=>{this.setDownloadUrl(url)}};
       Translation.initialize(translate,config,storage,route).subscribe(()=>{
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
@@ -188,9 +193,12 @@ export class NodeRenderComponent {
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
     }
+    ngOnDestroy() {
+        (window as any).ngRender = null;
+    }
 
-  public static close() {
-    window.history.back();
+  public static close(location:Location) {
+    location.back();
   }
   public switchPosition(pos:number){
     //this.router.navigate([UIConstants.ROUTER_PREFIX+"render",this.list[pos].ref.id]);
@@ -222,7 +230,6 @@ export class NodeRenderComponent {
       opt.push(o);
     }
     this.options=opt;
-    console.log(this._node);
     let download=new OptionItem('DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
     if(this.isCollectionRef()){
@@ -273,7 +280,10 @@ export class NodeRenderComponent {
   }
 
   private downloadCurrentNode() {
-    NodeHelper.downloadNode(this.toast,this.connector.getCordovaService(),this._node,this.version);
+      if(this.downloadUrl)
+        NodeHelper.downloadUrl(this.toast,this.connector.getCordovaService(),this.downloadUrl);
+      else
+        NodeHelper.downloadNode(this.toast,this.connector.getCordovaService(),this._node,this.version);
   }
 
   private openConnector(list:ConnectorList,newWindow=true) {
@@ -351,10 +361,15 @@ export class NodeRenderComponent {
   }
 
   private addDownloadButton(download: OptionItem) {
+    this.downloadButton=download;
     this.options.splice(0,0,download);
     this.checkConnector();
 
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
     this.isLoading=true;
+  }
+  setDownloadUrl(url:string){
+      this.downloadButton.isEnabled=url!=null;
+      this.downloadUrl=url;
   }
 }

@@ -220,6 +220,12 @@ export class SearchComponent {
            this.network.getRepositories().subscribe((data: NetworkRepositories) => {
              this.allRepositories=Helper.deepCopy(data.repositories);
              this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
+             if(this.repositories.length<1){
+               console.warn("After filtering repositories via config, none left. Will use the home repository as default");
+               console.log(this.allRepositories);
+               console.log(this.config.instant('availableRepositories'));
+               this.repositories = this.getHomeRepoList();
+             }
              if (this.repositories.length < 2) {
                this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
                /*this.repositories = null;*/
@@ -242,7 +248,7 @@ export class SearchComponent {
 
            }, (error: any) => {
              console.warn("could not fetch repository list. Remote repositories can not be shown. Some features might not work properly. Please check the error and re-configure the repository");
-             this.repositories = [({id:'local',isHomeRepo:true} as any)];
+             this.repositories = this.getHomeRepoList();
              this.allRepositories=[];
              let home:any={id:'local',isHomeRepo:true};
              this.allRepositories.push(home);
@@ -252,7 +258,9 @@ export class SearchComponent {
        });
      });
   }
-
+  getHomeRepoList(){
+      return [({id:'local',isHomeRepo:true} as any)];
+  }
   public refresh(){
     this.getSearch(null,true);
   }
