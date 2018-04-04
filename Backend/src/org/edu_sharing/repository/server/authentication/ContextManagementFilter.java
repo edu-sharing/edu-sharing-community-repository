@@ -23,7 +23,9 @@ import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.model.AvailableMds;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+
 
 public class ContextManagementFilter implements javax.servlet.Filter {
 	
@@ -62,7 +64,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 					}
 				}
 				
-			}catch(Exception e) {
+			}catch(Throwable e) {
 				log.debug(e.getMessage());
 			}
 			chain.doFilter(req,res);
