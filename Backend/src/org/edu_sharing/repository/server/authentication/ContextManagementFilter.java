@@ -14,11 +14,13 @@ import javax.servlet.http.HttpSession;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
@@ -48,6 +50,11 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			((HttpServletResponse)res).setHeader("Access-Control-Expose-Headers","X-Edu-Scope");
 			((HttpServletResponse)res).setHeader("X-Edu-Scope", NodeServiceInterceptor.getEduSharingScope());
 			
+			try {
+				HttpContext.setCurrentMetadataSet(ConfigServiceFactory.getCurrentConfig().values.availableMds[0].mds[0]);
+			}catch(Exception e) {
+				log.debug(e.getMessage());
+			}
 			chain.doFilter(req,res);
 
 		} finally {
@@ -56,6 +63,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			
 			NodeServiceInterceptor.setEduSharingScope((String)null);
 			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod((String)null);
+			
+			HttpContext.setCurrentMetadataSet(null);
 			
 			/**
 			 * OAuth kill Session

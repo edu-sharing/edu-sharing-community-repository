@@ -16,6 +16,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 /**
@@ -86,8 +87,9 @@ public class OnUpdatePersonPropertiesPolicy implements OnCreateNodePolicy, OnUpd
 		logger.debug("will create edu folders in userhome");
 		new HomeFolderTool(serviceRegistry).constructPersonFolders(nodeRef);
 		
-		
-		
+		if(HttpContext.getCurrentMetadataSet() != null) {
+			nodeService.setProperty(homeFolderNodeRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET), HttpContext.getCurrentMetadataSet());
+		}
 		//create esuid that will be used for user creation in remote repositories
 		
 		UUID uuid = UUID.randomUUID();
