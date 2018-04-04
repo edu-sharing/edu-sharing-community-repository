@@ -9,7 +9,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -18,12 +17,13 @@ import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.config.model.AvailableMds;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
-
-import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 
 public class ContextManagementFilter implements javax.servlet.Filter {
 	
@@ -51,7 +51,17 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			((HttpServletResponse)res).setHeader("X-Edu-Scope", NodeServiceInterceptor.getEduSharingScope());
 			
 			try {
-				HttpContext.setCurrentMetadataSet(ConfigServiceFactory.getCurrentConfig().values.availableMds[0].mds[0]);
+				
+				AvailableMds[] availableMdss = ConfigServiceFactory.getCurrentConfig().values.availableMds;
+				if(availableMdss != null) {
+					for(AvailableMds availableMds : availableMdss) {
+						if(RepositoryDao.HOME.equals(availableMds.repository) 
+								|| ApplicationInfoList.getHomeRepository().getAppId().equals(availableMds.repository)){
+							HttpContext.setCurrentMetadataSet(availableMds.mds[0]);
+						}
+					}
+				}
+				
 			}catch(Exception e) {
 				log.debug(e.getMessage());
 			}
