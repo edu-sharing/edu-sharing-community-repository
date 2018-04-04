@@ -102,6 +102,10 @@ export class RestAdminService {
     let query=this.connector.createUrl("admin/:version/refreshAppInfo",null);
     return this.connector.post(query,null,this.connector.getRequestOptions());
   }
+  public refreshEduGroupCache = (): Observable<Response> => {
+      let query=this.connector.createUrl("admin/:version/refreshEduGroupCache",null);
+      return this.connector.post(query,null,this.connector.getRequestOptions());
+  }
   public getPropertyValuespace = (property:string): Observable<any> => {
     let query=this.connector.createUrl("admin/:version/propertyToMds?properties=:property",null,[
       [":property",property],

@@ -372,7 +372,7 @@ public class AdminApi {
 		
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
 	}
-	@GET
+	@POST
 	@Path("/refreshEduGroupCache")
 	
 	@ApiOperation(value = "Refresh the Edu Group Cache", notes = "Refresh the Edu Group Cache.")
