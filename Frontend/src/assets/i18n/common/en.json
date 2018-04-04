@@ -298,6 +298,11 @@
     "LICENSE_LINK":"Manage license",
     "CONTRIBUTOR_LINK":"Additional Contributors"
   },
+  "LICENSE_AGREEMENT":{
+    "TITLE":"License agreement",
+    "CHECKBOX":"I read the license agreement and accept it",
+    "ACCEPT":"Accept & Continue"
+  },
   "TOAST":{
     "NODE_LOCKED":"The document is currently used by an other user and can not be opened",
     "FIELD_REQUIRED":"The field {{ name }} is required",

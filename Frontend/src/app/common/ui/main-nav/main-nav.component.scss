@@ -17,6 +17,16 @@
 .dialog{
   z-index:$dialogZIndex+5;
 }
+.card{
+  z-index:$dialogZIndex+6;
+  .card-content{
+    display:flex;
+    flex-direction: column;
+  }
+  .card-scroll{
+    height:calc(100% - 68px)
+  }
+}
 user-profile{
   display:inherit!important;
 }

@@ -64,7 +64,8 @@
       "TYPE_COORDINATOR_DESCRIPTION":"can see, edit, delete, view and edit permissions, add and remove elements and publish",
       "TYPE_UNKNOWN":"Individual",
       "TYPE_UNKNOWN_DESCRIPTION":"Individual permissions have been set by admin: {{permissions}}",
-      "PUBLISHER":"can publish",
+      "PUBLISHER":"... and may publish",
+      "PUBLISHER_TOOLTIP":"Can use and publish the material in collections and attached systems (i.e. moodle)",
       "MESSAGE":"Add message",
       "MESSAGE_PLACEHOLDER":"Enter message...",
       "INHERIT":"Inherit permissions from parent folder",
@@ -81,6 +82,7 @@
       "PUBLISH_ACTIVE_DOCUMENT":"The document is made publicly available on the Internet",
       "PUBLISH_ACTIVE_COLLECTION":"The collection is made publicly available on the Internet",
       "PUBLISH_ACTIVE_DIRECTORY":"All documents of this folder are made publicly available on the Internet",
+      "NO_FUZZY":"Enter the full e-mail address to add users",
       "HISTORY":{
         "TITLE":"Sharing-History",
         "ADDED":"Added",
@@ -286,6 +288,7 @@
     "TOAST":{
       "FOLDER_ADDED":"Folder added",
       "NODE_EXISTS_IN_COLLECTION":"The collection already contains the element {{name}}",
+      "VIEW_COLLECTION":"View collection",
       "ADDED_TO_COLLECTION_MY":"{{count}} element(s) have been added to collection {{collection}} and is visible for you",
       "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to collection {{collection}} and are visible to all invited persons",
       "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to collection {{collection}} and are visible to everyone",

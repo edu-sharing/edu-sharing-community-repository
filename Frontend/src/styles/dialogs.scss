@@ -1,6 +1,6 @@
 @import "./variables";
 
-
+$cardActionHeight:77px;
 
 .dialog{
   width:100%;
@@ -27,15 +27,23 @@
   left:50%;
   margin: auto!important;
   margin-left:-250px!important;
-  padding-bottom: $cardPadding;
 }
 
-.card-content{
-  height: calc(100% - 50px);
+.card .card-content{
+  height: calc(100% - #{$cardActionHeight});
+  margin-bottom: 0;
 }
-.card .card-action a{
-  max-width: 400px;
-  word-break: break-all;
+.card .card-action {
+  display: flex;
+  align-items: end;
+  justify-items: right;
+  min-height: $cardActionHeight;
+  /* justify-content: space-between; */
+  flex-direction: row-reverse;
+  a {
+    max-width: 400px;
+    word-break: break-all;
+  }
 }
 .card-action .card-content{
   padding-top:32px;
@@ -62,6 +70,7 @@
 .card-title{
   word-break: break-all;
   max-height: 48px;
+  align-items: start;
   overflow: hidden;
   @include unselectableText();
 }
@@ -87,9 +96,6 @@ input[type=search]{
   background: #fff;
   border:1px solid $searchInputBorderColor;
   padding:0 10px;
-}
-.card-high .card-content{
-  height:calc(100% - 55px);
 }
 .card-high{
   top:10%;
@@ -183,7 +189,6 @@ input[type=search]{
 @mixin fullsizeCard(){
   position:fixed;
   width:100%;
-  padding-bottom: 25px;
   left:0%;
   margin-left:0!important;
 }
@@ -192,7 +197,7 @@ input[type=search]{
     overflow: scroll;
     @include darken();
     z-index:151;
-    background: linear-gradient(to top, #ffffff 0,#ffffff 128px,$darkenColor 128px,$darkenColor 100%);
+    background: linear-gradient(to top, #ffffff 0,#ffffff 120px,$darkenColor 120px,$darkenColor 100%);
   }
   .card-wide{
     @include fullsizeCard();
@@ -205,6 +210,11 @@ input[type=search]{
   .card-low{
     width:90%;
     left:5%;
+  }
+  .center-card .btn,
+  .center-card .btn-flat{
+    margin: 0 0;
+    padding:0 1.5rem;
   }
 }
 @media screen and (max-height: ($mobileHeight)) {

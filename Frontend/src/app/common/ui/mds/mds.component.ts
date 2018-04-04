@@ -22,6 +22,7 @@ import {RestLocatorService} from '../../rest/services/rest-locator.service';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../ui-animation';
 import {DialogButton} from '../modal-dialog/modal-dialog.component';
+import {UIService} from '../../services/ui.service';
 
 @Component({
   selector: 'mds',
@@ -215,6 +216,7 @@ export class MdsComponent{
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
               private route : ActivatedRoute,
+              private uiService : UIService,
               private node : RestNodeService,
               private tools : RestToolService,
               private toast : Toast,
@@ -1127,9 +1129,10 @@ export class MdsComponent{
     }
     else {
       html += `
-                document.getElementById('` + id + `_suggestionsInput').value='';
-                document.getElementById('` + id + `_suggestionsInput').focus();
-                var badges=document.getElementById('` + id + `');
+                document.getElementById('` + id + `_suggestionsInput').value='';`;
+      if(!this.uiService.isMobile())
+        html += `document.getElementById('` + id + `_suggestionsInput').focus();`;
+      html += `var badges=document.getElementById('` + id + `');
                 var elements=badges.childNodes;
                 for(var i=0;i<elements.length;i++){
                     if(elements[i].getAttribute('data-value')==this.getAttribute('data-value')){
@@ -1230,7 +1233,7 @@ export class MdsComponent{
               window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
-    if(allowCustom && !showOpen && !this.isSearch()){
+    if(allowCustom && !showOpen){
       html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;

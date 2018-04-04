@@ -3,21 +3,29 @@
 .breadcrumb::before{
   content:''!important;
 }
-.breadcrumb .homeIsIcon{
-  position: relative;
-  top: 1px;
+.breadcrumbMobile .homeIsIcon{
+  word-break: break-all;
 }
 
-.breadcrumb div{
-  float:left;
-  color:$primary;
-  padding:2px 4px;
-  font-size:70%;
-}
 .breadcrumb{
   width:100%;
-  max-height:25px;
+  max-height:1.5em;
+  display:flex;
   overflow:hidden;
+  div{
+    float:left;
+    color:$primary;
+    padding:2px 4px;
+    font-size: 9pt;
+    max-height: 20px;
+  }
+  .homeIsIcon{
+    margin-top: -4px;
+  }
+  .homeIcon{
+    margin-top: 0;
+    max-height: none;
+  }
 }
 .selected{
   background-color: #fff;
@@ -30,14 +38,12 @@
 }
 .breadcrumbMobile{
   display:none;
-  margin-top: -4px;
-  .folder{
-    word-break: break-all;
-  }
 }
 @media screen and (max-width: $mobileWidth) {
   .breadcrumbMobile{
     display:flex;
+    align-items: center;
+    margin-top: -2px;
   }
   .breadcrumbDesktop{
     display:none;

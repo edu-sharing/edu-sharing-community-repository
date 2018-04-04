@@ -535,7 +535,13 @@ export class SearchComponent {
     this.globalProgress=true;
     this.nodeApi.importNode(node.ref.repo,node.ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
       this.globalProgress=false;
-      this.toast.toast('SEARCH.NODE_IMPORTED',{link:this.getWorkspaceUrl(data.node)});
+      this.toast.toast('SEARCH.NODE_IMPORTED',null,null,null,
+          {link:
+                        {caption:'SEARCH.NODE_IMPORTED_VIEW',
+                         callback:()=>{
+                            UIHelper.goToWorkspace(this.nodeApi,this.router,this.login,data.node);
+                        }}
+      });
     },(error:any)=>{
       this.toast.error(error);
       this.globalProgress=false;
@@ -896,7 +902,7 @@ export class SearchComponent {
   }
   private goToSaveSearchWorkspace() {
     this.nodeApi.getNodeMetadata(RestConstants.SAVED_SEARCH).subscribe((data:NodeWrapper)=>{
-      NodeHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.login,data.node.ref.id);
+      UIHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.login,data.node.ref.id);
     });
   }
   private loadSavedSearch() {
@@ -993,7 +999,7 @@ export class SearchComponent {
           if(repo!=this.currentRepository){
               return;
           }
-          this.mdsSets=ConfigurationHelper.filterValidMds(repo,data.metadatasets,this.config);
+          this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepositoryObject ? this.currentRepositoryObject : this.currentRepository,data.metadatasets,this.config);
           if(this.mdsSets){
             UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
             try {
