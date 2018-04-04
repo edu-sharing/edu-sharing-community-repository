@@ -191,24 +191,39 @@ export class RestHelper{
         if (node.name) return node.name;
         return node.title;
     }
-  public static getDurationInSeconds(node:any) : number {
-    // PT1H5M23S
-    //
-    let value = node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION];
-    if (!value)
-      return 0;
-    try {
-      let regexp = new RegExp("PT(\\d+H)?(\\d+M)?(\\d+S)?");
-      let result = regexp.exec(value[0]);
-      let h = result[1] ? parseInt(result[1]) : 0;
-      let m = result[2] ? parseInt(result[2]) : 0;
-      let s = result[3] ? parseInt(result[3]) : 0;
-      let time = h * 60 * 60 + m * 60 + s;
-      return time;
-    }catch(e){
-      return value;
+    public static getDurationInSeconds(node:any) : number {
+        // PT1H5M23S
+        // or 00:00:00
+        //
+        let value = node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION];
+        if (!value)
+            return 0;
+        try{
+            let result=value[0].split(":");
+            if(result.length==3) {
+                let h = result[0] ? parseInt(result[0]) : 0;
+                let m = result[1] ? parseInt(result[1]) : 0;
+                let s = result[2] ? parseInt(result[2]) : 0;
+                let time = h * 60 * 60 + m * 60 + s;
+                return time;
+            }
+        }
+        catch(e) {
+            return value;
+        }
+        try {
+            let regexp = new RegExp("PT(\\d+H)?(\\d+M)?(\\d+S)?");
+            let result = regexp.exec(value[0]);
+            let h = result[1] ? parseInt(result[1]) : 0;
+            let m = result[2] ? parseInt(result[2]) : 0;
+            let s = result[3] ? parseInt(result[3]) : 0;
+            let time = h * 60 * 60 + m * 60 + s;
+            return time;
+        }catch(e){
+            return value;
+        }
+
     }
-  }
   public static getDurationFormatted(node:any) : string{
       let time=RestHelper.getDurationInSeconds(node);
       if(!time)
