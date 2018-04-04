@@ -96,12 +96,18 @@ export class AdminComponent {
         });
         this.refreshCatalina();
         this.refreshAppList();
-        this.admin.getOAIClasses().subscribe((data:string[])=>{
-          this.oaiClasses=data;
-          this.oai.className=data[0];
+        this.admin.getOAIClasses().subscribe((classes:string[])=>{
+          this.oaiClasses=classes;
           this.storage.get("admin_oai").subscribe((data:any)=>{
             if(data)
               this.oai=data;
+            else{
+              this.oai={
+                className:classes[0],
+                importerClassName:"org.edu_sharing.repository.server.importer.OAIPMHLOMImporter",
+                recordHandlerClassName:"org.edu_sharing.repository.server.importer.RecordHandlerLOM"
+              };
+            }
           });
         });
         this.admin.getRepositoryVersion().subscribe((data:string)=>{
