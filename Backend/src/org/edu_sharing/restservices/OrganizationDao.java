@@ -7,6 +7,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -72,7 +73,7 @@ public class OrganizationDao {
 	public static String create(RepositoryDao repoDao, String orgName, GroupProfile profile) throws DAOException {
 		try {
 			OrganizationService organizationService = OrganizationServiceFactory.getOrganizationService(repoDao.getApplicationInfo().getAppId());
-			return organizationService.createOrganization(orgName, profile.getDisplayName());
+			return organizationService.createOrganization(orgName, profile.getDisplayName(),HttpContext.getCurrentMetadataSet());
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}		
