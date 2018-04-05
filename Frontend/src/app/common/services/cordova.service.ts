@@ -154,7 +154,17 @@ export class CordovaService {
 
     });  
    }
+   public getFileAsBlob(file:string,mimetype:string){
+       return new Observable<Blob>((observer: Observer<Blob>) => {
+           (window as any).resolveLocalFileSystemURL(file, (data:any)=>{
+             data.file((data2:File)=>{
+                 observer.next(data2);
+                 observer.complete();
+             })
 
+           },(error:any)=>console.error(error));
+       });
+   }
    private registerOnShareContent() : void {
        if (this.isAnroid()) {
            console.log("register on share intent");
@@ -163,10 +173,23 @@ export class CordovaService {
                console.log(intent);
                if(intent && intent.extras){
                    let uri=intent.extras["android.intent.extra.TEXT"];
-                   if(!uri)
-                       uri=intent.extras["android.intent.extra.STREAM"];
                    if(uri){
                        this.observerShareContent.next({uri:uri,mimetype:intent.type});
+                       // clear handler to just fire it on first app opening
+                       (window as any).plugins.intent.getCordovaIntent(null);
+                       return;
+                   }
+                   uri = intent.extras["android.intent.extra.STREAM"];
+                   // it's a file
+                   if(uri){
+                       (window as any).plugins.intent.getCordovaIntent(null);
+
+                       (window as any).plugins.intent.getRealPathFromContentUrl(uri,(file:string)=>{
+                           this.observerShareContent.next({uri:uri,file:file,mimetype:intent.type});
+                       },(error:any)=>{
+                           this.observerShareContent.next({uri:uri,mimetype:intent.type});
+                       });
+
                    }
                }
            };

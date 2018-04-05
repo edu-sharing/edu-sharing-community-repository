@@ -3,7 +3,7 @@ import {UIHelper} from "../../common/ui/ui-helper";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Toast} from "../../common/ui/toast";
 import {ConfigurationService} from "../../common/services/configuration.service";
-import {Title} from "@angular/platform-browser";
+import {DomSanitizer, Title} from "@angular/platform-browser";
 import {TranslateService} from "@ngx-translate/core";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
@@ -22,6 +22,7 @@ import {RestNodeService} from "../../common/rest/services/rest-node.service";
 import {ListItem} from "../../common/ui/list-item";
 import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
 import {RestHelper} from "../../common/rest/rest-helper";
+import {CordovaService} from "../../common/services/cordova.service";
 @Component({
   selector: 'share-app',
   templateUrl: 'share-app.component.html',
@@ -31,35 +32,39 @@ import {RestHelper} from "../../common/rest/rest-helper";
   ]
 })
 export class ShareAppComponent {
-    private uri: any;
+    private uri: string;
     private type="LINK";
     private title:string;
     private description:string;
-    private previewUrl:string;
+    private previewUrl:any;
     private globalProgress=true;
     private inboxPath: Node[];
     private inbox: Node;
     private columns:ListItem[]=[];
     private collections: Collection[];
     private mimetype: string;
+    private file: File;
+    private fileName: string;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
+              private sanitizer: DomSanitizer,
               private node: RestNodeService,
               private utilities: RestUtilitiesService,
               private translate: TranslateService,
               private collectionApi: RestCollectionService,
               private storage : SessionStorageService,
+              private cordova : CordovaService,
               private config : ConfigurationService,
               private connector: RestConnectorService) {
       this.columns.push(new ListItem("COLLECTION", 'title'));
       this.columns.push(new ListItem("COLLECTION", 'info'));
       this.columns.push(new ListItem("COLLECTION",'scope'));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-          this.previewUrl=this.connector.getThemeMimePreview('link.svg');
           this.route.queryParams.subscribe((params:any)=>{
               this.uri=params['uri'];
               this.mimetype=params['mimetype'];
+              this.fileName=params['file'];
               console.log(this.uri);
               this.collectionApi.search("",{
                   sortBy:[RestConstants.CM_MODIFIED_DATE],
@@ -73,6 +78,7 @@ export class ShareAppComponent {
                   this.inboxPath = data.nodes;
                   this.inbox=data.nodes[0];
               });
+              this.previewUrl=this.connector.getThemeMimePreview(this.getType()+'.svg');
               if(this.isLink()) {
                   this.utilities.getWebsiteInformation(this.uri).subscribe((data: any) => {
                       this.title = data.title;
@@ -81,10 +87,29 @@ export class ShareAppComponent {
                   });
               }
               else{
-                  let split=this.uri.split("/");
-                  this.title=split[split.length-1];
-                  this.previewUrl=this.uri;
                   this.globalProgress=false;
+                  this.cordova.getFileAsBlob(this.uri,this.mimetype).subscribe((data:any)=>{
+                      console.log(this.fileName);
+                      let split=this.fileName ? this.fileName.split("/") : this.uri.split("/");
+                      console.log(data);
+                      this.title=split[split.length-1];
+                      this.file=data;
+                      if(this.mimetype.startsWith("image/"))
+                        this.previewUrl=this.sanitizer.bypassSecurityTrustUrl(data.localURL);
+                      let request = new XMLHttpRequest();
+                      let result=request.open('GET', data.localURL, true);
+                      request.responseType = 'blob';
+                      request.onload = ()=> {
+                          console.log(request.response);
+                          this.file=request.response;
+                          (this.file as any).name=this.title;
+                      };
+                      request.onerror=(e)=>{
+                          this.toast.error(e);
+                          console.error(e);
+                      }
+                      request.send();
+                  })
               }
           })
       });
@@ -95,6 +120,7 @@ export class ShareAppComponent {
       return "file-"+this.mimetype.split("/")[0];
     }
     saveInternal(callback:Function){
+        this.globalProgress=true;
         if(this.isLink()){
             let prop:any={};
             prop[RestConstants.CCM_PROP_IO_WWWURL]=[this.uri];
@@ -104,9 +130,9 @@ export class ShareAppComponent {
             });
         }
         else {
-            let prop: any = RestHelper.createNameProperty(this.uri);
+            let prop: any = RestHelper.createNameProperty(this.title);
             this.node.createNode(this.inbox.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true).subscribe((data: NodeWrapper) => {
-                this.node.uploadNodeContentCordova(data.node.ref.id, this.uri, RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(() => {
+                this.node.uploadNodeContent(data.node.ref.id, this.file, RestConstants.COMMENT_MAIN_FILE_UPLOAD,this.mimetype).subscribe(() => {
                     callback(data.node);
                 });
             });
