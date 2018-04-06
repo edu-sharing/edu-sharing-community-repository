@@ -46,6 +46,7 @@ import org.edu_sharing.restservices.shared.GroupProfile;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.Pagination;
+import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserCredential;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserSimple;
@@ -377,7 +378,7 @@ public class IamApi  {
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
+	        @ApiResponse(code = 200, message = "OK.", response = User.class),        
 	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
@@ -395,9 +396,9 @@ public class IamApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	PersonDao.createPerson(repoDao, person,password, profile);
+	    	User result = PersonDao.createPerson(repoDao, person,password, profile).asPerson();
 	    	
-	    	return Response.status(Response.Status.OK).build();
+	    	return Response.status(Response.Status.OK).entity(result).build();
 	    	
     	} catch (DAOValidationException t) {
     		
@@ -744,7 +745,7 @@ public class IamApi  {
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
+	        @ApiResponse(code = 200, message = "OK.", response = Group.class),        
 	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
@@ -762,9 +763,9 @@ public class IamApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	GroupDao.createGroup(repoDao, group, profile,parent);
+	    	Group groupResult = GroupDao.createGroup(repoDao, group, profile,parent).asGroup();
 	    	
-	    	return Response.status(Response.Status.OK).build();
+	    	return Response.status(Response.Status.OK).entity(groupResult).build();
 	    	
     	} catch (DAOValidationException t) {
     		

@@ -31,6 +31,7 @@ import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.iam.v1.model.UserEntries;
 import org.edu_sharing.restservices.organization.v1.model.OrganizationEntries;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.Organization;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -121,7 +122,7 @@ public class OrganizationApi  {
     
     @ApiResponses(
     	value = { 
-    		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+    		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Group.class),        
 	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -138,9 +139,9 @@ public class OrganizationApi  {
     	try {
 
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	OrganizationDao.create(repoDao, organization);
+	    	Group group = OrganizationDao.create(repoDao, organization).asGroup();
 	    	
-	    	return Response.status(Response.Status.OK).build();
+	    	return Response.status(Response.Status.OK).entity(group).build();
 	
     	} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);

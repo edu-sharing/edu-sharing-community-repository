@@ -32,10 +32,10 @@ public class GroupDao {
 		}
 	}
 
-	public static String createGroup(RepositoryDao repoDao, String groupName, GroupProfile profile,String parentGroup) throws DAOException {
+	public static GroupDao createGroup(RepositoryDao repoDao, String groupName, GroupProfile profile,String parentGroup) throws DAOException {
 		try {
 			AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
-			return authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
+			return GroupDao.getGroup(repoDao, authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup));
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
