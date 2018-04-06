@@ -154,6 +154,9 @@ public class SearchToken {
 			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_MAP});
 			searchCriterias.setAspects(new String[]{CCConstants.CCM_ASPECT_COLLECTION});
 		}
+		if(getContentType().equals(ContentType.TOOLPERMISSIONS)){
+			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_TOOLPERMISSION});
+		}
 	}
 	/**
 	 * Get and set query string (for ui purposes/info)

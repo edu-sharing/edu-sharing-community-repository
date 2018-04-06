@@ -24,6 +24,7 @@ public interface SearchService {
 		FOLDERS,
 		FILES_AND_FOLDERS,
 		COLLECTIONS,
+		TOOLPERMISSIONS,
 		ALL
 	};
 	public static enum CombineMode{
