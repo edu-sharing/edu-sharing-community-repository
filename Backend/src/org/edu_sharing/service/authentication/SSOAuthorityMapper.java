@@ -33,6 +33,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.service.authentication.sso.config.Condition;
+import org.edu_sharing.service.authentication.sso.config.CustomGroupMapping;
 import org.edu_sharing.service.authentication.sso.config.MappingGroup;
 import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilder;
 import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilderFactory;
@@ -113,6 +114,7 @@ public class SSOAuthorityMapper {
 	boolean debug = false;
 	String mappingGroupBuilderClass;
 	
+	CustomGroupMapping customGroupMapping;
 	
 	List<String> additionalAttributes = new ArrayList<String>();
 	
@@ -299,6 +301,10 @@ public class SSOAuthorityMapper {
 					organisationName = mappingGroupBuilder.getOrganisation().getMapTo();
 					organisationDisplayName = mappingGroupBuilder.getOrganisation().getMapToDisplayName();
 					mappingGroups.addAll(mappingGroupBuilder.getMapTo());
+				}
+				
+				if(customGroupMapping != null) {
+					customGroupMapping.map(ssoAttributes);
 				}
 				
 				/**
@@ -659,4 +665,7 @@ public class SSOAuthorityMapper {
 		return mappingGroupBuilderClass;
 	}
 	
+	public void setCustomGroupMapping(CustomGroupMapping customGroupMapping) {
+		this.customGroupMapping = customGroupMapping;
+	}
 }
