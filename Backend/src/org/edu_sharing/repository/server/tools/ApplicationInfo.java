@@ -114,6 +114,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String KEY_API_KEY = "apikey";
 	
 	public static final String KEY_ORDER = "order";
+
+	
 	/**
 	 * property file vals
 	 */

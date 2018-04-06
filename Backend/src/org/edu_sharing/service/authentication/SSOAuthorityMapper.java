@@ -25,6 +25,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -319,7 +320,10 @@ public class SSOAuthorityMapper {
 					}
 					
 					if(existingOrganisationName == null) {
-						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName);
+						
+						String metadataSetId = ssoType.equals(SSO_TYPE_Shibboleth) ? HttpContext.getCurrentMetadataSet() : null;
+						
+						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName, metadataSetId);
 						existingOrganisationName = AuthorityType.GROUP.getPrefixString() + existingOrganisationName;
 					}
 					
