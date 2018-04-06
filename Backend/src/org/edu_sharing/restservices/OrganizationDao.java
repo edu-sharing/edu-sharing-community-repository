@@ -57,10 +57,11 @@ public class OrganizationDao {
 				
 	}
 	
-	public static void create(RepositoryDao repoDao, String orgName) throws DAOException {
+	public static GroupDao create(RepositoryDao repoDao, String orgName) throws DAOException {
 		GroupProfile profile=new GroupProfile();
 		profile.setDisplayName(orgName);
-		create(repoDao,orgName,profile);
+		String authorityName=create(repoDao,orgName,profile);
+		return GroupDao.getGroup(repoDao, authorityName);
 	}
 	/**
 	 * returns Groupname
