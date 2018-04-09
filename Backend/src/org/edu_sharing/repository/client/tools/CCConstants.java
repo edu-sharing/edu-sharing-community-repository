@@ -612,6 +612,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_COMPETENCE_DIGITAL2 = "{http://www.campuscontent.de/model/1.0}competence_digital2";
 
+	public final static String CCM_PROP_IO_SEARCH_CONTEXT = "{http://www.campuscontent.de/model/1.0}search_context";
+	
 	/**
 	 * share props
 	 */

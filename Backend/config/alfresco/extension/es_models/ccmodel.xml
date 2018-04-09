@@ -696,6 +696,15 @@
 	               </index>
 				</property>
 				
+				<property name="ccm:search_context">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
 			</properties>
 		</aspect>
 
