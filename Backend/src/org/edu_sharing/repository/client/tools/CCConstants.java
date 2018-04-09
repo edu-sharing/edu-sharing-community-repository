@@ -292,6 +292,8 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_USERNAME = "{http://www.alfresco.org/model/content/1.0}userName";
 	
 	public final static String CM_PROP_PERSON_ESORIGINALUID = "{http://www.alfresco.org/model/content/1.0}esoriginaluid";
+	
+	public final static String CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION = "{http://www.alfresco.org/model/content/1.0}eduSchoolPrimaryAffiliation";
 
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
 
