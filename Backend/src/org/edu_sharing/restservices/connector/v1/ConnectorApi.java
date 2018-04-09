@@ -13,6 +13,7 @@ import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.ConnectorDAO;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.connector.v1.model.Connector;
+import org.edu_sharing.restservices.connector.v1.model.ConnectorList;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 
 import io.swagger.annotations.Api;
