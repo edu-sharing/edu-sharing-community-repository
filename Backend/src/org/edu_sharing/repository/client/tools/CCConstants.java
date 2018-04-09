@@ -506,6 +506,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_INTERACTIVITYTYPE = "{http://www.campuscontent.de/model/1.0}educationalinteractivitytype";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE = "{http://www.campuscontent.de/model/1.0}educationaltypicalagerange";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE = "{http://www.campuscontent.de/model/1.0}educationalintendedenduserrole";
+	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_SCHEMA_RELATION = "{http://www.campuscontent.de/model/1.0}schema_relation";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LANGUAGE = "{http://www.campuscontent.de/model/1.0}educationallanguage";
 
 	public final static String CCM_PROP_IO_REPL_TAXON_ENTRY  = "{http://www.campuscontent.de/model/1.0}taxonentry";
