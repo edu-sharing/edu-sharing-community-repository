@@ -58,6 +58,8 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	public static final String CCM_PROP_IO_RESSOURCEVERSION = "{http://www.campuscontent.de/model/1.0}ccressourceversion";
 
 	public static final String CCM_PROP_IO_RESOURCESUBTYPE = "{http://www.campuscontent.de/model/1.0}ccresourcesubtype";
+	public static final String CCM_RESSOURCETYPE_MOODLE = "moodle";
+	public static final String CCM_RESSOURCETYPE_H5P = "h5p";
 
 	protected void executeImpl(Action action, NodeRef actionedUponNodeRef) {
 
@@ -121,6 +123,11 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 					if (current.getName().equals("moodle_backup.xml")) {
 						processMoodle2_0(zip, contentreader, actionedUponNodeRef);
+						zip.close();
+						return;
+					}
+					if (current.getName().equals("h5p.json")) {
+						processH5P(zip, contentreader, actionedUponNodeRef);
 						zip.close();
 						return;
 					}
@@ -259,7 +266,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 					}
 
 					nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCETYPE),
-							"moodle");
+							CCM_RESSOURCETYPE_MOODLE);
 					nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCEVERSION),
 							schemaVers);
 				}
@@ -267,6 +274,11 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void processH5P(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {
+		nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCETYPE),
+				CCM_RESSOURCETYPE_H5P);
 	}
 
 	private void processMoodle2_0(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {
@@ -289,7 +301,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 					}
 
 					nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCETYPE),
-							"moodle");
+							CCM_RESSOURCETYPE_MOODLE);
 					nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCEVERSION),
 							schemaVers);
 				}
