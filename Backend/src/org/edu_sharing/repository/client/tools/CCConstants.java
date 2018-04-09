@@ -616,6 +616,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_SEARCH_CONTEXT = "{http://www.campuscontent.de/model/1.0}search_context";
 	
+	public final static String CCM_PROP_IO_EDITORIAL_STATE = "{http://www.campuscontent.de/model/1.0}editorial_state";
+	
 	/**
 	 * share props
 	 */
