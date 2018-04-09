@@ -735,6 +735,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		String serientitel = null;
 		
 		List relationToSafeList = new ArrayList();
+		List relationToSafeListProperty = new ArrayList();
 		NodeList nodeRelationList = (NodeList) xpath.evaluate("metadata/lom/relation", nodeRecord, XPathConstants.NODESET);
 		if(nodeRelationList != null){
 			
@@ -763,12 +764,17 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 					relationProps.put("TYPE#"+ CCConstants.LOM_TYPE_IDENTIFIER + "#" + CCConstants.LOM_ASSOC_RESOURCE_IDENTIFIER, identifierProps);
 					
 					relationToSafeList.add(relationProps);
+					if(!relationKind.equals("hasthumbnail") && entry!=null && !entry.isEmpty())
+						relationToSafeListProperty.add(relationKind+"#"+entry);
 				}
 			}
 		}
 		
 		if(relationToSafeList.size() > 0){
 			toSafeMap.put("TYPE#" + CCConstants.LOM_TYPE_RELATION + "#" + CCConstants.LOM_ASSOC_SCHEMA_RELATION, relationToSafeList);
+			// store as flat property for solr search
+			if(relationToSafeListProperty.size() > 0)
+				toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_SCHEMA_RELATION,relationToSafeListProperty);
 		}
 		
 		ApplicationInfo homeApplication = ApplicationInfoList.getHomeRepository();

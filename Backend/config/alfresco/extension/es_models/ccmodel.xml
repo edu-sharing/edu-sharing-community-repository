@@ -748,6 +748,10 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
+				<property name="ccm:schema_relation">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
 				<property name="ccm:educationallanguage">
 					<type>d:text</type>
 					<multiple>true</multiple>

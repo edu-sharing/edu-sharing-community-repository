@@ -108,6 +108,8 @@ export class AdminComponent {
                 recordHandlerClassName:"org.edu_sharing.repository.server.importer.RecordHandlerLOM"
               };
             }
+            if(!this.oai.binaryHandlerClassName)
+              this.oai.binaryHandlerClassName="";
           });
         });
         this.admin.getRepositoryVersion().subscribe((data:string)=>{
@@ -349,7 +351,7 @@ export class AdminComponent {
     if(this.oaiSave){
       this.storage.set("admin_oai",this.oai);
     }
-    this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,this.oai.file).subscribe(()=>{      this.globalProgress=false;
+    this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,this.oai.file,this.oai.oaiIds).subscribe(()=>{      this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.OAI_STARTED');
     },(error:any)=>{
       this.globalProgress=false;

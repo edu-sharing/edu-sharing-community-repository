@@ -84,6 +84,7 @@
       "OAI_NO_PREFIX":"OAI Metadata Prefix fehlt",
       "OAI_METADATA":"OAI Metadata Set",
       "OAI_FILE":"URL to File",
+      "OAI_IDS":"Specific id's to import, comma seperated",
       "OAI_IMPORTER":"Importer Job",
       "OAI_IMPORTER_CLASS_NAME":"Importer Class Name",
       "OAI_RECORD_HANDLER_CLASS_NAME":"Record Handler Class Name",
