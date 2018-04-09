@@ -93,8 +93,8 @@ export class RestAdminService {
     return this.connector.get(query,this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
-  public importOAI = (baseUrl:string,set:string,metadataPrefix:string,className:string,importerClassName:string,recordHandlerClassName:string,binaryHandlerClassName:string,metadataset="",fileUrl=""): Observable<Response> => {
-    let query=this.connector.createUrl("admin/:version/import/oai?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix&className=:className&importerClassName=:importerClassName&recordHandlerClassName=:recordHandlerClassName&binaryHandlerClassName=:binaryHandlerClassName&metadataset=:metadataset&fileUrl=:fileUrl",null,[
+  public importOAI = (baseUrl:string,set:string,metadataPrefix:string,className:string,importerClassName:string,recordHandlerClassName:string,binaryHandlerClassName:string,metadataset="",fileUrl="",oaiIds=""): Observable<Response> => {
+    let query=this.connector.createUrl("admin/:version/import/oai?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix&className=:className&importerClassName=:importerClassName&recordHandlerClassName=:recordHandlerClassName&binaryHandlerClassName=:binaryHandlerClassName&metadataset=:metadataset&fileUrl=:fileUrl&oaiIds=:oaiIds",null,[
       [":baseUrl",baseUrl],
       [":set",set],
       [":metadataPrefix",metadataPrefix],
@@ -103,7 +103,8 @@ export class RestAdminService {
       [":recordHandlerClassName",recordHandlerClassName],
       [":binaryHandlerClassName",binaryHandlerClassName],
       [":metadataset",metadataset],
-      [":fileUrl",fileUrl]
+      [":fileUrl",fileUrl],
+      [":oaiIds",oaiIds]
     ]);
     return this.connector.post(query,null,this.connector.getRequestOptions());
   }
