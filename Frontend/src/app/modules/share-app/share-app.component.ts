@@ -32,12 +32,12 @@ import {CordovaService} from "../../common/services/cordova.service";
   ]
 })
 export class ShareAppComponent {
+    globalProgress=true;
     private uri: string;
     private type="LINK";
     private title:string;
     private description:string;
     private previewUrl:any;
-    private globalProgress=true;
     private inboxPath: Node[];
     private inbox: Node;
     private columns:ListItem[]=[];
