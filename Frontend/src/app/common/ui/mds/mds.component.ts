@@ -1770,7 +1770,10 @@ export class MdsComponent{
     let html='<div class="widgetGroup">'
     for(let sub of widget.subwidgets){
       let subwidget=this.getWidget(sub.id);
-      if(this.isMultivalueWidget(subwidget)){
+      if(subwidget==null){
+          html+='Widget '+sub.id+" was not found. Check the widget id";
+      }
+      else if(this.isMultivalueWidget(subwidget)){
         html+='Widget '+subwidget.id+" is a multivalue widget. This is not supported for groups";
       }
       else {
