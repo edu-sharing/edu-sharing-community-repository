@@ -5,6 +5,8 @@
 import {ConfigurationService} from "../services/configuration.service";
 import {MdsInfo, Repository} from "./data-object";
 import {RestConstants} from "./rest-constants";
+import {RestHelper} from "./rest-helper";
+import {RestNetworkService} from "./services/rest-network.service";
 
 export class ConfigurationHelper {
   public static getBanner(config: ConfigurationService){
@@ -71,6 +73,8 @@ export class ConfigurationHelper {
     let validRepositories = config.instant("availableRepositories");
     if (validRepositories && validRepositories.length) {
       for (let i = 0; i < repositories.length; i++) {
+        if(validRepositories.indexOf(RestConstants.HOME_REPOSITORY)!=-1 && repositories[i].isHomeRepo)
+          continue;
         if (validRepositories.indexOf(repositories[i].id) == -1) {
           repositories.splice(i, 1);
           i--;

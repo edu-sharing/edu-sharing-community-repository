@@ -12,6 +12,12 @@ public class Connector {
 	
 	private String url;
 	
+	/**
+	 * optional, create element if an empty node is created
+	 * Currently only used for h5p connector
+	 */
+	private String defaultCreateElement;
+	
 	private List<String> parameters;
 	
 	private List<ConnectorFileType> filetypes;
@@ -63,7 +69,12 @@ public class Connector {
 	public void setFiletypes(List<ConnectorFileType> filetypes) {
 		this.filetypes = filetypes;
 	}
-	
-	
 
+	public String getDefaultCreateElement() {
+		return defaultCreateElement;
+	}
+
+	public void setDefaultCreateElement(String defaultCreateElement) {
+		this.defaultCreateElement = defaultCreateElement;
+	}
 }

@@ -12,6 +12,8 @@ public class RenderInfoResult  implements java.io.Serializable {
 
     private int contentHash;
 
+    private java.lang.String eduSchoolPrimaryAffiliation;
+
     private java.lang.Boolean guestReadAllowed;
 
     private java.lang.Boolean hasContentLicense;
@@ -42,6 +44,7 @@ public class RenderInfoResult  implements java.io.Serializable {
     public RenderInfoResult(
            java.lang.String[] aspects,
            int contentHash,
+           java.lang.String eduSchoolPrimaryAffiliation,
            java.lang.Boolean guestReadAllowed,
            java.lang.Boolean hasContentLicense,
            org.edu_sharing.webservices.types.KeyValue[] labels,
@@ -56,6 +59,7 @@ public class RenderInfoResult  implements java.io.Serializable {
            java.lang.Boolean userReadAllowed) {
            this.aspects = aspects;
            this.contentHash = contentHash;
+           this.eduSchoolPrimaryAffiliation = eduSchoolPrimaryAffiliation;
            this.guestReadAllowed = guestReadAllowed;
            this.hasContentLicense = hasContentLicense;
            this.labels = labels;
@@ -108,6 +112,26 @@ public class RenderInfoResult  implements java.io.Serializable {
      */
     public void setContentHash(int contentHash) {
         this.contentHash = contentHash;
+    }
+
+
+    /**
+     * Gets the eduSchoolPrimaryAffiliation value for this RenderInfoResult.
+     * 
+     * @return eduSchoolPrimaryAffiliation
+     */
+    public java.lang.String getEduSchoolPrimaryAffiliation() {
+        return eduSchoolPrimaryAffiliation;
+    }
+
+
+    /**
+     * Sets the eduSchoolPrimaryAffiliation value for this RenderInfoResult.
+     * 
+     * @param eduSchoolPrimaryAffiliation
+     */
+    public void setEduSchoolPrimaryAffiliation(java.lang.String eduSchoolPrimaryAffiliation) {
+        this.eduSchoolPrimaryAffiliation = eduSchoolPrimaryAffiliation;
     }
 
 
@@ -366,6 +390,9 @@ public class RenderInfoResult  implements java.io.Serializable {
              (this.aspects!=null &&
               java.util.Arrays.equals(this.aspects, other.getAspects()))) &&
             this.contentHash == other.getContentHash() &&
+            ((this.eduSchoolPrimaryAffiliation==null && other.getEduSchoolPrimaryAffiliation()==null) || 
+             (this.eduSchoolPrimaryAffiliation!=null &&
+              this.eduSchoolPrimaryAffiliation.equals(other.getEduSchoolPrimaryAffiliation()))) &&
             ((this.guestReadAllowed==null && other.getGuestReadAllowed()==null) || 
              (this.guestReadAllowed!=null &&
               this.guestReadAllowed.equals(other.getGuestReadAllowed()))) &&
@@ -425,6 +452,9 @@ public class RenderInfoResult  implements java.io.Serializable {
             }
         }
         _hashCode += getContentHash();
+        if (getEduSchoolPrimaryAffiliation() != null) {
+            _hashCode += getEduSchoolPrimaryAffiliation().hashCode();
+        }
         if (getGuestReadAllowed() != null) {
             _hashCode += getGuestReadAllowed().hashCode();
         }
@@ -515,6 +545,12 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "contentHash"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"));
         elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("eduSchoolPrimaryAffiliation");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "eduSchoolPrimaryAffiliation"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("guestReadAllowed");

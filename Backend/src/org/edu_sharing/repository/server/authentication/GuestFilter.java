@@ -51,7 +51,7 @@ public class GuestFilter implements javax.servlet.Filter {
 			if(guestFilterHeader!=null && new Boolean(guestFilterHeader)) {
 				logger.info("Guest Filter disabled via header");
 			}
-			if (authentication == null && !new Boolean(guestFilterdisabled)) {
+			else if (authentication == null && !new Boolean(guestFilterdisabled)) {
 				String guestLogin = ApplicationInfoList.getHomeRepository().getGuest_username();
 				String guestPW = ApplicationInfoList.getHomeRepository().getGuest_password();
 				if (guestLogin != null && guestPW != null && !guestLogin.isEmpty() && !guestPW.isEmpty()) {

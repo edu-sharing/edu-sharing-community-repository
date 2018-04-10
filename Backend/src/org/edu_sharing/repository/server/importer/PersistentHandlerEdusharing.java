@@ -45,6 +45,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.policy.BehaviourFilterImpl;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.logging.Log;
@@ -419,7 +420,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		simpleProps.remove("{http://www.campuscontent.de/model/1.0}replicationsource");
 	*/
 		
-		String newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+		String newNodeId =null;
+		try {
+			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+		}catch(DuplicateChildNodeNameException e) {
+			simpleProps.put(CCConstants.CM_NAME, (String)simpleProps.get(CCConstants.CM_NAME) + System.currentTimeMillis());
+			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+		}
 		if(aspects!=null){
 			for(String aspect : aspects){
 				mcAlfrescoBaseClient.addAspect(newNodeId, aspect);

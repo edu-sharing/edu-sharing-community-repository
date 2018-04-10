@@ -65,7 +65,7 @@ public class PersonDao {
 		}
 	}
 
-	public static void createPerson(RepositoryDao repoDao, String userName,String password, UserProfile profile) throws DAOException {
+	public static PersonDao createPerson(RepositoryDao repoDao, String userName,String password, UserProfile profile) throws DAOException {
 		
 		try {
 
@@ -85,8 +85,10 @@ public class PersonDao {
 				userInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
 				
 				((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateUser(userInfo);
+				PersonDao result=new PersonDao(repoDao, userName);
 				if(password!=null)
-					new PersonDao(repoDao, userName).changePassword(null,password);
+					result.changePassword(null,password);
+				return result;
 			}			
 			
 		} catch (Exception e) {

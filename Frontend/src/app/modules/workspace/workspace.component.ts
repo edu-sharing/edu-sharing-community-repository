@@ -35,6 +35,7 @@ import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {Helper} from "../../common/helper";
 import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {DateHelper} from '../../common/ui/DateHelper';
+import {CordovaService} from "../../common/services/cordova.service";
 
 @Component({
     selector: 'workspace-main',
@@ -222,18 +223,20 @@ export class WorkspaceMainComponent{
                 private title : Title,
                 private http : Http,
                 private event : FrameEventsService,
-                private connector : RestConnectorService) {
+                private connector : RestConnectorService,
+                private cordova : CordovaService
+    ) {
         Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
             UIHelper.setTitle('WORKSPACE.TITLE',title,translate,config);
+            this.initialize();
         });
         this.connector.setRoute(this.route);
         this.globalProgress=true;
-        this.initialize();
         this.explorerOptions=this.getOptions([new Node()],true);
         //this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }
     private showTimeout(){
-        return this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
+        return !this.cordova.isRunningCordova() && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
             (this.isSafe || !this.isSafe && this.config.instant('sessionExpiredDialog',{show:true}).show);
     }
     private updateTimeout(){
@@ -656,7 +659,7 @@ export class WorkspaceMainComponent{
     }
     private downloadNode(node: Node) {
         let list = this.getNodeList(node);
-        NodeHelper.downloadNodes(this.connector,list);
+        NodeHelper.downloadNodes(this.toast,this.connector,list);
     }
     private displayNode(event:Node){
         let list = this.getNodeList(event);

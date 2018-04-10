@@ -190,6 +190,7 @@
     <input type="text" [(ngModel)]="oai.prefix" placeholder="{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}">
     <input type="text" [(ngModel)]="oai.metadata" placeholder="{{'ADMIN.IMPORT.OAI_METADATA' | translate}}">
     <input type="text" [(ngModel)]="oai.file" placeholder="{{'ADMIN.IMPORT.OAI_FILE' | translate}}">
+    <input type="text" [(ngModel)]="oai.oaiIds" placeholder="{{'ADMIN.IMPORT.OAI_IDS' | translate}}">
     <select [(ngModel)]="oai.className">
       <option *ngFor="let option of oaiClasses">{{ option }}</option>
     </select>
@@ -214,6 +215,10 @@
   <div class="group">
     <div class="info">{{'ADMIN.TOOLKIT.REFRESH_APP_INFO' | translate }}</div>
     <div class="btn-flat btn-shadow" (click)="refreshAppInfo()">{{'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</div>
+  </div>
+  <div class="group">
+    <div class="info">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
+    <div class="btn-flat btn-shadow" (click)="refreshEduGroupCache()">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
   </div>
   <div class="heading"><i class="material-icons">cached</i><span>{{'ADMIN.TOOLKIT.CACHE_INFO' | translate}}</span></div>
   <div class="group">

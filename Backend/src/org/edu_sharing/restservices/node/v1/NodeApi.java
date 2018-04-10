@@ -409,6 +409,9 @@ public class NodeApi  {
     		Filter filter = new Filter(propertyFilter);
 		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	if("-inbox-".equals(node)){
+    			node = repoDao.getUserInbox();
+    		}
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
 	    	ParentEntries response=new ParentEntries();

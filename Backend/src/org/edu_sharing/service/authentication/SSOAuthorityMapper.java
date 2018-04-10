@@ -25,6 +25,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -32,6 +33,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.service.authentication.sso.config.Condition;
+import org.edu_sharing.service.authentication.sso.config.CustomGroupMapping;
 import org.edu_sharing.service.authentication.sso.config.MappingGroup;
 import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilder;
 import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilderFactory;
@@ -112,6 +114,7 @@ public class SSOAuthorityMapper {
 	boolean debug = false;
 	String mappingGroupBuilderClass;
 	
+	CustomGroupMapping customGroupMapping;
 	
 	List<String> additionalAttributes = new ArrayList<String>();
 	
@@ -300,6 +303,10 @@ public class SSOAuthorityMapper {
 					mappingGroups.addAll(mappingGroupBuilder.getMapTo());
 				}
 				
+				if(customGroupMapping != null) {
+					customGroupMapping.map(ssoAttributes);
+				}
+				
 				/**
 				 * create eduGroup for affiliation
 				 */
@@ -319,7 +326,10 @@ public class SSOAuthorityMapper {
 					}
 					
 					if(existingOrganisationName == null) {
-						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName);
+						
+						String metadataSetId = ssoType.equals(SSO_TYPE_Shibboleth) ? HttpContext.getCurrentMetadataSet() : null;
+						
+						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName, metadataSetId);
 						existingOrganisationName = AuthorityType.GROUP.getPrefixString() + existingOrganisationName;
 					}
 					
@@ -655,4 +665,7 @@ public class SSOAuthorityMapper {
 		return mappingGroupBuilderClass;
 	}
 	
+	public void setCustomGroupMapping(CustomGroupMapping customGroupMapping) {
+		this.customGroupMapping = customGroupMapping;
+	}
 }

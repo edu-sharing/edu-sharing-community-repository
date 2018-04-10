@@ -1,0 +1,35 @@
+<global-progress *ngIf="globalProgress"></global-progress>
+<div class="content" *ngIf="!globalProgress">
+    <div class="preview">
+        <img [src]="previewUrl">
+        <div class="info">
+            <div class="type">{{'MEDIATYPE.'+getType() | translate}}</div>
+            <div class="label">{{title ? title : uri}}</div>
+            <div class="description" *ngIf="description">{{description}}</div>
+        </div>
+    </div>
+    <div class="location">
+        {{'SHARE_APP.WILL_BE_SAVED_AT' | translate}}: <breadcrumbs
+            [breadcrumbsAsNode]="inboxPath"
+            [home]="'WORKSPACE.MY_FILES'"
+            [clickable]="false"
+        ></breadcrumbs>
+    </div>
+    <div class="save" (click)="saveFile()"><i class="material-icons">folder</i><span>{{'SAVE' | translate}}</span></div>
+    <div class="collections">
+        <div class="addToCollection">
+            {{'SHARE_APP.ADD_TO_COLLECTION' | translate}}
+        </div>
+        <listTable
+                [nodes]="collections"
+                [columns]="columns"
+                [hasIcon]="true"
+                [validatePermissions]="hasWritePermissions"
+                [hasCheckbox]="false"
+                [hasHeading]="false"
+                [isClickable]="true"
+                [viewType]="2"
+                (clickRow)="saveToCollection($event)"
+        ></listTable>
+    </div>
+</div>

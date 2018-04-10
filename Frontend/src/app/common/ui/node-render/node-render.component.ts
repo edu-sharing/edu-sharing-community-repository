@@ -1,6 +1,6 @@
 import {
-  Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
-  HostListener, ChangeDetectorRef, ApplicationRef
+    Component, OnInit, OnDestroy, Input, EventEmitter, Output, ViewChild, ElementRef,
+    HostListener, ChangeDetectorRef, ApplicationRef, NgZone
 } from '@angular/core';
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestConstants} from "../../rest/rest-constants";
@@ -20,11 +20,13 @@ import {Title} from "@angular/platform-browser";
 import {SessionStorageService} from "../../services/session-storage.service";
 import {RestConnectorsService} from "../../rest/services/rest-connectors.service";
 import {trigger} from "@angular/animations";
+import {Location} from "@angular/common";
 import {NodeHelper} from "../node-helper";
 import {RestToolService} from "../../rest/services/rest-tool.service";
 import {UIConstants} from "../ui-constants";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {SearchService} from "../../../modules/search/search.service";
+import {Helper} from "../../helper";
 
 declare var jQuery:any;
 declare var window: any;
@@ -70,6 +72,8 @@ export class NodeRenderComponent {
   private fromLogin = false;
   public banner: any;
   private repository: string;
+  private downloadButton: OptionItem;
+  private downloadUrl: string;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
@@ -104,22 +108,11 @@ export class NodeRenderComponent {
 
   }
     private _node : Node;
+    private _nodeId : string;
     @Input() set node(node: Node|string){
       let id=(node as Node).ref ? (node as Node).ref.id : (node as string);
-      if((node as Node).ref && (node as Node).name) {
-        this._node = (node as Node);
-      }else{
-        this.nodeApi.getNodeRenderSnippet(id).subscribe((data:NodeWrapper)=>{
-          this._node=data.node;
-          this.loadNode();
-        },(error:any)=>{
-          if(error.status==401)
-            return;
-          this.toast.error(error);
-        });
-        return;
-      }
-      this.loadNode();
+      this._nodeId=id;
+      this.loadRenderData();
     }
     @Output() onClose=new EventEmitter();
     private close(){
@@ -133,7 +126,7 @@ export class NodeRenderComponent {
           }
           else {
             this.searchService.reinit=false;
-            NodeRenderComponent.close();
+            NodeRenderComponent.close(this.location);
           }
         }
       }
@@ -159,6 +152,7 @@ export class NodeRenderComponent {
     }
     constructor(
       private translate : TranslateService,
+      private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
       private connectors : RestConnectorsService,
@@ -166,12 +160,14 @@ export class NodeRenderComponent {
       private toolService: RestToolService,
       private frame : FrameEventsService,
       private toast : Toast,
+      private cd: ChangeDetectorRef,
       private title : Title,
       private config : ConfigurationService,
       private storage : SessionStorageService,
       private route : ActivatedRoute,
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
+      (window as any).ngRender = {setDownloadUrl:(url:string)=>{this.setDownloadUrl(url)}};
       Translation.initialize(translate,config,storage,route).subscribe(()=>{
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
@@ -197,9 +193,12 @@ export class NodeRenderComponent {
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
     }
+    ngOnDestroy() {
+        (window as any).ngRender = null;
+    }
 
-  public static close() {
-    window.history.back();
+  public static close(location:Location) {
+    location.back();
   }
   public switchPosition(pos:number){
     //this.router.navigate([UIConstants.ROUTER_PREFIX+"render",this.list[pos].ref.id]);
@@ -217,12 +216,12 @@ export class NodeRenderComponent {
     this.nodeMetadata=null;
   }
   public refresh(){
-    this.loadNode();
-
+    this.isLoading=true;
+    this.node=this._nodeId;
   }
   private loadNode() {
-      if(!this._node)
-        return;
+    if(!this._node)
+      return;
 
     let input=this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS);
     if(!input) input=[];
@@ -231,7 +230,6 @@ export class NodeRenderComponent {
       opt.push(o);
     }
     this.options=opt;
-    console.log(this._node);
     let download=new OptionItem('DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
     if(this.isCollectionRef()){
@@ -250,41 +248,29 @@ export class NodeRenderComponent {
     this.addDownloadButton(download);
   }
   private loadRenderData(){
-    let parent=this;
-    let url=this.connector.endpointUrl + this.nodeApi.getNodeRenderSnippetUrl(this._node.ref.id,this.version ? this.version : "-1");
-
     let parameters={
       showDownloadButton:false,
       showDownloadAdvice:!this.isOpenable
     };
-    jQuery.ajax({
-      url: url,
-      method:this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0 ? 'POST' : 'GET',
-      contentType: "application/json",
-      data:JSON.stringify(parameters),
-      dataType: 'json',
-      crossDomain : true,
-      xhrFields: {
-        withCredentials: true
-      },
-      success:function(data: any) {
-        if (!data.detailsSnippet) {
-          console.error(data);
-          parent.toast.error(null,"RENDERSERVICE_API_ERROR");
-        }
-        else {
-          jQuery('#nodeRenderContent').html(data.detailsSnippet);
-          parent.postprocessHtml();
-        }
-        parent.isLoading = false;
-      },
-      error:function(data : any) {
-        //jQuery('#nodeRenderContent').html('Error fetching ' + url);
-        console.log(data);
-        parent.toast.error(JSON.parse(data.responseText).message);
-        parent.isLoading = false;
-      }
-    });
+    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters)
+        .subscribe((data:any)=>{
+            if (!data.detailsSnippet) {
+                console.error(data);
+                this.toast.error(null,"RENDERSERVICE_API_ERROR");
+            }
+            else {
+                this._node=data.node;
+                jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                this.postprocessHtml();
+                this.loadNode();
+                this.isLoading = false;
+            }
+            this.isLoading = false;
+        },(error:any)=>{
+            console.log(error);
+            this.toast.error(error);
+            this.isLoading = false;
+        })
   }
 
   private postprocessHtml() {
@@ -295,7 +281,10 @@ export class NodeRenderComponent {
   }
 
   private downloadCurrentNode() {
-    NodeHelper.downloadNode(this._node,this.version);
+      if(this.downloadUrl)
+        NodeHelper.downloadUrl(this.toast,this.connector.getCordovaService(),this.downloadUrl);
+      else
+        NodeHelper.downloadNode(this.toast,this.connector.getCordovaService(),this._node,this.version);
   }
 
   private openConnector(list:ConnectorList,newWindow=true) {
@@ -352,18 +341,15 @@ export class NodeRenderComponent {
           let view=new OptionItem("WORKSPACE.OPTION.VIEW", "launch",()=>this.openConnector(data,true));
           //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
           this.options.splice(0,0,view);
-          this.options=this.options.slice();
+          this.options=Helper.deepCopyArray(this.options);
           this.isOpenable=true;
           if(this.editor && RestConnectorsService.connectorSupportsEdit(data,this._node).id==this.editor){
             this.openConnector(data,false);
           }
         }
-        this.loadRenderData();
       },(error:any)=>{
-        this.loadRenderData();
       });
-
-
+      this.options=Helper.deepCopyArray(this.options);
     });
   }
 
@@ -376,10 +362,15 @@ export class NodeRenderComponent {
   }
 
   private addDownloadButton(download: OptionItem) {
+    this.downloadButton=download;
     this.options.splice(0,0,download);
     this.checkConnector();
 
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
-    this.isLoading=true;
+  }
+  setDownloadUrl(url:string){
+      if(this.downloadButton!=null)
+        this.downloadButton.isEnabled=url!=null;
+      this.downloadUrl=url;
   }
 }

@@ -451,6 +451,26 @@ export class RestNodeService {
       .map((response: Response) => response.json());
       */
   }
+    public uploadNodeContentCordova = (node : string,
+                                uri : string,
+                                versionComment : string,
+                                mimetype="auto",
+                                onProgress:Function=null,
+                                repository=RestConstants.HOME_REPOSITORY) : Observable<XMLHttpRequest> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/content?versionComment=:comment&mimetype=:mime",repository,
+            [
+                [":node",node],
+                [":comment",versionComment],
+            ]);
+        let options=this.connector.getRequestOptions();
+
+        return this.connector.getCordovaService().uploadLocalContent(uri,query,this.connector.getRequestOptions().headers.values())
+            .map((response: Response) => response.json());
+        /*
+        return this.http.post(query,"",this.connector.getRequestOptions())
+          .map((response: Response) => response.json());
+          */
+    }
   public addWorkflow = (node : string,workflow:WorkflowEntry,repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
     let query=this.connector.createUrl("node/:version/nodes/:repository/:node/workflow",repository,[
       [":node",node],
