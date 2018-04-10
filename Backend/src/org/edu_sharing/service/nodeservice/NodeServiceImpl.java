@@ -207,7 +207,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 			else if("defaultvalue".equals(widget.getType())) {
 				logger.info("will put widget "+id+" defaultvalue "+widget.getDefaultvalue());
-				toSafe.put(id,widget.getDefaultvalue());
+				toSafe.put(widget.getId(),widget.getDefaultvalue());
 			}
 			if(values==null)
 				continue;
