@@ -655,6 +655,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable{
 		return apiClient.getProperties(storeProtocol, storeId, nodeId);
 	}
+	
+	@Override
+	public String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
+		return apiClient.getProperty(new StoreRef(storeProtocol,storeId), nodeId, property);
+	}
+	
 	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String contentProp) throws Throwable{
 		return apiClient.getContent(nodeId,contentProp);
