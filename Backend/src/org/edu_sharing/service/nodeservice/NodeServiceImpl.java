@@ -206,8 +206,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id+"_to",valuesTo[0]);
 			}
 			else if("defaultvalue".equals(widget.getType())) {
-				logger.info("will put widget "+id+" defaultvalue "+widget.getDefaultvalue());
-				toSafe.put(widget.getId(),widget.getDefaultvalue());
+				logger.info("will save property "+widget.getId()+" with predefined defaultvalue "+widget.getDefaultvalue());
+				toSafe.put(id,widget.getDefaultvalue());
+				continue;
 			}
 			if(values==null)
 				continue;
