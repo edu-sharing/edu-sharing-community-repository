@@ -6,7 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
+import org.edu_sharing.service.nodeservice.NodeServiceImpl;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+
+import com.google.gwt.user.client.ui.WidgetCollection;
 
 public class MetadataWidget extends MetadataTranslatable{
 	public static class Subwidget implements Serializable {
@@ -67,7 +72,7 @@ public class MetadataWidget extends MetadataTranslatable{
 	private String id,type,caption,bottomCaption,icon,
 					placeholder,defaultvalue,template,
 					suggestionSource,suggestionQuery,unit,format;
-	private Integer min,max,defaultValue,defaultMin,defaultMax,step;
+	private Integer min,max,defaultMin,defaultMax,step;
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty;
 	private List<MetadataKey> values;
 	private List<Subwidget> subwidgets;
@@ -172,12 +177,6 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setMax(Integer max) {
 		this.max = max;
 	}
-	public Integer getDefaultValue() {
-		return defaultValue;
-	}
-	public void setDefaultValue(Integer defaultValue) {
-		this.defaultValue = defaultValue;
-	}
 	public Integer getDefaultMin() {
 		return defaultMin;
 	}
@@ -267,6 +266,24 @@ public class MetadataWidget extends MetadataTranslatable{
 			map.put(value.getKey(), value);
 		}
 		return map;
+	}
+	
+	Logger logger = Logger.getLogger(MetadataWidget.class);
+	/** resolves this widget's condition
+	 * only works for condition type TOOLPERMISSION
+	 * @return
+	 */
+	public boolean isConditionTrue() {
+		Condition condition = getCondition();
+		if(getCondition()==null)
+			return true;
+		if(Condition.CONDITION_TYPE.TOOLPERMISSION.equals(condition.getType())){
+			boolean result=ToolPermissionServiceFactory.getInstance().hasToolPermission(condition.getValue());
+			if(result)
+				return !condition.isNegate();
+		}
+		logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
+		return true;
 	}
 	
 }

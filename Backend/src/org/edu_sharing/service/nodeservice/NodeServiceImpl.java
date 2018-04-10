@@ -188,8 +188,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(application, metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
-		for (MetadataWidget widget : mds.getWidgets()) {
+		for (MetadataWidget widget : mds.getWidgetsByNodeType(nodeType)) {
 			String id=widget.getId();
+			if(!widget.isConditionTrue()) {
+				logger.info("widget "+id+" skipped because condition failed");
+				logger.info("condition that should match: "+widget.getCondition().getType()+" "+(widget.getCondition().isNegate() ? "!=" : "=" )+" "+widget.getCondition().getValue());
+				continue;
+			}
 			id=CCConstants.getValidGlobalName(id);
 			String [] values = props.get(id);
 			if("range".equals(widget.getType())){
@@ -199,6 +204,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					continue;
 				toSafe.put(id+"_from",valuesFrom[0]);
 				toSafe.put(id+"_to",valuesTo[0]);
+			}
+			else if("defaultvalue".equals(widget.getType())) {
+				logger.info("will put widget "+id+" defaultvalue "+widget.getDefaultvalue());
+				toSafe.put(id,widget.getDefaultvalue());
 			}
 			if(values==null)
 				continue;
