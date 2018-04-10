@@ -888,7 +888,7 @@ export class CordovaService {
    * https://github.com/SpiderOak/FileViewerPlugin
    */
 
-   openContentNative(filePath:string, successCallback:Function, failCallback:Function) : void {
+   openContentNative(filePath:string, successCallback:Function=null, failCallback:Function=null) : void {
     try {
       (window as any).FileViewerPlugin.view({
               action: (window as any).FileViewerPlugin.ACTION_VIEW,
@@ -896,15 +896,15 @@ export class CordovaService {
           },
           () => {
             // WIN
-            successCallback();
+              if(successCallback) successCallback();
           },
           (error:any) => {
             // FAIL
-            failCallback("FAIL on openContentNative",error);
+            if(failCallback) failCallback("FAIL on openContentNative",error);
           }
       );
     } catch (e) {
-      failCallback("EXCEPTION on openContentNative",e);
+        if(failCallback) failCallback("EXCEPTION on openContentNative",e);
     }
    }
 
