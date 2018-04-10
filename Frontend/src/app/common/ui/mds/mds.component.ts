@@ -879,7 +879,6 @@ export class MdsComponent{
         extended[0]=true;
       this.replaceVariables(widget);
       this.currentWidgets.push(widget);
-      console.log(attr);
       let widgetData=this.renderWidget(widget,attr,template);
       if(!widgetData) {
         removeWidgets.push(widget);
