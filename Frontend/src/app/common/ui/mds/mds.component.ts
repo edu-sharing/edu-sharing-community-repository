@@ -143,7 +143,7 @@ export class MdsComponent{
     this.isLoading=true;
     this.mdsService.getSet().subscribe((data:any)=> {
       this.mds=data;
-      this.renderGroup(this.createType, this.mds, this.currentNode);
+      this.renderGroup(this.createType, this.mds);
       this.isLoading=false;
     });
   }
@@ -176,7 +176,7 @@ export class MdsComponent{
           if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
             nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
           }
-          this.renderGroup(nodeGroup, this.mds, this.currentNode);
+          this.renderGroup(nodeGroup, this.mds);
           this.isLoading = false;
         });
       },(error:any)=>{
@@ -306,6 +306,7 @@ export class MdsComponent{
     if(widgetValues /* && !this._groupId */)
       elements[0].style.display=hits || allowCustom ? 'none' : '';
   }
+  /*
   private renderTabs(group:any,data:any,node:Node) : string{
     let tabs='<div class="row tab-group"><ul class="tabs">';
     let content='';
@@ -335,7 +336,8 @@ export class MdsComponent{
     tabs+='</ul></div>';
     return tabs+content;
   }
-  private renderList(group:any,data:any,node:Node) : any{
+  */
+  private renderList(group:any,data:any) : any{
     let content='';
     let i=0;
     let hasExtended=[false];
@@ -350,10 +352,10 @@ export class MdsComponent{
           if (view.rel) {
           if(!result[view.rel])
             result[view.rel]='';
-            result[view.rel] += this.renderTemplate(view, data, hasExtended,node);
+            result[view.rel] += this.renderTemplate(view, data, hasExtended);
           }
           else {
-            result.main += this.renderTemplate(view, data, hasExtended,node);
+            result.main += this.renderTemplate(view, data, hasExtended);
           }
           i++;
           break;
@@ -436,7 +438,7 @@ export class MdsComponent{
     return html;
   }
 
-  private renderGroup(id:string,data:any,node:Node=null){
+  private renderGroup(id:string,data:any){
     if(!id)
       return;
     this.currentWidgets=[];
@@ -451,13 +453,13 @@ export class MdsComponent{
     }
     for(let group of data.groups){
       if(group.id==id){
-        let result=this.renderList(group,data,node);
+        let result=this.renderList(group,data);
         this.setRenderedHtml(result.main);
         if(result.suggestions)
           this.renderedSuggestions=this.sanitizer.bypassSecurityTrustHtml(result.suggestions);
         let jumpHtml=this.renderJumpmarks(group,data);
         this.jumpmarks=this.sanitizer.bypassSecurityTrustHtml(jumpHtml);
-        this.readValues(data,node);
+        this.readValues(data);
         //setTimeout(()=>UIHelper.materializeSelect(),15);
         return;
       }
@@ -831,11 +833,11 @@ export class MdsComponent{
     }
     return id;
   }
-  private readValues(data:any,node:Node){
-    this.setGeneralNodeData(node);
-    this.setValuesByProperty(data,node ? node.properties : []);
+  private readValues(data:any){
+    this.setGeneralNodeData();
+    this.setValuesByProperty(data,this.currentNode ? this.currentNode.properties : []);
   }
-  private renderTemplate(template : any,data:any,extended:boolean[],node:Node) {
+  private renderTemplate(template : any,data:any,extended:boolean[]) {
     if(!template.html || !template.html.trim()){
       return '';
     }
@@ -878,7 +880,7 @@ export class MdsComponent{
       this.replaceVariables(widget);
       this.currentWidgets.push(widget);
       console.log(attr);
-      let widgetData=this.renderWidget(widget,attr,template,node);
+      let widgetData=this.renderWidget(widget,attr,template);
       if(!widgetData) {
         removeWidgets.push(widget);
         continue;
@@ -1456,29 +1458,33 @@ export class MdsComponent{
     html+='</fieldset>';
     return html;
   }
-  private renderWidget(widget: any,attr:string,template:any,node:Node) : string{
+  private isWidgetConditionTrue(widget:any){
+    if(!widget.condition)
+      return true;
+    let condition=widget.condition;
+    console.log('condition:');
+    console.log(condition);
+    if(condition.type=='PROPERTY' && this.currentNode) {
+        if (!this.currentNode.properties[condition.value] && !condition.negate || this.currentNode.properties[condition.value] && condition.negate) {
+            return false;
+        }
+    }
+    if(condition.type=='TOOLPERMISSION'){
+        let tp=this.connector.hasToolPermissionInstant(condition.value);
+        if(tp==condition.negate){
+            return false;
+        }
+    }
+    console.log("condition is true, will display widget");
+    return true;
+  }
+  private renderWidget(widget: any,attr:string,template:any) : string{
     let id=widget.id;
     let hasCaption=widget.caption;
     let html='';
     let caption='';
-
-    if(widget.condition){
-      let condition=widget.condition;
-      console.log('condition:');
-      console.log(condition);
-      if(condition.type=='PROPERTY' && node) {
-          if (!node.properties[condition.value] && !condition.negate || node.properties[condition.value] && condition.negate) {
-              return null;
-          }
-      }
-      if(condition.type=='TOOLPERMISSION'){
-        let tp=this.connector.hasToolPermissionInstant(condition.value);
-        if(tp==condition.negate){
-          return null;
-        }
-      }
-      console.log("condition is true, will display widget");
-    }
+    if(!this.isWidgetConditionTrue(widget))
+      return null;
 
     if(hasCaption) {
       caption=this.getCaption(widget);
@@ -1537,7 +1543,11 @@ export class MdsComponent{
       html+=this.renderVCardWidget(widget,attr);
     }
     else if(widget.type=='multivalueGroup'){
-        html+=this.renderGroupWidget(widget,attr,template,node);
+        html+=this.renderGroupWidget(widget,attr,template);
+    }
+    else if(widget.type=='defaultvalue'){
+        // hide this widget, it's used in backend
+        return '';
     }
     else if(widget.id=='preview'){
       html+=this.renderPreview(widget,attr);
@@ -1763,7 +1773,7 @@ export class MdsComponent{
     let caption=this.getGroupValueCaption(result,widget);
     document.getElementById(id).innerHTML+=this.getMultivalueBadge(result,caption);
   }
-  private renderGroupWidget(widget: any,attr:string,template:any,node:Node){
+  private renderGroupWidget(widget: any,attr:string,template:any){
     if(!widget.subwidgets || !widget.subwidgets.length){
       return "Widget "+widget.id+" is a group widget, but has no subwidgets attached";
     }
@@ -1777,7 +1787,9 @@ export class MdsComponent{
         html+='Widget '+subwidget.id+" is a multivalue widget. This is not supported for groups";
       }
       else {
-          html += this.renderWidget(subwidget, null, template, node);
+        console.log(subwidget);
+        let render=this.renderWidget(subwidget, null, template);
+        html += render ? render : "";
       }
     }
     html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
@@ -1790,7 +1802,7 @@ export class MdsComponent{
         return 'widget \'license\' does not have values connected, can\'t render it.';
       }
       for(let value of widget.values){
-        let image=NodeHelper.getLicenseIconByString(value.id, this.connector);;
+        let image=NodeHelper.getLicenseIconByString(value.id, this.connector);
         if(image)
           value.imageSrc = image;
       }
@@ -1813,10 +1825,10 @@ export class MdsComponent{
     }
   }
 
-  private setPreview(node: Node,counter=1) {
+  private setPreview(counter=1) {
     let preview:any=document.getElementById('preview');
     if(preview){
-      if(!node){
+      if(!this.currentNode){
         if(this.createType==MdsComponent.TYPE_TOOLDEFINITION){
           preview.src = this.connector.getThemeMimePreview('tool_definition.svg');
         }
@@ -1825,21 +1837,21 @@ export class MdsComponent{
         }
         return;
       }
-      if(preview.src && !preview.src.startsWith(node.preview.url))
+      if(preview.src && !preview.src.startsWith(this.currentNode.preview.url))
         return;
-      preview.src=node.preview.url+'&crop=true&width=400&height=300&dontcache='+new Date().getMilliseconds();
+      preview.src=this.currentNode.preview.url+'&crop=true&width=400&height=300&dontcache='+new Date().getMilliseconds();
       //if(node.preview.isIcon){
         setTimeout(()=>{
           //this.node.getNodeMetadata(node.ref.id).subscribe((data:NodeWrapper)=>{this.setPreview(data.node)});
-          this.setPreview(node,counter*2);
+          this.setPreview(counter*2);
         },Math.min(10000,500*counter));
       //}
     }
   }
 
-  private setGeneralNodeData(node:Node) {
+  private setGeneralNodeData() {
     setTimeout(()=>{
-      this.setPreview(node);
+      this.setPreview();
     },10);
   }
 
@@ -1908,7 +1920,7 @@ export class MdsComponent{
   private getWidget(id: string,template:string=null,widgets=this.mds.widgets) {
     for(let w of widgets){
       if(w.id==id){
-        if(template==null || w.template==template){
+        if((template==null || w.template==template) && this.isWidgetConditionTrue(w)){
           return w;
         }
       }
