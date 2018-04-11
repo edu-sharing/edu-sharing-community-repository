@@ -26,6 +26,9 @@
         color: $textLight;
         padding-bottom: 15px;
       }
+      .label{
+        @include limitLineCount(1);
+      }
       .description{
         font-size: 90%;
         color: $textLight;

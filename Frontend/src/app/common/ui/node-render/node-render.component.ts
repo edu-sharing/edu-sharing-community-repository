@@ -283,7 +283,8 @@ export class NodeRenderComponent {
       element.click((event:any)=>{
           if(this.connector.getCordovaService().isRunningCordova()){
               let href=element.attr('href');
-              this.connector.getCordovaService().openContentNative(href);
+              console.log(href);
+              this.connector.getCordovaService().openBrowser(href);
               event.preventDefault();
           }
       });

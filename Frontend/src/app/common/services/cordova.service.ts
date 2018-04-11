@@ -162,7 +162,10 @@ export class CordovaService {
                  observer.complete();
              })
 
-           },(error:any)=>console.error(error));
+           },(error:any)=>{
+               observer.error(error);
+               observer.complete();
+           });
        });
    }
    private registerOnShareContent() : void {
@@ -193,6 +196,7 @@ export class CordovaService {
                    }
                }
            };
+           console.log((window as any).plugins);
            (window as any).plugins.intent.getCordovaIntent(handleIntent);
            (window as any).plugins.intent.setNewIntentHandler(handleIntent);
            /*
@@ -880,6 +884,9 @@ export class CordovaService {
      }*/
    }
 
+   openBrowser(url:string){
+       window.open(url,'_system');
+   }
    /**********************************************************
    * FileViewer PlugIn
    **********************************************************
@@ -1055,12 +1062,14 @@ export class CordovaService {
               observer.next(null);
               observer.complete();
           }, (error: any) => {
-              observer.error(null);
-              observer.complete();
+              console.warn(error);
+              console.warn("cordova: invalid oauth, go back to server selection");
+              this.reiniting = false;
               this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
               this.clearAllCookies();
-              console.warn("cordova: invalid oauth, go back to server selection");
               this.restartCordova();
+              observer.error(null);
+              observer.complete();
           });
       });
   }
@@ -1089,6 +1098,7 @@ export class CordovaService {
 
         },
         (error: any) => {
+          console.error(error);
           observer.error(error);
           observer.complete();
         });

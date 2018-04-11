@@ -65,6 +65,7 @@ export class ShareAppComponent {
               this.uri=params['uri'];
               this.mimetype=params['mimetype'];
               this.fileName=params['file'];
+              this.description=null;
               console.log(this.uri);
               this.collectionApi.search("",{
                   sortBy:[RestConstants.CM_MODIFIED_DATE],
@@ -81,7 +82,7 @@ export class ShareAppComponent {
               this.previewUrl=this.connector.getThemeMimePreview(this.getType()+'.svg');
               if(this.isLink()) {
                   this.utilities.getWebsiteInformation(this.uri).subscribe((data: any) => {
-                      this.title = data.title;
+                      this.title = data.title+" - "+data.page;
                       this.description = data.description;
                       this.globalProgress=false;
                   });
@@ -105,11 +106,14 @@ export class ShareAppComponent {
                           (this.file as any).name=this.title;
                       };
                       request.onerror=(e)=>{
-                          this.toast.error(e);
-                          console.error(e);
+                          this.toast.error('SHARE_APP.');
+                          UIHelper.goToDefaultLocation(this.router,this.connector.getConfigurationService());
                       }
                       request.send();
-                  })
+                  },(error:any)=>{
+                      this.toast.error(error);
+                      UIHelper.goToDefaultLocation(this.router,this.connector.getConfigurationService());
+                  });
               }
           })
       });

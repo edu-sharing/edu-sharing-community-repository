@@ -277,7 +277,9 @@ export class WorkspaceMainComponent{
         if(event.type.editorType){
             prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
         }
-        var win=window.open("",'_blank');
+        let win:any;
+        if(!this.cordova.isRunningCordova())
+            window.open("");
         this.node.createNode(this.currentFolder.ref.id,RestConstants.CCM_TYPE_IO,[],prop,false).subscribe(
             (data : NodeWrapper)=>{
                 this.editConnector(data.node,event.type,win,this.createConnectorType);

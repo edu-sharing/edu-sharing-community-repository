@@ -60,6 +60,9 @@ export class RestConnectorsService extends AbstractRestService{
       let send: any = {};
       send["connectorId"] = connectorType.id;
       send["nodeId"] = node.ref.id;
+      if(this.connector.getCordovaService().isRunningCordova()){
+        send["accessToken"]=this.connector.getCordovaService().oauth.access_token;
+      }
       let req = this.connector.getAbsoluteEndpointUrl()+"../eduservlet/connector?";
       let i=0;
       for (let param in send) {
