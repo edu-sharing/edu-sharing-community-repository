@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -68,20 +69,27 @@ public class ToolPermissionService {
 	}
 	
 	public List<String> getAllToolPermissions(){
-		
-		List<String> result = new ArrayList<String>();
-		
-		try {
-			String tpFolder = getEdu_SharingToolPermissionsFolder();
-			List<ChildAssociationRef> childAssocRefs = eduNodeService.getChildrenChildAssociationRef(tpFolder);
-			for(ChildAssociationRef childAssocRef : childAssocRefs) {
-				String name = eduNodeService.getProperty(childAssocRef.getChildRef().getStoreRef().getProtocol(), childAssocRef.getChildRef().getStoreRef().getIdentifier(), childAssocRef.getChildRef().getId(), CCConstants.CM_NAME);
-				result.add(name);
+		RunAsWork<List<String>> runas = new RunAsWork<List<String>>() {
+			@Override
+			public List<String> doWork() throws Exception {
+				List<String> result = new ArrayList<String>();
+				try {
+					
+					
+					String tpFolder = getEdu_SharingToolPermissionsFolder();
+					List<ChildAssociationRef> childAssocRefs = eduNodeService.getChildrenChildAssociationRef(tpFolder);
+					for(ChildAssociationRef childAssocRef : childAssocRefs) {
+						String name = eduNodeService.getProperty(childAssocRef.getChildRef().getStoreRef().getProtocol(), childAssocRef.getChildRef().getStoreRef().getIdentifier(), childAssocRef.getChildRef().getId(), CCConstants.CM_NAME);
+						result.add(name);
+					}
+				}catch(Throwable e) {
+					logger.error(e.getMessage(), e);
+				}
+				return result;
 			}
-		}catch(Throwable e) {
-			logger.error(e.getMessage(), e);
-		}
-		return result;
+		};
+		
+		return AuthenticationUtil.runAsSystem(runas);
 	}
 	
 	
