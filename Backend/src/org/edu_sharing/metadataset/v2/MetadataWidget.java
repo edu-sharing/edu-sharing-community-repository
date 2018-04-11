@@ -268,7 +268,7 @@ public class MetadataWidget extends MetadataTranslatable{
 		return map;
 	}
 	
-	Logger logger = Logger.getLogger(MetadataWidget.class);
+	transient Logger logger = Logger.getLogger(MetadataWidget.class);
 	/** resolves this widget's condition
 	 * only works for condition type TOOLPERMISSION
 	 * @return
