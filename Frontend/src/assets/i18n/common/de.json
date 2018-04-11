@@ -303,8 +303,7 @@
   },
   "SHARE_APP":{
     "WILL_BE_SAVED_AT":"Wird gespeichert unter",
-    "ADD_TO_COLLECTION":"In welche Sammlung einsortieren?",
-    "CONTENT_NOT_READABLE":"edu-sharing konnte leider auf diesen Inhalt nicht zugreifen. Versuchen Sie bitte, lokale Inhalte (z.B. aus der Galerie) zu verwenden"
+    "ADD_TO_COLLECTION":"In welche Sammlung einsortieren?"
   },
   "LICENSE_AGREEMENT":{
     "TITLE":"Nutzungsbedingungen",

@@ -106,13 +106,11 @@ export class ShareAppComponent {
                           (this.file as any).name=this.title;
                       };
                       request.onerror=(e)=>{
-                          this.toast.error('SHARE_APP.');
-                          UIHelper.goToDefaultLocation(this.router,this.connector.getConfigurationService());
+                          this.router.navigate([UIConstants.ROUTER_PREFIX,'messages','CONTENT_NOT_READABLE']);
                       }
                       request.send();
                   },(error:any)=>{
-                      this.toast.error(error);
-                      UIHelper.goToDefaultLocation(this.router,this.connector.getConfigurationService());
+                      this.router.navigate([UIConstants.ROUTER_PREFIX,'messages','CONTENT_NOT_READABLE']);
                   });
               }
           })
