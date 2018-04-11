@@ -279,8 +279,7 @@ public class MetadataWidget extends MetadataTranslatable{
 			return true;
 		if(Condition.CONDITION_TYPE.TOOLPERMISSION.equals(condition.getType())){
 			boolean result=ToolPermissionServiceFactory.getInstance().hasToolPermission(condition.getValue());
-			if(result)
-				return !condition.isNegate();
+			return result!=condition.isNegate();
 		}
 		logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
 		return true;
