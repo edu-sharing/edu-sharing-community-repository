@@ -9,12 +9,14 @@ import {RequestObject} from "../request-object";
 import {Node, Connector, OAuthResult, ConnectorList, Filetype, NodeLock, RestError} from "../data-object";
 import {Observer} from "rxjs";
 import {RestNodeService} from "./rest-node.service";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestConnectorsService {
-  constructor(private connector : RestConnectorService,
-              public nodeApi : RestNodeService) {}
-
+export class RestConnectorsService extends AbstractRestService{
+  constructor(connector : RestConnectorService,
+              public nodeApi : RestNodeService) {
+      super(connector);
+  }
 
   public list = (repository=RestConstants.HOME_REPOSITORY
                   ): Observable<ConnectorList> => {

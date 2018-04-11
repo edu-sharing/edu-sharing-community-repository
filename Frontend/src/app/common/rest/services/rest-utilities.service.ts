@@ -14,12 +14,13 @@ import {RequestObject} from "../request-object";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
 import {NodeHelper} from "../../ui/node-helper";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestUtilitiesService{
-  constructor(private connector : RestConnectorService) {
+export class RestUtilitiesService extends AbstractRestService{
+  constructor(connector : RestConnectorService) {
+      super(connector);
   }
-
   public getWebsiteInformation = (url:string) : Observable<any> => {
     let query=this.connector.createUrl("clientUtils/:version/getWebsiteInformation?url=:url",null,
       [

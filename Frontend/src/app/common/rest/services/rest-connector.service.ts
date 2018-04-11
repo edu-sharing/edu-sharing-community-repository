@@ -73,6 +73,9 @@ export class RestConnectorService {
     this.numberPerRequest=RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
     event.addListener(this);
   }
+  public getLocatorService(){
+    return this.locator;
+  }
   public getCordovaService(){
     return this.cordova;
   }

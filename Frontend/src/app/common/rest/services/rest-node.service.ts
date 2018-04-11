@@ -13,11 +13,12 @@ import {
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestNodeService {
-  constructor(private connector : RestConnectorService,private events:FrameEventsService, private iam : RestIamService, private toast : Toast) {
-
+export class RestNodeService extends AbstractRestService{
+  constructor(connector : RestConnectorService,private events:FrameEventsService, private iam : RestIamService, private toast : Toast) {
+    super(connector);
     events.addListener(this);
   }
   onEvent(event:string,data:any){

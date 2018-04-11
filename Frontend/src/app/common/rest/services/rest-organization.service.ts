@@ -4,10 +4,12 @@ import {Observable} from "rxjs";
 import {RestConnectorService} from "./rest-connector.service";
 import {IamUsers, IamAuthorities, OrganizationOrganizations} from "../data-object";
 import {Response} from "@angular/http";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestOrganizationService {
-  constructor(private connector: RestConnectorService) {
+export class RestOrganizationService extends AbstractRestService{
+  constructor(connector : RestConnectorService) {
+      super(connector);
   }
   public removeMember = (organization : string,member : string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> => {
     let query = this.connector.createUrl("organization/:version/organizations/:repository/:organization/member/:member", repository,

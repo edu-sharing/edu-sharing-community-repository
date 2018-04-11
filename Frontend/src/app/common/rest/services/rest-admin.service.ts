@@ -10,10 +10,13 @@ import {
   IamUsers, IamUser, UserProfile, UserCredentials, ServerUpdate, CacheInfo, NetworkRepositories, Application
 } from "../data-object";
 import {Observer} from "rxjs";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestAdminService {
-  constructor(private connector : RestConnectorService) {}
+export class RestAdminService extends AbstractRestService{
+  constructor(connector : RestConnectorService) {
+    super(connector);
+  }
 
   public addApplication = (url:string): Observable<any> => {
     let query=this.connector.createUrl("admin/:version/applications?url=:url",null,[
