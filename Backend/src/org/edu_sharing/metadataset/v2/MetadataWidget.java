@@ -268,7 +268,7 @@ public class MetadataWidget extends MetadataTranslatable{
 		return map;
 	}
 	
-	transient Logger logger = Logger.getLogger(MetadataWidget.class);
+	//transient Logger logger = Logger.getLogger(MetadataWidget.class);
 	/** resolves this widget's condition
 	 * only works for condition type TOOLPERMISSION
 	 * @return
@@ -281,7 +281,7 @@ public class MetadataWidget extends MetadataTranslatable{
 			boolean result=ToolPermissionServiceFactory.getInstance().hasToolPermission(condition.getValue());
 			return result!=condition.isNegate();
 		}
-		logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
+		//logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
 		return true;
 	}
 	
