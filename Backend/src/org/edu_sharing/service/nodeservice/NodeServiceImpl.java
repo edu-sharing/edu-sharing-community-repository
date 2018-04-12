@@ -24,6 +24,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -184,7 +185,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
 		
-		if(metadataSetId == null) metadataSetId = CCConstants.metadatasetdefault_id;
+		if(metadataSetId == null) {
+			
+			if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
+				metadataSetId = HttpContext.getCurrentMetadataSet();
+			}else {
+				metadataSetId = CCConstants.metadatasetdefault_id;
+			}
+		}
 		
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(application, metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
