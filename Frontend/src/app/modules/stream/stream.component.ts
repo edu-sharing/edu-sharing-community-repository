@@ -61,7 +61,7 @@ export class StreamComponent {
 
   sortieren() {
     // here is going to be the sorting functionality: 
-
+    console.log(this.streams);
    // let temp = this.other['stream'].shift();
     //this.other['stream'].push(temp);
   }

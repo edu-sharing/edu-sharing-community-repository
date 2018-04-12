@@ -1,8 +1,20 @@
 @import "../../../styles/variables.scss";
 
+.margin-show{
+    width: 70%;
+    padding: 20px;
+}
+
+.customfloat{
+    float: left;
+}
+
+.stream-header{
+    padding-left: 20px;
+}
 
 .stream-box{
-    border: 2px solid black;
+    background-color: white;
     margin: 15px 0px;
 }
 
@@ -19,19 +31,22 @@
 .stream-box-title{
     padding: 15px 15px 0px 15px;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 18px;
 }
 
 .stream-box-main{
-    width: 94%;
+    width: 92%;
     display: inline-block;
 }
 .stream-box-main-vert{
    
-    display: inline-block;
+    float: right;
+    padding-top: 15px;
+    padding-right: 10px;
 }
 
 .stream-box-desc{
+    padding-top: 15px;
     padding-left: 15px;
     
 }
@@ -42,9 +57,25 @@
 }
 
 .stream-box-image{
-    padding: 15px;
+    padding: 1px;
+    position: relative;
+    text-align: center;
+    color: white;
     
 }
+
+.bottom-left {
+    position: absolute;
+    bottom: 12px;
+    left: 18px;
+}
+
+.bottom-right {
+    position: absolute;
+    bottom: 12px;
+    right: 18px;
+}
+
 
 .stream-box-footer{
     border-top: 2px solid black;

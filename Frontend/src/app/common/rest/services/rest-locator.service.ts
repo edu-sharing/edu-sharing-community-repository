@@ -10,6 +10,7 @@ import {subscribeOn} from "rxjs/operator/subscribeOn";
 @Injectable()
 export class RestLocatorService {
   private static ENDPOINT_URLS = [
+    "http://edu50.edu-sharing.de/edu-sharing/rest/",
     "rest/",
     "http://localhost:8080/edu-sharing/rest/",
     "http://localhost:8081/edu-sharing/rest/",
