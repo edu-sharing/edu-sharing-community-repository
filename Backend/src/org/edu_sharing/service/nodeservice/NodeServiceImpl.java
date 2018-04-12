@@ -192,6 +192,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}else {
 				metadataSetId = CCConstants.metadatasetdefault_id;
 			}
+			
+			props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
 		}
 		
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(application, metadataSetId);
