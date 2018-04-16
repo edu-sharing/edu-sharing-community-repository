@@ -8,6 +8,7 @@ import { RestConstants } from '../rest/rest-constants';
 import {PlatformLocation} from "@angular/common";
 import {Helper} from "../helper";
 import {UIConstants} from "../ui/ui-constants";
+import {Router} from "@angular/router";
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -36,6 +37,7 @@ export class CordovaService {
   private serviceIsReady = false;
 
   private lastShareTS:number = 0;
+  private lastIntent: any;
 
   get oauth(){
     return this._oauth;
@@ -56,7 +58,8 @@ export class CordovaService {
    * CONSTRUCTOR
    */
   constructor(
-    private http : Http
+    private http : Http,
+    private router : Router
   ) {
 
     this.initialHref = window.location.href;
@@ -102,6 +105,12 @@ export class CordovaService {
 
   }
 
+    /**
+     * get the last android intent
+     */
+    public getLastIntent(){
+      return this.lastIntent;
+    }
   private deviceReadyLoop(counter:number) : void {
     console.log("deviceReadyLoop("+counter+")");
     setTimeout(()=>{
@@ -121,6 +130,18 @@ export class CordovaService {
       // load basic data from storage
       this.loadStorage();
 
+      // when new share contet - go to share screen
+      if(this.hasValidConfig()) {
+          this.onNewShareContent().subscribe(
+              (data: any) => {
+                  // TODO: take URI and processes on share screen
+                  // this.router.navigate(['share', URI]);
+                  this.router.navigate(['app', 'share'], {queryParams: data});
+              }, (error) => {
+                  console.log("ERROR on new share event", error);
+              });
+      }
+
       // hide the splashscreen (if still showing)
       setTimeout(()=>{
         try {
@@ -137,7 +158,6 @@ export class CordovaService {
       if (this.observerShareContent!=null) this.registerOnShareContent();
 
     };
-
   /**********************************************************
    * Plugin: WebIntent (for Android)
    **********************************************************
@@ -145,7 +165,7 @@ export class CordovaService {
    * https://github.com/cordova-misc/cordova-webintent
    */
 
-   onNewShareContent() : Observable<any> {
+   private onNewShareContent() : Observable<any> {
     return new Observable<any>((observer: Observer<any>) => {
       this.observerShareContent = observer;
 
@@ -171,12 +191,14 @@ export class CordovaService {
    private registerOnShareContent() : void {
        if (this.isAnroid()) {
            console.log("register on share intent");
+           // only run once. Will loop otherwise if no auth is found and intent was send
            let handleIntent=(intent:any)=> {
                // Do things
                console.log(intent);
                if(intent && intent.extras){
                    let uri=intent.extras["android.intent.extra.TEXT"];
                    if(uri){
+                       this.lastIntent=intent;
                        this.observerShareContent.next({uri:uri,mimetype:intent.type});
                        // clear handler to just fire it on first app opening
                        (window as any).plugins.intent.getCordovaIntent(null);
@@ -185,8 +207,8 @@ export class CordovaService {
                    uri = intent.extras["android.intent.extra.STREAM"];
                    // it's a file
                    if(uri){
+                       this.lastIntent=intent;
                        (window as any).plugins.intent.getCordovaIntent(null);
-
                        (window as any).plugins.intent.getRealPathFromContentUrl(uri,(file:string)=>{
                            this.observerShareContent.next({uri:uri,file:file,mimetype:intent.type});
                        },(error:any)=>{

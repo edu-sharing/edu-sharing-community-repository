@@ -456,14 +456,14 @@ export class RestNodeService extends AbstractRestService{
                                 text : string,
                                 versionComment : string = "",
                                 mimetype="text/plain",
-                                repository=RestConstants.HOME_REPOSITORY) : Observable<XMLHttpRequest> => {
-        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/content?versionComment=:comment&mimetype=:mime",repository,
+                                repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/content?versionComment=:comment&mimetype=:mimetype",repository,
             [
                 [":node",node],
                 [":mimetype",mimetype],
                 [":comment",versionComment],
             ]);
-        let options=this.connector.getRequestOptions();
+        let options=this.connector.getRequestOptions('multipart/form-data');
         return this.connector.post(query,text,options).map((response: Response) => response.json());
 
         /*
