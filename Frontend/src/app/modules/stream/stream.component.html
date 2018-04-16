@@ -1,56 +1,73 @@
-<div class="margin-show">
-<h5>
-  <div class="stream-header">
-      <div class="stream-header-left">
-          <div class="stream-title">Heute </div>
-          <span class="stream-title-date">Dienstag, 06 August 2018 </span>
-      </div>
-      <div class="stream-header-right">
-         <!-- <div class="stream-uppericon"> <i class="material-icons fix-up " >shuffle</i>  </div> <div (click)="sortieren()" class="stream-uppertext">Sortieren</div>-->
-      </div>
-  </div>
-  
-  <!-- This could be a directive : -->
+<main-nav #mainNav
+          [title]="'STREAM.TITLE'"
+          [currentScope]="'stream'"
+          [searchEnabled]="true"
+          [searchPlaceholder]="'STREAM.SEARCH_PLACEHOLDER'"
+          [(searchQuery)]="searchQuery"
+          (onSearch)="doSearch($event)"
+></main-nav>
+<div class="stream-container">
+    <div class="margin-show">
+        <h5>
+            <div class="stream-header">
+                <div class="stream-header-left">
+                    <div class="stream-title">Heute </div>
+                    <span class="stream-title-date">Dienstag, 06 August 2018 </span>
+                </div>
+                <div class="stream-header-right">
+                    <!-- <div class="stream-uppericon"> <i class="material-icons fix-up " >shuffle</i>  </div> <div (click)="sortieren()" class="stream-uppertext">Sortieren</div>-->
+                </div>
+            </div>
 
-</h5>
+            <!-- This could be a directive : -->
 
-<div class="stream-box" *ngFor="let strm of streams" >
-    <div class="stream-box-main">
-      <div class="stream-box-title">{{ strm.nodes[0].title || 'Schon gewusst?' }} </div>
-      <span *ngIf="strm.id == 'jpX1LmIBeHUS9fwXsg-1'"><div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div> </span>
-      <span *ngIf="strm.id == 'jZW8LmIBeHUS9fwX9g91'">
+        </h5>
+
+        <div class="stream-box" *ngFor="let strm of streams" >
+            <div class="stream-box-main">
+                <div class="stream-box-title">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
+                <!-- todo: ngfor over strm.properties.['cclom:general_keyword'] -->
+                <span *ngIf="strm.id == 'jpX1LmIBeHUS9fwXsg-1'"><div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div> </span>
+                <span *ngIf="strm.id == 'jZW8LmIBeHUS9fwX9g91'">
           <div class="stream-box-desc">{{ strm.nodes[0].description || 'lorem ipsum dolor sit amet, consectetur' }}</div> 
           <div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
       </span>
-        
-    </div>
-    <div class="stream-box-main-vert">
-        <i class="material-icons " >more_vert</i>
-    </div>
-    <div class="stream-box-kompetenzen"></div>
-    <div class="stream-box-image">
-        <span *ngIf="strm.id == 'jpX1LmIBeHUS9fwXsg-1'"><img src="https://image.ibb.co/cCdTCS/4088098530_0516436daa_b.jpg" alt="HTML tutorial" style="width:100%;height:auto;border:0;"></span>
-        <span *ngIf="strm.id == 'jZW8LmIBeHUS9fwX9g91'"><img src="https://image.ibb.co/b9qQsS/6952010211_5a3408b0f7_k.jpg" alt="HTML tutorial" style="width:100%;height:auto;border:0;"></span>
-        <div class="bottom-left">Titel des Materials</div>
-        <div class="bottom-right">{{ strm.nodes[0].commentCount }} <i class="material-icons stic" >comment</i> </div>
-    </div>
-</div>
 
-<!--
-<div class="stream-box" *ngFor="let strm of streams" >
-    <div class="stream-box-main">
-      <div class="stream-box-title">{{ strm.nodes[0].title || 'Schon gewusst?' }} </div>
-      <div class="stream-box-desc">{{ strm.nodes[0].description || 'lorem ipsum dolor sit amet, consectetur' }} </div>
-    </div>
-    <div class="stream-box-main-vert">
-        <i class="material-icons " >more_vert</i>
-    </div>
-    <div class="stream-box-kompetenzen"></div>
-    <div class="stream-box-image"></div>
-    <div class="stream-box-footer">
-        <div class="stream-box-imgname">{{ strm.nodes[0].name }}</div><div class="stream-box-rating"><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i></div><div class="stream-box-comment"> {{ strm.nodes[0].commentCount }} <i class="material-icons stic" >chat</i> </div> 
-    </div>   
-</div>
--->
+            </div>
+            <div class="stream-box-main-vert">
+                <actionbar
+                    [numberOfAlwaysVisibleOptions]="0"
+                    [numberOfAlwaysVisibleOptionsMobile]="0"
+                    [style]="'flat'"
+                    [options]="actionOptions"
 
+                ></actionbar>
+            </div>
+            <div class="stream-box-kompetenzen"></div>
+            <div class="stream-box-image">
+                <span *ngIf="strm.id == 'jpX1LmIBeHUS9fwXsg-1'"><img src="https://image.ibb.co/cCdTCS/4088098530_0516436daa_b.jpg" alt="HTML tutorial" style="width:100%;height:auto;border:0;"></span>
+                <span *ngIf="strm.id == 'jZW8LmIBeHUS9fwX9g91'"><img src="https://image.ibb.co/b9qQsS/6952010211_5a3408b0f7_k.jpg" alt="HTML tutorial" style="width:100%;height:auto;border:0;"></span>
+                <div class="bottom-left">Titel des Materials</div>
+                <div class="bottom-right">{{ strm.nodes[0].commentCount }} <i class="material-icons stic" >comment</i> </div>
+            </div>
+        </div>
+
+        <!--
+        <div class="stream-box" *ngFor="let strm of streams" >
+            <div class="stream-box-main">
+              <div class="stream-box-title">{{ strm.nodes[0].title || 'Schon gewusst?' }} </div>
+              <div class="stream-box-desc">{{ strm.nodes[0].description || 'lorem ipsum dolor sit amet, consectetur' }} </div>
+            </div>
+            <div class="stream-box-main-vert">
+                <i class="material-icons " >more_vert</i>
+            </div>
+            <div class="stream-box-kompetenzen"></div>
+            <div class="stream-box-image"></div>
+            <div class="stream-box-footer">
+                <div class="stream-box-imgname">{{ strm.nodes[0].name }}</div><div class="stream-box-rating"><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i></div><div class="stream-box-comment"> {{ strm.nodes[0].commentCount }} <i class="material-icons stic" >chat</i> </div>
+            </div>
+        </div>
+        -->
+
+    </div>
 </div>

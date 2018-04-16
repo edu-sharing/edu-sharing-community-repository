@@ -24,6 +24,7 @@ import {RestHelper} from "../../common/rest/rest-helper";
 import {ListItem} from "../../common/ui/list-item";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {Observable} from 'rxjs/Rx';
+import {RestStreamService} from "../../common/rest/services/rest-stream.service";
 
 
 
@@ -38,7 +39,14 @@ import {Observable} from 'rxjs/Rx';
 export class StreamComponent {
   test = 'sdsd';
   streams: any;
-
+  actionOptions:OptionItem[]=[];
+  // TODO: Store and use current search query
+  searchQuery:string;
+  doSearch(query:string){
+    this.searchQuery=query;
+    console.log(query);
+    // TODO: Search for the given query
+  }
   constructor(
     private router : Router,
     private route : ActivatedRoute,
@@ -46,7 +54,7 @@ export class StreamComponent {
     private nodeService: RestNodeService,
     private searchService: RestSearchService,
     private metadataService:RestMetadataService,
-    private mdsService:RestMdsService,
+    private streamService:RestStreamService,
     private storage : TemporaryStorageService,
     private session : SessionStorageService,
     private title : Title,
@@ -56,7 +64,15 @@ export class StreamComponent {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
       });
+      // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
+      this.actionOptions.push(new OptionItem('EXAMPLE 1','cloud',()=>{
+        alert('callback 1');
+      }));
+      this.actionOptions.push(new OptionItem('EXAMPLE 2','adb',()=>{
+          alert('callback 2');
+      }));
       this.getJSON().subscribe(data => this.streams = data['stream'], error => console.log(error));
+
   }
 
   sortieren() {
@@ -68,15 +84,8 @@ export class StreamComponent {
 
   // the way of doing the post request will be changed:
   public getJSON(): Observable<any> {
-    const httpOptions = {
-      headers: new Headers({
-        'Content-Type':  'application/json'
-      })
-    };
-    return this.http.post('http://edu50.edu-sharing.de/edu-sharing/rest/stream/v1/search/-home-?maxItems=10&skipCount=0', {}, httpOptions )
-                    .map((res:any) => res.json())
-
-}
+    return this.streamService.getStream();
+  }
 
 
 }
