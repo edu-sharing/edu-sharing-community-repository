@@ -1570,8 +1570,8 @@ export class MdsComponent{
 
   private getCaption(widget: any) {
     let caption = '<label for="' + widget.id + '"> ' + widget.caption;
-    if(widget.required)
-      caption+= ' ('+this.translate.instant('FIELD_REQUIRED')+')';
+    if(widget.required || widget.isRequired)
+      caption+= ' <span class="required">('+this.translate.instant('FIELD_REQUIRED')+')</span>';
     caption +=  '</label>';
     return caption;
   }

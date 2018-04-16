@@ -38,7 +38,16 @@ mds .mdsGroup{
   float:left;
   padding:25px;
   padding-bottom:5px;
-
+  label{
+    display: flex;
+    .required{
+      padding-left: 5px;
+      font-size: 80%;
+      font-weight: bold;
+      display: flex;
+      align-self: center;
+    }
+  }
   > div{
     padding: 15px 0px;
   }
