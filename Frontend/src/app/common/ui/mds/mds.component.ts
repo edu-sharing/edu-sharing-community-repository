@@ -557,7 +557,12 @@ export class MdsComponent{
       }
       if(this.isRequiredWidget(widget) && (!props.length || props[0]=='')){
         if(showError) {
-          element.className += 'invalid';
+          let inputField=element;
+          if(this.isMultivalueWidget(widget)){
+            inputField=document.getElementById(widget.id+'_suggestionsInput');
+          }
+          if(inputField)
+            inputField.className += 'invalid';
           this.toast.error(null, 'TOAST.FIELD_REQUIRED', {name: widget.caption});
         }
         return;
@@ -1570,7 +1575,7 @@ export class MdsComponent{
 
   private getCaption(widget: any) {
     let caption = '<label for="' + widget.id + '"> ' + widget.caption;
-    if(widget.required || widget.isRequired)
+    if(this.isRequiredWidget(widget))
       caption+= ' <span class="required">('+this.translate.instant('FIELD_REQUIRED')+')</span>';
     caption +=  '</label>';
     return caption;
