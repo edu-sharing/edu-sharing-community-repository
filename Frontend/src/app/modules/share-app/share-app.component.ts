@@ -82,10 +82,15 @@ export class ShareAppComponent {
               this.previewUrl=this.connector.getThemeMimePreview(this.getType()+'.svg');
               if(this.isLink()) {
                   this.utilities.getWebsiteInformation(this.uri).subscribe((data: any) => {
-                      this.title = data.title+" - "+data.page;
+                      this.title = data.title + " - " + data.page;
                       this.description = data.description;
-                      this.globalProgress=false;
+                      this.globalProgress = false;
                   });
+              }
+              else if(this.isTextSnippet()){
+                  this.globalProgress = false;
+                  this.title = this.translate.instant('SHARE_APP.TEXT_SNIPPET');
+                  this.mimetype='text/plain';
               }
               else{
                   this.globalProgress=false;
@@ -131,6 +136,9 @@ export class ShareAppComponent {
                 callback(data.node);
             });
         }
+        else if(this.isTextSnippet()){
+
+        }
         else {
             let prop: any = RestHelper.createNameProperty(this.title);
             this.node.createNode(this.inbox.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true).subscribe((data: NodeWrapper) => {
@@ -151,9 +159,14 @@ export class ShareAppComponent {
       });
     }
     private isLink() {
-        return !this.uri.startsWith("content://");
+        if(this.uri.startsWith("content://"))
+            return false;
+        let pos=this.uri.indexOf("://");
+        return pos>0 && pos<10;
     }
-
+    private isTextSnippet() {
+        return !this.uri.startsWith("content://") && !this.isLink();
+    }
     private goToInbox() {
         UIHelper.goToWorkspaceFolder(this.node,this.router,null,this.inbox.ref.id,{replaceUrl:true});
     }
