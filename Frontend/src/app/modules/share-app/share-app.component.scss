@@ -5,6 +5,15 @@
   width:100%;
   max-width:$cardWidth*3 + 125px;
   margin:auto;
+  .breadcrumbs{
+    color: $primary;
+    display: flex;
+    align-items: center;
+    margin-left: 5px;
+    >*{
+     margin:0 2px;
+    }
+  }
   .preview{
     display:flex;
     padding-bottom:10px;

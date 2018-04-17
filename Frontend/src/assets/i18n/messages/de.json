@@ -6,13 +6,13 @@
     "share_file_deleted":"Die Datei wurde gelöscht",
     "invalid_share":"Ungültiger Link",
     "share_empty":"Die Datei kann nicht geladen werden",
-    "CONTENT_NOT_READABLE":"Inhalt nicht lesbar",
+    "SHARING_ERROR":"Freigeben fehlgeschlagen",
     "DETAILS":{
       "share_expired":"Die Linkfreigabe ist abgelaufen oder wurde vom Besitzer des Materials beendet",
       "share_file_deleted":"Die Linkfreigabe zeigt auf eine bereits gelöschte Datei. Bitte kontaktieren Sie den Autor",
       "invalid_share":"Der angegebene Link ist ungültig",
       "share_empty":"Der Link zeigt auf eine inkompatible Datei oder eine Datei ohne Inhalt",
-      "CONTENT_NOT_READABLE":"edu-sharing kann aktuell leider nur Inhalte von lokalen Quellen laden. Bitte versuchen Sie Elemente z.B. aus der Galerie freizugeben.",
+      "SHARING_ERROR":"edu-sharing kann aktuell leider nur Dateien begrenzter Größe teilen. Bitte versuchen Sie es mit einer anderen Datei",
       "INVALID":""
     }
   }

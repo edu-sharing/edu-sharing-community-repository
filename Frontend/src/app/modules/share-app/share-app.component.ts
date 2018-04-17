@@ -63,13 +63,16 @@ export class ShareAppComponent {
       this.columns.push(new ListItem("COLLECTION",'scope'));
       this.cordova.subscribeServiceReady().subscribe(()=> {
 
-          if (this.cordova.hasValidConfig()) {
+          this.init();
+          // should be handled via cordova service now
+          /*if (this.cordova.hasValidConfig()) {
               this.init();
           }
           else{
               console.log("no cordova config, go to start");
               this.router.navigate(['']);
           }
+          */
       });
   }
     getType(){
@@ -148,6 +151,7 @@ export class ShareAppComponent {
     }
     private init() {
         Translation.initialize(this.translate, this.config, this.storage, this.route).subscribe(() => {
+            console.log("translate");
             this.route.queryParams.subscribe((params:any)=>{
                 this.uri=params['uri'];
                 this.mimetype=params['mimetype'];
@@ -197,7 +201,7 @@ export class ShareAppComponent {
                         });
                     }
                     else{
-                        this.router.navigate([UIConstants.ROUTER_PREFIX,'messages','CONTENT_NOT_READABLE']);
+                        this.router.navigate([UIConstants.ROUTER_PREFIX,'messages','SHARING_ERROR']);
                     }
                     /*
                     this.cordova.getFileAsBlob(this.uri,this.mimetype).subscribe((data:any)=>{
