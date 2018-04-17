@@ -412,7 +412,10 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 		List<String> extSearch = new ArrayList<String>();
 		
- 		String searchWord = searchWordCriteria[0];
+ 		String searchWord = "";
+ 		if(searchWordCriteria!=null && searchWordCriteria.length>0) {
+ 			searchWord = searchWordCriteria[0];
+ 		}
 		if (searchWord.equals("*") ){
 			searchWord="";
 		}
