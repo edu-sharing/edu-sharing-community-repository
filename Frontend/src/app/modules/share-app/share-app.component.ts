@@ -167,7 +167,6 @@ export class ShareAppComponent {
                     }) as any);
                 }
                 else{
-                    this.globalProgress=false;
                     if(this.cordova.getLastIntent().stream){
                         let base64=this.cordova.getLastIntent().stream;
                         if(this.mimetype.startsWith("image/")) {
@@ -175,10 +174,12 @@ export class ShareAppComponent {
                         }
                         this.file = Helper.base64toBlob(base64,this.mimetype) as any;
                         this.cordova.getFileAsBlob(this.uri,this.mimetype).subscribe((data:any)=> {
-                            console.log(this.fileName);
-                            let split = this.fileName ? this.fileName.split("/") : this.uri.split("/");
-                            console.log(data);
-                            this.title = decodeURIComponent(split[split.length - 1]);
+                            this.globalProgress=false;
+                            this.updateTitle();
+                        },(error:any)=>{
+                            console.warn(error);
+                            this.globalProgress=false;
+                            this.updateTitle();
                         });
                     }
                     else{
@@ -214,6 +215,11 @@ export class ShareAppComponent {
                 }
             })
         });
+    }
+
+    private updateTitle() {
+        let split = this.fileName ? this.fileName.split("/") : this.uri.split("/");
+        this.title = decodeURIComponent(split[split.length - 1]);
     }
 }
 
