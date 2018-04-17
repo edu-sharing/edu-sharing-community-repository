@@ -251,8 +251,8 @@ export class WorkspaceMainComponent{
             list.length=1;
             this.filesToUpload=list;
         },(error:any)=>{
-            console.log(error);
-            this.toast.error(error);
+            console.warn(error);
+            //this.toast.error(error);
         });
     }
     private showTimeout(){
