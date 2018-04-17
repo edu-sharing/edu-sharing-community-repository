@@ -15,11 +15,13 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.search.SearchParameters.FieldFacet;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.SQLKeyword;
 import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.suggest.ConnectionDBAlfresco;
 import org.edu_sharing.service.suggest.ConnectionPool;
 import org.springframework.context.ApplicationContext;
 
@@ -28,6 +30,9 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.sun.star.lang.IllegalArgumentException;
 
 public class MetadataSearchHelper {
+	
+	
+	static Logger logger = Logger.getLogger(MetadataSearchHelper.class);
 	public static String getLuceneSearchQuery(MetadataQueries queries,String queryId,Map<String,String[]> parameters) throws IllegalArgumentException{
 		for(MetadataQuery query : queries.getQueries()){
 			if(query.getId().equals(queryId)){
@@ -166,8 +171,9 @@ public class MetadataSearchHelper {
 			throw new IllegalArgumentException("suggestionSource "+MetadataReaderV2.SUGGESTION_SOURCE_SQL+" at widget "+widget.getId()+" needs an suggestionQuery, but none was found");
 		}
 		
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		try{			
-			con = ConnectionPool.getConnection();
+			con = dbAlf.getConnection();
 			statement = con.prepareStatement(query);
 			
 			value = StringEscapeUtils.escapeSql(value);
@@ -182,8 +188,9 @@ public class MetadataSearchHelper {
 				result.add(sqlKw);
 			}	
 		}catch(Throwable e){
+			logger.error(e.getMessage());
 		}finally {
-			ConnectionPool.cleanUp(con, statement);
+			dbAlf.cleanUp(con, statement);
 		}
 		return result;
 	}
