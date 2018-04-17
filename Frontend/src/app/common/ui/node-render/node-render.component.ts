@@ -136,8 +136,10 @@ export class NodeRenderComponent {
 
 
     private showDetails() {
-      let rect=document.getElementById('edusharing_rendering_metadata').getBoundingClientRect();;
-      UIHelper.scrollSmooth(rect.top,1.5);
+      let rect=document.getElementById('edusharing_rendering_metadata').getBoundingClientRect();
+      if(window.scrollY<rect.top) {
+          UIHelper.scrollSmooth(rect.top, 1.5);
+      }
     }
     public getPosition(){
       if(!this._node || !this.list)
