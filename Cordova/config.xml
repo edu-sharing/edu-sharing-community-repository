@@ -10,7 +10,7 @@
     <content src="index.html" />
     <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="10000" />
-	<preference name="ShowSplashScreenSpinner" value="false"/>
+    <preference name="ShowSplashScreenSpinner" value="false" />
     <preference name="loadUrlTimeoutValue" value="700000" />
     <preference name="SplashMaintainAspectRatio" value="true" />
     <preference name="AndroidLaunchMode" value="singleTask" />
