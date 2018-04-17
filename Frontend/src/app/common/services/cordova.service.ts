@@ -17,7 +17,7 @@ import {Router} from "@angular/router";
 export class CordovaService {
 
   // change this during development for testing true, but false is default
-  private forceCordovaMode: boolean = true;
+  private forceCordovaMode: boolean = false;
 
   private deviceIsReady: boolean = false;
 
