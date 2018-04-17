@@ -235,6 +235,26 @@ export class WorkspaceMainComponent{
         this.explorerOptions=this.getOptions([new Node()],true);
         //this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }
+    private uploadCamera(event:any){
+        this.filesToUpload=event.target.files;
+    }
+    private openCamera(){
+        this.cordova.getPhotoFromCamera((data:any)=>{
+            console.log(data);
+            let name=this.translate.instant('SHARE_APP.IMAGE')+" "+DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+".jpg";
+            let blob:any=Helper.base64toBlob(data,"image/jpeg");
+            blob.name=name;
+            let list:any={};
+            list.item=(i:number)=>{
+                return blob;
+            }
+            list.length=1;
+            this.filesToUpload=list;
+        },(error:any)=>{
+            console.warn(error);
+            //this.toast.error(error);
+        });
+    }
     private showTimeout(){
         return !this.cordova.isRunningCordova() && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
             (this.isSafe || !this.isSafe && this.config.instant('sessionExpiredDialog',{show:true}).show);

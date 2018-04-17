@@ -377,7 +377,12 @@ export class MainNavComponent {
     //window.scrollTo(0,0);
   }
   editProfile(){
-    window.location.href=this.editUrl;
+    if(this.cordova.isRunningCordova()){
+      window.open(this.editUrl,'_system',UIHelper.getDefaultNewWindowParameters(this.nodeService));
+    }
+    else {
+      window.location.href = this.editUrl;
+    }
   }
   openSidenav() {
     if(this.canOpen) {
@@ -398,7 +403,7 @@ export class MainNavComponent {
   }
   public showHelp(url:string){
     this.helpOpen=false;
-    window.open(url);
+    window.open(url,'_blank',UIHelper.getDefaultNewWindowParameters(this.nodeService));
   }
   private logout(){
     if(this.cordova.isRunningCordova()){

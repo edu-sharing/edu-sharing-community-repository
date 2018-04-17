@@ -275,7 +275,10 @@ export class UIHelper{
    * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
    */
   static scrollSmooth(y: number=0,smoothness=1) {
-    let mode=window.scrollY>y;
+    let mode=window.scrollY>=y;
+    console.log(mode);
+    console.log(y);
+    console.log(window.scrollY);
     let divider=3*smoothness;
     let minSpeed=7/smoothness;
     let lastY=y;

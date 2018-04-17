@@ -87,7 +87,7 @@ export class ActionbarComponent{
 
     setTimeout(()=> {
       UIHelper.setFocusOnDropdown(this.dropdownElement);
-      UIHelper.scrollSmoothElement(0,this.dropdownContainerElement.nativeElement);
+      UIHelper.scrollSmoothElement(this.dropdownContainerElement.nativeElement.scrollHeight,this.dropdownContainerElement.nativeElement);
     });
   }
 
