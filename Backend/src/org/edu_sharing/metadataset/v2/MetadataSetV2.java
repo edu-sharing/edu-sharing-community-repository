@@ -1,11 +1,17 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
+import org.edu_sharing.repository.client.tools.CCConstants;
 
 import com.google.gwt.user.client.ui.Widget;
 
 public class MetadataSetV2 {
-	
+	Logger logger = Logger.getLogger(MetadataSetV2.class);
+
 	public static String DEFAULT_CLIENT_QUERY="ngsearch";
 	public static String DEFAULT_CLIENT_QUERY_CRITERIA = "ngsearchword";	
 	
@@ -150,12 +156,67 @@ public class MetadataSetV2 {
 		}
 		throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
 	}
+	public List<MetadataWidget> findAllWidgets(String widgetId) {
+		List<MetadataWidget> found = new ArrayList<>();
+		for(MetadataWidget widget : widgets){
+			if(widget.getId().equals(widgetId))
+				found.add(widget);
+		}
+		if(found.size()>0)
+			return found;
+		throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+	}
+	public MetadataGroup findGroup(String groupId) {
+		for(MetadataGroup group : groups){
+			if(group.getId().equals(groupId))
+				return group;
+		}
+		throw new IllegalArgumentException("Group "+groupId+" was not found in the mds "+id);
+	}
+	public MetadataTemplate findTemplate(String templateId) {
+		for(MetadataTemplate template : templates){
+			if(template.getId().equals(templateId))
+				return template;
+		}
+		throw new IllegalArgumentException("Template "+templateId+" was not found in the mds "+id);
+	}
 	public MetadataQuery findQuery(String queryId) {
 		for(MetadataQuery query : queries.getQueries()){
 			if(query.getId().equals(queryId))
 				return query;
 		}
 		throw new IllegalArgumentException("Query "+queryId+" was not found in the mds "+id);
+	}
+	public List<MetadataWidget> getWidgetsByNodeType(String nodeType) {
+		String group=null;
+		if(CCConstants.CCM_TYPE_IO.equals(nodeType)) {
+			group="io";
+		}
+		if(CCConstants.CCM_TYPE_MAP.equals(nodeType)) {
+			group="map";
+		}
+		if(group==null) {
+			logger.info("Node type "+nodeType+" currently not supported by backend, will use metadata from all available widgets");
+			return getWidgets();
+		}
+		List<MetadataWidget> usedWidgets=new ArrayList<>();
+		for(String view : findGroup(group).getViews()) {
+			String html = findTemplate(view).getHtml();
+			for(MetadataWidget widget : getWidgets()) {
+				if(html.indexOf("<"+widget.getId())>-1) {
+					usedWidgets.add(widget);
+					// handle group (sub) widgets
+					if(widget.getSubwidgets()!=null && widget.getSubwidgets().size()>0) {
+						for(Subwidget subwidget : widget.getSubwidgets()) {
+							usedWidgets.addAll(findAllWidgets(subwidget.getId()));
+						}
+					}
+				}
+			}
+			
+		}
+		logger.info("Node type "+nodeType+" uses "+usedWidgets.size()+" from a total of "+getWidgets().size()+" widgets");
+		return usedWidgets;
 	}
 	
 }

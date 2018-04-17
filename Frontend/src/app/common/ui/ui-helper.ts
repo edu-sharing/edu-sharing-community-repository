@@ -21,6 +21,7 @@ import {FrameEventsService} from "../services/frame-events.service";
 import {RestNodeService} from "../rest/services/rest-node.service";
 import {PlatformLocation} from "@angular/common";
 import {ListItem} from './list-item';
+import {AbstractRestService} from "../rest/services/abstract-rest-service";
 export class UIHelper{
   static MOBILE_WIDTH = 600;
 
@@ -232,8 +233,9 @@ export class UIHelper{
     if(connectorType==null){
       connectorType=RestConnectorsService.connectorSupportsEdit(connectorList,node);
     }
-    if(win==null && newWindow)
-      win=window.open("",'_blank');
+    let isCordova=connector.getRestConnector().getCordovaService().isRunningCordova();
+    if(win==null && newWindow && !isCordova)
+      win=window.open("");
 
     connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
       if(result.isLocked) {
@@ -242,12 +244,18 @@ export class UIHelper{
         return;
       }
       connector.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
-          if(newWindow)
+          if(win)
             win.location.href=url;
-          else
-            window.location.replace(url);
-
-          events.addWindow(win);
+          else if(isCordova){
+              //connector.getRestConnector().getCordovaService() .openBrowser(url);
+              window.open(url,"_blank",UIHelper.getDefaultNewWindowParameters(connector));
+          }
+          else {
+              window.location.replace(url);
+          }
+          if(win) {
+              events.addWindow(win);
+          }
         },
         (error:string)=>{
           toast.error(null,error);
@@ -363,5 +371,9 @@ export class UIHelper{
           else
               window.location.assign(url)
         });
+    }
+
+    static getDefaultNewWindowParameters(rest:AbstractRestService) {
+        return rest.getRestConnector().getCordovaService().isRunningCordova() ? "location=no" : null;
     }
 }

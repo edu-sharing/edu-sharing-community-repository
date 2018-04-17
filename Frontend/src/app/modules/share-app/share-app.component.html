@@ -9,11 +9,12 @@
         </div>
     </div>
     <div class="location">
-        {{'SHARE_APP.WILL_BE_SAVED_AT' | translate}}: <breadcrumbs
-            [breadcrumbsAsNode]="inboxPath"
-            [home]="'WORKSPACE.MY_FILES'"
-            [clickable]="false"
-        ></breadcrumbs>
+        {{'SHARE_APP.WILL_BE_SAVED_AT' | translate}}:
+        <div class="breadcrumbs" *ngIf="inbox">
+            <i class="material-icons">home</i>
+            <div>&rsaquo;</div>
+            <div>{{inbox.name}}</div>
+        </div>
     </div>
     <div class="save" (click)="saveFile()"><i class="material-icons">folder</i><span>{{'SAVE' | translate}}</span></div>
     <div class="collections">

@@ -84,7 +84,7 @@
 		init-method="init">
 
 		<property name="expiresIn">
-			<value>30</value>
+			<value>3600</value>
 		</property>
 
 		<property name="trustedClients">

@@ -302,6 +302,7 @@
     "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern"
   },
   "SHARE_APP":{
+    "TEXT_SNIPPET":"Notiz",
     "WILL_BE_SAVED_AT":"Wird gespeichert unter",
     "ADD_TO_COLLECTION":"In welche Sammlung einsortieren?"
   },

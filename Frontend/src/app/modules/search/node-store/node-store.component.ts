@@ -16,6 +16,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
+import {ActionbarHelper} from '../../../common/ui/actionbar/actionbar-helper';
 
 @Component({
   selector: 'search-node-store',
@@ -74,8 +75,10 @@ export class SearchNodeStoreComponent {
   private updateActionOptions() {
     this.actionOptions=[];
     if(this.selected && this.selected.length){
-      let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download",
+      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',this.selected,this.connector,(node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
+      /*let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download",
         (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
+        */
       this.actionOptions.push(download);
       this.actionOptions.push(new OptionItem("SEARCH.NODE_STORE.REMOVE_ITEM","delete",()=>{
         this.deleteSelection();

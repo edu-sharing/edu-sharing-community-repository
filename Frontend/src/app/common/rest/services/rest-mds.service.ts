@@ -9,11 +9,13 @@ import {
   ArchiveRestore, ArchiveSearch, Node, MdsMetadatasets, MdsMetadataset, MdsValues,
   MdsValueList
 } from "../data-object";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestMdsService {
-  constructor(private connector : RestConnectorService) {}
-
+export class RestMdsService extends AbstractRestService{
+    constructor(connector : RestConnectorService) {
+        super(connector);
+    }
   public getSets = (repository=RestConstants.HOME_REPOSITORY): Observable<MdsMetadatasets> => {
     let query=this.connector.createUrl("mds/:version/metadatasetsV2/:repository",repository);
     return this.connector.get(query,this.connector.getRequestOptions())

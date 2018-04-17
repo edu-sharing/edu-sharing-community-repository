@@ -348,9 +348,7 @@ public class MetadataReaderV2 {
 				if(name.equals("min"))
 					widget.setMin(Integer.parseInt(value));				
 				if(name.equals("max"))
-					widget.setMax(Integer.parseInt(value));				
-				if(name.equals("default"))
-					widget.setDefaultValue(Integer.parseInt(value));				
+					widget.setMax(Integer.parseInt(value));							
 				if(name.equals("defaultMin"))
 					widget.setDefaultMin(Integer.parseInt(value));				
 				if(name.equals("defaultMax"))

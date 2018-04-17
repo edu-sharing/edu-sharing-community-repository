@@ -62,7 +62,7 @@
           {{ 'LOGIN_APP.SERVERURL_BACK'| translate}}
         </div>
         <div class="card-scroll">
-          <form (ngSubmit)="login()" #loginForm>
+          <form (ngSubmit)="buttonServerUrl()" #loginForm>
             <div>
               <label for="username">{{ 'LOGIN_APP.SERVERURL_ADDRESS'| translate}}</label>
               <input #urlInput type="text" requried name="url" id="url" (keyup)="checkUrl()" [(ngModel)]="serverurl" autofocus/>

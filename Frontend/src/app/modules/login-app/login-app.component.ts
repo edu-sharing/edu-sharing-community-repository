@@ -72,7 +72,9 @@ export class LoginAppComponent  implements OnInit {
             // -> go to default location (this will check oauth)
             if (this.cordova.hasValidConfig()) {
                 console.log("VALID Configuration --> directly go to default");
-                UIHelper.goToDefaultLocation(this.router,this.config);
+                this.config.getAll().subscribe(()=> {
+                    UIHelper.goToDefaultLocation(this.router, this.config);
+                });
                 return;
             }
 

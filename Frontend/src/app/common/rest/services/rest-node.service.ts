@@ -13,11 +13,12 @@ import {
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestNodeService {
-  constructor(private connector : RestConnectorService,private events:FrameEventsService, private iam : RestIamService, private toast : Toast) {
-
+export class RestNodeService extends AbstractRestService{
+  constructor(connector : RestConnectorService,private events:FrameEventsService, private iam : RestIamService, private toast : Toast) {
+    super(connector);
     events.addListener(this);
   }
   onEvent(event:string,data:any){
@@ -451,21 +452,20 @@ export class RestNodeService {
       .map((response: Response) => response.json());
       */
   }
-    public uploadNodeContentCordova = (node : string,
-                                uri : string,
-                                versionComment : string,
-                                mimetype="auto",
-                                onProgress:Function=null,
-                                repository=RestConstants.HOME_REPOSITORY) : Observable<XMLHttpRequest> => {
-        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/content?versionComment=:comment&mimetype=:mime",repository,
+    public setNodeTextContent = (node : string,
+                                text : string,
+                                versionComment : string = "",
+                                mimetype="text/plain",
+                                repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/content?versionComment=:comment&mimetype=:mimetype",repository,
             [
                 [":node",node],
+                [":mimetype",mimetype],
                 [":comment",versionComment],
             ]);
-        let options=this.connector.getRequestOptions();
+        let options=this.connector.getRequestOptions('multipart/form-data');
+        return this.connector.post(query,text,options).map((response: Response) => response.json());
 
-        return this.connector.getCordovaService().uploadLocalContent(uri,query,this.connector.getRequestOptions().headers.values())
-            .map((response: Response) => response.json());
         /*
         return this.http.post(query,"",this.connector.getRequestOptions())
           .map((response: Response) => response.json());

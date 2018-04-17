@@ -24,6 +24,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -184,12 +185,26 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
 		
-		if(metadataSetId == null) metadataSetId = CCConstants.metadatasetdefault_id;
+		if(metadataSetId == null) {
+			
+			if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
+				metadataSetId = HttpContext.getCurrentMetadataSet();
+			}else {
+				metadataSetId = CCConstants.metadatasetdefault_id;
+			}
+			
+			props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
+		}
 		
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(application, metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
-		for (MetadataWidget widget : mds.getWidgets()) {
+		for (MetadataWidget widget : mds.getWidgetsByNodeType(nodeType)) {
 			String id=widget.getId();
+			if(!widget.isConditionTrue()) {
+				logger.info("widget "+id+" skipped because condition failed");
+				logger.info("condition that should match: "+widget.getCondition().getType()+" "+(widget.getCondition().isNegate() ? "!=" : "=" )+" "+widget.getCondition().getValue());
+				continue;
+			}
 			id=CCConstants.getValidGlobalName(id);
 			String [] values = props.get(id);
 			if("range".equals(widget.getType())){
@@ -199,6 +214,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					continue;
 				toSafe.put(id+"_from",valuesFrom[0]);
 				toSafe.put(id+"_to",valuesTo[0]);
+			}
+			else if("defaultvalue".equals(widget.getType())) {
+				logger.info("will save property "+widget.getId()+" with predefined defaultvalue "+widget.getDefaultvalue());
+				toSafe.put(id,widget.getDefaultvalue());
+				continue;
 			}
 			if(values==null)
 				continue;
@@ -645,6 +665,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable{
 		return apiClient.getProperties(storeProtocol, storeId, nodeId);
 	}
+	
+	@Override
+	public String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
+		return apiClient.getProperty(new StoreRef(storeProtocol,storeId), nodeId, property);
+	}
+	
 	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String contentProp) throws Throwable{
 		return apiClient.getContent(nodeId,contentProp);

@@ -8,6 +8,7 @@ import { RestConstants } from '../rest/rest-constants';
 import {PlatformLocation} from "@angular/common";
 import {Helper} from "../helper";
 import {UIConstants} from "../ui/ui-constants";
+import {Router} from "@angular/router";
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -36,6 +37,7 @@ export class CordovaService {
   private serviceIsReady = false;
 
   private lastShareTS:number = 0;
+  private lastIntent: any;
 
   get oauth(){
     return this._oauth;
@@ -56,7 +58,8 @@ export class CordovaService {
    * CONSTRUCTOR
    */
   constructor(
-    private http : Http
+    private http : Http,
+    private router : Router
   ) {
 
     this.initialHref = window.location.href;
@@ -102,6 +105,12 @@ export class CordovaService {
 
   }
 
+    /**
+     * get the last android intent
+     */
+    public getLastIntent(){
+      return this.lastIntent;
+    }
   private deviceReadyLoop(counter:number) : void {
     console.log("deviceReadyLoop("+counter+")");
     setTimeout(()=>{
@@ -121,6 +130,18 @@ export class CordovaService {
       // load basic data from storage
       this.loadStorage();
 
+      // when new share contet - go to share screen
+      if(this.hasValidConfig()) {
+          this.onNewShareContent().subscribe(
+              (data: any) => {
+                  // TODO: take URI and processes on share screen
+                  // this.router.navigate(['share', URI]);
+                  this.router.navigate(['app', 'share'], {queryParams: data});
+              }, (error) => {
+                  console.log("ERROR on new share event", error);
+              });
+      }
+
       // hide the splashscreen (if still showing)
       setTimeout(()=>{
         try {
@@ -137,7 +158,6 @@ export class CordovaService {
       if (this.observerShareContent!=null) this.registerOnShareContent();
 
     };
-
   /**********************************************************
    * Plugin: WebIntent (for Android)
    **********************************************************
@@ -145,7 +165,7 @@ export class CordovaService {
    * https://github.com/cordova-misc/cordova-webintent
    */
 
-   onNewShareContent() : Observable<any> {
+   private onNewShareContent() : Observable<any> {
     return new Observable<any>((observer: Observer<any>) => {
       this.observerShareContent = observer;
 
@@ -162,18 +182,23 @@ export class CordovaService {
                  observer.complete();
              })
 
-           },(error:any)=>console.error(error));
+           },(error:any)=>{
+               observer.error(error);
+               observer.complete();
+           });
        });
    }
    private registerOnShareContent() : void {
        if (this.isAnroid()) {
            console.log("register on share intent");
+           // only run once. Will loop otherwise if no auth is found and intent was send
            let handleIntent=(intent:any)=> {
                // Do things
                console.log(intent);
                if(intent && intent.extras){
                    let uri=intent.extras["android.intent.extra.TEXT"];
                    if(uri){
+                       this.lastIntent=intent;
                        this.observerShareContent.next({uri:uri,mimetype:intent.type});
                        // clear handler to just fire it on first app opening
                        (window as any).plugins.intent.getCordovaIntent(null);
@@ -182,8 +207,8 @@ export class CordovaService {
                    uri = intent.extras["android.intent.extra.STREAM"];
                    // it's a file
                    if(uri){
+                       this.lastIntent=intent;
                        (window as any).plugins.intent.getCordovaIntent(null);
-
                        (window as any).plugins.intent.getRealPathFromContentUrl(uri,(file:string)=>{
                            this.observerShareContent.next({uri:uri,file:file,mimetype:intent.type});
                        },(error:any)=>{
@@ -193,6 +218,7 @@ export class CordovaService {
                    }
                }
            };
+           console.log((window as any).plugins);
            (window as any).plugins.intent.getCordovaIntent(handleIntent);
            (window as any).plugins.intent.setNewIntentHandler(handleIntent);
            /*
@@ -880,6 +906,9 @@ export class CordovaService {
      }*/
    }
 
+   openBrowser(url:string){
+       window.open(url,'_system');
+   }
    /**********************************************************
    * FileViewer PlugIn
    **********************************************************
@@ -888,7 +917,7 @@ export class CordovaService {
    * https://github.com/SpiderOak/FileViewerPlugin
    */
 
-   openContentNative(filePath:string, successCallback:Function, failCallback:Function) : void {
+   openContentNative(filePath:string, successCallback:Function=null, failCallback:Function=null) : void {
     try {
       (window as any).FileViewerPlugin.view({
               action: (window as any).FileViewerPlugin.ACTION_VIEW,
@@ -896,15 +925,15 @@ export class CordovaService {
           },
           () => {
             // WIN
-            successCallback();
+              if(successCallback) successCallback();
           },
           (error:any) => {
             // FAIL
-            failCallback("FAIL on openContentNative",error);
+            if(failCallback) failCallback("FAIL on openContentNative",error);
           }
       );
     } catch (e) {
-      failCallback("EXCEPTION on openContentNative",e);
+        if(failCallback) failCallback("EXCEPTION on openContentNative",e);
     }
    }
 
@@ -1055,12 +1084,14 @@ export class CordovaService {
               observer.next(null);
               observer.complete();
           }, (error: any) => {
-              observer.error(null);
-              observer.complete();
+              console.warn(error);
+              console.warn("cordova: invalid oauth, go back to server selection");
+              this.reiniting = false;
               this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
               this.clearAllCookies();
-              console.warn("cordova: invalid oauth, go back to server selection");
               this.restartCordova();
+              observer.error(null);
+              observer.complete();
           });
       });
   }
@@ -1089,6 +1120,7 @@ export class CordovaService {
 
         },
         (error: any) => {
+          console.error(error);
           observer.error(error);
           observer.complete();
         });

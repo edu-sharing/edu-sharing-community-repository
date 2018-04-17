@@ -7,11 +7,13 @@ import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {RequestObject} from "../request-object";
 import {ArchiveRestore, ArchiveSearch, Node} from "../data-object";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestArchiveService {
-  constructor(private connector : RestConnectorService) {}
-
+export class RestArchiveService extends AbstractRestService{
+    constructor(connector : RestConnectorService) {
+        super(connector);
+    }
   /**
    * Searches for nodes in the Archive that contain the specific pattern
    * @param pattern Pattern to contain, or "*" to show all

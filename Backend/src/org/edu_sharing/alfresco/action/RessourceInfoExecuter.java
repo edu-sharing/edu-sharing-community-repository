@@ -103,6 +103,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 					zip = new ZipArchiveInputStream(is, contentreader.getEncoding(), true);
 				}else {
 					logger.info("unknown format:" +  type);
+					return;
 				}
 				
 

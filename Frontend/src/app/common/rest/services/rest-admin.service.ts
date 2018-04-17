@@ -10,10 +10,13 @@ import {
   IamUsers, IamUser, UserProfile, UserCredentials, ServerUpdate, CacheInfo, NetworkRepositories, Application
 } from "../data-object";
 import {Observer} from "rxjs";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestAdminService {
-  constructor(private connector : RestConnectorService) {}
+export class RestAdminService extends AbstractRestService{
+  constructor(connector : RestConnectorService) {
+    super(connector);
+  }
 
   public addApplication = (url:string): Observable<any> => {
     let query=this.connector.createUrl("admin/:version/applications?url=:url",null,[
@@ -93,7 +96,7 @@ export class RestAdminService {
     return this.connector.get(query,this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
-  public importOAI = (baseUrl:string,set:string,metadataPrefix:string,className:string,importerClassName:string,recordHandlerClassName:string,binaryHandlerClassName="",metadataset="",fileUrl=""): Observable<Response> => {
+  public importOAI = (baseUrl:string,set:string,metadataPrefix:string,className:string,importerClassName:string,recordHandlerClassName:string,binaryHandlerClassName="",metadataset="",fileUrl="",oaiIds=""): Observable<Response> => {
     let query=this.connector.createUrl("admin/:version/import/oai?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix&className=:className&importerClassName=:importerClassName&recordHandlerClassName=:recordHandlerClassName&binaryHandlerClassName=:binaryHandlerClassName&metadataset=:metadataset&fileUrl=:fileUrl&oaiIds=:oaiIds",null,[
       [":baseUrl",baseUrl],
       [":set",set],

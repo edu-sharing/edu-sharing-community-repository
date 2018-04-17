@@ -278,6 +278,19 @@ export class NodeRenderComponent {
       jQuery('.edusharing_rendering_content_wrapper').hide();
       jQuery('.showDetails').hide();
     }
+      let element=jQuery('#edusharing_rendering_content_href');
+      console.log(element);
+      element.click((event:any)=>{
+          if(this.connector.getCordovaService().isRunningCordova()){
+              let href=element.attr('href');
+              console.log(href);
+              this.connector.getCordovaService().openBrowser(href);
+              event.preventDefault();
+          }
+      });
+  }
+  private openLink(href:string){
+
   }
 
   private downloadCurrentNode() {

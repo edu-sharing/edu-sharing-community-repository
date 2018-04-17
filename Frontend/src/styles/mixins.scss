@@ -49,6 +49,9 @@
   //respect element border radius
   @include removeDefaultFocus();
   box-shadow: inset 0 0 0 $focusWidth $focusColor !important;
+  @media(pointer: coarse){
+    box-shadow: none !important;
+  }
 }
 @mixin darken(){
   background-color:$darkenColor;
