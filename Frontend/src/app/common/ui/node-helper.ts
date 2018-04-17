@@ -267,7 +267,7 @@ export class NodeHelper{
       "cc-by-sa","cc-by","copyright-free","copyright-license","custom",
       "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk"];
     if(LICENSE_ICONS.indexOf(icon)==-1)
-      return null;
+      icon='none';
     return rest.getAbsoluteEndpointUrl()+"../ccimages/licenses/"+icon+".svg";
   }
   /**
