@@ -29,10 +29,11 @@ public class SuggestDAOKeywordSQLImpl implements SuggestDAO {
 		Connection con = null;
 		PreparedStatement statement = null;
 		
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		try {
 			
 			List<GNDKeywordDTO> result = new ArrayList<GNDKeywordDTO>();
-			con = ConnectionPool.getConnection();
+			con = dbAlf.getConnection();
 			
 			query = StringEscapeUtils.escapeSql(query);
 			statement = con.prepareStatement(select);
@@ -60,7 +61,7 @@ public class SuggestDAOKeywordSQLImpl implements SuggestDAO {
 		} catch(Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
-			ConnectionPool.cleanUp(con, statement);
+			dbAlf.cleanUp(con, statement);
 		}
 		
 		return null;
@@ -70,8 +71,10 @@ public class SuggestDAOKeywordSQLImpl implements SuggestDAO {
 	public String getValue(String key) {
 		Connection con = null;
 		PreparedStatement statement = null;
+		
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		try {
-			con = ConnectionPool.getConnection();
+			con = dbAlf.getConnection();
 			statement = con.prepareStatement(selectOne);
 			
 			key =  StringEscapeUtils.escapeSql(key);
@@ -88,7 +91,7 @@ public class SuggestDAOKeywordSQLImpl implements SuggestDAO {
 		} catch(Throwable e) {
 			logger.error(e.getMessage(), e);
 		} finally {
-			ConnectionPool.cleanUp(con, statement);
+			dbAlf.cleanUp(con, statement);
 		}
 		
 		return null;
@@ -97,8 +100,11 @@ public class SuggestDAOKeywordSQLImpl implements SuggestDAO {
 	public String getValueNoCat(String key) {
 		Connection con = null;
 		PreparedStatement statement = null;
+		
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+		
 		try{
-			con = ConnectionPool.getConnection();
+			con = dbAlf.getConnection();
 			statement = con.prepareStatement(selectOne);
 			key= StringEscapeUtils.escapeSql(key);
 			statement.setString(1, key);
@@ -112,7 +118,7 @@ public class SuggestDAOKeywordSQLImpl implements SuggestDAO {
 		}catch(Exception e){
 			logger.error(e.getMessage(), e);
 		}finally {
-			ConnectionPool.cleanUp(con, statement);
+			dbAlf.cleanUp(con, statement);
 		}
 		return null;
 	}
