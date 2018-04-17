@@ -5,11 +5,13 @@ import java.util.Map;
 
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.content.ContentStore;
+import org.apache.log4j.Logger;
 import org.apache.oltu.oauth2.as.issuer.MD5Generator;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuer;
 import org.apache.oltu.oauth2.as.issuer.OAuthIssuerImpl;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class TokenService {
 
 	private static final String STORE_LOCATION = "tokenStore";
-	
+	Logger logger = Logger.getLogger(TokenService.class);
+
 	private SimpleCache<String, Token> tokenCache;
 	private File tokenStore;
 	
@@ -72,6 +75,7 @@ public class TokenService {
     	token.setRefreshToken(refreshToken);
     	token.setClientId(clientId);
     	token.setTicket(ticket);
+    	token.setTimestamp(System.currentTimeMillis());
 
     	tokenCache.put(accessToken, token);    	
 
@@ -104,6 +108,7 @@ public class TokenService {
     	token.setRefreshToken(refreshToken);
     	token.setClientId(clientId);
     	token.setTicket(ticket);
+    	token.setTimestamp(System.currentTimeMillis());
 
     	tokenCache.put(accessToken, token);    	
 
@@ -125,6 +130,7 @@ public class TokenService {
     	token.setRefreshToken(refreshToken);
     	token.setClientId(clientId);
     	token.setTicket(ticket);
+    	token.setTimestamp(System.currentTimeMillis());
 
     	tokenCache.put(accessToken, token);    	
     	mapper.writeValue(new File(tokenStore, refreshToken), token);
@@ -133,10 +139,15 @@ public class TokenService {
     }    
     
     public Token getToken(String accessToken) throws Exception {
-    	return tokenCache.get(accessToken);
-
-    	
-    	
+    	Token token=tokenCache.get(accessToken);
+    	if(token!=null) {
+    		if(System.currentTimeMillis()>token.getTimestamp()+getExpiresIn()*1000) {
+    			logger.info(accessToken+" token is too old, will remove it");
+    			tokenCache.remove(accessToken);
+    			return null;
+    		}
+    	}
+    	return token;    	
     }
     public Token getRefreshToken(String refreshToken) throws OAuthProblemException {
     	ObjectMapper mapper = new ObjectMapper();
@@ -166,9 +177,15 @@ public class TokenService {
     	private String username;
     	private String clientId;
     	private String ticket;
-    	
+    	private long timestamp;
 		public String getAccessToken() {
 			return accessToken;
+		}		
+		public long getTimestamp() {
+			return timestamp;
+		}
+		public void setTimestamp(long timestamp) {
+			this.timestamp = timestamp;
 		}
 		public void setAccessToken(String accessToken) {
 			this.accessToken = accessToken;

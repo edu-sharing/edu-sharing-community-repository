@@ -9,10 +9,13 @@ import {
   ArchiveRestore, ArchiveSearch, Node, NodeList, IamGroup, IamGroups, IamAuthorities, GroupProfile,
   IamUsers, IamUser, UserProfile, UserCredentials
 } from "../data-object";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestIamService {
-  constructor(private connector : RestConnectorService) {}
+export class RestIamService extends AbstractRestService{
+    constructor(connector : RestConnectorService) {
+        super(connector);
+    }
   public searchAuthorities = (pattern="*",global=true,request : any = null,repository=RestConstants.HOME_REPOSITORY): Observable<IamAuthorities> => {
     let query=this.connector.createUrlNoEscape("iam/:version/authorities/:repository?pattern=:pattern&global=:global&:request",repository,[
       [":pattern",encodeURIComponent(pattern)],

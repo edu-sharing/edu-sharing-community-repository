@@ -55,6 +55,21 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
+   <element name="checkTicket">
+    <complexType>
+     <sequence>
+      <element name="username" type="xsd:string"/>
+      <element name="ticket" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="checkTicketResponse">
+    <complexType>
+     <sequence>
+      <element name="checkTicketReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
    <element name="authenticateByApp">
     <complexType>
      <sequence>
@@ -70,21 +85,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <complexType>
      <sequence>
       <element name="authenticateByAppReturn" type="impl:AuthenticationResult"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="checkTicket">
-    <complexType>
-     <sequence>
-      <element name="username" type="xsd:string"/>
-      <element name="ticket" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="checkTicketResponse">
-    <complexType>
-     <sequence>
-      <element name="checkTicketReturn" type="xsd:boolean"/>
      </sequence>
     </complexType>
    </element>
@@ -204,21 +204,21 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="authenticateByApp">
-
-         <wsdl:input message="impl:authenticateByAppRequest" name="authenticateByAppRequest"/>
-
-         <wsdl:output message="impl:authenticateByAppResponse" name="authenticateByAppResponse"/>
-
-         <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
-
-      </wsdl:operation>
-
       <wsdl:operation name="checkTicket">
 
          <wsdl:input message="impl:checkTicketRequest" name="checkTicketRequest"/>
 
          <wsdl:output message="impl:checkTicketResponse" name="checkTicketResponse"/>
+
+         <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="authenticateByApp">
+
+         <wsdl:input message="impl:authenticateByAppRequest" name="authenticateByAppRequest"/>
+
+         <wsdl:output message="impl:authenticateByAppResponse" name="authenticateByAppResponse"/>
 
          <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
 
@@ -288,17 +288,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="authenticateByApp">
+      <wsdl:operation name="checkTicket">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="authenticateByAppRequest">
+         <wsdl:input name="checkTicketRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="authenticateByAppResponse">
+         <wsdl:output name="checkTicketResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -312,17 +312,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="checkTicket">
+      <wsdl:operation name="authenticateByApp">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="checkTicketRequest">
+         <wsdl:input name="authenticateByAppRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="checkTicketResponse">
+         <wsdl:output name="authenticateByAppResponse">
 
             <wsdlsoap:body use="literal"/>
 

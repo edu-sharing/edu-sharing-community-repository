@@ -22,6 +22,7 @@ import {UIHelper} from "../ui-helper";
 import {Helper} from "../../helper";
 import {RestNetworkService} from "../../rest/services/rest-network.service";
 import {ColorHelper} from '../color-helper';
+import {RestLocatorService} from '../../rest/services/rest-locator.service';
 
 @Component({
   selector: 'listTable',
@@ -316,15 +317,17 @@ export class ListTableComponent implements EventListener{
               private changes : ChangeDetectorRef,
               private storage : TemporaryStorageService,
               private network : RestNetworkService,
+              private locator : RestLocatorService,
               private toast : Toast,
               private frame : FrameEventsService,
               private sanitizer: DomSanitizer) {
     this.id=Math.random();
     frame.addListener(this);
-
-    this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
-      this.repositories=data.repositories;
-      this.cd.detectChanges();
+    this.locator.locateApi().subscribe(()=>{
+      this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
+        this.repositories=data.repositories;
+        this.cd.detectChanges();
+      });
     });
   }
   onEvent(event:string,data:any){
@@ -598,7 +601,7 @@ export class ListTableComponent implements EventListener{
       this.onUpdateOptions.emit(node);
       setTimeout(()=>{
         UIHelper.setFocusOnDropdown(this.dropdownElement);
-        UIHelper.scrollSmoothElement(0,this.dropdownContainerElement.nativeElement);
+        UIHelper.scrollSmoothElement(this.dropdownContainerElement.nativeElement.scrollHeight,this.dropdownContainerElement.nativeElement);
       });
     }
 

@@ -9,6 +9,7 @@ import {DECLARATIONS_SEARCH} from "./modules/search/declarations";
 import {PROVIDERS_SEARCH} from "./modules/search/providers";
 import {DECLARATIONS_COLLECTIONS} from "./modules/collections/declarations";
 import {DECLARATIONS_LOGIN} from "./modules/login/declarations";
+import {DECLARATIONS_LOGINAPP} from "./modules/login-app/declarations";
 import {DECLARATIONS_PERMISSIONS} from "./modules/permissions/declarations";
 import {DECLARATIONS_OER} from "./modules/oer/declarations";
 import {DECLARATIONS_ADMIN} from "./modules/admin/declarations";
@@ -16,6 +17,8 @@ import {DECLARATIONS_MANAGEMENT_DIALOGS} from "./modules/management-dialogs/decl
 import {DECLARATIONS_MESSAGES} from "./modules/messages/declarations";
 import {DECLARATIONS_UPLOAD} from "./modules/upload/declarations";
 import {DECLARATIONS_PROFILES} from "./modules/profiles/declarations";
+import {DECLARATIONS_STARTUP} from './modules/startup/declarations';
+import {DECLARATIONS_SHARE_APP} from "./modules/share-app/declarations";
 
 
 
@@ -31,13 +34,16 @@ import {DECLARATIONS_PROFILES} from "./modules/profiles/declarations";
     DECLARATIONS_SEARCH,
     DECLARATIONS_COLLECTIONS,
     DECLARATIONS_LOGIN,
+    DECLARATIONS_LOGINAPP,
+    DECLARATIONS_STARTUP,
     DECLARATIONS_PERMISSIONS,
     DECLARATIONS_OER,
     DECLARATIONS_MANAGEMENT_DIALOGS,
     DECLARATIONS_ADMIN,
     DECLARATIONS_UPLOAD,
     DECLARATIONS_PROFILES,
-    DECLARATIONS_MESSAGES
+    DECLARATIONS_MESSAGES,
+    DECLARATIONS_SHARE_APP
   ],
   imports: [
     IMPORTS,

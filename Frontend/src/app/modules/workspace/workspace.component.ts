@@ -35,6 +35,7 @@ import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {Helper} from "../../common/helper";
 import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {DateHelper} from '../../common/ui/DateHelper';
+import {CordovaService} from "../../common/services/cordova.service";
 
 @Component({
     selector: 'workspace-main',
@@ -222,18 +223,40 @@ export class WorkspaceMainComponent{
                 private title : Title,
                 private http : Http,
                 private event : FrameEventsService,
-                private connector : RestConnectorService) {
+                private connector : RestConnectorService,
+                private cordova : CordovaService
+    ) {
         Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
             UIHelper.setTitle('WORKSPACE.TITLE',title,translate,config);
+            this.initialize();
         });
         this.connector.setRoute(this.route);
         this.globalProgress=true;
-        this.initialize();
         this.explorerOptions=this.getOptions([new Node()],true);
         //this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }
+    private uploadCamera(event:any){
+        this.filesToUpload=event.target.files;
+    }
+    private openCamera(){
+        this.cordova.getPhotoFromCamera((data:any)=>{
+            console.log(data);
+            let name=this.translate.instant('SHARE_APP.IMAGE')+" "+DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+".jpg";
+            let blob:any=Helper.base64toBlob(data,"image/jpeg");
+            blob.name=name;
+            let list:any={};
+            list.item=(i:number)=>{
+                return blob;
+            }
+            list.length=1;
+            this.filesToUpload=list;
+        },(error:any)=>{
+            console.warn(error);
+            //this.toast.error(error);
+        });
+    }
     private showTimeout(){
-        return this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
+        return !this.cordova.isRunningCordova() && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
             (this.isSafe || !this.isSafe && this.config.instant('sessionExpiredDialog',{show:true}).show);
     }
     private updateTimeout(){
@@ -274,7 +297,9 @@ export class WorkspaceMainComponent{
         if(event.type.editorType){
             prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
         }
-        var win=window.open("",'_blank');
+        let win:any;
+        if(!this.cordova.isRunningCordova())
+            window.open("");
         this.node.createNode(this.currentFolder.ref.id,RestConstants.CCM_TYPE_IO,[],prop,false).subscribe(
             (data : NodeWrapper)=>{
                 this.editConnector(data.node,event.type,win,this.createConnectorType);
@@ -656,7 +681,7 @@ export class WorkspaceMainComponent{
     }
     private downloadNode(node: Node) {
         let list = this.getNodeList(node);
-        NodeHelper.downloadNodes(this.connector,list);
+        NodeHelper.downloadNodes(this.toast,this.connector,list);
     }
     private displayNode(event:Node){
         let list = this.getNodeList(event);

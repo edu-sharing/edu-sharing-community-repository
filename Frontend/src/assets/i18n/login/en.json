@@ -12,5 +12,25 @@
     "REGISTER_LINK":"Create one",
     "SAFE_PREVIOUS":"In order to login to the safe space, please login to the regular workspace first",
     "NO_ACCESS":"No permissions to access this area"
+  },
+  "LOGIN_APP":{
+    "SERVERLIST_OWN":"set own server",
+    "SERVERLIST":"Where do you wanna go?",
+    "SERVERLIST_INFO":"Choose the server you like to connect with.",
+    "LOGIN":"Login",
+    "LOGIN_INFO":"Login with your credentials.",
+    "SERVERURL" : "Set own server",
+    "SERVERURL_INFO" : "Enter the URL of the server you like to connect to.",
+    "SERVERURL_ADDRESS" : "Server URL",
+    "SERVERURL_BACK" : "Back",
+    "SERVERURL_CONTINUE" : "Continue",
+    "SERVERURL_TOOSHORT": "URL is too short.",
+    "SERVERURL_NOHTTPS": "HTTP instead of HTTPS is not secure.",
+    "NOTINTERNET" : "No Internet",
+    "NOTINTERNET_SUB" : "Not able to load the server listing.",
+    "NOTINTERNET_INFO" : "Info",
+    "NOTINTERNET_TEXT" : "Please check the internet connection. Then try again or exit the app to try again later.",
+    "NOTINTERNET_EXIT" : "Exit",
+    "NOTINTERNET_RETRY" : "Retry"
   }
 }

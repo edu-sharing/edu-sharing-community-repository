@@ -33,14 +33,15 @@ public class GroupDao {
 		}
 	}
 
-	public static String createGroup(RepositoryDao repoDao, String groupName, GroupProfile profile,String parentGroup) throws DAOException {
+	public static GroupDao createGroup(RepositoryDao repoDao, String groupName, GroupProfile profile,String parentGroup) throws DAOException {
 		try {
 			AuthorityService authorityService = AuthorityServiceFactory.getAuthorityService(repoDao.getApplicationInfo().getAppId());
 			String result=authorityService.createGroup(groupName, profile.getDisplayName(), parentGroup);
+			GroupDao groupDao=GroupDao.getGroup(repoDao, result);
 			if(result!=null) {
-				GroupDao.getGroup(repoDao, result).setGroupType(profile);
+				groupDao.setGroupType(profile);
 			}
-			return result;
+			return groupDao;
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
@@ -100,7 +101,7 @@ public class GroupDao {
 				throw new DAOMissingException(
 						new IllegalArgumentException(groupName));
 				
-			}									
+			}
 			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
 			
 		} catch (Throwable t) {

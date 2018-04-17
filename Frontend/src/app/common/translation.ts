@@ -12,6 +12,7 @@ import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
 import {RestLocatorService} from "./rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
+import {CordovaService} from './services/cordova.service';
 import * as moment from 'moment';
 
 export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','profiles','messages','override'];
@@ -27,9 +28,10 @@ export class Translation  {
     "de":"de_DE",
     "en":"en_US",
   };
+  private static DEFAULT_SUPPORTED_LANGUAGES = ["de","en"];
   public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
-      config.get("supportedLanguages",["de","en"]).subscribe((data: string[]) => {
+      config.get("supportedLanguages",Translation.DEFAULT_SUPPORTED_LANGUAGES).subscribe((data: string[]) => {
         translate.addLangs(data);
         translate.setDefaultLang(data[0]);
         translate.use(data[0]);
@@ -60,9 +62,29 @@ export class Translation  {
             });
           });
         });
-
       });
     });
+  }
+  public static initializeCordova(translate : TranslateService,cordova:CordovaService) {
+     return new Observable<string>((observer: Observer<string>) => {
+          translate.addLangs(Translation.DEFAULT_SUPPORTED_LANGUAGES);
+          let language=Translation.DEFAULT_SUPPORTED_LANGUAGES[0];
+          translate.setDefaultLang(language);
+          translate.use(language);
+          Translation.setLanguage(language);
+          cordova.getLanguage().subscribe((data: string) => {
+              if (Translation.DEFAULT_SUPPORTED_LANGUAGES.indexOf(data) != -1) {
+                  language=data;
+              }
+              translate.use(language);
+              Translation.setLanguage(language);
+              translate.getTranslation(language).subscribe(()=>{
+                  Translation.languageLoaded=true;
+                  observer.next(language);
+                  observer.complete();
+              });
+          })
+      });
   }
   public static isLanguageLoaded(){
     return Translation.languageLoaded;
@@ -108,20 +130,24 @@ export class TranslationLoader implements TranslateLoader {
   public getTranslation(lang: string): Observable<any> {
     //return this.http.get(`${this.prefix}/common/${lang}${this.suffix}`)
     //  .map((res: Response) => res.json());
-    var translations : any =[];
-    var results=0;
+    let translations : any =[];
+    let results=0;
+    let maxCount=TRANSLATION_LIST.length;
     for (let translation of TRANSLATION_LIST) {
       this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
         .subscribe((data : any) => translations.push(data));
 
     }
-    this.locator.getConfigLanguage(lang).subscribe((data:any)=>{
-      translations.push(data);
-    });
+    if(!this.locator.getCordova().isRunningCordova() || this.locator.getCordova().hasValidConfig()) {
+      maxCount++;
+      this.locator.getConfigLanguage(lang).subscribe((data: any) => {
+          translations.push(data);
+      });
+    }
 
     return new Observable<any>((observer : Observer<any>) => {
       let callback = ()=> {
-        if (translations.length < TRANSLATION_LIST.length + 1) {
+        if (translations.length < maxCount) {
           setTimeout(callback, 10);
           return;
         }

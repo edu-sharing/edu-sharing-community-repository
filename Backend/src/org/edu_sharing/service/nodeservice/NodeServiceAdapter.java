@@ -242,4 +242,10 @@ public class NodeServiceAdapter implements NodeService {
 		return false;
 	}
 
+	@Override
+	public String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

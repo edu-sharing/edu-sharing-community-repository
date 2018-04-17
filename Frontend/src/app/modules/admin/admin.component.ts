@@ -96,12 +96,20 @@ export class AdminComponent {
         });
         this.refreshCatalina();
         this.refreshAppList();
-        this.admin.getOAIClasses().subscribe((data:string[])=>{
-          this.oaiClasses=data;
-          this.oai.className=data[0];
+        this.admin.getOAIClasses().subscribe((classes:string[])=>{
+          this.oaiClasses=classes;
           this.storage.get("admin_oai").subscribe((data:any)=>{
             if(data)
               this.oai=data;
+            else{
+              this.oai={
+                className:classes[0],
+                importerClassName:"org.edu_sharing.repository.server.importer.OAIPMHLOMImporter",
+                recordHandlerClassName:"org.edu_sharing.repository.server.importer.RecordHandlerLOM"
+              };
+            }
+            if(!this.oai.binaryHandlerClassName)
+              this.oai.binaryHandlerClassName="";
           });
         });
         this.admin.getRepositoryVersion().subscribe((data:string)=>{
@@ -310,6 +318,16 @@ export class AdminComponent {
       this.toast.error(error);
     });
   }
+  public refreshEduGroupCache(){
+      this.globalProgress=true;
+      this.admin.refreshEduGroupCache().subscribe(()=>{
+          this.globalProgress=false;
+          this.toast.toast('ADMIN.TOOLKIT.EDU_GROUP_CACHE_REFRESHED');
+      },(error:any)=>{
+          this.globalProgress=false;
+          this.toast.error(error);
+      });
+  }
   public refreshCache(sticky:boolean){
     this.globalProgress=true;
     this.admin.refreshCache(this.cacheName,sticky).subscribe(()=>{
@@ -333,7 +351,7 @@ export class AdminComponent {
     if(this.oaiSave){
       this.storage.set("admin_oai",this.oai);
     }
-    this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,this.oai.file).subscribe(()=>{      this.globalProgress=false;
+    this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,this.oai.file,this.oai.oaiIds).subscribe(()=>{      this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.OAI_STARTED');
     },(error:any)=>{
       this.globalProgress=false;

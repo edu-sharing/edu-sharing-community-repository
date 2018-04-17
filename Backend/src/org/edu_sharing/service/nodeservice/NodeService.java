@@ -91,6 +91,8 @@ public interface NodeService {
 
 	public boolean exists(String protocol, String store, String nodeId);
 
+	String getProperty(String storeProtocol, String storeId, String nodeId, String property);
+
 
 	
 }

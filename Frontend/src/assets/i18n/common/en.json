@@ -133,7 +133,7 @@
     "dimensions": "Image size",
     "exif:dateTimeOriginal":"Recording date",
     "cm:modified": "Last change",
-    "cm:created": "Created",
+    "cm:created": "Creation date",
     "cm:creator": "Created by",
     "cclom:title": "Title",
     "cclom:general_keyword": "Key words",
@@ -204,6 +204,7 @@
     "file-txt":"text file",
     "file-video":"video",
     "file-qti":"ONYX file",
+    "file-h5p":"H5P file",
     "file-pdf":"pdf file",
     "link":"Website",
     "folder":"Folder",
@@ -296,8 +297,18 @@
     "AUTHOR_PERSON":"Author & Contributors",
     "LICENSE":"License",
     "LICENSE_LINK":"Manage license",
-    "CONTRIBUTOR_LINK":"Additional Contributors"
+    "CONTRIBUTOR_LINK":"Additional Contributors",
+    "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
+    "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment"
   },
+  
+  "SHARE_APP":{
+    "TEXT_SNIPPET":"Note",
+    "IMAGE":"Image",
+    "WILL_BE_SAVED_AT":"Will be stored at:",
+    "ADD_TO_COLLECTION":"Would you like to add the object to a collection?"
+  },
+  
   "LICENSE_AGREEMENT":{
     "TITLE":"License agreement",
     "CHECKBOX":"I read the license agreement and accept it",

@@ -22,7 +22,7 @@ import org.edu_sharing.repository.client.rpc.SQLKeyword;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.suggest.ConnectionPool;
+import org.edu_sharing.service.suggest.ConnectionDBAlfresco;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -201,8 +201,9 @@ public class MetadataSearchHelper {
 			throw new IllegalArgumentException("suggestionSource "+MetadataReaderV2.SUGGESTION_SOURCE_SQL+" at widget "+widget.getId()+" needs an suggestionQuery, but none was found");
 		}
 		
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		try{			
-			con = ConnectionPool.getConnection();
+			con = dbAlf.getConnection();
 			statement = con.prepareStatement(query);
 			
 			value = StringEscapeUtils.escapeSql(value);
@@ -218,7 +219,7 @@ public class MetadataSearchHelper {
 			}	
 		}catch(Throwable e){
 		}finally {
-			ConnectionPool.cleanUp(con, statement);
+			dbAlf.cleanUp(con, statement);
 		}
 		return result;
 	}

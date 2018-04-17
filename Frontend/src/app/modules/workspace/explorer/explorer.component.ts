@@ -110,6 +110,7 @@ export class WorkspaceExplorerComponent  {
       RestConstants.DEFAULT,[],'workspace').subscribe((data:NodeList)=>{
       this.addNodes(data,true);
     },(error:any)=>{
+        this.totalCount=0;
         this.handleError(error);
     });
 		//this.nodeApi.searchNodes(query,[],request).subscribe((data : NodeList) => this.addNodes(data,true));
@@ -119,6 +120,7 @@ export class WorkspaceExplorerComponent  {
     console.log(this._node);
     this.nodeApi.getChildren(this._node,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
       (error:any) => {
+        this.totalCount=0;
         this.handleError(error);
       });
 	}

@@ -9,6 +9,7 @@ import {DialogButton} from "./modal-dialog/modal-dialog.component";
 import {UIConstants} from "./ui-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "./ui-animation";
+import {CordovaService} from "../services/cordova.service";
 
 @Injectable()
 export class Toast{
@@ -25,6 +26,7 @@ export class Toast{
   constructor(private toasty : ToastyService,
               private router : Router,
               private storage : TemporaryStorageService,
+              private cordova : CordovaService,
               private translate : TranslateService){
     (window as any)['toastComponent']=this;
   }
@@ -43,13 +45,10 @@ export class Toast{
       if(dialogTitle){
         text+='<br /><a onclick="window[\'toastComponent\'].openDetails()">'+this.translate.instant("DETAILS")+'</a>';
       }
-      if(additional && additional.link){
-          text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.translate.instant(additional.link.caption)+'</a>';
-      }
+      text=this.handleAdditional(text,additional);
       this.dialogParameters=parameters;
       this.toasty.info(this.getToastOptions(text));
       this.dialogTitle=dialogTitle;
-      this.linkCallback=additional.link.callback;
       this.dialogMessage=dialogMessage;
     });
   }
@@ -84,7 +83,7 @@ export class Toast{
   /**
    * Generates a toast error message
    */
-  public error(errorObject : any,message="COMMON_API_ERROR",parameters: any = null,dialogTitle='',dialogMessage='') : void {
+  public error(errorObject : any,message="COMMON_API_ERROR",parameters: any = null,dialogTitle='',dialogMessage='',additional : any = null) : void {
     let errorInfo="";
     let error=errorObject;
     let jsonParse=null;
@@ -161,7 +160,7 @@ export class Toast{
       }
       else if (errorObject.status == RestConstants.HTTP_FORBIDDEN) {
         message = "TOAST.API_FORBIDDEN";
-        this.dialogTitle = '';
+        this.dialogTitle = null;
 
         let login=this.storage.get(TemporaryStorageService.SESSION_INFO);
         if(login && login.isGuest){
@@ -182,6 +181,10 @@ export class Toast{
         parameters["error"] = error;
       }
     }
+    if(error && error.status==0 && this.cordova.isRunningCordova()){
+        message='TOAST.NO_CONNECTION';
+        this.dialogTitle = null;
+    }
     if(this.lastToastError==message && (Date.now()-this.lastToastErrorTime)<Toast.MIN_TIME_BETWEEN_TOAST)
       return;
     this.lastToastError=message;
@@ -190,6 +193,7 @@ export class Toast{
       if (this.dialogTitle) {
         text += '<br /><a onclick="window[\'toastComponent\'].openDetails()">' + this.translate.instant("DETAILS") + '</a>';
       }
+      text=this.handleAdditional(text,additional);
       this.toasty.error(this.getToastOptions(text))
     });
 
@@ -199,5 +203,13 @@ export class Toast{
   }
   onShowModalDialog(param:Function) {
     this.onShowModal=param;
+  }
+
+  private handleAdditional(text:string,additional: any) {
+      if(additional && additional.link){
+          text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.translate.instant(additional.link.caption)+'</a>';
+          this.linkCallback=additional.link.callback;
+      }
+      return text;
   }
 }

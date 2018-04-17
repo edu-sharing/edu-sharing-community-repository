@@ -7,8 +7,8 @@ import {UIAnimation} from "../ui-animation";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {
     IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList,
-    NodeTextContent
-} from "../../rest/data-object";
+    NodeTextContent, NodeWrapper, Node
+} from '../../rest/data-object';
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../../router/router.component";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
@@ -25,6 +25,7 @@ import {Http} from "@angular/http";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
+import {CordovaService} from '../../services/cordova.service';
 import {SessionStorageService} from "../../services/session-storage.service";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {Translation} from "../../translation";
@@ -82,6 +83,7 @@ export class MainNavComponent {
   licenseAgreement: boolean;
   licenseAgreementHTML: string;
   canEditProfile: boolean;
+  private licenseAgreementNode: Node;
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
   }
@@ -303,6 +305,7 @@ export class MainNavComponent {
   }
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
+              private cordova : CordovaService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
               private nodeService : RestNodeService,
@@ -379,7 +382,12 @@ export class MainNavComponent {
     //window.scrollTo(0,0);
   }
   editProfile(){
-    window.location.href=this.editUrl;
+    if(this.cordova.isRunningCordova()){
+      window.open(this.editUrl,'_system',UIHelper.getDefaultNewWindowParameters(this.nodeService));
+    }
+    else {
+      window.location.href = this.editUrl;
+    }
   }
   openSidenav() {
     if(this.canOpen) {
@@ -400,9 +408,15 @@ export class MainNavComponent {
   }
   public showHelp(url:string){
     this.helpOpen=false;
-    window.open(url);
+    window.open(url,'_blank',UIHelper.getDefaultNewWindowParameters(this.nodeService));
   }
   private logout(){
+    if(this.cordova.isRunningCordova()){
+      this.cordova.clearAllCookies();
+      this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
+      this.cordova.restartCordova();
+      return;
+    }
     if(this.config.logout) {
       if(this.config.logout.ajax){
         this.http.get(this.config.logout.url).subscribe(()=>{
@@ -524,15 +538,13 @@ export class MainNavComponent {
   }
   saveLicenseAgreement(){
     this.licenseAgreement=false;
-    this.session.set('licenseAgreement',true);
+    if(this.licenseAgreementNode)
+      this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
   }
   private showLicenseAgreement() {
     if(!this.config.licenseAgreement || this.isGuest)
       return;
-    this.session.get('licenseAgreement',false).subscribe((checked:boolean)=>{
-      if(checked)
-        return;
-      this.licenseAgreement=true;
+    this.session.get('licenseAgreement',false).subscribe((version:string)=>{
       this.licenseAgreementHTML=null;
       let nodeId:string=null;
       for(let node of this.config.licenseAgreement.nodeId) {
@@ -543,11 +555,22 @@ export class MainNavComponent {
           break;
         }
       }
-      this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
-          this.licenseAgreementHTML = data.html ? data.html : data.raw;
-      }, (error: any) => {
-          this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
-      });
+      this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
+        this.licenseAgreementNode=data.node;
+        console.log(data.node);
+        if(version==data.node.contentVersion)
+          return;
+        this.licenseAgreement=true;
+        this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
+            this.licenseAgreementHTML = data.html ? data.html : data.raw ? data.raw : data.text;
+        }, (error: any) => {
+            this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
+        });
+      },(error:any)=>{
+          this.licenseAgreement=true;
+          this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
+      })
+
     });
 
   }

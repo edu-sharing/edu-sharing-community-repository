@@ -294,6 +294,8 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_USERNAME = "{http://www.alfresco.org/model/content/1.0}userName";
 	
 	public final static String CM_PROP_PERSON_ESORIGINALUID = "{http://www.alfresco.org/model/content/1.0}esoriginaluid";
+	
+	public final static String CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION = "{http://www.alfresco.org/model/content/1.0}eduSchoolPrimaryAffiliation";
 
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
 
@@ -512,6 +514,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_INTERACTIVITYTYPE = "{http://www.campuscontent.de/model/1.0}educationalinteractivitytype";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE = "{http://www.campuscontent.de/model/1.0}educationaltypicalagerange";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE = "{http://www.campuscontent.de/model/1.0}educationalintendedenduserrole";
+	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_SCHEMA_RELATION = "{http://www.campuscontent.de/model/1.0}schema_relation";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LANGUAGE = "{http://www.campuscontent.de/model/1.0}educationallanguage";
 
 	public final static String CCM_PROP_IO_REPL_TAXON_ENTRY  = "{http://www.campuscontent.de/model/1.0}taxonentry";
@@ -617,6 +620,10 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_COMPETENCE_DIGITAL2 = "{http://www.campuscontent.de/model/1.0}competence_digital2";
 
+	public final static String CCM_PROP_IO_SEARCH_CONTEXT = "{http://www.campuscontent.de/model/1.0}search_context";
+	
+	public final static String CCM_PROP_IO_EDITORIAL_STATE = "{http://www.campuscontent.de/model/1.0}editorial_state";
+	
 	/**
 	 * share props
 	 */
@@ -1706,7 +1713,9 @@ public class CCConstants {
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACE_I18N_PREFIX = "taxonid_valuespace_i18n_prefix";
 
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE = "resolve_website_title";
-
+	
+	public static String EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS = "initial_dbscripts";
+	
 	/**
 	 * @return <namespace,localnamespace>
 	 */

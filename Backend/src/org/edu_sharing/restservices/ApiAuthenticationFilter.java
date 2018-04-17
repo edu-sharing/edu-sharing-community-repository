@@ -60,6 +60,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		}
 				
 		HttpSession session = httpReq.getSession(true);
+		//session.setMaxInactiveInterval(30);
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 		HashMap<String, String> validatedAuth = authTool.validateAuthentication(session);
 		

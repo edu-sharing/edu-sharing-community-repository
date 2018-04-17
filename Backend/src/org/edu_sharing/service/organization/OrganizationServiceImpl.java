@@ -31,6 +31,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public String createOrganization(String orgName, String groupDisplayName) throws Throwable {
+		return this.createOrganization(orgName, groupDisplayName, null);
+	}
+	
+	@Override
+	public String createOrganization(String orgName, String groupDisplayName, String metadataSet) throws Throwable {
 			return (String)baseClient.doInTransaction(new RetryingTransactionCallback<String>() {
 
 				@Override
@@ -40,7 +45,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 						throw new AccessDeniedException(currentUser);
 					}
 					
-					return eduOrganisationService.createOrganization(orgName, groupDisplayName);
+					return eduOrganisationService.createOrganization(orgName, groupDisplayName, metadataSet);
 				}
 			});							
 	}

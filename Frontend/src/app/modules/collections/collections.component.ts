@@ -39,16 +39,11 @@ import {TranslateService} from "@ngx-translate/core";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
+import {Location} from "@angular/common";
 import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
-
-// data class for breadcrumbs
-export class Breadcrumb {
-  ref:EduData.Reference;
-  name:string;
-}
 
 // component class
 @Component({
@@ -125,6 +120,7 @@ export class CollectionsMainComponent {
     private router : Router,
     private toast : Toast,
     private title:Title,
+    private location:Location,
     private config:ConfigurationService,
     private translationService: TranslateService) {
     this.collectionsColumns.push(new ListItem("COLLECTION", 'title'));
@@ -385,7 +381,7 @@ export class CollectionsMainComponent {
           }
       }
       let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,
-        (node:Node)=>NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
+        (node:Node)=>NodeHelper.downloadNodes(this.toast,this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
       if(fromList) {
@@ -547,14 +543,10 @@ export class CollectionsMainComponent {
   }
   onCollectionsClick(collection:EduData.Collection) : void {
 
-    // remember actual collection as breadcrumb
-    if (!this.isRootLevelCollection()) {
-
-      let crumb = new Breadcrumb();
-      crumb.ref = this.collectionContent.collection.ref;
-      crumb.name =this.collectionContent.collection.title;
-      this.parentCollectionId = crumb.ref;
-    }
+        // remember actual collection as breadcrumb
+        if (!this.isRootLevelCollection()) {
+            this.parentCollectionId = this.collectionContent.collection.ref;
+        }
 
     // set thru router so that browser back button can work
     this.navigate(collection.ref.id);
@@ -583,22 +575,22 @@ export class CollectionsMainComponent {
     this.nodeService.getNodeMetadata(content.ref.id).subscribe((data:NodeWrapper)=>{
       this.contentDetailObject=data.node;
 
-      // remember the scroll Y before displaying content
-      this.lastScrollY = window.scrollY;
-      /*if(data.node.downloadUrl)
-        this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", () => this.downloadMaterial()));
-       */
-      if(data.node.access.indexOf(RestConstants.ACCESS_DELETE)!=-1) {
-        this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
-          NodeRenderComponent.close();
-        })));
-      }
-      // set content for being displayed in detail
-      this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,this.nodeOptions);
-      this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,this.collectionContent.references);
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"render",  content.ref.id]);
-      //this.navigate(this.collectionContent.collection.ref.id,content.ref.id);
-      // add breadcrumb
+        // remember the scroll Y before displaying content
+        this.lastScrollY = window.scrollY;
+        /*if(data.node.downloadUrl)
+          this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", () => this.downloadMaterial()));
+         */
+        if(data.node.access.indexOf(RestConstants.ACCESS_DELETE)!=-1) {
+          this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
+            NodeRenderComponent.close(this.location);
+          })));
+        }
+        // set content for being displayed in detail
+        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,this.nodeOptions);
+        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,this.collectionContent.references);
+        this.router.navigate([UIConstants.ROUTER_PREFIX+"render",  content.ref.id]);
+        //this.navigate(this.collectionContent.collection.ref.id,content.ref.id);
+        // add breadcrumb
 
 
     });

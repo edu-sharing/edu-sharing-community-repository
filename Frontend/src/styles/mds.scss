@@ -21,7 +21,16 @@ mds .mdsGroup{
   float:left;
   padding:25px;
   padding-bottom:5px;
-
+  label{
+    display: inline-flex;
+    .required{
+      padding-left: 5px;
+      font-size: 80%;
+      font-weight: bold;
+      display: flex;
+      align-self: center;
+    }
+  }
   > div{
     padding: 15px 0px;
   }
@@ -31,6 +40,12 @@ mds .mdsGroup{
   .card{
     padding: 0!important;
     padding-bottom: 20px!important;
+  }
+  .mdsNoPermissions{
+    color:$textLight;
+    font-size: 90%;
+    padding-top: 10px;
+    font-style: italic;
   }
   .radioVertical label,
   .checkboxVertical label{
