@@ -170,7 +170,9 @@ export class ShareAppComponent {
                     this.globalProgress=false;
                     if(this.cordova.getLastIntent().stream){
                         let base64=this.cordova.getLastIntent().stream;
-                        this.previewUrl=this.sanitizer.bypassSecurityTrustResourceUrl("data:"+this.mimetype+";base64,"+base64);
+                        if(this.mimetype.startsWith("image/")) {
+                            this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl("data:" + this.mimetype + ";base64," + base64);
+                        }
                         this.file = Helper.base64toBlob(base64,this.mimetype) as any;
                         this.cordova.getFileAsBlob(this.uri,this.mimetype).subscribe((data:any)=> {
                             console.log(this.fileName);
