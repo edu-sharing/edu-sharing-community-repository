@@ -303,6 +303,7 @@
   },
   "SHARE_APP":{
     "TEXT_SNIPPET":"Notiz",
+    "IMAGE":"Bild",
     "WILL_BE_SAVED_AT":"Wird gespeichert unter",
     "ADD_TO_COLLECTION":"In welche Sammlung einsortieren?"
   },

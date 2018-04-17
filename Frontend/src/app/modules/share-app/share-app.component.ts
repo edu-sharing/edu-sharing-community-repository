@@ -128,27 +128,6 @@ export class ShareAppComponent {
         }
         return {status:true};
     }
-    private base64toBlob(base64:string) {
-        let sliceSize =  512;
-
-        let byteCharacters = atob(base64);
-        let byteArrays = [];
-
-        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-            let slice = byteCharacters.slice(offset, offset + sliceSize);
-
-            let byteNumbers = new Array(slice.length);
-            for (let i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-
-            let byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
-        }
-
-        let blob = new Blob(byteArrays, {type: this.mimetype});
-        return blob;
-    }
     private init() {
         Translation.initialize(this.translate, this.config, this.storage, this.route).subscribe(() => {
             console.log("translate");
@@ -181,7 +160,7 @@ export class ShareAppComponent {
                 else if(this.isTextSnippet()){
                     this.globalProgress = false;
                     this.title = this.translate.instant('SHARE_APP.TEXT_SNIPPET')+" "+
-                        DateHelper.formatDate(this.translate,new Date().getTime(),false,false)+".txt";
+                        DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+".txt";
                     this.mimetype='text/plain';
                     this.file = (new Blob([this.uri], {
                         type: 'text/plain'
@@ -192,7 +171,7 @@ export class ShareAppComponent {
                     if(this.cordova.getLastIntent().stream){
                         let base64=this.cordova.getLastIntent().stream;
                         this.previewUrl=this.sanitizer.bypassSecurityTrustResourceUrl("data:"+this.mimetype+";base64,"+base64);
-                        this.file = this.base64toBlob(base64) as any;
+                        this.file = Helper.base64toBlob(base64,this.mimetype) as any;
                         this.cordova.getFileAsBlob(this.uri,this.mimetype).subscribe((data:any)=> {
                             console.log(this.fileName);
                             let split = this.fileName ? this.fileName.split("/") : this.uri.split("/");

@@ -128,4 +128,25 @@ export class Helper {
     }
     return array;
   }
+    static base64toBlob(base64:string,mimetype:string) {
+        let sliceSize =  512;
+
+        let byteCharacters = atob(base64);
+        let byteArrays = [];
+
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            let slice = byteCharacters.slice(offset, offset + sliceSize);
+
+            let byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+
+            let byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+
+        let blob = new Blob(byteArrays, {type: mimetype});
+        return blob;
+    }
 }
