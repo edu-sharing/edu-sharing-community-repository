@@ -8,8 +8,8 @@
     "ENTER_NAME" : "Please enter a name for this collection.",
     "NO_EDITORIAL_GROUPS":"No editorial groups found",
     "DETAIL": {
-      "REMOVE": "delete",
-      "ADD_TO_OTHER": "to collection"
+      "REMOVE": "Remove",
+      "ADD_TO_OTHER": "Add to collection"
     },
     "STEP":{
       "GENERAL":"Title, Image, Description and Color",
