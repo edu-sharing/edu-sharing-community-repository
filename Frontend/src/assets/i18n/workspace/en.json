@@ -294,7 +294,7 @@
       "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to everyone",
       "DELETE_FINISHED":"Element(s) move to recycle",
       "CUT_COPY":"{{count}} Element(s) copied to clipboard",
-      "PASTE":"{{count}} Element(s) have been {{mode}} from {{from}} to {{to}}",
+      "PASTE":"{{count}} Element(s) have been {{mode}} from \"{{from}}\" to \"{{to}}\"",
       "PASTE_DRAG":"{{count}} Element(s) have been {{mode}} to {{to}}",
       "DUPLICATE_NAME":"The name {{name}} already exists.<br>Please use an other, unique name",
       "CYCLIC_NODE":"A folder can not be pasted into its own",
