@@ -110,7 +110,7 @@
     "SEARCH":"Search",
     "COLLECTIONS":"Collections",
     "SECURE":"Safe",
-    "PERMISSIONS":"Permissions",
+    "PERMISSIONS":"User management",
     "LOGIN":"Login",
     "ADMIN":"Admin-Tools"
   },
