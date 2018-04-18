@@ -446,6 +446,8 @@ export class MainNavComponent {
     this.onSearch.emit({query:value,cleared:false});
   }
   private openButton(button : any){
+    if(button.isDisabled)
+      return;
     this.displaySidebar=false;
     if(button.scope==this._currentScope){
       return;

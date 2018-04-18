@@ -254,6 +254,10 @@ user-profile{
 .sidenav .button i{
   padding-right:10px;
 }
+.sidenav .button.disabled{
+  cursor:default;
+  color:$textVeryLight;
+}
 .sidenav .selected{
   color: $primary;
   font-weight: bold;

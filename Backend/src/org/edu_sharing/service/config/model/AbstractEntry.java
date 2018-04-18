@@ -7,6 +7,7 @@ public class AbstractEntry {
 	@XmlElement public String icon;
 	@XmlElement public String name;
 	@XmlElement	public String url;
+	@XmlElement	public Boolean isDisabled;
 	@XmlElement public Boolean isSeperate;
 	@XmlElement public Boolean isSeperateBottom;
 }
