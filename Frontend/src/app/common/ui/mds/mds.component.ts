@@ -1662,12 +1662,8 @@ export class MdsComponent{
     preview+=`<input type="file" style="display:none" id="previewSelect" accept="image/*" onchange="
             var valid=this.files.length;
             if(valid){
-              var reader  = new FileReader();
-              reader.addEventListener('load',function(){
-                  document.getElementById('preview').setAttribute('data-custom',true);
-                  document.getElementById('preview').src=reader.result;
-              });
-              reader.readAsDataURL(this.files[0]);
+                document.getElementById('preview').setAttribute('data-custom',true);
+                document.getElementById('preview').src=window.URL.createObjectURL(this.files[0]);
             }
           " />
             <label>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW')+`</label>`;
