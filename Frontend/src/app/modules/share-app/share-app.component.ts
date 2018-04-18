@@ -111,13 +111,19 @@ export class ShareAppComponent {
       });
     }
     private isLink() {
-        if(this.uri.startsWith("content://"))
+        if(this.hasData())
+            return false;
+        if(this.uri.startsWith("content://") || this.uri.startsWith("file://"))
             return false;
         let pos=this.uri.indexOf("://");
         return pos>0 && pos<10;
     }
     private isTextSnippet() {
-        return !this.uri.startsWith("content://") && !this.isLink();
+        if(this.hasData())
+            return false;
+        if(this.isLink())
+            return false;
+        return !this.uri.startsWith("content://") && !this.uri.startsWith("file://");
     }
     private goToInbox() {
         UIHelper.goToWorkspaceFolder(this.node,this.router,null,this.inbox.ref.id,{replaceUrl:true});
@@ -220,6 +226,10 @@ export class ShareAppComponent {
     private updateTitle() {
         let split = this.fileName ? this.fileName.split("/") : this.uri.split("/");
         this.title = decodeURIComponent(split[split.length - 1]);
+    }
+
+    private hasData() {
+        return this.cordova.getLastIntent() && this.cordova.getLastIntent().stream!=null;
     }
 }
 
