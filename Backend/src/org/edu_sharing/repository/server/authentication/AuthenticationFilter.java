@@ -196,12 +196,17 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 			Config config = ConfigServiceFactory.getCurrentConfig();
 			if(config != null) {
 				if(config.contexts != null) {
+					String reqDomain = req.getServerName();
 					for(Context context : config.contexts.context) {
-						if(req.getServerName().equals(context.domain)) {
-							if(!(context.values.loginUrl != null && context.values.loginUrl.contains("edu-sharing/shibboleth"))){
-								contextAllowesSSO = false;
+						
+						for(String currentDomain : context.domain) {
+							if(reqDomain.equals(currentDomain)) {
+								if(!(context.values.loginUrl != null && context.values.loginUrl.contains("edu-sharing/shibboleth"))){
+									contextAllowesSSO = false;
+								}
 							}
 						}
+						
 					}
 				}
 			}
