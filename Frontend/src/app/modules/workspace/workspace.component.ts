@@ -995,8 +995,12 @@ export class WorkspaceMainComponent{
         this.searchQuery=null;
         this.actionOptions=null;
         let id="";
+        let length=this.path ? this.path.length : 0;
         if(position>0)
             id=this.path[position-1].ref.id;
+        else if(length>0){
+            id=null;
+        }
         else {
             this.showSelectRoot = true;
             return;
