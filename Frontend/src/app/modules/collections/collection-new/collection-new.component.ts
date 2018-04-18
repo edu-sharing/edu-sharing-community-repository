@@ -304,7 +304,7 @@ export class CollectionNewComponent {
     }
     private saveImage(collection:EduData.Collection) : void {
 
-       if ((this.imageData!=null) && (this.imageData).startsWith("data:")) {
+       if (this.imageData!=null) {
            this.collectionService.uploadCollectionImage(collection.ref.id, this.imageFile, "image/png").subscribe(() => {
                this.navigateToCollectionId(collection.ref.id);
            });
