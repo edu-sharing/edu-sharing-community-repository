@@ -36,7 +36,7 @@
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
 
-        <div class="dialog dialogOptions" *ngIf="sortMenu" (click)="sortMenu=null" (contextmenu)="sortMenu=false;$event.preventDefault();$event.stopPropagation();"></div>
+        <div class="dialog" *ngIf="sortMenu" (click)="sortMenu=null" (contextmenu)="sortMenu=false;$event.preventDefault();$event.stopPropagation();"></div>
         <div class="sortMenu collection" *ngIf="sortMenu" [@openOverlay]="sortMenu">
             <div class="collection-item-title">{{'SORT_BY' | translate}}</div>
             <a *ngFor="let item of getSortableColumns();let i = index" (click)="setSorting(item.name,false);sortMenu=false" class="collection-item" [class.active]="sortBy==item.name">
