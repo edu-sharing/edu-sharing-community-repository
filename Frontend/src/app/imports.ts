@@ -10,6 +10,8 @@ import {NgDatepickerModule} from "ng2-datepicker";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
+import { InfiniteScrollModule } from "ngx-infinite-scroll";
+
 
 
 export const IMPORTS=[
@@ -18,6 +20,7 @@ export const IMPORTS=[
   FormsModule,
   HttpModule,
   HttpClientModule,
+  InfiniteScrollModule,
   NgDatepickerModule,
   TranslateModule.forRoot({
     loader:{

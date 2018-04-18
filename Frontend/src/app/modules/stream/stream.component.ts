@@ -75,6 +75,11 @@ export class StreamComponent {
 
   }
 
+  onScroll() {
+    console.log("scrolled!!");
+    this.getJSON().subscribe(data => this.streams = this.streams.concat(data['stream']), error => console.log(error));
+  }
+
   sortieren() {
     // here is going to be the sorting functionality: 
     console.log(this.streams);

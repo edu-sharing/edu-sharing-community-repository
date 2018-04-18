@@ -6,7 +6,10 @@
           [(searchQuery)]="searchQuery"
           (onSearch)="doSearch($event)"
 ></main-nav>
-<div class="stream-container">
+<div class="stream-container" infiniteScroll
+[infiniteScrollDistance]="0.1"
+[infiniteScrollThrottle]="200"
+(scrolled)="onScroll()">
     <div class="margin-show">
         <h5>
             <div class="stream-header">
@@ -25,7 +28,8 @@
 
         <div class="stream-box" *ngFor="let strm of streams" >
             <div class="stream-box-main">
-                <div class="stream-box-title">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
+                <div class="stream-box-title">{{ strm.properties['add_to_stream_
+                    title'] || 'Schon gewusst?' }} </div>
                 <!-- todo: ngfor over strm.properties.['cclom:general_keyword'] -->
                 <span *ngIf="strm.id == 'jpX1LmIBeHUS9fwXsg-1'"><div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div> </span>
                 <span *ngIf="strm.id == 'jZW8LmIBeHUS9fwX9g91'">
