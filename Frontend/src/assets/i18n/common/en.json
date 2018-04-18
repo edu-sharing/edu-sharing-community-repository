@@ -56,7 +56,7 @@
   "SORT_BY":"Sort by",
   "CLEAR_FILTERS":"Clear all filters",
   "EDIT_ACCOUNT":"Manage account",
-  "DEFAULT_METADATASET":"Default-Metadataset",
+  "DEFAULT_METADATASET":"Default-Metadataset ({{name}})",
   "NO_MATCHES" : "No matches found",
   "NO_CC_PUBLISH" : "Insufficient permissions",
   "ADD_TO_RECENT_COLLECTION":"Add to recent collection",

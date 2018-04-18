@@ -203,7 +203,7 @@ export class UIHelper{
   static prepareMetadatasets(translate:TranslateService,mdsSets: MdsInfo[]) {
     for(let i=0;i<mdsSets.length;i++){
       if(mdsSets[i].id=="mds")
-        mdsSets[i].name=translate.instant('DEFAULT_METADATASET');
+        mdsSets[i].name=translate.instant('DEFAULT_METADATASET',{name:mdsSets[i].name});
     }
   }
   static addToCollection(collectionService:RestCollectionService,router:Router,toast:Toast,collection:Node|Collection,nodes:Node[],callback:Function=null,position=0,error=false){
