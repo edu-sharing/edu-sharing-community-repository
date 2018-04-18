@@ -53,6 +53,7 @@
   "LOGOUT" : "Log out",
   "INVALID_OPERATION":"This feature is currently not supported",
   "SHOW_IN_FOLDER":"Open storage location",
+  "SORT_BY":"Sort by",
   "CLEAR_FILTERS":"Clear all filters",
   "EDIT_ACCOUNT":"Manage account",
   "DEFAULT_METADATASET":"Default-Metadataset",

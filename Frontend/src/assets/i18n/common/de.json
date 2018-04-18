@@ -52,6 +52,7 @@
   "LOGOUT" : "Abmelden",
   "INVALID_OPERATION":"Diese Funktion wird leider nicht unterstützt",
   "SHOW_IN_FOLDER":"Zum Speicherort",
+  "SORT_BY":"Sortieren nach",
   "CLEAR_FILTERS":"Alle Filter zurücksetzen",
   "EDIT_ACCOUNT":"Account Verwalten",
   "DEFAULT_METADATASET":"Standard-Metadatenset",

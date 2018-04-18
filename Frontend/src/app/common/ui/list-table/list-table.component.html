@@ -36,6 +36,16 @@
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
 
+        <div class="dialog dialogOptions" *ngIf="sortMenu" (click)="sortMenu=null" (contextmenu)="sortMenu=false;$event.preventDefault();$event.stopPropagation();"></div>
+        <div class="sortMenu collection" *ngIf="sortMenu" [@openOverlay]="sortMenu">
+            <div class="collection-item-title">{{'SORT_BY' | translate}}</div>
+            <a *ngFor="let item of getSortableColumns();let i = index" (click)="setSorting(item.name,false);sortMenu=false" class="collection-item" [class.active]="sortBy==item.name">
+                <div class="title">{{item.type+"."+item.name | translate}}</div>
+                <a *ngIf="sortBy==item.name"><i class="material-icons" *ngIf="sortAscending">arrow_upward</i><i class="material-icons" *ngIf="!sortAscending">arrow_downward</i></a>
+                <a *ngIf="sortBy!=item.name"></a>
+            </a>
+        </div>
+
         <div class="heading">
         <div class="checkbox" *ngIf="hasCheckbox">
             <input *ngIf="_nodes.length" id="selectAll" (click)="toggleAll()" type="checkbox" class="filled-in" [checked]="selectedNodes.length==_nodes.length"/>
@@ -43,10 +53,10 @@
         </div>
         <div class="checkboxDummy" *ngIf="!hasCheckbox">&nbsp;</div>
         <div class="icon" *ngIf="hasIcon">&nbsp;</div>
-        <div *ngFor="let item of columnsVisible;let i = index"
+            <div *ngFor="let item of columnsVisible;let i = index"
              class="{{getItemCssClass(item)}} row_{{i+1}}">
-            <a class="text" [class.clickable]="canBeSorted(item.name)" (click)="setSorting(item.name)">{{item.type+"."+item.name | translate}}</a>
-            <div *ngIf="sortBy" class="sorting" (click)="setSorting(item.name)">
+            <a class="text" [class.clickable]="canBeSorted(item.name)" (click)="setSorting(item.name,i==0)">{{item.type+"."+item.name | translate}}</a>
+            <div *ngIf="sortBy" class="sorting" (click)="setSorting(item.name,i==0)">
                 <a class="" *ngIf="sortBy==item.name && sortAscending"><i class="material-icons">arrow_drop_up</i></a>
                 <a class="" *ngIf="sortBy==item.name && !sortAscending"><i class="material-icons">arrow_drop_down</i></a>
             </div>

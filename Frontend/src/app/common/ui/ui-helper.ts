@@ -22,7 +22,6 @@ import {RestNodeService} from "../rest/services/rest-node.service";
 import {PlatformLocation} from "@angular/common";
 import {AbstractRestService} from "../rest/services/abstract-rest-service";
 export class UIHelper{
-  static MOBILE_WIDTH = 600;
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
     config.get("branding").subscribe((data:any)=>{
