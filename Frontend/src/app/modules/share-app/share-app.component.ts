@@ -10,7 +10,7 @@ import {RestConnectorService} from "../../common/rest/services/rest-connector.se
 import {Component, ViewChild, ElementRef} from "@angular/core";
 import {
     LoginResult, ServerUpdate, CacheInfo, Application, Node, ParentList,
-    CollectionContent, Collection, NodeWrapper
+    CollectionContent, Collection, NodeWrapper, ConnectorList, Connector
 } from "../../common/rest/data-object";
 import {RestAdminService} from "../../common/rest/services/rest-admin.service";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
@@ -24,6 +24,7 @@ import {RestCollectionService} from "../../common/rest/services/rest-collection.
 import {RestHelper} from "../../common/rest/rest-helper";
 import {CordovaService} from "../../common/services/cordova.service";
 import {DateHelper} from "../../common/ui/DateHelper";
+import {RestConnectorsService} from "../../common/rest/services/rest-connectors.service";
 @Component({
   selector: 'share-app',
   templateUrl: 'share-app.component.html',
@@ -44,6 +45,7 @@ export class ShareAppComponent {
     private columns:ListItem[]=[];
     private collections: Collection[];
     private mimetype: string;
+    private editorType: string;
     private file: File;
     private fileName: string;
   constructor(private toast: Toast,
@@ -51,6 +53,7 @@ export class ShareAppComponent {
               private router: Router,
               private sanitizer: DomSanitizer,
               private node: RestNodeService,
+              private connectors: RestConnectorsService,
               private utilities: RestUtilitiesService,
               private translate: TranslateService,
               private collectionApi: RestCollectionService,
@@ -93,6 +96,9 @@ export class ShareAppComponent {
         }
         else {
             let prop: any = RestHelper.createNameProperty(this.title);
+            if(this.editorType){
+                prop[RestConstants.CCM_PROP_EDITOR_TYPE]=[this.editorType];
+            }
             this.node.createNode(this.inbox.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true).subscribe((data: NodeWrapper) => {
                 this.node.uploadNodeContent(data.node.ref.id, this.file, RestConstants.COMMENT_MAIN_FILE_UPLOAD,this.mimetype).subscribe(() => {
                     callback(data.node);
@@ -165,12 +171,11 @@ export class ShareAppComponent {
                 }
                 else if(this.isTextSnippet()){
                     this.globalProgress = false;
-                    this.title = this.translate.instant('SHARE_APP.TEXT_SNIPPET')+" "+
-                        DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+".txt";
-                    this.mimetype='text/plain';
-                    this.file = (new Blob([this.uri], {
-                        type: 'text/plain'
-                    }) as any);
+                    this.connectors.list().subscribe((list:ConnectorList)=>{
+                        this.prepareTextSnippet(list.connectors);
+                    },(error:any)=>{
+                        this.prepareTextSnippet(null);
+                    })
                 }
                 else{
                     if(this.cordova.getLastIntent().stream){
@@ -230,6 +235,25 @@ export class ShareAppComponent {
 
     private hasData() {
         return this.cordova.getLastIntent() && this.cordova.getLastIntent().stream!=null;
+    }
+
+    private prepareTextSnippet(connectors : Connector[]) {
+        this.mimetype='text/plain';
+        let filetype='txt';
+        if(connectors && connectors.length){
+            let i=Helper.indexOfObjectArray(connectors,"id","TINYMCE");
+            if(i!=-1){
+                let connector=connectors[i];
+                this.mimetype=connector.filetypes[0].mimetype;
+                filetype=connector.filetypes[0].filetype;
+                this.editorType=connector.filetypes[0].editorType;
+            }
+        }
+        this.title = this.translate.instant('SHARE_APP.TEXT_SNIPPET')+" "+
+            DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+"."+filetype;
+        this.file = (new Blob([this.uri], {
+            type: this.mimetype
+        }) as any);
     }
 }
 
