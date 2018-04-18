@@ -41,4 +41,11 @@
 				</views>
 			</group>
 		</groups>
+		<queries>
+			<query join="AND" id="ngsearch">
+				<property name="title"></property>
+				<property name="place"></property>
+				<property name="affiliate"></property>
+			</query>
+		</queries>
 </metadataset>
