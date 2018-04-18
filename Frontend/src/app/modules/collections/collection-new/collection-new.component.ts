@@ -1,4 +1,4 @@
-import {Component, OnInit, NgZone, HostListener, ViewChild} from '@angular/core';
+import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer} from '@angular/core';
 
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
@@ -27,6 +27,7 @@ import {ListItem} from "../../../common/ui/list-item";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {ColorHelper} from '../../../common/ui/color-helper';
+import {DomSanitizer} from "@angular/platform-browser";
 
 // component class
 @Component({
@@ -60,7 +61,7 @@ export class CollectionNewComponent {
   public editorialGroups:Group[]=[];
   public editorialGroupsSelected:Group[]=[];
   public editorialColumns:ListItem[]=[new ListItem("GROUP",RestConstants.AUTHORITY_DISPLAYNAME)];
-  private imageData:string = null;
+  private imageData:any = null;
   private imageFile:File = null;
   private STEP_NEW = 'NEW';
   private STEP_GENERAL = 'GENERAL';
@@ -101,6 +102,7 @@ export class CollectionNewComponent {
         private toast : Toast,
         private storage : SessionStorageService,
         private zone: NgZone,
+        private sanitizer: DomSanitizer,
         private config : ConfigurationService,
         private translationService:TranslateService) {
         Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
@@ -244,13 +246,7 @@ export class CollectionNewComponent {
 
         // remember file for upload
         this.imageFile = file;
-        // read file base64
-        var reader  = new FileReader();
-        reader.addEventListener("load", () => {
-            this.imageData = reader.result;
-        });
-        reader.readAsDataURL(file);
-
+        this.imageData=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
     }
     handleError(error:any){
       if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
