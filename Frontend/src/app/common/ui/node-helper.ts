@@ -229,17 +229,6 @@ export class NodeHelper{
       node.preview.data=data.blob();
       observer.next(node);
       observer.complete();
-      /*
-      var reader = new FileReader();
-      console.log(data.blob());
-      reader.readAsDataURL(data.blob());
-      reader.onloadend = function() {
-        node.preview.data=reader.result;
-        console.log(node.preview.data);
-        observer.next(node);
-        observer.complete();
-      }
-      */
     });
   });
   }
