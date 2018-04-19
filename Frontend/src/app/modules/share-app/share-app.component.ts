@@ -83,6 +83,8 @@ export class ShareAppComponent {
           return "link";
       if(this.isTextSnippet())
           return "file-txt";
+      if(this.mimetype=="application/pdf")
+          return "file-pdf";
       return "file-"+this.mimetype.split("/")[0];
     }
     saveInternal(callback:Function){
