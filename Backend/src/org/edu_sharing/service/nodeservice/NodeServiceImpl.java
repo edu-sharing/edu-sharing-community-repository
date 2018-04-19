@@ -187,14 +187,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
 		
 		if(metadataSetId == null) {
-			
-			if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
-				metadataSetId = HttpContext.getCurrentMetadataSet();
-			}else {
-				metadataSetId = CCConstants.metadatasetdefault_id;
+			Boolean forceMds = (Boolean)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+			if(forceMds == null) forceMds = false;
+			if(!forceMds) {
+				if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
+					metadataSetId = HttpContext.getCurrentMetadataSet();
+				}else {
+					metadataSetId = CCConstants.metadatasetdefault_id;
+				}
+				props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
 			}
-			
-			props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
 		}
 		
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(application, metadataSetId);
