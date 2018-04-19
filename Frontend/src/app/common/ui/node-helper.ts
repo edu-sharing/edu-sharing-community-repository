@@ -22,6 +22,7 @@ import {ApplyToLmsComponent} from "./apply-to-lms/apply-to-lms.component";
 import {ListItem} from "./list-item";
 import {Helper} from "../helper";
 import {ConfigurationHelper} from "../rest/configuration-helper";
+import {CordovaService} from "../services/cordova.service";
 
 export class NodeHelper{
   /**
@@ -126,30 +127,6 @@ export class NodeHelper{
     return error.status;
   }
 
-  /**
-   * Navigate to the workspace
-   * @param nodeService instance of NodeService
-   * @param router instance of Router
-   * @param login a result of the isValidLogin method
-   * @param node The node to open and show
-   */
-  public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node) {
-    nodeService.getNodeParents(node.ref.id).subscribe((data:ParentList)=>{
-      router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
-        {queryParams:{id:node.parent.id,file:node.ref.id,root:data.scope}});
-    });
-  }
-  /**
-   * Navigate to the workspace
-   * @param nodeService instance of NodeService
-   * @param router instance of Router
-   * @param login a result of the isValidLogin method
-   * @param folder The folder id to open
-   */
-  public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
-    router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
-      {queryParams:{id:folder}});
-  }
   public static getCollectionScopeInfo(collection : any) : any{
     let scope=collection.scope;
     let icon="help";
@@ -209,14 +186,32 @@ export class NodeHelper{
     return collection[item];
   }
 
+  public static downloadUrl(toast:Toast,cordova:CordovaService,url:string,fileName="download"){
+    if(cordova.isRunningCordova()){
+        toast.toast('TOAST.DOWNLOAD_STARTED',{name:fileName});
+        cordova.downloadContent(url,fileName,(deviceFileName:string)=>{
+            toast.toast('TOAST.DOWNLOAD_FINISHED',{name:fileName});
+        },()=>{
+            toast.error(null,'TOAST.DOWNLOAD_FAILED',{name:fileName},null,null,{
+              link:{
+                caption:'TOAST.DOWNLOAD_TRY_AGAIN',
+                callback:()=>{this.downloadUrl(toast,cordova,url,fileName)}
+              }
+            });
+        });
+    }
+    else{
+        window.open(url);
+    }
+  }
   /**
    * Download (a single) node
    * @param node
    */
-  public static downloadNode(node:any,version=RestConstants.NODE_VERSION_CURRENT) {
+  public static downloadNode(toast:Toast,cordova:CordovaService,node:any,version=RestConstants.NODE_VERSION_CURRENT) {
     if(node.reference)
       node=node.reference;
-    window.open(node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""));
+    this.downloadUrl(toast,cordova,node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""),node.name);
   }
 
 
@@ -484,14 +479,15 @@ export class NodeHelper{
    * Download one or multiple nodes
    * @param node
    */
-  static downloadNodes(connector:RestConnectorService,nodes: Node[]) {
+  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[]) {
     if(nodes.length==1)
-      return this.downloadNode(nodes[0]);
+      return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
+
     let nodesString=RestHelper.getNodeIds(nodes).join(",");
-      window.open(connector.getAbsoluteEndpointUrl()+
+      this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
       "../eduservlet/download?appId="+
       encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString));
+      "&nodeIds="+encodeURIComponent(nodesString),"download.zip");
   }
 
   static getLRMIProperty(data: any, item: ListItem) {

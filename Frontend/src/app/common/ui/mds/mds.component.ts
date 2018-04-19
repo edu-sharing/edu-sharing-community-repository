@@ -22,6 +22,7 @@ import {RestLocatorService} from '../../rest/services/rest-locator.service';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../ui-animation';
 import {DialogButton} from '../modal-dialog/modal-dialog.component';
+import {UIService} from '../../services/ui.service';
 
 @Component({
   selector: 'mds',
@@ -73,7 +74,8 @@ export class MdsComponent{
   dialogParameters: any;
   dialogButtons: DialogButton[];
   private variables: string[];
-    private currentWidgetSuggestion: string;
+  private currentWidgetSuggestion: string;
+  private static GROUP_MULTIVALUE_DELIMITER="[+]";
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -141,7 +143,7 @@ export class MdsComponent{
     this.isLoading=true;
     this.mdsService.getSet().subscribe((data:any)=> {
       this.mds=data;
-      this.renderGroup(this.createType, this.mds, this.currentNode);
+      this.renderGroup(this.createType, this.mds);
       this.isLoading=false;
     });
   }
@@ -174,7 +176,7 @@ export class MdsComponent{
           if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
             nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
           }
-          this.renderGroup(nodeGroup, this.mds, this.currentNode);
+          this.renderGroup(nodeGroup, this.mds);
           this.isLoading = false;
         });
       },(error:any)=>{
@@ -214,6 +216,7 @@ export class MdsComponent{
   constructor(private mdsService : RestMdsService,
               private translate : TranslateService,
               private route : ActivatedRoute,
+              private uiService : UIService,
               private node : RestNodeService,
               private tools : RestToolService,
               private toast : Toast,
@@ -303,6 +306,7 @@ export class MdsComponent{
     if(widgetValues /* && !this._groupId */)
       elements[0].style.display=hits || allowCustom ? 'none' : '';
   }
+  /*
   private renderTabs(group:any,data:any,node:Node) : string{
     let tabs='<div class="row tab-group"><ul class="tabs">';
     let content='';
@@ -332,7 +336,8 @@ export class MdsComponent{
     tabs+='</ul></div>';
     return tabs+content;
   }
-  private renderList(group:any,data:any,node:Node) : any{
+  */
+  private renderList(group:any,data:any) : any{
     let content='';
     let i=0;
     let hasExtended=[false];
@@ -347,10 +352,10 @@ export class MdsComponent{
           if (view.rel) {
           if(!result[view.rel])
             result[view.rel]='';
-            result[view.rel] += this.renderTemplate(view, data, hasExtended,node);
+            result[view.rel] += this.renderTemplate(view, data, hasExtended);
           }
           else {
-            result.main += this.renderTemplate(view, data, hasExtended,node);
+            result.main += this.renderTemplate(view, data, hasExtended);
           }
           i++;
           break;
@@ -433,7 +438,7 @@ export class MdsComponent{
     return html;
   }
 
-  private renderGroup(id:string,data:any,node:Node=null){
+  private renderGroup(id:string,data:any){
     if(!id)
       return;
     this.currentWidgets=[];
@@ -448,13 +453,13 @@ export class MdsComponent{
     }
     for(let group of data.groups){
       if(group.id==id){
-        let result=this.renderList(group,data,node);
+        let result=this.renderList(group,data);
         this.setRenderedHtml(result.main);
         if(result.suggestions)
           this.renderedSuggestions=this.sanitizer.bypassSecurityTrustHtml(result.suggestions);
         let jumpHtml=this.renderJumpmarks(group,data);
         this.jumpmarks=this.sanitizer.bypassSecurityTrustHtml(jumpHtml);
-        this.readValues(data,node);
+        this.readValues(data);
         //setTimeout(()=>UIHelper.materializeSelect(),15);
         return;
       }
@@ -462,13 +467,13 @@ export class MdsComponent{
     let html='Group \''+id+'\' was not found in the mds';
     this.setRenderedHtml(html);
   }
-  public getValues(propertiesIn:any={},showError=true){
+  public getValues(propertiesIn:any={},showError=true,widgets=this.currentWidgets){
     let properties:any={};
     // add author data
     this.addAuthorValue(properties);
-    if(!this.currentWidgets)
+    if(!widgets)
       return properties;
-    for(let widget of this.currentWidgets){
+    for(let widget of widgets){
       if(widget.id=='preview' || widget.id=='author'){
         continue;
       }
@@ -552,7 +557,12 @@ export class MdsComponent{
       }
       if(this.isRequiredWidget(widget) && (!props.length || props[0]=='')){
         if(showError) {
-          element.className += 'invalid';
+          let inputField=element;
+          if(this.isMultivalueWidget(widget)){
+            inputField=document.getElementById(widget.id+'_suggestionsInput');
+          }
+          if(inputField)
+            inputField.className += 'invalid';
           this.toast.error(null, 'TOAST.FIELD_REQUIRED', {name: widget.caption});
         }
         return;
@@ -749,7 +759,15 @@ export class MdsComponent{
           if(!props)
             continue;
 
-          if (this.isMultivalueWidget(widget)){
+          if(widget.type=='multivalueGroup'){
+              for(let v of props){
+                  if(v!="") {
+                    let caption=this.getGroupValueCaption(v,widget);
+                    element.innerHTML += this.getMultivalueBadge(v, caption);
+                  }
+              }
+          }
+          else if (this.isMultivalueWidget(widget)){
             for(let v of props){
               if(v!='') {
                 let caption=this.getValueCaption(widget, v);
@@ -820,11 +838,11 @@ export class MdsComponent{
     }
     return id;
   }
-  private readValues(data:any,node:Node){
-    this.setGeneralNodeData(node);
-    this.setValuesByProperty(data,node ? node.properties : []);
+  private readValues(data:any){
+    this.setGeneralNodeData();
+    this.setValuesByProperty(data,this.currentNode ? this.currentNode.properties : []);
   }
-  private renderTemplate(template : any,data:any,extended:boolean[],node:Node) {
+  private renderTemplate(template : any,data:any,extended:boolean[]) {
     if(!template.html || !template.html.trim()){
       return '';
     }
@@ -845,28 +863,28 @@ export class MdsComponent{
       let search='<'+widget.id+'>';
       let start=html.indexOf(search);
       let end=start+search.length;
+      let attr="";
       if(start<0){
         search='<'+widget.id+' ';
         start=html.indexOf(search);
-        end=-1;
+        end=html.indexOf('>',start)+1;
+        attr=html.substring(start+search.length,end-1);
+        let attributes=this.getAttributes(html.substring(start,end-1));
+        for(var k in attributes){
+            widget[k]=attributes[k];
+        }
       }
       if(start<0)
         continue;
-      if(end==-1)
-        end=html.indexOf('>',start);
 
       let first=html.substring(0,start);
-      let second=html.substring(end+1);
-      let attributes=this.getAttributes(html.substring(start,end));
-      for(var k in attributes){
-        widget[k]=attributes[k];
-      }
+      let second=html.substring(end);
+
       if(this.isExtendedWidget(widget))
         extended[0]=true;
       this.replaceVariables(widget);
       this.currentWidgets.push(widget);
-      let attr=html.substring(start+search.length,end);
-      let widgetData=this.renderWidget(widget,attr,template,node);
+      let widgetData=this.renderWidget(widget,attr,template);
       if(!widgetData) {
         removeWidgets.push(widget);
         continue;
@@ -1117,9 +1135,10 @@ export class MdsComponent{
     }
     else {
       html += `
-                document.getElementById('` + id + `_suggestionsInput').value='';
-                document.getElementById('` + id + `_suggestionsInput').focus();
-                var badges=document.getElementById('` + id + `');
+                document.getElementById('` + id + `_suggestionsInput').value='';`;
+      if(!this.uiService.isMobile())
+        html += `document.getElementById('` + id + `_suggestionsInput').focus();`;
+      html += `var badges=document.getElementById('` + id + `');
                 var elements=badges.childNodes;
                 for(var i=0;i<elements.length;i++){
                     if(elements[i].getAttribute('data-value')==this.getAttribute('data-value')){
@@ -1220,7 +1239,7 @@ export class MdsComponent{
               window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
-    if(allowCustom && !showOpen && !this.isSearch()){
+    if(allowCustom && !showOpen){
       html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;
@@ -1443,29 +1462,33 @@ export class MdsComponent{
     html+='</fieldset>';
     return html;
   }
-  private renderWidget(widget: any,attr:string,template:any,node:Node) : string{
+  private isWidgetConditionTrue(widget:any){
+    if(!widget.condition)
+      return true;
+    let condition=widget.condition;
+    console.log('condition:');
+    console.log(condition);
+    if(condition.type=='PROPERTY' && this.currentNode) {
+        if (!this.currentNode.properties[condition.value] && !condition.negate || this.currentNode.properties[condition.value] && condition.negate) {
+            return false;
+        }
+    }
+    if(condition.type=='TOOLPERMISSION'){
+        let tp=this.connector.hasToolPermissionInstant(condition.value);
+        if(tp==condition.negate){
+            return false;
+        }
+    }
+    console.log("condition is true, will display widget");
+    return true;
+  }
+  private renderWidget(widget: any,attr:string,template:any) : string{
     let id=widget.id;
     let hasCaption=widget.caption;
     let html='';
     let caption='';
-
-    if(widget.condition){
-      let condition=widget.condition;
-      console.log('condition:');
-      console.log(condition);
-      if(condition.type=='PROPERTY' && node) {
-          if (!node.properties[condition.value] && !condition.negate || node.properties[condition.value] && condition.negate) {
-              return null;
-          }
-      }
-      if(condition.type=='TOOLPERMISSION'){
-        let tp=this.connector.hasToolPermissionInstant(condition.value);
-        if(tp==condition.negate){
-          return null;
-        }
-      }
-      console.log("condition is true, will display widget");
-    }
+    if(!this.isWidgetConditionTrue(widget))
+      return null;
 
     if(hasCaption) {
       caption=this.getCaption(widget);
@@ -1523,8 +1546,15 @@ export class MdsComponent{
     else if(widget.type=='vcard') {
       html+=this.renderVCardWidget(widget,attr);
     }
+    else if(widget.type=='multivalueGroup'){
+        html+=this.renderGroupWidget(widget,attr,template);
+    }
+    else if(widget.type=='defaultvalue'){
+        // hide this widget, it's used in backend
+        return '';
+    }
     else if(widget.id=='preview'){
-      html+=this.renderPreview(widget);
+      html+=this.renderPreview(widget,attr);
     }
     else if(widget.id=='author'){
       html+=this.renderAuthor(widget);
@@ -1545,8 +1575,8 @@ export class MdsComponent{
 
   private getCaption(widget: any) {
     let caption = '<label for="' + widget.id + '"> ' + widget.caption;
-    if(widget.required)
-      caption+= ' ('+this.translate.instant('FIELD_REQUIRED')+')';
+    if(this.isRequiredWidget(widget))
+      caption+= ' <span class="required">('+this.translate.instant('FIELD_REQUIRED')+')</span>';
     caption +=  '</label>';
     return caption;
   }
@@ -1579,12 +1609,13 @@ export class MdsComponent{
  }
 
   private isMultivalueWidget(widget: any) {
-    return widget.type == 'multivalueBadges'
-    || widget.type=='multioption'
-    || widget.type=='multivalueFixedBadges'
-    || widget.type=='multivalueSuggestBadges'
-    || widget.type=='singlevalueTree' // it basically uses the tree so all functions relay on multivalue stuff
-    || widget.type=='multivalueTree'
+    return widget.type == "multivalueBadges"
+    || widget.type=="multioption"
+    || widget.type=="multivalueFixedBadges"
+    || widget.type=="multivalueSuggestBadges"
+    || widget.type=="singlevalueTree" // it basically uses the tree so all functions relay on multivalue stuff
+    || widget.type=="multivalueTree"
+    || widget.type=="multivalueGroup"
   }
   private isSliderWidget(widget: any) {
     return widget.type == 'duration'
@@ -1625,7 +1656,7 @@ export class MdsComponent{
     `;
     return author;
   }
-  private renderPreview(widget: any) {
+  private renderPreview(widget: any,attr:string) {
     let preview=`<div class="mdsPreview">`;
 
     preview+=`<input type="file" style="display:none" id="previewSelect" accept="image/*" onchange="
@@ -1643,7 +1674,7 @@ export class MdsComponent{
     if(this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0) {
       preview += `<div onclick="document.getElementById('previewSelect').click()" class="changePreview clickable">` + this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') + `</div>`;
     }
-    preview+=`<div class="previewImage"><img id="preview"></div>
+    preview+=`<div class="previewImage"><img id="preview" `+attr+`></div>
             </div>`;
     return preview;
   }
@@ -1697,13 +1728,85 @@ export class MdsComponent{
       this.openContributor.emit();
     })
   }
+  private getGroupValueCaption(value:string,widget:any){
+    let values=value.split(MdsComponent.GROUP_MULTIVALUE_DELIMITER);
+    let caption="";
+    let i=0;
+    for(let sub of widget.subwidgets){
+      let v=values[i++];
+      if(!v)
+        continue;
+      if(caption!=""){
+        caption+=", ";
+      }
+      caption+=this.getValueCaption(this.getWidget(sub.id),v);
+    }
+    return caption;
+  }
+  private addGroupValues(id:string){
+    let widget=this.getWidget(id);
+    let widgets=[];
+    for(let sub of widget.subwidgets){
+      widgets.push(this.getWidget(sub.id));
+    }
+    let values=this.getValues([],true,widgets);
+    if(!values)
+      return;
+    let result="";
+    let i=0;
+    let hasValue=false;
+    for(let sub of widget.subwidgets){
+        if(values[sub.id] && values[sub.id][0]){
+          hasValue=true;
+          result+=values[sub.id][0];
+        }
+        if(i++<widget.subwidgets.length-1)
+          result+=MdsComponent.GROUP_MULTIVALUE_DELIMITER;
+    }
+    if(!hasValue){
+      return;
+    }
+    let badges=document.getElementById(widget.id);
+    let elements:any=badges.childNodes;
+    let add=true;
+    for(let i=0;i<elements.length;i++){
+        if(elements[i].getAttribute('data-value')==result){
+            return;
+        }
+    }
+    let caption=this.getGroupValueCaption(result,widget);
+    document.getElementById(id).innerHTML+=this.getMultivalueBadge(result,caption);
+  }
+  private renderGroupWidget(widget: any,attr:string,template:any){
+    if(!widget.subwidgets || !widget.subwidgets.length){
+      return "Widget "+widget.id+" is a group widget, but has no subwidgets attached";
+    }
+    let html='<div class="widgetGroup">'
+    for(let sub of widget.subwidgets){
+      let subwidget=this.getWidget(sub.id);
+      if(subwidget==null){
+          html+='Widget '+sub.id+" was not found. Check the widget id";
+      }
+      else if(this.isMultivalueWidget(subwidget)){
+        html+='Widget '+subwidget.id+" is a multivalue widget. This is not supported for groups";
+      }
+      else {
+        console.log(subwidget);
+        let render=this.renderWidget(subwidget, null, template);
+        html += render ? render : "";
+      }
+    }
+    html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
+            <div id="`+widget.id+`" class="multivalueBadges"></div>`;
+    return html;
+  }
   private renderLicense(widget: any) {
     if(this.mode=='search'){
       if(!widget.values){
         return 'widget \'license\' does not have values connected, can\'t render it.';
       }
       for(let value of widget.values){
-        let image=NodeHelper.getLicenseIconByString(value.id, this.connector);;
+        let image=NodeHelper.getLicenseIconByString(value.id, this.connector);
         if(image)
           value.imageSrc = image;
       }
@@ -1712,18 +1815,24 @@ export class MdsComponent{
       return html;
     }
     else {
-      let html = `<div class="mdsLicense">
-                    <a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
-                    this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>
-                  </div>`;
-      return html;
+        let html=`<div class="mdsLicense">`
+        let isSafe=this.connector.getCurrentLogin() && this.connector.getCurrentLogin().currentScope!=null;
+        if(isSafe || !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE)){
+            html+=`<div class="mdsNoPermissions">`+this.translate.instant('MDS.LICENSE_NO_PERMISSIONS'+(isSafe ? '_SAFE' : ''))+`</div>`;
+        }
+        else {
+            html += `<a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
+                this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>`;
+        }
+        html+=`</div>`;
+        return html;
     }
   }
 
-  private setPreview(node: Node,counter=1) {
+  private setPreview(counter=1) {
     let preview:any=document.getElementById('preview');
     if(preview){
-      if(!node){
+      if(!this.currentNode){
         if(this.createType==MdsComponent.TYPE_TOOLDEFINITION){
           preview.src = this.connector.getThemeMimePreview('tool_definition.svg');
         }
@@ -1732,21 +1841,21 @@ export class MdsComponent{
         }
         return;
       }
-      if(preview.src && !preview.src.startsWith(node.preview.url))
+      if(preview.src && !preview.src.startsWith(this.currentNode.preview.url))
         return;
-      preview.src=node.preview.url+'&crop=true&width=400&height=300&dontcache='+new Date().getMilliseconds();
+      preview.src=this.currentNode.preview.url+'&crop=true&width=400&height=300&dontcache='+new Date().getMilliseconds();
       //if(node.preview.isIcon){
         setTimeout(()=>{
           //this.node.getNodeMetadata(node.ref.id).subscribe((data:NodeWrapper)=>{this.setPreview(data.node)});
-          this.setPreview(node,counter*2);
+          this.setPreview(counter*2);
         },Math.min(10000,500*counter));
       //}
     }
   }
 
-  private setGeneralNodeData(node:Node) {
+  private setGeneralNodeData() {
     setTimeout(()=>{
-      this.setPreview(node);
+      this.setPreview();
     },10);
   }
 
@@ -1815,7 +1924,7 @@ export class MdsComponent{
   private getWidget(id: string,template:string=null,widgets=this.mds.widgets) {
     for(let w of widgets){
       if(w.id==id){
-        if(template==null || w.template==template){
+        if((template==null || w.template==template) && this.isWidgetConditionTrue(w)){
           return w;
         }
       }

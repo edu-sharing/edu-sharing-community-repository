@@ -9,12 +9,14 @@ import {RequestObject} from "../request-object";
 import {Node, Connector, OAuthResult, ConnectorList, Filetype, NodeLock, RestError} from "../data-object";
 import {Observer} from "rxjs";
 import {RestNodeService} from "./rest-node.service";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestConnectorsService {
-  constructor(private connector : RestConnectorService,
-              public nodeApi : RestNodeService) {}
-
+export class RestConnectorsService extends AbstractRestService{
+  constructor(connector : RestConnectorService,
+              public nodeApi : RestNodeService) {
+      super(connector);
+  }
 
   public list = (repository=RestConstants.HOME_REPOSITORY
                   ): Observable<ConnectorList> => {
@@ -58,6 +60,9 @@ export class RestConnectorsService {
       let send: any = {};
       send["connectorId"] = connectorType.id;
       send["nodeId"] = node.ref.id;
+      if(this.connector.getCordovaService().isRunningCordova()){
+        send["accessToken"]=this.connector.getCordovaService().oauth.access_token;
+      }
       let req = this.connector.getAbsoluteEndpointUrl()+"../eduservlet/connector?";
       let i=0;
       for (let param in send) {

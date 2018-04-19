@@ -152,7 +152,7 @@ public class AdminServiceImpl implements AdminService  {
 			throw new IllegalArgumentException("Toolpermissions are not supported for members of "+CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
 		}
 		Map<String,ToolPermission> toolpermissions=new HashMap<>();
-		for(String tp : ToolPermissionServiceFactory.getAllToolPermissions()) {
+		for(String tp : tpService.getAllToolPermissions()) {
 			String nodeId=tpService.getToolPermissionNodeId(tp);
 			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,authority);
 			List<String> permissions = permissionService.getPermissionsForAuthority(nodeId, authority);
@@ -181,7 +181,7 @@ public class AdminServiceImpl implements AdminService  {
 		if(AuthorityServiceFactory.getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
 			throw new IllegalArgumentException("Toolpermissions are not supported for members of "+CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
 		}
-		for(String tp : ToolPermissionServiceFactory.getAllToolPermissions()) {
+		for(String tp : tpService.getAllAvailableToolPermissions()) {
 			ToolPermission.Status status = toolpermissions.get(tp);
 			String nodeId=tpService.getToolPermissionNodeId(tp);
 			ACL acl = permissionService.getPermissions(nodeId);

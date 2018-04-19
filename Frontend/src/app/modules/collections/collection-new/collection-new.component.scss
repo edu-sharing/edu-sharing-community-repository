@@ -249,21 +249,25 @@ $imagePath: '../../../../assets/images/collections/';
   top: 20%;
   text-align: center;
 }
-.color-option {
+.color-group{
+  display: flex;
+  flex-wrap: wrap;
+  margin: auto;
+  max-width: 220px;
+  justify-content: center;
+  .color-option {
     display:inline-block;
     border-radius: 50%;
     width: 29px;
     height: 29px;
     margin-left: 3px;
     margin-right: 3px;
-    border-width: 3px;
-    border-color: transparent;
-    border-style: solid;
+    margin-bottom: 8px;
     cursor: pointer;
-}
-
-.color-selected {
-    border-color: black;
+  }
+  .color-selected {
+    border: 2px solid #333;
+  }
 }
 
 .icon-bottom {
@@ -397,14 +401,11 @@ input[type="radio"] {
     color: #FFFFFF;
 }
 
-/* für schmale Screens */
-
 @media screen and (max-height: $mobileHeight+$mobileStage*2){
   .card, .card-high {
     top:$mainnavHeight+75px;
   }
 }
-
 @media screen and (max-width: $mobileWidth+$mobileStage*3){
   .card-high{
     top:15%;
@@ -439,5 +440,10 @@ input[type="radio"] {
         justify-content: center;
       }
     }
+  }
+}
+@media screen and (max-width: $mobileWidth+$mobileStage*3) and (max-height: $mobileHeight+$mobileStage*2) {
+  .createContainer .createProgress{
+    display: none;
   }
 }

@@ -19,6 +19,7 @@ import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -59,6 +60,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		}
 				
 		HttpSession session = httpReq.getSession(true);
+		//session.setMaxInactiveInterval(30);
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 		HashMap<String, String> validatedAuth = authTool.validateAuthentication(session);
 		
@@ -93,7 +95,11 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 						
 						// Authenticate the user
 						validatedAuth = authTool.createNewSession(username, password);
-						authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET),CCConstants.AUTH_TYPE_DEFAULT, session);										
+						logger.info("AuthChain SuccsessFullAuthMethod:" + SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod());
+						
+						String succsessfullAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
+						String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
+						authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET),authMethod, session);										
 					} catch (Exception ex) {
 						
 						logger.error(ex.getMessage(), ex);
@@ -132,7 +138,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 					if(ticket != null){
 						if(authTool.validateTicket(ticket)){
 		  					//if its APIClient username is ignored and is figured out with authentication service
-		  					authTool.storeAuthInfoInSession(authTool.getCurrentUser(), ticket, CCConstants.AUTH_TYPE_DEFAULT, httpReq.getSession());
+		  					authTool.storeAuthInfoInSession(authTool.getCurrentUser(), ticket, CCConstants.AUTH_TYPE_TICKET, httpReq.getSession());
 		  					validatedAuth = authTool.validateAuthentication(session);
 		  				}
 					}

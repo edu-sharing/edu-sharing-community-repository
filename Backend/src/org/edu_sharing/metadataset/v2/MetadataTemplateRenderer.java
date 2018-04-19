@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.Metadata;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -33,6 +34,7 @@ import java.lang.IllegalArgumentException;
  */
 public class MetadataTemplateRenderer {
 
+	private static final String GROUP_MULTIVALUE_DELIMITER = "[+]";
 	private MetadataSetV2 mds;
 	private Map<String, String[]> properties;
 
@@ -52,10 +54,16 @@ public class MetadataTemplateRenderer {
 	private String render(MetadataGroup group) throws IllegalArgumentException {
 		String html="";
 		for(String view : group.getViews()){
+			boolean found=false;
 			for(MetadataTemplate template : mds.getTemplates()){
 				if(template.getId().equals(view)){
 					html += renderTemplate(template);
+					found=true;
+					break;
 				}
+			}
+			if(!found) {
+				html += "Error: View "+view+" was included in group "+group.getId()+" but not found in template list";
 			}
 		}
 		return html;
@@ -112,7 +120,7 @@ public class MetadataTemplateRenderer {
 						i++;
 					}
 					widgetHtml+="</div>";
-										
+
 				}
 			}
 			else {
@@ -122,8 +130,8 @@ public class MetadataTemplateRenderer {
 								   properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY))[0] : null;
 						String licenseVersion=properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)) ?
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION))[0] : null;
-										   
-					   
+
+
 						LicenseService license=new LicenseService();
 						String link=license.getLicenseUrl(licenseName,mds.getI18n(), licenseVersion);
 						value="";
@@ -134,7 +142,7 @@ public class MetadataTemplateRenderer {
 								"'>";
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
-							value+="<div class='licenseDescription'>"+StringEscapeUtils.escapeHtml(licenseDescription)+"</div>";							
+							value+="<div class='licenseDescription'>"+StringEscapeUtils.escapeHtml(licenseDescription)+"</div>";
 						}
 						if(link!=null)
 							value+="</a>";
@@ -152,7 +160,7 @@ public class MetadataTemplateRenderer {
 								}
 							}catch(Throwable t){
 								// wrong data or text
-							}		
+							}
 						}
 						if(widget.getType().equals("filesize")){
 							try{
@@ -160,7 +168,10 @@ public class MetadataTemplateRenderer {
 							}catch(Throwable t){
 							}
 						}
-					}
+						if(widget.getType().equals("multivalueGroup")) {
+                            value=formatGroupValue(value,widget);
+                        }
+                    }
 					if(valuesMap.containsKey(value))
 						value=valuesMap.get(value).getCaption();
 					widgetHtml+="<div>";
@@ -183,8 +194,32 @@ public class MetadataTemplateRenderer {
 		return html;
 	}
 
+	private String formatGroupValue(String value,MetadataWidget widget) {
+		if(value==null)
+			return null;
+		String[] splitted = StringUtils.splitByWholeSeparatorPreserveAllTokens(value,MetadataTemplateRenderer.GROUP_MULTIVALUE_DELIMITER);
+		String result="";
+		int i=0;
+		for(String s : splitted) {
+			Map<String, MetadataKey> valuesMap = mds.findWidget(widget.getSubwidgets().get(i).getId()).getValuesAsMap();
+			if(!s.isEmpty()) {
+				if(!result.isEmpty())
+					result+=", ";
+				if(valuesMap.containsKey(s))
+					s=valuesMap.get(s).getCaption();
+				result+=s;
+			}
+			i++;
+		}
+		return result;
+	}
+
 	private MetadataWidget applyAttributes(MetadataWidget widget, String str) throws IllegalArgumentException {
-		widget=widget.copyInstance();
+		try {
+			widget=widget.copyInstance();
+		}catch(Throwable t) {
+			throw new RuntimeException("Failed to serialize MetadataWidget class, check if all attributes are serializable",t);
+		}
 	    while(true){
 	      str=str.substring(str.indexOf(" ")+1);
 	      int pos=str.indexOf("=");
@@ -211,7 +246,7 @@ public class MetadataTemplateRenderer {
 	    		field.set(widget, value);
 	    	}catch(Throwable t){
 	    		throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
-	    	}	    
+	    	}
 	      }
 	    return widget;
 	}

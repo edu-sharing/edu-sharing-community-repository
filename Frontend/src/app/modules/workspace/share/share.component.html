@@ -27,7 +27,8 @@
             [globalSearch]="globalSearch"
             (onChooseAuthority)="addSuggestion($event)"
           ></authority-search-input>
-            <!-- <ng2-completer [(ngModel)]="searchStr" [clearSelected]="true" (selected)="addAuthority($event)" [dataService]="dataService" [minSearchLength]="2" class="search"></ng2-completer>-->
+          <div class="hintNoFuzzy" *ngIf="globalSearch && !fuzzyAllowed">{{'WORKSPACE.SHARE.NO_FUZZY' | translate}}</div>
+          <!-- <ng2-completer [(ngModel)]="searchStr" [clearSelected]="true" (selected)="addAuthority($event)" [dataService]="dataService" [minSearchLength]="2" class="search"></ng2-completer>-->
           <!-- <input type="text" id="inviteName" /> -->
 
 
@@ -79,11 +80,11 @@
               {{ 'WORKSPACE.SHARE.PUBLISH' | translate}}
             </label>
           </div>
-          <div *ngIf="!publishPermission" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
-          <div *ngIf="publishActive">
-            <div *ngIf="publishPermission && publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
-            <div *ngIf="!(publishPermission && publishInherit)" class="publishInfo">
-              {{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? "COLLECTION" : _node.isDirectory ? "DIRECTORY" : "DOCUMENT")) | translate}}
+          <div *ngIf="!publishPermission && !publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>
+          <div>
+            <div *ngIf="publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_INHERIT' | translate}}</div>
+            <div *ngIf="publishPermission && !publishInherit" class="publishInfo"
+                 innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
             </div>
           </div>
           </div>

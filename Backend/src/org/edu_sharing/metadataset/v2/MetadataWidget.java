@@ -6,18 +6,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
+import org.edu_sharing.service.nodeservice.NodeServiceImpl;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+
+import com.google.gwt.user.client.ui.WidgetCollection;
 
 public class MetadataWidget extends MetadataTranslatable{
+	public static class Subwidget implements Serializable {
+		private String id;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+	}
 	private static String[] MULTIVALUE_WIDGETS=new String[]{
 			"vcard",
 			"multivalueTree",
 			"multivalueBadges",
 			"multivalueFixedBadges",
 			"multivalueSuggestBadges",
+			"multivalueGroup",
 			"multioption"
 	};
-	
+
 	public static class Condition implements Serializable{
 		public Condition(String value, CONDITION_TYPE type, boolean negate) {
 			this.value = value;
@@ -49,14 +67,17 @@ public class MetadataWidget extends MetadataTranslatable{
 		public void setNegate(boolean negate) {
 			this.negate = negate;
 		}
-		
+
 	}
 	private String id,type,caption,bottomCaption,icon,
 					placeholder,defaultvalue,template,
 					suggestionSource,suggestionQuery,unit,format;
-	private Integer min,max,defaultValue,defaultMin,defaultMax,step;
+	private Integer min,max,defaultMin,defaultMax,step;
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty;
 	private List<MetadataKey> values;
+	private List<Subwidget> subwidgets;
+
+	
 	private Condition condition;
 	public String getSuggestionQuery() {
 		return suggestionQuery;
@@ -156,12 +177,6 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setMax(Integer max) {
 		this.max = max;
 	}
-	public Integer getDefaultValue() {
-		return defaultValue;
-	}
-	public void setDefaultValue(Integer defaultValue) {
-		this.defaultValue = defaultValue;
-	}
 	public Integer getDefaultMin() {
 		return defaultMin;
 	}
@@ -216,6 +231,12 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setBottomCaption(String bottomCaption) {
 		this.bottomCaption = bottomCaption;
 	}
+	public List<Subwidget> getSubwidgets() {
+		return subwidgets;
+	}
+	public void setSubwidgets(List<Subwidget> subwidgets) {
+		this.subwidgets = subwidgets;
+	}
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof MetadataWidget){
@@ -245,6 +266,23 @@ public class MetadataWidget extends MetadataTranslatable{
 			map.put(value.getKey(), value);
 		}
 		return map;
+	}
+	
+	//transient Logger logger = Logger.getLogger(MetadataWidget.class);
+	/** resolves this widget's condition
+	 * only works for condition type TOOLPERMISSION
+	 * @return
+	 */
+	public boolean isConditionTrue() {
+		Condition condition = getCondition();
+		if(getCondition()==null)
+			return true;
+		if(Condition.CONDITION_TYPE.TOOLPERMISSION.equals(condition.getType())){
+			boolean result=ToolPermissionServiceFactory.getInstance().hasToolPermission(condition.getValue());
+			return result!=condition.isNegate();
+		}
+		//logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
+		return true;
 	}
 	
 }

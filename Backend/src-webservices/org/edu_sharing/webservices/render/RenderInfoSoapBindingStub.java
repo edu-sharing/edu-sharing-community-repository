@@ -24,21 +24,6 @@ public class RenderInfoSoapBindingStub extends org.apache.axis.client.Stub imple
         org.apache.axis.description.OperationDesc oper;
         org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("getRenderInfoRepo");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "userName"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "version"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "RenderInfoResult"));
-        oper.setReturnClass(org.edu_sharing.webservices.render.RenderInfoResult.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "getRenderInfoRepoReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[0] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
         oper.setName("getRenderInfoLMS");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "userName"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
@@ -55,6 +40,21 @@ public class RenderInfoSoapBindingStub extends org.apache.axis.client.Stub imple
         oper.setReturnType(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "RenderInfoResult"));
         oper.setReturnClass(org.edu_sharing.webservices.render.RenderInfoResult.class);
         oper.setReturnQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "getRenderInfoLMSReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[0] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("getRenderInfoRepo");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "userName"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "version"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "RenderInfoResult"));
+        oper.setReturnClass(org.edu_sharing.webservices.render.RenderInfoResult.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "getRenderInfoRepoReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[1] = oper;
@@ -195,7 +195,7 @@ public class RenderInfoSoapBindingStub extends org.apache.axis.client.Stub imple
         }
     }
 
-    public org.edu_sharing.webservices.render.RenderInfoResult getRenderInfoRepo(java.lang.String userName, java.lang.String nodeId, java.lang.String version) throws java.rmi.RemoteException {
+    public org.edu_sharing.webservices.render.RenderInfoResult getRenderInfoLMS(java.lang.String userName, java.lang.String nodeId, java.lang.String lmsId, java.lang.String courseId, java.lang.String resourceId, java.lang.String version) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -207,11 +207,11 @@ public class RenderInfoSoapBindingStub extends org.apache.axis.client.Stub imple
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "getRenderInfoRepo"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "getRenderInfoLMS"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {userName, nodeId, version});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {userName, nodeId, lmsId, courseId, resourceId, version});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -229,7 +229,7 @@ public class RenderInfoSoapBindingStub extends org.apache.axis.client.Stub imple
 }
     }
 
-    public org.edu_sharing.webservices.render.RenderInfoResult getRenderInfoLMS(java.lang.String userName, java.lang.String nodeId, java.lang.String lmsId, java.lang.String courseId, java.lang.String resourceId, java.lang.String version) throws java.rmi.RemoteException {
+    public org.edu_sharing.webservices.render.RenderInfoResult getRenderInfoRepo(java.lang.String userName, java.lang.String nodeId, java.lang.String version) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -241,11 +241,11 @@ public class RenderInfoSoapBindingStub extends org.apache.axis.client.Stub imple
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "getRenderInfoLMS"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "getRenderInfoRepo"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {userName, nodeId, lmsId, courseId, resourceId, version});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {userName, nodeId, version});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;

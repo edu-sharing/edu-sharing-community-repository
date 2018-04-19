@@ -4,24 +4,41 @@
 Built on Apr 22, 2006 (06:55:48 PDT)-->
  <wsdl:types>
   <schema elementFormDefault="qualified" targetNamespace="http://usage2.webservices.edu_sharing.org" xmlns="http://www.w3.org/2001/XMLSchema">
-   <element name="deleteUsage">
+   <element name="getUsage">
     <complexType>
      <sequence>
       <element name="eduRef" type="xsd:string"/>
-      <element name="user" type="xsd:string"/>
       <element name="lmsId" type="xsd:string"/>
       <element name="courseId" type="xsd:string"/>
+      <element name="user" type="xsd:string"/>
       <element name="resourceId" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="deleteUsageResponse">
+   <element name="getUsageResponse">
     <complexType>
      <sequence>
-      <element name="deleteUsageReturn" type="xsd:boolean"/>
+      <element name="getUsageReturn" type="impl:Usage2Result"/>
      </sequence>
     </complexType>
    </element>
+   <complexType name="Usage2Result">
+    <sequence>
+     <element name="appUser" nillable="true" type="xsd:string"/>
+     <element name="appUserMail" nillable="true" type="xsd:string"/>
+     <element name="courseId" nillable="true" type="xsd:string"/>
+     <element name="distinctPersons" nillable="true" type="xsd:int"/>
+     <element name="fromUsed" nillable="true" type="xsd:dateTime"/>
+     <element name="lmsId" nillable="true" type="xsd:string"/>
+     <element name="nodeId" nillable="true" type="xsd:string"/>
+     <element name="parentNodeId" nillable="true" type="xsd:string"/>
+     <element name="resourceId" nillable="true" type="xsd:string"/>
+     <element name="toUsed" nillable="true" type="xsd:dateTime"/>
+     <element name="usageCounter" nillable="true" type="xsd:int"/>
+     <element name="usageVersion" nillable="true" type="xsd:string"/>
+     <element name="usageXmlParams" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
    <complexType name="Usage2Exception">
     <sequence/>
    </complexType>
@@ -50,38 +67,21 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
-   <complexType name="Usage2Result">
-    <sequence>
-     <element name="appUser" nillable="true" type="xsd:string"/>
-     <element name="appUserMail" nillable="true" type="xsd:string"/>
-     <element name="courseId" nillable="true" type="xsd:string"/>
-     <element name="distinctPersons" nillable="true" type="xsd:int"/>
-     <element name="fromUsed" nillable="true" type="xsd:dateTime"/>
-     <element name="lmsId" nillable="true" type="xsd:string"/>
-     <element name="nodeId" nillable="true" type="xsd:string"/>
-     <element name="parentNodeId" nillable="true" type="xsd:string"/>
-     <element name="resourceId" nillable="true" type="xsd:string"/>
-     <element name="toUsed" nillable="true" type="xsd:dateTime"/>
-     <element name="usageCounter" nillable="true" type="xsd:int"/>
-     <element name="usageVersion" nillable="true" type="xsd:string"/>
-     <element name="usageXmlParams" nillable="true" type="xsd:string"/>
-    </sequence>
-   </complexType>
-   <element name="getUsage">
+   <element name="deleteUsage">
     <complexType>
      <sequence>
       <element name="eduRef" type="xsd:string"/>
+      <element name="user" type="xsd:string"/>
       <element name="lmsId" type="xsd:string"/>
       <element name="courseId" type="xsd:string"/>
-      <element name="user" type="xsd:string"/>
       <element name="resourceId" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getUsageResponse">
+   <element name="deleteUsageResponse">
     <complexType>
      <sequence>
-      <element name="getUsageReturn" type="impl:Usage2Result"/>
+      <element name="deleteUsageReturn" type="xsd:boolean"/>
      </sequence>
     </complexType>
    </element>
@@ -159,11 +159,11 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    <wsdl:portType name="Usage2">
 
-      <wsdl:operation name="deleteUsage">
+      <wsdl:operation name="getUsage">
 
-         <wsdl:input message="impl:deleteUsageRequest" name="deleteUsageRequest"/>
+         <wsdl:input message="impl:getUsageRequest" name="getUsageRequest"/>
 
-         <wsdl:output message="impl:deleteUsageResponse" name="deleteUsageResponse"/>
+         <wsdl:output message="impl:getUsageResponse" name="getUsageResponse"/>
 
          <wsdl:fault message="impl:Usage2Exception" name="Usage2Exception"/>
 
@@ -179,11 +179,11 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getUsage">
+      <wsdl:operation name="deleteUsage">
 
-         <wsdl:input message="impl:getUsageRequest" name="getUsageRequest"/>
+         <wsdl:input message="impl:deleteUsageRequest" name="deleteUsageRequest"/>
 
-         <wsdl:output message="impl:getUsageResponse" name="getUsageResponse"/>
+         <wsdl:output message="impl:deleteUsageResponse" name="deleteUsageResponse"/>
 
          <wsdl:fault message="impl:Usage2Exception" name="Usage2Exception"/>
 
@@ -205,17 +205,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
-      <wsdl:operation name="deleteUsage">
+      <wsdl:operation name="getUsage">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="deleteUsageRequest">
+         <wsdl:input name="getUsageRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="deleteUsageResponse">
+         <wsdl:output name="getUsageResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -253,17 +253,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getUsage">
+      <wsdl:operation name="deleteUsage">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getUsageRequest">
+         <wsdl:input name="deleteUsageRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getUsageResponse">
+         <wsdl:output name="deleteUsageResponse">
 
             <wsdlsoap:body use="literal"/>
 

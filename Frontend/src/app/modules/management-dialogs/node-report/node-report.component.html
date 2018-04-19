@@ -3,8 +3,8 @@
   <div class="card-content">
     <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
     <div class="card-title">{{'NODE_REPORT.TITLE' | translate }}</div>
-    <form (ngSubmit)="report()">
-      <div *ngIf="_node">
+    <div *ngIf="_node" class="card-scroll">
+      <form (ngSubmit)="report()">
         <h4>{{'NODE_REPORT.REPORT_INFO' | translate:{name:(_node | nodeTitle) } }}</h4>
         <div class="report">
           <div *ngFor="let reason of reasons">
@@ -19,8 +19,8 @@
           <label for="reportMail">{{'NODE_REPORT.EMAIL' | translate}}</label>
           <input type="email" [disabled]="!isGuest" name="reportMail" id="reportMail" [(ngModel)]="email" placeholder="{{'NODE_REPORT.EMAIL_PLACEHOLDER' | translate}}">
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 
   <div class="card-action">

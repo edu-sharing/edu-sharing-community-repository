@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
+import org.edu_sharing.alfresco.action.RessourceInfoTool;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.Theme;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -173,6 +175,8 @@ public class MimeTypesV2 {
 		String ccressourcetype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
 			if("imsqti".equals(ccressourcetype))
 				return "file-qti";
+			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_H5P.equals(ccressourcetype))
+				return "file-h5p";
 		}
 		return "file-zip";
 	}

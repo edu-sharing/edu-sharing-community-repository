@@ -51,9 +51,9 @@ export class ProfilesComponent {
               private iamService: RestIamService) {
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
         route.params.subscribe((params)=>{
-          this.loadUser(params['authority']);
           this.editProfileUrl=this.config.instant("editProfileUrl");
           this.editProfile=this.config.instant("editProfile",true);
+          this.loadUser(params['authority']);
         });
       });
   }
@@ -61,6 +61,7 @@ export class ProfilesComponent {
     this.globalProgress=true;
     this.iamService.getUser(authority).subscribe((profile:IamUser)=>{
       this.user=profile.person;
+      this.editProfile=this.editProfile && profile.editProfile;
       let name=new AuthorityNamePipe(this.translate).transform(this.user,null);
       UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config,{name:name});
       this.globalProgress=false;

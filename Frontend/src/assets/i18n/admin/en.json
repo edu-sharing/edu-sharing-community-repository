@@ -76,6 +76,8 @@
     "TOOLKIT":{
       "REFRESH_APP":"Refresh Application Info",
       "REFRESH_APP_INFO":"Reload Metadata and Application-Info",
+      "REFRESH_EDU_GROUP_CACHE":"Refresh Edu Group Cache",
+      "EDU_GROUP_CACHE_REFRESHED":"Refresh Edu Group Cache done",
       "APP_INFO_REFRESHED":"Refresh Application Info done",
       "CACHE_INFO":"Cache Info",
       "CACHE_NAME":"Cache Name (ID/Bean Name)"

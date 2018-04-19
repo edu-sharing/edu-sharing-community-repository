@@ -22,6 +22,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.I18nServer;
 
@@ -80,6 +81,12 @@ public class HomeFolderTool {
 		NodeRef imageFolder = createMap(homefolder, CCConstants.CCM_VALUE_MAP_TYPE_IMAGES, CCConstants.I18n_USERFOLDER_IMAGES);
 		if(imageFolder != null){
 			ownableService.setOwner(imageFolder, userName);
+		}
+		
+		if(HttpContext.getCurrentMetadataSet() != null) {
+			nodeService.setProperty(docsFolder, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET), HttpContext.getCurrentMetadataSet());
+			nodeService.setProperty(favoriteFolder, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET), HttpContext.getCurrentMetadataSet());
+			nodeService.setProperty(imageFolder, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET), HttpContext.getCurrentMetadataSet());
 		}
 	}
 	

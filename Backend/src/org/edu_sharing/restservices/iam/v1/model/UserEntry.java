@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class UserEntry  {
   
   private User person = null;
+  private Boolean editProfile = null;
 
   
   /**
@@ -24,8 +25,14 @@ public class UserEntry  {
   public void setPerson(User person) {
     this.person = person;
   }
-
   
+  public void setEditProfile(Boolean editProfile) {
+	this.editProfile = editProfile;
+  }
+  
+  public Boolean getEditProfile() {
+	return editProfile;
+  }
 
   @Override
   public String toString()  {

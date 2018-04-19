@@ -69,7 +69,7 @@ public class PersonDao {
 			}
 	
 			/*
-			if (   !currentUser.equals(userName) 
+			if (   !currentUser.equals(userName)
 				&& !repoDao.getBaseClient().isAdmin(currentUser)
 				&& !AuthenticationUtil.isRunAsUserTheSystemUser()
 					) {
@@ -77,7 +77,7 @@ public class PersonDao {
 				throw new AccessDeniedException(currentUser);
 			}
 			*/
-				
+
 			return new PersonDao(repoDao, userName);
 			
 		} catch (Exception e) {
@@ -87,12 +87,12 @@ public class PersonDao {
 	}
 	private boolean isCurrentUserOrAdmin() {
 		try {
-		String currentUser = AuthenticationUtil.getFullyAuthenticatedUser(); 
-		if (   !currentUser.equals(getUserName()) 
+		String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+		if (   !currentUser.equals(getUserName())
 				&& !repoDao.getBaseClient().isAdmin(currentUser)
 				&& !AuthenticationUtil.isRunAsUserTheSystemUser()
 					) {
-								
+
 				return false;
 			}
 		}catch(Exception e) {
@@ -100,7 +100,7 @@ public class PersonDao {
 		}
 		return true;
 	}
-	public static void createPerson(RepositoryDao repoDao, String userName,String password, UserProfile profile) throws DAOException {
+	public static PersonDao createPerson(RepositoryDao repoDao, String userName,String password, UserProfile profile) throws DAOException {
 		
 		try {
 
@@ -120,8 +120,10 @@ public class PersonDao {
 				userInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
 				
 				((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateUser(userInfo);
+				PersonDao result=new PersonDao(repoDao, userName);
 				if(password!=null)
-					new PersonDao(repoDao, userName).changePassword(null,password);
+					result.changePassword(null,password);
+				return result;
 			}			
 			
 		} catch (Exception e) {
@@ -143,7 +145,7 @@ public class PersonDao {
 
 	private AuthorityService authorityService;
 
-	
+
 	public PersonDao(RepositoryDao repoDao, String userName) throws DAOException  {
 
 		try {
@@ -204,7 +206,7 @@ public class PersonDao {
 			newUserInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
 			newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
 			newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills());
-			
+
 			authorityService.createOrUpdateUser(newUserInfo);
 			
 		} catch (Throwable t) {
@@ -270,21 +272,21 @@ public class PersonDao {
     	
     	data.setProfile(getProfile());
     	data.setStats(getStats());
-    	
+
     	if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
 	    	homeDir.setRepo(repoDao.getId());
 	    	homeDir.setId(getHomeFolder());
 	    	data.setHomeFolder(homeDir);
-	
+
 	    	List<NodeRef> sharedFolderRefs = new ArrayList<NodeRef>();
 	    	for (String sharedFolderId : sharedFolderIds) {
-	    		
+
 	        	NodeRef sharedFolderRef = new NodeRef();
 	        	sharedFolderRef.setRepo(repoDao.getId());
 	        	sharedFolderRef.setId(sharedFolderId);
-	        	
-	        	sharedFolderRefs.add(sharedFolderRef);	
+
+	        	sharedFolderRefs.add(sharedFolderRef);
 	    	}
 	    	data.setSharedFolders(sharedFolderRefs);
     	}
@@ -315,18 +317,18 @@ public class PersonDao {
 				token.setContentType(SearchService.ContentType.FILES_AND_FOLDERS);
 		    	SearchResultNodeRef result = searchService.search(token);
 		    	stats.setNodeCount(result.getNodeCount());
-		    	
+
 		    	token.setLuceneString(luceneUser+" AND @ccm\\:commonlicense_key:\"CC_*\"");
 		    	result = searchService.search(token);
 		    	stats.setNodeCountCC(result.getNodeCount());
-		    	
+
 		    	token.setLuceneString(luceneUser);
 		    	token.setContentType(SearchService.ContentType.COLLECTIONS);
 		    	result = searchService.search(token);
 		    	stats.setCollectionCount(result.getNodeCount());
 				return stats;
 			}
-		});		
+		});
 	}
 
 	private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
@@ -403,7 +405,7 @@ public class PersonDao {
 		
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
 	}
-	
+
 	public String[] getType() {
 		return AuthenticationUtil.runAsSystem(new RunAsWork<String[]>() {
 			@Override
@@ -420,14 +422,14 @@ public class PersonDao {
 						String type=GroupDao.getGroup(repoDao, group).getGroupType();
 						if(type!=null)
 							types.add(type);
-							
+
 					}catch(Throwable t) {}
 				}
 				String[] typesArray = types.toArray(new String[0]);
 				PersonCache.put(getAuthorityName(),PersonCache.TYPE, typesArray);
 				return typesArray;
 			}
-		});		
+		});
 	}
 	
 	public String getLastName() {
@@ -439,10 +441,10 @@ public class PersonDao {
 		
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
 	}
-	public String getAbout() {	
+	public String getAbout() {
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_ABOUT);
 	}
-	public String[] getSkills() {	
+	public String[] getSkills() {
 		return (String[])this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS);
 	}
 	public String getHomeFolder() {

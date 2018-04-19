@@ -220,6 +220,12 @@ export class SearchComponent {
            this.network.getRepositories().subscribe((data: NetworkRepositories) => {
              this.allRepositories=Helper.deepCopy(data.repositories);
              this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
+             if(this.repositories.length<1){
+               console.warn("After filtering repositories via config, none left. Will use the home repository as default");
+               console.log(this.allRepositories);
+               console.log(this.config.instant('availableRepositories'));
+               this.repositories = this.getHomeRepoList();
+             }
              if (this.repositories.length < 2) {
                this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
                /*this.repositories = null;*/
@@ -242,7 +248,7 @@ export class SearchComponent {
 
            }, (error: any) => {
              console.warn("could not fetch repository list. Remote repositories can not be shown. Some features might not work properly. Please check the error and re-configure the repository");
-             this.repositories = [({id:'local',isHomeRepo:true} as any)];
+             this.repositories = this.getHomeRepoList();
              this.allRepositories=[];
              let home:any={id:'local',isHomeRepo:true};
              this.allRepositories.push(home);
@@ -252,7 +258,9 @@ export class SearchComponent {
        });
      });
   }
-
+  getHomeRepoList(){
+      return [({id:'local',isHomeRepo:true} as any)];
+  }
   public refresh(){
     this.getSearch(null,true);
   }
@@ -320,7 +328,7 @@ export class SearchComponent {
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
     this.scrollTo();
-    this.searchService.init();
+    //this.searchService.init();
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
@@ -535,7 +543,13 @@ export class SearchComponent {
     this.globalProgress=true;
     this.nodeApi.importNode(node.ref.repo,node.ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
       this.globalProgress=false;
-      this.toast.toast('SEARCH.NODE_IMPORTED',{link:this.getWorkspaceUrl(data.node)});
+      this.toast.toast('SEARCH.NODE_IMPORTED',null,null,null,
+          {link:
+                        {caption:'SEARCH.NODE_IMPORTED_VIEW',
+                         callback:()=>{
+                            UIHelper.goToWorkspace(this.nodeApi,this.router,this.login,data.node);
+                        }}
+      });
     },(error:any)=>{
       this.toast.error(error);
       this.globalProgress=false;
@@ -626,7 +640,7 @@ export class SearchComponent {
       }
 
       let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,this.connector,
-        (node: Node) => NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
+        (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
 
@@ -708,6 +722,10 @@ export class SearchComponent {
   }
   private prepare(param:any) {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
+      if (data.isValidLogin && data.currentScope != null) {
+          RestHelper.goToLogin(this.router,this.config);
+          return;
+      }
       this.login=data;
       this.isGuest = data.isGuest;
       this.updateMdsActions();
@@ -896,7 +914,7 @@ export class SearchComponent {
   }
   private goToSaveSearchWorkspace() {
     this.nodeApi.getNodeMetadata(RestConstants.SAVED_SEARCH).subscribe((data:NodeWrapper)=>{
-      NodeHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.login,data.node.ref.id);
+      UIHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.login,data.node.ref.id);
     });
   }
   private loadSavedSearch() {
@@ -993,7 +1011,7 @@ export class SearchComponent {
           if(repo!=this.currentRepository){
               return;
           }
-          this.mdsSets=ConfigurationHelper.filterValidMds(repo,data.metadatasets,this.config);
+          this.mdsSets=ConfigurationHelper.filterValidMds(this.currentRepositoryObject ? this.currentRepositoryObject : this.currentRepository,data.metadatasets,this.config);
           if(this.mdsSets){
             UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
             try {

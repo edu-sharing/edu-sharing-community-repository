@@ -1,0 +1,80 @@
+@import "../../../styles/variables.scss";
+
+.content{
+  padding:20px 30px;
+  width:100%;
+  max-width:$cardWidth*3 + 125px;
+  margin:auto;
+  .breadcrumbs{
+    color: $primary;
+    display: flex;
+    align-items: center;
+    margin-left: 5px;
+    >*{
+     margin:0 2px;
+    }
+  }
+  .preview{
+    display:flex;
+    padding-bottom:10px;
+    img{
+      $imgSize:90px;
+      width: $imgSize;
+      height: $imgSize;
+      min-width: $imgSize;
+      min-height: $imgSize;
+      object-fit: cover;
+    }
+    .info {
+      display: flex;
+      flex-direction:column;
+      padding-left:20px;
+      .type {
+        font-weight: bold;
+        font-size: 80%;
+        color: $textLight;
+        padding-bottom: 15px;
+      }
+      .label{
+        @include limitLineCount(1);
+      }
+      .description{
+        font-size: 90%;
+        color: $textLight;
+        @include limitLineCount(2);
+      }
+    }
+  }
+  .location{
+    display: flex;
+    align-items: center;
+    font-size:90%;
+    color:$textLight;
+    breadcrumbs{
+      margin-top:2px;
+    }
+  }
+  .save{
+    color:$primary;
+    font-weight:bold;
+    margin-top:20px;
+    display:flex;
+    align-items:center;
+    i{
+      margin-right:5px;
+    }
+    @include clickable();
+  }
+  .collections{
+    margin-top: 40px;
+    .addToCollection{
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  }
+}
+@media all and (max-width: ($cardWidth*3)) {
+  :host /deep/ .cardSmallList{
+    width:calc(100% - 10px)!important;
+  }
+}

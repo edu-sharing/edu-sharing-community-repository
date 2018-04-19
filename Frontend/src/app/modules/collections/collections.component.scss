@@ -285,7 +285,11 @@ table, div {
     }
 
 }
-
+@media all and (max-width: ($cardWidth*3)) {
+  :host /deep/ .cardSmallList{
+    width:calc(100% - 10px)!important;
+  }
+}
 @media only screen and (max-width: $mobileWidth) {
     :host /deep/{
       .collections-master-div-notabs .subcollections{
@@ -309,7 +313,7 @@ table, div {
   }
     .collections-breadcrumb{
       position: absolute;
-      top: 252px+$mainnavHeight;
+      top: 259px+$mainnavHeight;
       right: 10px;
       max-width: calc(100% - 100px);
     }

@@ -12,6 +12,7 @@ import {RestMetadataService} from "./common/rest/services/rest-metadata.service"
 import {SessionStorageService} from "./common/services/session-storage.service";
 import {RestOrganizationService} from "./common/rest/services/rest-organization.service";
 import {UIService} from "./common/services/ui.service";
+import {CordovaService} from "./common/services/cordova.service";
 import {RestConnectorsService} from "./common/rest/services/rest-connectors.service";
 import {ConfigurationService} from "./common/services/configuration.service";
 import {FrameEventsService} from "./common/services/frame-events.service";
@@ -21,6 +22,7 @@ import {RestToolService} from "./common/rest/services/rest-tool.service";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 import {RestCommentsService} from "./common/rest/services/rest-comments.service";
 import {RestStreamService} from "./common/rest/services/rest-stream.service";
+import {RestUtilitiesService} from "./common/rest/services/rest-utilities.service";
 
 
 export const PROVIDERS=[
@@ -42,9 +44,11 @@ export const PROVIDERS=[
   RestOrganizationService,
   RestCommentsService,
   RestToolService,
+  RestUtilitiesService,
   TemporaryStorageService,
   RestMetadataService,
   SessionStorageService,
   ConfigurationService,
-  UIService
+  UIService,
+  CordovaService
 ];

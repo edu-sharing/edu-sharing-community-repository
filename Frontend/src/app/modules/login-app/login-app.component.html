@@ -1,0 +1,224 @@
+<global-progress *ngIf="isLoading"></global-progress>
+<div class="appLogin" *ngIf="!isLoading">
+
+  <!--------------------
+     STATE: SERVERLIST 
+    ------------------- -->
+  <div *ngIf="state==0">
+    <div class="infoTop" style="margin-top: -10px;">
+      <h1>{{'LOGIN_APP.SERVERLIST' | translate}}</h1>
+      <div>{{'LOGIN_APP.SERVERLIST_INFO' | translate}}</div>
+    </div>
+    <div class="card center-card card-high" style="padding-bottom: 0px;">
+      <div class="card-content" style="padding-bottom: 0px; height: 100%;">
+        <div class="card-scroll ">
+          <div class="server clickable" *ngFor="let server of servers" (click)="chooseServer(server)" tabindex="0">
+            <div class="icon">
+              <img 
+              [src]="getServerIcon(server)" 
+              onerror="this.src = 'assets/images/app-icon.svg';" >
+            </div>
+            <div class="info">
+              <div class="name">{{server.name}}</div>
+              <div class="url"><div class="urlText">{{server.url}}</div>
+              <!-- <div class="version" [class.versionUnknown]="!server.version">{{server.version ? server.version : "?"}}</div>-->
+            </div>
+            </div>
+            <div class="right"><i class="material-icons">keyboard_arrow_right</i></div>
+          </div>
+          <div class="server clickable" (click)="chooseServer(null)">
+            <div class="icon">
+              <img src="assets/images/app-icon-custom.svg">
+            </div>
+            <div class="info">
+              <div class="name">{{'LOGIN_APP.SERVERLIST_OWN' | translate}}</div>
+              <div class="url">{{serverurl}}</div>
+            </div>
+            <div class="right"><i class="material-icons">keyboard_arrow_right</i></div>
+          </div>
+          <!--
+          <div class="register" *ngIf="config.registerUrl">
+            {{'LOGIN.REGISTER_TEXT' | translate}}
+            <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
+          </div>
+          -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--------------------
+     STATE: SERVERURL
+    ------------------- -->
+  <div *ngIf="state==2">
+
+    <div class="infoTop" style="margin-top: -10px;">
+      <h1>{{ 'LOGIN_APP.SERVERURL'| translate}}</h1>
+      <div>{{ 'LOGIN_APP.SERVERURL_INFO'| translate}}</div>
+    </div>
+    <div class="card center-card card-action">
+      <div class="card-content">
+        <div class="card-title"><i class="material-icons card-title-back" (click)="buttonLoginBack()">arrow_back</i>
+          {{ 'LOGIN_APP.SERVERURL_BACK'| translate}}
+        </div>
+        <div class="card-scroll">
+          <form (ngSubmit)="buttonServerUrl()" #loginForm>
+            <div>
+              <label for="username">{{ 'LOGIN_APP.SERVERURL_ADDRESS'| translate}}</label>
+              <input #urlInput type="text" requried name="url" id="url" (keyup)="checkUrl()" [(ngModel)]="serverurl" autofocus/>
+            </div>
+          </form>
+          <div style="min-height: 20px;">
+            <div *ngIf="errorURL!=null">
+                {{ errorURL| translate}}
+            </div>  
+          </div>
+        </div>
+      </div>
+      <div class="card-action" style="border-color: white;">
+        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="buttonServerUrl()">{{ 'LOGIN_APP.SERVERURL_CONTINUE'| translate}}</a>
+      </div>
+    </div>
+
+    <!--
+    <div style="
+          font-size:28px;
+          font-weight: bold;
+        ">
+      
+    </div>
+
+    <div style="color:lightgray;">
+      
+    </div>
+
+    <div style="
+      background-color: white;
+      color: black;
+      border-radius: 3px;
+      margin-top: 12px;
+      padding-bottom:4px;
+    ">
+
+      <div (click)="buttonServerList()" style="
+      border-radius: 3px;
+      background-color: lightgray;
+      font-weight: bold;
+      padding: 8px;
+      ">
+
+        <div style="
+        display: inline-block;
+        position: relative;
+        top: 2px;
+        ">
+          <i class="material-icons" style="color:#48708e;">arrow_back</i>
+        </div>
+        <div style="
+        display: inline-block;
+        position: relative;
+        top: -4px;
+        font-size: 120%;
+        ">
+          Serverauswahl
+        </div>
+
+      </div>
+
+      <div style="
+        padding: 16px;
+        color: darkgray;
+      ">
+
+        <div>
+          <label for="username">Serveradresse</label>
+          <input type="text" [(ngModel)]="serverurl" name="serverurl" id="serverurl" style="height: 41px;"
+          />
+        </div>
+
+        <div style="
+        display:inline-block;
+        text-align: center;
+        width: 100%;
+        ">
+          <a class="waves-effect waves-light btn" (click)="buttonTestServer()" style="width:100%;">Weiter</a>
+        </div>
+
+      </div>
+
+    </div>
+  -->
+
+  </div>
+
+  <!--------------------
+     STATE: LOGIN 
+    ------------------- -->
+  <div *ngIf="state==1">
+    <div class="infoTop" style="margin-top: -10px;">
+      <h1>{{'LOGIN_APP.LOGIN' | translate}}</h1>
+      <div>{{'LOGIN_APP.LOGIN_INFO' | translate}}</div>
+    </div>
+    <div class="card center-card card-action">
+      <div class="card-content">
+        <div class="card-title"><i class="material-icons card-title-back" (click)="buttonLoginBack()">arrow_back</i>
+          <img class="card-title-image" 
+          [src]="getServerIcon(currentServer)"
+          onerror="this.src = 'assets/images/app-icon.svg';"
+          >
+          {{currentServer.name}}</div>
+        <div class="card-scroll">
+          <form (ngSubmit)="login()" #loginForm>
+            <div>
+              <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
+              <input #usernameInput type="text" requried name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username"/>
+            </div>
+            <div>
+              <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
+              <input #passwordInput requried type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/>
+            </div>
+          </form>
+          <!--
+          <div class="register" *ngIf="config.registerUrl">
+            {{'LOGIN.REGISTER_TEXT' | translate}}
+            <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
+          </div>
+          -->
+        </div>
+      </div>
+      <div class="card-action" style="border-color: white;">
+        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+        <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
+      </div>
+    </div>
+  </div>
+
+  <!--------------------
+     STATE: NO INTERNET 
+    ------------------- -->
+    <div *ngIf="state==3">
+        <div class="infoTop" style="margin-top: -10px;">
+          <h1>{{'LOGIN_APP.NOTINTERNET' | translate }}</h1>
+          <div>{{'LOGIN_APP.NOTINTERNET_SUB' | translate }}</div>
+        </div>
+        <div class="card center-card card-action">
+          <div class="card-content">
+              <div class="card-title"><i class="material-icons card-title-back">warning</i>
+                {{'LOGIN_APP.NOTINTERNET_INFO' | translate }}
+              </div>
+              <div class="card-scroll">
+                  {{'LOGIN_APP.NOTINTERNET_TEXT' | translate }}
+              </div>
+          </div>
+          <div class="card-action" style="border-color: white;">
+            <a class="waves-effect waves-light btn" (click)="getServerList()">{{'LOGIN_APP.NOTINTERNET_RETRY' | translate }}</a>
+            <a class="btn-flat" (click)="buttonExitApp()">{{'LOGIN_APP.NOTINTERNET_EXIT' | translate }}</a>
+          </div>
+        </div>
+      </div>
+
+  <div class="powered center" *ngIf="config.branding">
+    {{ 'LOGIN.POWERED_BY' | translate}}
+  </div>
+
+</div>

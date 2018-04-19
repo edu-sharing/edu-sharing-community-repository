@@ -53,7 +53,7 @@
   "MINUTES_AGO" : "{{ minutes }} minutes ago",
   "JUST_NOW" : "Just now",
   "CREATE" : "create",
-  "LOGOUT" : "log out",
+  "LOGOUT" : "Log out",
   "INVALID_OPERATION":"This feature is currently not supported",
   "SHOW_IN_FOLDER":"Open storage location",
   "CLEAR_FILTERS":"Clear all filters",
@@ -108,12 +108,12 @@
   "GOTO":"go to",
   "SIDEBAR":{
     "WORKSPACE_OLD":"old workspace",
-    "WORKSPACE":"workspace",
-    "SEARCH":"search",
-    "COLLECTIONS":"collections",
+    "WORKSPACE":"Workspace",
+    "SEARCH":"Search",
+    "COLLECTIONS":"Collections",
     "STREAM":"Activity stream",
-    "SECURE":"safe",
-    "PERMISSIONS":"permissions",
+    "SECURE":"Safe",
+    "PERMISSIONS":"Permissions",
     "LOGIN":"Login",
     "ADMIN":"Admin-Tools"
   },
@@ -121,34 +121,34 @@
     "100_unchecked":"No status",
     "200_tocheck":"To check",
     "300_hasflaws":"Has flaws",
-    "400_checked":"checked"
+    "400_checked":"Checked"
   },
   "NODE" : {
-    "cm:name": "filename",
-    "description": "description",
-    "mimetype": "file type",
-    "size": "size",
-    "mediatype":"file type",
+    "cm:name": "Filename",
+    "description": "Description",
+    "mimetype": "File type",
+    "size": "Size",
+    "mediatype":"File type",
     "ccm:commonlicense_key":"License",
     "sys:node-uuid":"Node-ID",
-    "dimensions": "image size",
-    "exif:dateTimeOriginal":"recording date",
-    "cm:modified": "last change",
-    "cm:created": "created",
-    "cm:creator": "created by",
+    "dimensions": "Image size",
+    "exif:dateTimeOriginal":"Recording date",
+    "cm:modified": "Last change",
+    "cm:created": "Creation date",
+    "cm:creator": "Created by",
     "cclom:title": "Title",
-    "cclom:general_keyword": "key words",
-    "cclom:duration": "duration",
-    "sys:archivedDate": "deleted",
-    "cclom:version": "version",
-    "virtual:usagecount": "usage count",
+    "cclom:general_keyword": "Key words",
+    "cclom:duration": "Duration",
+    "sys:archivedDate": "Deleted",
+    "cclom:version": "Version",
+    "virtual:usagecount": "Usage count",
     "ccm:author_freetext":"General Author information",
-    "ccm:lifecyclecontributer_authorFN":"author",
+    "ccm:lifecyclecontributer_authorFN":"Author",
     "ccm:wf_status":"Status"
   },
   "NODE_REPORT":{
-    "TITLE":"report problem",
-    "OPTION":"report problem",
+    "TITLE":"Report problem",
+    "OPTION":"Report problem",
     "REPORT":"report",
     "REPORT_INFO":"Report problem with \"{{name}}\"",
     "COMMENT":"Please provide additional information about the problem that has occurred.",
@@ -205,6 +205,7 @@
     "file-txt":"text file",
     "file-video":"video",
     "file-qti":"ONYX file",
+    "file-h5p":"H5P file",
     "file-pdf":"pdf file",
     "link":"Website",
     "folder":"Folder",
@@ -273,9 +274,9 @@
   "LICENSE":{
     "NONE":"No or unknown license",
     "MULTI":"Multiple licenses",
-    "COPYRIGHT_FREE":"Copyright, freier Zugang",
-    "COPYRIGHT_LICENSE":"Copyright, lizenzpflichtig",
-    "SCHULFUNK":"Schulfunk (§47 UrhG)",
+    "COPYRIGHT_FREE":"Copyright, free access",
+    "COPYRIGHT_LICENSE":"Copyright, subject to licensing",
+    "SCHULFUNK":"German educational radio/television license (§47 UrhG)",
     "CUSTOM":"Custom license"
   },
   "LIST":{
@@ -297,7 +298,22 @@
     "AUTHOR_PERSON":"Author & Contributors",
     "LICENSE":"License",
     "LICENSE_LINK":"Manage license",
-    "CONTRIBUTOR_LINK":"Additional Contributors"
+    "CONTRIBUTOR_LINK":"Additional Contributors",
+    "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
+    "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment"
+  },
+
+  "SHARE_APP":{
+    "TEXT_SNIPPET":"Note",
+    "IMAGE":"Image",
+    "WILL_BE_SAVED_AT":"Will be stored at:",
+    "ADD_TO_COLLECTION":"Would you like to add the object to a collection?"
+  },
+
+  "LICENSE_AGREEMENT":{
+    "TITLE":"License agreement",
+    "CHECKBOX":"I read the license agreement and accept it",
+    "ACCEPT":"Accept & Continue"
   },
   "TOAST":{
     "NODE_LOCKED":"The document is currently used by an other user and can not be opened",

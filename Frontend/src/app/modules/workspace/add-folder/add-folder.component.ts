@@ -35,7 +35,13 @@ export class WorkspaceAddFolder  {
       this.mdsSets=ConfigurationHelper.filterValidMds(RestConstants.HOME_REPOSITORY,data.metadatasets,this.config);
       if(this.mdsSets) {
         UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
-        this.mdsSet = this.mdsSets[0].id;
+        if(this.mdsSets.length) {
+            this.mdsSet = this.mdsSets[0].id;
+        }
+        else{
+          console.error("Filtering valid mds failed, no mds was available after filtering. Will use default mds");
+          console.error("Check availableMds in config");
+        }
       }
       this._parent=parent;
       if(this._parent && this._parent.metadataset && this._parent.metadataset!="default")

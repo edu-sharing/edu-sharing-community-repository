@@ -25,6 +25,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -32,7 +33,10 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.service.authentication.sso.config.Condition;
+import org.edu_sharing.service.authentication.sso.config.CustomGroupMapping;
 import org.edu_sharing.service.authentication.sso.config.MappingGroup;
+import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilder;
+import org.edu_sharing.service.authentication.sso.config.MappingGroupBuilderFactory;
 import org.edu_sharing.service.authentication.sso.config.MappingRoot;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -104,9 +108,15 @@ public class SSOAuthorityMapper {
 	boolean updateUser = true;
 
 	boolean createGroups = true;
+	boolean hashUserName = false;
 	boolean hashGroupNames = false;
 	boolean updateMemberships = true;
 	boolean debug = false;
+	String mappingGroupBuilderClass;
+	
+	CustomGroupMapping customGroupMapping;
+	
+	List<String> additionalAttributes = new ArrayList<String>();
 	
 	public void init(){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -150,7 +160,9 @@ public class SSOAuthorityMapper {
 			tmpUserName += "@" + tmpAppId;
 		}
 		
-		final String userName = tmpUserName;
+		final String originalUsername = tmpUserName;
+		final String userName = (hashUserName) ? digest(tmpUserName) : tmpUserName;
+		
 		
 		RunAsWork<String> runAs = new RunAsWork<String>() {
 			@Override
@@ -249,6 +261,10 @@ public class SSOAuthorityMapper {
 							personProperties.put(QName.createQName(CCConstants.PROP_USER_REPOSITORYID), appInfo.getAppId());
 						}
 						
+						if(isHashUserName()) {
+							personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESORIGINALUID), originalUsername);
+						}
+						
 						personService.createPerson(personProperties);
 					} else if (updateUser) {
 
@@ -266,7 +282,7 @@ public class SSOAuthorityMapper {
 				}
 
 				// group memberships
-				List<MappingGroup> mappingGroups = mappingConfig.getGroupMapping();
+				List<MappingGroup> mappingGroups = new ArrayList<MappingGroup>(mappingConfig.getGroupMapping());
 				
 				/**
 				 * add moodle global groups
@@ -278,12 +294,28 @@ public class SSOAuthorityMapper {
 				String organisationDisplayName = null;
 				
 				String existingOrganisationName = null;
+				
+				MappingGroupBuilder mappingGroupBuilder = null;
+				if(mappingGroupBuilderClass != null && !mappingGroupBuilderClass.trim().equals("")) {
+					mappingGroupBuilder = MappingGroupBuilderFactory.instance(ssoAttributes, mappingGroupBuilderClass);
+					organisationName = mappingGroupBuilder.getOrganisation().getMapTo();
+					organisationDisplayName = mappingGroupBuilder.getOrganisation().getMapToDisplayName();
+					mappingGroups.addAll(mappingGroupBuilder.getMapTo());
+				}
+				
+				if(customGroupMapping != null) {
+					customGroupMapping.map(ssoAttributes);
+				}
+				
 				/**
 				 * create eduGroup for affiliation
 				 */
 				if(organisationName != null && !organisationName.trim().equals("")) {
 					
-					organisationDisplayName = ssoAttributes.get(organisationParam + "name");
+					if(organisationDisplayName == null) {
+						organisationDisplayName = ssoAttributes.get(organisationParam + "name");
+					}
+					
 					if(organisationDisplayName == null) {
 						organisationDisplayName = organisationName;
 					}
@@ -294,7 +326,10 @@ public class SSOAuthorityMapper {
 					}
 					
 					if(existingOrganisationName == null) {
-						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName);
+						
+						String metadataSetId = ssoType.equals(SSO_TYPE_Shibboleth) ? HttpContext.getCurrentMetadataSet() : null;
+						
+						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName, metadataSetId);
 						existingOrganisationName = AuthorityType.GROUP.getPrefixString() + existingOrganisationName;
 					}
 					
@@ -343,7 +378,7 @@ public class SSOAuthorityMapper {
 						lmsGlobalGroupsList.add(mappingGroup);
 					}
 					
-					mappingGroups = new ArrayList<MappingGroup>(mappingGroups);
+					
 					mappingGroups.addAll(lmsGlobalGroupsList);
 				}
 				
@@ -585,6 +620,14 @@ public class SSOAuthorityMapper {
 	public void setHashGroupNames(boolean hashGroupNames) {
 		this.hashGroupNames = hashGroupNames;
 	}
+	
+	public boolean isHashUserName() {
+		return hashUserName;
+	}
+	
+	public void setHashUserName(boolean hashUserName) {
+		this.hashUserName = hashUserName;
+	}
 
 	public boolean isUpdateMemberships() {
 		return updateMemberships;
@@ -612,5 +655,17 @@ public class SSOAuthorityMapper {
 
 	public void setGlobalGroupsParam(String globalGroupsParam) {
 		this.globalGroupsParam = globalGroupsParam;
+	}
+	
+	public void setMappingGroupBuilderClass(String mappingGroupBuilderClass) {
+		this.mappingGroupBuilderClass = mappingGroupBuilderClass;
+	}
+	
+	public String getMappingGroupBuilderClass() {
+		return mappingGroupBuilderClass;
+	}
+	
+	public void setCustomGroupMapping(CustomGroupMapping customGroupMapping) {
+		this.customGroupMapping = customGroupMapping;
 	}
 }

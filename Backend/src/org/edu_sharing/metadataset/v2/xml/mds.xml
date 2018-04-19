@@ -96,21 +96,25 @@
 				<id>ccm:tool_instance_params</id>
 				<type>textarea</type>
 				<caption>cb_tool_instance_params</caption>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:tool_instance_license</id>
 				<type>text</type>
 				<caption>cb_tool_instance_license</caption>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:tool_instance_support_contact</id>
 				<type>text</type>
 				<caption>cb_tool_instance_support_contact</caption>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:tool_instance_support_mail</id>
 				<type>email</type>
 				<caption>cb_tool_instance_support_mail</caption>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:tool_instance_provider</id>
@@ -131,6 +135,7 @@
 				<valuespace>valuespaces.xml</valuespace>
 				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
 				<valuespace_i18n_prefix>tool_access_</valuespace_i18n_prefix>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:lifecyclecontributer_author</id>

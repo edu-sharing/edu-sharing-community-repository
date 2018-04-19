@@ -99,6 +99,7 @@
   </div>
 
   <div class="dialog dialogAddDesktop" *ngIf="showAddDesktop" (click)="showAddDesktop=false" (contextmenu)="showAddDesktop=false;$event.preventDefault();$event.stopPropagation();"></div>
+  <!-- <input type="file" accept="image/*" capture="camera" #camera (change)="uploadCamera($event)"> -->
   <div class="addDesktopMenu collection"
        #dropdown
        [@overlay]="showAddDesktop"
@@ -109,6 +110,7 @@
        [style.bottom]="dropdownBottom"
        *ngIf="showAddDesktop">
     <a *ngIf="allowBinary" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;showUploadSelect=true" (click)="showAddDesktop=false;showUploadSelect=true"><i class="material-icons">cloud_upload</i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</a>
+    <a *ngIf="allowBinary && cordova.isRunningCordova()" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;showUploadSelect=true" (click)="showAddDesktop=false;openCamera()"><i class="material-icons">camera_alt</i> {{ 'WORKSPACE.ADD_CAMERA' | translate}}</a>
     <a *ngIf="!allowBinary" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;createEmptyNode()" (click)="showAddDesktop=false;createEmptyNode()"><i class="material-icons">description</i> {{ 'WORKSPACE.ADD_EMPTY_OBJECT' | translate}}</a>
     <a class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;addFolderName=''" (click)="showAddDesktop=false;addFolderName=''"><i class="material-icons">create_new_folder</i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</a>
     <a *ngFor="let connector of (connectorList && allowBinary) ? connectorList.connectors : null;let i=index"

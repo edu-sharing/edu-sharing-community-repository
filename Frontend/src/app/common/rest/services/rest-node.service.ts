@@ -6,17 +6,19 @@ import {RestConnectorService} from "./rest-connector.service";
 import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {
-  NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList, NodePermissionsHistory,
-  NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper
+    NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList,
+    NodePermissionsHistory,
+    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent
 } from "../data-object";
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestNodeService {
-  constructor(private connector : RestConnectorService,private events:FrameEventsService, private iam : RestIamService, private toast : Toast) {
-
+export class RestNodeService extends AbstractRestService{
+  constructor(connector : RestConnectorService,private events:FrameEventsService, private iam : RestIamService, private toast : Toast) {
+    super(connector);
     events.addListener(this);
   }
   onEvent(event:string,data:any){
@@ -450,6 +452,25 @@ export class RestNodeService {
       .map((response: Response) => response.json());
       */
   }
+    public setNodeTextContent = (node : string,
+                                text : string,
+                                versionComment : string = "",
+                                mimetype="text/plain",
+                                repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/content?versionComment=:comment&mimetype=:mimetype",repository,
+            [
+                [":node",node],
+                [":mimetype",mimetype],
+                [":comment",versionComment],
+            ]);
+        let options=this.connector.getRequestOptions('multipart/form-data');
+        return this.connector.post(query,text,options).map((response: Response) => response.json());
+
+        /*
+        return this.http.post(query,"",this.connector.getRequestOptions())
+          .map((response: Response) => response.json());
+          */
+    }
   public addWorkflow = (node : string,workflow:WorkflowEntry,repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
     let query=this.connector.createUrl("node/:version/nodes/:repository/:node/workflow",repository,[
       [":node",node],
@@ -522,5 +543,13 @@ export class RestNodeService {
 
     return this.connector.post(this.getNodeRenderSnippetUrl(node,version,repository),JSON.stringify(parameters),this.connector.getRequestOptions())
       .map((response: Response) => response.json());
+  }
+
+  public getNodeTextContent(node:string,repository=RestConstants.HOME_REPOSITORY) : Observable<NodeTextContent>{
+      let query=this.connector.createUrl("node/:version/nodes/:repository/:node/textContent",repository,[
+          [":node",node],
+      ]);
+      return this.connector.get(query,this.connector.getRequestOptions())
+          .map((response: Response) => response.json());
   }
 }

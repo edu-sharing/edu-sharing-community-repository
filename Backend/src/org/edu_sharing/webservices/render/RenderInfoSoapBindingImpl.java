@@ -158,6 +158,12 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		if(userInfo == null){
 			throw new RemoteException(EXCEPTION_USER_DOES_NOT_EXISTS);
 		}
+		
+		String primaryAffiliation = userInfo.get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+		if(primaryAffiliation != null && !primaryAffiliation.equals("")) {
+			rir.setEduSchoolPrimaryAffiliation(primaryAffiliation);
+		}
+		
 		HashMap<String, Boolean> perms = client.hasAllPermissions(nodeId, userName, PermissionServiceHelper.PERMISSIONS);
 
 		rir.setPermissions(PermissionServiceHelper.getPermissionsAsString(perms).toArray(new String[0]));
