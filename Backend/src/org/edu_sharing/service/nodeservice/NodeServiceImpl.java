@@ -187,9 +187,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
 		
 		if(metadataSetId == null) {
-			Boolean forceMds = (Boolean)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
-			if(forceMds == null) forceMds = false;
-			if(!forceMds) {
+			Boolean forceMds = false;
+			try {
+				forceMds = (Boolean)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+				if(forceMds == null) forceMds = false;
+			}catch(Throwable t) {}
+			if(forceMds) {
+				metadataSetId = (String)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+			}
+			else {
 				if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
 					metadataSetId = HttpContext.getCurrentMetadataSet();
 				}else {
