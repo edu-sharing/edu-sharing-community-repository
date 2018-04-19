@@ -111,6 +111,7 @@
     "WORKSPACE":"workspace",
     "SEARCH":"search",
     "COLLECTIONS":"collections",
+    "STREAM":"Activity stream",
     "SECURE":"safe",
     "PERMISSIONS":"permissions",
     "LOGIN":"Login",
