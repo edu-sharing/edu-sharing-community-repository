@@ -454,7 +454,7 @@ export class MainNavComponent {
     }
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
     if(button.url){
-      window.location.href=button.url;
+      window.open(button.url,'_blank',UIHelper.getDefaultNewWindowParameters(this.nodeService));
     }
     else {
       let queryParams=button.queryParams?button.queryParams:{};
