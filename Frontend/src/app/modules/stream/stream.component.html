@@ -7,8 +7,7 @@
           (onSearch)="doSearch($event)"
 ></main-nav>
 <div class="stream-container" infiniteScroll
-[infiniteScrollDistance]="0.1"
-[infiniteScrollThrottle]="200"
+[scrollWindow]="true"
 (scrolled)="onScroll()">
     <div class="margin-show">
         <h5>

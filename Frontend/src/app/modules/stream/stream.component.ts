@@ -11,7 +11,7 @@ import {RestMetadataService} from '../../common/rest/services/rest-metadata.serv
 import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Node, NodeList, LoginResult} from "../../common/rest/data-object";
+import {Node, NodeList, LoginResult, STREAM_STATUS} from '../../common/rest/data-object';
 import {OptionItem} from "../../common/ui/actionbar/option-item";
 import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
 import {UIHelper} from "../../common/ui/ui-helper";
@@ -89,7 +89,8 @@ export class StreamComponent {
 
   // the way of doing the post request will be changed:
   public getJSON(): Observable<any> {
-    return this.streamService.getStream();
+    let request:any={offset:this.streams ? this.streams.length : 0};
+    return this.streamService.getStream(STREAM_STATUS.OPEN,this.searchQuery,{},request);
   }
 
 

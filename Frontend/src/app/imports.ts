@@ -10,25 +10,22 @@ import {NgDatepickerModule} from "ng2-datepicker";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
-import { InfiniteScrollModule } from "ngx-infinite-scroll";
-
 
 
 export const IMPORTS=[
-  BrowserModule,
-  BrowserAnimationsModule,
-  FormsModule,
-  HttpModule,
-  HttpClientModule,
-  InfiniteScrollModule,
-  NgDatepickerModule,
-  TranslateModule.forRoot({
-    loader:{
-      provide: TranslateLoader,
-      useFactory: createTranslateLoader,
-      deps: [HttpClient,RestLocatorService]
-    }
-  }),
-  ToastyModule.forRoot(),
-  RouterModule.forRoot(ROUTES),
+    BrowserModule,
+    BrowserAnimationsModule,
+    FormsModule,
+    HttpModule,
+    HttpClientModule,
+    NgDatepickerModule,
+    TranslateModule.forRoot({
+        loader:{
+            provide: TranslateLoader,
+            useFactory: createTranslateLoader,
+            deps: [HttpClient,RestLocatorService]
+        }
+    }),
+    ToastyModule.forRoot(),
+    RouterModule.forRoot(ROUTES),
 ];
