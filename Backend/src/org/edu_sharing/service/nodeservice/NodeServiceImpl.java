@@ -60,6 +60,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_WF_PROTOCOL,
 			CCConstants.CCM_PROP_WF_RECEIVER,
 			CCConstants.CCM_PROP_WF_STATUS,
+			CCConstants.CCM_PROP_MAP_COLLECTIONREMOTEID,
 			CCConstants.CM_PROP_METADATASET_EDU_METADATASET,
 			CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET,
 			CCConstants.CCM_PROP_EDITOR_TYPE,
