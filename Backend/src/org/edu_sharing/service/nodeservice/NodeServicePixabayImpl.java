@@ -47,8 +47,10 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		if(propertyCache.containsKey(nodeId))
 			return propertyCache.get(nodeId);
+		
 		// Querying by "id" is no longer supported.
-		/*
+		// some api keys still have it, we can still try it
+		
 		try{
 			SearchResultNodeRef list = SearchServicePixabayImpl.searchPixabay(repositoryId, APIKey, "&id="+nodeId);
 			if(list.getData()!=null && list.getData().size()>0){
@@ -57,8 +59,9 @@ public class NodeServicePixabayImpl extends NodeServiceAdapter{
 			}
 		}
 		catch(Throwable t){
+			t.printStackTrace();
 		}
-		*/
+		
 		throw new Exception("Node "+nodeId+" was not found (cache expired)");
 	}
 
