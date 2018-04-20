@@ -38,6 +38,7 @@ import {RestStreamService} from "../../common/rest/services/rest-stream.service"
 
 export class StreamComponent {
   test = 'sdsd';
+  menuOption = 'stream';
   streams: any;
   actionOptions:OptionItem[]=[];
   // TODO: Store and use current search query
@@ -65,19 +66,26 @@ export class StreamComponent {
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
       });
       // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
-      this.actionOptions.push(new OptionItem('EXAMPLE 1','cloud',()=>{
+      this.actionOptions.push(new OptionItem('Erledigt','check',()=>{
         alert('callback 1');
       }));
-      this.actionOptions.push(new OptionItem('EXAMPLE 2','adb',()=>{
+      this.actionOptions.push(new OptionItem('Ganz oben anzeigen','arrow_upward',()=>{
           alert('callback 2');
       }));
+      this.actionOptions.push(new OptionItem('Aus Stream entfernen','remove_circle',()=>{
+        alert('callback 3');
+    }));
       this.getJSON().subscribe(data => this.streams = data['stream'], error => console.log(error));
 
   }
 
   onScroll() {
     console.log("scrolled!!");
-    this.getJSON().subscribe(data => this.streams = this.streams.concat(data['stream']), error => console.log(error));
+    //this.getJSON().subscribe(data => this.streams = this.streams.concat(data['stream']), error => console.log(error));
+  }
+
+  menuOptions(option: any) {
+    this.menuOption = option;
   }
 
   sortieren() {

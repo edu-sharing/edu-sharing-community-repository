@@ -9,7 +9,17 @@
 <div class="stream-container" infiniteScroll
 [scrollWindow]="true"
 (scrolled)="onScroll()">
-    <div class="margin-show">
+    <div class="row">
+    <div class="col s2 removepadding margin-show">
+        <div class="choose-menu"  (click)="menuOptions('stream')" [ngClass]="menuOption == 'stream' ? 'm-active' : 'm-inactive'">
+                <i class="tiny material-icons fix-icon-padding">date_range</i> Mein Stream
+        </div>
+        <div class="choose-menu"  (click)="menuOptions('erledigt')" [ngClass]="menuOption == 'erledigt' ? 'm-active' : 'm-inactive'">
+                <i class="tiny material-icons fix-icon-padding">check_circle</i> Schon erledigt
+        </div>
+    </div>    
+    <div class="col s8">
+    <div class="margin-show main-stream">
         <h5>
             <div class="stream-header">
                 <div class="stream-header-left">
@@ -47,8 +57,8 @@
             </div>
             <div class="stream-box-kompetenzen"></div>
             <div class="stream-box-image">
-                <span *ngIf="strm.id == 'jpX1LmIBeHUS9fwXsg-1'"><img src="https://image.ibb.co/cCdTCS/4088098530_0516436daa_b.jpg" alt="HTML tutorial" style="width:100%;height:auto;border:0;"></span>
-                <span *ngIf="strm.id == 'jZW8LmIBeHUS9fwX9g91'"><img src="https://image.ibb.co/b9qQsS/6952010211_5a3408b0f7_k.jpg" alt="HTML tutorial" style="width:100%;height:auto;border:0;"></span>
+                <span *ngIf="strm.id == 'jpX1LmIBeHUS9fwXsg-1'"><img src="{{ strm.nodes[0].preview.url }} " style="width:100%;height:auto;border:0;"></span>
+                <span *ngIf="strm.id == 'jZW8LmIBeHUS9fwX9g91'"><img src="{{ strm.nodes[0].preview.url }}" style="width:100%;height:auto;border:0;"></span>
                 <div class="bottom-left">Titel des Materials</div>
                 <div class="bottom-right">{{ strm.nodes[0].commentCount }} <i class="material-icons stic" >comment</i> </div>
             </div>
@@ -72,4 +82,7 @@
         -->
 
     </div>
+    </div> <!-- cols8 -->
+    <div class="col s2"></div>
+    </div> <!-- row -->
 </div>

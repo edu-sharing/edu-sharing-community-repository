@@ -3,9 +3,38 @@
 .stream-container{
     padding-top: $mainnavHeight;
 }
+
+.removepadding{
+    padding-left: 0 !important;
+}
+
+.main-stream{
+    padding-left: 25px;
+}
+
+.fix-icon-padding{
+    padding-right: 15px;
+}
+
+.choose-menu{
+    padding-left: 1.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;   
+    cursor: pointer;
+}
+
+.m-inactive{
+    border-left: 4px solid #f6f6f6;
+}
+
+.m-active{
+    border-left: 4px solid #48708e;
+    background-color: white;
+}
+
 .margin-show{
-    width: 70%;
-    padding: 20px;
+
+    padding-top: 15px;
 }
 
 .customfloat{
@@ -38,7 +67,6 @@
 }
 
 .stream-box-main{
-    width: 92%;
     display: inline-block;
 }
 .stream-box-main-vert{
