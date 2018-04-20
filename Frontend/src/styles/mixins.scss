@@ -20,10 +20,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
+  line-height: 1em;        /* fallback */
+  max-height: $N+em;       /* fallback */
   -webkit-box-orient: vertical;
   -webkit-line-clamp: $N; /* number of lines to show */
-  line-height: $N+'em';        /* fallback */
-  max-height: $N*2+'em';       /* fallback */
 }
 @mixin unselectableText(){
   cursor: default;
