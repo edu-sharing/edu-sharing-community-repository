@@ -46,7 +46,9 @@ export class NodeHelper{
       return translation.instant("MEDIATYPE."+node.mediatype);
     }
     if(name==RestConstants.CM_CREATOR){
-      return ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,config);
+      let value=ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,config);
+      if(value)
+        return value;
     }
     if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
       let workflow=NodeHelper.getWorkflowStatus(config,node);
