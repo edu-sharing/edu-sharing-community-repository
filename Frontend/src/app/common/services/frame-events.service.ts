@@ -23,6 +23,11 @@ export class FrameEventsService {
   public static EVENT_SESSION_TIMEOUT="SESSION_TIMEOUT";
   public static EVENT_APPLY_NODE="APPLY_NODE";
   public static EVENT_NODE_SAVED="NODE_SAVED";
+    /**
+     * Hint to ng that the content has changed (e.g. via a connector) and should be reloaded
+     * @type {string}
+     */
+  public static EVENT_REFRESH="REFRESH";
   public static EVENT_REST_RESPONSE="PARENT_REST_RESPONSE";
 
   public static INVALIDATE_HEIGHT_EVENTS=[
