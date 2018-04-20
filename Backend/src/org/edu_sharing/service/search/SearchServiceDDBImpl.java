@@ -280,88 +280,92 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, previewUrl);
 			
 			JSONObject item = allJson.getJSONObject("view").getJSONObject("item");				
-			if(item != null){
-				JSONArray fields = (JSONArray)item.get("fields");
-				
-				for(int i = 0; i < fields.length();i++){
-					JSONObject fieldsObj = (JSONObject)fields.get(i);
-					String usage = (String)fieldsObj.get("@usage");
-					if("index".equals(usage)){
-						JSONArray entries = (JSONArray)fieldsObj.get("field");
-						for(int f = 0; f < entries.length();f++){
-							JSONObject entry = (JSONObject)entries.get(f);
-							String name = (String)entry.get("name");
-							
-							Object val = entry.get("value");
-							String value = "";
-							if(val instanceof String){
-								value = (String) val;
-							}else if(val instanceof JSONArray){
-								Object tmp = ((JSONArray)val).get(0);
-								if(tmp instanceof String){
-									value = (String)tmp;
-								}
-								if(tmp instanceof JSONObject){
-									value = tmp.toString();
-								}
-							}else{
-								logger.error("unknown type for name:"+name+" val:"+val );
-							}
-							
-							String fid = (String)entry.get("@id");
-							
-							if("description".equals(fid)){
-								properties.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION, value);
-							}
-							
-							if("license".equals(fid)){
-								
-							}
-						}
-					}
-					if("display".equals(usage)){
-						JSONArray entries = (JSONArray)fieldsObj.get("field");
-						for(int f = 0; f < entries.length();f++){
-							JSONObject entry = (JSONObject)entries.get(f);
-							String name = (String)entry.get("name");
-							
-							Object val = entry.get("value");
-							String value = "";
-							if(val instanceof String){
-								value = (String) val;
-							}else if(val instanceof JSONArray){
-								Object tmp = ((JSONArray)val).get(0);
-								if(tmp instanceof String){
-									value = (String)tmp;
-								}
-								if(tmp instanceof JSONObject){
-									value = tmp.toString();
-								}
-								
-							}else{
-								logger.error("unknown type for name:"+name+" val:"+val );
-							}
-							
-							String fid = (String)entry.get("@id");
-							
-							if("Sprache".equals(name)){
-								properties.put(CCConstants.LOM_PROP_GENERAL_LANGUAGE, value);
-							}
-							if("Dokumenttyp".equals(name)){
-								properties.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, value);
-							}
-							
-						}
-					}
+			try {
+				if(item != null){
+					JSONArray fields = (JSONArray)item.get("fields");
 					
+					for(int i = 0; i < fields.length();i++){
+						JSONObject fieldsObj = (JSONObject)fields.get(i);
+						String usage = (String)fieldsObj.get("@usage");
+						if("index".equals(usage)){
+							JSONArray entries = (JSONArray)fieldsObj.get("field");
+							for(int f = 0; f < entries.length();f++){
+								JSONObject entry = (JSONObject)entries.get(f);
+								String name = (String)entry.get("name");
+								
+								Object val = entry.get("value");
+								String value = "";
+								if(val instanceof String){
+									value = (String) val;
+								}else if(val instanceof JSONArray){
+									Object tmp = ((JSONArray)val).get(0);
+									if(tmp instanceof String){
+										value = (String)tmp;
+									}
+									if(tmp instanceof JSONObject){
+										value = tmp.toString();
+									}
+								}else{
+									logger.error("unknown type for name:"+name+" val:"+val );
+								}
+								
+								String fid = (String)entry.get("@id");
+								
+								if("description".equals(fid)){
+									properties.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION, value);
+								}
+								
+								if("license".equals(fid)){
+									
+								}
+							}
+						}
+						if("display".equals(usage)){
+							JSONArray entries = (JSONArray)fieldsObj.get("field");
+							for(int f = 0; f < entries.length();f++){
+								JSONObject entry = (JSONObject)entries.get(f);
+								String name = (String)entry.get("name");
+								
+								Object val = entry.get("value");
+								String value = "";
+								if(val instanceof String){
+									value = (String) val;
+								}else if(val instanceof JSONArray){
+									Object tmp = ((JSONArray)val).get(0);
+									if(tmp instanceof String){
+										value = (String)tmp;
+									}
+									if(tmp instanceof JSONObject){
+										value = tmp.toString();
+									}
+									
+								}else{
+									logger.error("unknown type for name:"+name+" val:"+val );
+								}
+								
+								String fid = (String)entry.get("@id");
+								
+								if("Sprache".equals(name)){
+									properties.put(CCConstants.LOM_PROP_GENERAL_LANGUAGE, value);
+								}
+								if("Dokumenttyp".equals(name)){
+									properties.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, value);
+								}
+								
+							}
+						}
+					}
 				}
-				
+			}
+			catch(Throwable t) {}
+			try {
 				JSONObject institution = (JSONObject)item.get("institution");
 				if(institution != null){
 					String instName = (String)institution.get("name");
 					properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR+"FN", instName);
 					
 				}
+			}catch(Throwable t) {
 				
 			}
 		}
