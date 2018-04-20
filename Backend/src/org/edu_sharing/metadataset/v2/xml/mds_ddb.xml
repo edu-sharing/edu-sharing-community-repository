@@ -21,31 +21,49 @@
                 <type>text</type>
       </widget>
 
-  </widgets>
-
-		<templates>
-			<template>
+    </widgets>
+	<templates>
+		<template>
+			<id>search</id>
+			<html><![CDATA[
+	            <title>
+	            <place>
+	            <affiliate>
+		  ]]></html>
+		</template>
+		<template>
+			<id>node_general_render</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<html><![CDATA[
+	            <cclom:title>
+	            <sys:node-uuid>
+			]]></html>
+		</template>
+	</templates>
+	<lists>
+			<list>
 				<id>search</id>
-				<html><![CDATA[
-              <title>
-              <place>
-              <affiliate>
-			  ]]></html>
-			</template>
-		</templates>
-		<groups>
-			<group>
-				<id>ngsearch</id>
-				<views>
-					<view>search</view>
-				</views>
-			</group>
-		</groups>
-		<queries>
-			<query join="AND" id="ngsearch">
-				<property name="title"></property>
-				<property name="place"></property>
-				<property name="affiliate"></property>
-			</query>
-		</queries>
+				<columns>
+					<column>cm:title</column>
+					<column>cm:creator</column>
+					<column>cclom:general_description</column>
+					<column>ccm:replicationsource</column>				
+				</columns>
+			</list>
+	</lists>
+	<groups>
+		<group>
+			<id>ngsearch</id>
+			<views>
+				<view>search</view>
+			</views>
+		</group>
+	</groups>
+	<queries>
+		<query join="AND" id="ngsearch">
+			<property name="title"></property>
+			<property name="place"></property>
+			<property name="affiliate"></property>
+		</query>
+	</queries>
 </metadataset>
