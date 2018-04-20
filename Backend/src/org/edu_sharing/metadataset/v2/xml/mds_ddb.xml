@@ -1,5 +1,6 @@
 <metadataset id="default" label="default" hidden="false">
 		<name>Core Metadataset</name>
+		<inherit>mds</inherit>
 		<i18n>mds_translation</i18n>
 	<widgets>
       <widget>
