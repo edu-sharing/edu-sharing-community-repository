@@ -176,10 +176,10 @@ public class SearchApi  {
 	    	
 	    	try {
 	    					
-		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		    	MdsDao mdsDao = MdsDao.getMds(repoDao, mdsId);
+		    	//RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		    	//MdsDao mdsDao = MdsDao.getMds(repoDao, mdsId);
 
-		    	NodeDao nodeDao = NodeDao.saveSearch(repoDao,mdsId,query,name,parameters,replace!=null ? replace : false);
+		    	NodeDao nodeDao = NodeDao.saveSearch(repository,mdsId,query,name,parameters,replace!=null ? replace : false);
 		    	NodeEntry result=new NodeEntry();
 		    	result.setNode(nodeDao.asNode());
 		    	return Response.status(Response.Status.OK).entity(result).build();
