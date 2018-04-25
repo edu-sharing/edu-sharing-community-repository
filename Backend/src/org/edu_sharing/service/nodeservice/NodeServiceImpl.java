@@ -68,7 +68,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY,
 			CCConstants.CCM_PROP_SAVED_SEARCH_MDS,
 			CCConstants.CCM_PROP_SAVED_SEARCH_QUERY,
-			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS
+			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS,
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
@@ -240,8 +240,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id,values[0]);
 			}
 		}
-
-		for(String property : (String[])ArrayUtils.addAll(SAFE_PROPS,LICENSE_PROPS)){
+		
+		for(String property : getAllSafeProps()){
 			if(!props.containsKey(property)) continue;
 			
 			String[] arr = props.get(property);
@@ -288,6 +288,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return toSafe;
 	}
 	
+	private static Iterable<String> getAllSafeProps() {
+		List<String> safe=new ArrayList<>();
+		safe.addAll(Arrays.asList(SAFE_PROPS));
+		safe.addAll(Arrays.asList(LICENSE_PROPS));
+		safe.addAll(CCConstants.getLifecycleContributerPropsMap().values());
+		safe.addAll(CCConstants.getMetadataContributerPropsMap().values());
+		return safe;
+	}
 	@Override
 	public HashMap<String, String[]> getNameProperty(String name) {
 		HashMap<String, String[]> map=new HashMap<String, String[]>();
