@@ -169,8 +169,6 @@ export class CollectionNewComponent {
     getShareStatus(){
       if(this.permissions || this.originalPermissions){
         let perms=this.permissions || this.originalPermissions;
-        console.log(this.permissions);
-        console.log(perms);
         let type=RestConstants.COLLECTIONSCOPE_MY;
         if(perms && perms.permissions) {
             for (let perm of perms.permissions) {
