@@ -1535,7 +1535,7 @@ public class NodeDao {
 	/** store a new search node 
 	 * @return 
 	 * @throws DAO */
-	public static NodeDao saveSearch(RepositoryDao repoDao, String mdsId, String query, String name,
+	public static NodeDao saveSearch(String repoId, String mdsId, String query, String name,
 			List<MdsQueryCriteria> parameters,boolean replace) throws DAOException {
 		try{
     		String parent = RepositoryDao.getHomeRepository().getUserSavedSearch();
@@ -1543,7 +1543,7 @@ public class NodeDao {
     		HashMap<String, String[]> props=new HashMap();
     		props.put(CCConstants.CM_NAME, new String[]{name});
     		props.put(CCConstants.LOM_PROP_GENERAL_TITLE, new String[]{name});
-    		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY, new String[]{repoDao.getId()});
+    		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY, new String[]{repoId});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_MDS, new String[]{mdsId});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY, new String[]{query});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS, new String[]{Json.pretty(parameters)});
@@ -1552,7 +1552,7 @@ public class NodeDao {
     			return parentDao.createChild(CCConstants.CCM_TYPE_SAVED_SEARCH, null, props, false);
     		}catch(DAOException e){
     			if(e.getCause() instanceof DuplicateChildNodeNameException && replace){
-	    			NodeDao old = NodeDao.getByParent(repoDao, parent, CCConstants.CCM_TYPE_SAVED_SEARCH, NodeServiceHelper.cleanupCmName(name));
+	    			NodeDao old = NodeDao.getByParent(RepositoryDao.getHomeRepository(), parent, CCConstants.CCM_TYPE_SAVED_SEARCH, NodeServiceHelper.cleanupCmName(name));
 	    			old.changeProperties(props);
 	    			return old;
     			}
