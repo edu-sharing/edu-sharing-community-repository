@@ -20,8 +20,10 @@
 .card .btn-flat{
   color:$primary!important;
 }
-.card .card-title{
-  font-size:16pt;
+.card .card-content .card-title{
+  font-size:12pt;
+  line-height:initial;
+  height:48px;
 }
 .waves-effect .waves-ripple {
   /*background-color: rgba(#ccc, 0.65);*/
