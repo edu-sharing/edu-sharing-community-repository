@@ -80,6 +80,7 @@ export class CollectionNewComponent {
   public editPermissionsDummy: EduData.Node;
   private availableSteps: string[];
   private parentCollection: Collection;
+  private originalPermissions: LocalPermissions;
 
 
   @HostListener('document:keydown', ['$event'])
@@ -133,6 +134,7 @@ export class CollectionNewComponent {
                       this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
                       this.editId=id;
                       this.currentCollection=data.collection;
+                      this.originalPermissions=perm.permissions.localPermissions;
                       this.properties=node.node.properties;
                       this.newCollectionType=this.getTypeForCollection(this.currentCollection);
                       this.hasCustomScope=false;
@@ -163,6 +165,29 @@ export class CollectionNewComponent {
         // subscribe to paramter
 
 
+    }
+    getShareStatus(){
+      if(this.permissions || this.originalPermissions){
+        let perms=this.permissions || this.originalPermissions;
+        console.log(this.permissions);
+        console.log(perms);
+        let type=RestConstants.COLLECTIONSCOPE_MY;
+        if(perms && perms.permissions) {
+            for (let perm of perms.permissions) {
+                if (perm.authority.authorityName != this.user.authorityName) {
+                    type = RestConstants.COLLECTIONSCOPE_CUSTOM;
+                }
+                if (perm.authority.authorityName == RestConstants.AUTHORITY_EVERYONE) {
+                    type = RestConstants.COLLECTIONSCOPE_ALL;
+                    break;
+                }
+            }
+        }
+        return type;
+      }
+      else{
+        return RestConstants.COLLECTIONSCOPE_MY;
+      }
     }
     private saveCollection(){
        this.collectionService.updateCollection(this.currentCollection).subscribe(()=>{
