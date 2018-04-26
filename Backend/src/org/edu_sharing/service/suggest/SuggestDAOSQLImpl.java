@@ -30,8 +30,9 @@ public class SuggestDAOSQLImpl implements SuggestDAO {
 		Connection con = null;
 		PreparedStatement statement = null;
 		
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		try{
-			con = ConnectionPool.getConnection();
+			con = dbAlf.getConnection();
 			statement = con.prepareStatement(this.sqlStatement);
 			
 			key = StringEscapeUtils.escapeSql(key);
@@ -49,7 +50,7 @@ public class SuggestDAOSQLImpl implements SuggestDAO {
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
 		}finally {
-			ConnectionPool.cleanUp(con, statement);
+			dbAlf.cleanUp(con, statement);
 		}
 		
 		return result;
@@ -66,9 +67,10 @@ public class SuggestDAOSQLImpl implements SuggestDAO {
 			return result;
 		}
 		
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		try{
 			
-			con = ConnectionPool.getConnection();
+			con = dbAlf.getConnection();
 			statement = con.prepareStatement(this.sqlStatement);
 			
 			query = StringEscapeUtils.escapeSql(query);
@@ -86,7 +88,7 @@ public class SuggestDAOSQLImpl implements SuggestDAO {
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
 		}finally {
-			ConnectionPool.cleanUp(con, statement);
+			dbAlf.cleanUp(con, statement);
 		}
 		
 		return result;
