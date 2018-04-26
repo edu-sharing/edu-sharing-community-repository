@@ -6,6 +6,7 @@ import {trigger} from "@angular/animations";
 import {UIHelper} from "../ui-helper";
 import {OptionItem} from "./option-item";
 import {Helper} from '../../helper';
+import {UIConstants} from "../ui-constants";
 
 @Component({
   selector: 'actionbar',
@@ -66,7 +67,7 @@ export class ActionbarComponent{
   @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
   public getNumberOptions(){
-    if(window.innerWidth<UIHelper.MOBILE_WIDTH){
+    if(window.innerWidth<UIConstants.MOBILE_WIDTH){
       return this.numberOfAlwaysVisibleOptionsMobile;
     }
     return this.numberOfAlwaysVisibleOptions;

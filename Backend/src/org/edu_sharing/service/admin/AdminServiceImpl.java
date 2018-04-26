@@ -90,6 +90,7 @@ import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
+import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -634,6 +635,23 @@ public class AdminServiceImpl implements AdminService  {
 		if(jobListener.isVetoed()){
 			throw new Exception("job was vetoed by "+jobListener.getVetoBy());
 		}
+	}
+	
+	@Override
+	public void startJob(String jobClass, HashMap<String,Object> params) throws Exception {	
+		
+		if(params == null) {
+			params = new HashMap<String,Object>();
+		}
+		params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
+		params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+		
+		Class job = Class.forName(jobClass);
+		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(job, params);
+		if(jobListener != null && jobListener.isVetoed()){
+			throw new Exception("job was vetoed by " + jobListener.getVetoBy());
+		}
+		
 	}
 	
 	@Override

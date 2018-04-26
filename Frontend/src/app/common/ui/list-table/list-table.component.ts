@@ -23,6 +23,7 @@ import {Helper} from "../../helper";
 import {RestNetworkService} from "../../rest/services/rest-network.service";
 import {ColorHelper} from '../color-helper';
 import {RestLocatorService} from '../../rest/services/rest-locator.service';
+import {UIConstants} from "../ui-constants";
 
 @Component({
   selector: 'listTable',
@@ -62,6 +63,7 @@ export class ListTableComponent implements EventListener{
   private _nodes : any[];
   private animateNode: Node;
   private repositories: Repository[];
+  private sortMenu = false;
 
   /**
    * Set the current list of nodes to render
@@ -514,9 +516,21 @@ export class ListTableComponent implements EventListener{
   private canBeSorted(sortBy : string){
     return RestConstants.POSSIBLE_SORT_BY_FIELDS.indexOf(sortBy)!=-1;
   }
-  private setSorting(sortBy : string){
+  private getSortableColumns(){
+    let result:ListItem[]=[];
+    for(let col of this.columnsAll){
+      if(this.canBeSorted(col.name))
+        result.push(col);
+    }
+    return result;
+  }
+  private setSorting(sortBy : string,isPrimaryElement : boolean){
     if(!this.canBeSorted(sortBy))
       return;
+    if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*3){
+      this.sortMenu=true;
+      return;
+    }
     let sortAscending=true;
     if(sortBy==this.sortBy)
       sortAscending=!this.sortAscending;

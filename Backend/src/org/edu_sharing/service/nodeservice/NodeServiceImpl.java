@@ -60,6 +60,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_WF_PROTOCOL,
 			CCConstants.CCM_PROP_WF_RECEIVER,
 			CCConstants.CCM_PROP_WF_STATUS,
+			CCConstants.CCM_PROP_MAP_COLLECTIONREMOTEID,
 			CCConstants.CM_PROP_METADATASET_EDU_METADATASET,
 			CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET,
 			CCConstants.CCM_PROP_EDITOR_TYPE,
@@ -67,7 +68,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY,
 			CCConstants.CCM_PROP_SAVED_SEARCH_MDS,
 			CCConstants.CCM_PROP_SAVED_SEARCH_QUERY,
-			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS
+			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS,
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
@@ -186,14 +187,22 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
 		
 		if(metadataSetId == null) {
-			
-			if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
-				metadataSetId = HttpContext.getCurrentMetadataSet();
-			}else {
-				metadataSetId = CCConstants.metadatasetdefault_id;
+			Boolean forceMds = false;
+			try {
+				forceMds = (Boolean)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+				if(forceMds == null) forceMds = false;
+			}catch(Throwable t) {}
+			if(forceMds) {
+				metadataSetId = (String)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
 			}
-			
-			props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
+			else {
+				if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
+					metadataSetId = HttpContext.getCurrentMetadataSet();
+				}else {
+					metadataSetId = CCConstants.metadatasetdefault_id;
+				}
+				props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
+			}
 		}
 		
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(application, metadataSetId);
@@ -231,8 +240,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id,values[0]);
 			}
 		}
-
-		for(String property : (String[])ArrayUtils.addAll(SAFE_PROPS,LICENSE_PROPS)){
+		
+		for(String property : getAllSafeProps()){
 			if(!props.containsKey(property)) continue;
 			
 			String[] arr = props.get(property);
@@ -279,6 +288,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return toSafe;
 	}
 	
+	private static Iterable<String> getAllSafeProps() {
+		List<String> safe=new ArrayList<>();
+		safe.addAll(Arrays.asList(SAFE_PROPS));
+		safe.addAll(Arrays.asList(LICENSE_PROPS));
+		safe.addAll(CCConstants.getLifecycleContributerPropsMap().values());
+		safe.addAll(CCConstants.getMetadataContributerPropsMap().values());
+		return safe;
+	}
 	@Override
 	public HashMap<String, String[]> getNameProperty(String name) {
 		HashMap<String, String[]> map=new HashMap<String, String[]>();

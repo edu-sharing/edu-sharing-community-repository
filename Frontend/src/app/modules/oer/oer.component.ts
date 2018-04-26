@@ -48,7 +48,6 @@ export class OerComponent {
   public hasMore:boolean[]=[];
   private offsets:number[]=[];
   public nodes:Node[][]=[];
-  private nodesCollections:Node[]=[];
   private render_options: OptionItem[];
   constructor(
     private router : Router,

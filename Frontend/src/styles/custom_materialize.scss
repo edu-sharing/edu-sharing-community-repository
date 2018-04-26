@@ -20,8 +20,10 @@
 .card .btn-flat{
   color:$primary!important;
 }
-.card .card-title{
-  font-size:16pt;
+.card .card-content .card-title{
+  font-size:12pt;
+  line-height:initial;
+  height:48px;
 }
 .waves-effect .waves-ripple {
   /*background-color: rgba(#ccc, 0.65);*/
@@ -295,9 +297,18 @@ span.thumb{
   display:none; /* preview thumb for range does not work */
 }
 
-.collection .collection-item {
-  padding: 2px 20px 9px 20px;
-  border-bottom: none;
+.collection {
+  .collection-item {
+    padding: 2px 20px 9px 20px;
+    border-bottom: none;
+  }
+  .collection-item-title{
+    color:$textLight;
+    font-size:80%;
+    font-weight: bold;
+    background-color: #fff;
+    padding:5px 10px;
+  }
 }
 .collection-item-seperate {
   border-top:1px solid #ccc!important;

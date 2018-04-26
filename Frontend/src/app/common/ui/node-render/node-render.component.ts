@@ -27,6 +27,7 @@ import {UIConstants} from "../ui-constants";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {SearchService} from "../../../modules/search/search.service";
 import {Helper} from "../../helper";
+import {EventListener} from "../../../common/services/frame-events.service";
 
 declare var jQuery:any;
 declare var window: any;
@@ -41,7 +42,7 @@ declare var window: any;
 })
 
 
-export class NodeRenderComponent {
+export class NodeRenderComponent implements EventListener{
 
 
   public isLoading=true;
@@ -152,6 +153,11 @@ export class NodeRenderComponent {
       }
       return -1;
     }
+    onEvent(event: string, data: any): void {
+        if(event==FrameEventsService.EVENT_REFRESH){
+            this.refresh();
+        }
+    }
     constructor(
       private translate : TranslateService,
       private location: Location,
@@ -170,7 +176,8 @@ export class NodeRenderComponent {
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
       (window as any).ngRender = {setDownloadUrl:(url:string)=>{this.setDownloadUrl(url)}};
-      Translation.initialize(translate,config,storage,route).subscribe(()=>{
+      this.frame.addListener(this);
+        Translation.initialize(translate,config,storage,route).subscribe(()=>{
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.route.queryParams.subscribe((params:Params)=>{

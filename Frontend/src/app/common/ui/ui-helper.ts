@@ -23,7 +23,6 @@ import {PlatformLocation} from "@angular/common";
 import {ListItem} from './list-item';
 import {AbstractRestService} from "../rest/services/abstract-rest-service";
 export class UIHelper{
-  static MOBILE_WIDTH = 600;
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
     config.get("branding").subscribe((data:any)=>{
@@ -205,7 +204,7 @@ export class UIHelper{
   static prepareMetadatasets(translate:TranslateService,mdsSets: MdsInfo[]) {
     for(let i=0;i<mdsSets.length;i++){
       if(mdsSets[i].id=="mds")
-        mdsSets[i].name=translate.instant('DEFAULT_METADATASET');
+        mdsSets[i].name=translate.instant('DEFAULT_METADATASET',{name:mdsSets[i].name});
     }
   }
   static addToCollection(collectionService:RestCollectionService,router:Router,toast:Toast,collection:Node|Collection,nodes:Node[],callback:Function=null,position=0,error=false){
