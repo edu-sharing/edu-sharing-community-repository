@@ -28,6 +28,7 @@ export class FrameEventsService {
      * @type {string}
      */
   public static EVENT_REFRESH="REFRESH";
+  public static EVENT_CLOSE="CLOSE";
   public static EVENT_REST_RESPONSE="PARENT_REST_RESPONSE";
 
   public static INVALIDATE_HEIGHT_EVENTS=[
@@ -48,13 +49,7 @@ export class FrameEventsService {
 
   constructor() {
     let t=this;
-    window.addEventListener('message', function (event:any) {
-      if (event.source!==window.self && event.data){
-        t.eventListeners.forEach(function(listener:EventListener){
-          listener.onEvent(event.data.event,event.data.data);
-        });
-      }
-    }, false);
+    window.addEventListener('message', this.onEvent, false);
       setInterval(()=>{
         this.broadcastEvent(FrameEventsService.EVENT_CONTENT_HEIGHT,document.body.scrollHeight);
       },250);
@@ -66,6 +61,19 @@ export class FrameEventsService {
    */
   public addWindow(window:Window){
     this.windows.push(window);
+  }
+  public onEvent(event:any){
+      if (event.source!==window.self && event.data){
+          if(event.data.event==FrameEventsService.EVENT_CLOSE){
+              console.log("closing frame");
+              console.log(event.source);
+              event.source.close();
+              return;
+          }
+          this.eventListeners.forEach(function(listener:EventListener){
+              listener.onEvent(event.data.event,event.data.data);
+          });
+      }
   }
   public addListener(listener:EventListener) : void {
     this.eventListeners.push(listener);

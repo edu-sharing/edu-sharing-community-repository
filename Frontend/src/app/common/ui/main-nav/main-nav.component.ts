@@ -384,7 +384,7 @@ export class MainNavComponent {
   }
   editProfile(){
     if(this.cordova.isRunningCordova()){
-      window.open(this.editUrl,'_system',UIHelper.getDefaultNewWindowParameters(this.nodeService));
+      window.open(this.editUrl,'_system');
     }
     else {
       window.location.href = this.editUrl;
@@ -409,7 +409,7 @@ export class MainNavComponent {
   }
   public showHelp(url:string){
     this.helpOpen=false;
-    window.open(url,'_blank',UIHelper.getDefaultNewWindowParameters(this.nodeService));
+    UIHelper.openBlankWindow(url,this.cordova);
   }
   private logout(){
     if(this.cordova.isRunningCordova()){
@@ -460,7 +460,7 @@ export class MainNavComponent {
     }
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
     if(button.url){
-      window.open(button.url,'_blank',UIHelper.getDefaultNewWindowParameters(this.nodeService));
+      UIHelper.openBlankWindow(button.url,this.cordova);
     }
     else {
       let queryParams=button.queryParams?button.queryParams:{};
