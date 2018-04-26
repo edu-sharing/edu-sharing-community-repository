@@ -318,7 +318,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		searchSourceBuilder.size(request.size);
 		searchSourceBuilder.from(request.offset);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
-        searchRequest.scroll(SCROLL_TIME);
+        //searchRequest.scroll(SCROLL_TIME);
         searchRequest.indices(INDEX_NAME);
 		SearchResponse searchResult = client.search(searchRequest);
 		return responseToStreamResult(searchResult);
