@@ -27,7 +27,7 @@
                     <span class="stream-title-date">Dienstag, 06 August 2018 </span>
                 </div>
                 <div class="stream-header-right">
-                    <!-- <div class="stream-uppericon"> <i class="material-icons fix-up " >shuffle</i>  </div> <div (click)="sortieren()" class="stream-uppertext">Sortieren</div>-->
+                  <!--   <div class="stream-uppericon"> <i class="material-icons fix-up " >shuffle</i>  </div> <div (click)="sortieren()" class="stream-uppertext">Sortieren</div>-->
                 </div>
             </div>
 
@@ -39,11 +39,10 @@
             <div class="stream-box-main">
                 <div class="stream-box-title">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
                 <!-- todo: ngfor over strm.properties.['cclom:general_keyword'] -->
-                <span *ngIf="strm.id == 'jpX1LmIBeHUS9fwXsg-1'"><div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div> </span>
-                <span *ngIf="strm.id == 'jZW8LmIBeHUS9fwX9g91'">
+        
           <div class="stream-box-desc">{{ strm.nodes[0].description || 'lorem ipsum dolor sit amet, consectetur' }}</div> 
           <div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
-      </span>
+
 
             </div>
             <div class="stream-box-main-vert">
@@ -52,13 +51,14 @@
                     [numberOfAlwaysVisibleOptionsMobile]="0"
                     [style]="'flat'"
                     [options]="actionOptions"
+                    [node]="strm.id"
 
                 ></actionbar>
             </div>
             <div class="stream-box-kompetenzen"></div>
             <div class="stream-box-image">
-                <span *ngIf="strm.id == 'jpX1LmIBeHUS9fwXsg-1'"><img src="{{ strm.nodes[0].preview.url }} " style="width:100%;height:auto;border:0;"></span>
-                <span *ngIf="strm.id == 'jZW8LmIBeHUS9fwX9g91'"><img src="{{ strm.nodes[0].preview.url }}" style="width:100%;height:auto;border:0;"></span>
+                <img src="{{ strm.nodes[0].preview.url }} " style="width:100%;height:auto;border:0;">
+                
                 <div class="bottom-left">Titel des Materials</div>
                 <div class="bottom-right">{{ strm.nodes[0].commentCount }} <i class="material-icons stic" >comment</i> </div>
             </div>

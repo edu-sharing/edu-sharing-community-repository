@@ -66,8 +66,8 @@ export class StreamComponent {
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
       });
       // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
-      this.actionOptions.push(new OptionItem('Erledigt','check',()=>{
-        alert('callback 1');
+      this.actionOptions.push(new OptionItem('Erledigt','check',(node: Node)=>{
+        this.updateStream(node).subscribe(data => console.log(data), error => console.log(error));
       }));
       this.actionOptions.push(new OptionItem('Ganz oben anzeigen','arrow_upward',()=>{
           alert('callback 2');
@@ -75,7 +75,9 @@ export class StreamComponent {
       this.actionOptions.push(new OptionItem('Aus Stream entfernen','remove_circle',()=>{
         alert('callback 3');
     }));
-      this.getJSON().subscribe(data => this.streams = data['stream'], error => console.log(error));
+      this.getJSON(STREAM_STATUS.OPEN).subscribe(data => this.streams = data['stream'], error => console.log(error));
+
+      
 
   }
 
@@ -86,19 +88,29 @@ export class StreamComponent {
 
   menuOptions(option: any) {
     this.menuOption = option;
+    if (option === 'stream') {
+      this.getJSON(STREAM_STATUS.OPEN).subscribe(data => this.streams = data['stream'], error => console.log(error));
+    } else {
+      this.getJSON(STREAM_STATUS.DONE).subscribe(data => this.streams = data['stream'], error => console.log(error));
+    }
+
   }
 
   sortieren() {
     // here is going to be the sorting functionality: 
     console.log(this.streams);
+    
    // let temp = this.other['stream'].shift();
     //this.other['stream'].push(temp);
   }
 
-  // the way of doing the post request will be changed:
-  public getJSON(): Observable<any> {
+  public getJSON(streamStatus: any): Observable<any> {
     let request:any={offset:this.streams ? this.streams.length : 0};
-    return this.streamService.getStream(STREAM_STATUS.OPEN,this.searchQuery,{},request);
+    return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
+  }
+
+  public updateStream(idToUpdate: any): Observable<any> {
+    return this.streamService.updateStatus(idToUpdate, this.connector.getCurrentLogin().authorityName, STREAM_STATUS.DONE)
   }
 
 
