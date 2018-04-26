@@ -218,5 +218,17 @@ public class MetadataSetV2 {
 		logger.info("Node type "+nodeType+" uses "+usedWidgets.size()+" from a total of "+getWidgets().size()+" widgets");
 		return usedWidgets;
 	}
+	public MetadataWidget findWidgetForTemplate(String widgetId,String template) {
+		  MetadataWidget fallback=null;
+		  for(MetadataWidget widget : widgets){
+		   if(widget.getId().equals(widgetId))
+		    fallback=widget;
+		   if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate()))
+		    return widget;
+		  }
+		  if(fallback!=null)
+		   return fallback;
+		  throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+		 }
 	
 }
