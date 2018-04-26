@@ -33,10 +33,12 @@
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
     </div>
   </div>
-  <div *ngFor="let button of sidebarButtons" class="button clickable" [class.selected]="_currentScope==button.scope"
+  <div *ngFor="let button of sidebarButtons" class="button" [class.selected]="_currentScope==button.scope"
        (click)="openButton(button)"
        (keyup.enter)="openButton(button)"
        [class.collection-item-seperate]="button.isSeperate"
+       [class.clickable]="!button.isDisabled"
+       [class.disabled]="button.isDisabled"
        tabindex="0"
        title="{{'GOTO' | translate}} {{button.name | translate}}">
     <i *ngIf="button.icon" class="material-icons align-icon">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}"> <span>{{button.name | translate}}</span>

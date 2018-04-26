@@ -1,4 +1,4 @@
-import {Component, OnInit, NgZone, HostListener, ViewChild} from '@angular/core';
+import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer} from '@angular/core';
 
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
@@ -26,6 +26,7 @@ import {ListItem} from "../../../common/ui/list-item";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {ColorHelper} from '../../../common/ui/color-helper';
+import {DomSanitizer} from "@angular/platform-browser";
 
 // component class
 @Component({
@@ -58,7 +59,7 @@ export class CollectionNewComponent {
   public editorialGroups:Group[]=[];
   public editorialGroupsSelected:Group[]=[];
   public editorialColumns:ListItem[]=[new ListItem("GROUP",RestConstants.AUTHORITY_DISPLAYNAME)];
-  private imageData:string = null;
+  private imageData:any = null;
   private imageFile:File = null;
   private STEP_NEW = 'NEW';
   private STEP_GENERAL = 'GENERAL';
@@ -77,6 +78,7 @@ export class CollectionNewComponent {
   public editPermissionsDummy: EduData.Node;
   private availableSteps: string[];
   private parentCollection: Collection;
+  private originalPermissions: LocalPermissions;
 
 
   @HostListener('document:keydown', ['$event'])
@@ -99,6 +101,7 @@ export class CollectionNewComponent {
         private toast : Toast,
         private storage : SessionStorageService,
         private zone: NgZone,
+        private sanitizer: DomSanitizer,
         private config : ConfigurationService,
         private translationService:TranslateService) {
         Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
@@ -130,6 +133,7 @@ export class CollectionNewComponent {
                       this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
                       this.editId=id;
                       this.currentCollection=data.collection;
+                      this.originalPermissions=perm.permissions.localPermissions;
                       this.properties=node.node.properties;
                       this.newCollectionType=this.getTypeForCollection(this.currentCollection);
                       this.hasCustomScope=false;
@@ -160,6 +164,27 @@ export class CollectionNewComponent {
         // subscribe to paramter
 
 
+    }
+    getShareStatus(){
+      if(this.permissions || this.originalPermissions){
+        let perms=this.permissions || this.originalPermissions;
+        let type=RestConstants.COLLECTIONSCOPE_MY;
+        if(perms && perms.permissions) {
+            for (let perm of perms.permissions) {
+                if (perm.authority.authorityName != this.user.authorityName) {
+                    type = RestConstants.COLLECTIONSCOPE_CUSTOM;
+                }
+                if (perm.authority.authorityName == RestConstants.AUTHORITY_EVERYONE) {
+                    type = RestConstants.COLLECTIONSCOPE_ALL;
+                    break;
+                }
+            }
+        }
+        return type;
+      }
+      else{
+        return RestConstants.COLLECTIONSCOPE_MY;
+      }
     }
     private saveCollection(){
        this.collectionService.updateCollection(this.currentCollection).subscribe(()=>{
@@ -243,13 +268,7 @@ export class CollectionNewComponent {
 
         // remember file for upload
         this.imageFile = file;
-        // read file base64
-        var reader  = new FileReader();
-        reader.addEventListener("load", () => {
-            this.imageData = reader.result;
-        });
-        reader.readAsDataURL(file);
-
+        this.imageData=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
     }
     handleError(error:any){
       if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
@@ -307,7 +326,7 @@ export class CollectionNewComponent {
     }
     private saveImage(collection:EduData.Collection) : void {
 
-       if ((this.imageData!=null) && (this.imageData).startsWith("data:")) {
+       if (this.imageData!=null) {
            this.collectionService.uploadCollectionImage(collection.ref.id, this.imageFile, "image/png").subscribe(() => {
                this.navigateToCollectionId(collection.ref.id);
            });

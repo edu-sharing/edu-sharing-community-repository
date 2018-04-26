@@ -148,6 +148,24 @@ $imagePath: '../../../../assets/images/collections/';
     }
   }
 }
+.collection-permission-container{
+  .title{
+    font-size:140%;
+    font-weight: bold;
+    padding-bottom: 20px;
+  }
+  .description{
+    color:$textLight;
+    font-size:110%;
+    padding-bottom: 20px;
+  }
+  .status{
+    margin: -20px;
+    margin-top: 20px;
+    padding: 6px 20px;
+    background: $actionDialogBackground;
+  }
+}
 .collection-new-container {
   display:flex;
   flex-direction: column;

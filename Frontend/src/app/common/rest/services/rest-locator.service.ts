@@ -11,11 +11,10 @@ import {CordovaService} from '../../services/cordova.service';
 @Injectable()
 export class RestLocatorService {
   private static ENDPOINT_URLS = [
-    "http://edu50.edu-sharing.de/edu-sharing/rest/",
     "rest/",
     "http://localhost:8080/edu-sharing/rest/",
     "http://localhost:8081/edu-sharing/rest/",
-    "http://edu41.edu-sharing.de/edu-sharing/rest/",
+    "http://edu50.edu-sharing.de/edu-sharing/rest/",
     //"https://repository.oer-berlin.de/edu-sharing/rest/",
     "http://alfresco5.vm:8080/edu-sharing/rest/"
   ];

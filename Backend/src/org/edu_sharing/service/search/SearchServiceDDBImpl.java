@@ -25,11 +25,13 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
@@ -45,10 +47,12 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	String repositoryId = null;
 
 	String APIKey = null;
+
+	private ApplicationInfo appInfo;
 			
 	
 	public SearchServiceDDBImpl(String appId) {
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+		appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();		
 		this.APIKey = appInfo.getApiKey(); 
 
@@ -115,13 +119,12 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		HashMap<String,HashMap<String,Object>> result = new HashMap<String, HashMap<String,Object>>();
 		for(int i = 0; i < docs.length(); i++){
 			JSONObject doc = (JSONObject)docs.get(i);
-			
-			HashMap<String,Object> props =  this.getProperties(doc);
-			result.put((String)props.get(CCConstants.SYS_PROP_NODE_UID), props);
-
-			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
+			String id =  this.getNodeId(doc);
+			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(
+					repositoryId, 
 					Constants.storeRef.getProtocol(),
-					Constants.storeRef.getIdentifier(),props);
+					Constants.storeRef.getIdentifier(),
+					id);
 			data.add(ref);
 
 		}
@@ -190,8 +193,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
         return sb.toString();
     }	
 
-	private HashMap<String,Object> getProperties(JSONObject doc){
-		HashMap<String,Object> properties = new  HashMap<String,Object>();
+	private String getNodeId(JSONObject doc){
 		String id = null;
 		try {
 			id = (String)doc.get("id");
@@ -199,102 +201,87 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		String title = null;
-		try {
-			title = (String)doc.get("label");
-		} catch (JSONException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		String thumbnail = null;
-		try {
-			thumbnail = (String)doc.get("thumbnail");
-		} catch (JSONException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, title);
-		properties.put(CCConstants.SYS_PROP_NODE_UID, id);
-
-		try{
-			
-			String thumbnailUrl = DDB_API+ thumbnail+"?oauth_consumer_key=" + URLEncoder.encode(APIKey, "UTF-8");
-			//for the importer
-			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, thumbnailUrl);	
-			//for the gwt gui no persistent
-			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, thumbnailUrl);
-			
-		}catch(UnsupportedEncodingException e){}
-		properties.put(CCConstants.REPOSITORY_ID, this.repositoryId );
-		properties.put(CCConstants.NODETYPE, CCConstants.CCM_TYPE_IO);
-		
-		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, "");
-		
-		try{
-			properties.putAll(getProperties(id));
-		}catch(Throwable e){
-			logger.error(e.getMessage(),e);
-		}
-		
-		
-		return properties;
+		return id;
 	}
 	
 	
 	public HashMap<String, Object> getProperties(String nodeId) throws Throwable {
 		
 		HashMap<String,Object> properties = new  HashMap<String,Object>();
+		properties.put(CCConstants.SYS_PROP_NODE_UID,nodeId);
+		String url = "https://www.deutsche-digitale-bibliothek.de/item/"+nodeId;
+		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, url);
+		properties.put(CCConstants.CCM_PROP_IO_WWWURL, url);
+        properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(this.repositoryId, nodeId));
 		try{
-			String result = httpGet(DDB_API   +"/items/"+nodeId+"/binaries?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
-			if(result != null && result.trim().length() > 0){
-			
-				JSONObject jo = new JSONObject(result);//  )new JSONParser().parse(result);
-				if(jo != null){	
+			// fetch binary info
+			String all = httpGet(DDB_API+"/items/"+nodeId+"/aip?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
+			JSONObject allJson = new JSONObject(all);
+			try {
+				JSONArray binaries = (JSONArray)allJson.getJSONObject("binaries").getJSONArray("binary");			
+				JSONObject binary = null;
+				JSONObject binaryFallback = binaries.getJSONObject(0);
+				
+				for(int i = 0; i < binaries.length();i++){
+					binary =  (JSONObject)binaries.get(0);						
+					String path = (String)binary.get("@path");
 					
-					JSONArray binaries = (JSONArray)jo.get("binary");
-					
-					JSONObject binary = null;
-					JSONObject binaryFallback = null;
-					
-					for(int i = 0; i < binaries.length();i++){
-						
-						binary =  (JSONObject)binaries.get(0);
-						if(i == 0) binaryFallback = binary;
-						
-						String path = (String)binary.get("@path");
-						
-						// prefer mvpr
-						if(path.contains("mvpr")){
-							break;
-						}
+					// prefer mvpr
+					if(path.contains("mvpr")){
+						break;
 					}
-					
-					if(binary == null){
-						binary = binaryFallback;
-					}
-					String contenturl  = (String)binary.get("@path");
-					String mimetyp = (String)binary.get("@mimetype");
-					contenturl = DDB_API+contenturl+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
-					
-					//properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, contenturl);
-					String url = "https://www.deutsche-digitale-bibliothek.de/item/"+nodeId;
-					properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, url);
-					properties.put(CCConstants.CCM_PROP_IO_WWWURL, url);
-					
-					properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, mimetyp);
 				}
 				
-    		        properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(this.repositoryId, nodeId));
-			}
+				if(binary == null){
+					binary = binaryFallback;
+				}
+				String name  = (String)binary.get("@name");
+				properties.put(CCConstants.CM_NAME, name);
+				properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, name);
+				String contenturl  = (String)binary.get("@path");
+				String mimetyp = (String)binary.get("@mimetype");
+				contenturl = DDB_API+contenturl+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+				
+				//properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, contenturl);
+				properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"ddb");
+
+				properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, mimetyp);
+			}catch(Throwable t) {}
+			try {
+				JSONObject meta=allJson.getJSONObject("edm").getJSONObject("RDF").getJSONObject("ProvidedCHO");
+				try {
+				properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER,
+						VCardTool.nameToVCard(meta.getString("publisher")));
+				}catch(Throwable t) {}
+				try {
+					properties.put(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR,
+							VCardTool.nameToVCard(meta.getString("creator")));
+					properties.put(CCConstants.CM_PROP_C_CREATOR,meta.getString("creator"));
+					properties.put(CCConstants.NODECREATOR_FIRSTNAME,meta.getString("creator"));
+					properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,meta.getString("creator"));
+				}catch(Throwable t) {}
+				try {
+					String name=meta.getString("title");
+					properties.put(CCConstants.CM_NAME, name);
+					properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, name);
+				}catch(Throwable t) {}
+			}catch(Throwable t) {}
 			
-			String items = httpGet(DDB_API+"/items/"+nodeId+"/view?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
-			if(items != null && items.trim().length() > 0){
-				JSONObject jo = new JSONObject(items);
-				JSONObject item = new JSONObject(jo.get("item"));
+			
+			String previewUrl;
+			try {
+				previewUrl=DDB_API+allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+			}
+			catch(Throwable t) {
+				previewUrl=new MimeTypesV2(appInfo).getPreview(CCConstants.CCM_TYPE_IO, properties, null);
+			}
+			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, previewUrl);	
+			//for the gwt gui no persistent
+			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, previewUrl);
+			
+			JSONObject item = allJson.getJSONObject("view").getJSONObject("item");				
+			try {
 				if(item != null){
-					JSONObject license = (JSONObject)item.get("license");
-					//@TODO map: we dont have public domain at the moment
 					JSONArray fields = (JSONArray)item.get("fields");
 					
 					for(int i = 0; i < fields.length();i++){
@@ -367,24 +354,26 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 								
 							}
 						}
-						
 					}
-					
-					JSONObject institution = (JSONObject)item.get("institution");
-					if(institution != null){
-						String instName = (String)institution.get("name");
-						properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR+"FN", instName);
-						
-					}
+				}
+			}
+			catch(Throwable t) {}
+			try {
+				JSONObject institution = (JSONObject)item.get("institution");
+				if(institution != null){
+					String instName = (String)institution.get("name");
+					properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR+"FN", instName);
 					
 				}
-			
+			}catch(Throwable t) {
+				
 			}
-			
-		} catch(Exception e) {
-			logger.error(e.getMessage(), e);
 		}
-		
+		catch (Exception e) {
+			
+		}
+			
+			
 		return properties;
 	}
 	
@@ -412,7 +401,10 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 		List<String> extSearch = new ArrayList<String>();
 		
- 		String searchWord = searchWordCriteria[0];
+ 		String searchWord = "";
+ 		if(searchWordCriteria!=null && searchWordCriteria.length>0) {
+ 			searchWord = searchWordCriteria[0];
+ 		}
 		if (searchWord.equals("*") ){
 			searchWord="";
 		}

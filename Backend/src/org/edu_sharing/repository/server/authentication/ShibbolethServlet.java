@@ -50,6 +50,7 @@ import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
 public class ShibbolethServlet extends HttpServlet {
@@ -73,7 +74,12 @@ public class ShibbolethServlet extends HttpServlet {
 		
 		SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper)eduApplicationContext.getBean("ssoAuthorityMapper");
 		
-		List<String> additionalAttributes = (List<String>)eduApplicationContext.getBean("additionalAttributes");
+		List<String> additionalAttributes = null;
+		try {
+			additionalAttributes = (List<String>)eduApplicationContext.getBean("additionalAttributes");
+		}catch(NoSuchBeanDefinitionException e) {
+			
+		}
 		
 		String headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 		

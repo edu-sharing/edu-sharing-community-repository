@@ -5,7 +5,7 @@
       "GROUP":"Groups",
       "USER":"Users"
     },
-    "TITLE":"Permissions",
+    "TITLE":"User management",
     "SELECT_ORGANIZATION":"Please select an organization first",
     "MENU_CREATE_USER":"Create user",
     "MENU_CREATE_GROUP":"Create group",

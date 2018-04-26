@@ -37,6 +37,8 @@
       }
       .label{
         @include limitLineCount(1);
+        word-break: break-all;
+        margin-bottom: 10px;
       }
       .description{
         font-size: 90%;

@@ -98,6 +98,7 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -145,7 +146,7 @@ public class AdminServiceImpl implements AdminService  {
 	
 	@Override
 	public Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable {
-		
+
 		ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
 		PermissionService permissionService = PermissionServiceFactory.getLocalService();
 		if(AuthorityServiceFactory.getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
@@ -157,7 +158,7 @@ public class AdminServiceImpl implements AdminService  {
 			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,authority);
 			List<String> permissions = permissionService.getPermissionsForAuthority(nodeId, authority);
 			ToolPermission status=new ToolPermission();
-		
+
 			if(permissionsExplicit.contains(CCConstants.PERMISSION_DENY)) {
 				status.setExplicit(ToolPermission.Status.DENIED);
 			}
@@ -722,7 +723,24 @@ public class AdminServiceImpl implements AdminService  {
 			throw new Exception("job was vetoed by "+jobListener.getVetoBy());
 		}
 	}
-	
+
+	@Override
+	public void startJob(String jobClass, HashMap<String,Object> params) throws Exception {
+
+		if(params == null) {
+			params = new HashMap<String,Object>();
+		}
+		params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
+		params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+
+		Class job = Class.forName(jobClass);
+		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(job, params);
+		if(jobListener != null && jobListener.isVetoed()){
+			throw new Exception("job was vetoed by " + jobListener.getVetoBy());
+		}
+
+	}
+
 	@Override
 	public void startCacheRefreshingJob(String folderId,boolean sticky) throws Exception {
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();

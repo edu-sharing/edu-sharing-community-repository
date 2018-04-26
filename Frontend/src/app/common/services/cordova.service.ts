@@ -131,16 +131,21 @@ export class CordovaService {
       this.loadStorage();
 
       // when new share contet - go to share screen
-      if(this.hasValidConfig()) {
-          this.onNewShareContent().subscribe(
-              (data: any) => {
-                  // TODO: take URI and processes on share screen
-                  // this.router.navigate(['share', URI]);
-                  this.router.navigate(['app', 'share'], {queryParams: data});
-              }, (error) => {
-                  console.log("ERROR on new share event", error);
-              });
-      }
+      let shareInterval=setInterval(()=>{
+          if(this.hasValidConfig()) {
+              console.log("share content register");
+              clearInterval(shareInterval);
+              this.onNewShareContent().subscribe(
+                  (data: any) => {
+                      // TODO: take URI and processes on share screen
+                      // this.router.navigate(['share', URI]);
+                      this.router.navigate(['app', 'share'], {queryParams: data});
+                  }, (error) => {
+                      console.log("ERROR on new share event", error);
+                  });
+          }
+      },1000);
+
 
       // hide the splashscreen (if still showing)
       setTimeout(()=>{
@@ -762,7 +767,8 @@ export class CordovaService {
         correctOrientation: true,
         destinationType: 0, //Camera.DestinationType.DATA_URL
         sourceType: 1, // Camera.PictureSourceType.CAMERA
-        encodingType: 0 //Camera.EncodingType.JPEG
+        encodingType: 0, //Camera.EncodingType.JPEG
+        quality: 70
       };
 
       // Camera PlugIn

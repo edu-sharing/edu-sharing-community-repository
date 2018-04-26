@@ -36,6 +36,7 @@ import {Helper} from "../../common/helper";
 import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {DateHelper} from '../../common/ui/DateHelper';
 import {CordovaService} from "../../common/services/cordova.service";
+import {EventListener} from "../../common/services/frame-events.service";
 
 @Component({
     selector: 'workspace-main',
@@ -49,7 +50,7 @@ import {CordovaService} from "../../common/services/cordova.service";
         trigger('fromRight',UIAnimation.fromRight())
     ]
 })
-export class WorkspaceMainComponent{
+export class WorkspaceMainComponent implements EventListener{
     private isRootFolder : boolean;
     private homeDirectory : string;
     private sharedFolders : Node[]=[];
@@ -210,6 +211,11 @@ export class WorkspaceMainComponent{
             event.stopPropagation();
         }
     }
+    onEvent(event: string, data: any): void {
+        if(event==FrameEventsService.EVENT_REFRESH){
+            this.refresh();
+        }
+    }
     constructor(private toast : Toast,
                 private route : ActivatedRoute,
                 private router : Router,
@@ -230,6 +236,7 @@ export class WorkspaceMainComponent{
                 private connector : RestConnectorService,
                 private cordova : CordovaService
     ) {
+        this.event.addListener(this);
         Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
             UIHelper.setTitle('WORKSPACE.TITLE',title,translate,config);
             this.initialize();
@@ -303,7 +310,7 @@ export class WorkspaceMainComponent{
         }
         let win:any;
         if(!this.cordova.isRunningCordova())
-            window.open("");
+            win=window.open("");
         this.node.createNode(this.currentFolder.ref.id,RestConstants.CCM_TYPE_IO,[],prop,false).subscribe(
             (data : NodeWrapper)=>{
                 this.editConnector(data.node,event.type,win,this.createConnectorType);
@@ -1003,8 +1010,12 @@ export class WorkspaceMainComponent{
         this.searchQuery=null;
         this.actionOptions=null;
         let id="";
+        let length=this.path ? this.path.length : 0;
         if(position>0)
             id=this.path[position-1].ref.id;
+        else if(length>0){
+            id=null;
+        }
         else {
             this.showSelectRoot = true;
             return;

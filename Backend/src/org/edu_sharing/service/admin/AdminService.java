@@ -77,6 +77,8 @@ public interface AdminService {
 
 	String uploadTemp(String name, InputStream is) throws Exception;
 
+	void startJob(String jobClass, HashMap<String, Object> params) throws Exception;
+	
 	Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable;
 
 	void setToolpermissions(String authority,
