@@ -154,7 +154,8 @@ export class MdsComponent{
       return;
     this.isLoading=true;
     this.node.getNodeMetadata(nodeId,[RestConstants.ALL]).subscribe((node : NodeWrapper)=>{
-      this.mdsService.getSet(node.node.metadataset ? node.node.metadataset : RestConstants.DEFAULT).subscribe((data:any)=>{
+      this._setId = node.node.metadataset ? node.node.metadataset : RestConstants.DEFAULT;
+      this.mdsService.getSet(this._setId).subscribe((data:any)=>{
         // test a widget
         //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
         //data.views[0].html+="<test>";
