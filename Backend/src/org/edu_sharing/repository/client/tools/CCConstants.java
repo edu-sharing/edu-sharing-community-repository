@@ -998,6 +998,7 @@ public class CCConstants {
 
 	public final static String CCM_PROP_MAP_COLLECTIONTYPE = "{http://www.campuscontent.de/model/1.0}collectiontype";
 	public final static String CCM_PROP_MAP_COLLECTIONSCOPE = "{http://www.campuscontent.de/model/1.0}collectionscope";
+	public final static String CCM_PROP_MAP_COLLECTIONREMOTEID = "{http://www.campuscontent.de/model/1.0}collectionremoteid";
 
 	public final static String CCM_PROP_MAP_COLLECTIONLEVEL0 = "{http://www.campuscontent.de/model/1.0}collectionlevel0";
 

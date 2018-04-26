@@ -432,7 +432,7 @@ export class SearchComponent {
     let useRender=RestNetworkService.isFromHomeRepo(node,this.allRepositories) ||
       RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories) && RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories).repositoryType==RestConstants.REPOSITORY_TYPE_ALFRESCO;
     if(!useRender){
-      window.open(node.contentUrl);
+      window.open(node.contentUrl,"_blank",UIHelper.getDefaultNewWindowParameters(this.nodeApi));
       return;
     }
     this.renderedNode = node;
@@ -744,6 +744,13 @@ export class SearchComponent {
       if(param['reurl']) {
         this.hasCheckbox=false;
       }
+      if(param['savedQuery']){
+          this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
+              this.currentSavedSearch=data.node;
+              this.sidenavTab=1;
+              this.invalidateMds();
+          });
+      }
       this.refreshListOptions();
 
     });
@@ -999,12 +1006,6 @@ export class SearchComponent {
           this.routeSearch(this.searchService.searchTerm,use,RestConstants.DEFAULT);
         }
 
-        if(param['savedQuery']){
-          this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
-            this.currentSavedSearch=data.node;
-            this.sidenavTab=1;
-          });
-        }
         this.updateSelection([]);
         let repo=this.currentRepository;
         this.mdsService.getSets(repo).subscribe((data:MdsMetadatasets)=>{

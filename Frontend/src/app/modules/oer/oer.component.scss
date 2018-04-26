@@ -25,6 +25,9 @@
   .topBarSearch form {
     left: 50%;
     margin-left: - 250px;
+    .searchClearIcon{
+      right: 5px;
+    }
   }
   .topBarSearch form, .topBarSearch input {
     width: 500px;

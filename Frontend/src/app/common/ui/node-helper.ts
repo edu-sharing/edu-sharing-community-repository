@@ -46,7 +46,9 @@ export class NodeHelper{
       return translation.instant("MEDIATYPE."+node.mediatype);
     }
     if(name==RestConstants.CM_CREATOR){
-      return ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,config);
+      let value=ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,config);
+      if(value)
+        return value;
     }
     if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
       let workflow=NodeHelper.getWorkflowStatus(config,node);
@@ -229,17 +231,6 @@ export class NodeHelper{
       node.preview.data=data.blob();
       observer.next(node);
       observer.complete();
-      /*
-      var reader = new FileReader();
-      console.log(data.blob());
-      reader.readAsDataURL(data.blob());
-      reader.onloadend = function() {
-        node.preview.data=reader.result;
-        console.log(node.preview.data);
-        observer.next(node);
-        observer.complete();
-      }
-      */
     });
   });
   }
@@ -267,7 +258,7 @@ export class NodeHelper{
       "cc-by-sa","cc-by","copyright-free","copyright-license","custom",
       "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk"];
     if(LICENSE_ICONS.indexOf(icon)==-1)
-      return null;
+      icon='none';
     return rest.getAbsoluteEndpointUrl()+"../ccimages/licenses/"+icon+".svg";
   }
   /**

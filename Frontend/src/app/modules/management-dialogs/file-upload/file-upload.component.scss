@@ -67,7 +67,6 @@
   height:350px;
   margin:$cardPadding*-1;
   padding:$cardPadding;
-  margin-bottom: $cardPadding*-2;
 }
 @media screen and (max-height: ($mobileHeight)) {
   .card .scrollable{

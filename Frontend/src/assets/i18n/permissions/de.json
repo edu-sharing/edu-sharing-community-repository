@@ -5,7 +5,7 @@
       "GROUP":"Gruppen",
       "USER":"Nutzer"
     },
-    "TITLE":"Berechtigungen",
+    "TITLE":"Nutzerverwaltung",
     "SELECT_ORGANIZATION":"Bitte zuerst eine Organisation auswählen",
     "MENU_CREATE_USER":"Nutzer erstellen",
     "MENU_CREATE_GROUP":"Gruppe erstellen",

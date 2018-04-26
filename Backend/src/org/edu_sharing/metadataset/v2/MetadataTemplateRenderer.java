@@ -48,7 +48,7 @@ public class MetadataTemplateRenderer {
 			if(group.getId().equals(groupName))
 				return render(group);
 		}
-		return null;
+		throw new IllegalArgumentException("Group "+groupName+" was not found in the mds "+mds.getRepositoryId()+":"+mds.getId());
 	}
 
 	private String render(MetadataGroup group) throws IllegalArgumentException {

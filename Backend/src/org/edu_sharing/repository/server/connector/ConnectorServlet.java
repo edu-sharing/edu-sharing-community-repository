@@ -177,7 +177,7 @@ public class ConnectorServlet extends HttpServlet  {
 			jsonObject.put("ts", System.currentTimeMillis() / 1000);
 			jsonObject.put("sessionId", req.getSession().getId());
 			jsonObject.put("ticket", req.getSession().getAttribute(CCConstants.AUTH_TICKET));
-			jsonObject.put("api_url",homeRepo.getWebServerUrl() + "/" + homeRepo.getWebappname() + "/rest");
+			jsonObject.put("api_url",homeRepo.getClientBaseUrl() + "/rest");
 			
 			if(req.getSession().getAttribute(CCConstants.AUTH_SCOPE)==null){
 				ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();

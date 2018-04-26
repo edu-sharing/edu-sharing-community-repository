@@ -32,6 +32,13 @@ export class Translation  {
   public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
       config.get("supportedLanguages",Translation.DEFAULT_SUPPORTED_LANGUAGES).subscribe((data: string[]) => {
+        if(config.getLocator().getCordova().isRunningCordova()){
+          Translation.initializeCordova(translate,config.getLocator().getCordova(),data).subscribe((language:string)=>{
+            observer.next(language);
+            observer.complete();
+          });
+          return;
+        }
         translate.addLangs(data);
         translate.setDefaultLang(data[0]);
         translate.use(data[0]);
@@ -65,15 +72,16 @@ export class Translation  {
       });
     });
   }
-  public static initializeCordova(translate : TranslateService,cordova:CordovaService) {
+  public static initializeCordova(translate : TranslateService,cordova:CordovaService,supportedLanguages=Translation.DEFAULT_SUPPORTED_LANGUAGES) {
      return new Observable<string>((observer: Observer<string>) => {
-          translate.addLangs(Translation.DEFAULT_SUPPORTED_LANGUAGES);
-          let language=Translation.DEFAULT_SUPPORTED_LANGUAGES[0];
+          translate.addLangs(supportedLanguages);
+          let language=supportedLanguages[0];
           translate.setDefaultLang(language);
           translate.use(language);
           Translation.setLanguage(language);
           cordova.getLanguage().subscribe((data: string) => {
-              if (Translation.DEFAULT_SUPPORTED_LANGUAGES.indexOf(data) != -1) {
+              console.log("language from phone: "+data);
+              if (supportedLanguages.indexOf(data) != -1) {
                   language=data;
               }
               translate.use(language);

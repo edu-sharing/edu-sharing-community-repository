@@ -67,7 +67,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 	public static final int MAX_IMAGE_SIZE = 1200;
 
-	private static final float DEFAULT_QUALITY = 0.7f;
+	private static final float DEFAULT_QUALITY = 0.8f;
 
 	ServiceRegistry serviceRegistry;
 

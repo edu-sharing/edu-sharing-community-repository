@@ -1,0 +1,70 @@
+<metadataset id="default" label="default" hidden="false">
+		<name>Core Metadataset</name>
+		<inherit>mds</inherit>
+		<i18n>mds_translation</i18n>
+	<widgets>
+      <widget>
+                <id>title</id>
+                <caption>Title</caption>
+                <placeholder>z.B. Goethe</placeholder>
+                <type>text</type>
+      </widget>
+      <widget>
+                <id>place</id>
+                <caption>Ort</caption>
+                <placeholder>z.B. Frankfurt</placeholder>
+                <type>text</type>
+      </widget>
+      <widget>
+                <id>affiliate</id>
+                <caption>Person/Organisation</caption>
+                <placeholder>z.B. Kandinsky</placeholder>
+                <type>text</type>
+      </widget>
+
+    </widgets>
+	<templates>
+		<template>
+			<id>search</id>
+			<html><![CDATA[
+	            <title>
+	            <place>
+	            <affiliate>
+		  ]]></html>
+		</template>
+		<template>
+			<id>node_general_render</id>
+			<caption>dialog_upload_tab_basic</caption>
+			<html><![CDATA[
+	            <cclom:title>
+	            <sys:node-uuid>
+			]]></html>
+		</template>
+	</templates>
+	<lists>
+			<list>
+				<id>search</id>
+				<columns>
+					<column>cm:title</column>
+					<column>cm:creator</column>
+					<column>cclom:general_description</column>
+					<column>ccm:replicationsource</column>				
+				</columns>
+			</list>
+	</lists>
+	<groups>
+		<group>
+			<id>ngsearch</id>
+			<views>
+				<view>search</view>
+			</views>
+		</group>
+	</groups>
+	<queries>
+		<query join="AND" id="ngsearch">
+			<property name="title"></property>
+			<property name="place"></property>
+			<property name="affiliate"></property>
+		</query>
+	</queries>
+</metadataset>

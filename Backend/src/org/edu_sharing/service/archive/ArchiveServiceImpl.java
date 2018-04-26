@@ -106,9 +106,9 @@ public class ArchiveServiceImpl implements ArchiveService  {
 			searchToken.setMaxResult(maxResults);
 			searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
 			searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
-			searchToken.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR " + "TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") AND " + "@cm\\:name:\""+QueryParser.escape(searchWord) + "*\""+" AND ASPECT:\"sys:archived\"");
+			searchToken.setLuceneString("@cm\\:name:\""+QueryParser.escape(searchWord) + "*\""+" AND ASPECT:\"sys:archived\"");
 			searchToken.setSortDefinition(sortDefinition);
-			searchToken.setContentType(ContentType.ALL);
+			searchToken.setContentType(ContentType.FILES_AND_FOLDERS);
 			
 			return this.searchService.search(searchToken);
 		}catch(Throwable e){
@@ -127,9 +127,9 @@ public class ArchiveServiceImpl implements ArchiveService  {
 			searchToken.setMaxResult(maxResults);
 			searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
 			searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
-			searchToken.setLuceneString("(TYPE:\"" + CCConstants.CCM_TYPE_IO +"\" OR " + "TYPE:\"" + CCConstants.CCM_TYPE_MAP + "\") AND " + "@cm\\:name:\""+QueryParser.escape(searchWord) + "*\"" + " AND @sys\\:archivedBy:\"" + QueryParser.escape(user)+"\" AND ASPECT:\"sys:archived\"");
+			searchToken.setLuceneString("@cm\\:name:\""+QueryParser.escape(searchWord) + "*\"" + " AND @sys\\:archivedBy:\"" + QueryParser.escape(user)+"\" AND ASPECT:\"sys:archived\"");
 			searchToken.setSortDefinition(sortDefinition);
-			searchToken.setContentType(ContentType.ALL);
+			searchToken.setContentType(ContentType.FILES_AND_FOLDERS);
 			return this.searchService.search(searchToken);
 			
 		}catch(Throwable e){

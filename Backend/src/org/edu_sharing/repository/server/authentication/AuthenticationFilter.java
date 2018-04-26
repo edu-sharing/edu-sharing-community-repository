@@ -24,6 +24,9 @@ import org.edu_sharing.repository.server.tools.LocaleValidator;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
+import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.config.model.Config;
+import org.edu_sharing.service.config.model.Context;
 import org.springframework.context.ApplicationContext;
 
 public class AuthenticationFilter implements javax.servlet.Filter {
@@ -188,7 +191,28 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		
 		String allowedAuthTypes = ApplicationInfoList.getHomeRepository().getAllowedAuthenticationTypes();
 		
-		if(allowedAuthTypes != null && !allowedAuthTypes.trim().equals("")){
+		boolean contextAllowesSSO = true;
+		try {
+			Config config = ConfigServiceFactory.getCurrentConfig();
+			if(config != null) {
+				if(config.contexts != null) {
+					String reqDomain = req.getServerName();
+					for(Context context : config.contexts.context) {
+						
+						for(String currentDomain : context.domain) {
+							if(reqDomain.equals(currentDomain)) {
+								if(!(context.values.loginUrl != null && context.values.loginUrl.contains("edu-sharing/shibboleth"))){
+									contextAllowesSSO = false;
+								}
+							}
+						}
+						
+					}
+				}
+			}
+		}catch(Exception e) {}
+		
+		if(allowedAuthTypes != null && !allowedAuthTypes.trim().equals("") && contextAllowesSSO){
 			String shibbUrl = URLTool.addSSOPathWhenConfigured(URLTool.getBaseUrl()) + ( req.getQueryString() != null ? "?"+req.getQueryString() : "");
 			resp.sendRedirect(shibbUrl);
 		}else{

@@ -451,13 +451,15 @@ export class MainNavComponent {
     this.onSearch.emit({query:value,cleared:false});
   }
   private openButton(button : any){
+    if(button.isDisabled)
+      return;
     this.displaySidebar=false;
     if(button.scope==this._currentScope){
       return;
     }
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
     if(button.url){
-      window.location.href=button.url;
+      window.open(button.url,'_blank',UIHelper.getDefaultNewWindowParameters(this.nodeService));
     }
     else {
       let queryParams=button.queryParams?button.queryParams:{};

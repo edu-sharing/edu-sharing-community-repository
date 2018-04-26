@@ -41,16 +41,6 @@ export class FileComponent {
     // remember file for upload
     this.selectedFile = file;
     this.OnFileSelected.emit(file);
-    // read file base64
-    /*
-    var reader  = new FileReader();
-    reader.addEventListener("load", () => {
-      this.imageData = reader.result;
-      //console.log(this.imageData);
-      this.imageShow = true;
-    });
-    reader.readAsDataURL(file);
-    */
   }
 
 }
