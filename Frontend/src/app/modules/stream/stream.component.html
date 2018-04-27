@@ -36,13 +36,13 @@
             <!-- This could be a directive : -->
 
         </h5>
-
+        
         <div class="stream-box" *ngFor="let strm of streams" >
             <div class="stream-box-main">
                 <div class="stream-box-title">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
                 <!-- todo: ngfor over strm.properties.['cclom:general_keyword'] -->
         
-          <div class="stream-box-desc">{{ strm.nodes[0].description || 'lorem ipsum dolor sit amet, consectetur' }}</div> 
+          <div class="stream-box-desc">{{ strm.properties['add_to_stream_description'] || 'keine Beschreibung' }}</div> 
           <div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
 
 
