@@ -37,7 +37,25 @@ import {RestStreamService} from "../../common/rest/services/rest-stream.service"
 
 
 export class StreamComponent {
-  test = 'sdsd';
+  today() {
+      var d = new Date();
+      var weekday = d.getDay();
+      var dd = d.getDate(); 
+      var mm = d.getMonth()+1; //January is 0!
+      var yyyy = String(d.getFullYear());
+      var outstring = '';
+      if (weekday == 0) outstring += 'Sonntag, der ';
+      if (weekday == 1) outstring += 'Montag, der ';
+      if (weekday == 2) outstring += 'Dienstag, der ';
+      if (weekday == 3) outstring += 'Mittwoch, der ';
+      if (weekday == 4) outstring += 'Donnerstag, der ';
+      if (weekday == 5) outstring += 'Freitag, der ';
+      if (weekday == 6) outstring += 'Samstag, der ';
+      if(dd<10) {outstring += '0'+String(dd);} else {outstring += String(dd);}
+      outstring += '. ';
+      if(mm<10) {outstring += '0'+String(mm);} else {outstring +=  String(mm);}
+      return outstring + '. ' + String(yyyy);
+  }
   menuOption = 'stream';
   streams: any;
   actionOptions:OptionItem[]=[];
