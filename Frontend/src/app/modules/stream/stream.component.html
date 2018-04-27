@@ -29,7 +29,7 @@
                     </span>
                 </div>
                 <div class="stream-header-right">
-                  <!--   <div class="stream-uppericon"> <i class="material-icons fix-up " >shuffle</i>  </div> <div (click)="sortieren()" class="stream-uppertext">Sortieren</div>-->
+                     <!--<div class="stream-uppericon"> <i class="material-icons fix-up " >shuffle</i>  </div> <div (click)="sortieren()" class="stream-uppertext">Sortieren</div>-->
                 </div>
             </div>
             
@@ -39,7 +39,7 @@
         
         <div class="stream-box" *ngFor="let strm of streams" >
             <div class="stream-box-main">
-                <div class="stream-box-title">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
+                <div class="stream-box-title" (click)="onStreamObjectClick(strm)">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
                 <!-- todo: ngfor over strm.properties.['cclom:general_keyword'] -->
         
           <div class="stream-box-desc">{{ strm.properties['add_to_stream_description'] || 'keine Beschreibung' }}</div> 
@@ -58,8 +58,8 @@
                 ></actionbar>
             </div>
             <div class="stream-box-kompetenzen"></div>
-            <div class="stream-box-image">
-                <img src="{{ strm.nodes[0].preview.url }} " style="width:100%;height:auto;border:0;">
+            <div class="stream-box-image" >
+                <img src="{{ strm.nodes[0].preview.url }} " (click)="onStreamObjectClick(strm)" style="width:100%;height:auto;border:0;">
                 
                 <div class="bottom-left">{{strm.properties['add_to_stream_title']}}</div>
                 <div class="bottom-right">{{ strm.nodes[0].commentCount }} <i class="material-icons stic" >comment</i> </div>

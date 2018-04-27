@@ -85,7 +85,8 @@ export class StreamComponent {
       });
       // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
       this.actionOptions.push(new OptionItem('Erledigt','check',(node: Node)=>{
-        this.updateStream(node).subscribe(data => console.log(data), error => console.log(error));
+        // might be better without refreshing? (just update data)
+        this.updateStream(node).subscribe(data => this.refresh() , error => console.log(error));
       }));
       this.actionOptions.push(new OptionItem('Ganz oben anzeigen','arrow_upward',()=>{
           alert('callback 2');
@@ -117,9 +118,20 @@ export class StreamComponent {
   sortieren() {
     // here is going to be the sorting functionality: 
     console.log(this.streams);
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", '8bf25148-1625-4815-92d9-ab463271c5fd'])
     
    // let temp = this.other['stream'].shift();
     //this.other['stream'].push(temp);
+  }
+
+  refresh(): void {
+    window.location.reload();
+  }
+
+  onStreamObjectClick(node: any) {
+    console.log(node.nodes[0].ref.id);
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
+
   }
 
   public getJSON(streamStatus: any): Observable<any> {
