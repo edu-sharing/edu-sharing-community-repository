@@ -59,12 +59,21 @@ export class StreamComponent {
   menuOption = 'stream';
   streams: any;
   actionOptions:OptionItem[]=[];
+
+  erledigtOption = new OptionItem('Erledigt','check',(node: Node)=>{
+    this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.refresh() , error => console.log(error));
+  });
+
+  nichtErledigtOption = new OptionItem('Doch Nicht Erledigt','check',(node: Node)=>{
+    this.updateStream(node, STREAM_STATUS.OPEN).subscribe(data => this.refresh() , error => console.log(error));
+  });
+
   // TODO: Store and use current search query
   searchQuery:string;
   doSearch(query:string){
     this.searchQuery=query;
     console.log(query);
-    // TODO: Search for the given query
+    // TODO: Search for the given query doch nicht erledigt
   }
   constructor(
     private router : Router,
@@ -83,11 +92,9 @@ export class StreamComponent {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
       });
+
       // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
-      this.actionOptions.push(new OptionItem('Erledigt','check',(node: Node)=>{
-        // might be better without refreshing? (just update data)
-        this.updateStream(node).subscribe(data => this.refresh() , error => console.log(error));
-      }));
+      this.actionOptions.push(this.erledigtOption);
       this.actionOptions.push(new OptionItem('Ganz oben anzeigen','arrow_upward',()=>{
           alert('callback 2');
       }));
@@ -95,8 +102,6 @@ export class StreamComponent {
         alert('callback 3');
     }));
       this.getJSON(STREAM_STATUS.OPEN).subscribe(data => this.streams = data['stream'], error => console.log(error));
-
-      
 
   }
 
@@ -109,17 +114,17 @@ export class StreamComponent {
     this.menuOption = option;
     if (option === 'stream') {
       this.getJSON(STREAM_STATUS.OPEN).subscribe(data => this.streams = data['stream'], error => console.log(error));
+      this.actionOptions[0] = this.erledigtOption;
     } else {
       this.getJSON(STREAM_STATUS.DONE).subscribe(data => this.streams = data['stream'], error => console.log(error));
+      this.actionOptions[0] = this.nichtErledigtOption;
     }
 
   }
 
   sortieren() {
-    // here is going to be the sorting functionality: 
-    console.log(this.streams);
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", '8bf25148-1625-4815-92d9-ab463271c5fd'])
-    
+    //console.log(this.streams);
+    console.log(this.actionOptions);
    // let temp = this.other['stream'].shift();
     //this.other['stream'].push(temp);
   }
@@ -139,8 +144,8 @@ export class StreamComponent {
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
 
-  public updateStream(idToUpdate: any): Observable<any> {
-    return this.streamService.updateStatus(idToUpdate, this.connector.getCurrentLogin().authorityName, STREAM_STATUS.DONE)
+  public updateStream(idToUpdate: any, status: any): Observable<any> {
+    return this.streamService.updateStatus(idToUpdate, this.connector.getCurrentLogin().authorityName, status)
   }
 
 
