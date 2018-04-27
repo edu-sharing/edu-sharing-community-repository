@@ -344,12 +344,12 @@
     "API_FORBIDDEN_LOGIN":"Bitte anmelden, um auf diesen Bereich zuzugreifen"
   },
   "ADD_TO_STREAM":{
-    "TITLE":"Zur Pipeline hinzufügen",
-    "AUDIENCE_TYPE":"Auf Pipeline von...",
+    "TITLE":"Zum Stream hinzufügen",
+    "AUDIENCE_TYPE":"Auf Stream von...",
     "AUDIENCE_EVERYONE":"Allen",
-    "AUDIENCE_EVERYONE_INFO":"Der Eintrag wird bei allen Nutzern auf der Pipeline erscheinen",
+    "AUDIENCE_EVERYONE_INFO":"Der Eintrag wird bei allen Nutzern auf dem Stream erscheinen",
     "AUDIENCE_CUSTOM":"Einzelnen Personen oder Gruppen",
-    "SUCCESSFUL":"Element(e) wurden zur Pipeline hinzugefügt",
+    "SUCCESSFUL":"Element(e) wurden zum Stream hinzugefügt",
     "ERROR": {
       "NO_PERSON_INVITED": "Keine Personen gewählt"
     }
