@@ -138,7 +138,8 @@ export class CordovaService {
       this.loadStorage();
 
       // currently disabled, angular history navigation issues
-      //document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
+      // --> navigation issues exist anyway, need to check that later
+      document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
       let shareInterval=setInterval(()=>{
           if(this.hasValidConfig()) {
