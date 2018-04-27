@@ -49,7 +49,7 @@ export class FrameEventsService {
 
   constructor() {
     let t=this;
-    window.addEventListener('message', this.onEvent, false);
+    window.addEventListener('message', (event:any)=>this.onEvent(event), false);
       setInterval(()=>{
         this.broadcastEvent(FrameEventsService.EVENT_CONTENT_HEIGHT,document.body.scrollHeight);
       },250);
