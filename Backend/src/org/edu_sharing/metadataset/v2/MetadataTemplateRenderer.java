@@ -76,6 +76,7 @@ public class MetadataTemplateRenderer {
 		String content=template.getHtml();
 		
 		for(MetadataWidget widget : mds.getWidgets()){
+			widget=mds.findWidgetForTemplate(widget.getId(),template.getId());
 			int start=content.indexOf("<"+widget.getId());
 			if(start==-1)
 				continue;

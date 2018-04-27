@@ -9,6 +9,9 @@ import {PlatformLocation} from "@angular/common";
 import {Helper} from "../helper";
 import {UIConstants} from "../ui/ui-constants";
 import {Router} from "@angular/router";
+import {FrameEventsService} from "./frame-events.service";
+
+declare var cordova : any;
 
 /**
  * All services that touch the mobile app or cordova plugins are available here.
@@ -59,7 +62,8 @@ export class CordovaService {
    */
   constructor(
     private http : Http,
-    private router : Router
+    private router : Router,
+    private events : FrameEventsService
   ) {
 
     this.initialHref = window.location.href;
@@ -125,6 +129,7 @@ export class CordovaService {
   // CORDOVA EVENT: Device is Ready (on App StartUp)
   private whenDeviceIsReady = () => {
 
+      //window.open = cordova.InAppBrowser.open;
       console.log("CordovaService: App is Ready");
 
       // load basic data from storage
@@ -912,6 +917,45 @@ export class CordovaService {
      }*/
    }
 
+   openInAppBrowser(url:string){
+       let win:any=window.open(url,"_blank","location=no");
+       win.addEventListener( "loadstop", ()=> {
+           console.log("cordova init inapp window");
+           let loop = setInterval(()=>{
+
+               // Execute JavaScript to check for the existence of a name in the
+               // child browser's localStorage.
+               win.executeScript(
+                   {
+                       code: `
+                        if(!window.messages){
+                            window.messages=[];
+                        }
+                        window.opener={
+                            postMessage:function(event,scope){
+                                window.messages.push(event);
+                            }
+                        };
+                        var msg=window.messages;
+                        window.messages=[];
+                        JSON.stringify(msg);`
+                   },
+                   (values:string[])=>{
+                       let events = JSON.parse(values[0]);
+                       for(let e of events) {
+                           let event={source:win, data:e};
+                           console.log(event);
+                           this.events.onEvent(event);
+                           if(e.event==FrameEventsService.EVENT_CLOSE){
+                               clearInterval(loop);
+                           }
+                       }
+                   }
+               );
+           },500);
+       });
+       return win;
+   }
    openBrowser(url:string){
        window.open(url,'_system');
    }
