@@ -114,7 +114,11 @@ public class StreamDao {
 
 						@Override
 						public Void doWork() throws Exception {
-							nodes.add(NodeDao.getNode(repoDao, nodeId).asNode());
+							try {
+								nodes.add(NodeDao.getNode(repoDao, nodeId).asNode());
+							}catch(Throwable t) {
+								t.printStackTrace();
+							}
 							return null;
 						}
 					});
