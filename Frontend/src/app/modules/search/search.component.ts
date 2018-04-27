@@ -432,7 +432,7 @@ export class SearchComponent {
     let useRender=RestNetworkService.isFromHomeRepo(node,this.allRepositories) ||
       RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories) && RestNetworkService.getRepositoryById(node.ref.repo,this.allRepositories).repositoryType==RestConstants.REPOSITORY_TYPE_ALFRESCO;
     if(!useRender){
-      window.open(node.contentUrl,"_blank",UIHelper.getDefaultNewWindowParameters(this.nodeApi));
+      UIHelper.openBlankWindow(node.contentUrl,this.connector.getCordovaService());
       return;
     }
     this.renderedNode = node;

@@ -22,6 +22,7 @@ import {RestNodeService} from "../rest/services/rest-node.service";
 import {PlatformLocation} from "@angular/common";
 import {ListItem} from './list-item';
 import {AbstractRestService} from "../rest/services/abstract-rest-service";
+import {CordovaService} from "../services/cordova.service";
 export class UIHelper{
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
@@ -246,8 +247,7 @@ export class UIHelper{
           if(win)
             win.location.href=url;
           else if(isCordova){
-              //connector.getRestConnector().getCordovaService() .openBrowser(url);
-              window.open(url,"_blank",UIHelper.getDefaultNewWindowParameters(connector));
+            UIHelper.openBlankWindow(url,connector.getRestConnector().getCordovaService());
           }
           else {
               window.location.replace(url);
@@ -375,7 +375,12 @@ export class UIHelper{
         });
     }
 
-    static getDefaultNewWindowParameters(rest:AbstractRestService) {
-        return rest.getRestConnector().getCordovaService().isRunningCordova() ? "location=no" : null;
+    static openBlankWindow(url:string, cordova: CordovaService) {
+      if(cordova.isRunningCordova()){
+        return cordova.openInAppBrowser(url);
+      }
+      else {
+        return window.open(url, '_blank',);
+      }
     }
 }
