@@ -134,7 +134,7 @@ export class CordovaService {
 
       // load basic data from storage
       this.loadStorage();
-
+      document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
       let shareInterval=setInterval(()=>{
           if(this.hasValidConfig()) {
@@ -199,7 +199,7 @@ export class CordovaService {
        });
    }
    private registerOnShareContent() : void {
-       if (this.isAnroid()) {
+       if (this.isAndroid()) {
            console.log("register on share intent");
            // only run once. Will loop otherwise if no auth is found and intent was send
            let handleIntent=(intent:any)=> {
@@ -344,7 +344,7 @@ export class CordovaService {
    * Check if app is running on a Android device.
    * https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-device/index.html
    */
-  isAnroid() : boolean {
+  isAndroid() : boolean {
     try {
       let device:any = (window as any).device;
       console.log("cordova-plugin-device", device);
@@ -1248,5 +1248,19 @@ export class CordovaService {
         }
 
       });
+    }
+
+    private onBackKeyDown() {
+        let event = new KeyboardEvent('keydown', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+        });
+        let canceled = !window.document.dispatchEvent(event);
+        if(canceled){
+
+        } else {
+            window.history.back();
+        }
     }
 }
