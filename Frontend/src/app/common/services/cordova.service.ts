@@ -10,6 +10,7 @@ import {Helper} from "../helper";
 import {UIConstants} from "../ui/ui-constants";
 import {Router} from "@angular/router";
 import {FrameEventsService} from "./frame-events.service";
+import {Location} from '@angular/common';
 
 declare var cordova : any;
 
@@ -63,6 +64,7 @@ export class CordovaService {
   constructor(
     private http : Http,
     private router : Router,
+    private location: Location,
     private events : FrameEventsService
   ) {
 
@@ -134,7 +136,9 @@ export class CordovaService {
 
       // load basic data from storage
       this.loadStorage();
-      document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
+
+      // currently disabled, angular history navigation issues
+      //document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
       let shareInterval=setInterval(()=>{
           if(this.hasValidConfig()) {
@@ -1251,16 +1255,17 @@ export class CordovaService {
     }
 
     private onBackKeyDown() {
-        let event = new KeyboardEvent('keydown', {
-            'view': window,
-            'bubbles': true,
-            'cancelable': true
-        });
-        let canceled = !window.document.dispatchEvent(event);
-        if(canceled){
+      console.log("back key pressed");
+        let eventDown = new KeyboardEvent('keydown', {key: 'Escape',view: window,bubbles: true,cancelable: true});
+        let eventUp = new KeyboardEvent('keyup', {key: 'Escape',view: window,bubbles: true,cancelable: true});
+        let down = !window.document.dispatchEvent(eventDown);
+        let up = !window.document.dispatchEvent(eventUp);
+        console.log("was catched by escape "+down);
+        if(down || up){
 
         } else {
-            window.history.back();
+            //(navigator as any).app.backHistory();
+            this.location.back();
         }
     }
 }
