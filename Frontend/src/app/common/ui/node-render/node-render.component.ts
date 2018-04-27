@@ -174,8 +174,10 @@ export class NodeRenderComponent implements EventListener{
       private config : ConfigurationService,
       private storage : SessionStorageService,
       private route : ActivatedRoute,
+      private _ngZone: NgZone,
       private router : Router,
       private temporaryStorageService: TemporaryStorageService) {
+      (window as any)['nodeRenderComponentRef'] = {component: this, zone: _ngZone};
       (window as any).ngRender = {setDownloadUrl:(url:string)=>{this.setDownloadUrl(url)}};
       this.frame.addListener(this);
         Translation.initialize(translate,config,storage,route).subscribe(()=>{

@@ -58,7 +58,7 @@
                 ></actionbar>
             </div>
             <div class="stream-box-kompetenzen"></div>
-            <div class="stream-box-image" >
+            <div class="stream-box-image" *ngIf="strm.nodes[0]"> <!-- TODO: Display a warning when no node is found (it could be deleted) -->
                 <img src="{{ strm.nodes[0].preview.url }} " (click)="onStreamObjectClick(strm)" style="width:100%;height:auto;border:0;">
                 
                 <div class="bottom-left">{{strm.properties['add_to_stream_title']}}</div>
