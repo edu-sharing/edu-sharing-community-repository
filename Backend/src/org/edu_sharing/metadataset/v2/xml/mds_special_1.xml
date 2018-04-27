@@ -11,7 +11,7 @@
 				<type>multivalueGroup</type>
 				<subwidgets>
 					<widget>ccm:classification_purpose</widget>
-					<widget>ccm:taxonid</widget>
+					<widget>ccm:educationaltypicalagerange</widget>
 				</subwidgets>
 			</widget>
 			<widget>
@@ -40,7 +40,7 @@
 				<caption>Bildungsbereich/-sektor</caption>
 				<placeholder>z.B. Physik</placeholder>
 				<type>multivalueTree</type>
-				<valuespace>eaf_discipline.xml</valuespace>
+				<valuespace>lisum_taxon.xml</valuespace>
 			</widget>
 			<widget>
 				<id>ccm:educationaltypicalagerange</id>
@@ -87,6 +87,7 @@
 				<icon>help_outline</icon>
 				<html><![CDATA[
               <ccm:group_test>
+              <ccm:taxonid>
               <ccm:educationaltypicalagerange extended="true">
 				]]></html>
 			</template>
