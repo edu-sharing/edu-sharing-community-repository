@@ -999,7 +999,7 @@ export class CordovaService {
 
   // get the metadata about what servers that are part of the public listing
   public getPublicServerList() : Observable<any> {
-    let url='http://app-registry.edu-sharing.com/public-server-directory.php';
+    let url='http://app-registry.edu-sharing.com/servers.php?version=2.0';
     let headers=new Headers();
     headers.set('Accept','application/json');
     let options={headers:headers};
