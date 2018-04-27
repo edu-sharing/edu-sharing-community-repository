@@ -134,7 +134,7 @@ export class CordovaService {
 
       // load basic data from storage
       this.loadStorage();
-
+      document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
       let shareInterval=setInterval(()=>{
           if(this.hasValidConfig()) {
@@ -1248,5 +1248,19 @@ export class CordovaService {
         }
 
       });
+    }
+
+    private onBackKeyDown() {
+        let event = new KeyboardEvent('keydown', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+        });
+        let canceled = !window.document.dispatchEvent(event);
+        if(canceled){
+
+        } else {
+            window.history.back();
+        }
     }
 }
