@@ -61,11 +61,11 @@ export class StreamComponent {
   actionOptions:OptionItem[]=[];
 
   erledigtOption = new OptionItem('Erledigt','check',(node: Node)=>{
-    this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.refresh() , error => console.log(error));
+    this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   });
 
   nichtErledigtOption = new OptionItem('Doch Nicht Erledigt','check',(node: Node)=>{
-    this.updateStream(node, STREAM_STATUS.OPEN).subscribe(data => this.refresh() , error => console.log(error));
+    this.updateStream(node, STREAM_STATUS.OPEN).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.DONE) , error => console.log(error));
   });
 
   // TODO: Store and use current search query
@@ -101,7 +101,7 @@ export class StreamComponent {
       this.actionOptions.push(new OptionItem('Aus Stream entfernen','remove_circle',()=>{
         alert('callback 3');
     }));
-      this.getJSON(STREAM_STATUS.OPEN).subscribe(data => this.streams = data['stream'], error => console.log(error));
+      this.updateDataFromJSON(STREAM_STATUS.OPEN);
 
   }
 
@@ -113,13 +113,21 @@ export class StreamComponent {
   menuOptions(option: any) {
     this.menuOption = option;
     if (option === 'stream') {
-      this.getJSON(STREAM_STATUS.OPEN).subscribe(data => this.streams = data['stream'], error => console.log(error));
+      this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.actionOptions[0] = this.erledigtOption;
     } else {
-      this.getJSON(STREAM_STATUS.DONE).subscribe(data => this.streams = data['stream'], error => console.log(error));
+      this.updateDataFromJSON(STREAM_STATUS.DONE);
       this.actionOptions[0] = this.nichtErledigtOption;
     }
 
+  }
+
+  updateDataFromJSON(streamStatus: any) {
+    this.getSimpleJSON(streamStatus).subscribe(data => {
+      console.log('test: ', data);
+      this.streams = (<any>data)['streams'];
+      console.log(this.streams);
+    }, error => console.log(error));
   }
 
   sortieren() {
@@ -142,6 +150,10 @@ export class StreamComponent {
   public getJSON(streamStatus: any): Observable<any> {
     let request:any={offset:this.streams ? this.streams.length : 0};
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
+  }
+
+  public getSimpleJSON(streamStatus: any) {
+    return this.streamService.getStream(streamStatus);
   }
 
   public updateStream(idToUpdate: any, status: any): Observable<any> {
