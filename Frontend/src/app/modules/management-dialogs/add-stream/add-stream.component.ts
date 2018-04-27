@@ -78,7 +78,7 @@ export class AddStreamComponent  {
     }
     this.onLoading.emit(true);
     this.streamEntry.title=values['add_to_stream_title'][0];
-    this.streamEntry.priority=values['add_to_stream_priority'][0];
+    this.streamEntry.priority=5;//values['add_to_stream_priority'][0];
     this.streamEntry.description=values['add_to_stream_description'] ? values['add_to_stream_description'][0] : null;
     this.streamEntry.properties=values;
     this.streamEntry.nodes=RestHelper.getNodeIds(this._nodes);
