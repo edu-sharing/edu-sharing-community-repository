@@ -61,6 +61,7 @@ export class StreamComponent {
   actionOptions:OptionItem[]=[];
 
   erledigtOption = new OptionItem('Erledigt','check',(node: Node)=>{
+    alert(node);
     this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   });
 
@@ -105,6 +106,11 @@ export class StreamComponent {
 
   }
 
+  seen(id: any) {
+    alert(id);
+    this.updateStream(id, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
+  }
+
   onScroll() {
     console.log("scrolled!!");
     //this.getJSON().subscribe(data => this.streams = this.streams.concat(data['stream']), error => console.log(error));
@@ -123,9 +129,10 @@ export class StreamComponent {
   }
 
   updateDataFromJSON(streamStatus: any) {
-    this.getSimpleJSON(streamStatus).subscribe(data => {
+    this.getJSON(streamStatus).subscribe(data => {
       console.log('test: ', data);
-      this.streams = (<any>data)['streams'];
+      this.streams = data['stream'];
+
       console.log(this.streams);
     }, error => console.log(error));
   }
@@ -143,6 +150,7 @@ export class StreamComponent {
 
   onStreamObjectClick(node: any) {
     console.log(node.nodes[0].ref.id);
+    this.seen(node.id);
     this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
 
   }
