@@ -129,7 +129,7 @@ export class StreamComponent {
   }
 
   updateDataFromJSON(streamStatus: any) {
-    this.getJSON(streamStatus).subscribe(data => {
+    this.getSimpleJSON(streamStatus).subscribe(data => {
       console.log('test: ', data);
       this.streams = data['stream'];
 
@@ -160,8 +160,9 @@ export class StreamComponent {
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
 
-  public getSimpleJSON(streamStatus: any) {
-    return this.streamService.getStream(streamStatus);
+  public getSimpleJSON(streamStatus: any): Observable<any> {
+    let request:any={offset: 0};
+    return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
 
   public updateStream(idToUpdate: any, status: any): Observable<any> {
