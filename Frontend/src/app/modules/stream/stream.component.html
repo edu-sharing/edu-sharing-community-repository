@@ -14,7 +14,7 @@
         <div class="choose-menu"  (click)="menuOptions('stream')" [ngClass]="menuOption == 'stream' ? 'm-active' : 'm-inactive'">
                 <i class="tiny material-icons fix-icon-padding">date_range</i>  Was gibt's Neues?
         </div>
-        <div class="choose-menu"  (click)="menuOptions('erledigt')" [ngClass]="menuOption == 'erledigt' ? 'm-active' : 'm-inactive'">
+        <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'erledigt' ? 'm-active' : 'm-inactive'">
                 <i class="tiny material-icons fix-icon-padding">visibility</i> Schon gesehen
         </div>
     </div>    
@@ -23,8 +23,9 @@
         <h5>
             <div class="stream-header">
                 <div class="stream-header-left">
-                    <div class="stream-title">Heute</div>
-                    <span id="stream-title-date">
+                    <div *ngIf="menuOption == 'stream'" class="stream-title">Was gibt's Neues?</div>
+                    <div *ngIf="menuOption == 'gesehen'" class="stream-title">Schon gesehen</div>
+                    <span id="stream-title-date" class="stream-title-date">
                         {{today()}}
                     </span>
                 </div>

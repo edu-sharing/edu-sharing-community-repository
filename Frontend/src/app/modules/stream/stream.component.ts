@@ -60,12 +60,11 @@ export class StreamComponent {
   streams: any;
   actionOptions:OptionItem[]=[];
 
-  erledigtOption = new OptionItem('Erledigt','check',(node: Node)=>{
-    alert(node);
+  erledigtOption = new OptionItem('Gesehen','check',(node: Node)=>{
     this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   });
 
-  nichtErledigtOption = new OptionItem('Doch Nicht Erledigt','check',(node: Node)=>{
+  nichtErledigtOption = new OptionItem('Als ungesehen markieren','check',(node: Node)=>{
     this.updateStream(node, STREAM_STATUS.OPEN).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.DONE) , error => console.log(error));
   });
 
@@ -96,7 +95,7 @@ export class StreamComponent {
 
       // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
       this.actionOptions.push(this.erledigtOption);
-      this.actionOptions.push(new OptionItem('Ganz oben anzeigen','arrow_upward',()=>{
+      this.actionOptions.push(new OptionItem('In Samlung','arrow_upward',()=>{
           alert('callback 2');
       }));
       this.actionOptions.push(new OptionItem('Aus Stream entfernen','remove_circle',()=>{
@@ -107,7 +106,6 @@ export class StreamComponent {
   }
 
   seen(id: any) {
-    alert(id);
     this.updateStream(id, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   }
 
