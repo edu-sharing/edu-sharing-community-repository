@@ -656,8 +656,8 @@ export class MdsComponent{
     this.globalProgress=true;
     if(version){
       if(files.length){
-        this.node.uploadNodeContent(this.currentNode.ref.id,files[0],version).subscribe(()=>{
           this.node.editNodeMetadata(this.currentNode.ref.id,this.currentNode.properties).subscribe(()=>{
+              this.node.uploadNodeContent(this.currentNode.ref.id,files[0],version).subscribe(()=>{
             this.onUpdatePreview(callback);
           },(error:any)=>{
             this.toast.error(error);
