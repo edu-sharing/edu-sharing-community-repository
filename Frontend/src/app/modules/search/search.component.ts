@@ -233,11 +233,7 @@ export class SearchComponent {
                /*this.repositories = null;*/
 
              }
-             this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
-             if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
-               this.currentRepository=this.currentRepositoryObject.id;
-             }
-
+             this.updateCurrentRepositoryId();
              if(this.repositories) {
                let all = new Repository();
                all.id = RestConstants.ALL;
@@ -1006,14 +1002,18 @@ export class SearchComponent {
 
         if(param['query'])
           this.searchService.searchTerm=param['query'];
-        if(param['repository']){
-          this.mdsSets=null;
-          if(this.currentRepository!=param['repository']) {
-            this.mdsId = RestConstants.DEFAULT;
-          }
-          this.currentRepository=param['repository'];
-          this.updateRepositoryOrder();
+        let paramRepo=param['repository'];
+        if(!paramRepo){
+            paramRepo=RestConstants.HOME_REPOSITORY;
         }
+        this.mdsSets=null;
+        if(this.currentRepository!=paramRepo) {
+          this.mdsId = RestConstants.DEFAULT;
+        }
+        this.currentRepository=paramRepo;
+        this.updateRepositoryOrder();
+        this.updateCurrentRepositoryId();
+
         console.log(this.repositories);
         if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
           let use=this.config.instant("availableRepositories");
@@ -1057,4 +1057,11 @@ export class SearchComponent {
         });
       });
   }
+
+    private updateCurrentRepositoryId() {
+        this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
+        if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
+            this.currentRepository=this.currentRepositoryObject.id;
+        }
+    }
 }

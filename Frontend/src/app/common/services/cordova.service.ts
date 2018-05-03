@@ -1262,9 +1262,12 @@ export class CordovaService {
         console.log("was catched by escape "+down);
         if(down || up){
 
-        } else {
+        } else// if(window.history.length>2) {
             //(navigator as any).app.backHistory();
             this.location.back();
-        }
+        /*}
+        else{
+            (navigator as any).app.exitApp();
+        }*/
     }
 }
