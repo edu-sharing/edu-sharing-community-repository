@@ -85,10 +85,10 @@
        </div>
      </div>
      <div *ngIf="sidenavTab==0">
-     <div *ngIf="currentRepository=='-all-' && !groupResults" class="repositoryList">
+     <div *ngIf="currentRepository=='-all-'" class="repositoryList">
        <label>{{'SEARCH.REPOSITORY_FILTER' | translate}}</label>
        <div *ngFor="let repo of repositoryIds">
-         <input type="checkbox" class="filled-in" (change)="refresh()" [(ngModel)]="repo.enabled" [id]="repo.id"><label [for]="repo.id">{{repo.title}}</label>
+         <input type="checkbox" class="filled-in" [(ngModel)]="repo.enabled" [id]="repo.id"><label [for]="repo.id">{{repo.title}}</label>
        </div>
      </div>
 
@@ -245,13 +245,13 @@
         </div>
       </div>
       <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories && !showspinner">
-      <div *ngFor="let repo of repositories.slice(1);let i=index">
+      <div *ngFor="let repo of groupedRepositories;let i=index">
         <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
         <a class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
         <div class="noResults" *ngIf="searchService.searchResultRepositories[i] && !searchService.searchResultRepositories[i].length && !showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
         <listTable [class.list]="view==0" *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
           [nodes]="searchService.searchResultRepositories[i]"
-          [columns]="columns"
+          [columns]="searchService.columns"
           [hasIcon]="true"
           [options]="options"
           [dragDrop]="false"

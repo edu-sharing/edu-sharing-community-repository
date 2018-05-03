@@ -447,7 +447,7 @@ export class WorkspaceMainComponent implements EventListener{
                             this.route.queryParams.subscribe((params: Params) => {
                                 let needsUpdate=false;
                                 if(this.oldParams){
-                                    for(let key in params){
+                                    for(let key of Object.keys(this.oldParams).concat(Object.keys(params))){
                                         if(params[key]!=this.oldParams[key] && key!='viewType'){
                                             console.log("changed "+key);
                                             needsUpdate=true;

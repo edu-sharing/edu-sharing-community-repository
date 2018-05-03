@@ -195,7 +195,7 @@ export class RestHelper{
     public static getDurationInSeconds(node:any) : number {
         // PT1H5M23S
         // or 00:00:00
-        //
+        // or 00:00
         let value = node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION];
         if (!value)
             return 0;
@@ -206,6 +206,12 @@ export class RestHelper{
                 let m = result[1] ? parseInt(result[1]) : 0;
                 let s = result[2] ? parseInt(result[2]) : 0;
                 let time = h * 60 * 60 + m * 60 + s;
+                return time;
+            }
+            if(result.length==2) {
+                let m = result[0] ? parseInt(result[0]) : 0;
+                let s = result[1] ? parseInt(result[1]) : 0;
+                let time = m * 60 + s;
                 return time;
             }
         }

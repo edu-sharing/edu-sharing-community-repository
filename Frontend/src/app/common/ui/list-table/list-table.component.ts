@@ -303,8 +303,6 @@ export class ListTableComponent implements EventListener{
   @ViewChild('dropdown') dropdownElement : ElementRef;
   @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
-
-
   public dropdown : Node;
   public id : number;
 
@@ -345,6 +343,11 @@ export class ListTableComponent implements EventListener{
       event.stopPropagation();
     }
     if(event.key=="Escape"){
+      if(this.dropdown){
+        this.dropdown=null;
+        event.preventDefault();
+        event.stopPropagation();
+      }
       if(this.reorderDialog) {
         this.closeReorder(false);
         event.preventDefault();

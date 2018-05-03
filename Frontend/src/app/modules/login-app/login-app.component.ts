@@ -298,7 +298,7 @@ export class LoginAppComponent  implements OnInit {
 
     private goToDefaultLocation() {
         this.config.getAll().subscribe(()=> {
-            UIHelper.goToDefaultLocation(this.router, this.config);
+            UIHelper.goToDefaultLocation(this.router, this.config,{replaceUrl:true});
         });
     }
 }
