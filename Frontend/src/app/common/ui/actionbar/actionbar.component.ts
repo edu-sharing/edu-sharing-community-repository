@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, HostListener} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
 import {UIService} from "../../services/ui.service";
@@ -66,6 +66,14 @@ export class ActionbarComponent{
   @ViewChild('dropdownRef') dropdownElement : ElementRef;
   @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if(this.dropdown && event.key=="Escape"){
+      this.dropdown=false;
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
   public getNumberOptions(){
     if(window.innerWidth<UIConstants.MOBILE_WIDTH){
       return this.numberOfAlwaysVisibleOptionsMobile;

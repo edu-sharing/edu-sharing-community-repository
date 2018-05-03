@@ -343,8 +343,8 @@ export class UIHelper{
       return link;
   }
 
-  static goToDefaultLocation(router: Router,configService : ConfigurationService) {
-      return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")]);
+  static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
+      return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
   }
 
     /**

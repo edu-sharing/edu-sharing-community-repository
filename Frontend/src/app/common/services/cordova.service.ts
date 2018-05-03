@@ -8,7 +8,7 @@ import { RestConstants } from '../rest/rest-constants';
 import {PlatformLocation} from "@angular/common";
 import {Helper} from "../helper";
 import {UIConstants} from "../ui/ui-constants";
-import {Router} from "@angular/router";
+import {NavigationEnd, Router} from "@angular/router";
 import {FrameEventsService} from "./frame-events.service";
 import {Location} from '@angular/common';
 
@@ -76,7 +76,6 @@ export class CordovaService {
       // rember time when app went into background
       this.appGoneBackgroundTS = Date.now();
     };
-
     // CORDOVA EVENT: Resume (App comes back from Background)
     let whenDeviceGoesForeground = () => {
 
@@ -137,8 +136,8 @@ export class CordovaService {
       // load basic data from storage
       this.loadStorage();
 
-      // currently disabled, angular history navigation issues
-      //document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
+      // --> navigation issues exist anyway, need to check that later
+      document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
       let shareInterval=setInterval(()=>{
           if(this.hasValidConfig()) {
