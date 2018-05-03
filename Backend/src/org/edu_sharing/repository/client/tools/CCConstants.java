@@ -501,6 +501,7 @@ public class CCConstants {
 
 	//LOM Replication:
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE  = "{http://www.campuscontent.de/model/1.0}educationallearningresourcetype";
+	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE_AGG  = "{http://www.campuscontent.de/model/1.0}educationallearningresourcetype_agg";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_CONTEXT  = "{http://www.campuscontent.de/model/1.0}educationalcontext";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALLEARNINGTIME  = "{http://www.campuscontent.de/model/1.0}educationaltypicallearningtime";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM  = "{http://www.campuscontent.de/model/1.0}educationaltypicalagerange_from";

@@ -103,11 +103,12 @@ export class SearchComponent {
   public globalProgress = false;
   // Max items to fetch at all (afterwards no more infinite scroll)
   private static MAX_ITEMS_COUNT = 300;
-  private repositoryIds: any[];
+  private repositoryIds: any[]=[];
   public addNodesToCollection: Node[];
   private mdsSets: MdsInfo[];
   private _mdsId: string;
   private isSearching = false;
+  private groupedRepositories: Repository[];
   public get mdsId(){
     return this._mdsId;
   }
@@ -174,6 +175,7 @@ export class SearchComponent {
   applyParameters(props:any=null){
     this.searchService.reinit=true;
     this.currentValues=props;
+    this.updateGroupedRepositories();
     this.routeSearchParameters(props);
     //this.getSearch(null,true,props);
   }
@@ -231,11 +233,7 @@ export class SearchComponent {
                /*this.repositories = null;*/
 
              }
-             this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
-             if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
-               this.currentRepository=this.currentRepositoryObject.id;
-             }
-
+             this.updateCurrentRepositoryId();
              if(this.repositories) {
                let all = new Repository();
                all.id = RestConstants.ALL;
@@ -338,7 +336,7 @@ export class SearchComponent {
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
-    if(this.isSearching && init || this.repositoryIds==null){
+    if(this.isSearching && init || this.repositoryIds.length==0){
       setTimeout(()=>this.getSearch(searchString,init,properties),100);
       return;
     }
@@ -423,7 +421,18 @@ export class SearchComponent {
       }
     }
   }
-
+  updateGroupedRepositories(){
+      let list=this.repositories.slice(1);
+      for(let repo of this.repositoryIds){
+        if(repo.enabled)
+          continue;
+        let repoFound=RestNetworkService.getRepositoryById(repo.id,list);
+        console.log(repoFound);
+        if(repoFound)
+            list.splice(list.indexOf(repoFound),1);
+      }
+      this.groupedRepositories=list;
+  }
   render(node: Node) {
     if(node.collection){
       this.switchToCollections(node.ref.id);
@@ -846,11 +855,14 @@ export class SearchComponent {
         }
       }
     }
-    this.repositoryIds=[];
-    for(let repo of this.repositories){
-      if(repo.id==RestConstants.ALL || repo.id=='MORE')
-        continue;
-      this.repositoryIds.push({id:repo.id,title:repo.title,enabled:true});
+    if(this.repositoryIds.length==0) {
+        this.repositoryIds = [];
+        for (let repo of this.repositories) {
+            if (repo.id == RestConstants.ALL || repo.id == 'MORE')
+                continue;
+            this.repositoryIds.push({id: repo.id, title: repo.title, enabled: true});
+        }
+        this.updateGroupedRepositories();
     }
   }
   private updateMdsActions() {
@@ -990,14 +1002,18 @@ export class SearchComponent {
 
         if(param['query'])
           this.searchService.searchTerm=param['query'];
-        if(param['repository']){
-          this.mdsSets=null;
-          if(this.currentRepository!=param['repository']) {
-            this.mdsId = RestConstants.DEFAULT;
-          }
-          this.currentRepository=param['repository'];
-          this.updateRepositoryOrder();
+        let paramRepo=param['repository'];
+        if(!paramRepo){
+            paramRepo=RestConstants.HOME_REPOSITORY;
         }
+        this.mdsSets=null;
+        if(this.currentRepository!=paramRepo) {
+          this.mdsId = RestConstants.DEFAULT;
+        }
+        this.currentRepository=paramRepo;
+        this.updateRepositoryOrder();
+        this.updateCurrentRepositoryId();
+
         console.log(this.repositories);
         if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
           let use=this.config.instant("availableRepositories");
@@ -1041,4 +1057,11 @@ export class SearchComponent {
         });
       });
   }
+
+    private updateCurrentRepositoryId() {
+        this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
+        if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
+            this.currentRepository=this.currentRepositoryObject.id;
+        }
+    }
 }
