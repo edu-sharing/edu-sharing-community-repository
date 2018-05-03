@@ -690,7 +690,9 @@ export class CollectionsMainComponent implements GwtEventListener {
       this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
         console.log(params);
         if(params['scope'])
-          this.tabSelected=params['scope'];
+            this.tabSelected=params['scope'];
+        else
+            this.tabSelected=RestConstants.COLLECTIONSCOPE_MY;
         if(this.isGuest)
           this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
         if(params['mainnav'])
