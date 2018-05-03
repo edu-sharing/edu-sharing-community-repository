@@ -226,6 +226,7 @@ export class NodeRenderComponent implements EventListener{
     this.nodeMetadata=null;
   }
   public refresh(){
+    this.options=[];
     this.isLoading=true;
     this.node=this._nodeId;
   }

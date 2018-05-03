@@ -72,9 +72,7 @@ export class LoginAppComponent  implements OnInit {
             // -> go to default location (this will check oauth)
             if (this.cordova.hasValidConfig()) {
                 console.log("VALID Configuration --> directly go to default");
-                this.config.getAll().subscribe(()=> {
-                    UIHelper.goToDefaultLocation(this.router, this.config);
-                });
+                this.goToDefaultLocation();
                 return;
             }
 
@@ -283,7 +281,7 @@ export class LoginAppComponent  implements OnInit {
             this.cordova.loginOAuth(this.username, this.password).subscribe((oauthTokens: OAuthResult) => {
                     this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, JSON.stringify(oauthTokens));
                     // continue to within the app
-                    this.goToWorkspace();
+                    this.goToDefaultLocation();
                 },
                 (error) => {
                     this.isLoading = false;
@@ -298,8 +296,9 @@ export class LoginAppComponent  implements OnInit {
  
     }
 
-    private goToWorkspace() {
-        this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace']);
+    private goToDefaultLocation() {
+        this.config.getAll().subscribe(()=> {
+            UIHelper.goToDefaultLocation(this.router, this.config,{replaceUrl:true});
+        });
     }
-
 }

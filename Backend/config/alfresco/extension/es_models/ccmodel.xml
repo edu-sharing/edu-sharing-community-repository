@@ -758,6 +758,16 @@
 	                  <tokenised>both</tokenised>
 	               </index>
 				</property>
+				<!-- Field for aggregated values and toxenizing -->
+				<property name="ccm:educationallearningresourcetype_agg">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>both</tokenised>
+	               </index>
+				</property>
 				<property name="ccm:educationalcontext">
 					<type>d:text</type>
 					<multiple>true</multiple>

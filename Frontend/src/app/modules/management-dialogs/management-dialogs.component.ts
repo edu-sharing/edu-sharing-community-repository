@@ -80,36 +80,43 @@ export class WorkspaceManagementDialogsComponent  {
         if(this.mdsRef.handleKeyboardEvent(event))
           return;
         this.closeEditor(false);
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.addToCollection!=null){
         this.cancelAddToCollection();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.nodeContributor!=null){
         this.closeContributor();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.nodeLicense!=null){
         this.closeLicense();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.showLtiTools){
         this.closeLtiTools();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.nodeReport!=null){
         this.closeReport();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.ltiObject){
         this.ltiObject=null;
+        event.preventDefault();
         event.stopPropagation();
         return;
       }

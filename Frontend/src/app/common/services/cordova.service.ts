@@ -8,8 +8,9 @@ import { RestConstants } from '../rest/rest-constants';
 import {PlatformLocation} from "@angular/common";
 import {Helper} from "../helper";
 import {UIConstants} from "../ui/ui-constants";
-import {Router} from "@angular/router";
+import {NavigationEnd, Router} from "@angular/router";
 import {FrameEventsService} from "./frame-events.service";
+import {Location} from '@angular/common';
 
 declare var cordova : any;
 
@@ -63,6 +64,7 @@ export class CordovaService {
   constructor(
     private http : Http,
     private router : Router,
+    private location: Location,
     private events : FrameEventsService
   ) {
 
@@ -74,7 +76,6 @@ export class CordovaService {
       // rember time when app went into background
       this.appGoneBackgroundTS = Date.now();
     };
-
     // CORDOVA EVENT: Resume (App comes back from Background)
     let whenDeviceGoesForeground = () => {
 
@@ -135,6 +136,8 @@ export class CordovaService {
       // load basic data from storage
       this.loadStorage();
 
+      // --> navigation issues exist anyway, need to check that later
+      document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
       let shareInterval=setInterval(()=>{
           if(this.hasValidConfig()) {
@@ -199,7 +202,7 @@ export class CordovaService {
        });
    }
    private registerOnShareContent() : void {
-       if (this.isAnroid()) {
+       if (this.isAndroid()) {
            console.log("register on share intent");
            // only run once. Will loop otherwise if no auth is found and intent was send
            let handleIntent=(intent:any)=> {
@@ -344,7 +347,7 @@ export class CordovaService {
    * Check if app is running on a Android device.
    * https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-device/index.html
    */
-  isAnroid() : boolean {
+  isAndroid() : boolean {
     try {
       let device:any = (window as any).device;
       console.log("cordova-plugin-device", device);
@@ -999,7 +1002,7 @@ export class CordovaService {
 
   // get the metadata about what servers that are part of the public listing
   public getPublicServerList() : Observable<any> {
-    let url='http://app-registry.edu-sharing.com/public-server-directory.php';
+    let url='http://app-registry.edu-sharing.com/servers.php?version=2.0';
     let headers=new Headers();
     headers.set('Accept','application/json');
     let options={headers:headers};
@@ -1248,5 +1251,23 @@ export class CordovaService {
         }
 
       });
+    }
+
+    private onBackKeyDown() {
+      console.log("back key pressed");
+        let eventDown = new KeyboardEvent('keydown', {key: 'Escape',view: window,bubbles: true,cancelable: true});
+        let eventUp = new KeyboardEvent('keyup', {key: 'Escape',view: window,bubbles: true,cancelable: true});
+        let down = !window.document.dispatchEvent(eventDown);
+        let up = !window.document.dispatchEvent(eventUp);
+        console.log("was catched by escape "+down);
+        if(down || up){
+
+        } else// if(window.history.length>2) {
+            //(navigator as any).app.backHistory();
+            this.location.back();
+        /*}
+        else{
+            (navigator as any).app.exitApp();
+        }*/
     }
 }

@@ -276,7 +276,7 @@ public class CCConstants {
 	public final static String CM_TYPE_PERSON = "{http://www.alfresco.org/model/content/1.0}person";
 
 	public final static String CM_TYPE_CONTENT = "{http://www.alfresco.org/model/content/1.0}content";
-	
+
 	public final static String CM_TYPE_OBJECT = "{http://www.alfresco.org/model/content/1.0}cmobject";
 
 	public final static String CM_TYPE_CONTAINER = "{http://www.alfresco.org/model/system/1.0}container";
@@ -507,6 +507,7 @@ public class CCConstants {
 
 	//LOM Replication:
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE  = "{http://www.campuscontent.de/model/1.0}educationallearningresourcetype";
+	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE_AGG  = "{http://www.campuscontent.de/model/1.0}educationallearningresourcetype_agg";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_CONTEXT  = "{http://www.campuscontent.de/model/1.0}educationalcontext";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALLEARNINGTIME  = "{http://www.campuscontent.de/model/1.0}educationaltypicallearningtime";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM  = "{http://www.campuscontent.de/model/1.0}educationaltypicalagerange_from";
@@ -1054,7 +1055,7 @@ public class CCConstants {
 	public static final String CCM_PROP_USAGE_GUID = "{http://www.campuscontent.de/model/1.0}usageguid";
 
 	public static final String CCM_ASSOC_USAGEASPECT_USAGES = "{http://www.campuscontent.de/model/1.0}usages";
-	
+
 
 	public static final String CM_PROP_PERSON_ABOUT = "{http://www.alfresco.org/model/content/1.0}personabout";
 	public static final String CM_PROP_PERSON_SKILLS = "{http://www.alfresco.org/model/content/1.0}personskills";
