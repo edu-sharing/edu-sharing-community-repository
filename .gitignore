@@ -21,3 +21,7 @@ edu-sharing-cluster/
 Backend/lib/edu-sharing_cifs.jar
 Backend/lib/edu-sharing-tomcat.jar
 Frontend/gitlog.html
+Cordova/node_modules/
+Cordova/platforms/
+Cordova/plugins/
+Cordova/www/
