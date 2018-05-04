@@ -264,12 +264,15 @@ public class OAIPMHLOMImporter implements Importer{
 			}
 			
 			if(persistentHandler.mustBePersisted(identifier, timeStamp)){
+				logger.info("identifier:" + identifier + " has timeStamp: " + timeStamp+ " must be created/updated");
 				String url = oai_base_url+"?verb=GetRecord"+"&identifier="+identifier+"&metadataPrefix="+metadataPrefix;
-				logger.info("url record:"+url);
+				
 				String result = new HttpQueryTool().query(url);
 				if(result != null && !result.trim().equals("")){
 					handleGetRecordStuff(result, cursor,set,identifier);				
 				}
+			}else {
+				logger.info("identifier:" + identifier + " has timeStamp: " + timeStamp+ " must NOT be updated");
 			}
 			
 			if(i > MAX_PER_RESUMPTION){
