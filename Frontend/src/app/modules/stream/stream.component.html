@@ -10,54 +10,57 @@
 [scrollWindow]="true"
 (scrolled)="onScroll()">
     <div class="row">
-    <div class="col s2 removepadding margin-show">
+    <div class="col m2 choose-menu-main removepadding margin-show">
         <div class="choose-menu"  (click)="menuOptions('stream')" [ngClass]="menuOption == 'stream' ? 'm-active' : 'm-inactive'">
-                <i class="tiny material-icons fix-icon-padding">date_range</i>  Was gibt's Neues?
+                <i class="tiny material-icons ">date_range</i>  Was gibt's Neues?
         </div>
-        <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'erledigt' ? 'm-active' : 'm-inactive'">
-                <i class="tiny material-icons fix-icon-padding">visibility</i> Schon gesehen
+        <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'gesehen' ? 'm-active' : 'm-inactive'">
+                <i class="tiny material-icons ">visibility</i> Schon gesehen
         </div>
     </div>    
-    <div class="col s8">
-    <div class="margin-show main-stream">
-        <h5>
-            <div class="stream-header">
-                <div class="stream-header-left">
-                    <div *ngIf="menuOption == 'stream'" class="stream-title">Was gibt's Neues?</div>
-                    <div *ngIf="menuOption == 'gesehen'" class="stream-title">Schon gesehen</div>
-                    <span id="stream-title-date" class="stream-title-date">
-                        {{today()}}
-                    </span>
+    <div class="col s12 m8">
+    <div class="margin-show">
+
+        <div class="stream-header-left row stream-marginfix">
+            <div *ngIf="menuOption == 'stream'" class="stream-title col s10 m12">Was gibt's Neues? </div>
+            <div *ngIf="menuOption == 'gesehen'" class="stream-title col s10 m12">Schon gesehen </div>
+            <i class="small material-icons arrow-menu-display col s2 " (click)="toggleMenuOptions()">keyboard_arrow_down</i>
+            <span id="stream-title-date" class="stream-title-date col s12 m12">
+                {{today()}}
+            </span>
+            <div class="arrow-menu-display mobile-menu " [ngClass]="showMenuOptions ? '' : 'hide'">
+                <div class="choose-menu"  (click)="menuOptions('stream')" [ngClass]="menuOption == 'stream' ? 'm-active' : 'm-inactive'">
+                        <i class="tiny material-icons ">date_range</i>  Was gibt's Neues?
                 </div>
-                <div class="stream-header-right">
-                    <!-- <div class="stream-uppericon"> <i class="material-icons fix-up " >shuffle</i>  </div> <div (click)="sortieren()" class="stream-uppertext">Sortieren</div> -->
+                <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'gesehen' ? 'm-active' : 'm-inactive'">
+                        <i class="tiny material-icons ">visibility</i> Schon gesehen
                 </div>
             </div>
-            
+        </div>
+        
             <!-- This could be a directive : -->
-
-        </h5>
         
-        <div class="stream-box" *ngFor="let strm of streams" >
-            <div class="stream-box-main">
-                <div class="stream-box-title" (click)="onStreamObjectClick(strm)">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
+        <div class="stream-box row" *ngFor="let strm of streams" >
+           
+                <div class="stream-box-title col s10" (click)="onStreamObjectClick(strm)">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
                 <!-- todo: ngfor over strm.properties.['cclom:general_keyword'] -->
-        
-          <div class="stream-box-desc">{{ strm.properties['add_to_stream_description'] || 'keine Beschreibung' }}</div> 
-          <div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
+                <div class="stream-box-main-vert col s2">
+                    <actionbar
+                        [numberOfAlwaysVisibleOptions]="0"
+                        [numberOfAlwaysVisibleOptionsMobile]="0"
+                        [style]="'flat'"
+                        [options]="actionOptions"
+                        [node]="strm.id"
+    
+                    ></actionbar>
+                </div>
+            
+                <div class="stream-box-desc">{{ strm.properties['add_to_stream_description'] || 'keine Beschreibung' }}</div> 
+                <div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
 
 
-            </div>
-            <div class="stream-box-main-vert">
-                <actionbar
-                    [numberOfAlwaysVisibleOptions]="0"
-                    [numberOfAlwaysVisibleOptionsMobile]="0"
-                    [style]="'flat'"
-                    [options]="actionOptions"
-                    [node]="strm.id"
-
-                ></actionbar>
-            </div>
+  
+            
             <div class="stream-box-kompetenzen"></div>
             <div class="stream-box-image" *ngIf="strm.nodes[0]"> <!-- TODO: Display a warning when no node is found (it could be deleted) -->
                 <img src="{{ strm.nodes[0].preview.url }} " (click)="onStreamObjectClick(strm)" style="width:100%;height:auto;border:0;">
@@ -86,6 +89,6 @@
 
     </div>
     </div> <!-- cols8 -->
-    <div class="col s2"></div>
+    <div class="col m2"></div>
     </div> <!-- row -->
 </div>

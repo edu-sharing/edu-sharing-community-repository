@@ -57,6 +57,7 @@ export class StreamComponent {
       return outstring + '. ' + String(yyyy);
   }
   menuOption = 'stream';
+  showMenuOptions = false;
   streams: any;
   actionOptions:OptionItem[]=[];
 
@@ -112,6 +113,10 @@ export class StreamComponent {
   onScroll() {
     console.log("scrolled!!");
     //this.getJSON().subscribe(data => this.streams = this.streams.concat(data['stream']), error => console.log(error));
+  }
+
+  toggleMenuOptions() {
+    this.showMenuOptions = !this.showMenuOptions;
   }
 
   menuOptions(option: any) {
