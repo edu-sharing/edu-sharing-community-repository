@@ -122,9 +122,11 @@ export class StreamComponent {
   menuOptions(option: any) {
     this.menuOption = option;
     if (option === 'stream') {
+      this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.actionOptions[0] = this.erledigtOption;
     } else {
+      this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.DONE);
       this.actionOptions[0] = this.nichtErledigtOption;
     }

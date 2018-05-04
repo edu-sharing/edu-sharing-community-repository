@@ -36,10 +36,8 @@
                         <i class="tiny material-icons ">visibility</i> Schon gesehen
                 </div>
             </div>
-        </div>
-        
-            <!-- This could be a directive : -->
-        
+        </div>    
+        <!-- This could be a directive : -->   
         <div class="stream-box row" *ngFor="let strm of streams" >
            
                 <div class="stream-box-title col s10" (click)="onStreamObjectClick(strm)">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
@@ -58,9 +56,6 @@
                 <div class="stream-box-desc">{{ strm.properties['add_to_stream_description'] || 'keine Beschreibung' }}</div> 
                 <div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
 
-
-  
-            
             <div class="stream-box-kompetenzen"></div>
             <div class="stream-box-image" *ngIf="strm.nodes[0]"> <!-- TODO: Display a warning when no node is found (it could be deleted) -->
                 <img src="{{ strm.nodes[0].preview.url }} " (click)="onStreamObjectClick(strm)" style="width:100%;height:auto;border:0;">
@@ -69,23 +64,6 @@
                 <div class="bottom-right">{{ strm.nodes[0].commentCount }} <i class="material-icons stic" >comment</i> </div>
             </div>
         </div>
-
-        <!--
-        <div class="stream-box" *ngFor="let strm of streams" >
-            <div class="stream-box-main">
-              <div class="stream-box-title">{{ strm.nodes[0].title || 'Schon gewusst?' }} </div>
-              <div class="stream-box-desc">{{ strm.nodes[0].description || 'lorem ipsum dolor sit amet, consectetur' }} </div>
-            </div>
-            <div class="stream-box-main-vert">
-                <i class="material-icons " >more_vert</i>
-            </div>
-            <div class="stream-box-kompetenzen"></div>
-            <div class="stream-box-image"></div>
-            <div class="stream-box-footer">
-                <div class="stream-box-imgname">{{ strm.nodes[0].name }}</div><div class="stream-box-rating"><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i><i class="material-icons stic" >star</i></div><div class="stream-box-comment"> {{ strm.nodes[0].commentCount }} <i class="material-icons stic" >chat</i> </div>
-            </div>
-        </div>
-        -->
 
     </div>
     </div> <!-- cols8 -->
