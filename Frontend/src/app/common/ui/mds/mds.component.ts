@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnInit, NgZone, group, HostListener, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit, NgZone, HostListener, ViewChild, ElementRef} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {RestMdsService} from '../../rest/services/rest-mds.service';
 import {MdsMetadataset, View, Type, Node, NodeList, NodeWrapper, MdsValueList} from '../../rest/data-object';
