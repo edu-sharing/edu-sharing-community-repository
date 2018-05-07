@@ -68,7 +68,12 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 		this(null, null, null, oaiBaseUrl, set, metadataPrefix, null);
 	}
 
-	public ListIdentifiersHandler(RecordHandlerInterfaceBase recordHandler, PersistentHandlerInterface persistentHandler, BinaryHandler binaryHandler, String oaiBaseUrl, String set, String metadataPrefix,
+	public ListIdentifiersHandler(RecordHandlerInterfaceBase recordHandler, 
+			PersistentHandlerInterface persistentHandler, 
+			BinaryHandler binaryHandler, 
+			String oaiBaseUrl, 
+			String set, 
+			String metadataPrefix,
 			String esMetadataSetId) {
 
 		this.oaiBaseUrl = oaiBaseUrl;
