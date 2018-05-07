@@ -2,15 +2,25 @@ package org.edu_sharing.repository.server.importer.sax;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.importer.BinaryHandler;
 import org.edu_sharing.repository.server.importer.PersistentHandlerInterface;
+import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -46,22 +56,19 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 
 	PersistentHandlerInterface persistentHandler = null;
 	
-	RecordHandlerInterface recordHandler = null;
-
-	public ListIdentifiersHandler(RecordHandlerInterface recordHandler, PersistentHandlerInterface persistentHandler, String oaiBaseUrl, String set, String metadataPrefix,
-			String esMetadataSetId, String resumptionToken) {
-		this.oaiBaseUrl = oaiBaseUrl;
-		this.metadataPrefix = metadataPrefix;
-		this.esMetadataSetId = esMetadataSetId;
-		this.persistentHandler = persistentHandler;
-		this.set = set;
-		this.recordHandler = recordHandler;
-
-		String url = this.oaiBaseUrl + "?verb=ListIdentifiers&resumptionToken=" + resumptionToken;
-		handleIdentifiersList(url);
+	RecordHandlerInterfaceBase recordHandler = null;
+	
+	BinaryHandler binaryHandler = null;
+	
+	public ListIdentifiersHandler() {
+		
+	}
+	
+	public ListIdentifiersHandler(String oaiBaseUrl, String set, String metadataPrefix) {
+		this(null, null, null, oaiBaseUrl, set, metadataPrefix, null);
 	}
 
-	public ListIdentifiersHandler(RecordHandlerInterface recordHandler, PersistentHandlerInterface persistentHandler, String oaiBaseUrl, String set, String metadataPrefix,
+	public ListIdentifiersHandler(RecordHandlerInterfaceBase recordHandler, PersistentHandlerInterface persistentHandler, BinaryHandler binaryHandler, String oaiBaseUrl, String set, String metadataPrefix,
 			String esMetadataSetId) {
 
 		this.oaiBaseUrl = oaiBaseUrl;
@@ -70,6 +77,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 		this.persistentHandler = persistentHandler;
 		this.set = set;
 		this.recordHandler = recordHandler;
+		this.binaryHandler = binaryHandler;
 
 		String url = this.oaiBaseUrl + "?verb=ListIdentifiers&metadataPrefix=" + metadataPrefix + "&set=" + set;
 		handleIdentifiersList(url);
@@ -190,9 +198,9 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 	 * @param replId
 	 * @param timeStamp
 	 */
-	private void handleRecord(String replId, String timeStamp) {
+	protected void handleRecord(String replId, String timeStamp) {
 	
-		if (currentRecordIsDeleted) {
+		if (isCurrentRecordDeleted()) {
 			logger.info("record " + currentIdentifier + " is deleted");
 			return;
 		}
@@ -201,23 +209,59 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 
 		if (mustBePersisted) {
 			
-			String url = this.oaiBaseUrl + "?verb=GetRecord&identifier=" + replId + "&metadataPrefix=" + this.metadataPrefix;
+			String url = getRecordUrl(replId);
 			logger.info("url:" + url);
 			String result = qt.query(url);
 
 			try {
-				RecordHandlerInterface rh = recordHandler;
+				
 				
 				/**
 				 * prevent a Invalid byte 2 of 3-byte UTF-8 sequence. org.xml.sax.SAXParseException: Invalid byte 2 of 3-byte UTF-8 sequence.
 				 * with explicit utf-8 encoding
 				 */
-				rh.handleRecord(new ByteArrayInputStream(result.getBytes(Charset.forName("utf-8"))));
-				if (rh.getProperties().size() > 0) {
-					persistentHandler.safe(rh.getProperties(), cursor, set);
-				} else {
-					logger.warn("no properties found for object:" + replId);
+				if(recordHandler instanceof RecordHandlerInterface) {
+					((RecordHandlerInterface)recordHandler).handleRecord(new ByteArrayInputStream(result.getBytes(Charset.forName("utf-8"))));
+				
+					if (recordHandler.getProperties().size() > 0) {
+						persistentHandler.safe(recordHandler.getProperties(), cursor, set);
+					} else {
+						logger.warn("no properties found for object:" + replId);
+					}
 				}
+				if(recordHandler instanceof org.edu_sharing.repository.server.importer.RecordHandlerInterface) {
+					
+					try{
+						XPathFactory pfactory = XPathFactory.newInstance();
+						XPath xpath = pfactory.newXPath();
+						DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+						DocumentBuilder builder = factory.newDocumentBuilder();
+						Document doc = builder.parse(new InputSource(new StringReader(result)));
+						String errorcode = (String)xpath.evaluate("/OAI-PMH/error", doc, XPathConstants.STRING);
+						if(errorcode == null || errorcode.trim().equals("")){
+							Node nodeRecord = (Node)xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
+							((org.edu_sharing.repository.server.importer.RecordHandlerInterface)recordHandler).handleRecord(nodeRecord, cursor, set);
+							
+							String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
+							if(nodeId != null) {
+								if(binaryHandler != null){
+									binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
+								}
+								new MCAlfrescoAPIClient().createVersion(nodeId,null);
+							}
+						}else{
+							logger.error(errorcode);
+						}
+					}catch(org.xml.sax.SAXParseException e){
+						logger.error("SAXParseException occured: cursor:"+cursor+ " set:"+set +" identifier:"+ replId );
+						logger.error(e.getMessage(),e);
+					}catch(Throwable e){
+						logger.error("Throwable occured at set: "+set+", identifier: "+replId);
+						logger.error(e.getMessage(),e);
+					}
+				
+				}
+				
 				
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
@@ -230,6 +274,14 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 				logger.error(e.getMessage(), e);
 			}
 		}
+	}
+	
+	public String getRecordUrl(String replicationSourceId) {
+		return this.oaiBaseUrl + "?verb=GetRecord&identifier=" + replicationSourceId + "&metadataPrefix=" + this.metadataPrefix;
+	}
+	
+	public boolean isCurrentRecordDeleted() {
+		return currentRecordIsDeleted;
 	}
 
 	@Override
