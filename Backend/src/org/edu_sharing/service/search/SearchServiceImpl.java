@@ -279,6 +279,7 @@ public class SearchServiceImpl implements SearchService {
 								boolean add = false;
 								for (String group : memberships) {
 									if (group.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
+											|| AuthenticationUtil.isRunAsUserTheSystemUser()
 											|| group.equals(eduGroup.getGroupname())) {
 										add = true;
 										break;
