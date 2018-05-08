@@ -40,6 +40,7 @@ export class CollectionChooserComponent implements OnInit{
    * @type {EventEmitter}
    */
   @Output() onChoose = new EventEmitter();
+  @Output() onCreateCollection = new EventEmitter();
   /**
    * Fired when a list of nodes is dropped on a collection item
    * @type {EventEmitter}
@@ -66,7 +67,7 @@ export class CollectionChooserComponent implements OnInit{
     return true;
   }
   public createCollection(){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"collections/collection","new",RestConstants.ROOT]);
+    this.onCreateCollection.emit();
   }
   private hasWritePermissions(node:any){
       if(node.access.indexOf(RestConstants.ACCESS_WRITE)==-1){
