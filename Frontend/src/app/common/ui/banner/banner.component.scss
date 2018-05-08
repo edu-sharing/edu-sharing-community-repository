@@ -1,3 +1,4 @@
+@import "../../../../styles/variables.scss";
 $bannerHeight:130px;
 
 .banner{
@@ -9,4 +10,10 @@ $bannerHeight:130px;
   z-index: 100;
   background-repeat:repeat-y;
   background-position: 0 0;
+}
+
+@media screen and (max-width: $mobileWidth+$mobileStage*1) {
+  .banner{
+    display: none;
+  }
 }
