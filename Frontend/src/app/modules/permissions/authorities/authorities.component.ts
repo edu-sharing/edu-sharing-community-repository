@@ -294,11 +294,16 @@ export class PermissionsAuthoritiesComponent {
             (error:any)=>this.toast.error(error));
         }
         else {
+          this.globalProgress=true;
           this.iam.createGroup(name, this.edit.profile, this.org ? this.org.groupName : "").subscribe(() => {
             this.edit = null;
+            this.globalProgress=false;
             this.toast.toast("PERMISSIONS.GROUP_CREATED");
             this.refresh();
-          }, (error: any) => this.toast.error(error));
+          }, (error: any) =>{
+            this.toast.error(error);
+            this.globalProgress=false;
+          });
         }
         return;
       }
