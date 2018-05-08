@@ -1803,7 +1803,7 @@ export class MdsComponent{
         return 'widget \'license\' does not have values connected, can\'t render it.';
       }
       for(let value of widget.values){
-        let image=NodeHelper.getLicenseIconByString(value.id, this.connector);
+        let image=NodeHelper.getLicenseIconByString(value.id, this.connector,false);
         if(image)
           value.imageSrc = image;
       }

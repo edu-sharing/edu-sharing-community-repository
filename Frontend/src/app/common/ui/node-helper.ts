@@ -274,7 +274,7 @@ export class NodeHelper{
    * @param rest
    * @returns {string}
    */
-  public static getLicenseIconByString(string: String,rest:RestConnectorService) {
+  public static getLicenseIconByString(string: String,rest:RestConnectorService,useNoneAsFallback=true) {
     let icon=string.replace(/_/g,"-").toLowerCase();
     if(icon=='')
       icon='none';
@@ -283,6 +283,8 @@ export class NodeHelper{
       "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk"];
     if(LICENSE_ICONS.indexOf(icon)==-1)
       icon='none';
+    if(icon=='none' && !useNoneAsFallback)
+      return null;
     return rest.getAbsoluteEndpointUrl()+"../ccimages/licenses/"+icon+".svg";
   }
   /**
