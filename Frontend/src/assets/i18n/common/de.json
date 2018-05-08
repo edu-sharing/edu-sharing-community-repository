@@ -115,6 +115,7 @@
   "WRONG_PASSWORD":"Das angegebene Passwort ist ungültig",
   "PASSWORD_MIN_LENGTH":"Das Passwort muss mindestens {{length}} Zeichen lang sein",
   "PASSWORD_NOT_MATCH":"Die Passwörter stimmen nicht überein",
+  "LEARNINGAGE_YEAR":"Jahre",
   "SIDEBAR":{
     "WORKSPACE_OLD":"Klassischer Workspace",
     "WORKSPACE":"Workspace",

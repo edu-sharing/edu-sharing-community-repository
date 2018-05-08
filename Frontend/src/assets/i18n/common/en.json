@@ -99,6 +99,7 @@
   "WRONG_PASSWORD":"The entered password is invalid",
   "PASSWORD_MIN_LENGTH":"The password must be at least {{length}} characters",
   "PASSWORD_NOT_MATCH":"The passwords do not match",
+  "LEARNINGAGE_YEAR":"Years",
   "GROUP_EVERYONE":"everybody",
   "DETAILS": "details",
   "INFO": "info",

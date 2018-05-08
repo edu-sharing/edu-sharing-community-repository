@@ -50,6 +50,27 @@ export class NodeHelper{
       if(value)
         return value;
     }
+    if(name==RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE){
+      let range:string[];
+      if(node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE]){
+        range=node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE].split("-");
+      }
+      else{
+        try {
+          range = [node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE + '_from'][0], node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE + '_to'][0]];
+        }catch(e){
+          range=[null];
+        }
+      }
+      if(range[0]) {
+          if (range[0] == range[1]){
+            return range[0]+" "+translation.instant('LEARNINGAGE_YEAR');
+          }
+          else{
+            return range[0]+"-"+range[1]+" "+translation.instant('LEARNINGAGE_YEAR');
+          }
+      }
+    }
     if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
       let workflow=NodeHelper.getWorkflowStatus(config,node);
       return '<div class="workflowStatus" style="background-color: '+workflow.color+'">'+translation.instant('WORKFLOW.'+workflow.id)+'</div>'
