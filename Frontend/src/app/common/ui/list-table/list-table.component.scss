@@ -39,7 +39,7 @@ $borderRadius:2px;
   cursor: default;
 }
 .moreAlways{
-  transition: $animationTime all;
+  transition: $transitionNormal all;
   opacity: 1;
   color: $primary!important;
 }
@@ -216,6 +216,7 @@ $badgeWidth:250px;
 }
 .more{
   min-width:60px;
+  transition: $transitionNormal all;
   @include clickable();
 }
 .moreOpen{
@@ -279,12 +280,18 @@ $badgeWidth:250px;
 .cardList .row.selected{
   background: $workspaceSelectedBackgroundEffect;
   background-color:$workspaceSelectedBackground;
+  .more{
+    @include fadeRight($workspaceSelectedBackground,20px)
+  }
 }
 
 .cardList .row.selected{
-  background: transparent;
-  background-color:transparent;
+  background: $backgroundColor;
+  background-color:$backgroundColor;
   outline:2px solid $primary;
+  .more{
+    @include fadeRight($backgroundColor,20px)
+  }
 }
 .row:focus{
   @include setGlobalInsetFocus();
@@ -302,6 +309,9 @@ $badgeWidth:250px;
 }
 .list .row:hover{
   background-color:$workspaceSelectedBackground;
+  .more{
+    @include fadeRight($workspaceSelectedBackground,20px);
+  }
 }
 
 .list .filled-in:checked+label:after{
@@ -428,7 +438,7 @@ $strength:0.75deg;
   90% {    transform:rotate($strength*random(1));  }
   100% {   transform:rotate(-$strength*random(1));  }
 }
-$orderAnimationTime:$animationTime*5;
+$orderAnimationTime:$transitionNormal*5;
 .order-animation {
   animation: OrderAnimation $orderAnimationTime infinite;
 }
@@ -721,7 +731,12 @@ $orderAnimationTime:$animationTime*5;
 .cardList .more{
   position:absolute;
   right:-10px;
-  top:$cardHeight - 37px;
+  top:$cardHeight - 40px;
+  @include fadeRight(#fff,20px);
+  padding-bottom: 5px;
+  a{
+    padding-left: 10px;
+  }
 }
 .cardList .moreSingle{
   right:-5px;
@@ -942,7 +957,7 @@ $orderAnimationTime:$animationTime*5;
   .cardList .row .more{
     position: absolute;
     top: 45px;
-    left: calc(100% - 45px);
+    left: calc(100% - 55px);
   }
   .cardList .row_1{
     height: auto;
