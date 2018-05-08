@@ -310,8 +310,10 @@ export class PermissionsAuthoritiesComponent {
       if(this.editId==null){
         let name=this.editDetails.authorityName;
         let password=this.editDetails.password;
+        this.globalProgress=true;
         this.iam.createUser(name,password,this.edit.profile).subscribe(() => {
             this.edit=null;
+            this.globalProgress=false;
             if(this.org){
               this.iam.addGroupMember(this.org.authorityName,name).subscribe(()=>{
                 this.toast.toast("PERMISSIONS.USER_CREATED");
@@ -324,7 +326,10 @@ export class PermissionsAuthoritiesComponent {
             }
 
           },
-          (error : any)=>this.toast.error(error));
+          (error : any)=>{
+            this.toast.error(error);
+            this.globalProgress=false;
+          });
       }
       else {
         this.iam.editUser(this.editId, this.edit.profile).subscribe(() => {
