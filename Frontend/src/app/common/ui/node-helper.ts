@@ -54,7 +54,11 @@ export class NodeHelper{
     if(name==RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE){
       let range:string[];
       if(node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE]){
-        range=node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE].split("-");
+        try {
+          range = node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE][0].split("-");
+        }catch(e){
+          range=[null];
+        }
       }
       else{
         try {
