@@ -88,6 +88,8 @@ export class RestConstants {
   public static CCM_PROP_COLLECTION_PINNED_ORDER = "ccm:collection_pinned_order";
   public static CCM_PROP_IO_WWWURL = "ccm:wwwurl";
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
+  public static CCM_PROP_AUTHORITY_GROUPTYPE="ccm:groupType";
+
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";
   public static VIRTUAL_PROP_USAGECOUNT = "virtual:usagecount";
   public static GROUP_PREFIX="GROUP_";
@@ -217,6 +219,7 @@ export class RestConstants {
     RestConstants.CCM_PROP_LICENSE,
     RestConstants.AUTHORITY_DISPLAYNAME,
     RestConstants.AUTHORITY_FIRSTNAME,
+    RestConstants.AUTHORITY_GROUPTYPE,
   ];
   public static LICENSE_URLS={
     "CC_BY_ABOUT":"https://creativecommons.org/licenses/?lang=de",

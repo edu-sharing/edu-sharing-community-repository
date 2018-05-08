@@ -180,6 +180,9 @@ export class PermissionsAuthoritiesComponent {
   }
   public changeSort(event : any){
     //this.sortBy=event.sortBy;
+    if(this._mode=='GROUP'){
+      this.sortBy=event.sortBy;
+    }
     this.sortAscending=event.sortAscending;
     this.offset=0;
     this.list=[];
@@ -343,11 +346,18 @@ export class PermissionsAuthoritiesComponent {
   }
   public loadAuthorities() {
     this.loading=true;
-    let sort="authorityName";
+    let sort=RestConstants.AUTHORITY_NAME;
     if(this._mode=='ORG')
       sort=RestConstants.CM_PROP_AUTHORITY_AUTHORITYNAME;
-    if(this._mode=='GROUP' && !this.org)
-      sort="authorityName";
+    if(this._mode=='GROUP' && !this.org) {
+      sort=this.sortBy;
+      if(sort==RestConstants.AUTHORITY_DISPLAYNAME){
+        sort = RestConstants.AUTHORITY_NAME;
+      }
+      if(sort==RestConstants.AUTHORITY_GROUPTYPE) {
+        sort = RestConstants.CCM_PROP_AUTHORITY_GROUPTYPE;
+      }
+    }
     if(this._mode=='USER' && !this.org)
       sort="firstName";
 
