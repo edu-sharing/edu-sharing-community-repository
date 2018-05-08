@@ -68,7 +68,7 @@ export class NodeHelper{
         }
       }
       if(range[0]) {
-          if (range[0] == range[1]){
+          if (range[0] == range[1] || !range[1]){
             return range[0].trim()+" "+translation.instant('LEARNINGAGE_YEAR');
           }
           else{
