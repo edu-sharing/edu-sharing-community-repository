@@ -455,6 +455,7 @@ public class SearchApi {
 			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue = "-all-") @QueryParam("propertyFilter") List<String> propertyFilter,
+			@ApiParam(value = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -468,6 +469,7 @@ public class SearchApi {
 			token.setContentType(ContentType.ALL);
 			token.setLuceneString(query);
 			token.disableSearchCriterias();
+			token.setAuthorityScope(authorityScope);
 			NodeSearch search = NodeDao.search(repoDao, token);
 
 			List<Node> data = new ArrayList<Node>();

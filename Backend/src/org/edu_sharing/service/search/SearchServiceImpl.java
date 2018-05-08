@@ -12,8 +12,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.query.PagingRequest;
-import org.alfresco.query.PagingResults;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -31,17 +29,15 @@ import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
-import org.alfresco.service.cmr.security.PersonService.PersonInfo;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.policy.Helper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
-import org.edu_sharing.metadataset.v2.MetadataSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.Authority;
@@ -68,7 +64,6 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
-import org.mozilla.javascript.Context;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLEncoder;
 
@@ -668,6 +663,15 @@ public class SearchServiceImpl implements SearchService {
 				String sort = URLEncoder.encodeUriComponent("datetime@sd@" + CCConstants.CM_PROP_C_CREATED) + "+asc";
 				((ESSearchParameters) searchParameters).setGroupConfig(
 						"&group=true&group.limit=1&group.sort=" + sort + "&group.ngroups=true&group.truncate=true");
+			}
+			
+			if(searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0) {
+				
+				if(new Helper(serviceRegistry.getAuthorityService()).isAdmin(serviceRegistry.getAuthenticationService().getCurrentUserName())) {
+					((ESSearchParameters) searchParameters).setAuthorities(searchToken.getAuthorityScope().toArray(new String[searchToken.getAuthorityScope().size()]));
+				}else {
+					logger.error("only admins are allowed to change authority scope of search");
+				}
 			}
 
 			List<String> facettes = searchToken.getFacettes();
