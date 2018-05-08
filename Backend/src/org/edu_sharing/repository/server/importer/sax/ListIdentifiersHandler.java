@@ -211,6 +211,8 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 		}
 		
 		boolean mustBePersisted = persistentHandler.mustBePersisted(replId, timeStamp);
+		
+		logger.info("record " + currentIdentifier + " must be persisted " + mustBePersisted);
 
 		if (mustBePersisted) {
 			
