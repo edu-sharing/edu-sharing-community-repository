@@ -92,7 +92,25 @@ export class RestConstants {
   public static VIRTUAL_PROP_USAGECOUNT = "virtual:usagecount";
   public static GROUP_PREFIX="GROUP_";
 
-  public static DATE_FIELDS=[RestConstants.CM_ARCHIVED_DATE,
+  public static CONTRIBUTOR_LIFECYCLE_PREFIX="ccm:lifecyclecontributer_";
+  public static CONTRIBUTOR_METADATA_PREFIX="ccm:metadatacontributer_";
+  public static CONTRIBUTOR_ROLES_LIFECYCLE=["publisher","author","unknown","initiator","terminator","validator",
+    "editor","graphical_designer","technical_implementer","content_provider",
+    "educational_validator","script_writer","instructional_designer","subject_matter_expert"];
+  public static CONTRIBUTOR_ROLES_METADATA=["creator","validator","provider"];
+  public static getAllVCardFields(){
+      let list=[];
+      for(let role of RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE){
+        list.push(RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX+role);
+      }
+      for(let role of RestConstants.CONTRIBUTOR_ROLES_METADATA){
+          list.push(RestConstants.CONTRIBUTOR_METADATA_PREFIX+role);
+      }
+      return list;
+  }
+
+
+    public static DATE_FIELDS=[RestConstants.CM_ARCHIVED_DATE,
                             RestConstants.CM_MODIFIED_DATE,
                             RestConstants.CM_PROP_C_CREATED,
                             RestConstants.CCM_PROP_EAF_PRODUCTIONYEAR,

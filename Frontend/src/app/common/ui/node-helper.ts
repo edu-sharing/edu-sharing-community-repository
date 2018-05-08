@@ -23,6 +23,7 @@ import {ListItem} from "./list-item";
 import {Helper} from "../helper";
 import {ConfigurationHelper} from "../rest/configuration-helper";
 import {CordovaService} from "../services/cordova.service";
+import {VCard} from "../VCard";
 
 export class NodeHelper{
   /**
@@ -91,7 +92,9 @@ export class NodeHelper{
       value=node.properties[name].join(", ");
     if((node as any)[name])
       value=(node as any)[name];
-
+    if(value && RestConstants.getAllVCardFields().indexOf(name)!=-1){
+      return new VCard(value).getDisplayName();
+    }
     if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1){
       if(item.format){
         value=DateHelper.formatDateByPattern(value,item.format).trim();
