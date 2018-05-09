@@ -1,0 +1,28 @@
+@import "../../../../styles/variables.scss";
+
+:host /deep/{
+  .breadcrumb{
+    flex-wrap: wrap;
+    max-height: unset!important;
+  }
+}
+img{
+  max-width: 140px;
+}
+div{
+  >span{
+    margin:0 5px;
+    display:flex;
+  }
+  >span:first-child{
+    font-weight: bold;
+  }
+  padding-bottom: 5px;
+}
+.aspects{
+  white-space: pre-line;
+}
+.json{
+  white-space: pre;
+  font-family: "Lucida Console";
+}

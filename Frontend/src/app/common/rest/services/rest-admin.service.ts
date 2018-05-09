@@ -6,7 +6,7 @@ import {RestConnectorService} from "./rest-connector.service";
 import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {
-  ArchiveRestore, ArchiveSearch, Node, IamGroup, IamGroups, IamAuthorities, GroupProfile,
+  ArchiveRestore, ArchiveSearch, Node, NodeList, IamGroup, IamGroups, IamAuthorities, GroupProfile,
   IamUsers, IamUser, UserProfile, UserCredentials, ServerUpdate, CacheInfo, NetworkRepositories, Application
 } from "../data-object";
 import {Observer} from "rxjs";
@@ -146,15 +146,24 @@ export class RestAdminService extends AbstractRestService{
     return this.connector.post(query,null,this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
-    public startJob = (job:string,params:string): Observable<Response> => {
-        let query=this.connector.createUrl("admin/:version/job/:job",null,[
-            [":job",job],
-        ]);
-        if(!params || !params.trim()){
-          params="{}";
-        }
-        return this.connector.post(query,params,this.connector.getRequestOptions());
-    }
+  public searchLucene = (lucene:string,authorities:string[],request:any=null): Observable<NodeList> => {
+      let query=this.connector.createUrlNoEscape("admin/:version/lucene/?query=:lucene&:authorities&:request",null,[
+          [":lucene",encodeURIComponent(lucene)],
+          [":authorities",RestHelper.getQueryStringForList("authorityScope",authorities)],
+          [":request",this.connector.createRequestString(request)]
+      ]);
+      return this.connector.get(query,this.connector.getRequestOptions())
+          .map((response: Response) => response.json());
+  }
+  public startJob = (job:string,params:string): Observable<Response> => {
+      let query=this.connector.createUrl("admin/:version/job/:job",null,[
+          [":job",job],
+      ]);
+      if(!params || !params.trim()){
+        params="{}";
+      }
+      return this.connector.post(query,params,this.connector.getRequestOptions());
+  }
   public removeDeletedImports = (baseUrl:string,set:string,metadataPrefix:string): Observable<any> => {
     let query=this.connector.createUrl("admin/:version/import/oai/?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix",null,[
       [":baseUrl",baseUrl],

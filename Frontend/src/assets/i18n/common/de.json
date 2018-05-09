@@ -116,6 +116,13 @@
   "PASSWORD_MIN_LENGTH":"Das Passwort muss mindestens {{length}} Zeichen lang sein",
   "PASSWORD_NOT_MATCH":"Die Passwörter stimmen nicht überein",
   "LEARNINGAGE_YEAR":"Jahre",
+  "NODE_INFO":{
+    "TITLE":"Node \"{{name}}\"",
+    "LOCATION":"Pfad zum Element",
+    "NODE_ASPECTS":"Aspekte",
+    "NODE_TYPE":"Objekttyp",
+    "JSON":"Gesamtes Objekt"
+  },
   "SIDEBAR":{
     "WORKSPACE_OLD":"Klassischer Workspace",
     "WORKSPACE":"Workspace",
@@ -208,6 +215,7 @@
     "file-powerpoint":"Präsentation",
     "file-zip":"Zip-Datei",
     "file-script":"Skript",
+    "file-xml":"XML-Datei",
     "file-xml":"XML-Datei",
     "file-audio":"Audio",
     "file-txt":"Textdatei",

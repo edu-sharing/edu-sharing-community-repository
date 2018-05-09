@@ -22,6 +22,7 @@ export class RestConstants {
   public static AUTHORITY_TYPE_GROUP = "GROUP";
   public static AUTHORITY_TYPE_OWNER = "OWNER";
   public static AUTHORITY_TYPE_EVERYONE = "EVERYONE";
+  public static AUTHORITY_TYPE_UNKNOWN = "UNKNOWN";
   public static AUTHORITY_EVERYONE = "GROUP_EVERYONE";
   public static PERMISSION_OWNER = "Owner";
   public static PERMISSION_CONSUMER = "Consumer";

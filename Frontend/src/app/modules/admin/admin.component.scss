@@ -1,6 +1,5 @@
 @import "../../../styles/variables.scss";
 
-
 .content{
   padding:20px;
   padding-top:$mainnavHeight + 70px;
@@ -10,6 +9,20 @@
 .tabs{
   display: flex;
   overflow-x: auto;
+}
+.inputGroupGrow{
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  >*{
+    width:0;
+    flex-grow: 1;
+    display: flex;
+    margin:0 10px;
+  }
+  >input{
+    margin-bottom: 0;
+  }
 }
 .heading{
   color:$textLight;
@@ -200,15 +213,6 @@
   .group .inputGroup{
     padding:0;
   }
-  .inputGroupGrow{
-    display: flex;
-    align-items: center;
-    *{
-      width:0;
-      flex-grow: 1;
-      display: flex;
-    }
-  }
   .jobParams{
     min-height: 80px;
   }
@@ -240,6 +244,22 @@
       max-width: 250px;
       float:left;
     }
+  }
+}
+.browser{
+  .lucenePaging{
+    max-width: 700px;
+    margin: auto;
+    a{
+      flex-grow: initial;
+      width: auto;
+    }
+  }
+  .luceneAuthorities{
+    margin-top: -40px;
+  }
+  listTable{
+    padding-top: 20px;
   }
 }
 .row{

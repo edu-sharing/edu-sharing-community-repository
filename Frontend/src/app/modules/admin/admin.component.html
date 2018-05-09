@@ -9,6 +9,10 @@
               [buttons]="warningButtons"
               [isCancelable]="false"
 ></modal-dialog>
+<node-info *ngIf="nodeInfo"
+    [node]="nodeInfo"
+    (onClose)="nodeInfo=null"
+></node-info>
 <modal-dialog
 [title]="dialogTitle"
 [message]="dialogMessage"
@@ -49,6 +53,9 @@
       </li>
       <li class="clickable tab col s3" (click)="setTab('TOOLKIT')">
         <a [class.active]="tab=='TOOLKIT'" >{{'ADMIN.TAB.TOOLKIT' | translate}}</a>
+      </li>
+      <li class="clickable tab col s3" (click)="setTab('BROWSER')">
+        <a [class.active]="tab=='BROWSER'" >{{'ADMIN.TAB.BROWSER' | translate}}</a>
       </li>
     </ul>
   </div>
@@ -227,7 +234,7 @@
       <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
     </form>
   </div>
-  <div class="heading"><i class="material-icons">task</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
+  <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
   <div class="group">
     <form (ngSubmit)="startJob()">
       <div class="inputGroupGrow">
@@ -251,6 +258,46 @@
   <div class="group catalina">
     <div class="btn-flat btn-shadow" (click)="refreshCatalina()"><i class="material-icons">refresh</i></div>
     <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
+  </div>
+</div>
+<div *ngIf="tab=='BROWSER'" class="content browser">
+  <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.LUCENE_SEARCH' | translate}}</span></div>
+  <div class="group">
+    <div class="inputGroupGrow">
+      <div class="info">{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</div>
+      <input type="text" name="luceneQuery" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'>
+    </div>
+    <div class="inputGroupGrow">
+      <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
+      <authority-search-input [globalSearch]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>
+    </div>
+    <div class="inputGroupGrow luceneAuthorities" *ngIf="lucene.authorities && lucene.authorities.length">
+        <div></div>
+        <div>
+          <div class="badge" *ngFor="let authority of lucene.authorities">
+            <span>{{authority | authorityName}}</span>
+            <i class="material-icons clickable" tabindex="0" (keyup.enter)="authority(permission)" (click)="removeLuceneAuthority(authority)">cancel</i>
+          </div>
+        </div>
+    </div>
+  <div class="inputGroupGrow lucenePaging">
+      <div class="info">{{'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</div>
+      <input type="number" name="luceneOffset" [(ngModel)]="lucene.offset">
+      <div class="info">{{'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</div>
+      <input type="number" name="luceneCount" [(ngModel)]="lucene.count">
+      <a class="btn waves-effect waves-light" (click)="searchLucene()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
+  </div>
+  <div>
+      <listTable
+              [viewType]="0"
+              [columns]="searchColumns"
+              [hasHeading]="true"
+              [nodes]="luceneNodes"
+              [hasIcon]="true"
+              [isClickable]="true"
+              (clickRow)="debugNode($event)"
+      ></listTable>
+  </div>
   </div>
 </div>
 <global-progress *ngIf="globalProgress"></global-progress>

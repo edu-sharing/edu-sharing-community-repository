@@ -8,12 +8,13 @@ import {TranslateService} from "@ngx-translate/core";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {Component, ViewChild, ElementRef} from "@angular/core";
-import {LoginResult, ServerUpdate, CacheInfo, Application, Node} from "../../common/rest/data-object";
+import {LoginResult, ServerUpdate, CacheInfo, Application, Node, Authority, NodeList} from "../../common/rest/data-object";
 import {RestAdminService} from "../../common/rest/services/rest-admin.service";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 import {Helper} from "../../common/helper";
 import {RestConstants} from "../../common/rest/rest-constants";
 import {UIConstants} from "../../common/ui/ui-constants";
+import {ListItem} from "../../common/ui/list-item";
 @Component({
   selector: 'admin-main',
   templateUrl: 'admin.component.html',
@@ -33,6 +34,7 @@ export class AdminComponent {
   public cacheInfo:string;
   public oai:any={};
   public job:any={};
+  public lucene:any={offset:0,count:100};
   public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
@@ -68,6 +70,9 @@ export class AdminComponent {
   private static MULTILINE_PROPERTIES = [
     "custom_html_headers","public_key"
   ];
+  luceneNodes: Node[];
+  searchColumns: ListItem[]=[];
+  nodeInfo: Node;
   public startJob(){
     this.storage.set("admin_job",this.job);
     this.globalProgress=true;
@@ -79,7 +84,41 @@ export class AdminComponent {
         this.toast.error(error);
     });
   }
-
+  public debugNode(node:Node){
+    console.log(node);
+    this.nodeInfo=node;
+  }
+  public searchLucene(){
+    this.storage.set("admin_lucene",this.lucene);
+    let authorities=[];
+    if(this.lucene.authorities){
+      for(let auth of this.lucene.authorities){
+        authorities.push(auth.authorityName);
+      }
+    }
+    let request={
+      offset:this.lucene.offset ? this.lucene.offset : 0,
+      count:this.lucene.count,
+      propertyFilter:[RestConstants.ALL]
+    }
+    this.globalProgress=true;
+    this.admin.searchLucene(this.lucene.query,authorities,request).subscribe((data:NodeList)=>{
+      this.globalProgress=false;
+      console.log(data);
+      this.luceneNodes=data.nodes;
+    },(error:any)=>{
+      this.globalProgress=false;
+      this.toast.error(error);
+    });
+  }
+  public addLuceneAuthority(authority:Authority){
+    if(!this.lucene.authorities)
+      this.lucene.authorities=[];
+    this.lucene.authorities.push(authority);
+  }
+  public removeLuceneAuthority(authority:Authority){
+    this.lucene.authorities.splice(this.lucene.authorities.indexOf(authority),1);
+  }
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -89,6 +128,9 @@ export class AdminComponent {
               private storage : SessionStorageService,
               private admin : RestAdminService,
               private connector: RestConnectorService) {
+      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
+      this.searchColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
+      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
         this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
@@ -111,6 +153,9 @@ export class AdminComponent {
         this.refreshAppList();
         this.storage.get("admin_job",this.job).subscribe((data:any)=>{
           this.job=data;
+        });
+        this.storage.get("admin_lucene",this.lucene).subscribe((data:any)=>{
+            this.lucene=data;
         });
         this.admin.getOAIClasses().subscribe((classes:string[])=>{
           this.oaiClasses=classes;

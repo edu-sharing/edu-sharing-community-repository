@@ -16,6 +16,11 @@ export class AutocompleteComponent{
   @Input() placeholder: string;
   @Input() inputMinLength: number = 2;
   @Input() disabled=false;
+  /**
+   * Do allow any entered value to be accepted
+   * @type {boolean}
+   */
+  @Input() allowAny=false;
   @Input() maxSuggestions: number = 10;
 
   @Input() set suggestions(suggestions: SuggestItem[]) {
@@ -36,6 +41,7 @@ export class AutocompleteComponent{
 
   @Output() updateInput: EventEmitter<any> = new EventEmitter<any>();
   @Output() addItem: EventEmitter<any> = new EventEmitter<any>();
+  @Output() addAny: EventEmitter<any> = new EventEmitter<any>();
   @Output() removeItem: EventEmitter<any> = new EventEmitter<any>();
 
   _suggestions: SuggestItem[];
@@ -45,7 +51,11 @@ export class AutocompleteComponent{
 
   constructor(private translate : TranslateService) {}
 
-
+addValue(){
+    if(this.allowAny){
+      this.addAny.emit(this.valueInput);
+    }
+}
 itemChosen(item:SuggestItem) {
   if(typeof this.chosen != 'undefined') {
     for(var i = 0; i< this.chosen.length;i++) {
