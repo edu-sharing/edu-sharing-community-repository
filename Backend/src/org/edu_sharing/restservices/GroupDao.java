@@ -6,6 +6,7 @@ import java.util.List;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -70,6 +71,8 @@ public class GroupDao {
 	private AuthorityService authorityService;
 
 	private String groupType;
+
+	private NodeRef ref;
 	
 	public GroupDao(RepositoryDao repoDao, String groupName) throws DAOException  {
 
@@ -97,7 +100,7 @@ public class GroupDao {
 				
 			}		
 			this.groupType= authorityService.getProperty(this.authorityName,CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-
+			this.ref = authorityService.getAuthorityNodeRef(this.authorityName);
 			
 		} catch (Throwable t) {
 			
@@ -221,6 +224,7 @@ public class GroupDao {
 		
     	Group data = new Group();
     	
+    	data.setRef(getRef());
     	data.setAuthorityName(getAuthorityName());
     	data.setAuthorityType(Authority.Type.GROUP);
     	
@@ -237,7 +241,11 @@ public class GroupDao {
 	private String getGroupType() {
 		return this.groupType;
 	}
-
+	public org.edu_sharing.restservices.shared.NodeRef getRef() {
+	
+		return NodeDao.createNodeRef(repoDao, this.ref.getId());
+	}
+	
 	public String getAuthorityName() {
 	
 		return this.authorityName;

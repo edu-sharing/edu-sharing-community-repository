@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.MD5;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.restservices.DAOException;
@@ -66,5 +67,6 @@ public interface AuthorityService {
 	static String getGroupName(String groupName,String parentGroup){
 		return org.edu_sharing.alfresco.service.AuthorityService.getGroupName(groupName, parentGroup);
 	}
+	NodeRef getAuthorityNodeRef(String authority);
 	
 }
