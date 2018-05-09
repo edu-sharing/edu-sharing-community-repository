@@ -114,6 +114,7 @@ public class OrganizationDao {
 	
 	private final String authorityName;
 	private final String groupName;
+	private org.alfresco.service.cmr.repository.NodeRef ref;
 	
 	public OrganizationDao(RepositoryDao repoDao, EduGroup eduGroup) {
 
@@ -122,6 +123,7 @@ public class OrganizationDao {
 		
 		this.authorityName = generateAuthorityName(eduGroup);		
 		this.groupName = generateGroupName(eduGroup);
+		this.ref = AuthorityServiceFactory.getAuthorityService(repoDao.getId()).getAuthorityNodeRef(this.authorityName);
 		
 	}
 	/**
@@ -136,6 +138,7 @@ public class OrganizationDao {
 		
 		Organization data = new Organization();
     			
+		data.setRef(getRef());
     	data.setAuthorityName(authorityName);
     	data.setAuthorityType(Authority.Type.GROUP);
     	data.setGroupName(groupName);
@@ -151,6 +154,10 @@ public class OrganizationDao {
     	data.setSharedFolder(ref);
     	    	
     	return data; 
+	}
+
+	private NodeRef getRef() {
+		return NodeDao.createNodeRef(repoDao, this.ref.getId());
 	}
 
 	public void delete() throws DAOException {

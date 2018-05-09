@@ -882,10 +882,7 @@ public class NodeDao {
 	
 	public NodeRef getRef() {
 
-		NodeRef nodeRef = new NodeRef();
-		nodeRef.setRepo(repoDao.getId());
-		nodeRef.setId(getId());
-		nodeRef.setHomeRepo(repoDao.isHomeRepo());		
+		NodeRef nodeRef = createNodeRef(repoDao,nodeId);
 		String storeProtocol = (String)this.nodeProps.get(CCConstants.SYS_PROP_STORE_PROTOCOL);
 		if(Constants.archiveStoreRef.getProtocol().equals(storeProtocol)){
 			nodeRef.setArchived(true);
@@ -895,9 +892,12 @@ public class NodeDao {
 	}
 
 	private NodeRef getParentRef() {
+		return createNodeRef(repoDao,getParentId());
+	}
+	public static NodeRef createNodeRef(RepositoryDao repoDao,String nodeId) {
 		NodeRef parentRef = new NodeRef();
 		parentRef.setRepo(repoDao.getId());
-		parentRef.setId(getParentId());
+		parentRef.setId(nodeId);
 		parentRef.setHomeRepo(repoDao.isHomeRepo());		
 		return parentRef;
 	}
