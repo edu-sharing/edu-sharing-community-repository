@@ -269,6 +269,9 @@ $badgeWidth:250px;
 .row .icon{
   padding-top:20px;
 }
+.row{
+  transition: none;
+}
 .list .row{
   margin:0 0!important;
 }
