@@ -43,9 +43,11 @@ export class NodeInfoComponent{
   close(){
     this.onClose.emit();
   }
+  openNode(){
+    this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace"],{queryParams:{id:this._node.parent.id,file:this._node.ref.id}});
+  }
   openBreadcrumb(pos:number){
     let node=this._path[pos-1];
-    console.log(node);
     this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace"],{queryParams:{id:node.ref.id}});
   }
 }
