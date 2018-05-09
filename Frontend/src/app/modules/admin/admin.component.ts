@@ -32,6 +32,7 @@ export class AdminComponent {
   public cacheName:string;
   public cacheInfo:string;
   public oai:any={};
+  public job:any={};
   public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
@@ -67,6 +68,17 @@ export class AdminComponent {
   private static MULTILINE_PROPERTIES = [
     "custom_html_headers","public_key"
   ];
+  public startJob(){
+    this.storage.set("admin_job",this.job);
+    this.globalProgress=true;
+    this.admin.startJob(this.job.class,this.job.params).subscribe(()=>{
+        this.globalProgress=false;
+        this.toast.toast('ADMIN.TOOLKIT.JOB_STARTED');
+    },(error:any)=>{
+        this.globalProgress=false;
+        this.toast.error(error);
+    });
+  }
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -78,6 +90,7 @@ export class AdminComponent {
               private admin : RestAdminService,
               private connector: RestConnectorService) {
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
+        this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
@@ -96,6 +109,9 @@ export class AdminComponent {
         });
         this.refreshCatalina();
         this.refreshAppList();
+        this.storage.get("admin_job",this.job).subscribe((data:any)=>{
+          this.job=data;
+        });
         this.admin.getOAIClasses().subscribe((classes:string[])=>{
           this.oaiClasses=classes;
           this.storage.get("admin_oai").subscribe((data:any)=>{

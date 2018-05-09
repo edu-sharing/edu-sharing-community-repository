@@ -146,6 +146,15 @@ export class RestAdminService extends AbstractRestService{
     return this.connector.post(query,null,this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
+    public startJob = (job:string,params:string): Observable<Response> => {
+        let query=this.connector.createUrl("admin/:version/job/:job",null,[
+            [":job",job],
+        ]);
+        if(!params || !params.trim()){
+          params="{}";
+        }
+        return this.connector.post(query,params,this.connector.getRequestOptions());
+    }
   public removeDeletedImports = (baseUrl:string,set:string,metadataPrefix:string): Observable<any> => {
     let query=this.connector.createUrl("admin/:version/import/oai/?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix",null,[
       [":baseUrl",baseUrl],

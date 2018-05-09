@@ -200,6 +200,18 @@
   .group .inputGroup{
     padding:0;
   }
+  .inputGroupGrow{
+    display: flex;
+    align-items: center;
+    *{
+      width:0;
+      flex-grow: 1;
+      display: flex;
+    }
+  }
+  .jobParams{
+    min-height: 80px;
+  }
   .catalina{
     label{
       position: relative;
@@ -224,7 +236,7 @@
     .btn-flat{
       float:right;
     }
-    input{
+    .cacheInfo{
       max-width: 250px;
       float:left;
     }

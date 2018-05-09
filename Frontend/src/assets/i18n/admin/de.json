@@ -116,7 +116,10 @@
       "UPLOAD_TEMP":"Dateien in temporäres Verzeichnis hochladen",
       "CHOOSE_UPLOAD_TEMP":"Datei wählen",
       "UPLOAD_TEMP_START":"Hochladen",
-      "UPLOAD_TEMP_DONE":"Datei wurde unter {{filename}} auf dem Server abgelegt"
+      "UPLOAD_TEMP_DONE":"Datei wurde unter {{filename}} auf dem Server abgelegt",
+      "JOB_CLASS":"Klassenname der Job-Klasse",
+      "JOB_STARTED":"Der Job wurde gestartet. Überprüfen Sie die catalina.out für den Status",
+      "START_JOB":"Job ausführen"
     }
   }
 }
