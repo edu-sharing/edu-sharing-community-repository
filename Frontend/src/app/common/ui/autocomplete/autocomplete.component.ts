@@ -52,7 +52,7 @@ export class AutocompleteComponent{
   constructor(private translate : TranslateService) {}
 
 addValue(){
-    if(this.allowAny){
+    if(this.allowAny && this.valueInput){
       this.addAny.emit(this.valueInput);
     }
 }
@@ -118,6 +118,7 @@ itemChosen(item:SuggestItem) {
             if(item) {
               this.addItem.emit({item:item, id:this.id});
               this.clear();
+              event.stopPropagation();
             }
           }
         }
