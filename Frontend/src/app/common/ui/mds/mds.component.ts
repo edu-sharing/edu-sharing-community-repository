@@ -76,6 +76,7 @@ export class MdsComponent{
   private variables: string[];
   private currentWidgetSuggestion: string;
   private static GROUP_MULTIVALUE_DELIMITER='[+]';
+  private mdsId = Math.random();
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -246,11 +247,12 @@ export class MdsComponent{
       (window as any).mdsComponentRef = null;
     }
   private openSuggestions(id:string,event:any,allowCustom:boolean,widgetValues:boolean,showMore=false,search=this.suggestionsViaSearch){
+    let widget=this.getWidget(id);
     this.suggestionsViaSearch=search;
-    let searchField:any=document.getElementById(id+'_suggestionsInput');
+    let searchField:any=document.getElementById(this.getWidgetDomId(widget)+'_suggestionsInput');
     if(allowCustom){
       if(event && event.keyCode==13 && searchField.value!=''){
-        let badges=document.getElementById(id);
+        let badges=document.getElementById(this.getWidgetDomId(widget));
         let elements:any=badges.childNodes;
         let add=true;
         for(var i=0;i<elements.length;i++){
@@ -262,7 +264,7 @@ export class MdsComponent{
         searchField.value=null;
       }
     }
-    let list=document.getElementById(id+'_suggestions');
+    let list=document.getElementById(this.getWidgetDomId(widget)+'_suggestions');
     list.className=list.className.replace('suggestionListAll','').trim();
     if(showMore){
       list.className+=' suggestionListAll';
@@ -279,7 +281,7 @@ export class MdsComponent{
 
     if(searchField.value.length<2 && search)
       return;
-    this.currentWidgetSuggestion=id;
+    this.currentWidgetSuggestion=this.getWidgetDomId(widget);
     list.style.display='';
     let hits=0;
     let moreCount=0;
@@ -490,13 +492,14 @@ export class MdsComponent{
       if(widget.id=='preview' || widget.id=='author'){
         continue;
       }
+      let domId=this.getWidgetDomId(widget);
       if(widget.type=='vcard'){
         if(!propertiesIn[widget.id])
           propertiesIn[widget.id]=[null];
 
         let vcard=new VCard(propertiesIn[widget.id][0]);
         for(let field of MdsComponent.VCARD_FIELDS){
-          let element=(document.getElementById(widget.id+'_'+field) as any);
+          let element=(document.getElementById(domId+'_'+field) as any);
           if(!element)
             continue;
           vcard.set(field,element.value);
@@ -507,7 +510,7 @@ export class MdsComponent{
       }
       if(widget.type=='radioVertical' || widget.type=='radioHorizontal'){
         properties[widget.id]=[];
-        let list:any=document.getElementsByName(widget.id);
+        let list:any=document.getElementsByName(domId);
         for(let i=0;i<list.length;i++) {
           if(list.item(i).checked){
             properties[widget.id].push(list.item(i).value);
@@ -515,7 +518,7 @@ export class MdsComponent{
         }
         continue;
       }
-      let element=(document.getElementById(widget.id) as any);
+      let element=(document.getElementById(domId) as any);
       if(!element)
         continue;
       if(widget.type=='checkboxVertical' || widget.type=='checkboxHorizontal'){
@@ -549,8 +552,8 @@ export class MdsComponent{
           valueClean[0] *= 60000;
         }
         if(widget.type=='range'){
-          properties[widget.id+'_from']=[valueClean[0]];
-          properties[widget.id+'_to']=[valueClean[1]];
+          properties[domId+'_from']=[valueClean[0]];
+          properties[domId+'_to']=[valueClean[1]];
           continue;
         }
           if (Array.isArray(valueClean))
@@ -572,7 +575,7 @@ export class MdsComponent{
         if(showError) {
           let inputField=element;
           if(this.isMultivalueWidget(widget)){
-            inputField=document.getElementById(widget.id+'_suggestionsInput');
+            inputField=document.getElementById(domId+'_suggestionsInput');
           }
           if(inputField)
             inputField.className += 'invalid';
@@ -724,7 +727,7 @@ export class MdsComponent{
         if(widget.template)
           continue;
         let props=properties[widget.id];
-        let element=(document.getElementById(widget.id) as any);
+        let element=(document.getElementById(this.getWidgetDomId(widget)) as any);
         // try to resolve proper template widget if exists to exchange valuespace
         try {
           let template = element.parentNode.getAttribute('data-template');
@@ -749,7 +752,7 @@ export class MdsComponent{
 
           let vcard=new VCard(props[0]);
           for(let field of MdsComponent.VCARD_FIELDS){
-            let element=(document.getElementById(widget.id+'_'+field) as any);
+            let element=(document.getElementById(this.getWidgetDomId(widget)+'_'+field) as any);
             if(element){
               element.value=vcard.get(field);
             }
@@ -757,9 +760,9 @@ export class MdsComponent{
         }
         else if(element) {
           if(this.isSliderWidget(widget)){
-            if(widget.type=='range' && properties[widget.id+'_from'] && properties[widget.id+'_to']){
-              let from=properties[widget.id+'_from'][0];
-              let to=properties[widget.id+'_to'][0];
+            if(widget.type=='range' && properties[this.getWidgetDomId(widget)+'_from'] && properties[this.getWidgetDomId(widget)+'_to']){
+              let from=properties[this.getWidgetDomId(widget)+'_from'][0];
+              let to=properties[this.getWidgetDomId(widget)+'_to'][0];
               element.noUiSlider.set([from,to]);
             }
             if(!props)
@@ -830,7 +833,7 @@ export class MdsComponent{
           if(!props)
             continue;
           for(let v of props){
-            let element=(document.getElementById(widget.id+'_'+v) as any);
+            let element=(document.getElementById(this.getWidgetDomId(widget)+'_'+v) as any);
             if(element) {
               if (element.type == 'checkbox' || element.type=='radio')
                 element.checked = true;
@@ -916,7 +919,7 @@ export class MdsComponent{
     if(widget.icon){
       html+='<i class="inputIcon material-icons">'+widget.icon+'</i>';
     }
-    html+='<input type="'+type+'" id="'+widget.id+'" placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" class="'+css+'">';
+    html+='<input type="'+type+'" id="'+this.getWidgetDomId(widget)+'" placeholder="'+(widget.placeholder ? widget.placeholder : '')+'" class="'+css+'">';
     if(widget.type=='checkbox'){
       html+=this.getCaption(widget);
     }
@@ -946,7 +949,7 @@ export class MdsComponent{
     let html='';
     let i=0;
     for(let field of [MdsComponent.VCARD_FIELDS[1],MdsComponent.VCARD_FIELDS[0]]) {
-      let id = widget.id + '_' + field;
+      let id = this.getWidgetDomId(widget) + '_' + field;
       let caption = this.translate.instant('VCARD.' + field);
       html += `<div class="vcardGroup"><label for="` + id + `">` + caption + `</label>
                <input type="text" class="vcard_`+field+(i==0?' vcardFirstInput':'')+`" id="` + id + `">`;
@@ -975,11 +978,11 @@ export class MdsComponent{
     return html;
   }
   private renderSuggestBadgesWidget(widget:any, attr:string, allowCustom:boolean){
-    let html=this.autoSuggestField(widget,'',allowCustom,true)+`<div id="`+widget.id+`" class="multivalueBadges"></div>`;
+    let html=this.autoSuggestField(widget,'',allowCustom,true)+`<div id="`+this.getWidgetDomId(widget)+`" class="multivalueBadges"></div>`;
     return html;
   }
   private renderSubTree(widget:any,parent:string=null){
-    let html='<div id="'+widget.id+'_group_'+parent+'" class="treeGroup"';
+    let html='<div id="'+this.getWidgetDomId(widget)+'_group_'+parent+'" class="treeGroup"';
     if(parent!=null){
       html+=' style="display:none;"';
     }
@@ -989,12 +992,12 @@ export class MdsComponent{
       for (let value of widget.values) {
         if (value.parent != parent)
           continue;
-        let id = widget.id + '_' + value.id;
+        let id = this.getWidgetDomId(widget) + '_' + value.id;
         let sub = this.renderSubTree(widget, value.id);
         html += '<div><div id="'+id+'_bg"><div class="treeIcon">';
         if (sub) {
           html += `<i class="material-icons clickable" onclick="
-                  var element=document.getElementById('` + widget.id + `_group_` + value.id + `');
+                  var element=document.getElementById('` +this.getWidgetDomId(widget) + `_group_` + value.id + `');
                   var enable=element.style.display=='none';
                   element.style.display=enable ? '' : 'none';
                   this.innerHTML=enable ? 'keyboard_arrow_down' : 'keyboard_arrow_right';
@@ -1026,7 +1029,7 @@ export class MdsComponent{
     let multivalue=widget.type=='multivalueTree';
     document.getElementById(element.id+'_bg').className=element.checked ? 'treeSelected' : '';
     if(!multivalue) {
-      let inputs = document.getElementById('`+widget.id+`_tree').getElementsByTagName('input');
+      let inputs = document.getElementById(this.getWidgetDomId(widget)+'_tree').getElementsByTagName('input');
       for (let i = 0; i < inputs.length; i++) {
         if (inputs[i].id == element.id)
           continue;
@@ -1069,10 +1072,10 @@ export class MdsComponent{
     return false;
   }
   private mdsUpdateSuggests(id:string,showMore=false){
-    let list=document.getElementById(id+'_suggestions');
-    let element:any=document.getElementById(id+'_suggestionsInput');
-    let elements=list.getElementsByTagName('a');
     let widget=this.getWidget(id);
+    let list=document.getElementById(this.getWidgetDomId(id)+'_suggestions');
+    let element:any=document.getElementById(this.getWidgetDomId(id)+'_suggestionsInput');
+    let elements=list.getElementsByTagName('a');
     if(showMore){
       list.className+=' suggestionListAll';
     }
@@ -1106,7 +1109,7 @@ export class MdsComponent{
         if(!widget.values && value.displayString){
           caption=value.displayString;
         }
-        list.innerHTML+=this.getListEntry(id,key,caption,false,element.value);
+        list.innerHTML+=this.getListEntry(this.getWidgetDomId(id),key,caption,false,element.value);
         i++;
       }
       if(i==0){
@@ -1176,7 +1179,7 @@ export class MdsComponent{
     let postfix='_suggestionsInput';
     if(singleValue)
       postfix='';
-    let html=`<input type="text" id="`+widget.id+postfix+`" `
+    let html=`<input type="text" id="`+this.getWidgetDomId(widget)+postfix+`" `
     if(singleValue)
       html+='readonly ';
     html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`" 
@@ -1236,19 +1239,19 @@ export class MdsComponent{
       html+=`"><i class="material-icons">arrow_drop_down</i></a>`;
 
     }
-    html+=`<div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
+    html+=`<div id="`+this.getWidgetDomId(widget)+`_suggestions" class="suggestionList collection" style="display:none;">`;
     html+=`<a class="collection-item suggestionNoMatches"  onclick="
-              document.getElementById('`+widget.id+`_suggestions').style.display='none';
-              document.getElementById('`+widget.id+`_dialog').style.display='none';
+              document.getElementById('`+this.getWidgetDomId(widget)+`_suggestions').style.display='none';
+              document.getElementById('`+this.getWidgetDomId(widget)+`_dialog').style.display='none';
               ">`+this.translate.instant('NO_MATCHES')+`</a>`;
     if(widget.allowempty==true){
-      html += this.getListEntry(widget.id,'','',singleValue);
+      html += this.getListEntry(this.getWidgetDomId(widget),'','',singleValue);
     }
     if(widget.values) {
       for (let value of widget.values) {
         if (value.disabled/* || value.parent*/) // find all fields, not only main nodes of a tree
           continue;
-        html += this.getListEntry(widget.id,value.id,value.caption,singleValue);
+        html += this.getListEntry(this.getWidgetDomId(widget),value.id,value.caption,singleValue);
       }
     }
     html+=`<a class="collection-item suggestionMoreItems"  onclick="
@@ -1267,10 +1270,11 @@ export class MdsComponent{
     this.currentWidgetSuggestion=null;
   }
   private renderTreeWidget(widget:any,attr:string){
+    let domId=this.getWidgetDomId(widget);
     let html=this.autoSuggestField(widget)+`<div class="btn-flat suggestOpen" onclick="
-                  var tree=document.getElementById('`+widget.id+`_tree');
+                  var tree=document.getElementById('`+domId+`_tree');
                   tree.style.display='';
-                  var childs=document.getElementById('`+widget.id+`').childNodes;
+                  var childs=document.getElementById('`+domId+`').childNodes;
                   var elements=tree.getElementsByTagName('input');
                   for(var i=0;i<elements.length;i++){
                       elements[i].checked=false;
@@ -1278,7 +1282,7 @@ export class MdsComponent{
                   }
                   for(var i=0;i<childs.length;i++){
                      var child=childs[i];
-                     var element=document.getElementById('`+widget.id+`_'+child.getAttribute('data-value'));
+                     var element=document.getElementById('`+domId+`_'+child.getAttribute('data-value'));
                      var elementBg=document.getElementById(element.id+'_bg');
                      if(element){
                       element.checked=true;
@@ -1286,10 +1290,10 @@ export class MdsComponent{
                      }
                   }
               "><i class="material-icons">arrow_forward</i></div>
-              <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
+              <div class="dialog darken" style="display:none;z-index:121;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
-                  <div class="card-cancel" onclick="document.getElementById('`+widget.id+`_tree').style.display='none';"><i class="material-icons">close</i></div>
+                  <div class="card-cancel" onclick="document.getElementById('`+domId+`_tree').style.display='none';"><i class="material-icons">close</i></div>
                   <div class="card-title">`+(widget.caption ? widget.caption : widget.placeholder)+`</div>
                     <div class="card-scroll">
                     `+this.renderSubTree(widget,null)+`
@@ -1300,24 +1304,25 @@ export class MdsComponent{
                      </div>
                 </div>
               </div>
-              <div id="`+widget.id+`" class="multivalueBadges"></div>`;
+              <div id="`+domId+`" class="multivalueBadges"></div>`;
     // delete existing tree from document
     try{
-      document.getElementsByTagName('body')[0].removeChild(document.getElementById(widget.id+'_tree'));
+      document.getElementsByTagName('body')[0].removeChild(document.getElementById(domId+'_tree'));
     }catch(e){}
     // dirty hack: In search, the tree is inside the sidebar which does not render correctly. So we need to append it to the main body and delete any existing trees
     setTimeout(()=> {
       try {
-        let id = widget.id + '_tree';
+        let id = domId + '_tree';
         document.getElementsByTagName('body')[0].appendChild(document.getElementById(id));
       }catch(e){}
     },5);
     return html;
   }
   private saveTree(widgetId:string){
-    let tree=document.getElementById(widgetId+'_tree');
+    let widget=this.getWidget(widgetId);
+    let tree=document.getElementById(this.getWidgetDomId(widget)+'_tree');
     tree.style.display='none';
-    let badges=document.getElementById(widgetId);
+    let badges=document.getElementById(this.getWidgetDomId(widget));
     while (badges.firstChild)
       badges.removeChild(badges.firstChild);
     let elements=tree.getElementsByTagName('input');
@@ -1331,7 +1336,7 @@ export class MdsComponent{
     }
   }
   private renderTextareaWidget(widget:any,attr:string){
-    let html='<textarea class="materialize-textarea" id="'+widget.id+'"';
+    let html='<textarea class="materialize-textarea" id="'+this.getWidgetDomId(widget)+'"';
     if(widget.placeholder){
       html+=' placeholder="'+widget.placeholder+'"';
     }
@@ -1339,24 +1344,25 @@ export class MdsComponent{
     return html;
   }
   private renderDurationWidget(widget:any,attr:string){
+    let id=this.getWidgetDomId(widget);
     let html=`
-              <div class="inputField"><label for="`+widget.id+`_hours">`+this.translate.instant('INPUT_HOURS')+`</label>
-              <input type="number" min="0" max="9" id="`+widget.id+`_hours" onchange="
-              document.getElementById('`+widget.id+`').noUiSlider.set(
-              document.getElementById('`+widget.id+`_hours').value*60+
-              document.getElementById('`+widget.id+`_minutes').value*1);
+              <div class="inputField"><label for="`+id+`_hours">`+this.translate.instant('INPUT_HOURS')+`</label>
+              <input type="number" min="0" max="9" id="`+id+`_hours" onchange="
+              document.getElementById('`+id+`').noUiSlider.set(
+              document.getElementById('`+id+`_hours').value*60+
+              document.getElementById('`+id+`_minutes').value*1);
               " />
               </div>
               <div class="inputField"><span>:</span></div>
               <div class="inputField">
-              <label for="`+widget.id+`_minutes">`+this.translate.instant('INPUT_MINUTES')+`</label>
+              <label for="`+id+`_minutes">`+this.translate.instant('INPUT_MINUTES')+`</label>
               <input type="number" min="0" max="60" id="`+widget.id+`_minutes" onchange="
-              document.getElementById('`+widget.id+`').noUiSlider.set(
-              document.getElementById('`+widget.id+`_hours').value*60+
-              document.getElementById('`+widget.id+`_minutes').value*1);
+              document.getElementById('`+id+`').noUiSlider.set(
+              document.getElementById('`+id+`_hours').value*60+
+              document.getElementById('`+id+`_minutes').value*1);
               "/>
               </div>
-              <div class="inputSlider" id="`+widget.id+`"></div>
+              <div class="inputSlider" id="`+id+`"></div>
     `;
     setTimeout(()=>{
       eval(`
@@ -1425,8 +1431,8 @@ export class MdsComponent{
 
   private renderSingleoptionWidget(widget:any,attr:string){
     if(widget.values==null)
-      return 'Error at '+widget.id+': No values for a singleOption widget is not possible';
-    let html='<select id="'+widget.id+'">';
+      return 'Error at '+widget.id+': No values for a singleoption widget is not possible';
+    let html='<select id="'+this.getWidgetDomId(widget)+'">';
     if(widget.allowempty==true){
       html+='<option value=""></option>';
     }
@@ -1442,26 +1448,26 @@ export class MdsComponent{
   }
   private renderMultioptionWidget(widget:any,attr:string){
     let html=`<select onchange="
-        var elements=document.getElementById('`+widget.id+`').childNodes;
+        var elements=document.getElementById('`+this.getWidgetDomId(widget)+`').childNodes;
         for(var i=0;i<elements.length;i++){
             if(elements[i].getAttribute('data-value')==this.value){
                 return;
             }
         }
-        document.getElementById('`+widget.id+`').innerHTML+='`+this.getMultivalueBadgeEmbedded('this.options[this.selectedIndex].innerHTML')+`';
+        document.getElementById('`+this.getWidgetDomId(widget)+`').innerHTML+='`+this.getMultivalueBadgeEmbedded('this.options[this.selectedIndex].innerHTML')+`';
         this.value='';
       "><option></option>`;
     for(let option of widget.values){
       html+='<option value="'+option.id+'">'+option.caption+'</option>';
     }
-    html+='</select><div id="'+widget.id+'" class="multivalueBadges"></div>';
+    html+='</select><div id="'+this.getWidgetDomId(widget)+'" class="multivalueBadges"></div>';
     return html;
   }
   private renderRadioWidget(widget:any,attr:string,vertical:boolean){
     let html='<fieldset class="'+(vertical ? 'radioVertical' : 'radioHorizontal')+'">';
 
     for(let option of widget.values){
-      let id=widget.id+'_'+option.id;
+      let id=this.getWidgetDomId(widget)+'_'+option.id;
       html+='<input type="radio" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.id==widget.defaultvalue ? ' checked' : '')+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+option.caption+'</label>';
     }
     html+='</fieldset>';
@@ -1471,7 +1477,7 @@ export class MdsComponent{
     let html='<fieldset id="'+widget.id+'" class="'+(vertical ? 'checkboxVertical' : 'checkboxHorizontal')+'">';
 
     for(let option of widget.values){
-      let id=widget.id+'_'+option.id;
+      let id=this.getWidgetDomId(widget)+'_'+option.id;
       html+='<input type="checkbox" class="filled-in" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')
         +'> <label for="'+id+'">'+(option.imageSrc ? '<img src="'+option.imageSrc+'">' : '')+(option.caption ? '<span class="caption">'+option.caption+'</span>' : '')
         +(option.description ? '<span class="description">'+option.description+'</span>' : '')
@@ -1511,7 +1517,8 @@ export class MdsComponent{
     if(hasCaption) {
       caption=this.getCaption(widget);
     }
-    html+='<div id="'+widget.id+(template.rel ? '_'+template.rel : '')+'_container"';
+    let idLong=widget.id+(template.rel ? '_'+template.rel : '')+'_container';
+    html+='<div id="'+idLong+'" class="'+idLong+'"';
     if(this.isExtendedWidget(widget)){
       html+=' class="mdsExtendedGroup" style="display:none"';
     }
@@ -1715,6 +1722,8 @@ export class MdsComponent{
   }
   refreshChildobjects() {
     let list=document.getElementById('mdsChildobjects');
+    if(!list)
+      return;
     list.innerHTML='';
     let i=0;
     for(let child of this.childobjects) {
@@ -1856,7 +1865,7 @@ export class MdsComponent{
     if(!hasValue){
       return;
     }
-    let badges=document.getElementById(widget.id);
+    let badges=document.getElementById(this.getWidgetDomId(widget));
     let elements:any=badges.childNodes;
     let add=true;
     for(let i=0;i<elements.length;i++){
@@ -1865,7 +1874,7 @@ export class MdsComponent{
         }
     }
     let caption=this.getGroupValueCaption(result,widget);
-    document.getElementById(id).innerHTML+=this.getMultivalueBadge(result,caption);
+    document.getElementById(this.getWidgetDomId(widget)).innerHTML+=this.getMultivalueBadge(result,caption);
   }
   private renderGroupWidget(widget: any,attr:string,template:any){
     if(!widget.subwidgets || !widget.subwidgets.length){
@@ -1887,7 +1896,7 @@ export class MdsComponent{
       }
     }
     html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
-            <div id="`+widget.id+`" class="multivalueBadges"></div>`;
+            <div id="`+this.getWidgetDomId(widget)+`" class="multivalueBadges"></div>`;
     return html;
   }
   private renderLicense(widget: any) {
@@ -2194,4 +2203,8 @@ export class MdsComponent{
           this.onAddChildobject(callback,pos+1);
       }
   }
+
+    private getWidgetDomId(widget: any) {
+        return widget.id+'_'+this.mdsId;
+    }
 }
