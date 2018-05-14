@@ -34,7 +34,7 @@ export class Helper {
     }
 
   /**
-   * Returns if both arrays are equal(same length, and all primitive objects are equal)
+   * Returns true if both arrays are equal(same length, and all primitive objects are equal)
    * @param array1
    * @param array2
    * @returns {boolean}
@@ -52,6 +52,20 @@ export class Helper {
     }
     return true;
   }
+    /**
+     * Returns true if both objects have the same values stored
+     * will not work for classes including methods or similar dynamic data
+     * @param object1
+     * @param object2
+     * @returns {boolean}
+     */
+    public static objectEquals(object1:any,object2:any){
+        if(object1==null)
+            return object2==null;
+        if(object2==null)
+            return object1==null;
+        return JSON.stringify(object1)==JSON.stringify(object2);
+    }
 
   /**
    * Converts a date to a Year-Month-day string
