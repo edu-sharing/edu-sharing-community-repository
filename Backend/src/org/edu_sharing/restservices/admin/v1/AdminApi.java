@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
@@ -31,6 +32,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.CollectionDao;
+import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
@@ -42,13 +44,20 @@ import org.edu_sharing.restservices.admin.v1.model.UploadResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.restservices.shared.NodeSearch;
+import org.edu_sharing.restservices.shared.Pagination;
+import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
+import org.edu_sharing.service.search.SearchService.ContentType;
+import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
@@ -853,5 +862,79 @@ public class AdminApi {
 
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
 	}
+	
+	@GET
+	@Path("/lucene")
+	@Consumes({ "application/json" })
+
+	@ApiOperation(value = "Search for custom lucene query", notes = "e.g. @cm\\:name:\"*\"")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResult.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+	public Response searchByLucene(
+			@ApiParam(value = "query", defaultValue = "@cm\\:name:\"*\"") @QueryParam("query") String query,
+			@ApiParam(value = "maximum items per page", defaultValue = "10") @QueryParam("maxItems") Integer maxItems,
+			@ApiParam(value = "skip a number of items", defaultValue = "0") @QueryParam("skipCount") Integer skipCount,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue = "-all-") @QueryParam("propertyFilter") List<String> propertyFilter,
+			@ApiParam(value = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
+			@Context HttpServletRequest req) {
+
+		try {
+			
+			//check that there is an admin
+			AdminServiceFactory.getInstance();
+			
+			Filter filter = new Filter(propertyFilter);
+			RepositoryDao repoDao = RepositoryDao.getRepository("-home-");
+
+			SearchToken token = new SearchToken();
+			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
+			token.setFrom(skipCount != null ? skipCount : 0);
+			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
+			token.setContentType(ContentType.ALL);
+			token.setLuceneString(query);
+			token.disableSearchCriterias();
+			token.setAuthorityScope(authorityScope);
+			NodeSearch search = NodeDao.search(repoDao, token);
+
+			List<Node> data = new ArrayList<Node>();
+			for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
+				data.add(NodeDao.getNode(repoDao, ref.getId(), filter).asNode());
+			}
+
+			Pagination pagination = new Pagination();
+			pagination.setFrom(search.getSkip());
+			pagination.setCount(data.size());
+			pagination.setTotal(search.getCount());
+
+			SearchResult response = new SearchResult();
+			response.setNodes(data);
+			response.setPagination(pagination);
+			response.setFacettes(search.getFacettes());
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (DAOException e) {
+			return ErrorResponse.createResponse(e);
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@OPTIONS
+	@Path("/lucene")
+	@ApiOperation(hidden = true, value = "")
+
+	public Response options03() {
+
+		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+	}
+
 
 }

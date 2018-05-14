@@ -18,6 +18,10 @@ export class SessionStorageService {
   constructor(private iam : RestIamService,private connector:RestConnectorService) {
     this.get("").subscribe(()=>{});
   }
+  public refresh(){
+    this.loginResult=null;
+    this.preferences=null;
+  }
   public get(name: string,fallback:any=null) : Observable<any> {
     return Observable.create( (observer:Observer<any>) => {
       if (!this.loginResult) {

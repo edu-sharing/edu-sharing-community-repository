@@ -28,6 +28,8 @@ import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {ColorHelper} from '../../../common/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
+import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
+import {UIHelper} from "../../../common/ui/ui-helper";
 
 // component class
 @Component({
@@ -101,6 +103,7 @@ export class CollectionNewComponent {
         private route:ActivatedRoute,
         private router: Router,
         private toast : Toast,
+        private temporaryStorage : TemporaryStorageService,
         private storage : SessionStorageService,
         private zone: NgZone,
         private sanitizer: DomSanitizer,
@@ -448,11 +451,11 @@ export class CollectionNewComponent {
     if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
       let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,false);
       this.nodeService.setNodePermissions(collection.ref.id,permissions).subscribe(()=>{
-        this.saveImage(collection);
+        this.save4(collection);
       });
     }
     else {
-      this.saveImage(collection);
+      this.save4(collection);
     }
   }
 
@@ -512,5 +515,19 @@ export class CollectionNewComponent {
     this.currentCollection.color=this.COLORS[0];
     this.updateAvailableSteps();
     this.isLoading=false;
+  }
+
+  private save4(collection:Collection) {
+    // check if there are any nodes that should be added to this collection
+    let nodes=this.temporaryStorage.pop(TemporaryStorageService.COLLECTION_ADD_NODES);
+    if(!nodes) {
+        this.saveImage(collection);
+        return;
+    }
+    console.log("add nodes",nodes);
+    UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,nodes,()=>{
+        this.saveImage(collection);
+        return;
+    });
   }
 }

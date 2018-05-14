@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnInit, NgZone, group, HostListener, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit, NgZone, HostListener, ViewChild, ElementRef} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {RestMdsService} from '../../rest/services/rest-mds.service';
 import {MdsMetadataset, View, Type, Node, NodeList, NodeWrapper, MdsValueList} from '../../rest/data-object';
@@ -1803,7 +1803,7 @@ export class MdsComponent{
         return 'widget \'license\' does not have values connected, can\'t render it.';
       }
       for(let value of widget.values){
-        let image=NodeHelper.getLicenseIconByString(value.id, this.connector);
+        let image=NodeHelper.getLicenseIconByString(value.id, this.connector,false);
         if(image)
           value.imageSrc = image;
       }

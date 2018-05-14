@@ -43,7 +43,6 @@ import {MdsComponent} from "../../common/ui/mds/mds.component";
 import {RequestObject} from "../../common/rest/request-object";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
-import {Action} from "rxjs/scheduler/Action";
 import {WorkspaceManagementDialogsComponent} from "../management-dialogs/management-dialogs.component";
 import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 import {MdsHelper} from "../../common/rest/mds-helper";

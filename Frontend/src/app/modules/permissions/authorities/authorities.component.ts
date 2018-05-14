@@ -180,6 +180,9 @@ export class PermissionsAuthoritiesComponent {
   }
   public changeSort(event : any){
     //this.sortBy=event.sortBy;
+    if(this._mode=='GROUP'){
+      this.sortBy=event.sortBy;
+    }
     this.sortAscending=event.sortAscending;
     this.offset=0;
     this.list=[];
@@ -291,11 +294,16 @@ export class PermissionsAuthoritiesComponent {
             (error:any)=>this.toast.error(error));
         }
         else {
+          this.globalProgress=true;
           this.iam.createGroup(name, this.edit.profile, this.org ? this.org.groupName : "").subscribe(() => {
             this.edit = null;
+            this.globalProgress=false;
             this.toast.toast("PERMISSIONS.GROUP_CREATED");
             this.refresh();
-          }, (error: any) => this.toast.error(error));
+          }, (error: any) =>{
+            this.toast.error(error);
+            this.globalProgress=false;
+          });
         }
         return;
       }
@@ -310,8 +318,10 @@ export class PermissionsAuthoritiesComponent {
       if(this.editId==null){
         let name=this.editDetails.authorityName;
         let password=this.editDetails.password;
+        this.globalProgress=true;
         this.iam.createUser(name,password,this.edit.profile).subscribe(() => {
             this.edit=null;
+            this.globalProgress=false;
             if(this.org){
               this.iam.addGroupMember(this.org.authorityName,name).subscribe(()=>{
                 this.toast.toast("PERMISSIONS.USER_CREATED");
@@ -324,7 +334,10 @@ export class PermissionsAuthoritiesComponent {
             }
 
           },
-          (error : any)=>this.toast.error(error));
+          (error : any)=>{
+            this.toast.error(error);
+            this.globalProgress=false;
+          });
       }
       else {
         this.iam.editUser(this.editId, this.edit.profile).subscribe(() => {
@@ -338,11 +351,18 @@ export class PermissionsAuthoritiesComponent {
   }
   public loadAuthorities() {
     this.loading=true;
-    let sort="authorityName";
+    let sort=RestConstants.AUTHORITY_NAME;
     if(this._mode=='ORG')
       sort=RestConstants.CM_PROP_AUTHORITY_AUTHORITYNAME;
-    if(this._mode=='GROUP' && !this.org)
-      sort="authorityName";
+    if(this._mode=='GROUP' && !this.org) {
+      sort=this.sortBy;
+      if(sort==RestConstants.AUTHORITY_DISPLAYNAME){
+        sort = RestConstants.AUTHORITY_NAME;
+      }
+      if(sort==RestConstants.AUTHORITY_GROUPTYPE) {
+        sort = RestConstants.CCM_PROP_AUTHORITY_GROUPTYPE;
+      }
+    }
     if(this._mode=='USER' && !this.org)
       sort="firstName";
 

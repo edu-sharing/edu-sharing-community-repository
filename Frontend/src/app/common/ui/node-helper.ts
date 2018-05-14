@@ -23,6 +23,7 @@ import {ListItem} from "./list-item";
 import {Helper} from "../helper";
 import {ConfigurationHelper} from "../rest/configuration-helper";
 import {CordovaService} from "../services/cordova.service";
+import {VCard} from "../VCard";
 
 export class NodeHelper{
   /**
@@ -50,6 +51,31 @@ export class NodeHelper{
       if(value)
         return value;
     }
+    if(name==RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE){
+      let range:string[];
+      if(node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE]){
+        try {
+          range = node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE][0].split("-");
+        }catch(e){
+          range=[null];
+        }
+      }
+      else{
+        try {
+          range = [node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE + '_from'][0], node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE + '_to'][0]];
+        }catch(e){
+          range=[null];
+        }
+      }
+      if(range[0]) {
+          if (range[0] == range[1] || !range[1]){
+            return range[0].trim()+" "+translation.instant('LEARNINGAGE_YEAR');
+          }
+          else{
+            return range[0].trim()+"-"+range[1].trim()+" "+translation.instant('LEARNINGAGE_YEAR');
+          }
+      }
+    }
     if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
       let workflow=NodeHelper.getWorkflowStatus(config,node);
       return '<div class="workflowStatus" style="background-color: '+workflow.color+'">'+translation.instant('WORKFLOW.'+workflow.id)+'</div>'
@@ -70,7 +96,9 @@ export class NodeHelper{
       value=node.properties[name].join(", ");
     if((node as any)[name])
       value=(node as any)[name];
-
+    if(value && RestConstants.getAllVCardFields().indexOf(name)!=-1){
+      return new VCard(value).getDisplayName();
+    }
     if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1){
       if(item.format){
         value=DateHelper.formatDateByPattern(value,item.format).trim();
@@ -250,7 +278,7 @@ export class NodeHelper{
    * @param rest
    * @returns {string}
    */
-  public static getLicenseIconByString(string: String,rest:RestConnectorService) {
+  public static getLicenseIconByString(string: String,rest:RestConnectorService,useNoneAsFallback=true) {
     let icon=string.replace(/_/g,"-").toLowerCase();
     if(icon=='')
       icon='none';
@@ -259,6 +287,8 @@ export class NodeHelper{
       "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk"];
     if(LICENSE_ICONS.indexOf(icon)==-1)
       icon='none';
+    if(icon=='none' && !useNoneAsFallback)
+      return null;
     return rest.getAbsoluteEndpointUrl()+"../ccimages/licenses/"+icon+".svg";
   }
   /**
