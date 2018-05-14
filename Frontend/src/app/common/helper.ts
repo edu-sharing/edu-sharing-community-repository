@@ -17,6 +17,21 @@ export class Helper {
     }
     return -1;
   }
+    /**
+     * Filter only all elements in the array where the given property matches the given needle
+     * @param haystack
+     * @param property
+     * @param needle
+     * @returns {number}
+     */
+    public static filterArray(haystack: any, property: string, needle: any): any {
+      let result=[];
+      for(let i = 0; i<haystack.length; i++) {
+          if (haystack[i][property] == needle)
+            result.push(haystack[i]);
+      }
+      return result;
+    }
 
   /**
    * Returns if both arrays are equal(same length, and all primitive objects are equal)
