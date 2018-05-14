@@ -398,7 +398,8 @@ public class NodeDao {
 		try {
 			NameSpaceTool<String> nameSpaceTool = new NameSpaceTool<String>();
 			type = nameSpaceTool.transformToLongQName(type);
-			
+			if(childAssoc!=null)
+				childAssoc=CCConstants.getValidGlobalName(childAssoc);
 			HashMap<String, String[]> props = transformProperties(properties);
 			String childId;
 			

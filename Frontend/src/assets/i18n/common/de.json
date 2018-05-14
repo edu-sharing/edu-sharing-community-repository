@@ -315,7 +315,9 @@
     "LICENSE_LINK":"Lizenz verwalten",
     "CONTRIBUTOR_LINK":"Weitere Beteiligte",
     "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
-    "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern"
+    "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern",
+    "ADD_CHILD_OBJECT":"Weitere Materialien hinzufügen",
+    "ADD_CHILD_OBJECT_DESCRIPTION":"Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen"
   },
   "SHARE_APP":{
     "TEXT_SNIPPET":"Notiz",

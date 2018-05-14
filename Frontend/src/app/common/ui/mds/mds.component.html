@@ -33,6 +33,15 @@
     <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
   </div>
 </div>
+<workspace-file-upload-select
+  *ngIf="addChildobject"
+  [priority]="2"
+  [multiple]="false"
+  [supportsDrop]="false"
+  (onCancel)="addChildobject=false"
+  (onFileSelected)="addChildobjectFile($event)"
+  (onLinkSelected)="addChildobjectLink($event)"
+></workspace-file-upload-select>
 <modal-dialog
               [priority]="2"
               [title]="dialogTitle"

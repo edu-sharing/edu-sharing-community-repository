@@ -43,6 +43,9 @@ export class RestConstants {
   public static CCM_ASPECT_COLLECTION = "ccm:collection";
   public static CCM_ASPECT_LOMREPLICATION = "ccm:lomreplication";
   public static CCM_ASPECT_CCLOM_GENERAL = "cclom:general";
+  public static CCM_ASPECT_IO_CHILDOBJECT = "ccm:io_childobject";
+
+  public static CCM_ASSOC_CHILDIO = "ccm:childio";
 
   public static CM_TYPE_FOLDER = "cm:folder";
   public static CM_TYPE_PERSON = "cm:person";

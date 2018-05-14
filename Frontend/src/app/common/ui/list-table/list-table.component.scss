@@ -473,8 +473,8 @@ $orderAnimationTime:$transitionNormal*5;
 .icon-bg{
   background-color:$textOnPrimary;
   border-radius: 50%;
-  width:38px;
-  height:38px!important;
+  width:$tableIconSize;
+  height:$tableIconSize!important;
   position:relative;
   top:-5px;
 }

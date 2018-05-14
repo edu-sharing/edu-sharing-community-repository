@@ -75,7 +75,7 @@ export class MdsComponent{
   dialogButtons: DialogButton[];
   private variables: string[];
   private currentWidgetSuggestion: string;
-  private static GROUP_MULTIVALUE_DELIMITER="[+]";
+  private static GROUP_MULTIVALUE_DELIMITER='[+]';
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -148,47 +148,55 @@ export class MdsComponent{
     });
   }
 
-  @Input() set nodeId(nodeId:string){
-    this.currentNode=null;
-    if(nodeId==null)
-      return;
-    this.isLoading=true;
-    this.node.getNodeMetadata(nodeId,[RestConstants.ALL]).subscribe((node : NodeWrapper)=>{
-      this._setId = node.node.metadataset ? node.node.metadataset : RestConstants.DEFAULT;
-      this.mdsService.getSet(this._setId).subscribe((data:any)=>{
-        // test a widget
-        //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
-        //data.views[0].html+="<test>";
-        this.locator.getConfigVariables().subscribe((variables:string[])=> {
-          this.mds = data;
-          this.variables=variables;
-          this.currentNode = node.node;
-          for (let property in this.currentNode.properties) {
-            this.properties.push(property);
-          }
-          this.properties.sort();
-          let nodeGroup = this.currentNode.isDirectory ? 'map' : 'io';
-          if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) != -1) {
-            nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
-          }
-          if (this.currentNode.type == RestConstants.CCM_TYPE_TOOL_INSTANCE) {
-            nodeGroup = MdsComponent.TYPE_TOOLINSTANCE;
-          }
-          if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
-            nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
-          }
-          this.renderGroup(nodeGroup, this.mds);
-          this.isLoading = false;
+    @Input() set nodeId(nodeId:string){
+        this.currentNode=null;
+        if(nodeId==null)
+            return;
+        this.isLoading=true;
+        this.node.getNodeMetadata(nodeId,[RestConstants.ALL]).subscribe((node : NodeWrapper)=>{
+            this._setId = node.node.metadataset ? node.node.metadataset : RestConstants.DEFAULT;
+            this.mdsService.getSet(this._setId).subscribe((data:any)=>{
+                // test a widget
+                //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
+                //data.views[0].html+="<test>";
+                this.node.getChildren(nodeId,[],{propertyFilter:[RestConstants.ALL]}).subscribe((childs:NodeList)=>{
+                  this.currentChildobjects = Helper.filterArray(childs.nodes,'type',RestConstants.CCM_TYPE_IO);
+                  console.log(this.currentChildobjects);
+                    this.locator.getConfigVariables().subscribe((variables:string[])=> {
+                        this.mds = data;
+                        this.variables=variables;
+                        this.currentNode = node.node;
+                        for (let property in this.currentNode.properties) {
+                            this.properties.push(property);
+                        }
+                        this.properties.sort();
+                        let nodeGroup = this.currentNode.isDirectory ? 'map' : 'io';
+                        if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) != -1) {
+                            nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
+                        }
+                        if (this.currentNode.type == RestConstants.CCM_TYPE_TOOL_INSTANCE) {
+                            nodeGroup = MdsComponent.TYPE_TOOLINSTANCE;
+                        }
+                        if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
+                            nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
+                        }
+                        this.renderGroup(nodeGroup, this.mds);
+                        this.isLoading = false;
+                    });
+
+                },(error:any)=>{
+                    this.toast.error(error);
+                    this.cancel();
+                });
+            },(error:any)=>{
+                this.toast.error(error);
+                this.cancel();
+            });
+        },(error:any)=>{
+            this.toast.error(error);
+            this.cancel();
         });
-      },(error:any)=>{
-        this.toast.error(error);
-        this.cancel();
-      });
-    },(error:any)=>{
-      this.toast.error(error);
-      this.cancel();
-    });
-  };
+    };
   @Output() onCancel=new EventEmitter();
   @Output() onDone=new EventEmitter();
   @Output() openLicense=new EventEmitter();
@@ -202,6 +210,9 @@ export class MdsComponent{
   private widgetName='cclom:general_keyword';
   private widgetType='multivalueFixedBadges';
   private currentNode: Node;
+  public addChildobject = false;
+  private currentChildobjects:Node[]=[];
+  private childobjects:any=[];
   public globalProgress=false;
   private properties: string[]=[];
   private currentWidgets: any[];
@@ -415,17 +426,17 @@ export class MdsComponent{
     }
     this.jumpmarksCount=i;
     setInterval(function(){
-        let jump=document.getElementById("jumpmarks");
+        let jump=document.getElementById('jumpmarks');
         if(!jump)
             return;
-        let elements=jump.getElementsByTagName("a");
-        let scroll=document.getElementsByClassName("card-title-element");
-        let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
-        let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
+        let elements=jump.getElementsByTagName('a');
+        let scroll=document.getElementsByClassName('card-title-element');
+        let height=document.getElementById('mdsScrollContainer').getBoundingClientRect().bottom - document.getElementById('mdsScrollContainer').getBoundingClientRect().top;
+        let pos=document.getElementById('mdsScrollContainer').scrollTop - height - 200;
         let closest=999999;
         let active=elements[0];
         for(let i=0;i<elements.length;i++){
-            elements[i].className=elements[i].className.replace("active","").trim();
+            elements[i].className=elements[i].className.replace('active','').trim();
             if(!scroll[i])
                 continue;
             let top=scroll[i].getBoundingClientRect().top;
@@ -434,7 +445,7 @@ export class MdsComponent{
                 active=elements[i];
             }
         }
-        active.className+=" active";
+        active.className+=' active';
     },200);
     return html;
   }
@@ -446,6 +457,7 @@ export class MdsComponent{
     // add the default widgets
     data.widgets.push({id:'preview'});
     data.widgets.push({id:'version'});
+    data.widgets.push({id:'childobjects',caption:this.translate.instant('MDS.ADD_CHILD_OBJECT')});
     data.widgets.push({id:'author',caption:this.translate.instant('MDS.AUTHOR_LABEL')});
     data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
     data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
@@ -583,8 +595,8 @@ export class MdsComponent{
     return properties;
   }
   private checkFileExtension(callback:Function=null,values:any){
-    let ext1=this.currentNode.name.split(".");
-    let ext2=values[RestConstants.CM_NAME][0].split(".");
+    let ext1=this.currentNode.name.split('.');
+    let ext2=values[RestConstants.CM_NAME][0].split('.');
     let extV1=ext1[ext1.length-1];
     let extV2=ext2[ext2.length-1];
     if(ext1.length==1 && ext2.length==1)
@@ -762,7 +774,7 @@ export class MdsComponent{
 
           if(widget.type=='multivalueGroup'){
               for(let v of props){
-                  if(v!="") {
+                  if(v!='') {
                     let caption=this.getGroupValueCaption(v,widget);
                     element.innerHTML += this.getMultivalueBadge(v, caption);
                   }
@@ -864,7 +876,7 @@ export class MdsComponent{
       let search='<'+widget.id+'>';
       let start=html.indexOf(search);
       let end=start+search.length;
-      let attr="";
+      let attr='';
       if(start<0){
         search='<'+widget.id+' ';
         start=html.indexOf(search);
@@ -893,7 +905,7 @@ export class MdsComponent{
       html=first+widgetData+second;
     }
     for(let remove of removeWidgets){
-      html=html.replace(new RegExp("<"+remove.id+"*>"),'');
+      html=html.replace(new RegExp('<'+remove.id+'*>'),'');
     }
     html+='</div>';
     return html;
@@ -1036,7 +1048,12 @@ export class MdsComponent{
   }
   public handleKeyboardEvent(event: KeyboardEvent) {
     if(event.code=='Escape'){
-
+      if(this.addChildobject){
+        this.addChildobject=false;
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+      }
       for(let widget of this.currentWidgets){
         if(widget.type=='multivalueTree'){
           let element=document.getElementById(widget.id+'_tree');
@@ -1480,7 +1497,7 @@ export class MdsComponent{
             return false;
         }
     }
-    console.log("condition is true, will display widget");
+    console.log('condition is true, will display widget');
     return true;
   }
   private renderWidget(widget: any,attr:string,template:any) : string{
@@ -1563,6 +1580,9 @@ export class MdsComponent{
     else if(widget.id=='version'){
       html+=this.renderVersion(widget);
     }
+    else if(widget.id=='childobjects'){
+        html+=this.renderChildobjects(widget);
+    }
     else if(widget.id=='license'){
       html+=this.renderLicense(widget);
     }
@@ -1610,13 +1630,13 @@ export class MdsComponent{
  }
 
   private isMultivalueWidget(widget: any) {
-    return widget.type == "multivalueBadges"
-    || widget.type=="multioption"
-    || widget.type=="multivalueFixedBadges"
-    || widget.type=="multivalueSuggestBadges"
-    || widget.type=="singlevalueTree" // it basically uses the tree so all functions relay on multivalue stuff
-    || widget.type=="multivalueTree"
-    || widget.type=="multivalueGroup"
+    return widget.type == 'multivalueBadges'
+    || widget.type=='multioption'
+    || widget.type=='multivalueFixedBadges'
+    || widget.type=='multivalueSuggestBadges'
+    || widget.type=='singlevalueTree' // it basically uses the tree so all functions relay on multivalue stuff
+    || widget.type=='multivalueTree'
+    || widget.type=='multivalueGroup'
   }
   private isSliderWidget(widget: any) {
     return widget.type == 'duration'
@@ -1675,6 +1695,81 @@ export class MdsComponent{
             </div>`;
     return preview;
   }
+  private removeChildobject(pos:number){
+      console.log(document.getElementById('mdsChildobjects').getElementsByClassName('childobject'));
+
+      let element=document.getElementById('mdsChildobjects').getElementsByClassName('childobject').item(pos);
+      console.log(element);
+      document.getElementById('mdsChildobjects').removeChild(element);
+      this.childobjects.splice(pos,1);
+      this.refreshChildobjects();
+  }
+  private renderChildObject(data: any,pos:number){
+    console.log(data);
+    let list=document.getElementById('mdsChildobjects');
+    list.innerHTML+=`
+        <div class="childobject">
+            <div class="icon"><img src="`+data.icon+`"></div>
+            <div class="name">`+data.name+`</div>
+            <div class="remove"><i onclick="window.mdsComponentRef.component.removeChildobject(`+pos+`)" class="material-icons clickable">remove_circle_outline</i></div>
+        </div>
+    `;
+  }
+  refreshChildobjects() {
+    let list=document.getElementById('mdsChildobjects');
+    list.innerHTML='';
+    let i=0;
+    for(let child of this.childobjects) {
+      this.renderChildObject(child,i);
+      i++;
+    }
+    }
+  setCurrentChildobjects() {
+    for(let child of this.currentChildobjects){
+      this.childobjects.push({
+          icon:child.iconURL,
+          name:RestHelper.getTitle(child),
+          node:child,
+      });
+    }
+    this.refreshChildobjects();
+  }
+  private addChildobjectLink(link:string){
+      link=UIHelper.addHttpIfRequired(link);
+      this.addChildobject=false;
+      console.log(event);
+      let data={
+          icon:this.connector.getThemeMimeIconSvg('link.svg'),
+          name:link,
+          link:link
+      }
+      this.childobjects.push(data);
+      this.refreshChildobjects();
+  }
+  private addChildobjectFile(event:any){
+    this.addChildobject=false;
+    console.log(event);
+    let file=event[0];
+    let data={
+        icon:RestHelper.guessMediatypeIconForFile(this.connector,file),
+        name:file.name,
+        file:file
+    }
+    this.childobjects.push(data);
+    this.refreshChildobjects();
+  }
+  private renderChildobjects(widget: any) {
+      let html=`<div class="mdsChildobjects">
+        <div class="label-light">`+this.translate.instant('MDS.ADD_CHILD_OBJECT_DESCRIPTION')+`</div>
+        <input type="file" style="display:none" id="childSelect" onchange="window.mdsComponentRef.component.addChildobject(this)" />
+        <div id="mdsChildobjects"></div>
+        <a class="btn-flat btn-shadow waves-light waves-effect btn-icon" onclick="window.mdsComponentRef.component.addChildobject=true">
+            <i class="material-icons">add</i> `+this.translate.instant('ADD')+`
+        </a>
+        </div>
+        `;
+      return html;
+  }
   private renderVersion(widget: any) {
     if(!this.allowReplacing)
       return '';
@@ -1727,14 +1822,14 @@ export class MdsComponent{
   }
   private getGroupValueCaption(value:string,widget:any){
     let values=value.split(MdsComponent.GROUP_MULTIVALUE_DELIMITER);
-    let caption="";
+    let caption='';
     let i=0;
     for(let sub of widget.subwidgets){
       let v=values[i++];
       if(!v)
         continue;
-      if(caption!=""){
-        caption+=", ";
+      if(caption!=''){
+        caption+=', ';
       }
       caption+=this.getValueCaption(this.getWidget(sub.id),v);
     }
@@ -1749,7 +1844,7 @@ export class MdsComponent{
     let values=this.getValues([],true,widgets);
     if(!values)
       return;
-    let result="";
+    let result='';
     let i=0;
     let hasValue=false;
     for(let sub of widget.subwidgets){
@@ -1776,21 +1871,21 @@ export class MdsComponent{
   }
   private renderGroupWidget(widget: any,attr:string,template:any){
     if(!widget.subwidgets || !widget.subwidgets.length){
-      return "Widget "+widget.id+" is a group widget, but has no subwidgets attached";
+      return 'Widget '+widget.id+' is a group widget, but has no subwidgets attached';
     }
     let html='<div class="widgetGroup">'
     for(let sub of widget.subwidgets){
       let subwidget=this.getWidget(sub.id);
       if(subwidget==null){
-          html+='Widget '+sub.id+" was not found. Check the widget id";
+          html+='Widget '+sub.id+' was not found. Check the widget id';
       }
       else if(this.isMultivalueWidget(subwidget)){
-        html+='Widget '+subwidget.id+" is a multivalue widget. This is not supported for groups";
+        html+='Widget '+subwidget.id+' is a multivalue widget. This is not supported for groups';
       }
       else {
         console.log(subwidget);
         let render=this.renderWidget(subwidget, null, template);
-        html += render ? render : "";
+        html += render ? render : '';
       }
     }
     html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
@@ -1853,6 +1948,7 @@ export class MdsComponent{
   private setGeneralNodeData() {
     setTimeout(()=>{
       this.setPreview();
+      this.setCurrentChildobjects();
     },10);
   }
 
@@ -1863,11 +1959,7 @@ export class MdsComponent{
     }catch(e){}
     if(preview){
       this.node.uploadNodePreview(this.currentNode.ref.id,preview).subscribe(()=>{
-        this.toast.toast('WORKSPACE.EDITOR.UPDATED');
-        if(callback)
-          callback();
-        this.onDone.emit(this.currentNode);
-        this.globalProgress=false;
+        this.onAddChildobject(callback);
 
       },(error:any)=>{
         this.toast.error(error);
@@ -1875,11 +1967,7 @@ export class MdsComponent{
       });
     }
     else {
-      this.globalProgress=false;
-      this.toast.toast('WORKSPACE.EDITOR.UPDATED');
-      if(callback)
-        callback();
-      this.onDone.emit(this.currentNode);
+      this.onAddChildobject(callback);
     }
   }
   private cancel(){
@@ -2032,5 +2120,80 @@ export class MdsComponent{
     console.warn('mds declared variable '+string+', but it was not found in the config variables. List of known variables below');
     console.warn(variables);
     return string;
+  }
+  private finish(){
+      this.onDone.emit(this.currentNode);
+      this.globalProgress=false;
+      this.toast.toast('WORKSPACE.EDITOR.UPDATED');
+  }
+  private getRemovedChildobjects(){
+      let list=[];
+      for(let node of this.currentChildobjects){
+        let removed=true;
+        for(let childs of this.childobjects){
+          if(childs.node && Helper.objectEquals(childs.node.ref,node.ref)){
+            removed=false;
+            break;
+          }
+        }
+        if(removed)
+          list.push(node);
+      }
+      return list;
+  }
+  private onRemoveChildobject(callback: Function = null,pos = 0) {
+      if(pos>=this.getRemovedChildobjects().length) {
+          if (callback)
+              callback();
+          this.finish();
+          return;
+      }
+      let child=this.getRemovedChildobjects()[pos];
+      console.log('remove child',child);
+      this.node.deleteNode(child.ref.id,false).subscribe(()=>{
+        this.onRemoveChildobject(callback,pos+1);
+      });
+  }
+  private getChildobjectProperties(child:any){
+    if(child.file){
+        return RestHelper.createNameProperty(child.name);
+    }
+    else if(child.link){
+        let properties:any={};
+        properties[RestConstants.CCM_PROP_IO_WWWURL]=[child.link];
+        return properties;
+    }
+    else{
+      return child.properties;
+    }
+  }
+  private onAddChildobject(callback: Function = null,pos = 0) {
+    if(pos>=this.childobjects.length) {
+        if (callback)
+            callback();
+        this.onRemoveChildobject(callback);
+        return;
+    }
+
+      let child=this.childobjects[pos];
+      console.log('add new child',child);
+      if(child.file){
+          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
+            this.node.uploadNodeContent(data.node.ref.id,child.file,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(()=>{
+              this.onAddChildobject(callback,pos+1);
+            });
+        });
+      }
+      else if(child.link){
+        let properties:any={};
+        properties[RestConstants.CCM_PROP_IO_WWWURL]=[child.link];
+        this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
+            this.onAddChildobject(callback,pos+1);
+        });
+      }
+      else{
+          console.log('child exists, skip it');
+          this.onAddChildobject(callback,pos+1);
+      }
   }
 }

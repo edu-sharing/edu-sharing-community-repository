@@ -144,13 +144,15 @@ export class RestNodeService extends AbstractRestService{
                         properties : any[],
                         renameIfExists = false,
                         versionComment = "",
+                        assocType = "",
                         repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
-    let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository/:parent/children/?type=:type&renameIfExists=:rename&versionComment=:versionComment&:aspects",repository,
+    let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository/:parent/children/?type=:type&renameIfExists=:rename&assocType=:assocType&versionComment=:versionComment&:aspects",repository,
       [
         [":parent",encodeURIComponent(parent)],
         [":type",encodeURIComponent(type)],
         [":rename",encodeURIComponent(""+renameIfExists)],
         [":versionComment",encodeURIComponent(versionComment)],
+        [":assocType",encodeURIComponent(assocType)],
         [":aspects",RestHelper.getQueryStringForList("aspects",aspects)]
       ]);
     return this.connector.post(query,JSON.stringify(properties),this.connector.getRequestOptions())

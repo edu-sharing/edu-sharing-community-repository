@@ -1370,6 +1370,8 @@
 				</property>
 			</properties>
 		</aspect>
+		<aspect name="ccm:io_childobject">
+		</aspect>		
 		
 		<aspect name="ccm:collection">
 			<title>aspect for marking a map as a collection</title>
