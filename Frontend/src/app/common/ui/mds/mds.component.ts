@@ -1699,13 +1699,11 @@ export class MdsComponent{
       console.log(document.getElementById('mdsChildobjects').getElementsByClassName('childobject'));
 
       let element=document.getElementById('mdsChildobjects').getElementsByClassName('childobject').item(pos);
-      console.log(element);
       document.getElementById('mdsChildobjects').removeChild(element);
       this.childobjects.splice(pos,1);
       this.refreshChildobjects();
   }
   private renderChildObject(data: any,pos:number){
-    console.log(data);
     let list=document.getElementById('mdsChildobjects');
     list.innerHTML+=`
         <div class="childobject">
