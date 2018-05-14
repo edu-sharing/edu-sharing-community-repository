@@ -295,7 +295,10 @@ mds .mdsGroup{
       height:1.5rem;
     }
   }
-  #childobjects_container {
+  .childobjects_container {
+    >label{
+      font-weight: bold;
+    }
     float:left;
     width:calc(100% + 50px);
     margin-left:-25px;
