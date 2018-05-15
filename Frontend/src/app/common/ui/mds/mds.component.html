@@ -34,12 +34,20 @@
 </div>
 <mds
   *ngIf="editChildobject"
+  [priority]="2"
   [groupId]="'io_childobject'"
   [currentValues]="getChildobjectProperties(editChildobject)"
   (onCancel)="editChildobject=null"
   (onDone)="setChildobjectProperties($event)"
   [invalidate]="editChildobject!=null"
   ></mds>
+<workspace-license
+  *ngIf="editChildobjectLicense"
+  [priority]="2"
+  [properties]="getChildobjectProperties(editChildobjectLicense)"
+  (onDone)="setChildobjectProperties($event)"
+  (onCancel)="editChildobjectLicense=null"
+></workspace-license>
 <workspace-file-upload-select
   *ngIf="addChildobject"
   [priority]="2"

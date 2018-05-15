@@ -219,6 +219,7 @@ export class MdsComponent{
   private currentNode: Node;
   public addChildobject = false;
   public editChildobject:any;
+  public editChildobjectLicense:any;
   private currentChildobjects:Node[]=[];
   private childobjects:any=[];
   public globalProgress=false;
@@ -1690,11 +1691,14 @@ export class MdsComponent{
           </ul>
          </div>
          <div id="`+this.getDomId('mdsAuthorFreetext')+`">`+this.renderTextareaWidget(freetextWidget,null)+`</div>
-          <div id="`+this.getDomId('mdsAuthorPerson')+`">`+this.renderVCardWidget(authorWidget,null)+`
-            <div class="mdsContributors">
-            <a class="clickable contributorsLink" onclick="`+this.getWindowComponent()+`.openContributorsDialog();">`+
-            this.translate.instant('MDS.CONTRIBUTOR_LINK')+` <i class="material-icons">arrow_forward</i></a>
-          </div>
+          <div id="`+this.getDomId('mdsAuthorPerson')+`">`+this.renderVCardWidget(authorWidget,null);
+    if(this.currentNode){
+      author+=`<div class="mdsContributors">
+            <a class="clickable contributorsLink" onclick="`+this.getWindowComponent()+`.openContributorsDialog();">\`+
+            this.translate.instant('MDS.CONTRIBUTOR_LINK')+\` <i class="material-icons">arrow_forward</i></a>
+          </div>`;
+    }
+    author+=`
          </div>
         </div>
       </div>
@@ -1724,8 +1728,11 @@ export class MdsComponent{
     return preview;
   }
   private setEditChildobject(pos:number){
-        this.editChildobject=this.childobjects[pos];
-    }
+      this.editChildobject=this.childobjects[pos];
+  }
+  private setEditChildobjectLicense(pos:number){
+      this.editChildobjectLicense=this.childobjects[pos];
+  }
   private removeChildobject(pos:number){
       let element=document.getElementById(this.getDomId('mdsChildobjects')).getElementsByClassName('childobject').item(pos);
       document.getElementById(this.getDomId('mdsChildobjects')).removeChild(element);
@@ -1738,6 +1745,7 @@ export class MdsComponent{
         <div class="childobject">
             <div class="icon"><img src="`+data.icon+`"></div>
             <div class="name">`+data.name+`</div>
+            <div class="license"><i onclick="`+this.getWindowComponent()+`.setEditChildobjectLicense(`+pos+`)" class="material-icons clickable">copyright</i></div>
             <div class="edit"><i onclick="`+this.getWindowComponent()+`.setEditChildobject(`+pos+`)" class="material-icons clickable">edit</i></div>
             <div class="remove"><i onclick="`+this.getWindowComponent()+`.removeChildobject(`+pos+`)" class="material-icons clickable">remove_circle_outline</i></div>
         </div>
@@ -2190,9 +2198,11 @@ export class MdsComponent{
   }
   private setChildobjectProperties(props:any){
     console.log(props);
-    this.editChildobject.properties=props;
-    this.editChildobject.name=props[RestConstants.LOM_PROP_TITLE] ? props[RestConstants.LOM_PROP_TITLE] : props[RestConstants.CM_NAME];
+    let child=this.editChildobject || this.editChildobjectLicense;
+    child.properties=props;
+    child.name=props[RestConstants.LOM_PROP_TITLE] ? props[RestConstants.LOM_PROP_TITLE] : props[RestConstants.CM_NAME];
     this.editChildobject=null;
+    this.editChildobjectLicense=null;
     this.refreshChildobjects();
   }
 
