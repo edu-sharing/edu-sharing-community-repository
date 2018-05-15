@@ -312,7 +312,7 @@ mds .mdsGroup{
         float: left;
         margin-top: 10px;
       }
-      #mdsChildobjects {
+      .list {
         padding: 10px 0;
         float: left;
         width: 100%;
@@ -344,7 +344,8 @@ mds .mdsGroup{
           @include shortenText();
           margin-right: 10px;
         }
-        .remove {
+        .edit,.remove {
+          margin:0 5px;
           color: $primary;
           position: relative;
           top: 2px;

@@ -342,6 +342,16 @@
 				]]></html>
 			</template>
 			<template>
+				<id>node_childobject</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <ccm:wwwurl>		 
+              <cm:name>
+              <cclom:title>
+				]]></html>
+			</template>
+			<template>
 				<id>saved_search_general</id>
 				<caption>dialog_upload_tab_basic</caption>
 				<icon>description</icon>
@@ -501,6 +511,12 @@
 				<id>io</id>
 				<views>
 					<view>node_general</view>
+				</views>
+			</group>
+			<group>
+				<id>io_childobject</id>
+				<views>
+					<view>node_childobject</view>
 				</views>
 			</group>
 			<group>

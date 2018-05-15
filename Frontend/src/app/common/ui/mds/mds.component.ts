@@ -36,6 +36,12 @@ import {UIService} from '../../services/ui.service';
 export class MdsComponent{
   @ViewChild('mdsScrollContainer') mdsScrollContainer: ElementRef;
 
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   * Default is 1 for mds
+   */
+  @Input() priority = 1;
   @Input() addWidget=false;
   @Input() embedded=false;
   private activeAuthorType: number;
@@ -76,7 +82,7 @@ export class MdsComponent{
   private variables: string[];
   private currentWidgetSuggestion: string;
   private static GROUP_MULTIVALUE_DELIMITER='[+]';
-  private mdsId = Math.random();
+  private mdsId = new Date().getTime();
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -212,6 +218,7 @@ export class MdsComponent{
   private widgetType='multivalueFixedBadges';
   private currentNode: Node;
   public addChildobject = false;
+  public editChildobject:any;
   private currentChildobjects:Node[]=[];
   private childobjects:any=[];
   public globalProgress=false;
@@ -240,11 +247,14 @@ export class MdsComponent{
               private config : ConfigurationService,
               private _ngZone: NgZone) {
       Translation.initialize(this.translate,this.config,this.storage,this.route);
-      (window as any)['mdsComponentRef'] = {component: this, zone: _ngZone};
+      (window as any)['mdsComponentRef_'+this.mdsId] = {component: this, zone: _ngZone};
     }
 
     ngOnDestroy() {
-      (window as any).mdsComponentRef = null;
+      (window as any)['mdsComponentRef_'+this.mdsId]
+    }
+    getWindowComponent(){
+        return 'window.mdsComponentRef_'+this.mdsId+'.component';
     }
   private openSuggestions(id:string,event:any,allowCustom:boolean,widgetValues:boolean,showMore=false,search=this.suggestionsViaSearch){
     let widget=this.getWidget(id);
@@ -384,7 +394,7 @@ export class MdsComponent{
       let extended=`<div class="mdsExtended `+(this.isSearch() ? 'mdsExtendedSearch' : '')+`"><div class="label">`+this.translate.instant(this.isSearch() ? 'MDS.SHOW_EXTENDED_SEARCH' : 'MDS.SHOW_EXTENDED')+`</div><div class="switch">
             <label>
               `+this.translate.instant('OFF')+`
-                <input type="checkbox" id="mdsExtendedCheckbox" onchange="window.mdsComponentRef.component.showExtended(this.checked)">
+                <input type="checkbox" id="mdsExtendedCheckbox" onchange="`+this.getWindowComponent()+`.showExtended(this.checked)">
                 <span class="lever"></span>
               `+this.translate.instant('ON')+`
               </label>
@@ -420,7 +430,7 @@ export class MdsComponent{
     for(let viewId of group.views){
       for(let view of data.views){
         if(view.id==viewId){
-          html+=`<a class="clickable" onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
+          html+=`<a class="clickable" onclick="`+this.getWindowComponent()+`.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
           i++;
           break;
         }
@@ -632,7 +642,7 @@ export class MdsComponent{
     return true;
   }
   public saveValues(callback:Function=null,force=false){
-    if(this.embedded){
+    if(this.embedded || this.currentNode==null && this.createType==null){
       this.onDone.emit(this.getValues());
       return this.getValues();
     }
@@ -939,11 +949,11 @@ export class MdsComponent{
   private getMultivalueBadge(value:string,caption:string=value){
     return '<div class="badge" data-value="'+value+'"><span>'+caption+`</span><i class="material-icons clickable" tabindex="0" onkeyup="if(event.keyCode==13){this.click()}" onclick="
     this.parentNode.parentNode.removeChild(this.parentNode);
-    window.mdsComponentRef.component.applySuggestions();
+    `+this.getWindowComponent()+`.applySuggestions();
     ">cancel</i></div>`;
   }
   private getMultivalueBadgeEmbedded(label='this.value',value='this.value'){
-    return `<div class=\\'badge\\' data-value=\\''+`+value+`+'\\'><span>'+`+label+`+'</span><i class=\\'material-icons clickable\\' tabindex=\\'0\\' onkeyup=\\'if(event.keyCode==13){this.click()}\\' onclick=\\'this.parentNode.parentNode.removeChild(this.parentNode);window.mdsComponentRef.component.applySuggestions();\\'>cancel</i></div>`;
+    return `<div class=\\'badge\\' data-value=\\''+`+value+`+'\\'><span>'+`+label+`+'</span><i class=\\'material-icons clickable\\' tabindex=\\'0\\' onkeyup=\\'if(event.keyCode==13){this.click()}\\' onclick=\\'this.parentNode.parentNode.removeChild(this.parentNode);`+this.getWindowComponent()+`.applySuggestions();\\'>cancel</i></div>`;
   }
   private renderVCardWidget(widget: any, attr: string) {
     let html='';
@@ -1006,7 +1016,7 @@ export class MdsComponent{
         else
           html += '&nbsp;';
         html += '</div>'
-        html += `<input type="checkbox" id="` + id + `" class="filled-in" onchange="window.mdsComponentRef.component.changeTreeItem(this,'`+widget.id+`')"`;
+        html += `<input type="checkbox" id="` + id + `" class="filled-in" onchange="`+this.getWindowComponent()+`.changeTreeItem(this,'`+widget.id+`')"`;
         if (value.disabled) {
           html += ' disabled="true"';
         }
@@ -1056,6 +1066,12 @@ export class MdsComponent{
         event.preventDefault();
         event.stopPropagation();
         return true;
+      }
+      if(this.editChildobject){
+          this.editChildobject=null;
+          event.preventDefault();
+          event.stopPropagation();
+          return true;
       }
       for(let widget of this.currentWidgets){
         if(widget.type=='multivalueTree'){
@@ -1116,7 +1132,7 @@ export class MdsComponent{
         list.style.display='none';
       }
       if(moreCount){
-        list.innerHTML+='<a class="collection-item suggestionMoreItems" onclick="window.mdsComponentRef.component.mdsUpdateSuggests(\''+id+'\',true)">'+moreCount+' '+this.translate.instant('MORE_SELECTBOX')+'</a>';
+        list.innerHTML+='<a class="collection-item suggestionMoreItems" onclick="'+this.getWindowComponent()+'.mdsUpdateSuggests(\''+id+'\',true)">'+moreCount+' '+this.translate.instant('MORE_SELECTBOX')+'</a>';
       }
       //elements.item(0).style.display=data.values ? 'none' : '';
     },(error:any)=>{
@@ -1148,7 +1164,7 @@ export class MdsComponent{
                 }
                 " onclick="
                 document.getElementById('` + id + `_suggestions').style.display='none';
-                window.mdsComponentRef.component.currentWidgetSuggestion=null;`;
+                `+this.getWindowComponent()+`.currentWidgetSuggestion=null;`;
 
     if(singleValue){
       html+=`   document.getElementById('` + id + `').value=this.getAttribute('data-caption');
@@ -1183,7 +1199,7 @@ export class MdsComponent{
     if(singleValue)
       html+='readonly ';
     html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`" 
-            onkeyup="window.mdsComponentRef.component.openSuggestions('`+widget.id+`',event,`+allowCustom+`,`+(widget.values ? true  : false)+`,false,true)">`;
+            onkeyup="`+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',event,`+allowCustom+`,`+(widget.values ? true  : false)+`,false,true)">`;
     if(widget.type=='singleoption' && !widget.allowempty){
       setTimeout(()=>{
         let pos=0;
@@ -1204,7 +1220,7 @@ export class MdsComponent{
     html+=this.addBottomCaption(widget);
     if(showOpen){
       html+=`<a class="btn-flat suggestOpen" 
-              onclick="window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,false,false)"
+              onclick="`+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,false,false)"
               `;
       /*
               var list=document.getElementById('`+widget.id+`_suggestions');
@@ -1257,7 +1273,7 @@ export class MdsComponent{
     html+=`<a class="collection-item suggestionMoreItems"  onclick="
               //document.getElementById('`+widget.id+`_suggestions').style.display='none';
               //document.getElementById('`+widget.id+`_dialog').style.display='none';
-              window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
+              `+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
     if(allowCustom && !showOpen){
@@ -1286,7 +1302,7 @@ export class MdsComponent{
                      var elementBg=document.getElementById(element.id+'_bg');
                      if(element){
                       element.checked=true;
-                      window.mdsComponentRef.component.changeTreeItem(element,'`+widget.id+`');
+                      `+this.getWindowComponent()+`.changeTreeItem(element,'`+widget.id+`');
                      }
                   }
               "><i class="material-icons">arrow_forward</i></div>
@@ -1300,7 +1316,7 @@ export class MdsComponent{
                     </div>
                   </div>
                   <div class="card-action">
-                       <a class="waves-effect waves-light btn" onclick="window.mdsComponentRef.component.saveTree('` + widget.id + `')">`+this.translate.instant('SAVE')+`</a>
+                       <a class="waves-effect waves-light btn" onclick="`+this.getWindowComponent()+`.saveTree('` + widget.id + `')">`+this.translate.instant('SAVE')+`</a>
                      </div>
                 </div>
               </div>
@@ -1492,8 +1508,9 @@ export class MdsComponent{
     let condition=widget.condition;
     console.log('condition:');
     console.log(condition);
-    if(condition.type=='PROPERTY' && this.currentNode) {
-        if (!this.currentNode.properties[condition.value] && !condition.negate || this.currentNode.properties[condition.value] && condition.negate) {
+    let properties=this.currentNode ? this.currentNode : this._currentValues;
+    if(condition.type=='PROPERTY' && properties) {
+        if (!properties[condition.value] && !condition.negate || properties[condition.value] && condition.negate) {
             return false;
         }
     }
@@ -1663,19 +1680,19 @@ export class MdsComponent{
       <div class="mdsAuthor">
         <div class="row">
           <div class="col s12">
-          <ul class="tabs" id="mdsAuthorTabs">
-            <li class="clickable tab col s6" onclick="window.mdsComponentRef.component.setActiveAuthor(`+MdsComponent.AUTHOR_TYPE_FREETEXT+`)">
+          <ul class="tabs" id="`+this.getDomId('mdsAuthorTabs')+`">
+            <li class="clickable tab col s6" onclick="`+this.getWindowComponent()+`.setActiveAuthor(`+MdsComponent.AUTHOR_TYPE_FREETEXT+`)">
               <a>`+this.translate.instant('MDS.AUTHOR_FREETEXT')+`</a>
             </li>
-            <li class="clickable tab col s6" onclick="window.mdsComponentRef.component.setActiveAuthor(`+MdsComponent.AUTHOR_TYPE_PERSON+`)">
+            <li class="clickable tab col s6" onclick="`+this.getWindowComponent()+`.setActiveAuthor(`+MdsComponent.AUTHOR_TYPE_PERSON+`)">
               <a>`+this.translate.instant('MDS.AUTHOR_PERSON')+`</a>
             </li>
           </ul>
          </div>
-         <div id="mdsAuthorFreetext">`+this.renderTextareaWidget(freetextWidget,null)+`</div>
-          <div id="mdsAuthorPerson">`+this.renderVCardWidget(authorWidget,null)+`
+         <div id="`+this.getDomId('mdsAuthorFreetext')+`">`+this.renderTextareaWidget(freetextWidget,null)+`</div>
+          <div id="`+this.getDomId('mdsAuthorPerson')+`">`+this.renderVCardWidget(authorWidget,null)+`
             <div class="mdsContributors">
-            <a class="clickable contributorsLink" onclick="window.mdsComponentRef.component.openContributorsDialog();">`+
+            <a class="clickable contributorsLink" onclick="`+this.getWindowComponent()+`.openContributorsDialog();">`+
             this.translate.instant('MDS.CONTRIBUTOR_LINK')+` <i class="material-icons">arrow_forward</i></a>
           </div>
          </div>
@@ -1684,44 +1701,50 @@ export class MdsComponent{
     `;
     return author;
   }
+  private changePreview(element:any){
+      let valid=element.files.length;
+      if(valid){
+          document.getElementById(this.getDomId('preview')).setAttribute('data-custom',(true as any));
+          (document.getElementById(this.getDomId('preview')) as any).src=window.URL.createObjectURL(element.files[0]);
+      }
+  }
   private renderPreview(widget: any,attr:string) {
+    if(!this.currentNode){
+        return "Widget 'preview' is only supported if a node object is available";
+    }
     let preview=`<div class="mdsPreview">`;
 
-    preview+=`<input type="file" style="display:none" id="previewSelect" accept="image/*" onchange="
-            var valid=this.files.length;
-            if(valid){
-                document.getElementById('preview').setAttribute('data-custom',true);
-                document.getElementById('preview').src=window.URL.createObjectURL(this.files[0]);
-            }
-          " />
+    preview+=`<input type="file" style="display:none" id="`+this.getDomId('previewSelect')+`" accept="image/*" onchange="`+this.getWindowComponent()+`.changePreview(this)" />
             <label>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW')+`</label>`;
     if(this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0) {
-      preview += `<div onclick="document.getElementById('previewSelect').click()" class="changePreview clickable">` + this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') + `</div>`;
+      preview += `<div onclick="document.getElementById('`+this.getDomId('previewSelect')+`').click()" class="changePreview clickable">` + this.translate.instant('WORKSPACE.EDITOR.REPLACE_PREVIEW') + `</div>`;
     }
-    preview+=`<div class="previewImage"><img id="preview" `+attr+`></div>
+    preview+=`<div class="previewImage"><img id="`+this.getDomId('preview')+`" `+attr+`></div>
             </div>`;
     return preview;
   }
+  private setEditChildobject(pos:number){
+        this.editChildobject=this.childobjects[pos];
+    }
   private removeChildobject(pos:number){
-      console.log(document.getElementById('mdsChildobjects').getElementsByClassName('childobject'));
-
-      let element=document.getElementById('mdsChildobjects').getElementsByClassName('childobject').item(pos);
-      document.getElementById('mdsChildobjects').removeChild(element);
+      let element=document.getElementById(this.getDomId('mdsChildobjects')).getElementsByClassName('childobject').item(pos);
+      document.getElementById(this.getDomId('mdsChildobjects')).removeChild(element);
       this.childobjects.splice(pos,1);
       this.refreshChildobjects();
   }
   private renderChildObject(data: any,pos:number){
-    let list=document.getElementById('mdsChildobjects');
+    let list=document.getElementById(this.getDomId('mdsChildobjects'));
     list.innerHTML+=`
         <div class="childobject">
             <div class="icon"><img src="`+data.icon+`"></div>
             <div class="name">`+data.name+`</div>
-            <div class="remove"><i onclick="window.mdsComponentRef.component.removeChildobject(`+pos+`)" class="material-icons clickable">remove_circle_outline</i></div>
+            <div class="edit"><i onclick="`+this.getWindowComponent()+`.setEditChildobject(`+pos+`)" class="material-icons clickable">edit</i></div>
+            <div class="remove"><i onclick="`+this.getWindowComponent()+`.removeChildobject(`+pos+`)" class="material-icons clickable">remove_circle_outline</i></div>
         </div>
     `;
   }
   refreshChildobjects() {
-    let list=document.getElementById('mdsChildobjects');
+    let list=document.getElementById(this.getDomId('mdsChildobjects'));
     if(!list)
       return;
     list.innerHTML='';
@@ -1737,6 +1760,7 @@ export class MdsComponent{
           icon:child.iconURL,
           name:RestHelper.getTitle(child),
           node:child,
+          properties:child.properties
       });
     }
     this.refreshChildobjects();
@@ -1768,9 +1792,9 @@ export class MdsComponent{
   private renderChildobjects(widget: any) {
       let html=`<div class="mdsChildobjects">
         <div class="label-light">`+this.translate.instant('MDS.ADD_CHILD_OBJECT_DESCRIPTION')+`</div>
-        <input type="file" style="display:none" id="childSelect" onchange="window.mdsComponentRef.component.addChildobject(this)" />
-        <div id="mdsChildobjects"></div>
-        <a class="btn-flat btn-shadow waves-light waves-effect btn-icon" onclick="window.mdsComponentRef.component.addChildobject=true">
+        <input type="file" style="display:none" id="childSelect" onchange="`+this.getWindowComponent()+`.addChildobject(this)" />
+        <div class="list" id="`+this.getDomId('mdsChildobjects')+`"></div>
+        <a class="btn-flat btn-shadow waves-light waves-effect btn-icon" onclick="`+this.getWindowComponent()+`.addChildobject=true">
             <i class="material-icons">add</i> `+this.translate.instant('ADD')+`
         </a>
         </div>
@@ -1780,6 +1804,9 @@ export class MdsComponent{
   private renderVersion(widget: any) {
     if(!this.allowReplacing)
       return '';
+    if(!this.currentNode){
+      return "Widget 'version' is only supported if a node object is available";
+    }
     let html=`<div class="mdsVersion">
           <input type="file" style="display:none" id="fileSelect" onchange="
             var valid=this.files.length;
@@ -1895,7 +1922,7 @@ export class MdsComponent{
         html += render ? render : '';
       }
     }
-    html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
+    html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="`+this.getWindowComponent()+`.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
             <div id="`+this.getWidgetDomId(widget)+`" class="multivalueBadges"></div>`;
     return html;
   }
@@ -1920,7 +1947,7 @@ export class MdsComponent{
             html+=`<div class="mdsNoPermissions">`+this.translate.instant('MDS.LICENSE_NO_PERMISSIONS'+(isSafe ? '_SAFE' : ''))+`</div>`;
         }
         else {
-            html += `<a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
+            html += `<a class="clickable licenseLink" onclick="`+this.getWindowComponent()+`.openLicenseDialog();">` +
                 this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>`;
         }
         html+=`</div>`;
@@ -1929,7 +1956,7 @@ export class MdsComponent{
   }
 
   private setPreview(counter=1) {
-    let preview:any=document.getElementById('preview');
+    let preview:any=document.getElementById(this.getDomId('preview'));
     if(preview){
       if(!this.currentNode){
         if(this.createType==MdsComponent.TYPE_TOOLDEFINITION){
@@ -1962,7 +1989,7 @@ export class MdsComponent{
   private onUpdatePreview(callback:Function=null) {
     let preview=null;
     try{
-      preview = (document.getElementById('previewSelect') as any).files[0];
+      preview = (document.getElementById(this.getDomId('previewSelect')) as any).files[0];
     }catch(e){}
     if(preview){
       this.node.uploadNodePreview(this.currentNode.ref.id,preview).subscribe(()=>{
@@ -2057,11 +2084,11 @@ export class MdsComponent{
 
   private setActiveAuthor(type: number) {
     this.activeAuthorType=type;
-    let freetext=document.getElementById('mdsAuthorFreetext');
-    let person=document.getElementById('mdsAuthorPerson');
+    let freetext=document.getElementById(this.getDomId('mdsAuthorFreetext'));
+    let person=document.getElementById(this.getDomId('mdsAuthorPerson'));
     if(!freetext || !person)
       return;
-    let tabs=document.getElementById('mdsAuthorTabs').getElementsByTagName('li');
+    let tabs=document.getElementById(this.getDomId('mdsAuthorTabs')).getElementsByTagName('li');
     freetext.style.display='none';
     person.style.display='none';
     for(let i=0;i<tabs.length;i++){
@@ -2077,7 +2104,7 @@ export class MdsComponent{
   }
 
   private addAuthorValue(properties: any) {
-    if(document.getElementById(RestConstants.CCM_PROP_AUTHOR_FREETEXT) || document.getElementById(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR)) {
+    if(document.getElementById(this.getDomId(RestConstants.CCM_PROP_AUTHOR_FREETEXT)) || document.getElementById(this.getDomId(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR))) {
       //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_FREETEXT)
       if(Helper.indexOfObjectArray(this.currentWidgets,'id',RestConstants.CCM_PROP_AUTHOR_FREETEXT)==-1) {
           this.currentWidgets.push({id: RestConstants.CCM_PROP_AUTHOR_FREETEXT, type: 'textarea'});
@@ -2161,6 +2188,14 @@ export class MdsComponent{
         this.onRemoveChildobject(callback,pos+1);
       });
   }
+  private setChildobjectProperties(props:any){
+    console.log(props);
+    this.editChildobject.properties=props;
+    this.editChildobject.name=props[RestConstants.LOM_PROP_TITLE] ? props[RestConstants.LOM_PROP_TITLE] : props[RestConstants.CM_NAME];
+    this.editChildobject=null;
+    this.refreshChildobjects();
+  }
+
   private getChildobjectProperties(child:any){
     if(child.file){
         return RestHelper.createNameProperty(child.name);
@@ -2199,12 +2234,17 @@ export class MdsComponent{
         });
       }
       else{
-          console.log('child exists, skip it');
-          this.onAddChildobject(callback,pos+1);
+          console.log('child exists, update it');
+          this.node.editNodeMetadata(child.node.ref.id,this.getChildobjectProperties(child)).subscribe(()=>{
+            this.onAddChildobject(callback,pos+1);
+          });
       }
   }
 
     private getWidgetDomId(widget: any) {
-        return widget.id+'_'+this.mdsId;
+        return this.getDomId(widget.id);
+    }
+    private getDomId(id:string){
+        return id+'_'+this.mdsId;;
     }
 }
