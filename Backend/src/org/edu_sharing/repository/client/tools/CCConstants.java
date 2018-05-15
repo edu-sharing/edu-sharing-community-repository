@@ -374,8 +374,10 @@ public class CCConstants {
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPTYPE = "{http://www.campuscontent.de/model/1.0}groupType";
-
+	
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPSOURCE = "{http://www.campuscontent.de/model/1.0}groupSource";
+
+	public final static String CCM_PROP_AUTHOR_FREETEXT = "{http://www.campuscontent.de/model/1.0}author_freetext";
 
 	public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 

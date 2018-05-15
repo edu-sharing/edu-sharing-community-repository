@@ -69,6 +69,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_SAVED_SEARCH_MDS,
 			CCConstants.CCM_PROP_SAVED_SEARCH_QUERY,
 			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS,
+			CCConstants.CCM_PROP_AUTHOR_FREETEXT,
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
