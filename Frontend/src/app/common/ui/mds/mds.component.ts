@@ -2197,6 +2197,9 @@ export class MdsComponent{
   }
 
   private getChildobjectProperties(child:any){
+    if(child.properties){
+        return child.properties;
+    }
     if(child.file){
         return RestHelper.createNameProperty(child.name);
     }
@@ -2206,7 +2209,7 @@ export class MdsComponent{
         return properties;
     }
     else{
-      return child.properties;
+      console.error('Invalid object state for childobject',child);
     }
   }
   private onAddChildobject(callback: Function = null,pos = 0) {

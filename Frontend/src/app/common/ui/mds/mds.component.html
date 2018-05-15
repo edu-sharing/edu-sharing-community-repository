@@ -36,6 +36,7 @@
   *ngIf="editChildobject"
   [groupId]="'io_childobject'"
   [currentValues]="getChildobjectProperties(editChildobject)"
+  (onCancel)="editChildobject=null"
   (onDone)="setChildobjectProperties($event)"
   [invalidate]="editChildobject!=null"
   ></mds>
