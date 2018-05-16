@@ -127,7 +127,7 @@ public class PersonDao {
 						&& !AuthenticationUtil.getRunAsUser().equals(userName)) {
 					getGroupFolder = false;
 				}
-				if(getGroupFolder) {
+				if(getGroupFolder && userName!=null) {
 					String groupFolderId = ((MCAlfrescoAPIClient)baseClient).getGroupFolderId(userName);
 					if (groupFolderId != null) {
 						
