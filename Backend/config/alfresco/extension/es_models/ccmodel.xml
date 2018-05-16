@@ -1371,6 +1371,12 @@
 			</properties>
 		</aspect>
 		<aspect name="ccm:io_childobject">
+			<title>a childobject for a series of nodes</title>
+			<properties>
+				<property name="ccm:childobject_order">
+					<type>d:int</type>
+				</property>
+			</properties>
 		</aspect>		
 		
 		<aspect name="ccm:collection">

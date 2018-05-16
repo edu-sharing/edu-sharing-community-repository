@@ -83,6 +83,7 @@ export class MdsComponent{
   private currentWidgetSuggestion: string;
   private static GROUP_MULTIVALUE_DELIMITER='[+]';
   private mdsId = new Date().getTime();
+  private childobjectDrag: number;
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
   };
@@ -166,7 +167,7 @@ export class MdsComponent{
                 // test a widget
                 //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
                 //data.views[0].html+="<test>";
-                this.node.getChildren(nodeId,[],{propertyFilter:[RestConstants.ALL]}).subscribe((childs:NodeList)=>{
+                this.node.getChildren(nodeId,[],{propertyFilter:[RestConstants.ALL],sortBy:[RestConstants.CCM_PROP_CHILDOBJECT_ORDER],sortAscending:[true]}).subscribe((childs:NodeList)=>{
                   this.currentChildobjects = Helper.filterArray(childs.nodes,'type',RestConstants.CCM_TYPE_IO);
                   console.log(this.currentChildobjects);
                     this.locator.getConfigVariables().subscribe((variables:string[])=> {
@@ -1739,10 +1740,22 @@ export class MdsComponent{
       this.childobjects.splice(pos,1);
       this.refreshChildobjects();
   }
+  private startChildobjectDrag(event:any,pos:number){
+      this.childobjectDrag=pos;
+      event.dataTransfer.effectAllowed = 'all';
+  }
+  private childobjectDragOver(event:any,posNew:number){
+      Helper.arraySwap(this.childobjects,this.childobjectDrag,posNew);
+      this.childobjectDrag=posNew;
+      this.refreshChildobjects();
+  }
   private renderChildObject(data: any,pos:number){
     let list=document.getElementById(this.getDomId('mdsChildobjects'));
     list.innerHTML+=`
-        <div class="childobject">
+        <div class="childobject" 
+        draggable="true" 
+        ondragstart="`+this.getWindowComponent()+`.startChildobjectDrag(event,`+pos+`)"
+        ondragover="`+this.getWindowComponent()+`.childobjectDragOver(event,`+pos+`)">
             <div class="icon"><img src="`+data.icon+`"></div>
             <div class="name">`+data.name+`</div>
             <div class="license"><i onclick="`+this.getWindowComponent()+`.setEditChildobjectLicense(`+pos+`)" class="material-icons clickable">copyright</i></div>
@@ -2206,21 +2219,24 @@ export class MdsComponent{
     this.refreshChildobjects();
   }
 
-  private getChildobjectProperties(child:any){
+  private getChildobjectProperties(child:any,pos:number){
+    let props:any;
     if(child.properties){
-        return child.properties;
+        props=child.properties;
     }
-    if(child.file){
-        return RestHelper.createNameProperty(child.name);
+    else if(child.file){
+        props=RestHelper.createNameProperty(child.name);
     }
     else if(child.link){
-        let properties:any={};
-        properties[RestConstants.CCM_PROP_IO_WWWURL]=[child.link];
-        return properties;
+        props={};
+        props[RestConstants.CCM_PROP_IO_WWWURL]=[child.link];
     }
     else{
       console.error('Invalid object state for childobject',child);
+      return null;
     }
+    props[RestConstants.CCM_PROP_CHILDOBJECT_ORDER]=[pos];
+    return props;
   }
   private onAddChildobject(callback: Function = null,pos = 0) {
     if(pos>=this.childobjects.length) {
@@ -2233,7 +2249,7 @@ export class MdsComponent{
       let child=this.childobjects[pos];
       console.log('add new child',child);
       if(child.file){
-          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
+          this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
             this.node.uploadNodeContent(data.node.ref.id,child.file,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(()=>{
               this.onAddChildobject(callback,pos+1);
             });
@@ -2242,13 +2258,13 @@ export class MdsComponent{
       else if(child.link){
         let properties:any={};
         properties[RestConstants.CCM_PROP_IO_WWWURL]=[child.link];
-        this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
+        this.node.createNode(this.currentNode.ref.id,RestConstants.CCM_TYPE_IO,[RestConstants.CCM_ASPECT_IO_CHILDOBJECT],this.getChildobjectProperties(child,pos),true,'',RestConstants.CCM_ASSOC_CHILDIO).subscribe((data:NodeWrapper)=>{
             this.onAddChildobject(callback,pos+1);
         });
       }
       else{
           console.log('child exists, update it');
-          this.node.editNodeMetadata(child.node.ref.id,this.getChildobjectProperties(child)).subscribe(()=>{
+          this.node.editNodeMetadata(child.node.ref.id,this.getChildobjectProperties(child,pos)).subscribe(()=>{
             this.onAddChildobject(callback,pos+1);
           });
       }

@@ -1007,6 +1007,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_COLLECTION_ORDERED_POSITION = "{http://www.campuscontent.de/model/1.0}collection_ordered_position";
 
+	public final static String CCM_PROP_CHILDOBJECT_ORDER = "{http://www.campuscontent.de/model/1.0}childobject_order";
+
 	public final static String CCM_VALUE_LINK_LINKTYPE_CHAMELEON = "CMchameleon";
 
 	public final static String CCM_PROP_MAP_TYPE = "{http://www.campuscontent.de/model/1.0}maptype";
