@@ -145,6 +145,10 @@ export class AdminComponent {
         }
         this.globalProgress=false;
         this.tab='INFO';
+        this.route.queryParams.subscribe((data:any)=>{
+            if(data['mode'])
+                this.tab=data['mode'];
+        });
         this.showWarning=true;
         this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
           this.updates=data;
@@ -319,7 +323,7 @@ export class AdminComponent {
     ];
   }
   public setTab(tab:string){
-    this.tab=tab;
+    this.router.navigate(["./"],{queryParams:{mode:tab},relativeTo:this.route});
   }
   public pickDirectory(event : Node[]){
     this.parentNode=event[0];
