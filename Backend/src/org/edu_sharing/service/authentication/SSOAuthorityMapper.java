@@ -298,9 +298,13 @@ public class SSOAuthorityMapper {
 				MappingGroupBuilder mappingGroupBuilder = null;
 				if(mappingGroupBuilderClass != null && !mappingGroupBuilderClass.trim().equals("")) {
 					mappingGroupBuilder = MappingGroupBuilderFactory.instance(ssoAttributes, mappingGroupBuilderClass);
-					organisationName = mappingGroupBuilder.getOrganisation().getMapTo();
-					organisationDisplayName = mappingGroupBuilder.getOrganisation().getMapToDisplayName();
-					mappingGroups.addAll(mappingGroupBuilder.getMapTo());
+					if(mappingGroupBuilder.getOrganisation() != null) {
+						organisationName = mappingGroupBuilder.getOrganisation().getMapTo();
+						if(organisationName != null) {
+							organisationDisplayName = mappingGroupBuilder.getOrganisation().getMapToDisplayName();
+							mappingGroups.addAll(mappingGroupBuilder.getMapTo());
+						}	
+					}
 				}
 				
 				if(customGroupMapping != null) {
