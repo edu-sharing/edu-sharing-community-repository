@@ -224,7 +224,10 @@
                       (onClose)="closeMetadata()"
   ></workspace-metadata>
 
-
+<node-info *ngIf="nodeDebug"
+           [node]="nodeDebug"
+           (onClose)="nodeDebug=null"
+           ></node-info>
 
 </div>
   <global-progress *ngIf="globalProgress"></global-progress>
