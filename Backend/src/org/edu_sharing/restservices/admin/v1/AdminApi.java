@@ -110,7 +110,7 @@ public class AdminApi {
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response applyTemplate(@Context HttpServletRequest req,
 			@ApiParam(value = "Template Filename", required = true) @QueryParam("template") String template,
-			@ApiParam(value = "Group name", required = true) @QueryParam("group") String group,
+			@ApiParam(value = "Group name (authority name)", required = true) @QueryParam("group") String group,
 			@ApiParam(value = "Folder name", required = false) @QueryParam("folder") String folder) {
 		try {
 			AdminServiceFactory.getInstance().applyTemplate(template, group, folder);
