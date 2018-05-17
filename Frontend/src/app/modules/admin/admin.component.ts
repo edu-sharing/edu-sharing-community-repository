@@ -632,5 +632,11 @@ export class AdminComponent {
             this.applyTemplate(position + 1);
         });
     }
+
+    public gotoFoldertemplateFolder() {
+        this.getTemplateFolderId().subscribe((id) => {
+            this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"],{queryParams:{id:id}});
+        });
+    }
 }
 

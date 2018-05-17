@@ -269,14 +269,19 @@
     float:right;
     margin-top: 40px;
   }
+  .goto-folder {
+    display: inline-block;
+    margin-top: 20px;
+  }
   .group {
     float: left;
     margin-top: 60px;
     .upload-hint{
       display:inline-block;
+      margin-top: 10px;
     }
     .btn-flat {
-      margin: 0 20px 20px 0;
+      margin-right: 20px;
     }
   }
 }

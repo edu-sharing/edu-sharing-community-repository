@@ -141,7 +141,8 @@
       "TEMPLATE_APPLIED":"Vorlage {{templatename}} wurde für {{groupname}} angewandt.",
       "TEMPLATE_NOTAPPLIED":"Ordnervorlage {{templatename}} konnte nicht für {{groupname}} angewandt werden. Prüfen Sie die Ordnervorlage auf Richtigkeit.",
       "UPLOAD_HINT":"Sie können weitere Ordnervorlagen hochladen und anschließend auswählen.",
-      "UPLOAD_TEMPLATE":"Neue Ordnervorlage hochladen"
+      "UPLOAD_TEMPLATE":"Neue Ordnervorlage hochladen",
+      "GOTO_FOLDERTEMPLATES":"Ordnervorlagen verwalten"
     }
   }
 }
