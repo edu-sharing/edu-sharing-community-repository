@@ -322,6 +322,7 @@
     <select [(ngModel)]="selectedTemplate" name="template">
       <option *ngFor="let option of templates">{{ option }}</option>
     </select>
+    <a class="goto-folder clickable" (click)="gotoFoldertemplateFolder()">{{'ADMIN.FOLDERTEMPLATES.GOTO_FOLDERTEMPLATES' | translate }}</a>
     <div class="btn btn-shadow" (click)="applyTemplate()">{{'ADMIN.FOLDERTEMPLATES.APPLYTEMPLATE' | translate }}</div>
   </form>
   <div class="group">

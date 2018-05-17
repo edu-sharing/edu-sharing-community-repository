@@ -92,7 +92,9 @@
       "TEMPLATE_APPLIED":"Folder template {{templatename}} has been applied for {{groupname}}.",
       "TEMPLATE_NOTAPPLIED":"Folder template {{templatename}} could not been applied for {{groupname}}.",
       "UPLOAD_HINT":"You can upload more folder template and choose them afterwards.",
-      "UPLOAD_TEMPLATE":"Upload new folder template"
+      "UPLOAD_TEMPLATE":"Upload new folder template",
+      "GOTO_FOLDERTEMPLATES":"Maintain folder templates"
+
     }
   }
 }
