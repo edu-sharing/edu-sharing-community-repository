@@ -50,7 +50,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() nodeMetadataChange = new EventEmitter();
   @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
-  @Input() nodeMetadataAllowReplace : boolean;
+  @Input() nodeMetadataAllowReplace : Boolean;
   @Output() onClose=new EventEmitter();
   @Output() onCreate=new EventEmitter();
   @Output() onRefresh=new EventEmitter();
