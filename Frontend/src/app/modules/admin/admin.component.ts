@@ -8,12 +8,30 @@ import {TranslateService} from "ng2-translate";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {Component, ViewChild, ElementRef} from "@angular/core";
-import {LoginResult, ServerUpdate, CacheInfo, Application, Node} from "../../common/rest/data-object";
+import {
+    LoginResult,
+    ServerUpdate,
+    CacheInfo,
+    Application,
+    Node,
+    Authority,
+    NodeList,
+    NodeWrapper
+} from "../../common/rest/data-object";
 import {RestAdminService} from "../../common/rest/services/rest-admin.service";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 import {Helper} from "../../common/helper";
 import {RestConstants} from "../../common/rest/rest-constants";
 import {UIConstants} from "../../common/ui/ui-constants";
+import {ListItem} from "../../common/ui/list-item";
+import {RestNodeService} from "../../common/rest/services/rest-node.service";
+import {SuggestItem} from "../../common/ui/autocomplete/autocomplete.component";
+import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
+import {RestSearchService} from "../../common/rest/services/rest-search.service";
+import {RestHelper} from "../../common/rest/rest-helper";
+import {Observable, Observer} from "rxjs/index";
+
+
 @Component({
   selector: 'admin-main',
   templateUrl: 'admin.component.html',
@@ -55,6 +73,7 @@ export class AdminComponent {
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
   @ViewChild('excelSelect') excelSelect : ElementRef;
+  @ViewChild('templateSelect') templateSelect : ElementRef;
   private excelFile: File;
   public xmlAppKeys: string[];
   public currentApp: string;
@@ -72,13 +91,20 @@ export class AdminComponent {
               private translate: TranslateService,
               private storage : SessionStorageService,
               private admin : RestAdminService,
-              private connector: RestConnectorService) {
+              private connector: RestConnectorService,
+              private node: RestNodeService,
+              private searchApi: RestSearchService,
+              private organization: RestOrganizationService) {
+      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
+      this.searchColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
+      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
         new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=>{this.showWarning=false})
       ];
+      this.getTemplates();
       this.connector.isLoggedIn().subscribe((data: LoginResult) => {
         if (!data.isAdmin) {
           this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
@@ -368,5 +394,108 @@ export class AdminComponent {
     }
   },50);
   }
+
+  public getTemplates() {
+      this.getTemplateFolderId().subscribe((id) => {
+          this.node.getChildren(id).subscribe((data) => {
+              let templates = [];
+              for(let node of data.nodes) {
+                  if(node.name.split('.').pop() == 'xml') {
+                      templates.push(node.name);
+                  }
+              }
+              this.templates = templates;
+              this.selectedTemplate = this.templates[0];
+          });
+      })
+  }
+
+    public getTemplateFolderId() {
+        return new Observable<string>((observer: Observer<string>) => {
+        this.searchApi.searchByProperties([RestConstants.CM_NAME], ['Edu_Sharing_Sys_Template'], ['='], '', RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS).subscribe((data)=> {
+            for(let node of data.nodes) {
+                if (node.isDirectory) {
+                   observer.next(node.ref.id);
+                   observer.complete();
+                   return;
+                }
+            }
+        });
+      });
+    }
+
+    public updateEduGroupSuggestions(event : any) {
+        this.organization.getOrganizations(event.input).subscribe(
+            (data:any)=>{
+                var ret:SuggestItem[] = [];
+                for (let orga of data.organizations) {
+                    let item = new SuggestItem(orga.authorityName, orga.profile.displayName, 'group', '');
+                    item.originalObject = orga;
+                    ret.push(item);
+                }
+                this.eduGroupSuggestions=ret;
+            });
+    }
+
+    public addEduGroup(data:any) {
+        if(Helper.indexOfObjectArray(this.eduGroupsSelected, 'id', data.item.id) < 0)
+            this.eduGroupsSelected.push(data.item);
+    }
+
+    public removeEduGroup(data:SuggestItem) {
+        this.eduGroupsSelected.splice(Helper.indexOfObjectArray(this.eduGroupsSelected, 'id', data.id), 1);
+    }
+
+    public uploadTemplate(event:any){
+        console.log(event);
+        let file=event.target.files[0];
+        if(!file)
+            return;
+        let id = '';
+        this.globalProgress=true;
+        this.getTemplateFolderId().subscribe((id) => {
+            this.node.createNode(id,RestConstants.CCM_TYPE_IO,[],RestHelper.createNameProperty(file.name),true).subscribe(
+                (data : NodeWrapper) => {
+                    this.node.uploadNodeContent(data.node.ref.id,file,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+                        (data) => {
+                            this.getTemplates();
+                            this.toast.toast('ADMIN.FOLDERTEMPLATES.UPLOAD_DONE',{filename:JSON.parse(data.response).node.name});
+                            this.globalProgress=false;
+                            this.templateSelect.nativeElement.value=null;
+                        }
+                    );
+                },(error:any)=>{
+                    this.globalProgress=false;
+                    this.templateSelect.nativeElement.value=null;
+                    this.toast.error(error);
+                });
+        });
+    }
+
+    public applyTemplate(position = 0) {
+        this.globalProgress = true;
+        if(this.eduGroupsSelected.length < 1) {
+            this.toast.error(null, 'ADMIN.FOLDERTEMPLATES.MISSING_GROUP');
+            this.globalProgress = false;
+            return;
+        }
+        if(this.selectedTemplate == '') {
+            this.toast.error(null, 'ADMIN.FOLDERTEMPLATES.MISSING_TEMPLATE');
+            this.globalProgress = false;
+            return;
+        }
+        if (position >= this.eduGroupsSelected.length) {
+            this.globalProgress = false;
+            // done
+            return;
+        }
+        this.admin.applyTemplate(this.eduGroupsSelected[position].id, this.selectedTemplate).subscribe(data => {
+            this.toast.toast('ADMIN.FOLDERTEMPLATES.TEMPLATE_APPLIED', {templatename:this.selectedTemplate, groupname:this.eduGroupsSelected[position].id});
+            this.applyTemplate(position + 1);
+        }, (error: any) => {
+            this.toast.error(error,'ADMIN.FOLDERTEMPLATES.TEMPLATE_NOTAPPLIED', {templatename:this.selectedTemplate, groupname:this.eduGroupsSelected[position].id});
+            this.applyTemplate(position + 1);
+        });
+    }
 }
 
