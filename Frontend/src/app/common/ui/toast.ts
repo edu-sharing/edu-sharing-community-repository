@@ -185,9 +185,9 @@ export class Toast{
         message='TOAST.NO_CONNECTION';
         this.dialogTitle = null;
     }
-    if(this.lastToastError==message && (Date.now()-this.lastToastErrorTime)<Toast.MIN_TIME_BETWEEN_TOAST)
+    if(this.lastToastError==message+JSON.stringify(parameters) && (Date.now()-this.lastToastErrorTime)<Toast.MIN_TIME_BETWEEN_TOAST)
       return;
-    this.lastToastError=message;
+    this.lastToastError=message+JSON.stringify(parameters);
     this.lastToastErrorTime=Date.now();
     this.translate.get(message, parameters).subscribe((text: any) => {
       if (this.dialogTitle) {
