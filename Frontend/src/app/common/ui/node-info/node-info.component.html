@@ -14,7 +14,7 @@
       <div><span>{{'NODE.cm:creator' | translate}}</span><span>{{_creator}}</span></div>
       <div><span>{{'DOWNLOAD' | translate}}</span><span><a *ngIf="_node.downloadUrl" [href]="_node.downloadUrl" target="_blank">{{_node.downloadUrl}}</a><div *ngIf="!_node.downloadUrl">-</div></span></div>
       <div><span>{{'WORKSPACE.EDITOR.PREVIEW' | translate}}</span><span><a [href]="_node.preview.url" target="_blank">{{_node.preview.url}}</a></span><span>isIcon: {{_node.preview.isIcon}}</span> <img [src]="_node.preview.url"></div>
-      <div><span>{{'NODE_INFO.CHILDREN' | translate}}</span>
+      <div><span>{{'NODE_INFO.CHILDREN' | translate}} ({{_children ? _children.length : 0}})</span>
         <span class="children">
           <div *ngFor="let child of _children">{{child.type}} (<a class="clickable" (click)="openNode(child)">{{child.ref.id}}</a>)</div>
           <spinner-small *ngIf="!_children"></spinner-small>

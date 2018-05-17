@@ -370,7 +370,7 @@
 	</target>
 	<target name="deploy-reload" depends="deploy, reload">
 	</target>
-	<target name="deploy-ssh" depends="release, copy-ssh-true, copy-ssh-false">
+	<target name="deploy-ssh" depends="deploy, release, copy-ssh-true, copy-ssh-false">
 	</target>
 	<target name="copy-ssh-false" unless="ssh.host">
 		<error>To use ssh/scp, configure in your build.username.properties ssh.host, ssh.username and ssh.password</error>
