@@ -187,5 +187,11 @@ export class RestAdminService extends AbstractRestService{
     let query=this.connector.createUrl("admin/:version/applications/:xml",null,[[":xml",xml]]);
     return this.connector.put(query,JSON.stringify(homeAppProperties),this.connector.getRequestOptions());
   }
+
+  public applyTemplate = (groupName:string, templateName:string) :Observable<any> => {
+      let query=this.connector.createUrl("admin/:version/applyTemplate",null,[]);
+      let params = JSON.stringify({template:templateName,group:groupName});
+      return this.connector.post(query,params,this.connector.getRequestOptions());
+  }
 }
 

@@ -9,7 +9,8 @@
       "APPLICATIONS":"Applications",
       "UPDATE":"Server Update",
       "IMPORT":"Import",
-      "TOOLKIT":"Tool Kit"
+      "TOOLKIT":"Tool Kit",
+      "FOLDERTEMPLATES":"Folder Templates"
     },
     "APPLICATIONS":{
       "URL":"Url",
@@ -81,6 +82,17 @@
       "APP_INFO_REFRESHED":"Refresh Application Info done",
       "CACHE_INFO":"Cache Info",
       "CACHE_NAME":"Cache Name (ID/Bean Name)"
+    },
+    "FOLDERTEMPLATES":{
+      "EDUGROUP": "Organization",
+      "APPLYTEMPLATE":"Apply folder template",
+      "UPLOAD_DONE":"Template was saved as {{filename}}.",
+      "MISSING_GROUP":"You must choose at least one organization.",
+      "MISSING_TEMPLATE":"You must choose a folder template.",
+      "TEMPLATE_APPLIED":"Folder template {{templatename}} has been applied for {{groupname}}.",
+      "TEMPLATE_NOTAPPLIED":"Folder template {{templatename}} could not been applied for {{groupname}}.",
+      "UPLOAD_HINT":"You can upload more folder template and choose them afterwards.",
+      "UPLOAD_TEMPLATE":"Upload new folder template"
     }
   }
 }
