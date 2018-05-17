@@ -373,7 +373,7 @@
 	<target name="deploy-ssh" depends="deploy, release, copy-ssh-true, copy-ssh-false">
 	</target>
 	<target name="copy-ssh-false" unless="ssh.host">
-		<error>To use ssh/scp, configure in your build.username.properties ssh.host, ssh.username and ssh.password</error>
+		<fail>To use ssh/scp, configure in your build.username.properties ssh.host, ssh.username and ssh.password</fail>
 	</target>
 	<target name="copy-ssh-true" if="ssh.host">
 		<replace file="${release.foldername}/build.properties">
