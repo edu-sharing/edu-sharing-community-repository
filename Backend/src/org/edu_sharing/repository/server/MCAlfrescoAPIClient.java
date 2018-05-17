@@ -1569,7 +1569,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				properties.remove(CCConstants.KEY_PREVIEW_GENERATION_RUNS);
 			}
 
-			HashMap<String, HashMap<String, Object>> usages = this.getChildrenByType(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_TYPE_USAGE);
+			List<NodeRef> usages = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_USAGEASPECT_USAGES);
 			if (usages != null) {
 				properties.put(CCConstants.VIRT_PROP_USAGECOUNT, "" + usages.size());
 			}
@@ -1798,6 +1798,16 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				result.put(childNodeId, resultProps);
 
 			}
+		}
+		return result;
+	}
+	public List<NodeRef> getChildrenByAssociationNodeIds(StoreRef store, String nodeId, String association) {
+		
+		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId),QName.createQName(association),
+				RegexQNamePattern.MATCH_ALL);		
+		List<NodeRef> result=new ArrayList<>();
+		for (ChildAssociationRef child : childAssocList) {
+			result.add(child.getChildRef());
 		}
 		return result;
 	}
