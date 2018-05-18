@@ -294,8 +294,8 @@ export class AdminComponent {
   }
   public saveApp(){
     this.globalProgress=true;
-    if(this.xmlAppAdditionalPropertyName){
-      this.xmlAppProperties[this.xmlAppAdditionalPropertyName]=this.xmlAppAdditionalPropertyValue;
+    if(this.xmlAppAdditionalPropertyName.trim()){
+      this.xmlAppProperties[this.xmlAppAdditionalPropertyName.trim()]=this.xmlAppAdditionalPropertyValue;
     }
     this.admin.updateApplicationXML(this.currentAppXml,this.xmlAppProperties).subscribe(()=>{
       this.toast.toast('ADMIN.APPLICATIONS.APP_SAVED',{xml:this.currentAppXml});
