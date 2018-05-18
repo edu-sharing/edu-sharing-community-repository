@@ -87,7 +87,7 @@ export class WorkspaceMainComponent implements EventListener{
     public editNodeDeleteOnCancel = false;
     private createMds : string;
     private editNodeLicense : Node[];
-    private editNodeAllowReplace : boolean;
+    private editNodeAllowReplace : Boolean;
     private nodeDisplayedVersion : string;
     private createAllowed : boolean;
     private currentFolder : any|Node;
@@ -541,7 +541,7 @@ export class WorkspaceMainComponent implements EventListener{
     private editNode(node: Node) {
         let list=this.getNodeList(node);
         this.editNodeMetadata=list[0];
-        this.editNodeAllowReplace=true;
+        this.editNodeAllowReplace=new Boolean(true);
     }
     private editLicense(node: Node) {
         let list=this.getNodeList(node);
