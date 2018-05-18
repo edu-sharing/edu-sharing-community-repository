@@ -10,7 +10,8 @@
       "UPDATE":"Server Update",
       "IMPORT":"Import",
       "TOOLKIT":"Tool Kit",
-      "BROWSER":"Browser"
+      "BROWSER":"Browser",
+      "FOLDERTEMPLATES": "Ordnervorlagen"
     },
     "APPLICATIONS":{
       "URL":"Url",
@@ -130,6 +131,18 @@
       "LUCENE_COUNT":"Anzahl Treffer:",
       "LUCENE_START":"Suchen",
       "ADD_AUTHORITY":"Authority suchen..."
+    },
+    "FOLDERTEMPLATES":{
+      "EDUGROUP": "Organisation",
+      "APPLYTEMPLATE": "Ordnervorlage anwenden",
+      "UPLOAD_DONE":"Ordnervorlage wurde unter {{filename}} auf dem Server abgelegt.",
+      "MISSING_GROUP":"Es muss mindestens eine Organisation gewählt werden.",
+      "MISSING_TEMPLATE":"Es muss eine Ordnervorlage gewählt werden.",
+      "TEMPLATE_APPLIED":"Vorlage {{templatename}} wurde für {{groupname}} angewandt.",
+      "TEMPLATE_NOTAPPLIED":"Ordnervorlage {{templatename}} konnte nicht für {{groupname}} angewandt werden. Prüfen Sie die Ordnervorlage auf Richtigkeit.",
+      "UPLOAD_HINT":"Sie können weitere Ordnervorlagen hochladen und anschließend auswählen.",
+      "UPLOAD_TEMPLATE":"Neue Ordnervorlage hochladen",
+      "GOTO_FOLDERTEMPLATES":"Ordnervorlagen verwalten"
     }
   }
 }

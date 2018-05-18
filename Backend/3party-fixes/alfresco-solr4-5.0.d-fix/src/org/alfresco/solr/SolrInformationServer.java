@@ -2610,6 +2610,15 @@ Merged HEAD-BUG-FIX (5.1/Cloud) to HEAD (5.1/Cloud)
                     log.debug("ML "+field.getField() + " in "+ locale+ " of "+propValue);
                 }
                 
+                /**
+                 * edu-sharing fix: non default alfresco mltext properties got null value when version revert is done.
+                 * so avoid NPE
+                 */
+                if(propValue == null) {
+                	log.debug("edu-sharing fix: ml property " + field + " is null");
+                	continue;
+                }
+                
                 StringBuilder builder = new StringBuilder(propValue.length() + 16);
                 builder.append("\u0000").append(locale.toString()).append("\u0000").append(propValue);
        
