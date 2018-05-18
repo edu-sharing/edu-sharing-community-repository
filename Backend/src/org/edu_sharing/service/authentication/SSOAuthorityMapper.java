@@ -155,7 +155,7 @@ public class SSOAuthorityMapper {
 			return tmpUserName;
 		}
 		
-		if(tmpUserName.trim().equals("admin")){
+		if(tmpUserName.trim().equals(ApplicationInfoList.getHomeRepository().getUsername())){
 			String tmpAppId = ssoAttributes.get(PARAM_APP_ID);
 			tmpUserName += "@" + tmpAppId;
 		}
