@@ -1288,9 +1288,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					@Override
 					public Void doWork() throws Exception{
 						try {
-							HashMap<NodeRef, HashMap> assocNode = getAssocNode(nodeRef, CCConstants.CM_ASSOC_ORIGINAL);
+							List<NodeRef> assocNode = getAssociationNodeIds(nodeRef, CCConstants.CM_ASSOC_ORIGINAL);
 							if(assocNode.size() > 0){
-								String originalNodeId = (String)assocNode.entrySet().iterator().next().getValue().get(CCConstants.SYS_PROP_NODE_UID);
+								String originalNodeId = assocNode.get(0).getId();
 								propsCopy.put(CCConstants.CM_ASSOC_ORIGINAL, originalNodeId);
 							}
 						} catch (Throwable t) {
