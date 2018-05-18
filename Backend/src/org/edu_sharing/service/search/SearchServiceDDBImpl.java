@@ -213,6 +213,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, url);
 		properties.put(CCConstants.CCM_PROP_IO_WWWURL, url);
         properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(this.repositoryId, nodeId));
+		properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"ddb");
 		try{
 			// fetch binary info
 			String all = httpGet(DDB_API+"/items/"+nodeId+"/aip?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
@@ -243,7 +244,6 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 				contenturl = DDB_API+contenturl+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
 				
 				//properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, contenturl);
-				properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"ddb");
 
 				properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, mimetyp);
 			}catch(Throwable t) {}
