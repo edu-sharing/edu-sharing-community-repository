@@ -22,6 +22,12 @@ div{
 .aspects{
   white-space: pre-line;
 }
+.children{
+  flex-direction: column;
+}
+.property{
+  margin:0 10px;
+}
 .json{
   white-space: pre;
   font-family: "Lucida Console";

@@ -72,7 +72,6 @@ export class SearchComponent {
   public collectionsMore=false;
   view = ListTableComponent.VIEW_TYPE_GRID;
   searchFail: boolean = false;
-  showspinner: boolean = false;
   public nodeReport: Node;
   public currentRepository:string=RestConstants.HOME_REPOSITORY;
   public currentRepositoryObject:Repository;
@@ -191,10 +190,10 @@ export class SearchComponent {
     if(this.searchService.reinit){
       this.searchService.init();
       this.initalized=false;
+      this.searchService.showspinner=true;
     }
      this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
      this.connector.setRoute(this.activatedRoute).subscribe(()=> {
-         this.showspinner=true;
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
            if(this.setSidenavSettings()) {
@@ -343,7 +342,7 @@ export class SearchComponent {
       return;
     }
     this.isSearching=true;
-    this.showspinner = true;
+    this.searchService.showspinner = true;
     if(searchString==null)
       searchString = this.searchService.searchTerm;
     if(searchString==null)
@@ -353,7 +352,7 @@ export class SearchComponent {
       this.searchService.init();
     }
     else if(this.searchService.searchResult.length>SearchComponent.MAX_ITEMS_COUNT){
-      this.showspinner=false;
+      this.searchService.showspinner=false;
       this.isSearching=false;
       return;
     }
@@ -481,7 +480,7 @@ export class SearchComponent {
     this.checkFail();
     this.updateActionbar(this.selection);
     if(data.nodes.length < 1 && this.currentRepository!=RestConstants.ALL){
-      this.showspinner = false;
+      this.searchService.showspinner = false;
       this.isSearching=false;
       this.searchService.complete = true;
       return;
@@ -789,7 +788,7 @@ export class SearchComponent {
   private searchRepository(repos: Repository[],criterias:any,init:boolean,position=0,count=0) {
     if(position>0 && position>=repos.length) {
       this.searchService.numberofresults = count;
-      this.showspinner = false;
+      this.searchService.showspinner = false;
       this.isSearching=false;
       return;
     }

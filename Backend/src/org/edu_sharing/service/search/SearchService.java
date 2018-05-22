@@ -76,5 +76,8 @@ public interface SearchService {
 	SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
 			SortDefinition sort, Map<String, String> customProperties) throws Exception;
 
+	SearchResult<String> searchPersonGroups(String authorityName, String pattern, int skipCount, int maxValues,
+			SortDefinition sort);
+
 	SearchToken getLastSearchToken() throws Throwable;
 }
