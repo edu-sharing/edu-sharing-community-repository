@@ -310,6 +310,28 @@ public class SearchServiceImpl implements SearchService {
 	private List limitList(List list, int skipCount, int maxValues) {
 		return list.subList(Math.min(skipCount, list.size()), Math.min(list.size(), skipCount + maxValues));
 	}
+	
+	/**
+	 * find all parent groups where the given authority is a member
+	 */
+	@Override
+	public SearchResult<String> searchPersonGroups(String authorityName, String pattern, int skipCount, int maxValues, SortDefinition sort) {
+		AuthorityService authorityService = serviceRegistry.getAuthorityService();
+
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
+
+				new RetryingTransactionCallback<SearchResult<String>>() {
+
+					public SearchResult<String> execute() throws Throwable {
+						String key = authorityName;
+						String[] data = authorityService.getContainingAuthorities(null, key, true)
+								.toArray(new String[0]);
+						return filterAndSortAuthorities(data,pattern,null,skipCount,maxValues,sort);
+					}
+
+				}, true);
+	}
+	
 	@Override
 	public SearchResult<String> searchGroupMembers(String groupName, String pattern, String authorityType,
 			int skipCount, int maxValues, SortDefinition sort) {
@@ -323,62 +345,61 @@ public class SearchServiceImpl implements SearchService {
 						String key = groupName;
 						String[] data = authorityService.getContainedAuthorities(null, key, true)
 								.toArray(new String[0]);
-						return filterAndSortAuthorities(data);
+						return filterAndSortAuthorities(data,pattern,authorityType,skipCount,maxValues,sort);
 					}
 
-					private SearchResult<String> filterAndSortAuthorities(String[] data) throws Exception {
-						List<String> list2 = new ArrayList<String>();
-						if (authorityType != null && !authorityType.isEmpty()) {
-							for (String authority : data) {
-								if (authorityType.equals("GROUP")
-										&& !authority.startsWith(PermissionService.GROUP_PREFIX))
-									continue;
-								if (authorityType.equals("USER")
-										&& authority.startsWith(PermissionService.GROUP_PREFIX))
-									continue;
-								list2.add(authority);
-							}
-						} else {
-							list2 = Arrays.asList(data);
-						}
-
-						List<String> list = new ArrayList<>();
-						if (pattern != null && !pattern.isEmpty()) {
-							for (String authority : list2) {
-								String name = authority;
-
-								if (name.startsWith(PermissionService.GROUP_PREFIX))
-									name = name.substring(PermissionService.GROUP_PREFIX.length());
-								if (name.toLowerCase().contains(pattern.toLowerCase()))
-									list.add(authority);
-							}
-						} else {
-							list = list2;
-						}
-
-						if (sort.hasContent()) {
-							if (!sort.getFirstSortBy().equals("authorityName")) {
-								throw new Exception("Group Members can only be sorted by authorityName, requested: "
-										+ sort.getFirstSortBy());
-							}
-							Collections.sort(list, new Comparator<String>() {
-								@Override
-								public int compare(String o1, String o2) {
-									if (o1.startsWith(PermissionService.GROUP_PREFIX))
-										o1 = o1.substring(PermissionService.GROUP_PREFIX.length());
-									if (o2.startsWith(PermissionService.GROUP_PREFIX))
-										o2 = o2.substring(PermissionService.GROUP_PREFIX.length());
-									return o1.compareToIgnoreCase(o2) * (sort.getFirstSortAscending() ? 1 : -1);
-								}
-							});
-						}
-						int count = list.size();
-						list = limitList(list, skipCount, maxValues);
-						return new SearchResult<String>(list, skipCount, count);
-					}
 				}, true);
 	}
+	private SearchResult<String> filterAndSortAuthorities(String[] data,String pattern,String authorityType,int skipCount, int maxValues,SortDefinition sort) throws Exception {
+		List<String> list2 = new ArrayList<String>();
+		if (authorityType != null && !authorityType.isEmpty()) {
+			for (String authority : data) {
+				if (authorityType.equals("GROUP")
+						&& !authority.startsWith(PermissionService.GROUP_PREFIX))
+					continue;
+				if (authorityType.equals("USER")
+						&& authority.startsWith(PermissionService.GROUP_PREFIX))
+					continue;
+				list2.add(authority);
+			}
+		} else {
+			list2 = Arrays.asList(data);
+		}
 
+		List<String> list = new ArrayList<>();
+		if (pattern != null && !pattern.isEmpty()) {
+			for (String authority : list2) {
+				String name = authority;
+
+				if (name.startsWith(PermissionService.GROUP_PREFIX))
+					name = name.substring(PermissionService.GROUP_PREFIX.length());
+				if (name.toLowerCase().contains(pattern.toLowerCase()))
+					list.add(authority);
+			}
+		} else {
+			list = list2;
+		}
+
+		if (sort.hasContent()) {
+			if (!sort.getFirstSortBy().equals("authorityName")) {
+				throw new Exception("Group Members can only be sorted by authorityName, requested: "
+						+ sort.getFirstSortBy());
+			}
+			Collections.sort(list, new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					if (o1.startsWith(PermissionService.GROUP_PREFIX))
+						o1 = o1.substring(PermissionService.GROUP_PREFIX.length());
+					if (o2.startsWith(PermissionService.GROUP_PREFIX))
+						o2 = o2.substring(PermissionService.GROUP_PREFIX.length());
+					return o1.compareToIgnoreCase(o2) * (sort.getFirstSortAscending() ? 1 : -1);
+				}
+			});
+		}
+		int count = list.size();
+		list = limitList(list, skipCount, maxValues);
+		return new SearchResult<String>(list, skipCount, count);
+	}
 	@Override
 	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
 			SortDefinition sort,Map<String,String> customProperties) throws Exception {

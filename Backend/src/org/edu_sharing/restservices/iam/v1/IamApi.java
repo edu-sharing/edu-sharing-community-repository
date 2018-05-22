@@ -17,6 +17,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
@@ -916,6 +918,53 @@ public class IamApi  {
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
     }
 
+    @GET
+
+    @Path("/people/{repository}/{person}/memberships")    
+    
+    @ApiOperation(
+    	value = "Get all groups the given user is member of."
+    	)
+
+    @ApiResponses(
+    	value = { 
+	        @ApiResponse(code = 200, message = "OK.", response = AuthorityEntries.class),        
+	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+	    })
+
+    public Response getUserGroups(
+    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+    		@ApiParam(value = "authority name",required=true ) @PathParam("person") String person,
+       		@ApiParam(value = "pattern",required=false) @QueryParam("pattern") String pattern,
+    		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
+    	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
+    	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") Boolean sortAscending,
+ 
+    		@Context HttpServletRequest req) {
+
+    	try {
+    		
+    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+    		AuthorityEntries response = PersonDao.getPerson(repoDao, person).getMemberships(
+    				pattern, 
+    				skipCount!=null ? skipCount : 0,
+	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
+					new SortDefinition(sortProperties,sortAscending)
+			);
+    		
+	    	return Response.status(Response.Status.OK).entity(response).build();
+	    	
+    	} catch (Throwable t) {
+    		return ErrorResponse.createResponse(t);
+    	}
+    }
+
+    
     @GET
 
     @Path("/groups/{repository}/{group}/members")    

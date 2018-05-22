@@ -9,17 +9,25 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.NodeRef;
+import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.service.NotAnAdminException;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchResult;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -157,6 +165,30 @@ public class PersonDao {
 			throw DAOException.mapping(t);
 		}
 
+	}
+	public AuthorityEntries getMemberships(String pattern,int skipCount,int maxItems,SortDefinition sort) throws DAOException{
+		if (!AuthenticationUtil.getFullyAuthenticatedUser().equals(getAuthorityName()) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+			throw new NotAnAdminException();
+		}
+    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).searchPersonGroups(
+    					getAuthorityName(),
+    					pattern,
+    					skipCount,
+    					maxItems,
+    					sort
+    					
+    			);
+		List<Authority> result = new ArrayList<Authority>();
+    	for (String member: search.getData()) {
+    		result.add(
+    				member.startsWith(PermissionService.GROUP_PREFIX) ?
+    							new GroupDao(repoDao,member).asGroup() :
+    							new PersonDao(repoDao, member).asPerson());	
+    	}	
+    	AuthorityEntries response = new AuthorityEntries();
+    	response.setList(result);
+    	response.setPagination(new Pagination(search));
+    	return response;
 	}
 	
 	public void changePassword(String oldPassword, String newPassword) throws DAOException {
