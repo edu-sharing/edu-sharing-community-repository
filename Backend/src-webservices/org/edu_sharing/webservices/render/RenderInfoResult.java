@@ -10,6 +10,8 @@ package org.edu_sharing.webservices.render;
 public class RenderInfoResult  implements java.io.Serializable {
     private java.lang.String[] aspects;
 
+    private org.edu_sharing.webservices.types.Child[] childs;
+
     private int contentHash;
 
     private java.lang.String eduSchoolPrimaryAffiliation;
@@ -43,6 +45,7 @@ public class RenderInfoResult  implements java.io.Serializable {
 
     public RenderInfoResult(
            java.lang.String[] aspects,
+           org.edu_sharing.webservices.types.Child[] childs,
            int contentHash,
            java.lang.String eduSchoolPrimaryAffiliation,
            java.lang.Boolean guestReadAllowed,
@@ -58,6 +61,7 @@ public class RenderInfoResult  implements java.io.Serializable {
            org.edu_sharing.webservices.usage.UsageResult usage,
            java.lang.Boolean userReadAllowed) {
            this.aspects = aspects;
+           this.childs = childs;
            this.contentHash = contentHash;
            this.eduSchoolPrimaryAffiliation = eduSchoolPrimaryAffiliation;
            this.guestReadAllowed = guestReadAllowed;
@@ -92,6 +96,26 @@ public class RenderInfoResult  implements java.io.Serializable {
      */
     public void setAspects(java.lang.String[] aspects) {
         this.aspects = aspects;
+    }
+
+
+    /**
+     * Gets the childs value for this RenderInfoResult.
+     * 
+     * @return childs
+     */
+    public org.edu_sharing.webservices.types.Child[] getChilds() {
+        return childs;
+    }
+
+
+    /**
+     * Sets the childs value for this RenderInfoResult.
+     * 
+     * @param childs
+     */
+    public void setChilds(org.edu_sharing.webservices.types.Child[] childs) {
+        this.childs = childs;
     }
 
 
@@ -389,6 +413,9 @@ public class RenderInfoResult  implements java.io.Serializable {
             ((this.aspects==null && other.getAspects()==null) || 
              (this.aspects!=null &&
               java.util.Arrays.equals(this.aspects, other.getAspects()))) &&
+            ((this.childs==null && other.getChilds()==null) || 
+             (this.childs!=null &&
+              java.util.Arrays.equals(this.childs, other.getChilds()))) &&
             this.contentHash == other.getContentHash() &&
             ((this.eduSchoolPrimaryAffiliation==null && other.getEduSchoolPrimaryAffiliation()==null) || 
              (this.eduSchoolPrimaryAffiliation!=null &&
@@ -445,6 +472,17 @@ public class RenderInfoResult  implements java.io.Serializable {
                  i<java.lang.reflect.Array.getLength(getAspects());
                  i++) {
                 java.lang.Object obj = java.lang.reflect.Array.get(getAspects(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
+        if (getChilds() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getChilds());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getChilds(), i);
                 if (obj != null &&
                     !obj.getClass().isArray()) {
                     _hashCode += obj.hashCode();
@@ -537,6 +575,13 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField.setFieldName("aspects");
         elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "aspects"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
+        elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("childs");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "childs"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "Child"));
         elemField.setNillable(true);
         elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));
         typeDesc.addFieldDesc(elemField);
