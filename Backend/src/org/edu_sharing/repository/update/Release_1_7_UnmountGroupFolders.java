@@ -153,4 +153,9 @@ public class Release_1_7_UnmountGroupFolders extends UpdateAbstract {
 		}
 	}
 	
+	@Override
+	public void run() {
+		this.logInfo("not implemented");
+	}
+	
 }
