@@ -156,6 +156,7 @@
     "REVERTED_VERSION":"Version wurde erfolgreich wiederhergestellt",
     "OPTION":{
       "SHOW":"Vorschau & Infos",
+      "DEBUG":"Debug",
       "INVITE":"Freigeben",
       "EDIT":"Infos bearbeiten",
       "VIEW":"Öffnen",

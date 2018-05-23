@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.servlet.http.HttpSession;
 import javax.xml.soap.SOAPException;
 
+import org.alfresco.repo.search.impl.querymodel.impl.functions.Child;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -47,6 +48,7 @@ import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.usage.AlfServicesWrapper;
@@ -217,7 +219,6 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			rir.setContentHash(client.getContentHash(nodeId,CCConstants.CM_PROP_CONTENT));
 		}
 		
-		
 		String locale = getHeaderValue("locale", MessageContext.getCurrentContext());
 
 		locale = (locale != null) ? locale : "en_EN";
@@ -266,16 +267,17 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}
 		
 		props=VCardConverter.addVCardProperties(nodeType,props);
-		List<KeyValue> propsresult = new ArrayList<KeyValue>();
+		rir.setProperties(convertProperties(props));	
 		
-		//MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getRepositoryInfoById(appId),CCConstants.metadatasetdefault_id);
-		for(Map.Entry<String,Object> entry : props.entrySet()){
-			//MetadataWidget viewProperty = (isRemoteObject) ? null :  mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
-			if(entry.getKey() != null && entry.getValue() != null) {
-				propsresult.add(new KeyValue(entry.getKey(),entry.getValue().toString()));
-			}
+		List<org.edu_sharing.webservices.types.Child> childsConverted = new ArrayList<>();
+		List<Map<String, Object>> childs = getChildNodes(nodeId);
+		for(Map<String, Object> child : childs) {
+			org.edu_sharing.webservices.types.Child childConverted=new org.edu_sharing.webservices.types.Child();
+			child=VCardConverter.addVCardProperties(NodeServiceFactory.getLocalService().getType((String) child.get(CCConstants.SYS_PROP_NODE_UID)),child);
+			childConverted.setProperties(convertProperties(child));
+			childsConverted.add(childConverted);	
 		}
-		rir.setProperties(propsresult.toArray(new KeyValue[propsresult.size()]));	
+		rir.setChilds(childsConverted.toArray(new org.edu_sharing.webservices.types.Child[childsConverted.size()]));
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
 		
 		
@@ -328,6 +330,23 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		addMetadataTemplate(rir,locale,nodeType,props,appInfo);
 
 		return rir;
+	}
+	private KeyValue[] convertProperties(Map<String,Object> propertiesIn) {
+		List<KeyValue> propsresult = new ArrayList<KeyValue>();
+		
+		//MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getRepositoryInfoById(appId),CCConstants.metadatasetdefault_id);
+		for(Map.Entry<String,Object> entry : propertiesIn.entrySet()){
+			//MetadataWidget viewProperty = (isRemoteObject) ? null :  mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
+			if(entry.getKey() != null && entry.getValue() != null) {
+				propsresult.add(new KeyValue(entry.getKey(),entry.getValue().toString()));
+			}
+		}
+		return propsresult.toArray(new KeyValue[propsresult.size()]);	
+	}
+
+	private List<Map<String, Object>> getChildNodes(String nodeId) throws Throwable {
+		return NodeServiceHelper.getSubobjects(NodeServiceFactory.getLocalService(),nodeId);
+		
 	}
 
 	private void addMetadataTemplate(RenderInfoResult rir,String locale,String type, Map<String, Object> props,ApplicationInfo appInfo) throws Exception {

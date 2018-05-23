@@ -23,10 +23,7 @@ public class SearchToken {
 	
 	String luceneString;
 	
-	
 	List<String> facettes=null;
-
-	
 
 	String storeProtocol = "workspace";
 	
@@ -35,6 +32,12 @@ public class SearchToken {
 	int from;
 	
 	int maxResult;
+	
+	
+	/**
+	 * search in scope of authorities
+	 */
+	List<String> authorityScope;
 
 	private ContentType contentType;
 
@@ -189,6 +192,19 @@ public class SearchToken {
 		if(queryString!=null)
 			return queryString;
 		return getLuceneString();
-	}	
+	}
+	
+	/**
+	 * set the scope of authorities
+	 * security problem (only when admin permissions)
+	 * @param authorities
+	 */
+	public void setAuthorityScope(List<String> authorities) {
+		this.authorityScope = authorities;
+	}
+	
+	public List<String> getAuthorityScope() {
+		return authorityScope;
+	}
 	
 }

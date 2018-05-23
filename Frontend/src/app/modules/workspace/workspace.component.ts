@@ -87,7 +87,7 @@ export class WorkspaceMainComponent implements EventListener{
     public editNodeDeleteOnCancel = false;
     private createMds : string;
     private editNodeLicense : Node[];
-    private editNodeAllowReplace : boolean;
+    private editNodeAllowReplace : Boolean;
     private nodeDisplayedVersion : string;
     private createAllowed : boolean;
     private currentFolder : any|Node;
@@ -121,6 +121,7 @@ export class WorkspaceMainComponent implements EventListener{
     public showLtiTools=false;
     private oldParams: Params;
     private selectedNodeTree: string;
+    private nodeDebug: Node;
     private hideDialog() : void{
         this.dialogTitle=null;
     }
@@ -540,7 +541,7 @@ export class WorkspaceMainComponent implements EventListener{
     private editNode(node: Node) {
         let list=this.getNodeList(node);
         this.editNodeMetadata=list[0];
-        this.editNodeAllowReplace=true;
+        this.editNodeAllowReplace=new Boolean(true);
     }
     private editLicense(node: Node) {
         let list=this.getNodeList(node);
@@ -778,6 +779,17 @@ export class WorkspaceMainComponent implements EventListener{
         this.workflowNode=null;
         this.refresh();
     }
+    public debugNode(node:Node){
+        this.nodeDebug=this.getNodeList(node)[0];
+        /*
+        this.session.set("admin_lucene",{
+            query:'@sys\:node-uuid:"'+node.ref.id+'"',
+            offset:0,
+            count:10,
+        });
+        this.router.navigate([UIConstants.ROUTER_PREFIX,"admin"],{queryParams:{mode:'BROWSER'}});
+        */
+    }
     public getOptions(nodes : Node[],fromList:boolean) : OptionItem[] {
         if(nodes && !nodes.length)
             nodes=null;
@@ -798,7 +810,10 @@ export class WorkspaceMainComponent implements EventListener{
                 });
                 options.push(apply);
             }
-
+            if(this.isAdmin){
+                let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
+                options.push(debug);
+            }
             let open = new OptionItem("WORKSPACE.OPTION.SHOW", "remove_red_eye", (node: Node) => this.displayNode(node));
             if (!nodes[0].isDirectory)
                 options.push(open);
@@ -1110,8 +1125,6 @@ export class WorkspaceMainComponent implements EventListener{
         this.dropdownPosition = "fixed";
         this.dropdownTop = "auto";
         this.dropdownLeft = "auto";
-        this.dropdownBottom = "30px";
-        this.dropdownRight = "70px";
     }
 
     private goToLogin() {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.MD5;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.restservices.DAOException;
@@ -71,5 +72,7 @@ public interface AuthorityService {
 	boolean authorityExists(String authority);
 	Map<String, Serializable> getUserInfo(String userName) throws Exception;
 	void createOrUpdateUser(Map<String, Serializable> userInfo) throws Exception;
-	
+
+	NodeRef getAuthorityNodeRef(String authority);
+
 }

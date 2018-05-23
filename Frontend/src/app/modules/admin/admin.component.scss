@@ -1,6 +1,5 @@
 @import "../../../styles/variables.scss";
 
-
 .content{
   padding:20px;
   padding-top:$mainnavHeight + 70px;
@@ -10,6 +9,20 @@
 .tabs{
   display: flex;
   overflow-x: auto;
+}
+.inputGroupGrow{
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  >*{
+    width:0;
+    flex-grow: 1;
+    display: flex;
+    margin:0 10px;
+  }
+  >input{
+    margin-bottom: 0;
+  }
 }
 .heading{
   color:$textLight;
@@ -200,6 +213,9 @@
   .group .inputGroup{
     padding:0;
   }
+  .jobParams{
+    min-height: 80px;
+  }
   .catalina{
     label{
       position: relative;
@@ -224,12 +240,52 @@
     .btn-flat{
       float:right;
     }
-    input{
+    .cacheInfo{
       max-width: 250px;
       float:left;
     }
   }
 }
+.browser{
+  .lucenePaging{
+    max-width: 700px;
+    margin: auto;
+    a{
+      flex-grow: initial;
+      width: auto;
+    }
+  }
+  .luceneAuthorities{
+    margin-top: -40px;
+  }
+  listTable{
+    padding-top: 20px;
+  }
+}
+
+.foldertemplates {
+  max-width: 900px;
+  .btn {
+    float:right;
+    margin-top: 40px;
+  }
+  .goto-folder {
+    display: inline-block;
+    margin-top: 20px;
+  }
+  .group {
+    float: left;
+    margin-top: 60px;
+    .upload-hint{
+      display:inline-block;
+      margin-top: 10px;
+    }
+    .btn-flat {
+      margin-right: 20px;
+    }
+  }
+}
+
 .row{
   position: fixed;
   top: $mainnavHeight;

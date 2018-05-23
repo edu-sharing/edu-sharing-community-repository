@@ -169,5 +169,7 @@
 	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/webapps/solr4/WEB-INF/lib/xz-1.4.jar"/>
 	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/webapps/solr4/WEB-INF/lib/zookeeper-3.4.6.jar"/>
 	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d_2/tomcat/webapps/solr4/WEB-INF/lib/alfresco-solr4-5.0.d.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CCSearch"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/alfresco-solr4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

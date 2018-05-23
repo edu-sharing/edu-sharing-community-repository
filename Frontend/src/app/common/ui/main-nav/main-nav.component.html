@@ -19,7 +19,7 @@
     <a class="waves-effect waves-light btn" [class.disabled]="!acceptLicenseAgreement" (keyup.enter)="saveLicenseAgreement()" (click)="saveLicenseAgreement()">{{'LICENSE_AGREEMENT.ACCEPT' | translate }}</a>
   </div>
 </div>
-<div class="dialog darken" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
+<div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
   <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
@@ -79,35 +79,34 @@
       <i class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
       <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
     </div>
-    <div class="dialog" *ngIf="userOpen" (click)="userOpen=false" (keyup.enter)="userOpen=false" tabindex="0"></div>
-    <div class="userMenu collection" [@overlay]="userOpen" *ngIf="userOpen">
-      <a *ngIf="!isGuest" class="collection-item"
-         (click)="openProfile()"
-         (keyup.enter)="openProfile()"
-         tabindex="0"
-         title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
-
-      <a *ngIf="!isGuest" class="collection-item" (click)="showAddDesktop=false;logout()" (keyup.enter)="showAddDesktop=false;logout()" tabindex="0" title="{{ 'LOGOUT' | translate}}"><i class="material-icons">undo</i> {{ 'LOGOUT' | translate}}</a>
-      <a *ngIf="isGuest && !config.loginOptions" class="collection-item" (click)="showAddDesktop=false;login(true)" (keyup.enter)="showAddDesktop=false;login(true)" tabindex="0" title="{{ 'SIDEBAR.LOGIN' | translate}}"><i class="material-icons">person</i> {{ 'SIDEBAR.LOGIN' | translate}}</a>
-      <a *ngFor="let loginOption of isGuest?config.loginOptions:null" class="collection-item" tabindex="0" title="{{loginOption.name}}" href="{{loginOption.url}}">{{loginOption.name}}</a>
-    </div>
+  <dropdown class="userMenu"
+    [(show)]="userOpen"
+    [options]="userMenuOptions"
+  ></dropdown>
   <div class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
     <i class="material-icons">help_outline</i>
   </div>
-  <div class="dialog" *ngIf="helpOpen" (click)="helpOpen=false" (keyup.enter)="helpOpen=false" tabindex="0"></div>
-  <div class="helpMenu collection" [@overlay]="helpOpen" *ngIf="helpOpen">
-    <a class="collection-item" *ngIf="helpUrl"
-       (click)="showHelp(helpUrl)"
-       title="{{ 'ONLINE_HELP' | translate}}"><i class="material-icons">help_outline</i> {{ 'ONLINE_HELP' | translate}}</a>
-    <a class="collection-item"
-       (click)="showHelp(whatsNewUrl)" *ngIf="whatsNewUrl"
-       title="{{ 'WHATS_NEW' | translate}}"><i class="material-icons">lightbulb_outline</i> {{ 'WHATS_NEW' | translate}}</a>
-  </div>
+  <dropdown class="helpMenu"
+            [(show)]="helpOpen"
+            [options]="helpOptions"
+  ></dropdown>
 </div>
 <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
-
+<div class="tab-nav">
+  <div *ngFor="let button of sidebarButtons" class="button" [class.selected]="_currentScope==button.scope"
+       (click)="openButton(button)"
+       (keyup.enter)="openButton(button)"
+       [class.collection-item-seperate]="button.isSeperate"
+       [class.clickable]="!button.isDisabled"
+       [class.disabled]="button.isDisabled"
+       tabindex="0"
+       title="{{'GOTO' | translate}} {{button.name | translate}}">
+    <i *ngIf="button.icon" class="material-icons">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}"> <span>{{button.name | translate}}</span>
+  </div>
+</div>
 <search-node-store
   *ngIf="showNodeStore"
   (onClose)="setNodeStore(false)"
 ></search-node-store>
 
+<cookie-info></cookie-info>

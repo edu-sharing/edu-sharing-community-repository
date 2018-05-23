@@ -18,6 +18,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -35,6 +36,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.NotAnAdminException;
 import org.springframework.context.ApplicationContext;
 
@@ -60,6 +62,15 @@ public class AuthorityServiceImpl implements AuthorityService {
 	@Override
 	public Object getAuthorityProperty(String authority,String property){
 		return nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(property));
+	}
+	/**
+	 * returns the node id for the given authority (useful if you want to change metadata)
+	 * @param authority
+	 * @return
+	 */
+	@Override
+	public NodeRef getAuthorityNodeRef(String authority){
+		return authorityService.getAuthorityNodeRef(authority);
 	}
 	@Override
 	public void setAuthorityProperty(String authority,String property,Serializable value){
@@ -396,9 +407,9 @@ public EduGroup getEduGroup(String authority){
 	 */
 	@Override
 	public Map<String, Serializable> getUserInfo(String userName) throws Exception {
-		
+
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
+
                 new RetryingTransactionCallback<Map<String, Serializable>>()
                 {
                     public Map<String, Serializable> execute() throws Throwable
@@ -411,100 +422,100 @@ public EduGroup getEduGroup(String authority){
                 		Map<QName, Serializable> tmpProps = nodeService.getProperties(personRef);
                 		HashMap<String, Serializable> result = new HashMap<String, Serializable>();
                 		for (Map.Entry<QName, Serializable> entry : tmpProps.entrySet()) {
-                			
+
                 			Serializable value = entry.getValue();
-                			
+
                 			result.put(
-                					entry.getKey().toString(), 
+                					entry.getKey().toString(),
                 					value);
                 		}
                 		return result;
                     }
-                }, true); 
-		
-		
-			
+                }, true);
+
+
+
 		}
 		@Override
 		public void createOrUpdateUser(Map<String, Serializable> userInfo) throws Exception {
-			
+
 			String currentUser = AuthenticationUtil.getRunAsUser();
-			
+
 			if(userInfo == null){
 				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
 			}
-			
+
 			String userName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
 			String firstName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
 			String lastName = (String) userInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
 			String email = (String) userInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-			
+
 			if(userName == null || userName.trim().equals("")){
 				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_USERNAME);
 			}
-			
+
 			if(firstName == null || firstName.trim().equals("")){
 				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_FIRSTNAME);
 			}
-			
+
 			if(lastName == null || lastName.trim().equals("")){
 				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_LASTNAME);
 			}
-			
+
 			if(email == null || email.trim().equals("")){
 				throw new PropertyRequiredException(CCConstants.CM_PROP_PERSON_EMAIL);
 			}
-			
+
 			if (!currentUser.equals(userName) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
 				throw new NotAnAdminException();
 			}
-			
+
 			PersonService personService = serviceRegistry.getPersonService();
-			
+
 			serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-					
+
 		        new RetryingTransactionCallback<Void>()
 		        {
 		            public Void execute() throws Throwable
 		            {
 		        		Throwable runAs = AuthenticationUtil.runAs(
-		        				
+
 		    				new AuthenticationUtil.RunAsWork<Throwable>() {
-		    					
+
 		    					@Override
 		    					public Throwable doWork() throws Exception {
-		    						
+
 		    						try {
-		    							
+
 		    	                    	if (personService.personExists(userName)) {
-		    	                			
+
 		    	                			personService.setPersonProperties(userName, transformQName(userInfo));
-		    	                			
+
 		    	                		} else {
-		    	                			
+
 		    	                			personService.createPerson(transformQName(userInfo));
 		    	                		}
 		    	                    	addUserExtensionAspect(userName);
-		
+
 		    						} catch (Throwable e) {
 		    							logger.error(e.getMessage(), e);
 		    							return e;
 		    						}
-		    						
+
 		    						return null;
 		    					}
 
-		    				}, 
+		    				},
 		    				ApplicationInfoList.getHomeRepository().getUsername());
-		        		
+
 		        		if (runAs != null) {
 		        			throw runAs;
 		        		}
-		        		
+
 		        		return null;
 		            }
-		            
-		        }, 
+
+		        },
 		        false);
 		}
 		private void addUserExtensionAspect(String userName) {

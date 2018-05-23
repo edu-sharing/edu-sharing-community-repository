@@ -19,6 +19,21 @@ export class WorkspaceFileUploadSelectComponent  {
   public chooseParent=false;
   @ViewChild('fileSelect') file : ElementRef;
   @ViewChild('link') link : ElementRef;
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   */
+  @Input() priority = 0;
+  /**
+   * Allow multiple files uploaded
+   * @type {boolean}
+   */
+  @Input() multiple = true;
+  /**
+   * Should this widget display that it supports dropping
+   * @type {boolean}
+   */
+  @Input() supportsDrop = true;
   @Input() isFileOver=false;
   @Input() showPicker=false;
   private breadcrumbs: Node[];

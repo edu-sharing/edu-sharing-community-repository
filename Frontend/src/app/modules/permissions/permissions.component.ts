@@ -1,4 +1,4 @@
-import {Component, ViewChild, ElementRef, style, animate, transition, trigger} from '@angular/core';
+import {Component, ViewChild, ElementRef} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {
