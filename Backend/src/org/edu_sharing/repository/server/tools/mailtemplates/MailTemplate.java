@@ -49,7 +49,7 @@ public class MailTemplate {
 	public static String generateContentLink(ApplicationInfo appInfo,String nodeId) throws Throwable{
 		NodeService nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());
 		String mime=MimeTypesV2.getMimeType(nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
-		if(mime.equals(MimeTypesV2.MIME_DIRECTORY)){
+		if(mime != null && mime.equals(MimeTypesV2.MIME_DIRECTORY)){
 			return URLTool.getNgComponentsUrl()+"workspace/?id="+nodeId; 
 		}
 		return 	URLTool.getNgComponentsUrl()+"render/"+nodeId+"?closeOnBack=true"; 	
