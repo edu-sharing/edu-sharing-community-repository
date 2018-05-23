@@ -63,9 +63,11 @@ import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 
 export class SearchComponent {
   public initalized:boolean;
+  public tutorialElement:ElementRef;
   @ViewChild('mds') mdsRef: MdsComponent;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('managementDialogs') managementDialogs : WorkspaceManagementDialogsComponent;
+  @ViewChild('extendedSearch') extendedSearch : ElementRef;
   public mdsSuggestions:any={}
   public mdsExtended=false;
   public sidenavTab=0;
@@ -185,6 +187,7 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
+    //this.tutorialElement = this.extendedSearch;
     this.searchService.clear();
     this.initalized=true;
     if(this.searchService.reinit){
