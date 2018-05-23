@@ -8,12 +8,14 @@ import {RestConstants} from "../rest-constants";
 import {
     NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList,
     NodePermissionsHistory,
-    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent
+    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent, Node
 } from "../data-object";
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
 import {AbstractRestService} from "./abstract-rest-service";
+import {Helper} from "../../helper";
+import {Observer} from "rxjs/index";
 
 @Injectable()
 export class RestNodeService extends AbstractRestService{
@@ -553,5 +555,24 @@ export class RestNodeService extends AbstractRestService{
       ]);
       return this.connector.get(query,this.connector.getRequestOptions())
           .map((response: Response) => response.json());
+  }
+
+    /**
+     * Helper function to retrieve all childobjects of an io
+     * @param {string} nodeId
+     * @param {string} repository
+     * @returns {Observable<NodeList>}
+     */
+  public getNodeChildobjects(nodeId:string,repository=RestConstants.HOME_REPOSITORY){
+      return new Observable<NodeList>((observer : Observer<NodeList>)=>{
+          this.getChildren(nodeId,[],{count:RestConstants.COUNT_UNLIMITED,propertyFilter:[RestConstants.ALL],sortBy:[RestConstants.CCM_PROP_CHILDOBJECT_ORDER],sortAscending:[true]},repository).subscribe((childs:NodeList)=>{
+          childs.nodes = Helper.filterArray(childs.nodes,'type',RestConstants.CCM_TYPE_IO);
+          observer.next(childs);
+          observer.complete();
+      },(error:any)=>{
+          observer.error(error);
+          observer.complete();
+          });
+      });
   }
 }

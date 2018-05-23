@@ -167,8 +167,8 @@ export class MdsComponent{
                 // test a widget
                 //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
                 //data.views[0].html+="<test>";
-                this.node.getChildren(nodeId,[],{propertyFilter:[RestConstants.ALL],sortBy:[RestConstants.CCM_PROP_CHILDOBJECT_ORDER],sortAscending:[true]}).subscribe((childs:NodeList)=>{
-                  this.currentChildobjects = Helper.filterArray(childs.nodes,'type',RestConstants.CCM_TYPE_IO);
+                this.node.getNodeChildobjects(nodeId).subscribe((childs:NodeList)=>{
+                  this.currentChildobjects = childs.nodes;
                   console.log(this.currentChildobjects);
                     this.locator.getConfigVariables().subscribe((variables:string[])=> {
                         this.mds = data;
