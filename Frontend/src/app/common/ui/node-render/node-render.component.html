@@ -23,12 +23,31 @@
   <div class="next clickable" *ngIf="canSwitchForward()" (click)="switchPosition(getPosition()+1)"><i class="material-icons">keyboard_arrow_right</i></div>
 </div>
 <div class="alignWithBanner">
-  <div id="nodeRenderContent" [class.hide]="isLoading" ng-touchevent
-     (ngSwipeRight)="canSwitchBack() ? switchPosition(getPosition()-1) : null"
-     (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition()+1) : null">
-  </div>
-  <div class="nodeRenderLoading" *ngIf="isLoading">
-    <spinner></spinner>
+  <div id="nodeRenderContentWrapper">
+    <div *ngIf="sequence" id="sequence" #sequencediv>
+        <div class="wrapperouter clickable" (click)="node=sequenceParent">
+          {{sequenceParent.title}}
+          <div class="wrapper" [class.selected]="_nodeId==sequenceParent.ref.id">
+            <img src="{{sequenceParent.preview.url}}&crop=true&width=100&height=75">
+          </div>
+        </div>
+        <div *ngFor="let item of sequence.nodes" class="wrapperouter clickable" (click)="node=item">
+          {{item.name}}
+          <div class="wrapper" [class.selected]="_nodeId==item.ref.id">
+            <img src="{{item.preview.url}}&crop=true&width=100&height=75">
+          </div>
+        </div>
+      <div class="scroller left clickable" *ngIf="canScrollLeft" (click)="scroll('left')" id="left"><i class="material-icons">keyboard_arrow_left</i></div>
+      <div class="scroller right clickable" *ngIf="canScrollRight" (click)="scroll('right')" id="right"><i class="material-icons">keyboard_arrow_right</i></div>
+    </div>
+
+    <div id="nodeRenderContent" [class.hide]="isLoading" ng-touchevent
+       (ngSwipeRight)="canSwitchBack() ? switchPosition(getPosition()-1) : null"
+       (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition()+1) : null">
+    </div>
+    <div class="nodeRenderLoading" *ngIf="isLoading">
+      <spinner></spinner>
+    </div>
   </div>
 </div>
 
