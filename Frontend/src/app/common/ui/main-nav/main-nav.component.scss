@@ -324,9 +324,14 @@ user-profile{
   .sidenav,.dialog-sidenav{
     display: none;
   }
+  .topBar{
+    .nodeStore, .help{
+      display: none;
+    }
+  }
   .tab-nav{
     position:fixed;
-    z-index: $dialogZIndex - 1;
+    z-index: 20;
     width:100%;
     bottom:0;
     display:flex;

@@ -5,6 +5,7 @@
  this.options.push(new OptionItem("DELETE_SINGLE","archiveDelete", (node) => this.deleteSingle(node)));
 
  */
+
 export class OptionItem {
   /**
    * If true, this option will be shown all the time in the node table
@@ -37,7 +38,7 @@ export class OptionItem {
    */
   public onlyMobile = false;
   /**
-   * You can set a media-query similar to CSS, see the MEDIA_QUERY constants in ui-helper
+   * You can set a media-query similar to CSS, see the MEDIA_QUERY constants in ui-constants
    * Use in combination with mediaQueryValue
    * @type {boolean}
    */
@@ -73,26 +74,5 @@ export class OptionItem {
    * @param callback A function callback when this option is choosen. Will get the current node passed as an argument
    */
   constructor(public name: string, public icon: string, public callback: Function) {
-  }
-
-  static filterValidOptions(ui: any, options: OptionItem[]) {
-    if(options==null)
-      return null;
-    let optionsFiltered:OptionItem[]=[];
-    for(let option of options){
-      if(!option.onlyMobile || option.onlyMobile && ui.isMobile())
-        optionsFiltered.push(option);
-      else if(!option.mediaQueryType || option.mediaQueryType && ui.evaluateMediaQuery(option.mediaQueryType,option.mediaQueryValue))
-        optionsFiltered.push(option);
-    }
-    return optionsFiltered;
-  }
-  static filterToggleOptions(options: OptionItem[],toggle:boolean) {
-    let result:OptionItem[]=[];
-    for(let option of options){
-      if(option.isToggle==toggle)
-        result.push(option);
-    }
-    return result;
   }
 }

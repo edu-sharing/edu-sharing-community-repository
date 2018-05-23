@@ -76,22 +76,10 @@
       <i class="material-icons barIcon iconPerson">account_circle</i>
     </div>
     <div class="dialog" *ngIf="userOpen" (click)="userOpen=false" (keyup.enter)="userOpen=false" tabindex="0"></div>
-    <div class="userMenu collection" [@overlay]="userOpen" *ngIf="userOpen">
-      <a *ngIf="editUrl && !isGuest" class="collection-item"
-         (click)="editProfile()"
-         (keyup.enter)="editProfile()"
-         tabindex="0"
-         title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
-      <a *ngIf="showEditProfile && canEditProfile && !editUrl && !isGuest" class="collection-item"
-         (click)="openProfileDialog()"
-         (keyup.enter)="openProfileDialog()"
-         tabindex="0"
-         title="{{ 'EDIT_ACCOUNT' | translate}}"><i class="material-icons">assignment_ind</i> {{ 'EDIT_ACCOUNT' | translate}}</a>
-
-      <a *ngIf="!isGuest" class="collection-item" (click)="showAddDesktop=false;logout()" (keyup.enter)="showAddDesktop=false;logout()" tabindex="0" title="{{ 'LOGOUT' | translate}}"><i class="material-icons">undo</i> {{ 'LOGOUT' | translate}}</a>
-      <a *ngIf="isGuest && !config.loginOptions" class="collection-item" (click)="showAddDesktop=false;login(true)" (keyup.enter)="showAddDesktop=false;login(true)" tabindex="0" title="{{ 'SIDEBAR.LOGIN' | translate}}"><i class="material-icons">person</i> {{ 'SIDEBAR.LOGIN' | translate}}</a>
-      <a *ngFor="let loginOption of isGuest?config.loginOptions:null" class="collection-item" tabindex="0" title="{{loginOption.name}}" href="{{loginOption.url}}">{{loginOption.name}}</a>
-    </div>
+  <dropdown class="userMenu"
+    [(show)]="userOpen"
+    [options]="userMenuOptions"
+  ></dropdown>
   <div class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
     <i class="material-icons">help_outline</i>
   </div>

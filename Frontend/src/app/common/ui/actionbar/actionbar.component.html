@@ -1,4 +1,3 @@
-<div class="dialog dialogOptions" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false"></div>
 <dropdown [(show)]="dropdown"
           [callbackObject]="node"
           [options]="optionsMenu"></dropdown>

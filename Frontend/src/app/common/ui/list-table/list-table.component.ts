@@ -101,7 +101,7 @@ export class ListTableComponent implements EventListener{
    * @param options
    */
   @Input() set options(options : OptionItem[]){
-    options=OptionItem.filterValidOptions(this.ui,options);
+    options=UIHelper.filterValidOptions(this.ui,options);
     this._options=[];
     if(!options)
       return;

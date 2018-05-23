@@ -1,3 +1,4 @@
+<div class="dialog dialogOptions" *ngIf="_show" (contextmenu)="hide();$event.preventDefault();$event.stopPropagation();" (click)="hide()"></div>
 <div class="collectionContainer"
      #dropdownContainer
      [@openOverlay]="_show" *ngIf="_show" (contextmenu)="hide();$event.preventDefault();$event.stopPropagation();" (click)="hide()">

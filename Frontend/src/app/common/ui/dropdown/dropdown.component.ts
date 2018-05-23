@@ -32,7 +32,7 @@ export class DropdownComponent{
   };
   @Output() showChange=new EventEmitter();
   @Input() set options(options:OptionItem[]) {
-    this._options = OptionItem.filterValidOptions(this.ui,Helper.deepCopyArray(options));
+    this._options = UIHelper.filterValidOptions(this.ui,Helper.deepCopyArray(options));
   }
 
   /**
