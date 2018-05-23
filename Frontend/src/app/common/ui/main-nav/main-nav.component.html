@@ -19,7 +19,7 @@
     <a class="waves-effect waves-light btn" [class.disabled]="!acceptLicenseAgreement" (keyup.enter)="saveLicenseAgreement()" (click)="saveLicenseAgreement()">{{'LICENSE_AGREEMENT.ACCEPT' | translate }}</a>
   </div>
 </div>
-<div class="dialog darken" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
+<div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
   <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
@@ -106,7 +106,18 @@
   </div>
 </div>
 <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
-
+<div class="tab-nav">
+  <div *ngFor="let button of sidebarButtons" class="button" [class.selected]="_currentScope==button.scope"
+       (click)="openButton(button)"
+       (keyup.enter)="openButton(button)"
+       [class.collection-item-seperate]="button.isSeperate"
+       [class.clickable]="!button.isDisabled"
+       [class.disabled]="button.isDisabled"
+       tabindex="0"
+       title="{{'GOTO' | translate}} {{button.name | translate}}">
+    <i *ngIf="button.icon" class="material-icons">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}"> <span>{{button.name | translate}}</span>
+  </div>
+</div>
 <search-node-store
   *ngIf="showNodeStore"
   (onClose)="setNodeStore(false)"

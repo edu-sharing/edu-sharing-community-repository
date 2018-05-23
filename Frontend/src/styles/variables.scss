@@ -43,6 +43,8 @@ $mobileHeightWithKeyboard:   550px;
 // this factor should be multiplied by a natural number, e.g. *3 means stage 3 (relatively early)
 $mobileStage:   100px;
 $dialogZIndex: 120;
+$mobileTabSwitchWidth:   $mobileWidth+$mobileStage*2;
+$mobileTabNavHeight:62px;
 
 // for variable overrides, include it again
 @import "branding";

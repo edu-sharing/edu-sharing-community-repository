@@ -1125,8 +1125,6 @@ export class WorkspaceMainComponent implements EventListener{
         this.dropdownPosition = "fixed";
         this.dropdownTop = "auto";
         this.dropdownLeft = "auto";
-        this.dropdownBottom = "30px";
-        this.dropdownRight = "70px";
     }
 
     private goToLogin() {
