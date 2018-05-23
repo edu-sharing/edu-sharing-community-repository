@@ -77,14 +77,73 @@ a, a:hover, a:visited, a:active {
   padding-top: 12px;
 }
 
-#nodeRenderContent,.nodeRenderLoading {
+#nodeRenderContentWrapper {
   background: #666;
-  height: auto;
   position: absolute;
   top:$mainnavHeight;
   width:100%;
+  height: calc(100% - #{$mainnavHeight});
+}
+
+#nodeRenderContent,.nodeRenderLoading {
+  height: auto;
+  position: relative;
+  width:100%;
   overflow-x: hidden;
 }
+
+#sequence {
+  padding: 30px 20px;
+  min-width: 100%;
+  text-align: center;
+  overflow:hidden;
+  position:relative;
+  white-space: nowrap;
+  .wrapperouter {
+    display: inline-block;
+    position:relative;
+    margin: 0 10px;
+  .wrapper {
+    border: 3px solid transparent;
+    img {
+      margin-bottom: -5px;
+      height: 75px;
+      width: 100px;
+      @include materialShadow();
+    }
+  }
+  .wrapper.selected {
+    border: 3px solid $primaryMediumLight;
+  }
+  .wrapper.selected:after {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 75px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid $primaryMediumLight;
+    clear: both;
+  }
+  .scroller {
+    position: fixed;
+    top: calc(60px + #{$mainnavHeight});
+    padding: 5px 10px;
+    background: #000;
+    color: #fff;
+  }
+  .scroller.left {
+    left: 0;
+  }
+  .scroller.right {
+    right: 0;
+  }
+  }
+}
+
+
 .nodeRenderLoading{
   height: calc(100% - #{$mainnavHeight});
   overflow: hidden;
