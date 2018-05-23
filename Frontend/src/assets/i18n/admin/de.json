@@ -9,7 +9,9 @@
       "APPLICATIONS":"Quellen",
       "UPDATE":"Server Update",
       "IMPORT":"Import",
-      "TOOLKIT":"Tool Kit"
+      "TOOLKIT":"Tool Kit",
+      "BROWSER":"Browser",
+      "FOLDERTEMPLATES": "Ordnervorlagen"
     },
     "APPLICATIONS":{
       "URL":"Url",
@@ -116,7 +118,31 @@
       "UPLOAD_TEMP":"Dateien in temporäres Verzeichnis hochladen",
       "CHOOSE_UPLOAD_TEMP":"Datei wählen",
       "UPLOAD_TEMP_START":"Hochladen",
-      "UPLOAD_TEMP_DONE":"Datei wurde unter {{filename}} auf dem Server abgelegt"
+      "UPLOAD_TEMP_DONE":"Datei wurde unter {{filename}} auf dem Server abgelegt",
+      "JOB_CLASS":"Klassenname der Job-Klasse:",
+      "JOB_STARTED":"Der Job wurde gestartet. Überprüfen Sie die catalina.out für den Status",
+      "START_JOB":"Job ausführen"
+    },
+    "BROWSER":{
+      "LUCENE_SEARCH":"Suche via Lucene",
+      "LUCENE_QUERY":"Lucene-Query:",
+      "LUCENE_AUTHORITIES":"Suchen als folgende Authorities:",
+      "LUCENE_OFFSET":"Start bei:",
+      "LUCENE_COUNT":"Anzahl Treffer:",
+      "LUCENE_START":"Suchen",
+      "ADD_AUTHORITY":"Authority suchen..."
+    },
+    "FOLDERTEMPLATES":{
+      "EDUGROUP": "Organisation",
+      "APPLYTEMPLATE": "Ordnervorlage anwenden",
+      "UPLOAD_DONE":"Ordnervorlage wurde unter {{filename}} auf dem Server abgelegt.",
+      "MISSING_GROUP":"Es muss mindestens eine Organisation gewählt werden.",
+      "MISSING_TEMPLATE":"Es muss eine Ordnervorlage gewählt werden.",
+      "TEMPLATE_APPLIED":"Vorlage {{templatename}} wurde für {{groupname}} angewandt.",
+      "TEMPLATE_NOTAPPLIED":"Ordnervorlage {{templatename}} konnte nicht für {{groupname}} angewandt werden. Prüfen Sie die Ordnervorlage auf Richtigkeit.",
+      "UPLOAD_HINT":"Sie können weitere Ordnervorlagen hochladen und anschließend auswählen.",
+      "UPLOAD_TEMPLATE":"Neue Ordnervorlage hochladen",
+      "GOTO_FOLDERTEMPLATES":"Ordnervorlagen verwalten"
     }
   }
 }

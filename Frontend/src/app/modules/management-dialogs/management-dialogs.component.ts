@@ -15,6 +15,8 @@ import {UIAnimation} from "../../common/ui/ui-animation";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 import {Router} from '@angular/router';
+import {UIConstants} from "../../common/ui/ui-constants";
+import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
 
 @Component({
   selector: 'workspace-management',
@@ -52,7 +54,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() nodeMetadataChange = new EventEmitter();
   @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
-  @Input() nodeMetadataAllowReplace : boolean;
+  @Input() nodeMetadataAllowReplace : Boolean;
   @Output() onClose=new EventEmitter();
   @Output() onCreate=new EventEmitter();
   @Output() onRefresh=new EventEmitter();
@@ -127,6 +129,7 @@ export class WorkspaceManagementDialogsComponent  {
   public constructor(
     private nodeService:RestNodeService,
     private toolService:RestToolService,
+    private temporaryStorage:TemporaryStorageService,
     private collectionService:RestCollectionService,
     private translate:TranslateService,
     private config:ConfigurationService,
@@ -277,6 +280,11 @@ export class WorkspaceManagementDialogsComponent  {
     this.addToCollection=null;
     this.addToCollectionChange.emit(null);
     this.onCloseAddToCollection.emit();
+  }
+  public addToCollectionCreate(){
+      this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES,this.addToCollection);
+      this.router.navigate([UIConstants.ROUTER_PREFIX,"collections","collection","new",RestConstants.ROOT]);
+      this.cancelAddToCollection();
   }
   public addToCollectionList(collection:Collection,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
     console.log(collection);

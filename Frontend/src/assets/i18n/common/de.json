@@ -118,6 +118,17 @@
   "WRONG_PASSWORD":"Das angegebene Passwort ist ungültig",
   "PASSWORD_MIN_LENGTH":"Das Passwort muss mindestens {{length}} Zeichen lang sein",
   "PASSWORD_NOT_MATCH":"Die Passwörter stimmen nicht überein",
+  "LEARNINGAGE_YEAR":"Jahre",
+  "NODE_INFO":{
+    "TITLE":"Node \"{{name}}\"",
+    "LOCATION":"Pfad zum Element",
+    "NODE_ASPECTS":"Aspekte",
+    "NODE_PROPERTIES":"Properties",
+    "NODE_TYPE":"Objekttyp",
+    "JSON":"Gesamtes Objekt",
+    "CHILDREN":"Children",
+    "CHILDREN_NONE":"Dieses Element besitzt keine Child Objekte"
+  },
   "SIDEBAR":{
     "WORKSPACE_OLD":"Klassischer Workspace",
     "WORKSPACE":"Workspace",
@@ -165,6 +176,12 @@
     "COPYRIGHT_LICENSE":"Copyright, lizenzpflichtig",
     "SCHULFUNK":"Schulfunk (§47 UrhG)",
     "CUSTOM":"Benutzerdefinierte Lizenz"
+  },
+  "COOKIE_INFO":{
+    "DESCRIPTION":"edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren, diese Seite zu verwenden, nehmen wir an, dass Sie damit einverstanden sind.",
+    "MORE_LINK":"Weitere Informationen",
+    "DIALOG_TITLE":"Cookies",
+    "DIALOG_MESSAGE":"Die Internetseiten verwenden teilweise so genannte Cookies. Cookies richten auf Ihrem Rechner keinen Schaden an und enthalten keine Viren.\nCookies dienen dazu, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.\nCookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Die meisten der von uns verwendeten Cookies sind so genannte \"Session-Cookies\". Sie werden nach Ende Ihres Besuchs automatisch gelöscht. Andere Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese löschen.\nDiese Cookies ermöglichen es uns, Ihren Browser beim nächsten Besuch wiederzuerkennen.\nSie können Ihren Browser so einstellen, dass Sie über das Setzen von Cookies informiert werden und Cookies nur im Einzelfall erlauben, die Annahme von Cookies für bestimmte Fälle oder generell ausschließen sowie das automatische Löschen der Cookies beim Schließen des Browser aktivieren.\nBei der Deaktivierung von Cookies kann die Funktionalität dieser Website eingeschränkt sein."
   },
   "NODE_REPORT":{
     "TITLE":"Problem melden",
@@ -220,6 +237,7 @@
     "file-powerpoint":"Präsentation",
     "file-zip":"Zip-Datei",
     "file-script":"Skript",
+    "file-xml":"XML-Datei",
     "file-xml":"XML-Datei",
     "file-audio":"Audio",
     "file-txt":"Textdatei",
@@ -319,7 +337,9 @@
     "LICENSE_LINK":"Lizenz verwalten",
     "CONTRIBUTOR_LINK":"Weitere Beteiligte",
     "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
-    "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern"
+    "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern",
+    "ADD_CHILD_OBJECT":"Weitere Materialien hinzufügen",
+    "ADD_CHILD_OBJECT_DESCRIPTION":"Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen"
   },
   "SHARE_APP":{
     "TEXT_SNIPPET":"Notiz",

@@ -2,8 +2,9 @@ import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges} from '@an
 import {TranslateService} from "@ngx-translate/core";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {NodeHelper} from "../node-helper";
-import {IamAuthorities} from "../../rest/data-object";
+import {Authority, IamAuthorities} from "../../rest/data-object";
 import {RestIamService} from "../../rest/services/rest-iam.service";
+import {RestConstants} from "../../rest/rest-constants";
 
 @Component({
   selector: 'authority-search-input',
@@ -15,6 +16,11 @@ import {RestIamService} from "../../rest/services/rest-iam.service";
 export class AuthoritySearchInputComponent{
   public authoritySuggestions : SuggestItem[];
   @Input() globalSearch = false;
+  /**
+   * Do allow any entered authority (not recommended for general use)
+   * @type {boolean}
+   */
+  @Input() allowAny = false;
   @Input() disabled = false;
   @Input() maxSuggestions = 10;
   @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
@@ -22,6 +28,12 @@ export class AuthoritySearchInputComponent{
   private lastSuggestionSearch: string;
   public addSuggestion(data: any) {
     this.onChooseAuthority.emit(data.item.originalObject)
+  }
+  public addAny(data:string){
+    let authority=new Authority();
+    authority.authorityName=data;
+    authority.authorityType=RestConstants.AUTHORITY_TYPE_UNKNOWN;
+    this.onChooseAuthority.emit(authority);
   }
   constructor(private iam : RestIamService){
 

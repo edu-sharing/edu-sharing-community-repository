@@ -9,6 +9,10 @@
               [buttons]="warningButtons"
               [isCancelable]="false"
 ></modal-dialog>
+<node-info *ngIf="nodeInfo"
+    [node]="nodeInfo"
+    (onClose)="nodeInfo=null"
+></node-info>
 <modal-dialog
 [title]="dialogTitle"
 [message]="dialogMessage"
@@ -49,6 +53,12 @@
       </li>
       <li class="clickable tab col s3" (click)="setTab('TOOLKIT')">
         <a [class.active]="tab=='TOOLKIT'" >{{'ADMIN.TAB.TOOLKIT' | translate}}</a>
+      </li>
+      <li class="clickable tab col s3" (click)="setTab('BROWSER')">
+        <a [class.active]="tab=='BROWSER'" >{{'ADMIN.TAB.BROWSER' | translate}}</a>
+      </li>
+      <li class="clickable tab col s3" (click)="setTab('FOLDERTEMPLATES')">
+        <a [class.active]="tab=='FOLDERTEMPLATES'" >{{'ADMIN.TAB.FOLDERTEMPLATES' | translate}}</a>
       </li>
     </ul>
   </div>
@@ -223,8 +233,19 @@
   <div class="heading"><i class="material-icons">cached</i><span>{{'ADMIN.TOOLKIT.CACHE_INFO' | translate}}</span></div>
   <div class="group">
     <form (ngSubmit)="getCacheInfo()">
-      <input type="text" name="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
+      <input type="text" name="cacheInfo" class="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
       <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
+    </form>
+  </div>
+  <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
+  <div class="group">
+    <form (ngSubmit)="startJob()">
+      <div class="inputGroupGrow">
+        <div class="info">{{'ADMIN.TOOLKIT.JOB_CLASS' | translate }}</div>
+        <input type="text" name="jobClass" [(ngModel)]="job.class" placeholder="org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob">
+      </div>
+      <textarea name="jobParams" class="jobParams" [(ngModel)]="job.params" placeholder='{"param1":"value1","param2":"value2"}'></textarea>
+      <div class="btn-flat btn-shadow" (click)="startJob()">{{'ADMIN.TOOLKIT.START_JOB' | translate }}</div>
     </form>
   </div>
   <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
@@ -240,6 +261,74 @@
   <div class="group catalina">
     <div class="btn-flat btn-shadow" (click)="refreshCatalina()"><i class="material-icons">refresh</i></div>
     <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
+  </div>
+</div>
+<div *ngIf="tab=='BROWSER'" class="content browser">
+  <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.LUCENE_SEARCH' | translate}}</span></div>
+  <div class="group">
+    <div class="inputGroupGrow">
+      <div class="info">{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</div>
+      <input type="text" name="luceneQuery" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'>
+    </div>
+    <div class="inputGroupGrow">
+      <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
+      <authority-search-input [globalSearch]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></authority-search-input>
+    </div>
+    <div class="inputGroupGrow luceneAuthorities" *ngIf="lucene.authorities && lucene.authorities.length">
+        <div></div>
+        <div>
+          <div class="badge" *ngFor="let authority of lucene.authorities">
+            <span>{{authority | authorityName}}</span>
+            <i class="material-icons clickable" tabindex="0" (keyup.enter)="authority(permission)" (click)="removeLuceneAuthority(authority)">cancel</i>
+          </div>
+        </div>
+    </div>
+  <div class="inputGroupGrow lucenePaging">
+      <div class="info">{{'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</div>
+      <input type="number" name="luceneOffset" [(ngModel)]="lucene.offset">
+      <div class="info">{{'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</div>
+      <input type="number" name="luceneCount" [(ngModel)]="lucene.count">
+      <a class="btn waves-effect waves-light" (click)="searchLucene()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
+  </div>
+  <div>
+      <listTable
+              [viewType]="0"
+              [columns]="searchColumns"
+              [hasHeading]="true"
+              [nodes]="luceneNodes"
+              [hasIcon]="true"
+              [isClickable]="true"
+              (clickRow)="debugNode($event)"
+      ></listTable>
+  </div>
+  </div>
+</div>
+<div *ngIf="tab=='FOLDERTEMPLATES'" class="content foldertemplates">
+  <form (ngSubmit)="applyTemplate()">
+    <autocomplete
+            [id]="eduGroup"
+            [inputMinLength]="2"
+            (addItem)="addEduGroup($event)"
+            [placeholder]="'ADMIN.FOLDERTEMPLATES.EDUGROUP'"
+            [suggestions]="eduGroupSuggestions"
+            (updateInput)="updateEduGroupSuggestions($event)"
+    ></autocomplete>
+    <div class="eduGroupsSelected">
+      <div class="badge" *ngFor="let eduGroup of eduGroupsSelected">
+        <span>{{eduGroup.title}}</span>
+        <i class="material-icons clickable" (click)="removeEduGroup(eduGroup)">cancel</i>
+      </div>
+    </div>
+    <select [(ngModel)]="selectedTemplate" name="template">
+      <option *ngFor="let option of templates">{{ option }}</option>
+    </select>
+    <a class="goto-folder clickable" (click)="gotoFoldertemplateFolder()">{{'ADMIN.FOLDERTEMPLATES.GOTO_FOLDERTEMPLATES' | translate }}</a>
+    <div class="btn btn-shadow" (click)="applyTemplate()">{{'ADMIN.FOLDERTEMPLATES.APPLYTEMPLATE' | translate }}</div>
+  </form>
+  <div class="group">
+    <input #templateSelect type="file" style="display:none" id="templateSelect" accept="application/xml" (change)="uploadTemplate($event)" />
+    <div class="btn-flat btn-shadow btnXml" (click)="templateSelect.click()">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_TEMPLATE' | translate}}</div>
+    <div class="upload-hint">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_HINT' | translate}}</div>
   </div>
 </div>
 <global-progress *ngIf="globalProgress"></global-progress>

@@ -32,6 +32,7 @@
   [title]="'WORKSPACE.SELECT_COLLECTION'"
   (onCancel)="closeAddToCollection()"
   (onDrop)="addToCollectionList($event.target,$event.source,false)"
+  (onCreateCollection)="addToCollectionCreate()"
   (onChoose)="addToCollectionList($event)"
 ></collection-chooser>
 <workspace-lti-tools *ngIf="showLtiTools"

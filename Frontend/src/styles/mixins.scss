@@ -25,6 +25,9 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: $N; /* number of lines to show */
 }
+@mixin fadeRight($color,$position){
+  background: linear-gradient(to right,rgba(red($color),green($color),blue($color),0.001) 0,$color $position);
+}
 @mixin unselectableText(){
   cursor: default;
   user-select: none;

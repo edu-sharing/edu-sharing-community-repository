@@ -2,6 +2,7 @@ package org.edu_sharing.webservices.render;
 
 import java.util.List;
 
+import org.edu_sharing.webservices.types.Child;
 import org.edu_sharing.webservices.types.KeyValue;
 import org.edu_sharing.webservices.usage.UsageResult;
 
@@ -32,6 +33,7 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	
 	KeyValue[] labels;
 	
+	Child[] childs;
 	
 	String previewUrl;
 	
@@ -195,4 +197,14 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
     public String getEduSchoolPrimaryAffiliation() {
 		return eduSchoolPrimaryAffiliation;
 	}
+
+	public Child[] getChilds() {
+		return childs;
+	}
+
+	public void setChilds(Child[] childs) {
+		this.childs = childs;
+	}
+    
+    
 }

@@ -32,6 +32,28 @@ public class AuthenticationSoapBindingSkeleton implements org.edu_sharing.webser
         org.apache.axis.description.ParameterDesc [] _params;
         _params = new org.apache.axis.description.ParameterDesc [] {
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "applicationId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "email"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "ticket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "createUser"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"), boolean.class, false, false), 
+        };
+        _oper = new org.apache.axis.description.OperationDesc("authenticateByApp", _params, new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByAppReturn"));
+        _oper.setReturnType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationResult"));
+        _oper.setElementQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByApp"));
+        _oper.setSoapAction("");
+        _myOperationsList.add(_oper);
+        if (_myOperations.get("authenticateByApp") == null) {
+            _myOperations.put("authenticateByApp", new java.util.ArrayList());
+        }
+        ((java.util.List)_myOperations.get("authenticateByApp")).add(_oper);
+        _fault = new org.apache.axis.description.FaultDesc();
+        _fault.setName("AuthenticationException");
+        _fault.setQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "fault"));
+        _fault.setClassName("org.edu_sharing.webservices.authentication.AuthenticationException");
+        _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
+        _oper.addFault(_fault);
+        _params = new org.apache.axis.description.ParameterDesc [] {
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "applicationId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "ticket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "ssoData"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "KeyValue"), org.edu_sharing.webservices.types.KeyValue[].class, false, false), 
         };
@@ -89,28 +111,6 @@ public class AuthenticationSoapBindingSkeleton implements org.edu_sharing.webser
         _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
         _oper.addFault(_fault);
         _params = new org.apache.axis.description.ParameterDesc [] {
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "applicationId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "email"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "ticket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "createUser"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"), boolean.class, false, false), 
-        };
-        _oper = new org.apache.axis.description.OperationDesc("authenticateByApp", _params, new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByAppReturn"));
-        _oper.setReturnType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationResult"));
-        _oper.setElementQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByApp"));
-        _oper.setSoapAction("");
-        _myOperationsList.add(_oper);
-        if (_myOperations.get("authenticateByApp") == null) {
-            _myOperations.put("authenticateByApp", new java.util.ArrayList());
-        }
-        ((java.util.List)_myOperations.get("authenticateByApp")).add(_oper);
-        _fault = new org.apache.axis.description.FaultDesc();
-        _fault.setName("AuthenticationException");
-        _fault.setQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "fault"));
-        _fault.setClassName("org.edu_sharing.webservices.authentication.AuthenticationException");
-        _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
-        _oper.addFault(_fault);
-        _params = new org.apache.axis.description.ParameterDesc [] {
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "password"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
         };
@@ -138,6 +138,12 @@ public class AuthenticationSoapBindingSkeleton implements org.edu_sharing.webser
     public AuthenticationSoapBindingSkeleton(org.edu_sharing.webservices.authentication.Authentication impl) {
         this.impl = impl;
     }
+    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByApp(java.lang.String applicationId, java.lang.String username, java.lang.String email, java.lang.String ticket, boolean createUser) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
+    {
+        org.edu_sharing.webservices.authentication.AuthenticationResult ret = impl.authenticateByApp(applicationId, username, email, ticket, createUser);
+        return ret;
+    }
+
     public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByTrustedApp(java.lang.String applicationId, java.lang.String ticket, org.edu_sharing.webservices.types.KeyValue[] ssoData) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
     {
         org.edu_sharing.webservices.authentication.AuthenticationResult ret = impl.authenticateByTrustedApp(applicationId, ticket, ssoData);
@@ -153,12 +159,6 @@ public class AuthenticationSoapBindingSkeleton implements org.edu_sharing.webser
     public boolean checkTicket(java.lang.String username, java.lang.String ticket) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
     {
         boolean ret = impl.checkTicket(username, ticket);
-        return ret;
-    }
-
-    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByApp(java.lang.String applicationId, java.lang.String username, java.lang.String email, java.lang.String ticket, boolean createUser) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
-    {
-        org.edu_sharing.webservices.authentication.AuthenticationResult ret = impl.authenticateByApp(applicationId, username, email, ticket, createUser);
         return ret;
     }
 

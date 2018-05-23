@@ -982,6 +982,7 @@ public class NodeApi  {
 	    @ApiParam(value = "rename if the same node name exists",required=false,defaultValue="false") @QueryParam("renameIfExists") Boolean renameIfExists,
 	    @ApiParam(value = "comment, leave empty = no inital version", required=false ) @QueryParam("versionComment")  String versionComment,
 	    @ApiParam(value = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}" , required=true ) HashMap<String, String[]> properties,	    
+	    @ApiParam(value = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,	    
 		@Context HttpServletRequest req) {
 
     	try {
@@ -995,7 +996,10 @@ public class NodeApi  {
     		}
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	resolveURLTitle(properties);
-	    	NodeDao child = nodeDao.createChild(type, aspects, properties,renameIfExists==null ? false : renameIfExists.booleanValue());
+	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
+	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
+					assocType!=null && !assocType.trim().isEmpty() ? assocType : null);
+	    	
 			if(versionComment!=null && !versionComment.isEmpty()){
 				child.createVersion(versionComment);
 			}

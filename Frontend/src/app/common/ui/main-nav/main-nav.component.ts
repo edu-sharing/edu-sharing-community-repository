@@ -29,6 +29,7 @@ import {CordovaService} from '../../services/cordova.service';
 import {SessionStorageService} from "../../services/session-storage.service";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {Translation} from "../../translation";
+import {OptionItem} from "../actionbar/option-item";
 
 @Component({
   selector: 'main-nav',
@@ -84,6 +85,9 @@ export class MainNavComponent {
   licenseAgreementHTML: string;
   canEditProfile: boolean;
   private licenseAgreementNode: Node;
+  private userMenuOptions: OptionItem[];
+  private helpOptions: OptionItem[];
+
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
   }
@@ -402,9 +406,11 @@ export class MainNavComponent {
   private showUserMenu(){
     if(this._currentScope=='login')
       return;
+    this.updateUserOptions();
     this.userOpen=true;
   }
   public showHelpMenu(){
+    this.updateHelpOptions();
     this.helpOpen=true;
   }
   public showHelp(url:string){
@@ -577,4 +583,47 @@ export class MainNavComponent {
     });
 
   }
+
+    private updateUserOptions() {
+      this.userMenuOptions=[];
+
+      if(this._currentScope=='search') {
+        let option=new OptionItem('SEARCH.NODE_STORE.TITLE','bookmark_border',()=>this.setNodeStore(true));
+          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+          option.isSeperateBottom=true;
+          this.userMenuOptions.push(option);
+      }
+        if(this.helpUrl){
+            let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
+            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+            this.userMenuOptions.push(option);
+        }
+        if(this.whatsNewUrl){
+            let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
+            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+            option.isSeperateBottom=true;
+            this.userMenuOptions.push(option);
+        }
+      if(!this.isGuest){
+        this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
+      }
+      if(!this.isGuest){
+        this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
+      }
+    }
+
+    private updateHelpOptions() {
+      this.helpOptions=[];
+      if(this.helpUrl){
+          let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
+          this.helpOptions.push(option);
+      }
+      if(this.whatsNewUrl){
+          let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
+          this.helpOptions.push(option);
+      }
+    }
 }

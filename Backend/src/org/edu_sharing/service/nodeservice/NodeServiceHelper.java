@@ -1,8 +1,15 @@
 package org.edu_sharing.service.nodeservice;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
@@ -51,5 +58,33 @@ public class NodeServiceHelper {
 		}
 
 		return result;
+	}
+
+	public static List<Map<String,Object>> getSubobjects(NodeService service, String nodeId) throws Throwable {
+		List<Map<String,Object>> result = new ArrayList<>();
+		List<ChildAssociationRef> childs = service.getChildrenChildAssociationRef(nodeId);
+		for(ChildAssociationRef child : childs) {
+			NodeRef ref = child.getChildRef();
+			HashMap<String, Object> props = service.getProperties(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId());
+			String type = service.getType(ref.getId());
+			if(CCConstants.CCM_TYPE_IO.equals(type)) {
+				result.add(props);
+			}
+		}
+		Collections.sort(result,new Comparator<Map<String,Object>>() {
+
+			@Override
+			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+				try {
+				Integer v1 = Integer.parseInt((String) o1.get(CCConstants.CCM_PROP_CHILDOBJECT_ORDER));
+				Integer v2 = Integer.parseInt((String) o2.get(CCConstants.CCM_PROP_CHILDOBJECT_ORDER));
+				return v1.compareTo(v2);
+				}catch(Throwable t) {
+					t.printStackTrace();
+					return 0;
+				}
+			}
+		});
+		return result;		
 	}
 }

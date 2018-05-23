@@ -23,15 +23,7 @@
 .btn-flat:not(:hover){
   background: transparent;
 }
-.moreOpen{
-  position:absolute;
-  right:20px;
-  width:$contextMenuWidth;
-  padding:0!important;
-}
-.moreOpen a{
-  text-align: left;
-}
+
 .more{
   padding:0 10px;
 }

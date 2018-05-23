@@ -27,10 +27,8 @@ export class WorkspaceContributorComponent  {
   @ViewChild('datepicker') datepicker : NgDatepickerComponent;
   public contributorLifecycle:any={};
   public contributorMetadata:any={};
-  public rolesLifecycle=["publisher","author","unknown","initiator","terminator","validator",
-    "editor","graphical_designer","technical_implementer","content_provider",
-    "educational_validator","script_writer","instructional_designer","subject_matter_expert"];
-  public rolesMetadata=["creator","validator","provider"];
+  public rolesLifecycle=RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE;
+  public rolesMetadata=RestConstants.CONTRIBUTOR_ROLES_METADATA;
 
   private _nodeId: string;
   public loading=true;
@@ -55,7 +53,7 @@ export class WorkspaceContributorComponent  {
       this.node=data.node;
       for(let role of this.rolesLifecycle){
         this.contributorLifecycle[role]=[];
-        let list=data.node.properties["ccm:lifecyclecontributer_"+role];
+        let list=data.node.properties[RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX+role];
         if(!list)
           continue;
         for(let vcard of list){
@@ -65,7 +63,7 @@ export class WorkspaceContributorComponent  {
       }
       for(let role of this.rolesMetadata){
         this.contributorMetadata[role]=[];
-        let list=data.node.properties["ccm:metadatacontributer_"+role];
+        let list=data.node.properties[RestConstants.CONTRIBUTOR_METADATA_PREFIX+role];
         if(!list)
           continue;
         for(let vcard of list){

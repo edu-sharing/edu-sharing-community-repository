@@ -70,7 +70,7 @@
   z-index:85;
   position:fixed;
   right:25px;
-  bottom:25px;
+  bottom:25px+$mobileTabNavHeight;
   display:none;
 }
 .addDesktop,.addDesktopMenu{
@@ -207,7 +207,7 @@
   */
 }
 
-@media screen and (max-width: ($mobileWidth+$mobileStage*2)){
+@media screen and (max-width: ($mobileTabSwitchWidth)){
   .tree,
   .addDesktop{
     display:none;
@@ -220,6 +220,10 @@
   }
   .breadcrumbFrame{
     padding-left:10px;
+  }
+  .addDesktopMenu{
+    right:53px;
+    bottom:38px+$mobileTabNavHeight;
   }
   .explorer{
     left:0;

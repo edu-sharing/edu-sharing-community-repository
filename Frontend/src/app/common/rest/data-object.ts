@@ -116,6 +116,7 @@ export class Node {
   modifiedAt: Date;
   modifiedBy: Person;
   access: string[];
+  iconURL: string;
   contentVersion: string;
   repositoryType: string;
   contentUrl: string;

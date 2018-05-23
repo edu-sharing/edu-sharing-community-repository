@@ -214,12 +214,13 @@ public class URLTool{
 		String url = null;
 		
 		String nodeIdKey = null;
+		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 		try{
-			nodeIdKey = PropertiesHelper.getProperty(NOIDKEY_KEY, propertyfile, PropertiesHelper.XML);
+			nodeIdKey = appInfo.getNodeIdKey();
 			if(preview){
-				url = PropertiesHelper.getProperty(PREVIEWURLKEY, propertyfile, PropertiesHelper.XML);
+				url = appInfo.getPreviewUrl();
 			}else{
-				url = PropertiesHelper.getProperty(CONTENTURLKEY, propertyfile, PropertiesHelper.XML);
+				url = appInfo.getContentUrl();
 			}
 		}catch(Exception e){
 			logger.error(e.getMessage(), e);

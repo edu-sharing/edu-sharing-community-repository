@@ -15,15 +15,23 @@ import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {UIService} from "../services/ui.service";
 import {RestCollectionService} from "../rest/services/rest-collection.service";
 import {NodeHelper} from "./node-helper";
-import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {FrameEventsService} from "../services/frame-events.service";
 import {RestNodeService} from "../rest/services/rest-node.service";
 import {PlatformLocation} from "@angular/common";
 import {ListItem} from './list-item';
-import {AbstractRestService} from "../rest/services/abstract-rest-service";
 import {CordovaService} from "../services/cordova.service";
+import {OptionItem} from "./actionbar/option-item";
 export class UIHelper{
+
+  public static evaluateMediaQuery(type:string,value:number){
+    if(type==UIConstants.MEDIA_QUERY_MAX_WIDTH)
+      return value>window.innerWidth;
+    if(type==UIConstants.MEDIA_QUERY_MIN_WIDTH)
+        return value<window.innerWidth;
+    console.warn("Unsupported media query "+type);
+    return true;
+  }
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
     config.get("branding").subscribe((data:any)=>{
@@ -384,5 +392,24 @@ export class UIHelper{
       else {
         return window.open(url, '_blank',);
       }
+    }
+
+    static filterValidOptions(ui: UIService, options: OptionItem[]) {
+        if(options==null)
+            return null;
+        let optionsFiltered:OptionItem[]=[];
+        for(let option of options){
+            if((!option.onlyMobile || option.onlyMobile && ui.isMobile()) && (!option.mediaQueryType || option.mediaQueryType && UIHelper.evaluateMediaQuery(option.mediaQueryType,option.mediaQueryValue)))
+                optionsFiltered.push(option);
+        }
+        return optionsFiltered;
+    }
+    static filterToggleOptions(options: OptionItem[],toggle:boolean) {
+        let result:OptionItem[]=[];
+        for(let option of options){
+            if(option.isToggle==toggle)
+                result.push(option);
+        }
+        return result;
     }
 }

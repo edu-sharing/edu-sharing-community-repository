@@ -19,6 +19,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -31,14 +32,20 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
+import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.NodeRef;
+import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.restservices.shared.UserStats;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchResult;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -168,7 +175,7 @@ public class PersonDao {
 						&& !AuthenticationUtil.getRunAsUser().equals(userName)) {
 					getGroupFolder = false;
 				}
-				if(getGroupFolder) {
+				if(getGroupFolder && userName!=null) {
 					String groupFolderId = ((MCAlfrescoAPIClient)baseClient).getGroupFolderId(userName);
 					if (groupFolderId != null) {
 						
@@ -215,7 +222,31 @@ public class PersonDao {
 		}
 
 	}
-	
+	public AuthorityEntries getMemberships(String pattern,int skipCount,int maxItems,SortDefinition sort) throws DAOException{
+		if (!AuthenticationUtil.getFullyAuthenticatedUser().equals(getAuthorityName()) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+			throw new NotAnAdminException();
+		}
+    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).searchPersonGroups(
+    					getAuthorityName(),
+    					pattern,
+    					skipCount,
+    					maxItems,
+    					sort
+
+    			);
+		List<Authority> result = new ArrayList<Authority>();
+    	for (String member: search.getData()) {
+    		result.add(
+    				member.startsWith(PermissionService.GROUP_PREFIX) ?
+    							new GroupDao(repoDao,member).asGroup() :
+    							new PersonDao(repoDao, member).asPerson());
+    	}
+    	AuthorityEntries response = new AuthorityEntries();
+    	response.setList(result);
+    	response.setPagination(new Pagination(search));
+    	return response;
+	}
+
 	public void changePassword(String oldPassword, String newPassword) throws DAOException {
 		
 		try {
@@ -269,7 +300,7 @@ public class PersonDao {
     	
     	data.setUserName(getUserName());
     	
-    	
+
     	data.setProfile(getProfile());
     	data.setStats(getStats());
 
@@ -557,8 +588,8 @@ public class PersonDao {
 		}
 		else{
 			HashMap<String, String> newUserInfo = new HashMap<String, String>();
-			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());		
-			newUserInfo.put(CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());		
+			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
+			newUserInfo.put(CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
 			((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
 		}
 	}
