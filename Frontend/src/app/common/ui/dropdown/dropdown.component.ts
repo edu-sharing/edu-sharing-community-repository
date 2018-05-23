@@ -27,16 +27,29 @@ export class DropdownComponent{
 
   @Input() set show(show:boolean){
     this._show=show;
-    this.focusDropdown();
+    if(show)
+      this.focusDropdown();
   };
   @Output() showChange=new EventEmitter();
   @Input() set options(options:OptionItem[]) {
-    this._options = OptionItem.filterValidOptions(this.ui,options);
+    this._options = OptionItem.filterValidOptions(this.ui,Helper.deepCopyArray(options));
   }
+
+  /**
+   * the object that should be returned via the option's callback
+   * Can be null
+   */
+  @Input() callbackObject:any;
 
   hide(){
     this._show=false;
     this.showChange.emit(false);
+  }
+  click(option : OptionItem){
+      if(!option.isEnabled)
+          return;
+      option.callback(this.callbackObject);
+      this.hide();
   }
   focusDropdown(){
     setTimeout(()=> {

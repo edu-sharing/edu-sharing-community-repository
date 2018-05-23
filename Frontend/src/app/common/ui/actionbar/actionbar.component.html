@@ -1,5 +1,7 @@
 <div class="dialog dialogOptions" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false"></div>
-<dropdown [(show)]="dropdown" [options]="optionsMenu"></dropdown>
+<dropdown [(show)]="dropdown"
+          [callbackObject]="node"
+          [options]="optionsMenu"></dropdown>
 <div class="actionbar">
   <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
     <a *ngFor="let option of optionsToggle"

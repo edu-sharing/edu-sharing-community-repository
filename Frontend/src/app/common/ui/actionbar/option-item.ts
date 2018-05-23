@@ -82,7 +82,7 @@ export class OptionItem {
     for(let option of options){
       if(!option.onlyMobile || option.onlyMobile && ui.isMobile())
         optionsFiltered.push(option);
-      if(option.mediaQueryType || option.mediaQueryType && ui.evaluateMediaQuery(option.mediaQueryType,option.mediaQueryValue))
+      else if(!option.mediaQueryType || option.mediaQueryType && ui.evaluateMediaQuery(option.mediaQueryType,option.mediaQueryValue))
         optionsFiltered.push(option);
     }
     return optionsFiltered;

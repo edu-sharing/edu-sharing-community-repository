@@ -49,6 +49,7 @@ export class ActionbarComponent{
       this.optionsMenu=[];
       return;
     }
+    console.log(options);
     this.optionsToggle=OptionItem.filterToggleOptions(options,true);
 
     this.optionsAlways=this.getActionOptions(OptionItem.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
