@@ -45,6 +45,7 @@
   import {NodeInfoComponent} from "./common/ui/node-info/node-info.component";
   import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
   import {DropdownComponent} from "./common/ui/dropdown/dropdown.component";
+  import {TutorialComponent} from "./common/ui/tutorial/tutorial.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -93,5 +94,6 @@ export const DECLARATIONS = [
       BannerComponent,
       InfiniteScrollDirective,
       KeysPipe,
-      CookieInfoComponent
+      CookieInfoComponent,
+      TutorialComponent
     ];
