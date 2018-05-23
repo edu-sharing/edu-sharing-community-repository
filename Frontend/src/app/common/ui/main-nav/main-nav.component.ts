@@ -86,6 +86,8 @@ export class MainNavComponent {
   canEditProfile: boolean;
   private licenseAgreementNode: Node;
   private userMenuOptions: OptionItem[];
+  private helpOptions: OptionItem[];
+
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
   }
@@ -402,6 +404,7 @@ export class MainNavComponent {
     this.userOpen=true;
   }
   public showHelpMenu(){
+    this.updateHelpOptions();
     this.helpOpen=true;
   }
   public showHelp(url:string){
@@ -585,12 +588,12 @@ export class MainNavComponent {
           option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
       }
-      if(this.helpUrl){
-        let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
-          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
-          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-          this.userMenuOptions.push(option);
-      }
+        if(this.helpUrl){
+            let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
+            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+            this.userMenuOptions.push(option);
+        }
         if(this.whatsNewUrl){
             let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
             option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
@@ -606,6 +609,18 @@ export class MainNavComponent {
       }
       if(!this.isGuest){
         this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
+      }
+    }
+
+    private updateHelpOptions() {
+      this.helpOptions=[];
+      if(this.helpUrl){
+          let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
+          this.helpOptions.push(option);
+      }
+      if(this.whatsNewUrl){
+          let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
+          this.helpOptions.push(option);
       }
     }
 }

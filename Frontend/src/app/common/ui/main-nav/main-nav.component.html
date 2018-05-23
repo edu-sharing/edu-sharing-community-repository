@@ -75,7 +75,6 @@
       <i class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
       <i class="material-icons barIcon iconPerson">account_circle</i>
     </div>
-    <div class="dialog" *ngIf="userOpen" (click)="userOpen=false" (keyup.enter)="userOpen=false" tabindex="0"></div>
   <dropdown class="userMenu"
     [(show)]="userOpen"
     [options]="userMenuOptions"
@@ -83,15 +82,10 @@
   <div class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
     <i class="material-icons">help_outline</i>
   </div>
-  <div class="dialog" *ngIf="helpOpen" (click)="helpOpen=false" (keyup.enter)="helpOpen=false" tabindex="0"></div>
-  <div class="helpMenu collection" [@overlay]="helpOpen" *ngIf="helpOpen">
-    <a class="collection-item" *ngIf="helpUrl"
-       (click)="showHelp(helpUrl)"
-       title="{{ 'ONLINE_HELP' | translate}}"><i class="material-icons">help_outline</i> {{ 'ONLINE_HELP' | translate}}</a>
-    <a class="collection-item"
-       (click)="showHelp(whatsNewUrl)" *ngIf="whatsNewUrl"
-       title="{{ 'WHATS_NEW' | translate}}"><i class="material-icons">lightbulb_outline</i> {{ 'WHATS_NEW' | translate}}</a>
-  </div>
+  <dropdown class="helpMenu"
+            [(show)]="helpOpen"
+            [options]="helpOptions"
+  ></dropdown>
 </div>
 <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
 <div class="tab-nav">
