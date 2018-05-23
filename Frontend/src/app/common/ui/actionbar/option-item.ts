@@ -32,10 +32,21 @@ export class OptionItem {
    */
   public isSeperateBottom = false;
   /**
-   * If true, only displayed on a mobile device
+   * If true, only displayed on a mobile device (based on the navigator agent)
    * @type {boolean}
    */
   public onlyMobile = false;
+  /**
+   * You can set a media-query similar to CSS, see the MEDIA_QUERY constants in ui-helper
+   * Use in combination with mediaQueryValue
+   * @type {boolean}
+   */
+  public mediaQueryType : string;
+  /**
+   * The value for the defined media query
+   */
+  public mediaQueryValue : number;
+
   /**
    * Set to false if the action should be shown, but should not be clickable
    * @type {boolean}
@@ -70,6 +81,8 @@ export class OptionItem {
     let optionsFiltered:OptionItem[]=[];
     for(let option of options){
       if(!option.onlyMobile || option.onlyMobile && ui.isMobile())
+        optionsFiltered.push(option);
+      if(option.mediaQueryType || option.mediaQueryType && ui.evaluateMediaQuery(option.mediaQueryType,option.mediaQueryValue))
         optionsFiltered.push(option);
     }
     return optionsFiltered;

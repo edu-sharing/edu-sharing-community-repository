@@ -1,21 +1,5 @@
 <div class="dialog dialogOptions" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false"></div>
-<div class="collectionContainer"
-     #dropdownContainer
-     [@openOverlay]="dropdown" *ngIf="dropdown" (contextmenu)="dropdown=false;$event.preventDefault();$event.stopPropagation();" (click)="dropdown=false">
-  <div [@openOverlay]="dropdown"
-       #dropdownRef
-       class="moreOpen collection" (keydown.escape)="dropdown=false;$event.preventDefault();$event.stopPropagation();">
-      <a class="collection-item waves-effect"
-         *ngFor="let option of optionsMenu;let i=index;"
-         [class.collection-item-seperate]="option.isSeperate"
-         [class.collection-item-seperate-bottom]="option.isSeperateBottom && (i<optionsMenu.length-1 && !optionsMenu[i+1].isSeperate)"
-         [class.disabled]="!option.isEnabled"
-         tabindex="0"
-         (keyup.enter)="click(option)"
-         (click)="click(option)"
-      ><i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
-  </div>
-</div>
+<dropdown [(show)]="dropdown" [options]="optionsMenu"></dropdown>
 <div class="actionbar">
   <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
     <a *ngFor="let option of optionsToggle"
@@ -29,9 +13,9 @@
 
   </div>
 <div class="more btn-flat waves-effect"
-       (click)="showDropdown(true)"
+       (click)="showDropdown()"
        tabindex="0"
-       (keyup.enter)="showDropdown(true)"
+       (keyup.enter)="showDropdown()"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        *ngIf="optionsMenu.length"><a><i class="material-icons">more_vert</i></a></div>
 

@@ -63,9 +63,6 @@ export class ActionbarComponent{
 
   }
 
-  @ViewChild('dropdownRef') dropdownElement : ElementRef;
-  @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
-
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if(this.dropdown && event.key=="Escape"){
@@ -89,15 +86,8 @@ export class ActionbarComponent{
     option.callback(this.node);
     this.dropdown=false;
   }
-  private showDropdown(setFocus=true){
+  private showDropdown(){
     this.dropdown=true;
-    if(!setFocus)
-      return;
-
-    setTimeout(()=> {
-      UIHelper.setFocusOnDropdown(this.dropdownElement);
-      UIHelper.scrollSmoothElement(this.dropdownContainerElement.nativeElement.scrollHeight,this.dropdownContainerElement.nativeElement);
-    });
   }
 
 

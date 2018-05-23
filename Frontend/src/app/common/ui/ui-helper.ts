@@ -25,6 +25,15 @@ import {AbstractRestService} from "../rest/services/abstract-rest-service";
 import {CordovaService} from "../services/cordova.service";
 export class UIHelper{
 
+  public static evaluateMediaQuery(type:string,value:number){
+    if(type==UIConstants.MEDIA_QUERY_MAX_WIDTH)
+      return value>window.innerWidth;
+    if(type==UIConstants.MEDIA_QUERY_MIN_WIDTH)
+        return value<window.innerWidth;
+    console.warn("Unsupported media query "+type);
+    return true;
+  }
+
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
     config.get("branding").subscribe((data:any)=>{
       let t=name;
