@@ -27,6 +27,7 @@ import {UIConstants} from "../ui-constants";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {SearchService} from "../../../modules/search/search.service";
 import {Helper} from "../../helper";
+import {RestHelper} from "../../rest/rest-helper";
 import {EventListener} from "../../../common/services/frame-events.service";
 import {Observable} from "rxjs/index";
 import {Response} from "@angular/http";
@@ -90,6 +91,10 @@ export class NodeRenderComponent implements EventListener{
     if(this.isSafe){
       this.connector.logoutSync();
     }
+  }
+  @HostListener('window:resize', ['$event'])
+  onResize(event:any) {
+      this.setScrollparameters();
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -453,5 +458,8 @@ export class NodeRenderComponent implements EventListener{
         } else {
             this.canScrollRight = true;
         }
+    }
+    private getNodeName(node:Node) {
+      return RestHelper.getName(node);
     }
 }
