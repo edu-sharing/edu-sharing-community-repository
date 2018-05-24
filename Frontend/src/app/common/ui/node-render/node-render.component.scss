@@ -99,27 +99,39 @@ a, a:hover, a:visited, a:active {
   overflow:hidden;
   position:relative;
   white-space: nowrap;
+  .itemTitle {
+    color: #fff;
+    display: inline-block;
+    width: 100px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+    margin-bottom: -2px;
+  }
   .wrapperouter {
     display: inline-block;
     position:relative;
     margin: 0 10px;
   .wrapper {
-    border: 3px solid transparent;
+    margin: 3px;
+    @include materialShadow();
     img {
       margin-bottom: -5px;
       height: 75px;
       width: 100px;
-      @include materialShadow();
     }
   }
   .wrapper.selected {
+    margin: 0;
     border: 3px solid $primaryMediumLight;
+    @include materialShadowMediumLarge();
   }
   .wrapper.selected:after {
     content: '';
     position: absolute;
-    left: 40px;
-    top: 75px;
+    left: 43px;
+    top: 103px;
     width: 0;
     height: 0;
     border-left: 10px solid transparent;
@@ -127,22 +139,21 @@ a, a:hover, a:visited, a:active {
     border-top: 10px solid $primaryMediumLight;
     clear: both;
   }
-  .scroller {
-    position: fixed;
-    top: calc(60px + #{$mainnavHeight});
-    padding: 5px 10px;
-    background: #000;
-    color: #fff;
-  }
-  .scroller.left {
-    left: 0;
-  }
-  .scroller.right {
-    right: 0;
-  }
   }
 }
-
+.scroller {
+  position: absolute;
+  top: calc(8px + #{$mainnavHeight});
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+.scroller.left {
+  left: 0;
+}
+.scroller.right {
+  right: 0;
+}
 
 .nodeRenderLoading{
   height: calc(100% - #{$mainnavHeight});
@@ -172,6 +183,10 @@ a.edusharing_rendering_content{
 }
 .edusharing_rendering_content_wrapper{
   min-height:500px;
+}
+
+.edusharing_rendering_content {
+  height: calc(100% - #{$mainnavHeight} - 130px) !important;
 }
 
 div.download {
