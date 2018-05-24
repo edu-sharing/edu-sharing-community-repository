@@ -5,6 +5,7 @@
   [currentScope]="'collections'"
   [searchEnabled]="false"
 ></main-nav>
+<tutorial [element]="tutorialElement" [heading]="'COLLECTIONS.TUTORIAL_HEADING'" [description]="'COLLECTIONS.TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial>
 <collections-manage-pinning
   *ngIf="addPinning"
   [addCollection]="addPinning"
@@ -73,7 +74,7 @@
                 </div>
 
                 <!-- COLLECTION CARDS -->
-                <listTable
+                <listTable #listCollections
                   [listClass]="'subcollections'"
                   [addElement]="isAllowedToEditCollection() ? createCollectionElement : null"
                   [hasHeading]="false"

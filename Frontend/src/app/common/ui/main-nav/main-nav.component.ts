@@ -74,6 +74,7 @@ export class MainNavComponent {
   @ViewChild('topbar') topbar:ElementRef;
   @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
   @ViewChild('scrolltotop') scrolltotop:ElementRef;
+  @ViewChild('userRef') userRef:ElementRef;
   public config: any={};
   private editUrl: string;
   public nodeStoreAnimation=0;
@@ -87,6 +88,7 @@ export class MainNavComponent {
   private licenseAgreementNode: Node;
   private userMenuOptions: OptionItem[];
   private helpOptions: OptionItem[];
+  private tutorialElement: ElementRef;
 
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
@@ -361,6 +363,9 @@ export class MainNavComponent {
           this.canEditProfile=user.editProfile;
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
+          });
+          setTimeout(()=>{
+            this.tutorialElement=this.userRef;
           });
         });
         this.onInvalidNodeStore=new Boolean(true);

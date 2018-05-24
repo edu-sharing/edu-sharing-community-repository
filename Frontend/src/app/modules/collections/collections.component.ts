@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../router/router.component";
@@ -32,7 +32,7 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {ListItem} from "../../common/ui/list-item";
-import {AddElement} from "../../common/ui/list-table/list-table.component";
+import {AddElement, ListTableComponent} from "../../common/ui/list-table/list-table.component";
 import {RestMdsService} from "../../common/rest/services/rest-mds.service";
 import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {NodeHelper} from "../../common/ui/node-helper";
@@ -55,6 +55,7 @@ import {ColorHelper} from '../../common/ui/color-helper';
 })
 export class CollectionsMainComponent implements GwtEventListener {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
+  @ViewChild('listCollections') listCollections :  ListTableComponent;
 
   public dialogTitle : string;
     public globalProgress=false;
@@ -105,6 +106,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     private listOptions: OptionItem[];
     private _orderActive: boolean;
     optionsMaterials:OptionItem[];
+    private tutorialElement: ElementRef;
   // default hides the tabs
 
     // inject services
@@ -533,12 +535,17 @@ export class CollectionsMainComponent implements GwtEventListener {
             //this.sortCollectionContent();
             this.isLoading=false;
             this.mainNavRef.refreshBanner();
+            if(this.collectionContent.getCollectionID()==RestConstants.ROOT && this.isAllowedToEditCollection()) {
+                setTimeout(() => {
+                    this.tutorialElement = this.listCollections.addElementRef;
+                });
+            }
             if(callback)
               callback();
         });
 
 
-        if ((this.collectionContent.getCollectionID()!="-root-") && (this.collectionContent.collection.permission==null)) {
+        if ((this.collectionContent.getCollectionID()!=RestConstants.ROOT) && (this.collectionContent.collection.permission==null)) {
             this.nodeService.getNodePermissions(this.collectionContent.getCollectionID()).subscribe( permission => {
                 this.collectionContent.collection.permission = permission.permissions;
             });

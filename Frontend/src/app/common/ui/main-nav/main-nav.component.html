@@ -3,6 +3,7 @@
   (onCancel)="showProfile=false"
 ></user-profile>
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
+<tutorial [element]="tutorialElement" [heading]="'USER_TUTORIAL_HEADING'" [description]="'USER_TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial>
 
 <div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
 <div class="card center-card card-scroll card-high card-wide card-action" *ngIf="licenseAgreement" [@cardAnimation]="licenseAgreement">
@@ -69,7 +70,7 @@
     </div>
   </div>
 
-  <div class="user clickable" *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
+  <div class="user clickable" #userRef *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
       <div *ngIf="!isGuest">{{userName}}</div>
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
       <i class="material-icons barIcon iconArrow">keyboard_arrow_down</i>

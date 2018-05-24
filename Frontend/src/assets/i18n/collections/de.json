@@ -3,6 +3,8 @@
   "COLLECTIONS": {
     "TITLE": "Sammlungen",
     "CREATE_COLLECTION" : "Sammlung\nerstellen",
+    "TUTORIAL_HEADING":"Einsammeln was dir gefällt",
+    "TUTORIAL_DESCRIPTION":"Eigene Sammlungen erstellen und mit interessanten Materialien füllen - privat oder zusammen mit Anderen.",
     "ADD_MATERIAL" : "Material\nhinzufügen",
     "ERROR_DELETE": "Fehler beim Löschen der Sammlung",
     "ENTER_NAME" : "Bitte einen Namen für die Sammlung eingeben.",

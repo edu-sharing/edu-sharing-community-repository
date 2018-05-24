@@ -2,7 +2,7 @@
 
 .tutorial{
   position: fixed;
-  /* opacity: 0.9; */
+  opacity: 1;
   left:0;
   top:0;
   z-index: $dialogZIndex+20;
@@ -13,8 +13,9 @@
   padding: 10%;
   align-items: center;
   justify-content: center;
+  text-shadow:0 0 10px rgba(0,0,0,0.7);
   >.align-tutorial{
-    align-self: flex-start;
+    /* align-self: flex-start; */
     width: 100%;
     max-width: 700px;
     >div{
@@ -37,6 +38,7 @@
   .heading{
     font-size:150%;
     font-weight:bold;
+    text-transform: uppercase;
   }
   .description{
     padding:10px;

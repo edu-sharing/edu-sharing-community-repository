@@ -187,7 +187,9 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-    //this.tutorialElement = this.extendedSearch;
+    setTimeout(()=> {
+        this.tutorialElement = this.mainNavRef.search;
+    });
     this.searchService.clear();
     this.initalized=true;
     if(this.searchService.reinit){
