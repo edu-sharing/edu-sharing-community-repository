@@ -37,3 +37,4 @@ Cordova/npm-debug.log
 Cordova/.gradle/
 *.iml
 Backend/.idea/
+.idea/workspace.xml
