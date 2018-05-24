@@ -8,6 +8,7 @@
   "OK" : "ok",
   "BACK": "back",
   "NEXT": "continue",
+  "SKIP": "skip",
   "SAVE" : "save",
   "APPLY" : "apply",
   "CANCEL" : "cancel",

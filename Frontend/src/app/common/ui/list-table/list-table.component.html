@@ -72,7 +72,7 @@
         </div>
     </div>
     <div [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
-        <div *ngIf="addElement" class="addElement clickable"
+        <div *ngIf="addElement" class="addElement clickable" #addElementRef
              tabindex="0"
              (keyup.enter)="addElementClicked()"
              (click)="addElementClicked()"

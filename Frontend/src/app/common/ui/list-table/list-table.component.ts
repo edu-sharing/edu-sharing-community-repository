@@ -56,6 +56,7 @@ export class ListTableComponent implements EventListener{
   public static VIEW_TYPE_GRID = 1;
   public static VIEW_TYPE_GRID_SMALL = 2;
   @ViewChild('drag') drag : ElementRef;
+  @ViewChild('addElementRef') addElementRef : ElementRef;
 
 
   private optionsAlways:OptionItem[]=[];

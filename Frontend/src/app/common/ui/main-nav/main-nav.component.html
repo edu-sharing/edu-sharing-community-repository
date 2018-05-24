@@ -3,6 +3,7 @@
   (onCancel)="showProfile=false"
 ></user-profile>
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
+<tutorial [element]="tutorialElement" [heading]="'USER_TUTORIAL_HEADING'" [description]="'USER_TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial>
 
 <div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
 <div class="card center-card card-scroll card-high card-wide card-action" *ngIf="licenseAgreement" [@cardAnimation]="licenseAgreement">
@@ -72,7 +73,7 @@
     </div>
   </div>
 
-  <div class="user clickable" *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
+  <div class="user clickable" #userRef *ngIf="user && _showUser" (click)="showUserMenu()" (keyup.enter)="showUserMenu()" tabindex="0" title="{{'USERMENU' | translate}}">
       <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
       <div *ngIf="!isGuest">{{userName}}</div>
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
@@ -92,7 +93,7 @@
   ></dropdown>
 </div>
 <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
-<div class="tab-nav">
+<div class="tab-nav" *ngIf="_currentScope!='render'">
   <div *ngFor="let button of sidebarButtons" class="button" [class.selected]="_currentScope==button.scope"
        (click)="openButton(button)"
        (keyup.enter)="openButton(button)"

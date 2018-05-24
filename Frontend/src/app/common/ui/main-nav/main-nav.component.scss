@@ -61,7 +61,7 @@ user-profile{
 
 .topBarSearch {
   flex: auto;
-  padding: 18px 20px 0 10px;
+  padding: 19px 20px 0 10px;
 }
 
 .menuButton .barIcon, .menuButton img {
@@ -332,10 +332,18 @@ user-profile{
     display: none;
   }
   .topBar{
-    .nodeStore, .help{
+    .nodeStore, .help, .imprint{
       display: none;
     }
+    .user{
+      top:0;
+    }
+    .topBarSearch{
+      padding-left: 20px;
+      padding-right: 12px;
+    }
   }
+
   .tab-nav{
     position:fixed;
     z-index: 20;

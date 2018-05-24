@@ -74,6 +74,7 @@ export class MainNavComponent {
   @ViewChild('topbar') topbar:ElementRef;
   @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
   @ViewChild('scrolltotop') scrolltotop:ElementRef;
+  @ViewChild('userRef') userRef:ElementRef;
   public config: any={};
   private editUrl: string;
   public nodeStoreAnimation=0;
@@ -87,6 +88,7 @@ export class MainNavComponent {
   private licenseAgreementNode: Node;
   private userMenuOptions: OptionItem[];
   private helpOptions: OptionItem[];
+  private tutorialElement: ElementRef;
 
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
@@ -368,6 +370,9 @@ export class MainNavComponent {
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
+          setTimeout(()=>{
+            this.tutorialElement=this.userRef;
+          });
         });
         this.onInvalidNodeStore=new Boolean(true);
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
@@ -594,21 +599,28 @@ export class MainNavComponent {
           option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
       }
-        if(this.helpUrl){
-            let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
-            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
-            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-            this.userMenuOptions.push(option);
-        }
-        if(this.whatsNewUrl){
-            let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
-            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
-            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-            option.isSeperateBottom=true;
-            this.userMenuOptions.push(option);
-        }
+      if(this.helpUrl){
+          let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
+          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+          this.userMenuOptions.push(option);
+      }
+      if(this.whatsNewUrl){
+          let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
+          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+          option.isSeperateBottom=true;
+          this.userMenuOptions.push(option);
+      }
+      if(this.config.imprintUrl){
+          let option=new OptionItem('IMPRINT','info',()=>this.showHelp(this.whatsNewUrl));
+          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+          option.isSeperateBottom=true;
+          this.userMenuOptions.push(option);
+      }
       if(!this.isGuest){
-        this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
+          this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
       }
       if(!this.isGuest){
         this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
