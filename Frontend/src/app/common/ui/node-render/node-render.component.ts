@@ -161,7 +161,7 @@ export class NodeRenderComponent implements EventListener{
         return -1;
       let i=0;
       for(let node of this.list){
-        if(node.ref.id==this._node.ref.id)
+        if(node.ref.id==this._node.ref.id || node.ref.id==this.sequenceParent.ref.id)
           return i;
         i++;
       }
@@ -226,6 +226,7 @@ export class NodeRenderComponent implements EventListener{
   public switchPosition(pos:number){
     //this.router.navigate([UIConstants.ROUTER_PREFIX+"render",this.list[pos].ref.id]);
     this.isLoading=true;
+    this.sequence = null;
     this.node=this.list[pos];
     //this.options=[];
   }
@@ -425,7 +426,7 @@ export class NodeRenderComponent implements EventListener{
         this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
           if(data.nodes.length > 0)
             this.sequence = data;
-            setTimeout(()=>this.setScrollparameters(),10);
+            setTimeout(()=>this.setScrollparameters(),100);
         });
     }
 
@@ -447,17 +448,19 @@ export class NodeRenderComponent implements EventListener{
     }
 
     private setScrollparameters() {
-        let element = this.sequencediv.nativeElement;
-        if(element.scrollLeft <= 20) {
-            this.canScrollLeft = false;
-        } else {
-            this.canScrollLeft = true;
-        }
-        if((element.scrollLeft + 20) >= (element.scrollWidth - window.innerWidth)) {
-            this.canScrollRight = false;
-        } else {
-            this.canScrollRight = true;
-        }
+      if(!this.sequence)
+        return;
+      let element = this.sequencediv.nativeElement;
+      if(element.scrollLeft <= 20) {
+          this.canScrollLeft = false;
+      } else {
+          this.canScrollLeft = true;
+      }
+      if((element.scrollLeft + 20) >= (element.scrollWidth - window.innerWidth)) {
+          this.canScrollRight = false;
+      } else {
+          this.canScrollRight = true;
+      }
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
