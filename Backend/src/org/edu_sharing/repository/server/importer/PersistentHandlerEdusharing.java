@@ -491,12 +491,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	 * @return
 	 */
 	public boolean mustBePersisted(String replId, String timeStamp) {
-		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
 
 		// we will not safe without replId
 		if (replId == null) {
 			return false;
 		}
+		
+		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
 
 		// we will not safe without timestamp
 		if (timeStamp == null) {

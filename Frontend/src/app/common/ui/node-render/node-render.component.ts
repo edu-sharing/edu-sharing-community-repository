@@ -27,7 +27,11 @@ import {UIConstants} from "../ui-constants";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {SearchService} from "../../../modules/search/search.service";
 import {Helper} from "../../helper";
+import {RestHelper} from "../../rest/rest-helper";
 import {EventListener} from "../../../common/services/frame-events.service";
+import {Observable} from "rxjs/index";
+import {Response} from "@angular/http";
+import {SuggestItem} from "../autocomplete/autocomplete.component";
 
 declare var jQuery:any;
 declare var window: any;
@@ -76,12 +80,22 @@ export class NodeRenderComponent implements EventListener{
   private downloadButton: OptionItem;
   private downloadUrl: string;
   public nodeComments: Node;
+  private sequence: NodeList;
+  private sequenceParent: Node;
+  private canScrollLeft: boolean = false;
+  private canScrollRight: boolean = false;
+
+  @ViewChild('sequencediv') sequencediv : ElementRef;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
     if(this.isSafe){
       this.connector.logoutSync();
     }
+  }
+  @HostListener('window:resize', ['$event'])
+  onResize(event:any) {
+      this.setScrollparameters();
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -275,6 +289,7 @@ export class NodeRenderComponent implements EventListener{
             }
             else {
                 this._node=data.node;
+                this.getSequence();
                 jQuery('#nodeRenderContent').html(data.detailsSnippet);
                 this.postprocessHtml();
                 this.loadNode();
@@ -410,4 +425,55 @@ export class NodeRenderComponent implements EventListener{
         this.downloadButton.isEnabled=url!=null;
       this.downloadUrl=url;
   }
+
+    private getSequence() {
+        if(this.sequence)
+          return;
+        if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+           this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data =>{
+             this.sequenceParent = data.node;
+            });
+        } else {
+            this.sequenceParent = this._node;
+        }
+        this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+          if(data.nodes.length > 0)
+            this.sequence = data;
+            setTimeout(()=>this.setScrollparameters(),10);
+        });
+    }
+
+    private scroll(direction: string) {
+        let scrollAmount = 0;
+        let element = this.sequencediv.nativeElement;
+        let slideTimer = setInterval(()=>{
+            if(direction == 'left'){
+                element.scrollLeft -= 20;
+            } else {
+                element.scrollLeft += 20;
+            }
+            this.setScrollparameters();
+            scrollAmount += 10;
+            if(scrollAmount >= 100){
+                clearInterval(slideTimer);
+            }
+        }, 25);
+    }
+
+    private setScrollparameters() {
+        let element = this.sequencediv.nativeElement;
+        if(element.scrollLeft <= 20) {
+            this.canScrollLeft = false;
+        } else {
+            this.canScrollLeft = true;
+        }
+        if((element.scrollLeft + 20) >= (element.scrollWidth - window.innerWidth)) {
+            this.canScrollRight = false;
+        } else {
+            this.canScrollRight = true;
+        }
+    }
+    private getNodeName(node:Node) {
+      return RestHelper.getName(node);
+    }
 }

@@ -133,6 +133,7 @@
     "REVERTED_VERSION":"Version has been reverted successfully",
     "OPTION":{
       "SHOW":"Preview & Info",
+      "DEBUG":"Debug",
       "INVITE":"Invite",
       "EDIT":"Edit info",
       "VIEW":"View",

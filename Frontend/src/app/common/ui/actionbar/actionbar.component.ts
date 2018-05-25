@@ -48,28 +48,26 @@ export class ActionbarComponent{
    * @param options
    */
   @Input() set options(options : OptionItem[]){
-    options=OptionItem.filterValidOptions(this.ui,Helper.deepCopyArray(options));
+    options=UIHelper.filterValidOptions(this.ui,Helper.deepCopyArray(options));
     if(options==null){
       this.optionsAlways=[];
       this.optionsMenu=[];
       return;
     }
-    this.optionsToggle=OptionItem.filterToggleOptions(options,true);
+    console.log(options);
+    this.optionsToggle=UIHelper.filterToggleOptions(options,true);
 
-    this.optionsAlways=this.getActionOptions(OptionItem.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
+    this.optionsAlways=this.getActionOptions(UIHelper.filterToggleOptions(options,false)).slice(0,this.getNumberOptions());
     if(!this.optionsAlways.length){
-      this.optionsAlways=OptionItem.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
+      this.optionsAlways=UIHelper.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
     }
-    this.optionsMenu=this.hideActionOptions(OptionItem.filterToggleOptions(options,false),this.optionsAlways);
+    this.optionsMenu=this.hideActionOptions(UIHelper.filterToggleOptions(options,false),this.optionsAlways);
     if(this.optionsMenu.length<2){
       this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
       this.optionsMenu=[];
     }
 
   }
-
-  @ViewChild('dropdownRef') dropdownElement : ElementRef;
-  @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -94,15 +92,8 @@ export class ActionbarComponent{
     option.callback(this.node);
     this.dropdown=false;
   }
-  private showDropdown(setFocus=true){
+  private showDropdown(){
     this.dropdown=true;
-    if(!setFocus)
-      return;
-
-    setTimeout(()=> {
-      UIHelper.setFocusOnDropdown(this.dropdownElement);
-      UIHelper.scrollSmoothElement(this.dropdownContainerElement.nativeElement.scrollHeight,this.dropdownContainerElement.nativeElement);
-    });
   }
 
 

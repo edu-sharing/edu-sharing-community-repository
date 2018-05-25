@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../router/router.component";
@@ -31,7 +31,7 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {ListItem} from "../../common/ui/list-item";
-import {AddElement} from "../../common/ui/list-table/list-table.component";
+import {AddElement, ListTableComponent} from "../../common/ui/list-table/list-table.component";
 import {RestMdsService} from "../../common/rest/services/rest-mds.service";
 import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {NodeHelper} from "../../common/ui/node-helper";
@@ -53,6 +53,8 @@ import {ColorHelper} from '../../common/ui/color-helper';
 })
 export class CollectionsMainComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
+  @ViewChild('listCollections') listCollections :  ListTableComponent;
+
   public dialogTitle : string;
   public globalProgress=false;
   public dialogCancelable = false;
@@ -79,30 +81,31 @@ export class CollectionsMainComponent {
   private temp:string;
   private lastScrollY:number;
 
-  private person : EduData.User;
-  public mainnav = true;
-  private path : EduData.Node[];
-  private hasOrganizations = false;
-  private hasEditorial = false;
-  private nodeOptions: OptionItem[]=[];
-  public isGuest = true;
-  public addToOther:EduData.Node[];
-  private showCollection=true;
-  private pinningAllowed = false;
-  public addPinning: string;
-  public infoTitle: string;
-  public infoMessage: string;
-  public infoButtons: DialogButton[];
-  public infoClose: Function;
-  public nodeReport: Node;
-  public collectionsColumns : ListItem[]=[];
-  public referencesColumns : ListItem[]=[];
-  public createCollectionElement = new AddElement("COLLECTIONS.CREATE_COLLECTION");
-  public createCollectionReference = new AddElement("COLLECTIONS.ADD_MATERIAL","redo");
-  private listOptions: OptionItem[];
-  private _orderActive: boolean;
-  optionsMaterials:OptionItem[];
-    // default hides the tabs
+    private person : EduData.User;
+    public mainnav = true;
+    private path : EduData.Node[];
+    private hasOrganizations = false;
+    private hasEditorial = false;
+    private nodeOptions: OptionItem[]=[];
+    public isGuest = true;
+    public addToOther:EduData.Node[];
+    private showCollection=true;
+    private pinningAllowed = false;
+    public addPinning: string;
+    public infoTitle: string;
+    public infoMessage: string;
+    public infoButtons: DialogButton[];
+    public infoClose: Function;
+    public nodeReport: Node;
+    public collectionsColumns : ListItem[]=[];
+    public referencesColumns : ListItem[]=[];
+    public createCollectionElement = new AddElement("COLLECTIONS.CREATE_COLLECTION");
+    public createCollectionReference = new AddElement("COLLECTIONS.ADD_MATERIAL","redo");
+    private listOptions: OptionItem[];
+    private _orderActive: boolean;
+    optionsMaterials:OptionItem[];
+    private tutorialElement: ElementRef;
+  // default hides the tabs
 
   // inject services
   constructor(
@@ -523,19 +526,24 @@ export class CollectionsMainComponent {
       //if (this.isAllowedToEditCollection()) this.collectionContent.collections.unshift(new EduData.Collection());
 
 
-      //this.sortCollectionContent();
-      this.isLoading=false;
-      this.mainNavRef.refreshBanner();
-      if(callback)
-        callback();
-    });
+            //this.sortCollectionContent();
+            this.isLoading=false;
+            this.mainNavRef.refreshBanner();
+            if(this.collectionContent.getCollectionID()==RestConstants.ROOT && this.isAllowedToEditCollection()) {
+                setTimeout(() => {
+                    this.tutorialElement = this.listCollections.addElementRef;
+                });
+            }
+            if(callback)
+              callback();
+        });
 
 
-    if ((this.collectionContent.getCollectionID()!="-root-") && (this.collectionContent.collection.permission==null)) {
-      this.nodeService.getNodePermissions(this.collectionContent.getCollectionID()).subscribe( permission => {
-        this.collectionContent.collection.permission = permission.permissions;
-      });
-    }
+        if ((this.collectionContent.getCollectionID()!=RestConstants.ROOT) && (this.collectionContent.collection.permission==null)) {
+            this.nodeService.getNodePermissions(this.collectionContent.getCollectionID()).subscribe( permission => {
+                this.collectionContent.collection.permission = permission.permissions;
+            });
+        }
 
   }
   onCreateCollection(){

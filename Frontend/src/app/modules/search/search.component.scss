@@ -290,7 +290,7 @@ small-collection{
   width: $sidenavWidth;
   padding-top: 10px;
   top:$mainnavHeight+110px;
-  height: calc(100% - #{$mainnavHeight} - 110px - 70px);
+  height: calc(100% - #{$mainnavHeight} - 180px);
   transition: $transitionNormal all ease;
   @include iosScrolling();
 }
@@ -613,3 +613,14 @@ div.dialog.darken {
   }
 }
 
+@media all and (max-width: $mobileTabSwitchWidth) {
+  .results{
+    margin-bottom: $mobileTabNavHeight;
+  }
+  .sidenav{
+    height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 180px);
+  }
+  .sidenavContainer .apply{
+    bottom:$mobileTabNavHeight;
+  }
+}

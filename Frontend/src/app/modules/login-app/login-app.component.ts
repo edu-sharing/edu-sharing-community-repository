@@ -14,7 +14,6 @@ import { UIHelper } from '../../common/ui/ui-helper';
 import { Translation } from '../../common/translation';
 import { TranslateService } from '@ngx-translate/core';
 import { RestHelper } from '../../common/rest/rest-helper';
-import { AnimationKeyframesSequenceMetadata } from '@angular/core/src/animation/dsl';
 import { STATUS_CODES } from 'http';
 
 // possible states this UI component can be in

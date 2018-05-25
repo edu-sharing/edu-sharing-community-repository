@@ -1,0 +1,33 @@
+@import "../../../../styles/variables.scss";
+
+.notice{
+  position: fixed;
+  z-index:$dialogZIndex+10;
+  display: flex;
+  align-items: center;
+  padding:15px 30px;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: $primary;
+  color: $textOnPrimary;
+  >div{
+    padding:5px;
+  }
+  .description{
+    flex-grow: 4;
+    white-space: pre-line;
+  }
+  .more{
+    text-decoration: underline;
+    flex-grow: 1;
+  }
+  .btn-flat:hover{
+    background-color:#eee;
+  }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+  .notice{
+    flex-direction: column;
+  }
+}

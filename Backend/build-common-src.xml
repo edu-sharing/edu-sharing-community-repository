@@ -370,6 +370,40 @@
 	</target>
 	<target name="deploy-reload" depends="deploy, reload">
 	</target>
+	<target name="deploy-ssh" depends="deploy, release, copy-ssh-true, copy-ssh-false">
+	</target>
+	<target name="copy-ssh-false" unless="ssh.host">
+		<fail>To use ssh/scp, configure in your build.username.properties ssh.host, ssh.username and ssh.password</fail>
+	</target>
+	<target name="copy-ssh-true" if="ssh.host">
+		<replace file="${release.foldername}/build.properties">
+		  <replacetoken><![CDATA[C:/myprogs/]]></replacetoken>
+		  <replacevalue><![CDATA[/opt/]]></replacevalue>
+		</replace>
+		<replace file="${release.foldername}/call-ant.sh">
+		  <replacetoken><![CDATA[java]]></replacetoken>
+		  <replacevalue><![CDATA[/opt/alfresco-5.0.d/java/bin/java]]></replacevalue>
+		</replace>
+		<sshexec
+		    host="${ssh.host}"
+		    username="${ssh.username}"
+		    password="${ssh.password}"
+		    command="rm -rf /opt/edu-sharing/ &amp;&amp; mkdir -p /opt/edu-sharing"
+		    trust="true" />
+		<scp password="${ssh.password}" 
+			todir="${ssh.username}@${ssh.host}:/opt/edu-sharing/" 
+		    compressed="true"
+		    filemode="744"
+			trust="true">
+				<fileset dir="${release.foldername}" />
+		</scp>
+		<sshexec
+		    host="${ssh.host}"
+		    username="${ssh.username}"
+		    password="${ssh.password}"
+		    command="/etc/init.d/alfresco stop &amp;&amp; cd /opt/edu-sharing &amp;&amp; ./install.sh &amp;&amp; /etc/init.d/alfresco start"
+		    trust="true" />
+	</target>
 
 
 	<target name="clean">

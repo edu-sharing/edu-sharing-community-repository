@@ -8,6 +8,7 @@
   "OK" : "ok",
   "BACK": "back",
   "NEXT": "continue",
+  "SKIP": "skip",
   "SAVE" : "save",
   "APPLY" : "apply",
   "CANCEL" : "cancel",
@@ -102,6 +103,7 @@
   "WRONG_PASSWORD":"The entered password is invalid",
   "PASSWORD_MIN_LENGTH":"The password must be at least {{length}} characters",
   "PASSWORD_NOT_MATCH":"The passwords do not match",
+  "LEARNINGAGE_YEAR":"Years",
   "GROUP_EVERYONE":"everybody",
   "DETAILS": "details",
   "INFO": "info",
@@ -146,6 +148,12 @@
     "ccm:author_freetext":"General Author information",
     "ccm:lifecyclecontributer_authorFN":"Author",
     "ccm:wf_status":"Status"
+  },
+  "COOKIE_INFO":{
+    "DESCRIPTION":"edu-sharing uses cookies to improve the user-friendliness of the site.\nIf you continue to use it, we'll assume you are ok with that.",
+    "MORE_LINK":"find out more",
+    "DIALOG_TITLE":"Cookies",
+    "DIALOG_MESSAGE":"Our website uses so-called cookies. Cookies do not cause any damage to your computer and do not contain any viruses.\nCookies are used to make our website more user-friendly, effective and secure. Cookies are small text files that are stored on your computer and saved by your browser. Most of the cookies we use are so-called \"session cookies\". They are automatically deleted at the end of your visit. Other cookies remain stored on your device until you delete them. These cookies enable us to recognize your browser the next time you visit our website.\nYou can set your browser so that you are informed about the usage of cookies and only allow cookies in individual cases, exclude the acceptance of cookies for certain cases or generally and activate the automatic deletion of cookies when closing the browser.\nWhen cookies are deactivated, the functionality of this website may be limited. "
   },
   "NODE_REPORT":{
     "TITLE":"Report problem",

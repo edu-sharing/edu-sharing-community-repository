@@ -8,6 +8,7 @@ import java.util.Set;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -41,12 +42,16 @@ public class VirtualEduGroupFolderTool {
 				List<ChildAssociationRef> children = new ArrayList<ChildAssociationRef>();
 				for(NodeRef eduGroupNodeRef : eduGroupNodeRefs){
 				
-					NodeRef eduGroupHomeDir = (NodeRef)nodeService.getProperty(eduGroupNodeRef, QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
-					
-					String groupName = (String)nodeService.getProperty(eduGroupNodeRef, ContentModel.PROP_AUTHORITY_NAME);
-					if(eduGroupHomeDir != null && nodeService.exists(eduGroupHomeDir) && authorities.contains(groupName)){
-						String eduGroupHomeDirName = (String)nodeService.getProperty(eduGroupHomeDir,ContentModel.PROP_NAME);
-						children.add(new ChildAssociationRef(ContentModel.ASSOC_CONTAINS,nodeRef,QName.createQName(eduGroupHomeDirName),eduGroupHomeDir));
+					try {
+						NodeRef eduGroupHomeDir = (NodeRef)nodeService.getProperty(eduGroupNodeRef, QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+						
+						String groupName = (String)nodeService.getProperty(eduGroupNodeRef, ContentModel.PROP_AUTHORITY_NAME);
+						if(eduGroupHomeDir != null && nodeService.exists(eduGroupHomeDir) && authorities.contains(groupName)){
+							String eduGroupHomeDirName = (String)nodeService.getProperty(eduGroupHomeDir,ContentModel.PROP_NAME);
+							children.add(new ChildAssociationRef(ContentModel.ASSOC_CONTAINS,nodeRef,QName.createQName(eduGroupHomeDirName),eduGroupHomeDir));
+						}
+					}catch(InvalidNodeRefException e) {
+						logger.debug("eduGroupNodeRef:" + eduGroupNodeRef + " is in edugroupcache but not available over nodeservice. maybe transaction aware problem.");
 					}
 				}
 				return children;

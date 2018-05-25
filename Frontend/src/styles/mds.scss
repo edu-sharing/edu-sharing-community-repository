@@ -31,6 +31,10 @@ mds .mdsGroup{
       align-self: center;
     }
   }
+  .label-light{
+    color:$textVeryLight;
+    padding: 5px 10px;
+  }
   > div{
     padding: 15px 0px;
   }
@@ -272,6 +276,64 @@ mds .mdsGroup{
     .materialize-textarea{
       min-height:1.5rem;
       height:1.5rem;
+    }
+  }
+  .childobjects_container {
+    >label{
+      font-weight: bold;
+    }
+    float:left;
+    width:calc(100% + 50px);
+    margin-left:-25px;
+    padding:15px 25px;
+    background-color: $workspaceMetadataBackground;
+    .mdsChildobjects {
+      padding-bottom: 20px;
+      float: left;
+      width: 100%;
+      .btn-flat {
+        float: left;
+        margin-top: 10px;
+      }
+      .list {
+        padding: 10px 0;
+        float: left;
+        width: 100%;
+        > div {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          padding: 6px 15px;
+          cursor: default;
+        }
+        > div:hover {
+          background-color: $workspaceSelectedBackground;
+        }
+        .icon {
+          width: $tableIconSize;
+          height: $tableIconSize;
+          background: #fff;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 12px;
+          > img {
+            width: 50%;
+          }
+        }
+        .name {
+          flex-grow: 1;
+          @include shortenText();
+          margin-right: 10px;
+        }
+        .license,.edit,.remove {
+          margin:0 5px;
+          color: $primary;
+          position: relative;
+          top: 2px;
+        }
+      }
     }
   }
   .mdsPreview{
