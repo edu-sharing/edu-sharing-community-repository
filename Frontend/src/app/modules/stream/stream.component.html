@@ -6,6 +6,9 @@
           [(searchQuery)]="searchQuery"
           (onSearch)="doSearch($event)"
 ></main-nav>
+<workspace-management
+    [(addToCollection)]="collectionNodes"
+></workspace-management>
 <div class="stream-container" infiniteScroll
 [scrollWindow]="true"
 (scrolled)="onScroll()">
@@ -22,7 +25,7 @@
     <div class="margin-show">
 
         <div class="stream-header-left row stream-marginfix">
-            <div *ngIf="menuOption == 'stream'" class="stream-title col s10 m12">Was gibt's Neues? </div>
+            <div *ngIf="menuOption == 'stream'" class="stream-title col s10 m12" (click)="sortieren()">Was gibt's Neues? </div>
             <div *ngIf="menuOption == 'gesehen'" class="stream-title col s10 m12">Schon gesehen </div>
             <i class="small material-icons arrow-menu-display col s2 " (click)="toggleMenuOptions()">keyboard_arrow_down</i>
             <span id="stream-title-date" class="stream-title-date col s12 m12">

@@ -6,6 +6,9 @@ import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
+import * as EduData from "../../common/rest/data-object"; //
+import {RestCollectionService} from "../../common/rest/services/rest-collection.service"; //
+import {Toast} from "../../common/ui/toast"; //
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
 import {RestMetadataService} from '../../common/rest/services/rest-metadata.service';
 import {RestNodeService} from '../../common/rest/services/rest-node.service';
@@ -23,6 +26,8 @@ import {RestMdsService} from "../../common/rest/services/rest-mds.service";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {ListItem} from "../../common/ui/list-item";
 import {MdsHelper} from "../../common/rest/mds-helper";
+import {NodeHelper} from "../../common/ui/node-helper"; //
+import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper"; //
 import {Observable} from 'rxjs/Rx';
 import {RestStreamService} from "../../common/rest/services/rest-stream.service";
 
@@ -56,6 +61,12 @@ export class StreamComponent {
       if(mm<10) {outstring += '0'+String(mm);} else {outstring +=  String(mm);}
       return outstring + '. ' + String(yyyy);
   }
+  public collectionNodes:EduData.Node[]; //
+  public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
+  public mainnav = true;
+  public nodeReport: Node;
+  public globalProgress=false;
+  public collectionContent:EduData.CollectionContent; //
   menuOption = 'stream';
   showMenuOptions = false;
   streams: any;
@@ -87,6 +98,8 @@ export class StreamComponent {
     private storage : TemporaryStorageService,
     private session : SessionStorageService,
     private title : Title,
+    private toast : Toast,
+    private collectionService : RestCollectionService,
     private config : ConfigurationService,
     private http: Http,
     private translate : TranslateService) {
@@ -96,9 +109,7 @@ export class StreamComponent {
 
       // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
       this.actionOptions.push(this.erledigtOption);
-      this.actionOptions.push(new OptionItem('In Samlung','arrow_upward',()=>{
-          alert('callback 2');
-      }));
+      this.actionOptions.push(new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToOtherCollection(node)));
       this.actionOptions.push(new OptionItem('Aus Stream entfernen','remove_circle',()=>{
         alert('callback 3');
     }));
@@ -143,8 +154,8 @@ export class StreamComponent {
   }
 
   sortieren() {
-    //console.log(this.streams);
-    console.log(this.actionOptions);
+    console.log(this.streams);
+    //console.log(this.actionOptions);
    // let temp = this.other['stream'].shift();
     //this.other['stream'].push(temp);
   }
@@ -157,6 +168,16 @@ export class StreamComponent {
     console.log(node.nodes[0].ref.id);
     this.seen(node.id);
     this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
+
+  }
+//
+  private addToOtherCollection(node:EduData.Node) {
+    console.log("add to other", this.streams);
+    console.log("node; ",node);
+
+    let result = this.streams.filter( (n: any) => (n.id == node) ).map( (n: any) => { return n.nodes[0] } );
+    console.log("res: ",result[0].ref.id);
+    this.collectionNodes = result[0].ref.id;
 
   }
 
