@@ -72,13 +72,18 @@ export class StreamComponent {
   streams: any;
   actionOptions:OptionItem[]=[];
 
-  erledigtOption = new OptionItem('Gesehen','check',(node: Node)=>{
-    this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
+  moveUpOption = new OptionItem('Ganz oben anzeigen','check',(node: Node)=>{
+    //this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   });
 
-  nichtErledigtOption = new OptionItem('Als ungesehen markieren','check',(node: Node)=>{
+  collectionOption = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node));
+
+  removeOption = new OptionItem('Aus Stream entfernen','remove_circle',()=>{});
+  
+  
+  /*new OptionItem('Als ungesehen markieren','check',(node: Node)=>{
     this.updateStream(node, STREAM_STATUS.OPEN).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.DONE) , error => console.log(error));
-  });
+  });*/
 
   // TODO: Store and use current search query
   searchQuery:string;
@@ -108,11 +113,8 @@ export class StreamComponent {
       });
 
       // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
-      this.actionOptions.push(this.erledigtOption);
-      this.actionOptions.push(new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node)));
-      this.actionOptions.push(new OptionItem('Aus Stream entfernen','remove_circle',()=>{
-        alert('callback 3');
-    }));
+      this.actionOptions.push(this.moveUpOption);
+      this.actionOptions.push(this.collectionOption);
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
 
   }
@@ -135,11 +137,13 @@ export class StreamComponent {
     if (option === 'stream') {
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
-      this.actionOptions[0] = this.erledigtOption;
+      this.actionOptions[0] = this.moveUpOption;
+      this.actionOptions[1] = this.collectionOption;
     } else {
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.DONE);
-      this.actionOptions[0] = this.nichtErledigtOption;
+      this.actionOptions[0] = this.collectionOption;
+      this.actionOptions[1] = this.removeOption;
     }
 
   }

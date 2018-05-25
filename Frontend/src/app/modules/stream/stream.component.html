@@ -20,6 +20,9 @@
         <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'gesehen' ? 'm-active' : 'm-inactive'">
                 <i class="tiny material-icons ">visibility</i> Schon gesehen
         </div>
+        <div class="choose-menu"  (click)="sortieren()" [ngClass]="menuOption == 'gesehen' ? 'm-inactive' : 'm-inactive'">
+            <i class="tiny material-icons ">settings</i> Einstellungen
+        </div>
     </div>    
     <div class="col s12 m8">
     <div class="margin-show">
@@ -38,11 +41,14 @@
                 <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'gesehen' ? 'm-active' : 'm-inactive'">
                         <i class="tiny material-icons ">visibility</i> Schon gesehen
                 </div>
+                <div class="choose-menu"  (click)="sortieren()" [ngClass]="menuOption == 'gesehen' ? 'm-inactive' : 'm-inactive'">
+                    <i class="tiny material-icons ">settings</i> Einstellungen
+                </div>
             </div>
         </div>    
         <!-- This could be a directive : -->   
-        <div class="stream-box row" *ngFor="let strm of streams" >
-           
+        <div class="stream-box" *ngFor="let strm of streams" >
+           <div class="row row-nomargin">
                 <div class="stream-box-title col s10" (click)="onStreamObjectClick(strm)">{{ strm.properties['add_to_stream_title'] || 'Schon gewusst?' }} </div>
                 <!-- todo: ngfor over strm.properties.['cclom:general_keyword'] -->
                 <div class="stream-box-main-vert col s2">
@@ -55,6 +61,7 @@
     
                     ></actionbar>
                 </div>
+            </div>
             
                 <div class="stream-box-desc">{{ strm.properties['add_to_stream_description'] || 'keine Beschreibung' }}</div> 
                 <div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
