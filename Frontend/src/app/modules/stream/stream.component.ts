@@ -109,7 +109,7 @@ export class StreamComponent {
 
       // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
       this.actionOptions.push(this.erledigtOption);
-      this.actionOptions.push(new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToOtherCollection(node)));
+      this.actionOptions.push(new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node)));
       this.actionOptions.push(new OptionItem('Aus Stream entfernen','remove_circle',()=>{
         alert('callback 3');
     }));
@@ -171,13 +171,9 @@ export class StreamComponent {
 
   }
 //
-  private addToOtherCollection(node:EduData.Node) {
-    console.log("add to other", this.streams);
-    console.log("node; ",node);
-
+  private addToCollection(node: EduData.Node) {
     let result = this.streams.filter( (n: any) => (n.id == node) ).map( (n: any) => { return n.nodes[0] } );
-    console.log("res: ",result[0].ref.id);
-    this.collectionNodes = result[0].ref.id;
+    this.collectionNodes = result;
 
   }
 
