@@ -83,6 +83,7 @@ export class NodeRenderComponent implements EventListener{
   private sequenceParent: Node;
   private canScrollLeft: boolean = false;
   private canScrollRight: boolean = false;
+  private childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
 
@@ -199,6 +200,7 @@ export class NodeRenderComponent implements EventListener{
           this.editor=params['editor'];
           this.fromLogin=params['fromLogin']=='true';
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
+          this.childobject_order = params['childobject_order'] ? params['childobject_order'] : -1;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
@@ -207,7 +209,16 @@ export class NodeRenderComponent implements EventListener{
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params['version'])
                   this.version=params['version'];
-                setTimeout(()=>this.node = params['node'],10);
+                if(this.childobject_order > -1) {
+                    this.nodeApi.getNodeChildobjects(params['node']).subscribe((data:NodeList)=>{
+                        let id = data.nodes[this.childobject_order].ref.id;
+                        if(this.childobject_order >= data.nodes.length)
+                          id = params['node'];
+                        setTimeout(()=>this.node = id,10);
+                    });
+                } else {
+                    setTimeout(()=>this.node = params['node'],10);
+                }
               });
             }
           });
@@ -419,15 +430,20 @@ export class NodeRenderComponent implements EventListener{
         if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data =>{
              this.sequenceParent = data.node;
+               this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+                   if(data.nodes.length > 0)
+                    this.sequence = data;
+                    setTimeout(()=>this.setScrollparameters(),100);
+               });
             });
         } else {
             this.sequenceParent = this._node;
+            this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+                if(data.nodes.length > 0)
+                  this.sequence = data;
+                  setTimeout(()=>this.setScrollparameters(),100);
+            });
         }
-        this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
-          if(data.nodes.length > 0)
-            this.sequence = data;
-            setTimeout(()=>this.setScrollparameters(),100);
-        });
     }
 
     private scroll(direction: string) {
