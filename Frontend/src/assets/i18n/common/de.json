@@ -190,7 +190,7 @@
     "EMAIL_PLACEHOLDER":"jemand@beispiel.de",
     "EMAIL_REQUIRED":"Bitte eine gültige E-Mail-Adresse angeben",
     "REASON_REQUIRED":"Bitte wählen Sie aus, welches Problem besteht",
-    "DONE":"Ihre Anfrage wurde gesendet. Vielen Dank!",
+    "DONE":"Vielen Dank für Ihre Meldung.",
     "REASONS": {
       "UNAVAILABLE":"Medium nicht verfügbar",
       "INAPPROPRIATE_CONTENT":"Problematischer Inhalt",
