@@ -10,6 +10,7 @@ public class ContentEntry{
 		
 		public enum STATUS{
 			OPEN,
+			READ,
 			PROGRESS,
 			DONE
 		};

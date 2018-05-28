@@ -14,7 +14,7 @@ import {
 export class RestStreamService {
   constructor(private connector : RestConnectorService) {}
 
-  public getStream = (status:STREAM_STATUS = STREAM_STATUS.OPEN,queryString:string="",queryProperties:any={},request:any=null,repository=RestConstants.HOME_REPOSITORY): Observable<MdsMetadatasets> => {
+  public getStream = (status:STREAM_STATUS = STREAM_STATUS.OPEN,queryString="",queryProperties:any={},request:any=null,repository=RestConstants.HOME_REPOSITORY): Observable<MdsMetadatasets> => {
     let query=this.connector.createUrlNoEscape("stream/:version/search/:repository?status=:status&query=:query&:request",repository,[
       [":status",encodeURIComponent(status)],
       [":query",encodeURIComponent(queryString)],
