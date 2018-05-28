@@ -4,11 +4,6 @@
   ],
   "rules": {
     "class-name": true,
-    "comment-format": [
-      true,
-      "check-space"
-    ],
-    "curly": true,
     "eofline": true,
     "forin": true,
     "indent": [
@@ -19,7 +14,7 @@
     "label-undefined": true,
     "max-line-length": [
       true,
-      140
+      300
     ],
     "member-access": false,
     "member-ordering": [
@@ -37,14 +32,14 @@
       "timeEnd",
       "trace"
     ],
-    "no-construct": true,
+    "no-construct": false,
     "no-debugger": true,
     "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-empty": false,
     "no-eval": true,
     "no-inferrable-types": true,
-    "no-shadowed-variable": true,
+    "no-shadowed-variable": false,
     "no-string-literal": false,
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
@@ -57,41 +52,13 @@
     "one-line": [
       true,
       "check-open-brace",
-      "check-catch",
-      "check-else",
-      "check-whitespace"
-    ],
-    "quotemark": [
-      true,
-      "single"
+      "check-catch"
     ],
     "radix": true,
     "semicolon": [
       "always"
     ],
-    "triple-equals": [
-      true,
-      "allow-null-check"
-    ],
-    "typedef-whitespace": [
-      true,
-      {
-        "call-signature": "nospace",
-        "index-signature": "nospace",
-        "parameter": "nospace",
-        "property-declaration": "nospace",
-        "variable-declaration": "nospace"
-      }
-    ],
     "variable-name": false,
-    "whitespace": [
-      true,
-      "check-branch",
-      "check-decl",
-      "check-operator",
-      "check-separator",
-      "check-type"
-    ],
 
     "directive-selector-prefix": [true, "app"],
     "component-selector-prefix": [true, "app"],
