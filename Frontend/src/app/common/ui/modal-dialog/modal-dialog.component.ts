@@ -44,6 +44,11 @@ export class ModalDialogComponent{
    */
   @Input() isScrollable = false;
   /**
+   * Should the dialog be fill the whole height? (use with isScrollable=true)
+   * @type {boolean}
+   */
+  @Input() isHigh = false;
+  /**
    * The title, will be translated automatically
    * The dialog will only be visible if the title is not null
    */

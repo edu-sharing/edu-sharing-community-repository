@@ -162,7 +162,7 @@
     "EMAIL_PLACEHOLDER":"somebody@example.net",
     "EMAIL_REQUIRED":"Please provide a valind e-mail address.",
     "REASON_REQUIRED":"Please select what kind of problem you are experiencing.",
-    "DONE":"Your request has been sent. Thank you very much!",
+    "DONE":"Thanks for your message.",
     "REASONS": {
       "UNAVAILABLE":"object not available",
       "INAPPROPRIATE_CONTENT":"problematic content",

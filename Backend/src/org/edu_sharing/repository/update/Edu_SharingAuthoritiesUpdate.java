@@ -14,6 +14,8 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
 
+import com.google.gwt.gen2.logging.shared.Log;
+
 public class Edu_SharingAuthoritiesUpdate extends UpdateAbstract {
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -99,6 +101,11 @@ public class Edu_SharingAuthoritiesUpdate extends UpdateAbstract {
 	@Override
 	public String getDescription() {
 		return description;
+	}
+	
+	@Override
+	public void run() {
+		this.logInfo("not implemented");
 	}
 
 }

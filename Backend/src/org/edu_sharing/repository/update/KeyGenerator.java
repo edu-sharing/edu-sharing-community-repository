@@ -124,4 +124,9 @@ public class KeyGenerator extends UpdateAbstract {
 		}
 
 	}
+	
+	@Override
+	public void run() {
+		this.logInfo("not implemented");
+	}
 }

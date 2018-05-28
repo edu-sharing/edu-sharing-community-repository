@@ -320,14 +320,19 @@ export class SearchComponent {
   public routeSearchParameters(parameters:any){
     this.routeSearch(this.searchService.searchTerm,this.currentRepository,this.mdsId,parameters);
   }
+  public getMdsValues(){
+    if(this.currentRepository==RestConstants.ALL)
+      return {};
+    return this.mdsRef.getValues()
+  }
   public routeAndClearSearch(query:any) {
     let parameters:any=null;
     if(this.mdsRef) {
-      parameters = this.mdsRef.getValues();
+      parameters = this.getMdsValues();
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
-  public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.mdsRef.getValues()){
+  public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.getMdsValues()){
     this.scrollTo();
     //this.searchService.init();
     this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
@@ -339,6 +344,7 @@ export class SearchComponent {
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
+    console.log(properties);
     if(this.isSearching && init || this.repositoryIds.length==0){
       setTimeout(()=>this.getSearch(searchString,init,properties),100);
       return;
@@ -724,7 +730,7 @@ export class SearchComponent {
     if (this.searchService.searchResult.length < 1) {
       this.initalized = true;
       if(!this.currentValues && this.mdsRef) {
-        this.currentValues = this.mdsRef.getValues();
+        this.currentValues = this.getMdsValues();
       }
       if(this.searchService.reinit)
         this.getSearch(this.searchService.searchTerm, true,this.currentValues);
@@ -1009,6 +1015,7 @@ export class SearchComponent {
         if(!paramRepo){
             paramRepo=RestConstants.HOME_REPOSITORY;
         }
+        let previousRepository=this.currentRepository;
         this.mdsSets=null;
         if(this.currentRepository!=paramRepo) {
           this.mdsId = RestConstants.DEFAULT;
@@ -1024,7 +1031,9 @@ export class SearchComponent {
           console.log(this.repositories);
           this.routeSearch(this.searchService.searchTerm,use,RestConstants.DEFAULT);
         }
-
+        if(this.currentRepository!=previousRepository){
+          this.currentValues=null;
+        }
         this.updateSelection([]);
         let repo=this.currentRepository;
         this.mdsService.getSets(repo).subscribe((data:MdsMetadatasets)=>{

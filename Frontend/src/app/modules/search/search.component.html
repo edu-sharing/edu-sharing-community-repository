@@ -217,7 +217,7 @@
           <i class="material-icons">search</i>
           {{'SEARCH.QUERY_NO_RESULT' | translate}}
         </div>
-        <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} <span *ngIf="searchService.resultCount.materials">({{searchService.resultCount.materials}})</span></div>
+        <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} <span *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</span></div>
       <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
       <listTable
         [nodes]="searchService.searchResult"
