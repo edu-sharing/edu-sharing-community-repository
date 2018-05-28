@@ -34,6 +34,10 @@ import {RestConnectorsService} from '../../common/rest/services/rest-connectors.
 import {UIAnimation} from '../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {Connector} from '../../common/rest/data-object';
+import {NodeWrapper} from '../../common/rest/data-object';
+import {Filetype} from '../../common/rest/data-object';
+import {FrameEventsService} from '../../common/services/frame-events.service';
+import {CordovaService} from '../../common/services/cordova.service';
 
 
 
@@ -109,8 +113,10 @@ export class StreamComponent {
     private connector:RestConnectorService,
     private connectors:RestConnectorsService,
     private nodeService: RestNodeService,
+    private cordova: CordovaService,
     private searchService: RestSearchService,
     private metadataService:RestMetadataService,
+    private event:FrameEventsService,
     private streamService:RestStreamService,
     private storage : TemporaryStorageService,
     private session : SessionStorageService,
@@ -213,9 +219,32 @@ export class StreamComponent {
   public updateStream(idToUpdate: any, status: any): Observable<any> {
     return this.streamService.updateStatus(idToUpdate, this.connector.getCurrentLogin().authorityName, status)
   }
-  private create(){
-      if(!this.createAllowed)
-          return;
-      this.showCreate = true;
-  }
+    private create(){
+        if(!this.createAllowed)
+            return;
+        this.showCreate = true;
+    }
+    private createConnector(event : any){
+        this.createConnectorName=null;
+        let prop=NodeHelper.propertiesFromConnector(event);
+        let win:any;
+        if(!this.cordova.isRunningCordova())
+            win=window.open("");
+        this.nodeService.createNode(RestConstants.INBOX,RestConstants.CCM_TYPE_IO,[],prop,false).subscribe(
+            (data : NodeWrapper)=>{
+                this.editConnector(data.node,event.type,win,this.createConnectorType);
+                UIHelper.goToWorkspaceFolder(this.nodeService,this.router,null,RestConstants.INBOX);
+            },
+            (error : any)=>{
+                win.close();
+                if(NodeHelper.handleNodeError(this.toast,event.name,error)==RestConstants.DUPLICATE_NODE_RESPONSE){
+                    this.createConnectorName=event.name;
+                }
+            }
+        )
+
+    }
+    private editConnector(node:Node,type : Filetype=null,win : any = null,connectorType : Connector = null){
+        UIHelper.openConnector(this.connectors,this.event,this.toast,this.connectorList,node,type,win,connectorType);
+    }
 }
