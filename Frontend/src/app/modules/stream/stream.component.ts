@@ -14,7 +14,7 @@ import {RestMetadataService} from '../../common/rest/services/rest-metadata.serv
 import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Node, NodeList, LoginResult, STREAM_STATUS} from '../../common/rest/data-object';
+import {Node, NodeList, LoginResult, STREAM_STATUS, ConnectorList} from '../../common/rest/data-object';
 import {OptionItem} from "../../common/ui/actionbar/option-item";
 import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
 import {UIHelper} from "../../common/ui/ui-helper";
@@ -30,6 +30,10 @@ import {NodeHelper} from "../../common/ui/node-helper"; //
 import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper"; //
 import {Observable} from 'rxjs/Rx';
 import {RestStreamService} from "../../common/rest/services/rest-stream.service";
+import {RestConnectorsService} from '../../common/rest/services/rest-connectors.service';
+import {UIAnimation} from '../../common/ui/ui-animation';
+import {trigger} from '@angular/animations';
+import {Connector} from '../../common/rest/data-object';
 
 
 
@@ -37,8 +41,10 @@ import {RestStreamService} from "../../common/rest/services/rest-stream.service"
   selector: 'app-stream',
   templateUrl: 'stream.component.html',
   styleUrls: ['stream.component.scss'],
+  animations:[
+      trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
+  ]
   })
-
 
 
 export class StreamComponent {
@@ -61,6 +67,11 @@ export class StreamComponent {
       if(mm<10) {outstring += '0'+String(mm);} else {outstring +=  String(mm);}
       return outstring + '. ' + String(yyyy);
   }
+  private connectorList: ConnectorList;
+  private createConnectorName: string;
+  private createConnectorType: Connector;
+  private createAllowed : boolean ;
+  private showCreate = false;
   public collectionNodes:EduData.Node[]; //
   public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
   public mainnav = true;
@@ -96,6 +107,7 @@ export class StreamComponent {
     private router : Router,
     private route : ActivatedRoute,
     private connector:RestConnectorService,
+    private connectors:RestConnectorsService,
     private nodeService: RestNodeService,
     private searchService: RestSearchService,
     private metadataService:RestMetadataService,
@@ -110,6 +122,13 @@ export class StreamComponent {
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
+        this.connector.isLoggedIn().subscribe(data => {
+            console.log(data);
+            this.createAllowed=data.statusCode==RestConstants.STATUS_CODE_OK;
+        });
+          this.connectors.list().subscribe(list=>{
+              this.connectorList=list;
+          });
       });
 
       // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
@@ -194,6 +213,9 @@ export class StreamComponent {
   public updateStream(idToUpdate: any, status: any): Observable<any> {
     return this.streamService.updateStatus(idToUpdate, this.connector.getCurrentLogin().authorityName, status)
   }
-
-
+  private create(){
+      if(!this.createAllowed)
+          return;
+      this.showCreate = true;
+  }
 }

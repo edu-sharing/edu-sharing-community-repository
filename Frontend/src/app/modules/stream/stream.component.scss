@@ -183,3 +183,27 @@
 .row-nomargin{
     margin-bottom: 0;
 }
+.create{
+    z-index:85;
+    position:fixed;
+    right:25px;
+    bottom:25px+$mobileTabNavHeight;
+}
+.dialogCreate{
+    z-index:100;
+}
+.createMenu{
+    position: fixed;
+    width: 200px;
+    right:53px;
+    bottom:38px+$mobileTabNavHeight;
+    z-index:105;
+    .connectorBeta{
+        height: auto;
+        float: right;
+        position: absolute;
+        width: 30px;
+        margin-top: 10px;
+        right: 7px;
+    }
+}
