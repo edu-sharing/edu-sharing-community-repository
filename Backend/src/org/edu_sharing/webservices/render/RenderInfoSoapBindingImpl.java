@@ -46,6 +46,7 @@ import org.edu_sharing.repository.server.tools.LocaleValidator;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.license.LicenseService;
+import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -176,7 +177,6 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		//HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.ALL_AUTHORITIES, new String[]{PermissionService.READ});
 		HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.GUEST_AUTHORITY, new String[]{PermissionService.READ});
 		rir.setGuestReadAllowed(new Boolean(permsGuest.get(PermissionService.READ)));
-		
 		HashMap versionProps = null;
 		boolean collectionRefOriginalDeleted = false;
 		
@@ -241,7 +241,8 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			HashMap<String, Object> propsNew = NodeServiceFactory.getNodeService(appInfo.getAppId()).getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), remoteId);
 			props.putAll(propsNew);
 		}
-		
+		rir.setIconURL(new MimeTypesV2(appInfo).getIcon(nodeType,props,Arrays.asList(aspects)));
+
 		if(collectionRefOriginalDeleted){
 			props.put(CCConstants.VIRT_PROP_ORIGINAL_DELETED, "true");
 		}

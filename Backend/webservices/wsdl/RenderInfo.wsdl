@@ -45,6 +45,7 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element name="eduSchoolPrimaryAffiliation" nillable="true" type="xsd:string"/>
      <element name="guestReadAllowed" nillable="true" type="xsd:boolean"/>
      <element name="hasContentLicense" nillable="true" type="xsd:boolean"/>
+     <element name="iconURL" nillable="true" type="xsd:string"/>
      <element name="labels" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
      <element name="mdsTemplate" nillable="true" type="xsd:string"/>
      <element name="mimeTypeUrl" nillable="true" type="xsd:string"/>

@@ -20,6 +20,8 @@ public class RenderInfoResult  implements java.io.Serializable {
 
     private java.lang.Boolean hasContentLicense;
 
+    private java.lang.String iconURL;
+
     private org.edu_sharing.webservices.types.KeyValue[] labels;
 
     private java.lang.String mdsTemplate;
@@ -50,6 +52,7 @@ public class RenderInfoResult  implements java.io.Serializable {
            java.lang.String eduSchoolPrimaryAffiliation,
            java.lang.Boolean guestReadAllowed,
            java.lang.Boolean hasContentLicense,
+           java.lang.String iconURL,
            org.edu_sharing.webservices.types.KeyValue[] labels,
            java.lang.String mdsTemplate,
            java.lang.String mimeTypeUrl,
@@ -66,6 +69,7 @@ public class RenderInfoResult  implements java.io.Serializable {
            this.eduSchoolPrimaryAffiliation = eduSchoolPrimaryAffiliation;
            this.guestReadAllowed = guestReadAllowed;
            this.hasContentLicense = hasContentLicense;
+           this.iconURL = iconURL;
            this.labels = labels;
            this.mdsTemplate = mdsTemplate;
            this.mimeTypeUrl = mimeTypeUrl;
@@ -196,6 +200,26 @@ public class RenderInfoResult  implements java.io.Serializable {
      */
     public void setHasContentLicense(java.lang.Boolean hasContentLicense) {
         this.hasContentLicense = hasContentLicense;
+    }
+
+
+    /**
+     * Gets the iconURL value for this RenderInfoResult.
+     * 
+     * @return iconURL
+     */
+    public java.lang.String getIconURL() {
+        return iconURL;
+    }
+
+
+    /**
+     * Sets the iconURL value for this RenderInfoResult.
+     * 
+     * @param iconURL
+     */
+    public void setIconURL(java.lang.String iconURL) {
+        this.iconURL = iconURL;
     }
 
 
@@ -426,6 +450,9 @@ public class RenderInfoResult  implements java.io.Serializable {
             ((this.hasContentLicense==null && other.getHasContentLicense()==null) || 
              (this.hasContentLicense!=null &&
               this.hasContentLicense.equals(other.getHasContentLicense()))) &&
+            ((this.iconURL==null && other.getIconURL()==null) || 
+             (this.iconURL!=null &&
+              this.iconURL.equals(other.getIconURL()))) &&
             ((this.labels==null && other.getLabels()==null) || 
              (this.labels!=null &&
               java.util.Arrays.equals(this.labels, other.getLabels()))) &&
@@ -498,6 +525,9 @@ public class RenderInfoResult  implements java.io.Serializable {
         }
         if (getHasContentLicense() != null) {
             _hashCode += getHasContentLicense().hashCode();
+        }
+        if (getIconURL() != null) {
+            _hashCode += getIconURL().hashCode();
         }
         if (getLabels() != null) {
             for (int i=0;
@@ -607,6 +637,12 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField.setFieldName("hasContentLicense");
         elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "hasContentLicense"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("iconURL");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "iconURL"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();

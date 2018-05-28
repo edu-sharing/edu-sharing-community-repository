@@ -34,6 +34,8 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	KeyValue[] labels;
 	
 	Child[] childs;
+
+	String iconURL;
 	
 	String previewUrl;
 	
@@ -205,6 +207,12 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	public void setChilds(Child[] childs) {
 		this.childs = childs;
 	}
-    
-    
+
+	public String getIconURL() {
+		return iconURL;
+	}
+
+	public void setIconURL(String iconURL) {
+		this.iconURL = iconURL;
+	}
 }
