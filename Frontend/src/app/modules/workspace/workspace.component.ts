@@ -51,6 +51,8 @@ import {EventListener} from "../../common/services/frame-events.service";
     ]
 })
 export class WorkspaceMainComponent implements EventListener{
+    private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
+    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
     private isRootFolder : boolean;
     private homeDirectory : string;
     private sharedFolders : Node[]=[];
@@ -58,12 +60,11 @@ export class WorkspaceMainComponent implements EventListener{
     private parameterNode : Node;
     private metadataNode : String;
     private root = "MY_FILES";
-    private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
-    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
+
     private explorerOptions : OptionItem[]=[];
     private actionOptions : OptionItem[]=[];
     private selection : Node[]=[];
-    public fileIsOver: boolean = false;
+    public fileIsOver = false;
 
     private dialogTitle : string;
     private dialogCancelable = false;
@@ -122,9 +123,6 @@ export class WorkspaceMainComponent implements EventListener{
     private oldParams: Params;
     private selectedNodeTree: string;
     private nodeDebug: Node;
-    private hideDialog() : void{
-        this.dialogTitle=null;
-    }
     private sharedNode : Node;
     public contributorNode : Node;
     public shareLinkNode : Node;
@@ -245,6 +243,9 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private uploadCamera(event:any){
         this.filesToUpload=event.target.files;
+    }
+    private hideDialog() : void{
+        this.dialogTitle=null;
     }
     private openCamera(){
         this.cordova.getPhotoFromCamera((data:any)=>{
