@@ -367,5 +367,7 @@
 	<classpathentry kind="var" path="ALFRESCO_50d_TOMCAT_LIB"/>
 	<classpathentry kind="var" path="ALFRESCO_50d_WEBAPP_LIB"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.10-alfresco-patched.jar"/>
+	<classpathentry kind="lib" path="lib/handle-client.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

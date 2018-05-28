@@ -52,7 +52,6 @@ import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -61,20 +60,20 @@ import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.StringTool;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
-import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
-import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.handle.HandleService;
+import org.edu_sharing.service.handle.HandleServiceNotConfiguredException;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+import net.handle.hdllib.Common;
+import net.handle.hdllib.HandleValue;
 
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
@@ -261,6 +260,20 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
+			if (AuthorityType.EVERYONE.equals(authorityType)) {
+				
+				try {
+					HandleService handleService = new HandleService();
+					String contentLink =  MailTemplate.generateContentLink(appInfo, _nodeId);
+					HandleValue hv = new HandleValue(1,Common.STD_TYPE_URL,contentLink.getBytes());
+					handleService.createHandle(_nodeId,null, new HandleValue[]{hv});
+				}catch(HandleServiceNotConfiguredException e) {
+					logger.info("handle server not configured");
+				}catch(Exception e) {
+					logger.error(e.getMessage());
+				}
+			}
+			
 			if (AuthorityType.USER.equals(authorityType)) {
 				HashMap<String, String> personInfo = repoClient.getUserInfo(authority);
 
