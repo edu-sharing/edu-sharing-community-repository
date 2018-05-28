@@ -512,10 +512,15 @@ $orderAnimationTime:$transitionNormal*5;
   max-height:1.5rem;
   overflow: hidden;
 }
-.cardSmallList .rowInner{
-  max-height: 3.15rem;
-  word-break: normal;
-  overflow-wrap: break-word;
+.cardSmallList{
+  .row_1 .rowInner{
+    min-height: 3.15rem;
+  }
+  .rowInner{
+    max-height: 3.15rem;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
 }
 .node_ccm_commonlicense_key .rowInner,
 .cardList .rowInner{

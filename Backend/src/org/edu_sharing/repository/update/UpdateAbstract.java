@@ -1,8 +1,10 @@
 package org.edu_sharing.repository.update;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.CCConstants;
 
 public abstract class UpdateAbstract implements Update {
 
@@ -33,5 +35,23 @@ public abstract class UpdateAbstract implements Update {
 			}
 		}
 	}
+	
+	protected void executeWithProtocolEntry() {
+		try{
+			
+			Protocol protocol = new Protocol();
+			HashMap<String,Object> updateInfo = protocol.getSysUpdateEntry(this.getId());
+			if(updateInfo == null){
+				run();
+			}else{
+				logInfo("update" +this.getId()+ " already done at "+updateInfo.get(CCConstants.CCM_PROP_SYSUPDATE_DATE));
+			}
+			
+		}catch(Throwable e){
+			logError(e.getMessage(),e);
+		}
+	}
+	
+	public abstract void run();
 	
 }

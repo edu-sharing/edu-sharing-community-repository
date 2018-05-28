@@ -24,7 +24,7 @@ export class Translation  {
    * Initializes ng translate and returns the choosen language
    * @param translate
    */
-  private static LANGUAGES:any={
+  public static LANGUAGES:any={
     "de":"de_DE",
     "en":"en_US",
   };
@@ -148,7 +148,7 @@ export class TranslationLoader implements TranslateLoader {
     }
     if(!this.locator.getCordova().isRunningCordova() || this.locator.getCordova().hasValidConfig()) {
       maxCount++;
-      this.locator.getConfigLanguage(lang).subscribe((data: any) => {
+      this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
           translations.push(data);
       });
     }
@@ -173,7 +173,7 @@ export class TranslationLoader implements TranslateLoader {
           for (const key in obj) {
             let path=key.split(".");
             if(path.length==1) {
-              continue
+              continue;
             }
             else if(path.length==2){
               final[path[0]][path[1]]=obj[key];

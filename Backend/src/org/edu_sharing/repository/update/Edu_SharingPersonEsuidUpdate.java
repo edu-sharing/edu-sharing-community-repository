@@ -108,5 +108,10 @@ public class Edu_SharingPersonEsuidUpdate extends UpdateAbstract {
 	public String getDescription() {
 		return description;
 	}
+	
+	@Override
+	public void run() {
+		this.logInfo("not implemented");
+	}
 
 }

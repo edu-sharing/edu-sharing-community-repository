@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -114,72 +115,8 @@ public class RenderingProxy extends HttpServlet {
 		}
 			
 		if("window".equals(display)) {
-			
-			if(uEncrypted == null) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no user provided");
-				return;
-			}
-			
-			String encTicket = req.getParameter("ticket");
-			if(encTicket == null) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no ticket provided");
-				return;
-			}
-			
-			String ticket = null;
-			Encryption enc = new Encryption("RSA");
-			try {
-				ticket = enc.decrypt(Base64.decodeBase64(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
-			}catch(GeneralSecurityException e) {
-				logger.error(e.getMessage(), e);
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
-				return;
-			}
-			
-			
-			
-			/**
-			 * when it's an lms the user who is in a course where the node is used (Angular path can not handle signatures) 
-			 * 
-			 * doing edu ticket auth
-			 */
-			if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
-				HttpSession session = req.getSession(true);
-				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
-				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
-				
-				//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
-				AuthenticationToolAPI authTool = new AuthenticationToolAPI();
-				if(authTool.validateTicket(ticket)) {
-					authTool.storeAuthInfoInSession(usernameDecrypted, ticket,CCConstants.AUTH_TYPE_DEFAULT, session);
-				}else {
-					logger.warn("ticket:" + ticket +" is not valid");
-					return;
-				}
-			}else {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
-				return;
-			}
-			
-			String paramVersion=req.getParameter("version");
-			String version="/"+paramVersion;
-			if(paramVersion==null || !StringUtils.isNumeric(paramVersion)) {
-				logger.warn("parameter version missing, will use latest (-1)");
-				version="";
-			}
-			try {
-				if(Double.parseDouble(paramVersion)<1)
-					version="";
-			}catch(Throwable t) {
-				logger.warn("parameter version is non-numeric ("+paramVersion+"), will use latest (-1)");
-				version="";
-			}
-			String closeOnBack="";
-			if(req.getParameter("closeOnBack")!=null){
-				closeOnBack="?closeOnBack="+req.getParameter("closeOnBack");
-			}
-			String urlWindow = URLTool.getNgRenderNodeUrl(nodeId)+version+closeOnBack;
-			resp.sendRedirect(urlWindow);
+
+			openWindow(req, resp, nodeId, appInfoApplication, usernameDecrypted);
 			return;
 		}
 		
@@ -389,5 +326,90 @@ public class RenderingProxy extends HttpServlet {
 		}
 		
 	}
-	
+
+	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, ApplicationInfo appInfoApplication, String usernameDecrypted) throws IOException {
+		String ts = req.getParameter("ts");
+		String uEncrypted = req.getParameter("u");
+
+		if(uEncrypted == null) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no user provided");
+			return true;
+		}
+
+		String encTicket = req.getParameter("ticket");
+		if(encTicket == null) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no ticket provided");
+			return true;
+		}
+
+		String ticket = null;
+		Encryption enc = new Encryption("RSA");
+		try {
+			ticket = enc.decrypt(Base64.decodeBase64(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
+		}catch(GeneralSecurityException e) {
+			logger.error(e.getMessage(), e);
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
+			return true;
+		}
+
+
+		/**
+		 * when it's an lms the user who is in a course where the node is used (Angular path can not handle signatures)
+		 *
+		 * doing edu ticket auth
+		 */
+		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
+			HttpSession session = req.getSession(true);
+			req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
+			req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
+
+			//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
+			AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+			if(authTool.validateTicket(ticket)) {
+				authTool.storeAuthInfoInSession(usernameDecrypted, ticket,CCConstants.AUTH_TYPE_DEFAULT, session);
+			}else {
+				logger.warn("ticket:" + ticket +" is not valid");
+				return true;
+			}
+		}else {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
+			return true;
+		}
+
+		String paramVersion=req.getParameter("version");
+		String version="/"+paramVersion;
+
+		if(paramVersion==null || !StringUtils.isNumeric(paramVersion)) {
+			logger.warn("parameter version missing, will use latest (-1)");
+			version="";
+		}
+		try {
+			if(Double.parseDouble(paramVersion)<1)
+				version="";
+		}catch(Throwable t) {
+			logger.warn("parameter version is non-numeric ("+paramVersion+"), will use latest (-1)");
+			version="";
+		}
+
+		String urlWindow = URLTool.getNgRenderNodeUrl(nodeId)+version;
+
+		Map parameterMap = req.getParameterMap();
+		for(Object o : parameterMap.entrySet()) {
+			Map.Entry entry = (Map.Entry) o;
+			String key = (String)entry.getKey();
+			if(!(key.equals("closeOnBack") || key.equals("childobject_order"))) {
+				continue;
+			}
+			String value;
+			if(entry.getValue() instanceof String[]){
+				value = ((String[])entry.getValue())[0];
+			}else{
+				value = (String)entry.getValue();
+			}
+			urlWindow = UrlTool.setParam(urlWindow,key,value);
+		}
+		resp.sendRedirect(urlWindow);
+		return false;
+	}
+
 }

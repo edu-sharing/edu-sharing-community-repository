@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Backend/CCSearch.iml" filepath="$PROJECT_DIR$/Backend/CCSearch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/DaBi/DaBi.iml" filepath="$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/DaBi/DaBi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/Jointly/Jointly.iml" filepath="$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/Jointly/Jointly.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/JointlyPlayground/JointlyPlayground.iml" filepath="$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/JointlyPlayground/JointlyPlayground.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/LaSiDig/LaSiDig.iml" filepath="$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/LaSiDig/LaSiDig.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/LogineoHamburg/LogineoPaedagogik.iml" filepath="$PROJECT_DIR$/Edu-Sharing-Internal/Backend/extensions/LogineoHamburg/LogineoPaedagogik.iml" />
+    </modules>
+  </component>
+</project>
