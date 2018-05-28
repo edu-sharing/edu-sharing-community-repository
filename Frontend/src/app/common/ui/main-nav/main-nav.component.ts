@@ -590,7 +590,7 @@ export class MainNavComponent {
         if(this.isGuest){
           if(this.config.loginOptions){
             for(let login of this.config.loginOptions){
-              this.userMenuOptions.push(new OptionItem(login.name,'',()=>window.location.href=login.url);
+              this.userMenuOptions.push(new OptionItem(login.name,'',()=>window.location.href=login.url));
             }
           }
           else{
