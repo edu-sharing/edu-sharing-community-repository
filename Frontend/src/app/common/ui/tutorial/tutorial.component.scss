@@ -1,6 +1,7 @@
 @import "../../../../styles/variables.scss";
 
 .tutorial{
+  font-size:20px;
   position: fixed;
   opacity: 1;
   left:0;
@@ -42,5 +43,10 @@
   }
   .description{
     padding:10px;
+  }
+}
+@media screen and (max-width: ($mobileTabSwitchWidth)) {
+  .tutorial {
+    font-size: 14px;
   }
 }
