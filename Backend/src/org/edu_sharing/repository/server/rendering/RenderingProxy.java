@@ -397,10 +397,16 @@ public class RenderingProxy extends HttpServlet {
 		for(Object o : parameterMap.entrySet()) {
 			Map.Entry entry = (Map.Entry) o;
 			String key = (String)entry.getKey();
-			String value = (String)entry.getValue();
-			if(key.equals("closeOnBack") || key.equals("childobject_order")){
-				urlWindow = UrlTool.setParam(urlWindow,key,value);
+			if(!(key.equals("closeOnBack") || key.equals("childobject_order"))) {
+				continue;
 			}
+			String value;
+			if(entry.getValue() instanceof String[]){
+				value = ((String[])entry.getValue())[0];
+			}else{
+				value = (String)entry.getValue();
+			}
+			urlWindow = UrlTool.setParam(urlWindow,key,value);
 		}
 		resp.sendRedirect(urlWindow);
 		return false;
