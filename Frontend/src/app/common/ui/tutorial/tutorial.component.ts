@@ -1,7 +1,8 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {DomSanitizer, SafeStyle} from "@angular/platform-browser";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../ui-animation";
+import {KeyEvents} from '../key-events';
 
 @Component({
   selector: 'tutorial',
@@ -13,8 +14,8 @@ import {UIAnimation} from "../ui-animation";
 })
 export class TutorialComponent implements OnInit {
   private static activeTutorial:ElementRef=null;
-  @ViewChild('tutoral') tutorial : ElementRef;
   private static PADDING_TOLERANCE=50;
+  @ViewChild('tutoral') tutorial : ElementRef;
   private background: SafeStyle;
   private show = false;
   private alignEnd:boolean;
@@ -23,14 +24,24 @@ export class TutorialComponent implements OnInit {
   @Input() rgbColor = [0,0,0];
   //@Input() rgbColor = [72,112,142];
   @Input() showSkip = true;
-  @Input() heading = "TEST";
-  @Input() description = "lorem ipsum dolor sit amet";
+  @Input() heading : string;
+  @Input() description : string
   @Input() set element(element : ElementRef){
     console.log(element);
     this.setElement(element);
   }
   @Output() onNext = new EventEmitter();
   @Output() onSkip = new EventEmitter();
+
+    @HostListener('document:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        if (event.key == "Escape" && this.show) {
+            this.next();
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
+
   constructor(private sanitizer:DomSanitizer) { }
 
   ngOnInit() {
