@@ -34,7 +34,7 @@
 	        </fileset>
 	    </path> 
 
-	<target name="release">
+	<target name="release" description="Build Release">
 		
 		<!--incrementimng build number-->
 		<buildnumber file="build.number"/>
