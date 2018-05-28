@@ -38,6 +38,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -64,6 +65,7 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
+import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -946,6 +948,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				searchQuery.append(" AND (").append(groupPathQuery).append(")");
 			}
 		}
+		filterGuestAuthority(searchQuery);
 
 		if (subQuery.length() > 0) {
 			searchQuery.append(" AND (").append(subQuery).append(")");
@@ -954,6 +957,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		logger.info("findUsers: " + searchQuery);
 
 		return searchQuery;
+	}
+
+	private void filterGuestAuthority(StringBuffer searchQuery) {
+		String guest=ApplicationInfoList.getHomeRepository().getGuest_username();
+		if(guest!=null && !guest.trim().isEmpty()){
+			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"");
+		}
 	}
 
 	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
