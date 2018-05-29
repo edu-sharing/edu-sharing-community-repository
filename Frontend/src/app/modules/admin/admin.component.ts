@@ -29,7 +29,8 @@ import {SuggestItem} from "../../common/ui/autocomplete/autocomplete.component";
 import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
 import {RestHelper} from "../../common/rest/rest-helper";
-import {Observable, Observer} from "rxjs/index";
+import {Observable} from "rxjs/Observable";
+import {Observer} from "rxjs/Observer";
 
 
 @Component({
@@ -68,6 +69,10 @@ export class AdminComponent {
   public xmlAppAdditionalPropertyName:string;
   public xmlAppAdditionalPropertyValue:string;
   private parentNode: Node;
+    public selectedTemplate:string = '';
+    public templates:string[];
+    public eduGroupSuggestions:SuggestItem[];
+    public eduGroupsSelected:SuggestItem[] = [];
   public catalina : string;
   private oaiClasses: string[];
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
@@ -95,9 +100,6 @@ export class AdminComponent {
               private node: RestNodeService,
               private searchApi: RestSearchService,
               private organization: RestOrganizationService) {
-      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
-      this.searchColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
-      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
       this.warningButtons=[
@@ -398,6 +400,7 @@ export class AdminComponent {
   public getTemplates() {
       this.getTemplateFolderId().subscribe((id) => {
           this.node.getChildren(id).subscribe((data) => {
+              console.log(data);
               let templates = [];
               for(let node of data.nodes) {
                   if(node.name.split('.').pop() == 'xml') {
@@ -495,6 +498,12 @@ export class AdminComponent {
         }, (error: any) => {
             this.toast.error(error,'ADMIN.FOLDERTEMPLATES.TEMPLATE_NOTAPPLIED', {templatename:this.selectedTemplate, groupname:this.eduGroupsSelected[position].id});
             this.applyTemplate(position + 1);
+        });
+    }
+
+    public gotoFoldertemplateFolder() {
+        this.getTemplateFolderId().subscribe((id) => {
+            this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"],{queryParams:{id:id}});
         });
     }
 }
