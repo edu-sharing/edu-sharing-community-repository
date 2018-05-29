@@ -26,7 +26,7 @@ public interface PermissionService {
 	 */
 	public void addPermissions(String _nodeId, HashMap<String,String[]> _authPerm, 
 			Boolean _inheritPermissions, String _mailText, Boolean _sendMail, 
-			Boolean _sendCopy) throws Throwable;
+			Boolean _sendCopy, Boolean createHandle) throws Throwable;
 	
 	
 	/**
@@ -41,7 +41,7 @@ public interface PermissionService {
 	 * @throws Throwable
 	 */
 	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, 
-			String mailText, Boolean sendMail, Boolean sendCopy) throws Throwable;
+			String mailText, Boolean sendMail, Boolean sendCopy, Boolean createHandle) throws Throwable;
 
 
 	List<Notify> getNotifyList(String nodeId) throws Throwable;
