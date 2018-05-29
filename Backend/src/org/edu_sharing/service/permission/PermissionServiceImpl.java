@@ -189,7 +189,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 				authPermissions.put(toAdd.getAuthority(), permissions);
 			}
-			addPermissions(nodeId, authPermissions, inheritPermissions, mailText, sendMail, sendCopy);
+			addPermissions(nodeId, authPermissions, inheritPermissions, mailText, sendMail, sendCopy,createHandle);
 		}
 
 		if (acesToUpdate.size() > 0) {
@@ -222,7 +222,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 	@Override
 	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
-			String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
+			String _mailText, Boolean _sendMail, Boolean _sendCopy, Boolean createHandle) throws Throwable {
 
 		EmailValidator mailValidator = EmailValidator.getInstance(true, true);
 
@@ -273,11 +273,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				
 				HandleService handleService = null;
 				String handle = null;
-				try {
-					 handleService = new HandleService();
-					 handle = handleService.generateHandle(_nodeId, newVersion);
-				}catch(HandleServiceNotConfiguredException e) {
-					logger.info("handle server not configured");
+				
+				
+				if(createHandle && toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
+					try {
+						 handleService = new HandleService();
+						 handle = handleService.generateHandle(_nodeId, newVersion);
+					}catch(HandleServiceNotConfiguredException e) {
+						logger.info("handle server not configured");
+					}
 				}
 				
 				Map<QName,Serializable> publishedProps = new HashMap<QName,Serializable>();
@@ -306,7 +310,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					vprops.put(entry.getKey().getPrefixString(), entry.getValue());
 				}
 				new MCAlfrescoAPIClient().createVersion(_nodeId, vprops);
-				if(handleService != null) {
+				if(handleService != null && handle != null) {
 					try {
 						String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
 						handleService.createHandle(handle,handleService.getDefautValues(contentLink));

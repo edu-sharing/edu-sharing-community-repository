@@ -26,7 +26,7 @@ public interface PermissionService {
 	 */
 	public void addPermissions(String _nodeId, HashMap<String,String[]> _authPerm, 
 			Boolean _inheritPermissions, String _mailText, Boolean _sendMail, 
-			Boolean _sendCopy) throws Throwable;
+			Boolean _sendCopy, Boolean createHandle) throws Throwable;
 	
 	
 	/**
