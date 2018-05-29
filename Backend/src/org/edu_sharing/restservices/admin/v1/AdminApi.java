@@ -83,8 +83,31 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
-	
-	@OPTIONS    
+
+	@POST
+	@Path("/applyTemplate")
+
+	@ApiOperation(value = "apply a folder template", notes = "apply a folder template.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response applyTemplate(@Context HttpServletRequest req,
+			@ApiParam(value = "Template Filename", required = true) @QueryParam("template") String template,
+			@ApiParam(value = "Group name (authority name)", required = true) @QueryParam("group") String group,
+			@ApiParam(value = "Folder name", required = false) @QueryParam("folder") String folder) {
+		try {
+			AdminServiceFactory.getInstance().applyTemplate(template, group, folder);
+			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@OPTIONS
 	@Path("/refreshAppInfo")
     @ApiOperation(hidden = true, value = "")
 

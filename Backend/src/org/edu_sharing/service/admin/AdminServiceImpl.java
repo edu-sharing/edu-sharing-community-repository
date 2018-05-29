@@ -86,6 +86,8 @@ import org.edu_sharing.repository.update.Update;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
+import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
+import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -503,6 +505,15 @@ public class AdminServiceImpl implements AdminService  {
 	    return (Integer) activeSessions;	
 	}
 	
+	@Override
+	public void applyTemplate(String template,String group,String folderId) throws Throwable{
+		FolderTemplatesImpl ft = new FolderTemplatesImpl(new MCAlfrescoAPIClient());
+	 	ft.setTemplate(template,group, folderId);
+	 	List<String> slist = ft.getMessage();
+	 	String error=slist.toString();
+	 	if(!error.isEmpty())
+	 		throw new Exception(error);
+	}
 	@Override
 	public Collection<NodeRef> getActiveNodeLocks(){
 		 return EditLockServiceFactory.getEditLockService().getActiveLocks();

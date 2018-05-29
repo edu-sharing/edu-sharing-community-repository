@@ -64,6 +64,8 @@ public interface AdminService {
 
 	int getActiveSessions() throws Exception;
 
+	void applyTemplate(String template, String group, String folderId) throws Throwable;
+
 	Collection<NodeRef> getActiveNodeLocks();
 
 	List<String> getCatalinaOut() throws IOException;
