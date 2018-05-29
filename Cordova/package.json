@@ -2,15 +2,17 @@
     "name": "org.edusharing.app.cordova",
     "displayName": "edu-sharing",
     "version": "1.0.0",
-    "description": "A sample Apache Cordova application that responds to the deviceready event.",
+    "description": "edu-sharing app",
     "main": "index.js",
     "scripts": {
         "start": "cd ./../Frontend && ng build --prod --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova build",
         "restart": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova",
-        "debug-android": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova run android"
+        "debug-android": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova run android",
+        "release-android": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova build android --release || npm run sign-android",
+        "sign-android": "cd platforms/android/app/build/outputs/apk/release/ && jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore C:/ssh/Android.jks app-release-unsigned.apk key0 && zipalign -f 4 app-release-unsigned.apk app-release.apk"
     },
-    "author": "Apache Cordova Team",
-    "license": "Apache-2.0",
+    "author": "edu-sharing.com",
+    "license": "GNU GPL v2",
     "cordova": {
         "platforms": [
             "android",
