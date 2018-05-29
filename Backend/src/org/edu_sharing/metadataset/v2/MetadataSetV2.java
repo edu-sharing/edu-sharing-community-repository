@@ -109,6 +109,10 @@ public class MetadataSetV2 {
 		if(mdsOverride.getName()!=null)
 			setName(mdsOverride.getName());
 		for(MetadataWidget widget : mdsOverride.getWidgets()){
+			if(!widget.isInherit()){
+				List<MetadataWidget> widgetsRemove = findAllWidgets(widget.getId());
+				widgets.removeAll(widgetsRemove);
+			}
 			if(widgets.contains(widget)){
 				widgets.remove(widget);
 				widgets.add(0,widget);
