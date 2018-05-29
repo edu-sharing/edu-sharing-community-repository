@@ -203,20 +203,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    <element name="removeNodeResponse">
     <complexType/>
    </element>
-   <element name="getChildren">
+   <element name="removeChild">
     <complexType>
      <sequence>
       <element name="parentID" type="xsd:string"/>
-      <element name="type" type="xsd:string"/>
+      <element name="childID" type="xsd:string"/>
+      <element name="association" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getChildrenResponse">
-    <complexType>
-     <sequence>
-      <element name="getChildrenReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
+   <element name="removeChildResponse">
+    <complexType/>
    </element>
    <element name="getChild">
     <complexType>
@@ -235,56 +232,46 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
-   <element name="addPermissionACEs">
+   <element name="getChildren">
     <complexType>
      <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="aces" type="tns2:ACE"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="addPermissionACEsResponse">
-    <complexType/>
-   </element>
-   <element name="removePermissionACEs">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="aces" type="tns2:ACE"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="removePermissionACEsResponse">
-    <complexType/>
-   </element>
-   <element name="getChildenByProps">
-    <complexType>
-     <sequence>
-      <element name="parentId" type="xsd:string"/>
-      <element name="type" type="xsd:string"/>
-      <element name="props" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getChildenByPropsResponse">
-    <complexType>
-     <sequence>
-      <element name="getChildenByPropsReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getChildrenRecursive">
-    <complexType>
-     <sequence>
-      <element name="parentId" type="xsd:string"/>
+      <element name="parentID" type="xsd:string"/>
       <element name="type" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getChildrenRecursiveResponse">
+   <element name="getChildrenResponse">
     <complexType>
      <sequence>
-      <element name="getChildrenRecursiveReturn" type="apachesoap:Map"/>
+      <element name="getChildrenReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="copyNode">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="toNodeId" type="xsd:string"/>
+      <element name="copyChildren" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="copyNodeResponse">
+    <complexType/>
+   </element>
+   <element name="getChildrenByAssociation">
+    <complexType>
+     <sequence>
+      <element name="storeString" type="xsd:string"/>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="association" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getChildrenByAssociationResponse">
+    <complexType>
+     <sequence>
+      <element name="getChildrenByAssociationReturn" type="apachesoap:Map"/>
      </sequence>
     </complexType>
    </element>
@@ -303,15 +290,200 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
-   <element name="removeMemberships">
+   <element name="hasToolPermission">
     <complexType>
      <sequence>
-      <element name="groupName" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="members" type="xsd:string"/>
+      <element name="toolPermission" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="removeMembershipsResponse">
+   <element name="hasToolPermissionResponse">
+    <complexType>
+     <sequence>
+      <element name="hasToolPermissionReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="removePermissions">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="_authority" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="_permissions" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="removePermissionsResponse">
+    <complexType/>
+   </element>
+   <element name="hasAllPermissions">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="hasAllPermissionsResponse">
+    <complexType>
+     <sequence>
+      <element name="hasAllPermissionsReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setPermissionsBasic">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="_authority" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
+      <element name="changeInherit" type="xsd:boolean"/>
+      <element name="inheritPermission" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setPermissionsBasicResponse">
+    <complexType/>
+   </element>
+   <element name="createAssociation">
+    <complexType>
+     <sequence>
+      <element name="fromID" type="xsd:string"/>
+      <element name="toID" type="xsd:string"/>
+      <element name="association" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="createAssociationResponse">
+    <complexType/>
+   </element>
+   <element name="removeAssociation">
+    <complexType>
+     <sequence>
+      <element name="fromID" type="xsd:string"/>
+      <element name="toID" type="xsd:string"/>
+      <element name="association" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="removeAssociationResponse">
+    <complexType/>
+   </element>
+   <element name="getChildenByProps">
+    <complexType>
+     <sequence>
+      <element name="parentId" type="xsd:string"/>
+      <element name="type" type="xsd:string"/>
+      <element name="props" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getChildenByPropsResponse">
+    <complexType>
+     <sequence>
+      <element name="getChildenByPropsReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setUserDefinedPreview">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="content" type="xsd:base64Binary"/>
+      <element name="fileName" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setUserDefinedPreviewResponse">
+    <complexType/>
+   </element>
+   <element name="removeUserDefinedPreview">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="removeUserDefinedPreviewResponse">
+    <complexType/>
+   </element>
+   <element name="bindEduGroupFolder">
+    <complexType>
+     <sequence>
+      <element name="groupName" type="xsd:string"/>
+      <element name="folderId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="bindEduGroupFolderResponse">
+    <complexType/>
+   </element>
+   <element name="hasPermissionsSimple">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="hasPermissionsSimpleResponse">
+    <complexType>
+     <sequence>
+      <element name="hasPermissionsSimpleReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="updateNodeAtomicValues">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="properties" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="updateNodeAtomicValuesResponse">
+    <complexType/>
+   </element>
+   <element name="hasAllPermissionsExt">
+    <complexType>
+     <sequence>
+      <element name="storeProtocol" type="xsd:string"/>
+      <element name="storeId" type="xsd:string"/>
+      <element name="nodeId" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="hasAllPermissionsExtResponse">
+    <complexType>
+     <sequence>
+      <element name="hasAllPermissionsExtReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getPropertiesSimple">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getPropertiesSimpleResponse">
+    <complexType>
+     <sequence>
+      <element name="getPropertiesSimpleReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="addPermissionACEs">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="aces" type="tns2:ACE"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="addPermissionACEsResponse">
     <complexType/>
    </element>
    <element name="getRepositoryRoot">
@@ -321,6 +493,33 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <complexType>
      <sequence>
       <element name="getRepositoryRootReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="createChildAssociation">
+    <complexType>
+     <sequence>
+      <element name="from" type="xsd:string"/>
+      <element name="to" type="xsd:string"/>
+      <element name="assocType" type="xsd:string"/>
+      <element name="assocName" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="createChildAssociationResponse">
+    <complexType/>
+   </element>
+   <element name="getEduGroupContextOfNode">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getEduGroupContextOfNodeResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getEduGroupContextOfNodeReturn" type="impl:KeyValue"/>
      </sequence>
     </complexType>
    </element>
@@ -341,42 +540,34 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
-   <element name="setPermissionsBasic">
+   <element name="getChildrenByType">
     <complexType>
      <sequence>
       <element name="nodeId" type="xsd:string"/>
-      <element name="_authority" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
-      <element name="changeInherit" type="xsd:boolean"/>
-      <element name="inheritPermission" type="xsd:boolean"/>
+      <element name="type" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="setPermissionsBasicResponse">
-    <complexType/>
-   </element>
-   <element name="removeRelationsForNode">
+   <element name="getChildrenByTypeResponse">
     <complexType>
      <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="nodeParentId" type="xsd:string"/>
+      <element name="getChildrenByTypeReturn" type="apachesoap:Map"/>
      </sequence>
     </complexType>
    </element>
-   <element name="removeRelationsForNodeResponse">
-    <complexType/>
-   </element>
-   <element name="getPropertiesSimple">
+   <element name="getChildRecursive">
     <complexType>
      <sequence>
-      <element name="nodeId" type="xsd:string"/>
+      <element name="parentId" type="xsd:string"/>
+      <element name="type" type="xsd:string"/>
+      <element name="props" type="apachesoap:Map"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getPropertiesSimpleResponse">
+   <element name="getChildRecursiveResponse">
     <complexType>
      <sequence>
-      <element name="getPropertiesSimpleReturn" type="apachesoap:Map"/>
+      <element name="getChildRecursiveReturn" type="apachesoap:Map"/>
      </sequence>
     </complexType>
    </element>
@@ -395,34 +586,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
-   <element name="hasAllPermissionsExt">
-    <complexType>
-     <sequence>
-      <element name="storeProtocol" type="xsd:string"/>
-      <element name="storeId" type="xsd:string"/>
-      <element name="nodeId" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="hasAllPermissionsExtResponse">
-    <complexType>
-     <sequence>
-      <element name="hasAllPermissionsExtReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="removePermissions">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="_authority" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="_permissions" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="removePermissionsResponse">
+   <element name="getCompanyHomeNodeId">
     <complexType/>
+   </element>
+   <element name="getCompanyHomeNodeIdResponse">
+    <complexType>
+     <sequence>
+      <element name="getCompanyHomeNodeIdReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
    </element>
    <element name="removeGlobalAspectFromGroup">
     <complexType>
@@ -434,183 +606,28 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    <element name="removeGlobalAspectFromGroupResponse">
     <complexType/>
    </element>
-   <element name="removeAllMemberships">
+   <element name="removeRelationsForNode">
     <complexType>
      <sequence>
-      <element maxOccurs="unbounded" name="groupNames" type="xsd:string"/>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="nodeParentId" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="removeAllMembershipsResponse">
+   <element name="removeRelationsForNodeResponse">
     <complexType/>
    </element>
-   <element name="createAssociation">
-    <complexType>
-     <sequence>
-      <element name="fromID" type="xsd:string"/>
-      <element name="toID" type="xsd:string"/>
-      <element name="association" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="createAssociationResponse">
-    <complexType/>
-   </element>
-   <element name="bindEduGroupFolder">
-    <complexType>
-     <sequence>
-      <element name="groupName" type="xsd:string"/>
-      <element name="folderId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="bindEduGroupFolderResponse">
-    <complexType/>
-   </element>
-   <element name="getChildRecursive">
-    <complexType>
-     <sequence>
-      <element name="parentId" type="xsd:string"/>
-      <element name="type" type="xsd:string"/>
-      <element name="props" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getChildRecursiveResponse">
-    <complexType>
-     <sequence>
-      <element name="getChildRecursiveReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="removeUserDefinedPreview">
+   <element name="getVersionHistory">
     <complexType>
      <sequence>
       <element name="nodeId" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="removeUserDefinedPreviewResponse">
-    <complexType/>
-   </element>
-   <element name="getCompanyHomeNodeId">
-    <complexType/>
-   </element>
-   <element name="getCompanyHomeNodeIdResponse">
+   <element name="getVersionHistoryResponse">
     <complexType>
      <sequence>
-      <element name="getCompanyHomeNodeIdReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="hasToolPermission">
-    <complexType>
-     <sequence>
-      <element name="toolPermission" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="hasToolPermissionResponse">
-    <complexType>
-     <sequence>
-      <element name="hasToolPermissionReturn" type="xsd:boolean"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="createChildAssociation">
-    <complexType>
-     <sequence>
-      <element name="from" type="xsd:string"/>
-      <element name="to" type="xsd:string"/>
-      <element name="assocType" type="xsd:string"/>
-      <element name="assocName" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="createChildAssociationResponse">
-    <complexType/>
-   </element>
-   <element name="getChildrenByAssociation">
-    <complexType>
-     <sequence>
-      <element name="storeString" type="xsd:string"/>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="association" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getChildrenByAssociationResponse">
-    <complexType>
-     <sequence>
-      <element name="getChildrenByAssociationReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setUserDefinedPreview">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="content" type="xsd:base64Binary"/>
-      <element name="fileName" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setUserDefinedPreviewResponse">
-    <complexType/>
-   </element>
-   <element name="removeAssociation">
-    <complexType>
-     <sequence>
-      <element name="fromID" type="xsd:string"/>
-      <element name="toID" type="xsd:string"/>
-      <element name="association" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="removeAssociationResponse">
-    <complexType/>
-   </element>
-   <element name="hasAllPermissions">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="hasAllPermissionsResponse">
-    <complexType>
-     <sequence>
-      <element name="hasAllPermissionsReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getChildrenByType">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="type" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getChildrenByTypeResponse">
-    <complexType>
-     <sequence>
-      <element name="getChildrenByTypeReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getEduGroupContextOfNode">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getEduGroupContextOfNodeResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getEduGroupContextOfNodeReturn" type="impl:KeyValue"/>
+      <element maxOccurs="unbounded" name="getVersionHistoryReturn" type="impl:RepositoryNode"/>
      </sequence>
     </complexType>
    </element>
@@ -629,47 +646,22 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
-   <element name="updateNodeAtomicValues">
+   <element name="getChildrenRecursive">
     <complexType>
      <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="properties" type="apachesoap:Map"/>
+      <element name="parentId" type="xsd:string"/>
+      <element name="type" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="updateNodeAtomicValuesResponse">
-    <complexType/>
-   </element>
-   <element name="hasPermissionsSimple">
+   <element name="getChildrenRecursiveResponse">
     <complexType>
      <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
+      <element name="getChildrenRecursiveReturn" type="apachesoap:Map"/>
      </sequence>
     </complexType>
    </element>
-   <element name="hasPermissionsSimpleResponse">
-    <complexType>
-     <sequence>
-      <element name="hasPermissionsSimpleReturn" type="xsd:boolean"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getVersionHistory">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getVersionHistoryResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getVersionHistoryReturn" type="impl:RepositoryNode"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setPermissions">
+   <element name="removePermissionACEs">
     <complexType>
      <sequence>
       <element name="nodeId" type="xsd:string"/>
@@ -677,193 +669,29 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
-   <element name="setPermissionsResponse">
+   <element name="removePermissionACEsResponse">
     <complexType/>
    </element>
-   <element name="hasContent">
+   <element name="removeMemberships">
     <complexType>
      <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="contentProp" type="xsd:string"/>
+      <element name="groupName" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="members" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="hasContentResponse">
-    <complexType>
-     <sequence>
-      <element name="hasContentReturn" type="xsd:boolean"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setUserPassword">
-    <complexType>
-     <sequence>
-      <element name="userName" type="xsd:string"/>
-      <element name="password" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setUserPasswordResponse">
+   <element name="removeMembershipsResponse">
     <complexType/>
    </element>
-   <element name="findNodeByPath">
+   <element name="removeAllMemberships">
     <complexType>
      <sequence>
-      <element name="path" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="groupNames" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="findNodeByPathResponse">
-    <complexType>
-     <sequence>
-      <element name="findNodeByPathReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="invalideTicket">
-    <complexType>
-     <sequence>
-      <element name="ticket" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="invalideTicketResponse">
+   <element name="removeAllMembershipsResponse">
     <complexType/>
-   </element>
-   <element name="writeContent">
-    <complexType>
-     <sequence>
-      <element name="nodeID" type="xsd:string"/>
-      <element name="content" type="xsd:base64Binary"/>
-      <element name="mimetype" type="xsd:string"/>
-      <element name="encoding" type="xsd:string"/>
-      <element name="property" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="writeContentResponse">
-    <complexType/>
-   </element>
-   <element name="getAspects">
-    <complexType>
-     <sequence>
-      <element name="storeProtocol" type="xsd:string"/>
-      <element name="storeId" type="xsd:string"/>
-      <element name="nodeId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getAspectsResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getAspectsReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="isAdmin">
-    <complexType>
-     <sequence>
-      <element name="username" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="isAdminResponse">
-    <complexType>
-     <sequence>
-      <element name="isAdminReturn" type="xsd:boolean"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="searchNodeIds">
-    <complexType>
-     <sequence>
-      <element name="store" type="xsd:string"/>
-      <element name="luceneQuery" type="xsd:string"/>
-      <element name="permission" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="searchNodeIdsResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="searchNodeIdsReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="updateNode">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="properties" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="updateNodeResponse">
-    <complexType/>
-   </element>
-   <element name="createNode">
-    <complexType>
-     <sequence>
-      <element name="parentID" type="xsd:string"/>
-      <element name="nodeTypeString" type="xsd:string"/>
-      <element name="childAssociation" type="xsd:string"/>
-      <element name="props" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="createNodeResponse">
-    <complexType>
-     <sequence>
-      <element name="createNodeReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="hasPermissions">
-    <complexType>
-     <sequence>
-      <element name="userId" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
-      <element name="nodeId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="hasPermissionsResponse">
-    <complexType>
-     <sequence>
-      <element name="hasPermissionsReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="searchNodes">
-    <complexType>
-     <sequence>
-      <element name="store" type="xsd:string"/>
-      <element name="luceneQuery" type="xsd:string"/>
-      <element name="permission" type="xsd:string"/>
-      <element maxOccurs="unbounded" name="propertiesToReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="searchNodesResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="searchNodesReturn" type="impl:RepositoryNode"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="validateTicket">
-    <complexType>
-     <sequence>
-      <element name="ticket" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="validateTicketResponse">
-    <complexType>
-     <sequence>
-      <element name="validateTicketReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
    </element>
    <element name="searchSolr">
     <complexType>
@@ -900,6 +728,51 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
+   <element name="validateTicket">
+    <complexType>
+     <sequence>
+      <element name="ticket" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="validateTicketResponse">
+    <complexType>
+     <sequence>
+      <element name="validateTicketReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="isOwner">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="user" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="isOwnerResponse">
+    <complexType>
+     <sequence>
+      <element name="isOwnerReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="searchNodeIds">
+    <complexType>
+     <sequence>
+      <element name="store" type="xsd:string"/>
+      <element name="luceneQuery" type="xsd:string"/>
+      <element name="permission" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="searchNodeIdsResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="searchNodeIdsReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
    <element name="findGroups">
     <complexType>
      <sequence>
@@ -914,234 +787,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <complexType>
      <sequence>
       <element name="findGroupsReturn" type="impl:SearchResult"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getShares">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getSharesResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getSharesReturn" type="tns2:Share"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="moveNode">
-    <complexType>
-     <sequence>
-      <element name="newParentId" type="xsd:string"/>
-      <element name="childAssocType" type="xsd:string"/>
-      <element name="nodeId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="moveNodeResponse">
-    <complexType/>
-   </element>
-   <element name="addAspect">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="aspect" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="addAspectResponse">
-    <complexType/>
-   </element>
-   <element name="removeRelations">
-    <complexType>
-     <sequence>
-      <element name="parentID" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="removeRelationsResponse">
-    <complexType/>
-   </element>
-   <element name="getAssocNode">
-    <complexType>
-     <sequence>
-      <element name="nodeID" type="xsd:string"/>
-      <element name="association" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getAssocNodeResponse">
-    <complexType>
-     <sequence>
-      <element name="getAssocNodeReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getGroupDetails">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="groupNames" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getGroupDetailsResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getGroupDetailsReturn" type="impl:GroupDetails"/>
-     </sequence>
-    </complexType>
-   </element>
-   <complexType name="GroupDetails">
-    <sequence>
-     <element name="displayName" nillable="true" type="xsd:string"/>
-     <element name="groupName" nillable="true" type="xsd:string"/>
-     <element name="homeFolderId" nillable="true" type="xsd:string"/>
-     <element name="nodeId" nillable="true" type="xsd:string"/>
-    </sequence>
-   </complexType>
-   <element name="revertVersion">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="verLbl" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="revertVersionResponse">
-    <complexType/>
-   </element>
-   <element name="getGroupFolderId">
-    <complexType/>
-   </element>
-   <element name="getGroupFolderIdResponse">
-    <complexType>
-     <sequence>
-      <element name="getGroupFolderIdReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="deleteUser">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="userNames" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="deleteUserResponse">
-    <complexType/>
-   </element>
-   <element name="executeAction">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="actionName" type="xsd:string"/>
-      <element name="actionId" type="xsd:string"/>
-      <element name="parameters" type="apachesoap:Map"/>
-      <element name="async" type="xsd:boolean"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="executeActionResponse">
-    <complexType/>
-   </element>
-   <element name="getHomeFolderID">
-    <complexType>
-     <sequence>
-      <element name="username" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getHomeFolderIDResponse">
-    <complexType>
-     <sequence>
-      <element name="getHomeFolderIDReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getUserDetails">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="userNames" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getUserDetailsResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getUserDetailsReturn" type="impl:UserDetails"/>
-     </sequence>
-    </complexType>
-   </element>
-   <complexType name="UserDetails">
-    <sequence>
-     <element name="email" nillable="true" type="xsd:string"/>
-     <element name="firstName" nillable="true" type="xsd:string"/>
-     <element name="lastName" nillable="true" type="xsd:string"/>
-     <element name="password" nillable="true" type="xsd:string"/>
-     <element name="userName" nillable="true" type="xsd:string"/>
-    </sequence>
-   </complexType>
-   <element name="findUsers">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="searchProps" type="impl:KeyValue"/>
-      <element name="eduGroupNodeId" type="xsd:string"/>
-      <element name="from" type="xsd:int"/>
-      <element name="nrOfResults" type="xsd:int"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="findUsersResponse">
-    <complexType>
-     <sequence>
-      <element name="findUsersReturn" type="impl:SearchResult"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setUserDetails">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="userDetails" type="impl:UserDetails"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setUserDetailsResponse">
-    <complexType/>
-   </element>
-   <element name="removeAspect">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="aspect" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="removeAspectResponse">
-    <complexType/>
-   </element>
-   <element name="getMetadataSets">
-    <complexType/>
-   </element>
-   <element name="getMetadataSetsResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getMetadataSetsReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getNotifyList">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getNotifyListResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getNotifyListReturn" type="tns2:Notify"/>
      </sequence>
     </complexType>
    </element>
@@ -1160,40 +805,16 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
-   <element name="createVersion">
+   <element name="removeAspect">
     <complexType>
      <sequence>
       <element name="nodeId" type="xsd:string"/>
-      <element name="properties" type="apachesoap:Map"/>
+      <element name="aspect" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="createVersionResponse">
+   <element name="removeAspectResponse">
     <complexType/>
-   </element>
-   <element name="getGroupNames">
-    <complexType/>
-   </element>
-   <element name="getGroupNamesResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getGroupNamesReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="guessMimetype">
-    <complexType>
-     <sequence>
-      <element name="filename" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="guessMimetypeResponse">
-    <complexType>
-     <sequence>
-      <element name="guessMimetypeReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
    </element>
    <element name="createShare">
     <complexType>
@@ -1207,53 +828,27 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    <element name="createShareResponse">
     <complexType/>
    </element>
-   <element name="isOwner">
+   <element name="getShares">
     <complexType>
      <sequence>
       <element name="nodeId" type="xsd:string"/>
-      <element name="user" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="isOwnerResponse">
+   <element name="getSharesResponse">
     <complexType>
      <sequence>
-      <element name="isOwnerReturn" type="xsd:boolean"/>
+      <element maxOccurs="unbounded" name="getSharesReturn" type="tns2:Share"/>
      </sequence>
     </complexType>
    </element>
-   <element name="setOwner">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="username" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setOwnerResponse">
+   <element name="getMetadataSets">
     <complexType/>
    </element>
-   <element name="getUserNames">
-    <complexType/>
-   </element>
-   <element name="getUserNamesResponse">
+   <element name="getMetadataSetsResponse">
     <complexType>
      <sequence>
-      <element maxOccurs="unbounded" name="getUserNamesReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setGroupDetails">
-    <complexType>
-     <sequence>
-      <element name="groupDetails" type="impl:GroupDetails"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setGroupDetailsResponse">
-    <complexType>
-     <sequence>
-      <element name="setGroupDetailsReturn" type="impl:GroupDetails"/>
+      <element maxOccurs="unbounded" name="getMetadataSetsReturn" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
@@ -1273,6 +868,249 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
+   <element name="getHomeFolderID">
+    <complexType>
+     <sequence>
+      <element name="username" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getHomeFolderIDResponse">
+    <complexType>
+     <sequence>
+      <element name="getHomeFolderIDReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="executeAction">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="actionName" type="xsd:string"/>
+      <element name="actionId" type="xsd:string"/>
+      <element name="parameters" type="apachesoap:Map"/>
+      <element name="async" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="executeActionResponse">
+    <complexType/>
+   </element>
+   <element name="findUsers">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="searchProps" type="impl:KeyValue"/>
+      <element name="eduGroupNodeId" type="xsd:string"/>
+      <element name="from" type="xsd:int"/>
+      <element name="nrOfResults" type="xsd:int"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="findUsersResponse">
+    <complexType>
+     <sequence>
+      <element name="findUsersReturn" type="impl:SearchResult"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="isAdmin">
+    <complexType>
+     <sequence>
+      <element name="username" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="isAdminResponse">
+    <complexType>
+     <sequence>
+      <element name="isAdminReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="hasPermissions">
+    <complexType>
+     <sequence>
+      <element name="userId" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="permissions" type="xsd:string"/>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="hasPermissionsResponse">
+    <complexType>
+     <sequence>
+      <element name="hasPermissionsReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="updateNode">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="properties" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="updateNodeResponse">
+    <complexType/>
+   </element>
+   <element name="getNotifyList">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getNotifyListResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getNotifyListReturn" type="tns2:Notify"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setOwner">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="username" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setOwnerResponse">
+    <complexType/>
+   </element>
+   <element name="revertVersion">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="verLbl" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="revertVersionResponse">
+    <complexType/>
+   </element>
+   <element name="guessMimetype">
+    <complexType>
+     <sequence>
+      <element name="filename" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="guessMimetypeResponse">
+    <complexType>
+     <sequence>
+      <element name="guessMimetypeReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="createVersion">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="properties" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="createVersionResponse">
+    <complexType/>
+   </element>
+   <element name="searchNodes">
+    <complexType>
+     <sequence>
+      <element name="store" type="xsd:string"/>
+      <element name="luceneQuery" type="xsd:string"/>
+      <element name="permission" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="propertiesToReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="searchNodesResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="searchNodesReturn" type="impl:RepositoryNode"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="removeRelations">
+    <complexType>
+     <sequence>
+      <element name="parentID" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="removeRelationsResponse">
+    <complexType/>
+   </element>
+   <element name="addAspect">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="aspect" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="addAspectResponse">
+    <complexType/>
+   </element>
+   <element name="moveNode">
+    <complexType>
+     <sequence>
+      <element name="newParentId" type="xsd:string"/>
+      <element name="childAssocType" type="xsd:string"/>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="moveNodeResponse">
+    <complexType/>
+   </element>
+   <element name="getGroupFolderId">
+    <complexType/>
+   </element>
+   <element name="getGroupFolderIdResponse">
+    <complexType>
+     <sequence>
+      <element name="getGroupFolderIdReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="createNode">
+    <complexType>
+     <sequence>
+      <element name="parentID" type="xsd:string"/>
+      <element name="nodeTypeString" type="xsd:string"/>
+      <element name="childAssociation" type="xsd:string"/>
+      <element name="props" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="createNodeResponse">
+    <complexType>
+     <sequence>
+      <element name="createNodeReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setUserDetails">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="userDetails" type="impl:UserDetails"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="UserDetails">
+    <sequence>
+     <element name="email" nillable="true" type="xsd:string"/>
+     <element name="firstName" nillable="true" type="xsd:string"/>
+     <element name="lastName" nillable="true" type="xsd:string"/>
+     <element name="password" nillable="true" type="xsd:string"/>
+     <element name="userName" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="setUserDetailsResponse">
+    <complexType/>
+   </element>
    <element name="deleteGroup">
     <complexType>
      <sequence>
@@ -1283,17 +1121,19 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    <element name="deleteGroupResponse">
     <complexType/>
    </element>
-   <element name="getMemberships">
+   <element name="getAspects">
     <complexType>
      <sequence>
-      <element name="groupName" type="xsd:string"/>
+      <element name="storeProtocol" type="xsd:string"/>
+      <element name="storeId" type="xsd:string"/>
+      <element name="nodeId" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getMembershipsResponse">
+   <element name="getAspectsResponse">
     <complexType>
      <sequence>
-      <element maxOccurs="unbounded" name="getMembershipsReturn" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="getAspectsReturn" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
@@ -1312,6 +1152,52 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
+   <element name="deleteUser">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="userNames" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="deleteUserResponse">
+    <complexType/>
+   </element>
+   <element name="setGroupDetails">
+    <complexType>
+     <sequence>
+      <element name="groupDetails" type="impl:GroupDetails"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="GroupDetails">
+    <sequence>
+     <element name="displayName" nillable="true" type="xsd:string"/>
+     <element name="groupName" nillable="true" type="xsd:string"/>
+     <element name="homeFolderId" nillable="true" type="xsd:string"/>
+     <element name="nodeId" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="setGroupDetailsResponse">
+    <complexType>
+     <sequence>
+      <element name="setGroupDetailsReturn" type="impl:GroupDetails"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getMemberships">
+    <complexType>
+     <sequence>
+      <element name="groupName" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getMembershipsResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getMembershipsReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
    <element name="addMemberships">
     <complexType>
      <sequence>
@@ -1323,28 +1209,142 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    <element name="addMembershipsResponse">
     <complexType/>
    </element>
-   <element name="copyNode">
+   <element name="hasContent">
     <complexType>
      <sequence>
       <element name="nodeId" type="xsd:string"/>
-      <element name="toNodeId" type="xsd:string"/>
-      <element name="copyChildren" type="xsd:boolean"/>
+      <element name="contentProp" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="copyNodeResponse">
-    <complexType/>
-   </element>
-   <element name="removeChild">
+   <element name="hasContentResponse">
     <complexType>
      <sequence>
-      <element name="parentID" type="xsd:string"/>
-      <element name="childID" type="xsd:string"/>
+      <element name="hasContentReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="writeContent">
+    <complexType>
+     <sequence>
+      <element name="nodeID" type="xsd:string"/>
+      <element name="content" type="xsd:base64Binary"/>
+      <element name="mimetype" type="xsd:string"/>
+      <element name="encoding" type="xsd:string"/>
+      <element name="property" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="writeContentResponse">
+    <complexType/>
+   </element>
+   <element name="findNodeByPath">
+    <complexType>
+     <sequence>
+      <element name="path" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="findNodeByPathResponse">
+    <complexType>
+     <sequence>
+      <element name="findNodeByPathReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getGroupNames">
+    <complexType/>
+   </element>
+   <element name="getGroupNamesResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getGroupNamesReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="invalideTicket">
+    <complexType>
+     <sequence>
+      <element name="ticket" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="invalideTicketResponse">
+    <complexType/>
+   </element>
+   <element name="setUserPassword">
+    <complexType>
+     <sequence>
+      <element name="userName" type="xsd:string"/>
+      <element name="password" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setUserPasswordResponse">
+    <complexType/>
+   </element>
+   <element name="getGroupDetails">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="groupNames" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getGroupDetailsResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getGroupDetailsReturn" type="impl:GroupDetails"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getAssocNode">
+    <complexType>
+     <sequence>
+      <element name="nodeID" type="xsd:string"/>
       <element name="association" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="removeChildResponse">
+   <element name="getAssocNodeResponse">
+    <complexType>
+     <sequence>
+      <element name="getAssocNodeReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getUserNames">
+    <complexType/>
+   </element>
+   <element name="getUserNamesResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getUserNamesReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getUserDetails">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="userNames" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getUserDetailsResponse">
+    <complexType>
+     <sequence>
+      <element maxOccurs="unbounded" name="getUserDetailsReturn" type="impl:UserDetails"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setPermissions">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element maxOccurs="unbounded" name="aces" type="tns2:ACE"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setPermissionsResponse">
     <complexType/>
    </element>
   </schema>
@@ -1424,6 +1424,14 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element name="token" nillable="true" type="xsd:string"/>
     </sequence>
    </complexType>
+   <complexType name="GetPreviewResult">
+    <sequence>
+     <element name="createActionIsRunning" type="xsd:boolean"/>
+     <element name="createActionRunning" type="xsd:boolean"/>
+     <element name="type" nillable="true" type="xsd:string"/>
+     <element name="url" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
    <complexType name="Notify">
     <sequence>
      <element name="acl" nillable="true" type="tns2:ACL"/>
@@ -1436,14 +1444,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element name="notifyEvent" nillable="true" type="xsd:string"/>
      <element name="notifyTarget" nillable="true" type="xsd:string"/>
      <element name="notifyUser" nillable="true" type="xsd:string"/>
-    </sequence>
-   </complexType>
-   <complexType name="GetPreviewResult">
-    <sequence>
-     <element name="createActionIsRunning" type="xsd:boolean"/>
-     <element name="createActionRunning" type="xsd:boolean"/>
-     <element name="type" nillable="true" type="xsd:string"/>
-     <element name="url" nillable="true" type="xsd:string"/>
     </sequence>
    </complexType>
   </schema>
@@ -1515,15 +1515,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="getNotifyListRequest">
-
-      <wsdl:part element="impl:getNotifyList" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="createShareResponse">
 
       <wsdl:part element="impl:createShareResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getNotifyListRequest">
+
+      <wsdl:part element="impl:getNotifyList" name="parameters"/>
 
    </wsdl:message>
 
@@ -1563,15 +1563,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="removePermissionACEsRequest">
-
-      <wsdl:part element="impl:removePermissionACEs" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="hasAllPermissionsExtRequest">
 
       <wsdl:part element="impl:hasAllPermissionsExt" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="removePermissionACEsRequest">
+
+      <wsdl:part element="impl:removePermissionACEs" name="parameters"/>
 
    </wsdl:message>
 
@@ -1629,15 +1629,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="removeRelationsForNodeResponse">
-
-      <wsdl:part element="impl:removeRelationsForNodeResponse" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="removeAssociationResponse">
 
       <wsdl:part element="impl:removeAssociationResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="removeRelationsForNodeResponse">
+
+      <wsdl:part element="impl:removeRelationsForNodeResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -1677,15 +1677,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="bindEduGroupFolderResponse">
-
-      <wsdl:part element="impl:bindEduGroupFolderResponse" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="getChildrenByAssociationResponse">
 
       <wsdl:part element="impl:getChildrenByAssociationResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="bindEduGroupFolderResponse">
+
+      <wsdl:part element="impl:bindEduGroupFolderResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -1725,9 +1725,9 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="removeAllMembershipsResponse">
+   <wsdl:message name="updateNodeAtomicValuesRequest">
 
-      <wsdl:part element="impl:removeAllMembershipsResponse" name="parameters"/>
+      <wsdl:part element="impl:updateNodeAtomicValues" name="parameters"/>
 
    </wsdl:message>
 
@@ -1737,9 +1737,9 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="updateNodeAtomicValuesRequest">
+   <wsdl:message name="removeAllMembershipsResponse">
 
-      <wsdl:part element="impl:updateNodeAtomicValues" name="parameters"/>
+      <wsdl:part element="impl:removeAllMembershipsResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -1767,27 +1767,27 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="setUserPasswordRequest">
-
-      <wsdl:part element="impl:setUserPassword" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="executeActionResponse">
 
       <wsdl:part element="impl:executeActionResponse" name="parameters"/>
 
    </wsdl:message>
 
-   <wsdl:message name="getChildrenByTypeRequest">
+   <wsdl:message name="setUserPasswordRequest">
 
-      <wsdl:part element="impl:getChildrenByType" name="parameters"/>
+      <wsdl:part element="impl:setUserPassword" name="parameters"/>
 
    </wsdl:message>
 
    <wsdl:message name="updateNodeAtomicValuesResponse">
 
       <wsdl:part element="impl:updateNodeAtomicValuesResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getChildrenByTypeRequest">
+
+      <wsdl:part element="impl:getChildrenByType" name="parameters"/>
 
    </wsdl:message>
 
@@ -1923,15 +1923,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="getUserNamesResponse">
-
-      <wsdl:part element="impl:getUserNamesResponse" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="removeChildRequest">
 
       <wsdl:part element="impl:removeChild" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getUserNamesResponse">
+
+      <wsdl:part element="impl:getUserNamesResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -1953,15 +1953,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="getGroupDetailsRequest">
-
-      <wsdl:part element="impl:getGroupDetails" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="getGroupFolderIdResponse">
 
       <wsdl:part element="impl:getGroupFolderIdResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getGroupDetailsRequest">
+
+      <wsdl:part element="impl:getGroupDetails" name="parameters"/>
 
    </wsdl:message>
 
@@ -1989,27 +1989,27 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="invalideTicketRequest">
-
-      <wsdl:part element="impl:invalideTicket" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="getAspectsRequest">
 
       <wsdl:part element="impl:getAspects" name="parameters"/>
 
    </wsdl:message>
 
-   <wsdl:message name="getAssocNodeResponse">
+   <wsdl:message name="invalideTicketRequest">
 
-      <wsdl:part element="impl:getAssocNodeResponse" name="parameters"/>
+      <wsdl:part element="impl:invalideTicket" name="parameters"/>
 
    </wsdl:message>
 
    <wsdl:message name="addMembershipsResponse">
 
       <wsdl:part element="impl:addMembershipsResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getAssocNodeResponse">
+
+      <wsdl:part element="impl:getAssocNodeResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -2025,9 +2025,9 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="getGroupDetailsResponse">
+   <wsdl:message name="copyNodeRequest">
 
-      <wsdl:part element="impl:getGroupDetailsResponse" name="parameters"/>
+      <wsdl:part element="impl:copyNode" name="parameters"/>
 
    </wsdl:message>
 
@@ -2037,9 +2037,9 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="copyNodeRequest">
+   <wsdl:message name="getGroupDetailsResponse">
 
-      <wsdl:part element="impl:copyNode" name="parameters"/>
+      <wsdl:part element="impl:getGroupDetailsResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -2097,15 +2097,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="getUserDetailsRequest">
-
-      <wsdl:part element="impl:getUserDetails" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="getMembershipsResponse">
 
       <wsdl:part element="impl:getMembershipsResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getUserDetailsRequest">
+
+      <wsdl:part element="impl:getUserDetails" name="parameters"/>
 
    </wsdl:message>
 
@@ -2517,15 +2517,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="setPermissionsBasicResponse">
-
-      <wsdl:part element="impl:setPermissionsBasicResponse" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="hasToolPermissionRequest">
 
       <wsdl:part element="impl:hasToolPermission" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="setPermissionsBasicResponse">
+
+      <wsdl:part element="impl:setPermissionsBasicResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -2535,15 +2535,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="getMetadataSetsResponse">
-
-      <wsdl:part element="impl:getMetadataSetsResponse" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="getParentsRequest">
 
       <wsdl:part element="impl:getParents" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getMetadataSetsResponse">
+
+      <wsdl:part element="impl:getMetadataSetsResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -2651,11 +2651,11 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getChildren">
+      <wsdl:operation name="removeChild">
 
-         <wsdl:input message="impl:getChildrenRequest" name="getChildrenRequest"/>
+         <wsdl:input message="impl:removeChildRequest" name="removeChildRequest"/>
 
-         <wsdl:output message="impl:getChildrenResponse" name="getChildrenResponse"/>
+         <wsdl:output message="impl:removeChildResponse" name="removeChildResponse"/>
 
       </wsdl:operation>
 
@@ -2667,187 +2667,19 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="addPermissionACEs">
+      <wsdl:operation name="getChildren">
 
-         <wsdl:input message="impl:addPermissionACEsRequest" name="addPermissionACEsRequest"/>
+         <wsdl:input message="impl:getChildrenRequest" name="getChildrenRequest"/>
 
-         <wsdl:output message="impl:addPermissionACEsResponse" name="addPermissionACEsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removePermissionACEs">
-
-         <wsdl:input message="impl:removePermissionACEsRequest" name="removePermissionACEsRequest"/>
-
-         <wsdl:output message="impl:removePermissionACEsResponse" name="removePermissionACEsResponse"/>
+         <wsdl:output message="impl:getChildrenResponse" name="getChildrenResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="getChildenByProps">
+      <wsdl:operation name="copyNode">
 
-         <wsdl:input message="impl:getChildenByPropsRequest" name="getChildenByPropsRequest"/>
+         <wsdl:input message="impl:copyNodeRequest" name="copyNodeRequest"/>
 
-         <wsdl:output message="impl:getChildenByPropsResponse" name="getChildenByPropsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getChildrenRecursive">
-
-         <wsdl:input message="impl:getChildrenRecursiveRequest" name="getChildrenRecursiveRequest"/>
-
-         <wsdl:output message="impl:getChildrenRecursiveResponse" name="getChildrenRecursiveResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getAssociationNodeIds">
-
-         <wsdl:input message="impl:getAssociationNodeIdsRequest" name="getAssociationNodeIdsRequest"/>
-
-         <wsdl:output message="impl:getAssociationNodeIdsResponse" name="getAssociationNodeIdsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeMemberships">
-
-         <wsdl:input message="impl:removeMembershipsRequest" name="removeMembershipsRequest"/>
-
-         <wsdl:output message="impl:removeMembershipsResponse" name="removeMembershipsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getRepositoryRoot">
-
-         <wsdl:input message="impl:getRepositoryRootRequest" name="getRepositoryRootRequest"/>
-
-         <wsdl:output message="impl:getRepositoryRootResponse" name="getRepositoryRootResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createNodeAtomicValues">
-
-         <wsdl:input message="impl:createNodeAtomicValuesRequest" name="createNodeAtomicValuesRequest"/>
-
-         <wsdl:output message="impl:createNodeAtomicValuesResponse" name="createNodeAtomicValuesResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="setPermissionsBasic">
-
-         <wsdl:input message="impl:setPermissionsBasicRequest" name="setPermissionsBasicRequest"/>
-
-         <wsdl:output message="impl:setPermissionsBasicResponse" name="setPermissionsBasicResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeRelationsForNode">
-
-         <wsdl:input message="impl:removeRelationsForNodeRequest" name="removeRelationsForNodeRequest"/>
-
-         <wsdl:output message="impl:removeRelationsForNodeResponse" name="removeRelationsForNodeResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getPropertiesSimple">
-
-         <wsdl:input message="impl:getPropertiesSimpleRequest" name="getPropertiesSimpleRequest"/>
-
-         <wsdl:output message="impl:getPropertiesSimpleResponse" name="getPropertiesSimpleResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getChildrenCheckPermissions">
-
-         <wsdl:input message="impl:getChildrenCheckPermissionsRequest" name="getChildrenCheckPermissionsRequest"/>
-
-         <wsdl:output message="impl:getChildrenCheckPermissionsResponse" name="getChildrenCheckPermissionsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="hasAllPermissionsExt">
-
-         <wsdl:input message="impl:hasAllPermissionsExtRequest" name="hasAllPermissionsExtRequest"/>
-
-         <wsdl:output message="impl:hasAllPermissionsExtResponse" name="hasAllPermissionsExtResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removePermissions">
-
-         <wsdl:input message="impl:removePermissionsRequest" name="removePermissionsRequest"/>
-
-         <wsdl:output message="impl:removePermissionsResponse" name="removePermissionsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeGlobalAspectFromGroup">
-
-         <wsdl:input message="impl:removeGlobalAspectFromGroupRequest" name="removeGlobalAspectFromGroupRequest"/>
-
-         <wsdl:output message="impl:removeGlobalAspectFromGroupResponse" name="removeGlobalAspectFromGroupResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeAllMemberships">
-
-         <wsdl:input message="impl:removeAllMembershipsRequest" name="removeAllMembershipsRequest"/>
-
-         <wsdl:output message="impl:removeAllMembershipsResponse" name="removeAllMembershipsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createAssociation">
-
-         <wsdl:input message="impl:createAssociationRequest" name="createAssociationRequest"/>
-
-         <wsdl:output message="impl:createAssociationResponse" name="createAssociationResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="bindEduGroupFolder">
-
-         <wsdl:input message="impl:bindEduGroupFolderRequest" name="bindEduGroupFolderRequest"/>
-
-         <wsdl:output message="impl:bindEduGroupFolderResponse" name="bindEduGroupFolderResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getChildRecursive">
-
-         <wsdl:input message="impl:getChildRecursiveRequest" name="getChildRecursiveRequest"/>
-
-         <wsdl:output message="impl:getChildRecursiveResponse" name="getChildRecursiveResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeUserDefinedPreview">
-
-         <wsdl:input message="impl:removeUserDefinedPreviewRequest" name="removeUserDefinedPreviewRequest"/>
-
-         <wsdl:output message="impl:removeUserDefinedPreviewResponse" name="removeUserDefinedPreviewResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getCompanyHomeNodeId">
-
-         <wsdl:input message="impl:getCompanyHomeNodeIdRequest" name="getCompanyHomeNodeIdRequest"/>
-
-         <wsdl:output message="impl:getCompanyHomeNodeIdResponse" name="getCompanyHomeNodeIdResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="hasToolPermission">
-
-         <wsdl:input message="impl:hasToolPermissionRequest" name="hasToolPermissionRequest"/>
-
-         <wsdl:output message="impl:hasToolPermissionResponse" name="hasToolPermissionResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createChildAssociation">
-
-         <wsdl:input message="impl:createChildAssociationRequest" name="createChildAssociationRequest"/>
-
-         <wsdl:output message="impl:createChildAssociationResponse" name="createChildAssociationResponse"/>
+         <wsdl:output message="impl:copyNodeResponse" name="copyNodeResponse"/>
 
       </wsdl:operation>
 
@@ -2859,19 +2691,27 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="setUserDefinedPreview">
+      <wsdl:operation name="getAssociationNodeIds">
 
-         <wsdl:input message="impl:setUserDefinedPreviewRequest" name="setUserDefinedPreviewRequest"/>
+         <wsdl:input message="impl:getAssociationNodeIdsRequest" name="getAssociationNodeIdsRequest"/>
 
-         <wsdl:output message="impl:setUserDefinedPreviewResponse" name="setUserDefinedPreviewResponse"/>
+         <wsdl:output message="impl:getAssociationNodeIdsResponse" name="getAssociationNodeIdsResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="removeAssociation">
+      <wsdl:operation name="hasToolPermission">
 
-         <wsdl:input message="impl:removeAssociationRequest" name="removeAssociationRequest"/>
+         <wsdl:input message="impl:hasToolPermissionRequest" name="hasToolPermissionRequest"/>
 
-         <wsdl:output message="impl:removeAssociationResponse" name="removeAssociationResponse"/>
+         <wsdl:output message="impl:hasToolPermissionResponse" name="hasToolPermissionResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removePermissions">
+
+         <wsdl:input message="impl:removePermissionsRequest" name="removePermissionsRequest"/>
+
+         <wsdl:output message="impl:removePermissionsResponse" name="removePermissionsResponse"/>
 
       </wsdl:operation>
 
@@ -2883,35 +2723,59 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getChildrenByType">
+      <wsdl:operation name="setPermissionsBasic">
 
-         <wsdl:input message="impl:getChildrenByTypeRequest" name="getChildrenByTypeRequest"/>
+         <wsdl:input message="impl:setPermissionsBasicRequest" name="setPermissionsBasicRequest"/>
 
-         <wsdl:output message="impl:getChildrenByTypeResponse" name="getChildrenByTypeResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getEduGroupContextOfNode">
-
-         <wsdl:input message="impl:getEduGroupContextOfNodeRequest" name="getEduGroupContextOfNodeRequest"/>
-
-         <wsdl:output message="impl:getEduGroupContextOfNodeResponse" name="getEduGroupContextOfNodeResponse"/>
+         <wsdl:output message="impl:setPermissionsBasicResponse" name="setPermissionsBasicResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="searchNodeIdsLimit">
+      <wsdl:operation name="createAssociation">
 
-         <wsdl:input message="impl:searchNodeIdsLimitRequest" name="searchNodeIdsLimitRequest"/>
+         <wsdl:input message="impl:createAssociationRequest" name="createAssociationRequest"/>
 
-         <wsdl:output message="impl:searchNodeIdsLimitResponse" name="searchNodeIdsLimitResponse"/>
+         <wsdl:output message="impl:createAssociationResponse" name="createAssociationResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="updateNodeAtomicValues">
+      <wsdl:operation name="removeAssociation">
 
-         <wsdl:input message="impl:updateNodeAtomicValuesRequest" name="updateNodeAtomicValuesRequest"/>
+         <wsdl:input message="impl:removeAssociationRequest" name="removeAssociationRequest"/>
 
-         <wsdl:output message="impl:updateNodeAtomicValuesResponse" name="updateNodeAtomicValuesResponse"/>
+         <wsdl:output message="impl:removeAssociationResponse" name="removeAssociationResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildenByProps">
+
+         <wsdl:input message="impl:getChildenByPropsRequest" name="getChildenByPropsRequest"/>
+
+         <wsdl:output message="impl:getChildenByPropsResponse" name="getChildenByPropsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setUserDefinedPreview">
+
+         <wsdl:input message="impl:setUserDefinedPreviewRequest" name="setUserDefinedPreviewRequest"/>
+
+         <wsdl:output message="impl:setUserDefinedPreviewResponse" name="setUserDefinedPreviewResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeUserDefinedPreview">
+
+         <wsdl:input message="impl:removeUserDefinedPreviewRequest" name="removeUserDefinedPreviewRequest"/>
+
+         <wsdl:output message="impl:removeUserDefinedPreviewResponse" name="removeUserDefinedPreviewResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="bindEduGroupFolder">
+
+         <wsdl:input message="impl:bindEduGroupFolderRequest" name="bindEduGroupFolderRequest"/>
+
+         <wsdl:output message="impl:bindEduGroupFolderResponse" name="bindEduGroupFolderResponse"/>
 
       </wsdl:operation>
 
@@ -2923,6 +2787,118 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="updateNodeAtomicValues">
+
+         <wsdl:input message="impl:updateNodeAtomicValuesRequest" name="updateNodeAtomicValuesRequest"/>
+
+         <wsdl:output message="impl:updateNodeAtomicValuesResponse" name="updateNodeAtomicValuesResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="hasAllPermissionsExt">
+
+         <wsdl:input message="impl:hasAllPermissionsExtRequest" name="hasAllPermissionsExtRequest"/>
+
+         <wsdl:output message="impl:hasAllPermissionsExtResponse" name="hasAllPermissionsExtResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getPropertiesSimple">
+
+         <wsdl:input message="impl:getPropertiesSimpleRequest" name="getPropertiesSimpleRequest"/>
+
+         <wsdl:output message="impl:getPropertiesSimpleResponse" name="getPropertiesSimpleResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="addPermissionACEs">
+
+         <wsdl:input message="impl:addPermissionACEsRequest" name="addPermissionACEsRequest"/>
+
+         <wsdl:output message="impl:addPermissionACEsResponse" name="addPermissionACEsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getRepositoryRoot">
+
+         <wsdl:input message="impl:getRepositoryRootRequest" name="getRepositoryRootRequest"/>
+
+         <wsdl:output message="impl:getRepositoryRootResponse" name="getRepositoryRootResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createChildAssociation">
+
+         <wsdl:input message="impl:createChildAssociationRequest" name="createChildAssociationRequest"/>
+
+         <wsdl:output message="impl:createChildAssociationResponse" name="createChildAssociationResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getEduGroupContextOfNode">
+
+         <wsdl:input message="impl:getEduGroupContextOfNodeRequest" name="getEduGroupContextOfNodeRequest"/>
+
+         <wsdl:output message="impl:getEduGroupContextOfNodeResponse" name="getEduGroupContextOfNodeResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createNodeAtomicValues">
+
+         <wsdl:input message="impl:createNodeAtomicValuesRequest" name="createNodeAtomicValuesRequest"/>
+
+         <wsdl:output message="impl:createNodeAtomicValuesResponse" name="createNodeAtomicValuesResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildrenByType">
+
+         <wsdl:input message="impl:getChildrenByTypeRequest" name="getChildrenByTypeRequest"/>
+
+         <wsdl:output message="impl:getChildrenByTypeResponse" name="getChildrenByTypeResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildRecursive">
+
+         <wsdl:input message="impl:getChildRecursiveRequest" name="getChildRecursiveRequest"/>
+
+         <wsdl:output message="impl:getChildRecursiveResponse" name="getChildRecursiveResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildrenCheckPermissions">
+
+         <wsdl:input message="impl:getChildrenCheckPermissionsRequest" name="getChildrenCheckPermissionsRequest"/>
+
+         <wsdl:output message="impl:getChildrenCheckPermissionsResponse" name="getChildrenCheckPermissionsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCompanyHomeNodeId">
+
+         <wsdl:input message="impl:getCompanyHomeNodeIdRequest" name="getCompanyHomeNodeIdRequest"/>
+
+         <wsdl:output message="impl:getCompanyHomeNodeIdResponse" name="getCompanyHomeNodeIdResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeGlobalAspectFromGroup">
+
+         <wsdl:input message="impl:removeGlobalAspectFromGroupRequest" name="removeGlobalAspectFromGroupRequest"/>
+
+         <wsdl:output message="impl:removeGlobalAspectFromGroupResponse" name="removeGlobalAspectFromGroupResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeRelationsForNode">
+
+         <wsdl:input message="impl:removeRelationsForNodeRequest" name="removeRelationsForNodeRequest"/>
+
+         <wsdl:output message="impl:removeRelationsForNodeResponse" name="removeRelationsForNodeResponse"/>
+
+      </wsdl:operation>
+
       <wsdl:operation name="getVersionHistory">
 
          <wsdl:input message="impl:getVersionHistoryRequest" name="getVersionHistoryRequest"/>
@@ -2931,115 +2907,43 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="setPermissions">
+      <wsdl:operation name="searchNodeIdsLimit">
 
-         <wsdl:input message="impl:setPermissionsRequest" name="setPermissionsRequest"/>
+         <wsdl:input message="impl:searchNodeIdsLimitRequest" name="searchNodeIdsLimitRequest"/>
 
-         <wsdl:output message="impl:setPermissionsResponse" name="setPermissionsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="hasContent">
-
-         <wsdl:input message="impl:hasContentRequest" name="hasContentRequest"/>
-
-         <wsdl:output message="impl:hasContentResponse" name="hasContentResponse"/>
+         <wsdl:output message="impl:searchNodeIdsLimitResponse" name="searchNodeIdsLimitResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="setUserPassword">
+      <wsdl:operation name="getChildrenRecursive">
 
-         <wsdl:input message="impl:setUserPasswordRequest" name="setUserPasswordRequest"/>
+         <wsdl:input message="impl:getChildrenRecursiveRequest" name="getChildrenRecursiveRequest"/>
 
-         <wsdl:output message="impl:setUserPasswordResponse" name="setUserPasswordResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="findNodeByPath">
-
-         <wsdl:input message="impl:findNodeByPathRequest" name="findNodeByPathRequest"/>
-
-         <wsdl:output message="impl:findNodeByPathResponse" name="findNodeByPathResponse"/>
+         <wsdl:output message="impl:getChildrenRecursiveResponse" name="getChildrenRecursiveResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="invalideTicket">
+      <wsdl:operation name="removePermissionACEs">
 
-         <wsdl:input message="impl:invalideTicketRequest" name="invalideTicketRequest"/>
+         <wsdl:input message="impl:removePermissionACEsRequest" name="removePermissionACEsRequest"/>
 
-         <wsdl:output message="impl:invalideTicketResponse" name="invalideTicketResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="writeContent">
-
-         <wsdl:input message="impl:writeContentRequest" name="writeContentRequest"/>
-
-         <wsdl:output message="impl:writeContentResponse" name="writeContentResponse"/>
+         <wsdl:output message="impl:removePermissionACEsResponse" name="removePermissionACEsResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="getAspects">
+      <wsdl:operation name="removeMemberships">
 
-         <wsdl:input message="impl:getAspectsRequest" name="getAspectsRequest"/>
+         <wsdl:input message="impl:removeMembershipsRequest" name="removeMembershipsRequest"/>
 
-         <wsdl:output message="impl:getAspectsResponse" name="getAspectsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="isAdmin">
-
-         <wsdl:input message="impl:isAdminRequest" name="isAdminRequest"/>
-
-         <wsdl:output message="impl:isAdminResponse" name="isAdminResponse"/>
+         <wsdl:output message="impl:removeMembershipsResponse" name="removeMembershipsResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="searchNodeIds">
+      <wsdl:operation name="removeAllMemberships">
 
-         <wsdl:input message="impl:searchNodeIdsRequest" name="searchNodeIdsRequest"/>
+         <wsdl:input message="impl:removeAllMembershipsRequest" name="removeAllMembershipsRequest"/>
 
-         <wsdl:output message="impl:searchNodeIdsResponse" name="searchNodeIdsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="updateNode">
-
-         <wsdl:input message="impl:updateNodeRequest" name="updateNodeRequest"/>
-
-         <wsdl:output message="impl:updateNodeResponse" name="updateNodeResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createNode">
-
-         <wsdl:input message="impl:createNodeRequest" name="createNodeRequest"/>
-
-         <wsdl:output message="impl:createNodeResponse" name="createNodeResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="hasPermissions">
-
-         <wsdl:input message="impl:hasPermissionsRequest" name="hasPermissionsRequest"/>
-
-         <wsdl:output message="impl:hasPermissionsResponse" name="hasPermissionsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="searchNodes">
-
-         <wsdl:input message="impl:searchNodesRequest" name="searchNodesRequest"/>
-
-         <wsdl:output message="impl:searchNodesResponse" name="searchNodesResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="validateTicket">
-
-         <wsdl:input message="impl:validateTicketRequest" name="validateTicketRequest"/>
-
-         <wsdl:output message="impl:validateTicketResponse" name="validateTicketResponse"/>
+         <wsdl:output message="impl:removeAllMembershipsResponse" name="removeAllMembershipsResponse"/>
 
       </wsdl:operation>
 
@@ -3059,187 +2963,11 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="findGroups">
+      <wsdl:operation name="validateTicket">
 
-         <wsdl:input message="impl:findGroupsRequest" name="findGroupsRequest"/>
+         <wsdl:input message="impl:validateTicketRequest" name="validateTicketRequest"/>
 
-         <wsdl:output message="impl:findGroupsResponse" name="findGroupsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getShares">
-
-         <wsdl:input message="impl:getSharesRequest" name="getSharesRequest"/>
-
-         <wsdl:output message="impl:getSharesResponse" name="getSharesResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="moveNode">
-
-         <wsdl:input message="impl:moveNodeRequest" name="moveNodeRequest"/>
-
-         <wsdl:output message="impl:moveNodeResponse" name="moveNodeResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="addAspect">
-
-         <wsdl:input message="impl:addAspectRequest" name="addAspectRequest"/>
-
-         <wsdl:output message="impl:addAspectResponse" name="addAspectResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeRelations">
-
-         <wsdl:input message="impl:removeRelationsRequest" name="removeRelationsRequest"/>
-
-         <wsdl:output message="impl:removeRelationsResponse" name="removeRelationsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getAssocNode">
-
-         <wsdl:input message="impl:getAssocNodeRequest" name="getAssocNodeRequest"/>
-
-         <wsdl:output message="impl:getAssocNodeResponse" name="getAssocNodeResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getGroupDetails">
-
-         <wsdl:input message="impl:getGroupDetailsRequest" name="getGroupDetailsRequest"/>
-
-         <wsdl:output message="impl:getGroupDetailsResponse" name="getGroupDetailsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="revertVersion">
-
-         <wsdl:input message="impl:revertVersionRequest" name="revertVersionRequest"/>
-
-         <wsdl:output message="impl:revertVersionResponse" name="revertVersionResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getGroupFolderId">
-
-         <wsdl:input message="impl:getGroupFolderIdRequest" name="getGroupFolderIdRequest"/>
-
-         <wsdl:output message="impl:getGroupFolderIdResponse" name="getGroupFolderIdResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="deleteUser">
-
-         <wsdl:input message="impl:deleteUserRequest" name="deleteUserRequest"/>
-
-         <wsdl:output message="impl:deleteUserResponse" name="deleteUserResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="executeAction">
-
-         <wsdl:input message="impl:executeActionRequest" name="executeActionRequest"/>
-
-         <wsdl:output message="impl:executeActionResponse" name="executeActionResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getHomeFolderID">
-
-         <wsdl:input message="impl:getHomeFolderIDRequest" name="getHomeFolderIDRequest"/>
-
-         <wsdl:output message="impl:getHomeFolderIDResponse" name="getHomeFolderIDResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getUserDetails">
-
-         <wsdl:input message="impl:getUserDetailsRequest" name="getUserDetailsRequest"/>
-
-         <wsdl:output message="impl:getUserDetailsResponse" name="getUserDetailsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="findUsers">
-
-         <wsdl:input message="impl:findUsersRequest" name="findUsersRequest"/>
-
-         <wsdl:output message="impl:findUsersResponse" name="findUsersResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="setUserDetails">
-
-         <wsdl:input message="impl:setUserDetailsRequest" name="setUserDetailsRequest"/>
-
-         <wsdl:output message="impl:setUserDetailsResponse" name="setUserDetailsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeAspect">
-
-         <wsdl:input message="impl:removeAspectRequest" name="removeAspectRequest"/>
-
-         <wsdl:output message="impl:removeAspectResponse" name="removeAspectResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getMetadataSets">
-
-         <wsdl:input message="impl:getMetadataSetsRequest" name="getMetadataSetsRequest"/>
-
-         <wsdl:output message="impl:getMetadataSetsResponse" name="getMetadataSetsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getNotifyList">
-
-         <wsdl:input message="impl:getNotifyListRequest" name="getNotifyListRequest"/>
-
-         <wsdl:output message="impl:getNotifyListResponse" name="getNotifyListResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getParents">
-
-         <wsdl:input message="impl:getParentsRequest" name="getParentsRequest"/>
-
-         <wsdl:output message="impl:getParentsResponse" name="getParentsResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createVersion">
-
-         <wsdl:input message="impl:createVersionRequest" name="createVersionRequest"/>
-
-         <wsdl:output message="impl:createVersionResponse" name="createVersionResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getGroupNames">
-
-         <wsdl:input message="impl:getGroupNamesRequest" name="getGroupNamesRequest"/>
-
-         <wsdl:output message="impl:getGroupNamesResponse" name="getGroupNamesResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="guessMimetype">
-
-         <wsdl:input message="impl:guessMimetypeRequest" name="guessMimetypeRequest"/>
-
-         <wsdl:output message="impl:guessMimetypeResponse" name="guessMimetypeResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createShare">
-
-         <wsdl:input message="impl:createShareRequest" name="createShareRequest"/>
-
-         <wsdl:output message="impl:createShareResponse" name="createShareResponse"/>
+         <wsdl:output message="impl:validateTicketResponse" name="validateTicketResponse"/>
 
       </wsdl:operation>
 
@@ -3251,27 +2979,59 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="setOwner">
+      <wsdl:operation name="searchNodeIds">
 
-         <wsdl:input message="impl:setOwnerRequest" name="setOwnerRequest"/>
+         <wsdl:input message="impl:searchNodeIdsRequest" name="searchNodeIdsRequest"/>
 
-         <wsdl:output message="impl:setOwnerResponse" name="setOwnerResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getUserNames">
-
-         <wsdl:input message="impl:getUserNamesRequest" name="getUserNamesRequest"/>
-
-         <wsdl:output message="impl:getUserNamesResponse" name="getUserNamesResponse"/>
+         <wsdl:output message="impl:searchNodeIdsResponse" name="searchNodeIdsResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="setGroupDetails">
+      <wsdl:operation name="findGroups">
 
-         <wsdl:input message="impl:setGroupDetailsRequest" name="setGroupDetailsRequest"/>
+         <wsdl:input message="impl:findGroupsRequest" name="findGroupsRequest"/>
 
-         <wsdl:output message="impl:setGroupDetailsResponse" name="setGroupDetailsResponse"/>
+         <wsdl:output message="impl:findGroupsResponse" name="findGroupsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getParents">
+
+         <wsdl:input message="impl:getParentsRequest" name="getParentsRequest"/>
+
+         <wsdl:output message="impl:getParentsResponse" name="getParentsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeAspect">
+
+         <wsdl:input message="impl:removeAspectRequest" name="removeAspectRequest"/>
+
+         <wsdl:output message="impl:removeAspectResponse" name="removeAspectResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createShare">
+
+         <wsdl:input message="impl:createShareRequest" name="createShareRequest"/>
+
+         <wsdl:output message="impl:createShareResponse" name="createShareResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getShares">
+
+         <wsdl:input message="impl:getSharesRequest" name="getSharesRequest"/>
+
+         <wsdl:output message="impl:getSharesResponse" name="getSharesResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getMetadataSets">
+
+         <wsdl:input message="impl:getMetadataSetsRequest" name="getMetadataSetsRequest"/>
+
+         <wsdl:output message="impl:getMetadataSetsResponse" name="getMetadataSetsResponse"/>
 
       </wsdl:operation>
 
@@ -3283,6 +3043,150 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="getHomeFolderID">
+
+         <wsdl:input message="impl:getHomeFolderIDRequest" name="getHomeFolderIDRequest"/>
+
+         <wsdl:output message="impl:getHomeFolderIDResponse" name="getHomeFolderIDResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="executeAction">
+
+         <wsdl:input message="impl:executeActionRequest" name="executeActionRequest"/>
+
+         <wsdl:output message="impl:executeActionResponse" name="executeActionResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="findUsers">
+
+         <wsdl:input message="impl:findUsersRequest" name="findUsersRequest"/>
+
+         <wsdl:output message="impl:findUsersResponse" name="findUsersResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="isAdmin">
+
+         <wsdl:input message="impl:isAdminRequest" name="isAdminRequest"/>
+
+         <wsdl:output message="impl:isAdminResponse" name="isAdminResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="hasPermissions">
+
+         <wsdl:input message="impl:hasPermissionsRequest" name="hasPermissionsRequest"/>
+
+         <wsdl:output message="impl:hasPermissionsResponse" name="hasPermissionsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateNode">
+
+         <wsdl:input message="impl:updateNodeRequest" name="updateNodeRequest"/>
+
+         <wsdl:output message="impl:updateNodeResponse" name="updateNodeResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getNotifyList">
+
+         <wsdl:input message="impl:getNotifyListRequest" name="getNotifyListRequest"/>
+
+         <wsdl:output message="impl:getNotifyListResponse" name="getNotifyListResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setOwner">
+
+         <wsdl:input message="impl:setOwnerRequest" name="setOwnerRequest"/>
+
+         <wsdl:output message="impl:setOwnerResponse" name="setOwnerResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="revertVersion">
+
+         <wsdl:input message="impl:revertVersionRequest" name="revertVersionRequest"/>
+
+         <wsdl:output message="impl:revertVersionResponse" name="revertVersionResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="guessMimetype">
+
+         <wsdl:input message="impl:guessMimetypeRequest" name="guessMimetypeRequest"/>
+
+         <wsdl:output message="impl:guessMimetypeResponse" name="guessMimetypeResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createVersion">
+
+         <wsdl:input message="impl:createVersionRequest" name="createVersionRequest"/>
+
+         <wsdl:output message="impl:createVersionResponse" name="createVersionResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="searchNodes">
+
+         <wsdl:input message="impl:searchNodesRequest" name="searchNodesRequest"/>
+
+         <wsdl:output message="impl:searchNodesResponse" name="searchNodesResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeRelations">
+
+         <wsdl:input message="impl:removeRelationsRequest" name="removeRelationsRequest"/>
+
+         <wsdl:output message="impl:removeRelationsResponse" name="removeRelationsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="addAspect">
+
+         <wsdl:input message="impl:addAspectRequest" name="addAspectRequest"/>
+
+         <wsdl:output message="impl:addAspectResponse" name="addAspectResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="moveNode">
+
+         <wsdl:input message="impl:moveNodeRequest" name="moveNodeRequest"/>
+
+         <wsdl:output message="impl:moveNodeResponse" name="moveNodeResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getGroupFolderId">
+
+         <wsdl:input message="impl:getGroupFolderIdRequest" name="getGroupFolderIdRequest"/>
+
+         <wsdl:output message="impl:getGroupFolderIdResponse" name="getGroupFolderIdResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createNode">
+
+         <wsdl:input message="impl:createNodeRequest" name="createNodeRequest"/>
+
+         <wsdl:output message="impl:createNodeResponse" name="createNodeResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setUserDetails">
+
+         <wsdl:input message="impl:setUserDetailsRequest" name="setUserDetailsRequest"/>
+
+         <wsdl:output message="impl:setUserDetailsResponse" name="setUserDetailsResponse"/>
+
+      </wsdl:operation>
+
       <wsdl:operation name="deleteGroup">
 
          <wsdl:input message="impl:deleteGroupRequest" name="deleteGroupRequest"/>
@@ -3291,11 +3195,11 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getMemberships">
+      <wsdl:operation name="getAspects">
 
-         <wsdl:input message="impl:getMembershipsRequest" name="getMembershipsRequest"/>
+         <wsdl:input message="impl:getAspectsRequest" name="getAspectsRequest"/>
 
-         <wsdl:output message="impl:getMembershipsResponse" name="getMembershipsResponse"/>
+         <wsdl:output message="impl:getAspectsResponse" name="getAspectsResponse"/>
 
       </wsdl:operation>
 
@@ -3307,6 +3211,30 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="deleteUser">
+
+         <wsdl:input message="impl:deleteUserRequest" name="deleteUserRequest"/>
+
+         <wsdl:output message="impl:deleteUserResponse" name="deleteUserResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setGroupDetails">
+
+         <wsdl:input message="impl:setGroupDetailsRequest" name="setGroupDetailsRequest"/>
+
+         <wsdl:output message="impl:setGroupDetailsResponse" name="setGroupDetailsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getMemberships">
+
+         <wsdl:input message="impl:getMembershipsRequest" name="getMembershipsRequest"/>
+
+         <wsdl:output message="impl:getMembershipsResponse" name="getMembershipsResponse"/>
+
+      </wsdl:operation>
+
       <wsdl:operation name="addMemberships">
 
          <wsdl:input message="impl:addMembershipsRequest" name="addMembershipsRequest"/>
@@ -3315,19 +3243,91 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="copyNode">
+      <wsdl:operation name="hasContent">
 
-         <wsdl:input message="impl:copyNodeRequest" name="copyNodeRequest"/>
+         <wsdl:input message="impl:hasContentRequest" name="hasContentRequest"/>
 
-         <wsdl:output message="impl:copyNodeResponse" name="copyNodeResponse"/>
+         <wsdl:output message="impl:hasContentResponse" name="hasContentResponse"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="removeChild">
+      <wsdl:operation name="writeContent">
 
-         <wsdl:input message="impl:removeChildRequest" name="removeChildRequest"/>
+         <wsdl:input message="impl:writeContentRequest" name="writeContentRequest"/>
 
-         <wsdl:output message="impl:removeChildResponse" name="removeChildResponse"/>
+         <wsdl:output message="impl:writeContentResponse" name="writeContentResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="findNodeByPath">
+
+         <wsdl:input message="impl:findNodeByPathRequest" name="findNodeByPathRequest"/>
+
+         <wsdl:output message="impl:findNodeByPathResponse" name="findNodeByPathResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getGroupNames">
+
+         <wsdl:input message="impl:getGroupNamesRequest" name="getGroupNamesRequest"/>
+
+         <wsdl:output message="impl:getGroupNamesResponse" name="getGroupNamesResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="invalideTicket">
+
+         <wsdl:input message="impl:invalideTicketRequest" name="invalideTicketRequest"/>
+
+         <wsdl:output message="impl:invalideTicketResponse" name="invalideTicketResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setUserPassword">
+
+         <wsdl:input message="impl:setUserPasswordRequest" name="setUserPasswordRequest"/>
+
+         <wsdl:output message="impl:setUserPasswordResponse" name="setUserPasswordResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getGroupDetails">
+
+         <wsdl:input message="impl:getGroupDetailsRequest" name="getGroupDetailsRequest"/>
+
+         <wsdl:output message="impl:getGroupDetailsResponse" name="getGroupDetailsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getAssocNode">
+
+         <wsdl:input message="impl:getAssocNodeRequest" name="getAssocNodeRequest"/>
+
+         <wsdl:output message="impl:getAssocNodeResponse" name="getAssocNodeResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getUserNames">
+
+         <wsdl:input message="impl:getUserNamesRequest" name="getUserNamesRequest"/>
+
+         <wsdl:output message="impl:getUserNamesResponse" name="getUserNamesResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getUserDetails">
+
+         <wsdl:input message="impl:getUserDetailsRequest" name="getUserDetailsRequest"/>
+
+         <wsdl:output message="impl:getUserDetailsResponse" name="getUserDetailsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setPermissions">
+
+         <wsdl:input message="impl:setPermissionsRequest" name="setPermissionsRequest"/>
+
+         <wsdl:output message="impl:setPermissionsResponse" name="setPermissionsResponse"/>
 
       </wsdl:operation>
 
@@ -3499,17 +3499,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getChildren">
+      <wsdl:operation name="removeChild">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getChildrenRequest">
+         <wsdl:input name="removeChildRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getChildrenResponse">
+         <wsdl:output name="removeChildResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -3535,17 +3535,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="addPermissionACEs">
+      <wsdl:operation name="getChildren">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="addPermissionACEsRequest">
+         <wsdl:input name="getChildrenRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="addPermissionACEsResponse">
+         <wsdl:output name="getChildrenResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -3553,395 +3553,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="removePermissionACEs">
+      <wsdl:operation name="copyNode">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="removePermissionACEsRequest">
+         <wsdl:input name="copyNodeRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="removePermissionACEsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getChildenByProps">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getChildenByPropsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getChildenByPropsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getChildrenRecursive">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getChildrenRecursiveRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getChildrenRecursiveResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getAssociationNodeIds">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getAssociationNodeIdsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getAssociationNodeIdsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeMemberships">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="removeMembershipsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="removeMembershipsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getRepositoryRoot">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getRepositoryRootRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getRepositoryRootResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createNodeAtomicValues">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="createNodeAtomicValuesRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="createNodeAtomicValuesResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="setPermissionsBasic">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="setPermissionsBasicRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="setPermissionsBasicResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeRelationsForNode">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="removeRelationsForNodeRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="removeRelationsForNodeResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getPropertiesSimple">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getPropertiesSimpleRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getPropertiesSimpleResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getChildrenCheckPermissions">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getChildrenCheckPermissionsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getChildrenCheckPermissionsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="hasAllPermissionsExt">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="hasAllPermissionsExtRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="hasAllPermissionsExtResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removePermissions">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="removePermissionsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="removePermissionsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeGlobalAspectFromGroup">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="removeGlobalAspectFromGroupRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="removeGlobalAspectFromGroupResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeAllMemberships">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="removeAllMembershipsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="removeAllMembershipsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createAssociation">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="createAssociationRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="createAssociationResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="bindEduGroupFolder">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="bindEduGroupFolderRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="bindEduGroupFolderResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getChildRecursive">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getChildRecursiveRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getChildRecursiveResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeUserDefinedPreview">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="removeUserDefinedPreviewRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="removeUserDefinedPreviewResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getCompanyHomeNodeId">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getCompanyHomeNodeIdRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getCompanyHomeNodeIdResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="hasToolPermission">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="hasToolPermissionRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="hasToolPermissionResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createChildAssociation">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="createChildAssociationRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="createChildAssociationResponse">
+         <wsdl:output name="copyNodeResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -3967,17 +3589,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="setUserDefinedPreview">
+      <wsdl:operation name="getAssociationNodeIds">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="setUserDefinedPreviewRequest">
+         <wsdl:input name="getAssociationNodeIdsRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="setUserDefinedPreviewResponse">
+         <wsdl:output name="getAssociationNodeIdsResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -3985,17 +3607,35 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="removeAssociation">
+      <wsdl:operation name="hasToolPermission">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="removeAssociationRequest">
+         <wsdl:input name="hasToolPermissionRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="removeAssociationResponse">
+         <wsdl:output name="hasToolPermissionResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removePermissions">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="removePermissionsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="removePermissionsResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4021,17 +3661,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getChildrenByType">
+      <wsdl:operation name="setPermissionsBasic">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getChildrenByTypeRequest">
+         <wsdl:input name="setPermissionsBasicRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getChildrenByTypeResponse">
+         <wsdl:output name="setPermissionsBasicResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4039,17 +3679,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getEduGroupContextOfNode">
+      <wsdl:operation name="createAssociation">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getEduGroupContextOfNodeRequest">
+         <wsdl:input name="createAssociationRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getEduGroupContextOfNodeResponse">
+         <wsdl:output name="createAssociationResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4057,17 +3697,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="searchNodeIdsLimit">
+      <wsdl:operation name="removeAssociation">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="searchNodeIdsLimitRequest">
+         <wsdl:input name="removeAssociationRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="searchNodeIdsLimitResponse">
+         <wsdl:output name="removeAssociationResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4075,17 +3715,71 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="updateNodeAtomicValues">
+      <wsdl:operation name="getChildenByProps">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="updateNodeAtomicValuesRequest">
+         <wsdl:input name="getChildenByPropsRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="updateNodeAtomicValuesResponse">
+         <wsdl:output name="getChildenByPropsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setUserDefinedPreview">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="setUserDefinedPreviewRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="setUserDefinedPreviewResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeUserDefinedPreview">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="removeUserDefinedPreviewRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="removeUserDefinedPreviewResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="bindEduGroupFolder">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="bindEduGroupFolderRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="bindEduGroupFolderResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4111,6 +3805,258 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="updateNodeAtomicValues">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateNodeAtomicValuesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateNodeAtomicValuesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="hasAllPermissionsExt">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="hasAllPermissionsExtRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="hasAllPermissionsExtResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getPropertiesSimple">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getPropertiesSimpleRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getPropertiesSimpleResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="addPermissionACEs">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="addPermissionACEsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="addPermissionACEsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getRepositoryRoot">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getRepositoryRootRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getRepositoryRootResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createChildAssociation">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="createChildAssociationRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="createChildAssociationResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getEduGroupContextOfNode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getEduGroupContextOfNodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getEduGroupContextOfNodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createNodeAtomicValues">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="createNodeAtomicValuesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="createNodeAtomicValuesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildrenByType">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getChildrenByTypeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getChildrenByTypeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildRecursive">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getChildRecursiveRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getChildRecursiveResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildrenCheckPermissions">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getChildrenCheckPermissionsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getChildrenCheckPermissionsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getCompanyHomeNodeId">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getCompanyHomeNodeIdRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getCompanyHomeNodeIdResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeGlobalAspectFromGroup">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="removeGlobalAspectFromGroupRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="removeGlobalAspectFromGroupResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeRelationsForNode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="removeRelationsForNodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="removeRelationsForNodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
       <wsdl:operation name="getVersionHistory">
 
          <wsdlsoap:operation soapAction=""/>
@@ -4129,17 +4075,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="setPermissions">
+      <wsdl:operation name="searchNodeIdsLimit">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="setPermissionsRequest">
+         <wsdl:input name="searchNodeIdsLimitRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="setPermissionsResponse">
+         <wsdl:output name="searchNodeIdsLimitResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4147,17 +4093,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="hasContent">
+      <wsdl:operation name="getChildrenRecursive">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="hasContentRequest">
+         <wsdl:input name="getChildrenRecursiveRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="hasContentResponse">
+         <wsdl:output name="getChildrenRecursiveResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4165,17 +4111,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="setUserPassword">
+      <wsdl:operation name="removePermissionACEs">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="setUserPasswordRequest">
+         <wsdl:input name="removePermissionACEsRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="setUserPasswordResponse">
+         <wsdl:output name="removePermissionACEsResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4183,17 +4129,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="findNodeByPath">
+      <wsdl:operation name="removeMemberships">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="findNodeByPathRequest">
+         <wsdl:input name="removeMembershipsRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="findNodeByPathResponse">
+         <wsdl:output name="removeMembershipsResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4201,179 +4147,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="invalideTicket">
+      <wsdl:operation name="removeAllMemberships">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="invalideTicketRequest">
+         <wsdl:input name="removeAllMembershipsRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="invalideTicketResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="writeContent">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="writeContentRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="writeContentResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getAspects">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getAspectsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getAspectsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="isAdmin">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="isAdminRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="isAdminResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="searchNodeIds">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="searchNodeIdsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="searchNodeIdsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="updateNode">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="updateNodeRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="updateNodeResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createNode">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="createNodeRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="createNodeResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="hasPermissions">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="hasPermissionsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="hasPermissionsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="searchNodes">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="searchNodesRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="searchNodesResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="validateTicket">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="validateTicketRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="validateTicketResponse">
+         <wsdl:output name="removeAllMembershipsResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4417,413 +4201,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="findGroups">
+      <wsdl:operation name="validateTicket">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="findGroupsRequest">
+         <wsdl:input name="validateTicketRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="findGroupsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getShares">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getSharesRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getSharesResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="moveNode">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="moveNodeRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="moveNodeResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="addAspect">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="addAspectRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="addAspectResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeRelations">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="removeRelationsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="removeRelationsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getAssocNode">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getAssocNodeRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getAssocNodeResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getGroupDetails">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getGroupDetailsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getGroupDetailsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="revertVersion">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="revertVersionRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="revertVersionResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getGroupFolderId">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getGroupFolderIdRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getGroupFolderIdResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="deleteUser">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="deleteUserRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="deleteUserResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="executeAction">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="executeActionRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="executeActionResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getHomeFolderID">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getHomeFolderIDRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getHomeFolderIDResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getUserDetails">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getUserDetailsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getUserDetailsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="findUsers">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="findUsersRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="findUsersResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="setUserDetails">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="setUserDetailsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="setUserDetailsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="removeAspect">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="removeAspectRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="removeAspectResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getMetadataSets">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getMetadataSetsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getMetadataSetsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getNotifyList">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getNotifyListRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getNotifyListResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getParents">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getParentsRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getParentsResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createVersion">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="createVersionRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="createVersionResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getGroupNames">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getGroupNamesRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getGroupNamesResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="guessMimetype">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="guessMimetypeRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="guessMimetypeResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="createShare">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="createShareRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="createShareResponse">
+         <wsdl:output name="validateTicketResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4849,17 +4237,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="setOwner">
+      <wsdl:operation name="searchNodeIds">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="setOwnerRequest">
+         <wsdl:input name="searchNodeIdsRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="setOwnerResponse">
+         <wsdl:output name="searchNodeIdsResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4867,17 +4255,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getUserNames">
+      <wsdl:operation name="findGroups">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getUserNamesRequest">
+         <wsdl:input name="findGroupsRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getUserNamesResponse">
+         <wsdl:output name="findGroupsResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4885,17 +4273,89 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="setGroupDetails">
+      <wsdl:operation name="getParents">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="setGroupDetailsRequest">
+         <wsdl:input name="getParentsRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="setGroupDetailsResponse">
+         <wsdl:output name="getParentsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeAspect">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="removeAspectRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="removeAspectResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createShare">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="createShareRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="createShareResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getShares">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getSharesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getSharesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getMetadataSets">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getMetadataSetsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getMetadataSetsResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4921,6 +4381,330 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="getHomeFolderID">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getHomeFolderIDRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getHomeFolderIDResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="executeAction">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="executeActionRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="executeActionResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="findUsers">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="findUsersRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="findUsersResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="isAdmin">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="isAdminRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="isAdminResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="hasPermissions">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="hasPermissionsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="hasPermissionsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="updateNode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="updateNodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="updateNodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getNotifyList">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getNotifyListRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getNotifyListResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setOwner">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="setOwnerRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="setOwnerResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="revertVersion">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="revertVersionRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="revertVersionResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="guessMimetype">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="guessMimetypeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="guessMimetypeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createVersion">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="createVersionRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="createVersionResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="searchNodes">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="searchNodesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="searchNodesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="removeRelations">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="removeRelationsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="removeRelationsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="addAspect">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="addAspectRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="addAspectResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="moveNode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="moveNodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="moveNodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getGroupFolderId">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getGroupFolderIdRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getGroupFolderIdResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="createNode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="createNodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="createNodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setUserDetails">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="setUserDetailsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="setUserDetailsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
       <wsdl:operation name="deleteGroup">
 
          <wsdlsoap:operation soapAction=""/>
@@ -4939,17 +4723,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getMemberships">
+      <wsdl:operation name="getAspects">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getMembershipsRequest">
+         <wsdl:input name="getAspectsRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getMembershipsResponse">
+         <wsdl:output name="getAspectsResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -4975,6 +4759,60 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="deleteUser">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="deleteUserRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="deleteUserResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setGroupDetails">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="setGroupDetailsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="setGroupDetailsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getMemberships">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getMembershipsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getMembershipsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
       <wsdl:operation name="addMemberships">
 
          <wsdlsoap:operation soapAction=""/>
@@ -4993,17 +4831,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="copyNode">
+      <wsdl:operation name="hasContent">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="copyNodeRequest">
+         <wsdl:input name="hasContentRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="copyNodeResponse">
+         <wsdl:output name="hasContentResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -5011,17 +4849,179 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="removeChild">
+      <wsdl:operation name="writeContent">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="removeChildRequest">
+         <wsdl:input name="writeContentRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="removeChildResponse">
+         <wsdl:output name="writeContentResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="findNodeByPath">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="findNodeByPathRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="findNodeByPathResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getGroupNames">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getGroupNamesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getGroupNamesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="invalideTicket">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="invalideTicketRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="invalideTicketResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setUserPassword">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="setUserPasswordRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="setUserPasswordResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getGroupDetails">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getGroupDetailsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getGroupDetailsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getAssocNode">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getAssocNodeRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getAssocNodeResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getUserNames">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getUserNamesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getUserNamesResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getUserDetails">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getUserDetailsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getUserDetailsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="setPermissions">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="setPermissionsRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="setPermissionsResponse">
 
             <wsdlsoap:body use="literal"/>
 

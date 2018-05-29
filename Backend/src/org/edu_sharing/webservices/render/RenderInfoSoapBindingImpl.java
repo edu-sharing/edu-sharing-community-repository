@@ -241,7 +241,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			HashMap<String, Object> propsNew = NodeServiceFactory.getNodeService(appInfo.getAppId()).getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), remoteId);
 			props.putAll(propsNew);
 		}
-		rir.setIconURL(new MimeTypesV2(appInfo).getIcon(nodeType,props,Arrays.asList(aspects)));
+		rir.setIconUrl(new MimeTypesV2(appInfo).getIcon(nodeType,props,Arrays.asList(aspects)));
 
 		if(collectionRefOriginalDeleted){
 			props.put(CCConstants.VIRT_PROP_ORIGINAL_DELETED, "true");
@@ -270,15 +270,23 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		props=VCardConverter.addVCardProperties(nodeType,props);
 		rir.setProperties(convertProperties(props));	
 		
-		List<org.edu_sharing.webservices.types.Child> childsConverted = new ArrayList<>();
-		List<Map<String, Object>> childs = getChildNodes(nodeId);
-		for(Map<String, Object> child : childs) {
+		List<org.edu_sharing.webservices.types.Child> childrenConverted = new ArrayList<>();
+		List<Map<String, Object>> children = getChildNodes(nodeId);
+		NodeService nodeService = NodeServiceFactory.getLocalService();
+		for(Map<String, Object> child : children) {
 			org.edu_sharing.webservices.types.Child childConverted=new org.edu_sharing.webservices.types.Child();
-			child=VCardConverter.addVCardProperties(NodeServiceFactory.getLocalService().getType((String) child.get(CCConstants.SYS_PROP_NODE_UID)),child);
+			String childId=(String) child.get(CCConstants.SYS_PROP_NODE_UID);
+			String type=nodeService.getType(childId);
+			String[] childAspects=nodeService.getAspects((String) child.get(CCConstants.SYS_PROP_STORE_PROTOCOL),(String) child.get(CCConstants.SYS_PROP_STORE_IDENTIFIER),childId);
+			child=VCardConverter.addVCardProperties(type,child);
 			childConverted.setProperties(convertProperties(child));
-			childsConverted.add(childConverted);	
+			childConverted.setAspects(aspects);
+			childConverted.setIconUrl(new MimeTypesV2(appInfo).getIcon(type,child,Arrays.asList(childAspects)));
+			childConverted.setPreviewUrl(URLTool.getPreviewServletUrl(new NodeRef(MCAlfrescoAPIClient.storeRef, childId)));
+			childrenConverted.add(childConverted);
+
 		}
-		rir.setChilds(childsConverted.toArray(new org.edu_sharing.webservices.types.Child[childsConverted.size()]));
+		rir.setChildren(childrenConverted.toArray(new org.edu_sharing.webservices.types.Child[childrenConverted.size()]));
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
 		
 		

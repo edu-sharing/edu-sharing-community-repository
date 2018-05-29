@@ -10,7 +10,7 @@ package org.edu_sharing.webservices.render;
 public class RenderInfoResult  implements java.io.Serializable {
     private java.lang.String[] aspects;
 
-    private org.edu_sharing.webservices.types.Child[] childs;
+    private org.edu_sharing.webservices.types.Child[] children;
 
     private int contentHash;
 
@@ -20,7 +20,7 @@ public class RenderInfoResult  implements java.io.Serializable {
 
     private java.lang.Boolean hasContentLicense;
 
-    private java.lang.String iconURL;
+    private java.lang.String iconUrl;
 
     private org.edu_sharing.webservices.types.KeyValue[] labels;
 
@@ -47,12 +47,12 @@ public class RenderInfoResult  implements java.io.Serializable {
 
     public RenderInfoResult(
            java.lang.String[] aspects,
-           org.edu_sharing.webservices.types.Child[] childs,
+           org.edu_sharing.webservices.types.Child[] children,
            int contentHash,
            java.lang.String eduSchoolPrimaryAffiliation,
            java.lang.Boolean guestReadAllowed,
            java.lang.Boolean hasContentLicense,
-           java.lang.String iconURL,
+           java.lang.String iconUrl,
            org.edu_sharing.webservices.types.KeyValue[] labels,
            java.lang.String mdsTemplate,
            java.lang.String mimeTypeUrl,
@@ -64,12 +64,12 @@ public class RenderInfoResult  implements java.io.Serializable {
            org.edu_sharing.webservices.usage.UsageResult usage,
            java.lang.Boolean userReadAllowed) {
            this.aspects = aspects;
-           this.childs = childs;
+           this.children = children;
            this.contentHash = contentHash;
            this.eduSchoolPrimaryAffiliation = eduSchoolPrimaryAffiliation;
            this.guestReadAllowed = guestReadAllowed;
            this.hasContentLicense = hasContentLicense;
-           this.iconURL = iconURL;
+           this.iconUrl = iconUrl;
            this.labels = labels;
            this.mdsTemplate = mdsTemplate;
            this.mimeTypeUrl = mimeTypeUrl;
@@ -104,22 +104,22 @@ public class RenderInfoResult  implements java.io.Serializable {
 
 
     /**
-     * Gets the childs value for this RenderInfoResult.
+     * Gets the children value for this RenderInfoResult.
      * 
-     * @return childs
+     * @return children
      */
-    public org.edu_sharing.webservices.types.Child[] getChilds() {
-        return childs;
+    public org.edu_sharing.webservices.types.Child[] getChildren() {
+        return children;
     }
 
 
     /**
-     * Sets the childs value for this RenderInfoResult.
+     * Sets the children value for this RenderInfoResult.
      * 
-     * @param childs
+     * @param children
      */
-    public void setChilds(org.edu_sharing.webservices.types.Child[] childs) {
-        this.childs = childs;
+    public void setChildren(org.edu_sharing.webservices.types.Child[] children) {
+        this.children = children;
     }
 
 
@@ -204,22 +204,22 @@ public class RenderInfoResult  implements java.io.Serializable {
 
 
     /**
-     * Gets the iconURL value for this RenderInfoResult.
+     * Gets the iconUrl value for this RenderInfoResult.
      * 
-     * @return iconURL
+     * @return iconUrl
      */
-    public java.lang.String getIconURL() {
-        return iconURL;
+    public java.lang.String getIconUrl() {
+        return iconUrl;
     }
 
 
     /**
-     * Sets the iconURL value for this RenderInfoResult.
+     * Sets the iconUrl value for this RenderInfoResult.
      * 
-     * @param iconURL
+     * @param iconUrl
      */
-    public void setIconURL(java.lang.String iconURL) {
-        this.iconURL = iconURL;
+    public void setIconUrl(java.lang.String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 
 
@@ -437,9 +437,9 @@ public class RenderInfoResult  implements java.io.Serializable {
             ((this.aspects==null && other.getAspects()==null) || 
              (this.aspects!=null &&
               java.util.Arrays.equals(this.aspects, other.getAspects()))) &&
-            ((this.childs==null && other.getChilds()==null) || 
-             (this.childs!=null &&
-              java.util.Arrays.equals(this.childs, other.getChilds()))) &&
+            ((this.children==null && other.getChildren()==null) || 
+             (this.children!=null &&
+              java.util.Arrays.equals(this.children, other.getChildren()))) &&
             this.contentHash == other.getContentHash() &&
             ((this.eduSchoolPrimaryAffiliation==null && other.getEduSchoolPrimaryAffiliation()==null) || 
              (this.eduSchoolPrimaryAffiliation!=null &&
@@ -450,9 +450,9 @@ public class RenderInfoResult  implements java.io.Serializable {
             ((this.hasContentLicense==null && other.getHasContentLicense()==null) || 
              (this.hasContentLicense!=null &&
               this.hasContentLicense.equals(other.getHasContentLicense()))) &&
-            ((this.iconURL==null && other.getIconURL()==null) || 
-             (this.iconURL!=null &&
-              this.iconURL.equals(other.getIconURL()))) &&
+            ((this.iconUrl==null && other.getIconUrl()==null) || 
+             (this.iconUrl!=null &&
+              this.iconUrl.equals(other.getIconUrl()))) &&
             ((this.labels==null && other.getLabels()==null) || 
              (this.labels!=null &&
               java.util.Arrays.equals(this.labels, other.getLabels()))) &&
@@ -505,11 +505,11 @@ public class RenderInfoResult  implements java.io.Serializable {
                 }
             }
         }
-        if (getChilds() != null) {
+        if (getChildren() != null) {
             for (int i=0;
-                 i<java.lang.reflect.Array.getLength(getChilds());
+                 i<java.lang.reflect.Array.getLength(getChildren());
                  i++) {
-                java.lang.Object obj = java.lang.reflect.Array.get(getChilds(), i);
+                java.lang.Object obj = java.lang.reflect.Array.get(getChildren(), i);
                 if (obj != null &&
                     !obj.getClass().isArray()) {
                     _hashCode += obj.hashCode();
@@ -526,8 +526,8 @@ public class RenderInfoResult  implements java.io.Serializable {
         if (getHasContentLicense() != null) {
             _hashCode += getHasContentLicense().hashCode();
         }
-        if (getIconURL() != null) {
-            _hashCode += getIconURL().hashCode();
+        if (getIconUrl() != null) {
+            _hashCode += getIconUrl().hashCode();
         }
         if (getLabels() != null) {
             for (int i=0;
@@ -609,8 +609,8 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("childs");
-        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "childs"));
+        elemField.setFieldName("children");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "children"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "Child"));
         elemField.setNillable(true);
         elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));
@@ -640,8 +640,8 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("iconURL");
-        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "iconURL"));
+        elemField.setFieldName("iconUrl");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "iconUrl"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);

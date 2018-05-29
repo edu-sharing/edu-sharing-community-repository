@@ -40,12 +40,12 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    <complexType name="RenderInfoResult">
     <sequence>
      <element name="aspects" nillable="true" type="impl:ArrayOf_xsd_string"/>
-     <element name="childs" nillable="true" type="impl:ArrayOf_tns2_Child"/>
+     <element name="children" nillable="true" type="impl:ArrayOf_tns2_Child"/>
      <element name="contentHash" type="xsd:int"/>
      <element name="eduSchoolPrimaryAffiliation" nillable="true" type="xsd:string"/>
      <element name="guestReadAllowed" nillable="true" type="xsd:boolean"/>
      <element name="hasContentLicense" nillable="true" type="xsd:boolean"/>
-     <element name="iconURL" nillable="true" type="xsd:string"/>
+     <element name="iconUrl" nillable="true" type="xsd:string"/>
      <element name="labels" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
      <element name="mdsTemplate" nillable="true" type="xsd:string"/>
      <element name="mimeTypeUrl" nillable="true" type="xsd:string"/>
@@ -89,6 +89,9 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    </complexType>
    <complexType name="Child">
     <sequence>
+     <element name="aspects" nillable="true" type="impl:ArrayOf_xsd_string"/>
+     <element name="iconUrl" nillable="true" type="xsd:string"/>
+     <element name="previewUrl" nillable="true" type="xsd:string"/>
      <element name="properties" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
     </sequence>
    </complexType>
