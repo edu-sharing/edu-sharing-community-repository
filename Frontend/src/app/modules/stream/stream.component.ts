@@ -78,7 +78,12 @@ export class StreamComponent {
 
   collectionOption = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node));
 
-  removeOption = new OptionItem('Aus Stream entfernen','remove_circle',()=>{});
+  removeOption = new OptionItem('Aus Stream entfernen','remove_circle',(node: Node)=> {
+    this.updateStream(node, STREAM_STATUS.DONE).subscribe( (data) => {
+      let result = this.streams.filter( (n : any) => n.id !== node );
+      this.streams = result;
+    } , error => console.log(error));
+  });
   
   
   /*new OptionItem('Als ungesehen markieren','check',(node: Node)=>{
@@ -119,8 +124,9 @@ export class StreamComponent {
 
   }
 
+  // When seen, set Status to READ, and then display only OPEN stream
   seen(id: any) {
-    this.updateStream(id, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
+    this.updateStream(id, STREAM_STATUS.READ).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   }
 
   onScroll() {
@@ -141,7 +147,7 @@ export class StreamComponent {
       this.actionOptions[1] = this.collectionOption;
     } else {
       this.streams = [];
-      this.updateDataFromJSON(STREAM_STATUS.DONE);
+      this.updateDataFromJSON(STREAM_STATUS.READ);
       this.actionOptions[0] = this.collectionOption;
       this.actionOptions[1] = this.removeOption;
     }

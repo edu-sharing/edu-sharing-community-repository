@@ -12,6 +12,13 @@
     .choose-menu-main {
         display: none;
     }
+    .remove-horizontal-padding {
+        padding: 0;
+    }
+    .stream-container{
+        padding-top: $mainnavHeight;
+        padding-bottom: $mainnavHeight;
+    }
 }
 
 @media screen and (min-width: 600px) {
@@ -21,6 +28,12 @@
 }
 .arrow-menu-display {
 
+    cursor: pointer;
+}
+
+.arrow-menu-arrow {
+    font-size: 1.5rem;
+    color: gray;
     cursor: pointer;
 }
 
@@ -65,21 +78,23 @@
 
 .stream-box{
     background-color: white;
-    margin: 15px 0px;
+    margin-top: 15px;
 }
 
 .stream-title-date{
     font-size: 12px;
     color: grey;
+    padding-left: 20px;
 }
 
 .stream-title{
     font-weight: bold;
     font-size: 28px;
+    padding-left: 20px;
 }
 
 .stream-box-title{
-    padding: 15px 15px 0px 15px;
+    padding: 15px 15px 0px 20px;
     font-weight: bold;
     font-size: 18px;
     cursor: pointer;
@@ -96,36 +111,47 @@
 
 .stream-box-desc{
     padding-top: 15px;
-    padding-left: 15px;
+    padding-left: 20px;
     
 }
 
+
 .stream-box-kompetenzen{
-    padding: 15px;
-    
+    padding: 20px;  
 }
 
 .stream-box-image{
-    padding: 1px;
+    padding: 0;
     position: relative;
     text-align: center;
     color: white;
     cursor: pointer;
+    line-height: 0;
     
 }
 
+.mask1 {
+    background: black;
+    -webkit-mask-image: linear-gradient(to top,black, transparent);
+  }
+
 .bottom-left {
     position: absolute;
-    bottom: 12px;
+    bottom: 18px;
     left: 18px;
 }
 
 .bottom-right {
     position: absolute;
-    bottom: 12px;
-    right: 18px;
+    bottom: 20px;
+    right: 38px;
 }
 
+.bottom-right-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 16px;
+}
 
 .stream-box-footer{
     border-top: 2px solid black;

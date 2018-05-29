@@ -6,6 +6,7 @@ import {RestConstants} from "./rest-constants";
 export enum STREAM_STATUS {
   OPEN = "OPEN",
   PROGRESS = "PROGRESS",
+  READ = "READ",
   DONE = "DONE"
 }
 
