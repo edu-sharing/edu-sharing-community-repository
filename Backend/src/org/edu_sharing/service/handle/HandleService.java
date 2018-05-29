@@ -164,8 +164,12 @@ public class HandleService {
 	
 	
 	public HandleValue[] getDefautValues(String url) {
-		HandleValue hvUrl = new HandleValue(1,Common.STD_TYPE_URL,url.getBytes());
-		HandleValue hvMail = new HandleValue(2,Common.STD_TYPE_EMAIL,"info@edu-sharing.com".getBytes());
+		HandleValue hvUrl = new HandleValue(1,Common.STD_TYPE_URL, url.getBytes());
+		
+		String mail = Edu_SharingProperties.instance.getHandleServerEMail(); 
+		mail = (mail == null) ? "info@edu-sharing.com" : mail;
+		
+		HandleValue hvMail = new HandleValue(2,Common.STD_TYPE_EMAIL, mail.getBytes());
 		HandleValue hvAdmin = new HandleValue();
 		hvAdmin.setIndex(100);
 		hvAdmin.setType(Common.ADMIN_TYPE);
