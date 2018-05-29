@@ -89,5 +89,10 @@ public class SQLUpdater extends UpdateAbstract {
 	
 		dbAlf.cleanUp(connection);
 	}
+	
+	@Override
+	public void run() {
+		this.logInfo("not implemented");
+	}
 
 }

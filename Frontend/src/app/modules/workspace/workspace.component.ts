@@ -51,6 +51,8 @@ import {EventListener} from "../../common/services/frame-events.service";
     ]
 })
 export class WorkspaceMainComponent implements EventListener{
+    private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
+    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
     private isRootFolder : boolean;
     private homeDirectory : string;
     private sharedFolders : Node[]=[];
@@ -58,12 +60,11 @@ export class WorkspaceMainComponent implements EventListener{
     private parameterNode : Node;
     private metadataNode : String;
     private root = "MY_FILES";
-    private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
-    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
+
     private explorerOptions : OptionItem[]=[];
     private actionOptions : OptionItem[]=[];
     private selection : Node[]=[];
-    public fileIsOver: boolean = false;
+    public fileIsOver = false;
 
     private dialogTitle : string;
     private dialogCancelable = false;
@@ -97,7 +98,6 @@ export class WorkspaceMainComponent implements EventListener{
     public isSafe = false;
     private isLoggedIn = false;
     public addNodesToCollection : Node[];
-    public addNodesStream : Node[];
     @ViewChild('dropdown') dropdownElement : ElementRef;
     private dropdownPosition: string;
     private dropdownLeft: string;
@@ -123,9 +123,6 @@ export class WorkspaceMainComponent implements EventListener{
     private oldParams: Params;
     private selectedNodeTree: string;
     private nodeDebug: Node;
-    private hideDialog() : void{
-        this.dialogTitle=null;
-    }
     private sharedNode : Node;
     public contributorNode : Node;
     public shareLinkNode : Node;
@@ -202,9 +199,6 @@ export class WorkspaceMainComponent implements EventListener{
             else if(this.metadataNode!=null){
                 this.closeMetadata();
             }
-            else if(this.addNodesStream!=null){
-                this.addNodesStream=null;
-            }
             else{
                 return;
             }
@@ -249,6 +243,9 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private uploadCamera(event:any){
         this.filesToUpload=event.target.files;
+    }
+    private hideDialog() : void{
+        this.dialogTitle=null;
     }
     private openCamera(){
         this.cordova.getPhotoFromCamera((data:any)=>{
@@ -299,16 +296,7 @@ export class WorkspaceMainComponent implements EventListener{
     private createConnector(event : any){
         let name=event.name+"."+event.type.filetype;
         this.createConnectorName=null;
-        let prop=RestHelper.createNameProperty(name);
-        prop[RestConstants.LOM_PROP_TECHNICAL_FORMAT]=[event.type.mimetype];
-        if(event.type.mimetype=='application/zip') {
-            prop[RestConstants.CCM_PROP_CCRESSOURCETYPE] = [event.type.ccressourcetype];
-            prop[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE] = [event.type.ccresourcesubtype];
-            prop[RestConstants.CCM_PROP_CCRESSOURCEVERSION] = [event.type.ccressourceversion];
-        }
-        if(event.type.editorType){
-            prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
-        }
+        let prop=NodeHelper.propertiesFromConnector(event);
         let win:any;
         if(!this.cordova.isRunningCordova())
             win=window.open("");
@@ -845,10 +833,6 @@ export class WorkspaceMainComponent implements EventListener{
             if (collection && !this.isSafe)
                 options.push(collection);
         }
-        let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,this.connector,(node:Node)=>this.addToStream(node));
-        if (stream && !this.isSafe)
-            options.push(stream);
-
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
             share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,this.connector,(node: Node) => this.shareNode(node));
@@ -1102,10 +1086,6 @@ export class WorkspaceMainComponent implements EventListener{
         let nodes=this.getNodeList(node);
         this.addNodesToCollection=nodes;
     }
-    private addToStream(node: Node) {
-        let nodes=this.getNodeList(node);
-        this.addNodesStream=nodes;
-    }
     private createContext(event:any=null){
         if(!this.createAllowed)
             return;
@@ -1181,7 +1161,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private hasOpenWindows() {
-        return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.addNodesStream;
+        return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
     }
 }
 interface ClipboardObject{

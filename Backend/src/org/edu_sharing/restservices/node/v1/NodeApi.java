@@ -256,13 +256,9 @@ public class NodeApi  {
     		Filter filter = new Filter(propertyFilter);
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-saved_search-".equals(node)){
-	    		node = repoDao.getUserSavedSearch();
-	    	}
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(nodeDao.asNode());
@@ -697,15 +693,7 @@ public class NodeApi  {
     		
     		NodeEntries response=new NodeEntries();
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-inbox-".equals(node)){
-    			node = repoDao.getUserInbox();
-    		}
-	    	if("-saved_search-".equals(node)){
-	    		node = repoDao.getUserSavedSearch();
-	    	}
+	    	node=NodeDao.mapNodeConstants(repoDao,node);
 	    	List<NodeRef> children;
 
 	    	if("-shared_files-".equals(node)){
@@ -845,13 +833,9 @@ public class NodeApi  {
 	    	}
 	    	
 	    	RepositoryDao repoDaoHome = RepositoryDao.getRepository(RepositoryDao.HOME);
-	    	if("-userhome-".equals(parent)){
-	    		parent = repoDaoHome.getUserHome();
-    		}
-	    	if("-inbox-".equals(parent)){
-	    		parent = repoDaoHome.getUserInbox();
-    		}
-	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node).importNode(parent);
+			node=NodeDao.mapNodeConstants(repoDaoHome,node);
+
+			NodeDao nodeDao=NodeDao.getNode(repoDao, node).importNode(parent);
 	    	NodeEntry response=new NodeEntry();
 	    	response.setNode(nodeDao.asNode());
 	    	return Response.status(Response.Status.OK).entity(response).build();
@@ -988,13 +972,9 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-inbox-".equals(node)){
-    			node = repoDao.getUserInbox();
-    		}
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	resolveURLTitle(properties);
 	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
 	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
@@ -1078,14 +1058,12 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-userhome-".equals(source)){
-	    		source = repoDao.getUserHome();
-    		}
-	    	NodeDao child = nodeDao.createChildByCopy(source, withChildren);
+
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			source=NodeDao.mapNodeConstants(repoDao,source);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao child = nodeDao.createChildByCopy(source, withChildren);
 	    			
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(child.asNode());
@@ -1134,13 +1112,9 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-userhome-".equals(source)){
-	    		source = repoDao.getUserHome();
-    		}
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			source=NodeDao.mapNodeConstants(repoDao,source);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	NodeDao child = nodeDao.createChildByMove(source);
 	    			
 	    	NodeEntry response = new NodeEntry();

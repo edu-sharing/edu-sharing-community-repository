@@ -86,6 +86,7 @@ import org.edu_sharing.repository.update.Release_1_7_SubObjectsToFlatObjects;
 import org.edu_sharing.repository.update.Release_1_7_UnmountGroupFolders;
 import org.edu_sharing.repository.update.Release_3_2_DefaultScope;
 import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
+import org.edu_sharing.repository.update.Release_4_1_FixClassificationKeywordPrefix;
 import org.edu_sharing.repository.update.SystemFolderNameToDisplayName;
 import org.edu_sharing.repository.update.Update;
 import org.edu_sharing.service.admin.model.GlobalGroup;
@@ -522,7 +523,8 @@ public class AdminServiceImpl implements AdminService  {
 				result.add(new ServerUpdateInfo(FolderToMap.ID,FolderToMap.description));
 				result.add(new ServerUpdateInfo(Edu_SharingPersonEsuidUpdate.ID,Edu_SharingPersonEsuidUpdate.description));
 				result.add(new ServerUpdateInfo(Release_3_2_FillOriginalId.ID,Release_3_2_FillOriginalId.description));
-				result.add(new ServerUpdateInfo(Release_3_2_DefaultScope.ID,Release_3_2_DefaultScope.description));					
+				result.add(new ServerUpdateInfo(Release_3_2_DefaultScope.ID,Release_3_2_DefaultScope.description));			
+				result.add(new ServerUpdateInfo(Release_4_1_FixClassificationKeywordPrefix.ID,Release_4_1_FixClassificationKeywordPrefix.description));					
 		return result;
 	}
 	
@@ -530,7 +532,7 @@ public class AdminServiceImpl implements AdminService  {
 	public String runUpdate(String updateId,boolean execute) throws Exception{
 		StringWriter result=new StringWriter();
 		PrintWriter out=new PrintWriter(result);
-		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out)};
+		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out), new Release_4_1_FixClassificationKeywordPrefix(out)};
 
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);

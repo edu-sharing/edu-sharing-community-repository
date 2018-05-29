@@ -137,7 +137,7 @@
     "WORKSPACE":"Workspace",
     "SEARCH":"Suchumgebung",
     "COLLECTIONS":"Sammlungen",
-    "STREAM":"Aktivitäten-Stream",
+    "STREAM":"Stream",
     "SECURE":"Safe",
     "PERMISSIONS":"Nutzerverwaltung",
     "LOGIN":"Login",
@@ -181,7 +181,7 @@
     "CUSTOM":"Benutzerdefinierte Lizenz"
   },
   "COOKIE_INFO":{
-    "DESCRIPTION":"edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren, diese Seite zu verwenden, nehmen wir an, dass Sie damit einverstanden sind.",
+    "DESCRIPTION":"edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren und diese Seite verwenden, nehmen wir an, dass Sie damit einverstanden sind.",
     "MORE_LINK":"Weitere Informationen",
     "DIALOG_TITLE":"Cookies",
     "DIALOG_MESSAGE":"Die Internetseiten verwenden teilweise so genannte Cookies. Cookies richten auf Ihrem Rechner keinen Schaden an und enthalten keine Viren.\nCookies dienen dazu, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.\nCookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Die meisten der von uns verwendeten Cookies sind so genannte \"Session-Cookies\". Sie werden nach Ende Ihres Besuchs automatisch gelöscht. Andere Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese löschen.\nDiese Cookies ermöglichen es uns, Ihren Browser beim nächsten Besuch wiederzuerkennen.\nSie können Ihren Browser so einstellen, dass Sie über das Setzen von Cookies informiert werden und Cookies nur im Einzelfall erlauben, die Annahme von Cookies für bestimmte Fälle oder generell ausschließen sowie das automatische Löschen der Cookies beim Schließen des Browser aktivieren.\nBei der Deaktivierung von Cookies kann die Funktionalität dieser Website eingeschränkt sein."
@@ -197,7 +197,7 @@
     "EMAIL_PLACEHOLDER":"jemand@beispiel.de",
     "EMAIL_REQUIRED":"Bitte eine gültige E-Mail-Adresse angeben",
     "REASON_REQUIRED":"Bitte wählen Sie aus, welches Problem besteht",
-    "DONE":"Ihre Anfrage wurde gesendet. Vielen Dank!",
+    "DONE":"Vielen Dank für Ihre Meldung.",
     "REASONS": {
       "UNAVAILABLE":"Medium nicht verfügbar",
       "INAPPROPRIATE_CONTENT":"Problematischer Inhalt",

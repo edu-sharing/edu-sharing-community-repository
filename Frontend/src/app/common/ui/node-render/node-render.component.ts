@@ -84,6 +84,7 @@ export class NodeRenderComponent implements EventListener{
   private sequenceParent: Node;
   private canScrollLeft: boolean = false;
   private canScrollRight: boolean = false;
+  private childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
 
@@ -162,7 +163,7 @@ export class NodeRenderComponent implements EventListener{
         return -1;
       let i=0;
       for(let node of this.list){
-        if(node.ref.id==this._node.ref.id)
+        if(node.ref.id==this._node.ref.id || node.ref.id==this.sequenceParent.ref.id)
           return i;
         i++;
       }
@@ -202,6 +203,7 @@ export class NodeRenderComponent implements EventListener{
           this.editor=params['editor'];
           this.fromLogin=params['fromLogin']=='true';
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
+          this.childobject_order = params['childobject_order'] ? params['childobject_order'] : -1;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
@@ -210,7 +212,16 @@ export class NodeRenderComponent implements EventListener{
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params['version'])
                   this.version=params['version'];
-                setTimeout(()=>this.node = params['node'],10);
+                if(this.childobject_order > -1) {
+                    this.nodeApi.getNodeChildobjects(params['node']).subscribe((data:NodeList)=>{
+                        let id = data.nodes[this.childobject_order].ref.id;
+                        if(this.childobject_order >= data.nodes.length)
+                          id = params['node'];
+                        setTimeout(()=>this.node = id,10);
+                    });
+                } else {
+                    setTimeout(()=>this.node = params['node'],10);
+                }
               });
             }
           });
@@ -229,6 +240,7 @@ export class NodeRenderComponent implements EventListener{
   public switchPosition(pos:number){
     //this.router.navigate([UIConstants.ROUTER_PREFIX+"render",this.list[pos].ref.id]);
     this.isLoading=true;
+    this.sequence = null;
     this.node=this.list[pos];
     //this.options=[];
   }
@@ -432,15 +444,20 @@ export class NodeRenderComponent implements EventListener{
         if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data =>{
              this.sequenceParent = data.node;
+               this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+                   if(data.nodes.length > 0)
+                    this.sequence = data;
+                    setTimeout(()=>this.setScrollparameters(),100);
+               });
             });
         } else {
             this.sequenceParent = this._node;
+            this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+                if(data.nodes.length > 0)
+                  this.sequence = data;
+                  setTimeout(()=>this.setScrollparameters(),100);
+            });
         }
-        this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
-          if(data.nodes.length > 0)
-            this.sequence = data;
-            setTimeout(()=>this.setScrollparameters(),10);
-        });
     }
 
     private scroll(direction: string) {
@@ -461,17 +478,19 @@ export class NodeRenderComponent implements EventListener{
     }
 
     private setScrollparameters() {
-        let element = this.sequencediv.nativeElement;
-        if(element.scrollLeft <= 20) {
-            this.canScrollLeft = false;
-        } else {
-            this.canScrollLeft = true;
-        }
-        if((element.scrollLeft + 20) >= (element.scrollWidth - window.innerWidth)) {
-            this.canScrollRight = false;
-        } else {
-            this.canScrollRight = true;
-        }
+      if(!this.sequence)
+        return;
+      let element = this.sequencediv.nativeElement;
+      if(element.scrollLeft <= 20) {
+          this.canScrollLeft = false;
+      } else {
+          this.canScrollLeft = true;
+      }
+      if((element.scrollLeft + 20) >= (element.scrollWidth - window.innerWidth)) {
+          this.canScrollRight = false;
+      } else {
+          this.canScrollRight = true;
+      }
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);

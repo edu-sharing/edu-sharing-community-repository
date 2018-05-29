@@ -294,7 +294,7 @@ export class AdminComponent {
   }
   public saveApp(){
     this.globalProgress=true;
-    if(this.xmlAppAdditionalPropertyName.trim()){
+    if(this.xmlAppAdditionalPropertyName && this.xmlAppAdditionalPropertyName.trim()){
       this.xmlAppProperties[this.xmlAppAdditionalPropertyName.trim()]=this.xmlAppAdditionalPropertyValue;
     }
     this.admin.updateApplicationXML(this.currentAppXml,this.xmlAppProperties).subscribe(()=>{

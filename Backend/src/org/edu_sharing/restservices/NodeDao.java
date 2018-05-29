@@ -338,7 +338,25 @@ public class NodeDao {
 	private NodeDao(RepositoryDao repoDao, String storeProtocol, String storeId, String nodeId, Filter filter) throws DAOException {
 		this(repoDao,new org.edu_sharing.service.model.NodeRefImpl(repoDao.getId(),storeProtocol,storeId,nodeId),filter);
 	}
-	private int getCommentCount(){
+
+	public static String mapNodeConstants(RepositoryDao repoDao,String node) throws DAOException {
+		try {
+			if ("-userhome-".equals(node)) {
+				node = repoDao.getUserHome();
+			}
+			if ("-inbox-".equals(node)) {
+				node = repoDao.getUserInbox();
+			}
+			if ("-saved_search-".equals(node)) {
+				node = repoDao.getUserSavedSearch();
+			}
+			return node;
+		}catch (Exception e){
+			throw DAOException.mapping(e);
+		}
+	}
+
+    private int getCommentCount(){
 		if(repoDao.isHomeRepo()) {
 			try {
 				CommentService commentService = CommentServiceFactory.getCommentService();

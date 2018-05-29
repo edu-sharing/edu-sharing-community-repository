@@ -606,5 +606,20 @@ export class NodeHelper{
       let subject=translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
       window.location.href="mailto:"+mail+"?subject="+encodeURIComponent(subject);
   }
+
+  static propertiesFromConnector(event: any) {
+      let name=event.name+"."+event.type.filetype;
+      let prop=RestHelper.createNameProperty(name);
+      prop[RestConstants.LOM_PROP_TECHNICAL_FORMAT]=[event.type.mimetype];
+      if(event.type.mimetype=='application/zip') {
+          prop[RestConstants.CCM_PROP_CCRESSOURCETYPE] = [event.type.ccressourcetype];
+          prop[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE] = [event.type.ccresourcesubtype];
+          prop[RestConstants.CCM_PROP_CCRESSOURCEVERSION] = [event.type.ccressourceversion];
+      }
+      if(event.type.editorType){
+          prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
+      }
+      return prop;
+  }
 }
 

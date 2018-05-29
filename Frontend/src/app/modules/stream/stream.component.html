@@ -83,4 +83,40 @@
     </div> <!-- cols8 -->
     <div class="col m2"></div>
     </div> <!-- row -->
+    <div class="create fixed-action-btn"
+         *ngIf="createAllowed"
+         (click)="create()"
+    ><a class="btn-floating btn-large waves-effect"><i class="material-icons">add</i></a>
+        <!--
+      <ul>
+        <li><a class="btn-floating btn-floating-inverted" (click)="showUploadSelect=true"><i class="material-icons">cloud_upload</i></a></li>
+        <li><a class="btn-floating btn-floating-inverted" (click)="addFolderName=''"><i class="material-icons">create_new_folder</i></a></li>
+        <li *ngFor="let connector of connectorList ? connectorList.connectors : null">
+          <a class="btn-floating btn-floating-inverted" (click)="createConnectorName='';createConnectorType=connector"><i class="material-icons">{{connector.icon}}</i></a>
+        </li>
+        <li><a class="btn-floating btn-floating-inverted" (click)="listLTI()"><i class="material-icons">extension</i></a></li>
+      </ul>
+      -->
+    </div>
+    <div class="dialog dialogCreate" *ngIf="showCreate" (click)="showCreate=false" (contextmenu)="showCreate=false;$event.preventDefault();$event.stopPropagation();"></div>
+    <!-- <input type="file" accept="image/*" capture="camera" #camera (change)="uploadCamera($event)"> -->
+    <div class="createMenu collection"
+         #dropdown
+         [@overlay]="showCreate && connectorList"
+         *ngIf="showCreate && connectorList">
+        <a *ngFor="let connector of connectorList.connectors;let i=index"
+           class="collection-item"
+           [class.collection-item-seperate]="!i"
+           tabindex="0"
+           (keyup.enter)="showCreate=false;createConnectorName='';createConnectorType=connector"
+           (click)="showCreate=false;createConnectorName='';createConnectorType=connector">
+            <i class="material-icons">{{connector.icon}}</i> {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}<img class="connectorBeta" src="assets/images/beta.svg"></a>
+        <!-- <a class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a> -->
+    </div>
+    <workspace-create-connector *ngIf="createConnectorName!=null"
+                                [name]="createConnectorName"
+                                [connector]="createConnectorType"
+                                (onCancel)="createConnectorName=null"
+                                (onCreate)="createConnector($event)"
+    ></workspace-create-connector>
 </div>

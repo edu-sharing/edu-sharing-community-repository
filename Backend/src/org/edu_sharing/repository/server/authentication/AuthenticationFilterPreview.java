@@ -136,6 +136,10 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 			//the proxy Repository
 			String proxyRepId = req.getParameter("proxyRepId");
 			String sig = req.getParameter("sig");
+			if(sig == null || sig.trim().isEmpty()){
+				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing signature parameter (sig)");
+				return;
+			}
 			sig = sig.trim();
 			//sig= URLDecoder.decode(sig);
 			String ts = req.getParameter("ts");
