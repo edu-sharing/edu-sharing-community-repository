@@ -15,7 +15,7 @@
     <div class="row">
     <div class="col m2 choose-menu-main removepadding margin-show">
         <div class="choose-menu"  (click)="menuOptions('stream')" [ngClass]="menuOption == 'stream' ? 'm-active' : 'm-inactive'">
-                <i class="tiny material-icons ">date_range</i>  Was gibt's Neues?
+                <i class="tiny material-icons ">date_range</i> {{'STREAM.MENU.OPTION1' | translate }}
         </div>
         <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'gesehen' ? 'm-active' : 'm-inactive'">
                 <i class="tiny material-icons ">visibility</i> Schon gesehen
@@ -24,19 +24,19 @@
             <i class="tiny material-icons ">settings</i> Einstellungen
         </div>
     </div>    
-    <div class="col s12 m8">
+    <div class="col s12 m8 remove-horizontal-padding">
     <div class="margin-show">
 
         <div class="stream-header-left row stream-marginfix">
-            <div *ngIf="menuOption == 'stream'" class="stream-title col s10 m12" (click)="sortieren()">Was gibt's Neues? </div>
-            <div *ngIf="menuOption == 'gesehen'" class="stream-title col s10 m12">Schon gesehen </div>
-            <i class="small material-icons arrow-menu-display col s2 " (click)="toggleMenuOptions()">keyboard_arrow_down</i>
+            <div *ngIf="menuOption == 'stream'" class="stream-title col s10 m12" (click)="sortieren()">Was gibt's Neues? <i class="small material-icons arrow-menu-arrow " (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
+            <div *ngIf="menuOption == 'gesehen'" class="stream-title col s10 m12">Schon gesehen <i class="small material-icons arrow-menu-arrow" (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
+            
             <span id="stream-title-date" class="stream-title-date col s12 m12">
                 {{today()}}
             </span>
             <div class="arrow-menu-display mobile-menu " [ngClass]="showMenuOptions ? '' : 'hide'">
                 <div class="choose-menu"  (click)="menuOptions('stream')" [ngClass]="menuOption == 'stream' ? 'm-active' : 'm-inactive'">
-                        <i class="tiny material-icons ">date_range</i>  Was gibt's Neues?
+                        <i class="tiny material-icons ">date_range</i>  {{'STREAM.MENU.OPTION1' | translate }}
                 </div>
                 <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'gesehen' ? 'm-active' : 'm-inactive'">
                         <i class="tiny material-icons ">visibility</i> Schon gesehen
@@ -64,14 +64,18 @@
             </div>
             
                 <div class="stream-box-desc">{{ strm.properties['add_to_stream_description'] || 'keine Beschreibung' }}</div> 
-                <div class="stream-box-desc"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
+                <div class="stream-box-kompetenzen"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
 
-            <div class="stream-box-kompetenzen"></div>
+            
             <div class="stream-box-image" *ngIf="strm.nodes[0]"> <!-- TODO: Display a warning when no node is found (it could be deleted) -->
-                <img src="{{ strm.nodes[0].preview.url }} " (click)="onStreamObjectClick(strm)" style="width:100%;height:auto;border:0;">
+                <!--<img src="{{ strm.nodes[0].preview.url }} " (click)="onStreamObjectClick(strm)" style="width:100%;height:auto;border:0;" class="mask1">-->
+                <div [ngStyle]="{ 'background': 'linear-gradient(to bottom, transparent 70%, black 115%), url(' + strm.nodes[0].preview.url + ')', 'background-size':'cover'}">
+                    <img src="{{ strm.nodes[0].preview.url }} " (click)="onStreamObjectClick(strm)" style="width:100%;height:auto;border:0;visibility:hidden;">
+                </div>
                 
                 <div class="bottom-left">{{strm.properties['add_to_stream_title']}}</div>
-                <div class="bottom-right">{{ strm.nodes[0].commentCount }} <i class="material-icons stic" >comment</i> </div>
+                <div class="bottom-right">{{ strm.nodes[0].commentCount }} </div>
+                <div class="bottom-right-icon"><i class="material-icons stic" >comment</i> </div>
             </div>
         </div>
 
