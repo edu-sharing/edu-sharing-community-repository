@@ -301,6 +301,9 @@ public class MetadataReaderV2 {
 				if(name.equals("unit")){
 					widget.setUnit(getTranslation(widget,value));
 				}
+				if(name.equals("inherit")){
+					widget.setInherit(new Boolean(value));
+				}
 				if(name.equals("defaultvalue"))
 					widget.setDefaultvalue(value); 
 				if(name.equals("format"))
