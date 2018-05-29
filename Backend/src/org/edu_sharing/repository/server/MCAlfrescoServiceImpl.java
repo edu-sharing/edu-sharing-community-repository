@@ -1547,18 +1547,6 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 		}
 	}
 
-	public void setPermissionsAndMail(SetPermissionsAndMail setPermAndMail) throws CCSessionExpiredException,
-			CCException {
-		try {
-			PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
-			permissionService.addPermissions(setPermAndMail.getNodeId(), setPermAndMail.getAuthPerm(), 
-					setPermAndMail.getInheritPermissions(), setPermAndMail.getMailText(), setPermAndMail.getSendMail(),setPermAndMail.getSendCopy());
-
-		} catch (Throwable e) {
-			errorHandling(e);
-		}
-	}
-
 	private void setLicenses(String nodeId, AssignedLicense[] assignedLicenses, HashMap<String, String> authenticationInfo) throws CCException {
 		try {
 			
@@ -2802,6 +2790,12 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 			throw new CCException("Access Denied");
 		}
 		EduGroupCache.refresh();
+	}
+	
+	@Override
+	public void setPermissionsAndMail(SetPermissionsAndMail setPermAndMail) throws CCSessionExpiredException, CCException {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

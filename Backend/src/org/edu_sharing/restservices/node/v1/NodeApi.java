@@ -1709,6 +1709,7 @@ public class NodeApi  {
     	@ApiParam(value = "mailtext",required=false ) @QueryParam("mailtext")  String mailText,
     	@ApiParam(value = "sendMail",required=true ) @QueryParam("sendMail") Boolean sendMail,
     	@ApiParam(value = "sendCopy",required=true ) @QueryParam("sendCopy") Boolean sendCopy,
+    	@ApiParam(value = "createHandle",required=false ) @QueryParam("createHandle") Boolean createHandle,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -1716,7 +1717,8 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
-	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy);
+	    	if(createHandle == null) createHandle = false;
+	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy,createHandle);
 	    	
 	    	return Response.status(Response.Status.OK).build();
 	

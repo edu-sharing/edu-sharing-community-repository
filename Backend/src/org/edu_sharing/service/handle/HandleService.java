@@ -9,8 +9,10 @@ import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 
 import net.handle.api.HSAdapter;
 import net.handle.api.HSAdapterFactory;
+import net.handle.hdllib.AdminRecord;
 import net.handle.hdllib.AuthenticationInfo;
 import net.handle.hdllib.Common;
+import net.handle.hdllib.Encoder;
 import net.handle.hdllib.HandleException;
 import net.handle.hdllib.HandleValue;
 import net.handle.hdllib.PublicKeyAuthenticationInfo;
@@ -59,15 +61,16 @@ public class HandleService {
 	}
 	
 	public String createHandle(String nodeId, String version, final HandleValue[] values) throws Exception {
-		String handle = generateHandle(nodeId);
+		String handle = generateHandle(nodeId,version);
 		createHandle(handle,values);
 		
 		return handle;
 	}
 	
-	public void createHandle(final String handle, final HandleValue[] values) throws Exception {
+	public String createHandle(String handle, final HandleValue[] values) throws Exception {
 		HSAdapter adapter = HSAdapterFactory.newInstance(id,idIndex,getPrivateKeyBytes(),null);
 		adapter.createHandle(handle, values);
+		return handle;
 	}
 	
 	
@@ -149,8 +152,39 @@ public class HandleService {
 		}
 	}
 	
-	public String generateHandle(String nodeId) {
-		return handleServerPrefix +"/" + nodeId;
+	public String generateHandle(String nodeId, String version) {
+		if(version != null && version.trim().length() > 0)
+			return handleServerPrefix +"/" + nodeId + "-" +version;
+		else return handleServerPrefix +"/" + nodeId;
+	}
+	
+	public String getId() {
+		return id;
+	}
+	
+	
+	public HandleValue[] getDefautValues(String url) {
+		HandleValue hvUrl = new HandleValue(1,Common.STD_TYPE_URL,url.getBytes());
+		HandleValue hvMail = new HandleValue(2,Common.STD_TYPE_EMAIL,"info@edu-sharing.com".getBytes());
+		HandleValue hvAdmin = new HandleValue();
+		hvAdmin.setIndex(100);
+		hvAdmin.setType(Common.ADMIN_TYPE);
+		hvAdmin.setData(Encoder.encodeAdminRecord(new AdminRecord(Util.encodeString(getId()), 200, 
+                true, // addHandle
+                true, // deleteHandle
+                false, // addNA
+                false, // deleteNA
+                true, // readValue
+                true, // modifyValue
+                true, // removeValue
+                true, // addValue
+                true, // modifyAdmin
+                true, // removeAdmin
+                true, // addAdmin
+                false  // listHandles
+                )));
+		
+		return new HandleValue[] {hvUrl,hvMail,hvAdmin};
 	}
 	
 

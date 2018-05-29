@@ -60,6 +60,7 @@ import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.StringTool;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
@@ -72,11 +73,10 @@ import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import net.handle.hdllib.Common;
-import net.handle.hdllib.HandleValue;
-
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
+	
+	public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
 	private NodeService nodeService = null;
 	private PersonService personService;
 	private ApplicationInfo appInfo;
@@ -115,7 +115,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param sendCopy
 	 */
 	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
-			Boolean sendCopy) throws Throwable {
+			Boolean sendCopy, Boolean createHandle) throws Throwable {
 
 		ACL currentACL = repoClient.getPermissions(nodeId);
 
@@ -260,17 +260,59 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
+			/**
+			 * publish / handle
+			 */
 			if (AuthorityType.EVERYONE.equals(authorityType)) {
 				
+				String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId), 
+						QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION) );
+				
+				//get new version label
+				String newVersion = new Double(Double.valueOf(version) + 0.1).toString();
+				
+				HandleService handleService = null;
+				String handle = null;
 				try {
-					HandleService handleService = new HandleService();
-					String contentLink =  MailTemplate.generateContentLink(appInfo, _nodeId);
-					HandleValue hv = new HandleValue(1,Common.STD_TYPE_URL,contentLink.getBytes());
-					handleService.createHandle(_nodeId,null, new HandleValue[]{hv});
+					 handleService = new HandleService();
+					 handle = handleService.generateHandle(_nodeId, newVersion);
 				}catch(HandleServiceNotConfiguredException e) {
 					logger.info("handle server not configured");
-				}catch(Exception e) {
-					logger.error(e.getMessage());
+				}
+				
+				Map<QName,Serializable> publishedProps = new HashMap<QName,Serializable>();
+				publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
+				
+				if(handle != null) {
+					publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
+				}
+				
+				NodeRef nodeRef = new NodeRef(Constants.storeRef,_nodeId);
+				if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
+					nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
+				}else {
+					for(Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
+						nodeService.setProperty(nodeRef,entry.getKey(), entry.getValue());
+					}
+				}
+				
+				/**
+				 * create version for the published node
+				 */
+				Map<QName,Serializable> props = nodeService.getProperties(nodeRef);
+				props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
+				HashMap<String,Object> vprops = new HashMap<String,Object>();
+				for(Map.Entry<QName, Serializable> entry : props.entrySet()) {
+					vprops.put(entry.getKey().getPrefixString(), entry.getValue());
+				}
+				new MCAlfrescoAPIClient().createVersion(_nodeId, vprops);
+				if(handleService != null) {
+					try {
+						String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
+						handleService.createHandle(handle,handleService.getDefautValues(contentLink));
+					}catch(Exception e) {
+						logger.error(e.getMessage());
+					}
 				}
 			}
 			

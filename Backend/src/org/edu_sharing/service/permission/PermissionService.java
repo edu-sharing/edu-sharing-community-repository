@@ -41,7 +41,7 @@ public interface PermissionService {
 	 * @throws Throwable
 	 */
 	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, 
-			String mailText, Boolean sendMail, Boolean sendCopy) throws Throwable;
+			String mailText, Boolean sendMail, Boolean sendCopy, Boolean createHandle) throws Throwable;
 
 
 	List<Notify> getNotifyList(String nodeId) throws Throwable;

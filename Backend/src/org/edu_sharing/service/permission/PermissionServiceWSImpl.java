@@ -44,7 +44,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 
 	@Override
 	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
-			Boolean sendCopy) throws Throwable {
+			Boolean sendCopy, Boolean createHandle) throws Throwable {
 	}
 
 	@Override
