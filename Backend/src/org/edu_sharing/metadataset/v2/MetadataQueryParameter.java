@@ -1,5 +1,6 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.util.List;
 import java.util.Map;
 
 public class MetadataQueryParameter {
@@ -9,7 +10,8 @@ public class MetadataQueryParameter {
 	private boolean exactMatching;
 	private String multiplejoin;
 	private int ignorable;
-	
+	private List<String> facets;
+
 	public String getName() {
 		return name;
 	}
@@ -78,6 +80,12 @@ public class MetadataQueryParameter {
 		this.exactMatching = exactMatching;
 	}
 
-	
-	
+
+    public void setFacets(List<String> facets) {
+        this.facets = facets;
+    }
+
+    public List<String> getFacets() {
+        return facets;
+    }
 }
