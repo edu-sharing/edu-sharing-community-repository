@@ -390,10 +390,11 @@ export class NodeRenderComponent implements EventListener{
     this.downloadButton=download;
     this.options.splice(0,0,download);
 
-    let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,this._node,this.searchService.reurl));
-    apply.isEnabled=this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
-    this.options.splice(0,0,apply);
-
+    if(this.searchService.reurl) {
+      let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
+      apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+      this.options.splice(0, 0, apply);
+    }
     this.checkConnector();
 
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
