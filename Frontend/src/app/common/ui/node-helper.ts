@@ -32,7 +32,7 @@ export class NodeHelper{
    * @param item
    * @returns {any}
    */
-  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : ListItem) : string
+  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : ListItem,fallbackValue="-") : string
   {
     let name=item.name;
     if(name==RestConstants.CM_NAME)
@@ -114,7 +114,7 @@ export class NodeHelper{
     }
     if(value)
       return value;
-    return "-";
+    return fallbackValue;
     //return "MISSING "+item;
 
   }
