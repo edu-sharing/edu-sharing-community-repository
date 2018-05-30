@@ -1620,5 +1620,17 @@
 	    			</property>
 	    		</properties>
 	    </aspect>
+	    <aspect name="ccm:published">
+	    	<title>published aspect</title>
+	    	<properties>
+	    		<property name="ccm:published_date">
+	    			<type>d:datetime</type>
+	    		</property>
+	    		<property name="ccm:published_handle_id">
+	    			<type>d:text</type>
+	    		</property>
+	    	</properties>
+	    </aspect>
+
 	</aspects>
 </model>

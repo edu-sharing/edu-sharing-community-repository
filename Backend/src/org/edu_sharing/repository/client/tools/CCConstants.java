@@ -427,6 +427,7 @@ public class CCConstants {
 	/* federated groups */
 	public final static String CCM_ASPECT_SCOPE = "{http://www.campuscontent.de/model/1.0}scope";
 	public final static String CCM_PROP_SCOPE_TYPE = "{http://www.campuscontent.de/model/1.0}scopetype";
+	public final static String CCM_ASPECT_IO_CHILDOBJECT = "{http://www.campuscontent.de/model/1.0}io_childobject";
 
 	public final static String CCM_VALUE_SCOPETYPE_GLOBAL = "global";
 
@@ -628,6 +629,15 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_EDITORIAL_STATE = "{http://www.campuscontent.de/model/1.0}editorial_state";
 	
 	/**
+	 * published
+	 */
+	public final static String CCM_ASPECT_PUBLISHED = "{http://www.campuscontent.de/model/1.0}published";
+
+	public final static String CCM_PROP_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";
+
+	public final static String CCM_PROP_PUBLISHED_HANDLE_ID = "{http://www.campuscontent.de/model/1.0}published_handle_id";
+
+	/**
 	 * share props
 	 */
 	public final static String CCM_PROP_SHARE_EXPIRYDATE = "{http://www.campuscontent.de/model/1.0}share_expirydate";
@@ -694,6 +704,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING = "TOOLPERMISSION_COLLECTION_PINNING";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_CONFIDENTAL = "TOOLPERMISSION_CONFIDENTAL";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_HANDLESERVICE = "TOOLPERMISSION_HANDLESERVICE";
 
 	/**
 	 * dynamic generated properties

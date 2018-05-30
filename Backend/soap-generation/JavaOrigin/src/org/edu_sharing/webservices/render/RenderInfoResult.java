@@ -33,9 +33,9 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	
 	KeyValue[] labels;
 	
-	Child[] childs;
+	Child[] children;
 
-	String iconURL;
+	String iconUrl;
 	
 	String previewUrl;
 	
@@ -200,19 +200,19 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 		return eduSchoolPrimaryAffiliation;
 	}
 
-	public Child[] getChilds() {
-		return childs;
+	public Child[] getChildren() {
+		return children;
 	}
 
-	public void setChilds(Child[] childs) {
-		this.childs = childs;
+	public void setChildren(Child[] children) {
+		this.children = children;
 	}
 
-	public String getIconURL() {
-		return iconURL;
+	public String getIconUrl() {
+		return iconUrl;
 	}
 
-	public void setIconURL(String iconURL) {
-		this.iconURL = iconURL;
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 }

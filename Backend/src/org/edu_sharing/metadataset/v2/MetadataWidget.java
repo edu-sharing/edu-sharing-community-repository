@@ -73,7 +73,7 @@ public class MetadataWidget extends MetadataTranslatable{
 					placeholder,defaultvalue,template,
 					suggestionSource,suggestionQuery,unit,format;
 	private Integer min,max,defaultMin,defaultMax,step;
-	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty;
+	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
 	private List<MetadataKey> values;
 	private List<Subwidget> subwidgets;
 
@@ -237,6 +237,15 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setSubwidgets(List<Subwidget> subwidgets) {
 		this.subwidgets = subwidgets;
 	}
+
+	public boolean isInherit() {
+		return inherit;
+	}
+
+	public void setInherit(boolean inherit) {
+		this.inherit = inherit;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof MetadataWidget){

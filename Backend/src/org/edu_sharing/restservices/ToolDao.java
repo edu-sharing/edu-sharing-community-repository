@@ -44,7 +44,7 @@ public class ToolDao {
 					try {
 						NodeService nodeService = NodeServiceFactory.getNodeService(repoDao.getApplicationInfo().getAppId());
 						String nodeId = nodeService.createNode(companyHomeId, CCConstants.CCM_TYPE_MAP, nodeService.getNameProperty( CCConstants.TOOL_HOMEFOLDER));
-						PermissionServiceFactory.getPermissionService(null).setPermissions(nodeId, new ACE[]{}, false, null,null, false);
+						PermissionServiceFactory.getPermissionService(null).setPermissions(nodeId, new ACE[]{}, false, null,null, false,false);
 						return nodeId;
 					}catch(Throwable e) {
 						throw new Exception(e);

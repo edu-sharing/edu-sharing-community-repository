@@ -13,6 +13,12 @@ public class Edu_SharingProperties {
 	public static final String KEY_HELP_URL_SHARE = "help_url_share";
 	
 	public static final String KEY_FUZZY_USERSEARCH = "fuzzy_usersearch";
+	
+	public static final String KEY_HANDLESERVER_PREFIX = "handle_server_prefix";
+	
+	public static final String KEY_HANDLESERVER_PRIVKEY = "handle_server_privkey";
+	
+	public static final String KEY_HANDLESERVER_EMAIL = "handle_server_email";
 
 	public static final String PROPERTY_FILE = "edu-sharing.properties";
 	
@@ -29,6 +35,12 @@ public class Edu_SharingProperties {
 	
 	boolean fuzzyUserSearch = false;
 	
+	String handleServerPrefix = null;
+	
+	String handleServerPrivKey = null;
+	
+	String handleServerEMail = null;
+	
 	private  Edu_SharingProperties() {
 		
 		synchronized(Edu_SharingProperties.class){
@@ -39,6 +51,10 @@ public class Edu_SharingProperties {
 				helpUrlCustom = PropertiesHelper.getProperty(KEY_HELP_URL_CUSTOM, PROPERTY_FILE, PropertiesHelper.TEXT);
 				helpUrlShare = PropertiesHelper.getProperty(KEY_HELP_URL_SHARE, PROPERTY_FILE, PropertiesHelper.TEXT);
 				fuzzyUserSearch = Boolean.parseBoolean(PropertiesHelper.getProperty(KEY_FUZZY_USERSEARCH, PROPERTY_FILE, PropertiesHelper.TEXT));
+			
+				handleServerPrefix = PropertiesHelper.getProperty(KEY_HANDLESERVER_PREFIX, PROPERTY_FILE, PropertiesHelper.TEXT);
+				handleServerPrivKey = PropertiesHelper.getProperty(KEY_HANDLESERVER_PRIVKEY, PROPERTY_FILE, PropertiesHelper.TEXT);
+				handleServerEMail = PropertiesHelper.getProperty(KEY_HANDLESERVER_EMAIL, PROPERTY_FILE, PropertiesHelper.TEXT);
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -68,6 +84,18 @@ public class Edu_SharingProperties {
 	
 	public boolean isFuzzyUserSearch() {
 		return fuzzyUserSearch;
+	}
+	
+	public String getHandleServerPrefix() {
+		return handleServerPrefix;
+	}
+	
+	public String getHandleServerPrivKey() {
+		return handleServerPrivKey;
+	}
+	
+	public String getHandleServerEMail() {
+		return handleServerEMail;
 	}
 	
 	public static final Edu_SharingProperties instance = new Edu_SharingProperties();

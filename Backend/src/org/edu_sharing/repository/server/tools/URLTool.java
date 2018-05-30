@@ -305,8 +305,14 @@ public class URLTool{
 		
 	}
 
-	public static String getNgRenderNodeUrl(String nodeId) {
-		return getNgComponentsUrl()+"render/"+nodeId;
+	/**
+	 * Get the url to the angular rendering component
+	 * @param nodeId
+	 * @param version may be null to use the latest
+	 * @return
+	 */
+	public static String getNgRenderNodeUrl(String nodeId,String version) {
+		return getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.trim().isEmpty() ? "/"+version : "");
 	}
 	
 	public static String getRedirectServletLink(String repId, String nodeId){

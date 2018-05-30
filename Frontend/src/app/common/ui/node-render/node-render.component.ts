@@ -287,6 +287,11 @@ export class NodeRenderComponent implements EventListener{
       return;
     }
     this.addDownloadButton(download);
+    this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+        if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+          this.downloadButton.name = 'DOWNLOAD_ALL';
+        }
+    });
   }
   private loadRenderData(){
     let parameters={
@@ -345,10 +350,18 @@ export class NodeRenderComponent implements EventListener{
       this.nodeComments=this._node;
   }
   private downloadCurrentNode() {
-      if(this.downloadUrl)
-        NodeHelper.downloadUrl(this.toast,this.connector.getCordovaService(),this.downloadUrl);
-      else
-        NodeHelper.downloadNode(this.toast,this.connector.getCordovaService(),this._node,this.version);
+      if(this.downloadUrl) {
+          NodeHelper.downloadUrl(this.toast, this.connector.getCordovaService(), this.downloadUrl);
+      } else {
+          this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+              if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+                  let nodes = [this.sequenceParent].concat(this.sequence.nodes);
+                  NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name);
+              } else {
+                  NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
+              }
+          });
+      }
   }
 
   private openConnector(list:ConnectorList,newWindow=true) {

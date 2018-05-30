@@ -109,7 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
 		replace.put("reason", reason);
 		replace.put("name", (String)properties.get(CCConstants.CM_NAME));
 		replace.put("id", nodeId);
-		replace.put("link", URLTool.getNgRenderNodeUrl(nodeId));
+		replace.put("link", URLTool.getNgRenderNodeUrl(nodeId,null));
 		Mail mail=new Mail();
 		String receiver=(String)mail.getProperties().get("mail.report.receiver");
 		if(receiver==null)

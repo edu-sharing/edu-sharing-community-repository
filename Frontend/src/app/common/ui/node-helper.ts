@@ -32,7 +32,7 @@ export class NodeHelper{
    * @param item
    * @returns {any}
    */
-  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : ListItem) : string
+  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : ListItem,fallbackValue="-") : string
   {
     let name=item.name;
     if(name==RestConstants.CM_NAME)
@@ -114,7 +114,7 @@ export class NodeHelper{
     }
     if(value)
       return value;
-    return "-";
+    return fallbackValue;
     //return "MISSING "+item;
 
   }
@@ -500,7 +500,7 @@ export class NodeHelper{
    * Download one or multiple nodes
    * @param node
    */
-  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[]) {
+  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[], fileName="download.zip") {
     if(nodes.length==1)
       return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
 
@@ -508,7 +508,7 @@ export class NodeHelper{
       this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
       "../eduservlet/download?appId="+
       encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString),"download.zip");
+      "&nodeIds="+encodeURIComponent(nodesString),fileName);
   }
 
   static getLRMIProperty(data: any, item: ListItem) {

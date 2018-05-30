@@ -74,7 +74,7 @@ export class WorkspaceMetadataComponent  {
       this.versions=data.versions.reverse();
       for(let version of this.versions) {
         if(version.comment){
-          if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
+          if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD || version.comment==RestConstants.COMMENT_NODE_PUBLISHED || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
             let parameters = version.comment.split(",");
             let editor = "";
             if (parameters.length > 1)
@@ -153,6 +153,7 @@ export class WorkspaceMetadataComponent  {
       data["exifDate"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL));
 
     data["dimensions"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.DIMENSIONS));
+    data["dimensions"]=NodeHelper.getNodeAttribute(this.translate,this.config,node,new ListItem("NODE",RestConstants.DIMENSIONS),null);
 
     data["license"]=NodeHelper.getLicenseIcon(node);
     data["licenseName"]=NodeHelper.getLicenseName(node,this.translate);

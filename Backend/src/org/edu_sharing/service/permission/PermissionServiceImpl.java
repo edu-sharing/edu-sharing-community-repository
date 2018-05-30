@@ -52,7 +52,6 @@ import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -63,21 +62,21 @@ import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
-import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
-import org.edu_sharing.restservices.admin.v1.Application;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.handle.HandleService;
+import org.edu_sharing.service.handle.HandleServiceNotConfiguredException;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
+	
+	public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
 	private NodeService nodeService = null;
 	private PersonService personService;
 	private ApplicationInfo appInfo;
@@ -116,7 +115,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param sendCopy
 	 */
 	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
-			Boolean sendCopy) throws Throwable {
+			Boolean sendCopy, Boolean createHandle) throws Throwable {
 
 		ACL currentACL = repoClient.getPermissions(nodeId);
 
@@ -190,7 +189,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 				authPermissions.put(toAdd.getAuthority(), permissions);
 			}
-			addPermissions(nodeId, authPermissions, inheritPermissions, mailText, sendMail, sendCopy);
+			addPermissions(nodeId, authPermissions, inheritPermissions, mailText, sendMail, sendCopy,createHandle);
 		}
 
 		if (acesToUpdate.size() > 0) {
@@ -223,7 +222,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 	@Override
 	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
-			String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
+			String _mailText, Boolean _sendMail, Boolean _sendCopy, Boolean createHandle) throws Throwable {
 
 		EmailValidator mailValidator = EmailValidator.getInstance(true, true);
 
@@ -261,6 +260,66 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
+			/**
+			 * publish / handle
+			 */
+			if (AuthorityType.EVERYONE.equals(authorityType)) {
+				
+				String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId), 
+						QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION) );
+				
+				//get new version label
+				String newVersion = new Double(Double.valueOf(version) + 0.1).toString();
+				
+				HandleService handleService = null;
+				String handle = null;
+				
+				
+				if(createHandle && toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
+					try {
+						 handleService = new HandleService();
+						 handle = handleService.generateHandle(_nodeId, newVersion);
+					}catch(HandleServiceNotConfiguredException e) {
+						logger.info("handle server not configured");
+					}
+				}
+				
+				Map<QName,Serializable> publishedProps = new HashMap<QName,Serializable>();
+				publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
+				
+				if(handle != null) {
+					publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
+				}
+				
+				NodeRef nodeRef = new NodeRef(Constants.storeRef,_nodeId);
+				if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
+					nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
+				}else {
+					for(Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
+						nodeService.setProperty(nodeRef,entry.getKey(), entry.getValue());
+					}
+				}
+				
+				/**
+				 * create version for the published node
+				 */
+				Map<QName,Serializable> props = nodeService.getProperties(nodeRef);
+				props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
+				HashMap<String,Object> vprops = new HashMap<String,Object>();
+				for(Map.Entry<QName, Serializable> entry : props.entrySet()) {
+					vprops.put(entry.getKey().getPrefixString(), entry.getValue());
+				}
+				new MCAlfrescoAPIClient().createVersion(_nodeId, vprops);
+				if(handleService != null && handle != null) {
+					try {
+						String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
+						handleService.createHandle(handle,handleService.getDefautValues(contentLink));
+					}catch(Exception e) {
+						logger.error(e.getMessage());
+					}
+				}
+			}
+			
 			if (AuthorityType.USER.equals(authorityType)) {
 				HashMap<String, String> personInfo = repoClient.getUserInfo(authority);
 
