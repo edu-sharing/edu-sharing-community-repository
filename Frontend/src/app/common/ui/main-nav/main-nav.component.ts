@@ -499,6 +499,9 @@ export class MainNavComponent {
   private openImprint(){
     window.document.location.href=this.config.imprintUrl;
   }
+  private openPrivacy(){
+    window.document.location.href=this.config.privacyInformationUrl;
+  }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
       this.config=data;

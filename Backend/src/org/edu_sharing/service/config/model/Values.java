@@ -8,6 +8,7 @@ public class Values{
 	@XmlElement public String registerUrl;
 	@XmlElement public String recoverPasswordUrl;
 	@XmlElement	public String imprintUrl;
+	@XmlElement	public String privacyInformationUrl;
 	@XmlElement	public String helpUrl;
 	@XmlElement	public String whatsNewUrl;
 	@XmlElement	public String editProfileUrl;
