@@ -422,6 +422,7 @@ public class CCConstants {
 	/* federated groups */
 	public final static String CCM_ASPECT_SCOPE = "{http://www.campuscontent.de/model/1.0}scope";
 	public final static String CCM_PROP_SCOPE_TYPE = "{http://www.campuscontent.de/model/1.0}scopetype";
+	public final static String CCM_ASPECT_IO_CHILDOBJECT = "{http://www.campuscontent.de/model/1.0}io_childobject";
 
 	public final static String CCM_VALUE_SCOPETYPE_GLOBAL = "global";
 
