@@ -19,6 +19,7 @@ import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.stream.StreamService;
 import org.edu_sharing.service.stream.StreamServiceFactory;
+import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.edu_sharing.service.stream.model.ContentEntry;
 import org.edu_sharing.service.stream.model.ContentEntry.Audience.STATUS;
 import org.edu_sharing.service.stream.model.StreamSearchRequest;
@@ -47,7 +48,7 @@ public class StreamDao {
 	}
 	private static STATUS getStatusForEntry(String entryId) throws Exception{
 		StreamService service=StreamServiceFactory.getStreamService();
-		return service.getStatus(entryId, getCurrentAuthorities());
+		return service.getStatus(entryId, StreamServiceHelper.getCurrentAuthorities());
 	}
 	public static void deleteEntry(RepositoryDao repoDao,String entryId) throws DAOException{
 		try {
@@ -95,7 +96,7 @@ public class StreamDao {
 			StreamService service=StreamServiceFactory.getStreamService();
 			StreamList result=new StreamList();
 			
-			StreamSearchRequest request = new StreamSearchRequest(getCurrentAuthorities(),getStatus(status));
+			StreamSearchRequest request = new StreamSearchRequest(StreamServiceHelper.getCurrentAuthorities(),getStatus(status));
 			request.offset=offset;
 			request.size=maxItems;
 			if(property!=null && !property.isEmpty())
@@ -144,22 +145,6 @@ public class StreamDao {
 			throw DAOException.mapping(e);
 		}
 	}
-	private static List<String> getCurrentAuthorities() throws Exception {
-		AuthorityService authorityService=AuthorityServiceFactory.getLocalService();
-		ArrayList<String> authorities = new ArrayList<String>();
-		authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
-		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-
-			@Override
-			public Void doWork() throws Exception {
-				authorities.addAll(authorityService.getMemberships(AuthenticationUtil.getFullyAuthenticatedUser()));
-				return null;
-			}
-		});
-		if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
-			authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
-		return authorities;
-	}
 	private static STATUS getStatus(String status) {
 		if(status==null || status.isEmpty())
 			return null;
@@ -167,8 +152,7 @@ public class StreamDao {
 	}
 	public static boolean canAccessNode(String nodeId) throws DAOException{
 		try {
-			StreamService service=StreamServiceFactory.getStreamService();
-			return service.canAccessNode(getCurrentAuthorities(), nodeId);
+			return StreamServiceHelper.canCurrentAuthorityAccessNode(nodeId);
 		}catch(Exception e) {
 			throw DAOException.mapping(e);
 		}

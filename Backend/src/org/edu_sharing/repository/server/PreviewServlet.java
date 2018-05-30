@@ -57,6 +57,9 @@ import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.stream.StreamService;
+import org.edu_sharing.service.stream.StreamServiceFactory;
+import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gwt.widgetideas.graphics.client.Color;
@@ -354,6 +357,11 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	}
 
 	private void validatePermissions(StoreRef storeRef, String nodeId) {
+		try {
+			if (StreamServiceHelper.canCurrentAuthorityAccessNode(StreamServiceFactory.getStreamService(), nodeId))
+				return;
+		}catch (Exception e){}
+
 		HashMap<String, Boolean> result = PermissionServiceFactory.getLocalService().hasAllPermissions(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,new String[]{CCConstants.PERMISSION_READ_PREVIEW});
 		if(!result.get(CCConstants.PERMISSION_READ_PREVIEW))
 			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ_PREVIEW+" on "+nodeId);
