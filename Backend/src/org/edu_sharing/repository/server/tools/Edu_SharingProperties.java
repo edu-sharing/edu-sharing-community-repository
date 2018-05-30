@@ -17,6 +17,8 @@ public class Edu_SharingProperties {
 	public static final String KEY_HANDLESERVER_PREFIX = "handle_server_prefix";
 	
 	public static final String KEY_HANDLESERVER_PRIVKEY = "handle_server_privkey";
+	
+	public static final String KEY_HANDLESERVER_EMAIL = "handle_server_email";
 
 	public static final String PROPERTY_FILE = "edu-sharing.properties";
 	
@@ -37,6 +39,8 @@ public class Edu_SharingProperties {
 	
 	String handleServerPrivKey = null;
 	
+	String handleServerEMail = null;
+	
 	private  Edu_SharingProperties() {
 		
 		synchronized(Edu_SharingProperties.class){
@@ -50,7 +54,7 @@ public class Edu_SharingProperties {
 			
 				handleServerPrefix = PropertiesHelper.getProperty(KEY_HANDLESERVER_PREFIX, PROPERTY_FILE, PropertiesHelper.TEXT);
 				handleServerPrivKey = PropertiesHelper.getProperty(KEY_HANDLESERVER_PRIVKEY, PROPERTY_FILE, PropertiesHelper.TEXT);
-				
+				handleServerEMail = PropertiesHelper.getProperty(KEY_HANDLESERVER_EMAIL, PROPERTY_FILE, PropertiesHelper.TEXT);
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -88,6 +92,10 @@ public class Edu_SharingProperties {
 	
 	public String getHandleServerPrivKey() {
 		return handleServerPrivKey;
+	}
+	
+	public String getHandleServerEMail() {
+		return handleServerEMail;
 	}
 	
 	public static final Edu_SharingProperties instance = new Edu_SharingProperties();
