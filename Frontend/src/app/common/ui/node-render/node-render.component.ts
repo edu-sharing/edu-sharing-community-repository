@@ -28,6 +28,7 @@ import {ConfigurationHelper} from "../../rest/configuration-helper";
 import {SearchService} from "../../../modules/search/search.service";
 import {Helper} from "../../helper";
 import {EventListener} from "../../../common/services/frame-events.service";
+import {ActionbarHelper} from "../actionbar/actionbar-helper";
 
 declare var jQuery:any;
 declare var window: any;
@@ -165,6 +166,7 @@ export class NodeRenderComponent implements EventListener{
       private connector : RestConnectorService,
       private connectors : RestConnectorsService,
       private nodeApi : RestNodeService,
+      private searchStorage : SearchService,
       private toolService: RestToolService,
       private frame : FrameEventsService,
       private toast : Toast,
@@ -387,6 +389,11 @@ export class NodeRenderComponent implements EventListener{
   private addDownloadButton(download: OptionItem) {
     this.downloadButton=download;
     this.options.splice(0,0,download);
+
+    let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,this._node,this.searchService.reurl));
+    apply.isEnabled=this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+    this.options.splice(0,0,apply);
+
     this.checkConnector();
 
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);
