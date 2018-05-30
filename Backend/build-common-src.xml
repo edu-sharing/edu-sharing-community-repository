@@ -368,7 +368,7 @@
 	
 	<target name="deploy" depends="prepare-alfresco-webapps, compile-java, prepare, deploy-java, deploy-public, deploy-ng, deploy-ng-extension">
 	</target>
-	<target name="deploy-reload" depends="deploy, reload">
+	<target name="deploy-reload" depends="deploy, reload" description="Deploy and Reload tomcat app">
 	</target>
 	<target name="deploy-ssh" depends="deploy, release, copy-ssh-true, copy-ssh-false">
 	</target>

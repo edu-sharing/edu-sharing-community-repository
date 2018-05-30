@@ -39,6 +39,7 @@ public class ToolPermissionServiceFactory {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
 
 		
 		ConnectorList connectorList =  ConnectorServiceFactory.getConnectorService().getConnectorList();

@@ -164,6 +164,7 @@ export class RestConstants {
 
   public static COMMENT_MAIN_FILE_UPLOAD="MAIN_FILE_UPLOAD";
   public static COMMENT_EDITOR_UPLOAD="EDITOR_UPLOAD";
+  public static COMMENT_NODE_PUBLISHED="NODE_PUBLISHED";
   public static ACCESS_ADD_CHILDREN="AddChildren";
   public static ACCESS_WRITE="Write";
   public static ACCESS_DELETE="Delete";

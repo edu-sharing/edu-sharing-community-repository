@@ -111,7 +111,8 @@
       "USAGE_COUNT":"Usage count",
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
-        "EDITOR_UPLOAD": "File updated by editor"
+        "EDITOR_UPLOAD": "File updated by editor",
+        "NODE_PUBLISHED": "File published"
       }
     },
     "EDITOR":{

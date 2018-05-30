@@ -827,7 +827,7 @@ public class NodeDao {
 		});
 	}
 
-	public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy) throws DAOException {
+	public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy, boolean createHandle) throws DAOException {
 		
 		try {
 			
@@ -854,7 +854,7 @@ public class NodeDao {
 					nodeId, 
 					aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]), 
 					permissions.isInherited(), 
-					mailText, sendMail, sendCopy);
+					mailText, sendMail, sendCopy,createHandle);
 			
 			
 		} catch (Throwable t) {

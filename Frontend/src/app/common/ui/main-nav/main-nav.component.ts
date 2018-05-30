@@ -519,6 +519,9 @@ export class MainNavComponent implements AfterViewInit{
   private openImprint(){
     window.document.location.href=this.config.imprintUrl;
   }
+  private openPrivacy(){
+    window.document.location.href=this.config.privacyInformationUrl;
+  }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
       this.config=data;
@@ -627,12 +630,19 @@ export class MainNavComponent implements AfterViewInit{
           this.userMenuOptions.push(option);
       }
       if(this.config.imprintUrl){
-          let option=new OptionItem('IMPRINT','info_outline',()=>this.showHelp(this.whatsNewUrl));
+          let option=new OptionItem('IMPRINT','info_outline',()=>this.openImprint());
           option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-          option.isSeperateBottom=true;
+          option.isSeperateBottom=!this.config.privacyInformationUrl;
           this.userMenuOptions.push(option);
       }
+        if(this.config.privacyInformationUrl){
+            let option=new OptionItem('PRIVACY_INFORMATION','verified_user',()=>this.openPrivacy());
+            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+            option.isSeperateBottom=true;
+            this.userMenuOptions.push(option);
+        }
       if(this.editUrl && !this.isGuest){
         this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.editProfile()));
       }

@@ -104,6 +104,14 @@ mds .mdsGroup{
     font-weight:bold;
     color:$primary;
   }
+  .widget_multivalueFixedBadges,
+  .widget_multivalueSuggestBadges,
+  .widget_multivalueTree{
+    .input-hint-bottom{
+      margin-top: -5px;
+      margin-bottom: 5px;
+    }
+  }
   .suggestionMoreItems{
     font-weight: bold;
     text-align: center;
