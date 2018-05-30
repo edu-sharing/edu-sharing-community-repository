@@ -166,6 +166,18 @@ public class MetadataReaderV2 {
 						Node key=data.getAttributes().getNamedItem("value");
 						statements.put(key==null ? null : key.getTextContent(), value);
 					}
+					if(name.equals("facets")){
+						NodeList facets = data.getChildNodes();
+						List<String> facetsList=new ArrayList<>();
+						for(int l=0;l<facets.getLength();l++){
+							String facetName=facets.item(l).getNodeName();
+							String facetValue=facets.item(l).getTextContent();
+							if(facetName.equals("facet"))
+								facetsList.add(facetValue);
+						}
+						if(facetsList.size()>0)
+							parameter.setFacets(facetsList);
+					}
 					if(name.equals("ignorable"))
 						parameter.setIgnorable(Integer.parseInt(value));
 					if(name.equals("exactMatching"))
