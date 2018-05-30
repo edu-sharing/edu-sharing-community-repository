@@ -627,7 +627,7 @@ export class MainNavComponent implements AfterViewInit{
           this.userMenuOptions.push(option);
       }
       if(this.config.imprintUrl){
-          let option=new OptionItem('IMPRINT','info',()=>this.showHelp(this.whatsNewUrl));
+          let option=new OptionItem('IMPRINT','info_outline',()=>this.showHelp(this.whatsNewUrl));
           option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           option.isSeperateBottom=true;
