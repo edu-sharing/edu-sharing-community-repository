@@ -71,11 +71,11 @@ export class StreamComponent {
       if(mm<10) {outstring += '0'+String(mm);} else {outstring +=  String(mm);}
       return outstring + '. ' + String(yyyy);
   }
-  private connectorList: ConnectorList;
-  private createConnectorName: string;
-  private createConnectorType: Connector;
-  private createAllowed : boolean ;
-  private showCreate = false;
+  connectorList: ConnectorList;
+  createConnectorName: string;
+  createConnectorType: Connector;
+  createAllowed : boolean ;
+  showCreate = false;
   public collectionNodes:EduData.Node[]; //
   public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
   public mainnav = true;
