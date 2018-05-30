@@ -37,6 +37,11 @@ public class OnCopyIOPolicy implements OnCopyCompletePolicy{
 	public void onCopyComplete(QName classRef, NodeRef sourceNodeRef, NodeRef targetNodeRef, boolean copyToNewNode, Map<NodeRef, NodeRef> copyMap) {
 		logger.info("will set " + versionProp.toPrefixString() + " to 1.0");
 		nodeService.setProperty(targetNodeRef, versionProp, "1.0");
+		
+		QName publishedAspect = QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED);
+		if(nodeService.hasAspect(targetNodeRef, publishedAspect)) {
+			nodeService.removeAspect(targetNodeRef, publishedAspect);
+		}
 	}
 	
 	
