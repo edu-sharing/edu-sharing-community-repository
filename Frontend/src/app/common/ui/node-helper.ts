@@ -500,7 +500,7 @@ export class NodeHelper{
    * Download one or multiple nodes
    * @param node
    */
-  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[]) {
+  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[], fileName="download.zip") {
     if(nodes.length==1)
       return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
 
@@ -508,7 +508,7 @@ export class NodeHelper{
       this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
       "../eduservlet/download?appId="+
       encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString),"download.zip");
+      "&nodeIds="+encodeURIComponent(nodesString),fileName);
   }
 
   static getLRMIProperty(data: any, item: ListItem) {
