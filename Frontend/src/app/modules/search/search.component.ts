@@ -1004,6 +1004,7 @@ export class SearchComponent {
             this.updateActionbar(null);
           });
         }this.mainnav=param['mainnav']=='false' ? false : true;
+        this.searchService.reurl=null;
         if(param['reurl']) {
           this.searchService.reurl = param['reurl'];
           this.applyMode=true;

@@ -16,11 +16,10 @@ export class TutorialComponent implements OnInit {
   private static activeTutorial:ElementRef=null;
   private static PADDING_TOLERANCE=50;
   @ViewChild('tutoral') tutorial : ElementRef;
-  private background: SafeStyle;
-  private show = false;
-  private alignEnd:boolean;
+  background: SafeStyle;
+  show = false;
   private interval: any;
-  private padding:any={};
+  padding:any={};
   @Input() rgbColor = [0,0,0];
   //@Input() rgbColor = [72,112,142];
   @Input() showSkip = true;

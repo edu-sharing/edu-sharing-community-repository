@@ -33,8 +33,8 @@ export class WorkspaceLicenseComponent  {
    * Default is 1 for mds
    */
   @Input() priority = 1;
-  private _type="";
-  private _properties: any;
+  _type="";
+  _properties: any;
   public set type(type:string){
     this._type=type;
     if(this._type=='CC_0' && !this.cc0Type)

@@ -87,9 +87,9 @@ export class MainNavComponent implements AfterViewInit{
   licenseAgreementHTML: string;
   canEditProfile: boolean;
   private licenseAgreementNode: Node;
-  private userMenuOptions: OptionItem[];
-  private helpOptions: OptionItem[];
-  private tutorialElement: ElementRef;
+  userMenuOptions: OptionItem[];
+  helpOptions: OptionItem[];
+  tutorialElement: ElementRef;
 
 
   public showEditProfile: boolean;

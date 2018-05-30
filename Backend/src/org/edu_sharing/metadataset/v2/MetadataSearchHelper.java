@@ -3,11 +3,7 @@ package org.edu_sharing.metadataset.v2;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
@@ -132,35 +128,39 @@ public class MetadataSearchHelper {
 		searchParameters.setMaxItems(1);
 
 		searchParameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")");
-		
-		String facetName = "@" + parameter.getName();		
 
-		FieldFacet fieldFacet = new FieldFacet(facetName);
-		fieldFacet.setLimit(100);
-		fieldFacet.setMinCount(1);
-		searchParameters.addFieldFacet(fieldFacet);
+		String facetName = "@" + parameter.getName();
+		List<String> facets = parameter.getFacets() == null ? Arrays.asList(new String[]{facetName}) : parameter.getFacets();
+		for(String facet : facets){
+			FieldFacet fieldFacet = new FieldFacet(facet);
+			fieldFacet.setLimit(100);
+			fieldFacet.setMinCount(1);
+			searchParameters.addFieldFacet(fieldFacet);
+		}
 
 		ResultSet rs = searchService.query(searchParameters);
-		
-		List<Pair<String, Integer>> facettPairs = rs.getFieldFacet(facetName);
-		
 		Map<String, MetadataKey> captions = widget.getValuesAsMap();
-		for (Pair<String, Integer> pair : facettPairs) {
-			
-			//solr 4 bug: leave out zero values
-			if(pair.getSecond() == 0){
-				continue;
-			}
 
-			String hit = pair.getFirst(); // new String(pair.getFirst().getBytes(), "UTF-8");
-			
-			if(hit.toLowerCase().contains(value.toLowerCase())){
-			
-				SuggestFacetDTO dto = new SuggestFacetDTO();
-				dto.setFacet(hit);
-				dto.setDisplayString(captions.containsKey(hit) ? captions.get(hit).getCaption() : null);
-				
-				result.add(dto);
+		for(String facet : facets) {
+			List<Pair<String, Integer>> facettPairs = rs.getFieldFacet(facet);
+
+			for (Pair<String, Integer> pair : facettPairs) {
+
+				//solr 4 bug: leave out zero values
+				if (pair.getSecond() == 0) {
+					continue;
+				}
+
+				String hit = pair.getFirst(); // new String(pair.getFirst().getBytes(), "UTF-8");
+
+				if (hit.toLowerCase().contains(value.toLowerCase())) {
+
+					SuggestFacetDTO dto = new SuggestFacetDTO();
+					dto.setFacet(hit);
+					dto.setDisplayString(captions.containsKey(hit) ? captions.get(hit).getCaption() : null);
+
+					result.add(dto);
+				}
 			}
 		}
 		return result;

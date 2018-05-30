@@ -29,7 +29,7 @@ import {SearchService} from "../../../modules/search/search.service";
 import {Helper} from "../../helper";
 import {RestHelper} from "../../rest/rest-helper";
 import {EventListener} from "../../../common/services/frame-events.service";
-import {Observable} from "rxjs/index";
+import {ActionbarHelper} from "../actionbar/actionbar-helper";
 import {Response} from "@angular/http";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 
@@ -79,12 +79,12 @@ export class NodeRenderComponent implements EventListener{
   private repository: string;
   private downloadButton: OptionItem;
   private downloadUrl: string;
-  public nodeComments: Node;
-  private sequence: NodeList;
-  private sequenceParent: Node;
-  private canScrollLeft: boolean = false;
-  private canScrollRight: boolean = false;
-  private childobject_order: number = -1;
+  nodeComments: Node;
+  sequence: NodeList;
+  sequenceParent: Node;
+  canScrollLeft: boolean = false;
+  canScrollRight: boolean = false;
+  childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
 
@@ -181,6 +181,7 @@ export class NodeRenderComponent implements EventListener{
       private connector : RestConnectorService,
       private connectors : RestConnectorsService,
       private nodeApi : RestNodeService,
+      private searchStorage : SearchService,
       private toolService: RestToolService,
       private frame : FrameEventsService,
       private toast : Toast,
@@ -441,6 +442,12 @@ export class NodeRenderComponent implements EventListener{
   private addDownloadButton(download: OptionItem) {
     this.downloadButton=download;
     this.options.splice(0,0,download);
+
+    if(this.searchService.reurl) {
+      let apply = new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router, this.temporaryStorageService, this._node, this.searchService.reurl));
+      apply.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+      this.options.splice(0, 0, apply);
+    }
     this.checkConnector();
 
     UIHelper.setTitleNoTranslation(this._node.name,this.title,this.config);

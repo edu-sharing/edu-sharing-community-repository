@@ -16,9 +16,9 @@ import {trigger} from '@angular/animations';
 
 
 export class CookieInfoComponent{
-  private show=false;
-  private dialog=false;
-  private buttons : DialogButton[];
+  show=false;
+  dialog=false;
+  buttons : DialogButton[];
   constructor(private storage : SessionStorageService) {
     this.show=!this.storage.getCookie("COOKIE_INFO_ACCEPTED",false);
     this.buttons=[new DialogButton('CLOSE',DialogButton.TYPE_PRIMARY,()=>{this.dialog=false;})];
