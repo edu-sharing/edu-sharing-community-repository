@@ -79,11 +79,11 @@ export class NodeRenderComponent implements EventListener{
   private repository: string;
   private downloadButton: OptionItem;
   private downloadUrl: string;
-  private sequence: NodeList;
-  private sequenceParent: Node;
-  private canScrollLeft: boolean = false;
-  private canScrollRight: boolean = false;
-  private childobject_order: number = -1;
+  sequence: NodeList;
+  sequenceParent: Node;
+  canScrollLeft: boolean = false;
+  canScrollRight: boolean = false;
+  childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
 

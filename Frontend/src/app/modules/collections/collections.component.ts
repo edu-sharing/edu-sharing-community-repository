@@ -106,7 +106,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     private listOptions: OptionItem[];
     private _orderActive: boolean;
     optionsMaterials:OptionItem[];
-    private tutorialElement: ElementRef;
+    tutorialElement: ElementRef;
   // default hides the tabs
 
     // inject services

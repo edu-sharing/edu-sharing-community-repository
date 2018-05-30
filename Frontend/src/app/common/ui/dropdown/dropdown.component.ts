@@ -22,8 +22,8 @@ import {OptionItem} from "../actionbar/option-item";
 export class DropdownComponent{
   @ViewChild('dropdownRef') dropdownElement : ElementRef;
   @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
-  private _show: boolean;
-  private _options: OptionItem[];
+  _show: boolean;
+  _options: OptionItem[];
 
   @Input() set show(show:boolean){
     this._show=show;
