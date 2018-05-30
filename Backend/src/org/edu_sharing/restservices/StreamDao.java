@@ -152,7 +152,7 @@ public class StreamDao {
 	}
 	public static boolean canAccessNode(String nodeId) throws DAOException{
 		try {
-			return StreamServiceHelper.canCurrentAuthorityAccessNode(nodeId);
+			return StreamServiceHelper.canCurrentAuthorityAccessNode(StreamServiceFactory.getStreamService(),nodeId);
 		}catch(Exception e) {
 			throw DAOException.mapping(e);
 		}
