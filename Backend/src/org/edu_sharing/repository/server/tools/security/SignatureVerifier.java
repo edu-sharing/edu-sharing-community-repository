@@ -12,6 +12,9 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.stream.StreamService;
+import org.edu_sharing.service.stream.StreamServiceFactory;
+import org.edu_sharing.service.stream.StreamServiceHelper;
 
 public class SignatureVerifier {
 
@@ -115,20 +118,29 @@ public class SignatureVerifier {
 
 	/**
 	 * Checks if the given node is currently accessed via auth by usage and if so, runs the task as system
+	 * Also checks if the node is inserted in the user's stream (or some of it's groups)
 	 * Otherwise (default), the task will run as the current user
 	 * @param nodeId
 	 * @param httpSession
 	 * @param runAsWork
 	 * @throws Exception 
 	 */
-	public static <T> T runAsAuthByUsage(String nodeId, HttpSession httpSession, RunAsWork<T> runAsWork){
-		String authSingleUseNodeId = (String)httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
-		String authSingleUseTs = (String)httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP);
-		if(authSingleUseNodeId != null 
-				&& authSingleUseNodeId.equals(nodeId) 
-				&& Long.parseLong(authSingleUseTs) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
+	public static <T> T runAsAdminIfNodeIsAccessible(String nodeId, HttpSession httpSession, RunAsWork<T> runAsWork){
+		// Check Stream
+		try {
+			if (StreamServiceHelper.canCurrentAuthorityAccessNode(StreamServiceFactory.getStreamService(), nodeId)) {
 				return AuthenticationUtil.runAsSystem(runAsWork);
-		}else {
+			}
+		}catch(Exception e){}
+
+		// Check usage
+		String authSingleUseNodeId = (String) httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
+		String authSingleUseTs = (String) httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP);
+		if (authSingleUseNodeId != null
+				&& authSingleUseNodeId.equals(nodeId)
+				&& Long.parseLong(authSingleUseTs) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
+			return AuthenticationUtil.runAsSystem(runAsWork);
+		} else {
 			return AuthenticationUtil.runAs(runAsWork, AuthenticationUtil.getFullyAuthenticatedUser());
 		}
 	}

@@ -12,10 +12,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.NodeDao;
@@ -157,6 +155,6 @@ public class RenderingApi {
 	
 	private Response run(HttpServletRequest req, String nodeId, RunAsWork<Response> runAsWork ) {
 		HttpSession session = req.getSession();
-		return SignatureVerifier.runAsAuthByUsage(nodeId, session, runAsWork);
+		return SignatureVerifier.runAsAdminIfNodeIsAccessible(nodeId, session, runAsWork);
 	}
 }

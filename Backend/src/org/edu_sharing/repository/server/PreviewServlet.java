@@ -2,18 +2,12 @@ package org.edu_sharing.repository.server;
 
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.awt.image.FilteredImageSource;
-import java.awt.image.ImageFilter;
-import java.awt.image.ImageProducer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -25,7 +19,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -34,10 +27,7 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.GrayFilter;
 
-import org.alfresco.repo.content.ContentStore;
-import org.alfresco.repo.rule.ReorderRules;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -47,7 +37,7 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.VersionService;
-import org.alfresco.service.namespace.QName;import org.apache.james.mime4j.io.MaxHeaderLengthLimitException;
+import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.GetPreviewResult;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -57,12 +47,7 @@ import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
-import org.edu_sharing.service.stream.StreamService;
-import org.edu_sharing.service.stream.StreamServiceFactory;
-import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.springframework.context.ApplicationContext;
-
-import com.google.gwt.widgetideas.graphics.client.Color;
 
 public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
@@ -98,7 +83,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		String nodeId = req.getParameter("nodeId");
 		
 		// Auth by usage, allow a specific node to render if the user has a current usage signature for it
-		SignatureVerifier.runAsAuthByUsage(nodeId,req.getSession(),new RunAsWork<Void>() {
+		SignatureVerifier.runAsAdminIfNodeIsAccessible(nodeId,req.getSession(),new RunAsWork<Void>() {
 					@Override
 					public Void doWork() throws Exception {
 						fetchNodeData(req,resp);
