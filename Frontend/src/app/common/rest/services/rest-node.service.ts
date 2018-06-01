@@ -366,12 +366,13 @@ export class RestNodeService extends AbstractRestService{
    * @param repository
    * @returns {Observable<Response>}
    */
-  public setNodePermissions = (node : string,permissions:LocalPermissions,sendMail=false,mailText="",sendCopy=false,repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
-    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/permissions?mailtext=:mailText&sendMail=:sendMail&sendCopy=:sendCopy",repository,[
+  public setNodePermissions = (node : string,permissions:LocalPermissions,sendMail=false,mailText="",sendCopy=false,createHandle=false,repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
+    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/permissions?mailtext=:mailText&sendMail=:sendMail&sendCopy=:sendCopy&createHandle=:createHandle",repository,[
       [":node",node],
       [":mailText",mailText],
       [":sendMail",""+sendMail],
-      [":sendCopy",""+sendCopy]
+      [":sendCopy",""+sendCopy],
+      [":createHandle",""+createHandle]
     ]);
     return this.connector.post(query,JSON.stringify(permissions),this.connector.getRequestOptions());
   }

@@ -79,8 +79,10 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public showLink: boolean;
   public isAdmin: boolean;
   public publishPermission: boolean;
+  public doiPermission: boolean;
   public publishInherit: boolean;
   public publishActive: boolean;
+  public doiActive: boolean;
   private originalPermissions: LocalPermissions;
   private isSafe = false;
 
@@ -127,6 +129,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.setPermissions(data.permissions.localPermissions.permissions)
           this.inherited = data.permissions.localPermissions.inherited;
           this.updatePublishState();
+          this.doiActive = NodeHelper.isDOIActive(node,data.permissions);
         }
       },(error:any)=>this.toast.error(error));
     }
@@ -270,7 +273,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
         this.onClose.emit(permissions);
         return;
       }
-      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage).subscribe(() => {
+      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,this.doiActive).subscribe(() => {
           this.onLoading.emit(false);
           this.onClose.emit(permissions);
           this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
@@ -302,6 +305,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
       this.connector.hasToolPermission(this.isSafe ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY).subscribe((has:boolean)=>this.fuzzyAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);
+      this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
     });
   }
   private updatePermissionInfo(){
@@ -387,7 +391,11 @@ export class WorkspaceShareComponent implements AfterViewInit{
       this.link=data.length>0 && data[0].expiryDate!=0;
     });
   }
-
+  allowDOI(){
+    if(!this._node)
+      return false;
+    return !this._node.isDirectory && !this.publishInherit && this.publishActive && this.doiPermission;
+  }
   private updatePublishState() {
     this.publishInherit=this.inherited && this.getAuthorityPos(this.inherit,RestConstants.AUTHORITY_EVERYONE)!=-1;
     this.publishActive=this.publishInherit || this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE)!=-1;

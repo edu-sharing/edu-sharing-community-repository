@@ -86,6 +86,11 @@
             <div *ngIf="publishPermission && !publishInherit" class="publishInfo"
                  innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
             </div>
+            <div *ngIf="allowDOI()" class="doi">
+              <input type="checkbox" class="filled-in" [(ngModel)]="doiActive" id="doi">
+              <label for="doi">{{'WORKSPACE.SHARE.DOI' | translate}}</label>
+              <span>{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</span>
+            </div>
           </div>
           </div>
           <div *ngIf="publishActive" class="type"><i class="material-icons align-icon">remove_red_eye</i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span></div>
