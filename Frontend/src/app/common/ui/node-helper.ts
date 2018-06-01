@@ -614,7 +614,7 @@ export class NodeHelper{
      * @returns {boolean}
      */
   static isDOIActive(node: Node, permissions: Permissions) {
-    if(node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)!=-1 && node.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]) {
+    if(node.aspects.indexOf(RestConstants.CCM_ASPECT_PUBLISHED)!=-1 && node.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]) {
         for (let permission of permissions.localPermissions.permissions) {
             if (permission.authority.authorityName == RestConstants.AUTHORITY_EVERYONE)
                 return true;
