@@ -194,7 +194,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		if (acesToUpdate.size() > 0) {
 			for (ACE toUpdate : acesToUpdate) {
-				setPermissions(nodeId, toUpdate.getAuthority(), new String[] { toUpdate.getPermission() }, null);
+				setPermissions(nodeId, toUpdate.getAuthority(), new String[] { toUpdate.getPermission() }, null,createHandle);
 			}
 			createNotify = true;
 		}
@@ -216,6 +216,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			createNotifyObject(nodeId, new AuthenticationToolAPI().getCurrentUser(),
 					CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
 					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
+		}
+		
+		
+		if(createHandle) {
+			createHandle(AuthorityType.EVERYONE,nodeId);
 		}
 
 	}
@@ -260,65 +265,6 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
-			/**
-			 * publish / handle
-			 */
-			if (AuthorityType.EVERYONE.equals(authorityType)) {
-				
-				String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId), 
-						QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION) );
-				
-				//get new version label
-				String newVersion = new Double(Double.valueOf(version) + 0.1).toString();
-				
-				HandleService handleService = null;
-				String handle = null;
-				
-				
-				if(createHandle && toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
-					try {
-						 handleService = new HandleService();
-						 handle = handleService.generateHandle(_nodeId, newVersion);
-					}catch(HandleServiceNotConfiguredException e) {
-						logger.info("handle server not configured");
-					}
-				}
-				
-				Map<QName,Serializable> publishedProps = new HashMap<QName,Serializable>();
-				publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
-				
-				if(handle != null) {
-					publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
-				}
-				
-				NodeRef nodeRef = new NodeRef(Constants.storeRef,_nodeId);
-				if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
-					nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
-				}else {
-					for(Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
-						nodeService.setProperty(nodeRef,entry.getKey(), entry.getValue());
-					}
-				}
-				
-				/**
-				 * create version for the published node
-				 */
-				Map<QName,Serializable> props = nodeService.getProperties(nodeRef);
-				props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
-				HashMap<String,Object> vprops = new HashMap<String,Object>();
-				for(Map.Entry<QName, Serializable> entry : props.entrySet()) {
-					vprops.put(entry.getKey().getPrefixString(), entry.getValue());
-				}
-				new MCAlfrescoAPIClient().createVersion(_nodeId, vprops);
-				if(handleService != null && handle != null) {
-					try {
-						String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
-						handleService.createHandle(handle,handleService.getDefautValues(contentLink));
-					}catch(Exception e) {
-						logger.error(e.getMessage());
-					}
-				}
-			}
 			
 			if (AuthorityType.USER.equals(authorityType)) {
 				HashMap<String, String> personInfo = repoClient.getUserInfo(authority);
@@ -411,6 +357,80 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		permissionService.createNotifyObject(_nodeId, user, CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
 				CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+	}
+	
+	public void createHandle(AuthorityType authorityType, String _nodeId) {
+		if (AuthorityType.EVERYONE.equals(authorityType)) {
+			
+			String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId), 
+					QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION) );
+			
+			String currentHandle =  (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId), 
+					QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID) );
+			
+			/**
+			 * only create a new handle when version changed
+			 */
+			if(currentHandle != null && currentHandle.endsWith(version)) {
+				return;
+			}
+			
+			//get new version label
+			String newVersion = new Double(Double.valueOf(version) + 0.1).toString();
+			
+			HandleService handleService = null;
+			String handle = null;
+			
+			
+			if(toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
+				try {
+					 handleService = new HandleService();
+					 handle = handleService.generateHandle(_nodeId, newVersion);
+				}catch(HandleServiceNotConfiguredException e) {
+					logger.info("handle server not configured");
+				}
+			}
+			
+			Map<QName,Serializable> publishedProps = new HashMap<QName,Serializable>();
+			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
+			
+			if(handle != null) {
+				publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
+			}
+			
+			NodeRef nodeRef = new NodeRef(Constants.storeRef,_nodeId);
+			if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
+				nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
+			}else {
+				for(Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
+					nodeService.setProperty(nodeRef,entry.getKey(), entry.getValue());
+				}
+			}
+			
+			/**
+			 * create version for the published node
+			 */
+			Map<QName,Serializable> props = nodeService.getProperties(nodeRef);
+			props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
+			HashMap<String,Object> vprops = new HashMap<String,Object>();
+			for(Map.Entry<QName, Serializable> entry : props.entrySet()) {
+				vprops.put(entry.getKey().getPrefixString(), entry.getValue());
+			}
+			try {
+				new MCAlfrescoAPIClient().createVersion(_nodeId, vprops);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				logger.error(e1.getMessage(), e1);
+			}
+			if(handleService != null && handle != null) {
+				try {
+					String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
+					handleService.createHandle(handle,handleService.getDefautValues(contentLink));
+				}catch(Exception e) {
+					logger.error(e.getMessage());
+				}
+			}
+		}
 	}
 
 	@Override
@@ -788,6 +808,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 */
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission)
 			throws Exception {
+		setPermissions(nodeId, authority, permissions, inheritPermission, false);
+	}
+	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission, Boolean createHandle)
+			throws Exception {
 		checkCanManagePermissions(nodeId, authority);
 
 		PermissionService permissionsService = this.serviceRegistry.getPermissionService();
@@ -808,6 +832,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 
 				permissionsService.setPermission(new NodeRef(Constants.storeRef, nodeId), authority, permission, true);
+				
 			}
 		}
 
