@@ -14,7 +14,6 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
 
-import com.google.gwt.gen2.logging.shared.Log;
 
 public class Edu_SharingAuthoritiesUpdate extends UpdateAbstract {
 	

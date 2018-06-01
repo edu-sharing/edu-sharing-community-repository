@@ -59,7 +59,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.google.gwt.widgetideas.graphics.client.Color;
 
 public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
