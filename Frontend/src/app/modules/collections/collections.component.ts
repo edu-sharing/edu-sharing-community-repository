@@ -535,6 +535,8 @@ export class CollectionsMainComponent implements GwtEventListener {
             this.mainNavRef.refreshBanner();
             if(callback)
               callback();
+        },(error:any)=>{
+            this.toast.error(error);
         });
 
 
