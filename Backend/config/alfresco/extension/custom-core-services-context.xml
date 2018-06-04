@@ -610,6 +610,19 @@
         <property name="repositoryHelper" ref="repositoryHelper"/>
     </bean>
     
+    
+     <bean id="beforeDeleteIOPolicy" class="org.edu_sharing.alfresco.policy.BeforeDeleteIOPolicy" init-method="init">
+   	  <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+         <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+         <property name="versionService">
+            <ref bean="versionService" />
+        </property>
+   	 </bean>
+    
     <!-- 
      <bean id="CMISConnector" class="org.alfresco.opencmis.EduSharingCMISConnector" init-method="setup">
         <property name="store"                  value="${opencmis.connector.default.store}" />

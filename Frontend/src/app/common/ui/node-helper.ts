@@ -1,8 +1,8 @@
 import {RestConstants} from "../rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {
-  Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
-  Repository, WorkflowDefinition
+    Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
+    Repository, WorkflowDefinition, Permissions
 } from "../rest/data-object";
 import {FormatSizePipe} from "./file-size.pipe";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
@@ -605,6 +605,22 @@ export class NodeHelper{
       let mail=node.createdBy.firstName+" "+node.createdBy.lastName+"<"+node.createdBy.mailbox+">";
       let subject=translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
       window.location.href="mailto:"+mail+"?subject="+encodeURIComponent(subject);
+  }
+
+    /**
+     * checks if a doi handle is active (node must be explicitly public and handle it must be present)
+     * @param {Node} node
+     * @param {Permissions} permissions
+     * @returns {boolean}
+     */
+  static isDOIActive(node: Node, permissions: Permissions) {
+    if(node.aspects.indexOf(RestConstants.CCM_ASPECT_PUBLISHED)!=-1 && node.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]) {
+        for (let permission of permissions.localPermissions.permissions) {
+            if (permission.authority.authorityName == RestConstants.AUTHORITY_EVERYONE)
+                return true;
+        }
+    }
+      return false;
   }
 }
 

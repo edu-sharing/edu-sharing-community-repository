@@ -40,6 +40,7 @@ export class RestConstants {
   public static CCM_ASPECT_TOOL_DEFINITION = "ccm:tool_definition";
   public static CCM_ASPECT_TOOL_OBJECT = "ccm:tool_object";
   public static CCM_ASPECT_IO_REFERENCE = "ccm:collection_io_reference";
+  public static CCM_ASPECT_PUBLISHED = "ccm:published";
   public static CCM_ASPECT_COLLECTION = "ccm:collection";
   public static CCM_ASPECT_LOMREPLICATION = "ccm:lomreplication";
   public static CCM_ASPECT_CCLOM_GENERAL = "cclom:general";
@@ -94,6 +95,7 @@ export class RestConstants {
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
   public static CCM_PROP_AUTHORITY_GROUPTYPE="ccm:groupType";
   public static CCM_PROP_CHILDOBJECT_ORDER = "ccm:childobject_order";
+  public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
 
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";
   public static VIRTUAL_PROP_USAGECOUNT = "virtual:usagecount";
@@ -205,6 +207,7 @@ export class RestConstants {
   public static TOOLPERMISSION_COLLECTION_EDITORIAL="TOOLPERMISSION_COLLECTION_EDITORIAL";
   public static TOOLPERMISSION_COLLECTION_CURRICULUM="TOOLPERMISSION_COLLECTION_CURRICULUM";
   public static TOOLPERMISSION_COLLECTION_PINNING="TOOLPERMISSION_COLLECTION_PINNING";
+  public static TOOLPERMISSION_HANDLESERVICE="TOOLPERMISSION_HANDLESERVICE";
 
   public static SHARE_LINK = "LINK";
   public static SHARE_EXPIRY_UNLIMITED = -1;

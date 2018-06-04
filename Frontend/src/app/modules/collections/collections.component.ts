@@ -542,6 +542,8 @@ export class CollectionsMainComponent implements GwtEventListener {
             }
             if(callback)
               callback();
+        },(error:any)=>{
+            this.toast.error(error);
         });
 
 
