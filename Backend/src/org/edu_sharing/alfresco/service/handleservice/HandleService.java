@@ -1,11 +1,12 @@
-package org.edu_sharing.service.handle;
+package org.edu_sharing.alfresco.service.handleservice;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.util.Properties;
 
-import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
+
 
 import net.handle.api.HSAdapter;
 import net.handle.api.HSAdapterFactory;
@@ -32,10 +33,11 @@ public class HandleService {
 	
 	Resolver resolver = new Resolver();
 	
+	
 	public HandleService() throws HandleServiceNotConfiguredException{
 		if(this.handleServerAvailable()) {
-			handleServerPrefix = Edu_SharingProperties.instance.getHandleServerPrefix();
-			privkeyPath = Edu_SharingProperties.instance.getHandleServerPrivKey();
+			handleServerPrefix = HandleServiceProperties.instance.getHandleServerPrefix();
+			privkeyPath = HandleServiceProperties.instance.getHandleServerPrivKey();
 			id = "0.NA/"+handleServerPrefix;
 		}else {
 			throw new HandleServiceNotConfiguredException();
@@ -74,7 +76,10 @@ public class HandleService {
 	}
 	
 	
-	
+	public void deleteHandle(String handle) throws Exception {
+		HSAdapter adapter = HSAdapterFactory.newInstance(id,idIndex,getPrivateKeyBytes(),null);
+		adapter.deleteHandle(handle);
+	}
 	
 
 	public AuthenticationInfo getAuthenticationInfo(String id, Integer idIndex) {
@@ -144,8 +149,8 @@ public class HandleService {
 	}
 	
 	public boolean handleServerAvailable() {
-		if(Edu_SharingProperties.instance.getHandleServerPrefix() != null && !Edu_SharingProperties.instance.getHandleServerPrefix().trim().equals("") 
-				&& Edu_SharingProperties.instance.getHandleServerPrivKey() != null && !Edu_SharingProperties.instance.getHandleServerPrivKey().trim().equals("")) {
+		if(HandleServiceProperties.instance.getHandleServerPrefix() != null && !HandleServiceProperties.instance.getHandleServerPrefix().trim().equals("") 
+				&& HandleServiceProperties.instance.getHandleServerPrivKey() != null && !HandleServiceProperties.instance.getHandleServerPrivKey().trim().equals("")) {
 			return true;
 		}else {
 			return false;
@@ -166,7 +171,7 @@ public class HandleService {
 	public HandleValue[] getDefautValues(String url) {
 		HandleValue hvUrl = new HandleValue(1,Common.STD_TYPE_URL, url.getBytes());
 		
-		String mail = Edu_SharingProperties.instance.getHandleServerEMail(); 
+		String mail = HandleServiceProperties.instance.getHandleServerEMail(); 
 		mail = (mail == null) ? "info@edu-sharing.com" : mail;
 		
 		HandleValue hvMail = new HandleValue(2,Common.STD_TYPE_EMAIL, mail.getBytes());
