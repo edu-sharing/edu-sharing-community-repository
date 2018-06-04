@@ -1,4 +1,10 @@
 {
   "STREAM": {
+    "TITLE":"Activity-Stream",
+    "MENU": {
+      "OPTION1":"What's New?",
+      "OPTION2":"Already seen",
+      "OPTION3":"settings"
+    }
   }
 }

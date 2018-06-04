@@ -1,5 +1,10 @@
 {
   "STREAM": {
-    "TITLE":"Aktivitäten-Stream"
+    "TITLE":"Aktivitäten-Stream",
+    "MENU": {
+      "OPTION1":"Was gibt's Neues",
+      "OPTION2":"Schon gesehen",
+      "OPTION3":"Einstellungen"
+    }
   }
 }

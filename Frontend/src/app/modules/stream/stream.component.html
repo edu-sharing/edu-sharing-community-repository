@@ -18,7 +18,7 @@
                 <i class="tiny material-icons ">date_range</i> {{'STREAM.MENU.OPTION1' | translate }}
         </div>
         <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'gesehen' ? 'm-active' : 'm-inactive'">
-                <i class="tiny material-icons ">visibility</i> Schon gesehen
+                <i class="tiny material-icons ">visibility</i> {{'STREAM.MENU.OPTION2' | translate }}
         </div>
         <div class="choose-menu"  (click)="sortieren()" [ngClass]="menuOption == 'gesehen' ? 'm-inactive' : 'm-inactive'">
             <i class="tiny material-icons ">settings</i> Einstellungen
@@ -28,7 +28,7 @@
     <div class="margin-show">
 
         <div class="stream-header-left row stream-marginfix">
-            <div *ngIf="menuOption == 'stream'" class="stream-title col s10 m12" (click)="sortieren()">Was gibt's Neues? <i class="small material-icons arrow-menu-arrow " (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
+            <div *ngIf="menuOption == 'stream'" class="stream-title col s10 m12">Was gibt's Neues? <i class="small material-icons arrow-menu-arrow " (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
             <div *ngIf="menuOption == 'gesehen'" class="stream-title col s10 m12">Schon gesehen <i class="small material-icons arrow-menu-arrow" (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
             
             <span id="stream-title-date" class="stream-title-date col s12 m12">
@@ -39,7 +39,7 @@
                         <i class="tiny material-icons ">date_range</i>  {{'STREAM.MENU.OPTION1' | translate }}
                 </div>
                 <div class="choose-menu"  (click)="menuOptions('gesehen')" [ngClass]="menuOption == 'gesehen' ? 'm-active' : 'm-inactive'">
-                        <i class="tiny material-icons ">visibility</i> Schon gesehen
+                        <i class="tiny material-icons ">visibility</i> {{'STREAM.MENU.OPTION2' | translate }}
                 </div>
                 <div class="choose-menu"  (click)="sortieren()" [ngClass]="menuOption == 'gesehen' ? 'm-inactive' : 'm-inactive'">
                     <i class="tiny material-icons ">settings</i> Einstellungen
@@ -67,10 +67,10 @@
                 <div class="stream-box-kompetenzen"> <div class="chip">Kompetenz</div> <div class="chip">Kompetenz</div>  </div>
 
             
-            <div class="stream-box-image" *ngIf="strm.nodes[0]"> <!-- TODO: Display a warning when no node is found (it could be deleted) -->
+            <div class="stream-box-image" (click)="onStreamObjectClick(strm)"  *ngIf="strm.nodes[0]"> <!-- TODO: Display a warning when no node is found (it could be deleted) -->
                 <!--<img src="{{ strm.nodes[0].preview.url }} " (click)="onStreamObjectClick(strm)" style="width:100%;height:auto;border:0;" class="mask1">-->
                 <div [ngStyle]="{ 'background': 'linear-gradient(to bottom, transparent 70%, black 115%), url(' + strm.nodes[0].preview.url + ')', 'background-size':'cover'}">
-                    <img src="{{ strm.nodes[0].preview.url }} " (click)="onStreamObjectClick(strm)" style="width:100%;height:auto;border:0;visibility:hidden;">
+                    <img src="{{ strm.nodes[0].preview.url }} " style="width:100%;height:auto;border:0;visibility:hidden;">
                 </div>
                 
                 <div class="bottom-left">{{strm.properties['add_to_stream_title']}}</div>
