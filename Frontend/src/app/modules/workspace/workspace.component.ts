@@ -53,6 +53,7 @@ import {EventListener} from "../../common/services/frame-events.service";
 export class WorkspaceMainComponent implements EventListener{
     private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
     private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
+    @ViewChild('dropdown') dropdownElement : ElementRef;
     private isRootFolder : boolean;
     private homeDirectory : string;
     private sharedFolders : Node[]=[];
@@ -98,7 +99,7 @@ export class WorkspaceMainComponent implements EventListener{
     public isSafe = false;
     private isLoggedIn = false;
     public addNodesToCollection : Node[];
-    @ViewChild('dropdown') dropdownElement : ElementRef;
+    public addNodesStream : Node[];
     private dropdownPosition: string;
     private dropdownLeft: string;
     private dropdownRight: string;
@@ -833,6 +834,9 @@ export class WorkspaceMainComponent implements EventListener{
             if (collection && !this.isSafe)
                 options.push(collection);
         }
+        let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,this.connector,(node:Node)=>this.addToStream(node));
+        if (stream && !this.isSafe)
+            options.push(stream);
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
             share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,this.connector,(node: Node) => this.shareNode(node));
@@ -1086,6 +1090,10 @@ export class WorkspaceMainComponent implements EventListener{
         let nodes=this.getNodeList(node);
         this.addNodesToCollection=nodes;
     }
+  private addToStream(node: Node) {
+    let nodes=this.getNodeList(node);
+    this.addNodesStream=nodes;
+  }
     private createContext(event:any=null){
         if(!this.createAllowed)
             return;

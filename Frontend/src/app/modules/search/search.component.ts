@@ -104,7 +104,9 @@ export class SearchComponent {
   // Max items to fetch at all (afterwards no more infinite scroll)
   private static MAX_ITEMS_COUNT = 300;
   private repositoryIds: any[]=[];
+
   public addNodesToCollection: Node[];
+  public addNodesStream : Node[];
   private mdsSets: MdsInfo[];
   private _mdsId: string;
   private isSearching = false;
@@ -622,6 +624,10 @@ export class SearchComponent {
       if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
         options.push(collection);
 
+      let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,this.connector,(node:Node)=>this.addToStream(node));
+      if (stream)
+          options.push(stream);
+
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));
       });
@@ -679,6 +685,10 @@ export class SearchComponent {
     this.setViewType(this.view);
 
     return options;
+  }
+  private addToStream(node: Node) {
+      let nodes=ActionbarHelper.getNodes(this.selection,node);
+      this.addNodesStream=nodes;
   }
 
   private addToCollectionList(collection:Collection,nodes=this.addNodesToCollection,callback:Function=null,position=0,error=false){
