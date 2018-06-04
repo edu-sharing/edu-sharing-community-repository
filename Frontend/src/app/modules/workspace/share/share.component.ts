@@ -83,6 +83,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public publishInherit: boolean;
   public publishActive: boolean;
   public doiActive: boolean;
+  public doiDisabled: boolean;
   private originalPermissions: LocalPermissions;
   private isSafe = false;
 
@@ -130,6 +131,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.inherited = data.permissions.localPermissions.inherited;
           this.updatePublishState();
           this.doiActive = NodeHelper.isDOIActive(node,data.permissions);
+          this.doiDisabled = this.doiActive;
         }
       },(error:any)=>this.toast.error(error));
     }

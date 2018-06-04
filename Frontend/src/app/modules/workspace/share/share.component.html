@@ -87,7 +87,7 @@
                  innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
             </div>
             <div *ngIf="allowDOI()" class="doi">
-              <input type="checkbox" class="filled-in" [(ngModel)]="doiActive" id="doi">
+              <input type="checkbox" class="filled-in" [disabled]="doiDisabled" [(ngModel)]="doiActive" id="doi">
               <label for="doi">{{'WORKSPACE.SHARE.DOI' | translate}}</label>
               <span>{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</span>
             </div>
