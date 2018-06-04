@@ -84,6 +84,8 @@
       "PUBLISH_ACTIVE_COLLECTION":"The collection is made publicly available on the Internet",
       "PUBLISH_ACTIVE_DIRECTORY":"All documents of this folder are made publicly available on the Internet",
       "NO_FUZZY":"Enter the full e-mail address to add users",
+      "DOI":"Provide with DOI",
+      "DOI_INFO":"DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
       "HISTORY":{
         "TITLE":"Sharing-History",
         "ADDED":"Added",

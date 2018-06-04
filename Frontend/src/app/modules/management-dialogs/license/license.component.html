@@ -241,10 +241,24 @@
           </div>
         </div>
         <div class="licenseCheckbox">
-          <input #releaseCheckbox type="checkbox" class="filled-in release" [(ngModel)]="release" id="releaseCb" [disabled]="!allowRelease">
+         <!-- <input #releaseCheckbox type="checkbox" class="filled-in release" [(ngModel)]="release" id="releaseCb" [disabled]="!allowRelease">
           <label *ngIf="_nodes.length==1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE' | translate}}</label>
-          <label *ngIf="_nodes.length!=1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE_MULTI' | translate:{count:_nodes.length} }}</label>
-
+          <label *ngIf="_nodes.length!=1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE_MULTI' | translate:{count:_nodes.length} }}</label>-->
+          <!--DOI Switsh-->
+          <div class="switch-doi">
+            <div class="switch">
+              <label  class="strong">
+                <input type="checkbox">
+                <span class="lever"></span>
+                {{ 'WORKSPACE.LICENSE.RELEASE' | translate}}
+              </label>
+            </div>
+            <div class="doi">
+              <input type="checkbox" class="filled-in" id="doi">
+              <span>{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</span>
+            </div>
+          </div>
+          
           <input #contactCheckbox type="checkbox" class="filled-in" [(ngModel)]="contact" id="contactCb"><label for="contactCb">{{'WORKSPACE.LICENSE.CONTACT' | translate}}</label>
         </div>
     </div>

@@ -149,7 +149,7 @@ h5{
 .licenseCheckbox label{
   width:100%;
 }
-.release{
+.release, .strong{
   font-weight: bold;
 }
 .radio{
@@ -157,4 +157,20 @@ h5{
 }
 .radio h4{
   margin-top: 4px;
+}
+
+.switch-doi{
+  padding-bottom: 20px;
+  margin-left: -20px;
+}
+
+.doi{
+  margin-left: 77px;
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  span{
+    margin-left: 35px;
+    margin-right: 10px;
+  }
 }
