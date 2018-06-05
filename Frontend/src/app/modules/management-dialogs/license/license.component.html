@@ -244,18 +244,17 @@
          <!-- <input #releaseCheckbox type="checkbox" class="filled-in release" [(ngModel)]="release" id="releaseCb" [disabled]="!allowRelease">
           <label *ngIf="_nodes.length==1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE' | translate}}</label>
           <label *ngIf="_nodes.length!=1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE_MULTI' | translate:{count:_nodes.length} }}</label>-->
-          <!--DOI Switsh-->
-          <div class="switch-doi">
+          <div class="switch-release">
             <div class="switch">
-              <label  class="strong">
-                <input type="checkbox">
-                <span class="lever"></span>
-                {{ 'WORKSPACE.LICENSE.RELEASE' | translate}}
-              </label>
+                <label class="strong" class="release"><input #releaseCheckbox type="checkbox" [disabled]="!allowRelease" [(ngModel)]="release">
+                    <span class="lever"></span>
+                    {{'WORKSPACE.LICENSE.RELEASE'+(_nodes.length>1 ? '_MULTI' : '') | translate:{count:_nodes.length} }}
+                 </label>
             </div>
-            <div class="doi">
-              <input type="checkbox" class="filled-in" id="doi">
-              <span>{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</span>
+            <div class="doi" *ngIf="allowDOI()">
+              <input type="checkbox" [disabled]="doiDisabled" [(ngModel)]="doiActive" class="filled-in" id="doi">
+                <label for="doi" class="strong">{{'WORKSPACE.SHARE.DOI' | translate}}</label>
+                <span>{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</span>
             </div>
           </div>
           

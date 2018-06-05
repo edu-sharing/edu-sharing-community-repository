@@ -28,6 +28,9 @@ export class WorkspaceLicenseComponent  {
   @ViewChild('selectLicense') selectLicense : ElementRef;
 
   private _type="";
+  private doiPermission: boolean;
+  private doiActive: boolean;
+  private doiDisabled: boolean;
   public set type(type:string){
     this._type=type;
     if(this._type=='CC_0' && !this.cc0Type)
@@ -121,6 +124,10 @@ export class WorkspaceLicenseComponent  {
           this.nodeApi.getNodePermissions(node.ref.id).subscribe((permissions: NodePermissions) => {
             this.permissions = permissions.permissions.localPermissions;
             this.readPermissions(i==this._nodes.length);
+            if(this._nodes.length==1) {
+                this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions);
+                this.doiDisabled = this.doiActive;
+            }
           });
         }
       });
@@ -135,6 +142,7 @@ export class WorkspaceLicenseComponent  {
     private config : ConfigurationService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
+      this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
   }
   public cancel(){
     this.onCancel.emit();
@@ -331,7 +339,7 @@ export class WorkspaceLicenseComponent  {
       this.permissions.permissions.push(perm);
     }
     let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.permissions.inherited);
-    this.nodeApi.setNodePermissions(node.ref.id,permissions,false).subscribe(()=>{
+    this.nodeApi.setNodePermissions(node.ref.id,permissions,false,"",false,this.doiActive && this.release).subscribe(()=>{
     },(error:any)=>this.toast.error(error));
   }
   private readPermissions(last:boolean) {
@@ -382,7 +390,11 @@ export class WorkspaceLicenseComponent  {
       }
     });
   }
-
+  allowDOI(){
+      if(!this._nodes || this._nodes.length!=1)
+          return false;
+      return this.doiPermission && this.release;
+  }
   setCCBy() {
     this.type='CC_BY';
     this.ccShare='';
