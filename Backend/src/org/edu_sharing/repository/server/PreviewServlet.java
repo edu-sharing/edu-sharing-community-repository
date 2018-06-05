@@ -49,6 +49,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
+
 public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 	public static final String RESULT_TYPE_MIME_ICON = "mime_type";

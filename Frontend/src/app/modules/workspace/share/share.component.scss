@@ -128,6 +128,16 @@ a.active{
     color:$textLight;
     max-width:400px;
   }
+  .doi{
+    margin-left: 77px;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    span{
+      margin-left: 35px;
+      margin-right: -100px;
+    }
+  }
 }
 .group{
   display:flex;
@@ -305,6 +315,12 @@ label.notify p{
   }
   .advancedPermission{
     width:50%;
+  }
+  .publish .doi span{
+    margin-right: 0;
+  }
+  .publish .type{
+    display: none;
   }
 }
 @media screen and (max-width: $mobileWidth - $mobileStage*2) {

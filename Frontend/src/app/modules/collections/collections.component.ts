@@ -536,6 +536,8 @@ export class CollectionsMainComponent {
             }
             if(callback)
               callback();
+        },(error:any)=>{
+            this.toast.error(error);
         });
 
 
