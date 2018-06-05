@@ -97,6 +97,37 @@ $side:20px;
 .description,.value{
   width:calc(100% - 30px);
 }
+/*Value show in memu-tabs*/
+.value-properties{
+  float: right;
+  line-height: 40px;
+  margin-right: 18px;
+}
+// Statiskik Canvas
+canvas{
+  margin: 20px 0;
+}
+
+.statistik_value{
+  margin-left: 47px;
+  margin-top: -13px;
+  width: 110%;
+
+  .point{
+    float: left;
+    text-align: center;
+    //padding: 20px;
+    width: 55px;
+    margin-right: 23px;
+    color: #383838;
+    font-weight: bold;
+    font-size: 26px;
+  }
+}
+
+.usage_count{
+  margin: 20px 0;
+}
 .preview{
   width:calc(100% + 24px);
   margin-left:-13px;

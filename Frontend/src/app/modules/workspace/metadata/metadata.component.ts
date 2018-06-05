@@ -1,4 +1,4 @@
-import {Component, Input, EventEmitter, Output} from '@angular/core';
+import {Component, Input, EventEmitter, Output, AfterViewInit} from '@angular/core';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
   Node, NodeList, NodeWrapper, NodePermissions, NodeVersions, UsageList,
@@ -21,12 +21,15 @@ import {UIConstants} from "../../../common/ui/ui-constants";
 import {ListItem} from "../../../common/ui/list-item";
 import {ConfigurationHelper} from "../../../common/rest/configuration-helper";
 
+// Charts.js
+declare var Chart:any;
+
 @Component({
   selector: 'workspace-metadata',
   templateUrl: 'metadata.component.html',
   styleUrls: ['metadata.component.scss']
 })
-export class WorkspaceMetadataComponent  {
+export class WorkspaceMetadataComponent{
   private _node : string;
   public loading=true;
   public data : any;
@@ -39,6 +42,13 @@ export class WorkspaceMetadataComponent  {
   private nodeObject : Node;
   private versions : Version[];
   private versionsLoading=false;
+  /*Chart.js*/
+  canvas: any;
+  ctx: any;
+  labels = ["LMS-Kursen","Sammlungen","Download"];
+  points = [2,3,6];
+  colors = ['rgba(230, 178, 71, .8)','rgba(151, 91, 93, .8)','rgba(27, 102, 49, .8)'];
+
   @Input() isAdmin:boolean;
   @Input() set node(node : string){
     this._node=node;
@@ -66,6 +76,7 @@ export class WorkspaceMetadataComponent  {
 
       this.data=this.format(data.node);
       this.loading=false;
+      this.getStats();
     });
 
     this.nodeApi.getNodeVersions(this._node).subscribe((data : NodeVersions)=>{
@@ -101,6 +112,7 @@ export class WorkspaceMetadataComponent  {
     });
 
     this.usageApi.getNodeUsages(this._node).subscribe((data : UsageList) =>{
+      console.log(data);
       this.usageCount=data.usages.length;
     });
   }
@@ -240,4 +252,47 @@ export class WorkspaceMetadataComponent  {
     }
     return false;
   }
+  getStats() {
+    setTimeout(()=>{
+            this.canvas = document.getElementById('myChart');
+            this.ctx = this.canvas.getContext('2d');
+            // FontFamily
+            Chart.defaults.global.defaultFontFamily = 'open_sansregular';
+
+            let myChart = new Chart(this.ctx, {
+                type: "bar",
+                data: {
+                    labels: this.labels,
+                    datasets: [{
+                        data: this.points,
+                        backgroundColor: this.colors,
+                        borderWidth: 0.2
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    legend:{
+                        display:false
+                    },
+                    mode: 'index',
+                    layout: {
+                        padding: {
+                            left: 0,
+                            right: 0,
+                            top: 20,
+                            bottom: 0
+                        }
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+    }
+
 }
