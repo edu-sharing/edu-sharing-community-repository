@@ -89,10 +89,12 @@ export class RestConstants {
   public static CCM_PROP_COLLECTION_PINNED_STATUS = "ccm:collection_pinned_status";
   public static CCM_PROP_COLLECTION_PINNED_ORDER = "ccm:collection_pinned_order";
   public static CCM_PROP_IO_WWWURL = "ccm:wwwurl";
+  public static CCM_PROP_LINKTYPE = "ccm:linktype";
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
   public static CCM_PROP_AUTHORITY_GROUPTYPE="ccm:groupType";
   public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
 
+  public static LINKTYPE_USER_GENERATED="USER_GENERATED";
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";
   public static VIRTUAL_PROP_USAGECOUNT = "virtual:usagecount";
   public static GROUP_PREFIX="GROUP_";

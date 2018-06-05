@@ -528,6 +528,7 @@ export class RestNodeService extends AbstractRestService{
   private createNodeUrl(data: any) {
     let prop=RestHelper.createNameProperty(data.name);
     prop[RestConstants.CCM_PROP_IO_WWWURL]=[data.url];
+    prop[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
     this.createNode(RestConstants.USERHOME,RestConstants.CCM_TYPE_IO,[],prop,true).subscribe((data:NodeWrapper)=>{
       this.toast.toast("NODE_CREATED_USERHOME",{name:data.node.name});
       this.events.broadcastEvent(FrameEventsService.EVENT_NODE_SAVED,data.node);

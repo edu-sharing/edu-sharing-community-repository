@@ -379,6 +379,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_AUTHOR_FREETEXT = "{http://www.campuscontent.de/model/1.0}author_freetext";
 
+	public final static String CCM_PROP_LINKTYPE = "{http://www.campuscontent.de/model/1.0}linktype";
+
 	public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 
 	public final static String CCM_ASPECT_SHARES = "{http://www.campuscontent.de/model/1.0}shares";
@@ -1019,6 +1021,7 @@ public class CCConstants {
 	public final static String CCM_PROP_COLLECTION_ORDERED_POSITION = "{http://www.campuscontent.de/model/1.0}collection_ordered_position";
 
 	public final static String CCM_VALUE_LINK_LINKTYPE_CHAMELEON = "CMchameleon";
+	public final static String CCM_VALUE_LINK_LINKTYPE_USER_GENERATED = "USER_GENERATED";
 
 	public final static String CCM_PROP_MAP_TYPE = "{http://www.campuscontent.de/model/1.0}maptype";
 	public final static String CCM_VALUE_MAP_TYPE_FAVORITE = "FAVORITE";

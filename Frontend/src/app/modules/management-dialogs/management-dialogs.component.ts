@@ -163,6 +163,7 @@ export class WorkspaceManagementDialogsComponent  {
     let prop:any={};
     link=UIHelper.addHttpIfRequired(link);
     prop[RestConstants.CCM_PROP_IO_WWWURL]=[link];
+    prop[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
     this.closeUploadSelect();
     this.globalProgress=true;
     this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
