@@ -2,9 +2,18 @@
   "STREAM": {
     "TITLE":"Aktivitäten-Stream",
     "MENU": {
-      "OPTION1":"Was gibt's Neues",
+      "OPTION1":"Was gibt's Neues?",
       "OPTION2":"Schon gesehen",
       "OPTION3":"Einstellungen"
+    },
+    "OBJECT":{
+      "NOTITLE":"Keine Titel",
+      "NODESCRIPTION":"Keine Beschreibung",
+      "NONODES":"Es wurden keine Knoten gefunden",
+      "OPTION": {
+        "MOVEUP":"Ganz oben anzeigen",
+        "REMOVE":"Aus Stream entfernen"
+      }  
     }
   }
 }

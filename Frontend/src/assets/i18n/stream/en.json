@@ -5,6 +5,15 @@
       "OPTION1":"What's New?",
       "OPTION2":"Already seen",
       "OPTION3":"settings"
+    },
+    "OBJECT":{
+      "NOTITLE":"No title",
+      "NODESCRIPTION":"No description",
+      "NONODES":"No nodes were found",
+      "OPTION": {
+        "MOVEUP":"Show at the top",
+        "REMOVE":"Remove from stream"
+      }  
     }
   }
 }

@@ -76,34 +76,28 @@ export class StreamComponent {
   createConnectorType: Connector;
   createAllowed : boolean ;
   showCreate = false;
-  public collectionNodes:EduData.Node[]; //
+  public collectionNodes:EduData.Node[];
   public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
   public mainnav = true;
   public nodeReport: Node;
   public globalProgress=false;
-  public collectionContent:EduData.CollectionContent; //
   menuOption = 'stream';
   showMenuOptions = false;
   streams: any;
   actionOptions:OptionItem[]=[];
 
-  moveUpOption = new OptionItem('Ganz oben anzeigen','check',(node: Node)=>{
+  moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','check',(node: Node)=>{
     //this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   });
 
   collectionOption = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node));
 
-  removeOption = new OptionItem('Aus Stream entfernen','remove_circle',(node: Node)=> {
+  removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE','remove_circle',(node: Node)=> {
     this.updateStream(node, STREAM_STATUS.DONE).subscribe( (data) => {
       let result = this.streams.filter( (n : any) => n.id !== node );
       this.streams = result;
     } , error => console.log(error));
   });
-  
-  
-  /*new OptionItem('Als ungesehen markieren','check',(node: Node)=>{
-    this.updateStream(node, STREAM_STATUS.OPEN).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.DONE) , error => console.log(error));
-  });*/
 
   // TODO: Store and use current search query
   searchQuery:string;
@@ -166,11 +160,13 @@ export class StreamComponent {
   menuOptions(option: any) {
     this.menuOption = option;
     if (option === 'stream') {
+      this.toggleMenuOptions();
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.actionOptions[0] = this.moveUpOption;
       this.actionOptions[1] = this.collectionOption;
     } else {
+      this.toggleMenuOptions();
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.READ);
       this.actionOptions[0] = this.collectionOption;
@@ -188,13 +184,6 @@ export class StreamComponent {
     }, error => console.log(error));
   }
 
-  sortieren() {
-    console.log(this.streams);
-    //console.log(this.actionOptions);
-   // let temp = this.other['stream'].shift();
-    //this.other['stream'].push(temp);
-  }
-
   refresh(): void {
     window.location.reload();
   }
@@ -205,10 +194,11 @@ export class StreamComponent {
     this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
 
   }
-//
+
   private addToCollection(node: EduData.Node) {
-    let result = this.streams.filter( (n: any) => (n.id == node) ).map( (n: any) => { return n.nodes[0] } );
-    this.collectionNodes = result;
+    console.log(this.streams);
+    let result = this.streams.filter( (n: any) => (n.id == node) ).map( (n: any) => { return n.nodes } );
+    this.collectionNodes = [].concat.apply([], result);
 
   }
 

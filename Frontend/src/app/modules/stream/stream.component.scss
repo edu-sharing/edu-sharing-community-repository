@@ -25,6 +25,9 @@
     .arrow-menu-display {
         display: none;
     }
+    .arrow-menu-arrow {
+        display: none;
+    }
 }
 .arrow-menu-display {
 
@@ -113,6 +116,12 @@
     padding-top: 15px;
     padding-left: 20px;
     
+}
+
+.stream-box-nonodes{
+    text-align: center;
+    padding-bottom: 15px;
+    color: red;
 }
 
 
