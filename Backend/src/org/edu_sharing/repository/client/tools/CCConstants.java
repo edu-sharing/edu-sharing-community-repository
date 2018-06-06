@@ -879,6 +879,8 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPLICATIONSOURCE = "{http://www.campuscontent.de/model/1.0}replicationsource";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCEID = "{http://www.campuscontent.de/model/1.0}replicationsourceid";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestamp";
+	public final static String CCM_PROP_IO_REPLICATION_MODIFIED = "{http://www.campuscontent.de/model/1.0}replicationmodified";
+	
 	//replicationsourcetimestampFORMATED is an generated prop, to keep the original
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMPFORMATED = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestampFORMATED";
 

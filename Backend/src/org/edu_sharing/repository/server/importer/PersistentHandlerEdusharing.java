@@ -58,6 +58,7 @@ import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.Constants;
 import org.springframework.context.ApplicationContext;
 
@@ -73,7 +74,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	//
 	HashMap<String, String> replIdTimestampMap = null;
 
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
+	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
 	
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
