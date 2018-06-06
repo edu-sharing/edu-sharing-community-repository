@@ -55,6 +55,10 @@
      (openLicense)="nodeLicense=[nodeMetadata]"
      (openContributor)="nodeContributor=nodeMetadata"
 ></mds>
+<node-template *ngIf="nodeTemplate"
+     [nodeId]="nodeTemplate.ref.id"
+     (onClose)="closeTemplate()"
+></node-template>
 <workspace-file-upload *ngIf="filesToUpload"
                        [current]="parent"
                        [files]="filesToUpload"

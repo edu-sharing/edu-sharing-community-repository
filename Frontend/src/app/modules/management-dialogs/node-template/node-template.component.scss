@@ -1,0 +1,15 @@
+@import "../../../../styles/variables.scss";
+
+
+.switch{
+  margin:$cardPadding*-1;
+  margin-bottom: 20px;
+  padding:20px $cardPadding;
+  background-color: $actionDialogBackground;
+}
+.template-disabled{
+  padding-top: 15%;
+  text-align: center;
+  font-size: 140%;
+  color:$textLight;
+}

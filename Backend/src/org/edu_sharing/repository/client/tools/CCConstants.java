@@ -410,6 +410,7 @@ public class CCConstants {
 	/* Templates */
 
 	public final static String CCM_ASPECT_METADATA_PRESETTING ="{http://www.campuscontent.de/model/1.0}metadataPresetting";
+	public final static String CCM_ASPECT_METADATA_PRESETTING_TEMPLATE ="{http://www.campuscontent.de/model/1.0}metadataPresettingTemplate";
 
 
 	/**
@@ -426,6 +427,8 @@ public class CCConstants {
 	public final static String CCM_PROP_SCOPE_TYPE = "{http://www.campuscontent.de/model/1.0}scopetype";
 
 	public final static String CCM_VALUE_SCOPETYPE_GLOBAL = "global";
+
+	public final static String CCM_PROP_METADATA_PRESETTING_STATUS ="{http://www.campuscontent.de/model/1.0}metadataPresettingStatus";
 
 	public final static String CCM_PROP_METADATA_PRESETTING_PROPERTIES ="{http://www.campuscontent.de/model/1.0}metadataPresettingProperties";
 
@@ -741,8 +744,10 @@ public class CCConstants {
 
 	public final static String TOOL_HOMEFOLDER = "EDU_TOOL";
 
+    public static final String TEMPLATE_NODE_NAME = ".METADATA_TEMPLATE";
 
-	private static HashMap<String,String> lifecycleContributerPropsMap = new HashMap<String,String>();
+
+    private static HashMap<String,String> lifecycleContributerPropsMap = new HashMap<String,String>();
 
 	public static HashMap<String, String> getLifecycleContributerPropsMap() {
 		if(lifecycleContributerPropsMap.size() == 0){

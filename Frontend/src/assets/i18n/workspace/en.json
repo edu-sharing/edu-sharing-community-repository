@@ -150,7 +150,8 @@
       "LICENSE":"Assign a license",
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",
-      "WORKFLOW":"Workflow"
+      "WORKFLOW":"Workflow",
+      "TEMPLATE":"Metadata-Template"
     },
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",
@@ -309,7 +310,8 @@
       "NOT_FOUND":"The folder {{id}} was not found. May it has been deleted.",
       "LICENSE_UPDATED":"License has been updated",
       "CONTRIBUTOR_UPDATED":"Information of contributors have been updated",
-      "WORKFLOW_UPDATED":"Information of workflow have been updated"
+      "WORKFLOW_UPDATED":"Information of workflow have been updated",
+      "METADATA_TEMPLATE_UPDATED":"Information of metadata template have been updated"
     }
   }
 }

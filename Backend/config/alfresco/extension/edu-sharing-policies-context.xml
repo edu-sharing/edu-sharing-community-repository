@@ -53,7 +53,7 @@
             </list>
         </property>
         <property name="protectTemplatesInUse">
-           	<value>true</value>
+           	<value>false</value>
         </property>
    	 </bean>
 </beans>

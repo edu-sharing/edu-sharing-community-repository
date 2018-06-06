@@ -40,6 +40,7 @@ export class RestConstants {
   public static CCM_ASPECT_TOOL_DEFINITION = "ccm:tool_definition";
   public static CCM_ASPECT_TOOL_OBJECT = "ccm:tool_object";
   public static CCM_ASPECT_IO_REFERENCE = "ccm:collection_io_reference";
+  public static CCM_ASPECT_METADATA_PRESETTING= "ccm:metadataPresetting";
   public static CCM_ASPECT_PUBLISHED = "ccm:published";
   public static CCM_ASPECT_COLLECTION = "ccm:collection";
   public static CCM_ASPECT_LOMREPLICATION = "ccm:lomreplication";

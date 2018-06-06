@@ -8,7 +8,7 @@ import {RestConstants} from "../rest-constants";
 import {
     NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList,
     NodePermissionsHistory,
-    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent
+    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent, NodeTemplate
 } from "../data-object";
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
@@ -554,4 +554,20 @@ export class RestNodeService extends AbstractRestService{
       return this.connector.get(query,this.connector.getRequestOptions())
           .map((response: Response) => response.json());
   }
+
+  public getNodeTemplate(node: string,repository=RestConstants.HOME_REPOSITORY) : Observable<NodeTemplate> {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/metadata/template",repository,[
+            [":node",node],
+        ]);
+        return this.connector.get(query,this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+  }
+    public setNodeTemplate(node: string,enable:boolean,properties:any={},repository=RestConstants.HOME_REPOSITORY) : Observable<NodeTemplate> {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/metadata/template?enable=:enable",repository,[
+            [":node",node],
+            [":enable",""+enable],
+        ]);
+        return this.connector.put(query,JSON.stringify(properties),this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+    }
 }

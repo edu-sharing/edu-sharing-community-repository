@@ -7,8 +7,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
-import com.google.gwt.user.client.ui.Widget;
-
 public class MetadataSetV2 {
 	Logger logger = Logger.getLogger(MetadataSetV2.class);
 
@@ -196,15 +194,19 @@ public class MetadataSetV2 {
 		if(CCConstants.CCM_TYPE_IO.equals(nodeType)) {
 			group="io";
 		}
-		if(CCConstants.CCM_TYPE_MAP.equals(nodeType)) {
+		else if(CCConstants.CCM_TYPE_MAP.equals(nodeType)) {
 			group="map";
 		}
 		if(group==null) {
 			logger.info("Node type "+nodeType+" currently not supported by backend, will use metadata from all available widgets");
 			return getWidgets();
 		}
+		return getWidgetsByTemplate(group);
+	}
+
+	public List<MetadataWidget> getWidgetsByTemplate(String template) {
 		List<MetadataWidget> usedWidgets=new ArrayList<>();
-		for(String view : findGroup(group).getViews()) {
+		for(String view : findGroup(template).getViews()) {
 			String html = findTemplate(view).getHtml();
 			for(MetadataWidget widget : getWidgets()) {
 				if(html.indexOf("<"+widget.getId())>-1) {
@@ -217,11 +219,12 @@ public class MetadataSetV2 {
 					}
 				}
 			}
-			
+
 		}
-		logger.info("Node type "+nodeType+" uses "+usedWidgets.size()+" from a total of "+getWidgets().size()+" widgets");
+		logger.info("Template "+template+" uses "+usedWidgets.size()+" from a total of "+getWidgets().size()+" widgets");
 		return usedWidgets;
 	}
+
 	public MetadataWidget findWidgetForTemplate(String widgetId,String template) {
 		  MetadataWidget fallback=null;
 		  for(MetadataWidget widget : widgets){

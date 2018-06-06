@@ -45,9 +45,11 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() nodeReport : Node;
   @Output() nodeReportChange = new EventEmitter();
   @Input() nodeMetadata : Node;
-  @Input() nodeContributor : Node;
-  @Output() nodeContributorChange = new EventEmitter();
-  @Output() nodeMetadataChange = new EventEmitter();
+    @Output() nodeMetadataChange = new EventEmitter();
+    @Input() nodeTemplate : Node;
+    @Output() nodeTemplateChange = new EventEmitter();
+    @Input() nodeContributor : Node;
+    @Output() nodeContributorChange = new EventEmitter();
   @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
   @Input() nodeMetadataAllowReplace : Boolean;
@@ -90,6 +92,12 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
+        if(this.nodeTemplate!=null){
+            this.closeTemplate();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
       if(this.nodeContributor!=null){
         this.closeContributor();
         event.preventDefault();
@@ -306,5 +314,10 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeMetadataAllowReplace=false;
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);
+    }
+
+    closeTemplate() {
+        this.nodeTemplate = null;
+        this.nodeTemplateChange.emit(null);
     }
 }

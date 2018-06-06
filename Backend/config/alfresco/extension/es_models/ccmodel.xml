@@ -1338,12 +1338,18 @@
 			</properties>
 		</aspect>
 
+		<!-- aspect for marking the io template files -->
+		<aspect name="ccm:metadataPresettingTemplate">
+		</aspect>
 		<aspect name="ccm:metadataPresetting">
 			<title>aspect for metadata presetting</title>
 			<properties>
 				<property name="ccm:metadataPresettingProperties">
 					<type>d:qname</type>
 					<multiple>true</multiple>
+				</property>
+				<property name="ccm:metadataPresettingStatus">
+					<type>d:boolean</type>
 				</property>
 			</properties>
 			<associations>
