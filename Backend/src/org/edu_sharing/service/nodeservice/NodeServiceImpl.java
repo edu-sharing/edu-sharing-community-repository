@@ -2,28 +2,15 @@ package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.CopyService;
-import org.alfresco.service.cmr.repository.MLText;
-import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -44,6 +31,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
@@ -72,6 +60,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS,
 			CCConstants.CCM_PROP_AUTHOR_FREETEXT,
 			CCConstants.CCM_PROP_CHILDOBJECT_ORDER,
+			CCConstants.CCM_PROP_LINKTYPE,
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
@@ -116,7 +105,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void updateNode(String nodeId, HashMap<String, String[]> props) throws Throwable{
 			String nodeType = getType(nodeId);
 			String parentId = nodeService.getPrimaryParent(new NodeRef(Constants.storeRef,nodeId)).getParentRef().getId();
-			HashMap<String,Object> toSafeProps = getToSafeProps(props,false,nodeType,nodeId, parentId);
+			HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType, parentId,null);
 			updateNodeNative(nodeId, toSafeProps);
 	}
 	
@@ -141,14 +130,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props) throws Throwable{
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,true,nodeType, null,parentId);
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType ,parentId,null);
 		return createNodeBasic(parentId, nodeType, toSafeProps);
 	}
 	
 	@Override
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation)
 			throws Throwable {
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,true,nodeType, null,parentId);
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,parentId,null);
 		return this.createNodeBasic(Constants.storeRef, parentId, nodeType,childAssociation, toSafeProps);
 	}
 	@Override
@@ -184,7 +173,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String getCompanyHome(){
 		return repositoryHelper.getCompanyHome().getId();
 	}
-	HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, boolean createMode, String nodeType, String nodeId, String parentId) throws Throwable{
+	HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String parentId,String templateName) throws Throwable{
 		String[] metadataSetIdArr = props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
@@ -210,9 +199,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(application, metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
-		for (MetadataWidget widget : mds.getWidgetsByNodeType(nodeType)) {
+		for (MetadataWidget widget : (templateName==null ? mds.getWidgetsByNodeType(nodeType) : mds.getWidgetsByTemplate(templateName))) {
 			String id=widget.getId();
-			if(!widget.isConditionTrue()) {
+			if(!checkWidgetConditionTrue(widget)) {
 				logger.info("widget "+id+" skipped because condition failed");
 				logger.info("condition that should match: "+widget.getCondition().getType()+" "+(widget.getCondition().isNegate() ? "!=" : "=" )+" "+widget.getCondition().getValue());
 				continue;
@@ -290,7 +279,22 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		
 		return toSafe;
 	}
-	
+	//transient Logger logger = Logger.getLogger(MetadataWidget.class);
+	/** resolves this widget's condition
+	 * only works for condition type TOOLPERMISSION
+	 * @return
+	 */
+	private boolean checkWidgetConditionTrue(MetadataWidget widget) {
+		MetadataWidget.Condition condition = widget.getCondition();
+		if(widget.getCondition()==null)
+			return true;
+		if(MetadataWidget.Condition.CONDITION_TYPE.TOOLPERMISSION.equals(condition.getType())){
+			boolean result=ToolPermissionServiceFactory.getInstance().hasToolPermission(condition.getValue());
+			return result!=condition.isNegate();
+		}
+		//logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
+		return true;
+	}
 	private static Iterable<String> getAllSafeProps() {
 		List<String> safe=new ArrayList<>();
 		safe.addAll(Arrays.asList(SAFE_PROPS));
@@ -711,7 +715,48 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
 		return apiClient.getProperty(new StoreRef(storeProtocol,storeId), nodeId, property);
 	}
-	
+
+	@Override
+	public String getTemplateNode(String nodeId,boolean create) throws Throwable {
+		if(!getType(nodeId).equals(CCConstants.CCM_TYPE_MAP) && !getType(nodeId).equals(CCConstants.CM_TYPE_FOLDER)){
+			throw new IllegalArgumentException("Setting templates for nodes is only supported for type "+CCConstants.CCM_TYPE_MAP);
+		}
+
+		QName qname=QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE);
+		List<AssociationRef> result = nodeService.getTargetAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),qname);
+		if(result!=null && result.size()>0)
+			return result.get(0).getTargetRef().getId();
+		if(!create)
+			return null;
+
+		addAspect(nodeId,CCConstants.CCM_ASPECT_METADATA_PRESETTING);
+		HashMap<String,String[]> props = new HashMap<>();
+		props.put(CCConstants.CM_NAME,new String[]{CCConstants.TEMPLATE_NODE_NAME});
+		String id=createNode(nodeId,CCConstants.CCM_TYPE_IO,props);
+		nodeService.createAssociation(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
+				new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,id),
+				qname);
+		addAspect(id,CCConstants.CCM_ASPECT_METADATA_PRESETTING_TEMPLATE);
+		return id;
+	}
+	@Override
+	public void setTemplateProperties(String nodeId, HashMap<String, String[]> props) throws Throwable {
+		//updateNode(getOrCreateTemplateNode(nodeId),props);
+		String template = getTemplateNode(nodeId,true);
+		String nodeType = getType(template);
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType, nodeId,"io_template");
+		updateNodeNative(template, toSafeProps);
+	}
+
+	@Override
+	public void setTemplateStatus(String nodeId, Boolean enable) throws Throwable{
+		addAspect(nodeId,CCConstants.CCM_ASPECT_METADATA_PRESETTING);
+		nodeService.setProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),
+				QName.createQName(CCConstants.CCM_PROP_METADATA_PRESETTING_STATUS),
+				enable);
+
+	}
+
 	@Override
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String contentProp) throws Throwable{
 		return apiClient.getContent(nodeId,contentProp);

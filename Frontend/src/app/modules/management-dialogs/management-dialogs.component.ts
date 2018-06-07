@@ -49,9 +49,11 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() addNodesStream : Node[];
   @Output() addNodesStreamChange = new EventEmitter();
   @Input() nodeMetadata : Node;
-  @Input() nodeContributor : Node;
-  @Output() nodeContributorChange = new EventEmitter();
-  @Output() nodeMetadataChange = new EventEmitter();
+    @Output() nodeMetadataChange = new EventEmitter();
+    @Input() nodeTemplate : Node;
+    @Output() nodeTemplateChange = new EventEmitter();
+    @Input() nodeContributor : Node;
+    @Output() nodeContributorChange = new EventEmitter();
   @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
   @Input() nodeMetadataAllowReplace : Boolean;
@@ -94,6 +96,12 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
+        if(this.nodeTemplate!=null){
+            this.closeTemplate();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
       if(this.nodeContributor!=null){
         this.closeContributor();
         event.preventDefault();
@@ -167,6 +175,7 @@ export class WorkspaceManagementDialogsComponent  {
     let prop:any={};
     link=UIHelper.addHttpIfRequired(link);
     prop[RestConstants.CCM_PROP_IO_WWWURL]=[link];
+    prop[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
     this.closeUploadSelect();
     this.globalProgress=true;
     this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
@@ -316,5 +325,10 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeMetadataAllowReplace=false;
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);
+    }
+
+    closeTemplate() {
+        this.nodeTemplate = null;
+        this.nodeTemplateChange.emit(null);
     }
 }

@@ -26,6 +26,12 @@ export class ActionbarHelper{
         option.isEnabled=option.enabledCallback(null);
       }
     }
+    if(type=='NODE_TEMPLATE') {
+      if (nodes && nodes.length==1 && !NodeHelper.allFiles(nodes)) {
+          option = new OptionItem("WORKSPACE.OPTION.TEMPLATE", "assignment_turned_in", callback);
+          option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
+      }
+    }
     if(type=='ADD_TO_COLLECTION') {
       if (nodes && nodes.length && NodeHelper.allFiles(nodes)) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);

@@ -5,12 +5,11 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
-import org.edu_sharing.metadataset.v2.MetadataSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.search.QueryBuilder;
 import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
-import org.edu_sharing.service.search.SearchServiceImpl;
 
 import com.sun.star.lang.IllegalArgumentException;
 

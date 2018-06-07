@@ -1,0 +1,30 @@
+<div class="dialog darken" [@fade]="this"></div>
+<div class="card center-card card-high card-action" [@cardAnimation]="this">
+  <div class="card-content">
+    <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+    <div class="card-title">{{'WORKSPACE.NODE_TEMPLATE.TITLE' | translate:{name:node ? node.name : ''} }}</div>
+    <spinner *ngIf="loading"></spinner>
+    <div class="card-scroll" *ngIf="!loading">
+      <div class="switch">
+        <label>
+          <input type="checkbox" [(ngModel)]="enabled">
+          <span class="lever"></span>
+          {{ 'WORKSPACE.NODE_TEMPLATE.STATUS' | translate}}
+        </label>
+      </div>
+      <div *ngIf="!enabled" class="template-disabled">
+        {{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DISABLED' | translate}}
+      </div>
+      <mds *ngIf="enabled" #mds
+        [embedded]="true"
+        [groupId]="'io_template'"
+        [currentValues]="node ? node.properties : {}"
+        [invalidate]="true"
+      ></mds>
+    </div>
+  </div>
+  <div class="card-action">
+    <a class="waves-effect waves-light btn" [class.disabled]="loading" (click)="save()">{{'SAVE' | translate }}</a>
+    <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+  </div>
+</div>
