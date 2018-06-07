@@ -25,10 +25,10 @@ import {MdsComponent} from "../../../common/ui/mds/mds.component";
 })
 export class NodeTemplateComponent  {
     @ViewChild('mds') mdsRef : MdsComponent;
-    private loading : boolean;
-    private _nodeId: string;
-    private node: Node;
-    private enabled: boolean;
+    loading : boolean;
+    _nodeId: string;
+    node: Node;
+    enabled: boolean;
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
