@@ -53,6 +53,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public INVITE="INVITE";
   public INVITED="INVITED";
   public ADVANCED="ADVANCED";
+  private initialState: string;
   public tab=this.INVITE;
   private currentType=[RestConstants.ACCESS_CONSUMER,RestConstants.ACCESS_CC_PUBLISH];
   private inherited : boolean;
@@ -130,6 +131,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.setPermissions(data.permissions.localPermissions.permissions)
           this.inherited = data.permissions.localPermissions.inherited;
           this.updatePublishState();
+          this.initialState=this.getState();
           this.doiActive = NodeHelper.isDOIActive(node,data.permissions);
           this.doiDisabled = this.doiActive;
         }
@@ -144,6 +146,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
           for (let permission of data.permissions.localPermissions.permissions)
             this.inherit.push(permission);
           this.updatePublishState();
+          this.initialState=this.getState();
         }
 
       }, (error: any) => this.toast.error(error));
@@ -428,14 +431,19 @@ export class WorkspaceShareComponent implements AfterViewInit{
   }
 
     isStateModified() {
-        // TODO: @simon
-        return this.publishActive;
+        return this.initialState!=this.getState();
     }
 
     getState() {
-        // TODO: @simon
-        return 'PUBLIC';
-    }
+        if(this.publishActive || this.publishInherit){
+            return 'PUBLIC';
+        }
+        for(let perm of this.permissions.concat(this.inherit)){
+            if(perm.authority.authorityName!=RestConstants.AUTHORITY_EVERYONE)
+                return 'SHARED';
+        }
+        return 'PRIVATE';
+  }
 }
 /*
 class SearchData extends Subject<CompleterItem[]> implements CompleterData {

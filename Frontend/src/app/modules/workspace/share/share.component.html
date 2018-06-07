@@ -203,7 +203,7 @@
 
     <div class="card-action">
       <!--State-->
-      <div class="state">
+      <div class="state" *ngIf="initialState">
         <div *ngIf="getState()=='PRIVATE'" [class.state-changed]="isStateModified()"class="show-state"><i class="material-icons">lock</i><span> {{'WORKSPACE.SHARE.STATE.PRIVATE' | translate}}</span></div>
         <div *ngIf="getState()=='SHARED'" [class.state-changed]="isStateModified()" class="show-state"><i class="material-icons">group</i><span> {{'WORKSPACE.SHARE.STATE.SHARED' | translate}}</span></div>
         <div *ngIf="getState()=='PUBLIC'" [class.state-changed]="isStateModified()" class="show-state"><i class="material-icons" style="color: #42CA8D">public</i><span> {{'WORKSPACE.SHARE.STATE.PUBLIC' | translate}}</span></div>
