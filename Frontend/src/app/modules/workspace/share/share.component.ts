@@ -53,7 +53,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public INVITE="INVITE";
   public INVITED="INVITED";
   public ADVANCED="ADVANCED";
-  private initialState: string;
+  initialState: string;
   public tab=this.INVITE;
   private currentType=[RestConstants.ACCESS_CONSUMER,RestConstants.ACCESS_CC_PUBLISH];
   private inherited : boolean;
