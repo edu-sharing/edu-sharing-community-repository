@@ -1089,8 +1089,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					if (token.length() > 0) {
 	
 						boolean furtherToken = (subQuery.length() > 0);
-						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
-								.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
+						//subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
+						//		.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
+						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:").append("\"")
 								.append(token).append("\"");
 						subQuery.append(")");
 	
