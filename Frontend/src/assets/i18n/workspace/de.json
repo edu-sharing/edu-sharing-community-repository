@@ -87,6 +87,11 @@
       "NO_FUZZY":"Geben Sie die vollständige E-Mail-Adresse ein, um Personen hinzuzufügen",
       "DOI":"Mit DOI versehen",
       "DOI_INFO":"DOI (Digital Object Identifier) ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
+      "STATE": {
+        "PRIVATE": "Privat",
+        "SHARED": "Geteilt",
+        "PUBLIC": "Öffentlich"
+      },
       "HISTORY":{
         "TITLE":"Freigabe-Historie",
         "ADDED":"Hinzugefügt",

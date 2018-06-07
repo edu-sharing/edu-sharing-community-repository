@@ -86,6 +86,11 @@
       "NO_FUZZY":"Enter the full e-mail address to add users",
       "DOI":"Provide with DOI",
       "DOI_INFO":"DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
+      "STATE": {
+        "PRIVATE": "Private",
+        "SHARED": "Shared",
+        "PUBLIC": "Public"
+      },
       "HISTORY":{
         "TITLE":"Sharing-History",
         "ADDED":"Added",
@@ -110,7 +115,8 @@
       "RESTORE_TITLE":"Restore?",
       "RESTORE_MESSAGE":"Are you sure you want to change the version of this element?",
       "PERMALINK":"Link to object",
-      "USAGE_COUNT":"Usage count",
+      "USAGE_COUNT_TITLE":"Usage",
+      "USAGE_COUNT":"Total uses",
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
         "EDITOR_UPLOAD": "File updated by editor",

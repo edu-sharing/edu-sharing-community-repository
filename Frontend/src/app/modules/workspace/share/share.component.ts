@@ -426,6 +426,16 @@ export class WorkspaceShareComponent implements AfterViewInit{
     this.setPermissions(this.permissions);
     this.updatePublishState();
   }
+
+    isStateModified() {
+        // TODO: @simon
+        return this.publishActive;
+    }
+
+    getState() {
+        // TODO: @simon
+        return 'PUBLIC';
+    }
 }
 /*
 class SearchData extends Subject<CompleterItem[]> implements CompleterData {
