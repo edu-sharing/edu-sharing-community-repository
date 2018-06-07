@@ -391,7 +391,7 @@ public class RenderingProxy extends HttpServlet {
 			version="";
 		}
 
-		String urlWindow = URLTool.getNgRenderNodeUrl(nodeId)+version;
+		String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version);
 
 		Map parameterMap = req.getParameterMap();
 		for(Object o : parameterMap.entrySet()) {
