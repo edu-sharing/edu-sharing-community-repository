@@ -58,7 +58,7 @@
   "EDIT_ACCOUNT":"Account Verwalten",
   "DEFAULT_METADATASET":"Standard-Metadatenset ({{name}})",
   "NO_MATCHES" : "Keine übereinstimmenden Einträge",
-  "NO_CC_PUBLISH" : "Keine ausreichenden Berechtigungen",
+  "NO_CC_PUBLISH" : "Kein Recht zum Veröffentlichen",
   "ADD_TO_RECENT_COLLECTION":"In zuletzt verwendete Sammlungen",
   "SEARCH_COLLECTIONS":"Sammlung suchen...",
   "ASK_CC_PUBLISH" : "Nachfragen",
