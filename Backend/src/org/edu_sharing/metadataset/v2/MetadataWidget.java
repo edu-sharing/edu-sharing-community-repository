@@ -6,13 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
-import org.edu_sharing.service.nodeservice.NodeServiceImpl;
-import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
-
-import com.google.gwt.user.client.ui.WidgetCollection;
-
 public class MetadataWidget extends MetadataTranslatable{
 	public static class Subwidget implements Serializable {
 		private String id;
@@ -276,22 +269,5 @@ public class MetadataWidget extends MetadataTranslatable{
 		}
 		return map;
 	}
-	
-	//transient Logger logger = Logger.getLogger(MetadataWidget.class);
-	/** resolves this widget's condition
-	 * only works for condition type TOOLPERMISSION
-	 * @return
-	 */
-	public boolean isConditionTrue() {
-		Condition condition = getCondition();
-		if(getCondition()==null)
-			return true;
-		if(Condition.CONDITION_TYPE.TOOLPERMISSION.equals(condition.getType())){
-			boolean result=ToolPermissionServiceFactory.getInstance().hasToolPermission(condition.getValue());
-			return result!=condition.isNegate();
-		}
-		//logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
-		return true;
-	}
-	
+
 }

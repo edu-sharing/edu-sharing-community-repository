@@ -379,6 +379,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_AUTHOR_FREETEXT = "{http://www.campuscontent.de/model/1.0}author_freetext";
 
+	public final static String CCM_PROP_LINKTYPE = "{http://www.campuscontent.de/model/1.0}linktype";
+
 	public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 
 	public final static String CCM_ASPECT_SHARES = "{http://www.campuscontent.de/model/1.0}shares";
@@ -408,6 +410,7 @@ public class CCConstants {
 	/* Templates */
 
 	public final static String CCM_ASPECT_METADATA_PRESETTING ="{http://www.campuscontent.de/model/1.0}metadataPresetting";
+	public final static String CCM_ASPECT_METADATA_PRESETTING_TEMPLATE ="{http://www.campuscontent.de/model/1.0}metadataPresettingTemplate";
 
 
 	/**
@@ -425,6 +428,8 @@ public class CCConstants {
 	public final static String CCM_ASPECT_IO_CHILDOBJECT = "{http://www.campuscontent.de/model/1.0}io_childobject";
 
 	public final static String CCM_VALUE_SCOPETYPE_GLOBAL = "global";
+
+	public final static String CCM_PROP_METADATA_PRESETTING_STATUS ="{http://www.campuscontent.de/model/1.0}metadataPresettingStatus";
 
 	public final static String CCM_PROP_METADATA_PRESETTING_PROPERTIES ="{http://www.campuscontent.de/model/1.0}metadataPresettingProperties";
 
@@ -740,8 +745,10 @@ public class CCConstants {
 
 	public final static String TOOL_HOMEFOLDER = "EDU_TOOL";
 
+    public static final String TEMPLATE_NODE_NAME = ".METADATA_TEMPLATE";
 
-	private static HashMap<String,String> lifecycleContributerPropsMap = new HashMap<String,String>();
+
+    private static HashMap<String,String> lifecycleContributerPropsMap = new HashMap<String,String>();
 
 	public static HashMap<String, String> getLifecycleContributerPropsMap() {
 		if(lifecycleContributerPropsMap.size() == 0){
@@ -873,6 +880,8 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPLICATIONSOURCE = "{http://www.campuscontent.de/model/1.0}replicationsource";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCEID = "{http://www.campuscontent.de/model/1.0}replicationsourceid";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestamp";
+	public final static String CCM_PROP_IO_REPLICATION_MODIFIED = "{http://www.campuscontent.de/model/1.0}replicationmodified";
+	
 	//replicationsourcetimestampFORMATED is an generated prop, to keep the original
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMPFORMATED = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestampFORMATED";
 
@@ -1022,6 +1031,7 @@ public class CCConstants {
 	public final static String CCM_PROP_CHILDOBJECT_ORDER = "{http://www.campuscontent.de/model/1.0}childobject_order";
 
 	public final static String CCM_VALUE_LINK_LINKTYPE_CHAMELEON = "CMchameleon";
+	public final static String CCM_VALUE_LINK_LINKTYPE_USER_GENERATED = "USER_GENERATED";
 
 	public final static String CCM_PROP_MAP_TYPE = "{http://www.campuscontent.de/model/1.0}maptype";
 	public final static String CCM_VALUE_MAP_TYPE_FAVORITE = "FAVORITE";

@@ -18,7 +18,6 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
@@ -637,7 +636,9 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-
+	public List<String> getAspectsNative(){
+		return this.aspects;
+	}
 	public Node asNode() throws DAOException {
 
 		Node data = new Node();
@@ -1415,7 +1416,14 @@ public class NodeDao {
     		if(".DS_Store".equals(name) || "._.DS_Store".equals(name)){
         		nodes.remove(i);
         		i--;
+        		continue;
         	}
+        	// filter the metadata template file
+        	if(nodes.get(i).getAspectsNative().contains(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE)) {
+				nodes.remove(i);
+				i--;
+				continue;
+			}
     		if(type==null)
     			continue;
     		if(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(type) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(type)){
@@ -1587,5 +1595,33 @@ public class NodeDao {
 			nodeService.addAspect(nodeId, CCConstants.getValidGlobalName(aspect));
 		}
 	}
-
+	public boolean getTemplateStatus() throws DAOException {
+		Object value = this.getNativeProperties().getOrDefault(CCConstants.CCM_PROP_METADATA_PRESETTING_STATUS,false);
+		if(value instanceof String){
+			return Boolean.valueOf((String) value);
+		}
+		return (boolean)value;
+	}
+	public NodeDao getTemplateNode() throws DAOException {
+		try {
+			String template = nodeService.getTemplateNode(nodeId,false);
+			if(template==null)
+				return null;
+			return NodeDao.getNode(repoDao, template,Filter.createShowAllFilter());
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+	public NodeDao changeTemplateProperties(Boolean enable,HashMap<String, String[]> properties) throws DAOException {
+		try {
+			nodeService.setTemplateStatus(nodeId, enable);
+			if(enable) {
+				nodeService.setTemplateProperties(nodeId, transformProperties(properties));
+			}
+			return getTemplateNode();
+		}
+		catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
 }

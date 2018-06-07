@@ -53,8 +53,13 @@
      (onCancel)="closeEditor(false)"
      (onDone)="closeEditor(true,$event)"
      (openLicense)="nodeLicense=[nodeMetadata]"
+     (openTemplate)="nodeTemplate=nodeMetadata"
      (openContributor)="nodeContributor=nodeMetadata"
 ></mds>
+<node-template *ngIf="nodeTemplate"
+     [nodeId]="nodeTemplate.ref.id"
+     (onClose)="closeTemplate()"
+></node-template>
 <workspace-file-upload *ngIf="filesToUpload"
                        [current]="parent"
                        [files]="filesToUpload"

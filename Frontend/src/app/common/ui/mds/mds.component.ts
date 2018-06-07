@@ -208,6 +208,7 @@ export class MdsComponent{
   @Output() onCancel=new EventEmitter();
   @Output() onDone=new EventEmitter();
   @Output() openLicense=new EventEmitter();
+  @Output() openTemplate=new EventEmitter();
   @Output() openContributor=new EventEmitter();
   @Output() onMdsLoaded=new EventEmitter();
   private rendered : SafeHtml;
@@ -472,6 +473,7 @@ export class MdsComponent{
     data.widgets.push({id:'preview'});
     data.widgets.push({id:'version'});
     data.widgets.push({id:'childobjects',caption:this.translate.instant('MDS.ADD_CHILD_OBJECT')});
+    data.widgets.push({id:'template'});
     data.widgets.push({id:'author',caption:this.translate.instant('MDS.AUTHOR_LABEL')});
     data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
     data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
@@ -1612,6 +1614,9 @@ export class MdsComponent{
     else if(widget.id=='license'){
       html+=this.renderLicense(widget);
     }
+    else if(widget.id=='template'){
+      html+=this.renderTemplateWidget(widget);
+    }
     else{
       html+='Unknown widget type \''+widget.type+'\' at id \''+widget.id+'\'';
     }
@@ -1868,12 +1873,17 @@ export class MdsComponent{
   private openLicenseDialog(){
     this.saveValues(()=>{
       this.openLicense.emit();
-    })
+    });
+  }
+  private openTemplateDialog(){
+    this.saveValues(()=>{
+        this.openTemplate.emit();
+    });
   }
   private openContributorsDialog(){
     this.saveValues(()=>{
       this.openContributor.emit();
-    })
+    });
   }
   private getGroupValueCaption(value:string,widget:any){
     let values=value.split(MdsComponent.GROUP_MULTIVALUE_DELIMITER);
@@ -1946,6 +1956,13 @@ export class MdsComponent{
     html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="`+this.getWindowComponent()+`.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
             <div id="`+this.getWidgetDomId(widget)+`" class="multivalueBadges"></div>`;
     return html;
+  }
+  private renderTemplateWidget(widget: any){
+      let html=`<div class="mdsTemplate">
+                    <a class="clickable templateLink" onclick="window.mdsComponentRef.component.openTemplateDialog();">` +
+                    this.translate.instant('MDS.TEMPLATE_LINK') + ` <i class="material-icons">arrow_forward</i></a>
+                </div>`;
+      return html;
   }
   private renderLicense(widget: any) {
     if(this.mode=='search'){
