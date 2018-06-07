@@ -59,7 +59,7 @@
   "EDIT_ACCOUNT":"Manage account",
   "DEFAULT_METADATASET":"Default-Metadataset ({{name}})",
   "NO_MATCHES" : "No matches found",
-  "NO_CC_PUBLISH" : "Insufficient permissions",
+  "NO_CC_PUBLISH" : "Missing permission for publishing",
   "ADD_TO_RECENT_COLLECTION":"Add to recent collection",
   "SEARCH_COLLECTIONS":"Search collection...",
   "ASK_CC_PUBLISH" : "Ask",
