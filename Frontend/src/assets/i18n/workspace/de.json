@@ -169,7 +169,12 @@
       "CONTRIBUTOR":"Beteiligte",
       "SHARE_LINK":"Download-Link freigeben",
       "WORKFLOW":"Workflow",
-      "TEMPLATE":"Metadaten-Vorlage"
+      "TEMPLATE":"Metadaten Vorlage"
+    },
+    "NODE_TEMPLATE" : {
+      "STATUS": "Automatische Übernahme von Metadaten",
+      "STATUS_DESKRIPTION": "Nach der Aktivierung, erhalten neue Materialien \n die Metadaten aus dieser Vorlage",
+      "STATUS_DISABLED": "Aktiviere Metadaten Vorlage, um leichter bei neuen Materialien Metadaten zu erstellen"
     },
     "SHARE_LINK":{
       "TITLE":"Link für {{ name }} freigeben",
