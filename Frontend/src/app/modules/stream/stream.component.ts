@@ -88,7 +88,6 @@ export class StreamComponent {
 
   moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','check',(node: Node)=>{
     this.updateStream(node, STREAM_STATUS.PROGRESS).subscribe( (data) => {
-      // update stream from json should be done in a way that it forms the stream array with both statues
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
 
     }, error => console.log(error));
@@ -162,10 +161,7 @@ export class StreamComponent {
   }
 
   checkIfEnable(nodes: any) {
-    console.log("nodes", nodes);
-    console.log("is it?", this.collectionOption.isEnabled);
     this.collectionOption.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
-    console.log(NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH));
   }
 
   menuOptions(option: any) {
@@ -200,9 +196,7 @@ export class StreamComponent {
     }
     else {
       this.getSimpleJSON(streamStatus).subscribe(data => {
-        console.log('test: ', data);
         this.streams = data['stream'];
-        console.log(this.streams);
       }, error => console.log(error));
     }
 
@@ -220,7 +214,6 @@ export class StreamComponent {
   }
 
   private addToCollection(node: EduData.Node) {
-    console.log(this.streams);
     let result = this.streams.filter( (n: any) => (n.id == node) ).map( (n: any) => { return n.nodes } );
     this.collectionNodes = [].concat.apply([], result);
 
