@@ -157,6 +157,13 @@ export class StreamComponent {
     this.showMenuOptions = !this.showMenuOptions;
   }
 
+  checkIfEnable(nodes: any) {
+    console.log("nodes", nodes);
+    console.log("is it?", this.collectionOption.isEnabled);
+    this.collectionOption.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
+    console.log(NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH));
+  }
+
   menuOptions(option: any) {
     this.menuOption = option;
     if (option === 'stream') {
