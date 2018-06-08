@@ -87,7 +87,11 @@ export class StreamComponent {
   actionOptions:OptionItem[]=[];
 
   moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','check',(node: Node)=>{
-    //this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
+    this.updateStream(node, STREAM_STATUS.PROGRESS).subscribe( (data) => {
+      // update stream from json should be done in a way that it forms the stream array with both statues
+      this.updateDataFromJSON(STREAM_STATUS.OPEN);
+
+    }, error => console.log(error));
   });
 
   collectionOption = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node));
@@ -183,12 +187,25 @@ export class StreamComponent {
   }
 
   updateDataFromJSON(streamStatus: any) {
-    this.getSimpleJSON(streamStatus).subscribe(data => {
-      console.log('test: ', data);
-      this.streams = data['stream'];
+    if (streamStatus == STREAM_STATUS.OPEN) {
+      let openStreams: any[];
+      let progressStreams: any[];
+      this.getSimpleJSON(STREAM_STATUS.OPEN).subscribe(data => {
+        openStreams = data['stream'];
+        this.getSimpleJSON(STREAM_STATUS.PROGRESS).subscribe(data => {
+          progressStreams = data['stream'];
+          this.streams = progressStreams.concat(openStreams);
+        });
+      }, error => console.log(error));
+    }
+    else {
+      this.getSimpleJSON(streamStatus).subscribe(data => {
+        console.log('test: ', data);
+        this.streams = data['stream'];
+        console.log(this.streams);
+      }, error => console.log(error));
+    }
 
-      console.log(this.streams);
-    }, error => console.log(error));
   }
 
   refresh(): void {
