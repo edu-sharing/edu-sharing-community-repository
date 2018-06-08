@@ -86,6 +86,7 @@ export class WorkspaceMainComponent implements EventListener{
     private filesToUpload : FileList;
     public globalProgress = false;
     public editNodeMetadata : Node;
+    public editNodeTemplate : Node;
     public editNodeDeleteOnCancel = false;
     private createMds : string;
     private editNodeLicense : Node[];
@@ -839,6 +840,9 @@ export class WorkspaceMainComponent implements EventListener{
             options.push(stream);
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
+            let template = ActionbarHelper.createOptionIfPossible('NODE_TEMPLATE',nodes,this.connector,(node:Node)=>this.nodeTemplate(node));
+            if(template)
+                options.push(template);
             share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,this.connector,(node: Node) => this.shareNode(node));
             if(share) {
                 share.isEnabled = share.isEnabled && (
@@ -1086,6 +1090,9 @@ export class WorkspaceMainComponent implements EventListener{
         });
     }
 
+    private nodeTemplate(node: Node){
+        this.editNodeTemplate = this.getNodeList(node)[0];
+    }
     private addToCollection(node: Node) {
         let nodes=this.getNodeList(node);
         this.addNodesToCollection=nodes;

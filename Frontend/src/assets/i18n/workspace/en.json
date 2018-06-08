@@ -84,6 +84,8 @@
       "PUBLISH_ACTIVE_COLLECTION":"The collection is made publicly available on the Internet",
       "PUBLISH_ACTIVE_DIRECTORY":"All documents of this folder are made publicly available on the Internet",
       "NO_FUZZY":"Enter the full e-mail address to add users",
+      "DOI":"Provide with DOI",
+      "DOI_INFO":"DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
       "HISTORY":{
         "TITLE":"Sharing-History",
         "ADDED":"Added",
@@ -149,7 +151,8 @@
       "LICENSE":"Assign a license",
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",
-      "WORKFLOW":"Workflow"
+      "WORKFLOW":"Workflow",
+      "TEMPLATE":"Metadata-Template"
     },
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",
@@ -308,7 +311,8 @@
       "NOT_FOUND":"The folder {{id}} was not found. May it has been deleted.",
       "LICENSE_UPDATED":"License has been updated",
       "CONTRIBUTOR_UPDATED":"Information of contributors have been updated",
-      "WORKFLOW_UPDATED":"Information of workflow have been updated"
+      "WORKFLOW_UPDATED":"Information of workflow have been updated",
+      "METADATA_TEMPLATE_UPDATED":"Information of metadata template have been updated"
     }
   }
 }

@@ -9,6 +9,7 @@ import {WorkspaceContributorComponent} from "./contributor/contributor.component
 import {NodeReportComponent} from "./node-report/node-report.component";
 import {NodeCommentsComponent} from "./node-comments/node-comments.component";
 import {AddStreamComponent} from "./add-stream/add-stream.component";
+import {NodeTemplateComponent} from "./node-template/node-template.component";
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -21,5 +22,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceContributorComponent,
   NodeReportComponent,
   NodeCommentsComponent,
-  AddStreamComponent
+  AddStreamComponent,
+  NodeTemplateComponent
 ];

@@ -6,7 +6,7 @@ import java.util.List;
 import org.edu_sharing.metadataset.v2.MetadataGroup;
 import org.edu_sharing.metadataset.v2.MetadataList;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataTemplate;

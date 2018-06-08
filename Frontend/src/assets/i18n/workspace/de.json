@@ -174,7 +174,8 @@
       "LICENSE":"Lizenz (& Veröffentlichung)",
       "CONTRIBUTOR":"Beteiligte",
       "SHARE_LINK":"Download-Link freigeben",
-      "WORKFLOW":"Workflow"
+      "WORKFLOW":"Workflow",
+      "TEMPLATE":"Metadaten-Vorlage"
     },
     "SHARE_LINK":{
       "TITLE":"Link für {{ name }} freigeben",
@@ -335,7 +336,8 @@
       "NOT_FOUND":"Die gewünschte Ordner-ID {{id}} wurde nicht gefunden. Eventuell wurde sie gelöscht.",
       "LICENSE_UPDATED":"Lizenzinformationen wurden aktualisiert",
       "CONTRIBUTOR_UPDATED":"Informationen zu Beteiligten wurden aktualisiert",
-      "WORKFLOW_UPDATED":"Informationen zum Workflow wurden aktualisiert"
+      "WORKFLOW_UPDATED":"Informationen zum Workflow wurden aktualisiert",
+      "METADATA_TEMPLATE_UPDATED":"Informationen zum Metadaten-Template wurden aktualisiert"
     }
   }
 }
