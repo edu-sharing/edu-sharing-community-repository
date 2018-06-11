@@ -773,7 +773,19 @@ public class SearchServiceImpl implements SearchService {
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND @ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"");
+
+		
+		
+		Set<String> authoritiesForUser = serviceRegistry.getAuthorityService().getAuthorities();
+		String query = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND (@ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"";
+		for(String authority : authoritiesForUser) {
+			query+=" OR @ccm\\:wf_receiver:\"" + authority + "\"";
+		}
+		query+=")";
+		
+		parameters.setQuery(query);
+		
+
 		ResultSet resultSet = searchService.query(parameters);
 		return resultSet.getNodeRefs();
 	}
@@ -793,6 +805,7 @@ public class SearchServiceImpl implements SearchService {
 
 		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(toSearch, globalContext);
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
+		
 
 		/**
 		 * don't find groups of scopes when no scope is provided
