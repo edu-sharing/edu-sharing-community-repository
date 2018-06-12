@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.alfresco.query.PagingResults;
@@ -7,7 +8,11 @@ import org.alfresco.service.cmr.security.PersonService.PersonInfo;
 import org.alfresco.util.Pair;
 
 public class SearchResult<E> {
-	public List<E> getData() {
+    public SearchResult() {
+        this(new ArrayList<>(),0,0);
+    }
+
+    public List<E> getData() {
 		return data;
 	}
 

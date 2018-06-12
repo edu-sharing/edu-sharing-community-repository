@@ -810,7 +810,7 @@ public class SearchServiceImpl implements SearchService {
 		/**
 		 * don't find groups of scopes when no scope is provided
 		 */
-		if (NodeServiceInterceptor.getEduSharingScope() == null) {
+		if (NodeServiceInterceptor.getEduSharingScope() == null && findGroupsQuery!=null) {
 
 			/**
 			 * groups arent initialized with eduscope aspect and eduscopename
@@ -821,18 +821,27 @@ public class SearchServiceImpl implements SearchService {
 
 		String finalQuery;
 		if(type==null) {
-			finalQuery="("+findUsersQuery+") OR ("+findGroupsQuery+")";
+			finalQuery="";
+			if(findUsersQuery!=null)
+				finalQuery += "("+findUsersQuery+")";
+			if(findGroupsQuery!=null) {
+				finalQuery += " OR (" + findGroupsQuery + ")";
+			}
 		}
 		else if(type.equals(AuthorityType.USER)) {
 			finalQuery=findUsersQuery.toString();
 		}
 		else if(type.equals(AuthorityType.GROUP)) {
-			finalQuery=findGroupsQuery.toString();
+			if(findGroupsQuery==null)
+				finalQuery="";
+			else
+				finalQuery=findGroupsQuery.toString();
 		}
 		else {
 			throw new IllegalArgumentException("Unsupported authority type "+type);
 		}
-
+		if(finalQuery.isEmpty())
+			return new SearchResult<String>();
 		if(customProperties!=null){
 			for(Map.Entry<String, String> entry : customProperties.entrySet()){
 				finalQuery+=(" AND @"+entry.getKey().replace(":", "\\:")+":\""+QueryParser.escape(entry.getValue())+"\"");
