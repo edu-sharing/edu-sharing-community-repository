@@ -85,8 +85,8 @@
       "PUBLISH_ACTIVE_COLLECTION":"Öffentliche Sammlungen sind für <b>jeden</b> im Internet sichtbar",
       "PUBLISH_ACTIVE_DIRECTORY":"Alle Materialien in diesem Ordner sind öffentlich im Internet sichtbar",
       "NO_FUZZY":"Geben Sie die vollständige E-Mail-Adresse ein, um Personen hinzuzufügen",
-      "DOI":"Mit DOI versehen",
-      "DOI_INFO":"DOI (Digital Object Identifier) ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
+      "DOI":"Mit Handle versehen",
+      "DOI_INFO":"Ein Handle ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
       "STATE": {
         "PRIVATE": "Privat",
         "SHARED": "Geteilt",
