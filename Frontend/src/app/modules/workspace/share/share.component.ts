@@ -158,8 +158,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
       this.isAdmin=data.isAdmin;
     });
     if(node.ref.id) {
-      this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.CM_OWNER, RestConstants.CM_CREATOR]).subscribe((data: NodeWrapper) => {
-        console.log(data);
+      this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.ALL]).subscribe((data: NodeWrapper) => {
         let authority = data.node.properties[RestConstants.CM_CREATOR][0];
         let user = data.node.createdBy;
 
