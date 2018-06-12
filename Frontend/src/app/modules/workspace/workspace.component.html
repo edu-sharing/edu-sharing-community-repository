@@ -57,7 +57,7 @@
     </div>
   </div>
   <workspace-share *ngIf="sharedNode"
-  [node]="sharedNode"
+  [nodeId]="sharedNode.ref.id"
   [sendMessages]="true"
   (onLoading)="globalProgress=$event"
   (onClose)="sharedNode=null"
@@ -199,6 +199,7 @@
 [(addToCollection)]="addNodesToCollection"
 [(nodeLicense)]="editNodeLicense"
 [(nodeMetadata)]="editNodeMetadata"
+[(nodeTemplate)]="editNodeTemplate"
 [(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
 [(filesToUpload)]="filesToUpload"
 [fileIsOver]="fileIsOver"

@@ -623,6 +623,9 @@ export interface Facette {
 export interface NodeWrapper {
   node : Node;
 }
+export interface NodeTemplate extends NodeWrapper{
+  enabled : boolean;
+}
 export interface NodeRemoteWrapper extends NodeWrapper{
   remote : Node;
 }

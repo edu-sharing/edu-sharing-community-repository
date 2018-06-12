@@ -84,6 +84,13 @@
       "PUBLISH_ACTIVE_COLLECTION":"The collection is made publicly available on the Internet",
       "PUBLISH_ACTIVE_DIRECTORY":"All documents of this folder are made publicly available on the Internet",
       "NO_FUZZY":"Enter the full e-mail address to add users",
+      "DOI":"Provide with DOI",
+      "DOI_INFO":"DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
+      "STATE": {
+        "PRIVATE": "Private",
+        "SHARED": "Shared",
+        "PUBLIC": "Public"
+      },
       "HISTORY":{
         "TITLE":"Sharing-History",
         "ADDED":"Added",
@@ -108,7 +115,8 @@
       "RESTORE_TITLE":"Restore?",
       "RESTORE_MESSAGE":"Are you sure you want to change the version of this element?",
       "PERMALINK":"Link to object",
-      "USAGE_COUNT":"Usage count",
+      "USAGE_COUNT_TITLE":"Usage",
+      "USAGE_COUNT":"Total uses",
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
         "EDITOR_UPLOAD": "File updated by editor",
@@ -148,7 +156,13 @@
       "LICENSE":"Assign a license",
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",
-      "WORKFLOW":"Workflow"
+      "WORKFLOW":"Workflow",
+      "TEMPLATE":"Metadata Template"
+    },
+    "NODE_TEMPLATE" : {
+      "STATUS": "Automatic Metadata Inheritance",
+      "STATUS_DESKRIPTION": "After activation, new materials will receive the metadata from this template",
+      "STATUS_DISABLED": "Activate the metadata template to automatically apply the metadata specified here to new content in this folder."
     },
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",
@@ -307,7 +321,8 @@
       "NOT_FOUND":"The folder {{id}} was not found. May it has been deleted.",
       "LICENSE_UPDATED":"License has been updated",
       "CONTRIBUTOR_UPDATED":"Information of contributors have been updated",
-      "WORKFLOW_UPDATED":"Information of workflow have been updated"
+      "WORKFLOW_UPDATED":"Information of workflow have been updated",
+      "METADATA_TEMPLATE_UPDATED":"Information of metadata template have been updated"
     }
   }
 }

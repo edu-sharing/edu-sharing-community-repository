@@ -61,7 +61,7 @@
   "EDIT_ACCOUNT":"Manage account",
   "DEFAULT_METADATASET":"Default-Metadataset ({{name}})",
   "NO_MATCHES" : "No matches found",
-  "NO_CC_PUBLISH" : "Insufficient permissions",
+  "NO_CC_PUBLISH" : "Missing permission for publishing",
   "ADD_TO_RECENT_COLLECTION":"Add to recent collection",
   "SEARCH_COLLECTIONS":"Search collection...",
   "ASK_CC_PUBLISH" : "Ask",
@@ -296,6 +296,7 @@
     "AUTHOR_PERSON":"Author & Contributors",
     "LICENSE":"License",
     "LICENSE_LINK":"Manage license",
+    "TEMPLATE_LINK":"Manage metadata template",
     "CONTRIBUTOR_LINK":"Additional Contributors",
     "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
     "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment"

@@ -14,8 +14,7 @@ import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
 import {AbstractRestService} from "./abstract-rest-service";
-import {Helper} from "../../helper";
-import {Observer} from "rxjs/index";
+import {Observer} from "rxjs/Rx";
 
 @Injectable()
 export class RestNodeService extends AbstractRestService{
@@ -532,6 +531,7 @@ export class RestNodeService extends AbstractRestService{
   private createNodeUrl(data: any) {
     let prop=RestHelper.createNameProperty(data.name);
     prop[RestConstants.CCM_PROP_IO_WWWURL]=[data.url];
+    prop[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
     this.createNode(RestConstants.USERHOME,RestConstants.CCM_TYPE_IO,[],prop,true).subscribe((data:NodeWrapper)=>{
       this.toast.toast("NODE_CREATED_USERHOME",{name:data.node.name});
       this.events.broadcastEvent(FrameEventsService.EVENT_NODE_SAVED,data.node);
@@ -557,6 +557,22 @@ export class RestNodeService extends AbstractRestService{
       return this.connector.get(query,this.connector.getRequestOptions())
           .map((response: Response) => response.json());
   }
+
+  public getNodeTemplate(node: string,repository=RestConstants.HOME_REPOSITORY) : Observable<NodeTemplate> {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/metadata/template",repository,[
+            [":node",node],
+        ]);
+        return this.connector.get(query,this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+  }
+    public setNodeTemplate(node: string,enable:boolean,properties:any={},repository=RestConstants.HOME_REPOSITORY) : Observable<NodeTemplate> {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/metadata/template?enable=:enable",repository,[
+            [":node",node],
+            [":enable",""+enable],
+        ]);
+        return this.connector.put(query,JSON.stringify(properties),this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+    }
 
     /**
      * Helper function to retrieve all childobjects of an io

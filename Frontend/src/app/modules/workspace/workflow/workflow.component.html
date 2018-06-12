@@ -9,6 +9,7 @@
         <authority-search-input
           [disabled]="!status.hasReceiver"
           [globalSearch]="globalSearch"
+          [groupType]="TYPE_EDITORIAL"
           (onChooseAuthority)="addSuggestion($event)"
           [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
         ></authority-search-input>

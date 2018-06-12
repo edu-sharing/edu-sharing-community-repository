@@ -85,8 +85,13 @@
       "PUBLISH_ACTIVE_COLLECTION":"Öffentliche Sammlungen sind für <b>jeden</b> im Internet sichtbar",
       "PUBLISH_ACTIVE_DIRECTORY":"Alle Materialien in diesem Ordner sind öffentlich im Internet sichtbar",
       "NO_FUZZY":"Geben Sie die vollständige E-Mail-Adresse ein, um Personen hinzuzufügen",
-      "DOI":"Mit DOI versehen",
-      "DOI_INFO":"DOI (Digital Object Identifier) ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
+      "DOI":"Mit Handle versehen",
+      "DOI_INFO":"Ein Handle ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
+      "STATE": {
+        "PRIVATE": "Privat",
+        "SHARED": "Geteilt",
+        "PUBLIC": "Öffentlich"
+      },
       "HISTORY":{
         "TITLE":"Freigabe-Historie",
         "ADDED":"Hinzugefügt",
@@ -173,7 +178,13 @@
       "LICENSE":"Lizenz (& Veröffentlichung)",
       "CONTRIBUTOR":"Beteiligte",
       "SHARE_LINK":"Download-Link freigeben",
-      "WORKFLOW":"Workflow"
+      "WORKFLOW":"Workflow",
+      "TEMPLATE":"Metadaten Vorlage"
+    },
+    "NODE_TEMPLATE" : {
+      "STATUS": "Automatische Übernahme von Metadaten",
+      "STATUS_DESKRIPTION": "Nach der Aktivierung erhalten neue Materialien \n die Metadaten aus dieser Vorlage",
+      "STATUS_DISABLED": "Metadaten-Vorlage aktivieren, um die hier angegebenen Metadaten automatisch auf neue Inhalte in diesem Ordner anzuwenden"
     },
     "SHARE_LINK":{
       "TITLE":"Link für {{ name }} freigeben",
@@ -334,7 +345,8 @@
       "NOT_FOUND":"Die gewünschte Ordner-ID {{id}} wurde nicht gefunden. Eventuell wurde sie gelöscht.",
       "LICENSE_UPDATED":"Lizenzinformationen wurden aktualisiert",
       "CONTRIBUTOR_UPDATED":"Informationen zu Beteiligten wurden aktualisiert",
-      "WORKFLOW_UPDATED":"Informationen zum Workflow wurden aktualisiert"
+      "WORKFLOW_UPDATED":"Informationen zum Workflow wurden aktualisiert",
+      "METADATA_TEMPLATE_UPDATED":"Informationen zum Metadaten-Template wurden aktualisiert"
     }
   }
 }

@@ -546,6 +546,11 @@
 				<property name="ccm:replicationsourcetimestamp">
 					<type>d:text</type>
 				</property>
+				<!-- for sorting  -->
+				<property name="ccm:replicationmodified">
+					<type>d:date</type>
+				</property>
+				
 				<!-- for elixier objects thumbnail url -->
 				<property name="ccm:thumbnailurl">
 					<type>d:text</type>
@@ -1338,12 +1343,18 @@
 			</properties>
 		</aspect>
 
+		<!-- aspect for marking the io template files -->
+		<aspect name="ccm:metadataPresettingTemplate">
+		</aspect>
 		<aspect name="ccm:metadataPresetting">
 			<title>aspect for metadata presetting</title>
 			<properties>
 				<property name="ccm:metadataPresettingProperties">
 					<type>d:qname</type>
 					<multiple>true</multiple>
+				</property>
+				<property name="ccm:metadataPresettingStatus">
+					<type>d:boolean</type>
 				</property>
 			</properties>
 			<associations>

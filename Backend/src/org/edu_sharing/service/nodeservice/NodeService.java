@@ -49,7 +49,8 @@ public interface NodeService {
 	public void removeNode(String nodeID, String fromID);
 	
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable;
-	public InputStream getContent(String storeProtocol, String storeId, String nodeId,String contentProp) throws Throwable;
+
+	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String contentProp) throws Throwable;
 	
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId);
 	
@@ -89,5 +90,20 @@ public interface NodeService {
 	String getProperty(String storeProtocol, String storeId, String nodeId, String property);
 
 
-	
+	String getTemplateNode(String nodeId,boolean createIfNotExists) throws Throwable;
+
+	/**
+	 * Sets the properties for this node's template (inherit metadata to child nodes)
+	 * Should only be supported for folder types
+	 * @param nodeId
+	 * @param stringHashMap
+	 */
+	void setTemplateProperties(String nodeId, HashMap<String,String[]> stringHashMap) throws Throwable;
+
+	/**
+	 * Set if the inherition of properties is enabled for this folder
+	 * @param nodeId
+	 * @param enable
+	 */
+	void setTemplateStatus(String nodeId, Boolean enable) throws Throwable;
 }
