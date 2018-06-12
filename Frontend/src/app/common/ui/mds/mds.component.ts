@@ -1161,7 +1161,7 @@ export class MdsComponent{
     let postfix='_suggestionsInput';
     if(singleValue)
       postfix='';
-    let html=`<input type="text" id="`+widget.id+postfix+`" `
+    let html=`<div class="auto-suggest-field"><input type="text" id="`+widget.id+postfix+`" `
     if(singleValue)
       html+='readonly ';
     html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`" 
@@ -1221,7 +1221,7 @@ export class MdsComponent{
       html+=`"><i class="material-icons">arrow_drop_down</i></a>`;
 
     }
-    html+=`<div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
+    html+=`</div><div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
     html+=`<a class="collection-item suggestionNoMatches"  onclick="
               document.getElementById('`+widget.id+`_suggestions').style.display='none';
               document.getElementById('`+widget.id+`_dialog').style.display='none';
@@ -1252,7 +1252,7 @@ export class MdsComponent{
     this.currentWidgetSuggestion=null;
   }
   private renderTreeWidget(widget:any,attr:string){
-    let html=this.autoSuggestField(widget)+`<div class="btn-flat suggestOpen" onclick="
+    let html='<div class="auto-suggest-field">'+this.autoSuggestField(widget)+`<div class="btn-flat suggestOpen" onclick="
                   var tree=document.getElementById('`+widget.id+`_tree');
                   tree.style.display='';
                   var childs=document.getElementById('`+widget.id+`').childNodes;
@@ -1270,7 +1270,7 @@ export class MdsComponent{
                       window.mdsComponentRef.component.changeTreeItem(element,'`+widget.id+`');
                      }
                   }
-              "><i class="material-icons">arrow_forward</i></div>
+              "><i class="material-icons">arrow_forward</i></div></div>
               <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
