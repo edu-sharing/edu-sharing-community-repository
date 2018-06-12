@@ -965,7 +965,9 @@ export class MdsComponent{
     return html;
   }
   private renderSuggestBadgesWidget(widget:any, attr:string, allowCustom:boolean){
-    let html=this.autoSuggestField(widget,'',allowCustom,true)+`<div id="`+widget.id+`" class="multivalueBadges"></div>`;
+    let html=this.autoSuggestField(widget,'',allowCustom,
+        `window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,false,false)`
+        )+`<div id="`+widget.id+`" class="multivalueBadges"></div>`;
     return html;
   }
   private renderSubTree(widget:any,parent:string=null){
@@ -1153,10 +1155,10 @@ export class MdsComponent{
     html+=`">` + (searchString ? this.highlightSearch(caption,searchString) : caption) + `</a>`;
     return html;
   }
-  private autoSuggestField(widget:any,css='',allowCustom=false,showOpen=false,singleValue=false){
+  private autoSuggestField(widget:any,css='',allowCustom=false,openCallback:string,openIcon='arrow_drop_down',singleValue=false){
     if(widget.values==null/* || this._groupId*/)
-      showOpen=false;
-    if(!showOpen && widget.type!='multivalueTree' && widget.type!='singlevalueTree')
+        openCallback=null;
+    if(!openCallback && widget.type!='multivalueTree' && widget.type!='singlevalueTree')
       css+=' suggestInputNoOpen';
     let postfix='_suggestionsInput';
     if(singleValue)
@@ -1183,45 +1185,16 @@ export class MdsComponent{
         `)
       },5);
     }
-    html+=this.addBottomCaption(widget);
-    if(showOpen){
+    if(openCallback){
       html+=`<a class="btn-flat suggestOpen" 
-              onclick="window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,false,false)"
+              onclick="`+openCallback+`"
               `;
-      /*
-              var list=document.getElementById('`+widget.id+`_suggestions');
-              var dialog=document.getElementById('`+widget.id+`_dialog');
-              list.style.display='';
-              dialog.style.display='';
-              var elements=list.getElementsByTagName('a');
-              var more=elements[elements.length-1];
-              more.style.display='none';
-              var hits=0;
-              var moreCount=0;
-              for(var i=1;i<elements.length-1;i++){
-                  var element=elements[i];
-                  if(i==1) element.focus();
-                  var caption=element.getAttribute('data-caption');
-                  var add=true;
-                  if(hits>=`+MdsComponent.MAX_SUGGESTIONS+`){
-                    add=false;
-                    moreCount++;
-                  }
-                  element.style.display=add ? '' : 'none';
-                  if(!add)
-                    continue;
-                  element.innerHTML=caption;
-                  hits+=add;
-              }
-              if(moreCount){
-                  more.style.display='';
-                  more.innerHTML=moreCount+' `+this.translate.instant("MORE_SELECTBOX")+`';
-              }
-              elements[0].style.display='none';*/
-      html+=`"><i class="material-icons">arrow_drop_down</i></a>`;
+      html+=`"><i class="material-icons">`+openIcon+`</i></a>`;
 
     }
-    html+=`</div><div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
+    html+=`</div>`;
+    html+=this.addBottomCaption(widget);
+    html+=`<div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
     html+=`<a class="collection-item suggestionNoMatches"  onclick="
               document.getElementById('`+widget.id+`_suggestions').style.display='none';
               document.getElementById('`+widget.id+`_dialog').style.display='none';
@@ -1242,7 +1215,7 @@ export class MdsComponent{
               window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
-    if(allowCustom && !showOpen){
+    if(allowCustom && !openCallback){
       html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;
@@ -1251,27 +1224,29 @@ export class MdsComponent{
     document.getElementById(this.currentWidgetSuggestion+'_suggestions').style.display='none';
     this.currentWidgetSuggestion=null;
   }
+  openTree(id:string){
+      let tree=document.getElementById(id+'_tree');
+      tree.style.display='';
+      let childs=document.getElementById(id).childNodes;
+      let elements=tree.getElementsByTagName('input');
+      for(let i=0;i<elements.length;i++){
+          elements[i].checked=false;
+          document.getElementById(elements[i].id+'_bg').className='';
+      }
+      for(let i=0;i<childs.length;i++){
+          let child:any=childs[i];
+          let element:any=document.getElementById(id+'_'+child.getAttribute('data-value'));
+          let elementBg=document.getElementById(element.id+'_bg');
+          if(element){
+              element.checked=true;
+              this.changeTreeItem(element,id);
+          }
+      }
+  }
   private renderTreeWidget(widget:any,attr:string){
-    let html='<div class="auto-suggest-field">'+this.autoSuggestField(widget)+`<div class="btn-flat suggestOpen" onclick="
-                  var tree=document.getElementById('`+widget.id+`_tree');
-                  tree.style.display='';
-                  var childs=document.getElementById('`+widget.id+`').childNodes;
-                  var elements=tree.getElementsByTagName('input');
-                  for(var i=0;i<elements.length;i++){
-                      elements[i].checked=false;
-                      document.getElementById(elements[i].id+'_bg').className='';
-                  }
-                  for(var i=0;i<childs.length;i++){
-                     var child=childs[i];
-                     var element=document.getElementById('`+widget.id+`_'+child.getAttribute('data-value'));
-                     var elementBg=document.getElementById(element.id+'_bg');
-                     if(element){
-                      element.checked=true;
-                      window.mdsComponentRef.component.changeTreeItem(element,'`+widget.id+`');
-                     }
-                  }
-              "><i class="material-icons">arrow_forward</i></div></div>
-              <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
+    let html=this.autoSuggestField(widget,'',false,
+                `window.mdsComponentRef.component.openTree('`+widget.id+`')`,'arrow_forward')
+        +`     <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+widget.id+`_tree').style.display='none';"><i class="material-icons">close</i></div>
@@ -1522,7 +1497,6 @@ export class MdsComponent{
     }
     else if(widget.type=='singleoption'){
       html+=this.renderSingleoptionWidget(widget,attr);
-      //html+=this.autoSuggestField(widget,'',false,true,true);
     }
     else if(widget.type=='multioption'){
       html+=this.renderMultioptionWidget(widget,attr);
