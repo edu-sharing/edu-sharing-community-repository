@@ -14,9 +14,9 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSet;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetModelProperty;
@@ -196,7 +196,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 		}
 		
-		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(application, metadataSetId);
+		MetadataSetV2 mds = MetadataHelper.getMetadataset(application, metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
 		for (MetadataWidget widget : (templateName==null ? mds.getWidgetsByNodeType(nodeType) : mds.getWidgetsByTemplate(templateName))) {
 			String id=widget.getId();
