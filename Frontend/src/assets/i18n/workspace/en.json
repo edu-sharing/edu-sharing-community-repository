@@ -154,9 +154,9 @@
       "TEMPLATE":"Metadata Template"
     },
     "NODE_TEMPLATE" : {
-      "STATUS": "Automatic input of metadata",
-      "STATUS_DESKRIPTION": "After activation, new materials get metadata from this template",
-      "STATUS_DISABLED": "Enable metadata template to make metadata easier for new materials"
+      "STATUS": "Automatic Metadata Inheritance",
+      "STATUS_DESKRIPTION": "After activation, new materials will receive the metadata from this template",
+      "STATUS_DISABLED": "Activate the metadata template to automatically apply the metadata specified here to new content in this folder."
     },
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",

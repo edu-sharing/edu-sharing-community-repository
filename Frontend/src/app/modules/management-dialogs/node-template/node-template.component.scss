@@ -5,7 +5,7 @@
 }
 
 .template-disabled{
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 1);
   height: calc(100% - 30px);
   position: absolute;
   top: 0;
@@ -23,8 +23,8 @@
   margin:$cardPadding*-1;
   margin-bottom: 20px;
   padding:20px $cardPadding;
-  background: $workspaceTreeBackground;
-  border-bottom: 1px solid #000;
+  background: $actionDialogBackground;
+  border-bottom: 1px solid $cardSeperatorLineColor;
 
   label{
     float: right;

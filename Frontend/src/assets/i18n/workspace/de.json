@@ -173,8 +173,8 @@
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatische Übernahme von Metadaten",
-      "STATUS_DESKRIPTION": "Nach der Aktivierung, erhalten neue Materialien \n die Metadaten aus dieser Vorlage",
-      "STATUS_DISABLED": "Aktiviere Metadaten Vorlage, um leichter bei neuen Materialien Metadaten zu erstellen"
+      "STATUS_DESKRIPTION": "Nach der Aktivierung erhalten neue Materialien \n die Metadaten aus dieser Vorlage",
+      "STATUS_DISABLED": "Metadaten-Vorlage aktivieren, um die hier angegebenen Metadaten automatisch auf neue Inhalte in diesem Ordner anzuwenden"
     },
     "SHARE_LINK":{
       "TITLE":"Link für {{ name }} freigeben",
