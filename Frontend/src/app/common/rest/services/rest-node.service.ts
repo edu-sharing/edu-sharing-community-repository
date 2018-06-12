@@ -15,6 +15,7 @@ import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
 import {AbstractRestService} from "./abstract-rest-service";
 import {Observer} from "rxjs/Rx";
+import {Helper} from "../../helper";
 
 @Injectable()
 export class RestNodeService extends AbstractRestService{
