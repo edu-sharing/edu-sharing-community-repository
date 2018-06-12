@@ -96,7 +96,7 @@ export class StreamComponent {
   collectionOption = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node));
 
   removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE','remove_circle',(node: Node)=> {
-    this.updateStream(node, STREAM_STATUS.OPEN).subscribe( (data) => {
+    this.updateStream(node, STREAM_STATUS.DONE).subscribe( (data) => {
       let result = this.streams.filter( (n : any) => n.id !== node );
       this.streams = result;
     } , error => console.log(error));
@@ -158,10 +158,6 @@ export class StreamComponent {
 
   toggleMenuOptions() {
     this.showMenuOptions = !this.showMenuOptions;
-  }
-
-  hideMenuOptions() {
-    this.showMenuOptions = false;
   }
 
   checkIfEnable(nodes: any) {
