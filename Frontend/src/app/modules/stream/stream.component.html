@@ -11,9 +11,10 @@
 ></workspace-management>
 <div class="stream-container" infiniteScroll
 [scrollWindow]="true"
-(scrolled)="onScroll()">
+(scrolled)="onScroll()"
+(click)="hideMenuOptions()">
 <div class="row">
-    <div class="col m2 choose-menu-main removepadding margin-show">
+    <div class="col m3 choose-menu-main removepadding margin-show">
             <div class="choose-menu" (click)="menuOptions('stream')" [ngClass]="menuOption == 'stream' ? 'm-active' : 'm-inactive'">
                 <i class="tiny material-icons ">date_range</i> {{'STREAM.MENU.OPTION1' | translate }}
             </div>
@@ -24,7 +25,7 @@
                 <i class="tiny material-icons ">settings</i> {{'STREAM.MENU.OPTION3' | translate }}
             </div>-->
     </div>    
-    <div class="col s12 m8 remove-horizontal-padding">
+    <div class="col s12 m6 remove-horizontal-padding">
         <div class="margin-show">
 
         <div class="stream-header-left row stream-marginfix">
@@ -47,8 +48,8 @@
             </div>
         </div>    
   
-        <div class="stream-box" *ngFor="let strm of streams" >
-           <div class="row row-nomargin">
+        <div *ngFor="let strm of streams" [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'">
+           <div class="row row-nomargin" >
                 <div class="stream-box-title col s10" (click)="onStreamObjectClick(strm)"> <span *ngIf="strm.properties['add_to_stream_title']">{{ strm.properties['add_to_stream_title'] }}</span> <span *ngIf="!strm.properties['add_to_stream_title']">{{ 'STREAM.OBJECT.NOTITLE' | translate }}</span> </div>
                 <div class="stream-box-main-vert col s2">
                     <actionbar
@@ -81,7 +82,7 @@
 
     </div>
     </div> <!-- cols8 -->
-    <div class="col m2"></div>
+    <div class="col m3"></div>
 </div> <!-- row -->
 
 

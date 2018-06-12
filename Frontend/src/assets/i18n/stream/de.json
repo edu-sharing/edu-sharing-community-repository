@@ -14,6 +14,10 @@
         "MOVEUP":"Ganz oben anzeigen",
         "REMOVE":"Aus Stream entfernen"
       }  
+    },
+    "TOAST":{
+      "MOVEUP":"wird jetzt ganz oben angezeigt",
+      "SEEN":"Das eben benutzte Material ist jetzt in \"Schon gesehen\" zu finden."
     }
   }
 }

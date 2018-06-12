@@ -89,14 +89,14 @@ export class StreamComponent {
   moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','check',(node: Node)=>{
     this.updateStream(node, STREAM_STATUS.PROGRESS).subscribe( (data) => {
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
-
+      this.toast.toast("STREAM.TOAST.MOVEUP");
     }, error => console.log(error));
   });
 
   collectionOption = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node));
 
   removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE','remove_circle',(node: Node)=> {
-    this.updateStream(node, STREAM_STATUS.DONE).subscribe( (data) => {
+    this.updateStream(node, STREAM_STATUS.OPEN).subscribe( (data) => {
       let result = this.streams.filter( (n : any) => n.id !== node );
       this.streams = result;
     } , error => console.log(error));
@@ -158,6 +158,10 @@ export class StreamComponent {
 
   toggleMenuOptions() {
     this.showMenuOptions = !this.showMenuOptions;
+  }
+
+  hideMenuOptions() {
+    this.showMenuOptions = false;
   }
 
   checkIfEnable(nodes: any) {
