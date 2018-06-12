@@ -8,7 +8,8 @@ import {RestConstants} from "../rest-constants";
 import {
     NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList,
     NodePermissionsHistory,
-    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent, Node
+    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent, Node,
+    NodeTemplate
 } from "../data-object";
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";

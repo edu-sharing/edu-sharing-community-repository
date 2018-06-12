@@ -993,7 +993,7 @@ export class MdsComponent{
   }
   private renderSuggestBadgesWidget(widget:any, attr:string, allowCustom:boolean){
     let html=this.autoSuggestField(widget,'',allowCustom,
-        `window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,false,false)`
+        this.getWindowComponent()+`.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,false,false)`
         )+`<div id="`+this.getWidgetDomId(widget)+`" class="multivalueBadges"></div>`;
     return html;
   }
@@ -1263,7 +1263,8 @@ export class MdsComponent{
     document.getElementById(this.currentWidgetSuggestion+'_suggestions').style.display='none';
     this.currentWidgetSuggestion=null;
   }
-  openTree(id:string){
+  openTree(widget:string){
+      let id=this.getDomId(widget);
       let tree=document.getElementById(id+'_tree');
       tree.style.display='';
       let childs=document.getElementById(id).childNodes;
@@ -1278,14 +1279,15 @@ export class MdsComponent{
           let elementBg=document.getElementById(element.id+'_bg');
           if(element){
               element.checked=true;
-              this.changeTreeItem(element,id);
+              this.changeTreeItem(element,widget);
           }
       }
   }
   private renderTreeWidget(widget:any,attr:string){
+    let domId=this.getWidgetDomId(widget);
     let html=this.autoSuggestField(widget,'',false,
-                `window.mdsComponentRef.component.openTree('`+widget.id+`')`,'arrow_forward')
-        +`     <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
+                this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward')
+        +`     <div class="dialog darken" style="display:none;z-index:121;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+domId+`_tree').style.display='none';"><i class="material-icons">close</i></div>
@@ -2265,6 +2267,6 @@ export class MdsComponent{
         return this.getDomId(widget.id);
     }
     private getDomId(id:string){
-        return id+'_'+this.mdsId;;
+        return id+'_'+this.mdsId;
     }
 }
