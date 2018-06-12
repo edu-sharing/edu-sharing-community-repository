@@ -546,6 +546,11 @@
 				<property name="ccm:replicationsourcetimestamp">
 					<type>d:text</type>
 				</property>
+				<!-- for sorting  -->
+				<property name="ccm:replicationmodified">
+					<type>d:date</type>
+				</property>
+				
 				<!-- for elixier objects thumbnail url -->
 				<property name="ccm:thumbnailurl">
 					<type>d:text</type>
