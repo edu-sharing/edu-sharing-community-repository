@@ -105,11 +105,14 @@ export class WorkspaceShareComponent implements AfterViewInit{
   @Input() currentPermissions:LocalPermissions=null;
   @Input() set nodeId (node : string){
     if(node)
-      this.nodeApi.getNodeMetadata(node).subscribe((data:NodeWrapper)=>{
-        this.node=data.node;
+      this.nodeApi.getNodeMetadata(node,[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
+        this.setNode(data.node);
       });
   }
   @Input() set node (node : Node){
+    this.setNode(node);
+  }
+  setNode (node : Node){
     this._node=node;
     if(node==null)
       return;
