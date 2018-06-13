@@ -44,20 +44,17 @@
 
 :host /deep/ .card-jumpmarks{
   a{
-    padding:5px 10px;
-    padding-bottom:12px;
+    padding:10px 12px;
     width:100%;
-    display:block;
-
+    display:flex;
+    align-items: center;
+    >i{
+      margin-right:10px;
+    }
   }
   a.active{
     background: $workspaceTreeSelectedBackgroundEffect;
     background-color: $workspaceTreeSelectedBackground;
-  }
-  a i{
-    position: relative;
-    top:5px;
-    margin-right:10px;
   }
 }
 @media screen and (max-width: ($mobileWidth + $mobileStage*2)) {
