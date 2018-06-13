@@ -417,26 +417,28 @@ export class MdsComponent{
     }
     this.jumpmarksCount=i;
     setInterval(()=>{
-        let jump=this.jumpmarksRef;
-        if(!jump || !jump.nativeElement)
-            return;
-        let elements=jump.nativeElement.getElementsByTagName("a");
-        let scroll=document.getElementsByClassName("card-title-element");
-        let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
-        let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
-        let closest=999999;
-        let active=elements[0];
-        for(let i=0;i<elements.length;i++){
-            elements[i].className=elements[i].className.replace("active","").trim();
-            if(!scroll[i])
-                continue;
-            let top=scroll[i].getBoundingClientRect().top;
-            if(Math.abs(top-pos)<closest){
-                closest=Math.abs(top-pos);
-                active=elements[i];
-            }
-        }
-        active.className+=" active";
+      try {
+          let jump = this.jumpmarksRef;
+          let elements = jump.nativeElement.getElementsByTagName("a");
+          let scroll = document.getElementsByClassName("card-title-element");
+          let height = document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
+          let pos = document.getElementById("mdsScrollContainer").scrollTop - height - 200;
+          let closest = 999999;
+          let active = elements[0];
+          for (let i = 0; i < elements.length; i++) {
+              elements[i].className = elements[i].className.replace("active", "").trim();
+              if (!scroll[i])
+                  continue;
+              let top = scroll[i].getBoundingClientRect().top;
+              if (Math.abs(top - pos) < closest) {
+                  closest = Math.abs(top - pos);
+                  active = elements[i];
+              }
+          }
+          active.className += " active";
+      }catch(e){
+
+      }
     },200);
     return html;
   }
