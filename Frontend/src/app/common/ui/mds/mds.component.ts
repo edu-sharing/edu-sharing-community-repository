@@ -442,26 +442,28 @@ export class MdsComponent{
     }
     this.jumpmarksCount=i;
     setInterval(()=>{
-        let jump=this.jumpmarksRef;
-        if(!jump || !jump.nativeElement)
-            return;
-        let elements=jump.nativeElement.getElementsByTagName("a");
-        let scroll=document.getElementsByClassName("card-title-element");
-        let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
-        let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
-        let closest=999999;
-        let active=elements[0];
-        for(let i=0;i<elements.length;i++){
-            elements[i].className=elements[i].className.replace('active','').trim();
-            if(!scroll[i])
-                continue;
-            let top=scroll[i].getBoundingClientRect().top;
-            if(Math.abs(top-pos)<closest){
-                closest=Math.abs(top-pos);
-                active=elements[i];
-            }
-        }
-        active.className+=' active';
+      try {
+          let jump = this.jumpmarksRef;
+          let elements = jump.nativeElement.getElementsByTagName("a");
+          let scroll = document.getElementsByClassName("card-title-element");
+          let height = document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
+          let pos = document.getElementById("mdsScrollContainer").scrollTop - height - 200;
+          let closest = 999999;
+          let active = elements[0];
+          for (let i = 0; i < elements.length; i++) {
+              elements[i].className = elements[i].className.replace("active", "").trim();
+              if (!scroll[i])
+                  continue;
+              let top = scroll[i].getBoundingClientRect().top;
+              if (Math.abs(top - pos) < closest) {
+                  closest = Math.abs(top - pos);
+                  active = elements[i];
+              }
+          }
+          active.className += " active";
+      }catch(e){
+
+      }
     },200);
     return html;
   }
@@ -567,8 +569,8 @@ export class MdsComponent{
           valueClean[0] *= 60000;
         }
         if(widget.type=='range'){
-          properties[domId+'_from']=[valueClean[0]];
-          properties[domId+'_to']=[valueClean[1]];
+          properties[widget.id+'_from']=[valueClean[0]];
+          properties[widget.id+'_to']=[valueClean[1]];
           continue;
         }
           if (Array.isArray(valueClean))
@@ -1367,7 +1369,7 @@ export class MdsComponent{
     `;
     setTimeout(()=>{
       eval(`
-                var slider = document.getElementById('`+widget.id+`');
+                var slider = document.getElementById('`+id+`');
                           noUiSlider.create(slider, {
                            start: [0],
                            step: 1,
@@ -1385,8 +1387,8 @@ export class MdsComponent{
                            },
                           });
                           var sliderUpdate=function(values,handle,unencoded){
-                    document.getElementById('`+widget.id+`_hours').value=Math.floor(unencoded/60);
-                    document.getElementById('`+widget.id+`_minutes').value=Math.floor(unencoded%60);
+                    document.getElementById('`+id+`_hours').value=Math.floor(unencoded/60);
+                    document.getElementById('`+id+`_minutes').value=Math.floor(unencoded%60);
                   };
                   slider.noUiSlider.on('slide', sliderUpdate);
                   slider.noUiSlider.on('update', sliderUpdate);                 
@@ -1395,8 +1397,9 @@ export class MdsComponent{
     return html;
   }
   private renderRangeWidget(widget:any,attr:string){
-    let html=`
-              <div class="inputRange" id="`+widget.id+`"></div>
+      let id=this.getWidgetDomId(widget);
+      let html=`
+              <div class="inputRange" id="`+id+`"></div>
     `;
     setTimeout(()=>{
       let values=widget.defaultvalue!=null ? widget.defaultvalue : widget.min;
@@ -1406,7 +1409,7 @@ export class MdsComponent{
       }
       let unit=widget.unit ? widget.unit : '';
       eval(`
-                var slider = document.getElementById('`+widget.id+`');
+                var slider = document.getElementById('`+id+`');
                           noUiSlider.create(slider, {
                            start: [`+values+`],
                            step: `+(widget.step>1 ? widget.step : 1)+`,

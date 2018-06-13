@@ -1049,7 +1049,7 @@ export class WorkspaceMainComponent implements EventListener{
             this.currentFolder=folder;
             this.currentFolderRef=ref;
             this.searchQuery=search;
-        },10);
+        });
     }
 
     private doRestoreVersion(version: Version) : void {

@@ -78,6 +78,8 @@ mds .mdsGroup{
     font-size:80%;
     margin-top:-5px;
     margin-bottom:2px;
+    margin-left:0.75em;
+    margin-right:0.75em;
   }
   .suggestionInput{
     position: relative;
@@ -150,6 +152,7 @@ mds .mdsGroup{
   }
   .widget_range{
     height: 50px;
+    margin: 0 10px;
   }
   .widget_duration{
     width: 100%;
