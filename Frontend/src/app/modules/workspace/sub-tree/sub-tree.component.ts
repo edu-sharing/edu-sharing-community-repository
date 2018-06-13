@@ -44,6 +44,11 @@ export class WorkspaceSubTreeComponent  {
     this._options=options;
   }
   @Input() openPath : string[][]=[];
+  @Input() set reload(reload:Boolean){
+    if(reload){
+      this.refresh();
+    }
+  }
   @Input() selectedPath : string[]=[];
   @Input() parentPath : string[]=[];
   @Input() depth = 1;
@@ -59,13 +64,7 @@ export class WorkspaceSubTreeComponent  {
     if(node==null) {
         return;
     }
-    this.nodeApi.getChildren(node,[RestConstants.FILTER_FOLDERS],{count:RestConstants.COUNT_UNLIMITED}).subscribe((data : NodeList) => {
-      this._nodes=data.nodes;
-      this.loadingStates=Helper.initArray(this._nodes.length,true);
-      this.hasChilds.emit(this._nodes && this._nodes.length);
-      this.onLoading.emit(false);
-      this.loading=false;
-    });
+    this.refresh();
   }
   constructor(private ui : UIService,private nodeApi : RestNodeService,private storage : TemporaryStorageService) {
   }
@@ -197,4 +196,14 @@ export class WorkspaceSubTreeComponent  {
     this.onToggleTree.emit({node:node,parent:this.parentPath});
 
   }
+
+    private refresh() {
+        this.nodeApi.getChildren(this._node,[RestConstants.FILTER_FOLDERS],{count:RestConstants.COUNT_UNLIMITED}).subscribe((data : NodeList) => {
+            this._nodes=data.nodes;
+            this.loadingStates=Helper.initArray(this._nodes.length,true);
+            this.hasChilds.emit(this._nodes && this._nodes.length);
+            this.onLoading.emit(false);
+            this.loading=false;
+        });
+    }
 }
