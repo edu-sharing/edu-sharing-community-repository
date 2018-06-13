@@ -1,34 +1,17 @@
 package org.edu_sharing.restservices;
 
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.restservices.comment.v1.model.Comment;
+import org.edu_sharing.restservices.comment.v1.model.Comments;
+import org.edu_sharing.service.comment.CommentService;
+import org.edu_sharing.service.comment.CommentServiceFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.edu_sharing.metadataset.v2.MetadataGroup;
-import org.edu_sharing.metadataset.v2.MetadataList;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSearchHelper;
-import org.edu_sharing.metadataset.v2.MetadataSetInfo;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.MetadataTemplate;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.restservices.comment.v1.model.Comment;
-import org.edu_sharing.restservices.comment.v1.model.Comments;
-import org.edu_sharing.restservices.mds.v1.model.GroupV2;
-import org.edu_sharing.restservices.mds.v1.model.ListV2;
-import org.edu_sharing.restservices.mds.v1.model.Suggestions;
-import org.edu_sharing.restservices.mds.v1.model.ViewV2;
-import org.edu_sharing.restservices.mds.v1.model.WidgetV2;
-import org.edu_sharing.restservices.shared.MdsV2;
-import org.edu_sharing.service.comment.CommentService;
-import org.edu_sharing.service.comment.CommentServiceFactory;
-
-import com.google.gwt.user.client.ui.SuggestOracle;
 
 public class CommentDao {
 	

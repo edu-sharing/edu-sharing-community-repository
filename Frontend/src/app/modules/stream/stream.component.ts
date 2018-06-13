@@ -87,7 +87,10 @@ export class StreamComponent {
   actionOptions:OptionItem[]=[];
 
   moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','check',(node: Node)=>{
-    //this.updateStream(node, STREAM_STATUS.DONE).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
+    this.updateStream(node, STREAM_STATUS.PROGRESS).subscribe( (data) => {
+      this.updateDataFromJSON(STREAM_STATUS.OPEN);
+      this.toast.toast("STREAM.TOAST.MOVEUP");
+    }, error => console.log(error));
   });
 
   collectionOption = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers",(node: Node) => this.addToCollection(node));
@@ -157,6 +160,10 @@ export class StreamComponent {
     this.showMenuOptions = !this.showMenuOptions;
   }
 
+  checkIfEnable(nodes: any) {
+    this.collectionOption.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
+  }
+
   menuOptions(option: any) {
     this.menuOption = option;
     if (option === 'stream') {
@@ -176,12 +183,23 @@ export class StreamComponent {
   }
 
   updateDataFromJSON(streamStatus: any) {
-    this.getSimpleJSON(streamStatus).subscribe(data => {
-      console.log('test: ', data);
-      this.streams = data['stream'];
+    if (streamStatus == STREAM_STATUS.OPEN) {
+      let openStreams: any[];
+      let progressStreams: any[];
+      this.getSimpleJSON(STREAM_STATUS.OPEN).subscribe(data => {
+        openStreams = data['stream'];
+        this.getSimpleJSON(STREAM_STATUS.PROGRESS).subscribe(data => {
+          progressStreams = data['stream'];
+          this.streams = progressStreams.concat(openStreams);
+        });
+      }, error => console.log(error));
+    }
+    else {
+      this.getSimpleJSON(streamStatus).subscribe(data => {
+        this.streams = data['stream'];
+      }, error => console.log(error));
+    }
 
-      console.log(this.streams);
-    }, error => console.log(error));
   }
 
   refresh(): void {
@@ -196,7 +214,6 @@ export class StreamComponent {
   }
 
   private addToCollection(node: EduData.Node) {
-    console.log(this.streams);
     let result = this.streams.filter( (n: any) => (n.id == node) ).map( (n: any) => { return n.nodes } );
     this.collectionNodes = [].concat.apply([], result);
 

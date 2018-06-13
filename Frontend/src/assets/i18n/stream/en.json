@@ -14,6 +14,10 @@
         "MOVEUP":"Show at the top",
         "REMOVE":"Remove from stream"
       }  
+    },
+    "TOAST":{
+      "MOVEUP":"is now displayed at the top",
+      "SEEN":"The material is now in \"Seen\""
     }
   }
 }
