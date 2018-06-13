@@ -20,6 +20,9 @@
   color: $textVeryLight!important;
   background: #eee!important;
 }
+.disabled{
+  pointer-events: all;
+}
 .btn-flat:not(:hover){
   background: transparent;
 }

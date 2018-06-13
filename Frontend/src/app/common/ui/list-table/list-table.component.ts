@@ -544,8 +544,12 @@ export class ListTableComponent implements EventListener{
     return RestHelper.getTitle(node);
   }
   private callOption(option : OptionItem,node:Node){
-    if(!this.optionIsValid(option,node))
-      return;
+    if(!this.optionIsValid(option,node)) {
+      if(option.disabledCallback) {
+        option.disabledCallback(node);
+      }
+        return;
+    }
     option.callback(node);
     this.dropdown=null;
   }

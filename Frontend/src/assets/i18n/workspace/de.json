@@ -328,6 +328,7 @@
       "ADDED_TO_COLLECTION_MY":"{{count}} Material(ien) in {{collection}} hinzugefügt und darin nur für Sie sichtbar",
       "ADDED_TO_COLLECTION_SHARED":"{{count}} Material(ien) in {{collection}} hinzugefügt und darin für eingeladene Personen sichtbar",
       "ADDED_TO_COLLECTION_PUBLIC":"{{count}} Material(ien) in {{collection}} hinzugefügt und darin öffentlich sichtbar",
+      "ADD_TO_COLLECTION_DISABLED":"Für mindestens 1 gewähltes Material fehlen die Berechtigungen zum einsammeln",
       "DELETE_FINISHED":"Element(e) wurden in den Papierkorb verschoben",
       "CUT_COPY":"{{count}} Element(e) wurden in die Zwischenablage übernommen",
       "PASTE":"{{count}} Element(e) wurden von {{from}} nach {{to}} {{mode}}",
