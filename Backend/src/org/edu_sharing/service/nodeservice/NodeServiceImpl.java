@@ -11,6 +11,7 @@ import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -103,8 +104,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	public void updateNode(String nodeId, HashMap<String, String[]> props) throws Throwable{
 			String nodeType = getType(nodeId);
+			String[] aspects = getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
 			String parentId = nodeService.getPrimaryParent(new NodeRef(Constants.storeRef,nodeId)).getParentRef().getId();
-			HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType, parentId,null);
+			HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,aspects, parentId,null);
 			updateNodeNative(nodeId, toSafeProps);
 	}
 	
@@ -129,14 +131,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props) throws Throwable{
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType ,parentId,null);
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null,parentId,null);
 		return createNodeBasic(parentId, nodeType, toSafeProps);
 	}
 	
 	@Override
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation)
 			throws Throwable {
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,parentId,null);
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null,parentId,null);
 		return this.createNodeBasic(Constants.storeRef, parentId, nodeType,childAssociation, toSafeProps);
 	}
 	
@@ -172,7 +174,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String getCompanyHome(){
 		return repositoryHelper.getCompanyHome().getId();
 	}
-	HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String parentId,String templateName) throws Throwable{
+	HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String[] aspects, String parentId,String templateName) throws Throwable{
 		String[] metadataSetIdArr = props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
@@ -198,7 +200,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		
 		MetadataSetV2 mds = MetadataHelper.getMetadataset(application, metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
-		for (MetadataWidget widget : (templateName==null ? mds.getWidgetsByNodeType(nodeType) : mds.getWidgetsByTemplate(templateName))) {
+		for (MetadataWidget widget : (templateName==null ?
+				mds.getWidgetsByNode(nodeType,Arrays.asList(ArrayUtils.nullToEmpty(aspects))) :
+				mds.getWidgetsByTemplate(templateName))) {
 			String id=widget.getId();
 			if(!checkWidgetConditionTrue(widget)) {
 				logger.info("widget "+id+" skipped because condition failed");
@@ -722,7 +726,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		//updateNode(getOrCreateTemplateNode(nodeId),props);
 		String template = getTemplateNode(nodeId,true);
 		String nodeType = getType(template);
-		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType, nodeId,"io_template");
+		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null, nodeId,"io_template");
 		updateNodeNative(template, toSafeProps);
 	}
 
