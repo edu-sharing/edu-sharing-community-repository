@@ -396,19 +396,20 @@ mds .mdsGroup{
   }
 }
 .vcard {
+  display: flex;
+  width: 100%;
+  float: left;
+  padding-left: 10px;
   .vcardGroup {
-    width: 50%;
+    width: 0;
+    flex-grow: 1;
     display: flex;
-    padding: 10px 20px;
-    float: left;
+    padding: 10px 10px;
     > i {
       color: $textLight;
       align-self: center;
       margin-right: 5px;
     }
-  }
-  .vcardGroup:first-child{
-    padding-left: 0;
   }
 }
 .treeGroup {

@@ -91,6 +91,7 @@ input[type="checkbox"].filled-in:checked+label:before{
 }
 input:not([type]),
 input[type=text],
+input[type=password],
 input[type=number],
 select,
 textarea.materialize-textarea,
@@ -99,6 +100,7 @@ input[type=search]{
 
   border: 1px solid #ccc;
   padding: 0 0.75em;
+  width:calc(100% - 1.5em);
   border-radius: 3px;
   background-color: #fff;
 }
