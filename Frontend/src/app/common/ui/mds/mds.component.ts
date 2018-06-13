@@ -567,8 +567,8 @@ export class MdsComponent{
           valueClean[0] *= 60000;
         }
         if(widget.type=='range'){
-          properties[domId+'_from']=[valueClean[0]];
-          properties[domId+'_to']=[valueClean[1]];
+          properties[widget.id+'_from']=[valueClean[0]];
+          properties[widget.id+'_to']=[valueClean[1]];
           continue;
         }
           if (Array.isArray(valueClean))
@@ -1367,7 +1367,7 @@ export class MdsComponent{
     `;
     setTimeout(()=>{
       eval(`
-                var slider = document.getElementById('`+widget.id+`');
+                var slider = document.getElementById('`+id+`');
                           noUiSlider.create(slider, {
                            start: [0],
                            step: 1,
@@ -1385,8 +1385,8 @@ export class MdsComponent{
                            },
                           });
                           var sliderUpdate=function(values,handle,unencoded){
-                    document.getElementById('`+widget.id+`_hours').value=Math.floor(unencoded/60);
-                    document.getElementById('`+widget.id+`_minutes').value=Math.floor(unencoded%60);
+                    document.getElementById('`+id+`_hours').value=Math.floor(unencoded/60);
+                    document.getElementById('`+id+`_minutes').value=Math.floor(unencoded%60);
                   };
                   slider.noUiSlider.on('slide', sliderUpdate);
                   slider.noUiSlider.on('update', sliderUpdate);                 
@@ -1395,8 +1395,9 @@ export class MdsComponent{
     return html;
   }
   private renderRangeWidget(widget:any,attr:string){
-    let html=`
-              <div class="inputRange" id="`+widget.id+`"></div>
+      let id=this.getWidgetDomId(widget);
+      let html=`
+              <div class="inputRange" id="`+id+`"></div>
     `;
     setTimeout(()=>{
       let values=widget.default!=null ? widget.default : widget.min;
@@ -1406,7 +1407,7 @@ export class MdsComponent{
       }
       let unit=widget.unit ? widget.unit : '';
       eval(`
-                var slider = document.getElementById('`+widget.id+`');
+                var slider = document.getElementById('`+id+`');
                           noUiSlider.create(slider, {
                            start: [`+values+`],
                            step: `+(widget.step>1 ? widget.step : 1)+`,
