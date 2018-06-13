@@ -7,7 +7,6 @@
 				<caption>cm_name</caption>
 				<placeholder>cm_name_placeholder</placeholder>
 				<bottomCaption>cm_name_bottom</bottomCaption>
-				<icon>description</icon>
 				<type>text</type>
 				<required>true</required>
 				<!-- <condition>!ccm:wwwurl</condition>  -->
