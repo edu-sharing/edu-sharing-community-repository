@@ -82,8 +82,13 @@ export class ActionbarComponent{
 
   }
   private click(option : OptionItem){
-    if(!option.isEnabled)
+    if(!option.isEnabled) {
+      console.log("click");
+      if(option.disabledCallback) {
+          option.disabledCallback(this.node);
+      }
       return;
+    }
     option.callback(this.node);
     this.dropdown=false;
   }

@@ -7,7 +7,7 @@
   background-color:$primary!important;
   color:$textOnPrimary!important;
 }
-.btn:focus{
+.btn:focus:not(.disabled){
     background-color:$primaryDark!important;
 }
 .btn-flat{

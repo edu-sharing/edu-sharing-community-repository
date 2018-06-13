@@ -41,6 +41,9 @@ export class ActionbarHelper{
           let list = ActionbarHelper.getNodes(nodes, node);
           return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH);
         }
+        option.disabledCallback = () =>{
+          connector.getToastService().error(null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
+        };
       }
     }
     if(type=='INVITE'){
