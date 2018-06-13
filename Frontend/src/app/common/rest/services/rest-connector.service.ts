@@ -13,6 +13,7 @@ import {UIConstants} from "../../ui/ui-constants";
 import {ConfigurationService} from "../../services/configuration.service";
 import {RestLocatorService} from "./rest-locator.service";
 import {CordovaService} from '../../services/cordova.service';
+import {Toast} from "../../ui/toast";
 
 /**
  * The main connector. Manages the API Endpoint as well as common api parameters and url generation
@@ -67,11 +68,15 @@ export class RestConnectorService {
               private http : Http,
               private config: ConfigurationService,
               private locator: RestLocatorService,
+              private toast : Toast,
               private storage : TemporaryStorageService,
               private cordova : CordovaService,
               private event:FrameEventsService) {
     this.numberPerRequest=RestConnectorService.DEFAULT_NUMBER_PER_REQUEST;
     event.addListener(this);
+  }
+  public getToastService(){
+    return this.toast;
   }
   public getConfigurationService(){
       return this.config;

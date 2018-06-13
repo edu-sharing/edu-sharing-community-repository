@@ -108,7 +108,7 @@ mds .mdsGroup{
     width:100%;
     max-width:600px;
     margin-top: -18px;
-    top: 53px;
+    top: 60px;
   }
   .suggestionListAll{
     max-height: 300px;
@@ -144,7 +144,8 @@ mds .mdsGroup{
     }
     .btn-flat{
       overflow: hidden;
-      padding:0 1rem;
+      height: 41px;
+      padding: 0.3em 1rem
     }
   }
   .widget_range{
@@ -287,11 +288,13 @@ mds .mdsGroup{
   .mdsAuthor{
     float:left;
     width:100%;
-  }
-  .mdsAuthor{
+    .mdsAuthorFreetext,.mdsAuthorPerson{
+      margin: 0 10px;
+    }
     .materialize-textarea{
-      min-height:1.5rem;
-      height:1.5rem;
+      min-height:2.5rem;
+      height:2.5rem;
+      margin-top: 10px;
     }
   }
   .childobjects_container {
@@ -375,19 +378,21 @@ mds .mdsGroup{
     }
   }
 }
-.vcardGroup{
-  width: 50%;
+.vcard {
+  display: flex;
+  width: 100%;
   float: left;
-  padding: 10px;
-  .vcardFirstInput{
-    width:calc(100% - 30px);
-    float:right;
-  }
-  i{
-    float:left;
-    color:$textLight;
-    position: relative;
-    top:3px;
+  padding-left: 10px;
+  .vcardGroup {
+    width: 0;
+    flex-grow: 1;
+    display: flex;
+    padding: 10px 10px;
+    > i {
+      color: $textLight;
+      align-self: center;
+      margin-right: 5px;
+    }
   }
 }
 .treeGroup {

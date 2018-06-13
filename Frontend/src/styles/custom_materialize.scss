@@ -7,7 +7,7 @@
   background-color:$primary!important;
   color:$textOnPrimary!important;
 }
-.btn:focus{
+.btn:focus:not(.disabled){
     background-color:$primaryDark!important;
 }
 .btn-flat{
@@ -91,12 +91,44 @@ input[type="checkbox"].filled-in:checked+label:before{
 }
 input:not([type]),
 input[type=text],
+input[type=password],
 input[type=number],
 select,
+textarea.materialize-textarea,
 input[type=search]{
-  height:2.5rem;
+  height:3rem;
+
+  border: 1px solid #ccc;
+  padding: 0 0.75em;
+  width:calc(100% - 1.5em);
+  border-radius: 3px;
+  background-color: #fff;
+}
+textarea.materialize-textarea{
+  padding: 0.75em;
+  width: calc(100% - 20px);
 }
 
+/*
+  TODO: Check if it is possible to combine with the input state
+ */
+label,label:active{
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 90%;
+  margin-bottom: 3px;
+  color:$textMain;
+  margin-left: 0.75em;
+}
+input[type=checkbox]+label,
+input[type=radio]+label,
+.switch >label{
+  font-weight: normal;
+  color:$textLight;
+  font-size: 1rem;
+  margin-left: 0;
+  text-transform: none;
+}
 input:not([type]):focus:not([readonly]),
 input[type=search]:focus:not([readonly]),
 input[type=email]:focus:not([readonly]),
@@ -104,8 +136,10 @@ input[type=password]:focus:not([readonly]),
 input[type=number]:focus:not([readonly]),
 input[type=text]:focus:not([readonly]),
 .materialize-textarea:focus:not([readonly]){
-  box-shadow: 0 1px 0 0 $primary!important;
-  border-bottom: 1px solid $primary!important;
+  /*box-shadow: 0 1px 0 0 $primary!important;
+  border-bottom: 1px solid $primary!important;*/
+  border:1px solid $primaryMediumLight!important;
+  box-shadow: none!important;
 }
 .materialize-textarea{
   overflow-y: auto!important;
@@ -124,13 +158,10 @@ select {
   -moz-appearance: none;
   appearance: none;
   display: inherit;
-  border: none;
-  border-bottom: 1px solid #aaa;
-  border-radius: 0;
   background-position: calc(100% - 10px);
 }
 select,.select-wrapper .caret{
-  background-color:transparent;
+  background-color:#fff;
   background-image:url('../assets/images/select-arrow.svg');
   background-size:8px;
   background-repeat: no-repeat;
@@ -316,11 +347,6 @@ span.thumb{
 }
 .collection-item-seperate-bottom {
   border-bottom:1px solid #ccc!important;
-}
-label,
-label:active{
-  font-size:1rem;
-  color:$textLight;
 }
 /* ng2-datepicker */
 .ngx-datepicker-input{

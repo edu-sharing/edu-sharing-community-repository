@@ -310,6 +310,7 @@
       "ADDED_TO_COLLECTION_MY":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible for you",
       "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to all invited persons",
       "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to everyone",
+      "ADD_TO_COLLECTION_DISABLED":"At least 1 selected material can not be collected",
       "DELETE_FINISHED":"Element(s) move to recycle",
       "CUT_COPY":"{{count}} Element(s) copied to clipboard",
       "PASTE":"{{count}} Element(s) have been {{mode}} from \"{{from}}\" to \"{{to}}\"",
