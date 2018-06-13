@@ -305,6 +305,9 @@ mds .mdsGroup{
   .mdsAuthor{
     float:left;
     width:100%;
+    .mdsAuthorFreetext,.mdsAuthorPerson{
+      margin: 0 10px;
+    }
     .materialize-textarea{
       min-height:2.5rem;
       height:2.5rem;
@@ -392,19 +395,20 @@ mds .mdsGroup{
     }
   }
 }
-.vcardGroup{
-  width: 50%;
-  float: left;
-  padding: 10px;
-  .vcardFirstInput{
-    width:calc(100% - 30px);
-    float:right;
+.vcard {
+  .vcardGroup {
+    width: 50%;
+    display: flex;
+    padding: 10px 20px;
+    float: left;
+    > i {
+      color: $textLight;
+      align-self: center;
+      margin-right: 5px;
+    }
   }
-  i{
-    float:left;
-    color:$textLight;
-    position: relative;
-    top:3px;
+  .vcardGroup:first-child{
+    padding-left: 0;
   }
 }
 .treeGroup {

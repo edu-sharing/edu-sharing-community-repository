@@ -83,9 +83,12 @@ h5{
     margin-left: 20px;
   }
 }
+.authorFreetext,.authorPerson{
+  padding: 0 10px;
+}
 .authorFreetext{
   textarea{
-    min-height: 1.5rem;
+    min-height: 2.5rem;
   }
 }
 .oerCC0,.oerCCBY{
@@ -129,7 +132,7 @@ h5{
   padding-right: 40px;
   margin-top:-8px;
   select{
-    margin-top:-4px;
+    min-width: 70px;
   }
 }
 .licenseLocale{

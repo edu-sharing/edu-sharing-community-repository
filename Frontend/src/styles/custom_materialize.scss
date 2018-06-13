@@ -104,6 +104,7 @@ input[type=search]{
 }
 textarea.materialize-textarea{
   padding: 0.75em;
+  width: calc(100% - 20px);
 }
 
 /*
@@ -118,6 +119,7 @@ label,label:active{
   margin-left: 0.75em;
 }
 input[type=checkbox]+label,
+input[type=radio]+label,
 .switch >label{
   font-weight: normal;
   color:$textLight;

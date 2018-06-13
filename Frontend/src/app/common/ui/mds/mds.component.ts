@@ -960,19 +960,22 @@ export class MdsComponent{
     return `<div class=\\'badge\\' data-value=\\''+`+value+`+'\\'><span>'+`+label+`+'</span><i class=\\'material-icons clickable\\' tabindex=\\'0\\' onkeyup=\\'if(event.keyCode==13){this.click()}\\' onclick=\\'this.parentNode.parentNode.removeChild(this.parentNode);`+this.getWindowComponent()+`.applySuggestions();\\'>cancel</i></div>`;
   }
   private renderVCardWidget(widget: any, attr: string) {
-    let html='';
+    let html='<div class="vcard">';
     let i=0;
     for(let field of [MdsComponent.VCARD_FIELDS[1],MdsComponent.VCARD_FIELDS[0]]) {
       let id = this.getWidgetDomId(widget) + '_' + field;
       let caption = this.translate.instant('VCARD.' + field);
-      html += `<div class="vcardGroup"><label for="` + id + `">` + caption + `</label>
-               <input type="text" class="vcard_`+field+(i==0?' vcardFirstInput':'')+`" id="` + id + `">`;
+      html += `<div class="vcardGroup">`;
       if(i==0){
-        html += `<i class="material-icons">person</i>`;
+          html += `<i class="material-icons">person</i>`;
       }
-      html += `</div>`;
+      html += `<div><label for="` + id + `">` + caption + `</label>
+               <input type="text" class="vcard_`+field+`" id="` + id + `">`;
+
+      html += `</div></div>`;
       i++;
     }
+    html+='</div>';
     return html;
   }
   private renderMultivalueBadgesWidget(widget:any,attr:string){
@@ -1672,12 +1675,12 @@ export class MdsComponent{
             </li>
           </ul>
          </div>
-         <div id="`+this.getDomId('mdsAuthorFreetext')+`">`+this.renderTextareaWidget(freetextWidget,null)+`</div>
-          <div id="`+this.getDomId('mdsAuthorPerson')+`">`+this.renderVCardWidget(authorWidget,null);
+         <div id="`+this.getDomId('mdsAuthorFreetext')+`" class="mdsAuthorFreetext">`+this.renderTextareaWidget(freetextWidget,null)+`</div>
+          <div id="`+this.getDomId('mdsAuthorPerson')+`" class="mdsAuthorPerson">`+this.renderVCardWidget(authorWidget,null);
     if(this.currentNode){
       author+=`<div class="mdsContributors">
-            <a class="clickable contributorsLink" onclick="`+this.getWindowComponent()+`.openContributorsDialog();">\`+
-            this.translate.instant('MDS.CONTRIBUTOR_LINK')+\` <i class="material-icons">arrow_forward</i></a>
+            <a class="clickable contributorsLink" onclick="`+this.getWindowComponent()+`.openContributorsDialog();">`+
+            this.translate.instant('MDS.CONTRIBUTOR_LINK')+` <i class="material-icons">arrow_forward</i></a>
           </div>`;
     }
     author+=`

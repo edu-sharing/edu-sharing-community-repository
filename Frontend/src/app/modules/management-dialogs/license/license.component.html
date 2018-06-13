@@ -183,13 +183,20 @@
             </div>
             <div class="authorFreetext" *ngIf="authorTab==0"><textarea class="materialize-textarea" id="authorFreetext" #freetext [(ngModel)]="authorFreetext" placeholder="{{'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate}}"></textarea></div>
             <div class="authorPerson" *ngIf="authorTab==1">
-              <div class="vcardGroup">
-                <label for="firstName">{{'VCARD.Givenname' | translate}}</label>
-                <input type="text" class="vcard_Givenname vcardFirstInput" id="firstName" [(ngModel)]="authorVCard.givenname"><i class="material-icons">person</i>
-              </div>
-              <div class="vcardGroup">
-                <label for="lastName">{{'VCARD.Surname' | translate}}</label>
-                <input type="text" class="vcard_Surname" id="lastName" [(ngModel)]="authorVCard.surname">
+              <div class="vcard">
+                <div class="vcardGroup">
+                  <i class="material-icons">person</i>
+                  <div>
+                    <label for="firstName">{{'VCARD.Givenname' | translate}}</label>
+                    <input type="text" class="vcard_Givenname vcardFirstInput" id="firstName" [(ngModel)]="authorVCard.givenname">
+                  </div>
+                </div>
+                <div class="vcardGroup">
+                  <div>
+                    <label for="lastName">{{'VCARD.Surname' | translate}}</label>
+                    <input type="text" class="vcard_Surname" id="lastName" [(ngModel)]="authorVCard.surname">
+                  </div>
+                </div>
               </div>
             </div>
           </div>
