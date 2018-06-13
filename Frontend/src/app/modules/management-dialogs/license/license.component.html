@@ -22,7 +22,7 @@
                 <label for="CC_02">
                   <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
                   <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
-                  <h5><a [href]="licenseUrls.CC_0" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -32,7 +32,7 @@
                 <label for="PDM2">
                   <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
-                  <h5><a [href]="licenseUrls.PDM" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -45,7 +45,7 @@
                 <label for="CC_BY">
                   <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_RADIO' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_INFO' | translate}}</h5>
-                  <h5><a [href]="licenseUrls.CC_BY" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a [href]="getLicenseUrlVersion('CC_BY')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -55,7 +55,7 @@
                 <label for="CC_BY_SA">
                   <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_RADIO' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_INFO' | translate}}</h5>
-                  <h5><a [href]="licenseUrls.CC_BY" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a [href]="getLicenseUrlVersion('CC_BY_SA')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -76,7 +76,7 @@
           </select>
             <div>
           <div *ngIf="type=='CC_BY'" class="cc">
-            <h5 class="ccAbout"><a [href]="licenseUrls.CC_BY_ABOUT" target="_blank">{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate}}</a></h5>
+            <h5 class="ccAbout"><a [href]="getLicenseUrlVersion('CC_BY_ABOUT')" target="_blank">{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate}}</a></h5>
             <div *ngIf="isAllowedLicense('CC_BY_SA') || isAllowedLicense('CC_BY_ND')">
               <h4>{{'WORKSPACE.LICENSE.CC.SHARE' | translate}}</h4>
               <h5>{{'WORKSPACE.LICENSE.CC.SHARE_INFO' | translate}}</h5>
@@ -120,7 +120,7 @@
                     <label for="CC_0">
                       <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
                       <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
-                      <h5><a [href]="licenseUrls.CC_0" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                      <h5><a [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                     </label>
                   </div>
                 </div>
@@ -130,7 +130,7 @@
                     <label for="PDM">
                       <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
                       <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
-                      <h5><a [href]="licenseUrls.PDM" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                      <h5><a [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                     </label>
                   </div>
                 </div>
