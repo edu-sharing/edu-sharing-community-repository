@@ -1216,12 +1216,16 @@ public class IamApi  {
     		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
     		@ApiParam(value = "global search context, defaults to true, otherwise just searches for users within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
-    		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
+			@ApiParam(value = "find a specific groupType (does nothing for persons)",required=false) @QueryParam("groupType") String groupType,
+			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
     		@Context HttpServletRequest req) {
 
     	try {
-    		
+			HashMap<String, String> props = new HashMap<>();
+			if(groupType!=null && !groupType.isEmpty()){
+				props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), groupType);
+			}
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
 	    					null,
@@ -1230,7 +1234,7 @@ public class IamApi  {
 	    					skipCount!=null ? skipCount : 0,
 	    	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
 	    					null,
-	    					null
+	    					props
 	    					
 	    			);
 

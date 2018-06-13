@@ -134,10 +134,18 @@ mds .mdsGroup{
   .suggestInput, .multivalueBadgesText {
     margin-bottom: 10px;
   }
-  .suggestOpen{
-    float:right;
-    padding: 0;
-    margin:0;
+  .auto-suggest-field{
+    display: flex;
+    >.auto-suggest-field{
+      width:100%;
+    }
+    input{
+      flex-grow: 1;
+    }
+    .btn-flat{
+      overflow: hidden;
+      padding:0 1rem;
+    }
   }
   .widget_range{
     height: 50px;
@@ -219,7 +227,7 @@ mds .mdsGroup{
       max-height:20px;
     }
   }
-  .licenseLink,.contributorsLink{
+  .templateLink,.licenseLink,.contributorsLink{
     font-weight: bold;
     text-transform: uppercase;
     padding-top: 10px;

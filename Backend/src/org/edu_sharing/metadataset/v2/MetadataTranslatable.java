@@ -1,11 +1,6 @@
 package org.edu_sharing.metadataset.v2;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 
 public abstract class MetadataTranslatable implements Serializable{
 	private String i18n;

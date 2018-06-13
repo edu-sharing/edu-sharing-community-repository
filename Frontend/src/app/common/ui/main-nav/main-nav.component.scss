@@ -308,6 +308,9 @@ user-profile{
     margin-right: 7px;
   }
 }
+.scopeNameMobile{
+  display:none;
+}
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .searchInputGroup{
     width: calc(100% - 80px);
@@ -320,7 +323,12 @@ user-profile{
 }
 @media screen and (max-width: ($mobileTabSwitchWidth)){
 
-
+  .scopeNameMobile{
+    display: flex;
+    font-weight: bold;
+    font-size: 130%;
+    margin-top: -20px;
+  }
   .menuButton {
     width: auto;
     min-width: 65px;

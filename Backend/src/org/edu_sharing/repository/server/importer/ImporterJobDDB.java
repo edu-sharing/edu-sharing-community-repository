@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
@@ -50,7 +50,7 @@ public class ImporterJobDDB extends AbstractJob{
 
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfo(ddbFile);
 		ApplicationInfo app=ApplicationInfoList.getRepositoryInfoByRepositoryType(ApplicationInfo.REPOSITORY_TYPE_DDB);
-		MetadataSetV2 mds=MetadataReaderV2.getMetadataset(app, CCConstants.metadatasetdefault_id);
+		MetadataSetV2 mds=MetadataHelper.getMetadataset(app, CCConstants.metadatasetdefault_id);
 		
 		SearchToken token = new SearchToken();
 		HashMap<String, String[]> criterias = new HashMap<String,String[]>();

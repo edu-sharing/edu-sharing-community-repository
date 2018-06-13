@@ -47,6 +47,7 @@ export class WorkspaceWorkflowComponent  {
   public history: WorkflowEntry[];
   public globalAllowed: boolean;
   public globalSearch = false;
+  public TYPE_EDITORIAL=RestConstants.GROUP_TYPE_EDITORIAL;
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;

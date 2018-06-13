@@ -55,6 +55,7 @@
     </div>
   </div>
   <div class="topBarSearch" [class.noScope]="!showScope">
+    <div class="scopeNameMobile" *ngIf="!searchEnabled">{{title | translate}}</div>
   <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled">
     <div class="searchInputGroup">
       <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"

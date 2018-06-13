@@ -34,12 +34,17 @@ export class UIHelper{
   }
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
-    config.get("branding").subscribe((data:any)=>{
+    config.get("branding").subscribe((branding:boolean)=>{
       let t=name;
-      if(data==true){
-        t+=" - edu-sharing";
+      if(branding==true){
+          config.get("siteTitle","edu-sharing").subscribe((name:string)=>{
+              t+=" - "+name;
+              title.setTitle(t);
+          });
       }
-      title.setTitle(t);
+      else{
+        title.setTitle(t);
+      }
     });
   }
   public static setTitle(name:string,title:Title,translate:TranslateService,config:ConfigurationService,languageParams:any=null){

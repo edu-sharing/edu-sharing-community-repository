@@ -186,7 +186,6 @@ export class RestConnectorService {
     return this.hasToolPermission(null);
   }
   public hasToolPermission(permission:string){
-    console.log(this.toolPermissions);
     return new Observable<boolean>((observer : Observer<boolean>) => {
       if (this.toolPermissions == null) {
         this.isLoggedIn().subscribe(() => {

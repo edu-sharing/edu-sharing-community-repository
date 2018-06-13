@@ -21,6 +21,10 @@ export class AuthoritySearchInputComponent{
    * @type {boolean}
    */
   @Input() allowAny = false;
+  /**
+   * Group type to filter the groups searched for
+   */
+  @Input() groupType = "";
   @Input() disabled = false;
   @Input() maxSuggestions = 10;
   @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
@@ -40,7 +44,7 @@ export class AuthoritySearchInputComponent{
   }
   public updateSuggestions(event : any){
     this.lastSuggestionSearch = event.input;
-    this.iam.searchAuthorities(event.input,this.globalSearch).subscribe(
+    this.iam.searchAuthorities(event.input,this.globalSearch,this.groupType).subscribe(
       (authorities:IamAuthorities)=>{
         if(this.lastSuggestionSearch!=event.input)
           return;

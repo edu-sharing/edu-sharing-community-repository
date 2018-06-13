@@ -31,9 +31,7 @@ import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.MetadataTemplateRenderer;
-import org.edu_sharing.repository.client.rpc.ACE;
-import org.edu_sharing.repository.client.rpc.ACL;
+import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.Theme;
@@ -219,7 +217,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}else{
 			rir.setContentHash(client.getContentHash(nodeId,CCConstants.CM_PROP_CONTENT));
 		}
-		
+
 		String locale = getHeaderValue("locale", MessageContext.getCurrentContext());
 
 		locale = (locale != null) ? locale : "en_EN";
@@ -280,7 +278,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}
 		
 		props=VCardConverter.addVCardProperties(nodeType,props);
-		rir.setProperties(convertProperties(props));	
+		rir.setProperties(convertProperties(props));
 		
 		List<org.edu_sharing.webservices.types.Child> childrenConverted = new ArrayList<>();
 		List<Map<String, Object>> children = getChildNodes(nodeId);
@@ -354,7 +352,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 	}
 	private KeyValue[] convertProperties(Map<String,Object> propertiesIn) {
 		List<KeyValue> propsresult = new ArrayList<KeyValue>();
-		
+
 		//MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getRepositoryInfoById(appId),CCConstants.metadatasetdefault_id);
 		for(Map.Entry<String,Object> entry : propertiesIn.entrySet()){
 			//MetadataWidget viewProperty = (isRemoteObject) ? null :  mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
@@ -362,12 +360,12 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 				propsresult.add(new KeyValue(entry.getKey(),entry.getValue().toString()));
 			}
 		}
-		return propsresult.toArray(new KeyValue[propsresult.size()]);	
+		return propsresult.toArray(new KeyValue[propsresult.size()]);
 	}
 
 	private List<Map<String, Object>> getChildNodes(String nodeId) throws Throwable {
 		return NodeServiceHelper.getSubobjects(NodeServiceFactory.getLocalService(),nodeId);
-		
+
 	}
 
 	private void addMetadataTemplate(RenderInfoResult rir,String locale,String type, Map<String, Object> props,ApplicationInfo appInfo) throws Exception {

@@ -367,10 +367,19 @@
 				<caption>dialog_upload_tab_basic</caption>
 				<icon>description</icon>
 				<html><![CDATA[
-              <ccm:wwwurl>		 
+              <ccm:wwwurl>
               <cm:name>
               <cclom:title>
               <author>
+				]]></html>
+			</template>
+			<template>
+				<id>node_general_template</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <cclom:general_keyword>
+              <cclom:general_description>
 				]]></html>
 			</template>
 			<template>
@@ -389,6 +398,7 @@
 				<html><![CDATA[
 			  <preview>
               <cm:name>
+              <template>
 				]]></html>
 			</template>
 			<template>
@@ -543,6 +553,12 @@
 				<id>io</id>
 				<views>
 					<view>node_general</view>
+				</views>
+			</group>
+			<group>
+				<id>io_template</id>
+				<views>
+					<view>node_general_template</view>
 				</views>
 			</group>
 			<group>

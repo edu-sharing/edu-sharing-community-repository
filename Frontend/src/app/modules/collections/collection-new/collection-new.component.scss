@@ -460,6 +460,11 @@ input[type="radio"] {
     }
   }
 }
+@media only screen and (max-width: $mobileTabSwitchWidth) {
+  .collections-master-div{
+    margin-bottom: $mobileTabNavHeight;
+  }
+}
 @media screen and (max-width: $mobileWidth+$mobileStage*3) and (max-height: $mobileHeight+$mobileStage*2) {
   .createContainer .createProgress{
     display: none;
