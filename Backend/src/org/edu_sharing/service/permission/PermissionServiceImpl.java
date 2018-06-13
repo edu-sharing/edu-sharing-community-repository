@@ -1,6 +1,7 @@
 package org.edu_sharing.service.permission;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -376,7 +377,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 			
 			//get new version label
-			String newVersion = new Double(Double.valueOf(version) + 0.1).toString();
+			//use BigDecimal cause of rounding Problem with double
+			BigDecimal bd = BigDecimal.valueOf(Double.valueOf(version)).add(BigDecimal.valueOf(0.1));
+			String newVersion = bd.toString();
 			
 			HandleService handleService = null;
 			String handle = null;
