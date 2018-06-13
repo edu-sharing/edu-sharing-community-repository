@@ -35,6 +35,7 @@ import {UIService} from '../../services/ui.service';
 })
 export class MdsComponent{
   @ViewChild('mdsScrollContainer') mdsScrollContainer: ElementRef;
+  @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
 
   @Input() addWidget=false;
   @Input() embedded=false;
@@ -408,15 +409,15 @@ export class MdsComponent{
     for(let viewId of group.views){
       for(let view of data.views){
         if(view.id==viewId){
-          html+=`<a class="clickable" onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
+          html+=`<a class="clickable" onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i><span>`+view.caption+`</span></a>`;
           i++;
           break;
         }
       }
     }
     this.jumpmarksCount=i;
-    setInterval(function(){
-        let jump=document.getElementById("jumpmarks");
+    setInterval(()=>{
+        let jump=this.jumpmarksRef.nativeElement;
         if(!jump)
             return;
         let elements=jump.getElementsByTagName("a");
