@@ -57,7 +57,6 @@ export class WorkspaceLicenseComponent  {
   private copyrightType="COPYRIGHT_FREE";
   private eduType="P_NR";
   private rightsDescription="";
-  private licenseUrls=RestConstants.LICENSE_URLS;
   private showCcAuthor=false;
   private contact=true;
   private release=false;
@@ -302,6 +301,9 @@ export class WorkspaceLicenseComponent  {
   }
   private getLicenseUrl(){
     return NodeHelper.getLicenseUrlByString(this.getLicenseProperty(),this.ccVersion);
+  }
+  private getLicenseUrlVersion(type:string){
+      return NodeHelper.getLicenseUrlByString(type,this.ccVersion);
   }
   private getLicenseIcon(){
     return NodeHelper.getLicenseIconByString(this.getLicenseProperty(),this.connector);
