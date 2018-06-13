@@ -161,7 +161,8 @@ mds .mdsGroup{
     }
     .btn-flat{
       overflow: hidden;
-      padding:0 1rem;
+      height: 41px;
+      padding: 0.3em 1rem
     }
   }
   .widget_range{
@@ -304,11 +305,10 @@ mds .mdsGroup{
   .mdsAuthor{
     float:left;
     width:100%;
-  }
-  .mdsAuthor{
     .materialize-textarea{
-      min-height:1.5rem;
-      height:1.5rem;
+      min-height:2.5rem;
+      height:2.5rem;
+      margin-top: 10px;
     }
   }
   .childobjects_container {
