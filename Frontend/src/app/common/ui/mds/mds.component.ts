@@ -417,10 +417,10 @@ export class MdsComponent{
     }
     this.jumpmarksCount=i;
     setInterval(()=>{
-        let jump=this.jumpmarksRef.nativeElement;
-        if(!jump)
+        let jump=this.jumpmarksRef;
+        if(!jump || !jump.nativeElement)
             return;
-        let elements=jump.getElementsByTagName("a");
+        let elements=jump.nativeElement.getElementsByTagName("a");
         let scroll=document.getElementsByClassName("card-title-element");
         let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
         let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
