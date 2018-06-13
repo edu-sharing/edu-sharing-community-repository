@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSet;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSets;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -323,7 +324,7 @@ public class RepoFactory {
 		ArrayList<MetadataSetInfo> sets = new ArrayList<MetadataSetInfo>();
 		for(String id : appInfo.getMetadatsetsV2()){
 			MetadataSetInfo info=new MetadataSetInfo();
-			MetadataSetV2 mds = MetadataReaderV2.getMetadataset(appInfo, id);
+			MetadataSetV2 mds = MetadataHelper.getMetadataset(appInfo, id);
 			info.setId(id);
 			info.setName(mds.getName());
 			sets.add(info);
