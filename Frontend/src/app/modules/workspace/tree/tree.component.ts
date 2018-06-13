@@ -28,10 +28,13 @@ export class WorkspaceTreeComponent  {
   private _selectedPath : string[]=[];
   private _current : string;
   public dragHover: string;
+  reload: Boolean;
   @Input() selectedNode:string;
   @Input() set path (path : Node[]){
-    if(path.length==0)
-      return;
+    if(path.length==0) {
+        this.reload=new Boolean(true);
+        return;
+    }
     this._path[0]=[];
 
     for (let node of path) {

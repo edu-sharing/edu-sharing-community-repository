@@ -1,6 +1,7 @@
 package org.edu_sharing.metadataset.v2;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -189,13 +190,18 @@ public class MetadataSetV2 {
 		}
 		throw new IllegalArgumentException("Query "+queryId+" was not found in the mds "+id);
 	}
-	public List<MetadataWidget> getWidgetsByNodeType(String nodeType) {
+	public List<MetadataWidget> getWidgetsByNode(String nodeType,Collection<String> aspects) {
 		String group=null;
 		if(CCConstants.CCM_TYPE_IO.equals(nodeType)) {
 			group="io";
 		}
 		else if(CCConstants.CCM_TYPE_MAP.equals(nodeType)) {
-			group="map";
+			if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION)){
+				group="collection_editorial";
+			}
+			else {
+				group = "map";
+			}
 		}
 		if(group==null) {
 			logger.info("Node type "+nodeType+" currently not supported by backend, will use metadata from all available widgets");
