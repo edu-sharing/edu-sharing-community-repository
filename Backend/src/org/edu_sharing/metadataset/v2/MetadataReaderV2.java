@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.w3c.dom.Document;
@@ -38,14 +37,6 @@ public class MetadataReaderV2 {
 	
 	public static String getPath(){
 		return "/org/edu_sharing/metadataset/v2/";
-	}
-	
-	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet) throws Exception{
-		String locale="default";
-		try{
-			locale = new AuthenticationToolAPI().getCurrentLocale();
-		}catch(Throwable t){}
-		return getMetadataset(appId, mdsSet,locale);		
 	}
 	
 	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet,String locale) throws Exception{

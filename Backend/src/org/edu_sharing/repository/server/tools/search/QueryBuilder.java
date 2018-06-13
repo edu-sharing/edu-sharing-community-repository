@@ -34,8 +34,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueries;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQuery;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueryProperty;
@@ -346,7 +346,7 @@ public class QueryBuilder extends QueryBuilderBase implements IsSerializable {
 		
 		String basequery = null;
 		try{
-			MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getRepositoryInfoById(repositoryId), metadataSetId);
+			MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getRepositoryInfoById(repositoryId), metadataSetId);
 			basequery=mds.getQueries().getBasequery();
 		}catch(Exception e){
 			
