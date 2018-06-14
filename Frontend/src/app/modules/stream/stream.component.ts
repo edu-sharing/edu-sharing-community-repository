@@ -82,7 +82,6 @@ export class StreamComponent {
   public nodeReport: Node;
   public globalProgress=false;
   menuOption = 'new';
-  streamRoot = UIConstants.ROUTER_PREFIX+'stream';
   showMenuOptions = false;
   streams: any;
   actionOptions:OptionItem[]=[];
@@ -154,13 +153,12 @@ export class StreamComponent {
       });
   }
 
-  setStreamMode(movedToSeen?: String) {
+  setStreamMode() {
     this.route.queryParams.subscribe((params: Params) => {
       if (params.mode === 'new') {
         this.menuOptions(params.mode);
       }
       if (params.mode === 'seen') {
-        console.log(this.router);
         this.menuOptions(params.mode);
       }
       else {
@@ -184,12 +182,6 @@ export class StreamComponent {
 
   checkIfEnable(nodes: any) {
     this.collectionOption.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
-  }
-
-  getStreamMode(){
-    let streamRoot = UIConstants.ROUTER_PREFIX+'stream';
-    console.log(streamRoot);
-    return (this.menuOption == 'stream') ? '' : '/' + this.menuOption;
   }
 
   menuOptions(option: any) {
