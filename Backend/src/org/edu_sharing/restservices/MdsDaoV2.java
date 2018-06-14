@@ -34,7 +34,7 @@ public class MdsDaoV2 {
 		result.setValues(suggestionsResult);
 		try{
 			List<? extends SuggestOracle.Suggestion>  suggestions =		
-					MetadataSearchHelper.getSuggestions(mds, queryId, parameter, value);
+					MetadataSearchHelper.getSuggestions(this.repoDao.getId(), mds, queryId, parameter, value);
 
 			for(SuggestOracle.Suggestion suggest : suggestions){
 				Suggestions.Suggestion suggestion = new Suggestions.Suggestion();

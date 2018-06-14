@@ -19,6 +19,8 @@ import org.edu_sharing.repository.client.rpc.SQLKeyword;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.suggest.ConnectionDBAlfresco;
 import org.springframework.context.ApplicationContext;
 
@@ -168,13 +170,24 @@ public class MetadataSearchHelper {
 		
 	}
 
-	public static List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds,String queryId,String parameterId,String value) throws IllegalArgumentException  {
+	public static List<? extends  SuggestOracle.Suggestion> getSuggestions(String repoId,MetadataSetV2 mds,String queryId,String parameterId,String value) throws IllegalArgumentException  {
 		MetadataWidget widget=mds.findWidget(parameterId);
 		
 		String source=widget.getSuggestionSource();
 		if(source==null){
 			source=widget.getValues()!=null ? MetadataReaderV2.SUGGESTION_SOURCE_MDS : MetadataReaderV2.SUGGESTION_SOURCE_SOLR;
 		}
+		
+		/**
+		 * remote repo
+		 */
+		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
+			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value);
+		}
+		
+		/**
+		 * local repo
+		 */
 		if(source.equals(MetadataReaderV2.SUGGESTION_SOURCE_SOLR)){
 			MetadataQueryParameter parameter = getParameter(mds.getQueries(),queryId,parameterId);
 			return getSuggestionsSolr(parameter, widget, value);

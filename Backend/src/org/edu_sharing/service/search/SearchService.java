@@ -18,6 +18,8 @@ import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 
+import com.google.gwt.user.client.ui.SuggestOracle;
+
 public interface SearchService {
 	public static enum ContentType{
 		FILES,
@@ -80,4 +82,9 @@ public interface SearchService {
 			SortDefinition sort);
 
 	SearchToken getLastSearchToken() throws Throwable;
+	
+	public default List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
+		return null;	
+	}
+		
 }

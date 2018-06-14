@@ -24,6 +24,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -37,6 +38,8 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.gwt.user.client.ui.SuggestOracle;
 
 public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	
@@ -89,22 +92,9 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		//String lang=new AuthenticationToolAPI().getCurrentLocale().split("_")[0];
 
 		String jsonString = "";
-		URL url=new URL(DDB_API+path);
-		HttpsURLConnection connection = openDDBUrl(url);
-		connection.connect();		
-
-        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
-        BufferedReader br = new BufferedReader(isr);
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
-        }
-        br.close();
-        isr.close();
-        connection.disconnect();
-        jsonString = sb.toString();
-
+		
+		String urlAsStr = DDB_API+path;
+		jsonString = query(urlAsStr);
 		JSONObject jo = new JSONObject(jsonString);
     	
 		Integer nrOfResult = (Integer)jo.get("numberOfResults");
@@ -164,6 +154,24 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 	}
 	
+	private String query(String urlAsStr) throws Exception {
+		URL url = new URL(urlAsStr);
+		HttpsURLConnection connection = openDDBUrl(url);
+		connection.connect();		
+
+        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
+        BufferedReader br = new BufferedReader(isr);
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
+        }
+        br.close();
+        isr.close();
+        connection.disconnect();
+        return sb.toString();
+	}
+
 	public static String httpGet(String urlStr, HashMap<String, String> properties) throws IOException {
         if (properties == null) {
             properties = new HashMap<String, String>();
@@ -377,7 +385,78 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		return properties;
 	}
 	
+	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
+		
+		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
+		System.out.println("queryId:" + queryId + " parameterId:" + parameterId + " value:" + value);
+		
+		List<String> facets = mds.getQueries().findQuery(queryId).findParameterByName(parameterId).getFacets();
+		String url = getUrl("/search",value,facets, 0, 0);
+		
+		
+		
+		try {
+			String json = this.query(url);
+			JSONObject jo = new JSONObject(json);
+	    	
+			JSONArray resultsArr = (JSONArray)jo.get("facets");
+			
+			for(int i = 0; i < resultsArr.length(); i++) {
+				JSONObject facetObj = (JSONObject)resultsArr.get(i);
+				String field = facetObj.getString("field");
+				int numberOfFacets = facetObj.getInt("numberOfFacets");
+				if(facets.contains(field) && numberOfFacets > 0) {
+					
+					JSONArray facetValues = facetObj.getJSONArray("facetValues");
+					for(int j = 0; j < facetValues.length(); j++) {
+						JSONObject facetteVal = (JSONObject)facetValues.get(j);
+						//int count = facetteVal.getInt("count");
+						String val = facetteVal.getString("value");
+						
+						SuggestFacetDTO dto = new SuggestFacetDTO();
+						dto.setFacet(val);
+						dto.setDisplayString(val);
+
+						result.add(dto);
+					}
+					
+					
+				}
+			}
 	
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+		return result;
+	}
+	
+	public String getUrl(String basePath, String query, List<String> facets, int offset, int rows){
+		String url = DDB_API + basePath;
+		
+		try {
+			url += "?oauth_consumer_key=" + URLEncoder.encode(APIKey, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		url += "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(query);
+		if(facets != null && facets.size() > 0) {
+			url += "&facet=";
+			int i = 0;
+			for(String facet :  facets) {
+				if(i == 0) {
+					url += facet;
+				}else {
+					url += "," +facet;
+				}
+				
+			}
+		}
+		url += "&offset="+offset;
+		url += "&rows="+rows;
+		
+		return url;
+	}
 	
 	@Override
 	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
@@ -478,5 +557,52 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		}
 
 	}	
+	
+	public static void main(String[] args) {
+		
+		
+		
+		try {
+			String searchWord = "*";
+			String extendedSearch = "place:(Wolfenbüttel)";
+			String oauthKey = "nVyX1bwLOAEpMVrzfEIf3xth5eTtVOaqZeeUUcUEQDNa4Oigs6y1438781244192";
+			String path = "/search";
+			path += "?oauth_consumer_key=" + URLEncoder.encode(oauthKey, "UTF-8");
+			path += "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(searchWord+" " +extendedSearch);
+			path += "&facet=place_fct";
+			path += "&offset="+0;
+			path += "&rows="+10;
+			
+			List<String> list = new ArrayList<String>();
+			list.add("place_fct");
+			
+			//path = new SearchServiceDDBImpl("local").getSuggestionPath(list);
+			
+			URL url=new URL(DDB_API+path);
+			HttpsURLConnection connection = openDDBUrl(url);
+			connection.connect();		
+	
+	        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
+	        BufferedReader br = new BufferedReader(isr);
+	        StringBuilder sb = new StringBuilder();
+	        String line;
+	        while ((line = br.readLine()) != null) {
+	            sb.append(line);
+	        }
+	        br.close();
+	        isr.close();
+	        connection.disconnect();
+	        String jsonString = sb.toString();
+	        System.out.println(jsonString);
+			JSONObject jo = new JSONObject(jsonString);
+	    	
+			Integer nrOfResult = (Integer)jo.get("numberOfResults");
+			JSONArray resultsArr = (JSONArray)jo.get("results");
+			JSONObject results = (JSONObject)resultsArr.get(0);
+			JSONArray docs = (JSONArray)results.get("docs");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 }
