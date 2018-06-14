@@ -391,6 +391,13 @@ public class CCConstants {
 
 	public static final String CCM_PROP_WF_STATUS = "{http://www.campuscontent.de/model/1.0}wf_status";
 
+
+	public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
+	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";
+	public static String CCM_WF_STATUS_VALUE_HASFLAWS="300_hasflaws";
+	public static String CCM_WF_STATUS_VALUE_CHECKED="400_checked";
+
+
 	public static final String CCM_PROP_WF_INSTRUCTIONS = "{http://www.campuscontent.de/model/1.0}wf_instructions";
 
 	public static final String CCM_PROP_WF_PROTOCOL = "{http://www.campuscontent.de/model/1.0}wf_protocol";
