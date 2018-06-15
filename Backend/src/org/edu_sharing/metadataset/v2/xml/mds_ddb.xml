@@ -11,15 +11,16 @@
       </widget>
       <widget>
                 <id>place</id>
+                <type>multivalueFixedBadges</type>
+                <suggestionSource>Solr</suggestionSource>
                 <caption>Ort</caption>
                 <placeholder>z.B. Frankfurt</placeholder>
-                <type>text</type>
       </widget>
       <widget>
                 <id>affiliate</id>
+                 <type>multivalueFixedBadges</type>
                 <caption>Person/Organisation</caption>
                 <placeholder>z.B. Kandinsky</placeholder>
-                <type>text</type>
       </widget>
 
     </widgets>
@@ -63,8 +64,16 @@
 	<queries>
 		<query join="AND" id="ngsearch">
 			<property name="title"></property>
-			<property name="place"></property>
-			<property name="affiliate"></property>
+			<property name="place">
+				<facets>
+					<facet>place_fct</facet>
+				</facets>
+			</property>
+			<property name="affiliate">
+				<facets>
+					<facet>affiliate_fct</facet>
+				</facets>
+			</property>
 		</query>
 	</queries>
 </metadataset>

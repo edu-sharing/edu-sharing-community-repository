@@ -538,18 +538,6 @@ export class NodeHelper{
     return NodeHelper.getAttribute(translate,config,data,item);
   }
 
-  public static getNodePositionInArray(search: Node, _nodes: Node[]) {
-    let i=0;
-    for(let node of _nodes) {
-      if(node.ref) {
-        if (node.ref.id == search.ref.id)
-          return i;
-      }
-      i++;
-    }
-    return _nodes.indexOf(search);
-  }
-
   public static getLicenseHtml(translate:TranslateService,data:Node) {
     return '<span title="'+NodeHelper.getLicenseName(data,translate)+'"><img alt="'+NodeHelper.getLicenseName(data,translate)+'" src="'+NodeHelper.getLicenseIcon(data)+'"></span>';
   }

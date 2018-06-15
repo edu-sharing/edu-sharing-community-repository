@@ -326,6 +326,9 @@ export class NodeRenderComponent implements EventListener{
       jQuery('.edusharing_rendering_content_wrapper').hide();
       jQuery('.showDetails').hide();
     }
+    if(this.isOpenable){
+      jQuery('#edusharing_downloadadvice').hide();
+    }
       jQuery('.edusharing_rendering_metadata_header').append(`
       <div class="nodeDetails">
         <div class="item" onclick="window.nodeRenderComponentRef.component.showComments()">
@@ -424,6 +427,7 @@ export class NodeRenderComponent implements EventListener{
           if(this.editor && RestConnectorsService.connectorSupportsEdit(data,this._node).id==this.editor){
             this.openConnector(data,false);
           }
+          this.postprocessHtml();
         }
       },(error:any)=>{
       });

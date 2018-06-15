@@ -607,6 +607,7 @@ export class PermissionsAuthoritiesComponent {
     this.searchMembers();
   }
   private updateSelectedMembers(data:Authority[]){
+    console.log(data);
     this.selectedMembers=data;
     this.memberOptions=this.getMemberOptions();
   }

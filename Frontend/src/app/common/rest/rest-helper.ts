@@ -365,6 +365,23 @@ export class RestHelper{
     static guessMediatypeIconForFile(connector:RestConnectorService,file:File){
         return connector.getThemeMimeIconSvg(this.guessMediatypeForFile(file)+'.svg');
     }
+
+    static getRestObjectPositionInArray(search: any, haystack: any[]) {
+        let i=0;
+        for(let node of haystack) {
+            if(node.ref) {
+                if (node.ref.id == search.ref.id)
+                    return i;
+            }
+            else if(node.authorityName){
+                if(node.authorityName==search.authorityName)
+                    return i;
+            }
+            i++;
+        }
+        return haystack.indexOf(search);
+    }
+
 }
 export interface UrlReplace{
   search:string;
