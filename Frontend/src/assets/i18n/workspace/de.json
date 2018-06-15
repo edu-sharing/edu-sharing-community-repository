@@ -194,7 +194,7 @@
       "LINK":"Link zum Objekt",
       "ACTIVATE":"Linkfreigabe aktivieren",
       "COPY_CLIPBOARD":"Link kopieren",
-      "LINK_INFO":"Jeder, der Zugriff af den Link hat, darf das Objekt herunterladen.",
+      "LINK_INFO":"Jeder, der Zugriff auf den Link hat, darf das Objekt herunterladen.",
       "LINK_DOWNLOADS":"Bisherige Downloads: {{ count }}",
       "COPIED_CLIPBOARD":"Link wurde in die Zwischenablage kopiert",
       "COPIED_CLIPBOARD_ERROR":"Link konnte nicht kopiert werden. Bitte markieren und kopieren Sie den Link manuell"

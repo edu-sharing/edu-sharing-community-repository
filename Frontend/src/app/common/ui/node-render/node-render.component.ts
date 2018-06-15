@@ -321,6 +321,9 @@ export class NodeRenderComponent implements EventListener{
       jQuery('.edusharing_rendering_content_wrapper').hide();
       jQuery('.showDetails').hide();
     }
+    if(this.isOpenable){
+      jQuery('#edusharing_downloadadvice').hide();
+    }
       let element=jQuery('#edusharing_rendering_content_href');
       console.log(element);
       element.click((event:any)=>{
@@ -410,6 +413,7 @@ export class NodeRenderComponent implements EventListener{
           if(this.editor && RestConnectorsService.connectorSupportsEdit(data,this._node).id==this.editor){
             this.openConnector(data,false);
           }
+          this.postprocessHtml();
         }
       },(error:any)=>{
       });

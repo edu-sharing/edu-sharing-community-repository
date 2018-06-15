@@ -202,7 +202,8 @@ export class SearchComponent {
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
            if(this.setSidenavSettings()) {
-             let sidenavMode = this.config.instant("searchSidenavMode","auto");
+             // auto, never, always
+             let sidenavMode = this.config.instant("searchSidenavMode","never");
              if (sidenavMode == "never") {
                this.searchService.sidenavOpened = false;
              }

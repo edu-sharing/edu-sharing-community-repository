@@ -924,6 +924,18 @@ export class CordovaService {
        let win:any=window.open(url,"_blank","location=no");
        win.addEventListener( "loadstop", ()=> {
            console.log("cordova init inapp window");
+           console.log(win.postMessage);
+           win.postMessage=(data:any)=>{
+               console.log("postMessage",data);
+               win.executeScript({
+                   code:`
+                        var event = new CustomEvent('message',{detail:`+JSON.stringify(data)+`});
+                        window.dispatchEvent(event);`
+               },null);
+               var event = new Event('message');
+                //window.dispatchEvent(event);
+           };
+           this.events.addWindow(win);
            let loop = setInterval(()=>{
 
                // Execute JavaScript to check for the existence of a name in the
@@ -951,6 +963,11 @@ export class CordovaService {
                            this.events.onEvent(event);
                            if(e.event==FrameEventsService.EVENT_CLOSE){
                                clearInterval(loop);
+                           }
+                           if(e.event==FrameEventsService.EVENT_CORDOVA_CAMERA){
+                               this.getPhotoFromCamera((data:any)=>{
+                                   this.events.broadcastEvent(FrameEventsService.EVENT_CORDOVA_CAMERA_RESPONSE,data);
+                               },null);
                            }
                        }
                    }

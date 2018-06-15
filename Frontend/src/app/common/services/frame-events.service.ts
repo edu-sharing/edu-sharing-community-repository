@@ -29,6 +29,8 @@ export class FrameEventsService {
      */
   public static EVENT_REFRESH="REFRESH";
   public static EVENT_CLOSE="CLOSE";
+  public static EVENT_CORDOVA_CAMERA="EVENT_CORDOVA_CAMERA";
+  public static EVENT_CORDOVA_CAMERA_RESPONSE="EVENT_CORDOVA_CAMERA_RESPONSE";
   public static EVENT_REST_RESPONSE="PARENT_REST_RESPONSE";
 
   public static INVALIDATE_HEIGHT_EVENTS=[
@@ -65,9 +67,10 @@ export class FrameEventsService {
   public onEvent(event:any){
       if (event.source!==window.self && event.data){
           if(event.data.event==FrameEventsService.EVENT_CLOSE){
-              console.log("closing frame");
-              console.log(event.source);
               event.source.close();
+              let pos=this.windows.indexOf(event.source);
+              if(pos!=-1)
+                this.windows.splice(pos,1);
               return;
           }
           this.eventListeners.forEach(function(listener:EventListener){

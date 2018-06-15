@@ -13,9 +13,13 @@ import java.util.Map.Entry;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.repository.client.rpc.Notify;
@@ -1406,7 +1410,9 @@ public class NodeDao {
  	}
 
  	public static List<Node> sortAndFilterByType(RepositoryDao repoDao, List<NodeRef> children,SortDefinition sort, List<String> filter,Filter propFilter) throws DAOException {
-    	List<NodeDao> nodes=new ArrayList<NodeDao>(children.size());
+		DictionaryService dictionaryService = ((ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY)).getDictionaryService();
+
+		List<NodeDao> nodes=new ArrayList<NodeDao>(children.size());
     	for(NodeRef child : children){
 			nodes.add(NodeDao.getNode(repoDao, child.getId(),propFilter));
     	}
@@ -1452,6 +1458,7 @@ public class NodeDao {
 					for(SortDefinitionEntry criteria : sort.getSortDefinitionEntries()){
 						int value=0;
 						String property=CCConstants.getValidGlobalName(criteria.getProperty());
+
 						Object prop1=null,prop2=null;
 							
 						prop1=o1props.get(property);
@@ -1476,6 +1483,14 @@ public class NodeDao {
 						}
 						if(prop2 instanceof String) {
 							prop2=((String) prop2).toLowerCase();
+						}
+						try {
+							String fieldType = dictionaryService.getProperty(QName.createQName(property)).getDataType().getJavaClassName();
+
+							prop1=castPropertyByType(fieldType,prop1);
+							prop2=castPropertyByType(fieldType,prop2);
+
+						}catch(Throwable t){ //  conversion can fail in some cases (null pointer, wrong data types stored
 						}
 						if(criteria.isAscending())
 							value=((Comparable)prop1).compareTo(prop2);
@@ -1532,6 +1547,21 @@ public class NodeDao {
 		}
 		return filtered;
 	}
+
+	private static Object castPropertyByType(String fieldType, Object prop) {
+		if(prop==null)
+			return null;
+		if(prop instanceof String){
+			String str= (String) prop;
+			if(fieldType.equals(Integer.class.getName())){
+				if(str.isEmpty())
+					return Integer.valueOf(0);
+				return Integer.valueOf(str);
+			}
+		}
+		return prop;
+	}
+
 	public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
 		try{
 			NotificationServiceFactory.getNotificationService(repoDao.getApplicationInfo().getAppId())
