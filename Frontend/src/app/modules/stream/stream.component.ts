@@ -38,6 +38,9 @@ import {NodeWrapper} from '../../common/rest/data-object';
 import {Filetype} from '../../common/rest/data-object';
 import {FrameEventsService} from '../../common/services/frame-events.service';
 import {CordovaService} from '../../common/services/cordova.service';
+import { NavigationEnd } from '@angular/router';
+import { NavigationStart } from '@angular/router';
+import 'rxjs/add/operator/pairwise';
 
 
 
@@ -52,6 +55,7 @@ import {CordovaService} from '../../common/services/cordova.service';
 
 
 export class StreamComponent {
+
   today() {
       var d = new Date();
       var weekday = d.getDay();
@@ -81,7 +85,7 @@ export class StreamComponent {
   public mainnav = true;
   public nodeReport: Node;
   public globalProgress=false;
-  menuOption = 'stream';
+  menuOption = 'new';
   showMenuOptions = false;
   streams: any;
   actionOptions:OptionItem[]=[];
@@ -138,15 +142,36 @@ export class StreamComponent {
               this.connectorList=list;
           });
       });
-
-      // please refer to http://appserver7.metaventis.com/ngdocs/4.1/classes/optionitem.html
-      this.actionOptions.push(this.moveUpOption);
-      this.actionOptions.push(this.collectionOption);
-      this.updateDataFromJSON(STREAM_STATUS.OPEN);
-
+      this.setStreamMode();
+      this.router.events
+      .filter(e => e.constructor.name === 'RoutesRecognized')
+      .pairwise()
+      .first()
+      .subscribe((e: any[]) => {
+        if (/components\/render/.test(e[0].urlAfterRedirects)) {
+          this.route.queryParams.subscribe((params: Params) => {
+            if (params.mode === 'new') {
+              this.toast.toast('STREAM.TOAST.SEEN');
+            }
+          });
+        }
+      });
   }
 
-  // When seen, set Status to READ, and then display only OPEN stream
+  setStreamMode() {
+    this.route.queryParams.subscribe((params: Params) => {
+      if (params.mode === 'new') {
+        this.menuOptions(params.mode);
+      }
+      if (params.mode === 'seen') {
+        this.menuOptions(params.mode);
+      }
+      else {
+        this.menuOptions('new');
+      }
+    });
+  }
+
   seen(id: any) {
     this.updateStream(id, STREAM_STATUS.READ).subscribe(data => this.updateDataFromJSON(STREAM_STATUS.OPEN) , error => console.log(error));
   }
@@ -166,14 +191,16 @@ export class StreamComponent {
 
   menuOptions(option: any) {
     this.menuOption = option;
-    if (option === 'stream') {
+    if (option === 'new') {
       this.toggleMenuOptions();
+      this.router.navigate(["./"],{queryParams:{mode:this.menuOption},relativeTo:this.route})
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.actionOptions[0] = this.moveUpOption;
       this.actionOptions[1] = this.collectionOption;
     } else {
       this.toggleMenuOptions();
+      this.router.navigate(["./"],{queryParams:{mode:this.menuOption},relativeTo:this.route})
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.READ);
       this.actionOptions[0] = this.collectionOption;
