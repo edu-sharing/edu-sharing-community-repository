@@ -380,16 +380,9 @@ export class ListTableComponent implements EventListener{
     }
   }
   private exchange(node1:Node,node2:Node){
-    let i1,i2;
-    let i=0;
-    for(let node of this._nodes){
-      let id=node.ref.id;
-      if(id==node1.ref.id)
-        i1=i;
-      if(id==node2.ref.id)
-        i2=i;
-      i++;
-    }
+    let i1=RestHelper.getRestObjectPositionInArray(node1,this._nodes);
+    let i2=RestHelper.getRestObjectPositionInArray(node2,this._nodes);
+
     this._nodes.splice(i1,1,node2);
     this._nodes.splice(i2,1,node1);
   }
@@ -462,6 +455,8 @@ export class ListTableComponent implements EventListener{
       let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
       if(source.view==this.id && source.nodes.length==1){
         this.onOrderElements.emit(this._nodes);
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
     }
