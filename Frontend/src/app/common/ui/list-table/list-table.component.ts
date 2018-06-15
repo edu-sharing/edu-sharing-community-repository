@@ -665,8 +665,8 @@ export class ListTableComponent implements EventListener{
     let pos=this.getSelectedPos(node);
     // select from-to range via shift key
     if(fromCheckbox && pos==-1 && this.ui.isShiftCmd() && this.selectedNodes.length==1){
-      let pos1=NodeHelper.getNodePositionInArray(node,this._nodes);
-      let pos2=NodeHelper.getNodePositionInArray(this.selectedNodes[0],this._nodes);
+      let pos1=RestHelper.getRestObjectPositionInArray(node,this._nodes);
+      let pos2=RestHelper.getRestObjectPositionInArray(this.selectedNodes[0],this._nodes);
       let start=pos1<pos2 ? pos1 : pos2;
       let end=pos1<pos2 ? pos2 : pos1;
       console.log("from "+start+" to "+end);
@@ -698,7 +698,7 @@ export class ListTableComponent implements EventListener{
   private getSelectedPos(selected : Node) : number{
     if(!this.selectedNodes)
       return -1;
-    return NodeHelper.getNodePositionInArray(selected,this.selectedNodes);
+    return RestHelper.getRestObjectPositionInArray(selected,this.selectedNodes);
   }
   private optionIsValid(optionItem: OptionItem, node: Node) {
     if(optionItem.enabledCallback) {
