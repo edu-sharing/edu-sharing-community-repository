@@ -38,6 +38,9 @@ import {NodeWrapper} from '../../common/rest/data-object';
 import {Filetype} from '../../common/rest/data-object';
 import {FrameEventsService} from '../../common/services/frame-events.service';
 import {CordovaService} from '../../common/services/cordova.service';
+import { NavigationEnd } from '@angular/router';
+import { NavigationStart } from '@angular/router';
+import 'rxjs/add/operator/pairwise';
 
 
 
@@ -52,6 +55,7 @@ import {CordovaService} from '../../common/services/cordova.service';
 
 
 export class StreamComponent {
+
   today() {
       var d = new Date();
       var weekday = d.getDay();
@@ -142,6 +146,7 @@ export class StreamComponent {
       this.router.events
       .filter(e => e.constructor.name === 'RoutesRecognized')
       .pairwise()
+      .first()
       .subscribe((e: any[]) => {
         if (/components\/render/.test(e[0].urlAfterRedirects)) {
           this.route.queryParams.subscribe((params: Params) => {
