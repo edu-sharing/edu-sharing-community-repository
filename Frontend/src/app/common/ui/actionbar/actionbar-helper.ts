@@ -57,7 +57,7 @@ export class ActionbarHelper{
     if(type=='SHARE_LINK'){
       if(nodes && !nodes[0].isDirectory) {
         option = new OptionItem("WORKSPACE.OPTION.SHARE_LINK", "link", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE) && connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
+        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS) && connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
       }
     }
     return option;
