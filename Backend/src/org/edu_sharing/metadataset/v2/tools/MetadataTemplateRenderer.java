@@ -11,7 +11,10 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.DateTool;
+import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.service.license.LicenseService;
 
 import com.ibm.icu.text.SimpleDateFormat;
@@ -137,12 +140,16 @@ public class MetadataTemplateRenderer {
 						value+="<img src='"+
 								license.getIconUrl(licenseName)+
 								"'>";
+						if(link!=null)
+							value+="</a>";
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
 							value+="<div class='licenseDescription'>"+StringEscapeUtils.escapeHtml(licenseDescription)+"</div>";
 						}
-						if(link!=null)
-							value+="</a>";
+						else{
+							value+="<div class='licenseDescription'>" +getLicenseDescription(licenseName) +"</div>";
+						}
+
 					}
 					if(value==null || value.trim().isEmpty())
 						continue;
@@ -189,6 +196,29 @@ public class MetadataTemplateRenderer {
 		html+=content;
 		html+="</div></div>";
 		return html;
+	}
+
+	private String getLicenseDescription(String licenseName) {
+		if(licenseName==null)
+			licenseName="NONE";
+
+		if(licenseName.equals(CCConstants.COMMON_LICENSE_PDM)){
+			licenseName=CCConstants.COMMON_LICENSE_CC_ZERO;
+		}
+		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
+			String result=I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION.CC_BY");
+			if(licenseName.contains("SA")){
+				result+="\n"+I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION.CC_SHARE_SA");
+			}
+			if(licenseName.contains("ND")){
+				result+="\n"+I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION.CC_SHARE_ND");
+			}
+			if(licenseName.contains("NC")){
+				result+="\n"+I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION.CC_COMMERCIAL_NC");
+			}
+			return result;
+		}
+		return I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION."+licenseName);
 	}
 
 	private String formatGroupValue(String value,MetadataWidget widget) {
