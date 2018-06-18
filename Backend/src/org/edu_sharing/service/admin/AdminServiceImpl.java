@@ -181,7 +181,7 @@ public class AdminServiceImpl implements AdminService  {
 	public void setToolpermissions(String authority,Map<String, ToolPermission.Status> toolpermissions) throws Throwable {
 		ToolPermissionService tpService = ToolPermissionServiceFactory.getInstance();
 		PermissionService permissionService = PermissionServiceFactory.getLocalService();
-		if(AuthorityServiceFactory.getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
+		if(!CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authority) && AuthorityServiceFactory.getLocalService().getMemberships(authority).contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)) {
 			throw new IllegalArgumentException("Toolpermissions are not supported for members of "+CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
 		}
 		for(String tp : tpService.getAllAvailableToolPermissions()) {
