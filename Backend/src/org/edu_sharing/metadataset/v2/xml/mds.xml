@@ -612,6 +612,12 @@
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
 				</property>
+				<property name="workflow">
+					<statement>@ccm\:wf_status:"${value}"</statement>
+					<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
 			</query>
 			<query join="AND" id="saved_search" applyBasequery="false">
 				<basequery>TYPE:"ccm:saved_search"</basequery>

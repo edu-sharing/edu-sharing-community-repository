@@ -248,6 +248,18 @@ mds .mdsGroup{
       max-height:20px;
     }
   }
+  .workflow_container {
+    .caption{
+      display:flex;
+      .mds-workflow-status {
+        width: 14px;
+        height: 14px;
+        align-self: center;
+        margin-right: 10px;
+        border-radius: 50%;
+      }
+    }
+  }
   .templateLink,.licenseLink,.contributorsLink{
     font-weight: bold;
     text-transform: uppercase;
