@@ -194,12 +194,6 @@
 			<copy todir="${app.server.tomcat.webapps.alfresco.lib}">
 				<fileset dir="${lib.dir}" includes="${alfrescojars}"></fileset>
 			</copy>
-			<delete failonerror="false">
-		    		<fileset dir="${app.server.deploy.dir}/solr4/WEB-INF/lib" includes="${solr4jars_clean}"/>
-		    </delete>       
-			<copy failonerror="false" todir="${app.server.deploy.dir}/solr4/WEB-INF/lib">
-				<fileset dir="${lib.dir}" includes="${solr4jars}"></fileset>
-			</copy>
 			<delete>
 				<fileset dir="${app.server.tomcat.webapps.ccsearch.lib}" includes="${ccsearchjars_clean}"/>
 			</delete>		
