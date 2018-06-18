@@ -41,7 +41,7 @@
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
       </div>
-      <div class="collection-item clickable" *ngIf="shareToAll" tabindex="0" (keyup.enter)="setCollectionType('EDU_ALL')" (click)="setCollectionType('EDU_ALL')">
+      <div class="collection-item clickable" *ngIf="shareToAll && canInvite" tabindex="0" (keyup.enter)="setCollectionType('EDU_ALL')" (click)="setCollectionType('EDU_ALL')">
         <div class="iconLeft"> <i class="material-icons" style="color:#5C998F;">public</i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.PUBLIC' | translate}}</div>
