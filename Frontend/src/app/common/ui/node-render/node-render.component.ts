@@ -310,6 +310,7 @@ export class NodeRenderComponent implements EventListener{
                 this.getSequence();
                 jQuery('#nodeRenderContent').html(data.detailsSnippet);
                 this.postprocessHtml();
+                this.addComments();
                 this.loadNode();
                 this.isLoading = false;
             }
@@ -320,7 +321,15 @@ export class NodeRenderComponent implements EventListener{
             this.isLoading = false;
         })
   }
-
+  private addComments(){
+      jQuery('.edusharing_rendering_metadata_header').append(`
+      <div class="nodeDetails">
+        <div class="item" onclick="window.nodeRenderComponentRef.component.showComments()">
+          <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
+        </div>
+      </div>
+    `);
+  }
   private postprocessHtml() {
     if(!this.config.instant("rendering.showPreview",true)){
       jQuery('.edusharing_rendering_content_wrapper').hide();
@@ -329,13 +338,6 @@ export class NodeRenderComponent implements EventListener{
     if(this.isOpenable){
       jQuery('#edusharing_downloadadvice').hide();
     }
-      jQuery('.edusharing_rendering_metadata_header').append(`
-      <div class="nodeDetails">
-        <div class="item" onclick="window.nodeRenderComponentRef.component.showComments()">
-          <div>`+this._node.commentCount+`</div><i class="material-icons">message</i>
-        </div>
-      </div>
-    `);
       let element=jQuery('#edusharing_rendering_content_href');
       console.log(element);
       element.click((event:any)=>{

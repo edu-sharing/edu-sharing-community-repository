@@ -195,13 +195,22 @@ a.edusharing_rendering_content{
     color: $primary;
     display: flex;
     align-items:center;
+    min-width: 160px;
+    justify-content: flex-end;
     .item {
       display: flex;
       @include clickable();
       >i{
         padding-left: 5px;
       }
+      >div{
+        margin:0 10px;
+        span{
+          text-transform: uppercase;
+        }
+      }
     }
+
   }
 }
 div.download {

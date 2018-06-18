@@ -207,6 +207,8 @@
       "OTHER":"Anderer Fehler"
     }
   },
+  "COMMENTS_SINGLE":"Kommentar",
+  "COMMENTS_MULTIPLE":"Kommentare",
   "NODE_COMMENTS":{
     "TITLE":"Kommentare",
     "NEW_COMMENT_PLACEHOLDER":"Neuer Kommentar...",

@@ -176,6 +176,8 @@
       "OTHER":"none of the above"
     }
   },
+  "COMMENTS_SINGLE":"Comment",
+  "COMMENTS_MULTIPLE":"Comments",
   "NODE_COMMENTS":{
     "TITLE":"Comments",
     "NEW_COMMENT_PLACEHOLDER":"New comment...",
