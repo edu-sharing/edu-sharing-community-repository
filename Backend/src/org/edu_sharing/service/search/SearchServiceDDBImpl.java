@@ -388,7 +388,6 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
 		
 		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
-		System.out.println("queryId:" + queryId + " parameterId:" + parameterId + " value:" + value);
 		
 		List<String> facets = mds.getQueries().findQuery(queryId).findParameterByName(parameterId).getFacets();
 		String url = getUrl("/search",value,facets, 0, 0);
