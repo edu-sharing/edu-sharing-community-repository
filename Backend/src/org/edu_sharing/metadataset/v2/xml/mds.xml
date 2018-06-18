@@ -583,7 +583,7 @@
 			</group>
 		</groups>
 		<queries>
-			<basequery>-TYPE:"ccm:toolpermission" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*"</basequery>
+			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 			
 			<query join="AND"  id="ngsearch">
