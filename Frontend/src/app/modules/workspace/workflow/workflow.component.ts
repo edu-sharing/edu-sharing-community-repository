@@ -20,6 +20,7 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
+import {RestHelper} from "../../../common/rest/rest-helper";
 
 @Component({
   selector: 'workspace-workflow',
@@ -195,7 +196,8 @@ export class WorkspaceWorkflowComponent  {
       permission.authority={authorityName:authority,authorityType:RestConstants.AUTHORITY_TYPE_USER};
       permission.permissions=[RestConstants.PERMISSION_COORDINATOR];
       data.permissions.localPermissions.permissions.push(permission);
-      this.nodeService.setNodePermissions(this._nodeId,data.permissions.localPermissions,false).subscribe(()=>{
+      let permissions=RestHelper.copyAndCleanPermissions(data.permissions.localPermissions.permissions,data.permissions.localPermissions.inherited);
+      this.nodeService.setNodePermissions(this._nodeId,permissions,false).subscribe(()=>{
         this.saveWorkflow();
       },(error:any)=>this.toast.error(error));
     },(error:any)=>this.toast.error(error));
