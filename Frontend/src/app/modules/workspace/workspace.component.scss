@@ -69,7 +69,7 @@
 .addMobile{
   z-index:85;
   position:fixed;
-  right:50px;
+  right:25px;
   bottom:25px;
   display:none;
 }
@@ -79,9 +79,12 @@
   left: 50px;
   top: 13px+$mainnavHeight;
 }
+.dialogAddDesktop{
+  z-index:100;
+}
 .addDesktopMenu{
   top:42px+$mainnavHeight;
-  z-index:125;
+  z-index:105;
   .connectorBeta{
     height: auto;
     float: right;
@@ -179,7 +182,7 @@
   height:$workspaceBreadcrumbsHeight;
   z-index:96;
   background-color: #fff;
-  padding-top: 24px;
+  padding-top: 22px;
   padding-bottom: 20px;
   padding-right:50px;
 }
@@ -224,6 +227,11 @@
   }
   .timeout {
     display: none;
+  }
+  :host /deep/{
+    workspace-explorer .list{
+      padding-bottom:80px;
+    }
   }
 }
 

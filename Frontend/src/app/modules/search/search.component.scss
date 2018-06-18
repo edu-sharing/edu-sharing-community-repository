@@ -43,6 +43,7 @@ $sidenavWidth:300px;
 }
 .sidenav .row{
   margin:0 -30px;
+  margin-top: -10px;
 }
 .repositoryActive{
   background: $workspaceTreeSelectedBackgroundEffect;
@@ -60,17 +61,22 @@ $sidenavWidth:300px;
   margin-left: 15px;
 }
 .collections{
-  min-height: $cardSmallHeight+10px;
-  max-height: $cardSmallHeight+10px;
+  min-height: $listCardSmallHeight+10px;
+  max-height: $listCardSmallHeight+10px;
   overflow: hidden;
   margin-bottom:25px;
 }
 .collectionsMore{
-  min-height: unset;
-  max-height: unset;
+  min-height: auto;
+  max-height: none;
 }
 .extendedSearch a, .switchToCollections a, .switchToSearch a{
   padding: 5px;
+}
+.extendedSearch{
+  .mobile{
+    display:none;
+  }
 }
 .noResults,.noResultsMatched{
   color: $noResultsColor;
@@ -246,7 +252,6 @@ small-collection{
 .mdsSelect{
   float:left;
   width:calc(100% + 40px);
-  margin-bottom: 56px;
   >div {
     width: 100%;
     padding: 10px 10px;
@@ -283,14 +288,19 @@ small-collection{
   overflow-x: hidden;
   overflow-y: auto;
   width: $sidenavWidth;
-  padding-top: 0;
+  padding-top: 10px;
   top:$mainnavHeight+110px;
-  height: calc(100% - #{$mainnavHeight} - 110px);
+  height: calc(100% - #{$mainnavHeight} - 110px - 70px);
+  transition: $transitionNormal all ease;
   @include iosScrolling();
+}
+.sidenavHidden{
+  transform: translateX(-100%);
+  display: none;
 }
 .sidenavNoRepositories{
   top:$mainnavHeight+65px;
-  height: calc(100% - #{$mainnavHeight} - 65px);
+  height: calc(100% - #{$mainnavHeight} - 65px - 70px);
 }
 .contentSidenav{
   margin-left: $sidenavWidth;
@@ -454,14 +464,8 @@ listtable {
     margin-right: 20px;
   }
 }
-.sidenav{
-  .empty{
-    margin-top:20px;
-    text-align: center;
-    color: $textLight;
-    width:100%;
-  }
-  .apply, .manageSavedSearch {
+.sidenavContainer{
+  .apply{
     position: fixed;
     background-color: $backgroundColor;
     width:$sidenavWidth;
@@ -469,10 +473,30 @@ listtable {
     left:0;
     bottom:0;
     padding:20px 8px;
-    z-index: 1;
+    z-index: 25;
     actionbar,a{
       position: relative;
       top: 5px;
+    }
+  }
+}
+.sidenav{
+  .empty{
+    margin-top:20px;
+    text-align: center;
+    color: $textLight;
+    width:100%;
+  }
+  .savedSearch {
+    display:flex;
+    flex-direction: column;
+    listtable{
+      flex-grow: 1;
+    }
+    .manageSavedSearch {
+      background-color: $backgroundColor;
+      width: 100%;
+      text-align: center;
     }
   }
   input[type=search]{
@@ -496,12 +520,12 @@ div.dialog.darken {
 :host /deep/{
   .sidenav .list > div{
     margin:0 -20px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
   }
-  .sidenav .actionAlwaysCaption{
+  .sidenavContainer .actionAlwaysCaption{
     display: inline-block!important;
   }
-  .sidenav actionbar .moreOpen{
+  .sidenavContainer actionbar .moreOpen{
     left: 0px;
     top: -56px;
     width: 220px;
@@ -523,6 +547,14 @@ div.dialog.darken {
 @media all and (max-width: $mobileWidth) {
   .switchToCollections{
     display: none;
+  }
+  .extendedSearch{
+    span{
+      display:none
+    }
+    .mobile{
+      display:inline-block;
+    }
   }
 }
 @media (pointer: coarse) {
@@ -552,9 +584,7 @@ div.dialog.darken {
     .moreRepositories .collection-item{
       text-align: center;
     }
-    .sidenav{
-      @include materialShadow();
-    }
+
     .content_wrapper {
         margin: 0;
     }

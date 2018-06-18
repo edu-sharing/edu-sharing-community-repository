@@ -36,10 +36,19 @@
   import {CollectionChooserComponent} from "./common/ui/collection-chooser/collection-chooser.component";
   import {InfobarComponent} from "./common/ui/infobar/infobar.component";
   import {TimePipe} from "./common/ui/time.pipe";
+  import {AutocompleteComponent} from "./common/ui/autocomplete/autocomplete.component";
+  import {AuthoritySearchInputComponent} from "./common/ui/authority-search-input/authority-search-input.component";
+  import {GlobalProgressComponent} from "./common/ui/global-progress/global-progress.component";
+  import {SpinnerSmallComponent} from "./common/ui/spinner-small/spinner-small.component";
+  import {KeysPipe} from './common/keys.pipe';
+  import {InfiniteScrollDirective} from './common/ui/infinite-scroll.directive';
+  import {NodeInfoComponent} from "./common/ui/node-info/node-info.component";
+  import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
 
 export const DECLARATIONS = [
       RestTestComponent,
       MdsTestComponent,
+      GlobalProgressComponent,
       RestNodeTestComponent,
       RestArchiveTestComponent,
       RestCollectionTestComponent,
@@ -53,14 +62,18 @@ export const DECLARATIONS = [
       TimePipe,
       PermissionNamePipe,
       AuthorityNamePipe,
+      AutocompleteComponent,
+      AuthoritySearchInputComponent,
       NodeTitlePipe,
       FileComponent,
       SpinnerComponent,
+      SpinnerSmallComponent,
       ListTableComponent,
       FileChooserComponent,
       CollectionChooserComponent,
       BreadcrumbsComponent,
       ActionbarComponent,
+      NodeInfoComponent,
       SmallCollectionComponent,
       MainNavComponent,
       UserProfileComponent,
@@ -75,5 +88,8 @@ export const DECLARATIONS = [
       ModalDialogToastComponent,
       ToolListComponent,
       ToucheventDirective,
-      BannerComponent
+      BannerComponent,
+      InfiniteScrollDirective,
+      KeysPipe,
+      CookieInfoComponent
     ];

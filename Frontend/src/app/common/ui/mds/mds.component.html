@@ -1,7 +1,7 @@
 <global-progress *ngIf="globalProgress && !embedded"></global-progress>
-<div class="dialog darken" *ngIf="!embedded" [@fade]="this"></div>
+<div class="dialog dialogMdsGlobal darken" *ngIf="!embedded" [@fade]="this"></div>
 <div *ngIf="!embedded">
-  <div id="jumpmarks" class="card-jumpmarks" [innerHTML]="jumpmarks" *ngIf="(currentNode || createType) && jumpmarksCount>1">
+  <div #jumpmarksRef class="card-jumpmarks" [innerHTML]="jumpmarks" *ngIf="(currentNode || createType) && jumpmarksCount>1">
 
   </div>
   <div class="card center-card card-action card-wide card-high mdsMainCard"
@@ -12,7 +12,8 @@
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div class="card-title" *ngIf="currentNode">{{currentNode.name}}</div>
       <div class="card-title" *ngIf="!currentNode">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
-      <div class="card-scroll mdsCard" id="mdsScrollContainer">
+      <div class="card-scroll mdsCard" id="mdsScrollContainer" #mdsScrollContainer>
+        <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()" [style.top]="mdsScrollContainer.scrollTop+'px'"></div>
         <div [innerHTML]="rendered"></div>
 
       </div>
@@ -26,8 +27,18 @@
 </div>
 <div *ngIf="embedded">
   <div class="mdsEmbeddedGroup">
-    <div [innerHTML]="rendered"></div>
+    <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()"></div>
+    <div [innerHTML]="rendered" *ngIf="rendered"></div>
     <div class="reset" *ngIf="mode=='search' && rendered" (click)="resetValues()">{{'CLEAR_FILTERS' | translate}}</div>
     <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
   </div>
 </div>
+<modal-dialog
+              [priority]="2"
+              [title]="dialogTitle"
+              [message]="dialogMessage"
+              [isCancelable]="true"
+              [messageParameters]="dialogParameters"
+              [buttons]="dialogButtons"
+              (onCancel)="dialogTitle=null"
+></modal-dialog>

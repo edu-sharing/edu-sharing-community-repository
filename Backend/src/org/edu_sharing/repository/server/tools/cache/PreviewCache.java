@@ -10,8 +10,11 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.io.FileUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.PreviewServlet;
 import org.springframework.context.ApplicationContext;
 
 import antlr.collections.List;
@@ -36,14 +39,21 @@ public class PreviewCache {
 		ContentStore store = (ContentStore) applicationContext.getBean("fileContentStore");
 		return new File(store.getRootLocation()).getParentFile();
     }
-	public static File getFileForNode(String nodeId,int width,int height){
-		File folder=new File(getCacheStore(),width+"x"+height);
+	public static File getFileForNode(String nodeId,int width,int height,boolean createDirectories){
+		File folder=new File(getCacheStore(),width==-1 ? "full_"+PreviewServlet.MAX_IMAGE_SIZE : (width+"x"+height));
 		if(!folder.exists()){
-			folder.mkdir();
+			if(createDirectories)
+				folder.mkdir();
+			else
+				return null;
 		}
+		
 		folder=new File(folder,nodeId.substring(0,4));
-		if(!folder.exists()){
-			folder.mkdir();
+		if(!folder.exists() && createDirectories){
+			if(createDirectories)
+				folder.mkdir();
+			else
+				return null;
 		}
 		return new File(folder,nodeId+".jpg");
 	}
@@ -57,14 +67,22 @@ public class PreviewCache {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		NodeService nodeService = serviceRegistry.getNodeService();
+		
 		ArrayList<String> ids=new ArrayList<String>();
 		ids.add(nodeId);
-		for(ChildAssociationRef ref : nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId))){
-			ids.add(ref.getChildRef().getId());
+		
+		//only for IO's
+		if(nodeService.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).
+				equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
+			for(ChildAssociationRef ref : nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId))){
+				ids.add(ref.getChildRef().getId());
+			}
 		}
 		for(String id : ids){
-			for(int i=0;i<CACHE_SIZES_WIDTH.length;i++)
-				getFileForNode(id, CACHE_SIZES_WIDTH[i], CACHE_SIZES_HEIGHT[i]).delete();
+			for(int i=0;i<CACHE_SIZES_WIDTH.length;i++) {
+				File file=getFileForNode(id, CACHE_SIZES_WIDTH[i], CACHE_SIZES_HEIGHT[i],false);
+				if(file!=null) file.delete();
+			}
 		}
 	}
 	public static int getNumberOfPreviews() {

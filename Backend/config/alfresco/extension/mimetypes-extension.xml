@@ -396,6 +396,7 @@
             <extension display="JAR">jar</extension>
             <extension display="EAR">ear</extension>
             <extension display="moodle">mbz</extension>
+            <extension display="h5p">h5p</extension>
          </mimetype>
 
          <mimetype mimetype="image/vnd.dwg" display="AutoCAD Drawing">

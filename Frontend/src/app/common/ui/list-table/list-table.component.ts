@@ -21,6 +21,9 @@ import {ListItem} from "../list-item";
 import {UIHelper} from "../ui-helper";
 import {Helper} from "../../helper";
 import {RestNetworkService} from "../../rest/services/rest-network.service";
+import {ColorHelper} from '../color-helper';
+import {RestLocatorService} from '../../rest/services/rest-locator.service';
+import {UIConstants} from "../ui-constants";
 
 @Component({
   selector: 'listTable',
@@ -58,10 +61,9 @@ export class ListTableComponent implements EventListener{
   private optionsAlways:OptionItem[]=[];
 
   private _nodes : any[];
-  private lastScroll: number;
-  private static MIN_SCROLL_TIME=1000;
   private animateNode: Node;
   private repositories: Repository[];
+  private sortMenu = false;
 
   /**
    * Set the current list of nodes to render
@@ -119,6 +121,10 @@ export class ListTableComponent implements EventListener{
    */
   @Input() hasIcon : boolean;
   /**
+   * total item count, when used, the header of the table will display it
+   */
+  @Input() totalCount : number;
+  /**
    * is it possible to load more items? (Otherwise, the icon to laod more is hidden)
    */
   @Input() hasMore : boolean;
@@ -145,6 +151,12 @@ export class ListTableComponent implements EventListener{
    * Can an individual item be clicked
    */
   @Input() isClickable : boolean;
+  /**
+   *  a custom function to validate if a given node has permissions or should be displayed as "disabled"
+   *  Function will get the node object as a parameter and should return
+   *  {status:boolean, message:string[,button:{click:function,caption:string,icon:string]}
+   */
+  @Input() validatePermissions : Function;
   /**
    * Hint that the "apply node" mode is active (when reurl is used)
    */
@@ -220,6 +232,11 @@ export class ListTableComponent implements EventListener{
    *  Called with same parameters as onDrop event
    */
   @Input() canDrop:Function=()=>{return true};
+  /**
+   *  Prevent key events (like when the parent has open windows)
+   */
+  @Input() preventKeyevents=false;
+
   // Callbacks
 
   /**
@@ -282,9 +299,9 @@ export class ListTableComponent implements EventListener{
   private dropdownLeft : string;
   private dropdownTop : string;
   private dropdownBottom : string;
+  private dropdownRight : string;
   @ViewChild('dropdown') dropdownElement : ElementRef;
-
-
+  @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
   public dropdown : Node;
   public id : number;
@@ -300,14 +317,17 @@ export class ListTableComponent implements EventListener{
               private changes : ChangeDetectorRef,
               private storage : TemporaryStorageService,
               private network : RestNetworkService,
+              private locator : RestLocatorService,
               private toast : Toast,
               private frame : FrameEventsService,
               private sanitizer: DomSanitizer) {
     this.id=Math.random();
     frame.addListener(this);
-
-    this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
-      this.repositories=data.repositories;
+    this.locator.locateApi().subscribe(()=>{
+      this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
+        this.repositories=data.repositories;
+        this.cd.detectChanges();
+      });
     });
   }
   onEvent(event:string,data:any){
@@ -317,12 +337,17 @@ export class ListTableComponent implements EventListener{
   }
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.code=="KeyA" && (event.ctrlKey || this.ui.isAppleCmd()) && !KeyEvents.eventFromInputField(event)){
+    if(event.code=="KeyA" && (event.ctrlKey || this.ui.isAppleCmd()) && !KeyEvents.eventFromInputField(event) && !this.preventKeyevents){
       this.toggleAll();
       event.preventDefault();
       event.stopPropagation();
     }
     if(event.key=="Escape"){
+      if(this.dropdown){
+        this.dropdown=null;
+        event.preventDefault();
+        event.stopPropagation();
+      }
       if(this.reorderDialog) {
         this.closeReorder(false);
         event.preventDefault();
@@ -342,6 +367,9 @@ export class ListTableComponent implements EventListener{
   public delete(node:any){
     this.onDelete.emit(node);
   }
+    public isBrightColorCollection(color : string){
+        return ColorHelper.getColorBrightness(color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
+    }
   public toggleAll(){
     if(this.selectedNodes.length==this._nodes.length){
       this.selectedNodes=[];
@@ -352,33 +380,30 @@ export class ListTableComponent implements EventListener{
     }
   }
   private exchange(node1:Node,node2:Node){
-    let i1,i2;
-    let i=0;
-    for(let node of this._nodes){
-      let id=node.ref.id;
-      if(id==node1.ref.id)
-        i1=i;
-      if(id==node2.ref.id)
-        i2=i;
-      i++;
-    }
+    let i1=RestHelper.getRestObjectPositionInArray(node1,this._nodes);
+    let i2=RestHelper.getRestObjectPositionInArray(node2,this._nodes);
+
     this._nodes.splice(i1,1,node2);
     this._nodes.splice(i2,1,node1);
   }
   private allowDrag(event:any,target:Node){
     if(this.orderElements){
+      event.preventDefault();
       let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
-      if(source.view==this.id && source.nodes.length==1 && source.nodes[0].ref.id!=target.ref.id){
+      if(source.view==this.id && source.node.ref.id!=target.ref.id){
         this.orderElementsActive=true;
         this.orderElementsActiveChange.emit(true);
-        this.exchange(source.nodes[0],target);
+        this.exchange(source.node,target);
         return;
       }
     }
     if(UIHelper.handleAllowDragEvent(this.storage,this.ui,event,target,this.canDrop)) {
+      event.preventDefault();
       this.dragHover = target;
     }
-
+  }
+  private noPermissions(node:any){
+    return this.validatePermissions!=null && this.validatePermissions(node).status==false;
   }
   private closeReorder(save:boolean){
     this.reorderDialog=false;
@@ -430,6 +455,8 @@ export class ListTableComponent implements EventListener{
       let source=this.storage.get(TemporaryStorageService.LIST_DRAG_DATA);
       if(source.view==this.id && source.nodes.length==1){
         this.onOrderElements.emit(this._nodes);
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
     }
@@ -446,6 +473,7 @@ export class ListTableComponent implements EventListener{
     }
   }
   private dragStart(event:any,node : Node){
+
     if(!this.dragDrop)
       return;
     if(this.getSelectedPos(node)==-1) {
@@ -455,7 +483,8 @@ export class ListTableComponent implements EventListener{
         this.selectedNodes=[node];
     }
     let nodes=this.selectedNodes.length ? this.selectedNodes : [node];
-    event.dataTransfer.setData("node",JSON.stringify(nodes));
+
+    event.dataTransfer.setData("text",JSON.stringify(nodes));
     event.dataTransfer.effectAllowed = 'all';
     let name="";
     for(let node of nodes){
@@ -465,14 +494,16 @@ export class ListTableComponent implements EventListener{
     }
     this.currentDrag=name;
     this.currentDragCount=this.selectedNodes.length ? this.selectedNodes.length : 1;
-    event.dataTransfer.setDragImage(this.drag.nativeElement,100,20);
-    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,{nodes:nodes,view:this.id});
+    try {
+      event.dataTransfer.setDragImage(this.drag.nativeElement, 100, 20);
+    }catch(e){}
+    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,{node:node,nodes:nodes,view:this.id});
     this.onSelectionChanged.emit(this.selectedNodes);
   }
   private dragStartColumn(event:any,index:number,column : ListItem){
     if(!this.allowDragColumn || index==0)
       return;
-    event.dataTransfer.setData("column",index);
+    event.dataTransfer.setData("text",index);
     event.dataTransfer.effectAllowed = 'all';
     this.currentDragColumn=column;
   }
@@ -483,9 +514,21 @@ export class ListTableComponent implements EventListener{
   private canBeSorted(sortBy : string){
     return RestConstants.POSSIBLE_SORT_BY_FIELDS.indexOf(sortBy)!=-1;
   }
-  private setSorting(sortBy : string){
+  private getSortableColumns(){
+    let result:ListItem[]=[];
+    for(let col of this.columnsAll){
+      if(this.canBeSorted(col.name))
+        result.push(col);
+    }
+    return result;
+  }
+  private setSorting(sortBy : string,isPrimaryElement : boolean){
     if(!this.canBeSorted(sortBy))
       return;
+    if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*3){
+      this.sortMenu=true;
+      return;
+    }
     let sortAscending=true;
     if(sortBy==this.sortBy)
       sortAscending=!this.sortAscending;
@@ -496,15 +539,16 @@ export class ListTableComponent implements EventListener{
     return RestHelper.getTitle(node);
   }
   private callOption(option : OptionItem,node:Node){
-    if(!this.optionIsValid(option,node))
-      return;
+    if(!this.optionIsValid(option,node)) {
+      if(option.disabledCallback) {
+        option.disabledCallback(node);
+      }
+        return;
+    }
     option.callback(node);
     this.dropdown=null;
   }
   public scroll(){
-    if(Date.now()-this.lastScroll<ListTableComponent.MIN_SCROLL_TIME)
-      return;
-    this.lastScroll=Date.now();
     this.loadMore.emit();
   }
   private contextMenu(event:any,node : Node){
@@ -522,8 +566,12 @@ export class ListTableComponent implements EventListener{
       if(!this.dropdownElement || !this.dropdownElement.nativeElement)
         return;
       let y=this.dropdownElement.nativeElement.getBoundingClientRect().bottom;
+      let right=this.dropdownElement.nativeElement.getBoundingClientRect().right;
+      if(right>window.innerWidth){
+        this.dropdownRight="0";
+        this.dropdownLeft="auto";
+      }
       if(y>window.innerHeight){
-        //this.dropdownBottom=window.innerHeight-event.clientY+"px";
         this.dropdownBottom="0";
         this.dropdownTop="auto";
       }
@@ -561,11 +609,16 @@ export class ListTableComponent implements EventListener{
     this.dropdownLeft=null;
     this.dropdownTop=null;
     this.dropdownBottom=null;
+    this.dropdownRight=null;
     if(this.dropdown==node)
       this.dropdown=null;
     else {
       this.dropdown = node;
       this.onUpdateOptions.emit(node);
+      setTimeout(()=>{
+        UIHelper.setFocusOnDropdown(this.dropdownElement);
+        UIHelper.scrollSmoothElement(this.dropdownContainerElement.nativeElement.scrollHeight,this.dropdownContainerElement.nativeElement);
+      });
     }
 
     /*
@@ -607,8 +660,8 @@ export class ListTableComponent implements EventListener{
     let pos=this.getSelectedPos(node);
     // select from-to range via shift key
     if(fromCheckbox && pos==-1 && this.ui.isShiftCmd() && this.selectedNodes.length==1){
-      let pos1=NodeHelper.getNodePositionInArray(node,this._nodes);
-      let pos2=NodeHelper.getNodePositionInArray(this.selectedNodes[0],this._nodes);
+      let pos1=RestHelper.getRestObjectPositionInArray(node,this._nodes);
+      let pos2=RestHelper.getRestObjectPositionInArray(this.selectedNodes[0],this._nodes);
       let start=pos1<pos2 ? pos1 : pos2;
       let end=pos1<pos2 ? pos2 : pos1;
       console.log("from "+start+" to "+end);
@@ -627,7 +680,6 @@ export class ListTableComponent implements EventListener{
     this.onSelectionChanged.emit(this.selectedNodes);
     this.changes.detectChanges();
 
-
   }
   private getAttribute(data : any,item : ListItem) : SafeHtml{
     return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
@@ -641,7 +693,7 @@ export class ListTableComponent implements EventListener{
   private getSelectedPos(selected : Node) : number{
     if(!this.selectedNodes)
       return -1;
-    return NodeHelper.getNodePositionInArray(selected,this.selectedNodes);
+    return RestHelper.getRestObjectPositionInArray(selected,this.selectedNodes);
   }
   private optionIsValid(optionItem: OptionItem, node: Node) {
     if(optionItem.enabledCallback) {
@@ -659,9 +711,7 @@ export class ListTableComponent implements EventListener{
     this.onAddElement.emit();
   }
   public askCCPublish(event:any,node : Node){
-    let mail=node.createdBy.firstName+" "+node.createdBy.lastName+"<"+node.createdBy.mailbox+">";
-    let subject=this.translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
-    window.location.href="mailto:"+mail+"?subject="+encodeURIComponent(subject);
+    NodeHelper.askCCPublish(this.translate,node);
     event.preventDefault();
     event.stopPropagation();
   }

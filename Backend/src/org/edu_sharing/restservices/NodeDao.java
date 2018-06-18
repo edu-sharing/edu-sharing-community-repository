@@ -13,17 +13,21 @@ import java.util.Map.Entry;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ImageTool;
@@ -456,8 +460,9 @@ public class NodeDao {
 			throws DAOException {
 
 		try {
-			nodeService.copyNode(sourceId, nodeId, withChildren);
-	
+			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, withChildren);
+			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
+					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 			return new NodeDao(repoDao, sourceId);
 			
 		} catch (Throwable t) {
@@ -634,7 +639,9 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-
+	public List<String> getAspectsNative(){
+		return this.aspects;
+	}
 	public Node asNode() throws DAOException {
 
 		Node data = new Node();
@@ -824,7 +831,7 @@ public class NodeDao {
 		});
 	}
 
-	public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy) throws DAOException {
+	public void setPermissions(ACL permissions, String mailText, Boolean sendMail, Boolean sendCopy, boolean createHandle) throws DAOException {
 		
 		try {
 			
@@ -851,7 +858,7 @@ public class NodeDao {
 					nodeId, 
 					aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]), 
 					permissions.isInherited(), 
-					mailText, sendMail, sendCopy);
+					mailText, sendMail, sendCopy,createHandle);
 			
 			
 		} catch (Throwable t) {
@@ -880,10 +887,7 @@ public class NodeDao {
 	
 	public NodeRef getRef() {
 
-		NodeRef nodeRef = new NodeRef();
-		nodeRef.setRepo(repoDao.getId());
-		nodeRef.setId(getId());
-		nodeRef.setHomeRepo(repoDao.isHomeRepo());		
+		NodeRef nodeRef = createNodeRef(repoDao,nodeId);
 		String storeProtocol = (String)this.nodeProps.get(CCConstants.SYS_PROP_STORE_PROTOCOL);
 		if(Constants.archiveStoreRef.getProtocol().equals(storeProtocol)){
 			nodeRef.setArchived(true);
@@ -893,9 +897,12 @@ public class NodeDao {
 	}
 
 	private NodeRef getParentRef() {
+		return createNodeRef(repoDao,getParentId());
+	}
+	public static NodeRef createNodeRef(RepositoryDao repoDao,String nodeId) {
 		NodeRef parentRef = new NodeRef();
 		parentRef.setRepo(repoDao.getId());
-		parentRef.setId(getParentId());
+		parentRef.setId(nodeId);
 		parentRef.setHomeRepo(repoDao.isHomeRepo());		
 		return parentRef;
 	}
@@ -1402,7 +1409,9 @@ public class NodeDao {
  	}
 
  	public static List<Node> sortAndFilterByType(RepositoryDao repoDao, List<NodeRef> children,SortDefinition sort, List<String> filter,Filter propFilter) throws DAOException {
-    	List<NodeDao> nodes=new ArrayList<NodeDao>(children.size());
+		DictionaryService dictionaryService = ((ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY)).getDictionaryService();
+
+		List<NodeDao> nodes=new ArrayList<NodeDao>(children.size());
     	for(NodeRef child : children){
 			nodes.add(NodeDao.getNode(repoDao, child.getId(),propFilter));
     	}
@@ -1412,7 +1421,14 @@ public class NodeDao {
     		if(".DS_Store".equals(name) || "._.DS_Store".equals(name)){
         		nodes.remove(i);
         		i--;
+        		continue;
         	}
+        	// filter the metadata template file
+        	if(nodes.get(i).getAspectsNative().contains(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE)) {
+				nodes.remove(i);
+				i--;
+				continue;
+			}
     		if(type==null)
     			continue;
     		if(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(type) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(type)){
@@ -1441,11 +1457,16 @@ public class NodeDao {
 					for(SortDefinitionEntry criteria : sort.getSortDefinitionEntries()){
 						int value=0;
 						String property=CCConstants.getValidGlobalName(criteria.getProperty());
+
 						Object prop1=null,prop2=null;
 							
 						prop1=o1props.get(property);
 						prop2=o2props.get(property);
-							
+						if(o1props.containsKey(property+CCConstants.ISO8601_SUFFIX)) {
+							prop1=o1props.get(property+CCConstants.ISO8601_SUFFIX);
+							prop2=o2props.get(property+CCConstants.ISO8601_SUFFIX);
+						}
+						
 						// TODO: Use Node and nodeProps to get values for sorting!
 						
 						if(prop1==null || prop2==null){
@@ -1461,6 +1482,14 @@ public class NodeDao {
 						}
 						if(prop2 instanceof String) {
 							prop2=((String) prop2).toLowerCase();
+						}
+						try {
+							String fieldType = dictionaryService.getProperty(QName.createQName(property)).getDataType().getJavaClassName();
+
+							prop1=castPropertyByType(fieldType,prop1);
+							prop2=castPropertyByType(fieldType,prop2);
+
+						}catch(Throwable t){ //  conversion can fail in some cases (null pointer, wrong data types stored
 						}
 						if(criteria.isAscending())
 							value=((Comparable)prop1).compareTo(prop2);
@@ -1517,6 +1546,21 @@ public class NodeDao {
 		}
 		return filtered;
 	}
+
+	private static Object castPropertyByType(String fieldType, Object prop) {
+		if(prop==null)
+			return null;
+		if(prop instanceof String){
+			String str= (String) prop;
+			if(fieldType.equals(Integer.class.getName())){
+				if(str.isEmpty())
+					return Integer.valueOf(0);
+				return Integer.valueOf(str);
+			}
+		}
+		return prop;
+	}
+
 	public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
 		try{
 			NotificationServiceFactory.getNotificationService(repoDao.getApplicationInfo().getAppId())
@@ -1529,7 +1573,7 @@ public class NodeDao {
 	/** store a new search node 
 	 * @return 
 	 * @throws DAO */
-	public static NodeDao saveSearch(RepositoryDao repoDao, String mdsId, String query, String name,
+	public static NodeDao saveSearch(String repoId, String mdsId, String query, String name,
 			List<MdsQueryCriteria> parameters,boolean replace) throws DAOException {
 		try{
     		String parent = RepositoryDao.getHomeRepository().getUserSavedSearch();
@@ -1537,7 +1581,7 @@ public class NodeDao {
     		HashMap<String, String[]> props=new HashMap();
     		props.put(CCConstants.CM_NAME, new String[]{name});
     		props.put(CCConstants.LOM_PROP_GENERAL_TITLE, new String[]{name});
-    		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY, new String[]{repoDao.getId()});
+    		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY, new String[]{repoId});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_MDS, new String[]{mdsId});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY, new String[]{query});
     		props.put(CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS, new String[]{Json.pretty(parameters)});
@@ -1546,7 +1590,7 @@ public class NodeDao {
     			return parentDao.createChild(CCConstants.CCM_TYPE_SAVED_SEARCH, null, props, false);
     		}catch(DAOException e){
     			if(e.getCause() instanceof DuplicateChildNodeNameException && replace){
-	    			NodeDao old = NodeDao.getByParent(repoDao, parent, CCConstants.CCM_TYPE_SAVED_SEARCH, NodeServiceHelper.cleanupCmName(name));
+	    			NodeDao old = NodeDao.getByParent(RepositoryDao.getHomeRepository(), parent, CCConstants.CCM_TYPE_SAVED_SEARCH, NodeServiceHelper.cleanupCmName(name));
 	    			old.changeProperties(props);
 	    			return old;
     			}
@@ -1580,5 +1624,33 @@ public class NodeDao {
 			nodeService.addAspect(nodeId, CCConstants.getValidGlobalName(aspect));
 		}
 	}
-
+	public boolean getTemplateStatus() throws DAOException {
+		Object value = this.getNativeProperties().getOrDefault(CCConstants.CCM_PROP_METADATA_PRESETTING_STATUS,false);
+		if(value instanceof String){
+			return Boolean.valueOf((String) value);
+		}
+		return (boolean)value;
+	}
+	public NodeDao getTemplateNode() throws DAOException {
+		try {
+			String template = nodeService.getTemplateNode(nodeId,false);
+			if(template==null)
+				return null;
+			return NodeDao.getNode(repoDao, template,Filter.createShowAllFilter());
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+	public NodeDao changeTemplateProperties(Boolean enable,HashMap<String, String[]> properties) throws DAOException {
+		try {
+			nodeService.setTemplateStatus(nodeId, enable);
+			if(enable) {
+				nodeService.setTemplateProperties(nodeId, transformProperties(properties));
+			}
+			return getTemplateNode();
+		}
+		catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
 }

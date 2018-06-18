@@ -78,14 +78,12 @@ $imagePath: '../../../../assets/images/collections/';
 }
 
 .collections-master-div {
-  height:100%;
+  min-height: 100%;
   margin:auto;
   max-width:600px;
-  display:table;
-  padding: 20px 0px;
-  margin-top: $mainnavHeight;
-}
-.collections-master-div-mainnav{
+  display:flex;
+  align-items: center;
+  padding-top: $mainnavHeight;
 }
 .createCollection{
   background-color: #fff;
@@ -150,23 +148,37 @@ $imagePath: '../../../../assets/images/collections/';
     }
   }
 }
+.collection-permission-container{
+  .title{
+    font-size:140%;
+    font-weight: bold;
+    padding-bottom: 20px;
+  }
+  .description{
+    color:$textLight;
+    font-size:110%;
+    padding-bottom: 20px;
+  }
+  .status{
+    margin: -20px;
+    margin-top: 20px;
+    padding: 6px 20px;
+    background: $actionDialogBackground;
+  }
+}
 .collection-new-container {
-  display:table-cell;
-  vertical-align: middle;
-    margin: 0px auto;
-    max-width: 600px;
-    min-width: 300px;
+  display:flex;
+  flex-direction: column;
+  margin: 0px auto;
+  max-width: 600px;
+  min-width: 300px;
   width:100%;
-    /*
-    -webkit-box-shadow: 0px 4px 5px 0px rgba(0,0,0,0.5);
-    -moz-box-shadow: 0px 4px 5px 0px rgba(0,0,0,0.5);
-    box-shadow: 0px 4px 5px 0px rgba(0,0,0,0.5);
-    */
 }
 .collection-basic{
   width: 350px;
+  max-height:770px;
   margin-left: -175px!important;
-  left:auto;
+  left:50%;
   .card-scroll{
     padding-top:0;
     padding-left:0;
@@ -196,7 +208,6 @@ $imagePath: '../../../../assets/images/collections/';
   float:none;
 }
 .title{
-  color:#fff;
   font-size:120%;
 }
 .collectionShadow{
@@ -209,11 +220,20 @@ $imagePath: '../../../../assets/images/collections/';
 }
 
 .collection-new-preview-infoarea {
-    min-height: 120px;
-    padding: 16px;
-    color: white;
+  min-height: 120px;
+  padding: 16px;
+  color: #fff;
+  transition: $transitionNormal all;
+  @include placeholder {
+    color: #ccc;
+  }
 }
-
+.dark-color{
+  color:#000;
+  @include placeholder {
+    color: #333;
+  }
+}
 .collection-new-preview-headline {
     font-size: 200%;
 }
@@ -343,6 +363,7 @@ $imagePath: '../../../../assets/images/collections/';
 .card-image-preview {
     width: 100%;
     height: 240px;
+    object-fit: cover;
 }
 
 .image-upload-field {
@@ -394,14 +415,11 @@ input[type="radio"] {
     color: #FFFFFF;
 }
 
-/* für schmale Screens */
-
-@media screen and (max-height: $mobileHeight){
-  .card:not(.card-low), .card-high {
+@media screen and (max-height: $mobileHeight+$mobileStage*2){
+  .card, .card-high {
     top:$mainnavHeight+75px;
   }
 }
-
 @media screen and (max-width: $mobileWidth+$mobileStage*3){
   .card-high{
     top:15%;
@@ -436,5 +454,10 @@ input[type="radio"] {
         justify-content: center;
       }
     }
+  }
+}
+@media screen and (max-width: $mobileWidth+$mobileStage*3) and (max-height: $mobileHeight+$mobileStage*2) {
+  .createContainer .createProgress{
+    display: none;
   }
 }

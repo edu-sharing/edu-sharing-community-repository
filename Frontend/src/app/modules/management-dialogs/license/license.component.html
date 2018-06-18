@@ -22,7 +22,7 @@
                 <label for="CC_02">
                   <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
                   <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
-                  <h5><a [href]="licenseUrls.CC_0" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -32,7 +32,7 @@
                 <label for="PDM2">
                   <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
-                  <h5><a [href]="licenseUrls.PDM" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -45,7 +45,7 @@
                 <label for="CC_BY">
                   <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_RADIO' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_INFO' | translate}}</h5>
-                  <h5><a [href]="licenseUrls.CC_BY" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a [href]="getLicenseUrlVersion('CC_BY')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -55,7 +55,7 @@
                 <label for="CC_BY_SA">
                   <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_RADIO' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_INFO' | translate}}</h5>
-                  <h5><a [href]="licenseUrls.CC_BY" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a [href]="getLicenseUrlVersion('CC_BY_SA')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -76,7 +76,7 @@
           </select>
             <div>
           <div *ngIf="type=='CC_BY'" class="cc">
-            <h5 class="ccAbout"><a [href]="licenseUrls.CC_BY_ABOUT" target="_blank">{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate}}</a></h5>
+            <h5 class="ccAbout"><a [href]="getLicenseUrlVersion('CC_BY_ABOUT')" target="_blank">{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate}}</a></h5>
             <div *ngIf="isAllowedLicense('CC_BY_SA') || isAllowedLicense('CC_BY_ND')">
               <h4>{{'WORKSPACE.LICENSE.CC.SHARE' | translate}}</h4>
               <h5>{{'WORKSPACE.LICENSE.CC.SHARE_INFO' | translate}}</h5>
@@ -120,7 +120,7 @@
                     <label for="CC_0">
                       <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
                       <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
-                      <h5><a [href]="licenseUrls.CC_0" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                      <h5><a [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                     </label>
                   </div>
                 </div>
@@ -130,7 +130,7 @@
                     <label for="PDM">
                       <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
                       <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
-                      <h5><a [href]="licenseUrls.PDM" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                      <h5><a [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                     </label>
                   </div>
                 </div>
@@ -241,10 +241,23 @@
           </div>
         </div>
         <div class="licenseCheckbox">
-          <input #releaseCheckbox type="checkbox" class="filled-in release" [(ngModel)]="release" id="releaseCb" [disabled]="!allowRelease">
+         <!-- <input #releaseCheckbox type="checkbox" class="filled-in release" [(ngModel)]="release" id="releaseCb" [disabled]="!allowRelease">
           <label *ngIf="_nodes.length==1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE' | translate}}</label>
-          <label *ngIf="_nodes.length!=1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE_MULTI' | translate:{count:_nodes.length} }}</label>
-
+          <label *ngIf="_nodes.length!=1" class="release" for="releaseCb">{{'WORKSPACE.LICENSE.RELEASE_MULTI' | translate:{count:_nodes.length} }}</label>-->
+          <div class="switch-release">
+            <div class="switch">
+                <label class="strong" class="release"><input #releaseCheckbox type="checkbox" [disabled]="!allowRelease" [(ngModel)]="release">
+                    <span class="lever"></span>
+                    {{'WORKSPACE.LICENSE.RELEASE'+(_nodes.length>1 ? '_MULTI' : '') | translate:{count:_nodes.length} }}
+                 </label>
+            </div>
+            <div class="doi" *ngIf="allowDOI()">
+              <input type="checkbox" [disabled]="doiDisabled" [(ngModel)]="doiActive" class="filled-in" id="doi">
+                <label for="doi" class="strong">{{'WORKSPACE.SHARE.DOI' | translate}}</label>
+                <span>{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</span>
+            </div>
+          </div>
+          
           <input #contactCheckbox type="checkbox" class="filled-in" [(ngModel)]="contact" id="contactCb"><label for="contactCb">{{'WORKSPACE.LICENSE.CONTACT' | translate}}</label>
         </div>
     </div>

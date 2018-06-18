@@ -6,15 +6,13 @@
       <spinner *ngIf="loading"></spinner>
       <div class="card-scroll" *ngIf="!loading">
         <div class="inputs">
-        <autocomplete
-          [id]="searchAuthority"
-          [inputMinLength]="1"
+        <authority-search-input
           [disabled]="!status.hasReceiver"
-          (addItem)="addSuggestion($event)"
+          [globalSearch]="globalSearch"
+          [groupType]="TYPE_EDITORIAL"
+          (onChooseAuthority)="addSuggestion($event)"
           [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
-          [suggestions]="authoritySuggestions"
-          (updateInput)="updateSuggestions($event)"
-        ></autocomplete>
+        ></authority-search-input>
           <div class="status">
             <div class="btn-flat btn-shadow" tabindex="0" (keyup.enter)="chooseStatus=true" (click)="chooseStatus=true">
               <i class="align-icon statusIcon" [style.background-color]="status.color">&nbsp;</i> {{'WORKFLOW.'+status.id | translate}}
@@ -110,5 +108,6 @@
               [message]="dialogMessage"
               [messageParameters]="dialogMessageParameters"
               [buttons]="dialogButtons"
+              [priority]="1"
               (onCancel)="dialogTitle=null"
 ></modal-dialog>

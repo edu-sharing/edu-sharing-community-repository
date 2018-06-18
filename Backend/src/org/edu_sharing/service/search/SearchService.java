@@ -18,12 +18,15 @@ import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 
+import com.google.gwt.user.client.ui.SuggestOracle;
+
 public interface SearchService {
 	public static enum ContentType{
 		FILES,
 		FOLDERS,
 		FILES_AND_FOLDERS,
 		COLLECTIONS,
+		TOOLPERMISSIONS,
 		ALL
 	};
 	public static enum CombineMode{
@@ -60,22 +63,28 @@ public interface SearchService {
 
  	/**
       * find Authorities and Users plain solr
+ 	 * @param user
       * @param searchWord
       * @param globalContext
       * @param from
       * @param nrOfResults
+ 	 * @param customProperties
+ 	 * @param sort
       * @return
  	 * @throws InsufficientPermissionException 
       */
-	SearchResult<String> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults) throws InsufficientPermissionException;
+	SearchResult<String> findAuthorities(AuthorityType user, String searchWord, boolean globalContext, int from, int nrOfResults, SortDefinition sort, Map<String, String> customProperties) throws InsufficientPermissionException;
 
+	SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
+			SortDefinition sort, Map<String, String> customProperties) throws Exception;
 
-
-	SearchResult<String> searchAuthorities(AuthorityType type, String pattern, boolean globalSearch, int skipCount,
-			int maxValues, SortDefinition sort, Map<String, String> customProperties);
-
-	SearchResult<String> searchUsers(String pattern, boolean globalSearch, int skipCount, int maxValues,
-			SortDefinition sort, Map<String, String> customProperties);
+	SearchResult<String> searchPersonGroups(String authorityName, String pattern, int skipCount, int maxValues,
+			SortDefinition sort);
 
 	SearchToken getLastSearchToken() throws Throwable;
+	
+	public default List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
+		return null;	
+	}
+		
 }

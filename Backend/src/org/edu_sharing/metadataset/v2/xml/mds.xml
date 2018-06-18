@@ -19,14 +19,22 @@
 				<bottomCaption>cm_title_bottom</bottomCaption>
 				<type>text</type>
 				<hideIfEmpty>true</hideIfEmpty>
-				<condition>!ccm:wwwurl</condition>
+				<condition type="PROPERTY" negate="true">ccm:wwwurl</condition>
 			</widget>
 			<widget>
 				<id>cclom:title</id>
 				<caption>cm_title_wwwurl</caption>
 				<placeholder>cm_title_placeholder</placeholder>
 				<type>text</type>
-				<condition>ccm:wwwurl</condition>			
+				<condition type="PROPERTY">ccm:wwwurl</condition>			
+			</widget>
+			<widget>
+				<id>ccm:wwwurl</id>
+				<caption>cm_wwwurl</caption>
+				<placeholder>cm_wwwurl_placeholder</placeholder>
+				<type>text</type>
+				<required>true</required>
+				<condition type="PROPERTY">ccm:wwwurl</condition>			
 			</widget>
 			<widget>
 				<id>cclom:general_description</id>
@@ -88,21 +96,25 @@
 				<id>ccm:tool_instance_params</id>
 				<type>textarea</type>
 				<caption>cb_tool_instance_params</caption>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:tool_instance_license</id>
 				<type>text</type>
 				<caption>cb_tool_instance_license</caption>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:tool_instance_support_contact</id>
 				<type>text</type>
 				<caption>cb_tool_instance_support_contact</caption>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:tool_instance_support_mail</id>
 				<type>email</type>
 				<caption>cb_tool_instance_support_mail</caption>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:tool_instance_provider</id>
@@ -123,6 +135,7 @@
 				<valuespace>valuespaces.xml</valuespace>
 				<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
 				<valuespace_i18n_prefix>tool_access_</valuespace_i18n_prefix>
+				<extended>true</extended>
 			</widget>
 			<widget>
 				<id>ccm:lifecyclecontributer_author</id>
@@ -317,6 +330,7 @@
 				<icon>description</icon>
 				<html><![CDATA[
 			  <preview>
+              <ccm:wwwurl>		 
               <cm:name>
               <cclom:title>
               <cclom:general_keyword>
@@ -324,6 +338,15 @@
               <author>
               <license>
               <version>
+				]]></html>
+			</template>
+			<template>
+				<id>node_general_template</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <cclom:general_keyword>
+              <cclom:general_description>
 				]]></html>
 			</template>
 			<template>
@@ -342,6 +365,7 @@
 				<html><![CDATA[
 			  <preview>
               <cm:name>
+              <template>
 				]]></html>
 			</template>
 			<template>
@@ -489,6 +513,12 @@
 				</views>
 			</group>
 			<group>
+				<id>io_template</id>
+				<views>
+					<view>node_general_template</view>
+				</views>
+			</group>
+			<group>
 				<id>collection_editorial</id>
 				<views>
 					<view>collection_editorial</view>
@@ -536,7 +566,7 @@
 			</group>
 		</groups>
 		<queries>
-			<basequery>-TYPE:"ccm:toolpermission" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*"</basequery>
+			<basequery>-TYPE:"ccm:toolpermission" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 			
 			<query join="AND"  id="ngsearch">

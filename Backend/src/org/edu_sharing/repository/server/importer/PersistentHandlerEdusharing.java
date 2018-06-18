@@ -45,6 +45,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.policy.BehaviourFilterImpl;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.logging.Log;
@@ -52,10 +53,14 @@ import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.service.Constants;
+import org.springframework.context.ApplicationContext;
 
 public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
@@ -69,13 +74,14 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	//
 	HashMap<String, String> replIdTimestampMap = null;
 
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
+	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
+	
+	
+	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 	public PersistentHandlerEdusharing() throws Throwable {
-		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
-		AuthenticationTool authTool = RepoFactory.getAuthenticationToolInstance(homeRep.getAppId());
-		HashMap<String, String> authInfo = authTool.createNewSession(homeRep.getUsername(), homeRep.getPassword());
-		mcAlfrescoBaseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(homeRep.getAppId(), authInfo);
+		mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 	}
 
 	public void removeAllImportedObjects() throws Throwable {
@@ -256,6 +262,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			logger.info("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
 			try{			
 				nodeId=createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
+			
 			}catch(org.alfresco.service.cmr.repository.DuplicateChildNodeNameException e){
 				String name = (String)newNodeProps.get(CCConstants.CM_NAME);
 				name = name + System.currentTimeMillis();
@@ -414,7 +421,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		simpleProps.remove("{http://www.campuscontent.de/model/1.0}replicationsource");
 	*/
 		
-		String newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+		String newNodeId =null;
+		try {
+			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+		}catch(DuplicateChildNodeNameException e) {
+			simpleProps.put(CCConstants.CM_NAME, (String)simpleProps.get(CCConstants.CM_NAME) + System.currentTimeMillis());
+			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+		}
 		if(aspects!=null){
 			for(String aspect : aspects){
 				mcAlfrescoBaseClient.addAspect(newNodeId, aspect);
@@ -479,12 +492,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	 * @return
 	 */
 	public boolean mustBePersisted(String replId, String timeStamp) {
-		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
 
 		// we will not safe without replId
 		if (replId == null) {
 			return false;
 		}
+		
+		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
 
 		// we will not safe without timestamp
 		if (timeStamp == null) {

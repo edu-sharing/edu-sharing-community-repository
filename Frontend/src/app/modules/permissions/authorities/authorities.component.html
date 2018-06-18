@@ -81,7 +81,7 @@
   </div>
 </div>
 <div *ngIf="editMembers || addMembers" class="dialog darken">
-  <div class="card center-card card-action card-high">
+  <div class="card center-card card-action card-high card-xwide">
     <div class="card-content">
       <div class="card-cancel" (click)="cancelEditMembers()"><i class="material-icons">close</i></div>
       <div class="card-title" *ngIf="addMembers">{{'PERMISSIONS.ADD_MEMBER_TO_GROUP' | translate:{group:addMembers.profile.displayName} }}</div>
@@ -101,8 +101,8 @@
           [icon]="'person'"
           [hasIcon]="true"
           [selectedNodes]="selectedMembers"
-          [hasHeading]="false"
-          [selectOnClick]="false"
+          [hasHeading]="true"
+          [selectOnClick]="addMembers ? true : false"
           [isClickable]="true"
           (onSelectionChanged)="updateSelectedMembers($event)"
        ></listTable>

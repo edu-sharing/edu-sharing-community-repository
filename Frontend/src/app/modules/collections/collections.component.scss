@@ -71,8 +71,7 @@ table, div {
 
 .section-headline {
     color: #5F5F5F;
-    padding-top: 10px;
-    padding-bottom: 8px;
+    padding: 18px 15px;
 }
 
 .collections-breadcrumb {
@@ -153,7 +152,7 @@ table, div {
     padding:16px;
     padding-top: 8px;
     padding-left: 0px;
-    text-align:center;
+    width:100%;
 }
 
 .collection-nocontent-small {
@@ -205,7 +204,7 @@ table, div {
 
 .collections-header  {
     background-color: $primary;
-    color: #ffffff;
+    color: #fff;
     left: 0;
     height: 110%;
     width: 250px;
@@ -213,8 +212,11 @@ table, div {
     overflow-y: auto;
     top:$mainnavHeight;
 }
+.dark-color{
+  color: #000;
+}
 .collections-master-div-notabs {
-    padding-left:300px;
+    padding-left:285px;
     padding-right: 16px;
 }
 
@@ -261,6 +263,10 @@ table, div {
   .custom-order {
     padding-left: 10px;
   }
+  .actionbarMaterials{
+    position: absolute;
+    right:20px;
+  }
 }
 :host /deep/{
   .collections-pin-button custom-icon g{
@@ -279,13 +285,20 @@ table, div {
     }
 
 }
-
+@media all and (max-width: ($cardWidth*3)) {
+  :host /deep/ .cardSmallList{
+    width:calc(100% - 10px)!important;
+  }
+}
 @media only screen and (max-width: $mobileWidth) {
     :host /deep/{
       .collections-master-div-notabs .subcollections{
         margin-top: 240px+$mainnavHeight;
       }
     }
+  .section-headline{
+    padding: 18px 0;
+  }
   .collection-new-preview-headline{
     overflow-wrap: break-word;
     display: -webkit-box;
@@ -300,7 +313,7 @@ table, div {
   }
     .collections-breadcrumb{
       position: absolute;
-      top: 252px+$mainnavHeight;
+      top: 259px+$mainnavHeight;
       right: 10px;
       max-width: calc(100% - 100px);
     }

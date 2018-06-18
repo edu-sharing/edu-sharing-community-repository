@@ -7,11 +7,14 @@ import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import { NodeRef, Node, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList} from "../data-object";
 import {RequestObject} from "../request-object";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestSearchService {
+export class RestSearchService extends AbstractRestService{
+  constructor(connector : RestConnectorService) {
+      super(connector);
+  }
 
-  constructor(private connector : RestConnectorService) {}
   searchByProperties(properties:string[],values:string[],comparators:string[],combineMode=RestConstants.COMBINE_MODE_AND,contentType=RestConstants.CONTENT_TYPE_FILES,request: any=null, repository = RestConstants.HOME_REPOSITORY) : Observable<NodeList> {
     let url=this.connector.createUrlNoEscape('search/:version/custom/:repository?contentType=:contentType&combineMode=:combineMode&:properties&:values&:comparators&:request',repository,[
       [":contentType",contentType],

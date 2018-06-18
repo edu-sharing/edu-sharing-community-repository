@@ -47,7 +47,7 @@ public class Release_1_7_UnmountGroupFolders extends UpdateAbstract {
 	
 	private void doIt(boolean test){
 		
-		logger.info("starting with testmode="+test);
+		logger.debug("starting with testmode="+test);
 		//very important: use the alfrescoDefaultDbNodeService defined in custom-core-services-context.xml
 		//cause of overwriten getChild... methods in org.edu_sharing.alfresco.fixes.DbNodeServiceImpl
 		//create here cause of authentication of Update servlet is passed instead of in constructor
@@ -69,7 +69,7 @@ public class Release_1_7_UnmountGroupFolders extends UpdateAbstract {
 		}catch(Throwable e){
 			logError(e.getMessage(), e);
 		}
-		logger.info("finished with testmode="+test);
+		logger.debug("finished with testmode="+test);
 	}
 	
 	
@@ -114,7 +114,7 @@ public class Release_1_7_UnmountGroupFolders extends UpdateAbstract {
 								counter++;
 								
 								if((counter % 10) == 0){
-									logger.info("unmounted group folder of group "+groupname+" for "+counter +" persons");
+									logger.debug("unmounted group folder of group "+groupname+" for "+counter +" persons");
 								}
 							}
 						}
@@ -123,7 +123,7 @@ public class Release_1_7_UnmountGroupFolders extends UpdateAbstract {
 						logger.debug("can not unmount group Folder for person:"+personChildRef.getChildRef()+" cause of missing or invalid "+CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP+" Folder");
 					}
 				}
-				logger.info("unmounted eduGroupHomeDirRef:"+eduGroupHomeDirRef+" in "+counter+" user homes");
+				logger.debug("unmounted eduGroupHomeDirRef:"+eduGroupHomeDirRef+" in "+counter+" user homes");
 			}
 		}
 	}
@@ -142,7 +142,7 @@ public class Release_1_7_UnmountGroupFolders extends UpdateAbstract {
 						List<ChildAssociationRef> authorities = nodeService.getChildAssocs(sysChild.getChildRef());
 						
 						for(ChildAssociationRef authorityChild :authorities ){
-							logger.info("found authority"+authorityChild.getQName());
+							logger.debug("found authority"+authorityChild.getQName());
 							this.unmountEduGroupFoldersInUserHomes(authorityChild.getChildRef(),test);
 						}
 						
@@ -151,6 +151,11 @@ public class Release_1_7_UnmountGroupFolders extends UpdateAbstract {
 				
 			}
 		}
+	}
+	
+	@Override
+	public void run() {
+		this.logInfo("not implemented");
 	}
 	
 }

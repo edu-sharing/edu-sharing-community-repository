@@ -3,14 +3,18 @@ package org.edu_sharing.service.toolpermission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -18,7 +22,6 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.I18nServer;
@@ -33,27 +36,7 @@ public class ToolPermissionService {
 
 	Logger logger = Logger.getLogger(ToolPermissionService.class);
 	
-	static String[] validToolPermissions = new String[]{
-			CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE_SAFE,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES, 
-			CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY,CCConstants.CCM_VALUE_TOOLPERMISSION_INVITED,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_LICENSE,CCConstants.CCM_VALUE_TOOLPERMISSION_UNCHECKEDCONTENT,
-			CCConstants.CCM_VALUE_TOOLPERMISSION_WORKSPACE, CCConstants.CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX, 
-			CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL, CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM, 
-			CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING, 
-			CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL};
-
-	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-	
-	
 	
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	PermissionService permissionService = serviceRegistry.getPermissionService();
@@ -78,12 +61,38 @@ public class ToolPermissionService {
 	}
 	public List<String> getAllAvailableToolPermissions(){
 		List<String> allowed=new ArrayList<>();
-		for(String permission : ToolPermissionServiceFactory.getAllToolPermissions()){
+		for(String permission : this.getAllToolPermissions()){
 			if(hasToolPermission(permission))
 				allowed.add(permission);
 		}
 		return allowed;
 	}
+	
+	public List<String> getAllToolPermissions(){
+		RunAsWork<List<String>> runas = new RunAsWork<List<String>>() {
+			@Override
+			public List<String> doWork() throws Exception {
+				List<String> result = new ArrayList<String>();
+				try {
+					
+					
+					String tpFolder = getEdu_SharingToolPermissionsFolder();
+					List<ChildAssociationRef> childAssocRefs = eduNodeService.getChildrenChildAssociationRef(tpFolder);
+					for(ChildAssociationRef childAssocRef : childAssocRefs) {
+						String name = eduNodeService.getProperty(childAssocRef.getChildRef().getStoreRef().getProtocol(), childAssocRef.getChildRef().getStoreRef().getIdentifier(), childAssocRef.getChildRef().getId(), CCConstants.CM_NAME);
+						result.add(name);
+					}
+				}catch(Throwable e) {
+					logger.error(e.getMessage(), e);
+				}
+				return result;
+			}
+		};
+		
+		return AuthenticationUtil.runAsSystem(runas);
+	}
+	
+	
 	public boolean hasToolPermission(String toolPermission) {
 		
 		
@@ -136,23 +145,20 @@ public class ToolPermissionService {
 		AccessStatus accessStatus = permissionService.hasPermission(new NodeRef(Constants.storeRef, toolNodeId), PermissionService.READ);
 		return (0 == accessStatus.compareTo(AccessStatus.ALLOWED));
 	}
-	
-	private String getToolPermissionNodeId(String toolPermission) throws Throwable{
+	static Map<String,String> toolPermissionNodeCache = new HashMap<>();
+	public String getToolPermissionNodeId(String toolPermission) throws Throwable{
+		if(toolPermissionNodeCache.containsKey(toolPermission)) {
+			String nodeId=toolPermissionNodeCache.get(toolPermission);
+			// validate that the cached node is not deleted
+			if(eduNodeService.exists(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId))
+				return nodeId;
+		}
 		String systemFolderId = getEdu_SharingToolPermissionsFolder();
 		
 		
 		HashMap<String, Object> sysObject = eduNodeService.getChild(Constants.storeRef, systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, CCConstants.CM_NAME, toolPermission);
 		
 		if(sysObject == null){
-			
-			boolean validToolPermission = false;
-			for(String tp : validToolPermissions){
-				if(toolPermission.startsWith(tp)){
-					validToolPermission = true;
-				}
-			}
-			
-			if(!validToolPermission) throw new Exception("Invalid ToolPermission " + toolPermission);
 			
 			logger.info("ToolPermission" + toolPermission+ " does not exsist. will create it.");
 			HashMap props = new HashMap();
@@ -170,7 +176,9 @@ public class ToolPermissionService {
 			return result;
 			
 		}else{
-			return (String)sysObject.get(CCConstants.SYS_PROP_NODE_UID);
+			String nodeId=(String)sysObject.get(CCConstants.SYS_PROP_NODE_UID);
+			toolPermissionNodeCache.put(toolPermission, nodeId);
+			return nodeId;
 		}
 	}
 	
@@ -269,7 +277,7 @@ public class ToolPermissionService {
 	public void invalidateSessionCache() {
 		try{
 			HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-			for(String tp : ToolPermissionServiceFactory.getAllToolPermissions()){
+			for(String tp : this.getAllToolPermissions()){
 				session.removeAttribute(tp);
 			}
 		}catch(Throwable t){

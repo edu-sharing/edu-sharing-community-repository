@@ -5,10 +5,12 @@ import {RestConnectorService} from "./rest-connector.service";
 import {IamUsers, IamAuthorities, OrganizationOrganizations, NetworkRepositories, Repository,Node} from "../data-object";
 import {Response} from "@angular/http";
 import {Helper} from "../../helper";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestNetworkService {
-  constructor(private connector: RestConnectorService) {
+export class RestNetworkService extends AbstractRestService{
+  constructor(connector : RestConnectorService) {
+      super(connector);
   }
   public getRepositories = (): Observable<NetworkRepositories> => {
     let query = this.connector.createUrl("network/:version/repositories",null);
@@ -34,6 +36,8 @@ export class RestNetworkService {
     return true;
   }
   static isFromHomeRepo(node: Node,repositories:Repository[]) {
+    if(node.ref && node.ref.isHomeRepo)
+      return true;
     return RestNetworkService.isHomeRepo(node.ref.repo,repositories);
   }
 

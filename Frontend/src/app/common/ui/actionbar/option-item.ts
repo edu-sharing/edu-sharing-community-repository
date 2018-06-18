@@ -52,6 +52,10 @@ export class OptionItem {
   public enabledCallback : Function;
 
   /**
+   *   Optional: A callback that is called when the user clicks on the option when it's currently disabled (greyed out)
+   */
+  public disabledCallback : Function;
+  /**
    *   Show the given name (if false, only icon will show)
    */
   public showName = true;

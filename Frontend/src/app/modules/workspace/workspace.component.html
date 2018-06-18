@@ -48,6 +48,7 @@
                 [message]="dialogMessage"
                 [messageParameters]="dialogMessageParameters"
                 [buttons]="dialogButtons"
+                [priority]="10"
   ></modal-dialog>
   <div class="dialog darken dropZone" *ngIf="fileIsOver && false">
     <div>
@@ -56,7 +57,7 @@
     </div>
   </div>
   <workspace-share *ngIf="sharedNode"
-  [node]="sharedNode"
+  [nodeId]="sharedNode.ref.id"
   [sendMessages]="true"
   (onLoading)="globalProgress=$event"
   (onClose)="sharedNode=null"
@@ -90,13 +91,17 @@
   -->
   </div>
   <div class="addDesktop btn waves-effect"
+       tabindex="0"
        [class.disabled]="!createAllowed"
+       (keyup.enter)="createContext()"
        (click)="createContext()">
     <i class="material-icons">add_circle_outline</i><span>{{ 'WORKSPACE.ADD' | translate }}</span>
   </div>
 
-  <div class="dialog" *ngIf="showAddDesktop" (click)="showAddDesktop=false" (contextmenu)="showAddDesktop=false;$event.preventDefault();$event.stopPropagation();"></div>
+  <div class="dialog dialogAddDesktop" *ngIf="showAddDesktop" (click)="showAddDesktop=false" (contextmenu)="showAddDesktop=false;$event.preventDefault();$event.stopPropagation();"></div>
+  <!-- <input type="file" accept="image/*" capture="camera" #camera (change)="uploadCamera($event)"> -->
   <div class="addDesktopMenu collection"
+       #dropdown
        [@overlay]="showAddDesktop"
        [style.position]="dropdownPosition"
        [style.left]="dropdownLeft"
@@ -104,11 +109,15 @@
        [style.top]="dropdownTop"
        [style.bottom]="dropdownBottom"
        *ngIf="showAddDesktop">
-    <a class="collection-item" (click)="showAddDesktop=false;showUploadSelect=true"><i class="material-icons">cloud_upload</i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</a>
-    <a class="collection-item" (click)="showAddDesktop=false;addFolderName=''"><i class="material-icons">create_new_folder</i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</a>
-    <a *ngFor="let connector of connectorList ? connectorList.connectors : null;let i=index"
+    <a *ngIf="allowBinary" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;showUploadSelect=true" (click)="showAddDesktop=false;showUploadSelect=true"><i class="material-icons">cloud_upload</i> {{ 'WORKSPACE.ADD_OBJECT' | translate}}</a>
+    <a *ngIf="allowBinary && cordova.isRunningCordova()" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;showUploadSelect=true" (click)="showAddDesktop=false;openCamera()"><i class="material-icons">camera_alt</i> {{ 'WORKSPACE.ADD_CAMERA' | translate}}</a>
+    <a *ngIf="!allowBinary" class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;createEmptyNode()" (click)="showAddDesktop=false;createEmptyNode()"><i class="material-icons">description</i> {{ 'WORKSPACE.ADD_EMPTY_OBJECT' | translate}}</a>
+    <a class="collection-item" tabindex="0" (keyup.enter)="showAddDesktop=false;addFolderName=''" (click)="showAddDesktop=false;addFolderName=''"><i class="material-icons">create_new_folder</i> {{ 'WORKSPACE.ADD_FOLDER' | translate}}</a>
+    <a *ngFor="let connector of (connectorList && allowBinary) ? connectorList.connectors : null;let i=index"
        class="collection-item"
        [class.collection-item-seperate]="!i"
+       tabindex="0"
+       (keyup.enter)="showAddDesktop=false;createConnectorName='';createConnectorType=connector"
        (click)="showAddDesktop=false;createConnectorName='';createConnectorType=connector">
       <i class="material-icons">{{connector.icon}}</i> {{ 'CONNECTOR.'+connector.id+'.NAME' | translate}}<img class="connectorBeta" src="assets/images/beta.svg"></a>
     <!-- <a class="collection-item collection-item-seperate" (click)="listLTI()"><i class="material-icons">extension</i> {{ 'WORKSPACE.ADD_LTI' | translate}}</a> -->
@@ -118,9 +127,9 @@
   <div class="selectRootMenu collection" [@overlay]="showSelectRoot" *ngIf="showSelectRoot">
     <a class="collection-item" [class.rootSelected]="root=='MY_FILES'" (click)="showSelectRoot=false;setRoot('MY_FILES')"><i class="material-icons">person</i> {{ 'WORKSPACE.MY_FILES' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='SHARED_FILES'" (click)="showSelectRoot=false;setRoot('SHARED_FILES')"><i class="material-icons">group</i> {{ 'WORKSPACE.SHARED_FILES' | translate}}</a>
-    <a *ngIf="!isSafe" class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i class="material-icons">share</i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
-    <a *ngIf="!isSafe" class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i class="material-icons">send</i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
-    <a *ngIf="!isSafe && supportsWorkflow()" class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i class="material-icons">inbox</i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i class="material-icons">share</i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i class="material-icons">send</i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
+    <a *ngIf="supportsWorkflow()" class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i class="material-icons">inbox</i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i class="material-icons">delete</i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
 
@@ -140,8 +149,9 @@
 
 
   <workspace-tree class="tree" *ngIf="isLoggedIn"
-  [current]="currentFolder"
+  [current]="currentFolderRef"
                   [path]="path"
+                  [selectedNode]="selectedNodeTree"
                   [root]="root"
                   [isSafe]="isSafe"
                   [options]="explorerOptions"
@@ -169,11 +179,12 @@
              [options]="actionOptions"
 ></actionbar>
   <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'" (contextmenu)="createContext($event)"
-  [current]="currentFolder"
+  [current]="currentFolderRef"
   [selection]="selection"
   [searchQuery]="searchQuery"
   [options]="explorerOptions"
   [viewType]="viewType"
+  [preventKeyevents]="hasOpenWindows()"
   (onDrop)="handleDrop($event)"
   (onSelectNode)="clickNode($event)"
   (onListChange)="updateList($event)"
@@ -188,6 +199,8 @@
 [(addToCollection)]="addNodesToCollection"
 [(nodeLicense)]="editNodeLicense"
 [(nodeMetadata)]="editNodeMetadata"
+[(nodeTemplate)]="editNodeTemplate"
+[(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
 [(filesToUpload)]="filesToUpload"
 [fileIsOver]="fileIsOver"
 [(showUploadSelect)]="showUploadSelect"
@@ -212,7 +225,10 @@
                       (onClose)="closeMetadata()"
   ></workspace-metadata>
 
-
+<node-info *ngIf="nodeDebug"
+           [node]="nodeDebug"
+           (onClose)="nodeDebug=null"
+           ></node-info>
 
 </div>
   <global-progress *ngIf="globalProgress"></global-progress>

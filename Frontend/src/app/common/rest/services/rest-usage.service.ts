@@ -7,12 +7,15 @@ import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {RequestObject} from "../request-object";
 import {ArchiveRestore, ArchiveSearch, Node, UsageList} from "../data-object";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestUsageService {
-  constructor(private connector : RestConnectorService) {}
+export class RestUsageService extends AbstractRestService{
+    constructor(connector : RestConnectorService) {
+        super(connector);
+    }
 
-  public getNodeUsages = (node : string,
+    public getNodeUsages = (node : string,
                    repository=RestConstants.HOME_REPOSITORY
                   ): Observable<UsageList> => {
     // TODO does it need a repro?

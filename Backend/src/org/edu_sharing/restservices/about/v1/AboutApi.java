@@ -57,7 +57,7 @@ public class AboutApi  {
 	    	version.setRepository(VersionService.getVersionNoException(VersionService.Type.REPOSITORY));
 	    	version.setRenderservice(VersionService.getVersionNoException(VersionService.Type.RENDERSERVICE));
 	    	
-	    	logger.info("Request via domain "+Context.getCurrentInstance().getRequest().getServerName());
+	    	logger.debug("Request via domain "+Context.getCurrentInstance().getRequest().getServerName());
 	
 	    	about.setVersion(version);
 	    	

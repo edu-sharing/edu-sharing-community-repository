@@ -109,7 +109,7 @@ public class CollectionServiceImpl implements CollectionService{
 			
 			//fix for running in runas user mode
 			if((AuthenticationUtil.isRunAsUserTheSystemUser() || "admin".equals(AuthenticationUtil.getRunAsUser())) ) {
-				logger.info("starting in runas user mode");
+				logger.debug("starting in runas user mode");
 				this.authInfo = new HashMap<String,String>();
 				this.authInfo.put(CCConstants.AUTH_USERNAME, AuthenticationUtil.getRunAsUser());
 			}else {
@@ -147,8 +147,10 @@ public class CollectionServiceImpl implements CollectionService{
 				originalNodeId = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), originalNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
 			}
 			
+			String locale = (Context.getCurrentInstance() != null) ? Context.getCurrentInstance().getLocale() : "de_DE";
+			
 			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
-				String message = I18nServer.getTranslationDefaultResourcebundle("collection_no_publish_permission", Context.getCurrentInstance().getLocale());
+				String message = I18nServer.getTranslationDefaultResourcebundle("collection_no_publish_permission", locale);
 				throw new Exception(message);
 			}
 			
@@ -166,7 +168,7 @@ public class CollectionServiceImpl implements CollectionService{
 				// TODO: Maybe we can find a faster way to determine it?
 				String nodeRef = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), node, CCConstants.CCM_PROP_IO_ORIGINAL);
 				if(originalNodeId.equals(nodeRef)){
-					String message = I18nServer.getTranslationDefaultResourcebundle("collection_already_in", Context.getCurrentInstance().getLocale());
+					String message = I18nServer.getTranslationDefaultResourcebundle("collection_already_in", locale);
 					
 					throw new DuplicateNodeException(message);
 				}
@@ -232,8 +234,19 @@ public class CollectionServiceImpl implements CollectionService{
 	@Override
 	public Collection create(String parentId, Collection collection) throws Throwable {
 	
-		HashMap<String, String> currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getRequest().getSession());
+		String currentUsername = null;
 		
+		if(Context.getCurrentInstance() != null) {
+			currentUsername = authTool.validateAuthentication(Context.getCurrentInstance().getRequest().getSession()).get(CCConstants.AUTH_USERNAME);
+		}else {
+			if(AuthenticationUtil.getRunAsUser() != null) {
+				currentUsername = AuthenticationUtil.getRunAsUser();
+			}
+		}
+		
+		final String fcurrentUsername = currentUsername;
+		
+		if(fcurrentUsername != null) {
 			return AuthenticationUtil.runAsSystem(new RunAsWork<Collection>() {
 
 				@Override
@@ -257,11 +270,14 @@ public class CollectionServiceImpl implements CollectionService{
 					client.addAspect(collectionId, CCConstants.CCM_ASPECT_COLLECTION);
 					client.addAspect(collectionId, CCConstants.CCM_ASPECT_POSITIONABLE);
 
-					client.setOwner(collectionId, currentAuthentication.get(CCConstants.AUTH_USERNAME));
+					client.setOwner(collectionId, fcurrentUsername);
 					collection.setNodeId(collectionId);
 					return collection;
 				}
 			});
+		}else {
+			throw new Exception("not authenticated");
+		}
 			
 	}
 	

@@ -1,4 +1,4 @@
-import {Component, OnInit, NgZone, HostListener, ViewChild} from '@angular/core';
+import {Component, OnInit, NgZone, HostListener, ViewChild, Sanitizer} from '@angular/core';
 
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
@@ -14,7 +14,7 @@ import {RestHelper} from "../../../common/rest/rest-helper";
 import {GwtInterfaceService} from "../../../common/services/gwt-interface.service";
 import {Toast} from "../../../common/ui/toast";
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
-import {Group, IamGroups, IamUser, NodeRef, Permission} from "../../../common/rest/data-object";
+import {Group, IamGroups, IamUser, LoginResult, NodeRef, Permission} from '../../../common/rest/data-object';
 import {User} from "../../../common/rest/data-object";
 import {LocalPermissions} from "../../../common/rest/data-object";
 import {Collection} from "../../../common/rest/data-object";
@@ -26,6 +26,10 @@ import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {ListItem} from "../../../common/ui/list-item";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
+import {ColorHelper} from '../../../common/ui/color-helper';
+import {DomSanitizer} from "@angular/platform-browser";
+import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
+import {UIHelper} from "../../../common/ui/ui-helper";
 
 // component class
 @Component({
@@ -59,7 +63,7 @@ export class CollectionNewComponent {
   public editorialGroups:Group[]=[];
   public editorialGroupsSelected:Group[]=[];
   public editorialColumns:ListItem[]=[new ListItem("GROUP",RestConstants.AUTHORITY_DISPLAYNAME)];
-  private imageData:string = null;
+  private imageData:any = null;
   private imageFile:File = null;
   private STEP_NEW = 'NEW';
   private STEP_GENERAL = 'GENERAL';
@@ -78,6 +82,7 @@ export class CollectionNewComponent {
   public editPermissionsDummy: EduData.Node;
   private availableSteps: string[];
   private parentCollection: Collection;
+  private originalPermissions: LocalPermissions;
 
 
   @HostListener('document:keydown', ['$event'])
@@ -98,55 +103,92 @@ export class CollectionNewComponent {
         private route:ActivatedRoute,
         private router: Router,
         private toast : Toast,
+        private temporaryStorage : TemporaryStorageService,
         private storage : SessionStorageService,
         private zone: NgZone,
+        private sanitizer: DomSanitizer,
         private config : ConfigurationService,
         private translationService:TranslateService) {
         Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
-          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>this.canInvite=has);
-          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has)=>this.shareToAll=has);
-          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL).subscribe((has)=>this.createEditorial=has);
-          this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM).subscribe((has)=>this.createCurriculum=has);
-          this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
-          this.route.queryParams.subscribe(params => {
-            this.mainnav=params['mainnav']!='false';
-          });
-          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
-            this.editorialGroups=data.groups;
-          });
-          this.route.params.subscribe(params => {
-            // get mode from route and validate input data
-            let mode = params['mode'];
-            let id = params['id'];
-            if (mode=="edit") {
-              this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
-                this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
-                  this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
-                    this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
-                    this.editId=id;
-                    this.currentCollection=data.collection;
-                    this.properties=node.node.properties;
-                    this.newCollectionType=this.getTypeForCollection(this.currentCollection);
-                    this.hasCustomScope=false;
-                    this.newCollectionStep = this.STEP_GENERAL;
-                    this.updateAvailableSteps();
-                    this.isLoading=false;
+          this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+            if(data.statusCode!=RestConstants.STATUS_CODE_OK){
+              this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"]);
+              return;
+            }
+            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE).subscribe((has:boolean)=>this.canInvite=has);
+            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has)=>this.shareToAll=has);
+            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL).subscribe((has)=>this.createEditorial=has);
+            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM).subscribe((has)=>this.createCurriculum=has);
+            this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
+            this.route.queryParams.subscribe(params => {
+              this.mainnav=params['mainnav']!='false';
+            });
+            this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL,{count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
+              this.editorialGroups=data.groups;
+            });
+            this.route.params.subscribe(params => {
+              // get mode from route and validate input data
+              let mode = params['mode'];
+              let id = params['id'];
+              if (mode=="edit") {
+                this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
+                  this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
+                    this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
+                      this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
+                      this.editId=id;
+                      this.currentCollection=data.collection;
+                      this.originalPermissions=perm.permissions.localPermissions;
+                      this.properties=node.node.properties;
+                      this.newCollectionType=this.getTypeForCollection(this.currentCollection);
+                      this.hasCustomScope=false;
+                      this.newCollectionStep = this.STEP_GENERAL;
+                      if(this.currentCollection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC){
+                          this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+                      }
+                      this.updateAvailableSteps();
+                      this.isLoading=false;
+                    });
                   });
                 });
-              });
-            } else {
-              this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
-                this.setParent(id,data.collection);
-              },(error:any)=>{
-                this.setParent(id,null);
-              });
-            }
-          });
+              } else {
+                if(id==RestConstants.ROOT){
+                  this.setParent(id,null);
+                  return;
+                }
+                this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
+                  this.setParent(id,data.collection);
+                },(error:any)=>{
+                  this.setParent(id,null);
+                });
+              }
+            });
 
+          });
         });
         // subscribe to paramter
 
 
+    }
+    getShareStatus(){
+      if(this.permissions || this.originalPermissions){
+        let perms=this.permissions || this.originalPermissions;
+        let type=RestConstants.COLLECTIONSCOPE_MY;
+        if(perms && perms.permissions) {
+            for (let perm of perms.permissions) {
+                if (perm.authority.authorityName != this.user.authorityName) {
+                    type = RestConstants.COLLECTIONSCOPE_CUSTOM;
+                }
+                if (perm.authority.authorityName == RestConstants.AUTHORITY_EVERYONE) {
+                    type = RestConstants.COLLECTIONSCOPE_ALL;
+                    break;
+                }
+            }
+        }
+        return type;
+      }
+      else{
+        return RestConstants.COLLECTIONSCOPE_MY;
+      }
     }
     private saveCollection(){
        this.collectionService.updateCollection(this.currentCollection).subscribe(()=>{
@@ -156,27 +198,17 @@ export class CollectionNewComponent {
          //this.toast.error(error)
        });
     }
-    private updatePermissions(){
-      this.isLoading=true;
-      if(this.permissions){
-        this.nodeService.setNodePermissions(this.currentCollection.ref.id,this.permissions).subscribe(()=>{
-          this.permissions=null;
-          this.saveCollection();
-        },(error:any)=>{
-          this.toast.error(error);
-          this.isLoading=false;
-        });
-        return;
-      }
-      this.saveCollection();
-
-    }
     private setPermissions(permissions : LocalPermissions){
       if(permissions) {
         this.permissions = permissions;
         this.permissions.inherited=false;
         if(this.permissions.permissions && this.permissions.permissions.length){
           this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
+          for(let permission of this.permissions.permissions){
+            if(!permission.hasOwnProperty('editable')){
+              permission.editable=true;
+            }
+          }
         }
       }
       this.showPermissions=false;
@@ -240,13 +272,7 @@ export class CollectionNewComponent {
 
         // remember file for upload
         this.imageFile = file;
-        // read file base64
-        var reader  = new FileReader();
-        reader.addEventListener("load", () => {
-            this.imageData = reader.result;
-        });
-        reader.readAsDataURL(file);
-
+        this.imageData=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
     }
     handleError(error:any){
       if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
@@ -304,7 +330,7 @@ export class CollectionNewComponent {
     }
     private saveImage(collection:EduData.Collection) : void {
 
-       if ((this.imageData!=null) && (this.imageData).startsWith("data:")) {
+       if (this.imageData!=null) {
            this.collectionService.uploadCollectionImage(collection.ref.id, this.imageFile, "image/png").subscribe(() => {
                this.navigateToCollectionId(collection.ref.id);
            });
@@ -414,23 +440,30 @@ export class CollectionNewComponent {
       this.save3(collection);
     }
   }
-  private save3(collection:Collection){
+    public isBrightColor(){
+        return ColorHelper.getColorBrightness(this.currentCollection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
+    }
+    private save3(collection:Collection){
     if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
       this.permissions=this.getEditorialGroupPermissions();
     }
     if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
-      this.nodeService.setNodePermissions(collection.ref.id,this.permissions).subscribe(()=>{
-        this.saveImage(collection);
+      let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,false);
+      this.nodeService.setNodePermissions(collection.ref.id,permissions).subscribe(()=>{
+        this.save4(collection);
       });
     }
     else {
-      this.saveImage(collection);
+      this.save4(collection);
     }
   }
 
   private getTypeForCollection(collection: Collection) {
     if(collection.type==RestConstants.GROUP_TYPE_EDITORIAL){
       return collection.type;
+    }
+    if(collection.scope==RestConstants.COLLECTIONSCOPE_MY && !this.canInvite){
+      return RestConstants.COLLECTIONSCOPE_MY;
     }
     if(collection.scope==RestConstants.COLLECTIONSCOPE_MY || collection.scope==RestConstants.COLLECTIONSCOPE_ORGA || collection.scope==RestConstants.COLLECTIONSCOPE_ALL || collection.scope==RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC)
       return RestConstants.COLLECTIONSCOPE_CUSTOM;
@@ -481,5 +514,19 @@ export class CollectionNewComponent {
     this.currentCollection.color=this.COLORS1[0];
     this.updateAvailableSteps();
     this.isLoading=false;
+  }
+
+  private save4(collection:Collection) {
+    // check if there are any nodes that should be added to this collection
+    let nodes=this.temporaryStorage.pop(TemporaryStorageService.COLLECTION_ADD_NODES);
+    if(!nodes) {
+        this.saveImage(collection);
+        return;
+    }
+    console.log("add nodes",nodes);
+    UIHelper.addToCollection(this.collectionService,this.router,this.toast,collection,nodes,()=>{
+        this.saveImage(collection);
+        return;
+    });
   }
 }

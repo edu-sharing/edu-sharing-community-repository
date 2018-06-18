@@ -9,6 +9,7 @@
     "TO_COLLECTIONS": "View collections",
     "SEARCH_STUFF": "Search for stuff ...",
     "EXPANDED_SEARCH": "Extended Search",
+    "EXPANDED_SEARCH_SHORT": "Filter",
     "METADATASET": "Choose Metadataset",
     "METADATASET_INFO": "Filter other search criterias",
     "APPLY": "APPLY",
@@ -33,18 +34,20 @@
       "BACK_TO_SEARCH": "Back to search"
     },
     "ADD_INTO_COLLECTION": "Add to collection \"{{title}}\"",
-    "NODE_IMPORTED": "Object imported<br><a href='{{link}}'>View</a>",
+    "ADD_INTO_COLLECTION_SHORT": "Add to collection",
+    "NODE_IMPORTED": "Object imported",
+    "NODE_IMPORTED_VIEW": "View",
     "ADD_TO_COLLECTION": "Add to collection",
     "ADD_TO_COLLECTION_SHORT": "Add",
-    "SHOW_NODE_STORE": "Merkliste",
-    "ADD_NODE_STORE": "Auf Merkliste",
-    "ADDED_TO_NODE_STORE": "{{count}} Element(s) have been bookmarked",
+    "SHOW_NODE_STORE": "bookmark list",
+    "ADD_NODE_STORE": "Add to bookmark list",
+    "ADDED_TO_NODE_STORE": "{{count}} Element(s) have been bookmarked.",
     "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} is already bookmarked",
     "NODE_STORE": {
       "TITLE": "Bookmarks",
       "LIST_EMPTY": "Bookmarks are empty",
       "REMOVE_ITEM": "Remove",
-      "REMOVED_ITEMS": "{{count}} Element(s) have been removed from bookmarks"
+      "REMOVED_ITEMS": "{{count}} Element(s) have been removed from bookmarks."
     },
     "APPLY_FILTER": "Apply",
     "TAB_FILTER": "filter",

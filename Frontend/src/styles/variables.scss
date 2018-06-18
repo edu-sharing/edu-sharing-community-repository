@@ -14,7 +14,7 @@ $secondaryBarHeight: 65px; // the white bar height in search and workspace
 $workspaceSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px);
 $workspaceTreeBackground: #f7f7f7;
 $mainnavHeight: 70px;
-$dialogRightWidth: 300px;
+$dialogRightWidth: 320px;
 $workspaceTreeSelectedBackground: #fff;
 $workspaceBreadcrumbsHeight: $secondaryBarHeight;
 $workspaceTreeSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px);
@@ -23,21 +23,26 @@ $contextMenuWidth: 240px;
 $actionDialogBackground: #eee;
 $searchInputBorderColor: #ccc;
 $cardSeperatorLineColor: #ccc;
+$inputBorderColor:#9e9e9e;
 $noResultsColor: #999;
 $darkenColor:rgba(0,0,0,.75);
 $colorStatusPositive:#40BF8E;
+$colorStatusNegative:$warning;
 $focusColor: $primaryMediumLight;
+$placeholderColor: #999;
 $focusWidth: 1px;
 $cardWidth: 200px;
 $cardHeight: 300px;
 $listItemHeight: 70px;
-$cardSmallHeight: 90px;
-$animationTime: 0.25s;
+$listCardSmallHeight: 100px;
+$cardPadding:20px;
 $transitionNormal: .2s;
 $mobileWidth:   700px;
 $mobileHeight:   750px;
+$mobileHeightWithKeyboard:   550px;
 // this factor should be multiplied by a natural number, e.g. *3 means stage 3 (relatively early)
 $mobileStage:   100px;
+$dialogZIndex: 120;
 
 // for variable overrides, include it again
 @import "branding";

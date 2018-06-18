@@ -1,8 +1,9 @@
-<div *ngIf="_nodes && _nodes.length">
+<div class="sub-tree-wrapper">
+<div *ngIf="_nodes && _nodes.length" [@open]="_nodes && _nodes.length">
   <div class="dialog" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
   <div class="moreOpen collection"
        *ngIf="dropdown && _options && _options.length"
-       [@openOverlay]="dropdown==node && dropdownBottom==null"
+       [@openOverlay]="dropdown && _options && _options.length"
        [style.position]="dropdownPosition"
        [style.left]="dropdownLeft"
        [style.top]="dropdownTop"
@@ -18,7 +19,7 @@
   </div>
 
 
-  <div *ngFor="let node of _nodes"
+  <div *ngFor="let node of _nodes;let i=index;"
      (dragend)="dragHover=null"
      (dragexit)="dragHover=null"
      (dragleave)="dragHover=null"
@@ -28,6 +29,7 @@
 >
 
   <div [style.paddingLeft.px]="depth*20" class="node waves-effect" [class.nodeSelected]="isSelected(node)" [class.hover]="dragHover==node">
+    <div class="fade-right" *ngIf="loadingStates[i]" [class.fade-right-selected]="isSelected(node)"></div>
   <i *ngIf="!isOpen(node)" class="arrow material-icons" (click)="openOrCloseTree(node)">
     keyboard_arrow_right
   </i>
@@ -43,7 +45,9 @@
                       [node]="node.ref.id"
                       [openPath]="openPath"
                       [selectedPath]="selectedPath"
+                      [selectedNode]="selectedNode"
                       [options]="_options"
+                      (onLoading)="setLoadingState($event,i)"
                       [parentPath]="getFullPath(node)"
                       (onUpdateOptions)="updateOptions($event)"
                       (hasChilds)="_hasChilds[getPathOpen(node)]=$event"
@@ -54,7 +58,10 @@
   ></workspace-sub-tree>
 </div>
 </div>
-<spinner *ngIf="loading"></spinner>
+  <div class="spinner" *ngIf="loading">
+    <spinner-small></spinner-small>
+  </div>
+</div>
 <!--
 <div [style.paddingLeft.px]="depth*20" *ngIf="!loading && (!_nodes || !_nodes.length)" class="empty">
   {{ 'WORKSPACE.NO_SUB_NODES' | translate }}

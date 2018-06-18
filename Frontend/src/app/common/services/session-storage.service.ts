@@ -8,8 +8,9 @@ import {LoginResult} from "../rest/data-object";
 import {RestConstants} from "../rest/rest-constants";
 /**
  Service to store any data in session (NEW: Now stored in repository) OLD: (stored as cookie)
- This is not the cleanest solution, but the current available modules for ng2 are not that great either
+ This is not the cleanest solution, but the current available modules for ng are not that great either
  Note that it currently only supports strings
+ If a user is logged in, it will be stored inside the user profile. otherwise, a cookie will be set
  */
 @Injectable()
 export class SessionStorageService {
@@ -17,6 +18,10 @@ export class SessionStorageService {
   private loginResult:LoginResult;
   constructor(private iam : RestIamService,private connector:RestConnectorService) {
     this.get("").subscribe(()=>{});
+  }
+  public refresh(){
+    this.loginResult=null;
+    this.preferences=null;
   }
   public get(name: string,fallback:any=null) : Observable<any> {
     return Observable.create( (observer:Observer<any>) => {
@@ -75,7 +80,7 @@ export class SessionStorageService {
     this.set(name,null)
   }
     // http://stackoverflow.com/questions/34298133/angular-2-cookies
-  public getCookie(name: string,fallback:any=null) {
+  public getCookie(name: string,fallback:any=null) : string {
     let ca: Array<string> = document.cookie.split(';');
     let caLen: number = ca.length;
     let cookieName = name + "=";

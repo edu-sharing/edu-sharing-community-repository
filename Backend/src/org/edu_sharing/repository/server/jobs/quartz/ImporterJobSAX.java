@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
+import org.edu_sharing.repository.server.importer.RecordHandlerInterfaceBase;
 import org.edu_sharing.repository.server.importer.sax.ListIdentifiersHandler;
 import org.edu_sharing.repository.server.importer.sax.RecordHandlerInterface;
 import org.edu_sharing.repository.server.importer.sax.RecordHandlerLOM;
@@ -24,23 +25,23 @@ public class ImporterJobSAX extends ImporterJob {
 	
 	
 	@Override
-	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass) {
+	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList) {
 		try{
 			for(String set: sets){
 				long millisec = System.currentTimeMillis();
 				logger.info("starting import");
 				
-				RecordHandlerInterface recordHandler = null;
+				RecordHandlerInterfaceBase recordHandler = null;
 				
 				if(recordHandlerClass != null){
 					Class tClass = Class.forName(recordHandlerClass);
 					Constructor constructor = tClass.getConstructor(String.class);
-					recordHandler = (RecordHandlerInterface)constructor.newInstance(metadataSetId);
+					recordHandler = (RecordHandlerInterfaceBase)constructor.newInstance(metadataSetId);
 				}else{
 					recordHandler = new RecordHandlerLOM(metadataSetId);
 				}
 				
-				new ListIdentifiersHandler(recordHandler, new PersistentHandlerEdusharing(), oaiBaseUrl, set, metadataPrefix, metadataSetId);
+				new ListIdentifiersHandler(recordHandler, new PersistentHandlerEdusharing(), null, oaiBaseUrl, set, metadataPrefix, metadataSetId);
 				logger.info("finished import in "+(System.currentTimeMillis() - millisec)/1000+" secs");
 			}
 		}catch(Throwable e){

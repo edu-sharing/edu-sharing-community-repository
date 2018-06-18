@@ -280,8 +280,10 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 							
 							if(date != null){
 								ArrayList<HashMap<String, Object>> vards = VCardConverter.vcardToHashMap(entity);
-								vards.get(0).put(CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE, date);
-								entity = VCardTool.hashMap2VCard((HashMap)vards.get(0));
+								if(vards != null && vards.size() > 0) {
+									vards.get(0).put(CCConstants.VCARD_EXT_LOM_CONTRIBUTE_DATE, date);
+									entity = VCardTool.hashMap2VCard((HashMap)vards.get(0));
+								}
 							}	
 							
 							tmpLCList.add(entity);
@@ -521,6 +523,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		List<String> lomReplicationLearningresourceTypeList = new ArrayList<String>();
 		List lomReplicationEducationalContextList = new ArrayList();
 		List lomReplicationIntendedEndUserList = new ArrayList();
+		List lomReplicationTypicalAgeRangeList = new ArrayList();
 		
 		for (int eduIdx = 0; eduIdx < nodeEducationalList.getLength(); eduIdx++) {
 			HashMap eduCationalToSafe = new HashMap();
@@ -559,7 +562,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 				// @TODO contexteSource
 			}
 
-			List typicalAgeRangeList = getMultivalue(nodeEducational, "typicalAgeRange");
+			lomReplicationTypicalAgeRangeList = getMultivalue(nodeEducational, "typicalAgeRange");
 			String educationalLanguage = (String) xpath.evaluate("language", nodeEducational, XPathConstants.STRING);
 
 			// SAFE PART
@@ -567,7 +570,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_INTENDED_ENDUSERROLE, intendedEndUserRoleToSafeList);
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_CONTEXT, contextToSafeList);
 
-			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_TYPICALAGERANGE, typicalAgeRangeList);
+			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_TYPICALAGERANGE, lomReplicationTypicalAgeRangeList);
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LANGUAGE, educationalLanguage);
 			educationalToSafeList.add(eduCationalToSafe);
 		}
@@ -593,6 +596,12 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE, null);
 		}
 
+		if(lomReplicationTypicalAgeRangeList != null && lomReplicationTypicalAgeRangeList.size() > 0) {
+			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE, lomReplicationTypicalAgeRangeList);
+		}else {
+			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE, null);
+		}
+		
 		/**
 		 * classification
 		 */
@@ -677,9 +686,11 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID, lomReplicationTaxonId);
 			
 		} else {
-			
-			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ENTRY, null);
-			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID, null);
+			/**
+			 * alf5 solr4 don't likes to get null for mltext properties (solr tracking failed). So we put an empty list here
+			 */
+			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ENTRY, new ArrayList<String>());
+			toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID, new ArrayList<String>());
 			
 		}
 		
@@ -724,6 +735,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		String serientitel = null;
 		
 		List relationToSafeList = new ArrayList();
+		List relationToSafeListProperty = new ArrayList();
 		NodeList nodeRelationList = (NodeList) xpath.evaluate("metadata/lom/relation", nodeRecord, XPathConstants.NODESET);
 		if(nodeRelationList != null){
 			
@@ -752,12 +764,17 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 					relationProps.put("TYPE#"+ CCConstants.LOM_TYPE_IDENTIFIER + "#" + CCConstants.LOM_ASSOC_RESOURCE_IDENTIFIER, identifierProps);
 					
 					relationToSafeList.add(relationProps);
+					if(!relationKind.equals("hasthumbnail") && entry!=null && !entry.isEmpty())
+						relationToSafeListProperty.add(relationKind+"#"+entry);
 				}
 			}
 		}
 		
 		if(relationToSafeList.size() > 0){
 			toSafeMap.put("TYPE#" + CCConstants.LOM_TYPE_RELATION + "#" + CCConstants.LOM_ASSOC_SCHEMA_RELATION, relationToSafeList);
+			// store as flat property for solr search
+			if(relationToSafeListProperty.size() > 0)
+				toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_SCHEMA_RELATION,relationToSafeListProperty);
 		}
 		
 		ApplicationInfo homeApplication = ApplicationInfoList.getHomeRepository();

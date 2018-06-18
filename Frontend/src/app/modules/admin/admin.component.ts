@@ -8,12 +8,30 @@ import {TranslateService} from "@ngx-translate/core";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {Component, ViewChild, ElementRef} from "@angular/core";
-import {LoginResult, ServerUpdate, CacheInfo, Application, Node} from "../../common/rest/data-object";
+import {
+    LoginResult,
+    ServerUpdate,
+    CacheInfo,
+    Application,
+    Node,
+    Authority,
+    NodeList,
+    NodeWrapper
+} from "../../common/rest/data-object";
 import {RestAdminService} from "../../common/rest/services/rest-admin.service";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 import {Helper} from "../../common/helper";
 import {RestConstants} from "../../common/rest/rest-constants";
 import {UIConstants} from "../../common/ui/ui-constants";
+import {ListItem} from "../../common/ui/list-item";
+import {RestNodeService} from "../../common/rest/services/rest-node.service";
+import {SuggestItem} from "../../common/ui/autocomplete/autocomplete.component";
+import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
+import {RestSearchService} from "../../common/rest/services/rest-search.service";
+import {RestHelper} from "../../common/rest/rest-helper";
+import {Observable, Observer} from "rxjs/index";
+
+
 @Component({
   selector: 'admin-main',
   templateUrl: 'admin.component.html',
@@ -32,6 +50,8 @@ export class AdminComponent {
   public cacheName:string;
   public cacheInfo:string;
   public oai:any={};
+  public job:any={};
+  public lucene:any={offset:0,count:100};
   public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
@@ -54,6 +74,7 @@ export class AdminComponent {
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
   @ViewChild('excelSelect') excelSelect : ElementRef;
+  @ViewChild('templateSelect') templateSelect : ElementRef;
   private excelFile: File;
   private collectionsFile: File;
   private uploadTempFile: File;
@@ -67,7 +88,60 @@ export class AdminComponent {
   private static MULTILINE_PROPERTIES = [
     "custom_html_headers","public_key"
   ];
+  luceneNodes: Node[];
+  searchColumns: ListItem[]=[];
+  nodeInfo: Node;
+  public selectedTemplate:string = '';
+  public templates:string[];
+  public eduGroupSuggestions:SuggestItem[];
+  public eduGroupsSelected:SuggestItem[] = [];
 
+  public startJob(){
+    this.storage.set("admin_job",this.job);
+    this.globalProgress=true;
+    this.admin.startJob(this.job.class,this.job.params).subscribe(()=>{
+        this.globalProgress=false;
+        this.toast.toast('ADMIN.TOOLKIT.JOB_STARTED');
+    },(error:any)=>{
+        this.globalProgress=false;
+        this.toast.error(error);
+    });
+  }
+  public debugNode(node:Node){
+    console.log(node);
+    this.nodeInfo=node;
+  }
+  public searchLucene(){
+    this.storage.set("admin_lucene",this.lucene);
+    let authorities=[];
+    if(this.lucene.authorities){
+      for(let auth of this.lucene.authorities){
+        authorities.push(auth.authorityName);
+      }
+    }
+    let request={
+      offset:this.lucene.offset ? this.lucene.offset : 0,
+      count:this.lucene.count,
+      propertyFilter:[RestConstants.ALL]
+    }
+    this.globalProgress=true;
+    this.admin.searchLucene(this.lucene.query,authorities,request).subscribe((data:NodeList)=>{
+      this.globalProgress=false;
+      console.log(data);
+      this.luceneNodes=data.nodes;
+    },(error:any)=>{
+      this.globalProgress=false;
+      this.toast.error(error);
+    });
+  }
+  public addLuceneAuthority(authority:Authority){
+    if(!this.lucene.authorities)
+      this.lucene.authorities=[];
+    this.lucene.authorities.push(authority);
+  }
+  public removeLuceneAuthority(authority:Authority){
+    this.lucene.authorities.splice(this.lucene.authorities.indexOf(authority),1);
+  }
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -76,13 +150,21 @@ export class AdminComponent {
               private translate: TranslateService,
               private storage : SessionStorageService,
               private admin : RestAdminService,
-              private connector: RestConnectorService) {
+              private connector: RestConnectorService,
+              private node: RestNodeService,
+              private searchApi: RestSearchService,
+              private organization: RestOrganizationService) {
+      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
+      this.searchColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
+      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
+        this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
         new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=>{this.showWarning=false})
       ];
+      this.getTemplates();
       this.connector.isLoggedIn().subscribe((data: LoginResult) => {
         if (!data.isAdmin) {
           this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
@@ -90,18 +172,36 @@ export class AdminComponent {
         }
         this.globalProgress=false;
         this.tab='INFO';
+        this.route.queryParams.subscribe((data:any)=>{
+            if(data['mode'])
+                this.tab=data['mode'];
+        });
         this.showWarning=true;
         this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
           this.updates=data;
         });
         this.refreshCatalina();
         this.refreshAppList();
-        this.admin.getOAIClasses().subscribe((data:string[])=>{
-          this.oaiClasses=data;
-          this.oai.className=data[0];
+        this.storage.get("admin_job",this.job).subscribe((data:any)=>{
+          this.job=data;
+        });
+        this.storage.get("admin_lucene",this.lucene).subscribe((data:any)=>{
+            this.lucene=data;
+        });
+        this.admin.getOAIClasses().subscribe((classes:string[])=>{
+          this.oaiClasses=classes;
           this.storage.get("admin_oai").subscribe((data:any)=>{
             if(data)
               this.oai=data;
+            else{
+              this.oai={
+                className:classes[0],
+                importerClassName:"org.edu_sharing.repository.server.importer.OAIPMHLOMImporter",
+                recordHandlerClassName:"org.edu_sharing.repository.server.importer.RecordHandlerLOM"
+              };
+            }
+            if(!this.oai.binaryHandlerClassName)
+              this.oai.binaryHandlerClassName="";
           });
         });
         this.admin.getRepositoryVersion().subscribe((data:string)=>{
@@ -194,8 +294,8 @@ export class AdminComponent {
   }
   public saveApp(){
     this.globalProgress=true;
-    if(this.xmlAppAdditionalPropertyName){
-      this.xmlAppProperties[this.xmlAppAdditionalPropertyName]=this.xmlAppAdditionalPropertyValue;
+    if(this.xmlAppAdditionalPropertyName && this.xmlAppAdditionalPropertyName.trim()){
+      this.xmlAppProperties[this.xmlAppAdditionalPropertyName.trim()]=this.xmlAppAdditionalPropertyValue;
     }
     this.admin.updateApplicationXML(this.currentAppXml,this.xmlAppProperties).subscribe(()=>{
       this.toast.toast('ADMIN.APPLICATIONS.APP_SAVED',{xml:this.currentAppXml});
@@ -250,7 +350,7 @@ export class AdminComponent {
     ];
   }
   public setTab(tab:string){
-    this.tab=tab;
+    this.router.navigate(["./"],{queryParams:{mode:tab},relativeTo:this.route});
   }
   public pickDirectory(event : Node[]){
     this.parentNode=event[0];
@@ -310,6 +410,16 @@ export class AdminComponent {
       this.toast.error(error);
     });
   }
+  public refreshEduGroupCache(){
+      this.globalProgress=true;
+      this.admin.refreshEduGroupCache().subscribe(()=>{
+          this.globalProgress=false;
+          this.toast.toast('ADMIN.TOOLKIT.EDU_GROUP_CACHE_REFRESHED');
+      },(error:any)=>{
+          this.globalProgress=false;
+          this.toast.error(error);
+      });
+  }
   public refreshCache(sticky:boolean){
     this.globalProgress=true;
     this.admin.refreshCache(this.cacheName,sticky).subscribe(()=>{
@@ -333,7 +443,7 @@ export class AdminComponent {
     if(this.oaiSave){
       this.storage.set("admin_oai",this.oai);
     }
-    this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,this.oai.file).subscribe(()=>{      this.globalProgress=false;
+    this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,this.oai.file,this.oai.oaiIds).subscribe(()=>{      this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.OAI_STARTED');
     },(error:any)=>{
       this.globalProgress=false;
@@ -419,5 +529,114 @@ export class AdminComponent {
     }
   },50);
   }
+
+  public getTemplates() {
+      this.getTemplateFolderId().subscribe((id) => {
+          this.node.getChildren(id).subscribe((data) => {
+              let templates = [];
+              for(let node of data.nodes) {
+                  if(node.name.split('.').pop() == 'xml') {
+                      templates.push(node.name);
+                  }
+              }
+              this.templates = templates;
+              this.selectedTemplate = this.templates[0];
+          });
+      })
+  }
+
+    public getTemplateFolderId() {
+        return new Observable<string>((observer: Observer<string>) => {
+        this.searchApi.searchByProperties([RestConstants.CM_NAME], ['Edu_Sharing_Sys_Template'], ['='], '', RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS).subscribe((data)=> {
+            for(let node of data.nodes) {
+                if (node.isDirectory) {
+                   observer.next(node.ref.id);
+                   observer.complete();
+                   return;
+                }
+            }
+        });
+      });
+    }
+
+    public updateEduGroupSuggestions(event : any) {
+        this.organization.getOrganizations(event.input).subscribe(
+            (data:any)=>{
+                var ret:SuggestItem[] = [];
+                for (let orga of data.organizations) {
+                    let item = new SuggestItem(orga.authorityName, orga.profile.displayName, 'group', '');
+                    item.originalObject = orga;
+                    ret.push(item);
+                }
+                this.eduGroupSuggestions=ret;
+            });
+    }
+
+    public addEduGroup(data:any) {
+        if(Helper.indexOfObjectArray(this.eduGroupsSelected, 'id', data.item.id) < 0)
+            this.eduGroupsSelected.push(data.item);
+    }
+
+    public removeEduGroup(data:SuggestItem) {
+        this.eduGroupsSelected.splice(Helper.indexOfObjectArray(this.eduGroupsSelected, 'id', data.id), 1);
+    }
+
+    public uploadTemplate(event:any){
+        console.log(event);
+        let file=event.target.files[0];
+        if(!file)
+            return;
+        let id = '';
+        this.globalProgress=true;
+        this.getTemplateFolderId().subscribe((id) => {
+            this.node.createNode(id,RestConstants.CCM_TYPE_IO,[],RestHelper.createNameProperty(file.name),true).subscribe(
+                (data : NodeWrapper) => {
+                    this.node.uploadNodeContent(data.node.ref.id,file,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+                        (data) => {
+                            this.getTemplates();
+                            this.toast.toast('ADMIN.FOLDERTEMPLATES.UPLOAD_DONE',{filename:JSON.parse(data.response).node.name});
+                            this.globalProgress=false;
+                            this.templateSelect.nativeElement.value=null;
+                        }
+                    );
+                },(error:any)=>{
+                    this.globalProgress=false;
+                    this.templateSelect.nativeElement.value=null;
+                    this.toast.error(error);
+                });
+        });
+    }
+
+    public applyTemplate(position = 0) {
+        this.globalProgress = true;
+        if(this.eduGroupsSelected.length < 1) {
+            this.toast.error(null, 'ADMIN.FOLDERTEMPLATES.MISSING_GROUP');
+            this.globalProgress = false;
+            return;
+        }
+        if(this.selectedTemplate == '') {
+            this.toast.error(null, 'ADMIN.FOLDERTEMPLATES.MISSING_TEMPLATE');
+            this.globalProgress = false;
+            return;
+        }
+        if (position >= this.eduGroupsSelected.length) {
+            this.globalProgress = false;
+            // done
+            return;
+        }
+        this.admin.applyTemplate(this.eduGroupsSelected[position].id, this.selectedTemplate).subscribe(data => {
+            this.toast.toast('ADMIN.FOLDERTEMPLATES.TEMPLATE_APPLIED', {templatename:this.selectedTemplate, groupname:this.eduGroupsSelected[position].id});
+            this.applyTemplate(position + 1);
+        }, (error: any) => {
+            this.toast.error(error,'ADMIN.FOLDERTEMPLATES.TEMPLATE_NOTAPPLIED', {templatename:this.selectedTemplate, groupname:this.eduGroupsSelected[position].id});
+            this.applyTemplate(position + 1);
+        });
+    }
+
+    public gotoFoldertemplateFolder() {
+        this.getTemplateFolderId().subscribe((id) => {
+            this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"],{queryParams:{id:id}});
+        });
+    }
 }
 

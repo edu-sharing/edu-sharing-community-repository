@@ -1,8 +1,8 @@
 import {RestConstants} from "../rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {
-  Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
-  Repository, WorkflowDefinition
+    Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
+    Repository, WorkflowDefinition, Permissions
 } from "../rest/data-object";
 import {FormatSizePipe} from "./file-size.pipe";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
@@ -22,6 +22,8 @@ import {ApplyToLmsComponent} from "./apply-to-lms/apply-to-lms.component";
 import {ListItem} from "./list-item";
 import {Helper} from "../helper";
 import {ConfigurationHelper} from "../rest/configuration-helper";
+import {CordovaService} from "../services/cordova.service";
+import {VCard} from "../VCard";
 
 export class NodeHelper{
   /**
@@ -30,9 +32,8 @@ export class NodeHelper{
    * @param item
    * @returns {any}
    */
-  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : ListItem) : string
+  public static getNodeAttribute(translation : TranslateService,config:ConfigurationService,node : Node,item : ListItem,fallbackValue="-") : string
   {
-
     let name=item.name;
     if(name==RestConstants.CM_NAME)
       return node["name"];
@@ -46,7 +47,34 @@ export class NodeHelper{
       return translation.instant("MEDIATYPE."+node.mediatype);
     }
     if(name==RestConstants.CM_CREATOR){
-      return ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,config);
+      let value=ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy,config);
+      if(value)
+        return value;
+    }
+    if(name==RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE){
+      let range:string[];
+      if(node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE]){
+        try {
+          range = node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE][0].split("-");
+        }catch(e){
+          range=[null];
+        }
+      }
+      else{
+        try {
+          range = [node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE + '_from'][0], node.properties[RestConstants.CCM_PROP_EDUCATIONALTYPICALAGERANGE + '_to'][0]];
+        }catch(e){
+          range=[null];
+        }
+      }
+      if(range[0]) {
+          if (range[0] == range[1] || !range[1]){
+            return range[0].trim()+" "+translation.instant('LEARNINGAGE_YEAR');
+          }
+          else{
+            return range[0].trim()+"-"+range[1].trim()+" "+translation.instant('LEARNINGAGE_YEAR');
+          }
+      }
     }
     if(name==RestConstants.CCM_PROP_WF_STATUS && !node.isDirectory){
       let workflow=NodeHelper.getWorkflowStatus(config,node);
@@ -68,12 +96,10 @@ export class NodeHelper{
       value=node.properties[name].join(", ");
     if((node as any)[name])
       value=(node as any)[name];
-
-    // Store already formatted dates inside node
-    if(!(node as any).propertiesFormatted){
-      (node as any).propertiesFormatted=[];
+    if(value && RestConstants.getAllVCardFields().indexOf(name)!=-1){
+      return new VCard(value).getDisplayName();
     }
-    if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1 && !(node as any).propertiesFormatted[name]){
+    if(value && RestConstants.DATE_FIELDS.indexOf(name)!=-1){
       if(item.format){
         value=DateHelper.formatDateByPattern(value,item.format).trim();
       }
@@ -82,15 +108,13 @@ export class NodeHelper{
       }
       if(node.properties[name])
         node.properties[name][0]=value;
-
-      (node as any).propertiesFormatted[name]=true;
     }
     if(node.properties[name+RestConstants.DISPLAYNAME_SUFFIX]){
       value=node.properties[name+RestConstants.DISPLAYNAME_SUFFIX].join(", ");
     }
     if(value)
       return value;
-    return "-";
+    return fallbackValue;
     //return "MISSING "+item;
 
   }
@@ -133,30 +157,6 @@ export class NodeHelper{
     return error.status;
   }
 
-  /**
-   * Navigate to the workspace
-   * @param nodeService instance of NodeService
-   * @param router instance of Router
-   * @param login a result of the isValidLogin method
-   * @param node The node to open and show
-   */
-  public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node) {
-    nodeService.getNodeParents(node.ref.id).subscribe((data:ParentList)=>{
-      router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
-        {queryParams:{id:node.parent.id,file:node.ref.id,root:data.scope}});
-    });
-  }
-  /**
-   * Navigate to the workspace
-   * @param nodeService instance of NodeService
-   * @param router instance of Router
-   * @param login a result of the isValidLogin method
-   * @param folder The folder id to open
-   */
-  public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
-    router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
-      {queryParams:{id:folder}});
-  }
   public static getCollectionScopeInfo(collection : any) : any{
     let scope=collection.scope;
     let icon="help";
@@ -216,14 +216,32 @@ export class NodeHelper{
     return collection[item];
   }
 
+  public static downloadUrl(toast:Toast,cordova:CordovaService,url:string,fileName="download"){
+    if(cordova.isRunningCordova()){
+        toast.toast('TOAST.DOWNLOAD_STARTED',{name:fileName});
+        cordova.downloadContent(url,fileName,(deviceFileName:string)=>{
+            toast.toast('TOAST.DOWNLOAD_FINISHED',{name:fileName});
+        },()=>{
+            toast.error(null,'TOAST.DOWNLOAD_FAILED',{name:fileName},null,null,{
+              link:{
+                caption:'TOAST.DOWNLOAD_TRY_AGAIN',
+                callback:()=>{this.downloadUrl(toast,cordova,url,fileName)}
+              }
+            });
+        });
+    }
+    else{
+        window.open(url);
+    }
+  }
   /**
    * Download (a single) node
    * @param node
    */
-  public static downloadNode(node:any,version=RestConstants.NODE_VERSION_CURRENT) {
+  public static downloadNode(toast:Toast,cordova:CordovaService,node:any,version=RestConstants.NODE_VERSION_CURRENT) {
     if(node.reference)
       node=node.reference;
-    window.open(node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""));
+    this.downloadUrl(toast,cordova,node.downloadUrl+(version && version!=RestConstants.NODE_VERSION_CURRENT ? "&version="+version : ""),node.name);
   }
 
 
@@ -241,17 +259,6 @@ export class NodeHelper{
       node.preview.data=data.blob();
       observer.next(node);
       observer.complete();
-      /*
-      var reader = new FileReader();
-      console.log(data.blob());
-      reader.readAsDataURL(data.blob());
-      reader.onloadend = function() {
-        node.preview.data=reader.result;
-        console.log(node.preview.data);
-        observer.next(node);
-        observer.complete();
-      }
-      */
     });
   });
   }
@@ -271,7 +278,7 @@ export class NodeHelper{
    * @param rest
    * @returns {string}
    */
-  public static getLicenseIconByString(string: String,rest:RestConnectorService) {
+  public static getLicenseIconByString(string: String,rest:RestConnectorService,useNoneAsFallback=true) {
     let icon=string.replace(/_/g,"-").toLowerCase();
     if(icon=='')
       icon='none';
@@ -279,6 +286,8 @@ export class NodeHelper{
       "cc-by-sa","cc-by","copyright-free","copyright-license","custom",
       "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk"];
     if(LICENSE_ICONS.indexOf(icon)==-1)
+      icon='none';
+    if(icon=='none' && !useNoneAsFallback)
       return null;
     return rest.getAbsoluteEndpointUrl()+"../ccimages/licenses/"+icon+".svg";
   }
@@ -341,6 +350,7 @@ export class NodeHelper{
 
   /**
    * Get an attribute (property) from a node
+   * The attribute will be cached add the object
    * @param translate
    * @param config
    * @param data The node or other object to use
@@ -348,6 +358,18 @@ export class NodeHelper{
    * @returns {any}
    */
   public static getAttribute(translate:TranslateService,config:ConfigurationService,data : any,item : ListItem) : string{
+      if((data as any).propertiesConverted && (data as any).propertiesConverted[item.name]){
+          return (data as any).propertiesConverted[item.name];
+      }
+      let value=this.getAttributeWithoutCache(translate,config,data,item);
+      // Store already converted data inside node/object
+      if(!(data as any).propertiesConverted){
+          (data as any).propertiesConverted=[];
+      }
+      (data as any).propertiesConverted[item.name]=value;
+      return value;
+  }
+  public static getAttributeWithoutCache(translate:TranslateService,config:ConfigurationService,data : any,item : ListItem) : string{
     if(item.type=='NODE') {
       if(data.reference) // collection ref, use original for properties
         data=data.reference;
@@ -478,14 +500,15 @@ export class NodeHelper{
    * Download one or multiple nodes
    * @param node
    */
-  static downloadNodes(connector:RestConnectorService,nodes: Node[]) {
+  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[]) {
     if(nodes.length==1)
-      return this.downloadNode(nodes[0]);
+      return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
+
     let nodesString=RestHelper.getNodeIds(nodes).join(",");
-      window.open(connector.getAbsoluteEndpointUrl()+
+      this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
       "../eduservlet/download?appId="+
       encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString));
+      "&nodeIds="+encodeURIComponent(nodesString),"download.zip");
   }
 
   static getLRMIProperty(data: any, item: ListItem) {
@@ -513,18 +536,6 @@ export class NodeHelper{
       }
     }
     return NodeHelper.getAttribute(translate,config,data,item);
-  }
-
-  public static getNodePositionInArray(search: Node, _nodes: Node[]) {
-    let i=0;
-    for(let node of _nodes) {
-      if(node.ref) {
-        if (node.ref.id == search.ref.id)
-          return i;
-      }
-      i++;
-    }
-    return _nodes.indexOf(search);
   }
 
   public static getLicenseHtml(translate:TranslateService,data:Node) {
@@ -576,6 +587,28 @@ export class NodeHelper{
 
   static hasAnimatedPreview(node: Node) {
     return !node.preview.isIcon && (node.mediatype=="file-video" || node.mimetype=="image/gif");
+  }
+
+  static askCCPublish(translate:TranslateService,node: Node) {
+      let mail=node.createdBy.firstName+" "+node.createdBy.lastName+"<"+node.createdBy.mailbox+">";
+      let subject=translate.instant('ASK_CC_PUBLISH_SUBJECT',{name:RestHelper.getTitle(node)});
+      window.location.href="mailto:"+mail+"?subject="+encodeURIComponent(subject);
+  }
+
+    /**
+     * checks if a doi handle is active (node must be explicitly public and handle it must be present)
+     * @param {Node} node
+     * @param {Permissions} permissions
+     * @returns {boolean}
+     */
+  static isDOIActive(node: Node, permissions: Permissions) {
+    if(node.aspects.indexOf(RestConstants.CCM_ASPECT_PUBLISHED)!=-1 && node.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]) {
+        for (let permission of permissions.localPermissions.permissions) {
+            if (permission.authority.authorityName == RestConstants.AUTHORITY_EVERYONE)
+                return true;
+        }
+    }
+      return false;
   }
 }
 

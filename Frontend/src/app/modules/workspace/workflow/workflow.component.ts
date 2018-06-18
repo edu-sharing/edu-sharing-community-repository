@@ -20,6 +20,7 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
+import {RestHelper} from "../../../common/rest/rest-helper";
 
 @Component({
   selector: 'workspace-workflow',
@@ -38,7 +39,6 @@ export class WorkspaceWorkflowComponent  {
   public dialogButtons:DialogButton[];
   public loading=true;
   public node: Node;
-  public authoritySuggestions : SuggestItem[];
   public receivers:UserSimple[]=[];
   public status=RestConstants.WORKFLOW_STATUS_UNCHECKED;
   public initialStatus=RestConstants.WORKFLOW_STATUS_UNCHECKED;
@@ -48,6 +48,7 @@ export class WorkspaceWorkflowComponent  {
   public history: WorkflowEntry[];
   public globalAllowed: boolean;
   public globalSearch = false;
+  public TYPE_EDITORIAL=RestConstants.GROUP_TYPE_EDITORIAL;
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
@@ -74,20 +75,6 @@ export class WorkspaceWorkflowComponent  {
   @Output() onDone=new EventEmitter();
   @Output() onClose=new EventEmitter();
   @Output() onLoading=new EventEmitter();
-  private updateSuggestions(event : any){
-    console.log("search "+event.input);
-    this.iam.searchUsers(event.input,this.globalSearch).subscribe(
-      (users:IamUsers) => {
-        var ret:SuggestItem[] = [];
-        for (let user of users.users){
-          let item=new SuggestItem(user.authorityName,user.profile.firstName+" "+user.profile.lastName, 'person', '');
-          item.originalObject=user;
-          ret.push(item);
-        }
-        this.authoritySuggestions=ret;
-      },
-      error => console.log(error));
-  }
   public isAllowedAsNext(status:WorkflowDefinition){
     if(!this.initialStatus.next)
       return true;
@@ -102,10 +89,10 @@ export class WorkspaceWorkflowComponent  {
     this.status=status;
     this.chooseStatus=false;
   }
-  private addSuggestion(data: any) {
+  private addSuggestion(data: UserSimple) {
     /*if(this.receivers.indexOf(data.item.id)==-1)
       this.receivers.push(data.item.id);*/
-    this.receivers=[data.item.originalObject];
+    this.receivers=[data];
   }
   public getWorkflowForId(id:string){
     return NodeHelper.getWorkflowStatusById(this.config,id);
@@ -127,7 +114,7 @@ export class WorkspaceWorkflowComponent  {
     let receivers=this.status.hasReceiver ? this.receivers : [];
     if(receivers.length){
       this.nodeService.getNodePermissionsForUser(this._nodeId,receivers[0].authorityName).subscribe((data:string[])=>{
-        if(data.indexOf(RestConstants.PERMISSION_COLLABORATOR)==-1 && data.indexOf(RestConstants.PERMISSION_COORDINATOR)==-1){
+        if(data.indexOf(RestConstants.PERMISSION_COORDINATOR)==-1){
           this.dialogTitle='WORKSPACE.WORKFLOW.USER_NO_PERMISSION';
           this.dialogMessage='WORKSPACE.WORKFLOW.USER_NO_PERMISSION_INFO';
           this.dialogMessageParameters={user:new AuthorityNamePipe().transform(receivers[0],null)};
@@ -207,9 +194,10 @@ export class WorkspaceWorkflowComponent  {
     this.nodeService.getNodePermissions(this._nodeId).subscribe((data:NodePermissions)=>{
       let permission=new Permission();
       permission.authority={authorityName:authority,authorityType:RestConstants.AUTHORITY_TYPE_USER};
-      permission.permissions=[RestConstants.PERMISSION_COLLABORATOR];
+      permission.permissions=[RestConstants.PERMISSION_COORDINATOR];
       data.permissions.localPermissions.permissions.push(permission);
-      this.nodeService.setNodePermissions(this._nodeId,data.permissions.localPermissions,false).subscribe(()=>{
+      let permissions=RestHelper.copyAndCleanPermissions(data.permissions.localPermissions.permissions,data.permissions.localPermissions.inherited);
+      this.nodeService.setNodePermissions(this._nodeId,permissions,false).subscribe(()=>{
         this.saveWorkflow();
       },(error:any)=>this.toast.error(error));
     },(error:any)=>this.toast.error(error));

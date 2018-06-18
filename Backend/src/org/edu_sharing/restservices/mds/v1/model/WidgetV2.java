@@ -12,8 +12,51 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 @ApiModel(description = "")
 public class WidgetV2 {
-		private String id,caption,bottomCaption,icon,type,template,condition;
+	public static class Condition{
+		private String value,type;
+		private boolean negate;
+		@JsonProperty
+		public String getValue() {
+			return value;
+		}
+		public void setValue(String value) {
+			this.value = value;
+		}
+		@JsonProperty
+		public String getType() {
+			return type;
+		}
+		public void setType(String type) {
+			this.type = type;
+		}
+		@JsonProperty
+		public boolean isNegate() {
+			return negate;
+		}
+		public void setNegate(boolean negate) {
+			this.negate = negate;
+		}
+
+	}
+	public static class Subwidget{
+    			private String id;
+
+    			public Subwidget(org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget key) {
+    				this.id = key.getId();
+    			}
+
+    			public String getId() {
+    				return id;
+    			}
+
+    			public void setId(String id) {
+    				this.id = id;
+    			}
+
+    }
+		private String id,caption,bottomCaption,icon,type,template;
 		private List<ValueV2> values;
+		private List<Subwidget> subwidgets;
 		private String placeholder;
 		private String unit;
 		private Integer min;
@@ -25,7 +68,8 @@ public class WidgetV2 {
 		private boolean isRequired;
 		private boolean allowempty;
 		private String defaultvalue;
-		
+		private Condition condition;
+
 		public WidgetV2(){}
 		public WidgetV2(MetadataWidget widget) {
 			this.id=widget.getId();		
@@ -45,20 +89,31 @@ public class WidgetV2 {
 			this.isExtended=widget.isExtended();
 			this.isRequired=widget.isRequired();
 			this.allowempty=widget.isAllowempty();
-			this.condition=widget.getCondition();
+			if(widget.getCondition()!=null) {
+				this.condition=new Condition();
+				this.condition.setValue(widget.getCondition().getValue());
+				this.condition.setType(widget.getCondition().getType().name());
+				this.condition.setNegate(widget.getCondition().isNegate());
+			}
 			if(widget.getValues()!=null && widget.isValuespaceClient()){
 				values=new ArrayList<ValueV2>();
 				for(MetadataKey key : widget.getValues()){
 					values.add(new ValueV2(key));
 				}
 			}
-			
+			if(widget.getSubwidgets()!=null){
+				subwidgets=new ArrayList<Subwidget>();
+				for(MetadataWidget.Subwidget key : widget.getSubwidgets()){
+					subwidgets.add(new Subwidget(key));
+				}
+			}
+
 		}
-		@JsonProperty("condition")
-		public String getCondition() {
+		@JsonProperty
+		public Condition getCondition() {
 			return condition;
 		}
-		public void setCondition(String condition) {
+		public void setCondition(Condition condition) {
 			this.condition = condition;
 		}
 		@JsonProperty("bottomCaption")
@@ -187,7 +242,12 @@ public class WidgetV2 {
 		public void setUnit(String unit) {
 			this.unit = unit;
 		}
-		
-		
+		@JsonProperty
+		public List<Subwidget> getSubwidgets() {
+			return subwidgets;
+		}
+		public void setSubwidgets(List<Subwidget> subwidgets) {
+			this.subwidgets = subwidgets;
+		}
 	}
 

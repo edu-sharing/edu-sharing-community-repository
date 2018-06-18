@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import {TranslateService, TranslateLoader} from "@ngx-translate/core";
-import { Http, Response, Headers } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
 import 'rxjs/add/observable/forkJoin';
@@ -12,6 +11,9 @@ import {ActivatedRoute} from "@angular/router";
 import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
 import {RestLocatorService} from "./rest/services/rest-locator.service";
+import {HttpClient, HttpClientModule} from "@angular/common/http";
+import {CordovaService} from './services/cordova.service';
+import * as moment from 'moment';
 
 export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','override'];
 
@@ -22,13 +24,21 @@ export class Translation  {
    * Initializes ng translate and returns the choosen language
    * @param translate
    */
-  private static LANGUAGES:any={
+  public static LANGUAGES:any={
     "de":"de_DE",
     "en":"en_US",
   };
+  private static DEFAULT_SUPPORTED_LANGUAGES = ["de","en"];
   public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
-      config.get("supportedLanguages",["de","en"]).subscribe((data: string[]) => {
+      config.get("supportedLanguages",Translation.DEFAULT_SUPPORTED_LANGUAGES).subscribe((data: string[]) => {
+        if(config.getLocator().getCordova().isRunningCordova()){
+          Translation.initializeCordova(translate,config.getLocator().getCordova(),data).subscribe((language:string)=>{
+            observer.next(language);
+            observer.complete();
+          });
+          return;
+        }
         translate.addLangs(data);
         translate.setDefaultLang(data[0]);
         translate.use(data[0]);
@@ -59,9 +69,30 @@ export class Translation  {
             });
           });
         });
-
       });
     });
+  }
+  public static initializeCordova(translate : TranslateService,cordova:CordovaService,supportedLanguages=Translation.DEFAULT_SUPPORTED_LANGUAGES) {
+     return new Observable<string>((observer: Observer<string>) => {
+          translate.addLangs(supportedLanguages);
+          let language=supportedLanguages[0];
+          translate.setDefaultLang(language);
+          translate.use(language);
+          Translation.setLanguage(language);
+          cordova.getLanguage().subscribe((data: string) => {
+              console.log("language from phone: "+data);
+              if (supportedLanguages.indexOf(data) != -1) {
+                  language=data;
+              }
+              translate.use(language);
+              Translation.setLanguage(language);
+              translate.getTranslation(language).subscribe(()=>{
+                  Translation.languageLoaded=true;
+                  observer.next(language);
+                  observer.complete();
+              });
+          })
+      });
   }
   public static isLanguageLoaded(){
     return Translation.languageLoaded;
@@ -84,6 +115,8 @@ export class Translation  {
   static applyToDateOptions(translate:TranslateService,dateOptions: DatepickerOptions) {
     //dateOptions.locale=moment.localeData(this.getLanguage());
     dateOptions.displayFormat=Translation.getDateFormat();
+    dateOptions.firstCalendarDay=1;
+    dateOptions.locale=(moment.locale(this.getLanguage()) as any);
     /*
     dateOptions.todayText=translate.instant("TODAY");
     dateOptions.clearText=translate.instant("DATE_CLEAR");
@@ -91,11 +124,11 @@ export class Translation  {
     */
   }
 }
-export function createTranslateLoader(http: Http,locator:RestLocatorService) {
+export function createTranslateLoader(http: HttpClient,locator:RestLocatorService) {
   return new TranslationLoader(http,locator);
 }
 export class TranslationLoader implements TranslateLoader {
-  constructor(private http: Http,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
+  constructor(private http: HttpClient,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
   /**
    * Gets the translations from the server
    * @param lang
@@ -105,20 +138,24 @@ export class TranslationLoader implements TranslateLoader {
   public getTranslation(lang: string): Observable<any> {
     //return this.http.get(`${this.prefix}/common/${lang}${this.suffix}`)
     //  .map((res: Response) => res.json());
-    var translations : any =[];
-    var results=0;
+    let translations : any =[];
+    let results=0;
+    let maxCount=TRANSLATION_LIST.length;
     for (let translation of TRANSLATION_LIST) {
       this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
-        .map((res: Response) => res.json()).subscribe((data : any) => translations.push(data));
+        .subscribe((data : any) => translations.push(data));
 
     }
-    this.locator.getConfigLanguage(lang).subscribe((data:any)=>{
-      translations.push(data);
-    });
+    if(!this.locator.getCordova().isRunningCordova() || this.locator.getCordova().hasValidConfig()) {
+      maxCount++;
+      this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
+          translations.push(data);
+      });
+    }
 
     return new Observable<any>((observer : Observer<any>) => {
       let callback = ()=> {
-        if (translations.length < TRANSLATION_LIST.length + 1) {
+        if (translations.length < maxCount) {
           setTimeout(callback, 10);
           return;
         }
@@ -136,7 +173,7 @@ export class TranslationLoader implements TranslateLoader {
           for (const key in obj) {
             let path=key.split(".");
             if(path.length==1) {
-              continue
+              continue;
             }
             else if(path.length==2){
               final[path[0]][path[1]]=obj[key];

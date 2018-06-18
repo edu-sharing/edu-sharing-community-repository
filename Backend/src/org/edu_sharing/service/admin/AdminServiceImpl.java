@@ -35,6 +35,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -83,12 +84,14 @@ import org.edu_sharing.repository.update.Release_1_7_SubObjectsToFlatObjects;
 import org.edu_sharing.repository.update.Release_1_7_UnmountGroupFolders;
 import org.edu_sharing.repository.update.Release_3_2_DefaultScope;
 import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
+import org.edu_sharing.repository.update.Release_4_1_FixClassificationKeywordPrefix;
 import org.edu_sharing.repository.update.SystemFolderNameToDisplayName;
 import org.edu_sharing.repository.update.Update;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
+import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -433,7 +436,8 @@ public class AdminServiceImpl implements AdminService  {
 				result.add(new ServerUpdateInfo(FolderToMap.ID,FolderToMap.description));
 				result.add(new ServerUpdateInfo(Edu_SharingPersonEsuidUpdate.ID,Edu_SharingPersonEsuidUpdate.description));
 				result.add(new ServerUpdateInfo(Release_3_2_FillOriginalId.ID,Release_3_2_FillOriginalId.description));
-				result.add(new ServerUpdateInfo(Release_3_2_DefaultScope.ID,Release_3_2_DefaultScope.description));					
+				result.add(new ServerUpdateInfo(Release_3_2_DefaultScope.ID,Release_3_2_DefaultScope.description));			
+				result.add(new ServerUpdateInfo(Release_4_1_FixClassificationKeywordPrefix.ID,Release_4_1_FixClassificationKeywordPrefix.description));					
 		return result;
 	}
 	
@@ -441,7 +445,7 @@ public class AdminServiceImpl implements AdminService  {
 	public String runUpdate(String updateId,boolean execute) throws Exception{
 		StringWriter result=new StringWriter();
 		PrintWriter out=new PrintWriter(result);
-		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out)};
+		Update[] avaiableUpdates = new Update[]{new Licenses1(out),new Licenses2(out),new ClassificationKWToGeneralKW(out), new SystemFolderNameToDisplayName(out), new Release_1_6_SystemFolderNameRename(out),new Release_1_7_UnmountGroupFolders(out), new  Edu_SharingAuthoritiesUpdate(out), new Release_1_7_SubObjectsToFlatObjects(out), new RefreshMimetypPreview(out), new KeyGenerator(out), new FixMissingUserstoreNode(out), new FolderToMap(out), new Edu_SharingPersonEsuidUpdate(out), new Release_3_2_FillOriginalId(out), new Release_3_2_DefaultScope(out), new Release_4_1_FixClassificationKeywordPrefix(out)};
 
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -578,7 +582,7 @@ public class AdminServiceImpl implements AdminService  {
 	}
 	
 	@Override
-	public void importOai(String set,String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName) throws Exception{	
+	public void importOai(String set,String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds) throws Exception{	
 		//new JobExecuter().start(ImporterJob.class, authInfo, setsParam.toArray(new String[setsParam.size()]));
 		
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
@@ -612,6 +616,11 @@ public class AdminServiceImpl implements AdminService  {
 		if(binaryHandlerClassName != null && !binaryHandlerClassName.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_BINARYHANDLER,binaryHandlerClassName);
 		}
+		if(oaiIds != null && !oaiIds.trim().isEmpty()){
+			paramsMap.put(OAIConst.PARAM_OAI_IDS,oaiIds);
+		}
+		
+		paramsMap.put(OAIConst.PARAM_USERNAME, AuthenticationUtil.getFullyAuthenticatedUser());
 		
 		Class importerClass = null;
 		for(JobConfig jobConfig : JobHandler.getInstance().getJobConfigList()){
@@ -628,6 +637,23 @@ public class AdminServiceImpl implements AdminService  {
 		if(jobListener.isVetoed()){
 			throw new Exception("job was vetoed by "+jobListener.getVetoBy());
 		}
+	}
+	
+	@Override
+	public void startJob(String jobClass, HashMap<String,Object> params) throws Exception {	
+		
+		if(params == null) {
+			params = new HashMap<String,Object>();
+		}
+		params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
+		params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+		
+		Class job = Class.forName(jobClass);
+		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(job, params);
+		if(jobListener != null && jobListener.isVetoed()){
+			throw new Exception("job was vetoed by " + jobListener.getVetoBy());
+		}
+		
 	}
 	
 	@Override

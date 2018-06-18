@@ -59,13 +59,14 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.google.gwt.widgetideas.graphics.client.Color;
 
 public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 	public static final String RESULT_TYPE_MIME_ICON = "mime_type";
 
-	private static final int MAX_IMAGE_SIZE = 2000;
+	public static final int MAX_IMAGE_SIZE = 1200;
+
+	private static final float DEFAULT_QUALITY = 0.8f;
 
 	ServiceRegistry serviceRegistry;
 
@@ -77,6 +78,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	}
 
 	private boolean isCacheable(int width,int height, int maxWidth, int maxHeight){
+		if(width==-1)
+			return true;
 		if(maxWidth>0 || maxHeight>0)
 			return false;
 		for(int i=0;i<PreviewCache.CACHE_SIZES_WIDTH.length;i++){
@@ -424,7 +427,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		if (getPrevResult.getType().equals(GetPreviewResult.TYPE_DEFAULT)) {
 			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
 			ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, QName.createQName(CCConstants.CM_PROP_CONTENT));
-			if(reader.getMimetype().startsWith("image")) {
+			if(reader!=null && reader.getMimetype().startsWith("image")) {
 				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp))
 					return true;
 			}
@@ -433,17 +436,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	}
 	private DataInputStream postProcessImage(String nodeId,DataInputStream in,HttpServletRequest req){
 		float quality=0.7f;
-		boolean grayscale=false;
 		
 		int width=0,height=0,maxHeight=0,maxWidth=0;
 		boolean crop=false;
 		boolean hasAnyValue=false;
 		try{
 			quality=Integer.parseInt(req.getParameter("quality"))/100.f;
-			hasAnyValue=true;
-		}catch(Throwable t){}
-		try{
-			grayscale=req.getParameter("grayscale").equals("true");
 			hasAnyValue=true;
 		}catch(Throwable t){}
 		
@@ -463,15 +461,21 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		try{
 			maxHeight=Integer.parseInt(req.getParameter("maxHeight"));
 		}catch(Throwable t){}
-		
-		if(!hasAnyValue)
-			return null;
+		boolean fullsize=false;
+		if(!hasAnyValue) {
+			width=-1;
+			height=-1;
+			crop=true;
+			fullsize=true;
+			maxWidth=MAX_IMAGE_SIZE;
+			maxHeight=MAX_IMAGE_SIZE;
+		}
 		
 		boolean fromCache=false;
 		
-		if(isCacheable(width, height,maxWidth,maxHeight)){
-			File file=PreviewCache.getFileForNode(nodeId,width,height);
-			if(file.exists()){
+		if(fullsize || isCacheable(width, height,maxWidth,maxHeight)){
+			File file=PreviewCache.getFileForNode(nodeId,fullsize ? width : -1,height,false);
+			if(file!=null && file.exists()){
 				try{
 					in.close();
 					in=new DataInputStream(new FileInputStream(file));
@@ -480,7 +484,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			}
 		}
 		// if the image is cached, allow only 70% quality because it's useless to compress in higher ratio
-		quality=Math.min(Math.max(quality, 0), fromCache ? 0.7f : 1);
+		quality=Math.min(Math.max(quality, 0), fromCache ? DEFAULT_QUALITY : 1);
 		width=Math.min(Math.max(width, 0), MAX_IMAGE_SIZE);
 		height=Math.min(Math.max(height, 0), MAX_IMAGE_SIZE);
 		maxWidth=Math.min(Math.max(maxWidth, 0), MAX_IMAGE_SIZE);
@@ -488,7 +492,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		
 		try{
 			// cache optimization, if no other tasks, just return the cached preview
-			if(fromCache && !grayscale && Math.abs(quality-0.7f)<0.1){
+			if(fromCache && Math.abs(quality-DEFAULT_QUALITY)<0.1){
 				return in;
 			}
 			
@@ -506,7 +510,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				}
 			}
 			catch(Throwable t){}
-			
+			boolean scale=true;
 			if(crop && !fromCache){
 				float aspectOriginal=(float)img.getWidth()/(float)img.getHeight();
 				if(maxWidth>0){
@@ -515,6 +519,21 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				if(maxHeight>0){
 					height=(int) Math.min(width/aspectOriginal,maxHeight);
 				}
+				if(maxWidth>0 && maxHeight>0) {
+					if(aspectOriginal>1) {
+						width=maxWidth;
+						height=(int) (width/aspectOriginal);
+					}
+					else {
+						height=maxHeight;
+						width=(int) (height*aspectOriginal);
+					}
+					if(width>img.getWidth() || height>img.getHeight()) {
+						scale=false;
+					}
+				}
+				if(!scale)
+					return null;
 				BufferedImage cropped=new BufferedImage(width,height, BufferedImage.TYPE_INT_ARGB); // getType() sometimes return 0
 				float aspectCrop=(float)width/(float)height;
 				Graphics g=cropped.getGraphics();
@@ -529,26 +548,18 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					g.drawImage(scaled, (int)( -(scaledWidth-cropped.getWidth())/2),0,(int)scaledWidth, cropped.getHeight(), null);
 				}
 				img=cropped;
+				
 			}
 			BufferedImage imgOut=new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 			imgOut.getGraphics().setColor(java.awt.Color.WHITE);
 			imgOut.getGraphics().fillRect(0, 0,imgOut.getWidth(),imgOut.getHeight());
 			imgOut.getGraphics().drawImage(img, 0, 0, null);
 		
-			if(!fromCache && isCacheable(width, height,maxWidth,maxHeight)){
+			if(scale && !fromCache && (isCacheable(width, height,maxWidth,maxHeight) || fullsize)){
 				// Drop alpha (weird colors in jpg otherwise)
-				ImageIO.write(imgOut, "JPG",PreviewCache.getFileForNode(nodeId, width, height));
+				ImageIO.write(imgOut, "JPG",PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width, height,true));
 			}
-				
-			if(grayscale){
-				ImageFilter filter = new GrayFilter(true, 0);  
-				ImageProducer producer = new FilteredImageSource(imgOut.getSource(), filter);  
-				Image gray = Toolkit.getDefaultToolkit().createImage(producer);
-				
-				imgOut.getGraphics().drawImage(gray, 0, 0, null);
-				
-			}
-				
+		
 			// Drop alpha (weird colors in jpg otherwise)
 			
 			JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(null);
@@ -566,10 +577,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			
 		}
 		catch(Throwable t){
+			return null;
+		}
+		finally {
 			try {
 				in.close();
 			} catch (IOException e) {}
-			return null;
 		}
 		
 	}

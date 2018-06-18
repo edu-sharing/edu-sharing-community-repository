@@ -6,10 +6,10 @@ import {FormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
 import {createTranslateLoader} from "./common/translation";
 import {ROUTES} from "./router/router.component";
-import {InfiniteScrollModule} from "ngx-infinite-scroll";
 import {NgDatepickerModule} from "ng2-datepicker";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
+import {HttpClient, HttpClientModule} from "@angular/common/http";
 
 
 export const IMPORTS=[
@@ -17,13 +17,13 @@ export const IMPORTS=[
   BrowserAnimationsModule,
   FormsModule,
   HttpModule,
-  InfiniteScrollModule,
+  HttpClientModule,
   NgDatepickerModule,
   TranslateModule.forRoot({
     loader:{
       provide: TranslateLoader,
       useFactory: createTranslateLoader,
-      deps: [Http,RestLocatorService]
+      deps: [HttpClient,RestLocatorService]
     }
   }),
   ToastyModule.forRoot(),

@@ -214,12 +214,13 @@ public class URLTool{
 		String url = null;
 		
 		String nodeIdKey = null;
+		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 		try{
-			nodeIdKey = PropertiesHelper.getProperty(NOIDKEY_KEY, propertyfile, PropertiesHelper.XML);
+			nodeIdKey = appInfo.getNodeIdKey();
 			if(preview){
-				url = PropertiesHelper.getProperty(PREVIEWURLKEY, propertyfile, PropertiesHelper.XML);
+				url = appInfo.getPreviewUrl();
 			}else{
-				url = PropertiesHelper.getProperty(CONTENTURLKEY, propertyfile, PropertiesHelper.XML);
+				url = appInfo.getContentUrl();
 			}
 		}catch(Exception e){
 			logger.error(e.getMessage(), e);
@@ -304,8 +305,14 @@ public class URLTool{
 		
 	}
 
-	public static String getNgRenderNodeUrl(String nodeId) {
-		return getNgComponentsUrl()+"render/"+nodeId;
+	/**
+	 * Get the url to the angular rendering component
+	 * @param nodeId
+	 * @param version may be null to use the latest
+	 * @return
+	 */
+	public static String getNgRenderNodeUrl(String nodeId,String version) {
+		return getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.trim().isEmpty() ? "/"+version : "");
 	}
 	
 	public static String getRedirectServletLink(String repId, String nodeId){

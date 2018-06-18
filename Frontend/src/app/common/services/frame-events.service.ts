@@ -23,6 +23,14 @@ export class FrameEventsService {
   public static EVENT_SESSION_TIMEOUT="SESSION_TIMEOUT";
   public static EVENT_APPLY_NODE="APPLY_NODE";
   public static EVENT_NODE_SAVED="NODE_SAVED";
+    /**
+     * Hint to ng that the content has changed (e.g. via a connector) and should be reloaded
+     * @type {string}
+     */
+  public static EVENT_REFRESH="REFRESH";
+  public static EVENT_CLOSE="CLOSE";
+  public static EVENT_CORDOVA_CAMERA="EVENT_CORDOVA_CAMERA";
+  public static EVENT_CORDOVA_CAMERA_RESPONSE="EVENT_CORDOVA_CAMERA_RESPONSE";
   public static EVENT_REST_RESPONSE="PARENT_REST_RESPONSE";
 
   public static INVALIDATE_HEIGHT_EVENTS=[
@@ -43,13 +51,7 @@ export class FrameEventsService {
 
   constructor() {
     let t=this;
-    window.addEventListener('message', function (event:any) {
-      if (event.source!==window.self && event.data){
-        t.eventListeners.forEach(function(listener:EventListener){
-          listener.onEvent(event.data.event,event.data.data);
-        });
-      }
-    }, false);
+    window.addEventListener('message', (event:any)=>this.onEvent(event), false);
       setInterval(()=>{
         this.broadcastEvent(FrameEventsService.EVENT_CONTENT_HEIGHT,document.body.scrollHeight);
       },250);
@@ -61,6 +63,20 @@ export class FrameEventsService {
    */
   public addWindow(window:Window){
     this.windows.push(window);
+  }
+  public onEvent(event:any){
+      if (event.source!==window.self && event.data){
+          if(event.data.event==FrameEventsService.EVENT_CLOSE){
+              event.source.close();
+              let pos=this.windows.indexOf(event.source);
+              if(pos!=-1)
+                this.windows.splice(pos,1);
+              return;
+          }
+          this.eventListeners.forEach(function(listener:EventListener){
+              listener.onEvent(event.data.event,event.data.data);
+          });
+      }
   }
   public addListener(listener:EventListener) : void {
     this.eventListeners.push(listener);

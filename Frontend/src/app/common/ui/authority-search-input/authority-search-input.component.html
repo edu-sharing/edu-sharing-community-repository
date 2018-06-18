@@ -1,0 +1,11 @@
+<autocomplete
+  [id]="'searchAuthority'"
+  [inputMinLength]="2"
+  (addItem)="addSuggestion($event)"
+  (addAny)="addAny($event)"
+  [disabled]="disabled"
+  [allowAny]="allowAny"
+  [placeholder]="placeholder"
+  [suggestions]="authoritySuggestions"
+  (updateInput)="updateSuggestions($event)"
+></autocomplete>

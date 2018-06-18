@@ -5,7 +5,10 @@ import {
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
 import {RestIamService} from "../../rest/services/rest-iam.service";
-import {IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList} from "../../rest/data-object";
+import {
+    IamUser, AccessScope, LoginResult, Organizations, OrganizationOrganizations, NodeList,
+    NodeTextContent, NodeWrapper, Node
+} from '../../rest/data-object';
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../../router/router.component";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
@@ -22,6 +25,10 @@ import {Http} from "@angular/http";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
+import {CordovaService} from '../../services/cordova.service';
+import {SessionStorageService} from "../../services/session-storage.service";
+import {RestNodeService} from "../../rest/services/rest-node.service";
+import {Translation} from "../../translation";
 
 @Component({
   selector: 'main-nav',
@@ -30,6 +37,7 @@ import {ConfigurationHelper} from "../../rest/configuration-helper";
   animations: [
     trigger('fromLeft', UIAnimation.fromLeft()),
     trigger('overlay', UIAnimation.openOverlay()),
+    trigger('cardAnimation', UIAnimation.cardAnimation()),
     trigger('fade', UIAnimation.fade()),
     trigger('nodeStore', [
       transition(':enter', [
@@ -71,6 +79,11 @@ export class MainNavComponent {
   public showNodeStore=false;
   private nodeStoreCount = 0;
   private static bannerPositionInterval: any;
+  acceptLicenseAgreement: boolean;
+  licenseAgreement: boolean;
+  licenseAgreementHTML: string;
+  canEditProfile: boolean;
+  private licenseAgreementNode: Node;
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
   }
@@ -108,13 +121,19 @@ export class MainNavComponent {
     for(let i=0;i<elementsAlign.length;i++) {
       elements.push(elementsAlign[i]);
     }
+    let ATTRIBUTE_NAME='data-banner-id';
     if(event==null) {
-      this.scrollInitialPositions=[];
+      /*this.scrollInitialPositions=[];*/
       for(let i=0;i<elements.length;i++) {
         let element: any = elements[i];
         element.style.position = null;
         element.style.top = null;
-        this.scrollInitialPositions.push(window.getComputedStyle(element).getPropertyValue('top'));
+        if(!element.getAttribute(ATTRIBUTE_NAME)){
+            element.setAttribute(ATTRIBUTE_NAME,Math.random());
+        }
+        if(this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)])
+          continue;
+        this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=window.getComputedStyle(element).getPropertyValue('top');
       }
     }
     if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
@@ -133,10 +152,10 @@ export class MainNavComponent {
         }
         else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
           element.style.position = 'fixed';
-          element.style.top = this.scrollInitialPositions[i];
+          element.style.top = this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)];
         } else {
           element.style.position = 'absolute';
-          element.style.top = Number.parseInt(this.scrollInitialPositions[i])+y + 'px';
+          element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)])+y + 'px';
         }
       }
     }
@@ -144,6 +163,29 @@ export class MainNavComponent {
       this.scrolltotop.nativeElement.style.display = 'block';
     } else {
       this.scrolltotop.nativeElement.style.display = 'none';
+    }
+  }
+  private touchStart : any;
+  @HostListener('document:touchstart',['$event']) onTouchStart(event:any) {
+    this.touchStart=event;
+  }
+  @HostListener('document:touchend',['$event']) onTouchEnd(event:any) {
+    let horizontal=event.changedTouches[0].clientX-this.touchStart.changedTouches[0].clientX;
+    let vertical=event.changedTouches[0].clientY-this.touchStart.changedTouches[0].clientY;
+    let horizontalRelative=horizontal/window.innerWidth;
+    if(Math.abs(horizontal)/Math.abs(vertical)<5)
+      return;
+    if(this._currentScope=='render')
+      return;
+    if(this.touchStart.changedTouches[0].clientX<window.innerWidth/7){
+      if(horizontalRelative>0.2){
+        this.displaySidebar=true;
+      }
+    }
+    if(this.touchStart.changedTouches[0].clientX>window.innerWidth/7){
+      if(horizontalRelative<-0.2){
+        this.displaySidebar=false;
+      }
     }
   }
 
@@ -223,7 +265,8 @@ export class MainNavComponent {
   public getCurrentScopeIcon(){
     if(this._currentScope=='login')
       return 'person';
-
+    if(this._currentScope=='oer')
+        return 'public'
     for(let button of this.sidebarButtons){
       if(button.scope==this._currentScope)
         return button.icon;
@@ -231,7 +274,6 @@ export class MainNavComponent {
     return null;
   }
   refreshBanner(){
-    console.log("refresh banner");
     this.handleScroll(null);
     setTimeout(()=>this.handleScroll(null),10);
   }
@@ -253,14 +295,18 @@ export class MainNavComponent {
     }
   private clearSearch(){
     this.searchQuery="";
+    this.searchQueryChange.emit("");
     this.onSearch.emit({query:"",cleared:true});
   }
   constructor(private iam : RestIamService,
               private connector : RestConnectorService,
+              private cordova : CordovaService,
               private changeDetector :  ChangeDetectorRef,
               private event : FrameEventsService,
+              private nodeService : RestNodeService,
               private configService : ConfigurationService,
               private storage : TemporaryStorageService,
+              private session : SessionStorageService,
               private http : Http,
               private org : RestOrganizationService,
               private router : Router,
@@ -308,6 +354,7 @@ export class MainNavComponent {
         this._showUser=this.currentScope!='login' && this.showUser;
         this.iam.getUser().subscribe((user : IamUser) => {
           this.user=user;
+          this.canEditProfile=user.editProfile;
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
@@ -330,7 +377,12 @@ export class MainNavComponent {
     //window.scrollTo(0,0);
   }
   editProfile(){
-    window.location.href=this.editUrl;
+    if(this.cordova.isRunningCordova()){
+      window.open(this.editUrl,'_system');
+    }
+    else {
+      window.location.href = this.editUrl;
+    }
   }
   openSidenav() {
     if(this.canOpen) {
@@ -351,9 +403,15 @@ export class MainNavComponent {
   }
   public showHelp(url:string){
     this.helpOpen=false;
-    window.open(url);
+    UIHelper.openBlankWindow(url,this.cordova);
   }
   private logout(){
+    if(this.cordova.isRunningCordova()){
+      this.cordova.clearAllCookies();
+      this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
+      this.cordova.restartCordova();
+      return;
+    }
     if(this.config.logout) {
       if(this.config.logout.ajax){
         this.http.get(this.config.logout.url).subscribe(()=>{
@@ -388,13 +446,15 @@ export class MainNavComponent {
     this.onSearch.emit({query:value,cleared:false});
   }
   private openButton(button : any){
+    if(button.isDisabled)
+      return;
     this.displaySidebar=false;
     if(button.scope==this._currentScope){
       return;
     }
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED,button.scope);
     if(button.url){
-      window.location.href=button.url;
+      UIHelper.openBlankWindow(button.url,this.cordova);
     }
     else {
       let queryParams=button.queryParams?button.queryParams:{};
@@ -439,6 +499,9 @@ export class MainNavComponent {
   private openImprint(){
     window.document.location.href=this.config.imprintUrl;
   }
+  private openPrivacy(){
+    window.document.location.href=this.config.privacyInformationUrl;
+  }
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
       this.config=data;
@@ -448,6 +511,7 @@ export class MainNavComponent {
       this.whatsNewUrl=this.configService.instant("whatsNewUrl",this.whatsNewUrl);
       this.hideButtons(buttons);
       this.addButtons(buttons);
+      this.showLicenseAgreement();
     },(error:any)=>this.hideButtons(buttons));
   }
 
@@ -471,5 +535,43 @@ export class MainNavComponent {
   }
   getIconSource() {
     return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
+  }
+  saveLicenseAgreement(){
+    this.licenseAgreement=false;
+    if(this.licenseAgreementNode)
+      this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
+  }
+  private showLicenseAgreement() {
+    if(!this.config.licenseAgreement || this.isGuest)
+      return;
+    this.session.get('licenseAgreement',false).subscribe((version:string)=>{
+      this.licenseAgreementHTML=null;
+      let nodeId:string=null;
+      for(let node of this.config.licenseAgreement.nodeId) {
+        if(node.language==null)
+          nodeId=node.value;
+        if(node.language==Translation.getLanguage()){
+          nodeId=node.value;
+          break;
+        }
+      }
+      this.nodeService.getNodeMetadata(nodeId).subscribe((data:NodeWrapper)=>{
+        this.licenseAgreementNode=data.node;
+        console.log(data.node);
+        if(version==data.node.contentVersion)
+          return;
+        this.licenseAgreement=true;
+        this.nodeService.getNodeTextContent(nodeId).subscribe((data: NodeTextContent) => {
+            this.licenseAgreementHTML = data.html ? data.html : data.raw ? data.raw : data.text;
+        }, (error: any) => {
+            this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
+        });
+      },(error:any)=>{
+          this.licenseAgreement=true;
+          this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
+      })
+
+    });
+
   }
 }

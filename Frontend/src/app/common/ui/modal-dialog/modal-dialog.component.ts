@@ -28,7 +28,11 @@ export class ModalDialogComponent{
       return;
     }
   }
-
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   */
+  @Input() priority = 0;
   /**
    * Wether or not this dialog can be closed using escape or the icon
    * @type {boolean}
@@ -39,6 +43,11 @@ export class ModalDialogComponent{
    * @type {boolean}
    */
   @Input() isScrollable = false;
+  /**
+   * Should the dialog be fill the whole height? (use with isScrollable=true)
+   * @type {boolean}
+   */
+  @Input() isHigh = false;
   /**
    * The title, will be translated automatically
    * The dialog will only be visible if the title is not null

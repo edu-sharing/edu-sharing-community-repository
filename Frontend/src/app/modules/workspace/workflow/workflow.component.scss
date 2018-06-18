@@ -6,14 +6,6 @@ h2{
   font-size: 120%;
   color:$textLight;
 }
-.statusIcon{
-  border-radius: 50%;
-  width: 12px;
-  height: 12px;
-  display: inline-block;
-  position: relative;
-  top: 13px;
-}
 .global{
   margin-bottom: 20px;
 }
@@ -79,7 +71,7 @@ h2{
   display:flex;
   width:100%;
   margin-bottom: -25px;
-  autocomplete{
+  authority-search-input{
     display: flex;
     width:0;
     flex-grow: 1;
@@ -105,6 +97,7 @@ h2{
   .collection-item{
     height:40px;
     line-height: 3rem;
+    display: flex;
   }
   .collection-item.disabled{
     /*filter:blur(1px);*/
@@ -113,6 +106,15 @@ h2{
       filter:saturate(0.5) contrast(0.5);
       opacity: 0.5;
     }
+  }
+  .statusIcon{
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    position: relative;
+    top: 13px;
+    margin-right: 5px;
   }
 }
 .chooseStatus{

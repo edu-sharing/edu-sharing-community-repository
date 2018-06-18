@@ -11,6 +11,7 @@ import {DatepickerOptions} from "ng2-datepicker";
 import {DateHelper} from "../../../common/ui/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
+import {NgDatepickerComponent} from "ng2-datepicker";
 
 @Component({
   selector: 'workspace-contributor',
@@ -18,16 +19,16 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
   styleUrls: ['contributor.component.scss'],
   animations: [
     trigger('fade', UIAnimation.fade()),
-    trigger('cardAnimation', UIAnimation.cardAnimation())
+    trigger('cardAnimation', UIAnimation.cardAnimation()),
+    trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
 export class WorkspaceContributorComponent  {
+  @ViewChild('datepicker') datepicker : NgDatepickerComponent;
   public contributorLifecycle:any={};
   public contributorMetadata:any={};
-  public rolesLifecycle=["publisher","author","unknown","initiator","terminator","validator",
-    "editor","graphical_designer","technical_implementer","content_provider",
-    "educational_validator","script_writer","instructional_designer","subject_matter_expert"];
-  public rolesMetadata=["creator","validator","provider"];
+  public rolesLifecycle=RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE;
+  public rolesMetadata=RestConstants.CONTRIBUTOR_ROLES_METADATA;
 
   private _nodeId: string;
   public loading=true;
@@ -52,7 +53,7 @@ export class WorkspaceContributorComponent  {
       this.node=data.node;
       for(let role of this.rolesLifecycle){
         this.contributorLifecycle[role]=[];
-        let list=data.node.properties["ccm:lifecyclecontributer_"+role];
+        let list=data.node.properties[RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX+role];
         if(!list)
           continue;
         for(let vcard of list){
@@ -62,7 +63,7 @@ export class WorkspaceContributorComponent  {
       }
       for(let role of this.rolesMetadata){
         this.contributorMetadata[role]=[];
-        let list=data.node.properties["ccm:metadatacontributer_"+role];
+        let list=data.node.properties[RestConstants.CONTRIBUTOR_METADATA_PREFIX+role];
         if(!list)
           continue;
         for(let vcard of list){
@@ -90,7 +91,7 @@ export class WorkspaceContributorComponent  {
 
   }
   public addVCard(mode:string) {
-    this.date=new Date();
+    this.date=null;
     this.editType='person';
     this.editMode=mode;
     this.edit=new VCard();
@@ -98,6 +99,10 @@ export class WorkspaceContributorComponent  {
     this.editScopeOld=null;
     this.editScopeNew=this.editMode=='lifecycle' ? this.rolesLifecycle[0] : this.rolesMetadata[0];
 
+  }
+  openDatepicker(){
+      this.date=new Date();
+      setTimeout(()=>this.datepicker.toggle());
   }
   public editVCard(mode:string,vcard : VCard,scope:string){
     this.editMode=mode;
@@ -108,6 +113,7 @@ export class WorkspaceContributorComponent  {
     this.editType=vcard.givenname||vcard.surname ? 'person' : 'org';
     this.date=null;
     let contributeDate=vcard.contributeDate;
+    console.log(contributeDate);
     if(contributeDate) {
       //this.date.formatted=contributeDate;
       //this.dateOptions.initialDate=new Date(contributeDate);
@@ -119,7 +125,6 @@ export class WorkspaceContributorComponent  {
         this.dateOptions.initialDate=new Date(parseInt(split[0]),parseInt(split[1]),parseInt(split[2]),0,0,0,0);
       }
       */
-
     }
   }
   public saveEdits(){
@@ -136,7 +141,7 @@ export class WorkspaceContributorComponent  {
       this.edit.surname='';
       this.edit.title='';
     }
-    this.edit.contributeDate=DateHelper.getDateFromDatepicker(this.date).toISOString();
+    this.edit.contributeDate=this.date ? DateHelper.getDateFromDatepicker(this.date).toISOString() : null;
     let array=this.editMode=='lifecycle' ? this.contributorLifecycle : this.contributorMetadata;
     if(this.editScopeOld) {
       let pos = array[this.editScopeOld].indexOf(this.editOriginal);

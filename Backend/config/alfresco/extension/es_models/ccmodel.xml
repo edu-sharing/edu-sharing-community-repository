@@ -546,6 +546,11 @@
 				<property name="ccm:replicationsourcetimestamp">
 					<type>d:text</type>
 				</property>
+				<!-- for sorting  -->
+				<property name="ccm:replicationmodified">
+					<type>d:date</type>
+				</property>
+				
 				<!-- for elixier objects thumbnail url -->
 				<property name="ccm:thumbnailurl">
 					<type>d:text</type>
@@ -696,6 +701,25 @@
 	               </index>
 				</property>
 				
+				<!-- property to show/hide a result depending on current metadataset -->
+				<property name="ccm:search_context">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
+				<!-- filter nodes in search depending on editorial state -->
+				<property name="ccm:editorial_state">
+					<type>d:text</type>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>false</tokenised>
+	               </index>
+				</property>
 			</properties>
 		</aspect>
 
@@ -705,6 +729,16 @@
 			</title>
 			<properties>
 				<property name="ccm:educationallearningresourcetype">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	                  <atomic>true</atomic>
+	                  <stored>false</stored>
+	                  <tokenised>both</tokenised>
+	               </index>
+				</property>
+				<!-- Field for aggregated values and toxenizing -->
+				<property name="ccm:educationallearningresourcetype_agg">
 					<type>d:text</type>
 					<multiple>true</multiple>
 					<index enabled="true">
@@ -745,6 +779,10 @@
 					<type>d:long</type>
 				</property>
 				<property name="ccm:educationalintendedenduserrole">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:schema_relation">
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
@@ -867,6 +905,252 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
+<!--  new Values LOM - DE   -->
+				<property name="ccm:lifecyclecontributer_animation">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_archiv">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_aufnahmeleitung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_aufnahmeteam">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_ausstattung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_autor">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_ballett">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_bearbeitete_fassung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_bildende_kunst">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_bildschnitt">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_buch">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_chor">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_choreographie">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_darsteller">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_design">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_dirigent">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_dvd-grafik_und_design">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_dvd-premastering">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_ensemble">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_fachberatung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_foto">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_grafik">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_idee">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_interpret">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_interview">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_kamera">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_kommentar">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_komponist">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_konzeption">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_libretto">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_literarische_vorlage">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_maz-bearbeitung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_mitwirkende">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_moderation">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_musik">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_musikalische_leitung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_musikalische_vorlage">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_musikgruppe">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_orchester">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_paedagogischer_sachbearbeiter_extern">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_produktionsleitung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_projektgruppe">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_projektleitung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_realisation">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_redaktion">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_regie">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_schnitt">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_screen-design">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_spezialeffekte">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_sprecher">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_studio">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_synchronisation">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_synchronregie">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_synchronsprecher">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_tanz">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_text">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_ton">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_trick">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_videotechnik">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_uebersetzung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<property name="ccm:lifecyclecontributer_uebertragung">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+
 				<!-- all shapes of metadatacontributer -->
 				<property name="ccm:metadatacontributer_creator">
 					<type>d:text</type>
@@ -948,6 +1232,11 @@
 				<property name="ccm:commonlicense_key">
 					<type>d:text</type>
 					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>false</tokenised>
+	         		</index>
 				</property>
 				<property name="ccm:questionsallowed">
 					<type>d:boolean</type>
@@ -984,7 +1273,15 @@
 				<property name="ccm:license_profile_url">
 					<type>d:text</type>
 				</property>
-
+				<property name="ccm:customlicense_key">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	          			<stored>false</stored>
+	         			<tokenised>false</tokenised>
+	         		</index>
+				</property>
 			</properties>
 		</aspect>
 
@@ -1046,12 +1343,18 @@
 			</properties>
 		</aspect>
 
+		<!-- aspect for marking the io template files -->
+		<aspect name="ccm:metadataPresettingTemplate">
+		</aspect>
 		<aspect name="ccm:metadataPresetting">
 			<title>aspect for metadata presetting</title>
 			<properties>
 				<property name="ccm:metadataPresettingProperties">
 					<type>d:qname</type>
 					<multiple>true</multiple>
+				</property>
+				<property name="ccm:metadataPresettingStatus">
+					<type>d:boolean</type>
 				</property>
 			</properties>
 			<associations>
@@ -1093,6 +1396,14 @@
 				</property>
 				<property name="ccm:collectioncolor">
 					<type>d:text</type>
+				</property>
+				<!-- remote id for referencing an imported collection -->
+				<property name="ccm:collectionremoteid">
+					<type>d:text</type>
+					<index enabled="true">
+	         			<atomic>true</atomic>
+	         			<tokenised>both</tokenised>
+	         		</index>
 				</property>
 				<property name="ccm:collectionlevel0">
 					<type>d:boolean</type>
@@ -1286,5 +1597,17 @@
 	    			</property>
 	    		</properties>
 	    </aspect>
+	    <aspect name="ccm:published">
+	    	<title>published aspect</title>
+	    	<properties>
+	    		<property name="ccm:published_date">
+	    			<type>d:datetime</type>
+	    		</property>
+	    		<property name="ccm:published_handle_id">
+	    			<type>d:text</type>
+	    		</property>
+	    	</properties>
+	    </aspect>
+	    
 	</aspects>
 </model>

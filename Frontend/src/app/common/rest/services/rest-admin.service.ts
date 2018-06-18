@@ -6,14 +6,17 @@ import {RestConnectorService} from "./rest-connector.service";
 import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {
-  ArchiveRestore, ArchiveSearch, Node, IamGroup, IamGroups, IamAuthorities, GroupProfile,
+  ArchiveRestore, ArchiveSearch, Node, NodeList, IamGroup, IamGroups, IamAuthorities, GroupProfile,
   IamUsers, IamUser, UserProfile, UserCredentials, ServerUpdate, CacheInfo, NetworkRepositories, Application
 } from "../data-object";
 import {Observer} from "rxjs";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestAdminService {
-  constructor(private connector : RestConnectorService) {}
+export class RestAdminService extends AbstractRestService{
+  constructor(connector : RestConnectorService) {
+    super(connector);
+  }
 
   public addApplication = (url:string): Observable<any> => {
     let query=this.connector.createUrl("admin/:version/applications?url=:url",null,[
@@ -93,8 +96,8 @@ export class RestAdminService {
     return this.connector.get(query,this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
-  public importOAI = (baseUrl:string,set:string,metadataPrefix:string,className:string,importerClassName:string,recordHandlerClassName:string,binaryHandlerClassName:string,metadataset="",fileUrl=""): Observable<Response> => {
-    let query=this.connector.createUrl("admin/:version/import/oai?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix&className=:className&importerClassName=:importerClassName&recordHandlerClassName=:recordHandlerClassName&binaryHandlerClassName=:binaryHandlerClassName&metadataset=:metadataset&fileUrl=:fileUrl",null,[
+  public importOAI = (baseUrl:string,set:string,metadataPrefix:string,className:string,importerClassName:string,recordHandlerClassName:string,binaryHandlerClassName="",metadataset="",fileUrl="",oaiIds=""): Observable<Response> => {
+    let query=this.connector.createUrl("admin/:version/import/oai?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix&className=:className&importerClassName=:importerClassName&recordHandlerClassName=:recordHandlerClassName&binaryHandlerClassName=:binaryHandlerClassName&metadataset=:metadataset&fileUrl=:fileUrl&oaiIds=:oaiIds",null,[
       [":baseUrl",baseUrl],
       [":set",set],
       [":metadataPrefix",metadataPrefix],
@@ -103,7 +106,8 @@ export class RestAdminService {
       [":recordHandlerClassName",recordHandlerClassName],
       [":binaryHandlerClassName",binaryHandlerClassName],
       [":metadataset",metadataset],
-      [":fileUrl",fileUrl]
+      [":fileUrl",fileUrl],
+      [":oaiIds",oaiIds]
     ]);
     return this.connector.post(query,null,this.connector.getRequestOptions());
   }
@@ -123,6 +127,10 @@ export class RestAdminService {
     let query=this.connector.createUrl("admin/:version/refreshAppInfo",null);
     return this.connector.post(query,null,this.connector.getRequestOptions());
   }
+  public refreshEduGroupCache = (): Observable<Response> => {
+      let query=this.connector.createUrl("admin/:version/refreshEduGroupCache",null);
+      return this.connector.post(query,null,this.connector.getRequestOptions());
+  }
   public getPropertyValuespace = (property:string): Observable<any> => {
     let query=this.connector.createUrl("admin/:version/propertyToMds?properties=:property",null,[
       [":property",property],
@@ -137,6 +145,24 @@ export class RestAdminService {
     ]);
     return this.connector.post(query,null,this.connector.getRequestOptions())
       .map((response: Response) => response.json());
+  }
+  public searchLucene = (lucene:string,authorities:string[],request:any=null): Observable<NodeList> => {
+      let query=this.connector.createUrlNoEscape("admin/:version/lucene/?query=:lucene&:authorities&:request",null,[
+          [":lucene",encodeURIComponent(lucene)],
+          [":authorities",RestHelper.getQueryStringForList("authorityScope",authorities)],
+          [":request",this.connector.createRequestString(request)]
+      ]);
+      return this.connector.get(query,this.connector.getRequestOptions())
+          .map((response: Response) => response.json());
+  }
+  public startJob = (job:string,params:string): Observable<Response> => {
+      let query=this.connector.createUrl("admin/:version/job/:job",null,[
+          [":job",job],
+      ]);
+      if(!params || !params.trim()){
+        params="{}";
+      }
+      return this.connector.post(query,params,this.connector.getRequestOptions());
   }
   public removeDeletedImports = (baseUrl:string,set:string,metadataPrefix:string): Observable<any> => {
     let query=this.connector.createUrl("admin/:version/import/oai/?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix",null,[
@@ -160,6 +186,12 @@ export class RestAdminService {
   public updateApplicationXML(xml:string,homeAppProperties: any[]) {
     let query=this.connector.createUrl("admin/:version/applications/:xml",null,[[":xml",xml]]);
     return this.connector.put(query,JSON.stringify(homeAppProperties),this.connector.getRequestOptions());
+  }
+
+  public applyTemplate = (groupName:string, templateName:string) :Observable<any> => {
+      let query=this.connector.createUrl("admin/:version/applyTemplate",null,[]);
+      let params = JSON.stringify({template:templateName,group:groupName});
+      return this.connector.post(query,params,this.connector.getRequestOptions());
   }
 }
 

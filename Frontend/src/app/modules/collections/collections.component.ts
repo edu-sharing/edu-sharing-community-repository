@@ -40,15 +40,11 @@ import {TranslateService} from "@ngx-translate/core";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
+import {Location} from "@angular/common";
 import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
-
-// data class for breadcrumbs
-export class Breadcrumb {
-    ref:EduData.Reference;
-    name:string;
-}
+import {ColorHelper} from '../../common/ui/color-helper';
 
 // component class
 @Component({
@@ -108,6 +104,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     public createCollectionReference = new AddElement("COLLECTIONS.ADD_MATERIAL","redo");
     private listOptions: OptionItem[];
     private _orderActive: boolean;
+    optionsMaterials:OptionItem[];
   // default hides the tabs
 
     // inject services
@@ -115,6 +112,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       public gwtInterface:GwtInterfaceService,
       private frame : FrameEventsService,
       private temporaryStorageService : TemporaryStorageService,
+        private location : Location,
         private collectionService : RestCollectionService,
         private nodeService : RestNodeService,
         private organizationService : RestOrganizationService,
@@ -180,6 +178,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       }
 
     }
+
     public set orderActive(orderActive:boolean){
       this._orderActive=orderActive;
       this.collectionContent.collection.orderMode=orderActive ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM : null;
@@ -350,29 +349,58 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
       }
     }
+    public isBrightColor(){
+        return ColorHelper.getColorBrightness(this.collectionContent.collection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
+    }
     getScopeInfo(){
       return NodeHelper.getCollectionScopeInfo(this.collectionContent.collection);
+    }
+    public onSelection(nodes:EduData.Node[]){
+        this.optionsMaterials=this.getOptions(nodes,false);
     }
     getOptions(nodes:Node[]=null,fromList:boolean) {
       if(fromList && (!nodes || !nodes.length)){
         nodes=[new Node()];
       }
       let options:OptionItem[]=[];
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,
-        (node:Node)=>this.addToOtherCollection(node));
-      if (collection) {
-        collection.name='COLLECTIONS.DETAIL.ADD_TO_OTHER';
-        options.push(collection);
+      if(!fromList){
+          if(nodes && nodes.length) {
+              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
+                  let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
+                  options.push(collection);
+              }
+              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
+                  let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE','remove_circle_outline',(node: Node)=>{
+                      this.deleteMultiple(ActionbarHelper.getNodes(nodes,node));
+                  });
+                  options.push(remove);
+              }
+          }
       }
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,
-        (node:Node)=>NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
+      if(fromList) {
+          let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector,
+              (node: Node) => this.addToOtherCollection(node));
+          if (collection) {
+              collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
+              options.push(collection);
+          }
+      }
+      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,
+        (node:Node)=>NodeHelper.downloadNodes(this.toast,this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
-      let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node:Node) => this.deleteReference(ActionbarHelper.getNodes(nodes,node)[0]));      remove.showCallback=(node:Node)=>{return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes,node),RestConstants.ACCESS_DELETE)};
-      options.push(remove);
-      if (this.config.instant("nodeReport", false)) {
-        let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes,node)[0]);
-        options.push(report);
+      if(fromList) {
+          let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
+          remove.showCallback = (node: Node) => {
+              return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
+          };
+          options.push(remove);
+      }
+      if(fromList || nodes && nodes.length==1) {
+          if (this.config.instant("nodeReport", false)) {
+              let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes, node)[0]);
+              options.push(report);
+          }
       }
 
       return options;
@@ -398,7 +426,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       }
       else {
         this.collectionService.addNodeToCollection(target.ref.id, source.ref.id).subscribe(() => {
-          UIHelper.showAddedToCollectionToast(this.toast, target, 1);
+          UIHelper.showAddedToCollectionToast(this.toast,this.router, target, 1);
           if (event.type == 'copy') {
             this.globalProgress = false;
             this.refreshContent();
@@ -470,6 +498,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     refreshContent(callback:Function=null) : void {
         if (!this.isReady) return;
         this.isLoading=true;
+        this.onSelection([]);
         // clear search field in GWT top area
         if (this.clearSearchOnNextStateChange) {
             this.clearSearchOnNextStateChange=false;
@@ -506,6 +535,8 @@ export class CollectionsMainComponent implements GwtEventListener {
             this.mainNavRef.refreshBanner();
             if(callback)
               callback();
+        },(error:any)=>{
+            this.toast.error(error);
         });
 
 
@@ -523,11 +554,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
         // remember actual collection as breadcrumb
         if (!this.isRootLevelCollection()) {
-
-            let crumb = new Breadcrumb();
-            crumb.ref = this.collectionContent.collection.ref;
-            crumb.name =this.collectionContent.collection.title;
-            this.parentCollectionId = crumb.ref;
+            this.parentCollectionId = this.collectionContent.collection.ref;
         }
 
         // set thru router so that browser back button can work
@@ -564,7 +591,7 @@ export class CollectionsMainComponent implements GwtEventListener {
          */
         if(data.node.access.indexOf(RestConstants.ACCESS_DELETE)!=-1) {
           this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
-            NodeRenderComponent.close();
+            NodeRenderComponent.close(this.location);
           })));
         }
         // set content for being displayed in detail
@@ -661,19 +688,22 @@ export class CollectionsMainComponent implements GwtEventListener {
       // set app to ready state
       this.gwtInterface.addListenerOfGwtEvents(this);
       this.isReady = true;
-
       // subscribe to parameters of url
       this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
         console.log(params);
         if(params['scope'])
-          this.tabSelected=params['scope'];
+            this.tabSelected=params['scope'];
+        else
+            this.tabSelected=RestConstants.COLLECTIONSCOPE_MY;
         if(this.isGuest)
           this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
         if(params['mainnav'])
           this.mainnav=params['mainnav']!='false';
 
+        this._orderActive = false;
+        this.infoTitle = null;
         // get id from route and validate input data
-        var id = params['id'] || '-root-';
+        let id = params['id'] || '-root-';
         if (id==":id") id = "-root-";
         if (id=="") id = "-root-";
         if(params['addToOther']){
@@ -731,7 +761,24 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.toast.error(error);
       });
   }
+    private deleteMultiple(nodes:Node[],position=0,error=false){
+            if(position==nodes.length){
+                if(!error) {
+                    this.toast.toast("COLLECTIONS.REMOVED_FROM_COLLECTION");
+                }
+                this.globalProgress=false;
+                this.refreshContent();
+                return;
+            }
+        this.globalProgress=true;
+        this.collectionService.removeFromCollection(nodes[position].ref.id,this.collectionContent.collection.ref.id).subscribe(()=>{
+            this.deleteMultiple(nodes,position+1,error);
 
+        },(error:any)=>{
+            this.toast.error(error);
+            this.deleteMultiple(nodes,position+1,true);
+        });
+    }
   public closeDialog() {
     this.dialogTitle=null;
   }

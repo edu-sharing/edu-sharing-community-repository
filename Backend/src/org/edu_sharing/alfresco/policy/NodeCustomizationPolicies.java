@@ -467,7 +467,8 @@ logger.debug("will do the thumbnail stuff");
 			
 			logger.info("---> UPDATE/CREATE THUMBNAIL FOR LINK("+afterURL+") ON NODE("+nodeRef.getId()+")");
 			
-			String previewImageBase64 = getPreviewFromURL(afterURL);
+			String linktype = (String)after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
+			String previewImageBase64 = (linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) ? getPreviewFromURL(afterURL) : null;
 			if (previewImageBase64!=null) {
 
 				logger.info("---> GOT PREVIEW IMAGE BASE64: "+previewImageBase64.substring(21, 256)+" ...");

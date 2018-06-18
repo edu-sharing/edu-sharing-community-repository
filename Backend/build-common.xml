@@ -353,7 +353,7 @@
 			<antcall target="copy-angular-app"></antcall>
 			<antcall target="copy-angular-app-extension"></antcall>
 		</target>
-		<target name="copy-angular-app" unless="extension-name">
+		<target name="copy-angular-app" unless="extension-name" description="Copy angular app when no extension is active">
 		<echo>Copying dist to ng...</echo>
 			<delete dir="ng" />	
 			<mkdir  dir="ng" />
@@ -364,7 +364,7 @@
 			
 		</target>
 		
-		<target name="copy-angular-app-extension" if="extension-name">
+		<target name="copy-angular-app-extension" if="extension-name" description="Copy angular app when extension is active">
 			<echo>Extension enabled: ${extensions.path}${extension-name}/ng</echo>
 				<delete dir="${extensions.path}${extension-name}/${extension-name}/ng" />	
 				<mkdir  dir="${extensions.path}${extension-name}/ng" />

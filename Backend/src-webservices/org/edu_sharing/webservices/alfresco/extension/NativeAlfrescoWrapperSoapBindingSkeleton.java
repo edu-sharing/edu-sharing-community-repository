@@ -147,6 +147,31 @@ public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing
         }
         ((java.util.List)_myOperations.get("removeNode")).add(_oper);
         _params = new org.apache.axis.description.ParameterDesc [] {
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+        };
+        _oper = new org.apache.axis.description.OperationDesc("setOwner", _params, null);
+        _oper.setElementQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "setOwner"));
+        _oper.setSoapAction("");
+        _myOperationsList.add(_oper);
+        if (_myOperations.get("setOwner") == null) {
+            _myOperations.put("setOwner", new java.util.ArrayList());
+        }
+        ((java.util.List)_myOperations.get("setOwner")).add(_oper);
+        _params = new org.apache.axis.description.ParameterDesc [] {
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "type"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+        };
+        _oper = new org.apache.axis.description.OperationDesc("getChildren", _params, new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildrenReturn"));
+        _oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
+        _oper.setElementQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildren"));
+        _oper.setSoapAction("");
+        _myOperationsList.add(_oper);
+        if (_myOperations.get("getChildren") == null) {
+            _myOperations.put("getChildren", new java.util.ArrayList());
+        }
+        ((java.util.List)_myOperations.get("getChildren")).add(_oper);
+        _params = new org.apache.axis.description.ParameterDesc [] {
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "type"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "property"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
@@ -186,45 +211,6 @@ public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing
             _myOperations.put("copyNode", new java.util.ArrayList());
         }
         ((java.util.List)_myOperations.get("copyNode")).add(_oper);
-        _params = new org.apache.axis.description.ParameterDesc [] {
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "parentID"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "type"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-        };
-        _oper = new org.apache.axis.description.OperationDesc("getChildren", _params, new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildrenReturn"));
-        _oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
-        _oper.setElementQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getChildren"));
-        _oper.setSoapAction("");
-        _myOperationsList.add(_oper);
-        if (_myOperations.get("getChildren") == null) {
-            _myOperations.put("getChildren", new java.util.ArrayList());
-        }
-        ((java.util.List)_myOperations.get("getChildren")).add(_oper);
-        _params = new org.apache.axis.description.ParameterDesc [] {
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-        };
-        _oper = new org.apache.axis.description.OperationDesc("setOwner", _params, null);
-        _oper.setElementQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "setOwner"));
-        _oper.setSoapAction("");
-        _myOperationsList.add(_oper);
-        if (_myOperations.get("setOwner") == null) {
-            _myOperations.put("setOwner", new java.util.ArrayList());
-        }
-        ((java.util.List)_myOperations.get("setOwner")).add(_oper);
-        _params = new org.apache.axis.description.ParameterDesc [] {
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeProtocol"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-        };
-        _oper = new org.apache.axis.description.OperationDesc("getPropertiesExt", _params, new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesExtReturn"));
-        _oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
-        _oper.setElementQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesExt"));
-        _oper.setSoapAction("");
-        _myOperationsList.add(_oper);
-        if (_myOperations.get("getPropertiesExt") == null) {
-            _myOperations.put("getPropertiesExt", new java.util.ArrayList());
-        }
-        ((java.util.List)_myOperations.get("getPropertiesExt")).add(_oper);
         _params = new org.apache.axis.description.ParameterDesc [] {
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "query"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "startIdx"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"), int.class, false, false), 
@@ -323,6 +309,20 @@ public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing
             _myOperations.put("hasPermissions", new java.util.ArrayList());
         }
         ((java.util.List)_myOperations.get("hasPermissions")).add(_oper);
+        _params = new org.apache.axis.description.ParameterDesc [] {
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeProtocol"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "storeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+        };
+        _oper = new org.apache.axis.description.OperationDesc("getPropertiesExt", _params, new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesExtReturn"));
+        _oper.setReturnType(new javax.xml.namespace.QName("http://xml.apache.org/xml-soap", "Map"));
+        _oper.setElementQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPropertiesExt"));
+        _oper.setSoapAction("");
+        _myOperationsList.add(_oper);
+        if (_myOperations.get("getPropertiesExt") == null) {
+            _myOperations.put("getPropertiesExt", new java.util.ArrayList());
+        }
+        ((java.util.List)_myOperations.get("getPropertiesExt")).add(_oper);
         _params = new org.apache.axis.description.ParameterDesc [] {
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "permissions"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String[].class, false, false), 
@@ -1287,6 +1287,17 @@ public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing
         impl.removeNode(nodeId, fromId);
     }
 
+    public void setOwner(java.lang.String nodeId, java.lang.String username) throws java.rmi.RemoteException
+    {
+        impl.setOwner(nodeId, username);
+    }
+
+    public java.util.HashMap getChildren(java.lang.String parentID, java.lang.String type) throws java.rmi.RemoteException
+    {
+        java.util.HashMap ret = impl.getChildren(parentID, type);
+        return ret;
+    }
+
     public java.util.HashMap getChild(java.lang.String parentId, java.lang.String type, java.lang.String property, java.lang.String value) throws java.rmi.RemoteException
     {
         java.util.HashMap ret = impl.getChild(parentId, type, property, value);
@@ -1301,23 +1312,6 @@ public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing
     public void copyNode(java.lang.String nodeId, java.lang.String toNodeId, boolean copyChildren) throws java.rmi.RemoteException
     {
         impl.copyNode(nodeId, toNodeId, copyChildren);
-    }
-
-    public java.util.HashMap getChildren(java.lang.String parentID, java.lang.String type) throws java.rmi.RemoteException
-    {
-        java.util.HashMap ret = impl.getChildren(parentID, type);
-        return ret;
-    }
-
-    public void setOwner(java.lang.String nodeId, java.lang.String username) throws java.rmi.RemoteException
-    {
-        impl.setOwner(nodeId, username);
-    }
-
-    public java.util.HashMap getPropertiesExt(java.lang.String storeProtocol, java.lang.String storeId, java.lang.String nodeId) throws java.rmi.RemoteException
-    {
-        java.util.HashMap ret = impl.getPropertiesExt(storeProtocol, storeId, nodeId);
-        return ret;
     }
 
     public org.edu_sharing.webservices.alfresco.extension.SearchResult searchSolr(java.lang.String query, int startIdx, int nrOfresults, java.lang.String[] facettes, int facettesMinCount, int facettesLimit) throws java.rmi.RemoteException
@@ -1358,6 +1352,12 @@ public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing
     public java.util.HashMap hasPermissions(java.lang.String userId, java.lang.String[] permissions, java.lang.String nodeId) throws java.rmi.RemoteException
     {
         java.util.HashMap ret = impl.hasPermissions(userId, permissions, nodeId);
+        return ret;
+    }
+
+    public java.util.HashMap getPropertiesExt(java.lang.String storeProtocol, java.lang.String storeId, java.lang.String nodeId) throws java.rmi.RemoteException
+    {
+        java.util.HashMap ret = impl.getPropertiesExt(storeProtocol, storeId, nodeId);
         return ret;
     }
 

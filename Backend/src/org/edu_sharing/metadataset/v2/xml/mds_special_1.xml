@@ -1,40 +1,38 @@
 <metadataset id="default" label="default" hidden="false">
 		<name>Sample MDS</name>
 		<i18n>mds</i18n>
+		<create>
+			<onlyMetadata>true</onlyMetadata>
+		</create>
 		<widgets>
 			<widget>
+				<id>ccm:group_test</id>
+				<caption>Gruppentest</caption>
+				<type>multivalueGroup</type>
+				<subwidgets>
+					<widget>ccm:classification_purpose</widget>
+					<widget>ccm:educationaltypicalagerange</widget>
+				</subwidgets>
+			</widget>
+			<widget>
 				<id>ccm:classification_purpose</id>
-				<caption>Klassifikation</caption>
+				<type>defaultvalue</type>
+				<defaultvalue>TP exist</defaultvalue>
+				<condition type="TOOLPERMISSION">TOOLPERMISSION_CONFIDENTAL</condition>
+			</widget>
+			<widget>
+				<id>ccm:classification_purpose</id>
+				<caption>Klassifikation (TOOLPERMISSION_CONFIDENTIAL existiert nicht)</caption>
 				<placeholder>z.B. Hochschule</placeholder>
 				<type>singleoption</type>
 				<valuespaceClient>true</valuespaceClient>
 				<extended>false</extended>
-				<defaultvalue>${aha}</defaultvalue>
+				<defaultvalue>${test}</defaultvalue>
+				<condition type="TOOLPERMISSION" negate="true">TOOLPERMISSION_CONFIDENTAL</condition>
 				<values>
-					<value cap="Schule">school</value>
-					<value cap="Hochschule">university</value>
-					<value cap="Berufsbildung">vocational training</value>
-					<value cap="Weiterbildung">further education</value>
-					<value cap="Elementarbildung">basic education</value>
-					<value cap="informelles Lernen">informal learning</value>
-					<value cap="Schule2">school2</value>
-					<value cap="Hochschule2">university2</value>
-					<value cap="Berufsbildung2">vocational training2</value>
-					<value cap="Weiterbildung2">further education2</value>
-					<value cap="Elementarbildung2">basic education2</value>
-					<value cap="informelles Lernen2">informal learning2</value>
-					<value cap="Schule3">school3</value>
-					<value cap="Hochschule3">university3</value>
-					<value cap="Berufsbildung3">vocational training3</value>
-					<value cap="Weiterbildung3">further education3</value>
-					<value cap="Elementarbildung3">basic education3</value>
-					<value cap="informelles Lernen3">informal learning3</value>
-					<value cap="Schule4">school4</value>
-					<value cap="Hochschule4">university4</value>
-					<value cap="Berufsbildung4">vocational training4</value>
-					<value cap="Weiterbildung4">further education4</value>
-					<value cap="Elementarbildung4">basic education4</value>
-					<value cap="informelles Lernen4">informal learning4</value>
+					<value cap="Text">text</value>
+					<value cap="Video">video</value>
+					<value cap="Audio">audio</value>
 				</values>
 			</widget>
 			<widget>
@@ -42,7 +40,7 @@
 				<caption>Bildungsbereich/-sektor</caption>
 				<placeholder>z.B. Physik</placeholder>
 				<type>multivalueTree</type>
-				<valuespace>eaf_discipline.xml</valuespace>
+				<valuespace>lisum_taxon.xml</valuespace>
 			</widget>
 			<widget>
 				<id>ccm:educationaltypicalagerange</id>
@@ -73,14 +71,24 @@
 				]]></html>
 			</template>
 			<template>
+				<id>node_general</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+				<ccm:wwwurl>
+              <cclom:title>
+			  <preview>
+              <cclom:general_description>
+				]]></html>
+			</template>
+			<template>
 				<id>node_extended</id>
 				<caption>Erweitert</caption>
 				<icon>help_outline</icon>
 				<html><![CDATA[
-              <ccm:classification_purpose defaultvalue="${test}">
+              <ccm:group_test>
               <ccm:taxonid>
               <ccm:educationaltypicalagerange extended="true">
-              <version>
 				]]></html>
 			</template>
 		</templates>

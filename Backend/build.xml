@@ -34,7 +34,7 @@
 	        </fileset>
 	    </path> 
 
-	<target name="release">
+	<target name="release" description="Build Release">
 		
 		<!--incrementimng build number-->
 		<buildnumber file="build.number"/>
@@ -43,7 +43,7 @@
 		<property file="build.number" prefix="tmp"></property>
 		
 	
-		<copyfile src="version.html.template" dest="${src.dir}/org/edu_sharing/repository/public/version.html" />
+		<copyfile src="version.html.template" dest="${src.dir}/org/edu_sharing/repository/public/version.html" forceoverwrite="true" />
 		
 		<tstamp>
   			<format property="TODAY" pattern="yyyy-MM-dd"/>
@@ -66,6 +66,7 @@
 			<arg value="--date=short" />
 		</exec>
 		<echo>${git.result}</echo>
+		<echo>the extension: ${extension-name}</echo>
 		<!-- replace the extension name with the current active extension -->
 		<replaceregexp match="version.extension:[a-zA-Z ]*\&lt;br/\&gt;" replace="version.extension: ${extension-name}\&lt;br/\&gt;" flags="gs" byline="true">
 		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
@@ -96,7 +97,8 @@
 		
 		<zip destfile="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" basedir="." includes="${release.foldername}/**">
 		</zip>
-		<copy file="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" todir="release"> </copy>
+		<move file="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" todir="release"> </move>
+		<checksum file="release/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" todir="release" algorithm="SHA"></checksum>
 		
 		<!--clean up version tmp file -->
 		<delete file="version_tmp.properties"></delete>

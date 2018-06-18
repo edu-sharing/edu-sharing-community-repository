@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -49,6 +50,7 @@ import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
 public class ShibbolethServlet extends HttpServlet {
@@ -72,6 +74,13 @@ public class ShibbolethServlet extends HttpServlet {
 		
 		SSOAuthorityMapper ssoMapper = (SSOAuthorityMapper)eduApplicationContext.getBean("ssoAuthorityMapper");
 		
+		List<String> additionalAttributes = null;
+		try {
+			additionalAttributes = (List<String>)eduApplicationContext.getBean("additionalAttributes");
+		}catch(NoSuchBeanDefinitionException e) {
+			
+		}
+		
 		String headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 		
 		if (req.getRemoteUser() != null && !req.getRemoteUser().trim().isEmpty()) {
@@ -92,6 +101,10 @@ public class ShibbolethServlet extends HttpServlet {
 				
 				logger.info("end session for user:" + validAuthInfo.get(CCConstants.AUTH_USERNAME));
 				authTool.logout(validAuthInfo.get(CCConstants.AUTH_TICKET));
+				if(req.getSession(false) != null) {
+					req.getSession(false).invalidate();
+				}
+				req.getSession(true);
 				
 			}
 		}
@@ -109,6 +122,16 @@ public class ShibbolethServlet extends HttpServlet {
 			HashMap<String,String> ssoMap = new HashMap<String,String>();
 			for(String ssoKey : ssoMapper.getMappingConfig().getAllSSOAttributes()){
 				ssoMap.put(ssoKey, getShibValue(ssoKey,req));
+			}
+			
+			//additional attributes
+			if(additionalAttributes != null) {
+				for(String ssoKey : additionalAttributes) {
+					String val = getShibValue(ssoKey, req);
+					if(val != null && !val.trim().isEmpty()) {
+						ssoMap.put(ssoKey, getShibValue(ssoKey,req));
+					}
+				}
 			}
 			
 			/**

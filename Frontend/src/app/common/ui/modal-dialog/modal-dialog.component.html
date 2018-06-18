@@ -1,5 +1,5 @@
-<div class="dialog darken" *ngIf="title" [@fade]="title"></div>
-<div class="card center-card card-low" *ngIf="title" [@cardAnimation]="title" [class.card-action]="isCancelable" [class.card-high]="isScrollable">
+<div class="dialog darken" [style.z-index]="120 + priority" *ngIf="title" [@fade]="title"></div>
+<div class="card center-card" [style.z-index]="121 + priority" *ngIf="title" [@cardAnimation]="title" [class.card-low]="!isScrollable" [class.card-action]="isCancelable" [class.card-high]="isHigh">
   <div class="card-content">
     <div *ngIf="isCancelable" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
     <span class="card-title ">{{title | translate }}</span>

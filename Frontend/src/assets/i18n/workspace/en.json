@@ -11,6 +11,8 @@
     "MY_FILES": "My content",
     "ADD": "Add",
     "ADD_OBJECT": "Add Material",
+    "ADD_CAMERA": "Take a picture",
+    "ADD_EMPTY_OBJECT": "Add Object",
     "ADD_OBJECT_TITLE": "Add new material",
     "ADD_OBJECT_MESSAGE": "Drop materials here",
     "SELECT_COLLECTION": "Select collection",
@@ -22,7 +24,7 @@
     "AUTOLOGOUT_INFO":"Your session was automatically closed for your safety, because you have been inactive for at least {{ minutes }} minutes. Please login again.",
     "ADD_FOLDER": "Add folder",
     "SHARED_FILES": "Shared content",
-    "MY_SHARED_FILES": "My shared content",
+    "MY_SHARED_FILES": "Shared by me",
     "TO_ME_SHARED_FILES": "Shared with me",
     "WORKFLOW_RECEIVE": "Assigned to me",
     "RECYCLE": "Recycle",
@@ -56,30 +58,39 @@
       "GROUP_USERS":"These users have access:",
       "GROUP_GROUPS":"These groups have access:",
       "TYPE_VIEWER":"Viewer",
-      "TYPE_VIEWER_DESCRIPTION":"can view",
+      "TYPE_VIEWER_DESCRIPTION":"can view item / details page",
       "TYPE_COWORKER":"Collaborator",
-      "TYPE_COWORKER_DESCRIPTION":"can see, edit, view permissions and add elements",
+      "TYPE_COWORKER_DESCRIPTION":"can view item / details page, edit item, view permissions and add elements",
       "TYPE_COORDINATOR":"Coordinator",
-      "TYPE_COORDINATOR_DESCRIPTION":"can see, edit, delete, view and edit permissions, add and remove elements and publish",
+      "TYPE_COORDINATOR_DESCRIPTION":"can view item / details page, edit & delete item, view and edit permissions, add and remove elements and publish to connected systems",
       "TYPE_UNKNOWN":"Individual",
       "TYPE_UNKNOWN_DESCRIPTION":"Individual permissions have been set by admin: {{permissions}}",
-      "PUBLISHER":"can publish",
+      "PUBLISHER":"... and may publish",
+      "PUBLISHER_TOOLTIP":"Can use and publish the material in collections and attached systems (i.e. moodle)",
       "MESSAGE":"Add message",
       "MESSAGE_PLACEHOLDER":"Enter message...",
-      "INHERIT":"Inherit permissions from folder",
+      "INHERIT":"Inherit permissions from parent folder",
       "INHERIT_HINT":"This permission is inherit from the parent folder",
       "GLOBAL_SEARCH":"Search beyond my organization",
       "SHOW_HISTORY":"View history",
       "LINK":"Shared link",
-      "LINK_ENABLED_INFO":"Link sharing is active. Everyone can access via link",
+      "LINK_ENABLED_INFO":"Link sharing is active. Everyone with the link can access the material.",
       "LINK_DISABLED_INFO":"Link sharing is diabled",
       "MANAGE_LINK":"Manage",
-      "PUBLISH":"Publish",
+      "PUBLISH":"Release material to the public.",
       "PUBLISH_INHERIT":"The access is inherit from the parent element. Disable the inherition to change access",
       "PUBLISH_NO_PERMISSION":"You have currently no permissions to publish elements",
       "PUBLISH_ACTIVE_DOCUMENT":"The document is made publicly available on the Internet",
       "PUBLISH_ACTIVE_COLLECTION":"The collection is made publicly available on the Internet",
       "PUBLISH_ACTIVE_DIRECTORY":"All documents of this folder are made publicly available on the Internet",
+      "NO_FUZZY":"Enter the full e-mail address to add users",
+      "DOI":"Provide with DOI",
+      "DOI_INFO":"DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
+      "STATE": {
+        "PRIVATE": "Private",
+        "SHARED": "Shared",
+        "PUBLIC": "Public"
+      },
       "HISTORY":{
         "TITLE":"Sharing-History",
         "ADDED":"Added",
@@ -89,6 +100,7 @@
       }
     },
     "INHERIT_DISABLED":"Inherition is currently disabled",
+    "INHERIT_EMPTY":"The parent folder has currently no permissions.\nPermissions will be applied as soon as they are added to the parent folder.",
     "PERMISSION_AUTHORITY_EXISTS":"The chosen user/group already has access. Check the current permissions at \"Invited\"",
     "PERMISSIONS_UPDATED":"Permissions updated",
 
@@ -103,10 +115,12 @@
       "RESTORE_TITLE":"Restore?",
       "RESTORE_MESSAGE":"Are you sure you want to change the version of this element?",
       "PERMALINK":"Link to object",
-      "USAGE_COUNT":"Usage count",
+      "USAGE_COUNT_TITLE":"Usage",
+      "USAGE_COUNT":"Total uses",
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
-        "EDITOR_UPLOAD": "File updated by editor"
+        "EDITOR_UPLOAD": "File updated by editor",
+        "NODE_PUBLISHED": "File published"
       }
     },
     "EDITOR":{
@@ -117,7 +131,7 @@
       "AUTHOR_FIRST":"Author: First name",
       "AUTHOR_LAST":"Last name",
       "KEYWORDS":"Add keywords",
-      "HINT_ENTER":"Enter to confirm",
+      "HINT_ENTER":"Press enter add keywords.",
       "AS_VERSION":"as Version",
       "VERSION":"Version",
       "VERSION_COMMENT":"Add version comment",
@@ -128,6 +142,7 @@
     "REVERTED_VERSION":"Version has been reverted successfully",
     "OPTION":{
       "SHOW":"Preview & Info",
+      "DEBUG":"Debug",
       "INVITE":"Invite",
       "EDIT":"Edit info",
       "VIEW":"View",
@@ -138,10 +153,16 @@
       "PASTE":"Paste",
       "METADATA":"Details",
       "COLLECTION":"Add To collection",
-      "LICENSE":"assign a license",
+      "LICENSE":"Assign a license",
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",
-      "WORKFLOW":"Workflow"
+      "WORKFLOW":"Workflow",
+      "TEMPLATE":"Metadata Template"
+    },
+    "NODE_TEMPLATE" : {
+      "STATUS": "Automatic Metadata Inheritance",
+      "STATUS_DESKRIPTION": "After activation, new materials will receive the metadata from this template",
+      "STATUS_DISABLED": "Activate the metadata template to automatically apply the metadata specified here to new content in this folder."
     },
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",
@@ -168,7 +189,7 @@
       "NO_COMMENT":"Please enter a comment for workflow activity.",
       "NO_HISTORY":"No entries for workflow activites have been made yet.",
       "USER_NO_PERMISSION":"Missing permissions",
-      "USER_NO_PERMISSION_INFO":"The user in charge '{{user}}' has currently no permission to access this document.\n\nIf you proceed, the user will gain editing permissions for this document.",
+      "USER_NO_PERMISSION_INFO":"The user in charge '{{user}}' has currently no permission to access this document.\n\nIf you proceed, the user will gain editing and sharing permissions for this document.",
       "PROCEED":"Proceed"
     },
     "CONTRIBUTOR":{
@@ -179,6 +200,7 @@
       "METADATACONTRIBUTOR":"Contributors of metadata",
       "SCOPE":"role",
       "DATE":"date  (optional)",
+      "CHOOSE_DATE":"Choose date",
       "MORE":"Add more data",
       "ORG_INFO":"Organization of contributor (optional)",
       "ADDRESS_INFO":"Address of contributor (optional)",
@@ -219,7 +241,7 @@
     "DRAG_DROP_MOVE":"move",
     "FEATURE_NOT_IMPLEMENTED":"This feature is currently not available",
     "LICENSE":{
-      "TITLE":"License of {{ name }}",
+      "TITLE":"License of \"{{ name }}\" ",
       "TYPE":"Choose license",
       "NONE_NAME":"No license chosen",
       "COPYRIGHT_NAME":"protected by copyright law",
@@ -277,18 +299,20 @@
         "CC_0":"This work is dedicated to the public domain.<br /> You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission.",
         "COPYRIGHT_FREE":"The work is accessible free of charge.<br />Use and attribution according to the generally applicable legal regulations.",
         "COPYRIGHT_LICENSE":"The work may only be used by the licensed user group according to the conditions stipulated in the license agreement.<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices.",
-        "SCHULFUNK":"Access-restricted and time-limited offering for school radio according to ยง47 UrhG (German Act on Copyright and Related Rights).<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices."
+        "SCHULFUNK":"Access-restricted and time-limited offering for school radio according to §47 UrhG (German Act on Copyright and Related Rights).<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices."
       }
     },
     "TOAST":{
       "FOLDER_ADDED":"Folder added",
       "NODE_EXISTS_IN_COLLECTION":"The collection already contains the element {{name}}",
-      "ADDED_TO_COLLECTION_MY":"{{count}} element(s) have been added to collection {{collection}} and is visible for you",
-      "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to collection {{collection}} and are visible to all invited persons",
-      "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to collection {{collection}} and are visible to everyone",
+      "VIEW_COLLECTION":"View collection",
+      "ADDED_TO_COLLECTION_MY":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible for you",
+      "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to all invited persons",
+      "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to everyone",
+      "ADD_TO_COLLECTION_DISABLED":"At least 1 selected material can not be collected",
       "DELETE_FINISHED":"Element(s) move to recycle",
       "CUT_COPY":"{{count}} Element(s) copied to clipboard",
-      "PASTE":"{{count}} Element(s) have been {{mode}} from {{from}} to {{to}}",
+      "PASTE":"{{count}} Element(s) have been {{mode}} from \"{{from}}\" to \"{{to}}\"",
       "PASTE_DRAG":"{{count}} Element(s) have been {{mode}} to {{to}}",
       "DUPLICATE_NAME":"The name {{name}} already exists.<br>Please use an other, unique name",
       "CYCLIC_NODE":"A folder can not be pasted into its own",
@@ -298,7 +322,8 @@
       "NOT_FOUND":"The folder {{id}} was not found. May it has been deleted.",
       "LICENSE_UPDATED":"License has been updated",
       "CONTRIBUTOR_UPDATED":"Information of contributors have been updated",
-      "WORKFLOW_UPDATED":"Information of workflow have been updated"
+      "WORKFLOW_UPDATED":"Information of workflow have been updated",
+      "METADATA_TEMPLATE_UPDATED":"Information of metadata template have been updated"
     }
   }
 }

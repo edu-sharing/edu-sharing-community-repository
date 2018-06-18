@@ -1,8 +1,11 @@
 import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../services/configuration.service";
-import {Collection, Connector, ConnectorList, Filetype, MdsInfo, Node, NodeLock} from "../rest/data-object";
-import {ActivatedRoute, Router} from "@angular/router";
+import {
+    Collection, Connector, ConnectorList, Filetype, LoginResult, MdsInfo, Node,
+    NodeLock, ParentList
+} from "../rest/data-object";
+import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
 import {UIConstants} from "./ui-constants";
 import {ElementRef, EventEmitter, HostListener} from "@angular/core";
 import {RestConstants} from "../rest/rest-constants";
@@ -15,16 +18,24 @@ import {NodeHelper} from "./node-helper";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {FrameEventsService} from "../services/frame-events.service";
+import {RestNodeService} from "../rest/services/rest-node.service";
+import {PlatformLocation} from "@angular/common";
+import {AbstractRestService} from "../rest/services/abstract-rest-service";
+import {CordovaService} from "../services/cordova.service";
 export class UIHelper{
-  static MOBILE_WIDTH = 600;
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
-    config.get("branding").subscribe((data:any)=>{
+    config.get("branding").subscribe((branding:boolean)=>{
       let t=name;
-      if(data==true){
-        t+=" - edu-sharing";
+      if(branding==true){
+          config.get("siteTitle","edu-sharing").subscribe((name:string)=>{
+              t+=" - "+name;
+              title.setTitle(t);
+          });
       }
-      title.setTitle(t);
+      else{
+        title.setTitle(t);
+      }
     });
   }
   public static setTitle(name:string,title:Title,translate:TranslateService,config:ConfigurationService){
@@ -84,6 +95,36 @@ export class UIHelper{
     let converted=UIHelper.convertSearchParameters(node);
     router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{query:converted.query,savedQuery:node.ref.id,repository:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],mds:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],parameters:JSON.stringify(converted.parameters)}});
   }
+    public static goToCollection(router:Router,node:Node,extras:NavigationExtras={}) {
+        extras.queryParams={id:node.ref.id};
+        router.navigate([UIConstants.ROUTER_PREFIX+"collections"],extras);
+    }
+    /**
+     * Navigate to the workspace
+     * @param nodeService instance of NodeService
+     * @param router instance of Router
+     * @param login a result of the isValidLogin method
+     * @param node The node to open and show
+     */
+    public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node,extras:NavigationExtras={}) {
+        nodeService.getNodeParents(node.ref.id).subscribe((data:ParentList)=>{
+            extras.queryParams={id:node.parent.id,file:node.ref.id,root:data.scope};
+            router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
+                extras);
+        });
+    }
+    /**
+     * Navigate to the workspace
+     * @param nodeService instance of NodeService
+     * @param router instance of Router
+     * @param login a result of the isValidLogin method
+     * @param folder The folder id to open
+     */
+    public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string,extras:NavigationExtras={}) {
+      extras.queryParams={id:folder};
+      router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login && login.currentScope ? login.currentScope : "files")],
+          extras);
+    }
   static convertSearchParameters(node: Node) {
     let parameters=JSON.parse(node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS]);
     let result:any={parameters:{},query:null};
@@ -104,7 +145,7 @@ export class UIHelper{
     eval("$('select').css('display','none');$('select').material_select()");
   }
 
-  static showAddedToCollectionToast(toast:Toast,node: any,count:number) {
+  static showAddedToCollectionToast(toast:Toast,router:Router,node: any,count:number) {
     let scope=node.collection ? node.collection.scope : node.scope;
     let type=node.collection ? node.collection.type : node.type;
     if(scope==RestConstants.COLLECTIONSCOPE_MY){
@@ -119,7 +160,12 @@ export class UIHelper{
     else if(type==RestConstants.COLLECTIONTYPE_EDITORIAL){
       scope='PUBLIC';
     }
-    toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)});
+    toast.toast("WORKSPACE.TOAST.ADDED_TO_COLLECTION_"+scope, {count: count, collection: RestHelper.getTitle(node)},null,null,{
+      link:{
+        caption:'WORKSPACE.TOAST.VIEW_COLLECTION',
+        callback:()=>UIHelper.goToCollection(router,node)
+      }
+    });
   }
 
 
@@ -135,7 +181,7 @@ export class UIHelper{
       */
     if(event.ctrlKey || ui.isShiftCmd())
       event.dataTransfer.dropEffect='copy';
-    //if(event.dataTransfer.getData("node"))
+    //if(event.dataTransfer.getData("text"))
     event.preventDefault();
     event.stopPropagation();
     return true;
@@ -143,9 +189,9 @@ export class UIHelper{
 
   static handleDropEvent(storage: TemporaryStorageService, ui: UIService, event: any, target: Node, onDrop: EventEmitter<any>) {
     storage.remove(TemporaryStorageService.LIST_DRAG_DATA);
-    if(!event.dataTransfer.getData("node"))
+    if(!event.dataTransfer.getData("text"))
       return;
-    let data=(JSON.parse(event.dataTransfer.getData("node")) as Node[]);
+    let data=(JSON.parse(event.dataTransfer.getData("text")) as Node[]);
     event.preventDefault();
     event.stopPropagation();
     if(!data) {
@@ -163,20 +209,20 @@ export class UIHelper{
   static prepareMetadatasets(translate:TranslateService,mdsSets: MdsInfo[]) {
     for(let i=0;i<mdsSets.length;i++){
       if(mdsSets[i].id=="mds")
-        mdsSets[i].name=translate.instant('DEFAULT_METADATASET');
+        mdsSets[i].name=translate.instant('DEFAULT_METADATASET',{name:mdsSets[i].name});
     }
   }
-  static addToCollection(collectionService:RestCollectionService,toast:Toast,collection:Node|Collection,nodes:Node[],callback:Function=null,position=0,error=false){
+  static addToCollection(collectionService:RestCollectionService,router:Router,toast:Toast,collection:Node|Collection,nodes:Node[],callback:Function=null,position=0,error=false){
     if(position>=nodes.length){
       if(!error)
-        UIHelper.showAddedToCollectionToast(toast,collection,nodes.length);
+        UIHelper.showAddedToCollectionToast(toast,router,collection,nodes.length);
       if(callback)
         callback(error);
       return;
     }
 
     collectionService.addNodeToCollection(collection.ref.id,nodes[position].ref.id).subscribe(()=>{
-        UIHelper.addToCollection(collectionService,toast,collection,nodes,callback,position+1,error);
+        UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,error);
       },
       (error:any)=>{
         if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
@@ -184,15 +230,16 @@ export class UIHelper{
         }
         else
           NodeHelper.handleNodeError(toast,RestHelper.getTitle(nodes[position]),error);
-        UIHelper.addToCollection(collectionService,toast,collection,nodes,callback,position+1,true);
+        UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,true);
       });
   }
   static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,connectorList:ConnectorList,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
     if(connectorType==null){
       connectorType=RestConnectorsService.connectorSupportsEdit(connectorList,node);
     }
-    if(win==null && newWindow)
-      win=window.open("",'_blank');
+    let isCordova=connector.getRestConnector().getCordovaService().isRunningCordova();
+    if(win==null && newWindow && !isCordova)
+      win=window.open("");
 
     connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
       if(result.isLocked) {
@@ -201,12 +248,17 @@ export class UIHelper{
         return;
       }
       connector.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
-          if(newWindow)
+          if(win)
             win.location.href=url;
-          else
-            window.location.replace(url);
-
-          events.addWindow(win);
+          else if(isCordova){
+            UIHelper.openBlankWindow(url,connector.getRestConnector().getCordovaService());
+          }
+          else {
+              window.location.replace(url);
+          }
+          if(win) {
+              events.addWindow(win);
+          }
         },
         (error:string)=>{
           toast.error(null,error);
@@ -226,7 +278,10 @@ export class UIHelper{
    * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
    */
   static scrollSmooth(y: number=0,smoothness=1) {
-    let mode=window.scrollY>y;
+    let mode=window.scrollY>=y;
+    console.log(mode);
+    console.log(y);
+    console.log(window.scrollY);
     let divider=3*smoothness;
     let minSpeed=7/smoothness;
     let lastY=y;
@@ -234,14 +289,94 @@ export class UIHelper{
       let yDiff=window.scrollY-lastY;
       lastY=window.scrollY;
       if(window.scrollY>y && mode && yDiff){
-        window.scrollBy(0, -Math.max((window.scrollY-y)/divider,minSpeed));
+          window.scrollBy(0, -Math.max((window.scrollY-y)/divider,minSpeed));
       }
       else if(window.scrollY<y && !mode && yDiff){
-        window.scrollBy(0, Math.max((y-window.scrollY)/divider,minSpeed));
+          window.scrollBy(0, Math.max((y-window.scrollY)/divider,minSpeed));
       }
       else {
         clearInterval(interval);
       }
     },16);
   }
+    /**
+     * smoothly scroll to the given y offset inside an element (use offsetTop on the child to determine this position)
+     * @param {y} number
+     * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
+     */
+    static scrollSmoothElement(y: number=0,element:Element,smoothness=1) {
+        let mode=element.scrollTop>y;
+        let divider=3*smoothness;
+        let minSpeed=7/smoothness;
+        let lastY=y;
+        let interval=setInterval(()=>{
+            let yDiff=element.scrollTop-lastY;
+            lastY=element.scrollTop;
+            if(element.scrollTop>y && mode && yDiff){
+                element.scrollTop-=Math.max((element.scrollTop-y)/divider,minSpeed);
+            }
+            else if(element.scrollTop<y && !mode && yDiff){
+                element.scrollTop+=Math.max((y-element.scrollTop)/divider,minSpeed);
+            }
+            else {
+                clearInterval(interval);
+            }
+        },16);
+    }
+  static setFocusOnCard() {
+    let elements=document.getElementsByClassName("card")[0].getElementsByTagName("*");
+    this.focusElements(elements);
+  }
+  static setFocusOnDropdown(ref: ElementRef) {
+    // the first element(s) might be currently invisible, so try to focus from bottom to top
+    if(ref && ref.nativeElement) {
+      let elements = ref.nativeElement.getElementsByTagName("a");
+      this.focusElements(elements);
+    }
+  }
+
+  private static focusElements(elements: any) {
+    for(let i=elements.length-1;i>=0;i--){
+      elements[i].focus();
+    }
+  }
+
+  static addHttpIfRequired(link: string) {
+      if(link.indexOf("://")==-1){
+        return "http://"+link;
+      }
+      return link;
+  }
+
+  static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
+      return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
+  }
+
+    /**
+     * try to navigate to given url using angular routing
+     */
+    static navigateToAbsoluteUrl(platformLocation: PlatformLocation,router:Router,url: string,replaceUrl=false) {
+        let cleanUrl=url.replace((platformLocation as any).location.origin+platformLocation.getBaseHrefFromDOM(),"");
+        let parsed=router.parseUrl(cleanUrl);
+        let segments:string[]=[];
+        for(let segment of parsed.root.children.primary.segments){
+            segments.push(segment.path);
+        }
+        router.navigate(segments, {queryParams: parsed.queryParams, replaceUrl: replaceUrl}).catch((error:any)=>{
+          console.warn(error);
+          if(replaceUrl)
+              window.location.replace(url);
+          else
+              window.location.assign(url)
+        });
+    }
+
+    static openBlankWindow(url:string, cordova: CordovaService) {
+      if(cordova.isRunningCordova()){
+        return cordova.openInAppBrowser(url);
+      }
+      else {
+        return window.open(url, '_blank',);
+      }
+    }
 }

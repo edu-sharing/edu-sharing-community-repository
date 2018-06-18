@@ -32,20 +32,20 @@ public class Usage2SoapBindingSkeleton implements org.edu_sharing.webservices.us
         org.apache.axis.description.ParameterDesc [] _params;
         _params = new org.apache.axis.description.ParameterDesc [] {
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "eduRef"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "user"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "lmsId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "courseId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "user"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "resourceId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
         };
-        _oper = new org.apache.axis.description.OperationDesc("deleteUsage", _params, new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "deleteUsageReturn"));
-        _oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
-        _oper.setElementQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "deleteUsage"));
+        _oper = new org.apache.axis.description.OperationDesc("getUsage", _params, new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "getUsageReturn"));
+        _oper.setReturnType(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "Usage2Result"));
+        _oper.setElementQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "getUsage"));
         _oper.setSoapAction("");
         _myOperationsList.add(_oper);
-        if (_myOperations.get("deleteUsage") == null) {
-            _myOperations.put("deleteUsage", new java.util.ArrayList());
+        if (_myOperations.get("getUsage") == null) {
+            _myOperations.put("getUsage", new java.util.ArrayList());
         }
-        ((java.util.List)_myOperations.get("deleteUsage")).add(_oper);
+        ((java.util.List)_myOperations.get("getUsage")).add(_oper);
         _fault = new org.apache.axis.description.FaultDesc();
         _fault.setName("Usage2Exception");
         _fault.setQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "fault"));
@@ -82,20 +82,20 @@ public class Usage2SoapBindingSkeleton implements org.edu_sharing.webservices.us
         _oper.addFault(_fault);
         _params = new org.apache.axis.description.ParameterDesc [] {
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "eduRef"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "user"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "lmsId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "courseId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "user"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "resourceId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
         };
-        _oper = new org.apache.axis.description.OperationDesc("getUsage", _params, new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "getUsageReturn"));
-        _oper.setReturnType(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "Usage2Result"));
-        _oper.setElementQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "getUsage"));
+        _oper = new org.apache.axis.description.OperationDesc("deleteUsage", _params, new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "deleteUsageReturn"));
+        _oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        _oper.setElementQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "deleteUsage"));
         _oper.setSoapAction("");
         _myOperationsList.add(_oper);
-        if (_myOperations.get("getUsage") == null) {
-            _myOperations.put("getUsage", new java.util.ArrayList());
+        if (_myOperations.get("deleteUsage") == null) {
+            _myOperations.put("deleteUsage", new java.util.ArrayList());
         }
-        ((java.util.List)_myOperations.get("getUsage")).add(_oper);
+        ((java.util.List)_myOperations.get("deleteUsage")).add(_oper);
         _fault = new org.apache.axis.description.FaultDesc();
         _fault.setName("Usage2Exception");
         _fault.setQName(new javax.xml.namespace.QName("http://usage2.webservices.edu_sharing.org", "fault"));
@@ -130,9 +130,9 @@ public class Usage2SoapBindingSkeleton implements org.edu_sharing.webservices.us
     public Usage2SoapBindingSkeleton(org.edu_sharing.webservices.usage2.Usage2 impl) {
         this.impl = impl;
     }
-    public boolean deleteUsage(java.lang.String eduRef, java.lang.String user, java.lang.String lmsId, java.lang.String courseId, java.lang.String resourceId) throws java.rmi.RemoteException, org.edu_sharing.webservices.usage2.Usage2Exception
+    public org.edu_sharing.webservices.usage2.Usage2Result getUsage(java.lang.String eduRef, java.lang.String lmsId, java.lang.String courseId, java.lang.String user, java.lang.String resourceId) throws java.rmi.RemoteException, org.edu_sharing.webservices.usage2.Usage2Exception
     {
-        boolean ret = impl.deleteUsage(eduRef, user, lmsId, courseId, resourceId);
+        org.edu_sharing.webservices.usage2.Usage2Result ret = impl.getUsage(eduRef, lmsId, courseId, user, resourceId);
         return ret;
     }
 
@@ -142,9 +142,9 @@ public class Usage2SoapBindingSkeleton implements org.edu_sharing.webservices.us
         return ret;
     }
 
-    public org.edu_sharing.webservices.usage2.Usage2Result getUsage(java.lang.String eduRef, java.lang.String lmsId, java.lang.String courseId, java.lang.String user, java.lang.String resourceId) throws java.rmi.RemoteException, org.edu_sharing.webservices.usage2.Usage2Exception
+    public boolean deleteUsage(java.lang.String eduRef, java.lang.String user, java.lang.String lmsId, java.lang.String courseId, java.lang.String resourceId) throws java.rmi.RemoteException, org.edu_sharing.webservices.usage2.Usage2Exception
     {
-        org.edu_sharing.webservices.usage2.Usage2Result ret = impl.getUsage(eduRef, lmsId, courseId, user, resourceId);
+        boolean ret = impl.deleteUsage(eduRef, user, lmsId, courseId, resourceId);
         return ret;
     }
 

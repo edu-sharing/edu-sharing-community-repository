@@ -1,14 +1,15 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
-import {RestNodeService} from "../../../common/rest/services/rest-node.service";
-import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../../common/translation";
-import {RestConstants} from "../../../common/rest/rest-constants";
-import {Node,NodeList} from "../../../common/rest/data-object";
-import {TemporaryStorageService} from "../../../common/services/temporary-storage.service";
-import {OptionItem} from "../../../common/ui/actionbar/option-item";
-import {UIService} from "../../../common/services/ui.service";
-import {UIAnimation} from "../../../common/ui/ui-animation";
-import {trigger} from "@angular/animations";
+import {RestNodeService} from '../../../common/rest/services/rest-node.service';
+import {TranslateService} from '@ngx-translate/core';
+import {Translation} from '../../../common/translation';
+import {RestConstants} from '../../../common/rest/rest-constants';
+import {Node,NodeList} from '../../../common/rest/data-object';
+import {TemporaryStorageService} from '../../../common/services/temporary-storage.service';
+import {OptionItem} from '../../../common/ui/actionbar/option-item';
+import {UIService} from '../../../common/services/ui.service';
+import {UIAnimation} from '../../../common/ui/ui-animation';
+import {trigger} from '@angular/animations';
+import {Helper} from '../../../common/helper';
 
 @Component({
   selector: 'workspace-sub-tree',
@@ -16,6 +17,7 @@ import {trigger} from "@angular/animations";
   styleUrls: ['sub-tree.component.scss'],
   animations: [
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
+    trigger('open', UIAnimation.openOverlay()),
   ]
 })
 export class WorkspaceSubTreeComponent  {
@@ -23,10 +25,9 @@ export class WorkspaceSubTreeComponent  {
   public loading = true;
   public _nodes : Node[];
   private dragHover : Node;
-  // the node which has the focus
-  private openNodes : Node[]=[];
 
   private _options : OptionItem[];
+  private loadingStates:boolean[] = [];
   private dropdownPosition: string;
   private dropdownLeft: string;
   private dropdownBottom: string;
@@ -43,30 +44,32 @@ export class WorkspaceSubTreeComponent  {
     this._options=options;
   }
   @Input() openPath : string[][]=[];
+  @Input() set reload(reload:Boolean){
+    if(reload){
+      this.refresh();
+    }
+  }
   @Input() selectedPath : string[]=[];
   @Input() parentPath : string[]=[];
   @Input() depth = 1;
+  @Input() selectedNode:string;
   @Output() onClick = new EventEmitter();
   @Output() onToggleTree = new EventEmitter();
+  @Output() onLoading = new EventEmitter();
   @Output() onDrop = new EventEmitter();
   @Output() hasChilds = new EventEmitter();
   @Output() onUpdateOptions = new EventEmitter();
   @Input() set node(node : string){
     this._node=node;
-    if(node==null)
-      return;
-    this.nodeApi.getChildren(node,[RestConstants.FILTER_FOLDERS],{count:RestConstants.COUNT_UNLIMITED}).subscribe((data : NodeList) => {
-      this._nodes=data.nodes;
-      this.hasChilds.emit(this._nodes && this._nodes.length);
-      this.loading=false;
-    });
-  }
-  @Input() set nodes(nodes : Node[]){
-    this._nodes=nodes;
-    this.hasChilds.emit(this._nodes && this._nodes.length);
-    this.loading=false;
+    if(node==null) {
+        return;
+    }
+    this.refresh();
   }
   constructor(private ui : UIService,private nodeApi : RestNodeService,private storage : TemporaryStorageService) {
+  }
+  setLoadingState(state:boolean,pos:number){
+    this.loadingStates[pos]=state;
   }
   private contextMenu(event:any,node : Node){
     event.preventDefault();
@@ -75,14 +78,14 @@ export class WorkspaceSubTreeComponent  {
     if(!this._options.length)
       return;
     this.showDropdown(node);
-    this.dropdownPosition="fixed";
+    this.dropdownPosition='fixed';
     //this.dropdownLeft=Math.min(100,event.clientX)+"px";
     if(event.clientY>window.innerHeight/2){
-      this.dropdownBottom=window.innerHeight-event.clientY+"px";
-      this.dropdownTop="auto";
+      this.dropdownBottom=window.innerHeight-event.clientY+'px';
+      this.dropdownTop='auto';
     }
     else{
-      this.dropdownTop=event.clientY+"px";
+      this.dropdownTop=event.clientY+'px';
     }
   }
   private callOption(option : OptionItem,node:Node){
@@ -103,7 +106,7 @@ export class WorkspaceSubTreeComponent  {
   private showDropdown(node : Node){
     //if(this._options==null || this._options.length<1)
     //  return;
-    this.dropdownPosition="";
+    this.dropdownPosition='';
     this.dropdownLeft=null;
     this.dropdownTop=null;
     this.dropdownBottom=null;
@@ -132,9 +135,9 @@ export class WorkspaceSubTreeComponent  {
   private dropEvent(event : any,target : Node){
     this.dragHover=null;
     this.storage.remove(TemporaryStorageService.LIST_DRAG_DATA);
-    if(!event.dataTransfer.getData("node"))
+    if(!event.dataTransfer.getData('text'))
       return;
-    let data=(JSON.parse(event.dataTransfer.getData("node")) as Node[]);
+    let data=(JSON.parse(event.dataTransfer.getData('text')) as Node[]);
     event.preventDefault();
     event.stopPropagation();
     if(!data) {
@@ -143,7 +146,7 @@ export class WorkspaceSubTreeComponent  {
     this.onDrop.emit({target:target,source:data,event:event});
   }
   private isSelected(node : Node){
-    return this.isOpen(node) && this.selectedPath[this.selectedPath.length-1]==node.ref.id;
+    return this.selectedNode==node.ref.id || (this.isOpen(node) && this.selectedPath[this.selectedPath.length-1]==node.ref.id && this.selectedNode==null);
   }
   private getFullPath(node : Node) : string[]{
     let path=this.parentPath.slice();
@@ -193,4 +196,14 @@ export class WorkspaceSubTreeComponent  {
     this.onToggleTree.emit({node:node,parent:this.parentPath});
 
   }
+
+    private refresh() {
+        this.nodeApi.getChildren(this._node,[RestConstants.FILTER_FOLDERS],{count:RestConstants.COUNT_UNLIMITED}).subscribe((data : NodeList) => {
+            this._nodes=data.nodes;
+            this.loadingStates=Helper.initArray(this._nodes.length,true);
+            this.hasChilds.emit(this._nodes && this._nodes.length);
+            this.onLoading.emit(false);
+            this.loading=false;
+        });
+    }
 }

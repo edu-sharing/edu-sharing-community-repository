@@ -13,7 +13,7 @@ Or visit the edu-sharing [documentation](http://docs.edu-sharing.com/confluence/
 
 Where can I get the latest release?
 -----------------------------------
-You can download source and binaries from our [download page](http://edu-sharing.com/downloads/?lang=en).
+You can download source and binaries from our [download page](http://edu-sharing.com/downloads/?lang=en) or checkout the [Releases Page](https://github.com/edu-sharing/Edu-Sharing/releases) on GitHub.
 
 Contributing
 ------------

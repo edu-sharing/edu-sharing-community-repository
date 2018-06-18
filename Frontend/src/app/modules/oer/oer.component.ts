@@ -48,7 +48,6 @@ export class OerComponent {
   public hasMore:boolean[]=[];
   private offsets:number[]=[];
   public nodes:Node[][]=[];
-  private nodesCollections:Node[]=[];
   private render_options: OptionItem[];
   constructor(
     private router : Router,
@@ -65,52 +64,54 @@ export class OerComponent {
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('SEARCH.TITLE',title,translate,config);
+          for(let i=0;i<this.TYPE_COUNT;i++) {
+              this.columns.push([]);
+              this.updateOptions(i)
+              this.nodes.push([]);
+          }
+
+          this.columns[this.COLLECTIONS].push(new ListItem("NODE",RestConstants.CM_NAME));
+          this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'info'));
+          this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'scope'));
+          this.mdsService.getSet().subscribe((mds:any)=>{
+              this.columns[this.MATERIALS]=MdsHelper.getColumns(mds,'search');
+          });
+          /*
+          this.config.get("searchColumns").subscribe((data:any)=>{
+            this.columns[this.MATERIALS]=[];
+            if(data && data.length){
+              for(let item of data){
+                this.columns[this.MATERIALS].push(new ListItem("NODE",item));
+              }
+            }
+            else{
+              this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CM_NAME));
+              this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
+              this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_LICENSE));
+              this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
+            }
+          });
+          //this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
+          */
+          this.columns[this.TOOLS].push(new ListItem("NODE",RestConstants.CM_NAME));
+          this.columns[this.TOOLS].push(new ListItem("NODE",RestConstants.LOM_PROP_DESCRIPTION));
+
+          this.connector.numberPerRequest=20;
+          for(let i=0;i<this.TYPE_COUNT;i++){
+              this.offsets[i]=0;
+              this.nodes[i]=[];
+              this.showMore[i]=false;
+              this.hasMore[i]=false;
+          }
+
+          this.route.queryParams.forEach((params: Params) => {
+              for (let i = 0; i < this.TYPE_COUNT; i++) {
+                  this.showMore[i] = params['showMore' + i]=='true';
+              }
+              this.search(params["query"]?params["query"]:"");
+          });
       });
-      for(let i=0;i<this.TYPE_COUNT;i++) {
-        this.columns.push([]);
-        this.updateOptions(i)
-        this.nodes.push([]);
-      }
 
-    this.columns[this.COLLECTIONS].push(new ListItem("NODE",RestConstants.CM_NAME));
-    this.columns[this.COLLECTIONS].push(new ListItem("COLLECTION",'info'));
-    this.mdsService.getSet().subscribe((mds:any)=>{
-      this.columns[this.MATERIALS]=MdsHelper.getColumns(mds,'search');
-    });
-    /*
-    this.config.get("searchColumns").subscribe((data:any)=>{
-      this.columns[this.MATERIALS]=[];
-      if(data && data.length){
-        for(let item of data){
-          this.columns[this.MATERIALS].push(new ListItem("NODE",item));
-        }
-      }
-      else{
-        this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CM_NAME));
-        this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
-        this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_LICENSE));
-        this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
-      }
-    });
-    //this.columns[this.MATERIALS].push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
-    */
-    this.columns[this.TOOLS].push(new ListItem("NODE",RestConstants.CM_NAME));
-    this.columns[this.TOOLS].push(new ListItem("NODE",RestConstants.LOM_PROP_DESCRIPTION));
-
-    this.connector.numberPerRequest=20;
-      for(let i=0;i<this.TYPE_COUNT;i++){
-        this.offsets[i]=0;
-        this.nodes[i]=[];
-        this.showMore[i]=false;
-        this.hasMore[i]=false;
-      }
-
-    this.route.queryParams.forEach((params: Params) => {
-      for (let i = 0; i < this.TYPE_COUNT; i++) {
-          this.showMore[i] = params['showMore' + i]=='true';
-      }
-      this.search(params["query"]?params["query"]:"");
-    });
     setInterval(()=>this.updateHasMore(),1000);
    }
    private goToCollections(){
@@ -151,7 +152,7 @@ export class OerComponent {
      criterias.push({'property': 'ngsearchword', 'values': [string]});
 
 
-     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.COLLECTIONS]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
+     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.COLLECTIONS],propertyFilter:[RestConstants.ALL]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
        (data : NodeList) => {
          if(this.currentQuery!=originalQuery)
            return;
@@ -163,7 +164,7 @@ export class OerComponent {
        }
      );
 
-     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.MATERIALS],propertyFilter:[RestConstants.CM_MODIFIED_DATE,RestConstants.CM_CREATOR,RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR_FN,RestConstants.CCM_PROP_METADATACONTRIBUTER_CREATOR_FN,RestConstants.CCM_PROP_LICENSE,RestConstants.CCM_PROP_REPLICATIONSOURCE]}).subscribe(
+     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.MATERIALS],propertyFilter:[RestConstants.ALL]}).subscribe(
        (data : NodeList) => {
          if(this.currentQuery!=originalQuery)
            return;

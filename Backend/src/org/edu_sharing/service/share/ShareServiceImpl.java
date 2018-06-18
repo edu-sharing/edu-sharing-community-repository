@@ -30,6 +30,9 @@ import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 public class ShareServiceImpl implements ShareService {
@@ -66,7 +69,9 @@ public class ShareServiceImpl implements ShareService {
 	@Override
 	public String createShare(String nodeId, String[] emails, long expiryDate, String emailMessageLocale) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException,
 			NodeDoesNotExsistException, PermissionFailedException {
-		
+		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE)) {
+			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
+		}
 		NodeService nodeService = serviceRegistry.getNodeService();
 		AuthenticationService authService = serviceRegistry.getAuthenticationService();
 		//email validation

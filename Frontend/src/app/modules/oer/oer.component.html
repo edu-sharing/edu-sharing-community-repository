@@ -1,4 +1,7 @@
-<img src="assets/images/layout/oer_bg.jpg" class="header">
+<div class="header">
+  <img src="assets/images/layout/oer_bg.jpg">
+  <div class="headerGradient"></div>
+</div>
 <main-nav
     [title]="'SEARCH.TITLE'"
     [currentScope]="'oer'"
@@ -13,7 +16,7 @@
   <h2>{{'OER.HEADING_DESCRIPTION' | translate}}</h2>
 </div>
 <div class="content">
-<div class="collectionsGroup" *ngIf="nodes[COLLECTIONS].length">
+<div class="collectionsGroup" *ngIf="nodes[COLLECTIONS] && nodes[COLLECTIONS].length">
   <div class="caption">{{ 'OER.COLLECTIONS' | translate}}</div>
   <div class="more" *ngIf="hasMore[COLLECTIONS] || true"><a class="clickable" (click)="goToCollections()">{{(showMore[COLLECTIONS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
   <div class="noResults collections" *ngIf="!loading[COLLECTIONS] && !nodes[COLLECTIONS].length">{{'OER.NO_COLLECTION_RESULTS' | translate}}</div>
@@ -41,8 +44,8 @@
   <div class="materials">
     <div class="caption">{{ 'OER.MATERIALS' | translate}}</div>
     <div class="more" *ngIf="hasMore[MATERIALS]"><a class="clickable" (click)="goToSearch()">{{(showMore[MATERIALS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
-    <div class="noResults materials" *ngIf="!loading[MATERIALS] && !nodes[MATERIALS].length">{{'OER.NO_MATERIAL_RESULTS' | translate}}</div>
-    <listTable *ngIf="loading[MATERIALS] || nodes[MATERIALS].length"
+    <div class="noResults materials" *ngIf="!(loading[MATERIALS] || nodes[MATERIALS] && nodes[MATERIALS].length)">{{'OER.NO_MATERIAL_RESULTS' | translate}}</div>
+    <listTable *ngIf="loading[MATERIALS] || nodes[MATERIALS] && nodes[MATERIALS].length"
       id="materials"
       class="list materials"
       [class.listLoading]="loading[MATERIALS]"

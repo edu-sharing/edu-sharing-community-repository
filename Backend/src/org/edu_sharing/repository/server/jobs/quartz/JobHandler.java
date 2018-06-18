@@ -365,7 +365,7 @@ public class JobHandler {
 
 		// init the jobs
 		for (JobConfig jc : jobConfigList) {
-			logger.info("JobListEntry:" + jc.getJobClass().getSimpleName() + " Trigger:" + jc.getTriggerType() + " " + jc.getTrigger().getClass().getName());
+			logger.debug("JobListEntry:" + jc.getJobClass().getSimpleName() + " Trigger:" + jc.getTriggerType() + " " + jc.getTrigger().getClass().getName());
 			// all except those to start now
 			if (!jc.getTriggerType().equals(TRIGGER_TYPE_IMMEDIATE)) {
 				this.scheduleJob(jc);

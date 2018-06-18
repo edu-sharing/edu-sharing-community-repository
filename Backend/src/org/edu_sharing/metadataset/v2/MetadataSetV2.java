@@ -1,11 +1,16 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import com.google.gwt.user.client.ui.Widget;
+import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
+import org.edu_sharing.repository.client.tools.CCConstants;
 
 public class MetadataSetV2 {
-	
+	Logger logger = Logger.getLogger(MetadataSetV2.class);
+
 	public static String DEFAULT_CLIENT_QUERY="ngsearch";
 	public static String DEFAULT_CLIENT_QUERY_CRITERIA = "ngsearchword";	
 	
@@ -16,6 +21,7 @@ public class MetadataSetV2 {
 	private List<MetadataGroup> groups;
 	private List<MetadataList> lists;
 	private MetadataQueries queries;
+	private MetadataCreate create;
 	public String getId() {
 		return id;
 	}
@@ -84,7 +90,12 @@ public class MetadataSetV2 {
 	public void setQueries(MetadataQueries queries) {
 		this.queries = queries;
 	}
-	
+	public MetadataCreate getCreate() {
+		return create;
+	}
+	public void setCreate(MetadataCreate create) {
+		this.create = create;
+	}
 	public List<MetadataList> getLists() {
 		return lists;
 	}
@@ -97,40 +108,47 @@ public class MetadataSetV2 {
 		if(mdsOverride.getName()!=null)
 			setName(mdsOverride.getName());
 		for(MetadataWidget widget : mdsOverride.getWidgets()){
+			if(!widget.isInherit()){
+				List<MetadataWidget> widgetsRemove = findAllWidgets(widget.getId());
+				widgets.removeAll(widgetsRemove);
+			}
 			if(widgets.contains(widget)){
 				widgets.remove(widget);
-				widgets.add(widget);
+				widgets.add(0,widget);
 			}
 			else{
-				widgets.add(widget);
+				widgets.add(0,widget);
 			}
 		}
 		for(MetadataTemplate template : mdsOverride.getTemplates()){
 			if(templates.contains(template)){
 				templates.remove(template);
-				templates.add(template);
+				templates.add(0,template);
 			}
 			else{
-				templates.add(template);
+				templates.add(0,template);
 			}
 		}
 		for(MetadataGroup group : mdsOverride.getGroups()){
 			if(groups.contains(group)){
 				groups.remove(group);
-				groups.add(group);
+				groups.add(0,group);
 			}
 			else{
-				groups.add(group);
+				groups.add(0,group);
 			}
 		}
 		for(MetadataList list : mdsOverride.getLists()){
 			if(lists.contains(list)){
 				lists.remove(list);
-				lists.add(list);
+				lists.add(0,list);
 			}
 			else{
-				lists.add(list);
+				lists.add(0,list);
 			}
+		}
+		if(mdsOverride.getCreate()!=null) {
+			setCreate(mdsOverride.getCreate());
 		}
 		queries.overrideWith(mdsOverride.getQueries());
 	}
@@ -141,6 +159,30 @@ public class MetadataSetV2 {
 		}
 		throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
 	}
+	public List<MetadataWidget> findAllWidgets(String widgetId) {
+		List<MetadataWidget> found = new ArrayList<>();
+		for(MetadataWidget widget : widgets){
+			if(widget.getId().equals(widgetId))
+				found.add(widget);
+		}
+		if(found.size()>0)
+			return found;
+		throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+	}
+	public MetadataGroup findGroup(String groupId) {
+		for(MetadataGroup group : groups){
+			if(group.getId().equals(groupId))
+				return group;
+		}
+		throw new IllegalArgumentException("Group "+groupId+" was not found in the mds "+id);
+	}
+	public MetadataTemplate findTemplate(String templateId) {
+		for(MetadataTemplate template : templates){
+			if(template.getId().equals(templateId))
+				return template;
+		}
+		throw new IllegalArgumentException("Template "+templateId+" was not found in the mds "+id);
+	}
 	public MetadataQuery findQuery(String queryId) {
 		for(MetadataQuery query : queries.getQueries()){
 			if(query.getId().equals(queryId))
@@ -148,5 +190,58 @@ public class MetadataSetV2 {
 		}
 		throw new IllegalArgumentException("Query "+queryId+" was not found in the mds "+id);
 	}
+	public List<MetadataWidget> getWidgetsByNode(String nodeType,Collection<String> aspects) {
+		String group=null;
+		if(CCConstants.CCM_TYPE_IO.equals(nodeType)) {
+			group="io";
+		}
+		else if(CCConstants.CCM_TYPE_MAP.equals(nodeType)) {
+			if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION)){
+				group="collection_editorial";
+			}
+			else {
+				group = "map";
+			}
+		}
+		if(group==null) {
+			logger.info("Node type "+nodeType+" currently not supported by backend, will use metadata from all available widgets");
+			return getWidgets();
+		}
+		return getWidgetsByTemplate(group);
+	}
+
+	public List<MetadataWidget> getWidgetsByTemplate(String template) {
+		List<MetadataWidget> usedWidgets=new ArrayList<>();
+		for(String view : findGroup(template).getViews()) {
+			String html = findTemplate(view).getHtml();
+			for(MetadataWidget widget : getWidgets()) {
+				if(html.indexOf("<"+widget.getId())>-1) {
+					usedWidgets.add(widget);
+					// handle group (sub) widgets
+					if(widget.getSubwidgets()!=null && widget.getSubwidgets().size()>0) {
+						for(Subwidget subwidget : widget.getSubwidgets()) {
+							usedWidgets.addAll(findAllWidgets(subwidget.getId()));
+						}
+					}
+				}
+			}
+
+		}
+		logger.info("Template "+template+" uses "+usedWidgets.size()+" from a total of "+getWidgets().size()+" widgets");
+		return usedWidgets;
+	}
+
+	public MetadataWidget findWidgetForTemplate(String widgetId,String template) {
+		  MetadataWidget fallback=null;
+		  for(MetadataWidget widget : widgets){
+		   if(widget.getId().equals(widgetId))
+		    fallback=widget;
+		   if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate()))
+		    return widget;
+		  }
+		  if(fallback!=null)
+		   return fallback;
+		  throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+		 }
 	
 }

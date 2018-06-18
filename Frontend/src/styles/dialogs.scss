@@ -1,23 +1,23 @@
 @import "./variables";
 
-
+$cardActionHeight:77px;
 
 .dialog{
-   width:100%;
-   height:100%;
-   left:0;
-   top:0;
-   position:fixed;
-   z-index:120;
+  width:100%;
+  height:100%;
+  left:0;
+  top:0;
+  position:fixed;
+  z-index:$dialogZIndex;
 }
 .globalProgress{
-  z-index:122;
+  z-index:$dialogZIndex+2;
 }
 .darken{
   @include darken();
 }
 .card{
-  z-index:121;
+  z-index:$dialogZIndex+1;
   background-color: #fff!important;
 }
 .center-card{
@@ -27,15 +27,23 @@
   left:50%;
   margin: auto!important;
   margin-left:-250px!important;
-  padding-bottom: 20px;
 }
 
-.card-content{
-  height: calc(100% - 50px);
+.card .card-content{
+  height: calc(100% - #{$cardActionHeight});
+  margin-bottom: 0;
 }
-.card .card-action a{
-  max-width: 400px;
-  word-break: break-all;
+.card .card-action {
+  display: flex;
+  align-items: end;
+  justify-items: right;
+  min-height: $cardActionHeight;
+  /* justify-content: space-between; */
+  flex-direction: row-reverse;
+  a {
+    max-width: 400px;
+    word-break: break-all;
+  }
 }
 .card-action .card-content{
   padding-top:32px;
@@ -62,8 +70,21 @@
 .card-title{
   word-break: break-all;
   max-height: 48px;
+  align-items: start;
   overflow: hidden;
-  @unselectableText();
+  display:flex;
+  align-items:center;
+  @include unselectableText();
+  .card-title-back{
+    color: $primary;
+    @include clickable();
+    margin-right:15px;
+  }
+  .card-title-image{
+    width:auto;
+    height:25px;
+    margin-right:15px;
+  }
 }
 .center-card .card-scroll{
   overflow-y: auto;
@@ -88,9 +109,6 @@ input[type=search]{
   border:1px solid $searchInputBorderColor;
   padding:0 10px;
 }
-.card-high .card-content{
-  height:calc(100% - 55px);
-}
 .card-high{
   top:10%;
   bottom:10%;
@@ -105,6 +123,23 @@ input[type=search]{
 }
 .center-card .checkbox{
   padding-top:10px;
+}
+.card-title-element{
+  font-size:140%;
+  font-weight:bold;
+  border-bottom: 1px solid #000;
+  padding-bottom:10px;
+  padding-top:8px;
+  float:left;
+  width:100%;
+  background-color: $workspaceMetadataBackground;
+  i{
+    margin-left:10px;
+    margin-right:10px;
+    color:#666;
+    position: relative;
+    top:5px;
+  }
 }
 .center-card .btn,
 .center-card .btn-flat{
@@ -145,7 +180,7 @@ input[type=search]{
       padding-top: 10px;
       input {
         padding-left: 40px;
-        width: $dialogRightWidth - 110px;
+        width: $dialogRightWidth - 120px;
         margin-bottom: 0;
       }
       .searchIcon {
@@ -163,25 +198,43 @@ input[type=search]{
     overflow-y: auto;
   }
 }
+@mixin fullsizeCard(){
+  position:fixed;
+  width:100%;
+  left:0%;
+  margin-left:0!important;
+}
+@media screen and (max-width: ($mobileWidth)) {
+  .dialogOptions{
+    overflow: scroll;
+    @include darken();
+    z-index:151;
+    background: linear-gradient(to top, #ffffff 0,#ffffff 120px,$darkenColor 120px,$darkenColor 100%);
+  }
+  .card-wide{
+    @include fullsizeCard();
+  }
+}
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
   .center-card{
-    position:fixed;
-    width:100%;
-    padding-bottom: 25px;
-    left:0%;
-    margin-left:0!important;
+    @include fullsizeCard();
   }
   .card-low{
     width:90%;
     left:5%;
   }
+  .center-card .btn,
+  .center-card .btn-flat{
+    margin: 0 0;
+    padding:0 1.5rem;
+  }
 }
 @media screen and (max-height: ($mobileHeight)) {
- .card:not(.card-low), .card-high {
+  .card:not(.card-low), .card-high {
     top: 0;
     bottom: 0;
-   .scrollable{
-     height:100%;
-   }
+    .scrollable{
+      height:100%;
+    }
   }
 }

@@ -1,5 +1,14 @@
 @import "../../../../../styles/variables.scss";
-
+.dialog{
+  z-index: $dialogZIndex+1;
+}
+.card{
+  z-index: $dialogZIndex+2;
+}
+.groupHistory{
+  margin-left: $cardPadding*-1;
+  width: calc(100% + #{$cardPadding});
+}
 .heading{
   padding:10px;
   border-bottom: 1px solid #aaa;

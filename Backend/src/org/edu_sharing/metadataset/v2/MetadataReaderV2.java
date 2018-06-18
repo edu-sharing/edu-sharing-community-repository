@@ -1,27 +1,9 @@
 package org.edu_sharing.metadataset.v2;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.w3c.dom.Document;
@@ -29,12 +11,22 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
 public class MetadataReaderV2 {
 	
 	public static final String SUGGESTION_SOURCE_SOLR = "Solr";
 	public static final String SUGGESTION_SOURCE_MDS = "Mds";
 	public static final String SUGGESTION_SOURCE_SQL = "Sql";
-	private static Logger logger = Logger.getLogger(MCAlfrescoAPIClient.class);
+	private static Logger logger = Logger.getLogger(MetadataReaderV2.class);
 	private static Map<String,MetadataSetV2> mdsCache=new HashMap<>();
 	XPathFactory pfactory = XPathFactory.newInstance();
 	XPath xpath = pfactory.newXPath();
@@ -45,14 +37,6 @@ public class MetadataReaderV2 {
 	
 	public static String getPath(){
 		return "/org/edu_sharing/metadataset/v2/";
-	}
-	
-	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet) throws Exception{
-		String locale="default";
-		try{
-			locale = new AuthenticationToolAPI().getCurrentLocale();
-		}catch(Throwable t){}
-		return getMetadataset(appId, mdsSet,locale);		
 	}
 	
 	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet,String locale) throws Exception{
@@ -75,10 +59,9 @@ public class MetadataReaderV2 {
 				throw new IllegalArgumentException("Invalid mds set "+mdsSet+", was not found in the list of mds sets of appid "+appId.getAppId());
 			}
 		}
-		String id=appId.getAppId()+mdsName+"_"+locale;
-		if(mdsCache.containsKey(id))
+		String id=appId.getAppId()+"_"+mdsName+"_"+locale;
+		if(mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
 			return mdsCache.get(id);
-		
 		reader=new MetadataReaderV2(mdsNameDefault+".xml",locale);
 		mds=reader.getMetadatasetForFile(mdsNameDefault);
 		mds.setRepositoryId(appId.getAppId());
@@ -106,7 +89,6 @@ public class MetadataReaderV2 {
 			mds.overrideWith(mdsOverride);
 		}
 		catch(IOException e){
-			e.printStackTrace();
 		}
 		mdsCache.put(id, mds);
 		return mds;
@@ -138,10 +120,10 @@ public class MetadataReaderV2 {
 				query.setJoin(nodeMap.getNamedItem("join").getTextContent());
 			else
 				query.setJoin("AND");
-			
+
 			if(nodeMap.getNamedItem("applyBasequery")!=null)
 				query.setApplyBasequery(nodeMap.getNamedItem("applyBasequery").getTextContent().equals("true"));
-			
+
 			List<MetadataQueryParameter> parameters=new ArrayList<>();
 
 			NodeList list2=node.getChildNodes();
@@ -165,6 +147,18 @@ public class MetadataReaderV2 {
 					if(name.equals("statement")) {
 						Node key=data.getAttributes().getNamedItem("value");
 						statements.put(key==null ? null : key.getTextContent(), value);
+					}
+					if(name.equals("facets")){
+						NodeList facets = data.getChildNodes();
+						List<String> facetsList=new ArrayList<>();
+						for(int l=0;l<facets.getLength();l++){
+							String facetName=facets.item(l).getNodeName();
+							String facetValue=facets.item(l).getTextContent();
+							if(facetName.equals("facet"))
+								facetsList.add(facetValue);
+						}
+						if(facetsList.size()>0)
+							parameter.setFacets(facetsList);
 					}
 					if(name.equals("ignorable"))
 						parameter.setIgnorable(Integer.parseInt(value));
@@ -244,6 +238,7 @@ public class MetadataReaderV2 {
 		mds.setI18n(i18n.getTextContent());
 		mds.setLabel(label);
 		
+		mds.setCreate(getCreate());
 		mds.setWidgets(getWidgets());
 		mds.setTemplates(getTemplates());
 		mds.setGroups(getGroups());
@@ -252,7 +247,20 @@ public class MetadataReaderV2 {
 		
 		return mds;
 	}
-	
+	private MetadataCreate getCreate() throws Exception {
+		Node createNode = (Node) xpath.evaluate("/metadataset/create", doc, XPathConstants.NODE);
+		if(createNode==null)
+			return null;
+		MetadataCreate create=new MetadataCreate();
+		for(int i=0;i<createNode.getChildNodes().getLength();i++) {
+			Node node = createNode.getChildNodes().item(i);
+			if(node.getNodeName().equals("onlyMetadata")) {
+				create.setOnlyMetadata(node.getTextContent().equalsIgnoreCase("true"));
+			}
+		}
+		return create;
+	}
+
 	private List<MetadataWidget> getWidgets() throws Exception {
 		List<MetadataWidget> widgets=new ArrayList<>();
 		NodeList widgetsNode = (NodeList) xpath.evaluate("/metadataset/widgets/widget", doc, XPathConstants.NODESET);
@@ -287,14 +295,34 @@ public class MetadataReaderV2 {
 				if(name.equals("unit")){
 					widget.setUnit(getTranslation(widget,value));
 				}
+				if(name.equals("inherit")){
+					widget.setInherit(new Boolean(value));
+				}
 				if(name.equals("defaultvalue"))
 					widget.setDefaultvalue(value); 
 				if(name.equals("format"))
-					widget.setFormat(value); 
+					widget.setFormat(value);
 				if(name.equals("type"))
 					widget.setType(value);
-				if(name.equals("condition"))
-					widget.setCondition(value);
+				if(name.equals("condition")) {
+					boolean negate=false;
+					NamedNodeMap attr = data.getAttributes();
+					CONDITION_TYPE type=CONDITION_TYPE.PROPERTY;
+					if(attr!=null && attr.getNamedItem("type")!=null) {
+						try {
+							type=CONDITION_TYPE.valueOf(attr.getNamedItem("type").getTextContent());
+						}catch(Throwable t) {
+							logger.warn("Widget "+widget.getId()+" has condition, but the given type "+attr.getNamedItem("type").getTextContent()+" is invalid. Will use default type "+type);
+						}
+					}
+					else {
+						logger.warn("Widget "+widget.getId()+" has condition, but no type for condition was specified. Using default type "+type);
+					}
+					if(attr!=null && attr.getNamedItem("negate")!=null && attr.getNamedItem("negate").getTextContent().equalsIgnoreCase("true")) {
+						negate=true;
+					}
+					widget.setCondition(new MetadataWidget.Condition(value,type,negate));
+				}
 				if(name.equals("suggestionSource"))
 					widget.setSuggestionSource(value);
 				if(name.equals("suggestionQuery"))
@@ -317,9 +345,7 @@ public class MetadataReaderV2 {
 				if(name.equals("min"))
 					widget.setMin(Integer.parseInt(value));				
 				if(name.equals("max"))
-					widget.setMax(Integer.parseInt(value));				
-				if(name.equals("default"))
-					widget.setDefaultValue(Integer.parseInt(value));				
+					widget.setMax(Integer.parseInt(value));							
 				if(name.equals("defaultMin"))
 					widget.setDefaultMin(Integer.parseInt(value));				
 				if(name.equals("defaultMax"))
@@ -337,6 +363,8 @@ public class MetadataReaderV2 {
 					widget.setValues(getValuespace(value,widget.getId(),valuespaceI18n,valuespaceI18nPrefix));
 				if(name.equals("values"))
 					widget.setValues(getValues(data.getChildNodes(),valuespaceI18n,valuespaceI18nPrefix));
+				if(name.equals("subwidgets"))
+					widget.setSubwidgets(getSubwidgets(data.getChildNodes()));
 			}
 			widgets.add(widget);
 		}
@@ -381,7 +409,18 @@ public class MetadataReaderV2 {
 		}
 		return keys;
 	}
-	
+	private List<MetadataWidget.Subwidget> getSubwidgets(NodeList keysNode) throws IOException {
+		List<MetadataWidget.Subwidget> widgets=new ArrayList<>();
+		for(int i=0;i<keysNode.getLength();i++){
+			Node keyNode=keysNode.item(i);
+			if(keyNode.getTextContent().trim().isEmpty()) continue;
+			MetadataWidget.Subwidget widget=new MetadataWidget.Subwidget();
+			widget.setId(keyNode.getTextContent());
+			widgets.add(widget);
+		}
+		return widgets;
+	}
+
 	private List<MetadataTemplate> getTemplates() throws XPathExpressionException, IOException {
 		List<MetadataTemplate> templates=new ArrayList<>();
 		NodeList templatesNode = (NodeList) xpath.evaluate("/metadataset/templates/template", doc, XPathConstants.NODESET);
@@ -479,7 +518,7 @@ public class MetadataReaderV2 {
 							if(attributes!=null){
 								Node showDefault = attributes.getNamedItem("showDefault");
 								if(showDefault!=null)
-									col.setShowDefault(showDefault.getTextContent().equals("true"));
+									col.setShowDefault(showDefault.getTextContent().equalsIgnoreCase("true"));
 								Node format = attributes.getNamedItem("format");
 								if(format!=null)
 									col.setFormat(format.getTextContent());
@@ -509,58 +548,67 @@ public class MetadataReaderV2 {
 				key=translatable.getI18nPrefix()+key;
 			return getTranslation(translatable.getI18n(),key,fallback,locale);
 		}catch(Exception e){
+			e.printStackTrace();
 			logger.warn(e.toString());
 			return key;
 		}
 	}
-	
+	private static Map<String,ResourceBundle> translationBundles=new HashMap<>();
+	private static ResourceBundle getTranslationCache(String i18nFile) {
+		if(translationBundles.containsKey(i18nFile))
+			return translationBundles.get(i18nFile);
+		PropertyResourceBundle bundle = null;
+		try {
+			InputStream isLocale=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18nFile+".properties");
+			bundle = new PropertyResourceBundle(isLocale);
+		}catch(Throwable t) {
+		}
+		translationBundles.put(i18nFile, bundle);
+		return bundle;
+	}
+
 	private static String getTranslation(String i18n,String key,String fallback,String locale){
-		
 		String defaultValue=key;
 		if(fallback!=null)
 			defaultValue=fallback;
 		
-		InputStream isDefaultOverride=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/mds_override.properties");
-		InputStream isLocaleOverride=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/mds_override_"+locale+".properties");
-		InputStream isDefault=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18n+".properties");
-		InputStream isLocale=MetadataReaderV2.class.getResourceAsStream(getPath()+"i18n/"+i18n+"_"+locale+".properties");
-		
+		ResourceBundle defaultResourceBundleGlobal=null;
+		ResourceBundle defaultResourceBundleLocal=null;
+		ResourceBundle defaultResourceBundleGlobalOverride=null;
+		ResourceBundle defaultResourceBundleLocalOverride=null;
+
 		if(key!=null)
 			key=key.replace(" ","_");
 		
 		try{
-			ResourceBundle defaultResourceBundle =  new PropertyResourceBundle(isDefault);
-			if(defaultResourceBundle.containsKey(key))
-				defaultValue=defaultResourceBundle.getString(key);
-			if(isDefaultOverride!=null){
-				ResourceBundle resourceBundle =  new PropertyResourceBundle(isDefaultOverride);
-				if(resourceBundle!=null && resourceBundle.containsKey(key))
-					defaultValue=resourceBundle.getString(key);
-			}
-			
+			defaultResourceBundleLocal=getTranslationCache(i18n+"_"+locale);
+			try {
+				defaultResourceBundleLocalOverride=getTranslationCache(i18n+"_override_"+locale);
+				if(defaultResourceBundleLocalOverride.containsKey(key))
+					return defaultResourceBundleLocalOverride.getString(key);
+			}catch(Throwable t) {}
+			if(defaultResourceBundleLocal.containsKey(key))
+				return defaultResourceBundleLocal.getString(key);
+		}catch(Throwable t){
+		}
+		try{
+			defaultResourceBundleGlobal=getTranslationCache(i18n);
+			try {
+				defaultResourceBundleGlobalOverride=getTranslationCache(i18n+"_override");
+				if(defaultResourceBundleGlobalOverride.containsKey(key))
+					return defaultResourceBundleGlobalOverride.getString(key);
+			}catch(Throwable t) {}
+			if(defaultResourceBundleGlobal.containsKey(key))
+				defaultValue=defaultResourceBundleGlobal.getString(key);
 		}catch(Throwable t){
 			logger.warn("No translation file "+i18n+" found while looking for "+key);
 		}
-		try{
-			if(isLocale!=null){
-				if(isLocaleOverride!=null){
-					ResourceBundle resourceBundle =  new PropertyResourceBundle(isLocaleOverride);
-					if(resourceBundle!=null && resourceBundle.containsKey(key))
-						return resourceBundle.getString(key);
-				}
-				ResourceBundle resourceBundle =  new PropertyResourceBundle(isLocale);
-				if(resourceBundle!=null && resourceBundle.containsKey(key))
-					return resourceBundle.getString(key);
-			}
-		}catch(IOException e){
-			e.printStackTrace();
-		}
 		return defaultValue;
-
 	}
 	
 	public static void refresh() {
 		mdsCache.clear();
+		translationBundles=new HashMap<>();
 		prepareMetadatasets();
 	}
 	

@@ -39,7 +39,7 @@ $borderRadius:2px;
   cursor: default;
 }
 .moreAlways{
-  transition: $animationTime all;
+  transition: $transitionNormal all;
   opacity: 1;
   color: $primary!important;
 }
@@ -47,8 +47,9 @@ $borderRadius:2px;
   color:$textVeryLight!important;
   cursor: default;
 }
-.noCCPublish > div{
-  opacity:0.5;
+.noCCPublish > div,
+.noPermissions > div{
+  /*opacity:0.5;*/
 }
 .blurred{
   @include imageDisabledBlur();
@@ -56,44 +57,55 @@ $borderRadius:2px;
   left: 2px;
   right: 2px;
 }
-.ccPublishMissing{
+.ccPublishMissing,.permissionsMissing{
   width: 100%;
   height: 100%;
   background-color:rgba(255,255,255,0.65);
   position: absolute;
   left:0;
+  top:0;
+  z-index: 110;
   text-align: center;
-  padding-top: 40px;
+  padding-top: 35px;
   div{
     color:$textPrimary!important;
     opacity: 1;
     padding-bottom: 7px;
   }
   a{
+    text-shadow:0 0 15px #fff;
     i{
       position:relative;
       top:7px;
     }
   }
 }
-$badgeWidth:200px;
+.cardSmallList{
+  .ccPublishMissing,.permissionsMissing{
+    padding-top:20px;
+  }
+}
+$badgeWidth:250px;
 .dragBadge{
-  border:2px solid $primary;
-  background-color: $primaryLight;
   width:$badgeWidth;
-  padding:10px;
-  height: 44px;
-  border-radius: 4px;
-  position:absolute;
+  height:54px;
+  position:fixed;
   left:-999px;
   top:-999px;
-  div{
+  .badge{
+    position: absolute;
+    width:100%;
+    top:7px;
+    border:2px solid $primary;
+    background-color: $primaryLight;
+    padding:10px;
+    border-radius: 4px;
     @include shortenText();
   }
   .count{
-    position:relative;
-    left: $badgeWidth - 23px;
-    top: -40px;
+    position:absolute;
+    right: -10px;
+    top:0;
     text-align: center;
     border-radius:50%;
     background-color: #E6B247;
@@ -137,6 +149,9 @@ $badgeWidth:200px;
 .node_cm_created{
    min-width:160px;
 }
+.node_ccm_educationaltypicalagerange{
+  min-width:50px;
+}
 .node_ccm_wf_status{
   min-width: 100px;
 }
@@ -158,12 +173,19 @@ $badgeWidth:200px;
 .node_dimensions{
   min-width:110px;
 }
+.node_cclom_title{
+  min-width: 160px;
+  word-break: break-all;
+}
 .node_cclom_general_keyword{
   min-width: 160px;
   word-break: break-all;
 }
 .node_cclom_version{
   min-width: 60px;
+}
+.node_sys_node-uuid{
+  min-width: 250px;
 }
 .node_virtual_usagecount{
   min-width: 150px;
@@ -194,6 +216,7 @@ $badgeWidth:200px;
 }
 .more{
   min-width:60px;
+  transition: $transitionNormal all;
   @include clickable();
 }
 .moreOpen{
@@ -208,11 +231,46 @@ $badgeWidth:200px;
   display:table-cell;
   padding:0px 5px;
   padding-top:12px;
-  color:$textLight;
   vertical-align: middle;
+  color:$textLight;
+}
+.headingGroup {
+  position: relative;
+  .totalCount {
+    position: absolute;
+    left: 56px;
+    top: 14px;
+    color:$textLight;
+  }
+  .sortMenu{
+    position: absolute;
+    z-index: $dialogZIndex+1;
+    left:80px;
+    width: $contextMenuWidth;
+    .collection-item{
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      .title{
+        flex-grow: 1;
+      }
+      a{
+        height:20px;
+      }
+      i{
+        position: initial;
+      }
+      &.active{
+        font-weight: bold;
+      }
+    }
+  }
 }
 .row .icon{
   padding-top:20px;
+}
+.row{
+  transition: none;
 }
 .list .row{
   margin:0 0!important;
@@ -225,13 +283,18 @@ $badgeWidth:200px;
 .cardList .row.selected{
   background: $workspaceSelectedBackgroundEffect;
   background-color:$workspaceSelectedBackground;
+  .more{
+    @include fadeRight($workspaceSelectedBackground,20px)
+  }
 }
 
-.tableList .row:focus,
 .cardList .row.selected{
-  background: transparent;
-  background-color:transparent;
+  background: $backgroundColor;
+  background-color:$backgroundColor;
   outline:2px solid $primary;
+  .more{
+    @include fadeRight($backgroundColor,20px)
+  }
 }
 .row:focus{
   @include setGlobalInsetFocus();
@@ -249,6 +312,9 @@ $badgeWidth:200px;
 }
 .list .row:hover{
   background-color:$workspaceSelectedBackground;
+  .more{
+    @include fadeRight($workspaceSelectedBackground,20px);
+  }
 }
 
 .list .filled-in:checked+label:after{
@@ -339,6 +405,12 @@ $badgeWidth:200px;
     }
   }
 }
+.list .cardSmallList.dark-color,
+.list .cardList.dark-color{
+  .row_1,.row_2,.row_3,.row_4,.row_5,.row_6 {
+    color: #000 !important;
+  }
+}
 :host /deep/{
   .collectionPinned custom-icon g{
     fill:#fff;
@@ -369,7 +441,7 @@ $strength:0.75deg;
   90% {    transform:rotate($strength*random(1));  }
   100% {   transform:rotate(-$strength*random(1));  }
 }
-$orderAnimationTime:$animationTime*5;
+$orderAnimationTime:$transitionNormal*5;
 .order-animation {
   animation: OrderAnimation $orderAnimationTime infinite;
 }
@@ -439,6 +511,16 @@ $orderAnimationTime:$animationTime*5;
 .rowInner{
   max-height:1.5rem;
   overflow: hidden;
+}
+.cardSmallList{
+  .row_1 .rowInner{
+    min-height: 3.15rem;
+  }
+  .rowInner{
+    max-height: 3.15rem;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
 }
 .node_ccm_commonlicense_key .rowInner,
 .cardList .rowInner{
@@ -548,7 +630,7 @@ $orderAnimationTime:$animationTime*5;
 .cardSmallList{
   display:block;
   width:$cardWidth;
-  height:$cardSmallHeight;
+  height: $listCardSmallHeight;
   @include materialShadow();
   float:left;
   margin:6px;
@@ -556,12 +638,13 @@ $orderAnimationTime:$animationTime*5;
   border-bottom: 5px solid $primary;
 }
 .cardSmallList img{
-  position: relative;
-  left: -15px;
-  top: -40px;
-  opacity:0.7;
-  width:201px;
-  height:151px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0.7;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .cardSmallList .row_1,
 .cardSmallList .row_2{
@@ -574,7 +657,6 @@ $orderAnimationTime:$animationTime*5;
 .cardSmallList .row_1{
   top: 5px;
   font-size: 110%;
-  height: 56px;
   overflow: hidden;
 }
 .cardSmallList .row_2{
@@ -657,7 +739,12 @@ $orderAnimationTime:$animationTime*5;
 .cardList .more{
   position:absolute;
   right:-10px;
-  top:$cardHeight - 37px;
+  top:$cardHeight - 40px;
+  @include fadeRight(#fff,20px);
+  padding-bottom: 5px;
+  a{
+    padding-left: 10px;
+  }
 }
 .cardList .moreSingle{
   right:-5px;
@@ -718,8 +805,8 @@ $orderAnimationTime:$animationTime*5;
     }
   }
   .cardList{
-    .collection_info {
-      margin-top: 34px;
+    .collection_info,.collection_scope {
+      margin-top: 15px;
     }
   }
   .row .node_ccm_replicationsource  img,
@@ -805,19 +892,17 @@ $orderAnimationTime:$animationTime*5;
   }
 }
 @media all and (max-width: ($mobileWidth)) {
-  .dialogMore{
-    overflow: scroll;
-    @include darken();
-    background: linear-gradient(to bottom, $darkenColor 0%,$darkenColor 75%,#ffffff 75%,#ffffff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  }
-  .cardList{
-    width:100%;
-    height:160px;
-    box-shadow: none;
-    border-top:1px solid $cardSeperatorLineColor;
-    .typeicon{
-      display:none!important;
+    .cardList.nodeCollection .collectionEditorial {
+      top: 20px;
     }
+    .cardList{
+      width:100%;
+      height:160px;
+      box-shadow: none;
+      border-top:1px solid $cardSeperatorLineColor;
+      .typeicon{
+        display:none!important;
+      }
   }
   .cardList.addElement{
     height:90px;
@@ -872,6 +957,7 @@ $orderAnimationTime:$animationTime*5;
     position: absolute;
     top: 25px;
     left: 120px;
+    max-width: 50px;
   }
   .cardList .actionText{
     display:none;
@@ -879,7 +965,7 @@ $orderAnimationTime:$animationTime*5;
   .cardList .row .more{
     position: absolute;
     top: 45px;
-    left: calc(100% - 45px);
+    left: calc(100% - 55px);
   }
   .cardList .row_1{
     height: auto;

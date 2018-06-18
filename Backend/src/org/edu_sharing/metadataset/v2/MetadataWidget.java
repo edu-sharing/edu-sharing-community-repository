@@ -1,26 +1,77 @@
 package org.edu_sharing.metadataset.v2;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MetadataWidget extends MetadataTranslatable{
+	public static class Subwidget implements Serializable {
+		private String id;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+	}
 	private static String[] MULTIVALUE_WIDGETS=new String[]{
 			"vcard",
 			"multivalueTree",
 			"multivalueBadges",
 			"multivalueFixedBadges",
 			"multivalueSuggestBadges",
+			"multivalueGroup",
 			"multioption"
 	};
-	private String id,type,caption,bottomCaption,icon,
-					placeholder,defaultvalue,template,condition,
-					suggestionSource,suggestionQuery,unit,format;
-	private Integer min,max,defaultValue,defaultMin,defaultMax,step;
-	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty;
-	private List<MetadataKey> values;
 
+	public static class Condition implements Serializable{
+		public Condition(String value, CONDITION_TYPE type, boolean negate) {
+			this.value = value;
+			this.type = type;
+			this.negate = negate;
+		}
+		public static enum CONDITION_TYPE{
+			PROPERTY,
+			TOOLPERMISSION
+		};
+		private String value;
+		private CONDITION_TYPE type;
+		private boolean negate;
+		public String getValue() {
+			return value;
+		}
+		public void setValue(String value) {
+			this.value = value;
+		}
+		public CONDITION_TYPE getType() {
+			return type;
+		}
+		public void setType(CONDITION_TYPE type) {
+			this.type = type;
+		}
+		public boolean isNegate() {
+			return negate;
+		}
+		public void setNegate(boolean negate) {
+			this.negate = negate;
+		}
+
+	}
+	private String id,type,caption,bottomCaption,icon,
+					placeholder,defaultvalue,template,
+					suggestionSource,suggestionQuery,unit,format;
+	private Integer min,max,defaultMin,defaultMax,step;
+	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
+	private List<MetadataKey> values;
+	private List<Subwidget> subwidgets;
+
+	
+	private Condition condition;
 	public String getSuggestionQuery() {
 		return suggestionQuery;
 	}
@@ -54,10 +105,10 @@ public class MetadataWidget extends MetadataTranslatable{
 	public boolean isMultivalue(){
 		return Arrays.asList(MULTIVALUE_WIDGETS).contains(type);
 	}
-	public String getCondition() {
+	public Condition getCondition() {
 		return condition;
 	}
-	public void setCondition(String condition) {
+	public void setCondition(Condition condition) {
 		this.condition = condition;
 	}
 	public String getTemplate() {
@@ -119,12 +170,6 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setMax(Integer max) {
 		this.max = max;
 	}
-	public Integer getDefaultValue() {
-		return defaultValue;
-	}
-	public void setDefaultValue(Integer defaultValue) {
-		this.defaultValue = defaultValue;
-	}
 	public Integer getDefaultMin() {
 		return defaultMin;
 	}
@@ -179,6 +224,21 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setBottomCaption(String bottomCaption) {
 		this.bottomCaption = bottomCaption;
 	}
+	public List<Subwidget> getSubwidgets() {
+		return subwidgets;
+	}
+	public void setSubwidgets(List<Subwidget> subwidgets) {
+		this.subwidgets = subwidgets;
+	}
+
+	public boolean isInherit() {
+		return inherit;
+	}
+
+	public void setInherit(boolean inherit) {
+		this.inherit = inherit;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof MetadataWidget){
@@ -209,5 +269,5 @@ public class MetadataWidget extends MetadataTranslatable{
 		}
 		return map;
 	}
-	
+
 }

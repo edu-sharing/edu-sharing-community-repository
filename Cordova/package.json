@@ -1,0 +1,59 @@
+{
+    "name": "org.edusharing.app.cordova",
+    "displayName": "edu-sharing",
+    "version": "1.0.0",
+    "description": "A sample Apache Cordova application that responds to the deviceready event.",
+    "main": "index.js",
+    "scripts": {
+        "start": "cd ./../Frontend && ng build --prod --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova build",
+        "restart": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova",
+        "debug-android": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova run android"
+    },
+    "author": "Apache Cordova Team",
+    "license": "Apache-2.0",
+    "cordova": {
+        "platforms": [
+            "android",
+            "ios"
+        ],
+        "plugins": {
+            "cordova-plugin-whitelist": {},
+            "cordova-plugin-splashscreen": {},
+            "cordova-plugin-x-toast": {},
+            "cordova-plugin-device": {},
+            "cordova-plugin-screen-orientation": {},
+            "com.borismus.webintent": {},
+            "cordova-plugin-camera": {},
+            "cordova-plugin-globalization": {},
+            "cordova-plugin-android-permissions": {},
+            "cordova-plugin-nativestorage": {},
+            "info.protonet.appgroupsuserdefaults": {},
+            "com.spideroak.fileviewerplugin": {},
+            "cordova-plugin-http": {},
+            "cordova-plugin-file-transfer": {},
+            "com.napolitano.cordova.plugin.intent": {},
+            "cordova-plugin-inappbrowser": {}
+        }
+    },
+    "dependencies": {
+        "@types/cordova-plugin-file": "^4.3.2",
+        "cordova-android": "7.1.0",
+        "cordova-ios": "^4.5.4",
+        "cordova-plugin-android-permissions": "^1.0.0",
+        "cordova-plugin-camera": "^4.0.2",
+        "cordova-plugin-device": "^2.0.1",
+        "cordova-plugin-file": "^6.0.1",
+        "cordova-plugin-file-transfer": "^1.7.1",
+        "cordova-plugin-fileviewer": "git+https://github.com/SpiderOak/FileViewerPlugin.git",
+        "cordova-plugin-globalization": "^1.0.9",
+        "cordova-plugin-http": "^1.2.0",
+        "cordova-plugin-inappbrowser": "^2.0.2",
+        "cordova-plugin-intent": "git+https://github.com/tsimon-edu-sharing/cordova-plugin-intent.git",
+        "cordova-plugin-nativestorage": "^2.3.1",
+        "cordova-plugin-screen-orientation": "^3.0.1",
+        "cordova-plugin-splashscreen": "^5.0.2",
+        "cordova-plugin-whitelist": "^1.3.3",
+        "cordova-plugin-x-toast": "^2.6.2",
+        "info.protonet.appgroupsuserdefaults": "git+https://github.com/rootzoll/cordova-plugin-nsuserdefaults-for-app-groups.git"
+    }
+}

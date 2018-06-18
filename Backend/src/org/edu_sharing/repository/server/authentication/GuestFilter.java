@@ -16,6 +16,9 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.config.model.Config;
+import org.edu_sharing.service.config.model.Values;
 
 public class GuestFilter implements javax.servlet.Filter {
 
@@ -44,16 +47,24 @@ public class GuestFilter implements javax.servlet.Filter {
 			HashMap<String, String> authentication = authTool.validateAuthentication(session);
 
 			String guestFilterdisabled = req.getParameter(CCConstants.REQUEST_PARAM_DISABLE_GUESTFILTER);
-			
-			if (authentication == null && !new Boolean(guestFilterdisabled)) {
+			String guestFilterHeader=((HttpServletRequest)req).getHeader("DisableGuest");
+			if(guestFilterHeader!=null && new Boolean(guestFilterHeader)) {
+				logger.info("Guest Filter disabled via header");
+			}
+			else if (authentication == null && !new Boolean(guestFilterdisabled)) {
 				String guestLogin = ApplicationInfoList.getHomeRepository().getGuest_username();
 				String guestPW = ApplicationInfoList.getHomeRepository().getGuest_password();
 				if (guestLogin != null && guestPW != null && !guestLogin.isEmpty() && !guestPW.isEmpty()) {
-					logger.info("doing guest login");
-					HashMap<String, String> authInfoGuest = authTool.createNewSession(guestLogin, guestPW);
-					authTool.storeAuthInfoInSession(authInfoGuest.get(CCConstants.AUTH_USERNAME), authInfoGuest.get(CCConstants.AUTH_TICKET),CCConstants.AUTH_TYPE_DEFAULT, session);
+					Config config = ConfigServiceFactory.getCurrentConfig();
+					if(config!=null && config.values.guest!=null && !config.values.guest.enabled) {
+						logger.debug("guest filter disabled for context "+ConfigServiceFactory.getCurrentDomain());
+					}
+					else {
+						HashMap<String, String> authInfoGuest = authTool.createNewSession(guestLogin, guestPW);
+						authTool.storeAuthInfoInSession(authInfoGuest.get(CCConstants.AUTH_USERNAME), authInfoGuest.get(CCConstants.AUTH_TICKET),CCConstants.AUTH_TYPE_DEFAULT, session);
+					}
 				}else{
-					logger.info("no guest defined");
+					logger.debug("no guest defined");
 				}
 			}
 		} catch (Throwable e) {

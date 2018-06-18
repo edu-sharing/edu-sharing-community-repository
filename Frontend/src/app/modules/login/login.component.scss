@@ -7,8 +7,8 @@ md-input{
   text-align: center;
   width: 100%;
   position:fixed;
-  top:calc(15% + 470px);
-  color: #fff;
+  top:calc(15% + 490px);
+  color: $textVeryLight;
 }
 .branding{
   width:100%;
@@ -18,11 +18,20 @@ md-input{
 .register{
   color:$textLight;
 }
-
-@media only screen and (max-width: $mobileWidth+$mobileStage*1) {
+@media screen and (max-height: ($mobileHeight)) {
+  .card{
+    top: 15%;
+    bottom:auto;
+  }
+}
+@media screen and (max-width: $mobileWidth+$mobileStage*1) {
   .card-title{
     margin-bottom: 15px;
   }
+  .powered{
+    top:calc(15% + 410px);
+  }
+
   .branding{
     position: absolute;
     top: 25px;
@@ -34,9 +43,9 @@ md-input{
     }
   }
 }
-
-@media screen and (max-height: ($mobileHeight)) {
+@media screen and (max-height: $mobileHeightWithKeyboard) {
   .card{
-    top: $mainnavHeight;
+    top: 0;
+    bottom: 0;
   }
 }

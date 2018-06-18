@@ -8,6 +8,7 @@ public class Values{
 	@XmlElement public String registerUrl;
 	@XmlElement public String recoverPasswordUrl;
 	@XmlElement	public String imprintUrl;
+	@XmlElement	public String privacyInformationUrl;
 	@XmlElement	public String helpUrl;
 	@XmlElement	public String whatsNewUrl;
 	@XmlElement	public String editProfileUrl;
@@ -24,6 +25,7 @@ public class Values{
 	@XmlElement	public Boolean licenseDialogOnUpload;
 	@XmlElement	public Boolean nodeReport;
 	@XmlElement	public Boolean branding;
+	@XmlElement	public String siteTitle;
 	@XmlElement	public String userDisplayName;
 	@XmlElement	public String defaultUsername;
 	@XmlElement	public String defaultPassword;
@@ -37,4 +39,7 @@ public class Values{
 	@XmlElement	public String loginDefaultLocation;
 	@XmlElement	public Boolean searchGroupResults;
 	@XmlElement	public Mainnav mainnav;
+	@XmlElement	public String searchSidenavMode;
+	@XmlElement	public Guest guest;
+	@XmlElement	public LicenseAgreement licenseAgreement;
 }

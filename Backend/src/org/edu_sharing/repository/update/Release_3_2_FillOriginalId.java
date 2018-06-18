@@ -102,7 +102,7 @@ public class Release_3_2_FillOriginalId implements Update {
 				}
 			}else{
 				if(this.out != null) this.out.println("Updater "+this.getId() + " already done");
-				logger.info("Updater "+this.getId() + " already done");
+				logger.debug("Updater "+this.getId() + " already done");
 			}
 			transaction.commit();
 			

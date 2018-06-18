@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
 import {Toast} from "../../common/ui/toast";
-import {Router, Route, Params, ActivatedRoute} from "@angular/router";
+import {Router, Route, Params, ActivatedRoute, UrlSerializer} from "@angular/router";
 import {OAuthResult, LoginResult, AccessScope} from "../../common/rest/data-object";
 import {RouterComponent} from "../../router/router.component";
 import {TranslateService} from "@ngx-translate/core";
@@ -16,6 +16,9 @@ import {Scope} from "@angular/core/src/profile/wtf_impl";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {Helper} from "../../common/helper";
 import {RestHelper} from "../../common/rest/rest-helper";
+import {PlatformLocation} from "@angular/common";
+
+import {CordovaService} from "../../common/services/cordova.service";
 
 @Component({
   selector: 'workspace-login',
@@ -26,7 +29,6 @@ export class LoginComponent  implements OnInit{
   @ViewChild('passwordInput') passwordInput : ElementRef;
   @ViewChild('usernameInput') usernameInput : ElementRef;
   @ViewChild('loginForm') loginForm : ElementRef;
-
 
   public isLoading=true;
   private disabled=false;
@@ -49,12 +51,17 @@ export class LoginComponent  implements OnInit{
   }
   constructor(private connector : RestConnectorService,
               private toast:Toast,
+              private platformLocation: PlatformLocation,
+              private urlSerializer:UrlSerializer,
               private router:Router,
               private translate:TranslateService,
               private configService:ConfigurationService,
               private title:Title,
               private storage : SessionStorageService,
-              private route : ActivatedRoute){
+              private route : ActivatedRoute,
+              private cordova: CordovaService
+            ){
+
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
@@ -70,9 +77,10 @@ export class LoginComponent  implements OnInit{
           this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
             if(data.currentScope){
               this.connector.logout().subscribe(()=>{}); // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
+              data.statusCode=null;
             }
             else if(data.currentScope==this.scope){
-              if(data.statusCode==RestConstants.STATUS_CODE_OK){
+              if(data.statusCode==RestConstants.STATUS_CODE_OK && params['local']!="true"){
                 this.goToNext();
               }
             }
@@ -133,34 +141,38 @@ export class LoginComponent  implements OnInit{
 
   }
   private login(){
+    
     this.isLoading=true;
-    this.connector.login(this.username,this.password,this.scope).subscribe(
-      (data:string) => {
-        if(data==RestConstants.STATUS_CODE_OK) {
-          this.goToNext();
-        }
-        else if(data==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
-          this.toast.error(null,"LOGIN.SAFE_PREVIOUS");
+
+      this.connector.login(this.username,this.password,this.scope).subscribe(
+        (data:string) => {
+          if(data==RestConstants.STATUS_CODE_OK) {
+            this.goToNext();
+          }
+          else if(data==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
+            this.toast.error(null,"LOGIN.SAFE_PREVIOUS");
+            this.isLoading=false;
+          }
+          else{
+            this.toast.error(null,"LOGIN.ERROR");
+            this.isLoading=false;
+          }
+        },
+        (error:any)=>{
+          this.toast.error(error);
           this.isLoading=false;
-        }
-        else{
-          this.toast.error(null,"LOGIN.ERROR");
-          this.isLoading=false;
-        }
-      },
-      (error:any)=>{
-        this.toast.error(error);
-        this.isLoading=false;
-      });
+        });
+
   }
 
   private goToNext() {
     if(this.next){
       this.next=Helper.addGetParameter("fromLogin","true",this.next);
-      window.location.assign(this.next);
+      UIHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,this.next);
+      //window.location.assign(this.next);
     }
     else {
-      this.router.navigate([UIConstants.ROUTER_PREFIX + this.configService.instant("loginDefaultLocation","workspace")]);
+      UIHelper.goToDefaultLocation(this.router,this.configService);
     }
   }
 }

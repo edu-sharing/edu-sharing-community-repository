@@ -38,7 +38,16 @@ mds .mdsGroup{
   float:left;
   padding:25px;
   padding-bottom:5px;
-
+  label{
+    display: inline-flex;
+    .required{
+      padding-left: 5px;
+      font-size: 80%;
+      font-weight: bold;
+      display: flex;
+      align-self: center;
+    }
+  }
   > div{
     padding: 15px 0px;
   }
@@ -48,6 +57,12 @@ mds .mdsGroup{
   .card{
     padding: 0!important;
     padding-bottom: 20px!important;
+  }
+  .mdsNoPermissions{
+    color:$textLight;
+    font-size: 90%;
+    padding-top: 10px;
+    font-style: italic;
   }
   .radioVertical label,
   .checkboxVertical label{
@@ -84,6 +99,14 @@ mds .mdsGroup{
   .suggestHighlight{
     font-weight:bold;
     color:$primary;
+  }
+  .widget_multivalueFixedBadges,
+  .widget_multivalueSuggestBadges,
+  .widget_multivalueTree{
+    .input-hint-bottom{
+      margin-top: -5px;
+      margin-bottom: 5px;
+    }
   }
   .suggestionMoreItems{
     font-weight: bold;
@@ -124,10 +147,18 @@ mds .mdsGroup{
   .suggestInput, .multivalueBadgesText {
     margin-bottom: 10px;
   }
-  .suggestOpen{
-    float:right;
-    padding: 0;
-    margin:0;
+  .auto-suggest-field{
+    display: flex;
+    >.auto-suggest-field{
+      width:100%;
+    }
+    input{
+      flex-grow: 1;
+    }
+    .btn-flat{
+      overflow: hidden;
+      padding:0 1rem;
+    }
   }
   .widget_range{
     height: 50px;
@@ -135,6 +166,18 @@ mds .mdsGroup{
   .widget_duration{
     width: 100%;
     float: left;
+  }
+  .widget_multivalueGroup{
+    .widgetGroup{
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      padding:10px 0;
+      >div{
+        flex-grow:1;
+        padding:0 10px;
+      }
+    }
   }
   .widget_duration div.inputField{
     padding-top: 5px;
@@ -197,7 +240,7 @@ mds .mdsGroup{
       max-height:20px;
     }
   }
-  .licenseLink,.contributorsLink{
+  .templateLink,.licenseLink,.contributorsLink{
     font-weight: bold;
     text-transform: uppercase;
     padding-top: 10px;
@@ -241,17 +284,17 @@ mds .mdsGroup{
     width: 100%;
   }
   .inputTable{
-    display:table;
+    display:flex;
     width: 100%;
+    align-items: center;
   }
   .inputTable input{
-    display:table-cell;
+    display:flex;
   }
   .inputIcon{
-    display:table-cell;
-    padding-right:10px;
-    position: relative;
-    top:10px;
+    display:flex;
+    margin-top: -14px;
+    margin-right:10px;
     color:#666;
   }
   .mdsAuthor{
@@ -282,7 +325,8 @@ mds .mdsGroup{
     }
     img{
       width:40%;
-      max-height: 175px;
+      height: 175px;
+      object-fit: cover;
     }
   }
 }

@@ -25,6 +25,9 @@
   .topBarSearch form {
     left: 50%;
     margin-left: - 250px;
+    .searchClearIcon{
+      right: 5px;
+    }
   }
   .topBarSearch form, .topBarSearch input {
     width: 500px;
@@ -50,7 +53,11 @@
       display: none;
     }
   }
-
+  @media screen and (max-width: ($mobileWidth+$mobileStage*1)) {
+    .searchInputGroup{
+      width: 100%!important;
+    }
+  }
 
   @media screen and (max-width: ($mobileWidth)) {
     .topBarSearch form {
@@ -64,6 +71,7 @@
 }
 .heading{
   position: absolute;
+  z-index: 2;
   top:0;
   margin-top:3%;
   width:100%;
@@ -80,10 +88,24 @@
   }
 }
 .header{
-  width:100%;
-  max-height: 300px;
-  min-height: 80px;
+  position: relative;
+  img{
+    object-fit: cover;
+    width:100%;
+    max-height: 300px;
+    min-height: 80px;
+  }
+  .headerGradient{
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 5px;
+    background:linear-gradient(rgba(0,0,0,0.0001) 0,rgba(0,0,0,0.5) 100%);
+  }
 }
+
 .content{
   position: relative;
   top:-20px;
@@ -108,8 +130,8 @@
   margin: 10px 0;
 }
 .collections{
-  min-height: $cardSmallHeight+15px;
-  max-height: $cardSmallHeight+15px;
+  min-height: $listCardSmallHeight+15px;
+  max-height: $listCardSmallHeight+15px;
   margin-bottom: 70px;
 }
 .materials{
@@ -134,7 +156,17 @@
   text-align: center;
   padding-top:20px;
 }
-@media all and (max-width: $mobileWidth+$mobileStage*1) {
+@media (pointer: coarse) {
+  :host /deep/ .collections {
+    width: 100%;
+    overflow-x: auto;
+    .list {
+      width: max-content;
+    }
+  }
+}
+
+@media all and (max-width: $mobileWidth+$mobileStage*2) {
   :host /deep/ .collections {
     .list {
       width: max-content;
@@ -144,14 +176,5 @@
     overflow-x: auto;
     width: calc(100% + 40px);
     margin:10px -20px;
-  }
-}
-@media (pointer: coarse) {
-  :host /deep/ .collections {
-    width: 100%;
-    overflow-x: auto;
-    .list {
-      width: max-content;
-    }
   }
 }

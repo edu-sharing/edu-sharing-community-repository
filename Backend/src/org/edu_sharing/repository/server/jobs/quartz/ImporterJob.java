@@ -33,7 +33,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.BinaryHandler;
 import org.edu_sharing.repository.server.importer.Importer;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
@@ -51,7 +55,27 @@ public class ImporterJob extends AbstractJob {
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
+		Map jobDataMap = context.getJobDetail().getJobDataMap();
+		String username = (String) jobDataMap.get(OAIConst.PARAM_USERNAME);
 		
+		if(username == null || username.trim().equals("")) {
+			throw new JobExecutionException("no user provided");
+		}
+		
+		RunAsWork<Void> runAs = new RunAsWork<Void>() {
+			
+			@Override
+			public Void doWork() throws Exception {
+				start(context);
+				return null;
+			}
+			
+		}; 
+		AuthenticationUtil.runAs(runAs, username);
+		
+	}
+	
+	private void start(JobExecutionContext context) {
 		logger.info("starting");
 		Map jobDataMap = context.getJobDetail().getJobDataMap();
 
@@ -85,12 +109,17 @@ public class ImporterJob extends AbstractJob {
 		String binaryHandlerClass = (String) jobDataMap.get(OAIConst.PARAM_BINARYHANDLER);
 
 		String importerClass = (String) jobDataMap.get(OAIConst.PARAM_IMPORTERCLASS);
-		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass);
+		
+		String oaiIds = (String) jobDataMap.get(OAIConst.PARAM_OAI_IDS);
+		
+		String[] idArr = (oaiIds != null) ? oaiIds.split(",") : null;
+		
+		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass,idArr);
 		logger.info("returns");
 	}
 
 	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-			String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass) {
+			String[] sets, String recordHandlerClass, String binaryHandlerClass, String importerClass, String[] idList) {
 		try {
 
 			Importer importer = null;
@@ -136,6 +165,11 @@ public class ImporterJob extends AbstractJob {
 				RecordHandlerLOM recordHandlerLom = new RecordHandlerLOM(null);
 				((OAIPMHLOMImporter)importer).importOAIObjectsFromFile(urlImport, recordHandlerLom);
 				new RefreshCacheExecuter().excecute(null, true, null);
+				return;
+			}
+			
+			if(idList != null && idList.length > 0) {
+				importer.startImport(idList, sets[0]);
 				return;
 			}
 

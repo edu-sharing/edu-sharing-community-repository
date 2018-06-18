@@ -5,12 +5,11 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
-import org.edu_sharing.metadataset.v2.MetadataSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.search.QueryBuilder;
 import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
-import org.edu_sharing.service.search.SearchServiceImpl;
 
 import com.sun.star.lang.IllegalArgumentException;
 
@@ -23,10 +22,7 @@ public class SearchToken {
 	
 	String luceneString;
 	
-	
 	List<String> facettes=null;
-
-	
 
 	String storeProtocol = "workspace";
 	
@@ -35,6 +31,12 @@ public class SearchToken {
 	int from;
 	
 	int maxResult;
+	
+	
+	/**
+	 * search in scope of authorities
+	 */
+	List<String> authorityScope;
 
 	private ContentType contentType;
 
@@ -174,6 +176,9 @@ public class SearchToken {
 			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_MAP});
 			searchCriterias.setAspects(new String[]{CCConstants.CCM_ASPECT_COLLECTION});
 		}
+		if(getContentType().equals(ContentType.TOOLPERMISSIONS)){
+			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_TOOLPERMISSION});
+		}
 	}
 	/**
 	 * Get and set query string (for ui purposes/info)
@@ -186,6 +191,19 @@ public class SearchToken {
 		if(queryString!=null)
 			return queryString;
 		return getLuceneString();
-	}	
+	}
+	
+	/**
+	 * set the scope of authorities
+	 * security problem (only when admin permissions)
+	 * @param authorities
+	 */
+	public void setAuthorityScope(List<String> authorities) {
+		this.authorityScope = authorities;
+	}
+	
+	public List<String> getAuthorityScope() {
+		return authorityScope;
+	}
 	
 }

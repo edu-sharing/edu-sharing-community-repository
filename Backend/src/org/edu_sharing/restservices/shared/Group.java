@@ -13,6 +13,7 @@ public class Group extends Authority {
 	private String groupName = null;
 	private String groupType = null;
 	private GroupProfile profile = null;
+	private NodeRef ref = null;
 
 	/**
 	 * editable in context of grouptype and loction(shared nodes)
@@ -73,5 +74,13 @@ public class Group extends Authority {
 	public void setEditable(boolean editable) {
 		this.editable = editable;
 	}
+	@JsonProperty
+	public NodeRef getRef() {
+		return ref;
+	}
+	public void setRef(NodeRef ref) {
+		this.ref = ref;
+	}
+	
 
 }

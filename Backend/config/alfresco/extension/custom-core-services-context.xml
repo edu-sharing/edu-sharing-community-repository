@@ -190,7 +190,7 @@
         <property name="lockService">
         		<ref bean="lockService"/>
         </property>
-        <property name="thumbnailService">
+         <property name="thumbnailService">
         		<ref bean="thumbnailService"/>
         </property>
         <property name="policyBehaviourFilter">
@@ -212,7 +212,7 @@
   	</bean>
   	 -->
   	  	<!-- inherit permissions to false for maps and folders in safe-->  	
-  	 <bean id="onCreateInheritPermFalsePolicy" class="org.edu_sharing.alfresco.policy.OnCreateInheritPermFalsePolicy" init-method="initForFoldersAndContentSafe">
+  	 <bean id="onCreateInheritPermFalsePolicy" class="org.edu_sharing.alfresco.policy.OnCreateInheritPermFalsePolicy" init-method="initForFoldersSafe">
   		<property name="policyComponent">
             <ref bean="policyComponent"/>
         </property>
@@ -341,7 +341,14 @@
             <ref bean="NodeService" />
         </property>
    	 </bean>
-   	 
+   	 <bean id="onCopyMapPolicy" class="org.edu_sharing.alfresco.policy.OnCopyMapPolicy" init-method="init">
+   	 	<property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+          <property name="nodeService">
+            <ref bean="NodeService" />
+        </property>
+   	 </bean>
    	 <bean id="onCopyCollectionRefSubNodesPolicy" class="org.edu_sharing.alfresco.policy.OnCopyCollectionRefSubNodesPolicy" init-method="init">
    	 	<property name="policyComponent">
             <ref bean="policyComponent"/>
@@ -361,24 +368,41 @@
  
  	 <alias name="dbNodeService" alias="dbNodeServiceImpl" />
    <bean id="dbNodeService" class="org.edu_sharing.alfresco.fixes.DbNodeServiceImpl" init-method="init" >
-   	  <property name="dictionaryService" ref="dictionaryService" />
-      <property name="transactionService" ref="transactionService" />
-      <property name="qnameDAO" ref="qnameDAO" />
-      <property name="nodeDAO" ref="nodeDAO" />
+      <property name="dictionaryService">
+         <ref bean="dictionaryService" />
+      </property>
+      <property name="transactionService">
+         <ref bean="transactionService" />
+      </property>
+      <property name="qnameDAO">
+         <ref bean="qnameDAO" />
+      </property>
+      <property name="nodeDAO">
+         <ref bean="nodeDAO" />
+      </property>
       <property name="permissionService" ref="permissionServiceImpl" />
-      <property name="policyComponent" ref="policyComponent"/>
-      <property name="storeArchiveMap" ref="storeArchiveMap"/>
-      <property name="nodeIndexer" ref="nodeIndexer"/>
+      
+      <property name="policyComponent">
+         <ref bean="policyComponent"/>
+      </property>
+      <property name="storeArchiveMap">
+         <ref bean="storeArchiveMap"/>
+      </property>
+      <property name="nodeIndexer">
+         <ref bean="nodeIndexer"/>
+      </property>
       <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
-       <property name="tenantService" ref="tenantService"/>
-      <property name="storesToIgnorePolicies">
+      <property name="tenantService">
+         <ref bean="tenantService"/>
+      </property>
+     <property name="storesToIgnorePolicies">
          <ref bean="storesToIgnorePolicies"/>
       </property>
       <property name="enableTimestampPropagation" value="${system.enableTimestampPropagation}" />
    	  <!-- edu-sharing customization -->
       <property name="serviceRegistry">
 			<ref bean="ServiceRegistry" />
-	  </property>
+		</property>
    </bean>
    
     <bean id="alfrescoDefaultDbNodeService" class="org.alfresco.repo.node.db.DbNodeServiceImpl" init-method="init" >
@@ -391,7 +415,7 @@
       <property name="storeArchiveMap" ref="storeArchiveMap"/>
       <property name="nodeIndexer" ref="nodeIndexer"/>
       <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
-       <property name="tenantService" ref="tenantService"/>
+      <property name="tenantService" ref="tenantService"/>
       <property name="storesToIgnorePolicies">
          <ref bean="storesToIgnorePolicies"/>
       </property>
@@ -466,10 +490,10 @@
          <ref bean="transformerConfig" />
       </property>
       <property name="nodeService">
-    	  	<ref bean="NodeService" />
+    	   <ref bean="NodeService" />
       </property>
        <property name="transactionService">
-    	   	<ref bean="TransactionService" />
+    	   <ref bean="TransactionService" />
       </property>
     </bean>
     <bean id="transformer.ESVideoTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
@@ -528,6 +552,7 @@
          </list>
       </property>
    </bean>
+   
    
    <bean id="searchServiceInterceptor" class="org.edu_sharing.alfresco.workspace_administration.SearchServiceInterceptor">
    </bean>
@@ -595,4 +620,31 @@
         <property name="repositoryHelper" ref="repositoryHelper"/>
     </bean>
     
+    
+     <bean id="beforeDeleteIOPolicy" class="org.edu_sharing.alfresco.policy.BeforeDeleteIOPolicy" init-method="init">
+   	  <property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+         <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+         <property name="versionService">
+            <ref bean="versionService" />
+        </property>
+   	 </bean>
+    
+     
+       <!-- for remembering current authentication method -->
+     <bean id="authenticationService"
+        class="org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService">
+        <property name="sysAdminParams">
+            <ref bean="sysAdminParams" />
+        </property>
+        <property name="applicationContextManager">
+            <ref bean="Authentication" />
+        </property>
+        <property name="sourceBeanName">
+            <value>localAuthenticationService</value>
+        </property>
+    </bean>
 </beans>

@@ -9,6 +9,7 @@ import {DialogButton} from "./modal-dialog/modal-dialog.component";
 import {UIConstants} from "./ui-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "./ui-animation";
+import {CordovaService} from "../services/cordova.service";
 
 @Injectable()
 export class Toast{
@@ -21,18 +22,21 @@ export class Toast{
   private lastToastError: string;
   private lastToastErrorTime: number;
   private static MIN_TIME_BETWEEN_TOAST = 2000;
+  private linkCallback: Function;
   constructor(private toasty : ToastyService,
               private router : Router,
               private storage : TemporaryStorageService,
+              private cordova : CordovaService,
               private translate : TranslateService){
     (window as any)['toastComponent']=this;
   }
   /**
    * Generates a toast message
    * @param message Translation-String of message
-   * @param parameters Additional parameter bindings for translation
+   * @param parameters Parameter bindings for translation
+   * @param additional: additional parameter objects {link:{caption:string,callback:Function}}
    */
-  public toast(message : string,parameters : Object = null,dialogTitle:string=null,dialogMessage:string=null,options : any = null) : void {
+  public toast(message : string,parameters : Object = null,dialogTitle:string=null,dialogMessage:string=null,additional : any = null) : void {
     if(this.lastToastMessage==message && (Date.now()-this.lastToastMessageTime)<Toast.MIN_TIME_BETWEEN_TOAST)
       return;
     this.lastToastMessage=message;
@@ -41,18 +45,18 @@ export class Toast{
       if(dialogTitle){
         text+='<br /><a onclick="window[\'toastComponent\'].openDetails()">'+this.translate.instant("DETAILS")+'</a>';
       }
+      text=this.handleAdditional(text,additional);
       this.dialogParameters=parameters;
-      this.toasty.info(this.getToastOptions(text,options));
+      this.toasty.info(this.getToastOptions(text));
       this.dialogTitle=dialogTitle;
       this.dialogMessage=dialogMessage;
     });
   }
-
   private openDetails(buttons:DialogButton[]=null){
     this.onShowModal({title:this.dialogTitle,message:this.dialogMessage,translation:this.dialogParameters,buttons:buttons});
   }
 
-  private getToastOptions(text: string, options: any = null) {
+  private getToastOptions(text: string) {
     let timeout=8000 + UIAnimation.ANIMATION_TIME_NORMAL;
     return {
       title: "",
@@ -79,7 +83,7 @@ export class Toast{
   /**
    * Generates a toast error message
    */
-  public error(errorObject : any,message="COMMON_API_ERROR",parameters: any = null,dialogTitle='',dialogMessage='') : void {
+  public error(errorObject : any,message="COMMON_API_ERROR",parameters: any = null,dialogTitle='',dialogMessage='',additional : any = null) : void {
     let errorInfo="";
     let error=errorObject;
     let jsonParse=null;
@@ -87,8 +91,9 @@ export class Toast{
       jsonParse=errorObject._body;
     if(!jsonParse && errorObject)
       jsonParse=errorObject.response;
+    let json:any;
     try {
-      let json=JSON.parse(jsonParse);
+      json=JSON.parse(jsonParse);
       error=json.error+": "+json.message;
     }catch(e){}
     this.dialogTitle=dialogTitle;
@@ -107,7 +112,7 @@ export class Toast{
         if (json.error.indexOf("DAOToolPermissionException") != -1) {
           this.dialogTitle = 'TOOLPERMISSION_ERROR_TITLE';
           message = 'TOOLPERMISSION_ERROR';
-          let permission = error.split(' ')[0];
+          let permission = (json ? json.message : error).split(' ')[0];
           this.dialogMessage = this.translate.instant('TOOLPERMISSION_ERROR_HEADER') + "\n- " +
             this.translate.instant('TOOLPERMISSION.' + permission) + "\n\n" +
             this.translate.instant('TOOLPERMISSION_ERROR_FOOTER', {permission: permission});
@@ -155,7 +160,7 @@ export class Toast{
       }
       else if (errorObject.status == RestConstants.HTTP_FORBIDDEN) {
         message = "TOAST.API_FORBIDDEN";
-        this.dialogTitle = '';
+        this.dialogTitle = null;
 
         let login=this.storage.get(TemporaryStorageService.SESSION_INFO);
         if(login && login.isGuest){
@@ -176,14 +181,19 @@ export class Toast{
         parameters["error"] = error;
       }
     }
-    if(this.lastToastError==message && (Date.now()-this.lastToastErrorTime)<Toast.MIN_TIME_BETWEEN_TOAST)
+    if(error && error.status==0 && this.cordova.isRunningCordova()){
+        message='TOAST.NO_CONNECTION';
+        this.dialogTitle = null;
+    }
+    if(this.lastToastError==message+JSON.stringify(parameters) && (Date.now()-this.lastToastErrorTime)<Toast.MIN_TIME_BETWEEN_TOAST)
       return;
-    this.lastToastError=message;
+    this.lastToastError=message+JSON.stringify(parameters);
     this.lastToastErrorTime=Date.now();
     this.translate.get(message, parameters).subscribe((text: any) => {
       if (this.dialogTitle) {
         text += '<br /><a onclick="window[\'toastComponent\'].openDetails()">' + this.translate.instant("DETAILS") + '</a>';
       }
+      text=this.handleAdditional(text,additional);
       this.toasty.error(this.getToastOptions(text))
     });
 
@@ -193,5 +203,13 @@ export class Toast{
   }
   onShowModalDialog(param:Function) {
     this.onShowModal=param;
+  }
+
+  private handleAdditional(text:string,additional: any) {
+      if(additional && additional.link){
+          text+='<br /><a onclick="window[\'toastComponent\'].linkCallback()">'+this.translate.instant(additional.link.caption)+'</a>';
+          this.linkCallback=additional.link.callback;
+      }
+      return text;
   }
 }

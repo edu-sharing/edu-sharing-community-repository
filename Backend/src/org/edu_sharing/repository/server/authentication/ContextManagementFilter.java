@@ -9,18 +9,23 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.HttpContext;
+import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
+import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.config.model.AvailableMds;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+
 
 public class ContextManagementFilter implements javax.servlet.Filter {
 	
@@ -47,6 +52,21 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			((HttpServletResponse)res).setHeader("Access-Control-Expose-Headers","X-Edu-Scope");
 			((HttpServletResponse)res).setHeader("X-Edu-Scope", NodeServiceInterceptor.getEduSharingScope());
 			
+			try {
+				
+				AvailableMds[] availableMdss = ConfigServiceFactory.getCurrentConfig().values.availableMds;
+				if(availableMdss != null) {
+					for(AvailableMds availableMds : availableMdss) {
+						if(RepositoryDao.HOME.equals(availableMds.repository) 
+								|| ApplicationInfoList.getHomeRepository().getAppId().equals(availableMds.repository)){
+							HttpContext.setCurrentMetadataSet(availableMds.mds[0]);
+						}
+					}
+				}
+				
+			}catch(Throwable e) {
+				log.debug(e.getMessage());
+			}
 			chain.doFilter(req,res);
 
 		} finally {
@@ -54,19 +74,15 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			log.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" cleaning up");
 			
 			NodeServiceInterceptor.setEduSharingScope((String)null);
+			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod((String)null);
+			
+			HttpContext.setCurrentMetadataSet(null);
 			
 			/**
 			 * OAuth kill Session
 			 */
 			HttpServletRequest request = (HttpServletRequest)req;
 			
-			HttpSession session = request.getSession(false);
-			if(session != null){
-				String authType = (String)session.getAttribute(CCConstants.AUTH_TYPE);
-				if(authType != null && authType.equals(CCConstants.AUTH_TYPE_OAUTH)){
-					session.invalidate();
-				}
-			}
 			
 			Context.getCurrentInstance().release();
 			

@@ -17,6 +17,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
@@ -46,6 +48,7 @@ import org.edu_sharing.restservices.shared.GroupProfile;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.Pagination;
+import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserCredential;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserSimple;
@@ -165,7 +168,19 @@ public class IamApi  {
 	    	
 	    	UserEntry response = new UserEntry();
 	    	response.setPerson(personDao.asPerson());
-	    		    	
+
+	    	org.edu_sharing.repository.server.authentication.Context context =  org.edu_sharing.repository.server.authentication.Context.getCurrentInstance();
+	    String username = context.getSessionAttribute(CCConstants.AUTH_USERNAME);
+	    	String authType = context.getAuthType();
+		if(person.equals("-me-") || person.equals(username)) {
+		 	if(authType != null && !authType.equals(CCConstants.AUTH_TYPE_DEFAULT)) {
+		 		response.setEditProfile(false);
+			}else {
+				response.setEditProfile(true);
+			}
+		}
+
+
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	    	
     	} catch (DAOValidationException t) {
@@ -369,7 +384,7 @@ public class IamApi  {
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
+	        @ApiResponse(code = 200, message = "OK.", response = User.class),
 	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
@@ -387,9 +402,9 @@ public class IamApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	PersonDao.createPerson(repoDao, person,password, profile);
+	    	User result = PersonDao.createPerson(repoDao, person,password, profile).asPerson();
 	    	
-	    	return Response.status(Response.Status.OK).build();
+	    	return Response.status(Response.Status.OK).entity(result).build();
 	    	
     	} catch (DAOValidationException t) {
     		
@@ -486,12 +501,12 @@ public class IamApi  {
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
 
     public Response changeUserProfile(
@@ -508,24 +523,24 @@ public class IamApi  {
 	    	personDao.changeProfile(profile);
 	    		    	
 	    	return Response.status(Response.Status.OK).build();
-	    	
+
     	} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
     }
     @PUT
-    @Path("/people/{repository}/{person}/avatar")    
+    @Path("/people/{repository}/{person}/avatar")
     @ApiOperation(
-    	value = "Set avatar of the user.", 
+    	value = "Set avatar of the user.",
     	notes = "Set avatar of the user. (To set foreign avatars, admin rights are required.)")
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    	value = {
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
 
     public Response changeUserAvatar(
@@ -535,32 +550,32 @@ public class IamApi  {
     		@Context HttpServletRequest req) {
 
     	try {
-    		
+
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
-	    	
+
 	    	personDao.changeAvatar(avatar);
-	    		    	
+
 	    	return Response.status(Response.Status.OK).build();
-	    	
+
     	} catch (Throwable t) {
- 	
+
     		return ErrorResponse.createResponse(t);
     	}
     }
     @DELETE
-    @Path("/people/{repository}/{person}/avatar")    
+    @Path("/people/{repository}/{person}/avatar")
     @ApiOperation(
-    	value = "Remove avatar of the user.", 
+    	value = "Remove avatar of the user.",
     	notes = "Remove avatar of the user. (To Remove foreign avatars, admin rights are required.)")
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+    	value = {
+	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 	    })
 
     public Response removeUserAvatar(
@@ -571,9 +586,9 @@ public class IamApi  {
     	try {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
-	    	personDao.removeAvatar();	    		    	
+	    	personDao.removeAvatar();
 	    	return Response.status(Response.Status.OK).build();
-	    	
+
     	} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
@@ -662,7 +677,7 @@ public class IamApi  {
 
     @ApiResponses(
         	value = { 
-    	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = GroupEntries.class),        
+    	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = GroupEntries.class),
     	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
     	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
     	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -687,7 +702,7 @@ public class IamApi  {
         			props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), groupType);
         		}
     	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-    	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).searchAuthorities(
+    	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
     	    					AuthorityType.GROUP,
     	    					pattern,
     	    					global==null ? true : global, 
@@ -788,7 +803,7 @@ public class IamApi  {
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = Void.class),        
+	        @ApiResponse(code = 200, message = "OK.", response = Group.class),
 	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
@@ -806,9 +821,9 @@ public class IamApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	GroupDao.createGroup(repoDao, group, profile,parent);
+	    	Group groupResult = GroupDao.createGroup(repoDao, group, profile,parent).asGroup();
 	    	
-	    	return Response.status(Response.Status.OK).build();
+	    	return Response.status(Response.Status.OK).entity(groupResult).build();
 	    	
     	} catch (DAOValidationException t) {
     		
@@ -958,6 +973,53 @@ public class IamApi  {
     	
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, PUT").build();
     }
+
+    @GET
+
+    @Path("/people/{repository}/{person}/memberships")
+
+    @ApiOperation(
+    	value = "Get all groups the given user is member of."
+    	)
+
+    @ApiResponses(
+    	value = {
+	        @ApiResponse(code = 200, message = "OK.", response = AuthorityEntries.class),
+	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),
+	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),
+	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),
+	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class),
+	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class)
+	    })
+
+    public Response getUserGroups(
+    		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+    		@ApiParam(value = "authority name",required=true ) @PathParam("person") String person,
+       		@ApiParam(value = "pattern",required=false) @QueryParam("pattern") String pattern,
+    		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
+    	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
+    	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+
+    		@Context HttpServletRequest req) {
+
+    	try {
+
+    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+    		AuthorityEntries response = PersonDao.getPerson(repoDao, person).getMemberships(
+    				pattern,
+    				skipCount!=null ? skipCount : 0,
+	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
+					new SortDefinition(sortProperties,sortAscending)
+			);
+
+	    	return Response.status(Response.Status.OK).entity(response).build();
+
+    	} catch (Throwable t) {
+    		return ErrorResponse.createResponse(t);
+    	}
+    }
+
 
     @GET
 
@@ -1154,18 +1216,25 @@ public class IamApi  {
     		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     		@ApiParam(value = "pattern",required=true) @QueryParam("pattern") String pattern,
     		@ApiParam(value = "global search context, defaults to true, otherwise just searches for users within the organizations",required=false,defaultValue="true") @QueryParam("global") Boolean global,
-    		@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
+			@ApiParam(value = "find a specific groupType (does nothing for persons)",required=false) @QueryParam("groupType") String groupType,
+			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
     	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
     		@Context HttpServletRequest req) {
 
     	try {
-    		
+			HashMap<String, String> props = new HashMap<>();
+			if(groupType!=null && !groupType.isEmpty()){
+				props.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), groupType);
+			}
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	SearchResult<String> search=SearchServiceFactory.getSearchService(repoDao.getId()).findAuthorities(
+	    					null,
 	    					pattern,
 	    					global==null ? true : global,
 	    					skipCount!=null ? skipCount : 0,
-	    	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS
+	    	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
+	    					null,
+	    					props
 	    					
 	    			);
 
