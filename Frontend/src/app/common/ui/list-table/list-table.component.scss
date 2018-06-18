@@ -1,5 +1,6 @@
 @import "../../../../styles/variables.scss";
 $borderRadius:2px;
+$previewHeight:160px;
 
 .heading div{
   padding:0px 0px;
@@ -500,6 +501,25 @@ $orderAnimationTime:$transitionNormal*5;
   padding: 3px !important;
   z-index: 1;
 }
+.nodeComments{
+  position: absolute;
+  z-index: 1;
+  top:$previewHeight - 40px;
+  right:0;
+  background-color: rgba(255,255,255,0.75);
+  border-radius: 0;
+  border-top-left-radius: 3px;
+  color:$primary;
+  width: 60px;
+  height: 30px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  >i{
+    margin-right: 7px;
+  }
+}
 
 .typeicon > img {
   width: 60%;
@@ -712,7 +732,7 @@ $orderAnimationTime:$transitionNormal*5;
   float:left;
 }
 .cardList .preview{
-  height:160px;
+  height:$previewHeight;
   padding:0!important;
   margin-top:-10px;
   margin-bottom:15px;

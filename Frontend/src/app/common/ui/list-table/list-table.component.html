@@ -139,6 +139,9 @@
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
                     <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
                 </div>
+                <div *ngIf="viewType==1 && !isCollection(node)" class="nodeComments">
+                    <i class="material-icons">message</i> <div>{{node.commentCount}}</div>
+                </div>
                 <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                 <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><custom-icon iconId="pin"></custom-icon></div>
                 <div class="checkbox column" *ngIf="hasCheckbox">
