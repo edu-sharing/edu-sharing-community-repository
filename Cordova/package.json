@@ -50,7 +50,7 @@
         "cordova-plugin-globalization": "^1.0.9",
         "cordova-plugin-http": "^1.2.0",
         "cordova-plugin-inappbrowser": "^2.0.2",
-        "cordova-plugin-intent": "git+https://github.com/napolitano/cordova-plugin-intent.git",
+        "cordova-plugin-intent": "git+https://github.com/tsimon-edu-sharing/cordova-plugin-intent.git",
         "cordova-plugin-nativestorage": "^2.3.1",
         "cordova-plugin-screen-orientation": "^3.0.1",
         "cordova-plugin-splashscreen": "^5.0.2",

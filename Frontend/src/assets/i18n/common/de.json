@@ -341,6 +341,7 @@
     "AUTHOR_FREETEXT_PLACEHOLDER":"Wer sind die Urheber des Werks? Wie sollen Sie genannt werden?",
     "AUTHOR_PERSON":"Autor & Beteiligte",
     "LICENSE":"Lizenz",
+    "WORKFLOW":"Workflow-Status",
     "LICENSE_LINK":"Lizenz verwalten",
     "TEMPLATE_LINK":"Metadaten-Vorlage verwalten",
     "CONTRIBUTOR_LINK":"Weitere Beteiligte",

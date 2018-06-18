@@ -23,6 +23,7 @@ import {trigger} from '@angular/animations';
 import {UIAnimation} from '../ui-animation';
 import {DialogButton} from '../modal-dialog/modal-dialog.component';
 import {UIService} from '../../services/ui.service';
+import {ConfigurationHelper} from "../../rest/configuration-helper";
 
 @Component({
   selector: 'mds',
@@ -477,6 +478,7 @@ export class MdsComponent{
     data.widgets.push({id:'version'});
     data.widgets.push({id:'childobjects',caption:this.translate.instant('MDS.ADD_CHILD_OBJECT')});
     data.widgets.push({id:'template'});
+    data.widgets.push({id:'workflow', caption: this.translate.instant('MDS.WORKFLOW')});
     data.widgets.push({id:'author',caption:this.translate.instant('MDS.AUTHOR_LABEL')});
     data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
     data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
@@ -1478,11 +1480,11 @@ export class MdsComponent{
     return html;
   }
   private renderCheckboxWidget(widget:any,attr:string,vertical:boolean){
-    let html='<fieldset id="'+widget.id+'" class="'+(vertical ? 'checkboxVertical' : 'checkboxHorizontal')+'">';
+    let html='<fieldset id="'+this.getWidgetDomId(widget)+'" class="'+(vertical ? 'checkboxVertical' : 'checkboxHorizontal')+'">';
 
     for(let option of widget.values){
       let id=this.getWidgetDomId(widget)+'_'+option.id;
-      html+='<input type="checkbox" class="filled-in" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')
+      html+='<input type="checkbox" class="filled-in" name="'+id+'" id="'+id+'" value="'+option.id+'"'+(option.disabled ? ' disabled' : '')
         +'> <label for="'+id+'">'+(option.imageSrc ? '<img src="'+option.imageSrc+'">' : '')+(option.caption ? '<span class="caption">'+option.caption+'</span>' : '')
         +(option.description ? '<span class="description">'+option.description+'</span>' : '')
         +'</label>';
@@ -1596,6 +1598,9 @@ export class MdsComponent{
     }
     else if(widget.id=='license'){
       html+=this.renderLicense(widget);
+    }
+    else if(widget.id=='workflow'){
+        html+=this.renderWorkflow(widget);
     }
     else if(widget.id=='template'){
       html+=this.renderTemplateWidget(widget);
@@ -1975,7 +1980,24 @@ export class MdsComponent{
         return html;
     }
   }
-
+    private renderWorkflow(widget: any) {
+        if(this.mode=='search'){
+            let workflows = NodeHelper.getWorkflows(this.config);
+            widget.values=[];
+            for(let w of workflows){
+                let value:any={};
+                value.id=w.id;
+                value.caption='<div class="mds-workflow-status" style="background-color:'+w.color+'"></div>'+this.translate.instant('WORKFLOW.'+w.id);
+                widget.values.push(value);
+            }
+            widget.type='checkboxVertical';
+            let html = this.renderCheckboxWidget(widget,null,true);
+            return html;
+        }
+        else {
+            return 'widget \'workflow\' is not supported in this mode.';
+        }
+    }
   private setPreview(counter=1) {
     let preview:any=document.getElementById(this.getDomId('preview'));
     if(preview){

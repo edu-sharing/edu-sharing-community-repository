@@ -81,6 +81,8 @@ h2{
     position: relative;
     left: 10px;
     min-width: 150px;
+    padding-top: 2px;
+    height: 40px;
     .right{
       position: relative;
       top:2px;
@@ -89,6 +91,7 @@ h2{
   }
   >div{
     display: flex;
+    margin-left: 20px;
   }
   .selected{
     float:right;

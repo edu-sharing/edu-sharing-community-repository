@@ -310,6 +310,7 @@
     "AUTHOR_FREETEXT_PLACEHOLDER":"Who are the authors of this work? How should they be attributed?",
     "AUTHOR_PERSON":"Author & Contributors",
     "LICENSE":"License",
+    "WORKFLOW":"Workflow state",
     "LICENSE_LINK":"Manage license",
     "TEMPLATE_LINK":"Manage metadata template",
     "CONTRIBUTOR_LINK":"Additional Contributors",

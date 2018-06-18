@@ -620,7 +620,7 @@
 			</group>
 		</groups>
 		<queries>
-			<basequery>-TYPE:"ccm:toolpermission" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*"</basequery>
+			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 			
 			<query join="AND"  id="ngsearch">
@@ -646,6 +646,12 @@
 					<statement value="CC_BY_RESTRICTED">@ccm\:commonlicense_key:"CC_BY_ND" OR @ccm\:commonlicense_key:"CC_BY_NC" OR @ccm\:commonlicense_key:"CC_BY_NC_SA" OR @ccm\:commonlicense_key:"CC_BY_NC_ND"</statement>
 					<statement value="CC_BY_ALL">@ccm\:commonlicense_key:"CC_0" OR @ccm\:commonlicense_key:"CC_BY*"</statement>
 					<statement value="COPYRIGHT_OTHERS">@ccm\:commonlicense_key:"COPYRIGHT*" OR @ccm\:commonlicense_key:"SCHULFUNK"</statement>
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
+				<property name="workflow">
+					<statement>@ccm\:wf_status:"${value}"</statement>
+					<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
 				</property>
