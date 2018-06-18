@@ -9,6 +9,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -42,6 +43,7 @@ public class CommentServiceImpl implements CommentService{
 			public String doWork() throws Exception {
 				String nodeId=nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node,CCConstants.CCM_TYPE_COMMENT,CCConstants.CCM_ASSOC_COMMENT, props);
 				permissionService.setPermissions(nodeId,null, true);
+				new RepositoryCache().remove(node);
 				return nodeId;
 			}
 		});
@@ -68,6 +70,7 @@ public class CommentServiceImpl implements CommentService{
 	@Override
 	public void deleteComment(String commentId) {
 		throwIfNoComment(commentId);
+		new RepositoryCache().remove(nodeService.getPrimaryParent(commentId));
 		nodeService.removeNode(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),commentId);
 	}
 

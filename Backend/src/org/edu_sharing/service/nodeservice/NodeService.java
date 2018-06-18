@@ -8,7 +8,6 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 
 public interface NodeService {
 
@@ -42,8 +41,10 @@ public interface NodeService {
 	
 	public String getOrCreateUserSavedSearch();
 	
+	public String getPrimaryParent(String nodeId);
+
 	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID);
-	
+
 	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID, String childType);
 	
 	public void createVersion(String nodeId, HashMap _properties) throws Exception;

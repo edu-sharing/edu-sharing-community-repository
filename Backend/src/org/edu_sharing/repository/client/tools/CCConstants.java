@@ -724,6 +724,8 @@ public class CCConstants {
 	 */
 	public final static String VIRT_PROP_USAGECOUNT = "{virtualproperty}usagecount";
 
+	public final static String VIRT_PROP_COMMENTCOUNT = "{virtualproperty}commentcount";
+
 	/**
 	 * says if this set of properties is from an remote repository that was linked in the local repo by an remoteobject
 	 * values are all that can be used in new Boolean(value)

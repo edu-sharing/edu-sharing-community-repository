@@ -183,6 +183,7 @@ import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.edu_sharing.repository.server.tools.search.QueryBuilder;
 import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.model.NodeRefImpl;
@@ -1572,6 +1573,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			List<NodeRef> usages = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_USAGEASPECT_USAGES);
 			if (usages != null) {
 				properties.put(CCConstants.VIRT_PROP_USAGECOUNT, "" + usages.size());
+			}
+			List<ChildAssociationRef> comments = CommentServiceFactory.getCommentService().getComments(nodeRef.getId());
+			if (comments != null) {
+				properties.put(CCConstants.VIRT_PROP_COMMENTCOUNT,comments.size());
 			}
 
 			// add permalink

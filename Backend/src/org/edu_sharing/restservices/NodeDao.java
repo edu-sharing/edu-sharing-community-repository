@@ -360,13 +360,8 @@ public class NodeDao {
 	}
 
     private int getCommentCount(){
-		if(repoDao.isHomeRepo()) {
-			try {
-				CommentService commentService = CommentServiceFactory.getCommentService();
-				return commentService.getComments(nodeId).size();
-			}catch(Exception e) {
-				
-			}
+		if(nodeProps.containsKey(CCConstants.VIRT_PROP_COMMENTCOUNT)){
+			return (int) nodeProps.get(CCConstants.VIRT_PROP_COMMENTCOUNT);
 		}
 		return 0;
 	}

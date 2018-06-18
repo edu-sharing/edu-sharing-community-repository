@@ -169,8 +169,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				properties);
 		return childRef.getChildRef().getId();
 	}
-	
-	
+
+	@Override
+	public String getPrimaryParent(String nodeId) {
+		return nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).getParentRef().getId();
+	}
+
 	@Override
 	public String getCompanyHome(){
 		return repositoryHelper.getCompanyHome().getId();
