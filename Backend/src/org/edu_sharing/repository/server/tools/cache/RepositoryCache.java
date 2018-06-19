@@ -53,8 +53,9 @@ public class RepositoryCache implements Cache {
 	
 	private static final ImmutableSet<String> allowedTypes = 
 			ImmutableSet.of(
-					CCConstants.CCM_TYPE_IO, 
-					CCConstants.CCM_TYPE_MAP, 
+					CCConstants.CCM_TYPE_TOOLPERMISSION,
+					CCConstants.CCM_TYPE_IO,
+					CCConstants.CCM_TYPE_MAP,
 					CCConstants.CCM_TYPE_MAPRELATION, 
 					CCConstants.CM_TYPE_FOLDER);
 		
