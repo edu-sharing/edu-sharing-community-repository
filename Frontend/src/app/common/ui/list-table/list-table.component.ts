@@ -435,6 +435,8 @@ export class ListTableComponent implements EventListener{
     if(!this.reorderColumns || index==0)
       return;
     this.currentDragColumn=null;
+    event.preventDefault();
+    event.stopPropagation();
   }
   private allowDeleteColumn(event:any){
     if(!this.reorderColumns || !this.currentDragColumn)
