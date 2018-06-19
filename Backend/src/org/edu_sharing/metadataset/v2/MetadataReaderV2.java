@@ -337,6 +337,9 @@ public class MetadataReaderV2 {
 				if(name.equals("valuespace_i18n_prefix")){
 					valuespaceI18nPrefix=value;
 				}
+				if(name.equals("valuespace_sort")){
+					widget.setValuespaceSort(value);
+				}
 				if(name.equals("valuespaceClient")){
 					widget.setValuespaceClient(value.equalsIgnoreCase("true"));				
 				}
@@ -360,7 +363,7 @@ public class MetadataReaderV2 {
 				String name=data.getNodeName();
 				String value=data.getTextContent();
 				if(name.equals("valuespace"))
-					widget.setValues(getValuespace(value,widget.getId(),valuespaceI18n,valuespaceI18nPrefix));
+					widget.setValues(getValuespace(value,widget,valuespaceI18n,valuespaceI18nPrefix));
 				if(name.equals("values"))
 					widget.setValues(getValues(data.getChildNodes(),valuespaceI18n,valuespaceI18nPrefix));
 				if(name.equals("subwidgets"))
@@ -371,14 +374,24 @@ public class MetadataReaderV2 {
 		return widgets;
 	}
 	
-	private List<MetadataKey> getValuespace(String value,String id, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
+	private List<MetadataKey> getValuespace(String value,MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
 		Document docValuespace = builder.parse(getFile(value,Filetype.VALUESPACE));
 		List<MetadataKey> keys=new ArrayList<>();
-		NodeList keysNode=(NodeList)xpath.evaluate("/valuespaces/valuespace[@property='"+id+"']/key",docValuespace, XPathConstants.NODESET);
+		NodeList keysNode=(NodeList)xpath.evaluate("/valuespaces/valuespace[@property='"+widget.getId()+"']/key",docValuespace, XPathConstants.NODESET);
 		if(keysNode.getLength()==0){
-			throw new Exception("No valuespace found in file "+value+": Searching for a node named /valuespaces/valuespace[@property='"+id+"']");
+			throw new Exception("No valuespace found in file "+value+": Searching for a node named /valuespaces/valuespace[@property='"+widget.getId()+"']");
 		}
-		return getValues(keysNode,valuespaceI18n,valuespaceI18nPrefix);
+		List<MetadataKey> list=getValues(keysNode,valuespaceI18n,valuespaceI18nPrefix);
+		if(!"default".equals(widget.getValuespaceSort())){
+			Collections.sort(list, (o1, o2) -> {
+				if("caption".equals(widget.getValuespaceSort())){
+					return o1.getCaption().compareTo(o2.getCaption());
+				}
+				logger.warn("Invalid value for valuespaceSort '"+widget.getValuespaceSort()+"' for widget '"+widget.getId()+"'");
+				return 0;
+			});
+		}
+		return list;
 	}
 	
 	private List<MetadataKey> getValues(NodeList keysNode, String valuespaceI18n, String valuespaceI18nPrefix) throws IOException {
