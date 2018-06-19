@@ -923,23 +923,34 @@ export class CordovaService {
    openInAppBrowser(url:string){
        let win:any=window.open(url,"_blank","location=no");
        win.addEventListener( "loadstop", ()=> {
-           console.log("cordova init inapp window");
-           console.log(win.postMessage);
+           // register iframe handling
+           win.executeScript({code:`
+                var cordovaIframeList=document.getElementsByTagName('iframe');
+                function cordovaReceiveMessage(event){
+                    for(var i=0;i<cordovaIframeList.length;i++){
+                        if (cordovaIframeList[i].contentWindow === event.source) {
+                            window.opener.postMessage(event.data);
+                            return;
+                        }
+                    }
+                    for(var i=0;i<cordovaIframeList.length;i++){
+                        cordovaIframeList[i].contentWindow.postMessage(event.detail,'*');
+                    }
+                }
+                window.addEventListener("message", cordovaReceiveMessage, false);        
+           `});
            win.postMessage=(data:any)=>{
-               console.log("postMessage",data);
+               // Redirect post messages to new window
                win.executeScript({
                    code:`
                         var event = new CustomEvent('message',{detail:`+JSON.stringify(data)+`});
                         window.dispatchEvent(event);`
                },null);
-               var event = new Event('message');
-                //window.dispatchEvent(event);
            };
            this.events.addWindow(win);
            let loop = setInterval(()=>{
 
-               // Execute JavaScript to check for the existence of a name in the
-               // child browser's localStorage.
+               // Execute JavaScript to fetch message chain
                win.executeScript(
                    {
                        code: `
@@ -972,7 +983,7 @@ export class CordovaService {
                        }
                    }
                );
-           },500);
+           },100);
        });
        return win;
    }
