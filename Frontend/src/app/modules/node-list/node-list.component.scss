@@ -76,6 +76,7 @@
 .noResults{
   text-align: center;
   padding-top: 20px;
+  color: $textVeryLight;
 }
 a:hover {
   @include clickable();
