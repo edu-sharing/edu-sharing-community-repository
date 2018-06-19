@@ -124,7 +124,8 @@ public class MetadataPresettingPolicy implements
 
 		NodeRef parentRef = childAssocRef.getParentRef();
 
-		if (nodeService.hasAspect(parentRef, ASPECT_TYPE)) {
+		Boolean status = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CCM_PROP_METADATA_PRESETTING_STATUS));
+		if (nodeService.hasAspect(parentRef, ASPECT_TYPE) && status!=null && status) {
 
 			List<AssociationRef> templates = nodeService.getTargetAssocs(
 					parentRef, ASPECT_ASSOC);
