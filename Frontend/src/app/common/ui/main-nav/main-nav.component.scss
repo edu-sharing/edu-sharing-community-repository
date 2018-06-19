@@ -336,7 +336,8 @@ user-profile{
   .menuButton {
     width: auto;
     min-width: 65px;
-    margin-bottom: 3px;
+    position: relative;
+    top: -3px;
   }
 }
 @media print{
