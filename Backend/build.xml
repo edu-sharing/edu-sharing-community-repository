@@ -46,7 +46,7 @@
 		<copyfile src="version.html.template" dest="${src.dir}/org/edu_sharing/repository/public/version.html" forceoverwrite="true" />
 		
 		<tstamp>
-  			<format property="TODAY" pattern="yyyy-MM-dd"/>
+  			<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss"/>
 		</tstamp>
 		<replaceregexp match="build.number: [0-9]*\&lt;br/\&gt;" replace="build.number: ${tmp.build.number}\&lt;br/\&gt;" flags="gs" byline="true">
 			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
