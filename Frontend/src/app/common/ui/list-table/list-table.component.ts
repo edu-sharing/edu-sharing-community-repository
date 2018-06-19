@@ -368,6 +368,8 @@ export class ListTableComponent implements EventListener{
     this.onDelete.emit(node);
   }
     public isBrightColorCollection(color : string){
+        if(!color)
+          return true;
         return ColorHelper.getColorBrightness(color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
     }
   public toggleAll(){
