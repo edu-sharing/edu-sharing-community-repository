@@ -7,7 +7,7 @@ public class MetadataQueryParameter {
 	private String name;
 	private Map<String,String> statements;
 	private boolean multiple;
-	private boolean exactMatching;
+	private boolean exactMatching = true;
 	private String multiplejoin;
 	private int ignorable;
 	private List<String> facets;
