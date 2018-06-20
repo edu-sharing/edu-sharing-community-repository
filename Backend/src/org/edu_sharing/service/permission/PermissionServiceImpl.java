@@ -1454,6 +1454,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission) {
+		return hasAllPermissions(storeProtocol,storeId,nodeId,new String[]{permission}).get(permission);
+	}
+
+	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {
 		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
@@ -1464,7 +1469,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if (permissions != null && permissions.length > 0) {
 			for (String permission : permissions) {
-				AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
+					AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
 				// Guest only has read permissions, no modify permissions
 				if(guest && !Arrays.asList(GUEST_PERMISSIONS).contains(permission)){
 					accessStatus=AccessStatus.DENIED;
