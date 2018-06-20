@@ -39,15 +39,15 @@
     "NODE_IMPORTED_VIEW": "View",
     "ADD_TO_COLLECTION": "Add to collection",
     "ADD_TO_COLLECTION_SHORT": "Add",
-    "SHOW_NODE_STORE": "bookmark list",
-    "ADD_NODE_STORE": "Add to bookmark list",
-    "ADDED_TO_NODE_STORE": "{{count}} Element(s) have been bookmarked.",
-    "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} is already bookmarked",
+    "SHOW_NODE_STORE": "memo list",
+    "ADD_NODE_STORE": "Add to memo list",
+    "ADDED_TO_NODE_STORE": "{{count}} Element(s) have been added to the list.",
+    "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} is already on the memo list.",
     "NODE_STORE": {
-      "TITLE": "Bookmarks",
-      "LIST_EMPTY": "Bookmarks are empty",
+      "TITLE": "Memo List",
+      "LIST_EMPTY": "Memo list is empty",
       "REMOVE_ITEM": "Remove",
-      "REMOVED_ITEMS": "{{count}} Element(s) have been removed from bookmarks."
+      "REMOVED_ITEMS": "{{count}} Element(s) have been removed from the memo list."
     },
     "APPLY_FILTER": "Apply",
     "TAB_FILTER": "filter",
