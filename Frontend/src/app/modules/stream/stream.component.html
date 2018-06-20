@@ -11,7 +11,8 @@
 ></workspace-management>
 <div class="stream-container" infiniteScroll
 [scrollWindow]="true"
-(scrolled)="onScroll()">
+(scrolled)="onScroll()"
+(click)="closeMenuOptions()">
 <div class="row">
     <div class="col m3 choose-menu-main removepadding margin-show">
             <div class="choose-menu" (click)="menuOptions('new')" [ngClass]="menuOption == 'new' ? 'm-active' : 'm-inactive'">

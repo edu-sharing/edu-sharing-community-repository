@@ -89,6 +89,7 @@ export class StreamComponent {
   pageOffset: number;
   imagesToLoad = 0;
   imagesLoaded = 0;
+  shouldOpen = false;
   routerSubscription: Subscription;
 
   moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','check',(node: Node)=>{
@@ -190,6 +191,17 @@ export class StreamComponent {
 
   toggleMenuOptions() {
     this.showMenuOptions = !this.showMenuOptions;
+    if (this.showMenuOptions) {
+      this.shouldOpen = true;
+    }
+  }
+
+  closeMenuOptions() {
+    this.showMenuOptions = false;
+    if (this.shouldOpen) {
+      this.showMenuOptions = true;
+      this.shouldOpen = false;
+    }
   }
 
   checkIfEnable(nodes: any) {
@@ -236,14 +248,12 @@ export class StreamComponent {
   menuOptions(option: any) {
     this.menuOption = option;
     if (option === 'new') {
-      this.toggleMenuOptions();
       this.router.navigate(["./"],{queryParams:{mode:this.menuOption},relativeTo:this.route})
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.actionOptions[0] = this.moveUpOption;
       this.actionOptions[1] = this.collectionOption;
     } else {
-      this.toggleMenuOptions();
       this.router.navigate(["./"],{queryParams:{mode:this.menuOption},relativeTo:this.route})
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.READ);
