@@ -291,7 +291,7 @@
         "PDM_INFO":"This object is free of known restrictions covered by copyright law."
       },
       "DESCRIPTION":{
-        "NONE":"Use and source indication according to the legal conditions specified in the medium or according to the general legal regulation.",
+        "NONE":"Usage and attribution according to the legal conditions specified in the object meta data or according to the general legal regulations.",
         "MULTI":"The selected elements have different licenses.<br />Defining a license overwrites the license information of all items.",
         "CC_BY":"The authors have to be credited in a manner specified by these.",
         "CC_SHARE_ND":"Licensees may copy, distribute, display and perform only verbatim copies of the work, not derivative works and remixes based on it.",
@@ -323,7 +323,7 @@
       "NOT_FOUND":"The folder {{id}} was not found. May it has been deleted.",
       "LICENSE_UPDATED":"License has been updated",
       "CONTRIBUTOR_UPDATED":"Information of contributors have been updated",
-      "WORKFLOW_UPDATED":"Information of workflow have been updated",
+      "WORKFLOW_UPDATED":"Workflow information have been updated",
       "METADATA_TEMPLATE_UPDATED":"Information of metadata template have been updated"
     }
   }

@@ -27,7 +27,8 @@ import {ListItem} from "../../../common/ui/list-item";
   styleUrls: ['authorities.component.scss'],
   animations:[
 	trigger('fromRight',UIAnimation.fromRight()),
-	trigger('fade',UIAnimation.fade())
+	trigger('fade',UIAnimation.fade()),
+    trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
 export class PermissionsAuthoritiesComponent {

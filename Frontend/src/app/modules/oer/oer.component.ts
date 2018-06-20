@@ -152,7 +152,10 @@ export class OerComponent {
      criterias.push({'property': 'ngsearchword', 'values': [string]});
 
 
-     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.COLLECTIONS],propertyFilter:[RestConstants.ALL]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
+     this.searchService.search(criterias,[], {sortBy:[
+            RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+             RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+             RestConstants.CM_MODIFIED_DATE],sortAscending:[false,true,false],offset:this.offsets[this.COLLECTIONS],propertyFilter:[RestConstants.ALL]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
        (data : NodeList) => {
          if(this.currentQuery!=originalQuery)
            return;

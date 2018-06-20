@@ -199,6 +199,8 @@ export class WorkspaceSubTreeComponent  {
   }
 
     private refresh() {
+      if(!this._node)
+        return;
         this.nodeApi.getChildren(this._node,[RestConstants.FILTER_FOLDERS],{count:RestConstants.COUNT_UNLIMITED}).subscribe((data : NodeList) => {
             this._nodes=data.nodes;
             this.loadingStates=Helper.initArray(this._nodes.length,true);

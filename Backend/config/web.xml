@@ -205,6 +205,20 @@
        	  <filter-name>Edu Context Management Filter</filter-name>
           <url-pattern>/node/*</url-pattern>
    </filter-mapping>
+    <!-- filter for LRMI data in render view -->
+    <filter-mapping>
+        <filter-name>Edu Context Management Filter</filter-name>
+        <url-pattern>/components/render/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/components/render/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Authentication Filter</filter-name>
+        <url-pattern>/components/render/*</url-pattern>
+    </filter-mapping>
+
    <filter-mapping>
        	  <filter-name>Edu Context Management Filter</filter-name>
           <url-pattern>/search</url-pattern>
@@ -444,6 +458,10 @@
     	<servlet-class>org.edu_sharing.repository.server.DownloadServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>SitemapServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.sitemap.SitemapServlet</servlet-class>
+    </servlet>
+    <servlet>
     	<servlet-name>ShareServlet</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.ShareServlet</servlet-class>   
     </servlet>
@@ -603,6 +621,10 @@
     <servlet-mapping>
      	<servlet-name>DownloadServlet</servlet-name>
      	<url-pattern>/eduservlet/download</url-pattern>   
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SitemapServlet</servlet-name>
+        <url-pattern>/eduservlet/sitemap</url-pattern>
     </servlet-mapping>
 	<servlet-mapping>
     	<servlet-name>Connector</servlet-name>

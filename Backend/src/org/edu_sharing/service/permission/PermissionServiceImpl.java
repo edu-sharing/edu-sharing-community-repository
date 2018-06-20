@@ -1049,7 +1049,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	private void filterGuestAuthority(StringBuffer searchQuery) {
 		String guest=ApplicationInfoList.getHomeRepository().getGuest_username();
 		if(guest!=null && !guest.trim().isEmpty()){
-			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"");
+			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"" 
+							 + " AND NOT @cm\\:userName:\"guest\"");
 		}
 	}
 

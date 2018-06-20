@@ -1,12 +1,3 @@
-<main-nav *ngIf="!disabled"
-  [title]="'PERMISSIONS.TITLE'"
-  [currentScope]="'permissions'"
-  [searchEnabled]="tab"
-  [searchQuery]="searchQuery"
-  [searchPlaceholder]="'PERMISSIONS.SEARCH_'+tab"
-  (onSearch)="doSearch($event.query)"
-></main-nav>
-
 <div class="row row-dark" *ngIf="!disabled">
   <div class="col s12">
     <ul class="tabs">
@@ -21,26 +12,35 @@
       </li>
     </ul>
   </div>
-  <div *ngIf="tab=='ORG'" class="content">
-    <permissions-authorities
-      [mode]="'ORG'"
-      [searchQuery]="searchQuery"
-      (onSelection)="selectedOrg=$event[0]"
-    ></permissions-authorities>
-  </div>
-  <div *ngIf="tab=='GROUP'" class="content">
-  <permissions-authorities
-    [mode]="'GROUP'"
-    [searchQuery]="searchQuery"
-    [org]="selectedOrg"
-    (setTab)="setTab($event)"
-  ></permissions-authorities>
-  </div>
-  <div *ngIf="tab=='USER'" class="content">
-    <permissions-authorities
-      [mode]="'USER'"
-      [searchQuery]="searchQuery"
-      [org]="selectedOrg"
-      (setTab)="setTab($event)"
-    ></permissions-authorities>  </div>
 </div>
+<div *ngIf="tab=='ORG'" class="content">
+  <permissions-authorities
+          [mode]="'ORG'"
+          [searchQuery]="searchQuery"
+          (onSelection)="selectedOrg=$event[0]"
+  ></permissions-authorities>
+</div>
+<div *ngIf="tab=='GROUP'" class="content">
+  <permissions-authorities
+          [mode]="'GROUP'"
+          [searchQuery]="searchQuery"
+          [org]="selectedOrg"
+          (setTab)="setTab($event)"
+  ></permissions-authorities>
+</div>
+<div *ngIf="tab=='USER'" class="content">
+  <permissions-authorities
+          [mode]="'USER'"
+          [searchQuery]="searchQuery"
+          [org]="selectedOrg"
+          (setTab)="setTab($event)"
+  ></permissions-authorities>
+</div>
+<main-nav *ngIf="!disabled"
+          [title]="'PERMISSIONS.TITLE'"
+          [currentScope]="'permissions'"
+          [searchEnabled]="tab"
+          [searchQuery]="searchQuery"
+          [searchPlaceholder]="'PERMISSIONS.SEARCH_'+tab"
+          (onSearch)="doSearch($event.query)"
+></main-nav>
