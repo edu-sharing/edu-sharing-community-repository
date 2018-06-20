@@ -36,7 +36,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   ngAfterViewInit(): void {
     UIHelper.setFocusOnCard();
   }
-  public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
+  public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Comment","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
     "Publisher","ReadPermissions","ChangePermissions","CCPublish","Deny"];
@@ -45,6 +45,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
     ["Read",["Consumer"]],
     ["ReadPreview",["Consumer"]],
     ["ReadAll",["Consumer"]],
+    ["Comment",["Consumer"]],
     ["Write",["Editor"]],
     ["DeleteChildren",["Delete"]],
     ["DeleteNode",["Delete"]],
