@@ -19,7 +19,6 @@ public class LRMITool {
         lrmi.put("learningResourceType",getProperty(props,CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE));
         lrmi.put("typicalAgeRange",getProperty(props,CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE));
         lrmi.put("timeRequired",getProperty(props,CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALLEARNINGTIME));
-        lrmi.put("timeRequired",getProperty(props,CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALLEARNINGTIME));
         return lrmi;
     }
 
