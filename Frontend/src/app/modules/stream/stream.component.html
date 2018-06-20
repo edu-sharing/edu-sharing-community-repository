@@ -31,7 +31,7 @@
             <div *ngIf="menuOption == 'new'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION1' | translate }} <i class="small material-icons arrow-menu-arrow " (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
             <div *ngIf="menuOption == 'seen'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION2' | translate }} <i class="small material-icons arrow-menu-arrow" (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
             
-            <span id="stream-title-date" class="stream-title-date col s12 m12">
+            <span id="stream-title-date" class="stream-title-date col s12 m12" (click)="scrollToDown()">
                 {{today()}}
             </span>
             <div class="arrow-menu-display mobile-menu " [ngClass]="showMenuOptions ? '' : 'hide'">
@@ -69,7 +69,7 @@
             <div class="stream-box-nonodes" *ngIf="strm.nodes.length === 0"> {{'STREAM.OBJECT.NONODES' | translate }} </div>
             <div class="stream-box-image" (click)="onStreamObjectClick(strm)" *ngIf="strm.nodes[0]"> 
                 <div [ngStyle]="{ 'background': 'linear-gradient(to bottom, transparent 70%, black 115%), url(' + strm.nodes[0].preview.url + ')', 'background-size':'cover'}">
-                    <img src="{{ strm.nodes[0].preview.url }} " style="width:100%;height:auto;border:0;visibility:hidden;">
+                    <img (load)="finishedLoad()" src="{{ strm.nodes[0].preview.url }} " style="width:100%;height:auto;border:0;visibility:hidden;">
                 </div>
                 
                 <div class="bottom-left">{{strm.properties['add_to_stream_title']}}</div>

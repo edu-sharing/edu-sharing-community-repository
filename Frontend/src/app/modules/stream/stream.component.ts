@@ -1,4 +1,3 @@
-
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
 import 'rxjs/add/operator/map';
 import { HttpModule } from '@angular/http';
@@ -38,10 +37,9 @@ import {NodeWrapper} from '../../common/rest/data-object';
 import {Filetype} from '../../common/rest/data-object';
 import {FrameEventsService} from '../../common/services/frame-events.service';
 import {CordovaService} from '../../common/services/cordova.service';
-import { NavigationEnd } from '@angular/router';
-import { NavigationStart } from '@angular/router';
 import 'rxjs/add/operator/pairwise';
-
+import { Subscription } from 'rxjs/Subscription';
+import { RoutesRecognized } from '@angular/router';
 
 
 @Component({
@@ -55,7 +53,6 @@ import 'rxjs/add/operator/pairwise';
 
 
 export class StreamComponent {
-
   today() {
       var d = new Date();
       var weekday = d.getDay();
@@ -89,6 +86,10 @@ export class StreamComponent {
   showMenuOptions = false;
   streams: any;
   actionOptions:OptionItem[]=[];
+  pageOffset: number;
+  imagesToLoad = 0;
+  imagesLoaded = 0;
+  routerSubscription: Subscription;
 
   moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','check',(node: Node)=>{
     this.updateStream(node, STREAM_STATUS.PROGRESS).subscribe( (data) => {
@@ -143,17 +144,23 @@ export class StreamComponent {
           });
       });
       this.setStreamMode();
-      this.router.events
-      .filter(e => e.constructor.name === 'RoutesRecognized')
+      this.routerSubscription = this.router.events
+      .filter(e => e instanceof RoutesRecognized)
       .pairwise()
-      .first()
       .subscribe((e: any[]) => {
+        document.cookie = "scroll="+"noScroll";
         if (/components\/render/.test(e[0].urlAfterRedirects)) {
           this.route.queryParams.subscribe((params: Params) => {
+            console.log("params.mode", params.mode);
+            if (params.mode === 'seen') {
+              document.cookie = "scroll="+"seen";
+            }
             if (params.mode === 'new') {
+              document.cookie = "scroll="+"new";
               this.toast.toast('STREAM.TOAST.SEEN');
             }
           });
+          this.routerSubscription.unsubscribe();
         }
       });
   }
@@ -189,6 +196,43 @@ export class StreamComponent {
     this.collectionOption.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
   }
 
+  finishedLoad() {
+    this.imagesLoaded++;
+    console.log("to load: ", this.imagesToLoad);
+    console.log("images loaded", this.imagesLoaded);
+    if (this.imagesLoaded === this.imagesToLoad) {
+      this.scrollToDown();
+    }
+  }
+
+  scrollToDown() {
+    console.log(this.getCookie("jumpToScrollPosition"));
+    let pos = Number(this.getCookie("jumpToScrollPosition"));
+    let whichScroll = this.getCookie("scroll");
+    console.log("which: ", whichScroll);
+    if (whichScroll !== "noScroll"){
+      console.log("scroll to: ",pos);
+      window.scrollTo(0,pos);
+    }
+    document.cookie = "scroll="+"noScroll";
+  }
+
+  getCookie(cname: any) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
   menuOptions(option: any) {
     this.menuOption = option;
     if (option === 'new') {
@@ -210,20 +254,23 @@ export class StreamComponent {
   }
 
   updateDataFromJSON(streamStatus: any) {
+    this.imagesLoaded = 0;
     if (streamStatus == STREAM_STATUS.OPEN) {
       let openStreams: any[];
       let progressStreams: any[];
       this.getSimpleJSON(STREAM_STATUS.OPEN).subscribe(data => {
-        openStreams = data['stream'];
+        openStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
         this.getSimpleJSON(STREAM_STATUS.PROGRESS).subscribe(data => {
-          progressStreams = data['stream'];
+          progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
           this.streams = progressStreams.concat(openStreams);
+          this.imagesToLoad = this.streams.length;
         });
       }, error => console.log(error));
     }
     else {
       this.getSimpleJSON(streamStatus).subscribe(data => {
-        this.streams = data['stream'];
+        this.streams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
+        this.imagesToLoad = this.streams.length;
       }, error => console.log(error));
     }
 
@@ -236,8 +283,8 @@ export class StreamComponent {
   onStreamObjectClick(node: any) {
     console.log(node.nodes[0].ref.id);
     this.seen(node.id);
+    document.cookie = "jumpToScrollPosition="+window.pageYOffset;
     this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
-
   }
 
   private addToCollection(node: EduData.Node) {
