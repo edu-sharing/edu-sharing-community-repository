@@ -250,4 +250,9 @@ public class NodeServiceAdapter implements NodeService {
 
 	}
 
+	@Override
+	public String getContentMimetype(String protocol, String storeId, String nodeId) {
+		return null;
+	}
+
 }

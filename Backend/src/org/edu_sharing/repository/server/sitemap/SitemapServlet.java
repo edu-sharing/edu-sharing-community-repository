@@ -15,14 +15,19 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.sitemap.xml.Sitemapindex;
 import org.edu_sharing.repository.server.sitemap.xml.Urlset;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 
 public class SitemapServlet extends HttpServlet{
@@ -82,18 +87,31 @@ public class SitemapServlet extends HttpServlet{
     private Urlset getNodes(HttpServletRequest request, int from) throws Throwable {
         Urlset set = new Urlset();
         SearchService search = SearchServiceFactory.getLocalService();
+        NodeService nodeService = NodeServiceFactory.getLocalService();
 
         SearchToken token=new SearchToken();
         token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(NODES_PER_MAP);
         token.setFrom(from);
+        SortDefinition sort = new SortDefinition();
+        sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.CM_PROP_C_CREATED,true));
+        token.setSortDefinition(sort);
         SearchResultNodeRef result = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         for(org.edu_sharing.service.model.NodeRef ref : result.getData()){
             Urlset.Url url=new Urlset.Url();
             url.loc=URLTool.getNgRenderNodeUrl(ref.getNodeId(),null);
-            Urlset.Url.Image image = new Urlset.Url.Image();
-            image.loc= URLTool.getPreviewServletUrl(ref);
-            url.image.add(image);
+            String mimetype=nodeService.getContentMimetype(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId());
+            if(MimeTypesV2.getTypeFromMimetype(mimetype).equals("file-video")){
+                Urlset.Url.Video video = new Urlset.Url.Video();
+                video.thumbnail_loc = URLTool.getPreviewServletUrl(ref);
+                video.content_loc = URLTool.getRenderServiceURL(ref.getNodeId(),false);
+                url.video.add(video);
+            }
+            else {
+                Urlset.Url.Image image = new Urlset.Url.Image();
+                image.loc = URLTool.getPreviewServletUrl(ref);
+                url.image.add(image);
+            }
             //getPreviewServletUrl
             set.url.add(url);
         }

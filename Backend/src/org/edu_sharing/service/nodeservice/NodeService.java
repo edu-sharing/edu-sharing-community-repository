@@ -106,4 +106,6 @@ public interface NodeService {
 	 * @param enable
 	 */
 	void setTemplateStatus(String nodeId, Boolean enable) throws Throwable;
+
+	String getContentMimetype(String protocol, String storeId, String nodeId);
 }
