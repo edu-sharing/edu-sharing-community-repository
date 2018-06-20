@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 public class MetadataWidget extends MetadataTranslatable{
-	public static class Subwidget implements Serializable {
+
+    public static class Subwidget implements Serializable {
 		private String id;
 
 		public String getId() {
@@ -64,7 +65,8 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	private String id,type,caption,bottomCaption,icon,
 					placeholder,defaultvalue,template,
-					suggestionSource,suggestionQuery,unit,format;
+					suggestionSource,suggestionQuery,unit,format,
+					valuespaceSort="default";
 	private Integer min,max,defaultMin,defaultMax,step;
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
 	private List<MetadataKey> values;
@@ -210,7 +212,14 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setStep(Integer step) {
 		this.step = step;
 	}
-	
+	public void setValuespaceSort(String valuespaceSort) {
+		this.valuespaceSort = valuespaceSort;
+	}
+
+	public String getValuespaceSort() {
+		return valuespaceSort;
+	}
+
 	public boolean isAllowempty() {
 		return allowempty;
 	}

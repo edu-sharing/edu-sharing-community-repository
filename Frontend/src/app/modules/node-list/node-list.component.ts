@@ -23,7 +23,6 @@ export class NodeListComponent {
   @Input() isInsideWorkspace = false;
   @Input() searchLabel : string;
   @Input() parent : any;
-  private isReady=false;
   @Input() set searchWorkspace(query : string){
     if(query && query.trim()) {
       this.currentQuery = query;
@@ -45,7 +44,8 @@ export class NodeListComponent {
   private sortBy : string;
   private sortAscending=true;
   @Input() set reload(reload:Boolean){
-    this.doReload();
+    if(reload)
+      this.doReload();
 }
   @Output() onSelectionChanged = new EventEmitter();
   public hasSearched = false;
@@ -67,12 +67,6 @@ export class NodeListComponent {
                 private toast: Toast) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
         Translation.initialize(translate,this.config,this.storage,this.route).subscribe(()=>{});
-
-        setTimeout(()=>{
-          this.isReady=true;
-          this.searchAll();
-        },1);
-
 
         /*
         let restoreResult=new ArchiveRestore();
@@ -134,8 +128,10 @@ export class NodeListComponent {
 
 
 	private search(searched : boolean) : void{
-	    if(!this.isReady)
-	      return;
+	if(this.isLoading){
+	  setTimeout(()=>this.search(searched),10);
+	  return;
+    }
     this.isLoading=true;
     console.log('search '+this.currentQuery);
 
@@ -151,12 +147,9 @@ export class NodeListComponent {
 
     private display(data : ArchiveSearch,searched : boolean){
       console.log(data);
-      var list=data.nodes;
+      let list=data.nodes;
         if(this.offset!=0){
-            for(var i=0;i<list.length;i++)
-                this.list.push(list[i]);
-            // Not working?!
-            //this.list.concat(list);
+          this.list=this.list.concat(list);
         }
         else{
             this.list=list;

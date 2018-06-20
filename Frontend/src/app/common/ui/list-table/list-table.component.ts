@@ -369,6 +369,8 @@ export class ListTableComponent implements EventListener{
     this.onDelete.emit(node);
   }
     public isBrightColorCollection(color : string){
+        if(!color)
+          return true;
         return ColorHelper.getColorBrightness(color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
     }
   public toggleAll(){
@@ -434,6 +436,8 @@ export class ListTableComponent implements EventListener{
     if(!this.reorderColumns || index==0)
       return;
     this.currentDragColumn=null;
+    event.preventDefault();
+    event.stopPropagation();
   }
   private allowDeleteColumn(event:any){
     if(!this.reorderColumns || !this.currentDragColumn)
