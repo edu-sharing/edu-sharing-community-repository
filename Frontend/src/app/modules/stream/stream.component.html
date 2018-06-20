@@ -31,7 +31,7 @@
             <div *ngIf="menuOption == 'new'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION1' | translate }} <i class="small material-icons arrow-menu-arrow " (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
             <div *ngIf="menuOption == 'seen'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION2' | translate }} <i class="small material-icons arrow-menu-arrow" (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
             
-            <span id="stream-title-date" class="stream-title-date col s12 m12" (click)="scrollToDown()">
+            <span id="stream-title-date" class="stream-title-date col s12 m12">
                 {{today()}}
             </span>
             <div class="arrow-menu-display mobile-menu " [ngClass]="showMenuOptions ? '' : 'hide'">
