@@ -978,7 +978,9 @@ export class CordovaService {
                            if(e.event==FrameEventsService.EVENT_CORDOVA_CAMERA){
                                this.getPhotoFromCamera((data:any)=>{
                                    this.events.broadcastEvent(FrameEventsService.EVENT_CORDOVA_CAMERA_RESPONSE,data);
-                               },null);
+                               },()=>{
+                                   this.events.broadcastEvent(FrameEventsService.EVENT_CORDOVA_CAMERA_RESPONSE,null);
+                               });
                            }
                        }
                    }
