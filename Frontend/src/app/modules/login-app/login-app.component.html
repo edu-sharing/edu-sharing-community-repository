@@ -75,7 +75,7 @@
           </div>
         </div>
       </div>
-      <div class="card-action" style="border-color: white;">
+      <div class="card-action">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="buttonServerUrl()">{{ 'LOGIN_APP.SERVERURL_CONTINUE'| translate}}</a>
       </div>
     </div>
@@ -186,7 +186,7 @@
           -->
         </div>
       </div>
-      <div class="card-action" style="border-color: white;">
+      <div class="card-action">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
@@ -210,7 +210,7 @@
                   {{'LOGIN_APP.NOTINTERNET_TEXT' | translate }}
               </div>
           </div>
-          <div class="card-action" style="border-color: white;">
+          <div class="card-action">
             <a class="waves-effect waves-light btn" (click)="getServerList()">{{'LOGIN_APP.NOTINTERNET_RETRY' | translate }}</a>
             <a class="btn-flat" (click)="buttonExitApp()">{{'LOGIN_APP.NOTINTERNET_EXIT' | translate }}</a>
           </div>
