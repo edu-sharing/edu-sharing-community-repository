@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="org.edusharing.app.cordova" version="2.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="org.edusharing.app.cordova" version="2.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>edu-sharing 2.0</name>
     <description>
         Mobile App Version of edu-sharing.
@@ -119,7 +119,6 @@
     </platform>
     <plugin name="cordova-plugin-android-permissions" spec="^1.0.0" />
     <plugin name="cordova-plugin-camera" spec="^4.0.2" />
-    <plugin name="cordova-plugin-device" spec="^2.0.1" />
     <plugin name="cordova-plugin-globalization" spec="^1.0.9" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
     <plugin name="cordova-plugin-screen-orientation" spec="^3.0.1" />
@@ -131,6 +130,7 @@
     <plugin name="com.napolitano.cordova.plugin.intent" spec="https://github.com/tsimon-edu-sharing/cordova-plugin-intent.git" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <plugin name="cordova-plugin-inappbrowser" spec="^2.0.2" />
-    <engine name="android" spec="7.1.0" />
+    <plugin name="cordova-plugin-device" spec="^2.0.1" />
     <engine name="ios" spec="^4.5.4" />
+    <engine name="android" spec="^7.0.0" />
 </widget>
