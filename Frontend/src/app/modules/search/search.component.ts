@@ -347,7 +347,6 @@ export class SearchComponent {
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
-    console.log(properties);
     if(this.isSearching && init || this.repositoryIds.length==0){
       setTimeout(()=>this.getSearch(searchString,init,properties),100);
       return;
