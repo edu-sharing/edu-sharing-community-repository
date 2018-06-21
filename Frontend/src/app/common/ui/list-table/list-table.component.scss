@@ -501,23 +501,33 @@ $orderAnimationTime:$transitionNormal*5;
   padding: 3px !important;
   z-index: 1;
 }
-.nodeComments{
+.nodeRatingComments {
   position: absolute;
   z-index: 1;
-  top:$previewHeight - 40px;
-  right:0;
-  background-color: rgba(0,0,0,0.5);
-  border-radius: 0;
-  border-top-left-radius: 3px;
-  color:#fff;
-  width: 60px;
-  height: 30px;
-  text-align: center;
+  top: $previewHeight - 60px;
+  width: 100%;
+  height: 50px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  >i{
-    margin-right: 7px;
+  align-items: flex-end;
+  padding-bottom: 10px;
+  background: linear-gradient(to bottom,rgba(0,0,0,0.001) 0,rgba(0,0,0,0.75) 100%);
+  .nodeRating{
+    flex-grow: 1;
+  }
+  .nodeComments {
+    right: 0;
+    border-radius: 0;
+    border-top-left-radius: 3px;
+    color: #fff;
+    width: 60px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    > i {
+      margin-right: 4px;
+      font-size: 16pt;
+    }
   }
 }
 
@@ -971,6 +981,10 @@ $orderAnimationTime:$transitionNormal*5;
     top: calc(50% - 60px);
     width: 160px;
     height:120px;
+  }
+  .cardList .nodeRatingComments{
+    width:160px;
+    height:40px;
   }
   .cardList .previewCollection{
     left: 46px;
