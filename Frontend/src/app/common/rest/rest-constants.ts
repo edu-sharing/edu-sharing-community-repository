@@ -102,6 +102,7 @@ export class RestConstants {
   public static LINKTYPE_USER_GENERATED="USER_GENERATED";
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";
   public static VIRTUAL_PROP_USAGECOUNT = "virtual:usagecount";
+  public static VIRTUAL_PROP_CHILDOBJECTCOUNT = "virtual:childobjectcount";
   public static GROUP_PREFIX="GROUP_";
 
   public static CONTRIBUTOR_LIFECYCLE_PREFIX="ccm:lifecyclecontributer_";

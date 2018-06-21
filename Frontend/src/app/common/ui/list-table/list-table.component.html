@@ -136,6 +136,9 @@
                  (dragover)="allowDrag($event,node)"
                  (dragenter)="allowDrag($event,node)"
                  (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
+                <div *ngIf="viewType==1 && node.properties && node.properties['virtual:childobjectcount']>0" class="childobjectCount">
+                    <span>{{node.properties['virtual:childobjectcount']}}</span><i class="material-icons">filter_none</i>
+                </div>
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
                     <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
                 </div>

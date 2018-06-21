@@ -2262,8 +2262,6 @@ export class MdsComponent{
   }
   private onAddChildobject(callback: Function = null,pos = 0) {
     if(pos>=this.childobjects.length) {
-        if (callback)
-            callback();
         this.onRemoveChildobject(callback);
         return;
     }

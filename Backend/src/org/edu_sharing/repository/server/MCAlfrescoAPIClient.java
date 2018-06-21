@@ -1563,6 +1563,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if (usages != null) {
 				properties.put(CCConstants.VIRT_PROP_USAGECOUNT, "" + usages.size());
 			}
+			List<NodeRef> childs = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_CHILDIO);
+			if (childs != null) {
+				properties.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT, "" + childs.size());
+			}
 
 			// add permalink
 			String version = (String) properties.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
