@@ -142,7 +142,7 @@
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
                     <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
                 </div>
-                <div *ngIf="viewType==1 && !isCollection(node)" class="nodeRatingComments">
+                <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                     <div class="nodeRating"></div>
                     <div class="nodeComments" (click)="select(node,'comments')"><i class="material-icons">comment</i> <div>{{node.commentCount}}</div></div>
                 </div>
