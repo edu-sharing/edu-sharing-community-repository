@@ -30,7 +30,7 @@
         (onSelectionChanged)="onSelection($event)"
         [listClass]="'fileChooserList'"
         (sortListener)="setSorting($event)"
-        (clickRow)="selectItem($event)"
+        (clickRow)="selectItem($event.node)"
         (loadMore)="loadMore()"></listTable>
     <h5 class="noElements" *ngIf="!isLoading && !list.length && !searchMode">{{'NO_MORE_ELEMENTS' | translate }}</h5>
     <h5 class="noElements" *ngIf="!isLoading && !list.length && searchMode">{{'NO_MATCHES' | translate }}</h5>

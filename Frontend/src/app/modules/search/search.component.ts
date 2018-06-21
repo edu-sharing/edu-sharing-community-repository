@@ -444,7 +444,9 @@ export class SearchComponent {
       }
       this.groupedRepositories=list;
   }
-  render(node: Node) {
+  render(event: any) {
+    console.log(event);
+    let node=event.node;
     if(node.collection){
       this.switchToCollections(node.ref.id);
       return;
@@ -458,7 +460,8 @@ export class SearchComponent {
     this.renderedNode = node;
     this.render_options=[];
     let queryParams={
-      "repository" : RestNetworkService.isFromHomeRepo(node,this.allRepositories) ? null : node.ref.repo
+      "repository" : RestNetworkService.isFromHomeRepo(node,this.allRepositories) ? null : node.ref.repo,
+      "comments" : event.source=="comments" ? true : null
     };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);

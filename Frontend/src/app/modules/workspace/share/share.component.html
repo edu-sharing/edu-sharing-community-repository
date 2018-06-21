@@ -237,7 +237,7 @@
     <div class="card-cancel" (click)="showCollections=false"><i class="material-icons">close</i></div>
     <span class="card-title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</span>
     <listTable
-      (clickRow)="openCollection($event)"
+      (clickRow)="openCollection($event.node)"
       [nodes]="collections"
       [isClickable]="true"
       [columns]="collectionColumns"

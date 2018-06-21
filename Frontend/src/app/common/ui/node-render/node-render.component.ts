@@ -84,6 +84,7 @@ export class NodeRenderComponent implements EventListener{
   sequenceParent: Node;
   canScrollLeft: boolean = false;
   canScrollRight: boolean = false;
+  private queryParams: Params;
   childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
@@ -205,6 +206,7 @@ export class NodeRenderComponent implements EventListener{
           this.fromLogin=params['fromLogin']=='true';
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
           this.childobject_order = params['childobject_order'] ? params['childobject_order'] : -1;
+          this.queryParams=params;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
@@ -307,6 +309,9 @@ export class NodeRenderComponent implements EventListener{
             }
             else {
                 this._node=data.node;
+                if(this.queryParams['comments'])
+                    this.showComments();
+
                 this.getSequence();
                 jQuery('#nodeRenderContent').html(data.detailsSnippet);
                 this.postprocessHtml();
