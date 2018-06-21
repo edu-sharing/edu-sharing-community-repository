@@ -741,6 +741,23 @@ $orderAnimationTime:$transitionNormal*5;
 .cardList .row_4{
   float:left;
 }
+.cardList .childobjectCount{
+  position: absolute;
+  z-index: 1;
+  top:8px;
+  right:45px;
+  background-color: #eee;
+  border-radius:15px;
+  width:45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:2px;
+  >i{
+    font-size: 8pt;
+    margin-left: 4px;
+  }
+}
 .cardList .preview{
   height:$previewHeight;
   padding:0!important;
@@ -795,8 +812,8 @@ $orderAnimationTime:$transitionNormal*5;
 }
 .cardList .row .checkbox{
   position: absolute;
-  right: -6px;
-  top: 7px;
+  right: 0px;
+  top: 10px;
   z-index:1;
   min-width:initial;
 }
@@ -981,6 +998,11 @@ $orderAnimationTime:$transitionNormal*5;
     top: calc(50% - 60px);
     width: 160px;
     height:120px;
+  }
+  .cardList .childobjectCount {
+    right:auto;
+    left:90px;
+    top:23px;
   }
   .cardList .nodeRatingComments{
     width:160px;

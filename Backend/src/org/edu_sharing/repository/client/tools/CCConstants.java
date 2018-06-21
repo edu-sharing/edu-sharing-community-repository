@@ -726,6 +726,8 @@ public class CCConstants {
 
 	public final static String VIRT_PROP_COMMENTCOUNT = "{virtualproperty}commentcount";
 
+	public final static String VIRT_PROP_CHILDOBJECTCOUNT = "{virtualproperty}childobjectcount";
+
 	/**
 	 * says if this set of properties is from an remote repository that was linked in the local repo by an remoteobject
 	 * values are all that can be used in new Boolean(value)
@@ -1090,6 +1092,8 @@ public class CCConstants {
 	public static final String CCM_PROP_USAGE_GUID = "{http://www.campuscontent.de/model/1.0}usageguid";
 
 	public static final String CCM_ASSOC_USAGEASPECT_USAGES = "{http://www.campuscontent.de/model/1.0}usages";
+
+	public static final String CCM_ASSOC_CHILDIO = "{http://www.campuscontent.de/model/1.0}childio";
 
 
 	public static final String CM_PROP_PERSON_ABOUT = "{http://www.alfresco.org/model/content/1.0}personabout";

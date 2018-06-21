@@ -32,6 +32,7 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -169,6 +170,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		ChildAssociationRef childRef = nodeService.createNode(parentNodeRef, QName.createQName(childAssociation), QName.createQName(assocName), nodeType,
 				properties);
+		if(childAssociation.equals(CCConstants.CCM_ASSOC_CHILDIO)){
+			new RepositoryCache().remove(parentID);
+		}
 		return childRef.getChildRef().getId();
 	}
 
@@ -713,6 +717,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	
 	@Override
 	public void removeNode(String nodeId, String parentId, boolean recycle) {
+		List<ChildAssociationRef> assocs = nodeService.getParentAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+		for(ChildAssociationRef assoc : assocs){
+			if(assoc.getTypeQName().toString().equals(CCConstants.CCM_ASSOC_CHILDIO)){
+				new RepositoryCache().remove(assoc.getParentRef().getId());
+			}
+		}
 		apiClient.removeNode(nodeId, parentId, recycle);
 	}
 	
