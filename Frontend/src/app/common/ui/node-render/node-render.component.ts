@@ -105,7 +105,7 @@ export class NodeRenderComponent implements EventListener{
     if(this.nodeMetadata!=null) {
       return;
     }
-    if(event.code=="Escape"){
+    if(event.code=="Escape" && this.nodeComments==null){
       event.preventDefault();
       event.stopPropagation();
       this.close();
