@@ -1524,18 +1524,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		// MimeType
 		// we run as system because the current user may not has enough permissions to access content
-		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+		properties.put(CCConstants.ALFRESCO_MIMETYPE, getAlfrescoMimetype(nodeRef));
 
-			@Override
-			public Void doWork() throws Exception {
-				ContentReader contentReader = contentService.getReader(nodeRef, QName.createQName(CCConstants.CM_PROP_CONTENT));
-				if (contentReader != null) {
-					properties.put(CCConstants.ALFRESCO_MIMETYPE, contentReader.getMimetype());
-				}
-				return null;
-			}
-		});
-		
 
 		// MapRelations
 		if (nodeType.equals(CCConstants.CCM_TYPE_MAPRELATION)) {
@@ -1624,6 +1614,16 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 
 		return properties;
+	}
+
+	public String getAlfrescoMimetype(NodeRef nodeRef) {
+		return AuthenticationUtil.runAsSystem(() -> {
+			ContentReader contentReader = contentService.getReader(nodeRef, QName.createQName(CCConstants.CM_PROP_CONTENT));
+			if (contentReader != null) {
+				return contentReader.getMimetype();
+			}
+			return null;
+		});
 	}
 
 	public String getProperty(StoreRef store, String nodeId, String property) {

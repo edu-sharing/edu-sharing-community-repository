@@ -6,6 +6,7 @@ import java.util.*;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -32,6 +33,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -830,5 +832,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public boolean exists(String protocol, String store, String nodeId) {
 		return nodeService.exists(new NodeRef(new StoreRef(protocol, store), nodeId));
+	}
+
+	@Override
+	public String getContentMimetype(String protocol, String storeId, String nodeId) {
+		if(PermissionServiceFactory.getPermissionService(application.getAppId()).hasPermission(protocol,storeId,nodeId,CCConstants.PERMISSION_READ))
+			return new MCAlfrescoAPIClient().getAlfrescoMimetype(new NodeRef(protocol,storeId,nodeId));
+		else
+			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ+" permission on node "+nodeId);
 	}
 }

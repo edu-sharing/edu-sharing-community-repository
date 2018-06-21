@@ -104,9 +104,12 @@ input[type=search]{
   border-radius: 3px;
   background-color: #fff;
 }
+select{
+  width:100%;
+}
 textarea.materialize-textarea{
   padding: 0.75em;
-  width: calc(100% - 20px);
+  width: calc(100% - 1.5em);
 }
 
 /*
