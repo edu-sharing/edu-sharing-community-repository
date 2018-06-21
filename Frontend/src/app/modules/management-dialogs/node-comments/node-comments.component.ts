@@ -1,4 +1,4 @@
-import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, HostListener} from '@angular/core';
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {Toast} from "../../../common/ui/toast";
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
@@ -45,6 +45,16 @@ export class NodeCommentsComponent  {
   }
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+      if(event.code=="Escape"){
+          event.preventDefault();
+          event.stopPropagation();
+          this.cancel();
+          return;
+      }
+  }
   constructor(
     private connector : RestConnectorService,
     private iam : RestIamService,
