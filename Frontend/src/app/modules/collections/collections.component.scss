@@ -338,7 +338,8 @@ table, div {
     }
 
     .collections-header-texttop {
-        text-align: center;
+        display: flex;
+        justify-content: center;
     }
 
     .table-tab-middle {
