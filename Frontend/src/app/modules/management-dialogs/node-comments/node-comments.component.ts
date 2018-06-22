@@ -32,6 +32,7 @@ export class NodeCommentsComponent  {
   public dialogMessage:string;
   public dialogButtons:DialogButton[];
   private isGuest: boolean;
+  private loading: boolean;
   private user: User;
   private comments: Comment[];
   private edit: Comment[];
@@ -42,9 +43,16 @@ export class NodeCommentsComponent  {
 
   @Input() set node(node : Node){
     this._node=node;
+    this.refresh();
   }
+  @Input() readOnly=false;
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
+    /**
+     * Some data has changed, may be a new, removed or edited comment
+     * @type {EventEmitter<any>}
+     */
+  @Output() onChange=new EventEmitter();
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -61,16 +69,14 @@ export class NodeCommentsComponent  {
     private commentsApi : RestCommentsService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
+    this.loading=true;
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+      this.loading=false;
       this.isGuest=data.isGuest;
       if(!data.isGuest){
         this.iam.getUser().subscribe((data)=>{
           this.user=data.person;
-          this.refresh();
         });
-      }
-      else {
-        this.refresh();
       }
     });
   }
@@ -78,6 +84,7 @@ export class NodeCommentsComponent  {
     this.onLoading.emit(true);
     this.commentsApi.editComment(this.editComment.ref.id,this.editCommentText.trim()).subscribe(()=>{
       this.onLoading.emit(false);
+      this.onChange.emit();
       this.editComment=null;
       this.refresh();
     },(error:any)=>{
@@ -105,6 +112,7 @@ export class NodeCommentsComponent  {
             this.dialogTitle=null;
             this.commentsApi.deleteComment(comment.ref.id).subscribe(()=>{
               this.refresh();
+              this.onChange.emit();
               this.onLoading.emit(false);
             },(error:any)=>{
               this.toast.error(error);
@@ -117,7 +125,7 @@ export class NodeCommentsComponent  {
     return options;
   }
   public canComment(){
-    if(this.isGuest || !this.user)
+    if(this.isGuest || !this.user || this.readOnly)
       return false;
     return this._node.access.indexOf(RestConstants.ACCESS_COMMENT)!=-1;
   }
@@ -129,6 +137,7 @@ export class NodeCommentsComponent  {
     this.onLoading.emit(true);
     this.commentsApi.addComment(this._node.ref.id,this.newComment.trim()).subscribe(()=>{
       this.onLoading.emit(false);
+      this.onChange.emit();
       this.newComment="";
       this.refresh();
     },(error:any)=>{
@@ -141,6 +150,13 @@ export class NodeCommentsComponent  {
   }
 
   private refresh() {
+    this.comments=null;
+    if(!this._node)
+      return;
+    if(this.loading){
+      setTimeout(()=>this.refresh(),100);
+      return;
+    }
     this.commentsApi.getComments(this._node.ref.id).subscribe((data:Comments)=>{
       this.comments=data.comments;
       this.options=[];

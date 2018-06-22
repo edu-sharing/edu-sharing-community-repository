@@ -5,7 +5,7 @@
       <div class="card-title">{{'NODE_COMMENTS.TITLE' | translate }}</div>
 
         <div *ngIf="_node" class="group">
-          <div class="comments" [class.commentsLong]="!canComment()">
+          <div class="comments" [class.commentsLong]="!canComment()" *ngIf="comments">
             <div *ngIf="comments && !comments.length" class="noComments">{{'NODE_COMMENTS.NO_COMMENTS' | translate}}</div>
             <div *ngFor="let comment of comments;let i=index" class="comment">
               <div class="top">
@@ -33,7 +33,7 @@
                 </div>
               </div>
               </div>
-              <div class="actions" [class.actionsAvailable]="(options[i] && options[i].length)">
+              <div *ngIf="!readOnly" class="actions" [class.actionsAvailable]="(options[i] && options[i].length)">
                 <actionbar
                   [numberOfAlwaysVisibleOptions]="1"
                   [options]="options[i]"
@@ -51,7 +51,7 @@
             </div>
             <div class="right">
               <form (ngSubmit)="addComment()">
-                <textarea name="comment" class="materialize-textarea" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="newComment"></textarea>
+                <textarea name="addComment" class="materialize-textarea" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="newComment"></textarea>
                 <i class="material-icons clickable" (click)="addComment()">send</i>
               </form>
             </div>

@@ -527,6 +527,13 @@
 				]]></html>
 			</template>
 			<template>
+				<id>node_comments_render</id>
+				<caption>dialog_upload_tab_comments</caption>
+				<html><![CDATA[
+				<comments>
+				]]></html>
+			</template>
+			<template>
 				<id>add_to_stream</id>
 				<caption>dialog_add_to_stream</caption>
 				<html><![CDATA[
@@ -597,6 +604,7 @@
 				<views>
 					<view>node_general_render</view>
 					<view>node_contributor_render</view>
+					<view>node_comments_render</view>
 				</views>
 			</group>
 			<group>

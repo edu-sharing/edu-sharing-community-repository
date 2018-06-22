@@ -168,6 +168,9 @@ export class WorkspaceManagementDialogsComponent  {
 
     this.onRefresh.emit();
   }
+  public refresh(){
+    this.onRefresh.emit();
+  }
  public uploadFile(event:any){
    this.onUploadFileSelected.emit(event);
  }

@@ -60,3 +60,9 @@
   (onCloseMetadata)="closeMetadata()"
 >
 </workspace-management>
+<div #commentsRef style="display:none">
+  <node-comments
+    [node]="_node"
+    [readOnly]="true"
+  ></node-comments>
+</div>

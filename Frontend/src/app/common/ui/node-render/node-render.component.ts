@@ -88,6 +88,7 @@ export class NodeRenderComponent implements EventListener{
   childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
+  @ViewChild('commentsRef') commentsRef : ElementRef;
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
@@ -301,6 +302,7 @@ export class NodeRenderComponent implements EventListener{
       showDownloadButton:false,
       showDownloadAdvice:!this.isOpenable
     };
+    this._node=null;
     this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
@@ -334,6 +336,13 @@ export class NodeRenderComponent implements EventListener{
         </div>
       </div>
     `);
+      let commentInterval=setInterval(()=> {
+          let html=this.getCommentWidgetHtml();
+          if(html) {
+              jQuery('#edusharing_rendering_metadata').html(jQuery('#edusharing_rendering_metadata').html().replace('<comments>', html));
+              clearInterval(commentInterval);
+          }
+      },100);
   }
   private postprocessHtml() {
     if(!this.config.instant("rendering.showPreview",true)){
@@ -525,5 +534,16 @@ export class NodeRenderComponent implements EventListener{
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
+    }
+
+    private getCommentWidgetHtml() {
+        let container = this.commentsRef.nativeElement.getElementsByClassName("comments");
+        console.log(container);
+        if (container.length) {
+
+            return '<div class="mdsWidget">' + container[0].outerHTML + '</div>';
+        }
+        return null;
+
     }
 }
