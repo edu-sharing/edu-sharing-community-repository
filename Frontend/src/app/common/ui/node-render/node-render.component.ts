@@ -126,7 +126,7 @@ export class NodeRenderComponent implements EventListener{
     }
 
   }
-    private _node : Node;
+    _node : Node;
     private _nodeId : string;
     @Input() set node(node: Node|string){
       let id=(node as Node).ref ? (node as Node).ref.id : (node as string);
