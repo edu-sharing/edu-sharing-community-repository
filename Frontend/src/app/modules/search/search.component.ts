@@ -47,6 +47,7 @@ import {WorkspaceManagementDialogsComponent} from "../management-dialogs/managem
 import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
+import {UIService} from '../../common/services/ui.service';
 
 
 @Component({
@@ -159,6 +160,7 @@ export class SearchComponent {
     public searchService:SearchService,
     private title:Title,
     private config:ConfigurationService,
+    private uiService:UIService,
     private storage : SessionStorageService,
     private network : RestNetworkService,
     private temporaryStorageService: TemporaryStorageService
@@ -325,6 +327,15 @@ export class SearchComponent {
     let parameters:any=null;
     if(this.mdsRef) {
       parameters = this.getMdsValues();
+    }
+    if(!query.cleared){
+      // try to hide keyboard on mobile
+      if(this.uiService.isMobile()) {
+        try {
+            (document.activeElement as any).blur();
+        }catch(e){console.warn(e);}
+      }
+
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
