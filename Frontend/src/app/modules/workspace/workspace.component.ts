@@ -798,7 +798,7 @@ export class WorkspaceMainComponent implements EventListener{
         let options: OptionItem[] = [];
 
         let allFiles = NodeHelper.allFiles(nodes);
-
+        let savedSearch = nodes && nodes.length && nodes[0].type==RestConstants.CCM_TYPE_SAVED_SEARCH;
         let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
         if(this.currentFolder && !nodes && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed) {
             options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
@@ -817,7 +817,7 @@ export class WorkspaceMainComponent implements EventListener{
                 options.push(debug);
             }
             let open = new OptionItem("WORKSPACE.OPTION.SHOW", "remove_red_eye", (node: Node) => this.displayNode(node));
-            if (!nodes[0].isDirectory)
+            if (!nodes[0].isDirectory && !savedSearch)
                 options.push(open);
         }
         let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", (node: Node) => this.editConnector(node));
@@ -831,7 +831,7 @@ export class WorkspaceMainComponent implements EventListener{
         else if(nodes && nodes.length==1 && RestConnectorsService.connectorSupportsEdit(this.connectorList,nodes[0])){
             options.push(view);
         }
-        if(nodes && nodes.length==1){
+        if(nodes && nodes.length==1 && !savedSearch){
             let edit=new OptionItem("WORKSPACE.OPTION.EDIT", "info_outline", (node: Node) => this.editNode(node));
             edit.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
             edit.isSeperateBottom = true;
@@ -868,16 +868,17 @@ export class WorkspaceMainComponent implements EventListener{
             if (license.isEnabled)
                 options.push(license);
         }
-        if (nodes && nodes.length == 1) {
+        if (nodes && nodes.length == 1 && !savedSearch) {
             let contributor=new OptionItem("WORKSPACE.OPTION.CONTRIBUTOR","group",(node:Node)=>this.manageContributorsNode(node));
             contributor.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
             if(nodes && !nodes[0].isDirectory && !this.isSafe)
                 options.push(contributor);
-            let workflow=new OptionItem("WORKSPACE.OPTION.WORKFLOW","swap_calls",(node:Node)=>this.manageWorkflowNode(node));
-            workflow.isEnabled=share.isEnabled;
-            if(nodes && !nodes[0].isDirectory && this.supportsWorkflow())
-                options.push(workflow);
-
+            if(share) {
+                let workflow = new OptionItem("WORKSPACE.OPTION.WORKFLOW", "swap_calls", (node: Node) => this.manageWorkflowNode(node));
+                workflow.isEnabled = share.isEnabled;
+                if (nodes && !nodes[0].isDirectory && this.supportsWorkflow())
+                    options.push(workflow);
+            }
 
             this.infoToggle=new OptionItem("WORKSPACE.OPTION.METADATA", "info_outline", (node: Node) => this.openMetadata(node));
             this.infoToggle.isToggle=true;
