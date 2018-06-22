@@ -206,7 +206,7 @@
                     </div>
                 </div>
                 <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node)">
-                    <div class="hiddendiv" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
+                    <div class="display-none" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
                     <div class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
                 </div>
                 <div *ngFor="let option of optionsAlways"
