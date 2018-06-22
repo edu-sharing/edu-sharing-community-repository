@@ -91,6 +91,7 @@ input[type="checkbox"].filled-in:checked+label:before{
 }
 input:not([type]),
 input[type=text],
+input[type=email],
 input[type=password],
 input[type=number],
 select,
