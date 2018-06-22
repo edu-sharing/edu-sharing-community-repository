@@ -1038,9 +1038,15 @@ $orderAnimationTime:$transitionNormal*5;
     width:auto;
   }
 
+  .cardList .row_2,
+  .cardList .row_3{
+    padding-top: 0 !important;
+  }
+
   .cardList .row_2{
     margin-bottom: 10px;
   }
+  /*
   .cardList .row .column.node_ccm_replicationsource {
     position: absolute;
     top: 80px;
