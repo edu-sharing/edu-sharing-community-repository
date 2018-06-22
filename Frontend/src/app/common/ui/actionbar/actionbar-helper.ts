@@ -47,7 +47,7 @@ export class ActionbarHelper{
       }
     }
     if(type=='INVITE'){
-      if(nodes && nodes.length==1 && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH) {
+      if(nodes && nodes.length==1) {
         option = new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", callback);
         option.isSeperate = NodeHelper.allFiles(nodes);
         option.showAsAction = true;

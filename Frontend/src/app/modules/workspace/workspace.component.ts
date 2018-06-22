@@ -876,7 +876,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(share) {
                 let workflow = new OptionItem("WORKSPACE.OPTION.WORKFLOW", "swap_calls", (node: Node) => this.manageWorkflowNode(node));
                 workflow.isEnabled = share.isEnabled;
-                if (nodes && !nodes[0].isDirectory && this.supportsWorkflow())
+                if (nodes && !nodes[0].isDirectory && this.supportsWorkflow() && !savedSearch)
                     options.push(workflow);
             }
 
