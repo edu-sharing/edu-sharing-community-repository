@@ -182,13 +182,7 @@ export class WorkspaceMainComponent implements EventListener{
             return;
         }
         if(event.key=="Escape"){
-            if(this.shareLinkNode!=null){
-                this.shareLinkNode=null;
-            }
-            else if(this.workflowNode!=null){
-                this.workflowNode=null;
-            }
-            else if(this.addFolderName!=null){
+            if(this.addFolderName!=null){
                 this.addFolderName=null;
             }
             else if(this.showUploadSelect){
@@ -780,10 +774,7 @@ export class WorkspaceMainComponent implements EventListener{
         this.explorerOptions=this.getOptions([node ? node : new Node()],true);
     }
 
-    public closeWorkflow(){
-        this.workflowNode=null;
-        this.refresh();
-    }
+
     public debugNode(node:Node){
         this.nodeDebug=this.getNodeList(node)[0];
         /*

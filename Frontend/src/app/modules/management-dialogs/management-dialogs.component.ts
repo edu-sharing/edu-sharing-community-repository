@@ -42,7 +42,13 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() showLtiToolsChange = new EventEmitter();
   @Input() nodeLicense : Node[];
   @Output() nodeLicenseChange = new EventEmitter();
-  @Input() nodeReport : Node;
+  @Input() nodeShare : Node;
+  @Output() nodeShareChange = new EventEmitter();
+    @Input() nodeShareLink : Node;
+    @Output() nodeShareLinkChange = new EventEmitter();
+    @Input() nodeWorkflow : Node;
+    @Output() nodeWorkflowChange = new EventEmitter();
+    @Input() nodeReport : Node;
   @Output() nodeReportChange = new EventEmitter();
   @Input() nodeMetadata : Node;
     @Output() nodeMetadataChange = new EventEmitter();
@@ -92,6 +98,24 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
+        if(this.nodeWorkflow!=null){
+            this.closeWorkflow();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        if(this.nodeShare!=null){
+            this.closeShare();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        if(this.nodeShareLink!=null){
+            this.closeShareLink();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if(this.nodeTemplate!=null){
             this.closeTemplate();
             event.preventDefault();
@@ -150,6 +174,19 @@ export class WorkspaceManagementDialogsComponent  {
     this.ltiToolConfig=null;
     this.ltiToolRefresh=new Boolean();
  }
+    closeShareLink() {
+        this.nodeShareLink = null
+        this.nodeShareLinkChange.emit(null);
+    }
+ closeShare() {
+     this.nodeShare = null
+     this.nodeShareChange.emit(null);
+ }
+    public closeWorkflow(){
+        this.nodeWorkflow=null;
+        this.nodeWorkflowChange.emit(null);
+        this.onRefresh.emit();
+    }
  public uploadDone(event : Node[]){
     if(this.config.instant('licenseDialogOnUpload',false)){
          this.nodeLicense=event;
