@@ -329,13 +329,7 @@ export class SearchComponent {
       parameters = this.getMdsValues();
     }
     if(!query.cleared){
-      // try to hide keyboard on mobile
-      if(this.uiService.isMobile()) {
-        try {
-            (document.activeElement as any).blur();
-        }catch(e){console.warn(e);}
-      }
-
+      this.uiService.hideKeyboardIfMobile();
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }

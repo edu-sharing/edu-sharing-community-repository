@@ -505,8 +505,11 @@ export class WorkspaceMainComponent implements EventListener{
             this.setSelection([this.parameterNode]);
     }
 
-    public doSearch(query:string){
-        this.routeTo(this.root,null,query);
+    public doSearch(query:any){
+        this.routeTo(this.root,null,query.query);
+        if(!query.cleared){
+            this.ui.hideKeyboardIfMobile();
+        }
     }
     private doSearchFromRoute(query:string){
         this.searchQuery=query;

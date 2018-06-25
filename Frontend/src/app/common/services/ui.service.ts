@@ -53,4 +53,12 @@ export class UIService {
       }
     });
   }
+
+    hideKeyboardIfMobile() {
+        if(this.isMobile()) {
+            try {
+                (document.activeElement as any).blur();
+            }catch(e){console.warn(e);}
+        }
+    }
 }
