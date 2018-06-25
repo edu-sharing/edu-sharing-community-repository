@@ -178,7 +178,7 @@ export class WorkspaceMainComponent implements EventListener{
             return;
         }
         if(event.code=="Delete" && !hasOpenWindow && !fromInputField && this.selection.length){
-            this.deleteNode();
+            this.deleteNodes();
             event.preventDefault();
             event.stopPropagation();
             return;
