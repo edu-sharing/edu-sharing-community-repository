@@ -567,7 +567,6 @@ export class NodeRenderComponent implements EventListener{
 
     private getCommentWidgetHtml() {
         let container = this.commentsRef.nativeElement.getElementsByClassName("comments");
-        console.log(container);
         if (container.length) {
 
             return '<div class="mdsWidget">' + container[0].outerHTML + '</div>';
