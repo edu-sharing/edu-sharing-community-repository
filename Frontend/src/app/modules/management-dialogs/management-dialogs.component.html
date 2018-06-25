@@ -14,8 +14,8 @@
 <workspace-workflow *ngIf="nodeWorkflow"
                     [nodeId]="nodeWorkflow.ref.id"
                     (onLoading)="globalProgress=$event"
-                    (onDone)="closeWorkflow()"
-                    (onClose)="nodeWorkflow=null"
+                    (onDone)="closeWorkflow(true)"
+                    (onClose)="closeWorkflow()"
 ></workspace-workflow>
 <workspace-share-link *ngIf="nodeShareLink"
                       [node]="nodeShareLink"

@@ -187,6 +187,7 @@
 [(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
 [(nodeWorkflow)]="workflowNode"
 [(nodeShare)]="sharedNode"
+[(nodeDelete)]="deleteNode"
 [(nodeShareLink)]="shareLinkNode"
 [(filesToUpload)]="filesToUpload"
 [fileIsOver]="fileIsOver"
@@ -198,6 +199,7 @@
 (onUploadFileSelected)="uploadFiles($event)"
 (onUpdateLicense)="updateLicense()"
 (onCloseMetadata)="closeMetadata()"
+(onDelete)="deleteDone()"
 >
 </workspace-management>
 

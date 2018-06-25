@@ -13,7 +13,7 @@ import {DialogButton, ModalDialogComponent} from "../../common/ui/modal-dialog/m
 import {RestConstants} from "../../common/rest/rest-constants";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {Toast} from "../../common/ui/toast";
-import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
+import {ClipboardObject, TemporaryStorageService} from '../../common/services/temporary-storage.service';
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {SessionStorageService} from "../../common/services/session-storage.service";
@@ -118,6 +118,7 @@ export class WorkspaceMainComponent implements EventListener{
     private currentNodes: Node[];
     private appleCmd=false;
     public workflowNode: Node;
+    public deleteNode: Node[];
     private reurl: string;
     private mdsParentNode: Node;
     public showLtiTools=false;
@@ -588,50 +589,17 @@ export class WorkspaceMainComponent implements EventListener{
         this.showUploadSelect=false;
         this.filesToUpload=files;
     }
-    private deleteConfirmed(nodes : Node[],position=0,error=false) : void {
-        if (position >= nodes.length) {
-            this.globalProgress = false;
-            this.metadataNode = null;
-            this.refresh();
-            if (!error)
-                this.toast.toast("WORKSPACE.TOAST.DELETE_FINISHED");
-            this.selection = [];
-            return;
-        }
-        this.hideDialog();
-        this.globalProgress = true;
-        this.node.deleteNode(nodes[position].ref.id).subscribe(data => {
-            this.removeNodeFromClipboard(nodes[position]);
-            this.deleteConfirmed(nodes, position + 1, error);
-        }, (error: any) => {
-            this.toast.error(error);
-            this.deleteConfirmed(nodes, position + 1, true);
-        });
-    }
-    private removeNodeFromClipboard(node: Node) {
-        let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
-        if(clip==null)
-            return;
 
-        for(let n of clip.nodes){
-            if(n.ref.id==node.ref.id){
-                clip.nodes.splice(clip.nodes.indexOf(n),1);
-            }
-            if(clip.nodes.length==0){
-                console.log("all items in clipboard removed");
-                this.storage.remove("workspace_clipboard");
-            }
-        }
-    }
-    private deleteNode(node: Node=null) {
+
+    private deleteNodes(node: Node=null) {
         let list=this.getNodeList(node);
         if(list==null)
             return;
-        this.dialogTitle="WORKSPACE.DELETE_TITLE"+(list.length==1 ? "_SINGLE" : "");
-        this.dialogCancelable=true;
-        this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(list.length==1 ? "_SINGLE" : "");
-        this.dialogMessageParameters={name:list[0].name};
-        this.dialogButtons=DialogButton.getOkCancel(() => this.hideDialog(),()=>this.deleteConfirmed(list));
+        this.deleteNode=list;
+    }
+    private deleteDone(data:any){
+        this.metadataNode=null;
+        this.refresh();
     }
 
     private pasteNode(position=0){
@@ -867,12 +835,10 @@ export class WorkspaceMainComponent implements EventListener{
             contributor.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
             if(nodes && !nodes[0].isDirectory && !this.isSafe)
                 options.push(contributor);
-            if(share) {
-                let workflow = new OptionItem("WORKSPACE.OPTION.WORKFLOW", "swap_calls", (node: Node) => this.manageWorkflowNode(node));
-                workflow.isEnabled = share.isEnabled;
-                if (nodes && !nodes[0].isDirectory && this.supportsWorkflow() && !savedSearch)
-                    options.push(workflow);
-            }
+            let workflow = ActionbarHelper.createOptionIfPossible('WORKFLOW',nodes,this.connector,(node:Node)=>this.manageWorkflowNode(node));
+            if(workflow)
+                options.push(workflow);
+
 
             this.infoToggle=new OptionItem("WORKSPACE.OPTION.METADATA", "info_outline", (node: Node) => this.openMetadata(node));
             this.infoToggle.isToggle=true;
@@ -890,11 +856,10 @@ export class WorkspaceMainComponent implements EventListener{
             cut.isSeperate = true;
             options.push(cut);
             options.push(new OptionItem("WORKSPACE.OPTION.COPY", "content_copy", (node: Node) => this.cutCopyNode(node, true)));
-            let del=new OptionItem("WORKSPACE.OPTION.DELETE","delete", (node : Node) => this.deleteNode(node));
-            del.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
-            del.isSeperate=true;
-            options.push(del);
-
+            let del=ActionbarHelper.createOptionIfPossible('DELETE',nodes,this.connector,(node : Node) => this.deleteNodes(node));
+            if(del){
+                options.push(del);
+            }
             let custom=this.config.instant("nodeOptions");
             NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.currentNodes, nodes, options,(load:boolean)=>this.globalProgress=load);
         }
@@ -904,9 +869,6 @@ export class WorkspaceMainComponent implements EventListener{
             options.push(this.viewToggle);
         }
         return options;
-    }
-    public supportsWorkflow(){
-        return this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0;
     }
     private setSelection(nodes : Node[]) {
         this.selection=nodes;
@@ -1174,9 +1136,4 @@ export class WorkspaceMainComponent implements EventListener{
     private hasOpenWindows() {
         return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
     }
-}
-interface ClipboardObject{
-    nodes : Node[];
-    sourceNode : Node;
-    copy : boolean;
 }
