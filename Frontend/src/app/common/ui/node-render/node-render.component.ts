@@ -339,8 +339,10 @@ export class NodeRenderComponent implements EventListener{
       let commentInterval=setInterval(()=> {
           let html=this.getCommentWidgetHtml();
           if(html) {
-              jQuery('#edusharing_rendering_metadata').html(jQuery('#edusharing_rendering_metadata').html().replace('<comments>', html));
-              clearInterval(commentInterval);
+              try {
+                  jQuery('#edusharing_rendering_metadata').html(jQuery('#edusharing_rendering_metadata').html().replace('<comments>', html));
+                  clearInterval(commentInterval);
+              }catch(e){}
           }
       },100);
   }
