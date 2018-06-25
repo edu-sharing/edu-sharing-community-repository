@@ -74,6 +74,7 @@ export class NodeRenderComponent implements EventListener{
   public nodeShare: Node;
   public nodeShareLink: Node;
   public nodeWorkflow: Node;
+  public nodeDelete: Node[];
   public addToCollection: Node[];
   public nodeReport: Node;
   private editor: string;
