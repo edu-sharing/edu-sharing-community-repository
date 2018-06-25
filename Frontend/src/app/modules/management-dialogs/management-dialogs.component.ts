@@ -16,7 +16,7 @@ import {UIHelper} from "../../common/ui/ui-helper";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 import {Router} from '@angular/router';
 import {UIConstants} from "../../common/ui/ui-constants";
-import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
+import {ClipboardObject, TemporaryStorageService} from '../../common/services/temporary-storage.service';
 
 @Component({
   selector: 'workspace-management',
@@ -42,6 +42,26 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() showLtiToolsChange = new EventEmitter();
   @Input() nodeLicense : Node[];
   @Output() nodeLicenseChange = new EventEmitter();
+    @Input() set nodeDelete (nodeDelete: Node[]){
+        if(nodeDelete==null)
+            return;
+        this.dialogTitle="WORKSPACE.DELETE_TITLE"+(nodeDelete.length==1 ? "_SINGLE" : "");
+        this.dialogCancelable=true;
+        this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(nodeDelete.length==1 ? "_SINGLE" : "");
+        this.dialogMessageParameters={name:nodeDelete[0].name};
+        this.dialogButtons=DialogButton.getOkCancel(() => {
+            this.dialogTitle = null;
+        }, ()=>this.deleteConfirmed(nodeDelete));
+    }
+    @Output() nodeDeleteChange = new EventEmitter();
+    @Output() onDelete = new EventEmitter();
+  @Input() nodeShare : Node;
+  @Output() nodeShareChange = new EventEmitter();
+    @Input() nodeShareLink : Node;
+    @Output() nodeShareLinkChange = new EventEmitter();
+    @Input() nodeWorkflow : Node;
+    @Output() nodeWorkflowChange = new EventEmitter();
+    @Input() nodeReport : Node;
   @Input() nodeComment : Node;
   @Output() nodeCommentChange = new EventEmitter();
   @Input() nodeReport : Node;
@@ -96,6 +116,24 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
+        if(this.nodeWorkflow!=null){
+            this.closeWorkflow();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        if(this.nodeShare!=null){
+            this.closeShare();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        if(this.nodeShareLink!=null){
+            this.closeShareLink();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if(this.nodeTemplate!=null){
             this.closeTemplate();
             event.preventDefault();
@@ -154,6 +192,53 @@ export class WorkspaceManagementDialogsComponent  {
     this.ltiToolConfig=null;
     this.ltiToolRefresh=new Boolean();
  }
+    closeShareLink() {
+        this.nodeShareLink = null
+        this.nodeShareLinkChange.emit(null);
+    }
+ closeShare() {
+     this.nodeShare = null
+     this.nodeShareChange.emit(null);
+ }
+    public closeWorkflow(refresh=false){
+        this.nodeWorkflow=null;
+        this.nodeWorkflowChange.emit(null);
+        if(refresh)
+            this.onRefresh.emit();
+    }
+    private deleteConfirmed(nodes : Node[],position=0,error=false) : void {
+        if (position >= nodes.length) {
+            this.globalProgress = false;
+            if (!error)
+                this.toast.toast("WORKSPACE.TOAST.DELETE_FINISHED");
+            this.onDelete.emit({error:error,count:position});
+            return;
+        }
+        this.dialogTitle=null;
+        this.globalProgress = true;
+        this.nodeService.deleteNode(nodes[position].ref.id).subscribe(data => {
+            this.removeNodeFromClipboard(nodes[position]);
+            this.deleteConfirmed(nodes, position + 1, error);
+        }, (error: any) => {
+            this.toast.error(error);
+            this.deleteConfirmed(nodes, position + 1, true);
+        });
+    }
+    private removeNodeFromClipboard(node: Node) {
+        let clip=(this.temporaryStorage.get("workspace_clipboard") as ClipboardObject);
+        if(clip==null)
+            return;
+
+        for(let n of clip.nodes){
+            if(n.ref.id==node.ref.id){
+                clip.nodes.splice(clip.nodes.indexOf(n),1);
+            }
+            if(clip.nodes.length==0){
+                console.log("all items in clipboard removed");
+                this.temporaryStorage.remove("workspace_clipboard");
+            }
+        }
+    }
  public uploadDone(event : Node[]){
     if(this.config.instant('licenseDialogOnUpload',false)){
          this.nodeLicense=event;

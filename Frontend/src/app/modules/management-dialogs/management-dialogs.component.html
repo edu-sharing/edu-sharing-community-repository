@@ -12,6 +12,23 @@
   (onCancel)="closeStream()"
   (onDone)="closeStream()"
 ></add-stream>
+<workspace-share *ngIf="nodeShare"
+                 [nodeId]="nodeShare.ref.id"
+                 [sendMessages]="true"
+                 (onLoading)="globalProgress=$event"
+                 (onClose)="closeShare()"
+></workspace-share>
+<workspace-workflow *ngIf="nodeWorkflow"
+                    [nodeId]="nodeWorkflow.ref.id"
+                    (onLoading)="globalProgress=$event"
+                    (onDone)="closeWorkflow(true)"
+                    (onClose)="closeWorkflow()"
+></workspace-workflow>
+<workspace-share-link *ngIf="nodeShareLink"
+                      [node]="nodeShareLink"
+                      (onLoading)="globalProgress=$event"
+                      (onClose)="closeShareLink()"
+></workspace-share-link>
 <node-report
   *ngIf="nodeReport"
   [node]="nodeReport"

@@ -2,6 +2,7 @@ package org.edu_sharing.service.permission;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -388,9 +389,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			if(toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
 				try {
 					 handleService = new HandleService();
-					 handle = handleService.generateHandle(_nodeId, newVersion);
+					 handle = handleService.generateHandle();
+					
 				}catch(HandleServiceNotConfiguredException e) {
 					logger.info("handle server not configured");
+					return;
+				} catch (SQLException e) {
+					logger.error("sql error while creating handle id",e);
+					return;
 				}
 			}
 			

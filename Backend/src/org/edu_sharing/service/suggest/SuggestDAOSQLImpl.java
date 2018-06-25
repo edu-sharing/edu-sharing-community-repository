@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.repository.client.rpc.SQLKeyword;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetBaseProperty;
 

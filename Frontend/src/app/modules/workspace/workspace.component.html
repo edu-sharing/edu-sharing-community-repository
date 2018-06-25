@@ -30,7 +30,7 @@
     [searchPlaceholder]="'WORKSPACE.SEARCH'"
     [canOpen]="mainnav"
     [searchQuery]="searchQuery"
-    (onSearch)="doSearch($event.query)"
+    (onSearch)="doSearch($event)"
   >
 
   </main-nav>
@@ -56,23 +56,7 @@
       <p>{{'WORKSPACE.DROP_FILES' | translate}}</p>
     </div>
   </div>
-  <workspace-share *ngIf="sharedNode"
-  [nodeId]="sharedNode.ref.id"
-  [sendMessages]="true"
-  (onLoading)="globalProgress=$event"
-  (onClose)="sharedNode=null"
-  ></workspace-share>
-  <workspace-workflow *ngIf="workflowNode"
-                         [nodeId]="workflowNode.ref.id"
-                         (onLoading)="globalProgress=$event"
-                      (onDone)="closeWorkflow()"
-                      (onClose)="workflowNode=null"
-  ></workspace-workflow>
-  <workspace-share-link *ngIf="shareLinkNode"
-                         [node]="shareLinkNode"
-                         (onLoading)="globalProgress=$event"
-                         (onClose)="shareLinkNode=null"
-  ></workspace-share-link>
+
 
 
   <div class="addMobile fixed-action-btn"
@@ -202,6 +186,10 @@
 [(nodeMetadata)]="editNodeMetadata"
 [(nodeTemplate)]="editNodeTemplate"
 [(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
+[(nodeWorkflow)]="workflowNode"
+[(nodeShare)]="sharedNode"
+[(nodeDelete)]="deleteNode"
+[(nodeShareLink)]="shareLinkNode"
 [(filesToUpload)]="filesToUpload"
 [fileIsOver]="fileIsOver"
 [(showUploadSelect)]="showUploadSelect"
@@ -212,6 +200,7 @@
 (onUploadFileSelected)="uploadFiles($event)"
 (onUpdateLicense)="updateLicense()"
 (onCloseMetadata)="closeMetadata()"
+(onDelete)="deleteDone()"
 >
 </workspace-management>
 

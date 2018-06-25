@@ -37,18 +37,27 @@ export class ActionbarComponent{
    */
   @Input() backgroundType = 'bright';
   /**
+   * Set a node that will be returned by callbacks (optional, otherwise the return value is always null)
+   * @type {null}
+   */
+  /**
    * Style, currently default or 'flat' if all always visible icons should get a flat look
    * @type {string}
    */
   @Input() style = 'default';
   @Input() node:Node = null;
-
+  /**
+   * Should disabled ("greyed out") options be shown or hidden?
+   * @type {boolean}
+   */
+  @Input() showDisabled = true;
   /**
    * Set the options, see @OptionItem
    * @param options
    */
   @Input() set options(options : OptionItem[]){
     options=UIHelper.filterValidOptions(this.ui,Helper.deepCopyArray(options));
+    options=this.filterDisabled(options);
     if(options==null){
       this.optionsAlways=[];
       this.optionsMenu=[];
@@ -120,4 +129,13 @@ export class ActionbarComponent{
     }
     return result;
   }
+
+    private filterDisabled(options: OptionItem[]) {
+      let filtered=[];
+      for(let option of options){
+          if(option.isEnabled || this.showDisabled)
+              filtered.push(option);
+      }
+      return filtered;
+    }
 }
