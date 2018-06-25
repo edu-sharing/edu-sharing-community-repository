@@ -61,7 +61,6 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow : Node;
     @Output() nodeWorkflowChange = new EventEmitter();
-    @Input() nodeReport : Node;
   @Input() nodeComment : Node;
   @Output() nodeCommentChange = new EventEmitter();
   @Input() nodeReport : Node;
