@@ -602,9 +602,9 @@
 			<group>
 				<id>io_render</id>
 				<views>
+					<view>node_comments_render</view>
 					<view>node_general_render</view>
 					<view>node_contributor_render</view>
-					<view>node_comments_render</view>
 				</views>
 			</group>
 			<group>
