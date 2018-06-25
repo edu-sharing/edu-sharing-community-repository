@@ -183,6 +183,9 @@ export class WorkspaceMetadataComponent  {
   private restoreVersion(restore : Version){
     this.onRestore.emit(restore);
   }
+  canRevert(){
+    return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
+  }
   private isAnimated(){
     return NodeHelper.hasAnimatedPreview(this.nodeObject);
   }

@@ -578,13 +578,22 @@ export class NodeHelper{
     let allFiles=true;
     if(nodes) {
       for (let node of nodes) {
-        if (node.isDirectory)
+        if (node.isDirectory || node.type!=RestConstants.CCM_TYPE_IO)
           allFiles = false;
       }
     }
     return allFiles;
   }
-
+    static allFolders(nodes: Node[]) {
+        let allFolders=true;
+        if(nodes) {
+            for (let node of nodes) {
+                if (!node.isDirectory)
+                    allFolders = false;
+            }
+        }
+        return allFolders;
+    }
   static hasAnimatedPreview(node: Node) {
     return !node.preview.isIcon && (node.mediatype=="file-video" || node.mimetype=="image/gif");
   }
