@@ -21,7 +21,27 @@ hr{
 .dropArea i{
   font-size:60px;
 }
-
+.lti-data{
+  background-color: $actionDialogBackground;
+  margin: 20px $cardPadding*-1;
+  padding:20px $cardPadding;
+  .heading{
+    font-size: 110%;
+    font-weight: bold;
+    padding:10px 0;
+  }
+  .info{
+    color:$textLight;
+    padding:5px 0;
+    white-space: pre-line;
+  }
+  .info-privacy{
+    font-size: 90%;
+  }
+  .inputs{
+    padding-top: 15px;
+  }
+}
 .link{
   width:100%;
   .linkLabel{

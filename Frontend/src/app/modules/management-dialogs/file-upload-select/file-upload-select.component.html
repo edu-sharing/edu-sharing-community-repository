@@ -13,7 +13,7 @@
             <hr>
             <div class="link"><div class="linkLabel"><i class="material-icons align-icon">link</i> <span class="linkTitle">{{ 'WORKSPACE.SELECT_LINK' | translate}}</span></div>
                 <input type="text" [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://">
-                <div class="lti">
+                <div class="lti" *ngIf="showLti">
                     <div class="switch">
                         <label>
                             <input type="checkbox" [disabled]="!ltiAllowed" [(ngModel)]="ltiActivated">
@@ -21,10 +21,23 @@
                             {{ 'WORKSPACE.ADD_OBJECT_LTI' | translate}}
                         </label>
                     </div>
+                    <div class="lti-data" *ngIf="ltiAllowed && ltiActivated">
+                        <div class="heading">{{'WORKSPACE.LTI_HEADING' | translate}}</div>
+                        <div class="info">{{'WORKSPACE.LTI_INFO' | translate}}</div>
+                        <div class="inputs">
+                            <label for="consumerKey">{{'WORKSPACE.LTI_CONSUMER_KEY' | translate}}</label>
+                            <input type="text" id="consumerKey" [(ngModel)]="ltiConsumerKey">
+                            <label for="sharedSecret">{{'WORKSPACE.LTI_SHARED_SECRET' | translate}}</label>
+                            <input type="text" id="sharedSecret" [(ngModel)]="ltiSharedSecret">
+                        </div>
+                        <div class="info info-privacy" innerHTML="{{'WORKSPACE.LTI_INFO_PRIVACY' | translate}}"></div>
+                    </div>
+                    <!--
                     <div *ngIf="ltiActivated && ltiAllowed && ltiTool" class="toolInfo">
                         <img [src]="ltiTool.preview.url+'&crop=true&width=50&height=50'">
                         <div class="title">{{ltiTool.title}}</div>
-                </div>
+                    </div>
+                    -->
             </div>
             <div *ngIf="showPicker" class="location">
                 <div class="caption">{{'WORKSPACE.FILE_LOCATION' | translate}}</div>
@@ -35,6 +48,7 @@
                 ></breadcrumbs>
             </div>
         </div>
+    </div>
     </div>
     <div class="card-action">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="setLink()">{{'OK' | translate }}</a>

@@ -21,9 +21,16 @@ export class WorkspaceFileUploadSelectComponent  {
   @ViewChild('fileSelect') file : ElementRef;
   @Input() isFileOver=false;
   @Input() showPicker=false;
+  /**
+   * Show the lti option and support generation of lti files?
+   * @type {boolean}
+   */
+  @Input() showLti=true;
   private breadcrumbs: Node[];
   private ltiAllowed:boolean;
   private ltiActivated:boolean;
+  private ltiConsumerKey:string;
+  private ltiSharedSecret:string;
   private ltiTool: Node;
     private _link: string;
   @Input() set parent(parent:string){
@@ -50,7 +57,7 @@ export class WorkspaceFileUploadSelectComponent  {
     this.onFileSelected.emit(event.target.files);
   }
   public setLink(){
-    this.onLinkSelected.emit(this._link);
+    this.onLinkSelected.emit({link:this._link,lti:this.ltiActivated,consumerKey:this.ltiConsumerKey,sharedSecret:this.ltiSharedSecret});
   }
   public get link(){
     return this._link;
@@ -62,14 +69,15 @@ export class WorkspaceFileUploadSelectComponent  {
   public setState(link: string){
     link=link.trim();
     this.disabled=!link;
-    this.ltiAllowed=false;
+    this.ltiAllowed=true;
     if(this.cleanupUrlForLti(link)) {
         this.searchService.search([{
             property: "url",
             values: [this.cleanupUrlForLti(link)]
         }], [], null, RestConstants.CONTENT_TYPE_ALL, RestConstants.HOME_REPOSITORY, RestConstants.DEFAULT, [], 'tool_instances')
             .subscribe((result: NodeList) => {
-                this.ltiAllowed = result.nodes.length > 0;
+                // for now, always allow
+                this.ltiAllowed = result.nodes.length > 0 || true;
                 if(result.nodes.length){
                   this.nodeService.getNodeMetadata(result.nodes[0].parent.id,[],result.nodes[0].parent.repo).subscribe((data:NodeWrapper)=>{
                     console.log(data.node);
@@ -89,6 +97,7 @@ export class WorkspaceFileUploadSelectComponent  {
     private searchService:RestSearchService,
   ){
     this.parent=RestConstants.USERHOME;
+    this.setState("");
   }
 
     private cleanupUrlForLti(link: string) {
