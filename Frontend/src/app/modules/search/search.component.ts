@@ -626,11 +626,13 @@ export class SearchComponent {
       let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
         this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
       });
-      collection.showCallback = (node: Node) => {
-        return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node,this.allRepositories);
-      };
-      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
-        options.push(collection);
+      if(collection) {
+          collection.showCallback = (node: Node) => {
+              return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node, this.allRepositories);
+          };
+          if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
+              options.push(collection);
+      }
 
       let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,this.connector,(node:Node)=>this.addToStream(node));
       if (stream)

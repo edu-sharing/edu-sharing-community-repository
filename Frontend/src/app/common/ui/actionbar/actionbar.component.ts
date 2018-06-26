@@ -131,6 +131,8 @@ export class ActionbarComponent{
   }
 
     private filterDisabled(options: OptionItem[]) {
+      if(options==null)
+          return null;
       let filtered=[];
       for(let option of options){
           if(option.isEnabled || this.showDisabled)
