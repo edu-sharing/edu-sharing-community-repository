@@ -5,6 +5,7 @@ import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {RestSearchService} from '../../../common/rest/services/rest-search.service';
+import {Toast} from '../../../common/ui/toast';
 
 @Component({
   selector: 'workspace-file-upload-select',
@@ -57,6 +58,19 @@ export class WorkspaceFileUploadSelectComponent  {
     this.onFileSelected.emit(event.target.files);
   }
   public setLink(){
+    if(this.ltiActivated && (!this.ltiConsumerKey || !this.ltiSharedSecret)){
+      let params={
+        link:{
+          caption:'WORKSPACE.TOAST.LTI_FIELDS_REQUIRED_LINK',
+          callback:()=>{
+            this.ltiActivated=false;
+            this.setLink();
+          }
+        }
+      };
+      this.toast.error(null,'WORKSPACE.TOAST.LTI_FIELDS_REQUIRED',null,null,null,params);
+      return;
+    }
     this.onLinkSelected.emit({link:this._link,lti:this.ltiActivated,consumerKey:this.ltiConsumerKey,sharedSecret:this.ltiSharedSecret});
   }
   public get link(){
@@ -95,6 +109,7 @@ export class WorkspaceFileUploadSelectComponent  {
   public constructor(
     private nodeService:RestNodeService,
     private searchService:RestSearchService,
+    private toast:Toast,
   ){
     this.parent=RestConstants.USERHOME;
     this.setState("");

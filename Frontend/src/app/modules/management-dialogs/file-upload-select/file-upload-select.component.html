@@ -1,6 +1,6 @@
 <div class="dialog darken" [@fade]="this"></div>
 <input #fileSelect type="file" style="display:none" id="fileSelect" multiple (change)="filesSelected($event)" />
-<div class="card center-card card-action" [@cardAnimation]="this">
+<div class="card card-high center-card card-action" [@cardAnimation]="this">
     <div class="card-content">
         <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
         <div class="card-title">{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}</div>
