@@ -31,6 +31,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 
 @Path("/stream/v1")
@@ -64,11 +65,13 @@ public class StreamApi {
 		    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS) @QueryParam("maxItems") Integer maxItems,
 		    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
 		    @ApiParam(value = "map with property + value to search", defaultValue="0") Map<String,String> properties,
+		    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES+", currently supported: created, priority, default: priority desc, created desc") @QueryParam("sortProperties") List<String> sortProperties,
+		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Context HttpServletRequest req) {
 	    	
 	    	try {
 	    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    		StreamList response = StreamDao.search(repoDao,status,properties,query, skipCount,maxItems);
+	    		StreamList response = StreamDao.search(repoDao,status,properties,query, skipCount,maxItems,new SortDefinition(sortProperties,sortAscending));
 		    	return Response.status(Response.Status.OK).entity(response).build();
 	    	}catch(Throwable t) {
 	    		return ErrorResponse.createResponse(t);
@@ -181,7 +184,7 @@ public class StreamApi {
     		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
 
-	    public Response addEntry(
+	    public Response updateEntry(
 	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = "entry id to update",required=true ) @PathParam("entry") String entryId,
 	    	@ApiParam(value = "authority to set/change status",required=true ) @QueryParam("authority") String authority,

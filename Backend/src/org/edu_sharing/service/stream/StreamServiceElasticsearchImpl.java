@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.join.ScoreMode;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.model.ContentEntry;
 import org.edu_sharing.service.stream.model.ContentEntry.Audience.STATUS;
 import org.edu_sharing.service.stream.model.ScoreResult;
@@ -112,6 +113,8 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 					startObject("properties").
 					startObject("created").field("type", "date").endObject().
 					startObject("modified").field("type", "date").endObject().
+					startObject("title").field("type", "keyword").endObject().
+					startObject("description").field("type", "text").endObject().
 					startObject("priority").field("type", "integer").endObject().
 					startObject("audience").field("type", "nested").
 						startObject("properties").
@@ -313,8 +316,15 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 			query.must(QueryBuilders.multiMatchQuery(request.search,"description","title"));
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		searchSourceBuilder.query(query);
-		searchSourceBuilder.sort("priority", SortOrder.DESC);
-		searchSourceBuilder.sort("created", SortOrder.DESC);
+		if(request.sortDefinition!=null && request.sortDefinition.hasContent()){
+			for(SortDefinition.SortDefinitionEntry sort : request.sortDefinition.getSortDefinitionEntries()){
+				searchSourceBuilder.sort(sort.getProperty(),sort.isAscending() ? SortOrder.ASC : SortOrder.DESC);
+			}
+		}
+		else {
+			searchSourceBuilder.sort("priority", SortOrder.DESC);
+			searchSourceBuilder.sort("created", SortOrder.DESC);
+		}
 		searchSourceBuilder.size(request.size);
 		searchSourceBuilder.from(request.offset);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);

@@ -17,6 +17,7 @@ import org.edu_sharing.restservices.stream.v1.model.StreamEntryInput;
 import org.edu_sharing.restservices.stream.v1.model.StreamList;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.stream.StreamService;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.stream.StreamServiceHelper;
@@ -91,7 +92,7 @@ public class StreamDao {
 		return entry;
 	}
 
-	public static StreamList search(RepositoryDao repoDao,String status,Map<String,String> property, String query, int offset, int maxItems) throws DAOException{
+	public static StreamList search(RepositoryDao repoDao, String status, Map<String, String> property, String query, int offset, int maxItems, SortDefinition sortDefinition) throws DAOException{
 		try {
 			StreamService service=StreamServiceFactory.getStreamService();
 			StreamList result=new StreamList();
@@ -103,6 +104,7 @@ public class StreamDao {
 				request.properties=property;
 			if(query!=null && !query.isEmpty())
 				request.search=query;
+			request.sortDefinition=sortDefinition;
 			StreamSearchResult response = service.search(request);
 			List<StreamEntry> list=new ArrayList<>();
 			for(ContentEntry contentEntry : response.results) {

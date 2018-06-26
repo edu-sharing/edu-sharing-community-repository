@@ -1,5 +1,7 @@
 package org.edu_sharing.service.stream.model;
 
+import org.edu_sharing.service.search.model.SortDefinition;
+
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +12,9 @@ public class StreamSearchRequest {
 	public String search;
 	public int offset=0;
 	public int size=0;
-	public StreamSearchRequest(List<String> authority,ContentEntry.Audience.STATUS status) {
+	public SortDefinition sortDefinition;
+
+    public StreamSearchRequest(List<String> authority,ContentEntry.Audience.STATUS status) {
 		this.authority=authority;
 		this.status=status;
 	}
