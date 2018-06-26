@@ -617,11 +617,13 @@ export class SearchComponent {
       let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
         this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
       });
-      collection.showCallback = (node: Node) => {
-        return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node,this.allRepositories);
-      };
-      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
-        options.push(collection);
+      if(collection) {
+          collection.showCallback = (node: Node) => {
+              return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node, this.allRepositories);
+          };
+          if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
+              options.push(collection);
+      }
 
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));
