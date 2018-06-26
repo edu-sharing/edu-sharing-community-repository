@@ -15,6 +15,8 @@ import {UIAnimation} from "../../common/ui/ui-animation";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
 import {Router} from '@angular/router';
+import {UIConstants} from "../../common/ui/ui-constants";
+import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
 
 @Component({
   selector: 'workspace-management',
@@ -43,12 +45,14 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() nodeReport : Node;
   @Output() nodeReportChange = new EventEmitter();
   @Input() nodeMetadata : Node;
-  @Input() nodeContributor : Node;
-  @Output() nodeContributorChange = new EventEmitter();
-  @Output() nodeMetadataChange = new EventEmitter();
+    @Output() nodeMetadataChange = new EventEmitter();
+    @Input() nodeTemplate : Node;
+    @Output() nodeTemplateChange = new EventEmitter();
+    @Input() nodeContributor : Node;
+    @Output() nodeContributorChange = new EventEmitter();
   @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
-  @Input() nodeMetadataAllowReplace : boolean;
+  @Input() nodeMetadataAllowReplace : Boolean;
   @Output() onClose=new EventEmitter();
   @Output() onCreate=new EventEmitter();
   @Output() onRefresh=new EventEmitter();
@@ -78,36 +82,49 @@ export class WorkspaceManagementDialogsComponent  {
         if(this.mdsRef.handleKeyboardEvent(event))
           return;
         this.closeEditor(false);
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.addToCollection!=null){
         this.cancelAddToCollection();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
+        if(this.nodeTemplate!=null){
+            this.closeTemplate();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
       if(this.nodeContributor!=null){
         this.closeContributor();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.nodeLicense!=null){
         this.closeLicense();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.showLtiTools){
         this.closeLtiTools();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.nodeReport!=null){
         this.closeReport();
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
       if(this.ltiObject){
         this.ltiObject=null;
+        event.preventDefault();
         event.stopPropagation();
         return;
       }
@@ -116,6 +133,7 @@ export class WorkspaceManagementDialogsComponent  {
   public constructor(
     private nodeService:RestNodeService,
     private toolService:RestToolService,
+    private temporaryStorage:TemporaryStorageService,
     private collectionService:RestCollectionService,
     private translate:TranslateService,
     private config:ConfigurationService,
@@ -153,6 +171,7 @@ export class WorkspaceManagementDialogsComponent  {
     let prop:any={};
     link=UIHelper.addHttpIfRequired(link);
     prop[RestConstants.CCM_PROP_IO_WWWURL]=[link];
+    prop[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
     this.closeUploadSelect();
     this.globalProgress=true;
     this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
@@ -260,6 +279,11 @@ export class WorkspaceManagementDialogsComponent  {
     this.addToCollectionChange.emit(null);
     this.onCloseAddToCollection.emit();
   }
+  public addToCollectionCreate(){
+      this.temporaryStorage.set(TemporaryStorageService.COLLECTION_ADD_NODES,this.addToCollection);
+      this.router.navigate([UIConstants.ROUTER_PREFIX,"collections","collection","new",RestConstants.ROOT]);
+      this.cancelAddToCollection();
+  }
   public addToCollectionList(collection:Collection,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
     console.log(collection);
     if(!force && (collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
@@ -290,5 +314,10 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeMetadataAllowReplace=false;
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);
+    }
+
+    closeTemplate() {
+        this.nodeTemplate = null;
+        this.nodeTemplateChange.emit(null);
     }
 }

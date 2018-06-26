@@ -42,6 +42,8 @@
   import {SpinnerSmallComponent} from "./common/ui/spinner-small/spinner-small.component";
   import {KeysPipe} from './common/keys.pipe';
   import {InfiniteScrollDirective} from './common/ui/infinite-scroll.directive';
+  import {NodeInfoComponent} from "./common/ui/node-info/node-info.component";
+  import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -71,6 +73,7 @@ export const DECLARATIONS = [
       CollectionChooserComponent,
       BreadcrumbsComponent,
       ActionbarComponent,
+      NodeInfoComponent,
       SmallCollectionComponent,
       MainNavComponent,
       UserProfileComponent,
@@ -87,5 +90,6 @@ export const DECLARATIONS = [
       ToucheventDirective,
       BannerComponent,
       InfiniteScrollDirective,
-      KeysPipe
+      KeysPipe,
+      CookieInfoComponent
     ];

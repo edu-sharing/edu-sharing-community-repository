@@ -26,6 +26,12 @@ export class ActionbarHelper{
         option.isEnabled=option.enabledCallback(null);
       }
     }
+    if(type=='NODE_TEMPLATE') {
+      if (nodes && nodes.length==1 && NodeHelper.allFolders(nodes)) {
+          option = new OptionItem("WORKSPACE.OPTION.TEMPLATE", "assignment_turned_in", callback);
+          option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
+      }
+    }
     if(type=='ADD_TO_COLLECTION') {
       if (nodes && nodes.length && NodeHelper.allFiles(nodes)) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
@@ -35,6 +41,9 @@ export class ActionbarHelper{
           let list = ActionbarHelper.getNodes(nodes, node);
           return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH);
         }
+        option.disabledCallback = () =>{
+          connector.getToastService().error(null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
+        };
       }
     }
     if(type=='INVITE'){
@@ -46,9 +55,9 @@ export class ActionbarHelper{
       }
     }
     if(type=='SHARE_LINK'){
-      if(nodes && !nodes[0].isDirectory) {
+      if(nodes && !nodes[0].isDirectory && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH) {
         option = new OptionItem("WORKSPACE.OPTION.SHARE_LINK", "link", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE) && connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
+        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS) && connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
       }
     }
     return option;

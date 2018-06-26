@@ -24,6 +24,7 @@ export class SearchService {
   resultCount:any={};
   sidenavSet = false;
   sidenavOpened = false;
+  showspinner: boolean;
   constructor() {}
   clear(){
     this.searchTerm="";

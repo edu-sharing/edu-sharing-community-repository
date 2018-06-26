@@ -35,6 +35,8 @@ import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {Helper} from "../../common/helper";
 import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {DateHelper} from '../../common/ui/DateHelper';
+import {CordovaService} from "../../common/services/cordova.service";
+import {EventListener} from "../../common/services/frame-events.service";
 
 @Component({
     selector: 'workspace-main',
@@ -48,7 +50,9 @@ import {DateHelper} from '../../common/ui/DateHelper';
         trigger('fromRight',UIAnimation.fromRight())
     ]
 })
-export class WorkspaceMainComponent{
+export class WorkspaceMainComponent implements EventListener{
+    private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
+    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
     private isRootFolder : boolean;
     private homeDirectory : string;
     private sharedFolders : Node[]=[];
@@ -56,12 +60,11 @@ export class WorkspaceMainComponent{
     private parameterNode : Node;
     private metadataNode : String;
     private root = "MY_FILES";
-    private static VALID_ROOTS=['MY_FILES','SHARED_FILES','MY_SHARED_FILES','TO_ME_SHARED_FILES','WORKFLOW_RECEIVE','RECYCLE'];
-    private static VALID_ROOTS_NODES=[RestConstants.USERHOME,'-shared_files-','-my_shared_files-','-to_me_shared_files-'];
+
     private explorerOptions : OptionItem[]=[];
     private actionOptions : OptionItem[]=[];
     private selection : Node[]=[];
-    public fileIsOver: boolean = false;
+    public fileIsOver = false;
 
     private dialogTitle : string;
     private dialogCancelable = false;
@@ -82,10 +85,11 @@ export class WorkspaceMainComponent{
     private filesToUpload : FileList;
     public globalProgress = false;
     public editNodeMetadata : Node;
+    public editNodeTemplate : Node;
     public editNodeDeleteOnCancel = false;
     private createMds : string;
     private editNodeLicense : Node[];
-    private editNodeAllowReplace : boolean;
+    private editNodeAllowReplace : Boolean;
     private nodeDisplayedVersion : string;
     private createAllowed : boolean;
     private currentFolder : any|Node;
@@ -119,9 +123,7 @@ export class WorkspaceMainComponent{
     public showLtiTools=false;
     private oldParams: Params;
     private selectedNodeTree: string;
-    private hideDialog() : void{
-        this.dialogTitle=null;
-    }
+    private nodeDebug: Node;
     private sharedNode : Node;
     public contributorNode : Node;
     public shareLinkNode : Node;
@@ -205,6 +207,11 @@ export class WorkspaceMainComponent{
             event.stopPropagation();
         }
     }
+    onEvent(event: string, data: any): void {
+        if(event==FrameEventsService.EVENT_REFRESH){
+            this.refresh();
+        }
+    }
     constructor(private toast : Toast,
                 private route : ActivatedRoute,
                 private router : Router,
@@ -222,18 +229,44 @@ export class WorkspaceMainComponent{
                 private title : Title,
                 private http : Http,
                 private event : FrameEventsService,
-                private connector : RestConnectorService) {
+                private connector : RestConnectorService,
+                private cordova : CordovaService
+    ) {
+        this.event.addListener(this);
         Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
             UIHelper.setTitle('WORKSPACE.TITLE',title,translate,config);
+            this.initialize();
         });
         this.connector.setRoute(this.route);
         this.globalProgress=true;
-        this.initialize();
         this.explorerOptions=this.getOptions([new Node()],true);
         //this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", (node:Node) => this.downloadNode(node)));
     }
+    private uploadCamera(event:any){
+        this.filesToUpload=event.target.files;
+    }
+    private hideDialog() : void{
+        this.dialogTitle=null;
+    }
+    private openCamera(){
+        this.cordova.getPhotoFromCamera((data:any)=>{
+            console.log(data);
+            let name=this.translate.instant('SHARE_APP.IMAGE')+" "+DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+".jpg";
+            let blob:any=Helper.base64toBlob(data,"image/jpeg");
+            blob.name=name;
+            let list:any={};
+            list.item=(i:number)=>{
+                return blob;
+            }
+            list.length=1;
+            this.filesToUpload=list;
+        },(error:any)=>{
+            console.warn(error);
+            //this.toast.error(error);
+        });
+    }
     private showTimeout(){
-        return this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
+        return !this.cordova.isRunningCordova() && this.timeIsValid && this.dialogTitle!='WORKSPACE.AUTOLOGOUT' &&
             (this.isSafe || !this.isSafe && this.config.instant('sessionExpiredDialog',{show:true}).show);
     }
     private updateTimeout(){
@@ -274,7 +307,9 @@ export class WorkspaceMainComponent{
         if(event.type.editorType){
             prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
         }
-        var win=window.open("",'_blank');
+        let win:any;
+        if(!this.cordova.isRunningCordova())
+            win=window.open("");
         this.node.createNode(this.currentFolder.ref.id,RestConstants.CCM_TYPE_IO,[],prop,false).subscribe(
             (data : NodeWrapper)=>{
                 this.editConnector(data.node,event.type,win,this.createConnectorType);
@@ -411,7 +446,7 @@ export class WorkspaceMainComponent{
                             this.route.queryParams.subscribe((params: Params) => {
                                 let needsUpdate=false;
                                 if(this.oldParams){
-                                    for(var key in params){
+                                    for(let key of Object.keys(this.oldParams).concat(Object.keys(params))){
                                         if(params[key]!=this.oldParams[key] && key!='viewType'){
                                             console.log("changed "+key);
                                             needsUpdate=true;
@@ -470,8 +505,11 @@ export class WorkspaceMainComponent{
             this.setSelection([this.parameterNode]);
     }
 
-    public doSearch(query:string){
-        this.routeTo(this.root,null,query);
+    public doSearch(query:any){
+        this.routeTo(this.root,null,query.query);
+        if(!query.cleared){
+            this.ui.hideKeyboardIfMobile();
+        }
     }
     private doSearchFromRoute(query:string){
         this.searchQuery=query;
@@ -508,7 +546,7 @@ export class WorkspaceMainComponent{
     private editNode(node: Node) {
         let list=this.getNodeList(node);
         this.editNodeMetadata=list[0];
-        this.editNodeAllowReplace=true;
+        this.editNodeAllowReplace=new Boolean(true);
     }
     private editLicense(node: Node) {
         let list=this.getNodeList(node);
@@ -656,7 +694,7 @@ export class WorkspaceMainComponent{
     }
     private downloadNode(node: Node) {
         let list = this.getNodeList(node);
-        NodeHelper.downloadNodes(this.connector,list);
+        NodeHelper.downloadNodes(this.toast,this.connector,list);
     }
     private displayNode(event:Node){
         let list = this.getNodeList(event);
@@ -746,13 +784,24 @@ export class WorkspaceMainComponent{
         this.workflowNode=null;
         this.refresh();
     }
+    public debugNode(node:Node){
+        this.nodeDebug=this.getNodeList(node)[0];
+        /*
+        this.session.set("admin_lucene",{
+            query:'@sys\:node-uuid:"'+node.ref.id+'"',
+            offset:0,
+            count:10,
+        });
+        this.router.navigate([UIConstants.ROUTER_PREFIX,"admin"],{queryParams:{mode:'BROWSER'}});
+        */
+    }
     public getOptions(nodes : Node[],fromList:boolean) : OptionItem[] {
         if(nodes && !nodes.length)
             nodes=null;
         let options: OptionItem[] = [];
 
         let allFiles = NodeHelper.allFiles(nodes);
-
+        let savedSearch = nodes && nodes.length && nodes[0].type==RestConstants.CCM_TYPE_SAVED_SEARCH;
         let clip=(this.storage.get("workspace_clipboard") as ClipboardObject);
         if(this.currentFolder && !nodes && !this.searchQuery && clip && ((!clip.sourceNode || clip.sourceNode.ref.id!=this.currentFolder.ref.id) || clip.copy) && this.createAllowed) {
             options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
@@ -766,9 +815,12 @@ export class WorkspaceMainComponent{
                 });
                 options.push(apply);
             }
-
+            if(this.isAdmin){
+                let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
+                options.push(debug);
+            }
             let open = new OptionItem("WORKSPACE.OPTION.SHOW", "remove_red_eye", (node: Node) => this.displayNode(node));
-            if (!nodes[0].isDirectory)
+            if (!nodes[0].isDirectory && !savedSearch)
                 options.push(open);
         }
         let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", (node: Node) => this.editConnector(node));
@@ -782,7 +834,7 @@ export class WorkspaceMainComponent{
         else if(nodes && nodes.length==1 && RestConnectorsService.connectorSupportsEdit(this.connectorList,nodes[0])){
             options.push(view);
         }
-        if(nodes && nodes.length==1){
+        if(nodes && nodes.length==1 && !savedSearch){
             let edit=new OptionItem("WORKSPACE.OPTION.EDIT", "info_outline", (node: Node) => this.editNode(node));
             edit.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
             edit.isSeperateBottom = true;
@@ -796,6 +848,9 @@ export class WorkspaceMainComponent{
         }
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
+            let template = ActionbarHelper.createOptionIfPossible('NODE_TEMPLATE',nodes,this.connector,(node:Node)=>this.nodeTemplate(node));
+            if(template)
+                options.push(template);
             share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,this.connector,(node: Node) => this.shareNode(node));
             if(share) {
                 share.isEnabled = share.isEnabled && (
@@ -816,16 +871,17 @@ export class WorkspaceMainComponent{
             if (license.isEnabled)
                 options.push(license);
         }
-        if (nodes && nodes.length == 1) {
+        if (nodes && nodes.length == 1 && !savedSearch) {
             let contributor=new OptionItem("WORKSPACE.OPTION.CONTRIBUTOR","group",(node:Node)=>this.manageContributorsNode(node));
             contributor.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
             if(nodes && !nodes[0].isDirectory && !this.isSafe)
                 options.push(contributor);
-            let workflow=new OptionItem("WORKSPACE.OPTION.WORKFLOW","swap_calls",(node:Node)=>this.manageWorkflowNode(node));
-            workflow.isEnabled=share.isEnabled;
-            if(nodes && !nodes[0].isDirectory && this.supportsWorkflow())
-                options.push(workflow);
-
+            if(share) {
+                let workflow = new OptionItem("WORKSPACE.OPTION.WORKFLOW", "swap_calls", (node: Node) => this.manageWorkflowNode(node));
+                workflow.isEnabled = share.isEnabled;
+                if (nodes && !nodes[0].isDirectory && this.supportsWorkflow() && !savedSearch)
+                    options.push(workflow);
+            }
 
             this.infoToggle=new OptionItem("WORKSPACE.OPTION.METADATA", "info_outline", (node: Node) => this.openMetadata(node));
             this.infoToggle.isToggle=true;
@@ -970,8 +1026,12 @@ export class WorkspaceMainComponent{
         this.searchQuery=null;
         this.actionOptions=null;
         let id="";
+        let length=this.path ? this.path.length : 0;
         if(position>0)
             id=this.path[position-1].ref.id;
+        else if(length>0){
+            id=null;
+        }
         else {
             this.showSelectRoot = true;
             return;
@@ -998,7 +1058,7 @@ export class WorkspaceMainComponent{
             this.currentFolder=folder;
             this.currentFolderRef=ref;
             this.searchQuery=search;
-        },10);
+        });
     }
 
     private doRestoreVersion(version: Version) : void {
@@ -1039,6 +1099,9 @@ export class WorkspaceMainComponent{
         });
     }
 
+    private nodeTemplate(node: Node){
+        this.editNodeTemplate = this.getNodeList(node)[0];
+    }
     private addToCollection(node: Node) {
         let nodes=this.getNodeList(node);
         this.addNodesToCollection=nodes;

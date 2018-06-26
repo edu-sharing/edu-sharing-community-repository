@@ -162,7 +162,7 @@ public class RenderingProxy extends HttpServlet {
 			}
 			
 			String paramVersion=req.getParameter("version");
-			String version="/"+paramVersion;
+			String version=paramVersion;
 			if(paramVersion==null || !StringUtils.isNumeric(paramVersion)) {
 				logger.warn("parameter version missing, will use latest (-1)");
 				version="";
@@ -178,7 +178,7 @@ public class RenderingProxy extends HttpServlet {
 			if(req.getParameter("closeOnBack")!=null){
 				closeOnBack="?closeOnBack="+req.getParameter("closeOnBack");
 			}
-			String urlWindow = URLTool.getNgRenderNodeUrl(nodeId)+version+closeOnBack;
+			String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version)+closeOnBack;
 			resp.sendRedirect(urlWindow);
 			return;
 		}

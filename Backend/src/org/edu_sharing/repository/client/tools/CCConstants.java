@@ -292,6 +292,8 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_USERNAME = "{http://www.alfresco.org/model/content/1.0}userName";
 	
 	public final static String CM_PROP_PERSON_ESORIGINALUID = "{http://www.alfresco.org/model/content/1.0}esoriginaluid";
+	
+	public final static String CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION = "{http://www.alfresco.org/model/content/1.0}eduSchoolPrimaryAffiliation";
 
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
 
@@ -372,8 +374,12 @@ public class CCConstants {
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPTYPE = "{http://www.campuscontent.de/model/1.0}groupType";
-
+	
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPSOURCE = "{http://www.campuscontent.de/model/1.0}groupSource";
+
+	public final static String CCM_PROP_AUTHOR_FREETEXT = "{http://www.campuscontent.de/model/1.0}author_freetext";
+
+	public final static String CCM_PROP_LINKTYPE = "{http://www.campuscontent.de/model/1.0}linktype";
 
 	public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 
@@ -384,6 +390,13 @@ public class CCConstants {
 	public static final String CCM_PROP_WF_RECEIVER = "{http://www.campuscontent.de/model/1.0}wf_receiver";
 
 	public static final String CCM_PROP_WF_STATUS = "{http://www.campuscontent.de/model/1.0}wf_status";
+
+
+	public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
+	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";
+	public static String CCM_WF_STATUS_VALUE_HASFLAWS="300_hasflaws";
+	public static String CCM_WF_STATUS_VALUE_CHECKED="400_checked";
+
 
 	public static final String CCM_PROP_WF_INSTRUCTIONS = "{http://www.campuscontent.de/model/1.0}wf_instructions";
 
@@ -404,6 +417,7 @@ public class CCConstants {
 	/* Templates */
 
 	public final static String CCM_ASPECT_METADATA_PRESETTING ="{http://www.campuscontent.de/model/1.0}metadataPresetting";
+	public final static String CCM_ASPECT_METADATA_PRESETTING_TEMPLATE ="{http://www.campuscontent.de/model/1.0}metadataPresettingTemplate";
 
 
 	/**
@@ -420,6 +434,8 @@ public class CCConstants {
 	public final static String CCM_PROP_SCOPE_TYPE = "{http://www.campuscontent.de/model/1.0}scopetype";
 
 	public final static String CCM_VALUE_SCOPETYPE_GLOBAL = "global";
+
+	public final static String CCM_PROP_METADATA_PRESETTING_STATUS ="{http://www.campuscontent.de/model/1.0}metadataPresettingStatus";
 
 	public final static String CCM_PROP_METADATA_PRESETTING_PROPERTIES ="{http://www.campuscontent.de/model/1.0}metadataPresettingProperties";
 
@@ -499,6 +515,7 @@ public class CCConstants {
 
 	//LOM Replication:
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE  = "{http://www.campuscontent.de/model/1.0}educationallearningresourcetype";
+	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE_AGG  = "{http://www.campuscontent.de/model/1.0}educationallearningresourcetype_agg";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_CONTEXT  = "{http://www.campuscontent.de/model/1.0}educationalcontext";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALLEARNINGTIME  = "{http://www.campuscontent.de/model/1.0}educationaltypicallearningtime";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM  = "{http://www.campuscontent.de/model/1.0}educationaltypicalagerange_from";
@@ -506,6 +523,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_INTERACTIVITYTYPE = "{http://www.campuscontent.de/model/1.0}educationalinteractivitytype";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE = "{http://www.campuscontent.de/model/1.0}educationaltypicalagerange";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE = "{http://www.campuscontent.de/model/1.0}educationalintendedenduserrole";
+	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_SCHEMA_RELATION = "{http://www.campuscontent.de/model/1.0}schema_relation";
 	public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LANGUAGE = "{http://www.campuscontent.de/model/1.0}educationallanguage";
 
 	public final static String CCM_PROP_IO_REPL_TAXON_ENTRY  = "{http://www.campuscontent.de/model/1.0}taxonentry";
@@ -611,6 +629,19 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_COMPETENCE_DIGITAL2 = "{http://www.campuscontent.de/model/1.0}competence_digital2";
 
+	public final static String CCM_PROP_IO_SEARCH_CONTEXT = "{http://www.campuscontent.de/model/1.0}search_context";
+	
+	public final static String CCM_PROP_IO_EDITORIAL_STATE = "{http://www.campuscontent.de/model/1.0}editorial_state";
+	
+	/**
+	 * published
+	 */
+	public final static String CCM_ASPECT_PUBLISHED = "{http://www.campuscontent.de/model/1.0}published";
+	
+	public final static String CCM_PROP_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";
+	
+	public final static String CCM_PROP_PUBLISHED_HANDLE_ID = "{http://www.campuscontent.de/model/1.0}published_handle_id";	
+	
 	/**
 	 * share props
 	 */
@@ -678,6 +709,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING = "TOOLPERMISSION_COLLECTION_PINNING";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_CONFIDENTAL = "TOOLPERMISSION_CONFIDENTAL";
+	
+	public final static String CCM_VALUE_TOOLPERMISSION_HANDLESERVICE = "TOOLPERMISSION_HANDLESERVICE";
 
 	/**
 	 * dynamic generated properties
@@ -718,8 +751,10 @@ public class CCConstants {
 
 	public final static String TOOL_HOMEFOLDER = "EDU_TOOL";
 
+    public static final String TEMPLATE_NODE_NAME = ".METADATA_TEMPLATE";
 
-	private static HashMap<String,String> lifecycleContributerPropsMap = new HashMap<String,String>();
+
+    private static HashMap<String,String> lifecycleContributerPropsMap = new HashMap<String,String>();
 
 	public static HashMap<String, String> getLifecycleContributerPropsMap() {
 		if(lifecycleContributerPropsMap.size() == 0){
@@ -851,6 +886,8 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPLICATIONSOURCE = "{http://www.campuscontent.de/model/1.0}replicationsource";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCEID = "{http://www.campuscontent.de/model/1.0}replicationsourceid";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestamp";
+	public final static String CCM_PROP_IO_REPLICATION_MODIFIED = "{http://www.campuscontent.de/model/1.0}replicationmodified";
+	
 	//replicationsourcetimestampFORMATED is an generated prop, to keep the original
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMPFORMATED = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestampFORMATED";
 
@@ -985,6 +1022,7 @@ public class CCConstants {
 
 	public final static String CCM_PROP_MAP_COLLECTIONTYPE = "{http://www.campuscontent.de/model/1.0}collectiontype";
 	public final static String CCM_PROP_MAP_COLLECTIONSCOPE = "{http://www.campuscontent.de/model/1.0}collectionscope";
+	public final static String CCM_PROP_MAP_COLLECTIONREMOTEID = "{http://www.campuscontent.de/model/1.0}collectionremoteid";
 
 	public final static String CCM_PROP_MAP_COLLECTIONLEVEL0 = "{http://www.campuscontent.de/model/1.0}collectionlevel0";
 
@@ -997,6 +1035,7 @@ public class CCConstants {
 	public final static String CCM_PROP_COLLECTION_ORDERED_POSITION = "{http://www.campuscontent.de/model/1.0}collection_ordered_position";
 
 	public final static String CCM_VALUE_LINK_LINKTYPE_CHAMELEON = "CMchameleon";
+	public final static String CCM_VALUE_LINK_LINKTYPE_USER_GENERATED = "USER_GENERATED";
 
 	public final static String CCM_PROP_MAP_TYPE = "{http://www.campuscontent.de/model/1.0}maptype";
 	public final static String CCM_VALUE_MAP_TYPE_FAVORITE = "FAVORITE";
@@ -1686,7 +1725,9 @@ public class CCConstants {
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACE_I18N_PREFIX = "taxonid_valuespace_i18n_prefix";
 
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE = "resolve_website_title";
-
+	
+	public static String EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS = "initial_dbscripts";
+	
 	/**
 	 * @return <namespace,localnamespace>
 	 */

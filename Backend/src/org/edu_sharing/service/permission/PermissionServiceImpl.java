@@ -1,6 +1,8 @@
 package org.edu_sharing.service.permission;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +40,9 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.service.handleservice.HandleService;
+import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -51,7 +56,6 @@ import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -62,7 +66,6 @@ import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
-import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -72,10 +75,10 @@ import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
+	
+	public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
 	private NodeService nodeService = null;
 	private PersonService personService;
 	private ApplicationInfo appInfo;
@@ -114,7 +117,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param sendCopy
 	 */
 	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
-			Boolean sendCopy) throws Throwable {
+			Boolean sendCopy, Boolean createHandle) throws Throwable {
 
 		ACL currentACL = repoClient.getPermissions(nodeId);
 
@@ -188,12 +191,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 				authPermissions.put(toAdd.getAuthority(), permissions);
 			}
-			addPermissions(nodeId, authPermissions, inheritPermissions, mailText, sendMail, sendCopy);
+			addPermissions(nodeId, authPermissions, inheritPermissions, mailText, sendMail, sendCopy,createHandle);
 		}
 
 		if (acesToUpdate.size() > 0) {
 			for (ACE toUpdate : acesToUpdate) {
-				setPermissions(nodeId, toUpdate.getAuthority(), new String[] { toUpdate.getPermission() }, null);
+				setPermissions(nodeId, toUpdate.getAuthority(), new String[] { toUpdate.getPermission() }, null,createHandle);
 			}
 			createNotify = true;
 		}
@@ -216,12 +219,17 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
 					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
 		}
+		
+		
+		if(createHandle) {
+			createHandle(AuthorityType.EVERYONE,nodeId);
+		}
 
 	}
 
 	@Override
 	public void addPermissions(String _nodeId, HashMap<String, String[]> _authPerm, Boolean _inheritPermissions,
-			String _mailText, Boolean _sendMail, Boolean _sendCopy) throws Throwable {
+			String _mailText, Boolean _sendMail, Boolean _sendCopy, Boolean createHandle) throws Throwable {
 
 		EmailValidator mailValidator = EmailValidator.getInstance(true, true);
 
@@ -259,6 +267,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
+			
 			if (AuthorityType.USER.equals(authorityType)) {
 				HashMap<String, String> personInfo = repoClient.getUserInfo(authority);
 
@@ -350,6 +359,87 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		permissionService.createNotifyObject(_nodeId, user, CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
 				CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+	}
+	
+	public void createHandle(AuthorityType authorityType, String _nodeId) {
+		if (AuthorityType.EVERYONE.equals(authorityType)) {
+			
+			String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId), 
+					QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION) );
+			
+			String currentHandle =  (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId), 
+					QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID) );
+			
+			/**
+			 * only create a new handle when version changed
+			 */
+			if(currentHandle != null && currentHandle.endsWith(version)) {
+				return;
+			}
+			
+			//get new version label
+			//use BigDecimal cause of rounding Problem with double
+			BigDecimal bd = BigDecimal.valueOf(Double.valueOf(version)).add(BigDecimal.valueOf(0.1));
+			String newVersion = bd.toString();
+			
+			HandleService handleService = null;
+			String handle = null;
+			
+			
+			if(toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
+				try {
+					 handleService = new HandleService();
+					 handle = handleService.generateHandle();
+					
+				}catch(HandleServiceNotConfiguredException e) {
+					logger.info("handle server not configured");
+					return;
+				} catch (SQLException e) {
+					logger.error("sql error while creating handle id",e);
+					return;
+				}
+			}
+			
+			Map<QName,Serializable> publishedProps = new HashMap<QName,Serializable>();
+			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
+			
+			if(handle != null) {
+				publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
+			}
+			
+			NodeRef nodeRef = new NodeRef(Constants.storeRef,_nodeId);
+			if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
+				nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
+			}else {
+				for(Map.Entry<QName, Serializable> entry : publishedProps.entrySet()) {
+					nodeService.setProperty(nodeRef,entry.getKey(), entry.getValue());
+				}
+			}
+			
+			/**
+			 * create version for the published node
+			 */
+			Map<QName,Serializable> props = nodeService.getProperties(nodeRef);
+			props.put(QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT), NODE_PUBLISHED);
+			HashMap<String,Object> vprops = new HashMap<String,Object>();
+			for(Map.Entry<QName, Serializable> entry : props.entrySet()) {
+				vprops.put(entry.getKey().getPrefixString(), entry.getValue());
+			}
+			try {
+				new MCAlfrescoAPIClient().createVersion(_nodeId, vprops);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				logger.error(e1.getMessage(), e1);
+			}
+			if(handleService != null && handle != null) {
+				try {
+					String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
+					handleService.createHandle(handle,handleService.getDefautValues(contentLink));
+				}catch(Exception e) {
+					logger.error(e.getMessage());
+				}
+			}
+		}
 	}
 
 	@Override
@@ -592,6 +682,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES) && hasAll) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
 		}
+		if (NodeServiceInterceptor.getEduSharingScope()!=null && hasAll) {
+			throw new SecurityException("Inviting of "+CCConstants.AUTHORITY_GROUP_EVERYONE+" is not allowed in scope "+NodeServiceInterceptor.getEduSharingScope());
+		}
 		if (!toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE) && hasUsers && !shared) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
 		}
@@ -724,6 +817,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 */
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission)
 			throws Exception {
+		setPermissions(nodeId, authority, permissions, inheritPermission, false);
+	}
+	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission, Boolean createHandle)
+			throws Exception {
 		checkCanManagePermissions(nodeId, authority);
 
 		PermissionService permissionsService = this.serviceRegistry.getPermissionService();
@@ -744,6 +841,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 
 				permissionsService.setPermission(new NodeRef(Constants.storeRef, nodeId), authority, permission, true);
+				
 			}
 		}
 
@@ -943,6 +1041,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				searchQuery.append(" AND (").append(groupPathQuery).append(")");
 			}
 		}
+		filterGuestAuthority(searchQuery);
 
 		if (subQuery.length() > 0) {
 			searchQuery.append(" AND (").append(subQuery).append(")");
@@ -951,6 +1050,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		logger.info("findUsers: " + searchQuery);
 
 		return searchQuery;
+	}
+
+	private void filterGuestAuthority(StringBuffer searchQuery) {
+		String guest=ApplicationInfoList.getHomeRepository().getGuest_username();
+		if(guest!=null && !guest.trim().isEmpty()){
+			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"" 
+							 + " AND NOT @cm\\:userName:\"guest\"");
+		}
 	}
 
 	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
@@ -992,8 +1099,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					if (token.length() > 0) {
 	
 						boolean furtherToken = (subQuery.length() > 0);
-						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
-								.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
+						//subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
+						//		.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
+						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:").append("\"")
 								.append(token).append("\"");
 						subQuery.append(")");
 	

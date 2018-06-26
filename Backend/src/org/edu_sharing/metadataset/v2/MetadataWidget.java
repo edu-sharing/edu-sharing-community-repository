@@ -6,10 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.edu_sharing.metadataset.v2.MetadataWidget.Condition.CONDITION_TYPE;
-
 public class MetadataWidget extends MetadataTranslatable{
-	public static class Subwidget implements Serializable {
+
+    public static class Subwidget implements Serializable {
 		private String id;
 
 		public String getId() {
@@ -66,9 +65,10 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	private String id,type,caption,bottomCaption,icon,
 					placeholder,defaultvalue,template,
-					suggestionSource,suggestionQuery,unit,format;
-	private Integer min,max,defaultValue,defaultMin,defaultMax,step;
-	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty;
+					suggestionSource,suggestionQuery,unit,format,
+					valuespaceSort="default";
+	private Integer min,max,defaultMin,defaultMax,step;
+	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
 	private List<MetadataKey> values;
 	private List<Subwidget> subwidgets;
 
@@ -172,12 +172,6 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setMax(Integer max) {
 		this.max = max;
 	}
-	public Integer getDefaultValue() {
-		return defaultValue;
-	}
-	public void setDefaultValue(Integer defaultValue) {
-		this.defaultValue = defaultValue;
-	}
 	public Integer getDefaultMin() {
 		return defaultMin;
 	}
@@ -218,7 +212,14 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setStep(Integer step) {
 		this.step = step;
 	}
-	
+	public void setValuespaceSort(String valuespaceSort) {
+		this.valuespaceSort = valuespaceSort;
+	}
+
+	public String getValuespaceSort() {
+		return valuespaceSort;
+	}
+
 	public boolean isAllowempty() {
 		return allowempty;
 	}
@@ -238,6 +239,15 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setSubwidgets(List<Subwidget> subwidgets) {
 		this.subwidgets = subwidgets;
 	}
+
+	public boolean isInherit() {
+		return inherit;
+	}
+
+	public void setInherit(boolean inherit) {
+		this.inherit = inherit;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof MetadataWidget){
@@ -268,5 +278,5 @@ public class MetadataWidget extends MetadataTranslatable{
 		}
 		return map;
 	}
-	
+
 }

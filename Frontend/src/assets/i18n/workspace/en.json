@@ -11,6 +11,7 @@
     "MY_FILES": "My content",
     "ADD": "Add",
     "ADD_OBJECT": "Add Material",
+    "ADD_CAMERA": "Take a picture",
     "ADD_EMPTY_OBJECT": "Add Object",
     "ADD_OBJECT_TITLE": "Add new material",
     "ADD_OBJECT_MESSAGE": "Drop materials here",
@@ -23,7 +24,7 @@
     "AUTOLOGOUT_INFO":"Your session was automatically closed for your safety, because you have been inactive for at least {{ minutes }} minutes. Please login again.",
     "ADD_FOLDER": "Add folder",
     "SHARED_FILES": "Shared content",
-    "MY_SHARED_FILES": "My shared content",
+    "MY_SHARED_FILES": "Shared by me",
     "TO_ME_SHARED_FILES": "Shared with me",
     "WORKFLOW_RECEIVE": "Assigned to me",
     "RECYCLE": "Recycle",
@@ -57,11 +58,11 @@
       "GROUP_USERS":"These users have access:",
       "GROUP_GROUPS":"These groups have access:",
       "TYPE_VIEWER":"Viewer",
-      "TYPE_VIEWER_DESCRIPTION":"can view",
+      "TYPE_VIEWER_DESCRIPTION":"can view item / details page",
       "TYPE_COWORKER":"Collaborator",
-      "TYPE_COWORKER_DESCRIPTION":"can see, edit, view permissions and add elements",
+      "TYPE_COWORKER_DESCRIPTION":"can view item / details page, edit item, view permissions and add elements",
       "TYPE_COORDINATOR":"Coordinator",
-      "TYPE_COORDINATOR_DESCRIPTION":"can see, edit, delete, view and edit permissions, add and remove elements and publish",
+      "TYPE_COORDINATOR_DESCRIPTION":"can view item / details page, edit & delete item, view and edit permissions, add and remove elements and publish to connected systems",
       "TYPE_UNKNOWN":"Individual",
       "TYPE_UNKNOWN_DESCRIPTION":"Individual permissions have been set by admin: {{permissions}}",
       "PUBLISHER":"... and may publish",
@@ -76,13 +77,20 @@
       "LINK_ENABLED_INFO":"Link sharing is active. Everyone with the link can access the material.",
       "LINK_DISABLED_INFO":"Link sharing is diabled",
       "MANAGE_LINK":"Manage",
-      "PUBLISH":"Publish",
+      "PUBLISH":"Release material to the public.",
       "PUBLISH_INHERIT":"The access is inherit from the parent element. Disable the inherition to change access",
       "PUBLISH_NO_PERMISSION":"You have currently no permissions to publish elements",
       "PUBLISH_ACTIVE_DOCUMENT":"The document is made publicly available on the Internet",
       "PUBLISH_ACTIVE_COLLECTION":"The collection is made publicly available on the Internet",
       "PUBLISH_ACTIVE_DIRECTORY":"All documents of this folder are made publicly available on the Internet",
       "NO_FUZZY":"Enter the full e-mail address to add users",
+      "DOI":"Provide with DOI",
+      "DOI_INFO":"DOI (Digital Object Identifier) is a standardized ID for unique global identification and retrieved material",
+      "STATE": {
+        "PRIVATE": "Private",
+        "SHARED": "Shared",
+        "PUBLIC": "Public"
+      },
       "HISTORY":{
         "TITLE":"Sharing-History",
         "ADDED":"Added",
@@ -107,10 +115,12 @@
       "RESTORE_TITLE":"Restore?",
       "RESTORE_MESSAGE":"Are you sure you want to change the version of this element?",
       "PERMALINK":"Link to object",
-      "USAGE_COUNT":"Usage count",
+      "USAGE_COUNT_TITLE":"Usage",
+      "USAGE_COUNT":"Total uses",
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
-        "EDITOR_UPLOAD": "File updated by editor"
+        "EDITOR_UPLOAD": "File updated by editor",
+        "NODE_PUBLISHED": "File published"
       }
     },
     "EDITOR":{
@@ -121,7 +131,7 @@
       "AUTHOR_FIRST":"Author: First name",
       "AUTHOR_LAST":"Last name",
       "KEYWORDS":"Add keywords",
-      "HINT_ENTER":"Enter to confirm",
+      "HINT_ENTER":"Press enter add keywords.",
       "AS_VERSION":"as Version",
       "VERSION":"Version",
       "VERSION_COMMENT":"Add version comment",
@@ -132,6 +142,7 @@
     "REVERTED_VERSION":"Version has been reverted successfully",
     "OPTION":{
       "SHOW":"Preview & Info",
+      "DEBUG":"Debug",
       "INVITE":"Invite",
       "EDIT":"Edit info",
       "VIEW":"View",
@@ -145,7 +156,13 @@
       "LICENSE":"Assign a license",
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",
-      "WORKFLOW":"Workflow"
+      "WORKFLOW":"Workflow",
+      "TEMPLATE":"Metadata Template"
+    },
+    "NODE_TEMPLATE" : {
+      "STATUS": "Automatic Metadata Inheritance",
+      "STATUS_DESKRIPTION": "After activation, new materials will receive the metadata from this template",
+      "STATUS_DISABLED": "Activate the metadata template to automatically apply the metadata specified here to new content in this folder."
     },
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",
@@ -273,7 +290,7 @@
         "PDM_INFO":"This object is free of known restrictions covered by copyright law."
       },
       "DESCRIPTION":{
-        "NONE":"Use and source indication according to the legal conditions specified in the medium or according to the general legal regulation.",
+        "NONE":"Usage and attribution according to the legal conditions specified in the object meta data or according to the general legal regulations.",
         "MULTI":"The selected elements have different licenses.<br />Defining a license overwrites the license information of all items.",
         "CC_BY":"The authors have to be credited in a manner specified by these.",
         "CC_SHARE_ND":"Licensees may copy, distribute, display and perform only verbatim copies of the work, not derivative works and remixes based on it.",
@@ -289,12 +306,13 @@
       "FOLDER_ADDED":"Folder added",
       "NODE_EXISTS_IN_COLLECTION":"The collection already contains the element {{name}}",
       "VIEW_COLLECTION":"View collection",
-      "ADDED_TO_COLLECTION_MY":"{{count}} element(s) have been added to collection {{collection}} and is visible for you",
-      "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to collection {{collection}} and are visible to all invited persons",
-      "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to collection {{collection}} and are visible to everyone",
+      "ADDED_TO_COLLECTION_MY":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible for you",
+      "ADDED_TO_COLLECTION_SHARED":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to all invited persons",
+      "ADDED_TO_COLLECTION_PUBLIC":"{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to everyone",
+      "ADD_TO_COLLECTION_DISABLED":"At least 1 selected material can not be collected",
       "DELETE_FINISHED":"Element(s) move to recycle",
       "CUT_COPY":"{{count}} Element(s) copied to clipboard",
-      "PASTE":"{{count}} Element(s) have been {{mode}} from {{from}} to {{to}}",
+      "PASTE":"{{count}} Element(s) have been {{mode}} from \"{{from}}\" to \"{{to}}\"",
       "PASTE_DRAG":"{{count}} Element(s) have been {{mode}} to {{to}}",
       "DUPLICATE_NAME":"The name {{name}} already exists.<br>Please use an other, unique name",
       "CYCLIC_NODE":"A folder can not be pasted into its own",
@@ -304,7 +322,8 @@
       "NOT_FOUND":"The folder {{id}} was not found. May it has been deleted.",
       "LICENSE_UPDATED":"License has been updated",
       "CONTRIBUTOR_UPDATED":"Information of contributors have been updated",
-      "WORKFLOW_UPDATED":"Information of workflow have been updated"
+      "WORKFLOW_UPDATED":"Workflow information have been updated",
+      "METADATA_TEMPLATE_UPDATED":"Information of metadata template have been updated"
     }
   }
 }

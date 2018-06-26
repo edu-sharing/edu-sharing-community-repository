@@ -85,10 +85,10 @@
        </div>
      </div>
      <div *ngIf="sidenavTab==0">
-     <div *ngIf="currentRepository=='-all-' && !groupResults" class="repositoryList">
+     <div *ngIf="currentRepository=='-all-'" class="repositoryList">
        <label>{{'SEARCH.REPOSITORY_FILTER' | translate}}</label>
        <div *ngFor="let repo of repositoryIds">
-         <input type="checkbox" class="filled-in" (change)="refresh()" [(ngModel)]="repo.enabled" [id]="repo.id"><label [for]="repo.id">{{repo.title}}</label>
+         <input type="checkbox" class="filled-in" [(ngModel)]="repo.enabled" [id]="repo.id"><label [for]="repo.id">{{repo.title}}</label>
        </div>
      </div>
 
@@ -210,12 +210,12 @@
           [isLoading]="false"></listTable>
         </div>
       </div>
-      <div *ngIf="!(currentRepository=='-all-' && groupResults && !showspinner)" class="searchUngrouped">
+      <div *ngIf="!(currentRepository=='-all-' && groupResults && !searchService.showspinner)" class="searchUngrouped">
         <div class="noResultsMatched" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">
           <i class="material-icons">search</i>
           {{'SEARCH.QUERY_NO_RESULT' | translate}}
         </div>
-        <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} <span *ngIf="searchService.resultCount.materials">({{searchService.resultCount.materials}})</span></div>
+        <div class="heading" *ngIf="searchService.searchResult.length">{{ 'SEARCH.MATERIALS' | translate}} <span *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</span></div>
       <div class="heading" *ngIf="searchService.searchResult.length && searchService.ignored && searchService.ignored.length">{{ 'SEARCH.IGNORED_PARAMETERS' | translate}}</div>
       <listTable
         [nodes]="searchService.searchResult"
@@ -237,21 +237,21 @@
         (doubleClickRow)="render($event)"
         (loadMore)="getMoreResults()"
         (onSelectionChanged)="updateSelection($event)"
-        [isLoading]="showspinner"></listTable>
+        [isLoading]="searchService.showspinner"></listTable>
 
-        <div class="noResults" *ngIf="searchFail && !showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">
+        <div class="noResults" *ngIf="searchFail && !searchService.showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">
           <i class="material-icons">search</i>
           {{'SEARCH.QUERY_NO_RESULT' | translate}}
         </div>
       </div>
-      <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories && !showspinner">
-      <div *ngFor="let repo of repositories.slice(1);let i=index">
+      <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories && !searchService.showspinner">
+      <div *ngFor="let repo of groupedRepositories;let i=index">
         <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
         <a class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
-        <div class="noResults" *ngIf="searchService.searchResultRepositories[i] && !searchService.searchResultRepositories[i].length && !showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
+        <div class="noResults" *ngIf="searchService.searchResultRepositories[i] && !searchService.searchResultRepositories[i].length && !searchService.showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
         <listTable [class.list]="view==0" *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
           [nodes]="searchService.searchResultRepositories[i]"
-          [columns]="columns"
+          [columns]="searchService.columns"
           [hasIcon]="true"
           [options]="options"
           [dragDrop]="false"
@@ -265,7 +265,7 @@
           (clickRow)="render($event)"
           (doubleClickRow)="render($event)"
           (onSelectionChanged)="updateSelection($event)"
-          [isLoading]="showspinner"></listTable>
+          [isLoading]="searchService.showspinner"></listTable>
       </div>
       </div>
     </div>

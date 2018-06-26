@@ -12,8 +12,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.query.PagingRequest;
-import org.alfresco.query.PagingResults;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -31,17 +29,15 @@ import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
-import org.alfresco.service.cmr.security.PersonService.PersonInfo;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.policy.Helper;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
-import org.edu_sharing.metadataset.v2.MetadataSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.Authority;
@@ -68,7 +64,6 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
-import org.mozilla.javascript.Context;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLEncoder;
 
@@ -117,17 +112,22 @@ public class SearchServiceImpl implements SearchService {
 		for (NodeRef node : refs) {
 			if (result.contains(node))
 				continue;
-			ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
-			if (permissions != null && permissions.length > 0) {
-				boolean add = false;
-				for (ACE perm : permissions) {
-					if (perm.isInherited())
-						continue;
-					add = true;
-					break;
+			try {
+				ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
+				if (permissions != null && permissions.length > 0) {
+					boolean add = false;
+					for (ACE perm : permissions) {
+						if (perm.isInherited())
+							continue;
+						add = true;
+						break;
+					}
+					if (add)
+						result.add(node);
 				}
-				if (add)
-					result.add(node);
+			}catch(Throwable t) {
+				logger.info("Error fetching permissions for node "+node.getId()+". It's may deleted or the user has no more permissions");
+				t.printStackTrace();
 			}
 		}
 
@@ -187,6 +187,9 @@ public class SearchServiceImpl implements SearchService {
 				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
 		ResultSet resultSet = searchService.query(parameters);
 		List<NodeRef> result = convertNotifysToObjects(resultSet.getNodeRefs());
+		Set<String> memberships = new HashSet<>();
+		memberships.addAll(serviceRegistry.getAuthorityService().getAuthorities());
+		memberships.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
 
 		return AuthenticationUtil.runAsSystem(new RunAsWork<List<NodeRef>>() {
 			@Override
@@ -197,17 +200,22 @@ public class SearchServiceImpl implements SearchService {
 						continue;
 					if (node.getId().equals(homeFolder))
 						continue;
-					ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
-					if (permissions != null && permissions.length > 0) {
-						boolean add = false;
-						for (ACE perm : permissions) {
-							if (!perm.isInherited() && perm.getAuthority().equals(username)) {
-								add = true;
-								break;
+					try {
+						ACE[] permissions = baseClient.getPermissions(node.getId()).getAces();
+						if (permissions != null && permissions.length > 0) {
+							boolean add = false;
+							for (ACE perm : permissions) {
+								if (!perm.isInherited() && (perm.getAuthority().equals(username) || memberships.contains(perm.getAuthority()))) {
+									add = true;
+									break;
+								}
 							}
+							if (add)
+								refs.add(node);
 						}
-						if (add)
-							refs.add(node);
+					}catch(Throwable t) {
+						logger.info("Error fetching permissions for node "+node.getId()+". It's may deleted or the user has no more permissions");
+						t.printStackTrace();
 					}
 				}
 				return refs;
@@ -266,6 +274,7 @@ public class SearchServiceImpl implements SearchService {
 								boolean add = false;
 								for (String group : memberships) {
 									if (group.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
+											|| AuthenticationUtil.isRunAsUserTheSystemUser()
 											|| group.equals(eduGroup.getGroupname())) {
 										add = true;
 										break;
@@ -298,6 +307,28 @@ public class SearchServiceImpl implements SearchService {
 	private List limitList(List list, int skipCount, int maxValues) {
 		return list.subList(Math.min(skipCount, list.size()), Math.min(list.size(), skipCount + maxValues));
 	}
+	
+	/**
+	 * find all parent groups where the given authority is a member
+	 */
+	@Override
+	public SearchResult<String> searchPersonGroups(String authorityName, String pattern, int skipCount, int maxValues, SortDefinition sort) {
+		AuthorityService authorityService = serviceRegistry.getAuthorityService();
+
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
+
+				new RetryingTransactionCallback<SearchResult<String>>() {
+
+					public SearchResult<String> execute() throws Throwable {
+						String key = authorityName;
+						String[] data = authorityService.getContainingAuthorities(null, key, true)
+								.toArray(new String[0]);
+						return filterAndSortAuthorities(data,pattern,null,skipCount,maxValues,sort);
+					}
+
+				}, true);
+	}
+	
 	@Override
 	public SearchResult<String> searchGroupMembers(String groupName, String pattern, String authorityType,
 			int skipCount, int maxValues, SortDefinition sort) {
@@ -311,62 +342,61 @@ public class SearchServiceImpl implements SearchService {
 						String key = groupName;
 						String[] data = authorityService.getContainedAuthorities(null, key, true)
 								.toArray(new String[0]);
-						return filterAndSortAuthorities(data);
+						return filterAndSortAuthorities(data,pattern,authorityType,skipCount,maxValues,sort);
 					}
 
-					private SearchResult<String> filterAndSortAuthorities(String[] data) throws Exception {
-						List<String> list2 = new ArrayList<String>();
-						if (authorityType != null && !authorityType.isEmpty()) {
-							for (String authority : data) {
-								if (authorityType.equals("GROUP")
-										&& !authority.startsWith(PermissionService.GROUP_PREFIX))
-									continue;
-								if (authorityType.equals("USER")
-										&& authority.startsWith(PermissionService.GROUP_PREFIX))
-									continue;
-								list2.add(authority);
-							}
-						} else {
-							list2 = Arrays.asList(data);
-						}
-
-						List<String> list = new ArrayList<>();
-						if (pattern != null && !pattern.isEmpty()) {
-							for (String authority : list2) {
-								String name = authority;
-
-								if (name.startsWith(PermissionService.GROUP_PREFIX))
-									name = name.substring(PermissionService.GROUP_PREFIX.length());
-								if (name.toLowerCase().contains(pattern.toLowerCase()))
-									list.add(authority);
-							}
-						} else {
-							list = list2;
-						}
-
-						if (sort.hasContent()) {
-							if (!sort.getFirstSortBy().equals("authorityName")) {
-								throw new Exception("Group Members can only be sorted by authorityName, requested: "
-										+ sort.getFirstSortBy());
-							}
-							Collections.sort(list, new Comparator<String>() {
-								@Override
-								public int compare(String o1, String o2) {
-									if (o1.startsWith(PermissionService.GROUP_PREFIX))
-										o1 = o1.substring(PermissionService.GROUP_PREFIX.length());
-									if (o2.startsWith(PermissionService.GROUP_PREFIX))
-										o2 = o2.substring(PermissionService.GROUP_PREFIX.length());
-									return o1.compareToIgnoreCase(o2) * (sort.getFirstSortAscending() ? 1 : -1);
-								}
-							});
-						}
-						int count = list.size();
-						list = limitList(list, skipCount, maxValues);
-						return new SearchResult<String>(list, skipCount, count);
-					}
 				}, true);
 	}
+	private SearchResult<String> filterAndSortAuthorities(String[] data,String pattern,String authorityType,int skipCount, int maxValues,SortDefinition sort) throws Exception {
+		List<String> list2 = new ArrayList<String>();
+		if (authorityType != null && !authorityType.isEmpty()) {
+			for (String authority : data) {
+				if (authorityType.equals("GROUP")
+						&& !authority.startsWith(PermissionService.GROUP_PREFIX))
+					continue;
+				if (authorityType.equals("USER")
+						&& authority.startsWith(PermissionService.GROUP_PREFIX))
+					continue;
+				list2.add(authority);
+			}
+		} else {
+			list2 = Arrays.asList(data);
+		}
 
+		List<String> list = new ArrayList<>();
+		if (pattern != null && !pattern.isEmpty()) {
+			for (String authority : list2) {
+				String name = authority;
+
+				if (name.startsWith(PermissionService.GROUP_PREFIX))
+					name = name.substring(PermissionService.GROUP_PREFIX.length());
+				if (name.toLowerCase().contains(pattern.toLowerCase()))
+					list.add(authority);
+			}
+		} else {
+			list = list2;
+		}
+
+		if (sort.hasContent()) {
+			if (!sort.getFirstSortBy().equals("authorityName")) {
+				throw new Exception("Group Members can only be sorted by authorityName, requested: "
+						+ sort.getFirstSortBy());
+			}
+			Collections.sort(list, new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					if (o1.startsWith(PermissionService.GROUP_PREFIX))
+						o1 = o1.substring(PermissionService.GROUP_PREFIX.length());
+					if (o2.startsWith(PermissionService.GROUP_PREFIX))
+						o2 = o2.substring(PermissionService.GROUP_PREFIX.length());
+					return o1.compareToIgnoreCase(o2) * (sort.getFirstSortAscending() ? 1 : -1);
+				}
+			});
+		}
+		int count = list.size();
+		list = limitList(list, skipCount, maxValues);
+		return new SearchResult<String>(list, skipCount, count);
+	}
 	@Override
 	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
 			SortDefinition sort,Map<String,String> customProperties) throws Exception {
@@ -655,6 +685,15 @@ public class SearchServiceImpl implements SearchService {
 				((ESSearchParameters) searchParameters).setGroupConfig(
 						"&group=true&group.limit=1&group.sort=" + sort + "&group.ngroups=true&group.truncate=true");
 			}
+			
+			if(searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0) {
+				
+				if(new Helper(serviceRegistry.getAuthorityService()).isAdmin(serviceRegistry.getAuthenticationService().getCurrentUserName())) {
+					((ESSearchParameters) searchParameters).setAuthorities(searchToken.getAuthorityScope().toArray(new String[searchToken.getAuthorityScope().size()]));
+				}else {
+					logger.error("only admins are allowed to change authority scope of search");
+				}
+			}
 
 			List<String> facettes = searchToken.getFacettes();
 			if (facettes != null && facettes.size() > 0) {
@@ -734,7 +773,19 @@ public class SearchServiceImpl implements SearchService {
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 		parameters.setMaxItems(Integer.MAX_VALUE);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
-		parameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND @ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"");
+
+		
+		
+		Set<String> authoritiesForUser = serviceRegistry.getAuthorityService().getAuthorities();
+		String query = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\") AND (@ccm\\:wf_receiver:\""+QueryParser.escape(user)+"\"";
+		for(String authority : authoritiesForUser) {
+			query+=" OR @ccm\\:wf_receiver:\"" + authority + "\"";
+		}
+		query+=")";
+		
+		parameters.setQuery(query);
+		
+
 		ResultSet resultSet = searchService.query(parameters);
 		return resultSet.getNodeRefs();
 	}
@@ -754,11 +805,12 @@ public class SearchServiceImpl implements SearchService {
 
 		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(toSearch, globalContext);
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
+		
 
 		/**
 		 * don't find groups of scopes when no scope is provided
 		 */
-		if (NodeServiceInterceptor.getEduSharingScope() == null) {
+		if (NodeServiceInterceptor.getEduSharingScope() == null && findGroupsQuery!=null) {
 
 			/**
 			 * groups arent initialized with eduscope aspect and eduscopename
@@ -769,18 +821,27 @@ public class SearchServiceImpl implements SearchService {
 
 		String finalQuery;
 		if(type==null) {
-			finalQuery="("+findUsersQuery+") OR ("+findGroupsQuery+")";
+			finalQuery="";
+			if(findUsersQuery!=null)
+				finalQuery += "("+findUsersQuery+")";
+			if(findGroupsQuery!=null) {
+				finalQuery += " OR (" + findGroupsQuery + ")";
+			}
 		}
 		else if(type.equals(AuthorityType.USER)) {
 			finalQuery=findUsersQuery.toString();
 		}
 		else if(type.equals(AuthorityType.GROUP)) {
-			finalQuery=findGroupsQuery.toString();
+			if(findGroupsQuery==null)
+				finalQuery="";
+			else
+				finalQuery=findGroupsQuery.toString();
 		}
 		else {
 			throw new IllegalArgumentException("Unsupported authority type "+type);
 		}
-
+		if(finalQuery.isEmpty())
+			return new SearchResult<String>();
 		if(customProperties!=null){
 			for(Map.Entry<String, String> entry : customProperties.entrySet()){
 				finalQuery+=(" AND @"+entry.getKey().replace(":", "\\:")+":\""+QueryParser.escape(entry.getValue())+"\"");

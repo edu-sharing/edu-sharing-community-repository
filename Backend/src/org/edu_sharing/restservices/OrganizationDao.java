@@ -7,6 +7,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -56,10 +57,11 @@ public class OrganizationDao {
 				
 	}
 	
-	public static void create(RepositoryDao repoDao, String orgName) throws DAOException {
+	public static GroupDao create(RepositoryDao repoDao, String orgName) throws DAOException {
 		GroupProfile profile=new GroupProfile();
 		profile.setDisplayName(orgName);
-		create(repoDao,orgName,profile);
+		String authorityName=create(repoDao,orgName,profile);
+		return GroupDao.getGroup(repoDao, authorityName);
 	}
 	/**
 	 * returns Groupname
@@ -72,7 +74,7 @@ public class OrganizationDao {
 	public static String create(RepositoryDao repoDao, String orgName, GroupProfile profile) throws DAOException {
 		try {
 			OrganizationService organizationService = OrganizationServiceFactory.getOrganizationService(repoDao.getApplicationInfo().getAppId());
-			return organizationService.createOrganization(orgName, profile.getDisplayName());
+			return organizationService.createOrganization(orgName, profile.getDisplayName(),HttpContext.getCurrentMetadataSet());
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}		
@@ -112,6 +114,7 @@ public class OrganizationDao {
 	
 	private final String authorityName;
 	private final String groupName;
+	private org.alfresco.service.cmr.repository.NodeRef ref;
 	
 	public OrganizationDao(RepositoryDao repoDao, EduGroup eduGroup) {
 
@@ -120,6 +123,7 @@ public class OrganizationDao {
 		
 		this.authorityName = generateAuthorityName(eduGroup);		
 		this.groupName = generateGroupName(eduGroup);
+		this.ref = AuthorityServiceFactory.getAuthorityService(repoDao.getId()).getAuthorityNodeRef(this.authorityName);
 		
 	}
 	/**
@@ -134,6 +138,7 @@ public class OrganizationDao {
 		
 		Organization data = new Organization();
     			
+		data.setRef(getRef());
     	data.setAuthorityName(authorityName);
     	data.setAuthorityType(Authority.Type.GROUP);
     	data.setGroupName(groupName);
@@ -149,6 +154,10 @@ public class OrganizationDao {
     	data.setSharedFolder(ref);
     	    	
     	return data; 
+	}
+
+	private NodeRef getRef() {
+		return NodeDao.createNodeRef(repoDao, this.ref.getId());
 	}
 
 	public void delete() throws DAOException {

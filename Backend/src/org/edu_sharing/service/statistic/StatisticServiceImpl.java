@@ -15,9 +15,8 @@ import org.alfresco.service.cmr.search.SearchParameters.FieldFacetSort;
 import org.alfresco.util.Pair;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.rpc.SearchResult;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
@@ -27,8 +26,6 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.springframework.context.ApplicationContext;
-
-import com.drew.metadata.Metadata;
 
 public class StatisticServiceImpl implements StatisticService {
 
@@ -111,7 +108,7 @@ public class StatisticServiceImpl implements StatisticService {
 
 	}
 	private String getLucene(String mdsId, String queryId, String type, String customLucene) throws Exception {
-		MetadataSetV2 set = MetadataReaderV2.getMetadataset(appInfo, mdsId);
+		MetadataSetV2 set = MetadataHelper.getMetadataset(appInfo, mdsId);
 		String lucene=set.getQueries().getBasequery();
 		String basequery=set.getQueries().findQuery(queryId).getBasequery();
 		if(basequery!=null && !basequery.trim().isEmpty()) {

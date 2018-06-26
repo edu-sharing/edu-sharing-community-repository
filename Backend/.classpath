@@ -7,12 +7,9 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry exported="true" kind="lib" path="lib/aspectjrt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aspectjtools.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/blowfishj-2.14.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-email-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-httpclient.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/eu.medsea.mimeutil_2.0.0.200901231306.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gwt-dnd-3.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gwt-widgets-0.2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlparser.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdom.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jmimemagic-0.1.0.jar"/>
@@ -48,7 +45,6 @@
 	<classpathentry exported="true" kind="lib" path="gwt/gwt-user.jar"/>
 	<classpathentry exported="true" kind="lib" path="gwt/validation-api-1.0.0.GA-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="gwt/validation-api-1.0.0.GA.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lib-gwt-file-0.3.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.oltu.oauth2.authzserver-1.0.2.jar" sourcepath="/org.apache.oltu.oauth2.authzserver"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.apache.oltu.oauth2.common-1.0.2.jar" sourcepath="/org.apache.oltu.oauth2.common"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/javax.inject-1.jar"/>
@@ -334,7 +330,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/axis2-transport-local-1.7.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/axiom-api-1.2.19.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/axiom-impl-1.2.19.jar"/>
-	<classpathentry kind="lib" path="lib/gwt-incubator-2.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hk2-api-2.4.0-b31.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hk2-locator-2.4.0-b31.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hk2-utils-2.4.0-b31.jar"/>
@@ -352,7 +347,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/jersey-guava-2.22.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-media-jaxb-2.22.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-media-json-jackson-2.22.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/org.moxieapps.gwt.uploader-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swagger-jersey2-jaxrs-1.5.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/validation-api-1.1.0.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wss4j-1.5.12.jar"/>
@@ -367,5 +361,7 @@
 	<classpathentry kind="var" path="ALFRESCO_50d_TOMCAT_LIB"/>
 	<classpathentry kind="var" path="ALFRESCO_50d_WEBAPP_LIB"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.10-alfresco-patched.jar"/>
+	<classpathentry kind="lib" path="lib/handle-client.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

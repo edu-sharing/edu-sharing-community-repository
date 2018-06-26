@@ -12,8 +12,9 @@
     "ADD": "Neu",
     "ADD_OBJECT": "Neues Material",
     "ADD_OBJECT_LTI": "Als LTI-Ressource einbinden",
+    "ADD_CAMERA": "Bild aufnehmen",
     "ADD_EMPTY_OBJECT": "Neues Objekt",
-    "ADD_OBJECT_TITLE": "Neues Objekt erstellen",
+    "ADD_OBJECT_TITLE": "Neues Material erstellen",
     "ADD_OBJECT_MESSAGE": "Materialien hier ablegen",
     "SELECT_COLLECTION": "Sammlung wählen",
     "SELECT_MATERIAL": "Material wählen",
@@ -78,13 +79,20 @@
       "LINK_ENABLED_INFO":"Linkfreigabe ist aktiv. Alle mit Link haben Zugriff",
       "LINK_DISABLED_INFO":"Linkfreigabe ist für dieses Objekt deaktiviert",
       "MANAGE_LINK":"Verwalten",
-      "PUBLISH":"Veröffentlichen",
+      "PUBLISH":"Material öffentlich freigeben",
       "PUBLISH_INHERIT":"Der Zugriff wurde vom übergeordneten Element geerbt. Deaktivieren Sie die Vererbung, um den Zugriff zu ändern",
       "PUBLISH_NO_PERMISSION":"Sie besitzen aktuell keine Berechtigung, Elemente zu veröffentlichen",
       "PUBLISH_ACTIVE_DOCUMENT":"Öffentliche Materialien sind für <b>jeden</b> im Internet sichtbar",
       "PUBLISH_ACTIVE_COLLECTION":"Öffentliche Sammlungen sind für <b>jeden</b> im Internet sichtbar",
       "PUBLISH_ACTIVE_DIRECTORY":"Alle Materialien in diesem Ordner sind öffentlich im Internet sichtbar",
       "NO_FUZZY":"Geben Sie die vollständige E-Mail-Adresse ein, um Personen hinzuzufügen",
+      "DOI":"Mit Handle versehen",
+      "DOI_INFO":"Ein Handle ist eine standardisierte ID, mit der dieses Material global eindeutig identifiziert und wiedergefunden werden kann",
+      "STATE": {
+        "PRIVATE": "Privat",
+        "SHARED": "Geteilt",
+        "PUBLIC": "Öffentlich"
+      },
       "HISTORY":{
         "TITLE":"Freigabe-Historie",
         "ADDED":"Hinzugefügt",
@@ -112,7 +120,8 @@
       "USAGE_COUNT":"Anzahl der Verwendungen",
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "Datei wurde erstellt",
-        "EDITOR_UPLOAD": "Datei wurde durch Editor {{editor}} aktualisiert"
+        "EDITOR_UPLOAD": "Datei wurde durch Editor {{editor}} aktualisiert",
+        "NODE_PUBLISHED": "Datei wurde veröffentlicht"
       }
     },
     "LTI_TOOLS":{
@@ -140,7 +149,7 @@
       "AUTHOR_FIRST":"Autor: Vorname",
       "AUTHOR_LAST":"Nachname",
       "KEYWORDS":"Schlagwörter hinzufügen",
-      "HINT_ENTER":"Enter zum Bestätigen",
+      "HINT_ENTER":"Schlagworte mit Enter bestätigen",
       "AS_VERSION":"als Version",
       "VERSION":"Version",
       "VERSION_COMMENT":"Versionskommentar hinzufügen",
@@ -151,6 +160,7 @@
     "REVERTED_VERSION":"Version wurde erfolgreich wiederhergestellt",
     "OPTION":{
       "SHOW":"Vorschau & Infos",
+      "DEBUG":"Debug",
       "INVITE":"Freigeben",
       "EDIT":"Infos bearbeiten",
       "VIEW":"Öffnen",
@@ -164,7 +174,13 @@
       "LICENSE":"Lizenz (& Veröffentlichung)",
       "CONTRIBUTOR":"Beteiligte",
       "SHARE_LINK":"Download-Link freigeben",
-      "WORKFLOW":"Workflow"
+      "WORKFLOW":"Workflow",
+      "TEMPLATE":"Metadaten Vorlage"
+    },
+    "NODE_TEMPLATE" : {
+      "STATUS": "Automatische Übernahme von Metadaten",
+      "STATUS_DESKRIPTION": "Nach der Aktivierung erhalten neue Materialien \n die Metadaten aus dieser Vorlage",
+      "STATUS_DISABLED": "Metadaten-Vorlage aktivieren, um die hier angegebenen Metadaten automatisch auf neue Inhalte in diesem Ordner anzuwenden"
     },
     "SHARE_LINK":{
       "TITLE":"Link für {{ name }} freigeben",
@@ -174,7 +190,7 @@
       "LINK":"Link zum Objekt",
       "ACTIVATE":"Linkfreigabe aktivieren",
       "COPY_CLIPBOARD":"Link kopieren",
-      "LINK_INFO":"Jeder, der Zugriff af den Link hat, darf das Objekt herunterladen.",
+      "LINK_INFO":"Jeder, der Zugriff auf den Link hat, darf das Objekt herunterladen.",
       "LINK_DOWNLOADS":"Bisherige Downloads: {{ count }}",
       "COPIED_CLIPBOARD":"Link wurde in die Zwischenablage kopiert",
       "COPIED_CLIPBOARD_ERROR":"Link konnte nicht kopiert werden. Bitte markieren und kopieren Sie den Link manuell"
@@ -313,6 +329,7 @@
       "ADDED_TO_COLLECTION_MY":"{{count}} Material(ien) in {{collection}} hinzugefügt und darin nur für Sie sichtbar",
       "ADDED_TO_COLLECTION_SHARED":"{{count}} Material(ien) in {{collection}} hinzugefügt und darin für eingeladene Personen sichtbar",
       "ADDED_TO_COLLECTION_PUBLIC":"{{count}} Material(ien) in {{collection}} hinzugefügt und darin öffentlich sichtbar",
+      "ADD_TO_COLLECTION_DISABLED":"Für mindestens 1 gewähltes Material fehlen die Berechtigungen zum einsammeln",
       "DELETE_FINISHED":"Element(e) wurden in den Papierkorb verschoben",
       "CUT_COPY":"{{count}} Element(e) wurden in die Zwischenablage übernommen",
       "PASTE":"{{count}} Element(e) wurden von {{from}} nach {{to}} {{mode}}",
@@ -325,7 +342,8 @@
       "NOT_FOUND":"Die gewünschte Ordner-ID {{id}} wurde nicht gefunden. Eventuell wurde sie gelöscht.",
       "LICENSE_UPDATED":"Lizenzinformationen wurden aktualisiert",
       "CONTRIBUTOR_UPDATED":"Informationen zu Beteiligten wurden aktualisiert",
-      "WORKFLOW_UPDATED":"Informationen zum Workflow wurden aktualisiert"
+      "WORKFLOW_UPDATED":"Informationen zum Workflow wurden aktualisiert",
+      "METADATA_TEMPLATE_UPDATED":"Informationen zum Metadaten-Template wurden aktualisiert"
     }
   }
 }

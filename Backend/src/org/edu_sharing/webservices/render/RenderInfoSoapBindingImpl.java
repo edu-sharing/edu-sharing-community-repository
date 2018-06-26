@@ -8,6 +8,7 @@
 package org.edu_sharing.webservices.render;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +30,7 @@ import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.MetadataTemplateRenderer;
-import org.edu_sharing.repository.client.rpc.ACE;
-import org.edu_sharing.repository.client.rpc.ACL;
+import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.client.tools.Theme;
@@ -45,9 +44,7 @@ import org.edu_sharing.repository.server.tools.LocaleValidator;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.license.LicenseService;
-import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.usage.AlfServicesWrapper;
 import org.edu_sharing.service.usage.UsageDAO;
@@ -158,6 +155,12 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		if(userInfo == null){
 			throw new RemoteException(EXCEPTION_USER_DOES_NOT_EXISTS);
 		}
+		
+		String primaryAffiliation = userInfo.get(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION);
+		if(primaryAffiliation != null && !primaryAffiliation.equals("")) {
+			rir.setEduSchoolPrimaryAffiliation(primaryAffiliation);
+		}
+		
 		HashMap<String, Boolean> perms = client.hasAllPermissions(nodeId, userName, PermissionServiceHelper.PERMISSIONS);
 
 		rir.setPermissions(PermissionServiceHelper.getPermissionsAsString(perms).toArray(new String[0]));
@@ -168,7 +171,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		//HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.ALL_AUTHORITIES, new String[]{PermissionService.READ});
 		HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.GUEST_AUTHORITY, new String[]{PermissionService.READ});
 		rir.setGuestReadAllowed(new Boolean(permsGuest.get(PermissionService.READ)));
-		
+
 		HashMap versionProps = null;
 		boolean collectionRefOriginalDeleted = false;
 		
@@ -210,8 +213,8 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}else{
 			rir.setContentHash(client.getContentHash(nodeId,CCConstants.CM_PROP_CONTENT));
 		}
-		
-		
+
+
 		String locale = getHeaderValue("locale", MessageContext.getCurrentContext());
 
 		locale = (locale != null) ? locale : "en_EN";
@@ -224,6 +227,9 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		//properties without clientinfo cause of admin etc. ticket 
 		NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
 		Map<String,Object> props = (versionProps == null) ? client.getPropertiesCached(nodeRef, true, true, false) : versionProps;//client.getProperties(nodeId);
+		// fix axis bug that emoji crash: https://issues.apache.org/jira/browse/AXIS-2908
+		props=removeUTF16Chars(props);
+
 		String nodeType = (String)props.get(CCConstants.NODETYPE);
 		boolean isRemoteObject = CCConstants.CCM_TYPE_REMOTEOBJECT.equals(nodeType);
 		ApplicationInfo appInfo=ApplicationInfoList.getHomeRepository();
@@ -234,7 +240,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			HashMap<String, Object> propsNew = NodeServiceFactory.getNodeService(appInfo.getAppId()).getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), remoteId);
 			props.putAll(propsNew);
 		}
-		
+
 		if(collectionRefOriginalDeleted){
 			props.put(CCConstants.VIRT_PROP_ORIGINAL_DELETED, "true");
 		}
@@ -269,7 +275,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 				propsresult.add(new KeyValue(entry.getKey(),entry.getValue().toString()));
 			}
 		}
-		rir.setProperties(propsresult.toArray(new KeyValue[propsresult.size()]));	
+		rir.setProperties(propsresult.toArray(new KeyValue[propsresult.size()]));
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
 		
 		
@@ -282,7 +288,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		//set default
 		rir.setHasContentLicense(true);
 		String cost = (String)props.get(CCConstants.CCM_PROP_IO_CUSTOM_LICENSE_KEY);
-		if(cost != null && cost.contains("license_rp") && cost.contains("license_none")) {
+		if(cost != null && (cost.contains("license_rp") || cost.contains("license_none"))) {
 			
 			String permissionsNodeId = nodeId;
 			if (Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
@@ -323,7 +329,20 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 
 		return rir;
 	}
+	private static HashMap<String, Object> removeUTF16Chars(Map<String, Object> props){
+		HashMap<String, Object> propsClean = new HashMap(props);
+		for(Map.Entry<String, Object> set : propsClean.entrySet()){
+			if(set.getValue() instanceof String){
+				String s= (String) set.getValue();
+				//s=s.replace("\uD83D\uDE09","&#x1F609");
+				//s=new String(s.getBytes("UTF-8"));
+				s = s.replaceAll( "([\\ud800-\\udbff\\udc00-\\udfff])", "");
 
+				propsClean.put(set.getKey(),s);
+			}
+		}
+		return propsClean;
+	}
 	private void addMetadataTemplate(RenderInfoResult rir,String locale,String type, Map<String, Object> props,ApplicationInfo appInfo) throws Exception {
 		String mdsId = (String)props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		if(mdsId==null)

@@ -10,8 +10,10 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.io.FileUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.PreviewServlet;
 import org.springframework.context.ApplicationContext;
 
@@ -65,10 +67,16 @@ public class PreviewCache {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		NodeService nodeService = serviceRegistry.getNodeService();
+		
 		ArrayList<String> ids=new ArrayList<String>();
 		ids.add(nodeId);
-		for(ChildAssociationRef ref : nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId))){
-			ids.add(ref.getChildRef().getId());
+		
+		//only for IO's
+		if(nodeService.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).
+				equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
+			for(ChildAssociationRef ref : nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId))){
+				ids.add(ref.getChildRef().getId());
+			}
 		}
 		for(String id : ids){
 			for(int i=0;i<CACHE_SIZES_WIDTH.length;i++) {

@@ -31,7 +31,7 @@ public class SigningHandler extends BasicHandler{
 			SignatureVerifier.Result result = sv.verify(appId, signature, signed, timestamp);
 			
 			if(result.getStatuscode() != HttpServletResponse.SC_OK){
-				log.error("StatusCode: " + result.getStatuscode());
+				log.error("StatusCode: " + result.getStatuscode()+" "+result.getMessage());
 				throw new AxisFault(result.getMessage());
 			}
 			

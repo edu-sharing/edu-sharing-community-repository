@@ -17,9 +17,24 @@ export class Helper {
     }
     return -1;
   }
+    /**
+     * Filter only all elements in the array where the given property matches the given needle
+     * @param haystack
+     * @param property
+     * @param needle
+     * @returns {number}
+     */
+    public static filterArray(haystack: any, property: string, needle: any): any {
+      let result=[];
+      for(let i = 0; i<haystack.length; i++) {
+          if (haystack[i][property] == needle)
+            result.push(haystack[i]);
+      }
+      return result;
+    }
 
   /**
-   * Returns if both arrays are equal(same length, and all primitive objects are equal)
+   * Returns true if both arrays are equal(same length, and all primitive objects are equal)
    * @param array1
    * @param array2
    * @returns {boolean}
@@ -37,6 +52,20 @@ export class Helper {
     }
     return true;
   }
+    /**
+     * Returns true if both objects have the same values stored
+     * will not work for classes including methods or similar dynamic data
+     * @param object1
+     * @param object2
+     * @returns {boolean}
+     */
+    public static objectEquals(object1:any,object2:any){
+        if(object1==null)
+            return object2==null;
+        if(object2==null)
+            return object1==null;
+        return JSON.stringify(object1)==JSON.stringify(object2);
+    }
 
   /**
    * Converts a date to a Year-Month-day string
@@ -128,4 +157,25 @@ export class Helper {
     }
     return array;
   }
+    static base64toBlob(base64:string,mimetype:string) {
+        let sliceSize =  512;
+
+        let byteCharacters = atob(base64);
+        let byteArrays = [];
+
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            let slice = byteCharacters.slice(offset, offset + sliceSize);
+
+            let byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+
+            let byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+
+        let blob = new Blob(byteArrays, {type: mimetype});
+        return blob;
+    }
 }

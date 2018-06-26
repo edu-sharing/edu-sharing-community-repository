@@ -5,7 +5,7 @@ import {
     Collection, Connector, ConnectorList, Filetype, LoginResult, MdsInfo, Node,
     NodeLock, ParentList
 } from "../rest/data-object";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
 import {UIConstants} from "./ui-constants";
 import {ElementRef, EventEmitter, HostListener} from "@angular/core";
 import {RestConstants} from "../rest/rest-constants";
@@ -20,16 +20,22 @@ import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {FrameEventsService} from "../services/frame-events.service";
 import {RestNodeService} from "../rest/services/rest-node.service";
 import {PlatformLocation} from "@angular/common";
+import {AbstractRestService} from "../rest/services/abstract-rest-service";
+import {CordovaService} from "../services/cordova.service";
 export class UIHelper{
-  static MOBILE_WIDTH = 600;
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
-    config.get("branding").subscribe((data:any)=>{
+    config.get("branding").subscribe((branding:boolean)=>{
       let t=name;
-      if(data==true){
-        t+=" - edu-sharing";
+      if(branding==true){
+          config.get("siteTitle","edu-sharing").subscribe((name:string)=>{
+              t+=" - "+name;
+              title.setTitle(t);
+          });
       }
-      title.setTitle(t);
+      else{
+        title.setTitle(t);
+      }
     });
   }
   public static setTitle(name:string,title:Title,translate:TranslateService,config:ConfigurationService){
@@ -89,9 +95,9 @@ export class UIHelper{
     let converted=UIHelper.convertSearchParameters(node);
     router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{query:converted.query,savedQuery:node.ref.id,repository:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],mds:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],parameters:JSON.stringify(converted.parameters)}});
   }
-    public static goToCollection(router:Router,node:Node) {
-        router.navigate([UIConstants.ROUTER_PREFIX+"collections"],
-            {queryParams:{id:node.ref.id}});
+    public static goToCollection(router:Router,node:Node,extras:NavigationExtras={}) {
+        extras.queryParams={id:node.ref.id};
+        router.navigate([UIConstants.ROUTER_PREFIX+"collections"],extras);
     }
     /**
      * Navigate to the workspace
@@ -100,10 +106,11 @@ export class UIHelper{
      * @param login a result of the isValidLogin method
      * @param node The node to open and show
      */
-    public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node) {
+    public static goToWorkspace(nodeService:RestNodeService,router:Router,login:LoginResult,node:Node,extras:NavigationExtras={}) {
         nodeService.getNodeParents(node.ref.id).subscribe((data:ParentList)=>{
+            extras.queryParams={id:node.parent.id,file:node.ref.id,root:data.scope};
             router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
-                {queryParams:{id:node.parent.id,file:node.ref.id,root:data.scope}});
+                extras);
         });
     }
     /**
@@ -113,9 +120,10 @@ export class UIHelper{
      * @param login a result of the isValidLogin method
      * @param folder The folder id to open
      */
-    public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string) {
-        router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login.currentScope ? login.currentScope : "files")],
-            {queryParams:{id:folder}});
+    public static goToWorkspaceFolder(nodeService:RestNodeService,router:Router,login:LoginResult,folder:string,extras:NavigationExtras={}) {
+      extras.queryParams={id:folder};
+      router.navigate([UIConstants.ROUTER_PREFIX+"workspace/"+(login && login.currentScope ? login.currentScope : "files")],
+          extras);
     }
   static convertSearchParameters(node: Node) {
     let parameters=JSON.parse(node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS]);
@@ -201,7 +209,7 @@ export class UIHelper{
   static prepareMetadatasets(translate:TranslateService,mdsSets: MdsInfo[]) {
     for(let i=0;i<mdsSets.length;i++){
       if(mdsSets[i].id=="mds")
-        mdsSets[i].name=translate.instant('DEFAULT_METADATASET');
+        mdsSets[i].name=translate.instant('DEFAULT_METADATASET',{name:mdsSets[i].name});
     }
   }
   static addToCollection(collectionService:RestCollectionService,router:Router,toast:Toast,collection:Node|Collection,nodes:Node[],callback:Function=null,position=0,error=false){
@@ -229,8 +237,9 @@ export class UIHelper{
     if(connectorType==null){
       connectorType=RestConnectorsService.connectorSupportsEdit(connectorList,node);
     }
-    if(win==null && newWindow)
-      win=window.open("",'_blank');
+    let isCordova=connector.getRestConnector().getCordovaService().isRunningCordova();
+    if(win==null && newWindow && !isCordova)
+      win=window.open("");
 
     connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
       if(result.isLocked) {
@@ -239,12 +248,17 @@ export class UIHelper{
         return;
       }
       connector.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
-          if(newWindow)
+          if(win)
             win.location.href=url;
-          else
-            window.location.replace(url);
-
-          events.addWindow(win);
+          else if(isCordova){
+            UIHelper.openBlankWindow(url,connector.getRestConnector().getCordovaService());
+          }
+          else {
+              window.location.replace(url);
+          }
+          if(win) {
+              events.addWindow(win);
+          }
         },
         (error:string)=>{
           toast.error(null,error);
@@ -264,7 +278,10 @@ export class UIHelper{
    * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
    */
   static scrollSmooth(y: number=0,smoothness=1) {
-    let mode=window.scrollY>y;
+    let mode=window.scrollY>=y;
+    console.log(mode);
+    console.log(y);
+    console.log(window.scrollY);
     let divider=3*smoothness;
     let minSpeed=7/smoothness;
     let lastY=y;
@@ -331,6 +348,10 @@ export class UIHelper{
       return link;
   }
 
+  static goToDefaultLocation(router: Router,configService : ConfigurationService,extras:NavigationExtras={}) {
+      return router.navigate([UIConstants.ROUTER_PREFIX + configService.instant("loginDefaultLocation","workspace")],extras);
+  }
+
     /**
      * try to navigate to given url using angular routing
      */
@@ -348,5 +369,14 @@ export class UIHelper{
           else
               window.location.assign(url)
         });
+    }
+
+    static openBlankWindow(url:string, cordova: CordovaService) {
+      if(cordova.isRunningCordova()){
+        return cordova.openInAppBrowser(url);
+      }
+      else {
+        return window.open(url, '_blank',);
+      }
     }
 }

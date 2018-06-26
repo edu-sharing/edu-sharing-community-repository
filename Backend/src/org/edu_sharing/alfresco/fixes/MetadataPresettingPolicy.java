@@ -18,7 +18,12 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.shared.Mds;
 
 public class MetadataPresettingPolicy implements
 		NodeServicePolicies.OnCreateNodePolicy,
@@ -119,7 +124,8 @@ public class MetadataPresettingPolicy implements
 
 		NodeRef parentRef = childAssocRef.getParentRef();
 
-		if (nodeService.hasAspect(parentRef, ASPECT_TYPE)) {
+		Boolean status = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CCM_PROP_METADATA_PRESETTING_STATUS));
+		if (nodeService.hasAspect(parentRef, ASPECT_TYPE) && status!=null && status) {
 
 			List<AssociationRef> templates = nodeService.getTargetAssocs(
 					parentRef, ASPECT_ASSOC);
@@ -141,6 +147,7 @@ public class MetadataPresettingPolicy implements
 			}
 
 			@SuppressWarnings("unchecked")
+			/*
 			List<QName> props = (List<QName>) nodeService.getProperty(
 					parentRef, ASPECT_PROP);
 
@@ -156,6 +163,24 @@ public class MetadataPresettingPolicy implements
 					nodeService.setProperty(targetRef, prop, value);
 				}
 
+			}
+			*/
+			String mdsId=CCConstants.metadatasetdefault_id;
+			String mdsProp = (String)nodeService.getProperty(
+					parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+			if(mdsProp!=null && !mdsProp.trim().isEmpty()){
+				mdsId=mdsProp;
+			}
+			try {
+				MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsId,"default");
+				for(MetadataWidget widget : mds.getWidgetsByTemplate("io_template")){
+					QName prop = QName.createQName(CCConstants.getValidGlobalName(widget.getId()));
+					Serializable value = nodeService.getProperty(sourceRef, prop);
+					if(value!=null)
+						nodeService.setProperty(targetRef,prop,value);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 

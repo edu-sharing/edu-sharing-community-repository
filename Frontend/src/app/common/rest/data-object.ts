@@ -622,6 +622,9 @@ export interface Facette {
 export interface NodeWrapper {
   node : Node;
 }
+export interface NodeTemplate extends NodeWrapper{
+  enabled : boolean;
+}
 export interface NodeRemoteWrapper extends NodeWrapper{
   remote : Node;
 }
@@ -662,12 +665,15 @@ export class LocalPermissionsResult {
   permissions: Permission[];
 }
 export interface  OAuthResult{
+
+  // set by server
   access_token:string;
   refresh_token:string;
   expires_in:number;
 
+  // for local use
+  expires_ts?:number;
 }
-
 
 export interface Permissions {
   localPermissions: LocalPermissionsResult;

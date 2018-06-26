@@ -13,6 +13,7 @@ import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.ConnectorDAO;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.connector.v1.model.Connector;
+import org.edu_sharing.restservices.connector.v1.model.ConnectorList;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 
 import io.swagger.annotations.Api;
@@ -34,7 +35,7 @@ public class ConnectorApi {
 	@ApiOperation(value = "List all available connectors")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Connector[].class),
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ConnectorList.class),
 	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        

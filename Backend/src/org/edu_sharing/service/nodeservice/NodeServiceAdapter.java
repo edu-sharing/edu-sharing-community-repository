@@ -229,4 +229,25 @@ public class NodeServiceAdapter implements NodeService {
 		return false;
 	}
 
+	@Override
+	public String getProperty(String storeProtocol, String storeId, String nodeId, String property) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getTemplateNode(String nodeId,boolean create) throws Throwable {
+		return null;
+	}
+
+	@Override
+	public void setTemplateProperties(String nodeId, HashMap<String, String[]> stringHashMap) throws Throwable {
+
+	}
+
+	@Override
+	public void setTemplateStatus(String nodeId, Boolean enable) throws Throwable {
+
+	}
+
 }

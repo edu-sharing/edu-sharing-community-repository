@@ -39,7 +39,7 @@ $borderRadius:2px;
   cursor: default;
 }
 .moreAlways{
-  transition: $animationTime all;
+  transition: $transitionNormal all;
   opacity: 1;
   color: $primary!important;
 }
@@ -149,6 +149,9 @@ $badgeWidth:250px;
 .node_cm_created{
    min-width:160px;
 }
+.node_ccm_educationaltypicalagerange{
+  min-width:50px;
+}
 .node_ccm_wf_status{
   min-width: 100px;
 }
@@ -213,6 +216,7 @@ $badgeWidth:250px;
 }
 .more{
   min-width:60px;
+  transition: $transitionNormal all;
   @include clickable();
 }
 .moreOpen{
@@ -238,9 +242,35 @@ $badgeWidth:250px;
     top: 14px;
     color:$textLight;
   }
+  .sortMenu{
+    position: absolute;
+    z-index: $dialogZIndex+1;
+    left:80px;
+    width: $contextMenuWidth;
+    .collection-item{
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      .title{
+        flex-grow: 1;
+      }
+      a{
+        height:20px;
+      }
+      i{
+        position: initial;
+      }
+      &.active{
+        font-weight: bold;
+      }
+    }
+  }
 }
 .row .icon{
   padding-top:20px;
+}
+.row{
+  transition: none;
 }
 .list .row{
   margin:0 0!important;
@@ -253,12 +283,18 @@ $badgeWidth:250px;
 .cardList .row.selected{
   background: $workspaceSelectedBackgroundEffect;
   background-color:$workspaceSelectedBackground;
+  .more{
+    @include fadeRight($workspaceSelectedBackground,20px)
+  }
 }
 
 .cardList .row.selected{
-  background: transparent;
-  background-color:transparent;
+  background: $backgroundColor;
+  background-color:$backgroundColor;
   outline:2px solid $primary;
+  .more{
+    @include fadeRight($backgroundColor,20px)
+  }
 }
 .row:focus{
   @include setGlobalInsetFocus();
@@ -276,6 +312,9 @@ $badgeWidth:250px;
 }
 .list .row:hover{
   background-color:$workspaceSelectedBackground;
+  .more{
+    @include fadeRight($workspaceSelectedBackground,20px);
+  }
 }
 
 .list .filled-in:checked+label:after{
@@ -402,7 +441,7 @@ $strength:0.75deg;
   90% {    transform:rotate($strength*random(1));  }
   100% {   transform:rotate(-$strength*random(1));  }
 }
-$orderAnimationTime:$animationTime*5;
+$orderAnimationTime:$transitionNormal*5;
 .order-animation {
   animation: OrderAnimation $orderAnimationTime infinite;
 }
@@ -473,10 +512,15 @@ $orderAnimationTime:$animationTime*5;
   max-height:1.5rem;
   overflow: hidden;
 }
-.cardSmallList .rowInner{
-  max-height: 3.15rem;
-  word-break: normal;
-  overflow-wrap: break-word;
+.cardSmallList{
+  .row_1 .rowInner{
+    min-height: 3.15rem;
+  }
+  .rowInner{
+    max-height: 3.15rem;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
 }
 .node_ccm_commonlicense_key .rowInner,
 .cardList .rowInner{
@@ -594,12 +638,13 @@ $orderAnimationTime:$animationTime*5;
   border-bottom: 5px solid $primary;
 }
 .cardSmallList img{
-  position: relative;
-  left: -15px;
-  top: -40px;
-  opacity:0.7;
-  width:201px;
-  height:151px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0.7;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .cardSmallList .row_1,
 .cardSmallList .row_2{
@@ -694,7 +739,12 @@ $orderAnimationTime:$animationTime*5;
 .cardList .more{
   position:absolute;
   right:-10px;
-  top:$cardHeight - 37px;
+  top:$cardHeight - 40px;
+  @include fadeRight(#fff,20px);
+  padding-bottom: 5px;
+  a{
+    padding-left: 10px;
+  }
 }
 .cardList .moreSingle{
   right:-5px;
@@ -915,7 +965,7 @@ $orderAnimationTime:$animationTime*5;
   .cardList .row .more{
     position: absolute;
     top: 45px;
-    left: calc(100% - 45px);
+    left: calc(100% - 55px);
   }
   .cardList .row_1{
     height: auto;
@@ -930,6 +980,10 @@ $orderAnimationTime:$animationTime*5;
     padding-top: 0 !important;
   }
 
+  .cardList .row_2{
+    margin-bottom: 10px;
+  }
+  /*
   .cardList .row .column.node_ccm_replicationsource {
     position: absolute;
     top: 80px;
@@ -942,6 +996,7 @@ $orderAnimationTime:$animationTime*5;
     left: 179px;
     text-align: left;
   }
+  */
 
   .cardList .row_2,
   .cardList .row_3,

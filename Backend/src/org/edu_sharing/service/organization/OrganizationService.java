@@ -14,4 +14,6 @@ public interface OrganizationService {
 	String createOrganization(String orgName, String groupDisplayName) throws Throwable;
 
 	Map<QName, Serializable> getOrganisation(String orgName);
+
+	String createOrganization(String orgName, String groupDisplayName, String metadataSet) throws Throwable;
 }

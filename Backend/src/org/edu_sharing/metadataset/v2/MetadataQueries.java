@@ -1,6 +1,5 @@
 package org.edu_sharing.metadataset.v2;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 
 public class MetadataQueries {
@@ -47,6 +46,6 @@ public class MetadataQueries {
 				return query;
 			}
 		}
-		throw new InvalidParameterException("Query id "+queryId+" not found");
+		throw new IllegalArgumentException("Query id "+queryId+" not found");
 	}
 }

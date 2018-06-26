@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnInit, NgZone, group, HostListener, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit, NgZone, HostListener, ViewChild, ElementRef} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {RestMdsService} from '../../rest/services/rest-mds.service';
 import {MdsMetadataset, View, Type, Node, NodeList, NodeWrapper, MdsValueList} from '../../rest/data-object';
@@ -35,6 +35,7 @@ import {UIService} from '../../services/ui.service';
 })
 export class MdsComponent{
   @ViewChild('mdsScrollContainer') mdsScrollContainer: ElementRef;
+  @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
 
   @Input() addWidget=false;
   @Input() embedded=false;
@@ -143,7 +144,7 @@ export class MdsComponent{
     this.isLoading=true;
     this.mdsService.getSet().subscribe((data:any)=> {
       this.mds=data;
-      this.renderGroup(this.createType, this.mds, this.currentNode);
+      this.renderGroup(this.createType, this.mds);
       this.isLoading=false;
     });
   }
@@ -154,7 +155,8 @@ export class MdsComponent{
       return;
     this.isLoading=true;
     this.node.getNodeMetadata(nodeId,[RestConstants.ALL]).subscribe((node : NodeWrapper)=>{
-      this.mdsService.getSet(node.node.metadataset ? node.node.metadataset : RestConstants.DEFAULT).subscribe((data:any)=>{
+      this._setId = node.node.metadataset ? node.node.metadataset : RestConstants.DEFAULT;
+      this.mdsService.getSet(this._setId).subscribe((data:any)=>{
         // test a widget
         //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
         //data.views[0].html+="<test>";
@@ -176,7 +178,7 @@ export class MdsComponent{
           if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
             nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
           }
-          this.renderGroup(nodeGroup, this.mds, this.currentNode);
+          this.renderGroup(nodeGroup, this.mds);
           this.isLoading = false;
         });
       },(error:any)=>{
@@ -191,6 +193,7 @@ export class MdsComponent{
   @Output() onCancel=new EventEmitter();
   @Output() onDone=new EventEmitter();
   @Output() openLicense=new EventEmitter();
+  @Output() openTemplate=new EventEmitter();
   @Output() openContributor=new EventEmitter();
   @Output() onMdsLoaded=new EventEmitter();
   private rendered : SafeHtml;
@@ -306,6 +309,7 @@ export class MdsComponent{
     if(widgetValues /* && !this._groupId */)
       elements[0].style.display=hits || allowCustom ? 'none' : '';
   }
+  /*
   private renderTabs(group:any,data:any,node:Node) : string{
     let tabs='<div class="row tab-group"><ul class="tabs">';
     let content='';
@@ -335,7 +339,8 @@ export class MdsComponent{
     tabs+='</ul></div>';
     return tabs+content;
   }
-  private renderList(group:any,data:any,node:Node) : any{
+  */
+  private renderList(group:any,data:any) : any{
     let content='';
     let i=0;
     let hasExtended=[false];
@@ -350,10 +355,10 @@ export class MdsComponent{
           if (view.rel) {
           if(!result[view.rel])
             result[view.rel]='';
-            result[view.rel] += this.renderTemplate(view, data, hasExtended,node);
+            result[view.rel] += this.renderTemplate(view, data, hasExtended);
           }
           else {
-            result.main += this.renderTemplate(view, data, hasExtended,node);
+            result.main += this.renderTemplate(view, data, hasExtended);
           }
           i++;
           break;
@@ -404,45 +409,48 @@ export class MdsComponent{
     for(let viewId of group.views){
       for(let view of data.views){
         if(view.id==viewId){
-          html+=`<a class="clickable" onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i>`+view.caption+`</a>`;
+          html+=`<a class="clickable" onclick="window.mdsComponentRef.component.scrollSmooth('`+view.id+`')"><i class="material-icons">`+view.icon+`</i><span>`+view.caption+`</span></a>`;
           i++;
           break;
         }
       }
     }
     this.jumpmarksCount=i;
-    setInterval(function(){
-        let jump=document.getElementById("jumpmarks");
-        if(!jump)
-            return;
-        let elements=jump.getElementsByTagName("a");
-        let scroll=document.getElementsByClassName("card-title-element");
-        let height=document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
-        let pos=document.getElementById("mdsScrollContainer").scrollTop - height - 200;
-        let closest=999999;
-        let active=elements[0];
-        for(let i=0;i<elements.length;i++){
-            elements[i].className=elements[i].className.replace("active","").trim();
-            if(!scroll[i])
-                continue;
-            let top=scroll[i].getBoundingClientRect().top;
-            if(Math.abs(top-pos)<closest){
-                closest=Math.abs(top-pos);
-                active=elements[i];
-            }
-        }
-        active.className+=" active";
+    setInterval(()=>{
+      try {
+          let jump = this.jumpmarksRef;
+          let elements = jump.nativeElement.getElementsByTagName("a");
+          let scroll = document.getElementsByClassName("card-title-element");
+          let height = document.getElementById("mdsScrollContainer").getBoundingClientRect().bottom - document.getElementById("mdsScrollContainer").getBoundingClientRect().top;
+          let pos = document.getElementById("mdsScrollContainer").scrollTop - height - 200;
+          let closest = 999999;
+          let active = elements[0];
+          for (let i = 0; i < elements.length; i++) {
+              elements[i].className = elements[i].className.replace("active", "").trim();
+              if (!scroll[i])
+                  continue;
+              let top = scroll[i].getBoundingClientRect().top;
+              if (Math.abs(top - pos) < closest) {
+                  closest = Math.abs(top - pos);
+                  active = elements[i];
+              }
+          }
+          active.className += " active";
+      }catch(e){
+
+      }
     },200);
     return html;
   }
 
-  private renderGroup(id:string,data:any,node:Node=null){
+  private renderGroup(id:string,data:any){
     if(!id)
       return;
     this.currentWidgets=[];
     // add the default widgets
     data.widgets.push({id:'preview'});
     data.widgets.push({id:'version'});
+    data.widgets.push({id:'template'});
     data.widgets.push({id:'author',caption:this.translate.instant('MDS.AUTHOR_LABEL')});
     data.widgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
     data.widgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
@@ -451,13 +459,13 @@ export class MdsComponent{
     }
     for(let group of data.groups){
       if(group.id==id){
-        let result=this.renderList(group,data,node);
+        let result=this.renderList(group,data);
         this.setRenderedHtml(result.main);
         if(result.suggestions)
           this.renderedSuggestions=this.sanitizer.bypassSecurityTrustHtml(result.suggestions);
         let jumpHtml=this.renderJumpmarks(group,data);
         this.jumpmarks=this.sanitizer.bypassSecurityTrustHtml(jumpHtml);
-        this.readValues(data,node);
+        this.readValues(data);
         //setTimeout(()=>UIHelper.materializeSelect(),15);
         return;
       }
@@ -555,7 +563,12 @@ export class MdsComponent{
       }
       if(this.isRequiredWidget(widget) && (!props.length || props[0]=='')){
         if(showError) {
-          element.className += 'invalid';
+          let inputField=element;
+          if(this.isMultivalueWidget(widget)){
+            inputField=document.getElementById(widget.id+'_suggestionsInput');
+          }
+          if(inputField)
+            inputField.className += 'invalid';
           this.toast.error(null, 'TOAST.FIELD_REQUIRED', {name: widget.caption});
         }
         return;
@@ -648,8 +661,8 @@ export class MdsComponent{
     this.globalProgress=true;
     if(version){
       if(files.length){
-        this.node.uploadNodeContent(this.currentNode.ref.id,files[0],version).subscribe(()=>{
           this.node.editNodeMetadata(this.currentNode.ref.id,this.currentNode.properties).subscribe(()=>{
+              this.node.uploadNodeContent(this.currentNode.ref.id,files[0],version).subscribe(()=>{
             this.onUpdatePreview(callback);
           },(error:any)=>{
             this.toast.error(error);
@@ -831,11 +844,11 @@ export class MdsComponent{
     }
     return id;
   }
-  private readValues(data:any,node:Node){
-    this.setGeneralNodeData(node);
-    this.setValuesByProperty(data,node ? node.properties : []);
+  private readValues(data:any){
+    this.setGeneralNodeData();
+    this.setValuesByProperty(data,this.currentNode ? this.currentNode.properties : []);
   }
-  private renderTemplate(template : any,data:any,extended:boolean[],node:Node) {
+  private renderTemplate(template : any,data:any,extended:boolean[]) {
     if(!template.html || !template.html.trim()){
       return '';
     }
@@ -877,8 +890,7 @@ export class MdsComponent{
         extended[0]=true;
       this.replaceVariables(widget);
       this.currentWidgets.push(widget);
-      console.log(attr);
-      let widgetData=this.renderWidget(widget,attr,template,node);
+      let widgetData=this.renderWidget(widget,attr,template);
       if(!widgetData) {
         removeWidgets.push(widget);
         continue;
@@ -956,7 +968,9 @@ export class MdsComponent{
     return html;
   }
   private renderSuggestBadgesWidget(widget:any, attr:string, allowCustom:boolean){
-    let html=this.autoSuggestField(widget,'',allowCustom,true)+`<div id="`+widget.id+`" class="multivalueBadges"></div>`;
+    let html=this.autoSuggestField(widget,'',allowCustom,
+        `window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,false,false)`
+        )+`<div id="`+widget.id+`" class="multivalueBadges"></div>`;
     return html;
   }
   private renderSubTree(widget:any,parent:string=null){
@@ -1060,7 +1074,7 @@ export class MdsComponent{
       group=RestConstants.DEFAULT_QUERY_NAME;
     }
     this.lastMdsQuery=element.value;
-    this.mdsService.getValues({query:group,property:id,pattern:element.value},this._setId).subscribe((data:MdsValueList)=>{
+    this.mdsService.getValues({query:group,property:id,pattern:element.value},this._setId,this._repository).subscribe((data:MdsValueList)=>{
       if(this.lastMdsQuery!=element.value)
         return;
 
@@ -1144,15 +1158,15 @@ export class MdsComponent{
     html+=`">` + (searchString ? this.highlightSearch(caption,searchString) : caption) + `</a>`;
     return html;
   }
-  private autoSuggestField(widget:any,css='',allowCustom=false,showOpen=false,singleValue=false){
+  private autoSuggestField(widget:any,css='',allowCustom=false,openCallback:string,openIcon='arrow_drop_down',singleValue=false){
     if(widget.values==null/* || this._groupId*/)
-      showOpen=false;
-    if(!showOpen && widget.type!='multivalueTree' && widget.type!='singlevalueTree')
+        openCallback=null;
+    if(!openCallback && widget.type!='multivalueTree' && widget.type!='singlevalueTree')
       css+=' suggestInputNoOpen';
     let postfix='_suggestionsInput';
     if(singleValue)
       postfix='';
-    let html=`<input type="text" id="`+widget.id+postfix+`" `
+    let html=`<div class="auto-suggest-field"><input type="text" id="`+widget.id+postfix+`" `
     if(singleValue)
       html+='readonly ';
     html+=`aria-label="`+widget.caption+`" placeholder="`+(widget.placeholder ? widget.placeholder : '')+`" class="suggestInput `+css+`" 
@@ -1174,44 +1188,15 @@ export class MdsComponent{
         `)
       },5);
     }
-    html+=this.addBottomCaption(widget);
-    if(showOpen){
+    if(openCallback){
       html+=`<a class="btn-flat suggestOpen" 
-              onclick="window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,false,false)"
+              onclick="`+openCallback+`"
               `;
-      /*
-              var list=document.getElementById('`+widget.id+`_suggestions');
-              var dialog=document.getElementById('`+widget.id+`_dialog');
-              list.style.display='';
-              dialog.style.display='';
-              var elements=list.getElementsByTagName('a');
-              var more=elements[elements.length-1];
-              more.style.display='none';
-              var hits=0;
-              var moreCount=0;
-              for(var i=1;i<elements.length-1;i++){
-                  var element=elements[i];
-                  if(i==1) element.focus();
-                  var caption=element.getAttribute('data-caption');
-                  var add=true;
-                  if(hits>=`+MdsComponent.MAX_SUGGESTIONS+`){
-                    add=false;
-                    moreCount++;
-                  }
-                  element.style.display=add ? '' : 'none';
-                  if(!add)
-                    continue;
-                  element.innerHTML=caption;
-                  hits+=add;
-              }
-              if(moreCount){
-                  more.style.display='';
-                  more.innerHTML=moreCount+' `+this.translate.instant("MORE_SELECTBOX")+`';
-              }
-              elements[0].style.display='none';*/
-      html+=`"><i class="material-icons">arrow_drop_down</i></a>`;
+      html+=`"><i class="material-icons">`+openIcon+`</i></a>`;
 
     }
+    html+=`</div>`;
+    html+=this.addBottomCaption(widget);
     html+=`<div id="`+widget.id+`_suggestions" class="suggestionList collection" style="display:none;">`;
     html+=`<a class="collection-item suggestionNoMatches"  onclick="
               document.getElementById('`+widget.id+`_suggestions').style.display='none';
@@ -1233,7 +1218,7 @@ export class MdsComponent{
               window.mdsComponentRef.component.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
-    if(allowCustom && !showOpen){
+    if(allowCustom && !openCallback){
       html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;
@@ -1242,27 +1227,29 @@ export class MdsComponent{
     document.getElementById(this.currentWidgetSuggestion+'_suggestions').style.display='none';
     this.currentWidgetSuggestion=null;
   }
+  openTree(id:string){
+      let tree=document.getElementById(id+'_tree');
+      tree.style.display='';
+      let childs=document.getElementById(id).childNodes;
+      let elements=tree.getElementsByTagName('input');
+      for(let i=0;i<elements.length;i++){
+          elements[i].checked=false;
+          document.getElementById(elements[i].id+'_bg').className='';
+      }
+      for(let i=0;i<childs.length;i++){
+          let child:any=childs[i];
+          let element:any=document.getElementById(id+'_'+child.getAttribute('data-value'));
+          let elementBg=document.getElementById(element.id+'_bg');
+          if(element){
+              element.checked=true;
+              this.changeTreeItem(element,id);
+          }
+      }
+  }
   private renderTreeWidget(widget:any,attr:string){
-    let html=this.autoSuggestField(widget)+`<div class="btn-flat suggestOpen" onclick="
-                  var tree=document.getElementById('`+widget.id+`_tree');
-                  tree.style.display='';
-                  var childs=document.getElementById('`+widget.id+`').childNodes;
-                  var elements=tree.getElementsByTagName('input');
-                  for(var i=0;i<elements.length;i++){
-                      elements[i].checked=false;
-                      document.getElementById(elements[i].id+'_bg').className='';
-                  }
-                  for(var i=0;i<childs.length;i++){
-                     var child=childs[i];
-                     var element=document.getElementById('`+widget.id+`_'+child.getAttribute('data-value'));
-                     var elementBg=document.getElementById(element.id+'_bg');
-                     if(element){
-                      element.checked=true;
-                      window.mdsComponentRef.component.changeTreeItem(element,'`+widget.id+`');
-                     }
-                  }
-              "><i class="material-icons">arrow_forward</i></div>
-              <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
+    let html=this.autoSuggestField(widget,'',false,
+                `window.mdsComponentRef.component.openTree('`+widget.id+`')`,'arrow_forward')
+        +`     <div class="dialog darken" style="display:none;z-index:121;" id="`+widget.id+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('`+widget.id+`_tree').style.display='none';"><i class="material-icons">close</i></div>
@@ -1456,29 +1443,33 @@ export class MdsComponent{
     html+='</fieldset>';
     return html;
   }
-  private renderWidget(widget: any,attr:string,template:any,node:Node) : string{
+  private isWidgetConditionTrue(widget:any){
+    if(!widget.condition)
+      return true;
+    let condition=widget.condition;
+    console.log('condition:');
+    console.log(condition);
+    if(condition.type=='PROPERTY' && this.currentNode) {
+        if (!this.currentNode.properties[condition.value] && !condition.negate || this.currentNode.properties[condition.value] && condition.negate) {
+            return false;
+        }
+    }
+    if(condition.type=='TOOLPERMISSION'){
+        let tp=this.connector.hasToolPermissionInstant(condition.value);
+        if(tp==condition.negate){
+            return false;
+        }
+    }
+    console.log("condition is true, will display widget");
+    return true;
+  }
+  private renderWidget(widget: any,attr:string,template:any) : string{
     let id=widget.id;
     let hasCaption=widget.caption;
     let html='';
     let caption='';
-
-    if(widget.condition){
-      let condition=widget.condition;
-      console.log('condition:');
-      console.log(condition);
-      if(condition.type=='PROPERTY' && node) {
-          if (!node.properties[condition.value] && !condition.negate || node.properties[condition.value] && condition.negate) {
-              return null;
-          }
-      }
-      if(condition.type=='TOOLPERMISSION'){
-        let tp=this.connector.hasToolPermissionInstant(condition.value);
-        if(tp==condition.negate){
-          return null;
-        }
-      }
-      console.log("condition is true, will display widget");
-    }
+    if(!this.isWidgetConditionTrue(widget))
+      return null;
 
     if(hasCaption) {
       caption=this.getCaption(widget);
@@ -1509,7 +1500,6 @@ export class MdsComponent{
     }
     else if(widget.type=='singleoption'){
       html+=this.renderSingleoptionWidget(widget,attr);
-      //html+=this.autoSuggestField(widget,'',false,true,true);
     }
     else if(widget.type=='multioption'){
       html+=this.renderMultioptionWidget(widget,attr);
@@ -1537,7 +1527,11 @@ export class MdsComponent{
       html+=this.renderVCardWidget(widget,attr);
     }
     else if(widget.type=='multivalueGroup'){
-        html+=this.renderGroupWidget(widget,attr,template,node);
+        html+=this.renderGroupWidget(widget,attr,template);
+    }
+    else if(widget.type=='defaultvalue'){
+        // hide this widget, it's used in backend
+        return '';
     }
     else if(widget.id=='preview'){
       html+=this.renderPreview(widget,attr);
@@ -1551,6 +1545,9 @@ export class MdsComponent{
     else if(widget.id=='license'){
       html+=this.renderLicense(widget);
     }
+    else if(widget.id=='template'){
+      html+=this.renderTemplateWidget(widget);
+    }
     else{
       html+='Unknown widget type \''+widget.type+'\' at id \''+widget.id+'\'';
     }
@@ -1561,8 +1558,8 @@ export class MdsComponent{
 
   private getCaption(widget: any) {
     let caption = '<label for="' + widget.id + '"> ' + widget.caption;
-    if(widget.required)
-      caption+= ' ('+this.translate.instant('FIELD_REQUIRED')+')';
+    if(this.isRequiredWidget(widget))
+      caption+= ' <span class="required">('+this.translate.instant('FIELD_REQUIRED')+')</span>';
     caption +=  '</label>';
     return caption;
   }
@@ -1648,12 +1645,8 @@ export class MdsComponent{
     preview+=`<input type="file" style="display:none" id="previewSelect" accept="image/*" onchange="
             var valid=this.files.length;
             if(valid){
-              var reader  = new FileReader();
-              reader.addEventListener('load',function(){
-                  document.getElementById('preview').setAttribute('data-custom',true);
-                  document.getElementById('preview').src=reader.result;
-              });
-              reader.readAsDataURL(this.files[0]);
+                document.getElementById('preview').setAttribute('data-custom',true);
+                document.getElementById('preview').src=window.URL.createObjectURL(this.files[0]);
             }
           " />
             <label>`+this.translate.instant('WORKSPACE.EDITOR.PREVIEW')+`</label>`;
@@ -1707,12 +1700,17 @@ export class MdsComponent{
   private openLicenseDialog(){
     this.saveValues(()=>{
       this.openLicense.emit();
-    })
+    });
+  }
+  private openTemplateDialog(){
+    this.saveValues(()=>{
+        this.openTemplate.emit();
+    });
   }
   private openContributorsDialog(){
     this.saveValues(()=>{
       this.openContributor.emit();
-    })
+    });
   }
   private getGroupValueCaption(value:string,widget:any){
     let values=value.split(MdsComponent.GROUP_MULTIVALUE_DELIMITER);
@@ -1763,23 +1761,35 @@ export class MdsComponent{
     let caption=this.getGroupValueCaption(result,widget);
     document.getElementById(id).innerHTML+=this.getMultivalueBadge(result,caption);
   }
-  private renderGroupWidget(widget: any,attr:string,template:any,node:Node){
+  private renderGroupWidget(widget: any,attr:string,template:any){
     if(!widget.subwidgets || !widget.subwidgets.length){
       return "Widget "+widget.id+" is a group widget, but has no subwidgets attached";
     }
     let html='<div class="widgetGroup">'
     for(let sub of widget.subwidgets){
       let subwidget=this.getWidget(sub.id);
-      if(this.isMultivalueWidget(subwidget)){
+      if(subwidget==null){
+          html+='Widget '+sub.id+" was not found. Check the widget id";
+      }
+      else if(this.isMultivalueWidget(subwidget)){
         html+='Widget '+subwidget.id+" is a multivalue widget. This is not supported for groups";
       }
       else {
-          html += this.renderWidget(subwidget, null, template, node);
+        console.log(subwidget);
+        let render=this.renderWidget(subwidget, null, template);
+        html += render ? render : "";
       }
     }
     html+=`<div class="widgetGroupAdd"><div class="btn waves-effect waves-light" onclick="window.mdsComponentRef.component.addGroupValues('`+widget.id+`')">`+this.translate.instant('ADD')+`</div></div></div>
             <div id="`+widget.id+`" class="multivalueBadges"></div>`;
     return html;
+  }
+  private renderTemplateWidget(widget: any){
+      let html=`<div class="mdsTemplate">
+                    <a class="clickable templateLink" onclick="window.mdsComponentRef.component.openTemplateDialog();">` +
+                    this.translate.instant('MDS.TEMPLATE_LINK') + ` <i class="material-icons">arrow_forward</i></a>
+                </div>`;
+      return html;
   }
   private renderLicense(widget: any) {
     if(this.mode=='search'){
@@ -1787,7 +1797,7 @@ export class MdsComponent{
         return 'widget \'license\' does not have values connected, can\'t render it.';
       }
       for(let value of widget.values){
-        let image=NodeHelper.getLicenseIconByString(value.id, this.connector);;
+        let image=NodeHelper.getLicenseIconByString(value.id, this.connector,false);
         if(image)
           value.imageSrc = image;
       }
@@ -1796,18 +1806,24 @@ export class MdsComponent{
       return html;
     }
     else {
-      let html = `<div class="mdsLicense">
-                    <a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
-                    this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>
-                  </div>`;
-      return html;
+        let html=`<div class="mdsLicense">`
+        let isSafe=this.connector.getCurrentLogin() && this.connector.getCurrentLogin().currentScope!=null;
+        if(isSafe || !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE)){
+            html+=`<div class="mdsNoPermissions">`+this.translate.instant('MDS.LICENSE_NO_PERMISSIONS'+(isSafe ? '_SAFE' : ''))+`</div>`;
+        }
+        else {
+            html += `<a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +
+                this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>`;
+        }
+        html+=`</div>`;
+        return html;
     }
   }
 
-  private setPreview(node: Node,counter=1) {
+  private setPreview(counter=1) {
     let preview:any=document.getElementById('preview');
     if(preview){
-      if(!node){
+      if(!this.currentNode){
         if(this.createType==MdsComponent.TYPE_TOOLDEFINITION){
           preview.src = this.connector.getThemeMimePreview('tool_definition.svg');
         }
@@ -1816,21 +1832,21 @@ export class MdsComponent{
         }
         return;
       }
-      if(preview.src && !preview.src.startsWith(node.preview.url))
+      if(preview.src && !preview.src.startsWith(this.currentNode.preview.url))
         return;
-      preview.src=node.preview.url+'&crop=true&width=400&height=300&dontcache='+new Date().getMilliseconds();
+      preview.src=this.currentNode.preview.url+'&crop=true&width=400&height=300&dontcache='+new Date().getMilliseconds();
       //if(node.preview.isIcon){
         setTimeout(()=>{
           //this.node.getNodeMetadata(node.ref.id).subscribe((data:NodeWrapper)=>{this.setPreview(data.node)});
-          this.setPreview(node,counter*2);
+          this.setPreview(counter*2);
         },Math.min(10000,500*counter));
       //}
     }
   }
 
-  private setGeneralNodeData(node:Node) {
+  private setGeneralNodeData() {
     setTimeout(()=>{
-      this.setPreview(node);
+      this.setPreview();
     },10);
   }
 
@@ -1899,7 +1915,7 @@ export class MdsComponent{
   private getWidget(id: string,template:string=null,widgets=this.mds.widgets) {
     for(let w of widgets){
       if(w.id==id){
-        if(template==null || w.template==template){
+        if((template==null || w.template==template) && this.isWidgetConditionTrue(w)){
           return w;
         }
       }

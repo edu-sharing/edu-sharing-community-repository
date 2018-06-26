@@ -14,6 +14,16 @@ export class UIAnimation{
     ];
 
   }
+  public static fromBottom(time=UIAnimation.ANIMATION_TIME_NORMAL){
+      return  [transition(':enter', [
+          style({transform:'translateY(100%)'}),
+          animate(time, style({transform:'translateY(0)'}))
+      ]),
+          transition(':leave', [
+              style({transform:'translateY(0)'}),
+              animate(time, style({transform:'translateY(100%)'}))      ])
+      ];
+  }
   public static fromLeft(time=UIAnimation.ANIMATION_TIME_NORMAL){
     return  [transition(':enter', [
       style({transform:'translateX(-100%)'}),

@@ -7,11 +7,14 @@ import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import { NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList} from "../data-object";
 import {RequestObject} from "../request-object";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestMetadataService {
+export class RestMetadataService extends AbstractRestService{
 
-  constructor(private connector : RestConnectorService) {}
+    constructor(connector : RestConnectorService) {
+        super(connector);
+    }
 
     getMetadataValues(metadataset:string, query:string, prop: string, pattern: string, repository = RestConstants.HOME_REPOSITORY): Observable<any> {
         let q=this.connector.createUrl('mds/:version/metadatasets/:repository/'+metadataset+'/values', repository, []);

@@ -134,9 +134,9 @@ import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
@@ -1223,7 +1223,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if(propsCopy.containsKey(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)){
 				mdsId=(String)propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 			}
-			MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
+			MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
 			HashMap<String, Object> addAndOverwriteDateMap = new HashMap<String, Object>();
 			for (Map.Entry<String, Object> entry : propsCopy.entrySet()) {
 
@@ -1569,7 +1569,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				properties.remove(CCConstants.KEY_PREVIEW_GENERATION_RUNS);
 			}
 
-			HashMap<String, HashMap<String, Object>> usages = this.getChildrenByType(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_TYPE_USAGE);
+			List<NodeRef> usages = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_USAGEASPECT_USAGES);
 			if (usages != null) {
 				properties.put(CCConstants.VIRT_PROP_USAGECOUNT, "" + usages.size());
 			}
@@ -1798,6 +1798,16 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				result.put(childNodeId, resultProps);
 
 			}
+		}
+		return result;
+	}
+	public List<NodeRef> getChildrenByAssociationNodeIds(StoreRef store, String nodeId, String association) {
+		
+		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId),QName.createQName(association),
+				RegexQNamePattern.MATCH_ALL);		
+		List<NodeRef> result=new ArrayList<>();
+		for (ChildAssociationRef child : childAssocList) {
+			result.add(child.getChildRef());
 		}
 		return result;
 	}

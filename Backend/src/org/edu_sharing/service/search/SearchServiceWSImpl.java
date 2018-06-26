@@ -173,4 +173,11 @@ public class SearchServiceWSImpl implements SearchService {
 		return null;
 	}
 
+	@Override
+	public SearchResult<String> searchPersonGroups(String authorityName, String pattern, int skipCount, int maxValues,
+			SortDefinition sort) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -18,6 +18,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -33,6 +34,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 public class AuthorityServiceImpl implements AuthorityService {
@@ -57,6 +59,15 @@ public class AuthorityServiceImpl implements AuthorityService {
 	@Override
 	public Object getAuthorityProperty(String authority,String property){
 		return nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(property));
+	}
+	/**
+	 * returns the node id for the given authority (useful if you want to change metadata)
+	 * @param authority
+	 * @return
+	 */
+	@Override
+	public NodeRef getAuthorityNodeRef(String authority){
+		return authorityService.getAuthorityNodeRef(authority);
 	}
 	@Override
 	public void setAuthorityProperty(String authority,String property,Serializable value){

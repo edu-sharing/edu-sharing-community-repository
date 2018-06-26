@@ -39,6 +39,7 @@ public class NgServlet extends HttpServlet {
 				int pos=html.indexOf("<head>")+6;
 				html=html.substring(0,pos)+head+html.substring(pos);
 			}
+			resp.setHeader("Content-Type","text/html");
 			resp.getOutputStream().print(html);
 		}catch(Throwable t) {
 			t.printStackTrace();

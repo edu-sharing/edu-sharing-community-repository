@@ -8,16 +8,17 @@ import {RestConstants} from "../rest-constants";
 import {
     NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList,
     NodePermissionsHistory,
-    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent
+    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent, NodeTemplate
 } from "../data-object";
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestNodeService {
-  constructor(private connector : RestConnectorService,private events:FrameEventsService, private iam : RestIamService, private toast : Toast) {
-
+export class RestNodeService extends AbstractRestService{
+  constructor(connector : RestConnectorService,private events:FrameEventsService, private iam : RestIamService, private toast : Toast) {
+    super(connector);
     events.addListener(this);
   }
   onEvent(event:string,data:any){
@@ -365,12 +366,13 @@ export class RestNodeService {
    * @param repository
    * @returns {Observable<Response>}
    */
-  public setNodePermissions = (node : string,permissions:LocalPermissions,sendMail=false,mailText="",sendCopy=false,repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
-    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/permissions?mailtext=:mailText&sendMail=:sendMail&sendCopy=:sendCopy",repository,[
+  public setNodePermissions = (node : string,permissions:LocalPermissions,sendMail=false,mailText="",sendCopy=false,createHandle=false,repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
+    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/permissions?mailtext=:mailText&sendMail=:sendMail&sendCopy=:sendCopy&createHandle=:createHandle",repository,[
       [":node",node],
       [":mailText",mailText],
       [":sendMail",""+sendMail],
-      [":sendCopy",""+sendCopy]
+      [":sendCopy",""+sendCopy],
+      [":createHandle",""+createHandle]
     ]);
     return this.connector.post(query,JSON.stringify(permissions),this.connector.getRequestOptions());
   }
@@ -451,6 +453,25 @@ export class RestNodeService {
       .map((response: Response) => response.json());
       */
   }
+    public setNodeTextContent = (node : string,
+                                text : string,
+                                versionComment : string = "",
+                                mimetype="text/plain",
+                                repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/content?versionComment=:comment&mimetype=:mimetype",repository,
+            [
+                [":node",node],
+                [":mimetype",mimetype],
+                [":comment",versionComment],
+            ]);
+        let options=this.connector.getRequestOptions('multipart/form-data');
+        return this.connector.post(query,text,options).map((response: Response) => response.json());
+
+        /*
+        return this.http.post(query,"",this.connector.getRequestOptions())
+          .map((response: Response) => response.json());
+          */
+    }
   public addWorkflow = (node : string,workflow:WorkflowEntry,repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
     let query=this.connector.createUrl("node/:version/nodes/:repository/:node/workflow",repository,[
       [":node",node],
@@ -507,6 +528,7 @@ export class RestNodeService {
   private createNodeUrl(data: any) {
     let prop=RestHelper.createNameProperty(data.name);
     prop[RestConstants.CCM_PROP_IO_WWWURL]=[data.url];
+    prop[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
     this.createNode(RestConstants.USERHOME,RestConstants.CCM_TYPE_IO,[],prop,true).subscribe((data:NodeWrapper)=>{
       this.toast.toast("NODE_CREATED_USERHOME",{name:data.node.name});
       this.events.broadcastEvent(FrameEventsService.EVENT_NODE_SAVED,data.node);
@@ -532,4 +554,20 @@ export class RestNodeService {
       return this.connector.get(query,this.connector.getRequestOptions())
           .map((response: Response) => response.json());
   }
+
+  public getNodeTemplate(node: string,repository=RestConstants.HOME_REPOSITORY) : Observable<NodeTemplate> {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/metadata/template",repository,[
+            [":node",node],
+        ]);
+        return this.connector.get(query,this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+  }
+    public setNodeTemplate(node: string,enable:boolean,properties:any={},repository=RestConstants.HOME_REPOSITORY) : Observable<NodeTemplate> {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/metadata/template?enable=:enable",repository,[
+            [":node",node],
+            [":enable",""+enable],
+        ]);
+        return this.connector.put(query,JSON.stringify(properties),this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+    }
 }

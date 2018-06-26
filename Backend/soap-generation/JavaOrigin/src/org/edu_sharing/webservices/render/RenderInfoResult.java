@@ -42,6 +42,8 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	String mdsTemplate;
 	
 	private java.lang.String[] permissions;
+	
+	String eduSchoolPrimaryAffiliation;
 
 	public Boolean getGuestReadAllowed() {
 		return guestReadAllowed;
@@ -185,4 +187,12 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
     public void setMdsTemplate(java.lang.String mdsTemplate) {
         this.mdsTemplate = mdsTemplate;
     }
+    
+    public void setEduSchoolPrimaryAffiliation(String eduSchoolPrimaryAffiliation) {
+		this.eduSchoolPrimaryAffiliation = eduSchoolPrimaryAffiliation;
+	}
+    
+    public String getEduSchoolPrimaryAffiliation() {
+		return eduSchoolPrimaryAffiliation;
+	}
 }

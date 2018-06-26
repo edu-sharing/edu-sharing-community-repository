@@ -24,17 +24,22 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.gwt.user.client.ui.SuggestOracle;
 
 public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	
@@ -45,10 +50,12 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	String repositoryId = null;
 
 	String APIKey = null;
+
+	private ApplicationInfo appInfo;
 			
 	
 	public SearchServiceDDBImpl(String appId) {
-		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+		appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 		this.repositoryId = appInfo.getAppId();		
 		this.APIKey = appInfo.getApiKey(); 
 
@@ -85,22 +92,9 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		//String lang=new AuthenticationToolAPI().getCurrentLocale().split("_")[0];
 
 		String jsonString = "";
-		URL url=new URL(DDB_API+path);
-		HttpsURLConnection connection = openDDBUrl(url);
-		connection.connect();		
-
-        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
-        BufferedReader br = new BufferedReader(isr);
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
-        }
-        br.close();
-        isr.close();
-        connection.disconnect();
-        jsonString = sb.toString();
-
+		
+		String urlAsStr = DDB_API+path;
+		jsonString = query(urlAsStr);
 		JSONObject jo = new JSONObject(jsonString);
     	
 		Integer nrOfResult = (Integer)jo.get("numberOfResults");
@@ -115,13 +109,12 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		HashMap<String,HashMap<String,Object>> result = new HashMap<String, HashMap<String,Object>>();
 		for(int i = 0; i < docs.length(); i++){
 			JSONObject doc = (JSONObject)docs.get(i);
-			
-			HashMap<String,Object> props =  this.getProperties(doc);
-			result.put((String)props.get(CCConstants.SYS_PROP_NODE_UID), props);
-
-			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId, 
+			String id =  this.getNodeId(doc);
+			org.edu_sharing.service.model.NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(
+					repositoryId, 
 					Constants.storeRef.getProtocol(),
-					Constants.storeRef.getIdentifier(),props);
+					Constants.storeRef.getIdentifier(),
+					id);
 			data.add(ref);
 
 		}
@@ -161,6 +154,24 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 	}
 	
+	private String query(String urlAsStr) throws Exception {
+		URL url = new URL(urlAsStr);
+		HttpsURLConnection connection = openDDBUrl(url);
+		connection.connect();		
+
+        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
+        BufferedReader br = new BufferedReader(isr);
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
+        }
+        br.close();
+        isr.close();
+        connection.disconnect();
+        return sb.toString();
+	}
+
 	public static String httpGet(String urlStr, HashMap<String, String> properties) throws IOException {
         if (properties == null) {
             properties = new HashMap<String, String>();
@@ -190,8 +201,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
         return sb.toString();
     }	
 
-	private HashMap<String,Object> getProperties(JSONObject doc){
-		HashMap<String,Object> properties = new  HashMap<String,Object>();
+	private String getNodeId(JSONObject doc){
 		String id = null;
 		try {
 			id = (String)doc.get("id");
@@ -199,102 +209,87 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		String title = null;
-		try {
-			title = (String)doc.get("label");
-		} catch (JSONException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		String thumbnail = null;
-		try {
-			thumbnail = (String)doc.get("thumbnail");
-		} catch (JSONException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, title);
-		properties.put(CCConstants.SYS_PROP_NODE_UID, id);
-
-		try{
-			
-			String thumbnailUrl = DDB_API+ thumbnail+"?oauth_consumer_key=" + URLEncoder.encode(APIKey, "UTF-8");
-			//for the importer
-			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, thumbnailUrl);	
-			//for the gwt gui no persistent
-			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, thumbnailUrl);
-			
-		}catch(UnsupportedEncodingException e){}
-		properties.put(CCConstants.REPOSITORY_ID, this.repositoryId );
-		properties.put(CCConstants.NODETYPE, CCConstants.CCM_TYPE_IO);
-		
-		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, "");
-		
-		try{
-			properties.putAll(getProperties(id));
-		}catch(Throwable e){
-			logger.error(e.getMessage(),e);
-		}
-		
-		
-		return properties;
+		return id;
 	}
 	
 	
 	public HashMap<String, Object> getProperties(String nodeId) throws Throwable {
 		
 		HashMap<String,Object> properties = new  HashMap<String,Object>();
+		properties.put(CCConstants.SYS_PROP_NODE_UID,nodeId);
+		String url = "https://www.deutsche-digitale-bibliothek.de/item/"+nodeId;
+		properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, url);
+		properties.put(CCConstants.CCM_PROP_IO_WWWURL, url);
+        properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(this.repositoryId, nodeId));
+		properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"ddb");
 		try{
-			String result = httpGet(DDB_API   +"/items/"+nodeId+"/binaries?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
-			if(result != null && result.trim().length() > 0){
-			
-				JSONObject jo = new JSONObject(result);//  )new JSONParser().parse(result);
-				if(jo != null){	
+			// fetch binary info
+			String all = httpGet(DDB_API+"/items/"+nodeId+"/aip?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
+			JSONObject allJson = new JSONObject(all);
+			try {
+				JSONArray binaries = (JSONArray)allJson.getJSONObject("binaries").getJSONArray("binary");			
+				JSONObject binary = null;
+				JSONObject binaryFallback = binaries.getJSONObject(0);
+				
+				for(int i = 0; i < binaries.length();i++){
+					binary =  (JSONObject)binaries.get(0);						
+					String path = (String)binary.get("@path");
 					
-					JSONArray binaries = (JSONArray)jo.get("binary");
-					
-					JSONObject binary = null;
-					JSONObject binaryFallback = null;
-					
-					for(int i = 0; i < binaries.length();i++){
-						
-						binary =  (JSONObject)binaries.get(0);
-						if(i == 0) binaryFallback = binary;
-						
-						String path = (String)binary.get("@path");
-						
-						// prefer mvpr
-						if(path.contains("mvpr")){
-							break;
-						}
+					// prefer mvpr
+					if(path.contains("mvpr")){
+						break;
 					}
-					
-					if(binary == null){
-						binary = binaryFallback;
-					}
-					String contenturl  = (String)binary.get("@path");
-					String mimetyp = (String)binary.get("@mimetype");
-					contenturl = DDB_API+contenturl+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
-					
-					//properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, contenturl);
-					String url = "https://www.deutsche-digitale-bibliothek.de/item/"+nodeId;
-					properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, url);
-					properties.put(CCConstants.CCM_PROP_IO_WWWURL, url);
-					
-					properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, mimetyp);
 				}
 				
-    		        properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(this.repositoryId, nodeId));
-			}
+				if(binary == null){
+					binary = binaryFallback;
+				}
+				String name  = (String)binary.get("@name");
+				properties.put(CCConstants.CM_NAME, name);
+				properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, name);
+				String contenturl  = (String)binary.get("@path");
+				String mimetyp = (String)binary.get("@mimetype");
+				contenturl = DDB_API+contenturl+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+				
+				//properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, contenturl);
+
+				properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, mimetyp);
+			}catch(Throwable t) {}
+			try {
+				JSONObject meta=allJson.getJSONObject("edm").getJSONObject("RDF").getJSONObject("ProvidedCHO");
+				try {
+				properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER,
+						VCardTool.nameToVCard(meta.getString("publisher")));
+				}catch(Throwable t) {}
+				try {
+					properties.put(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR,
+							VCardTool.nameToVCard(meta.getString("creator")));
+					properties.put(CCConstants.CM_PROP_C_CREATOR,meta.getString("creator"));
+					properties.put(CCConstants.NODECREATOR_FIRSTNAME,meta.getString("creator"));
+					properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,meta.getString("creator"));
+				}catch(Throwable t) {}
+				try {
+					String name=meta.getString("title");
+					properties.put(CCConstants.CM_NAME, name);
+					properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, name);
+				}catch(Throwable t) {}
+			}catch(Throwable t) {}
 			
-			String items = httpGet(DDB_API+"/items/"+nodeId+"/view?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
-			if(items != null && items.trim().length() > 0){
-				JSONObject jo = new JSONObject(items);
-				JSONObject item = new JSONObject(jo.get("item"));
+			
+			String previewUrl;
+			try {
+				previewUrl=DDB_API+allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+			}
+			catch(Throwable t) {
+				previewUrl=new MimeTypesV2(appInfo).getPreview(CCConstants.CCM_TYPE_IO, properties, null);
+			}
+			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, previewUrl);	
+			//for the gwt gui no persistent
+			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, previewUrl);
+			
+			JSONObject item = allJson.getJSONObject("view").getJSONObject("item");				
+			try {
 				if(item != null){
-					JSONObject license = (JSONObject)item.get("license");
-					//@TODO map: we dont have public domain at the moment
 					JSONArray fields = (JSONArray)item.get("fields");
 					
 					for(int i = 0; i < fields.length();i++){
@@ -367,28 +362,101 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 								
 							}
 						}
-						
 					}
-					
-					JSONObject institution = (JSONObject)item.get("institution");
-					if(institution != null){
-						String instName = (String)institution.get("name");
-						properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR+"FN", instName);
-						
-					}
+				}
+			}
+			catch(Throwable t) {}
+			try {
+				JSONObject institution = (JSONObject)item.get("institution");
+				if(institution != null){
+					String instName = (String)institution.get("name");
+					properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR+"FN", instName);
 					
 				}
-			
+			}catch(Throwable t) {
+				
 			}
-			
-		} catch(Exception e) {
-			logger.error(e.getMessage(), e);
 		}
-		
+		catch (Exception e) {
+			
+		}
+			
+			
 		return properties;
 	}
 	
+	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
+		
+		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
+		
+		List<String> facets = mds.getQueries().findQuery(queryId).findParameterByName(parameterId).getFacets();
+		String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
+		
+		System.out.println("url:" + url);
+		
+		try {
+			String json = this.query(url);
+			System.out.println(json);
+			JSONObject jo = new JSONObject(json);
+	    	
+			JSONArray resultsArr = (JSONArray)jo.get("facets");
+			
+			for(int i = 0; i < resultsArr.length(); i++) {
+				JSONObject facetObj = (JSONObject)resultsArr.get(i);
+				String field = facetObj.getString("field");
+				int numberOfFacets = facetObj.getInt("numberOfFacets");
+				if(facets.contains(field) && numberOfFacets > 0) {
+					
+					JSONArray facetValues = facetObj.getJSONArray("facetValues");
+					for(int j = 0; j < facetValues.length(); j++) {
+						JSONObject facetteVal = (JSONObject)facetValues.get(j);
+						//int count = facetteVal.getInt("count");
+						String val = facetteVal.getString("value");
+						
+						SuggestFacetDTO dto = new SuggestFacetDTO();
+						dto.setFacet(val);
+						dto.setDisplayString(val);
+
+						result.add(dto);
+					}
+					
+					
+				}
+			}
 	
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+		return result;
+	}
+	
+	public String getUrl(String basePath, String query, List<String> facets, int offset, int rows){
+		String url = DDB_API + basePath;
+		
+		try {
+			url += "?oauth_consumer_key=" + URLEncoder.encode(APIKey, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		url += "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(query);
+		if(facets != null && facets.size() > 0) {
+			url += "&facet=";
+			int i = 0;
+			for(String facet :  facets) {
+				if(i == 0) {
+					url += facet;
+				}else {
+					url += "," +facet;
+				}
+				
+			}
+		}
+		url += "&offset="+offset;
+		url += "&rows="+rows;
+		
+		return url;
+	}
 	
 	@Override
 	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
@@ -412,7 +480,10 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 		List<String> extSearch = new ArrayList<String>();
 		
- 		String searchWord = searchWordCriteria[0];
+ 		String searchWord = "";
+ 		if(searchWordCriteria!=null && searchWordCriteria.length>0) {
+ 			searchWord = searchWordCriteria[0];
+ 		}
 		if (searchWord.equals("*") ){
 			searchWord="";
 		}
@@ -486,5 +557,45 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		}
 
 	}	
+	
+	public static void main(String[] args) {
+		try {
+			String searchWord = "*";
+			String extendedSearch = "place:(Frankfurt)";
+			String oauthKey = "nVyX1bwLOAEpMVrzfEIf3xth5eTtVOaqZeeUUcUEQDNa4Oigs6y1438781244192";
+			String path = "/search";
+			path += "?oauth_consumer_key=" + URLEncoder.encode(oauthKey, "UTF-8");
+			path += "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(searchWord+" " +extendedSearch);
+			path += "&facet=place_fct";
+			path += "&offset="+0;
+			path += "&rows="+0;
+			
+			
+			URL url=new URL(DDB_API+path);
+			HttpsURLConnection connection = openDDBUrl(url);
+			connection.connect();		
+	
+	        InputStreamReader isr = new InputStreamReader(connection.getInputStream(), "UTF-8");
+	        BufferedReader br = new BufferedReader(isr);
+	        StringBuilder sb = new StringBuilder();
+	        String line;
+	        while ((line = br.readLine()) != null) {
+	            sb.append(line);
+	        }
+	        br.close();
+	        isr.close();
+	        connection.disconnect();
+	        String jsonString = sb.toString();
+	        System.out.println(jsonString);
+			JSONObject jo = new JSONObject(jsonString);
+	    	
+			Integer nrOfResult = (Integer)jo.get("numberOfResults");
+			JSONArray resultsArr = (JSONArray)jo.get("results");
+			JSONObject results = (JSONObject)resultsArr.get(0);
+			JSONArray docs = (JSONArray)results.get("docs");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 }

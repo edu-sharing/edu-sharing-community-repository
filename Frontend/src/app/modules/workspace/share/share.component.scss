@@ -102,6 +102,7 @@ a.active{
   .publishElements{
     float: left;
     max-width: 495px;
+    margin-left: 10px;
   }
   .type{
     color: $textLight;
@@ -121,6 +122,16 @@ a.active{
     margin-left: 76px;
     color:$textLight;
     max-width:400px;
+  }
+  .doi{
+    margin-left: 77px;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    span{
+      margin-left: 35px;
+      margin-right: -100px;
+    }
   }
 }
 .group{
@@ -267,6 +278,31 @@ label.notify p{
   color:$textLight;
 }
 
+.state{
+  font-size: 9pt;
+  position: absolute;
+  left: 12px;
+  i{
+    color: $textLight;
+    vertical-align: bottom;
+    font-size: 14pt;
+  }
+  .show-state{
+    border: 2px dashed transparent;
+    border-radius: 15px;
+    padding: 6px;
+    padding-right: 12px;
+    padding-left: 8px;
+  }
+
+  .state-changed{
+    border-color: $workspaceInheritColor;
+    i{
+      color: $textLight;
+    }
+  }
+}
+
 @media screen and (max-width: $mobileWidth) {
   .typeButton .btn-flat{
     min-width: auto;
@@ -278,6 +314,13 @@ label.notify p{
   .advancedPermission{
     width:50%;
   }
+  .publish .doi span{
+    margin-right: 0;
+  }
+  .publish .type{
+    display: none;
+  }
+
 }
 @media screen and (max-width: $mobileWidth - $mobileStage*2) {
   .groupHeading{
@@ -287,5 +330,18 @@ label.notify p{
   .inheritCheck{
     padding-left:5px;
   }
-}
+  .state{
+    left: 10px;
+    .show-state > span{
+      display: none;
+    }
 
+    .state-changed{
+      border-color: transparent;
+      i{
+        color: $workspaceInheritColor;
+      }
+    }
+  }
+
+}

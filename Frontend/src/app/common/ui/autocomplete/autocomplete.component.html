@@ -1,6 +1,8 @@
 <div class="dialog" *ngIf="showSuggestions" (click)="showSuggestions=false"></div>
 <div class="form-group edusharing-autocomplete-wrapper">
- <input name="valueInput" class="searchInput" [(ngModel)]="valueInput" [disabled]="disabled" placeholder="{{placeholder | translate}}" title="{{placeholder | translate}}" autocomplete="off">
+    <form (ngSubmit)="addValue()">
+        <input name="valueInput" class="searchInput" [(ngModel)]="valueInput" (keyup.enter)="addValue()" [disabled]="disabled" placeholder="{{placeholder | translate}}" title="{{placeholder | translate}}" autocomplete="off">
+    </form>
  <ul class="suggestbox" *ngIf="showSuggestions">
      <li *ngFor="let suggestion of _suggestions">
          <a (click)="handleSuggestClick(suggestion)" [class.activeItem]="activeItem==suggestion.index" title="{{SUGGESTION | translate}} {{suggestion.title}}">

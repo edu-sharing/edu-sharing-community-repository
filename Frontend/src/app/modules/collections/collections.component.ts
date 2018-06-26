@@ -40,16 +40,11 @@ import {TranslateService} from "@ngx-translate/core";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {trigger} from "@angular/animations";
+import {Location} from "@angular/common";
 import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
-
-// data class for breadcrumbs
-export class Breadcrumb {
-    ref:EduData.Reference;
-    name:string;
-}
 
 // component class
 @Component({
@@ -117,6 +112,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       public gwtInterface:GwtInterfaceService,
       private frame : FrameEventsService,
       private temporaryStorageService : TemporaryStorageService,
+        private location : Location,
         private collectionService : RestCollectionService,
         private nodeService : RestNodeService,
         private organizationService : RestOrganizationService,
@@ -390,7 +386,7 @@ export class CollectionsMainComponent implements GwtEventListener {
           }
       }
       let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,
-        (node:Node)=>NodeHelper.downloadNodes(this.connector,ActionbarHelper.getNodes(nodes,node)));
+        (node:Node)=>NodeHelper.downloadNodes(this.toast,this.connector,ActionbarHelper.getNodes(nodes,node)));
       if (download)
         options.push(download);
       if(fromList) {
@@ -539,6 +535,8 @@ export class CollectionsMainComponent implements GwtEventListener {
             this.mainNavRef.refreshBanner();
             if(callback)
               callback();
+        },(error:any)=>{
+            this.toast.error(error);
         });
 
 
@@ -556,11 +554,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
         // remember actual collection as breadcrumb
         if (!this.isRootLevelCollection()) {
-
-            let crumb = new Breadcrumb();
-            crumb.ref = this.collectionContent.collection.ref;
-            crumb.name =this.collectionContent.collection.title;
-            this.parentCollectionId = crumb.ref;
+            this.parentCollectionId = this.collectionContent.collection.ref;
         }
 
         // set thru router so that browser back button can work
@@ -597,7 +591,7 @@ export class CollectionsMainComponent implements GwtEventListener {
          */
         if(data.node.access.indexOf(RestConstants.ACCESS_DELETE)!=-1) {
           this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
-            NodeRenderComponent.close();
+            NodeRenderComponent.close(this.location);
           })));
         }
         // set content for being displayed in detail
@@ -698,7 +692,9 @@ export class CollectionsMainComponent implements GwtEventListener {
       this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
         console.log(params);
         if(params['scope'])
-          this.tabSelected=params['scope'];
+            this.tabSelected=params['scope'];
+        else
+            this.tabSelected=RestConstants.COLLECTIONSCOPE_MY;
         if(this.isGuest)
           this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
         if(params['mainnav'])

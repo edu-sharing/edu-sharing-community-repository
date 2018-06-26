@@ -22,6 +22,7 @@ export class RestConstants {
   public static AUTHORITY_TYPE_GROUP = "GROUP";
   public static AUTHORITY_TYPE_OWNER = "OWNER";
   public static AUTHORITY_TYPE_EVERYONE = "EVERYONE";
+  public static AUTHORITY_TYPE_UNKNOWN = "UNKNOWN";
   public static AUTHORITY_EVERYONE = "GROUP_EVERYONE";
   public static PERMISSION_OWNER = "Owner";
   public static PERMISSION_CONSUMER = "Consumer";
@@ -39,6 +40,8 @@ export class RestConstants {
   public static CCM_ASPECT_TOOL_DEFINITION = "ccm:tool_definition";
   public static CCM_ASPECT_TOOL_OBJECT = "ccm:tool_object";
   public static CCM_ASPECT_IO_REFERENCE = "ccm:collection_io_reference";
+  public static CCM_ASPECT_METADATA_PRESETTING= "ccm:metadataPresetting";
+  public static CCM_ASPECT_PUBLISHED = "ccm:published";
   public static CCM_ASPECT_COLLECTION = "ccm:collection";
   public static CCM_ASPECT_LOMREPLICATION = "ccm:lomreplication";
   public static CCM_ASPECT_CCLOM_GENERAL = "cclom:general";
@@ -83,15 +86,39 @@ export class RestConstants {
   public static CCM_PROP_CCRESSOURCETYPE = "ccm:ccressourcetype";
   public static CCM_PROP_CCRESSOURCESUBTYPE = "ccm:ccresourcesubtype";
   public static CCM_PROP_CCRESSOURCEVERSION = "ccm:ccressourceversion";
+  public static CCM_PROP_EDUCATIONALTYPICALAGERANGE = "ccm:educationaltypicalagerange";
   public static CCM_PROP_COLLECTION_PINNED_STATUS = "ccm:collection_pinned_status";
   public static CCM_PROP_COLLECTION_PINNED_ORDER = "ccm:collection_pinned_order";
   public static CCM_PROP_IO_WWWURL = "ccm:wwwurl";
+  public static CCM_PROP_LINKTYPE = "ccm:linktype";
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
+  public static CCM_PROP_AUTHORITY_GROUPTYPE="ccm:groupType";
+  public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
+
+  public static LINKTYPE_USER_GENERATED="USER_GENERATED";
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";
   public static VIRTUAL_PROP_USAGECOUNT = "virtual:usagecount";
   public static GROUP_PREFIX="GROUP_";
 
-  public static DATE_FIELDS=[RestConstants.CM_ARCHIVED_DATE,
+  public static CONTRIBUTOR_LIFECYCLE_PREFIX="ccm:lifecyclecontributer_";
+  public static CONTRIBUTOR_METADATA_PREFIX="ccm:metadatacontributer_";
+  public static CONTRIBUTOR_ROLES_LIFECYCLE=["publisher","author","unknown","initiator","terminator","validator",
+    "editor","graphical_designer","technical_implementer","content_provider",
+    "educational_validator","script_writer","instructional_designer","subject_matter_expert"];
+  public static CONTRIBUTOR_ROLES_METADATA=["creator","validator","provider"];
+  public static getAllVCardFields(){
+      let list=[];
+      for(let role of RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE){
+        list.push(RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX+role);
+      }
+      for(let role of RestConstants.CONTRIBUTOR_ROLES_METADATA){
+          list.push(RestConstants.CONTRIBUTOR_METADATA_PREFIX+role);
+      }
+      return list;
+  }
+
+
+    public static DATE_FIELDS=[RestConstants.CM_ARCHIVED_DATE,
                             RestConstants.CM_MODIFIED_DATE,
                             RestConstants.CM_PROP_C_CREATED,
                             RestConstants.CCM_PROP_EAF_PRODUCTIONYEAR,
@@ -138,6 +165,7 @@ export class RestConstants {
 
   public static COMMENT_MAIN_FILE_UPLOAD="MAIN_FILE_UPLOAD";
   public static COMMENT_EDITOR_UPLOAD="EDITOR_UPLOAD";
+  public static COMMENT_NODE_PUBLISHED="NODE_PUBLISHED";
   public static ACCESS_ADD_CHILDREN="AddChildren";
   public static ACCESS_WRITE="Write";
   public static ACCESS_DELETE="Delete";
@@ -178,6 +206,7 @@ export class RestConstants {
   public static TOOLPERMISSION_COLLECTION_EDITORIAL="TOOLPERMISSION_COLLECTION_EDITORIAL";
   public static TOOLPERMISSION_COLLECTION_CURRICULUM="TOOLPERMISSION_COLLECTION_CURRICULUM";
   public static TOOLPERMISSION_COLLECTION_PINNING="TOOLPERMISSION_COLLECTION_PINNING";
+  public static TOOLPERMISSION_HANDLESERVICE="TOOLPERMISSION_HANDLESERVICE";
 
   public static SHARE_LINK = "LINK";
   public static SHARE_EXPIRY_UNLIMITED = -1;
@@ -198,6 +227,7 @@ export class RestConstants {
     RestConstants.CCM_PROP_LICENSE,
     RestConstants.AUTHORITY_DISPLAYNAME,
     RestConstants.AUTHORITY_FIRSTNAME,
+    RestConstants.AUTHORITY_GROUPTYPE,
   ];
   public static LICENSE_URLS={
     "CC_BY_ABOUT":"https://creativecommons.org/licenses/?lang=de",

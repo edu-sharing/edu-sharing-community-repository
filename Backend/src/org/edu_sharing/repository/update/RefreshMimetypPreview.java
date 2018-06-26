@@ -153,5 +153,10 @@ public class RefreshMimetypPreview extends UpdateAbstract {
 	public String getId() {
 		return ID;
 	}
+	
+	@Override
+	public void run() {
+		this.logInfo("not implemented");
+	}
 
 }

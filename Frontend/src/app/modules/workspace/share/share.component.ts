@@ -53,6 +53,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public INVITE="INVITE";
   public INVITED="INVITED";
   public ADVANCED="ADVANCED";
+  initialState: string;
   public tab=this.INVITE;
   private currentType=[RestConstants.ACCESS_CONSUMER,RestConstants.ACCESS_CC_PUBLISH];
   private inherited : boolean;
@@ -79,8 +80,11 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public showLink: boolean;
   public isAdmin: boolean;
   public publishPermission: boolean;
+  public doiPermission: boolean;
   public publishInherit: boolean;
   public publishActive: boolean;
+  public doiActive: boolean;
+  public doiDisabled: boolean;
   private originalPermissions: LocalPermissions;
   private isSafe = false;
 
@@ -101,11 +105,14 @@ export class WorkspaceShareComponent implements AfterViewInit{
   @Input() currentPermissions:LocalPermissions=null;
   @Input() set nodeId (node : string){
     if(node)
-      this.nodeApi.getNodeMetadata(node).subscribe((data:NodeWrapper)=>{
-        this.node=data.node;
+      this.nodeApi.getNodeMetadata(node,[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
+        this.setNode(data.node);
       });
   }
   @Input() set node (node : Node){
+    this.setNode(node);
+  }
+  setNode (node : Node){
     this._node=node;
     if(node==null)
       return;
@@ -127,6 +134,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.setPermissions(data.permissions.localPermissions.permissions)
           this.inherited = data.permissions.localPermissions.inherited;
           this.updatePublishState();
+          this.initialState=this.getState();
+          this.doiActive = NodeHelper.isDOIActive(node,data.permissions);
+          this.doiDisabled = this.doiActive;
         }
       },(error:any)=>this.toast.error(error));
     }
@@ -139,6 +149,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
           for (let permission of data.permissions.localPermissions.permissions)
             this.inherit.push(permission);
           this.updatePublishState();
+          this.initialState=this.getState();
         }
 
       }, (error: any) => this.toast.error(error));
@@ -150,8 +161,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
       this.isAdmin=data.isAdmin;
     });
     if(node.ref.id) {
-      this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.CM_OWNER, RestConstants.CM_CREATOR]).subscribe((data: NodeWrapper) => {
-        console.log(data);
+      this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.ALL]).subscribe((data: NodeWrapper) => {
         let authority = data.node.properties[RestConstants.CM_CREATOR][0];
         let user = data.node.createdBy;
 
@@ -270,7 +280,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
         this.onClose.emit(permissions);
         return;
       }
-      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage).subscribe(() => {
+      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiActive && this.publishActive).subscribe(() => {
           this.onLoading.emit(false);
           this.onClose.emit(permissions);
           this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
@@ -302,6 +312,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
       this.connector.hasToolPermission(this.isSafe ? RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE : RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH).subscribe((has:boolean)=>this.globalAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY).subscribe((has:boolean)=>this.fuzzyAllowed=has);
       this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES).subscribe((has:boolean)=>this.publishPermission=has);
+      this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_HANDLESERVICE).subscribe((has:boolean)=>this.doiPermission=has);
     });
   }
   private updatePermissionInfo(){
@@ -387,7 +398,11 @@ export class WorkspaceShareComponent implements AfterViewInit{
       this.link=data.length>0 && data[0].expiryDate!=0;
     });
   }
-
+  allowDOI(){
+    if(!this._node)
+      return false;
+    return !this._node.isDirectory && !this.publishInherit && this.publishActive && this.doiPermission;
+  }
   private updatePublishState() {
     this.publishInherit=this.inherited && this.getAuthorityPos(this.inherit,RestConstants.AUTHORITY_EVERYONE)!=-1;
     this.publishActive=this.publishInherit || this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE)!=-1;
@@ -415,6 +430,21 @@ export class WorkspaceShareComponent implements AfterViewInit{
     }
     this.setPermissions(this.permissions);
     this.updatePublishState();
+  }
+
+    isStateModified() {
+        return this.initialState!=this.getState();
+    }
+
+    getState() {
+        if(this.publishActive || this.publishInherit){
+            return 'PUBLIC';
+        }
+        for(let perm of this.permissions.concat(this.inherit)){
+            if(perm.authority.authorityName!=RestConstants.AUTHORITY_EVERYONE)
+                return 'SHARED';
+        }
+        return 'PRIVATE';
   }
 }
 /*

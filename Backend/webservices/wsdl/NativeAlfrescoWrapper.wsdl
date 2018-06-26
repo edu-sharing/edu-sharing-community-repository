@@ -203,6 +203,32 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    <element name="removeNodeResponse">
     <complexType/>
    </element>
+   <element name="setOwner">
+    <complexType>
+     <sequence>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="username" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="setOwnerResponse">
+    <complexType/>
+   </element>
+   <element name="getChildren">
+    <complexType>
+     <sequence>
+      <element name="parentID" type="xsd:string"/>
+      <element name="type" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getChildrenResponse">
+    <complexType>
+     <sequence>
+      <element name="getChildrenReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
    <element name="getChild">
     <complexType>
      <sequence>
@@ -242,48 +268,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    </element>
    <element name="copyNodeResponse">
     <complexType/>
-   </element>
-   <element name="getChildren">
-    <complexType>
-     <sequence>
-      <element name="parentID" type="xsd:string"/>
-      <element name="type" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getChildrenResponse">
-    <complexType>
-     <sequence>
-      <element name="getChildrenReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setOwner">
-    <complexType>
-     <sequence>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="username" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="setOwnerResponse">
-    <complexType/>
-   </element>
-   <element name="getPropertiesExt">
-    <complexType>
-     <sequence>
-      <element name="storeProtocol" type="xsd:string"/>
-      <element name="storeId" type="xsd:string"/>
-      <element name="nodeId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getPropertiesExtResponse">
-    <complexType>
-     <sequence>
-      <element name="getPropertiesExtReturn" type="apachesoap:Map"/>
-     </sequence>
-    </complexType>
    </element>
    <element name="searchSolr">
     <complexType>
@@ -391,6 +375,22 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <complexType>
      <sequence>
       <element name="hasPermissionsReturn" type="apachesoap:Map"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getPropertiesExt">
+    <complexType>
+     <sequence>
+      <element name="storeProtocol" type="xsd:string"/>
+      <element name="storeId" type="xsd:string"/>
+      <element name="nodeId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getPropertiesExtResponse">
+    <complexType>
+     <sequence>
+      <element name="getPropertiesExtReturn" type="apachesoap:Map"/>
      </sequence>
     </complexType>
    </element>
@@ -1809,15 +1809,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="getPropertiesExtResponse">
-
-      <wsdl:part element="impl:getPropertiesExtResponse" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="searchSolrResponse">
 
       <wsdl:part element="impl:searchSolrResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getPropertiesExtResponse">
+
+      <wsdl:part element="impl:getPropertiesExtResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -2651,6 +2651,22 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="setOwner">
+
+         <wsdl:input message="impl:setOwnerRequest" name="setOwnerRequest"/>
+
+         <wsdl:output message="impl:setOwnerResponse" name="setOwnerResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildren">
+
+         <wsdl:input message="impl:getChildrenRequest" name="getChildrenRequest"/>
+
+         <wsdl:output message="impl:getChildrenResponse" name="getChildrenResponse"/>
+
+      </wsdl:operation>
+
       <wsdl:operation name="getChild">
 
          <wsdl:input message="impl:getChildRequest" name="getChildRequest"/>
@@ -2672,30 +2688,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
          <wsdl:input message="impl:copyNodeRequest" name="copyNodeRequest"/>
 
          <wsdl:output message="impl:copyNodeResponse" name="copyNodeResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getChildren">
-
-         <wsdl:input message="impl:getChildrenRequest" name="getChildrenRequest"/>
-
-         <wsdl:output message="impl:getChildrenResponse" name="getChildrenResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="setOwner">
-
-         <wsdl:input message="impl:setOwnerRequest" name="setOwnerRequest"/>
-
-         <wsdl:output message="impl:setOwnerResponse" name="setOwnerResponse"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getPropertiesExt">
-
-         <wsdl:input message="impl:getPropertiesExtRequest" name="getPropertiesExtRequest"/>
-
-         <wsdl:output message="impl:getPropertiesExtResponse" name="getPropertiesExtResponse"/>
 
       </wsdl:operation>
 
@@ -2752,6 +2744,14 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
          <wsdl:input message="impl:hasPermissionsRequest" name="hasPermissionsRequest"/>
 
          <wsdl:output message="impl:hasPermissionsResponse" name="hasPermissionsResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getPropertiesExt">
+
+         <wsdl:input message="impl:getPropertiesExtRequest" name="getPropertiesExtRequest"/>
+
+         <wsdl:output message="impl:getPropertiesExtResponse" name="getPropertiesExtResponse"/>
 
       </wsdl:operation>
 
@@ -3499,6 +3499,42 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="setOwner">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="setOwnerRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="setOwnerResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getChildren">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getChildrenRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getChildrenResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
       <wsdl:operation name="getChild">
 
          <wsdlsoap:operation soapAction=""/>
@@ -3546,60 +3582,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
          </wsdl:input>
 
          <wsdl:output name="copyNodeResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getChildren">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getChildrenRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getChildrenResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="setOwner">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="setOwnerRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="setOwnerResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="getPropertiesExt">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getPropertiesExtRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getPropertiesExtResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -3726,6 +3708,24 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
          </wsdl:input>
 
          <wsdl:output name="hasPermissionsResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getPropertiesExt">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getPropertiesExtRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getPropertiesExtResponse">
 
             <wsdlsoap:body use="literal"/>
 

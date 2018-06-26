@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.repository.client.rpc.SQLKeyword;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetBaseProperty;
 
@@ -30,8 +31,9 @@ public class SuggestDAOSQLImpl implements SuggestDAO {
 		Connection con = null;
 		PreparedStatement statement = null;
 		
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		try{
-			con = ConnectionPool.getConnection();
+			con = dbAlf.getConnection();
 			statement = con.prepareStatement(this.sqlStatement);
 			
 			key = StringEscapeUtils.escapeSql(key);
@@ -49,7 +51,7 @@ public class SuggestDAOSQLImpl implements SuggestDAO {
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
 		}finally {
-			ConnectionPool.cleanUp(con, statement);
+			dbAlf.cleanUp(con, statement);
 		}
 		
 		return result;
@@ -66,9 +68,10 @@ public class SuggestDAOSQLImpl implements SuggestDAO {
 			return result;
 		}
 		
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		try{
 			
-			con = ConnectionPool.getConnection();
+			con = dbAlf.getConnection();
 			statement = con.prepareStatement(this.sqlStatement);
 			
 			query = StringEscapeUtils.escapeSql(query);
@@ -86,7 +89,7 @@ public class SuggestDAOSQLImpl implements SuggestDAO {
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
 		}finally {
-			ConnectionPool.cleanUp(con, statement);
+			dbAlf.cleanUp(con, statement);
 		}
 		
 		return result;

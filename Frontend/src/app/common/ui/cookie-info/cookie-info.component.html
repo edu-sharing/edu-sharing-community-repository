@@ -1,0 +1,13 @@
+<div *ngIf="show" [@fromBottom]="show" class="notice">
+    <div class="description">{{'COOKIE_INFO.DESCRIPTION' | translate}}</div>
+    <div class="more clickable" (click)="dialog=true">{{'COOKIE_INFO.MORE_LINK' | translate}}</div>
+    <div class="ok"><a class="btn-flat waves-effect waves-light" (click)="accept()">{{'OK' | translate}}</a></div>
+</div>
+<modal-dialog *ngIf="dialog"
+    [isCancelable]="true"
+    [isScrollable]="true"
+    [priority]="11"
+    [title]="'COOKIE_INFO.DIALOG_TITLE'"
+    [message]="'COOKIE_INFO.DIALOG_MESSAGE'"
+    [buttons]="buttons"
+></modal-dialog>

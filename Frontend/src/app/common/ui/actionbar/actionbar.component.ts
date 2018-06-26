@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, HostListener} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
 import {UIService} from "../../services/ui.service";
@@ -6,6 +6,7 @@ import {trigger} from "@angular/animations";
 import {UIHelper} from "../ui-helper";
 import {OptionItem} from "./option-item";
 import {Helper} from '../../helper';
+import {UIConstants} from "../ui-constants";
 
 @Component({
   selector: 'actionbar',
@@ -65,8 +66,16 @@ export class ActionbarComponent{
   @ViewChild('dropdownRef') dropdownElement : ElementRef;
   @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
 
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if(this.dropdown && event.key=="Escape"){
+      this.dropdown=false;
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
   public getNumberOptions(){
-    if(window.innerWidth<UIHelper.MOBILE_WIDTH){
+    if(window.innerWidth<UIConstants.MOBILE_WIDTH){
       return this.numberOfAlwaysVisibleOptionsMobile;
     }
     return this.numberOfAlwaysVisibleOptions;
@@ -75,8 +84,13 @@ export class ActionbarComponent{
 
   }
   private click(option : OptionItem){
-    if(!option.isEnabled)
+    if(!option.isEnabled) {
+      console.log("click");
+      if(option.disabledCallback) {
+          option.disabledCallback(this.node);
+      }
       return;
+    }
     option.callback(this.node);
     this.dropdown=false;
   }
@@ -87,7 +101,7 @@ export class ActionbarComponent{
 
     setTimeout(()=> {
       UIHelper.setFocusOnDropdown(this.dropdownElement);
-      UIHelper.scrollSmoothElement(0,this.dropdownContainerElement.nativeElement);
+      UIHelper.scrollSmoothElement(this.dropdownContainerElement.nativeElement.scrollHeight,this.dropdownContainerElement.nativeElement);
     });
   }
 

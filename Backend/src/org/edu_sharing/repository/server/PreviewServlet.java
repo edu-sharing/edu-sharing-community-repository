@@ -59,7 +59,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.google.gwt.widgetideas.graphics.client.Color;
 
 public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
@@ -67,7 +66,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 	public static final int MAX_IMAGE_SIZE = 1200;
 
-	private static final float DEFAULT_QUALITY = 0.7f;
+	private static final float DEFAULT_QUALITY = 0.8f;
 
 	ServiceRegistry serviceRegistry;
 

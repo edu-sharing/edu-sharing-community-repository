@@ -86,6 +86,11 @@
             <div *ngIf="publishPermission && !publishInherit" class="publishInfo"
                  innerHTML="{{('WORKSPACE.SHARE.PUBLISH_ACTIVE_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}">
             </div>
+            <div *ngIf="allowDOI()" class="doi">
+              <input type="checkbox" class="filled-in" [disabled]="doiDisabled" [(ngModel)]="doiActive" id="doi">
+              <label for="doi">{{'WORKSPACE.SHARE.DOI' | translate}}</label>
+              <span>{{'WORKSPACE.SHARE.DOI_INFO' | translate}}</span>
+            </div>
           </div>
           </div>
           <div *ngIf="publishActive" class="type"><i class="material-icons align-icon">remove_red_eye</i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span></div>
@@ -197,6 +202,14 @@
     </div>
 
     <div class="card-action">
+      <!--State-->
+      <div class="state" *ngIf="initialState">
+        <div *ngIf="getState()=='PRIVATE'" [class.state-changed]="isStateModified()"class="show-state"><i class="material-icons">lock</i><span> {{'WORKSPACE.SHARE.STATE.PRIVATE' | translate}}</span></div>
+        <div *ngIf="getState()=='SHARED'" [class.state-changed]="isStateModified()" class="show-state"><i class="material-icons">group</i><span> {{'WORKSPACE.SHARE.STATE.SHARED' | translate}}</span></div>
+        <div *ngIf="getState()=='PUBLIC'" [class.state-changed]="isStateModified()" class="show-state"><i class="material-icons" style="color: #42CA8D">public</i><span> {{'WORKSPACE.SHARE.STATE.PUBLIC' | translate}}</span></div>
+      </div>
+        <!--/ <i class="material-icons"></i>-->
+
       <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="save()" *ngIf="tab==INVITE" (click)="save()">{{'WORKSPACE.BTN_INVITE' | translate }}</a>
       <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="save()" *ngIf="tab==INVITED || tab==ADVANCED" (click)="save()">{{'APPLY' | translate }}</a>
       <a class="btn-flat" tabindex="0" (keyup.enter)="cancel()" (click)="cancel()">{{'CANCEL' | translate }}</a>

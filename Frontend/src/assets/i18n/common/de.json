@@ -15,6 +15,7 @@
   "USERMENU": "Nutzermenü",
   "USER_GUEST" : "Gast",
   "IMPRINT" : "Impressum",
+  "PRIVACY_INFORMATION" : "Datenschutz",
   "ONLINE_HELP" : "Online-Hilfe",
   "WHATS_NEW" : "Was ist neu?",
   "SHOW_MORE": "mehr anzeigen",
@@ -52,11 +53,12 @@
   "LOGOUT" : "Abmelden",
   "INVALID_OPERATION":"Diese Funktion wird leider nicht unterstützt",
   "SHOW_IN_FOLDER":"Zum Speicherort",
+  "SORT_BY":"Sortieren nach",
   "CLEAR_FILTERS":"Alle Filter zurücksetzen",
   "EDIT_ACCOUNT":"Account Verwalten",
-  "DEFAULT_METADATASET":"Standard-Metadatenset",
+  "DEFAULT_METADATASET":"Standard-Metadatenset ({{name}})",
   "NO_MATCHES" : "Keine übereinstimmenden Einträge",
-  "NO_CC_PUBLISH" : "Keine ausreichenden Berechtigungen",
+  "NO_CC_PUBLISH" : "Kein Recht zum Veröffentlichen",
   "ADD_TO_RECENT_COLLECTION":"In zuletzt verwendete Sammlungen",
   "SEARCH_COLLECTIONS":"Sammlung suchen...",
   "ASK_CC_PUBLISH" : "Nachfragen",
@@ -114,13 +116,24 @@
   "WRONG_PASSWORD":"Das angegebene Passwort ist ungültig",
   "PASSWORD_MIN_LENGTH":"Das Passwort muss mindestens {{length}} Zeichen lang sein",
   "PASSWORD_NOT_MATCH":"Die Passwörter stimmen nicht überein",
+  "LEARNINGAGE_YEAR":"Jahre",
+  "NODE_INFO":{
+    "TITLE":"Node \"{{name}}\"",
+    "LOCATION":"Pfad zum Element",
+    "NODE_ASPECTS":"Aspekte",
+    "NODE_PROPERTIES":"Properties",
+    "NODE_TYPE":"Objekttyp",
+    "JSON":"Gesamtes Objekt",
+    "CHILDREN":"Children",
+    "CHILDREN_NONE":"Dieses Element besitzt keine Child Objekte"
+  },
   "SIDEBAR":{
     "WORKSPACE_OLD":"Klassischer Workspace",
     "WORKSPACE":"Workspace",
     "SEARCH":"Suchumgebung",
     "COLLECTIONS":"Sammlungen",
     "SECURE":"Safe",
-    "PERMISSIONS":"Berechtigungen",
+    "PERMISSIONS":"Nutzerverwaltung",
     "LOGIN":"Login",
     "ADMIN":"Admin-Tools"
   },
@@ -141,7 +154,7 @@
     "dimensions": "Bildgröße",
     "exif:dateTimeOriginal":"Aufnahmedatum",
     "cm:modified": "zuletzt geändert",
-    "cm:created": "erstellt",
+    "cm:created": "Erstellungsdatum",
     "cm:creator": "erstellt von",
     "cclom:title": "Titel",
     "cclom:general_keyword": "Schlagwörter",
@@ -161,6 +174,12 @@
     "SCHULFUNK":"Schulfunk (§47 UrhG)",
     "CUSTOM":"Benutzerdefinierte Lizenz"
   },
+  "COOKIE_INFO":{
+    "DESCRIPTION":"edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren und diese Seite verwenden, nehmen wir an, dass Sie damit einverstanden sind.",
+    "MORE_LINK":"Weitere Informationen",
+    "DIALOG_TITLE":"Cookies",
+    "DIALOG_MESSAGE":"Die Internetseiten verwenden teilweise so genannte Cookies. Cookies richten auf Ihrem Rechner keinen Schaden an und enthalten keine Viren.\nCookies dienen dazu, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.\nCookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Die meisten der von uns verwendeten Cookies sind so genannte \"Session-Cookies\". Sie werden nach Ende Ihres Besuchs automatisch gelöscht. Andere Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese löschen.\nDiese Cookies ermöglichen es uns, Ihren Browser beim nächsten Besuch wiederzuerkennen.\nSie können Ihren Browser so einstellen, dass Sie über das Setzen von Cookies informiert werden und Cookies nur im Einzelfall erlauben, die Annahme von Cookies für bestimmte Fälle oder generell ausschließen sowie das automatische Löschen der Cookies beim Schließen des Browser aktivieren.\nBei der Deaktivierung von Cookies kann die Funktionalität dieser Website eingeschränkt sein."
+  },
   "NODE_REPORT":{
     "TITLE":"Problem melden",
     "OPTION":"Problem melden",
@@ -172,7 +191,7 @@
     "EMAIL_PLACEHOLDER":"jemand@beispiel.de",
     "EMAIL_REQUIRED":"Bitte eine gültige E-Mail-Adresse angeben",
     "REASON_REQUIRED":"Bitte wählen Sie aus, welches Problem besteht",
-    "DONE":"Ihre Anfrage wurde gesendet. Vielen Dank!",
+    "DONE":"Vielen Dank für Ihre Meldung.",
     "REASONS": {
       "UNAVAILABLE":"Medium nicht verfügbar",
       "INAPPROPRIATE_CONTENT":"Problematischer Inhalt",
@@ -207,10 +226,12 @@
     "file-zip":"Zip-Datei",
     "file-script":"Skript",
     "file-xml":"XML-Datei",
+    "file-xml":"XML-Datei",
     "file-audio":"Audio",
     "file-txt":"Textdatei",
     "file-video":"Video",
     "file-qti":"ONYX-Datei",
+    "file-h5p":"H5P-Datei",
     "file-pdf":"PDF-Datei",
     "link":"Website",
     "folder":"Ordner",
@@ -264,6 +285,12 @@
       "PLACEHOLDER":"Titel des Materials",
       "FILENAME": "Folgende Datei wird erstellt"
     },
+    "H5P": {
+      "NAME": "H5P",
+      "TITLE": "Neuer H5P-Inhalt",
+      "PLACEHOLDER": "Name des Inhalts",
+      "FILENAME": "Folgende Datei wird erstellt"
+    },
     "MIMETYPE": {
       "imsqti_xmlv2p1_questionnaire": "Fragebogen",
       "imsqti_xmlv2p1_test": "Test",
@@ -296,7 +323,16 @@
     "AUTHOR_PERSON":"Autor & Beteiligte",
     "LICENSE":"Lizenz",
     "LICENSE_LINK":"Lizenz verwalten",
-    "CONTRIBUTOR_LINK":"Weitere Beteiligte"
+    "TEMPLATE_LINK":"Metadaten-Vorlage verwalten",
+    "CONTRIBUTOR_LINK":"Weitere Beteiligte",
+    "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
+    "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern"
+  },
+  "SHARE_APP":{
+    "TEXT_SNIPPET":"Notiz",
+    "IMAGE":"Bild",
+    "WILL_BE_SAVED_AT":"Wird gespeichert unter",
+    "ADD_TO_COLLECTION":"In welche Sammlung einsortieren?"
   },
   "LICENSE_AGREEMENT":{
     "TITLE":"Nutzungsbedingungen",
@@ -306,6 +342,11 @@
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",
     "FIELD_REQUIRED":"Das Feld {{ name }} muss ausgefüllt sein",
+    "NO_CONNECTION":"Instabile Internetverbindung, Inhalt konnte nicht geladen werden. Bitte später erneut versuchen",
+    "DOWNLOAD_STARTED":"Download von {{name}} wurde gestartet",
+    "DOWNLOAD_FINISHED":"Download von {{name}} abgeschlossen.<br />Sie finden das Element im Download-Ordner des Gerätes",
+    "DOWNLOAD_FAILED":"Download von {{name}} fehlgeschlagen.<br />Überprüfen Sie die Internetverbindung und versuchen Sie es erneut",
+    "DOWNLOAD_TRY_AGAIN":"Erneut versuchen",
     "API_FORBIDDEN":"Keine Rechte, um auf diesen Inhalt zuzugreifen",
     "API_FORBIDDEN_LOGIN":"Bitte anmelden, um auf diesen Bereich zuzugreifen"
   },

@@ -9,11 +9,13 @@ import {RestConstants} from "../rest-constants";
 
 import * as EduData from "../data-object";
 import {CollectionWrapper} from "../data-object";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestCollectionService {
-  constructor(private connector : RestConnectorService) {}
-
+export class RestCollectionService extends AbstractRestService{
+    constructor(connector : RestConnectorService) {
+        super(connector);
+    }
   public deleteCollection = (collection : string,repository=RestConstants.HOME_REPOSITORY): Observable<void> => {
     let query=this.connector.createUrl("collection/:version/collections/:repository/:collection",repository,[[":collection",collection]]);
     return this.connector.delete(query,this.connector.getRequestOptions())

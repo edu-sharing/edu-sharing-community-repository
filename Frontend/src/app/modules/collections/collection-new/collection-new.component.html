@@ -33,7 +33,7 @@
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
       </div>
-      <div class="collection-item clickable" *ngIf="canInvite" tabindex="0" (keyup.enter)="setCollectionType('CUSTOM    ')" (click)="setCollectionType('CUSTOM')">
+      <div class="collection-item clickable" *ngIf="canInvite" tabindex="0" (keyup.enter)="setCollectionType('CUSTOM')" (click)="setCollectionType('CUSTOM')">
         <div class="iconLeft"><i class="material-icons" style="color:#4F7899;">group</i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.SHARED' | translate}}</div>
@@ -41,7 +41,7 @@
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
       </div>
-      <div class="collection-item clickable" *ngIf="shareToAll" tabindex="0" (keyup.enter)="setCollectionType('EDU_ALL')" (click)="setCollectionType('EDU_ALL')">
+      <div class="collection-item clickable" *ngIf="shareToAll && canInvite" tabindex="0" (keyup.enter)="setCollectionType('EDU_ALL')" (click)="setCollectionType('EDU_ALL')">
         <div class="iconLeft"> <i class="material-icons" style="color:#5C998F;">public</i></div>
         <div class="content">
           <div class="title">{{'COLLECTIONS.CREATE.PUBLIC' | translate}}</div>
@@ -102,7 +102,7 @@
 
               <div *ngIf="imageData" class="card-collection-image-container">
                   <div class="card-image-container">
-                      <img src="{{imageData}}" class="card-image-preview" >
+                      <img [src]="imageData" class="card-image-preview" >
                   </div>
               </div>
 
@@ -193,15 +193,18 @@
       <a class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()">{{ 'BACK' | translate }}</a>
     </div>
   </section>
-  <section *ngIf="newCollectionStep==STEP_PERMISSIONS" class="card center-card card-low card-action collectionShadow">
+  <section *ngIf="newCollectionStep==STEP_PERMISSIONS" class="card center-card card-low card-action collectionShadow collection-permission-container">
     <div class="card-content">
       <div class="card-title">
         <span>{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}</span>
       </div>
       <div>
+          <div class="title">{{'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate}}</div>
+          <div class="description">{{'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate}}</div>
         <div class="dialog-basic-area permissionsBtn">
           <a class="btn-flat btn-shadow btn-icon" tabindex="0" (keyup.enter)="editPermissions()" (click)="editPermissions()"><i class="material-icons">person_add</i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</a>
         </div>
+          <div class="status">{{('COLLECTIONS.PERMISSIONS_STATUS_'+getShareStatus()) | translate}}</div>
       </div>
     </div>
       <div class="card-action">

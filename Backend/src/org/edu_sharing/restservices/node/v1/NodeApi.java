@@ -35,19 +35,7 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.PersonDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.node.v1.model.NodeEntries;
-import org.edu_sharing.restservices.node.v1.model.NodeEntry;
-import org.edu_sharing.restservices.node.v1.model.NodeLocked;
-import org.edu_sharing.restservices.node.v1.model.NodePermissionEntry;
-import org.edu_sharing.restservices.node.v1.model.NodeShare;
-import org.edu_sharing.restservices.node.v1.model.NodeText;
-import org.edu_sharing.restservices.node.v1.model.NodeVersionEntries;
-import org.edu_sharing.restservices.node.v1.model.NodeVersionEntry;
-import org.edu_sharing.restservices.node.v1.model.NodeVersionRefEntries;
-import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
-import org.edu_sharing.restservices.node.v1.model.ParentEntries;
-import org.edu_sharing.restservices.node.v1.model.SearchResult;
-import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
+import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.shared.ACL;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
@@ -274,8 +262,8 @@ public class NodeApi  {
     	}
 
     }
-    
-    
+
+
     @GET
     @Path("/nodes/{repository}/{node}/lock/unlock")
         
@@ -409,6 +397,9 @@ public class NodeApi  {
     		Filter filter = new Filter(propertyFilter);
 		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	if("-inbox-".equals(node)){
+    			node = repoDao.getUserInbox();
+    		}
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
 	    	ParentEntries response=new ParentEntries();
@@ -510,9 +501,95 @@ public class NodeApi  {
     	}
 
     }
-    
-    
-    @POST
+
+	@GET
+	@Path("/nodes/{repository}/{node}/metadata/template")
+
+	@ApiOperation(
+			value = "Get the metadata template + status for this folder.",
+			notes = "All the given metadata will be inherited to child nodes.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getTemplateMetadata(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+
+			NodeTemplateEntry response = new NodeTemplateEntry();
+			if(nodeDao.getTemplateNode()!=null)
+				response.setNode(nodeDao.getTemplateNode().asNode());
+			response.setEnabled(nodeDao.getTemplateStatus());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@PUT
+	@Path("/nodes/{repository}/{node}/metadata/template")
+
+	@ApiOperation(
+			value = "Set the metadata template for this folder.",
+			notes = "All the given metadata will be inherited to child nodes.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response changeTemplateMetadata(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@ApiParam(value = "Is the inherition currently enabled",required=true ) @QueryParam("enable") Boolean enable,
+			@ApiParam(value = "properties" ,required=true ) HashMap<String, String[]> properties,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+			NodeDao templateNode = nodeDao.changeTemplateProperties(enable,properties);
+
+			NodeTemplateEntry response = new NodeTemplateEntry();
+			if(nodeDao.getTemplateNode()!=null)
+				response.setNode(templateNode.asNode());
+			response.setEnabled(nodeDao.getTemplateStatus());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+
+	@POST
     @Path("/nodes/{repository}/{node}/metadata")    
     
     @ApiOperation(
@@ -1706,6 +1783,7 @@ public class NodeApi  {
     	@ApiParam(value = "mailtext",required=false ) @QueryParam("mailtext")  String mailText,
     	@ApiParam(value = "sendMail",required=true ) @QueryParam("sendMail") Boolean sendMail,
     	@ApiParam(value = "sendCopy",required=true ) @QueryParam("sendCopy") Boolean sendCopy,
+    	@ApiParam(value = "createHandle",required=false ) @QueryParam("createHandle") Boolean createHandle,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -1713,7 +1791,8 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
-	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy);
+	    	if(createHandle == null) createHandle = false;
+	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy,createHandle);
 	    	
 	    	return Response.status(Response.Status.OK).build();
 	

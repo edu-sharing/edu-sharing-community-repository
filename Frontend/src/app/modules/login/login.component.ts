@@ -18,6 +18,8 @@ import {Helper} from "../../common/helper";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {PlatformLocation} from "@angular/common";
 
+import {CordovaService} from "../../common/services/cordova.service";
+
 @Component({
   selector: 'workspace-login',
   templateUrl: 'login.component.html',
@@ -27,7 +29,6 @@ export class LoginComponent  implements OnInit{
   @ViewChild('passwordInput') passwordInput : ElementRef;
   @ViewChild('usernameInput') usernameInput : ElementRef;
   @ViewChild('loginForm') loginForm : ElementRef;
-
 
   public isLoading=true;
   private disabled=false;
@@ -57,7 +58,10 @@ export class LoginComponent  implements OnInit{
               private configService:ConfigurationService,
               private title:Title,
               private storage : SessionStorageService,
-              private route : ActivatedRoute){
+              private route : ActivatedRoute,
+              private cordova: CordovaService
+            ){
+
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
@@ -137,25 +141,28 @@ export class LoginComponent  implements OnInit{
 
   }
   private login(){
+    
     this.isLoading=true;
-    this.connector.login(this.username,this.password,this.scope).subscribe(
-      (data:string) => {
-        if(data==RestConstants.STATUS_CODE_OK) {
-          this.goToNext();
-        }
-        else if(data==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
-          this.toast.error(null,"LOGIN.SAFE_PREVIOUS");
+
+      this.connector.login(this.username,this.password,this.scope).subscribe(
+        (data:string) => {
+          if(data==RestConstants.STATUS_CODE_OK) {
+            this.goToNext();
+          }
+          else if(data==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
+            this.toast.error(null,"LOGIN.SAFE_PREVIOUS");
+            this.isLoading=false;
+          }
+          else{
+            this.toast.error(null,"LOGIN.ERROR");
+            this.isLoading=false;
+          }
+        },
+        (error:any)=>{
+          this.toast.error(error);
           this.isLoading=false;
-        }
-        else{
-          this.toast.error(null,"LOGIN.ERROR");
-          this.isLoading=false;
-        }
-      },
-      (error:any)=>{
-        this.toast.error(error);
-        this.isLoading=false;
-      });
+        });
+
   }
 
   private goToNext() {
@@ -165,7 +172,7 @@ export class LoginComponent  implements OnInit{
       //window.location.assign(this.next);
     }
     else {
-      this.router.navigate([UIConstants.ROUTER_PREFIX + this.configService.instant("loginDefaultLocation","workspace")]);
+      UIHelper.goToDefaultLocation(this.router,this.configService);
     }
   }
 }

@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.edu_sharing.metadataset.v2.MetadataGroup;
 import org.edu_sharing.metadataset.v2.MetadataList;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataTemplate;
@@ -34,7 +34,7 @@ public class MdsDaoV2 {
 		result.setValues(suggestionsResult);
 		try{
 			List<? extends SuggestOracle.Suggestion>  suggestions =		
-					MetadataSearchHelper.getSuggestions(mds, queryId, parameter, value);
+					MetadataSearchHelper.getSuggestions(this.repoDao.getId(), mds, queryId, parameter, value);
 
 			for(SuggestOracle.Suggestion suggest : suggestions){
 				Suggestions.Suggestion suggestion = new Suggestions.Suggestion();
@@ -62,7 +62,7 @@ public class MdsDaoV2 {
 
 		try {
 			
-			MetadataSetV2 mds=MetadataReaderV2.getMetadataset(repoDao.getApplicationInfo(),mdsId);
+			MetadataSetV2 mds=MetadataHelper.getMetadataset(repoDao.getApplicationInfo(),mdsId);
 			
 			if (mds == null) {
 				throw new DAOMissingException(new IllegalArgumentException(mdsId));

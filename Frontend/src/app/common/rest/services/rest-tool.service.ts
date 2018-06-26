@@ -14,13 +14,15 @@ import {RequestObject} from "../request-object";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
 import {NodeHelper} from "../../ui/node-helper";
+import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
-export class RestToolService {
-  constructor(private connector : RestConnectorService) {
+export class RestToolService extends AbstractRestService{
+  constructor(connector : RestConnectorService) {
+      super(connector);
   }
 
-  /** Create a new tool definition object
+    /** Create a new tool definition object
    *
    * @param parent The parent id
    * @param properties properties of this node, each key of the array represents the property name
