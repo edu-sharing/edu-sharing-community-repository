@@ -32,6 +32,7 @@ public class HandleService {
 	
 	
 	static String handleServerPrefix = null;
+	static String handleServerRepoId = null;
 	
 	String id = null;
 	Integer idIndex = 300;
@@ -43,6 +44,7 @@ public class HandleService {
 	public HandleService() throws HandleServiceNotConfiguredException{
 		if(this.handleServerAvailable()) {
 			handleServerPrefix = HandleServiceProperties.instance.getHandleServerPrefix();
+			handleServerRepoId = HandleServiceProperties.instance.getHandleServerRepoId();
 			privkeyPath = HandleServiceProperties.instance.getHandleServerPrivKey();
 			id = "0.NA/"+handleServerPrefix;
 		}else {
@@ -162,7 +164,7 @@ public class HandleService {
 	public String generateHandle() throws SQLException  {
 		
 		String id = HandleService.generateUniqueHandleId();
-		return handleServerPrefix +"/" + id;
+		return handleServerPrefix +"/" + handleServerRepoId + id;
 	}
 	
 	public String getId() {
