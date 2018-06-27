@@ -92,7 +92,7 @@ export class StreamComponent {
   shouldOpen = false;
   routerSubscription: Subscription;
 
-  moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','check',(node: Node)=>{
+  moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','arrow_upward',(node: Node)=>{
     this.updateStream(node, STREAM_STATUS.PROGRESS).subscribe( (data) => {
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.toast.toast("STREAM.TOAST.MOVEUP");
