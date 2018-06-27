@@ -198,6 +198,9 @@
                   </div>
                 </div>
               </div>
+              <div class="contributors" *ngIf="_nodes.length==1">
+                <a class="clickable contributorsLink" (click)="openContributorDialog()">{{'MDS.CONTRIBUTOR_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
+              </div>
             </div>
           </div>
           <div class="currentLicense">

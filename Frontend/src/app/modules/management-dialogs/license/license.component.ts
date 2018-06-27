@@ -151,6 +151,7 @@ export class WorkspaceLicenseComponent  {
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
   @Output() onDone=new EventEmitter();
+  @Output() openContributor=new EventEmitter();
   constructor(
     private connector : RestConnectorService,
     private translate : TranslateService,
@@ -163,7 +164,7 @@ export class WorkspaceLicenseComponent  {
     this.onCancel.emit();
   }
 
-  public saveLicense(){
+  public saveLicense(callback:Function=null){
     if(this._properties){
         this.onDone.emit(this.getProperties(this._properties));
         return;
@@ -185,6 +186,8 @@ export class WorkspaceLicenseComponent  {
           this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
           this.onLoading.emit(false);
           this.onDone.emit(prop);
+          if(callback)
+            callback();
         }
       }, (error: any) => {
         this.onLoading.emit(false);
@@ -433,5 +436,13 @@ export class WorkspaceLicenseComponent  {
             prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
         }
         return prop;
+    }
+
+    openContributorDialog() {
+        let nodes=this._nodes;
+        this.saveLicense(()=>{
+          console.log("open contr");
+            this.openContributor.emit(nodes);
+        });
     }
 }

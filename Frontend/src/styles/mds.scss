@@ -13,6 +13,21 @@
     float: left;
   }
 }
+.templateLink,.licenseLink,.contributorsLink{
+  font-weight: bold;
+  text-transform: uppercase;
+  padding-top: 10px;
+  padding-bottom: 30px;
+  float: left;
+  width: 100%;
+  i{
+    position: relative;
+    top: 6px;
+  }
+}
+.contributorsLink{
+  padding-top: 0;
+}
 .mdsViewHeader{
   font-size:140%;
   font-weight:bold;
@@ -259,21 +274,6 @@ mds .mdsGroup{
         border-radius: 50%;
       }
     }
-  }
-  .templateLink,.licenseLink,.contributorsLink{
-    font-weight: bold;
-    text-transform: uppercase;
-    padding-top: 10px;
-    padding-bottom: 30px;
-    float: left;
-    width: 100%;
-    i{
-      position: relative;
-      top: 6px;
-    }
-  }
-  .contributorsLink{
-    padding-top: 0;
   }
   .version {
     margin-top: 10px;

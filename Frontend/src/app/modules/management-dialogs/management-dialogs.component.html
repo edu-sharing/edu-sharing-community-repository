@@ -3,6 +3,7 @@
   [nodes]="nodeLicense"
   (onLoading)="globalProgress=$event"
   (onCancel)="closeLicense()"
+  (openContributor)="nodeContributor=$event[0]"
   (onDone)="updateLicense()"
 ></workspace-license>
 <workspace-share *ngIf="nodeShare"
