@@ -169,35 +169,37 @@ export class MdsComponent{
                 // test a widget
                 //data.widgets.push({caption:'Test',id:'test',type:'range',min:0,max:60});
                 //data.views[0].html+="<test>";
-                this.node.getNodeChildobjects(nodeId).subscribe((childs:NodeList)=>{
-                  this.currentChildobjects = childs.nodes;
-                  console.log(this.currentChildobjects);
-                    this.locator.getConfigVariables().subscribe((variables:string[])=> {
-                        this.mds = data;
-                        this.variables=variables;
-                        this.currentNode = node.node;
-                        for (let property in this.currentNode.properties) {
-                            this.properties.push(property);
-                        }
-                        this.properties.sort();
-                        let nodeGroup = this.currentNode.isDirectory ? 'map' : 'io';
-                        if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) != -1) {
-                            nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
-                        }
-                        if (this.currentNode.type == RestConstants.CCM_TYPE_TOOL_INSTANCE) {
-                            nodeGroup = MdsComponent.TYPE_TOOLINSTANCE;
-                        }
-                        if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
-                            nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
-                        }
-                        this.renderGroup(nodeGroup, this.mds);
-                        this.isLoading = false;
-                    });
+                if(node.node.type==RestConstants.CCM_TYPE_IO) {
+                    this.node.getNodeChildobjects(nodeId).subscribe((childs: NodeList) => {
+                        this.currentChildobjects = childs.nodes;
+                        console.log(this.currentChildobjects);
+                        this.locator.getConfigVariables().subscribe((variables: string[]) => {
+                            this.mds = data;
+                            this.variables = variables;
+                            this.currentNode = node.node;
+                            for (let property in this.currentNode.properties) {
+                                this.properties.push(property);
+                            }
+                            this.properties.sort();
+                            let nodeGroup = this.currentNode.isDirectory ? 'map' : 'io';
+                            if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) != -1) {
+                                nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
+                            }
+                            if (this.currentNode.type == RestConstants.CCM_TYPE_TOOL_INSTANCE) {
+                                nodeGroup = MdsComponent.TYPE_TOOLINSTANCE;
+                            }
+                            if (this.currentNode.type == RestConstants.CCM_TYPE_SAVED_SEARCH) {
+                                nodeGroup = MdsComponent.TYPE_SAVED_SEARCH;
+                            }
+                            this.renderGroup(nodeGroup, this.mds);
+                            this.isLoading = false;
+                        });
 
-                },(error:any)=>{
-                    this.toast.error(error);
-                    this.cancel();
-                });
+                    }, (error: any) => {
+                        this.toast.error(error);
+                        this.cancel();
+                    });
+                }
             },(error:any)=>{
                 this.toast.error(error);
                 this.cancel();
