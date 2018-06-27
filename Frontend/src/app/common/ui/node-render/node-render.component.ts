@@ -71,6 +71,10 @@ export class NodeRenderComponent implements EventListener{
   private isOpenable: boolean;
   private closeOnBack: boolean;
   public nodeMetadata: Node;
+  public nodeShare: Node;
+  public nodeShareLink: Node;
+  public nodeWorkflow: Node;
+  public nodeDelete: Node[];
   public addToCollection: Node[];
   public nodeReport: Node;
   private editor: string;
@@ -86,6 +90,10 @@ export class NodeRenderComponent implements EventListener{
   childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
+
+    public static close(location:Location) {
+        location.back();
+    }
 
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
@@ -232,9 +240,6 @@ export class NodeRenderComponent implements EventListener{
         (window as any).ngRender = null;
     }
 
-  public static close(location:Location) {
-    location.back();
-  }
   public switchPosition(pos:number){
     //this.router.navigate([UIConstants.ROUTER_PREFIX+"render",this.list[pos].ref.id]);
     this.isLoading=true;
@@ -269,6 +274,7 @@ export class NodeRenderComponent implements EventListener{
     this.options=opt;
     let download=new OptionItem('DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
     download.isEnabled=this._node.downloadUrl!=null;
+    download.showAsAction=true;
     if(this.isCollectionRef()){
       console.log("is ref");
       this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node:NodeWrapper)=>{
@@ -315,7 +321,12 @@ export class NodeRenderComponent implements EventListener{
             this.isLoading = false;
         })
   }
-
+    onDelete(event:any){
+        console.log(event);
+        if(event.error)
+            return;
+        this.close();
+    }
   private postprocessHtml() {
     if(!this.config.instant("rendering.showPreview",true)){
       jQuery('.edusharing_rendering_content_wrapper').hide();
@@ -396,11 +407,26 @@ export class NodeRenderComponent implements EventListener{
       let addCollection=new OptionItem('WORKSPACE.OPTION.COLLECTION','layers',()=>this.addToCollection=[this._node]);
       addCollection.isEnabled=this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH)!=-1 && this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT;
       this.options.push(addCollection);
-
+        let share = ActionbarHelper.createOptionIfPossible('INVITE',[this._node],this.connector,(node:Node)=>this.nodeShare=this._node);
+        if(share){
+            share.isSeperate=true;
+            this.options.push(share);
+        }
+        let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',[this._node],this.connector,(node: Node) => this.nodeShareLink=this._node);
+        if (shareLink && !this.isSafe)
+            this.options.push(shareLink);
+        let workflow = ActionbarHelper.createOptionIfPossible('WORKFLOW',[this._node],this.connector,(node:Node)=>this.nodeWorkflow=this._node);
+        if(workflow){
+            this.options.push(workflow);
+        }
       if (this.config.instant("nodeReport", false)) {
         let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
         this.options.push(nodeReport);
       }
+        let del=ActionbarHelper.createOptionIfPossible('DELETE',[this._node],this.connector,(node : Node) => this.nodeDelete=[this._node]);
+        if(del){
+            this.options.push(del);
+        }
 
       this.isOpenable=false;
       this.connectors.list().subscribe((data:ConnectorList)=>{

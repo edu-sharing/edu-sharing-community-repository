@@ -27,7 +27,7 @@ export class ActionbarHelper{
       }
     }
     if(type=='NODE_TEMPLATE') {
-      if (nodes && nodes.length==1 && !NodeHelper.allFiles(nodes)) {
+      if (nodes && nodes.length==1 && NodeHelper.allFolders(nodes)) {
           option = new OptionItem("WORKSPACE.OPTION.TEMPLATE", "assignment_turned_in", callback);
           option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
       }
@@ -46,6 +46,14 @@ export class ActionbarHelper{
         };
       }
     }
+    if(type=='DELETE'){
+      if(nodes && nodes.length){
+          option=new OptionItem("WORKSPACE.OPTION.DELETE","delete", callback);
+          option.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
+          option.isSeperate=true;
+
+      }
+    }
     if(type=='INVITE'){
       if(nodes && nodes.length==1) {
         option = new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", callback);
@@ -54,8 +62,14 @@ export class ActionbarHelper{
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
       }
     }
+    if(type=='WORKFLOW'){
+        if (nodes && nodes.length==1 && !nodes[0].isDirectory  && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH) {
+            option = new OptionItem("WORKSPACE.OPTION.WORKFLOW", "swap_calls", callback);
+            option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS);
+        }
+    }
     if(type=='SHARE_LINK'){
-      if(nodes && !nodes[0].isDirectory) {
+      if(nodes && !nodes[0].isDirectory && nodes[0].type!=RestConstants.CCM_TYPE_SAVED_SEARCH) {
         option = new OptionItem("WORKSPACE.OPTION.SHARE_LINK", "link", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS) && connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE);
       }

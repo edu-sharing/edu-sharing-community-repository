@@ -1,20 +1,22 @@
 {
     "name": "org.edusharing.app.cordova",
     "displayName": "edu-sharing",
-    "version": "1.0.0",
-    "description": "A sample Apache Cordova application that responds to the deviceready event.",
+    "version": "1.0.1",
+    "description": "edu-sharing app",
     "main": "index.js",
     "scripts": {
         "start": "cd ./../Frontend && ng build --prod --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova build",
         "restart": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova",
-        "debug-android": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova run android"
+        "debug-android": "cd ./../Frontend && ng build --base-href ./ --output-path ./../Cordova/www && cd ./../Cordova && cordova run android",
+        "release-android": "cd ./../Frontend && ng build --base-href ./ --aot --output-path ./../Cordova/www && cd ./../Cordova && cordova build android --release || npm run sign-android",
+        "sign-android": "cd platforms/android/app/build/outputs/apk/release/ && jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore C:/ssh/Android.jks app-release-unsigned.apk key0 && zipalign -f 4 app-release-unsigned.apk app-release.apk"
     },
-    "author": "Apache Cordova Team",
-    "license": "Apache-2.0",
+    "author": "edu-sharing.com",
+    "license": "GNU GPL v2",
     "cordova": {
         "platforms": [
-            "android",
-            "ios"
+            "ios",
+            "android"
         ],
         "plugins": {
             "cordova-plugin-whitelist": {},
@@ -37,7 +39,7 @@
     },
     "dependencies": {
         "@types/cordova-plugin-file": "^4.3.2",
-        "cordova-android": "7.1.0",
+        "cordova-android": "^7.0.0",
         "cordova-ios": "^4.5.4",
         "cordova-plugin-android-permissions": "^1.0.0",
         "cordova-plugin-camera": "^4.0.2",
@@ -54,6 +56,7 @@
         "cordova-plugin-splashscreen": "^5.0.2",
         "cordova-plugin-whitelist": "^1.3.3",
         "cordova-plugin-x-toast": "^2.6.2",
-        "info.protonet.appgroupsuserdefaults": "git+https://github.com/rootzoll/cordova-plugin-nsuserdefaults-for-app-groups.git"
+        "info.protonet.appgroupsuserdefaults": "git+https://github.com/rootzoll/cordova-plugin-nsuserdefaults-for-app-groups.git",
+        "com.napolitano.cordova.plugin.intent": "https://github.com/tsimon-edu-sharing/cordova-plugin-intent.git"
     }
 }

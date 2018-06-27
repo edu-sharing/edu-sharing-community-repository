@@ -462,6 +462,10 @@
         <servlet-class>org.edu_sharing.repository.server.sitemap.SitemapServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>RobotsTXTServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.sitemap.RobotsTXTServlet</servlet-class>
+    </servlet>
+    <servlet>
     	<servlet-name>ShareServlet</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.ShareServlet</servlet-class>   
     </servlet>
@@ -625,6 +629,10 @@
     <servlet-mapping>
         <servlet-name>SitemapServlet</servlet-name>
         <url-pattern>/eduservlet/sitemap</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RobotsTXTServlet</servlet-name>
+        <url-pattern>/robots.txt</url-pattern>
     </servlet-mapping>
 	<servlet-mapping>
     	<servlet-name>Connector</servlet-name>

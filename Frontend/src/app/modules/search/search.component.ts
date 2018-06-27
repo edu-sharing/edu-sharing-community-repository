@@ -47,6 +47,7 @@ import {WorkspaceManagementDialogsComponent} from "../management-dialogs/managem
 import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
+import {UIService} from '../../common/services/ui.service';
 
 
 @Component({
@@ -161,6 +162,7 @@ export class SearchComponent {
     public searchService:SearchService,
     private title:Title,
     private config:ConfigurationService,
+    private uiService:UIService,
     private storage : SessionStorageService,
     private network : RestNetworkService,
     private temporaryStorageService: TemporaryStorageService
@@ -330,6 +332,9 @@ export class SearchComponent {
     let parameters:any=null;
     if(this.mdsRef) {
       parameters = this.getMdsValues();
+    }
+    if(!query.cleared){
+      this.uiService.hideKeyboardIfMobile();
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
@@ -617,11 +622,13 @@ export class SearchComponent {
       let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
         this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
       });
-      collection.showCallback = (node: Node) => {
-        return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node,this.allRepositories);
-      };
-      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
-        options.push(collection);
+      if(collection) {
+          collection.showCallback = (node: Node) => {
+              return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node, this.allRepositories);
+          };
+          if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
+              options.push(collection);
+      }
 
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));

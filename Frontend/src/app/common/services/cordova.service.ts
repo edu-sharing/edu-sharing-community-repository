@@ -338,6 +338,7 @@ export class CordovaService {
       let device:any = (window as any).device;
       return device.platform=="iOS";
     } catch (e) {
+        console.error(e);
       console.log("FAIL on Plugin cordova-plugin-device (1)");
       return false;
     }
@@ -756,6 +757,7 @@ export class CordovaService {
       });
 
     } catch(error) {
+        console.error(error);
       errorCallback("FAIL-EXCEPTION",error);
     }
 

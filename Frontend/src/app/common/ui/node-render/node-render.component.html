@@ -10,6 +10,7 @@
                [node]="_node"
                [@fadeFast]="options && options.length"
                [options]="options"
+               [showDisabled]="false"
                [backgroundType]="'dark'"
                [numberOfAlwaysVisibleOptions]="1"
                [numberOfAlwaysVisibleOptionsMobile]="0"
@@ -55,7 +56,12 @@
   [nodeMetadataAllowReplace]="true"
   [(addToCollection)]="addToCollection"
   [(nodeReport)]="nodeReport"
+  [(nodeShare)]="nodeShare"
+  [(nodeShareLink)]="nodeShareLink"
+  [(nodeWorkflow)]="nodeWorkflow"
+  [(nodeDelete)]="nodeDelete"
   (onRefresh)="refresh()"
   (onCloseMetadata)="closeMetadata()"
+  (onDelete)="onDelete($event)"
 >
 </workspace-management>

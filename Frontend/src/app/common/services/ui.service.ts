@@ -1,11 +1,14 @@
 
 import {HostListener, Injectable} from "@angular/core";
+import {CordovaService} from './cordova.service';
 @Injectable()
 export class UIService {
   /** Returns true if the current sessions seems to be running on a mobile device
    *
    */
   public isMobile(){
+    if(this.cordova.isRunningCordova())
+      return true;
     // http://stackoverflow.com/questions/11381673/detecting-a-mobile-browser
     if( navigator.userAgent.match(/Android/i)
       || navigator.userAgent.match(/webOS/i)
@@ -30,7 +33,7 @@ export class UIService {
   public isShiftCmd() {
     return this.shiftCmd;
   }
-  constructor() {
+  constructor(private cordova : CordovaService) {
     // HostListener not working, so use window
     window.addEventListener('keydown', (event) => {
       if (event.key == 'Shift') {
@@ -50,4 +53,12 @@ export class UIService {
       }
     });
   }
+
+    hideKeyboardIfMobile() {
+        if(this.isMobile()) {
+            try {
+                (document.activeElement as any).blur();
+            }catch(e){console.warn(e);}
+        }
+    }
 }
