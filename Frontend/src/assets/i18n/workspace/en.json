@@ -23,6 +23,12 @@
     "AUTOLOGOUT":"You have been logged out",
     "AUTOLOGOUT_INFO":"Your session was automatically closed for your safety, because you have been inactive for at least {{ minutes }} minutes. Please login again.",
     "ADD_FOLDER": "Add folder",
+    "ADD_LTI":"LTI-Tools",
+    "LTI_HEADING": "Create link as external LTI-ressource",
+    "LTI_INFO": "Enter the corresponding data to create an external LTI-ressource.",
+    "LTI_INFO_PRIVACY": "<b>Information on data protection:</b><br />Names and e-mail addresses of participants may be transferred to the external provider. When in doubt ask the LTI provider about data protection.",
+    "LTI_CONSUMER_KEY": "Consumer Key",
+    "LTI_SHARED_SECRET": "Shared Secret",
     "SHARED_FILES": "Shared content",
     "MY_SHARED_FILES": "Shared by me",
     "TO_ME_SHARED_FILES": "Shared with me",
@@ -323,7 +329,9 @@
       "LICENSE_UPDATED":"License has been updated",
       "CONTRIBUTOR_UPDATED":"Information of contributors have been updated",
       "WORKFLOW_UPDATED":"Workflow information have been updated",
-      "METADATA_TEMPLATE_UPDATED":"Information of metadata template have been updated"
+      "METADATA_TEMPLATE_UPDATED":"Information of metadata template have been updated",
+      "LTI_FIELDS_REQUIRED":"All required fields must be filled out in order to create a lti-resource",
+      "LTI_FIELDS_REQUIRED_LINK":"Create regular link"
     }
   }
 }

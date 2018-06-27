@@ -39,6 +39,7 @@ export class RestConstants {
 
   public static CCM_ASPECT_TOOL_DEFINITION = "ccm:tool_definition";
   public static CCM_ASPECT_TOOL_OBJECT = "ccm:tool_object";
+  public static CCM_ASPECT_TOOL_INSTANCE_LINK = "ccm:tool_instance_link";
   public static CCM_ASPECT_IO_REFERENCE = "ccm:collection_io_reference";
   public static CCM_ASPECT_METADATA_PRESETTING= "ccm:metadataPresetting";
   public static CCM_ASPECT_PUBLISHED = "ccm:published";
@@ -94,6 +95,8 @@ export class RestConstants {
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
   public static CCM_PROP_AUTHORITY_GROUPTYPE="ccm:groupType";
   public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
+  public static CCM_PROP_TOOL_INSTANCE_KEY="ccm:tool_instance_key";
+  public static CCM_PROP_TOOL_INSTANCE_SECRET="ccm:tool_instance_secret";
 
   public static LINKTYPE_USER_GENERATED="USER_GENERATED";
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";
