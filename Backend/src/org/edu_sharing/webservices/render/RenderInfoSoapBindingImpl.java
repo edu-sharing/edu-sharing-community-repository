@@ -334,11 +334,21 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		for(Map.Entry<String, Object> set : propsClean.entrySet()){
 			if(set.getValue() instanceof String){
 				String s= (String) set.getValue();
-				//s=s.replace("\uD83D\uDE09","&#x1F609");
-				//s=new String(s.getBytes("UTF-8"));
+				/*
+				// also matches "-"
 				s = s.replaceAll( "([\\ud800-\\udbff\\udc00-\\udfff])", "");
-
 				propsClean.put(set.getKey(),s);
+				*/
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < s.length(); i++) {
+					if (i<s.length()-1 && Character.isSurrogatePair(s.charAt(i), s.charAt(i + 1))) {
+						i++;
+						continue;
+					}
+					sb.append(s.charAt(i));
+				}
+				propsClean.put(set.getKey(),sb.toString());
+
 			}
 		}
 		return propsClean;
