@@ -289,6 +289,8 @@ export class RestHelper{
       permClean.authority=new Authority();
       permClean.authority.authorityName=perm.authority.authorityName;
       permClean.authority.authorityType=perm.authority.authorityType;
+      permClean.user=perm.user;
+      permClean.group=perm.group;
       permClean.permissions=perm.permissions;
       permissions.permissions.push(permClean);
     }
