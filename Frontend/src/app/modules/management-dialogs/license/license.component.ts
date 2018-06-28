@@ -341,7 +341,7 @@ export class WorkspaceLicenseComponent  {
       this.permissions.permissions.push(perm);
     }
     let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.permissions.inherited);
-    this.nodeApi.setNodePermissions(node.ref.id,permissions,false,"",false,this.doiActive && this.release).subscribe(()=>{
+    this.nodeApi.setNodePermissions(node.ref.id,permissions,false,"",false,this.doiPermission && this.doiActive && this.release).subscribe(()=>{
     },(error:any)=>this.toast.error(error));
   }
   private readPermissions(last:boolean) {
@@ -406,4 +406,10 @@ export class WorkspaceLicenseComponent  {
     this.type='CC_0';
     this.cc0Type='CC_0';
   }
+
+    changeRelease(release:boolean) {
+        if(release){
+          this.doiActive=true;
+        }
+    }
 }
