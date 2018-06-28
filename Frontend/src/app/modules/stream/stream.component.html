@@ -68,10 +68,10 @@
                 <div class="stream-box-kompetenzen" > <div class="chip" *ngFor="let keyword of strm.properties['cclom:general_keyword']">{{keyword}}</div> </div>
 
             <div class="stream-box-nonodes" *ngIf="strm.nodes.length === 0"> {{'STREAM.OBJECT.NONODES' | translate }} </div>
-            <div class="stream-box-image" (click)="onStreamObjectClick(strm)" *ngIf="strm.nodes[0]"> 
-                <div [ngStyle]="{ 'background': 'linear-gradient(to bottom, transparent 70%, black 115%), url(' + strm.nodes[0].preview.url + ')', 'background-size':'cover'}">
-                    <img (load)="finishedLoad()" src="{{ strm.nodes[0].preview.url }} " style="width:100%;height:auto;border:0;visibility:hidden;">
-                </div>
+            <div class="stream-box-image" [ngStyle]="{ 'background': 'linear-gradient(to bottom, transparent 70%, black 115%), url(' + strm.nodes[0].preview.url + ')', 'background-size':'cover'}" (click)="onStreamObjectClick(strm)" *ngIf="strm.nodes[0]"> 
+                
+                <img (load)="finishedLoad()" src="{{ strm.nodes[0].preview.url }} " style="display:none;border:0;visibility:hidden;">
+                
                 
                 <div class="bottom-left">{{ (strm.nodes[0].name.length > 40) ? (strm.nodes[0].name | slice:0:40)+'...':(strm.nodes[0].name) }}</div>
                 <div class="bottom-right">{{ strm.nodes[0].commentCount }} </div>
