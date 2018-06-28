@@ -11,6 +11,7 @@ import {UIConstants} from "../ui/ui-constants";
 import {NavigationEnd, Router} from "@angular/router";
 import {FrameEventsService} from "./frame-events.service";
 import {Location} from '@angular/common';
+import {RestLocatorService} from "../rest/services/rest-locator.service";
 
 declare var cordova : any;
 
@@ -37,7 +38,6 @@ export class CordovaService {
   private appGoneBackgroundTS : number = null;
 
   private _oauth:OAuthResult;
-  public endpointUrl:string;
   private serviceIsReady = false;
 
   private lastShareTS:number = 0;
@@ -564,7 +564,7 @@ export class CordovaService {
     }
 
     // if server address - sync with sharescreen
-    if (key==CordovaService.STORAGE_SERVER_OWN) {
+    if (key==CordovaService.STORAGE_SERVER_OWN && this.isIOS()) {
       try {
         this.iosShareScreenStoreValue(CordovaService.IOSSHARE_SERVER,value);
       } catch (e) {
@@ -612,10 +612,7 @@ export class CordovaService {
   loadStorage(){
     this.getPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,(data:string)=>{
         this._oauth = (data!=null) ? JSON.parse(data) : null;
-        this.getPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,(data:string)=>{
-            this.endpointUrl=data;
-            this.serviceIsReady=true;
-        });
+        this.serviceIsReady=true;
     });
   }
 
@@ -1072,35 +1069,10 @@ export class CordovaService {
   public static TEST_TESTSKIPPED:string = "TESTSKIPPED";
   public static TEST_OK:string = "OK";
 
-  public setServerURL(url:string, doTesting:boolean): Observable<string> {
-    return new Observable<string>((observer: Observer<string>) => {
-
-      if (doTesting) {
-
-        // test URL TO API
-        this.setPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,url);
-        this.endpointUrl=url;
-        console.warn("TODO: TESTING OF URL NEEDED");
-        observer.next(CordovaService.TEST_OK);
-        observer.complete();
-
-      } else {
-      
-        // simply set API URL and OK
-        this.setPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,url);
-        this.endpointUrl=url;
-        observer.next(CordovaService.TEST_TESTSKIPPED);
-        observer.complete();
-      
-      }
-
-    });
-  }
-
   // oAuth login that is used when running as mobile app
-  public loginOAuth(username: string = "", password: string = ""): Observable<OAuthResult> {
+  public loginOAuth(endpointUrl:string, username: string = "", password: string = ""): Observable<OAuthResult> {
 
-    let url = this.endpointUrl + "../oauth2/token";
+    let url = endpointUrl + "../oauth2/token";
     let headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
     headers.append('Accept', '*/*');
@@ -1145,7 +1117,7 @@ export class CordovaService {
    * Cordova needs to refresh tokens
    */
   private reiniting=false;
-  public reinitStatus():Observable<void>{
+  public reinitStatus(endpointUrl:string):Observable<void>{
       return new Observable<void>((observer: Observer<void>) => {
 
           console.info("cordova: reinit");
@@ -1163,7 +1135,7 @@ export class CordovaService {
           }
           console.log("cordova: refresh oAuth");
           this.reiniting = true;
-          this.refreshOAuth(this.oauth).subscribe(() => {
+          this.refreshOAuth(endpointUrl,this.oauth).subscribe(() => {
               console.info("cordova: oauth OK");
               this.reiniting = false;
               observer.next(null);
@@ -1182,9 +1154,9 @@ export class CordovaService {
   }
 
   // oAuth refresh tokens
-  private refreshOAuth(oauth: OAuthResult): Observable<OAuthResult> {
+  private refreshOAuth(endpointUrl:string,oauth: OAuthResult): Observable<OAuthResult> {
 
-    let url = this.endpointUrl + "../oauth2/token";
+    let url = endpointUrl + "../oauth2/token";
     let headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
     headers.append('Accept', '*/*');
@@ -1217,6 +1189,7 @@ export class CordovaService {
   * then use this method to get a cookie/session and subscribe on refreshes on oAuth tokens.
   * When the Observable an error mit "INVALID" - oAuth tokens are outdated and new login is needed. 
   */
+  /*
   public initOAuthSession(oauth: OAuthResult): Observable<OAuthResult> {
 
     return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
@@ -1254,9 +1227,10 @@ export class CordovaService {
     });
 
   }
+  */
 
     hasValidConfig() {
-        return this._oauth && this.endpointUrl;
+        return this._oauth;
     }
 
     getLanguage() {
@@ -1301,5 +1275,8 @@ export class CordovaService {
         else{
             (navigator as any).app.exitApp();
         }*/
+    }
+    getIndexPath() {
+        return cordova.file.applicationDirectory+'www/';
     }
 }
