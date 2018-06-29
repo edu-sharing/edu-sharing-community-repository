@@ -418,10 +418,14 @@ export class CordovaService {
   }
 
   restartCordova():void {
+    this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
+    window.location.replace("http://app-registry.edu-sharing.com/ng/?reset=true");
+    /*
     try {
       (navigator as any).splashscreen.show();
     } catch (e) {}
     document.location.href = this.initialHref;
+    */
   }
 
 
@@ -1279,4 +1283,5 @@ export class CordovaService {
     getIndexPath() {
         return cordova.file.applicationDirectory+'www/';
     }
+
 }

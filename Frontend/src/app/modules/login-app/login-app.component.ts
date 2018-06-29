@@ -103,7 +103,7 @@ export class LoginAppComponent  implements OnInit {
     private buttonLoginBack() : void {
         //window.history.back();
         //window.location.replace(this.cordova.getIndexPath()+"?reset=true");
-        window.location.replace("cdvfile://android_asset/www/?reset=true");
+        this.cordova.restartCordova();
         //(navigator as any).app.loadUrl(this.cordova.getIndexPath()+"?reset=true");
     }
 
