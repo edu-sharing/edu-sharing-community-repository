@@ -272,7 +272,7 @@ export class StreamComponent {
         openStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
         this.getSimpleJSON(STREAM_STATUS.PROGRESS).subscribe(data => {
           progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
-          this.streams = progressStreams.concat(openStreams);
+          this.streams = progressStreams.concat(openStreams.reverse());
           this.imagesToLoad = this.streams.length;
         });
       }, error => console.log(error));
