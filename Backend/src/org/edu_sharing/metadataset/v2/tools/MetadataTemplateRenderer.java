@@ -1,27 +1,21 @@
 package org.edu_sharing.metadataset.v2.tools;
 
+import com.ibm.icu.text.SimpleDateFormat;
+import jersey.repackaged.com.google.common.collect.Lists;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.server.tools.DateTool;
+import org.edu_sharing.service.license.LicenseService;
+
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.edu_sharing.metadataset.v2.*;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.I18nAngular;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.tools.DateTool;
-import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.service.license.LicenseService;
-
-import com.ibm.icu.text.SimpleDateFormat;
-
-import jersey.repackaged.com.google.common.collect.Lists;
-
-import java.lang.IllegalArgumentException;
 
 
 
@@ -182,10 +176,20 @@ public class MetadataTemplateRenderer {
 					if(widget.getIcon()!=null){
 						widgetHtml+=insertIcon(widget.getIcon());
 					}
-					widgetHtml+=value;
-					widgetHtml+="</div>";
 					if(!value.trim().isEmpty())
 						empty=false;
+					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
+						value=widget.getFormat().replace("${value}",value);
+					}
+					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
+						widgetHtml+="<a href=\""+value+"\" target=\""+widget.getLink()+"\">";
+					}
+					widgetHtml+=value;
+					if(widget.getLink()!=null && !widget.getLink().isEmpty()) {
+						widgetHtml+="</a>";
+					}
+					widgetHtml+="</div>";
+
 				}
 			}
 			widgetHtml+="</div></div>";
