@@ -16,6 +16,7 @@ export class FrameEventsService {
   public static EVENT_USER_LOGGED_OUT="USER_LOGGED_OUT";
   public static EVENT_VIEW_SWITCHED="VIEW_SWITCHED";
   public static EVENT_VIEW_OPENED="VIEW_OPENED";
+  public static EVENT_SHARED="SHARED";
   public static EVENT_NODE_FOLDER_OPENED="NODE_FOLDER_OPENED";
   public static EVENT_GLOBAL_SEARCH="GLOBAL_SEARCH";
   public static EVENT_CONTENT_HEIGHT="CONTENT_HEIGHT";

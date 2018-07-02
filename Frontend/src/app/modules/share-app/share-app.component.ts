@@ -25,6 +25,7 @@ import {RestHelper} from "../../common/rest/rest-helper";
 import {CordovaService} from "../../common/services/cordova.service";
 import {DateHelper} from "../../common/ui/DateHelper";
 import {RestConnectorsService} from "../../common/rest/services/rest-connectors.service";
+import {FrameEventsService} from "../../common/services/frame-events.service";
 @Component({
   selector: 'share-app',
   templateUrl: 'share-app.component.html',
@@ -54,6 +55,7 @@ export class ShareAppComponent {
               private sanitizer: DomSanitizer,
               private node: RestNodeService,
               private connectors: RestConnectorsService,
+              private events: FrameEventsService,
               private utilities: RestUtilitiesService,
               private translate: TranslateService,
               private collectionApi: RestCollectionService,
@@ -107,12 +109,16 @@ export class ShareAppComponent {
         }
     }
     saveFile(){
-        this.saveInternal(()=>this.goToInbox());
+        this.saveInternal((node:Node)=>{
+            this.goToInbox();
+            this.events.broadcastEvent(FrameEventsService.EVENT_SHARED,node);
+        });
     }
     private saveToCollection(collection:Node){
       this.saveInternal((node:Node)=>{
           this.collectionApi.addNodeToCollection(collection.ref.id,node.ref.id).subscribe(()=>{
               UIHelper.goToCollection(this.router,collection,{replaceUrl:true});
+              this.events.broadcastEvent(FrameEventsService.EVENT_SHARED,node);
           });
       });
     }
