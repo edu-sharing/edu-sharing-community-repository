@@ -63,20 +63,16 @@ export class ShareAppComponent {
               private connector: RestConnectorService) {
       this.columns.push(new ListItem("COLLECTION", 'title'));
       this.columns.push(new ListItem("COLLECTION", 'info'));
-      this.columns.push(new ListItem("COLLECTION",'scope'));
-      this.cordova.subscribeServiceReady().subscribe(()=> {
-
-          this.init();
-          // should be handled via cordova service now
-          /*if (this.cordova.hasValidConfig()) {
+      this.columns.push(new ListItem("COLLECTION", 'scope'));
+      if (this.cordova.isRunningCordova()) {
+          this.cordova.subscribeServiceReady().subscribe(() => {
               this.init();
-          }
-          else{
-              console.log("no cordova config, go to start");
-              this.router.navigate(['']);
-          }
-          */
-      });
+          });
+      }
+      else{
+          this.init();
+      }
+
   }
     getType(){
       if(this.isLink())
@@ -85,7 +81,9 @@ export class ShareAppComponent {
           return "file-txt";
       if(this.mimetype=="application/pdf")
           return "file-pdf";
-      return "file-"+this.mimetype.split("/")[0];
+      if(this.mimetype)
+          return "file-"+this.mimetype.split("/")[0];
+      return "file";
     }
     saveInternal(callback:Function){
         this.globalProgress=true;
@@ -121,6 +119,8 @@ export class ShareAppComponent {
     private isLink() {
         if(this.hasData())
             return false;
+        if(!this.uri)
+            return false;
         if(this.uri.startsWith("content://") || this.uri.startsWith("file://"))
             return false;
         let pos=this.uri.indexOf("://");
@@ -130,6 +130,8 @@ export class ShareAppComponent {
         if(this.hasData())
             return false;
         if(this.isLink())
+            return false;
+        if(!this.uri)
             return false;
         return !this.uri.startsWith("content://") && !this.uri.startsWith("file://");
     }
@@ -180,7 +182,7 @@ export class ShareAppComponent {
                     })
                 }
                 else{
-                    if(this.cordova.getLastIntent().stream){
+                    if(this.cordova.isRunningCordova() && this.cordova.getLastIntent().stream){
                         let base64=this.cordova.getLastIntent().stream;
                         if(this.mimetype.startsWith("image/")) {
                             this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl("data:" + this.mimetype + ";base64," + base64);
@@ -236,7 +238,7 @@ export class ShareAppComponent {
     }
 
     private hasData() {
-        return this.cordova.getLastIntent() && this.cordova.getLastIntent().stream!=null;
+        return this.cordova.isRunningCordova() && this.cordova.getLastIntent() && this.cordova.getLastIntent().stream!=null;
     }
 
     private prepareTextSnippet(connectors : Connector[]) {
