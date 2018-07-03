@@ -12,6 +12,7 @@
           [groupType]="TYPE_EDITORIAL"
           (onChooseAuthority)="addSuggestion($event)"
           [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
+          [hintBottom]="'WORKSPACE.WORKFLOW.RECEIVERS_HINT'"
         ></authority-search-input>
           <div class="status">
             <div class="btn-flat btn-shadow" tabindex="0" (keyup.enter)="chooseStatus=true" (click)="chooseStatus=true">
