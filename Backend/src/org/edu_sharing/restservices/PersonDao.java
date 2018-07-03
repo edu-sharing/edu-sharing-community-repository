@@ -14,15 +14,9 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
-import org.edu_sharing.restservices.shared.Authority;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.Pagination;
-import org.edu_sharing.restservices.shared.User;
-import org.edu_sharing.restservices.shared.UserProfile;
-import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -166,7 +160,7 @@ public class PersonDao {
 		}
 
 	}
-	public AuthorityEntries getMemberships(String pattern,int skipCount,int maxItems,SortDefinition sort) throws DAOException{
+	public GroupEntries getMemberships(String pattern, int skipCount, int maxItems, SortDefinition sort) throws DAOException{
 		if (!AuthenticationUtil.getFullyAuthenticatedUser().equals(getAuthorityName()) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
 			throw new NotAnAdminException();
 		}
@@ -178,14 +172,11 @@ public class PersonDao {
     					sort
     					
     			);
-		List<Authority> result = new ArrayList<Authority>();
+		List<Group> result = new ArrayList<>();
     	for (String member: search.getData()) {
-    		result.add(
-    				member.startsWith(PermissionService.GROUP_PREFIX) ?
-    							new GroupDao(repoDao,member).asGroup() :
-    							new PersonDao(repoDao, member).asPerson());	
+    		result.add(new GroupDao(repoDao,member).asGroup());
     	}	
-    	AuthorityEntries response = new AuthorityEntries();
+    	GroupEntries response = new GroupEntries();
     	response.setList(result);
     	response.setPagination(new Pagination(search));
     	return response;

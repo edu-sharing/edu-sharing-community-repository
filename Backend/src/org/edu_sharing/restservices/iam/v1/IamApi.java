@@ -928,7 +928,7 @@ public class IamApi  {
 
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = "OK.", response = AuthorityEntries.class),        
+	        @ApiResponse(code = 200, message = "OK.", response = GroupEntries.class),
 	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
@@ -950,7 +950,7 @@ public class IamApi  {
     	try {
     		
     		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-    		AuthorityEntries response = PersonDao.getPerson(repoDao, person).getMemberships(
+			GroupEntries response = PersonDao.getPerson(repoDao, person).getMemberships(
     				pattern, 
     				skipCount!=null ? skipCount : 0,
 	    			maxItems!=null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS,
