@@ -126,7 +126,7 @@ public class VCardConverter {
 			if(!name.trim().isEmpty())
 				return name.trim();
 		}
-		if(data.containsKey(CCConstants.VCARD_ORG))
+		if(data.containsKey(prefix+CCConstants.VCARD_ORG))
 			return (String) data.get(prefix+CCConstants.VCARD_ORG);
 		return null;		
 	}
