@@ -185,9 +185,7 @@ export class WorkspaceLicenseComponent  {
       if(this.ccLocale)
         prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]=[this.ccLocale];
     }
-    prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=this.getValueForAll(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,[],[],true);
-    console.log(prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]);
-    prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0]=this.authorVCard.toVCardString();
+    //prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0]=this.authorVCard.toVCardString();
     prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
 
     if(this.type=='CUSTOM') {
@@ -196,6 +194,11 @@ export class WorkspaceLicenseComponent  {
     let i=0;
     this.onLoading.emit(true);
     for(let node of this._nodes) {
+      let authors=this._nodes[i].properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];
+      if(!authors)
+          authors=[];
+      authors[0]=this.authorVCard.toVCardString();
+      prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=authors;
       i++;
       this.nodeApi.editNodeMetadata(node.ref.id, prop).subscribe(() => {
         this.savePermissions(node);
