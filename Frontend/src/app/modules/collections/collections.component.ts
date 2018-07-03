@@ -365,13 +365,15 @@ export class CollectionsMainComponent {
           if(nodes && nodes.length) {
               if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
                   let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
-                  options.push(collection);
+                  if(collection)
+                    options.push(collection);
               }
               if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
                   let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE','remove_circle_outline',(node: Node)=>{
                       this.deleteMultiple(ActionbarHelper.getNodes(nodes,node));
                   });
-                  options.push(remove);
+                  if(remove)
+                    options.push(remove);
               }
           }
       }
@@ -392,12 +394,14 @@ export class CollectionsMainComponent {
           remove.showCallback = (node: Node) => {
               return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
           };
-          options.push(remove);
+          if(remove)
+            options.push(remove);
       }
       if(fromList || nodes && nodes.length==1) {
           if (this.config.instant("nodeReport", false)) {
               let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes, node)[0]);
-              options.push(report);
+              if(report)
+                options.push(report);
           }
       }
 

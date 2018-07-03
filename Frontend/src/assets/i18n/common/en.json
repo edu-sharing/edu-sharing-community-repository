@@ -321,7 +321,7 @@
   "SHARE_APP":{
     "TEXT_SNIPPET":"Note",
     "IMAGE":"Image",
-    "WILL_BE_SAVED_AT":"Will be stored at:",
+    "WILL_BE_SAVED_AT":"Will be stored at",
     "ADD_TO_COLLECTION":"Would you like to add the object to a collection?"
   },
 

@@ -562,6 +562,11 @@ export class WorkspaceMainComponent implements EventListener{
             }
         )
     }
+    private afterUpload(node:Node[]){
+        if(this.reurl){
+            NodeHelper.addNodeToLms(this.router,this.storage,node[0],this.reurl);
+        }
+    }
     private uploadFiles(files : FileList){
         this.onFileDrop(files);
     }

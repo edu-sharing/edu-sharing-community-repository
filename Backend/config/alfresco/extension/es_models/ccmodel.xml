@@ -380,17 +380,10 @@
        		<title>Tool Permission</title>
          	<parent>ccm:io</parent>
        </type>
-       
-       <type name="ccm:tool_instance">
+		<type name="ccm:tool_instance">
        		<title>Tool Instance</title>
        		<parent>cm:cmobject</parent>
          	<properties>
-         		<property name="ccm:tool_instance_key">
-         			<type>d:text</type>	
-         		</property>
-         		<property name="ccm:tool_instance_secret">
-         			<type>d:text</type>	
-         		</property>
          		<property name="ccm:tool_instance_params">
          			<type>d:text</type>	
          		</property>
@@ -413,11 +406,26 @@
          			<type>d:text</type>	
          		</property>
          	</properties>
+         	<mandatory-aspects>
+    			<aspect>ccm:eduscope</aspect>
+   			</mandatory-aspects>
        </type>
 	</types>
 
 
 	<aspects>
+
+		<aspect name="ccm:tool_instance_link">
+			<title>Tool Instance Link</title>
+			<properties>
+				<property name="ccm:tool_instance_key">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:tool_instance_secret">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
 
 		<aspect name="ccm:ressourceinfo">
 			<title>Aspect for additional resource Information like scorm, qti

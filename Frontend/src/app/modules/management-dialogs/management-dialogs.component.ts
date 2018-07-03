@@ -79,6 +79,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onClose=new EventEmitter();
   @Output() onCreate=new EventEmitter();
   @Output() onRefresh=new EventEmitter();
+  @Output() onUploadFilesProcessed=new EventEmitter();
   @Output() onCloseMetadata=new EventEmitter();
   @Output() onUploadFileSelected=new EventEmitter();
   @Output() onUpdateLicense=new EventEmitter();
@@ -97,6 +98,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Input() nodeDeleteOnCancel: boolean;
   @Output() nodeDeleteOnCancelChange = new EventEmitter();
   private nodeLicenseOnUpload = false;
+  private wasUploaded: boolean;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -246,10 +248,12 @@ export class WorkspaceManagementDialogsComponent  {
     else if(this.filesToUpload.length==1){
         this.showMetadataAfterUpload(event);
     }
-
+    else{
+        this.onUploadFilesProcessed.emit(event);
+    }
+    this.wasUploaded=true;
     this.filesToUpload=null;
     this.filesToUploadChange.emit(null);
-
     this.onRefresh.emit();
   }
   public refresh(){
@@ -258,14 +262,20 @@ export class WorkspaceManagementDialogsComponent  {
  public uploadFile(event:any){
    this.onUploadFileSelected.emit(event);
  }
-  private createUrlLink(link : string){
+  private createUrlLink(link : any){
     let prop:any={};
-    link=UIHelper.addHttpIfRequired(link);
-    prop[RestConstants.CCM_PROP_IO_WWWURL]=[link];
+    let aspects:string[]=[];
+    let url=UIHelper.addHttpIfRequired(link.link);
+    prop[RestConstants.CCM_PROP_IO_WWWURL]=[url];
+    if(link.lti){
+        aspects.push(RestConstants.CCM_ASPECT_TOOL_INSTANCE_LINK);
+        prop[RestConstants.CCM_PROP_TOOL_INSTANCE_KEY]=[link.consumerKey];
+        prop[RestConstants.CCM_PROP_TOOL_INSTANCE_SECRET]=[link.sharedSecret];
+    }
     prop[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
     this.closeUploadSelect();
     this.globalProgress=true;
-    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,aspects,prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
       (data:NodeWrapper)=>{
         this.globalProgress=false;
         this.nodeDeleteOnCancel=true;
@@ -294,6 +304,11 @@ export class WorkspaceManagementDialogsComponent  {
     if(this.nodeLicenseOnUpload && this.nodeLicense.length==1){
       this.showMetadataAfterUpload(this.nodeLicense);
     }
+    else {
+        if(this.wasUploaded)
+            this.onUploadFilesProcessed.emit(this.nodeLicense);
+        this.wasUploaded = false;
+    }
     this.nodeLicense=null;
     this.nodeLicenseOnUpload=false;
     this.nodeLicenseChange.emit(null);
@@ -304,15 +319,19 @@ export class WorkspaceManagementDialogsComponent  {
     this.onRefresh.emit();
   }
   private closeEditor(refresh:boolean,node:Node=null){
-    if(this.nodeDeleteOnCancel && node==null){
-      this.globalProgress=true;
-      this.nodeService.deleteNode(this.nodeMetadata.ref.id,false).subscribe(()=>{
-        this.nodeDeleteOnCancel=false;
-        this.nodeDeleteOnCancelChange.emit(false);
-        this.globalProgress=false;
-        this.closeEditor(true);
-      });
-      return;
+      if(node!=null && this.wasUploaded){
+          this.onUploadFilesProcessed.emit([node]);
+      }
+      this.wasUploaded=false;
+      if(this.nodeDeleteOnCancel && node==null){
+          this.globalProgress=true;
+          this.nodeService.deleteNode(this.nodeMetadata.ref.id,false).subscribe(()=>{
+            this.nodeDeleteOnCancel=false;
+            this.nodeDeleteOnCancelChange.emit(false);
+            this.globalProgress=false;
+            this.closeEditor(true);
+          });
+          return;
     }
     this.nodeDeleteOnCancel=false;
     this.nodeDeleteOnCancelChange.emit(false);

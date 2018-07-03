@@ -21,14 +21,51 @@ hr{
 .dropArea i{
   font-size:60px;
 }
-.linkTitle{
-  color:$textLight;
+.lti-data{
+  background-color: $actionDialogBackground;
+  margin: 20px $cardPadding*-1;
+  padding:20px $cardPadding;
+  .heading{
+    font-size: 110%;
+    font-weight: bold;
+    padding:10px 0;
+  }
+  .info{
+    color:$textLight;
+    padding:5px 0;
+    white-space: pre-line;
+  }
+  .info-privacy{
+    font-size: 90%;
+  }
+  .inputs{
+    padding-top: 15px;
+  }
 }
 .link{
   width:100%;
-  text-align: center;
+  .linkLabel{
+    text-align: center;
+  }
+  .linkTitle{
+    color:$textLight;
+  }
   i{
     top: 7px;
+  }
+  .lti{
+    display: flex;
+    flex-direction: column;
+  }
+  .toolInfo{
+    display:flex;
+    padding: 15px 20px;
+    img{
+      padding-right:15px;
+    }
+    .title{
+      font-weight: bold;
+    }
   }
 }
 .dropArea .btn-flat{
