@@ -185,7 +185,8 @@
     },
     "WORKFLOW": {
       "TITLE": "workflow for {{ name }}",
-      "RECEIVERS": "user in charge",
+      "RECEIVERS": "user/editorial group",
+      "RECEIVERS_HINT": "Who is in charge?",
       "COMMENT": "comments",
       "COMMENT_INFO": "What changes have been made?",
       "RECEIVERS_NEXT":"pass on to",

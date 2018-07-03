@@ -207,7 +207,8 @@
     },
     "WORKFLOW": {
       "TITLE": "Workflow für {{ name }}",
-      "RECEIVERS": "Zuständige(r)",
+      "RECEIVERS": "Nutzer/Redaktionsgruppe",
+      "RECEIVERS_HINT": "Wer ist verantwortlich?",
       "COMMENT": "Kommentar zum Workflow",
       "COMMENT_INFO": "Was sollte der Zuständige wissen? Was wurde geändert?",
       "RECEIVERS_NEXT":"übergeben an",

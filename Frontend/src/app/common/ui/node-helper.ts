@@ -2,7 +2,7 @@ import {RestConstants} from "../rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {
     Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
-    Repository, WorkflowDefinition, Permissions
+    Repository, WorkflowDefinition, Permissions, CollectionReference
 } from "../rest/data-object";
 import {FormatSizePipe} from "./file-size.pipe";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
@@ -574,10 +574,14 @@ export class NodeHelper{
     ]);
   }
 
-  static allFiles(nodes: Node[]) {
+  static allFiles(nodes: any[]) {
     let allFiles=true;
     if(nodes) {
       for (let node of nodes) {
+        if(!node)
+          continue;
+        if(node.reference)
+          node=node.reference;
         if (node.isDirectory || node.type!=RestConstants.CCM_TYPE_IO)
           allFiles = false;
       }

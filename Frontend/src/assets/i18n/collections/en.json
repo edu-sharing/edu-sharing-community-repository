@@ -7,6 +7,10 @@
     "ERROR_DELETE": "An error occurred while deleting the collection.",
     "ENTER_NAME" : "Please enter a name for this collection.",
     "NO_EDITORIAL_GROUPS":"No editorial groups found",
+    "ORDER_ELEMENTS":"Would you like to change the order of the objects manually?",
+    "ORDER_ELEMENTS_INFO":"Viewers of the collection see the contained materials in a certain order.",
+    "ORDER_SAVED":"The object order has been changed.",
+    "CUSTOM_ORDER":"change object-order",
     "DETAIL": {
       "REMOVE": "Remove",
       "ADD_TO_OTHER": "Add to collection"

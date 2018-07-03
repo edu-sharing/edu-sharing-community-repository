@@ -2,6 +2,7 @@
 <div class="form-group edusharing-autocomplete-wrapper">
     <form (ngSubmit)="addValue()">
         <input name="valueInput" class="searchInput" [(ngModel)]="valueInput" (keyup.enter)="addValue()" [disabled]="disabled" placeholder="{{placeholder | translate}}" title="{{placeholder | translate}}" autocomplete="off">
+        <div class="input-hint-bottom" *ngIf="hintBottom">{{hintBottom | translate}}</div>
     </form>
  <ul class="suggestbox" *ngIf="showSuggestions">
      <li *ngFor="let suggestion of _suggestions">

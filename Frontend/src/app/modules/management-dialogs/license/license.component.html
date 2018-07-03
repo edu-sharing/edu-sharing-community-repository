@@ -2,11 +2,10 @@
   <div class="card center-card card-action card-high card-wide" [style.z-index]="121 + priority" [@cardAnimation]="this">
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
-      <div *ngIf="this._properties" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:this._properties['cm:name']} }}</div>
-      <div *ngIf="this._nodes && this._nodes.length==1" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:this._nodes[0].name} }}</div>
-      <div *ngIf="this._nodes && this._nodes.length!=1" class="card-title">{{'WORKSPACE.LICENSE.TITLE_MULTI' | translate:{count:this._nodes.length} }}</div>
+      <div *ngIf="_nodes && _nodes.length==1" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:_nodes[0].name} }}</div>
+      <div *ngIf="_nodes && _nodes.length!=1" class="card-title">{{'WORKSPACE.LICENSE.TITLE_MULTI' | translate:{count:count} }}</div>
       <spinner *ngIf="loading"></spinner>
-      <div *ngIf="(this._nodes || this._properties) && !loading" class="card-scroll">
+      <div *ngIf="_nodes && !loading" class="card-scroll">
         <div class="oerSelect switch">
           <label>
             {{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}

@@ -586,7 +586,7 @@ export class SearchComponent {
 
   private getOptions(nodes:Node[]=this.selection,fromList:boolean) {
     if(fromList && (!nodes || !nodes.length)){
-      nodes=[new Node()];
+      //nodes=[new Node()];
     }
     let options=[];
     if(this.searchService.reurl) {
@@ -599,7 +599,7 @@ export class SearchComponent {
       return options;
     }
     if (this.addToCollection) {
-      if (nodes && nodes.length) {
+      if (fromList || nodes && nodes.length) {
         let addTo = new OptionItem(fromList ? "SEARCH.ADD_TO_COLLECTION_SHORT" : "SEARCH.ADD_TO_COLLECTION", "layers", (node: Node) => {
           this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(this.selection,node), () => {
             this.switchToCollections(this.addToCollection.ref.id);
@@ -618,7 +618,7 @@ export class SearchComponent {
       }
       return options;
     }
-    if(nodes && nodes.length) {
+    if(fromList || nodes && nodes.length) {
       let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
         this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
       });
@@ -655,7 +655,7 @@ export class SearchComponent {
         */
       }
 
-      if(nodes.length==1){
+      if(fromList || nodes && nodes.length==1){
         if(!this.isGuest && (fromList || RestNetworkService.supportsImport(nodes[0].ref.repo,this.allRepositories))) {
           let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(this.getCurrentNode(node)));
           save.showCallback=(node:Node)=>{
@@ -670,7 +670,7 @@ export class SearchComponent {
       if (download)
         options.push(download);
 
-      if(nodes.length==1 && this.config.instant("nodeReport",false)){
+      if((fromList || nodes && nodes.length==1) && this.config.instant("nodeReport",false)){
         let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
         report.showCallback=(node:Node)=>{
           return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
