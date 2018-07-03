@@ -11,6 +11,7 @@
     "MY_FILES": "Meine Inhalte",
     "ADD": "Neu",
     "ADD_OBJECT": "Neues Material",
+    "ADD_OBJECT_LTI": "Als LTI-Ressource einbinden",
     "ADD_CAMERA": "Bild aufnehmen",
     "ADD_EMPTY_OBJECT": "Neues Objekt",
     "ADD_OBJECT_TITLE": "Neues Material erstellen",
@@ -24,6 +25,11 @@
     "AUTOLOGOUT_INFO":"Ihre Sitzung wurde aufgrund von Inaktivität zu Ihrer Sicherheit automatisch beendet, da Sie mindestens {{ minutes }} Minuten nicht aktiv waren. Bitte melden Sie sich erneut an.",
     "ADD_FOLDER": "Neuer Ordner",
     "ADD_LTI": "LTI-Tools",
+    "LTI_HEADING": "Link als externe LTI-Ressource anlegen",
+    "LTI_INFO": "Geben sie die entsprechenden Daten an, um eine externe LTI-Ressource anzulegen",
+    "LTI_INFO_PRIVACY": "<b>Informationen zum Datenschutz:</b><br />Eventuell werden Namen und E-Mail-Adressen der Teilnehmer-/innen an den externen Anbieter übertragen. Fragen Sie den Anbieter.",
+    "LTI_CONSUMER_KEY": "Consumer Key",
+    "LTI_SHARED_SECRET": "Shared Secret",
     "SHARED_FILES": "Gemeinsame Inhalte",
     "MY_SHARED_FILES": "Von mir freigegeben",
     "TO_ME_SHARED_FILES": "Für mich freigegeben",
@@ -347,7 +353,9 @@
       "LICENSE_UPDATED":"Lizenzinformationen wurden aktualisiert",
       "CONTRIBUTOR_UPDATED":"Informationen zu Beteiligten wurden aktualisiert",
       "WORKFLOW_UPDATED":"Informationen zum Workflow wurden aktualisiert",
-      "METADATA_TEMPLATE_UPDATED":"Informationen zum Metadaten-Template wurden aktualisiert"
+      "METADATA_TEMPLATE_UPDATED":"Informationen zum Metadaten-Template wurden aktualisiert",
+      "LTI_FIELDS_REQUIRED":"Alle nötigen Felder müssen korrekt ausgefüllt sein, um eine LTI-Ressource anzulegen",
+      "LTI_FIELDS_REQUIRED_LINK":"Als normalen Link anlegen"
     }
   }
 }

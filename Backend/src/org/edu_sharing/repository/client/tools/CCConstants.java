@@ -383,6 +383,10 @@ public class CCConstants {
 
 	public final static String CCM_PROP_LINKTYPE = "{http://www.campuscontent.de/model/1.0}linktype";
 
+	public final static String CCM_PROP_TOOL_INSTANCE_KEY = "{http://www.campuscontent.de/model/1.0}tool_instance_key";
+
+	public final static String CCM_PROP_TOOL_INSTANCE_SECRET = "{http://www.campuscontent.de/model/1.0}tool_instance_secret";
+
 	public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 
 	public final static String CCM_ASPECT_SHARES = "{http://www.campuscontent.de/model/1.0}shares";
