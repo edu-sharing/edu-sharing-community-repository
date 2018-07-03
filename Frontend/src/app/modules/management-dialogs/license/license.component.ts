@@ -130,39 +130,38 @@ export class WorkspaceLicenseComponent  {
                   }
               });
           }
-      }
       });
-
   }
     private loadConfig() {
-    this.config.get("allowedLicenses").subscribe((data:string[])=>{
-        if(!data) {
-            this.licenseMainTypes = this.ALL_LICENSE_TYPES;
-            this.allowedLicenses = null;
-        }
-        else {
-            this.licenseMainTypes = [];
-            this.allowedLicenses = data;
-            for (let entry of data) {
-                if (entry.startsWith("CC_BY")) {
-                    if (this.licenseMainTypes.indexOf("CC_BY") == -1)
-                        this.licenseMainTypes.push("CC_BY");
-                }
-                else if (entry == "CC_0" || entry == "PDM") {
-                    if (this.licenseMainTypes.indexOf("CC_0") == -1)
-                        this.licenseMainTypes.push("CC_0");
-                }
-                else if (entry.startsWith("COPYRIGHT")) {
-                    this.licenseMainTypes.push("COPYRIGHT");
-                    if (data.indexOf(this.copyrightType) == -1)
-                        this.copyrightType = entry;
-                }
-                else if (this.ALL_LICENSE_TYPES.indexOf(entry) != -1) {
-                    this.licenseMainTypes.push(entry);
+        this.config.get("allowedLicenses").subscribe((data: string[]) => {
+            if (!data) {
+                this.licenseMainTypes = this.ALL_LICENSE_TYPES;
+                this.allowedLicenses = null;
+            }
+            else {
+                this.licenseMainTypes = [];
+                this.allowedLicenses = data;
+                for (let entry of data) {
+                    if (entry.startsWith("CC_BY")) {
+                        if (this.licenseMainTypes.indexOf("CC_BY") == -1)
+                            this.licenseMainTypes.push("CC_BY");
+                    }
+                    else if (entry == "CC_0" || entry == "PDM") {
+                        if (this.licenseMainTypes.indexOf("CC_0") == -1)
+                            this.licenseMainTypes.push("CC_0");
+                    }
+                    else if (entry.startsWith("COPYRIGHT")) {
+                        this.licenseMainTypes.push("COPYRIGHT");
+                        if (data.indexOf(this.copyrightType) == -1)
+                            this.copyrightType = entry;
+                    }
+                    else if (this.ALL_LICENSE_TYPES.indexOf(entry) != -1) {
+                        this.licenseMainTypes.push(entry);
+                    }
                 }
             }
-        }
-    });
+        });
+    }
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
   @Output() onDone=new EventEmitter();
@@ -449,7 +448,6 @@ export class WorkspaceLicenseComponent  {
             if(this.ccLocale)
                 prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]=[this.ccLocale];
         }
-        prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=[this.authorVCard.toVCardString()];
         prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
 
         if(this.type=='CUSTOM') {
