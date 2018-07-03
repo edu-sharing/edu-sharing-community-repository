@@ -15,10 +15,13 @@ export class ActionbarHelper{
   static createOptionIfPossible(type:string,nodes:Node[],connector:RestConnectorService,callback:Function){
     let option:OptionItem=null;
     if(type=='DOWNLOAD') {
-      if (nodes && nodes.length && NodeHelper.allFiles(nodes)) {
+      console.log(nodes);
+      if (NodeHelper.allFiles(nodes)) {
         option = new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download", callback);
         option.enabledCallback = (node: Node) => {
           let list:any=ActionbarHelper.getNodes(nodes, node);
+          if(!list)
+            return false;
           if(list[0].reference)
             list[0]=list[0].reference;
           return list && list[0].downloadUrl && list[0].properties && !list[0].properties[RestConstants.CCM_PROP_IO_WWWURL];
@@ -33,7 +36,7 @@ export class ActionbarHelper{
       }
     }
     if(type=='ADD_TO_COLLECTION') {
-      if (nodes && nodes.length && NodeHelper.allFiles(nodes)) {
+      if (NodeHelper.allFiles(nodes)) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
         option.showAsAction = true;
