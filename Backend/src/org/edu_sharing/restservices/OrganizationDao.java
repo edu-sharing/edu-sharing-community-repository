@@ -36,7 +36,7 @@ public class OrganizationDao {
 		}
 	}
 
-	public static String create(RepositoryDao repoDao, String groupName, String folderId) throws DAOException {
+	public static String create(RepositoryDao repoDao, String groupName, String folderId,String scope) throws DAOException {
 
 		try {
 			
@@ -56,10 +56,10 @@ public class OrganizationDao {
 				
 	}
 	
-	public static GroupDao create(RepositoryDao repoDao, String orgName) throws DAOException {
+	public static GroupDao create(RepositoryDao repoDao, String orgName,String scope) throws DAOException {
 		GroupProfile profile=new GroupProfile();
 		profile.setDisplayName(orgName);
-		String authorityName=create(repoDao,orgName,profile);
+		String authorityName=create(repoDao,orgName,profile,scope);
 		return GroupDao.getGroup(repoDao, authorityName);
 	}
 	/**
@@ -70,10 +70,10 @@ public class OrganizationDao {
 	 * @return
 	 * @throws DAOException
 	 */
-	public static String create(RepositoryDao repoDao, String orgName, GroupProfile profile) throws DAOException {
+	public static String create(RepositoryDao repoDao, String orgName, GroupProfile profile,String scope) throws DAOException {
 		try {
 			OrganizationService organizationService = OrganizationServiceFactory.getOrganizationService(repoDao.getApplicationInfo().getAppId());
-			return organizationService.createOrganization(orgName, profile.getDisplayName());
+			return organizationService.createOrganization(orgName, profile.getDisplayName(),scope);
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}		

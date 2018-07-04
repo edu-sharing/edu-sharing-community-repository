@@ -134,12 +134,13 @@ public class OrganizationApi  {
     public Response createOrganizations(
         	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     		@ApiParam(value = "organization name",required=true) @PathParam("organization") String organization,
+    		@ApiParam(value = "eduscope (may be null)",defaultValue="",required=false) @QueryParam("eduscope") String scope,
     		@Context HttpServletRequest req) {
     	
     	try {
 
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	Group group = OrganizationDao.create(repoDao, organization).asGroup();
+	    	Group group = OrganizationDao.create(repoDao, organization,scope).asGroup();
 	    	
 	    	return Response.status(Response.Status.OK).entity(group).build();
 	

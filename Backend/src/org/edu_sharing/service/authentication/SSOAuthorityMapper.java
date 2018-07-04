@@ -289,7 +289,7 @@ public class SSOAuthorityMapper {
 					}
 					
 					if(existingOrganisationName == null) {
-						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName);
+						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName, null);
 						existingOrganisationName = AuthorityType.GROUP.getPrefixString() + existingOrganisationName;
 					}
 					

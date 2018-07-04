@@ -26,7 +26,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	org.edu_sharing.alfresco.service.OrganisationService eduOrganisationService = (org.edu_sharing.alfresco.service.OrganisationService) alfApplicationContext.getBean("eduOrganisationService");
 	
 	@Override
-	public String createOrganization(String orgName, String groupDisplayName) throws Throwable {
+	public String createOrganization(String orgName, String groupDisplayName, String scope) throws Throwable {
 			return (String)baseClient.doInTransaction(new RetryingTransactionCallback<String>() {
 
 				@Override
@@ -36,7 +36,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 						throw new AccessDeniedException(currentUser);
 					}
 					
-					return eduOrganisationService.createOrganization(orgName, groupDisplayName);
+					return eduOrganisationService.createOrganization(orgName, groupDisplayName,scope);
 				}
 			});							
 	}
