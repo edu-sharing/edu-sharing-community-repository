@@ -3,6 +3,8 @@
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div class="card-title">{{'WORKSPACE.SHARE.TITLE' | translate }}</div>
+      <div class="share-link" (click)="shareLink()"><i class="material-icons">link</i> <span>{{'WORKSPACE.OPTION.SHARE_LINK' | translate}}</span></div>
+
       <div class="row">
         <div class="col s12">
           <ul class="tabs">

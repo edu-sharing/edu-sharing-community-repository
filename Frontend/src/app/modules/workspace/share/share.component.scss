@@ -306,6 +306,27 @@ label.notify p{
   color:$textLight;
 }
 
+.share-link{
+  position: absolute;
+  top: 14px;
+  right: 60px;
+  text-transform: uppercase;
+  color:$primary;
+  cursor: pointer;
+
+  span{
+    vertical-align: middle;
+  }
+  i{
+    vertical-align: middle;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 1px 1px 15px 1px #d0d0d0;
+    display: inline-table;
+    padding: 3px;
+    margin-right: 8px;
+  }
+}
 .state{
   font-size: 9pt;
   position: absolute;
@@ -358,6 +379,7 @@ label.notify p{
   .inheritCheck{
     padding-left:5px;
   }
+
   .state{
     left: 10px;
     .show-state > span{
@@ -371,5 +393,9 @@ label.notify p{
       }
     }
   }
-
+  .share-link{
+    span{
+      display: none;
+    }
+  }
 }

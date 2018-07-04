@@ -101,6 +101,11 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public openLink(){
     this.linkNode=this._node;
   }
+  public shareLink(){
+    //@TODO: Torsten Hier soll man zum "Download-Link Freigeben Diallog" gelangen
+    alert("Download-Link Freigeben Diallog");
+
+  }
   private addSuggestion(data: any) {
     this.addAuthority(data);
   }
