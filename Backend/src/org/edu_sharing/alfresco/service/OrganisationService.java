@@ -35,7 +35,8 @@ public class OrganisationService {
 	public static final QName QNAME_EDUGROUP = QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP);
 
 	public String createOrganization(String orgName, String groupDisplayName, String scope) throws Exception {
-		orgName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
+        orgName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
+        groupDisplayName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
 		String groupName = eduAuthorityService.createOrUpdateGroup(AuthorityService.ORG_GROUP_PREFIX + orgName, groupDisplayName, null, true);
 		
 		String authorityAdmins = eduAuthorityService.createOrUpdateGroup(AuthorityService.ADMINISTRATORS_GROUP, orgName + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, groupName, true);
