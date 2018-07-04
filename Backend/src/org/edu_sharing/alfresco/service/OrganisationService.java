@@ -34,12 +34,14 @@ public class OrganisationService {
 	public static final String CCM_PROP_EDUGROUP_EDU_UNIQUENAME = "{http://www.campuscontent.de/model/1.0}edu_uniquename";
 	public static final QName QNAME_EDUGROUP = QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP);
 
-    public String createOrganization(String orgName, String groupDisplayName) throws Exception {
-        return createOrganization(orgName, groupDisplayName, null, null);
-    }
-	public String createOrganization(String orgName, String groupDisplayName, String metadataset, String scope) throws Exception {
+	public String createOrganization(String orgName, String groupDisplayName) throws Exception {
+		return createOrganization(orgName, groupDisplayName, null, null);
+	}
+
+	public String createOrganization(String orgName, String groupDisplayName,String metadataset, String scope) throws Exception {
 		orgName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
-		String groupName = eduAuthorityService.createOrUpdateGroup(AuthorityService.ORG_GROUP_PREFIX + orgName, groupDisplayName, null, true);
+        groupDisplayName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
+        String groupName = eduAuthorityService.createOrUpdateGroup(AuthorityService.ORG_GROUP_PREFIX + orgName, groupDisplayName, null, true);
 		
 		String authorityAdmins = eduAuthorityService.createOrUpdateGroup(AuthorityService.ADMINISTRATORS_GROUP, groupDisplayName + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, groupName, true);
 
