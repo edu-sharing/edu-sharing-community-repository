@@ -805,7 +805,7 @@ export class MdsComponent{
             }
           }
           else if(widget.type=='singleoption'){
-            element.value=props[0];
+            element.value=props[0] ? props[0] : "";
           }
           else {
             let caption=props[0];

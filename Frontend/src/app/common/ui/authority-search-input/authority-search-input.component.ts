@@ -28,6 +28,7 @@ export class AuthoritySearchInputComponent{
   @Input() disabled = false;
   @Input() maxSuggestions = 10;
   @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
+  @Input() hintBottom = "";
   @Output() onChooseAuthority = new EventEmitter();
   private lastSuggestionSearch: string;
   public addSuggestion(data: any) {

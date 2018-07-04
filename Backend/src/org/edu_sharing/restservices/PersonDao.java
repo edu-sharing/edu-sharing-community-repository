@@ -1,17 +1,5 @@
 package org.edu_sharing.restservices;
 
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpSession;
-
-import org.alfresco.repo.search.impl.solr.facet.Exceptions.IllegalArgument;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
@@ -19,8 +7,6 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
@@ -32,32 +18,26 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
-import org.edu_sharing.restservices.iam.v1.model.AuthorityEntries;
-import org.edu_sharing.restservices.shared.Authority;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.Pagination;
-import org.edu_sharing.restservices.shared.User;
-import org.edu_sharing.restservices.shared.UserProfile;
-import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
-import org.edu_sharing.restservices.shared.UserStats;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.model.SearchResult;
-import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.search.SearchServiceImpl;
+import org.edu_sharing.service.search.model.SearchResult;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.oracle.jrockit.jfr.ContentType;
+import javax.servlet.http.HttpSession;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.*;
 
 public class PersonDao {
 
@@ -222,7 +202,7 @@ public class PersonDao {
 		}
 
 	}
-	public AuthorityEntries getMemberships(String pattern,int skipCount,int maxItems,SortDefinition sort) throws DAOException{
+	public GroupEntries getMemberships(String pattern, int skipCount, int maxItems, SortDefinition sort) throws DAOException{
 		if (!AuthenticationUtil.getFullyAuthenticatedUser().equals(getAuthorityName()) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
 			throw new NotAnAdminException();
 		}
@@ -234,14 +214,11 @@ public class PersonDao {
     					sort
 
     			);
-		List<Authority> result = new ArrayList<Authority>();
+		List<Group> result = new ArrayList<>();
     	for (String member: search.getData()) {
-    		result.add(
-    				member.startsWith(PermissionService.GROUP_PREFIX) ?
-    							new GroupDao(repoDao,member).asGroup() :
-    							new PersonDao(repoDao, member).asPerson());
+    		result.add(new GroupDao(repoDao,member).asGroup());
     	}
-    	AuthorityEntries response = new AuthorityEntries();
+    	GroupEntries response = new GroupEntries();
     	response.setList(result);
     	response.setPagination(new Pagination(search));
     	return response;
