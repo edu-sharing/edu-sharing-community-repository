@@ -10,14 +10,6 @@ import {CordovaService} from '../../services/cordova.service';
 
 @Injectable()
 export class RestLocatorService {
-  private static ENDPOINT_URLS = [
-      "rest/",
-      "http://localhost:8080/edu-sharing/rest/",
-      "http://localhost:8081/edu-sharing/rest/",
-      "http://edu50.edu-sharing.de/edu-sharing/rest/",
-      //"https://repository.oer-berlin.de/edu-sharing/rest/",
-    "http://alfresco5.vm:8080/edu-sharing/rest/"
-  ];
   private static DEFAULT_NUMBER_PER_REQUEST = 25;
   public numberPerRequest = RestLocatorService.DEFAULT_NUMBER_PER_REQUEST;
 
@@ -134,32 +126,47 @@ export class RestLocatorService {
         observer.complete();
       },100);
     }
-    private testApi(pos : number,observer : Observer<void>) : void{
-    if(pos==RestLocatorService.ENDPOINT_URLS.length)
-      return;
-
-    this.http.get(RestLocatorService.ENDPOINT_URLS[pos] + "_about", this.getRequestOptions(""))
-      .map((response:Response)=>response.json())
-      .subscribe((data:any)=> {
-          this._endpointUrl=RestLocatorService.ENDPOINT_URLS[pos];
-          this._apiVersion=data.version.major+data.version.minor/10;
-          this.isLocating=false;
-          this.themesUrl=data.themesUrl;
-          console.log("API version "+this.apiVersion+" "+this._endpointUrl);
-          observer.next(null);
-          observer.complete();
-          return;
-        },
-        (error:any)=>{
-          if(error.status==RestConstants.HTTP_UNAUTHORIZED){
-            this._endpointUrl=RestLocatorService.ENDPOINT_URLS[pos];
-            this.isLocating=false;
-            observer.next(null);
-            observer.complete();
-            return;
-          }
-          this.testApi(pos+1,observer);
+    private testEndpoint(url:string,local=true,observer:Observer<void>){
+        this.http.get(url+"_about", this.getRequestOptions(""))
+            .map((response:Response)=>response.json())
+            .subscribe((data:any)=> {
+                    this._endpointUrl=url;
+                    this._apiVersion=data.version.major+data.version.minor/10;
+                    this.isLocating=false;
+                    this.themesUrl=data.themesUrl;
+                    console.log("API version "+this.apiVersion+" "+this._endpointUrl);
+                    observer.next(null);
+                    observer.complete();
+                    return;
+                },
+                (error:any)=>{
+                    if(error.status==RestConstants.HTTP_UNAUTHORIZED){
+                        this._endpointUrl=url;
+                        this.isLocating=false;
+                        observer.next(null);
+                        observer.complete();
+                        return;
+                    }
+                    if(local==true){
+                      this.testApi(false,observer);
+                    }
+                    else{
+                      console.error("Could not contact rest api at location "+url);
+                    }
+                });
+    }
+    private testApi(local=true,observer : Observer<void>) : void{
+      if(local) {
+          let url = "_rest/";
+          this.testEndpoint(url,true,observer);
+      }
+      else{
+        this.http.get("assets/endpoint.txt").map(response => response.text()).subscribe((data:any)=>{
+          this.testEndpoint(data,false,observer);
+        },(error:any)=>{
+          console.error("Could not contact locale rest endpoint and no url was found. If in develop mode, please create a file at assets/endpoint.txt and enter the url to your rest api");
         });
+      }
   }
   public locateApi() : Observable<void> {
     if(this.isLocating){
@@ -187,7 +194,7 @@ export class RestLocatorService {
     }
       console.log("locate api generic");
     return new Observable<void>((observer: Observer<void>) => {
-      this.testApi(0,observer);
+      this.testApi(true,observer);
     });
   }
 
