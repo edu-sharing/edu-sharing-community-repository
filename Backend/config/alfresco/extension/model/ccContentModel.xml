@@ -352,6 +352,10 @@
 		           <tokenised>false</tokenised>
 		       </index>
             </property>
+            <!-- like active, locked... -->
+            <property name="cm:espersonstatus">
+            	<type>d:text</type>
+            </property>
             
          </properties>
          

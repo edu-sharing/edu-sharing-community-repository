@@ -65,6 +65,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_AUTHOR_FREETEXT,
 			CCConstants.CCM_PROP_CHILDOBJECT_ORDER,
 			CCConstants.CCM_PROP_LINKTYPE,
+			CCConstants.CCM_PROP_TOOL_INSTANCE_KEY,
+			CCConstants.CCM_PROP_TOOL_INSTANCE_SECRET,
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,

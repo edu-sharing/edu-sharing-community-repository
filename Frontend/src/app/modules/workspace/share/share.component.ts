@@ -290,7 +290,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
         this.onClose.emit(permissions);
         return;
       }
-      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiActive && this.publishActive).subscribe(() => {
+      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.doiActive && this.publishActive).subscribe(() => {
           this.onLoading.emit(false);
           this.onClose.emit(permissions);
           this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
@@ -433,6 +433,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
       let perm=RestHelper.getAllAuthoritiesPermission();
       perm.permissions=[RestConstants.PERMISSION_CONSUMER];
       this.permissions.push(perm);
+      if(this.doiPermission){
+        this.doiActive=true;
+      }
     }
     else{
       let i=this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE);

@@ -255,14 +255,20 @@ export class WorkspaceManagementDialogsComponent  {
  public uploadFile(event:any){
    this.onUploadFileSelected.emit(event);
  }
-  private createUrlLink(link : string){
+  private createUrlLink(link : any){
     let prop:any={};
-    link=UIHelper.addHttpIfRequired(link);
-    prop[RestConstants.CCM_PROP_IO_WWWURL]=[link];
+    let aspects:string[]=[];
+    let url=UIHelper.addHttpIfRequired(link.link);
+    prop[RestConstants.CCM_PROP_IO_WWWURL]=[url];
+    if(link.lti){
+        aspects.push(RestConstants.CCM_ASPECT_TOOL_INSTANCE_LINK);
+        prop[RestConstants.CCM_PROP_TOOL_INSTANCE_KEY]=[link.consumerKey];
+        prop[RestConstants.CCM_PROP_TOOL_INSTANCE_SECRET]=[link.sharedSecret];
+    }
     prop[RestConstants.CCM_PROP_LINKTYPE]=[RestConstants.LINKTYPE_USER_GENERATED];
     this.closeUploadSelect();
     this.globalProgress=true;
-    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,[],prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,aspects,prop,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
       (data:NodeWrapper)=>{
         this.globalProgress=false;
         this.nodeDeleteOnCancel=true;
