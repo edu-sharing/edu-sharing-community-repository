@@ -344,7 +344,8 @@
   "LICENSE_AGREEMENT":{
     "TITLE":"Nutzungsbedingungen",
     "CHECKBOX":"Ich habe die oben genannten Bedingungen gelesen und akzeptiere diese",
-    "ACCEPT":"Akzeptieren & Fortfahren"
+    "ACCEPT":"Akzeptieren & Fortfahren",
+    "DECLINE":"Ablehnen"
   },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",

@@ -31,11 +31,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public String createOrganization(String orgName, String groupDisplayName) throws Throwable {
-		return this.createOrganization(orgName, groupDisplayName, null);
+		return this.createOrganization(orgName, groupDisplayName, null, null);
 	}
-	
+
 	@Override
-	public String createOrganization(String orgName, String groupDisplayName, String metadataSet) throws Throwable {
+	public String createOrganization(String orgName, String groupDisplayName, String metadataSet, String scope) throws Throwable {
 			return (String)baseClient.doInTransaction(new RetryingTransactionCallback<String>() {
 
 				@Override
@@ -45,14 +45,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 						throw new AccessDeniedException(currentUser);
 					}
 					
-					return eduOrganisationService.createOrganization(orgName, groupDisplayName, metadataSet);
+					return eduOrganisationService.createOrganization(orgName, groupDisplayName, metadataSet, scope);
 				}
 			});							
 	}
-	
+
 	@Override
 	public Map<QName, Serializable> getOrganisation(String orgName) {
 		return eduOrganisationService.getOrganisation(orgName);
 	}
-	
+
 }

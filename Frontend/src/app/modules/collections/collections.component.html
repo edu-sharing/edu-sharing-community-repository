@@ -144,7 +144,7 @@
                 ></listTable>
 
                 <!-- NO CONTENT NOTICE -->
-                <div *ngIf="collectionContent.references.length==0" class="section-headline collection-nocontent-container">
+                <div *ngIf="collectionContent.references.length + collectionContent.collections.length == 0" class="section-headline collection-nocontent-container">
                     <div class="collection-nocontent-big">
                         {{ 'collections_noContentAvailable' | translate }}
                     </div>
@@ -232,10 +232,9 @@
       {{collectionContent.collection.title}}
     </div>
 
-    <div *ngIf="(collectionContent.collection.childReferencesCount>=collectionContent.collection.childCollectionsCount)" class="collection-new-preview-subline collections-header-texttop">{{collectionContent.collection.childReferencesCount}} {{ 'COLLECTION.INFO_CHILDS_MULTI' | translate }}
+    <div *ngIf="collectionContent.collection.childCollectionsCount" class="collection-new-preview-subline collections-header-texttop">{{collectionContent.collection.childCollectionsCount}} {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
     </div>
-
-    <div *ngIf="(collectionContent.collection.childReferencesCount<collectionContent.collection.childCollectionsCount)" class="collection-new-preview-subline collections-header-texttop">{{collectionContent.collection.childCollectionsCount}} {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
+    <div *ngIf="collectionContent.collection.childReferencesCount" class="collection-new-preview-subline collections-header-texttop">{{collectionContent.collection.childReferencesCount}} {{ 'COLLECTION.INFO_CHILDS_MULTI' | translate }}
     </div>
 
     <div class="collection-new-preview-infoline">

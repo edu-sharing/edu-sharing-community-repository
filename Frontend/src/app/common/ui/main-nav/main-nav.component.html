@@ -18,6 +18,7 @@
   </div>
   <div class="card-action">
     <a class="waves-effect waves-light btn" [class.disabled]="!acceptLicenseAgreement" (keyup.enter)="saveLicenseAgreement()" (click)="saveLicenseAgreement()">{{'LICENSE_AGREEMENT.ACCEPT' | translate }}</a>
+    <a class="waves-effect waves-light btn-flat" (keyup.enter)="logout()" (click)="logout()">{{'LICENSE_AGREEMENT.DECLINE' | translate }}</a>
   </div>
 </div>
 <div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
