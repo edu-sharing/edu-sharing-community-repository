@@ -1660,4 +1660,8 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
+	
+	public void setOwner(String nodeId, String username) {
+		nodeService.setOwner(nodeId, username);
+	}
 }
