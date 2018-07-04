@@ -7,6 +7,7 @@ import {ActivatedRoute} from "@angular/router";
 import {Injectable} from "@angular/core";
 import {subscribeOn} from "rxjs/operator/subscribeOn";
 import {CordovaService} from '../../services/cordova.service';
+import {environment} from "../../../../environments/environment";
 
 @Injectable()
 export class RestLocatorService {
@@ -157,15 +158,21 @@ export class RestLocatorService {
     }
     private testApi(local=true,observer : Observer<void>) : void{
       if(local) {
-          let url = "_rest/";
+          let url = "rest/";
           this.testEndpoint(url,true,observer);
       }
       else{
-        this.http.get("assets/endpoint.txt").map(response => response.text()).subscribe((data:any)=>{
-          this.testEndpoint(data,false,observer);
-        },(error:any)=>{
-          console.error("Could not contact locale rest endpoint and no url was found. If in develop mode, please create a file at assets/endpoint.txt and enter the url to your rest api");
-        });
+          if(environment.production){
+              console.error("Could not contact rest api. There is probably an issue with the backend");
+              return;
+          }
+          else {
+              this.http.get("assets/endpoint.txt").map(response => response.text()).subscribe((data: any) => {
+                  this.testEndpoint(data, false, observer);
+              }, (error: any) => {
+                  console.error("Could not contact locale rest endpoint and no url was found. Please create a file at assets/endpoint.txt and enter the url to your rest api");
+              });
+          }
       }
   }
   public locateApi() : Observable<void> {
