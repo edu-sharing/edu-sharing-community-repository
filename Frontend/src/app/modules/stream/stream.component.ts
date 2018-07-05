@@ -174,7 +174,7 @@ export class StreamComponent {
       if (params.mode === 'seen') {
         this.menuOptions(params.mode);
       }
-      else {
+      if (params.mode !== 'new' && params.mode !== 'seen') {
         this.menuOptions('new');
       }
     });
@@ -248,19 +248,20 @@ export class StreamComponent {
   menuOptions(option: any) {
     this.menuOption = option;
     if (option === 'new') {
-      this.router.navigate(["./"],{queryParams:{mode:this.menuOption},relativeTo:this.route})
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.actionOptions[0] = this.moveUpOption;
       this.actionOptions[1] = this.collectionOption;
     } else {
-      this.router.navigate(["./"],{queryParams:{mode:this.menuOption},relativeTo:this.route})
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.READ);
       this.actionOptions[0] = this.collectionOption;
       this.actionOptions[1] = this.removeOption;
     }
+  }
 
+  goToOption(option: any) {
+    this.router.navigate(["./"],{queryParams:{mode:option},relativeTo:this.route})
   }
 
   updateDataFromJSON(streamStatus: any) {
@@ -269,10 +270,8 @@ export class StreamComponent {
       let openStreams: any[];
       let progressStreams: any[];
       this.getSimpleJSON(STREAM_STATUS.OPEN, true).subscribe(data => {
-        console.log("openstreams: ", data);
         openStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
         this.getSimpleJSON(STREAM_STATUS.PROGRESS, true).subscribe(data => {
-          console.log("progresstreams: ", data);
           progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
           this.streams = progressStreams.concat(openStreams);
           this.imagesToLoad = this.streams.length;
