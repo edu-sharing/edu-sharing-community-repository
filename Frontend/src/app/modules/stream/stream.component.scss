@@ -82,21 +82,26 @@
 }
 
 .choose-menu{
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: 1.0rem;
+    padding-right: 2.5rem;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;   
     cursor: pointer;
     max-width: 200px;
+    line-height: 1.8;
+    position: relative;
 }
 
 .m-inactive{
     border-left: 4px solid #f6f6f6;
+    color: #888;
 }
 
 .m-active{
     border-left: 4px solid #48708e;
     background-color: white;
+    color: #48708e;
+    font-weight: bold;
 }
 
 .margin-show{
@@ -108,7 +113,12 @@
     float: left;
 }
 
-
+.menu-icon-text{
+    display: inline-block;
+    position: relative;
+    left: 10px;
+    bottom: 3px;
+}
 
 .stream-box{
     background-color: white;
@@ -188,6 +198,12 @@
     position: absolute;
     bottom: 10px;
     right: 16px;
+}
+
+.menuic{
+    font-size: 18px;
+    line-height: 1.8;
+    position: relative;
 }
 
 .stream-box-footer{
