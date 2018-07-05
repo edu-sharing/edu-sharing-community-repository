@@ -801,10 +801,11 @@ export class WorkspaceMainComponent implements EventListener{
             let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,this.connector,(node:Node)=>this.addToCollection(node));
             if (collection && !this.isSafe)
                 options.push(collection);
+            let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,this.connector,(node:Node)=>this.addToStream(node));
+            if (stream && !this.isSafe)
+                options.push(stream);
         }
-        let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,this.connector,(node:Node)=>this.addToStream(node));
-        if (stream && !this.isSafe)
-            options.push(stream);
+
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
             let template = ActionbarHelper.createOptionIfPossible('NODE_TEMPLATE',nodes,this.connector,(node:Node)=>this.nodeTemplate(node));

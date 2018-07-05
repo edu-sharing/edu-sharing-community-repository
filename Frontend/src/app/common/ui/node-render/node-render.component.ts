@@ -74,6 +74,7 @@ export class NodeRenderComponent implements EventListener{
   public nodeShare: Node;
   public nodeShareLink: Node;
   public nodeWorkflow: Node;
+  public addNodesStream: Node[];
   public nodeDelete: Node[];
   public addToCollection: Node[];
   public nodeReport: Node;
@@ -449,9 +450,14 @@ export class NodeRenderComponent implements EventListener{
         if (shareLink && !this.isSafe)
             this.options.push(shareLink);
         let workflow = ActionbarHelper.createOptionIfPossible('WORKFLOW',[this._node],this.connector,(node:Node)=>this.nodeWorkflow=this._node);
-        if(workflow){
+        if(workflow) {
             this.options.push(workflow);
         }
+        let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',[this._node],this.connector,(node:Node)=>this.addNodesStream=[this._node]);
+        if(stream){
+            this.options.push(stream);
+        }
+
       if (this.config.instant("nodeReport", false)) {
         let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
         this.options.push(nodeReport);
