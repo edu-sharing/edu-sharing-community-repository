@@ -268,11 +268,13 @@ export class StreamComponent {
     if (streamStatus == STREAM_STATUS.OPEN) {
       let openStreams: any[];
       let progressStreams: any[];
-      this.getSimpleJSON(STREAM_STATUS.OPEN).subscribe(data => {
+      this.getSimpleJSON(STREAM_STATUS.OPEN, true).subscribe(data => {
+        console.log("openstreams: ", data);
         openStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
-        this.getSimpleJSON(STREAM_STATUS.PROGRESS).subscribe(data => {
+        this.getSimpleJSON(STREAM_STATUS.PROGRESS, true).subscribe(data => {
+          console.log("progresstreams: ", data);
           progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
-          this.streams = progressStreams.concat(openStreams.reverse());
+          this.streams = progressStreams.concat(openStreams);
           this.imagesToLoad = this.streams.length;
         });
       }, error => console.log(error));
@@ -308,8 +310,8 @@ export class StreamComponent {
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
 
-  public getSimpleJSON(streamStatus: any): Observable<any> {
-    let request:any={offset: 0, sortBy:["priority","created"],sortAscending:[false,false]};
+  public getSimpleJSON(streamStatus: any, sortAscendingCreated: boolean = false): Observable<any> {
+    let request:any={offset: 0, sortBy:["priority","created"],sortAscending:[false,sortAscendingCreated]};
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
 
