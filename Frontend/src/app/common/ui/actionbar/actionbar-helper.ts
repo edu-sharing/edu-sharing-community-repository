@@ -58,7 +58,7 @@ export class ActionbarHelper{
       }
     }
     if(type=='ADD_TO_STREAM') {
-      if (nodes && nodes.length && NodeHelper.allFiles(nodes)) {
+      if (NodeHelper.allFiles(nodes)) {
         option = new OptionItem("WORKSPACE.OPTION.STREAM", "event", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
         option.enabledCallback = (node: Node) => {

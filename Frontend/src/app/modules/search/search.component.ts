@@ -633,11 +633,11 @@ export class SearchComponent {
           if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
               options.push(collection);
       }
-
-      let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,this.connector,(node:Node)=>this.addToStream(node));
-      if (stream)
-          options.push(stream);
-
+      if(fromList || nodes && nodes.length) {
+          let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM', nodes, this.connector, (node: Node) => this.addToStream(node));
+          if (stream)
+              options.push(stream);
+      }
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));
       });
