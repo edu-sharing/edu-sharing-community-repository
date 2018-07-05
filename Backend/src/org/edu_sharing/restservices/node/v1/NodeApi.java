@@ -1920,14 +1920,5 @@ public class NodeApi  {
 	    	}
 
 	    }
-	    
-		@OPTIONS    
-		@Path("/nodes/{repository}/{node}/permissions")
-	    @ApiOperation(hidden = true, value = "")
-
-		public Response options13() {
-			
-			return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, @POST").build();
-		}
 }
 
