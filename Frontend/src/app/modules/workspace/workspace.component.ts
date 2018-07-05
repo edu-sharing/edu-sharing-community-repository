@@ -562,6 +562,11 @@ export class WorkspaceMainComponent implements EventListener{
             }
         )
     }
+    private afterUpload(node:Node[]){
+        if(this.reurl){
+            NodeHelper.addNodeToLms(this.router,this.storage,node[0],this.reurl);
+        }
+    }
     private uploadFiles(files : FileList){
         this.onFileDrop(files);
     }
@@ -843,9 +848,11 @@ export class WorkspaceMainComponent implements EventListener{
 
 
         }
-        let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,(node: Node) => this.downloadNode(node));
-        if(download)
-            options.push(download);
+        if(fromList || nodes && nodes.length) {
+            let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes, this.connector, (node: Node) => this.downloadNode(node));
+            if (download)
+                options.push(download);
+        }
         if (nodes && nodes.length) {
             let cut=new OptionItem("WORKSPACE.OPTION.CUT", "content_cut", (node: Node) => this.cutCopyNode(node, false));
             cut.isSeperate = true;

@@ -302,6 +302,8 @@ public class MetadataReaderV2 {
 					widget.setDefaultvalue(value); 
 				if(name.equals("format"))
 					widget.setFormat(value);
+				if(name.equals("link"))
+					widget.setLink(value);
 				if(name.equals("type"))
 					widget.setType(value);
 				if(name.equals("condition")) {

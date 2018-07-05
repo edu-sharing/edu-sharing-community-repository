@@ -74,6 +74,16 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	
 	private Condition condition;
+	private String link;
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
 	public String getSuggestionQuery() {
 		return suggestionQuery;
 	}

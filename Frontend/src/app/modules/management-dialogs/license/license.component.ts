@@ -75,7 +75,8 @@ export class WorkspaceLicenseComponent  {
                      "uk","hu"];
   public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
-  public _nodes:Node[];
+  count: number;
+  _nodes:Node[];
   private permissions: LocalPermissionsResult;
   public loading=true;
   private allowedLicenses: string[];
@@ -97,30 +98,43 @@ export class WorkspaceLicenseComponent  {
     this.readLicense();
     this.loading=false;
   }
-  @Input() set nodes(nodes : Node[]){
-      this._nodes=nodes;
-      this.loadConfig();
-      this.checkAllowRelease();
-      this.readLicense();
-      this.loading=false;
-      this.releaseMulti=null;
-      let i=0;
-      for(let node of this._nodes) {
-        i++;
-        this.nodeApi.getNodePermissions(node.ref.id).subscribe((permissions: NodePermissions) => {
-          this.permissions = permissions.permissions.localPermissions;
-          this.readPermissions(i==this._nodes.length);
-            if(this._nodes.length==1) {
-                this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions);
-                this.doiDisabled = this.doiActive;
-            }
-        });
-      }
+  public loadNodes(nodes:Node[],callback:Function,pos=0){
+    if(pos==nodes.length){
+      callback();
+      return;
     }
-
+    this.nodeApi.getNodeMetadata(nodes[pos].ref.id,[RestConstants.ALL]).subscribe((node)=>{
+      this._nodes.push(node.node);
+      this.loadNodes(nodes,callback,pos+1);
+    },(error)=>{
+      this.toast.error(error);
+      this.cancel();
+    });
+  }
+  @Input() set nodes(nodes : Node[]){
+      this.loadNodes(nodes,()=>{
+          this.loadConfig();
+          this.checkAllowRelease();
+          this.readLicense();
+          this.loading=false;
+          this.releaseMulti=null;
+          let i=0;
+          for(let node of this._nodes) {
+              i++;
+              this.nodeApi.getNodePermissions(node.ref.id).subscribe((permissions: NodePermissions) => {
+                  this.permissions = permissions.permissions.localPermissions;
+                  this.readPermissions(i==this._nodes.length);
+                  if(this._nodes.length==1) {
+                      this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions);
+                      this.doiDisabled = this.doiActive;
+                  }
+              });
+          }
+      });
+  }
     private loadConfig() {
-        this.config.get("allowedLicenses").subscribe((data:string[])=>{
-            if(!data) {
+        this.config.get("allowedLicenses").subscribe((data: string[]) => {
+            if (!data) {
                 this.licenseMainTypes = this.ALL_LICENSE_TYPES;
                 this.allowedLicenses = null;
             }
@@ -146,11 +160,12 @@ export class WorkspaceLicenseComponent  {
                     }
                 }
             }
-    });
-  }
+        });
+    }
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
   @Output() onDone=new EventEmitter();
+  @Output() openContributor=new EventEmitter();
   constructor(
     private connector : RestConnectorService,
     private translate : TranslateService,
@@ -163,7 +178,7 @@ export class WorkspaceLicenseComponent  {
     this.onCancel.emit();
   }
 
-  public saveLicense(){
+  public saveLicense(callback:Function=null){
     if(this._properties){
         this.onDone.emit(this.getProperties(this._properties));
         return;
@@ -178,6 +193,11 @@ export class WorkspaceLicenseComponent  {
     let i=0;
     this.onLoading.emit(true);
     for(let node of this._nodes) {
+      let authors=this._nodes[i].properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];
+      if(!authors)
+          authors=[];
+      authors[0]=this.authorVCard.toVCardString();
+      prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=authors;
       i++;
       this.nodeApi.editNodeMetadata(node.ref.id, prop).subscribe(() => {
         this.savePermissions(node);
@@ -185,6 +205,8 @@ export class WorkspaceLicenseComponent  {
           this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
           this.onLoading.emit(false);
           this.onDone.emit(prop);
+          if(callback)
+            callback();
         }
       }, (error: any) => {
         this.onLoading.emit(false);
@@ -192,7 +214,7 @@ export class WorkspaceLicenseComponent  {
       });
     }
   }
-  private getValueForAll(prop:string,fallbackNotIdentical="",fallbackIsEmpty=fallbackNotIdentical){
+  private getValueForAll(prop:string,fallbackNotIdentical:any="",fallbackIsEmpty=fallbackNotIdentical,asArray=false){
     let found=null;
     let foundAny=false;
     if(this._properties){
@@ -200,7 +222,7 @@ export class WorkspaceLicenseComponent  {
     }
     for(let node of this._nodes){
       let v=node.properties[prop];
-      let value=v ? v[0] : fallbackIsEmpty;
+      let value=v ? asArray ? v : v[0] : fallbackIsEmpty;
       if(foundAny && found!=value)
         return fallbackNotIdentical;
       found=value;
@@ -344,7 +366,7 @@ export class WorkspaceLicenseComponent  {
       this.permissions.permissions.push(perm);
     }
     let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.permissions.inherited);
-    this.nodeApi.setNodePermissions(node.ref.id,permissions,false,"",false,this.doiActive && this.release).subscribe(()=>{
+    this.nodeApi.setNodePermissions(node.ref.id,permissions,false,"",false,this.doiPermission && this.doiActive && this.release).subscribe(()=>{
     },(error:any)=>this.toast.error(error));
   }
   private readPermissions(last:boolean) {
@@ -426,12 +448,25 @@ export class WorkspaceLicenseComponent  {
             if(this.ccLocale)
                 prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]=[this.ccLocale];
         }
-        prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=[this.authorVCard.toVCardString()];
         prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
 
         if(this.type=='CUSTOM') {
             prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
         }
         return prop;
+    }
+
+    openContributorDialog() {
+        let nodes=this._nodes;
+        this.saveLicense(()=>{
+          console.log("open contr");
+            this.openContributor.emit(nodes);
+        });
+    }
+
+    changeRelease(release:boolean) {
+        if(release){
+          this.doiActive=true;
+        }
     }
 }

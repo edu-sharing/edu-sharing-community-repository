@@ -357,47 +357,54 @@ export class CollectionsMainComponent {
         this.optionsMaterials=this.getOptions(nodes,false);
     }
     getOptions(nodes:Node[]=null,fromList:boolean) {
-      if(fromList && (!nodes || !nodes.length)){
-        nodes=[new Node()];
+        if (fromList && (!nodes || !nodes.length)) {
+            //nodes = [new Node()];
+        }
+        let options: OptionItem[] = [];
+        if (!fromList) {
+            if (nodes && nodes.length) {
+                if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
+                    let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
+                    if (collection)
+                        options.push(collection);
+                }
+                if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
+                    let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE', 'remove_circle_outline', (node: Node) => {
+                        this.deleteMultiple(ActionbarHelper.getNodes(nodes, node));
+                    });
+                    if (remove)
+                        options.push(remove);
+                }
+            }
+        }
+        if (fromList) {
+            let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector,
+                (node: Node) => this.addToOtherCollection(node));
+            if (collection) {
+                collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
+                options.push(collection);
+            }
+        }
+      if (fromList || nodes && nodes.length) {
+
+            let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes, this.connector,
+                (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelper.getNodes(nodes, node)));
+            if (download)
+                options.push(download);
       }
-      let options:OptionItem[]=[];
-      if(!fromList){
-          if(nodes && nodes.length) {
-              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
-                  let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
-                  options.push(collection);
-              }
-              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
-                  let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE','remove_circle_outline',(node: Node)=>{
-                      this.deleteMultiple(ActionbarHelper.getNodes(nodes,node));
-                  });
-                  options.push(remove);
-              }
-          }
-      }
-      if(fromList) {
-          let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector,
-              (node: Node) => this.addToOtherCollection(node));
-          if (collection) {
-              collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
-              options.push(collection);
-          }
-      }
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,
-        (node:Node)=>NodeHelper.downloadNodes(this.toast,this.connector,ActionbarHelper.getNodes(nodes,node)));
-      if (download)
-        options.push(download);
       if(fromList) {
           let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
           remove.showCallback = (node: Node) => {
               return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
           };
-          options.push(remove);
+          if(remove)
+            options.push(remove);
       }
       if(fromList || nodes && nodes.length==1) {
           if (this.config.instant("nodeReport", false)) {
               let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes, node)[0]);
-              options.push(report);
+              if(report)
+                options.push(report);
           }
       }
 

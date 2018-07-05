@@ -352,6 +352,11 @@
 		           <tokenised>false</tokenised>
 		       </index>
             </property>
+            <!-- like active, locked... -->
+            <property name="cm:espersonstatus">
+            	<type>d:text</type>
+            </property>
+
             <!-- edu-sharing customization description/about the user -->
             <property name="cm:personabout">
                <type>d:text</type>

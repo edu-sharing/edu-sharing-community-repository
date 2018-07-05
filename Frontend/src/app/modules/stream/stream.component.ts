@@ -309,7 +309,7 @@ export class StreamComponent {
   }
 
   public getSimpleJSON(streamStatus: any): Observable<any> {
-    let request:any={offset: 0, sortProperties:["priority","created"],sortAscending:[false,false]};
+    let request:any={offset: 0, sortBy:["priority","created"],sortAscending:[false,false]};
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
 

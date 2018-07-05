@@ -7,6 +7,10 @@
     "ERROR_DELETE": "An error occurred while deleting the collection.",
     "ENTER_NAME" : "Please enter a name for this collection.",
     "NO_EDITORIAL_GROUPS":"No editorial groups found",
+    "ORDER_ELEMENTS":"Would you like to change the order of the objects manually?",
+    "ORDER_ELEMENTS_INFO":"Viewers of the collection see the contained materials in a certain order.",
+    "ORDER_SAVED":"The object order has been changed.",
+    "CUSTOM_ORDER":"change object-order",
     "DETAIL": {
       "REMOVE": "Remove",
       "ADD_TO_OTHER": "Add to collection"
@@ -16,7 +20,7 @@
       "METADATA":"Additional information",
       "PERMISSIONS":"Share",
       "SETTINGS":"Settings",
-      "EDITORIAL_GROUPS":"Responsible Redactional groups",
+      "EDITORIAL_GROUPS":"Editors groups in charge",
       "DONE":"Done"
     },
     "TAB":{
@@ -36,7 +40,7 @@
     "CREATE_TYPE":"Create new collection...",
     "CREATE":{
       "PRIVATE":"private collection",
-      "PRIVATE_DESCRIPTION":"Nobody but you can see the collection. You can always share or publish the collection to others later.",
+      "PRIVATE_DESCRIPTION":"Nobody but you can see the collection. You can always share or publish the collection with others later.",
       "SHARED":"collaborative collection",
       "SHARED_DESCRIPTION":"Collect together with friends and colleagues. You can determine who is allowed to do what with the collection.",
       "PUBLIC":"public collection",
@@ -57,10 +61,10 @@
     "ADDED_TO_COLLECTION": "Element was saved in additional collection",
     "TO_SEARCH":"view search",
     "EDIT_PERMISSIONS":"Set permissions",
-    "EDIT_PERMISSIONS_SUBTEXT":"Share collection to others",
+    "EDIT_PERMISSIONS_SUBTEXT":"Share collection with others",
     "EDIT_PERMISSIONS_DESCRIPTION":"Invite persons or groups and collect together.",
     "PERMISSIONS_STATUS_MY":"This collection is currently only visible for you",
-    "PERMISSIONS_STATUS_CUSTOM":"This collection is shared to invited members",
+    "PERMISSIONS_STATUS_CUSTOM":"This collection is shared with invited members",
     "PERMISSIONS_STATUS_EDU_ALL":"This collection is public",
     "OPEN_MISSING" : "Open",
     "ORIGINAL_MISSING" : "The original has been deleted",
