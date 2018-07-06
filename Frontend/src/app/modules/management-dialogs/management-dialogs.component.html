@@ -9,6 +9,7 @@
 <workspace-share *ngIf="nodeShare"
                  [nodeId]="nodeShare.ref.id"
                  [sendMessages]="true"
+                 (onShareLink)="nodeShareLink=nodeShare"
                  (onLoading)="globalProgress=$event"
                  (onClose)="closeShare()"
 ></workspace-share>
