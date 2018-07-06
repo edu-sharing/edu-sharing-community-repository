@@ -295,7 +295,7 @@ public class NodeDao {
 	private final HashMap<String, Object> nodeProps;
 	private HashMap<String, HashMap<String, Object>> nodeHistory;
 
-	private final HashMap<String, Boolean> hasPermissions;
+	private HashMap<String, Boolean> hasPermissions;
 
 	private final String type;
 	private final List<String> aspects;
@@ -389,8 +389,7 @@ public class NodeDao {
 				this.nodeProps = nodeRef.getProperties();
 			}
 	
-			this.hasPermissions = new PermissionServiceHelper(permissionService).hasAllPermissions(storeProtocol, storeId, nodeId);
-	
+			refreshPermissions();
 			
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
 				this.type = (String) nodeProps.get(CCConstants.NODETYPE);
@@ -410,6 +409,10 @@ public class NodeDao {
 		}
 	}
 	
+	public void refreshPermissions() {
+		this.hasPermissions = new PermissionServiceHelper(permissionService).hasAllPermissions(storeProtocol, storeId, nodeId);
+	}
+
 	private String renameNode(String oldName,int number){
 		String[] split=oldName.split("\\.");
 		int i=split.length-2;

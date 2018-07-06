@@ -113,18 +113,19 @@ public class StreamDao {
 				for(String nodeId : contentEntry.nodeId) {
 					// TODO: Is this correct?
 					// When an item is visible in the stream, allow fully access to the user who has access to the stream entity
-					AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-
-						@Override
-						public Void doWork() throws Exception {
-							try {
-								nodes.add(NodeDao.getNode(repoDao, nodeId).asNode());
-							}catch(Throwable t) {
-								t.printStackTrace();
-							}
-							return null;
+					NodeDao nodeDao=AuthenticationUtil.runAsSystem(()-> {
+						try {
+							return NodeDao.getNode(repoDao, nodeId);
+						}catch(Throwable t) {
+							t.printStackTrace();
 						}
+						return null;
 					});
+					if(nodeDao==null) {
+						continue;
+					}
+					nodeDao.refreshPermissions();
+					nodes.add(nodeDao.asNode());
 				}
 				entry.setNodes(nodes);
 				entry.setId(contentEntry.id);
