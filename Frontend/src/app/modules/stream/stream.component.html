@@ -63,7 +63,7 @@
                 </div>
             </div>
             
-                <div class="stream-box-desc"><span *ngIf="strm.properties['add_to_stream_description']">{{ strm.properties['add_to_stream_description'] }}</span> <span *ngIf="!strm.properties['add_to_stream_description']">{{ 'STREAM.OBJECT.NODESCRIPTION' | translate }}</span></div>
+                <div class="stream-box-desc"><span *ngIf="strm.properties['add_to_stream_description']">{{ strm.properties['add_to_stream_description'] }}</span></div>
 
                 <div class="stream-box-kompetenzen" > <div class="chip" *ngFor="let keyword of strm.properties['cclom:general_keyword']">{{keyword}}</div> </div>
 
