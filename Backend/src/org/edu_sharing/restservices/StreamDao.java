@@ -124,8 +124,12 @@ public class StreamDao {
 					if(nodeDao==null) {
 						continue;
 					}
+					// load permissions with the current user
 					nodeDao.refreshPermissions();
-					nodes.add(nodeDao.asNode());
+					AuthenticationUtil.runAsSystem(()-> {
+						nodes.add(nodeDao.asNode());
+						return null;
+					});
 				}
 				entry.setNodes(nodes);
 				entry.setId(contentEntry.id);
