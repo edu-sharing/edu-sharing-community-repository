@@ -130,7 +130,7 @@ table, div {
 }
 
 .collection-new-preview-subline {
-  font-size: 120%;
+  //font-size: 120%;
   opacity: 0.85;
 }
 
@@ -194,7 +194,7 @@ table, div {
 }
 
 .card-image-icon-container {
-    height: 200px;
+    height: 210px;
     width: 100%;
     overflow: hidden;
     margin: auto;
@@ -226,13 +226,13 @@ table, div {
 
 
 .collections-edit-button {
-    right: 50px;
+    right: 63px;
 }
 .collections-pin-button {
   right: 90px;
 }
 .collections-delete-button {
-    right: 10px;
+    right: 17px;
 }
 .collections-edit-button,
 .collections-pin-button,
@@ -245,14 +245,15 @@ table, div {
 }
 .collections-pin-button,.collections-edit-button,.collections-delete-button{
   position: absolute;
-  width:32px;
-  height:32px;
+  width:40px;
+  height:40px;
   top: 160px;
-  color: #6b6b6b;
+  color: $primary;
   border-radius: 50%;
-  padding: 5px;
+  padding: 9px;
   background-color: #fff;
   cursor: pointer;
+  z-index: 100;
 }
 .section-headline {
   float:left;
