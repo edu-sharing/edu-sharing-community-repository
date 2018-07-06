@@ -14,6 +14,7 @@ export class AutocompleteComponent{
 
   @Input() id: string;
   @Input() placeholder: string;
+  @Input() hintBottom: string;
   @Input() inputMinLength: number = 2;
   @Input() disabled=false;
   /**

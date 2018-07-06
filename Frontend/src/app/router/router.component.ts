@@ -75,6 +75,7 @@ export var ROUTES=[
     { path: '', component: StartupComponent },
     { path: 'app', component: LoginAppComponent },
     { path: 'app/share', component: ShareAppComponent },
+    { path: UIConstants.ROUTER_PREFIX+'sharing', component: ShareAppComponent },
     { path: UIConstants.ROUTER_PREFIX+'test/mds',component: MdsTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'test/rest',component: RestTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node', component: NodeRenderComponent},

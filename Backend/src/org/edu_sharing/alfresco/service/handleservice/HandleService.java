@@ -12,8 +12,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 
-import com.sun.media.jfxmedia.logging.Logger;
-
 import net.handle.api.HSAdapter;
 import net.handle.api.HSAdapterFactory;
 import net.handle.hdllib.AdminRecord;

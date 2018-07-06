@@ -33,3 +33,6 @@ testem.log
 .DS_Store
 Thumbs.db
 docs/
+
+# edu-sharing
+src/assets/endpoint.txt
