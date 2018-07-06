@@ -22,8 +22,6 @@ export class RestLocatorService {
   private isLocating = false;
 
   get endpointUrl(): string {
-    if(this.cordova.isRunningCordova())
-      return this.cordova.endpointUrl;
     return this._endpointUrl;
   }
   get apiVersion(): number {
@@ -104,9 +102,6 @@ export class RestLocatorService {
     else if(this.cordova.oauth!=null){
       headers.append('Authorization', "Bearer " + this.cordova.oauth.access_token);
     }
-    else if(this.cordova.isRunningCordova()){
-      throw new Error("cordova is not ready yet (or has no oauth). Check if your code is calling 'locateApi'!");
-    }
     else{
       headers.append('Authorization',"");
     }
@@ -116,17 +111,6 @@ export class RestLocatorService {
 
     return {headers:headers,withCredentials:true}; // Warn: withCredentials true will ignore a Bearer from OAuth!
   }
-    private testApiCordova(observer : Observer<void>) : void {
-      setTimeout(()=>{
-        if(this.cordova.endpointUrl==null){
-          this.testApiCordova(observer);
-          return;
-        }
-        this.isLocating=false;
-        observer.next(null);
-        observer.complete();
-      },100);
-    }
     private testEndpoint(url:string,local=true,observer:Observer<void>){
         this.http.get(url+"_about", this.getRequestOptions(""))
             .map((response:Response)=>response.json())
@@ -193,13 +177,6 @@ export class RestLocatorService {
       });
     }
     this.isLocating=true;
-    if(this.cordova.isRunningCordova()){
-      console.log("locate via cordova");
-      return new Observable<void>((observer: Observer<void>) => {
-          this.testApiCordova(observer);
-      });
-    }
-      console.log("locate api generic");
     return new Observable<void>((observer: Observer<void>) => {
       this.testApi(true,observer);
     });

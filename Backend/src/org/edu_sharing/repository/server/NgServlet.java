@@ -1,20 +1,19 @@
 package org.edu_sharing.repository.server;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.json.JSONObject;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
 public class NgServlet extends HttpServlet {
 	private static Logger logger = Logger.getLogger(NgServlet.class);
@@ -32,6 +31,10 @@ public class NgServlet extends HttpServlet {
 			URL url = new URL(req.getRequestURL().toString());
 			if(url.getPath().contains("components/render/")){
 				html = addLRMI(html,url);
+			}
+			if(req.getHeader("User-Agent")!=null && req.getHeader("User-Agent").contains("cordova / edu-sharing-app")){
+				html=addToHead("<script type=\"text/javascript\" src=\"assets/cordova/android/cordova.js\"></script>",html);
+				logger.info("cordova app, add cordova.js to header");
 			}
 			resp.setHeader("Content-Type","text/html");
 			resp.getOutputStream().write(html.getBytes("UTF-8"));
