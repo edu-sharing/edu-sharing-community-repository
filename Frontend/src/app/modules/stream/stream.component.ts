@@ -175,7 +175,7 @@ export class StreamComponent {
         this.menuOptions(params.mode);
       }
       if (params.mode !== 'new' && params.mode !== 'seen') {
-        this.menuOptions('new');
+        this.goToOption('new');
       }
     });
   }
