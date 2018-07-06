@@ -33,9 +33,6 @@
     width: 500px;
     box-sizing: border-box;
   }
-  .user {
-    width: 300px;
-  }
   @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
     .topBarSearch form {
       margin-left: -200px;
