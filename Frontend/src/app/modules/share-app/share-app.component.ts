@@ -25,6 +25,7 @@ import {RestHelper} from "../../common/rest/rest-helper";
 import {CordovaService} from "../../common/services/cordova.service";
 import {DateHelper} from "../../common/ui/DateHelper";
 import {RestConnectorsService} from "../../common/rest/services/rest-connectors.service";
+import {FrameEventsService} from "../../common/services/frame-events.service";
 @Component({
   selector: 'share-app',
   templateUrl: 'share-app.component.html',
@@ -54,6 +55,7 @@ export class ShareAppComponent {
               private sanitizer: DomSanitizer,
               private node: RestNodeService,
               private connectors: RestConnectorsService,
+              private events: FrameEventsService,
               private utilities: RestUtilitiesService,
               private translate: TranslateService,
               private collectionApi: RestCollectionService,
@@ -63,20 +65,16 @@ export class ShareAppComponent {
               private connector: RestConnectorService) {
       this.columns.push(new ListItem("COLLECTION", 'title'));
       this.columns.push(new ListItem("COLLECTION", 'info'));
-      this.columns.push(new ListItem("COLLECTION",'scope'));
-      this.cordova.subscribeServiceReady().subscribe(()=> {
-
-          this.init();
-          // should be handled via cordova service now
-          /*if (this.cordova.hasValidConfig()) {
+      this.columns.push(new ListItem("COLLECTION", 'scope'));
+      if (this.cordova.isRunningCordova()) {
+          this.cordova.subscribeServiceReady().subscribe(() => {
               this.init();
-          }
-          else{
-              console.log("no cordova config, go to start");
-              this.router.navigate(['']);
-          }
-          */
-      });
+          });
+      }
+      else{
+          this.init();
+      }
+
   }
     getType(){
       if(this.isLink())
@@ -85,7 +83,9 @@ export class ShareAppComponent {
           return "file-txt";
       if(this.mimetype=="application/pdf")
           return "file-pdf";
-      return "file-"+this.mimetype.split("/")[0];
+      if(this.mimetype)
+          return "file-"+this.mimetype.split("/")[0];
+      return "file";
     }
     saveInternal(callback:Function){
         this.globalProgress=true;
@@ -109,17 +109,23 @@ export class ShareAppComponent {
         }
     }
     saveFile(){
-        this.saveInternal(()=>this.goToInbox());
+        this.saveInternal((node:Node)=>{
+            this.goToInbox();
+            this.events.broadcastEvent(FrameEventsService.EVENT_SHARED,node);
+        });
     }
     private saveToCollection(collection:Node){
       this.saveInternal((node:Node)=>{
           this.collectionApi.addNodeToCollection(collection.ref.id,node.ref.id).subscribe(()=>{
               UIHelper.goToCollection(this.router,collection,{replaceUrl:true});
+              this.events.broadcastEvent(FrameEventsService.EVENT_SHARED,node);
           });
       });
     }
     private isLink() {
         if(this.hasData())
+            return false;
+        if(!this.uri)
             return false;
         if(this.uri.startsWith("content://") || this.uri.startsWith("file://"))
             return false;
@@ -130,6 +136,8 @@ export class ShareAppComponent {
         if(this.hasData())
             return false;
         if(this.isLink())
+            return false;
+        if(!this.uri)
             return false;
         return !this.uri.startsWith("content://") && !this.uri.startsWith("file://");
     }
@@ -180,7 +188,7 @@ export class ShareAppComponent {
                     })
                 }
                 else{
-                    if(this.cordova.getLastIntent().stream){
+                    if(this.cordova.isRunningCordova() && this.cordova.getLastIntent().stream){
                         let base64=this.cordova.getLastIntent().stream;
                         if(this.mimetype.startsWith("image/")) {
                             this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl("data:" + this.mimetype + ";base64," + base64);
@@ -236,7 +244,7 @@ export class ShareAppComponent {
     }
 
     private hasData() {
-        return this.cordova.getLastIntent() && this.cordova.getLastIntent().stream!=null;
+        return this.cordova.isRunningCordova() && this.cordova.getLastIntent() && this.cordova.getLastIntent().stream!=null;
     }
 
     private prepareTextSnippet(connectors : Connector[]) {
