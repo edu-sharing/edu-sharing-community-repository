@@ -5,7 +5,7 @@ import {UIHelper} from "../../common/ui/ui-helper";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {TranslateService} from "@ngx-translate/core";
 import {Title} from "@angular/platform-browser";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {ConfigurationService} from "../../common/services/configuration.service";
@@ -45,7 +45,9 @@ export class ProfilesComponent {
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private title: Title,
+              private connector: RestConnectorService,
               private translate: TranslateService,
+              private router: Router,
               private config: ConfigurationService,
               private storage : SessionStorageService,
               private iamService: RestIamService) {
@@ -59,24 +61,29 @@ export class ProfilesComponent {
   }
   public loadUser(authority:string){
     this.globalProgress=true;
-    this.iamService.getUser(authority).subscribe((profile:IamUser)=>{
-      this.user=profile.person;
-      this.editProfile=this.editProfile && profile.editProfile;
-      let name=new AuthorityNamePipe(this.translate).transform(this.user,null);
-      UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config,{name:name});
-      this.globalProgress=false;
-      this.iamService.getUser().subscribe((profile:IamUser)=>{
-        this.isMe=profile.person.authorityName==this.user.authorityName;
-      });
-    },(error:any)=>{
-      this.globalProgress=false;
-      this.toast.error(null,'PROFILES.LOAD_ERROR');
+    this.connector.isLoggedIn().subscribe((login)=> {
+        this.iamService.getUser(authority).subscribe((profile: IamUser) => {
+            this.user = profile.person;
+            this.editProfile = this.editProfile;// && profile.editProfile;
+            let name = new AuthorityNamePipe(this.translate).transform(this.user, null);
+            UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name: name});
+            this.globalProgress = false;
+            this.iamService.getUser().subscribe((me)=>{
+                this.isMe = profile.person.authorityName == me.person.authorityName;
+                if(this.isMe && login.isGuest){
+                    RestHelper.goToLogin(this.router,this.config);
+                }
+            });
+        }, (error: any) => {
+            this.globalProgress = false;
+            this.toast.error(null, 'PROFILES.LOAD_ERROR');
+        });
     });
   }
   public updateAvatar(event:any){
     if(event.srcElement.files && event.srcElement.files.length){
       this.avatarFile=event.srcElement.files[0];
-      var reader = new FileReader();
+      let reader = new FileReader();
       reader.onload = (e:any) => {
         this.avatarImage=e.target.result;
       }
