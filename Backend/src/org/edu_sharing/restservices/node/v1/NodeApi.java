@@ -1103,7 +1103,7 @@ public class NodeApi  {
 		     properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),url);
 			 return;
 		 }
-		 String title=info.getTitle()+" - "+info.getPage();
+		 String title=info.getTitle();
 		 if(info.getTitle()==null)
 			 title=info.getPage();
     	String[] name = new String[]{title};
