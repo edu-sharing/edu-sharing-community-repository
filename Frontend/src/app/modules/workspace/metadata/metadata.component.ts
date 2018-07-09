@@ -1,9 +1,9 @@
 import {Component, Input, EventEmitter, Output, AfterViewInit} from '@angular/core';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
-  Node, NodeList, NodeWrapper, NodePermissions, NodeVersions, UsageList,
-  Version, LoginResult, IamUser, Permission
-} from "../../../common/rest/data-object";
+    Node, NodeList, NodeWrapper, NodePermissions, NodeVersions, UsageList,
+    Version, LoginResult, IamUser, Permission, Usage, Collection
+} from '../../../common/rest/data-object';
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {NodeHelper} from "../../../common/ui/node-helper";
@@ -38,16 +38,19 @@ export class WorkspaceMetadataComponent{
   private VERSIONS="VERSIONS";
   private tab=this.INFO;
   private permissions : any;
-  private usageCount : number;
+  private usages : Usage[];
+  private usagesCollection : Collection[];
   private nodeObject : Node;
   private versions : Version[];
   private versionsLoading=false;
   /*Chart.js*/
   canvas: any;
   ctx: any;
-  labels = ["LMS-Kursen","Sammlungen","Download"];
-  points = [2,3,6];
-  colors = ['rgba(230, 178, 71, .8)','rgba(151, 91, 93, .8)','rgba(27, 102, 49, .8)'];
+  stats:any= {
+      labels: [],
+      points: [],
+      colors: ['rgba(230, 178, 71, .8)', 'rgba(151, 91, 93, .8)', 'rgba(27, 102, 49, .8)']
+  };
 
   @Input() isAdmin:boolean;
   @Input() set node(node : string){
@@ -76,44 +79,45 @@ export class WorkspaceMetadataComponent{
 
       this.data=this.format(data.node);
       this.loading=false;
-      this.getStats();
-    });
+        this.nodeApi.getNodeVersions(this._node).subscribe((data : NodeVersions)=>{
+            if(currentNode!=this._node)
+                return;
+            this.versions=data.versions.reverse();
+            for(let version of this.versions) {
+                if(version.comment){
+                    if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD || version.comment==RestConstants.COMMENT_NODE_PUBLISHED || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
+                        let parameters = version.comment.split(",");
+                        let editor = "";
+                        if (parameters.length > 1)
+                            editor = this.translate.instant("CONNECTOR." + parameters[1] + ".NAME");
+                        version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor: editor});
+                    }
+                }
+            }
+            let i=0;
+            for(let version of this.versions){
+                if(this.isCurrentVersion(version)){
+                    this.versions.splice(i,1);
+                    this.versions.splice(0,0,version);
+                    break;
+                }
+                i++;
+            }
+            this.versionsLoading=false;
+        });
+        this.iamApi.getUser().subscribe((login:IamUser)=>{
+            this.nodeApi.getNodePermissions(this._node).subscribe((data : NodePermissions) => {
+                this.permissions=this.formatPermissions(login,data);
+            });
+        });
 
-    this.nodeApi.getNodeVersions(this._node).subscribe((data : NodeVersions)=>{
-      if(currentNode!=this._node)
-        return;
-      this.versions=data.versions.reverse();
-      for(let version of this.versions) {
-        if(version.comment){
-          if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD || version.comment==RestConstants.COMMENT_NODE_PUBLISHED || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
-            let parameters = version.comment.split(",");
-            let editor = "";
-            if (parameters.length > 1)
-              editor = this.translate.instant("CONNECTOR." + parameters[1] + ".NAME");
-            version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor: editor});
-          }
-        }
-      }
-        let i=0;
-      for(let version of this.versions){
-        if(this.isCurrentVersion(version)){
-          this.versions.splice(i,1);
-          this.versions.splice(0,0,version);
-          break;
-        }
-        i++;
-      }
-      this.versionsLoading=false;
-    });
-    this.iamApi.getUser().subscribe((login:IamUser)=>{
-      this.nodeApi.getNodePermissions(this._node).subscribe((data : NodePermissions) => {
-        this.permissions=this.formatPermissions(login,data);
-      });
-    });
-
-    this.usageApi.getNodeUsages(this._node).subscribe((data : UsageList) =>{
-      console.log(data);
-      this.usageCount=data.usages.length;
+        this.usageApi.getNodeUsages(this._node).subscribe((usages : UsageList) =>{
+            this.usages=usages.usages;
+            this.usageApi.getNodeUsagesCollection(this._node).subscribe((collection)=>{
+                this.usagesCollection=collection;
+                this.getStats();
+            });
+        });
     });
   }
   private isCurrentVersion(version : Version) : boolean{
@@ -253,45 +257,51 @@ export class WorkspaceMetadataComponent{
     return false;
   }
   getStats() {
-    setTimeout(()=>{
-            this.canvas = document.getElementById('myChart');
-            this.ctx = this.canvas.getContext('2d');
-            // FontFamily
-            Chart.defaults.global.defaultFontFamily = 'open_sansregular';
-
-            let myChart = new Chart(this.ctx, {
-                type: "bar",
-                data: {
-                    labels: this.labels,
-                    datasets: [{
-                        data: this.points,
-                        backgroundColor: this.colors,
-                        borderWidth: 0.2
-                    }]
+        this.stats.labels=[];
+        this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.LMS"));
+        this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.COLLECTION"));
+        //this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD"));
+        this.stats.points=[];
+        this.stats.points.push(this.usages.length-this.usagesCollection.length);
+        this.stats.points.push(this.usagesCollection.length);
+        //this.stats.points.push(0);
+        this.canvas = document.getElementById('myChart');
+        this.ctx = this.canvas.getContext('2d');
+        // FontFamily
+        Chart.defaults.global.defaultFontFamily = 'open_sansregular';
+        let myChart = new Chart(this.ctx, {
+            type: "bar",
+            data: {
+                labels: this.stats.labels,
+                datasets: [{
+                    data: this.stats.points,
+                    backgroundColor: this.stats.colors,
+                    borderWidth: 0.2
+                }]
+            },
+            options: {
+                responsive: false,
+                legend:{
+                    display:false
                 },
-                options: {
-                    responsive: false,
-                    legend:{
-                        display:false
-                    },
-                    mode: 'index',
-                    layout: {
-                        padding: {
-                            left: 0,
-                            right: 0,
-                            top: 20,
-                            bottom: 0
-                        }
-                    },
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero:true
-                            }
-                        }]
+                mode: 'index',
+                layout: {
+                    padding: {
+                        left: 0,
+                        right: 0,
+                        top: 20,
+                        bottom: 0
                     }
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero:true,
+                            max:this.usages.length>6 ? this.usages.length : 6
+                        }
+                    }]
                 }
-            });
+            }
         });
     }
 

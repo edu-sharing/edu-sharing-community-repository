@@ -12,7 +12,7 @@
           </li>
           <!--Icon for Usages-->
           <li class="clickable tab col s4" (click)="setTab(PROPERTIES)" title="Statistik">
-            <a [class.active]="tab==PROPERTIES" alt="Statistik"><i class="material-icons">equalizer</i><div class="value-properties">{{usageCount}}</div></a>
+            <a [class.active]="tab==PROPERTIES" alt="Statistik"><i class="material-icons">equalizer</i><div class="value-properties">{{usages ? usages.length : 0}}</div></a>
           </li>
           <li class="clickable tab col s4" (click)="setTab(VERSIONS)" title="Version">
             <a [class.active]="tab==VERSIONS" alt="Version"><i class="material-icons">restore</i></a>
@@ -89,10 +89,10 @@
 
     <canvas id="myChart" width="300" height="300"></canvas>
     <ul class="statistik_value">
-      <li *ngFor="let point of points" class="point">{{point}}</li>
+      <li *ngFor="let point of stats.points" class="point">{{point}}</li>
 
     </ul>
-    <div class="description usage_count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <strong style="font-weight: bold;">{{usageCount}}</strong></div>
+    <div class="description usage_count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <strong style="font-weight: bold;">{{usages ? usages.length : 0}}</strong></div>
 
 
 
