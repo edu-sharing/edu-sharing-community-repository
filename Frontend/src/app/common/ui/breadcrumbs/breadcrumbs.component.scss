@@ -7,15 +7,6 @@
   word-break: break-all;
 }
 
-.breadcrumb-space{
-  padding: 20px 50px;
-  background: white;
-  margin-top: -40px;
-  margin-left: -40px;
-  margin-right: -16px;
-  box-shadow: 0 0 5px rgba(0,0,0,.3);
-}
-
 .breadcrumb{
   width:100%;
   max-height:1.5em;
@@ -37,7 +28,7 @@
     max-height: none;
   }
   .breadcrumb-arrow{
-    font-size: 17pt;
+    font-size: 15pt;
     margin-left: -10px;
   }
 }
@@ -54,9 +45,6 @@
   display:none;
 }
 @media screen and (max-width: $mobileWidth) {
-  .breadcrumb-space{
-    display: none;
-  }
   .breadcrumbMobile{
     display:flex;
     align-items: center;

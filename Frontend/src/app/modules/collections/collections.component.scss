@@ -126,7 +126,8 @@ table, div {
   transform: translateY(-50%);
 }
 .collection-new-preview-headline {
-    font-size: 200%;
+  font-size: 180%;
+  padding-bottom: 15px;
 }
 
 .collection-new-preview-subline {
@@ -254,6 +255,7 @@ table, div {
   background-color: #fff;
   cursor: pointer;
   z-index: 100;
+  @include materialShadowBottom();
 }
 .section-headline {
   float:left;
@@ -274,7 +276,15 @@ table, div {
     fill: #6b6b6b;
   }
 }
-
+.breadcrumb-space{
+  padding: 20px 50px;
+  padding-bottom: 0;
+  background: #fff;
+  margin-top: -40px;
+  margin-left: -40px;
+  margin-right: -16px;
+  @include materialShadow();
+}
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
 
     .table-tab-title-long {
@@ -312,9 +322,12 @@ table, div {
   .card-image-icon-container{
     margin-top: $mainnavHeight;
   }
+  .breadcrumb-space{
+    background: transparent;
+  }
     .collections-breadcrumb{
       position: absolute;
-      top: 259px+$mainnavHeight;
+      top: 239px+$mainnavHeight;
       right: 10px;
       max-width: calc(100% - 100px);
     }
