@@ -115,7 +115,7 @@
               <!-- <img class="inherit" src="assets/images/inherit.svg" /> -->
             </label></div>
           </div>
-          <div class="inherit" [class.crossed]="!inherited" *ngIf="inherited">
+          <div class="inherit" [class.crossed]="!inherited" *ngIf="inherited && inherit && inherit.length">
             <div *ngFor="let permission of inherit" class="groupEntry">
               <workspace-share-permission
                 [permission]="permission"
