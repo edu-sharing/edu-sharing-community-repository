@@ -8,7 +8,7 @@
     },
     "OBJECT":{
       "NOTITLE":"No title",
-      "NODESCRIPTION":"No description",
+      "NOMATERIALS":"No materials are available yet.",
       "NONODES":"No nodes were found",
       "OPTION": {
         "MOVEUP":"Show at the top",

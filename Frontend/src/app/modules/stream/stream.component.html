@@ -46,9 +46,15 @@
                     <i class="menuic material-icons ">settings</i>  {{'STREAM.MENU.OPTION3' | translate }}
                 </div>-->
             </div>
+        </div>
+        <div class="stream-emptytxt" *ngIf="!allImagesLoaded">
+                <div *ngIf="imagesToLoad !== 0"><spinner></spinner></div>
+        </div>
+        <div class="stream-emptytxt" *ngIf="streams.length === 0">
+            <div *ngIf="imagesToLoad === 0">{{'STREAM.OBJECT.NOMATERIALS' | translate }} </div>    
         </div>    
-  
-        <div *ngFor="let strm of streams" [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'">
+       
+        <div *ngFor="let strm of streams" [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'" [hidden]="!allImagesLoaded">
            <div class="row row-nomargin" >
                 <div class="stream-box-title col s10" (click)="onStreamObjectClick(strm)"> <span *ngIf="strm.properties['add_to_stream_title']">{{ strm.properties['add_to_stream_title'] }}</span> <span *ngIf="!strm.properties['add_to_stream_title']">{{ 'STREAM.OBJECT.NOTITLE' | translate }}</span> </div>
                 <div class="stream-box-main-vert col s2">
@@ -79,7 +85,7 @@
             </div>
 
         </div>
-
+       
     </div>
     </div> <!-- cols8 -->
     <div class="col m1 l3"></div>

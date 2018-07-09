@@ -87,8 +87,9 @@ export class StreamComponent {
   streams: any;
   actionOptions:OptionItem[]=[];
   pageOffset: number;
-  imagesToLoad = 0;
+  imagesToLoad = -1;
   imagesLoaded = 0;
+  allImagesLoaded = false;
   shouldOpen = false;
   routerSubscription: Subscription;
 
@@ -213,6 +214,7 @@ export class StreamComponent {
     console.log("to load: ", this.imagesToLoad);
     console.log("images loaded", this.imagesLoaded);
     if (this.imagesLoaded === this.imagesToLoad) {
+      this.allImagesLoaded = true;
       this.scrollToDown();
     }
   }
@@ -247,6 +249,8 @@ export class StreamComponent {
 
   menuOptions(option: any) {
     this.menuOption = option;
+    this.allImagesLoaded = false;
+    this.imagesToLoad = -1;
     if (option === 'new') {
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);

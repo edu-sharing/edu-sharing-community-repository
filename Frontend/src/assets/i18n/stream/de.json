@@ -8,7 +8,7 @@
     },
     "OBJECT":{
       "NOTITLE":"Keine Titel",
-      "NODESCRIPTION":"Keine Beschreibung",
+      "NOMATERIALS":"Noch Keine Materialien vorhanden.",
       "NONODES":"Es wurden keine Knoten gefunden",
       "OPTION": {
         "MOVEUP":"Ganz oben anzeigen",
