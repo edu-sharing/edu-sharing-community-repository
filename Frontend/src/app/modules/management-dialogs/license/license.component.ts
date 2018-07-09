@@ -112,6 +112,7 @@ export class WorkspaceLicenseComponent  {
     });
   }
   @Input() set nodes(nodes : Node[]){
+      this._nodes=[];
       this.loadNodes(nodes,()=>{
           this.loadConfig();
           this.checkAllowRelease();
