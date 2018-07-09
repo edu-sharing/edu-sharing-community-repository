@@ -119,8 +119,7 @@
                        (contextmenu)="callOption(option,node);$event.preventDefault();$event.stopPropagation();"
                        tabindex="0"
                        (keyup.enter)="callOption(option,node)"
-                       (click)="callOption(option,node)">
-                        <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
+                       (click)="callOption(option,node)"><i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
                 </div>
             </div>
             <div class="row waves-effect"
@@ -144,7 +143,7 @@
                 </div>
                 <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                     <div class="nodeRating"></div>
-                    <div class="nodeComments" (click)="select(node,'comments')"><i class="material-icons">comment</i> <div>{{node.commentCount}}</div></div>
+                    <div class="nodeComments" (click)="select(node,'comments')"><i class="material-icons">comment</i> <div>{{getOriginalNode(node).commentCount}}</div></div>
                 </div>
                 <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                 <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><custom-icon iconId="pin"></custom-icon></div>

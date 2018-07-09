@@ -598,6 +598,11 @@ export class ListTableComponent implements EventListener{
   public isHomeNode(node : any){
     return RestNetworkService.isFromHomeRepo(node,this.repositories);
   }
+  public getOriginalNode(node : any){
+    if(node.reference)
+      return node.reference;
+    return node;
+  }
   public getIconUrl(node : any){
     return node.reference ? node.reference.iconURL : node.iconURL;
   }
