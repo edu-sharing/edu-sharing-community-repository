@@ -427,8 +427,6 @@ export class MainNavComponent implements AfterViewInit{
   }
   private logout(){
     if(this.cordova.isRunningCordova()){
-      this.cordova.clearAllCookies();
-      this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
       this.cordova.restartCordova();
       return;
     }
