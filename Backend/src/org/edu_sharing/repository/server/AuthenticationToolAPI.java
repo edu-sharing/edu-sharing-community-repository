@@ -211,6 +211,13 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		//i.e jession with ticket + basic auth in ApiAuthenticationFilter
 		authenticationService.validate(ticket);
 		
+		try {
+			HashMap<String, String> userInfo = getUserInfo(authenticationService.getCurrentUserName(), ticket);
+			session.setAttribute(CCConstants.AUTH_USERNAME_CAPTION, userInfo.get(CCConstants.AUTH_USERNAME_CAPTION));
+		}catch(Exception e) {
+			
+		}
+		
 		String locale = (String)session.getAttribute(CCConstants.AUTH_LOCALE);
 		if(locale == null){
 			Object localeObj = nodeService.getProperty(personService.getPerson(authenticationService.getCurrentUserName()), ContentModel.PROP_LOCALE);
