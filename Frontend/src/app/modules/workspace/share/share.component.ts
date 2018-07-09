@@ -101,9 +101,6 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public openLink(){
     this.linkNode=this._node;
   }
-  public shareLink(){
-    this.onShareLink.emit(this._node);
-  }
   private addSuggestion(data: any) {
     this.addAuthority(data);
   }
@@ -190,7 +187,6 @@ export class WorkspaceShareComponent implements AfterViewInit{
   }
   @Output() onClose=new EventEmitter();
   @Output() onLoading=new EventEmitter();
-  @Output() onShareLink=new EventEmitter();
   private showChooseType = false;
   private showChooseTypeList : Permission;
   @HostListener('document:keydown', ['$event'])
