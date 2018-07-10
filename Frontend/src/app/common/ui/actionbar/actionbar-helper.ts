@@ -35,6 +35,18 @@ export class ActionbarHelper{
           option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
       }
     }
+  if(type=='CREATE_VARIANT') {
+      if (NodeHelper.allFiles(nodes)) {
+          option = new OptionItem("WORKSPACE.OPTION.VARIANT", "layers", callback);
+          /*
+          option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
+          option.enabledCallback = (node: Node) => {
+              let list = ActionbarHelper.getNodes(nodes, node);
+              return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH);
+          }
+          */
+      }
+  }
     if(type=='ADD_TO_COLLECTION') {
       if (NodeHelper.allFiles(nodes)) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
