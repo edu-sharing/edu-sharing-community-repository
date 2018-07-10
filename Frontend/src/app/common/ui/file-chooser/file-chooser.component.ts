@@ -86,6 +86,7 @@ export class FileChooserComponent implements OnInit{
    * @type {Array}
    */
   @Input() filter : string[] = [];
+  @Input() priority = 0;
   private sortBy : string;
   private sortAscending=true;
   /**

@@ -12,16 +12,17 @@
   max-height:1.5em;
   display:flex;
   overflow:hidden;
-
+  cursor: default;
   div{
     float:left;
     color:$primary;
     padding:2px 4px;
     font-size: 9pt;
     max-height: 20px;
+    overflow-y: hidden;
   }
   .homeIsIcon{
-    margin-top: -4px;
+    margin-top: 3px;
   }
   .homeIcon{
     margin-top: 0;

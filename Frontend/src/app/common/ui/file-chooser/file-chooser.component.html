@@ -1,50 +1,49 @@
-<div class="dialog darken">
-  <div class="card center-card card-high card-action" [class.card-xwide]="_collections">
+<div class="dialog darken" [style.z-index]="120 + priority"></div>
+<div class="card center-card card-high card-action" [style.z-index]="121 + priority" [class.card-xwide]="_collections">
     <div class="card-content">
-      <div *ngIf="isCancelable" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
-      <span class="card-title">{{title | translate }}</span>
-  <div class="fileChooser">
-    <breadcrumbs class="breadcrumbFrame" *ngIf="!searchMode"
-    [breadcrumbsAsNode]="path"
-    (onClick)="selectBreadcrumb($event)"
-    ></breadcrumbs>
-    <div *ngIf="searchMode" class="breadcrumbFrame">
-      <form (ngSubmit)="search()" autocomplete="off"><input type="search" name="search" placeholder="{{'NODE_SEARCH' | translate}}" [(ngModel)]="searchQuery"></form>
-    </div>
+        <div *ngIf="isCancelable" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+        <span class="card-title">{{title | translate }}</span>
+        <div class="fileChooser">
+            <breadcrumbs class="breadcrumbFrame" *ngIf="!searchMode"
+                         [breadcrumbsAsNode]="path"
+                         (onClick)="selectBreadcrumb($event)"
+            ></breadcrumbs>
+            <div *ngIf="searchMode" class="breadcrumbFrame">
+                <form (ngSubmit)="search()" autocomplete="off"><input type="search" name="search" placeholder="{{'NODE_SEARCH' | translate}}" [(ngModel)]="searchQuery"></form>
+            </div>
 
-      <listTable class="listFrame" *ngIf="isLoading || list.length"
-        [nodes]="list"
-        [columns]="columns"
-        [hasIcon]="true"
-        [hasCheckbox]="false"
-        [hasHeading]="hasHeading"
-        [isClickable]="true"
-        [viewType]="viewType"
-        [icon]="icon"
-        [selectOnClick]="!_pickDirectory"
-        [isLoading]="isLoading"
-        [validatePermissions]="writeRequired ? hasWritePermissions : null"
-        [scrollWindow]="false"
-        [sortBy]="sortBy"
-        [sortAscending]="sortAscending"
-        (onSelectionChanged)="onSelection($event)"
-        [listClass]="'fileChooserList'"
-        (sortListener)="setSorting($event)"
-        (clickRow)="selectItem($event)"
-        (loadMore)="loadMore()"></listTable>
-    <h5 class="noElements" *ngIf="!isLoading && !list.length && !searchMode">{{'NO_MORE_ELEMENTS' | translate }}</h5>
-    <h5 class="noElements" *ngIf="!isLoading && !list.length && searchMode">{{'NO_MATCHES' | translate }}</h5>
+            <listTable class="listFrame" *ngIf="isLoading || list.length"
+                       [nodes]="list"
+                       [columns]="columns"
+                       [hasIcon]="true"
+                       [hasCheckbox]="false"
+                       [hasHeading]="hasHeading"
+                       [isClickable]="true"
+                       [viewType]="viewType"
+                       [icon]="icon"
+                       [selectOnClick]="!_pickDirectory"
+                       [isLoading]="isLoading"
+                       [validatePermissions]="writeRequired ? hasWritePermissions : null"
+                       [scrollWindow]="false"
+                       [sortBy]="sortBy"
+                       [sortAscending]="sortAscending"
+                       (onSelectionChanged)="onSelection($event)"
+                       [listClass]="'fileChooserList'"
+                       (sortListener)="setSorting($event)"
+                       (clickRow)="selectItem($event)"
+                       (loadMore)="loadMore()"></listTable>
+            <h5 class="noElements" *ngIf="!isLoading && !list.length && !searchMode">{{'NO_MORE_ELEMENTS' | translate }}</h5>
+            <h5 class="noElements" *ngIf="!isLoading && !list.length && searchMode">{{'NO_MATCHES' | translate }}</h5>
 
-  </div>
+        </div>
 
     </div>
     <div class="card-action">
-      <a *ngIf="_pickDirectory && path.length" class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="chooseDirectory()" (click)="chooseDirectory()">{{(_collections ? 'SELECT_COLLECTION' : 'SELECT_DIRECTORY') |translate:{name:path[path.length-1].name} }}</a>
-      <a *ngIf="_pickDirectory && !path.length" class="waves-effect waves-light btn disabled">{{'SELECT_ROOT_DISABLED' | translate}}</a>
-      <a *ngIf="selectedFiles.length" class="waves-effect waves-light btn"  [class.disabled]="writeRequired && hasWritePermissions(selectedFiles[0]).status==false" tabindex="0" (keyup.enter)="chooseFile()" (click)="chooseFile()">
-        {{(_collections ? 'SELECT_COLLECTION' : 'SELECT_FILE') | translate:{name:selectedFiles[0].name ? selectedFiles[0].name : selectedFiles[0].title} }}</a>
-      <a *ngIf="isCancelable && false" class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="cancel()" (click)="cancel()">{{ 'CANCEL' | translate}}</a>
+        <a *ngIf="_pickDirectory && path.length" class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="chooseDirectory()" (click)="chooseDirectory()">{{(_collections ? 'SELECT_COLLECTION' : 'SELECT_DIRECTORY') |translate:{name:path[path.length-1].name} }}</a>
+        <a *ngIf="_pickDirectory && !path.length" class="waves-effect waves-light btn disabled">{{'SELECT_ROOT_DISABLED' | translate}}</a>
+        <a *ngIf="selectedFiles.length" class="waves-effect waves-light btn"  [class.disabled]="writeRequired && hasWritePermissions(selectedFiles[0]).status==false" tabindex="0" (keyup.enter)="chooseFile()" (click)="chooseFile()">
+            {{(_collections ? 'SELECT_COLLECTION' : 'SELECT_FILE') | translate:{name:selectedFiles[0].name ? selectedFiles[0].name : selectedFiles[0].title} }}</a>
+        <a *ngIf="isCancelable && false" class="waves-effect waves-light btn-flat" tabindex="0" (keyup.enter)="cancel()" (click)="cancel()">{{ 'CANCEL' | translate}}</a>
     </div>
-  </div>
 </div>
 

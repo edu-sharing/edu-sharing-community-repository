@@ -33,6 +33,7 @@
 <node-variant
         *ngIf="nodeVariant"
         [node]="nodeVariant"
+        (onLoading)="globalProgress=$event"
         (onCancel)="closeVariant()"
         (onDone)="closeVariant()"
 ></node-variant>
