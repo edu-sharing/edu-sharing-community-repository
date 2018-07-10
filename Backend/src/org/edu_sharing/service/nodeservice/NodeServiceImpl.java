@@ -116,7 +116,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,aspects, parentId,null);
 			updateNodeNative(nodeId, toSafeProps);
 	}
-	
+
+	@Override
+	public void createAssoc(String parentId, String childId, String assocName) {
+		nodeService.createAssociation(
+				new NodeRef(Constants.storeRef, parentId),
+				new NodeRef(Constants.storeRef, childId),
+				QName.createQName(assocName)
+		);
+	}
+
 	public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
 		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 

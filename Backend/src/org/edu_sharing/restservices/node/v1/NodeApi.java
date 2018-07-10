@@ -244,13 +244,9 @@ public class NodeApi  {
     		Filter filter = new Filter(propertyFilter);
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-saved_search-".equals(node)){
-	    		node = repoDao.getUserSavedSearch();
-	    	}
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(nodeDao.asNode());
@@ -1123,8 +1119,51 @@ public class NodeApi  {
     	
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, POST").build();
     }
+	@POST
+	@Path("/nodes/{repository}/{node}/children/_fork")
 
-    @POST
+	@ApiOperation(
+			value = "Create a copy of a node by creating a forked version (variant)."
+	)
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response createForkOfNode(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
+			@ApiParam(value = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
+			@ApiParam(value = "flag for children",required=true) @QueryParam("withChildren") boolean withChildren,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			source=NodeDao.mapNodeConstants(repoDao,source);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao child = nodeDao.createFork(source);
+
+			NodeEntry response = new NodeEntry();
+			response.setNode(child.asNode());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@POST
     @Path("/nodes/{repository}/{node}/children/_copy")    
     
     @ApiOperation(
@@ -1152,14 +1191,12 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-userhome-".equals(source)){
-	    		source = repoDao.getUserHome();
-    		}
-	    	NodeDao child = nodeDao.createChildByCopy(source, withChildren);
+
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			source=NodeDao.mapNodeConstants(repoDao,source);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao child = nodeDao.createChildByCopy(source, withChildren);
 	    			
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(child.asNode());

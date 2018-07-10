@@ -1093,6 +1093,8 @@ public class CCConstants {
 
 	public static final String CCM_ASSOC_CHILDIO = "{http://www.campuscontent.de/model/1.0}childio";
 
+	public static final String CCM_ASSOC_FORKIO = "{http://www.campuscontent.de/model/1.0}forkio";
+
 
 	/**
 	 * tempory, non persistent properties

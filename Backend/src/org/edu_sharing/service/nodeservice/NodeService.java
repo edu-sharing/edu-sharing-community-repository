@@ -14,6 +14,8 @@ public interface NodeService {
 
 	
 	public void updateNode(String nodeId, HashMap<String, String[]> props) throws Throwable;
+
+	public void createAssoc(String parentId,String childId,String assocName);
 	
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props)throws Throwable;
 	
