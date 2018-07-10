@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -252,6 +253,11 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public String getContentMimetype(String protocol, String storeId, String nodeId) {
+		return null;
+	}
+
+	@Override
+	public List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc) {
 		return null;
 	}
 

@@ -15,6 +15,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -62,6 +63,7 @@ import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -523,7 +525,33 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
+	public List<NodeRef> getAssocs(AssocInfo assoc) throws DAOException {
 
+		try {
+			List<NodeRef> result = new ArrayList<NodeRef>();
+			assoc.setAssocName(CCConstants.getValidGlobalName(assoc.getAssocName()));
+			for (AssociationRef childRef : nodeService.getNodesByAssoc(getId(),assoc)) {
+
+				NodeRef ref = new NodeRef();
+				ref.setRepo(this.repoDao.getId());
+				ref.setHomeRepo(this.repoDao.isHomeRepo());
+				ref.setId(childRef.getTargetRef().getId());
+
+				String storeProtocol = childRef.getTargetRef().getStoreRef().getProtocol();
+				if(Constants.archiveStoreRef.getProtocol().equals(storeProtocol)){
+					ref.setArchived(true);
+				}
+
+				result.add(ref);
+			}
+
+			return result;
+
+		} catch (Throwable t) {
+
+			throw DAOException.mapping(t);
+		}
+	}
 	public NodeDao changeProperties(HashMap<String,String[]> properties)
 			throws DAOException {
 

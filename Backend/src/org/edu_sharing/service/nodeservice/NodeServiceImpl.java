@@ -370,7 +370,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return null;
 	}
-	
+
+
+
 	private HashMap<String, Object> getPropertiesWithoutChildren(NodeRef nodeRef) {
 		Map<QName, Serializable> childPropMap = nodeService.getProperties(nodeRef);
 		HashMap<String, Object> resultProps = new HashMap<String, Object>();
@@ -845,5 +847,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return new MCAlfrescoAPIClient().getAlfrescoMimetype(new NodeRef(protocol,storeId,nodeId));
 		else
 			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ+" permission on node "+nodeId);
+	}
+	@Override
+	public List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc) {
+		NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+		if(assoc.getDirection().equals(AssocInfo.Direction.SOURCE)) {
+			return nodeService.getSourceAssocs(ref,QName.createQName(assoc.getAssocName()));
+		}
+		else{
+			return nodeService.getTargetAssocs(ref,QName.createQName(assoc.getAssocName()));
+		}
 	}
 }
