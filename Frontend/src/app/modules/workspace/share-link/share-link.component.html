@@ -7,49 +7,67 @@
         <spinner *ngIf="loading"></spinner>
         <div *ngIf="!loading">
           <div class="info">
-            <div class="infoLeft">
-              <div class="heading">{{'WORKSPACE.SHARE_LINK.EXPIRY_TITLE' | translate}}</div>
-              <label>{{'WORKSPACE.SHARE_LINK.EXPIRY_INFO' | translate}}</label>
-              <ng-datepicker class="datepickerShareLink" *ngIf="expiry" [(ngModel)]="expiryDate"
-                              [options]="dateOptions"></ng-datepicker>
-            </div>
-            <div class="infoRight">
-              <div class="switch">
-                <label>
-                  <input type="checkbox" [(ngModel)]="expiry" (change)="setExpiry(expiry)" [disabled]="!enabled">
-                  <span class="lever"></span>
-                </label>
+            <div class="configuration-link">
+              <div class="info-left">
+                <div class="heading">{{'WORKSPACE.SHARE_LINK.EXPIRY_TITLE' | translate}}</div>
+                <div>{{'WORKSPACE.SHARE_LINK.EXPIRY_INFO' | translate}}</div>
+                <ng-datepicker class="datepickerShareLink" *ngIf="expiry" [(ngModel)]="expiryDate"
+                               [options]="dateOptions"></ng-datepicker>
               </div>
+              <div class="info-right">
+                <div class="switch">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="expiry" (change)="setExpiry(expiry)" [disabled]="!enabled">
+                    <span class="lever"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="configuration-link">
+              <div class="info-left">
+                <div class="heading">{{'WORKSPACE.SHARE_LINK.PASSWORD' | translate}}</div>
+                <div>{{'WORKSPACE.SHARE_LINK.PASSWORD_INFO' | translate}}</div>
+              </div>
+
+              <div class="info-right small-switch">
+                <div class="switch">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="password" (change)="setPassword()" [disabled]="!enabled">
+                    <span class="lever"></span>
+                  </label>
+                </div>
+              </div>
+              <div *ngIf="password" class="password-link">
+                <input type="{{input_type}}" id="PasswordInput" placeholder="{{'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER' | translate}}">
+                <i (click)="showPassword()" [class.eye-aktiv]="input_type == 'text'" class="material-icons eye">remove_red_eye</i>
+              </div>
+
             </div>
           </div>
 
           <div class="link">
             <div class="info">
-              <div class="infoLeft"></div>
-              <div class="infoRight activateLink">
-                <div class="switch">
-                  <label>
-                    <input type="checkbox" [(ngModel)]="enabled" (change)="setEnabled(enabled)">
-                    <span class="lever"></span>
-                    {{ 'WORKSPACE.SHARE_LINK.ACTIVATE' | translate}}
-                  </label>
-                </div>
+              <div class="info-left">
+                <div>
+                  <input id="share" type="checkbox" class="filled-in" [(ngModel)]="enabled" (change)="setEnabled(enabled)"> <label for="share" class="link-activate">{{ 'WORKSPACE.SHARE_LINK.ACTIVATE' | translate}}
+                </label></div>
               </div>
+
             </div>
-            <div class="heading linkTitle">{{'WORKSPACE.SHARE_LINK.LINK' | translate}}</div>
+            <div class="heading link-title">{{'WORKSPACE.SHARE_LINK.LINK' | translate}}</div>
             <div class="info">
-              <div class="linkInput infoLeft">
+              <div class="linkInput info-left">
                 <input type="text" [disabled]="!enabled" readonly="true" [(ngModel)]="currentShare.url">
               </div>
-              <div class="infoRight copyLink">
-                <a (click)="copyClipboard()" class="clickable" *ngIf="enabled">{{'WORKSPACE.SHARE_LINK.COPY_CLIPBOARD' |
-                  translate}}</a>
+              <div class="info-right copyLink">
+                <div (click)="copyClipboard()" class="btn-flat btn-shadow btn-icon btnVersion link-copy" *ngIf="enabled"> {{'WORKSPACE.SHARE_LINK.COPY_CLIPBOARD' |
+                  translate}}</div>
               </div>
             </div>
-            <label class="linkInfo">{{ 'WORKSPACE.SHARE_LINK.LINK_INFO' | translate}}</label>
-            <label class="linkDownloads">{{ 'WORKSPACE.SHARE_LINK.LINK_DOWNLOADS' |
-              translate:{count:currentShare.downloadCount} }}</label>
-          </div>
+        </div>
+          <div class="link-info">{{ 'WORKSPACE.SHARE_LINK.LINK_INFO' | translate}}</div>
+          <div class="link-downloads">{{ 'WORKSPACE.SHARE_LINK.LINK_DOWNLOADS' |
+            translate:{count:currentShare.downloadCount} }}</div>
         </div>
       </div>
 

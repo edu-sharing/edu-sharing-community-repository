@@ -201,6 +201,10 @@
     "SHARE_LINK":{
       "TITLE":"Link für {{ name }} freigeben",
       "EXPIRY_TITLE":"Ablaufdatum für den Link angeben",
+      "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
+      "PASSWORD":"Passwortschutz",
+      "PASSWORD_INFO":"Dieser Link wird mit einem Password geschützt",
+      "PASSWORD_PLACEHOLDER":"Passwort bestimmen...",
       "DISABLED":"Linkfreigabe ist deaktiviert",
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "LINK":"Link zum Objekt",

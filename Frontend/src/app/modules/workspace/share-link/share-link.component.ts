@@ -28,6 +28,8 @@ export class WorkspaceShareLinkComponent  {
   public dateOptions: DatepickerOptions;
   public enabled=true;
   public expiry=false;
+  public password=false;
+  public input_type = "password";
   public _expiryDate : Date;
   public set expiryDate(date:Date){
     this._expiryDate=date;
@@ -101,6 +103,7 @@ export class WorkspaceShareLinkComponent  {
     else{
       this.updateShare(0);
       this.expiry=false;
+      this.password=false;
     }
   }
   public setDate(){
@@ -122,6 +125,21 @@ export class WorkspaceShareLinkComponent  {
     let date=value ? DateHelper.getDateFromDatepicker(this.expiryDate).getTime() : RestConstants.SHARE_EXPIRY_UNLIMITED;
     this.updateShare(date);
     console.log(date);
+  }
+
+  public showPassword(){
+      if (this.input_type === "password") {
+          this.input_type = "text";
+      } else {
+          this.input_type = "password";
+      }
+  }
+
+  public setPassword(){
+  //  TODO: @Simon
+  /*
+  Hier den Objekt mit einem Password versehen
+  */
   }
   public constructor(
     private nodeService:RestNodeService,

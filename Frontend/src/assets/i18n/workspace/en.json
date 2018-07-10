@@ -178,8 +178,11 @@
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",
       "EXPIRY_TITLE":"Set expiry date",
-      "DISABLED":"Link sharing is diabled",
       "EXPIRY_INFO":"After this date the link won't be accessible for anyone",
+      "DISABLED":"Link sharing is diabled",
+      "PASSWORD":"Password Protect",
+      "PASSWORD_INFO":"Then this link will be password protected",
+      "PASSWORD_PLACEHOLDER":"Set password...",
       "LINK":"Link to object",
       "ACTIVATE":"Activate sharing",
       "COPY_CLIPBOARD":"Copy link",

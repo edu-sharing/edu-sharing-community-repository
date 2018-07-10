@@ -2,19 +2,24 @@
 
 .info{
   display:table;
-  .infoLeft,.infoRight{
+  .info-left,.info-right{
     display: table-cell;
   }
-  .infoLeft{
+  .configuration-link{
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .info-left{
     width:100%;
   }
-  .infoRight{
-    float:right;
+  .info-right{
+    //float:right;
     text-align: right;
     .switch{
       float:right;
     }
   }
+
 }
 .copyLink{
   padding-left: 10px;
@@ -24,16 +29,47 @@
 }
 .link{
   background-color: $backgroundColor;
-  margin-top: 20px;
   padding: 10px 30px;
   margin-left: -20px;
   margin-right: -20px;
-  .linkInfo,.linkDownloads{
-    display: block;
-    width:100%;
-    line-height: 1.5;
-    padding: 3px 0;
+
+  .link-copy{
+    margin: 0;
+    padding: 0 1rem;
+    position: relative;
+    top: 10px;
+    height: 40px;
+    line-height: 41px;
   }
+}
+
+.link-info,.link-downloads{
+  display: block;
+  width:100%;
+  line-height: 1.5;
+}
+.link-info{
+  padding: 10px 0 5px;
+}
+.password-link{
+  margin-top: 10px;
+  position: relative;
+  .eye{
+    position: absolute;
+    top: 1px;
+    right: 0;
+    padding: 8px;
+    //background: white;
+    box-sizing: content-box;
+    color: $textLight;
+    cursor: pointer;
+  }
+  .eye-aktiv{
+    color: $primary;
+  }
+}
+.link-activate{
+  color: black;
 }
 :host /deep/{
   .datepickerShareLink .datepicker-calendar {
@@ -43,15 +79,23 @@
     z-index: 1;
   }
 }
-.linkTitle{
-  margin-top: 20px;
+.link-title{
+  margin-top: 10px;
 }
-.activateLink{
-  min-width:220px;
-}
+
 .copyLink{
   min-width: 135px;
   position: relative;
   top:5px;
   text-transform: uppercase;
+}
+.small-switch{
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+@media screen and (max-width: 600px){
+  .small-switch{
+    position: relative;
+  }
 }
