@@ -126,11 +126,12 @@ table, div {
   transform: translateY(-50%);
 }
 .collection-new-preview-headline {
-    font-size: 200%;
+  font-size: 180%;
+  padding-bottom: 15px;
 }
 
 .collection-new-preview-subline {
-  font-size: 120%;
+  //font-size: 120%;
   opacity: 0.85;
 }
 
@@ -194,7 +195,7 @@ table, div {
 }
 
 .card-image-icon-container {
-    height: 200px;
+    height: 210px;
     width: 100%;
     overflow: hidden;
     margin: auto;
@@ -226,13 +227,13 @@ table, div {
 
 
 .collections-edit-button {
-    right: 50px;
+    right: 63px;
 }
 .collections-pin-button {
   right: 90px;
 }
 .collections-delete-button {
-    right: 10px;
+    right: 17px;
 }
 .collections-edit-button,
 .collections-pin-button,
@@ -245,14 +246,16 @@ table, div {
 }
 .collections-pin-button,.collections-edit-button,.collections-delete-button{
   position: absolute;
-  width:32px;
-  height:32px;
+  width:40px;
+  height:40px;
   top: 160px;
-  color: #6b6b6b;
+  color: $primary;
   border-radius: 50%;
-  padding: 5px;
+  padding: 9px;
   background-color: #fff;
   cursor: pointer;
+  z-index: 100;
+  @include materialShadowBottom();
 }
 .section-headline {
   float:left;
@@ -273,7 +276,15 @@ table, div {
     fill: #6b6b6b;
   }
 }
-
+.breadcrumb-space{
+  padding: 20px 50px;
+  padding-bottom: 0;
+  background: #fff;
+  margin-top: -40px;
+  margin-left: -40px;
+  margin-right: -16px;
+  @include materialShadow();
+}
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
 
     .table-tab-title-long {
@@ -311,9 +322,12 @@ table, div {
   .card-image-icon-container{
     margin-top: $mainnavHeight;
   }
+  .breadcrumb-space{
+    background: transparent;
+  }
     .collections-breadcrumb{
       position: absolute;
-      top: 259px+$mainnavHeight;
+      top: 239px+$mainnavHeight;
       right: 10px;
       max-width: calc(100% - 100px);
     }

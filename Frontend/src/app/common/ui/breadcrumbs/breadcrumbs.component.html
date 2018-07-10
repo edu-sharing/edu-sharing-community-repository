@@ -11,7 +11,7 @@
        [class.clickable]="clickable"
        [class.selected]="node && dragHover==node"
        (click)="openBreadcrumb(i+1)"
-       (keyup.enter)="openBreadcrumb(i+1)"> &rsaquo; {{node ? node.name : ''}}</div>
+       (keyup.enter)="openBreadcrumb(i+1)"> <i class="material-icons breadcrumb-arrow">keyboard_arrow_right</i> {{node ? node.name : ''}}</div>
 </div>
 <!--
 <div class="breadcrumb breadcrumbMobile" *ngIf="_breadcrumbsAsNodeShort">

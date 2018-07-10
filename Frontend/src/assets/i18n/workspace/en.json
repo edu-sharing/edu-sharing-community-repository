@@ -123,6 +123,11 @@
       "PERMALINK":"Link to object",
       "USAGE_COUNT_TITLE":"Usage",
       "USAGE_COUNT":"Total uses",
+      "USAGE_TYPE": {
+        "LMS": "LMS-Courses",
+        "COLLECTION": "Collections",
+        "DOWNLOAD": "Downloads"
+      },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
         "EDITOR_UPLOAD": "File updated by editor",

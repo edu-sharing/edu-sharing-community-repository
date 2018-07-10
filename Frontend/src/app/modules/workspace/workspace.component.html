@@ -142,7 +142,7 @@
                   (onDrop)="handleDrop($event)"
   (onSetRoot)="setRoot($event)"
   (onOpenNode)="openNode($event)"
-                  (onDeleteNodes)="deleteNode($event)"
+                  (onDeleteNodes)="deleteNode=$event"
                   (onUpdateOptions)="updateOptions($event)"
   ></workspace-tree>
 <breadcrumbs class="breadcrumbFrame" *ngIf="isLoggedIn"

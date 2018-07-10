@@ -821,9 +821,9 @@ export class WorkspaceMainComponent implements EventListener{
                 //    share.isEnabled = false;
                 options.push(share);
             }
-            let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
+            /*let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',nodes,this.connector,(node: Node) => this.setShareLinkNode(node));
             if (shareLink && !this.isSafe)
-                options.push(shareLink);
+                options.push(shareLink);*/
         }
         if(nodes) {
             let license = new OptionItem("WORKSPACE.OPTION.LICENSE", "copyright", (node: Node) => this.editLicense(node));

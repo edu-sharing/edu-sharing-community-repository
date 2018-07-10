@@ -13,13 +13,15 @@ public interface NodeService {
 
 	
 	public void updateNode(String nodeId, HashMap<String, String[]> props) throws Throwable;
-	
+
+	public void createAssoc(String parentId,String childId,String assocName);
+
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props)throws Throwable;
 	
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation) throws Throwable;
 	
 	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props);
-	
+
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
 			HashMap<String, Object> _props);
 
@@ -43,11 +45,15 @@ public interface NodeService {
 	
 	public String getPrimaryParent(String nodeId);
 
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID);
+	default List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
+		return getChildrenChildAssociationRefAssoc(parentID,null);
+	}
 
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID, String childType);
-	
-	public void createVersion(String nodeId, HashMap _properties) throws Exception;
+	public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID, String childType);
+
+    public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName);
+
+    public void createVersion(String nodeId, HashMap _properties) throws Exception;
 	
 	public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
 			final String property) throws Exception;

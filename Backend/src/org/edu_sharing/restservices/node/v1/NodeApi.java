@@ -758,7 +758,7 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_FILTER) @QueryParam("filter") List<String> filter,
 	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-	     
+	    @ApiParam(value = "Filter for a specific association. May be empty",required = false,defaultValue = "") @QueryParam("assocName") String assocName,
 	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 
@@ -785,7 +785,7 @@ public class NodeApi  {
 	    	}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
-	    		children = nodeDao.getChildren();
+	    		children = nodeDao.getChildren(assocName);
 	    	}
 	    	
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
@@ -1083,7 +1083,7 @@ public class NodeApi  {
 		     properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),url);
 			 return;
 		 }
-		 String title=info.getTitle()+" - "+info.getPage();
+		 String title=info.getTitle();
 		 if(info.getTitle()==null)
 			 title=info.getPage();
     	String[] name = new String[]{title};
@@ -1103,8 +1103,51 @@ public class NodeApi  {
     	
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, POST").build();
     }
+	@POST
+	@Path("/nodes/{repository}/{node}/children/_fork")
 
-    @POST
+	@ApiOperation(
+			value = "Create a copy of a node by creating a forked version (variant)."
+	)
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response createForkOfNode(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
+			@ApiParam(value = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
+			@ApiParam(value = "flag for children",required=true) @QueryParam("withChildren") boolean withChildren,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			source=NodeDao.mapNodeConstants(repoDao,source);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao child = nodeDao.createFork(source);
+
+			NodeEntry response = new NodeEntry();
+			response.setNode(child.asNode());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@POST
     @Path("/nodes/{repository}/{node}/children/_copy")    
     
     @ApiOperation(

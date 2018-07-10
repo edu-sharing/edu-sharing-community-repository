@@ -12,6 +12,7 @@ import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
@@ -115,7 +116,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,aspects, parentId,null);
 			updateNodeNative(nodeId, toSafeProps);
 	}
-	
+
+	@Override
+	public void createAssoc(String parentId, String childId, String assocName) {
+		nodeService.createAssociation(
+				new NodeRef(Constants.storeRef, parentId),
+				new NodeRef(Constants.storeRef, childId),
+				QName.createQName(assocName)
+		);
+	}
+
 	public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
 		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 
@@ -664,25 +674,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);		
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
-	
+
 	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
-		if (parentID == null) {
-
-			String startParentId = apiClient.getRootNodeId();
-			if (startParentId == null || startParentId.trim().equals("")) {
-				parentID = nodeService.getRootNode(Constants.storeRef).getId();
-			} else {
-				parentID = startParentId;
-			}
+	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID,String assocName){
+		NodeRef parentNodeRef = getParentRef(parentID);
+		if(assocName==null || assocName.isEmpty()){
+			return nodeService.getChildAssocs(parentNodeRef);
 		}
-
-		NodeRef parentNodeRef = new NodeRef(Constants.storeRef, parentID);
-		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(parentNodeRef);
-		return childAssocList;
+		else{
+			return nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
+		}
 	}
-	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID,String childType){
+
+	private NodeRef getParentRef(String parentID) {
 		if (parentID == null) {
 
 			String startParentId = apiClient.getRootNodeId();
@@ -693,7 +697,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 		}
 
-		NodeRef parentNodeRef = new NodeRef(Constants.storeRef, parentID);
+		return new NodeRef(Constants.storeRef, parentID);
+	}
+
+	@Override
+	public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID,String childType){
+		NodeRef parentNodeRef = getParentRef(parentID);
 		if(childType==null) {
 			return nodeService.getChildAssocs(parentNodeRef);
 		}

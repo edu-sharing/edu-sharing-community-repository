@@ -306,7 +306,7 @@ public class NodeDao {
 	
 	NodeService nodeService;
 	CommentService commentService;
-	
+
 	Filter filter;
 
 	private org.edu_sharing.service.permission.PermissionService permissionService;
@@ -366,7 +366,7 @@ public class NodeDao {
 		}
 		return 0;
 	}
-	
+
 	private NodeDao(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef, Filter filter) throws DAOException {
 		try{
 	
@@ -502,15 +502,19 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-
 	public List<NodeRef> getChildren() throws DAOException {
+		return getChildren(null);
+	}
+	public List<NodeRef> getChildren(String assocName) throws DAOException {
 
 		try {
 			List<NodeRef> result = new ArrayList<NodeRef>();
 	
 			
-			
-			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRef(getId())) {
+			if(assocName!=null && !assocName.isEmpty()){
+				assocName=CCConstants.getValidGlobalName(assocName);
+			}
+			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRefAssoc(getId(),assocName)) {
 	
 				NodeRef ref = new NodeRef();
 				ref.setRepo(this.repoDao.getId());
@@ -1691,5 +1695,17 @@ public class NodeDao {
 	
 	public void setOwner(String nodeId, String username) {
 		nodeService.setOwner(nodeId, username);
+	}
+
+	public NodeDao createFork(String sourceId) throws DAOException {
+		try {
+			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, false);
+			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
+					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
+			nodeService.createAssoc(sourceId,newNode.getId(),CCConstants.CCM_ASSOC_FORKIO);
+			return new NodeDao(repoDao, newNode.getId());
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
 	}
 }

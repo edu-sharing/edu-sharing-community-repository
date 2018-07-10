@@ -24,7 +24,13 @@ public class LRMITool {
 
     private static Object getProperty(HashMap<String, Object> props, String... keys) {
         for(String key : keys){
-            if(props.containsKey(key))
+            if(!props.containsKey(key) || props.get(key)==null)
+                continue;
+            if(props.get(key) instanceof String){
+                if(((String)props.get(key)).isEmpty()){
+                    continue;
+                }
+            }
                 return props.get(key);
         }
         return null;

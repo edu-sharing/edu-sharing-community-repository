@@ -50,7 +50,7 @@ public class CommentServiceImpl implements CommentService{
 	}
 	@Override
 	public List<ChildAssociationRef> getComments(String node) throws Exception {
-		return this.nodeService.getChildrenChildAssociationRef(node,CCConstants.CCM_TYPE_COMMENT);
+		return this.nodeService.getChildrenChildAssociationRefType(node,CCConstants.CCM_TYPE_COMMENT);
 	}
 
 	@Override

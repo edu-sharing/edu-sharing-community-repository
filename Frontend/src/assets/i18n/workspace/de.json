@@ -127,7 +127,13 @@
       "RESTORE_TITLE":"Zurücksetzen?",
       "RESTORE_MESSAGE":"Sind Sie sicher, dass Sie die Version des Elements ändern möchten?",
       "PERMALINK":"Link Zum Objekt",
-      "USAGE_COUNT":"Anzahl der Verwendungen",
+      "USAGE_COUNT_TITLE":"Verwendungen",
+      "USAGE_COUNT":"Verwendung insgesamt: ",
+      "USAGE_TYPE": {
+        "LMS": "LMS-Kurse",
+        "COLLECTION": "Sammlungen",
+        "DOWNLOAD": "Downloads"
+      },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "Datei wurde erstellt",
         "EDITOR_UPLOAD": "Datei wurde durch Editor {{editor}} aktualisiert",

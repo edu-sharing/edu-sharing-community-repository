@@ -37,6 +37,7 @@ export class WorkspaceShareLinkComponent  {
     return this._expiryDate;
   }
   private currentShare: NodeShare;
+  @Input() priority = 1;
   @Input() set node(node : Node){
     this._node=node;
     this.loading=true;

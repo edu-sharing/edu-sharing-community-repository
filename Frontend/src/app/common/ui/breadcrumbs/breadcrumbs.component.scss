@@ -12,6 +12,7 @@
   max-height:1.5em;
   display:flex;
   overflow:hidden;
+
   div{
     float:left;
     color:$primary;
@@ -25,6 +26,10 @@
   .homeIcon{
     margin-top: 0;
     max-height: none;
+  }
+  .breadcrumb-arrow{
+    font-size: 15pt;
+    margin-left: -10px;
   }
 }
 .selected{

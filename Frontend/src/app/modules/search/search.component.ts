@@ -417,14 +417,15 @@ export class SearchComponent {
     if(init) {
       this.searchService.searchResultCollections = [];
       if(this.isHomeRepository() || this.currentRepository==RestConstants.ALL) {
-        this.search.search(criterias, [], {
+        this.search.search(this.getCriterias(properties,searchString,false), [], {
           sortBy: [
             RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
             RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
             RestConstants.CM_MODIFIED_DATE
           ],
           sortAscending: [false,true,false]
-        }, RestConstants.CONTENT_TYPE_COLLECTIONS,this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository,this.mdsId).subscribe(
+        }, RestConstants.CONTENT_TYPE_COLLECTIONS,
+            this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository,this.mdsId,[],"collections").subscribe(
           (data: NodeList) => {
             this.searchService.searchResultCollections = data.nodes;
             this.searchService.resultCount.collections = data.pagination.total;
@@ -944,12 +945,14 @@ export class SearchComponent {
       });
   }
 
-  private getCriterias(properties=this.currentValues,searchString=this.searchService.searchTerm) {
+  private getCriterias(properties=this.currentValues,searchString=this.searchService.searchTerm,addAll=true) {
     let criterias:any=[];
     if(searchString)
       criterias.push({'property': RestConstants.PRIMARY_SEARCH_CRITERIA, 'values': [searchString]});
+    if(!addAll)
+      return criterias;
     if(properties) {
-      for (var property in properties) {
+      for (let property in properties) {
         if(properties[property] && properties[property].length)
           criterias.push({'property':property,'values':properties[property]});
       }

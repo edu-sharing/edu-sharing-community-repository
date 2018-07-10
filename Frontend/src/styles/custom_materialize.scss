@@ -104,6 +104,9 @@ input[type=search]{
   width:calc(100% - 1.5em);
   border-radius: 3px;
   background-color: #fff;
+  &:disabled{
+    border:1px dashed #ccc;
+  }
 }
 select{
   width:100%;

@@ -89,11 +89,13 @@ export class RestNodeService extends AbstractRestService{
   public getChildren = (parent : string,
                         filter : string[]=[],
                         request : any = null,
+                        assocName : string = "",
                         repository=RestConstants.HOME_REPOSITORY) : Observable<NodeList> => {
-    let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository/:parent/children/?:filter&:request",repository,
+    let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository/:parent/children/?:filter&assocName=:assocName&:request",repository,
       [
         [":parent",encodeURIComponent(parent)],
         [":filter",RestHelper.getQueryStringForList("filter",filter)],
+        [":assocName",encodeURIComponent(assocName)],
         [":request",this.connector.createRequestString(request)],
       ]);
     return this.connector.get(query,this.connector.getRequestOptions())
@@ -583,6 +585,8 @@ export class RestNodeService extends AbstractRestService{
      * @returns {Observable<NodeList>}
      */
   public getNodeChildobjects(nodeId:string,repository=RestConstants.HOME_REPOSITORY){
+      return this.getChildren(nodeId,[],{count:RestConstants.COUNT_UNLIMITED,propertyFilter:[RestConstants.ALL],sortBy:[RestConstants.CCM_PROP_CHILDOBJECT_ORDER],sortAscending:[true]},RestConstants.CCM_ASSOC_CHILDIO,repository);
+      /*
       return new Observable<NodeList>((observer : Observer<NodeList>)=>{
           this.getChildren(nodeId,[],{count:RestConstants.COUNT_UNLIMITED,propertyFilter:[RestConstants.ALL],sortBy:[RestConstants.CCM_PROP_CHILDOBJECT_ORDER],sortAscending:[true]},repository).subscribe((childs:NodeList)=>{
           childs.nodes = Helper.filterArray(childs.nodes,'type',RestConstants.CCM_TYPE_IO);
@@ -593,5 +597,6 @@ export class RestNodeService extends AbstractRestService{
           observer.complete();
           });
       });
+      */
   }
 }

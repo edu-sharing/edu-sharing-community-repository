@@ -7,18 +7,20 @@
   <div class="row" *ngIf="!data.isDirectory">
       <div class="col s12">
         <ul class="tabs">
-          <li class="clickable tab col s4" (click)="setTab(INFO)">
-            <a [class.active]="tab==INFO" ><i class="material-icons">info_outline</i></a>
+          <li class="clickable tab col s4" (click)="setTab(INFO)" title="Info">
+            <a [class.active]="tab==INFO" alt="Info"><i class="material-icons">info_outline</i></a>
           </li>
-          <li class="clickable tab col s4" (click)="setTab(PROPERTIES)">
-            <a [class.active]="tab==PROPERTIES"><i class="material-icons">local_offer</i></a>
+          <!--Icon for Usages-->
+          <li class="clickable tab col s4" (click)="setTab(PROPERTIES)" title="Statistik">
+            <a [class.active]="tab==PROPERTIES" alt="Statistik"><i class="material-icons">equalizer</i><div class="value-properties">{{usages ? usages.length : 0}}</div></a>
           </li>
-          <li class="clickable tab col s4" (click)="setTab(VERSIONS)">
-            <a [class.active]="tab==VERSIONS"><i class="material-icons">restore</i></a>
+          <li class="clickable tab col s4" (click)="setTab(VERSIONS)" title="Version">
+            <a [class.active]="tab==VERSIONS" alt="Version"><i class="material-icons">restore</i></a>
           </li>
         </ul>
     </div>
   </div>
+
   <div *ngIf="tab==INFO" class="content">
     <img class="preview clickable" (click)="display()" [src]="isAnimated() ? data.preview : data.preview+'&crop=true&width=600&height=450'" />
     <div class="edit clickable" (click)="edit()"><i class="material-icons">edit</i></div>
@@ -80,11 +82,24 @@
       </div>
     </div>
   </div>
-  <div *ngIf="tab==PROPERTIES" class="content">
-    <div class="description"><a class="clickable" (click)="openPermalink()">{{'WORKSPACE.METADATA.PERMALINK' | translate}}</a></div>
-    <div class="description">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}}</div>
-    <div class="value">{{usageCount}}</div>
+  <!--Usages Info -->
+  <div [class.hiddendiv]="tab!=PROPERTIES" class="content">
+    <div class="description">{{'WORKSPACE.METADATA.USAGE_COUNT_TITLE' | translate}}</div>
+
+
+    <canvas id="myChart" width="300" height="300"></canvas>
+    <ul class="statistik_value">
+      <li *ngFor="let point of stats.points" class="point">{{point}}</li>
+
+    </ul>
+    <div class="description usage_count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <strong style="font-weight: bold;">{{usages ? usages.length : 0}}</strong></div>
+
+
+
+    <!--<div class="value">{{usageCount}}</div>-->
+    <!--<div class="description"><a class="clickable" (click)="openPermalink()">{{'WORKSPACE.METADATA.PERMALINK' | translate}}</a></div>-->
   </div>
+
   <div *ngIf="tab==VERSIONS" class="content">
     <div *ngIf="versionsLoading" class="center"><spinner></spinner></div>
     <div *ngFor="let version of versions" class="version" [class.versionMain]="isCurrentVersion(version)">
