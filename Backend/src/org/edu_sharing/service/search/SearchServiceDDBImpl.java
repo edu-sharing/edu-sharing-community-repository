@@ -390,8 +390,8 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
 		
 		List<String> facets = mds.getQueries().findQuery(queryId).findParameterByName(parameterId).getFacets();
-		String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
-		
+		//String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
+		String url = getUrl("/search","*",facets, 0, 0);
 		System.out.println("url:" + url);
 		
 		try {
@@ -413,11 +413,13 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						//int count = facetteVal.getInt("count");
 						String val = facetteVal.getString("value");
 						
-						SuggestFacetDTO dto = new SuggestFacetDTO();
-						dto.setFacet(val);
-						dto.setDisplayString(val);
-
-						result.add(dto);
+						if(val.contains(value)) {					
+							SuggestFacetDTO dto = new SuggestFacetDTO();
+							dto.setFacet(val);
+							dto.setDisplayString(val);
+	
+							result.add(dto);
+						}
 					}
 					
 					
