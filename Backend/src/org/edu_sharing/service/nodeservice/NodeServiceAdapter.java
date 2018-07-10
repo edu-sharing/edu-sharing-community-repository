@@ -26,6 +26,11 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
+	public void createAssoc(String parentId, String childId, String assocName) {
+
+	}
+
+	@Override
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props) throws Throwable {
 		return null;
 	}
@@ -72,11 +77,6 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public String getOrCreateUserInbox() {
-		return null;
-	}
-
-	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID, String assocName) {
 		return null;
 	}
 
@@ -255,4 +255,8 @@ public class NodeServiceAdapter implements NodeService {
 		return null;
 	}
 
+	@Override
+	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName) {
+		return null;
+	}
 }

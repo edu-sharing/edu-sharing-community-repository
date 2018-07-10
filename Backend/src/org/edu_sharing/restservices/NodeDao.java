@@ -501,7 +501,7 @@ public class NodeDao {
 			if(assocName!=null && !assocName.isEmpty()){
 				assocName=CCConstants.getValidGlobalName(assocName);
 			}
-			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRef(getId(),assocName)) {
+			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRefAssoc(getId(),assocName)) {
 	
 				NodeRef ref = new NodeRef();
 				ref.setRepo(this.repoDao.getId());

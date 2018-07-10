@@ -157,11 +157,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null,parentId,null);
 		return this.createNodeBasic(Constants.storeRef, parentId, nodeType,childAssociation, toSafeProps);
 	}
-	
+
 	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props) {
 		return this.createNodeBasic(Constants.storeRef, parentID, nodeTypeString,CCConstants.CM_ASSOC_FOLDER_CONTAINS, _props);
 	}
-	
+
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, Object> _props) {
 		childAssociation = (childAssociation == null) ? CCConstants.CM_ASSOC_FOLDER_CONTAINS : childAssociation;
 		Map<QName, Serializable> properties = transformPropMap(_props);
@@ -254,7 +254,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id,values[0]);
 			}
 		}
-		
+
 		for(String property : getAllSafeProps()){
 			if(!props.containsKey(property)) continue;
 			
@@ -669,9 +669,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);		
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
-	
+
 	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID,String assocName){
+	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID,String assocName){
+		NodeRef parentNodeRef = getParentRef(parentID);
+		if(assocName==null || assocName.isEmpty()){
+			return nodeService.getChildAssocs(parentNodeRef);
+		}
+		else{
+			return nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
+		}
+	}
+
+	private NodeRef getParentRef(String parentID) {
 		if (parentID == null) {
 
 			String startParentId = apiClient.getRootNodeId();
@@ -682,17 +692,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			}
 		}
 
-		NodeRef parentNodeRef = new NodeRef(Constants.storeRef, parentID);
-		if(assocName==null || assocName.isEmpty()){
-			return nodeService.getChildAssocs(parentNodeRef);
-		}
-		else{
-			return nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
-		}
+		return new NodeRef(Constants.storeRef, parentID);
 	}
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
-		return  getChildrenChildAssociationRef(parentID,null);
-	}
+
 	public void createVersion(String nodeId, HashMap _properties) throws Exception{
 		apiClient.createVersion(nodeId, _properties);
 	}
