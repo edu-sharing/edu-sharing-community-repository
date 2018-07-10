@@ -104,7 +104,9 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		List<HttpHost> hosts = getConfiguredHosts();
 		RestClientBuilder restClient = RestClient.builder(
                 hosts.toArray(new HttpHost[0]));
-		client=new RestHighLevelClient(restClient);
+		if(client==null){
+			client=new RestHighLevelClient(restClient);
+		}
 		try {
 			CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
 			indexRequest.mapping(TYPE_NAME, jsonBuilder().
@@ -133,6 +135,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 		}
 		
 	}
+
 	private List<HttpHost> getConfiguredHosts() {
 		List<HttpHost> hosts=null;
 		try {
@@ -160,7 +163,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	private static String INDEX_NAME="entry_index22";
 	private static String TYPE_NAME="entry";
 	private static TimeValue SCROLL_TIME=TimeValue.timeValueMinutes(1);
-	private RestHighLevelClient client;
+	private static RestHighLevelClient client;
 
 	@Override
 	public String addEntry(ContentEntry entry) throws Exception {
