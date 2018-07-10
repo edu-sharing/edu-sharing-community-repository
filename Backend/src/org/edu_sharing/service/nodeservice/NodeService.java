@@ -42,7 +42,7 @@ public interface NodeService {
 	public String getOrCreateUserInbox();
 	
 	public String getOrCreateUserSavedSearch();
-	
+
 	public String getPrimaryParent(String nodeId);
 
 	default List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
