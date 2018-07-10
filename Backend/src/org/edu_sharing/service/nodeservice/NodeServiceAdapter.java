@@ -76,7 +76,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID) {
+	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID, String assocName) {
 		return null;
 	}
 

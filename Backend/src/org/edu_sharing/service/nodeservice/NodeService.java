@@ -38,8 +38,12 @@ public interface NodeService {
 	public String getOrCreateUserInbox();
 	
 	public String getOrCreateUserSavedSearch();
-	
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID);
+
+	default List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
+		return getChildrenChildAssociationRef(parentID,null);
+	}
+
+	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID,String assocName);
 
 	public void createVersion(String nodeId, HashMap _properties) throws Exception;
 	

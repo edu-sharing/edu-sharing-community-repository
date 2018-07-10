@@ -12,6 +12,7 @@ import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
@@ -661,7 +662,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
+	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID,String assocName){
 		if (parentID == null) {
 
 			String startParentId = apiClient.getRootNodeId();
@@ -673,10 +674,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 
 		NodeRef parentNodeRef = new NodeRef(Constants.storeRef, parentID);
-		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(parentNodeRef);
-		return childAssocList;
+		if(assocName==null || assocName.isEmpty()){
+			return nodeService.getChildAssocs(parentNodeRef);
+		}
+		else{
+			return nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
+		}
 	}
-
+	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
+		return  getChildrenChildAssociationRef(parentID,null);
+	}
 	public void createVersion(String nodeId, HashMap _properties) throws Exception{
 		apiClient.createVersion(nodeId, _properties);
 	}

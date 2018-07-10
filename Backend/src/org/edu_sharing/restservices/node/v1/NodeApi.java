@@ -762,7 +762,7 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_FILTER) @QueryParam("filter") List<String> filter,
 	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-	     
+	    @ApiParam(value = "Filter for a specific association. May be empty",required = false,defaultValue = "") @QueryParam("assocName") String assocName,
 	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 
@@ -797,7 +797,7 @@ public class NodeApi  {
 	    	}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
-	    		children = nodeDao.getChildren();
+	    		children = nodeDao.getChildren(assocName);
 	    	}
 	    	
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);

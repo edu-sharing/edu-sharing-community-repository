@@ -472,15 +472,19 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-
 	public List<NodeRef> getChildren() throws DAOException {
+		return getChildren(null);
+	}
+	public List<NodeRef> getChildren(String assocName) throws DAOException {
 
 		try {
 			List<NodeRef> result = new ArrayList<NodeRef>();
 	
 			
-			
-			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRef(getId())) {
+			if(assocName!=null && !assocName.isEmpty()){
+				assocName=CCConstants.getValidGlobalName(assocName);
+			}
+			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRef(getId(),assocName)) {
 	
 				NodeRef ref = new NodeRef();
 				ref.setRepo(this.repoDao.getId());
