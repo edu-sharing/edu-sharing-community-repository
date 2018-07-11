@@ -360,11 +360,11 @@ span.thumb{
 }
 /* ng2-datepicker */
 .ngx-datepicker-input{
+  padding: 0!important;
   color:$textPrimary!important;
   margin-top: 10px !important;
-  padding-bottom: 0!important;
   text-align: center;
-  width: 278px !important;
+  width: 298px !important;
   cursor: pointer;
 }
 
