@@ -37,7 +37,7 @@ export class ActionbarHelper{
     }
   if(type=='CREATE_VARIANT') {
       if (NodeHelper.allFiles(nodes)) {
-          option = new OptionItem("WORKSPACE.OPTION.VARIANT", "layers", callback);
+          option = new OptionItem("WORKSPACE.OPTION.VARIANT", "call_split", callback);
           /*
           option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
           option.enabledCallback = (node: Node) => {

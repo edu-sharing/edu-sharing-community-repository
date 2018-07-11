@@ -191,7 +191,8 @@
       "CONTRIBUTOR":"Beteiligte",
       "SHARE_LINK":"Download-Link freigeben",
       "WORKFLOW":"Workflow",
-      "TEMPLATE":"Metadaten Vorlage"
+      "TEMPLATE":"Metadaten Vorlage",
+      "VARIANT": "Variante anlegen"
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatische Übernahme von Metadaten",
