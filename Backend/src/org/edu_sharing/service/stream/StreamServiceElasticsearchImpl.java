@@ -101,12 +101,12 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 	}
 	private static final String PROPERTY_XML = "elasticsearch.properties.xml";
 	public StreamServiceElasticsearchImpl() {
+		if(client!=null)
+			return;
 		List<HttpHost> hosts = getConfiguredHosts();
 		RestClientBuilder restClient = RestClient.builder(
-                hosts.toArray(new HttpHost[0]));
-		if(client==null){
-			client=new RestHighLevelClient(restClient);
-		}
+				hosts.toArray(new HttpHost[0]));
+		client=new RestHighLevelClient(restClient);
 		try {
 			CreateIndexRequest  indexRequest = new CreateIndexRequest(INDEX_NAME);
 			indexRequest.mapping(TYPE_NAME, jsonBuilder().
@@ -119,21 +119,20 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 					startObject("description").field("type", "text").endObject().
 					startObject("priority").field("type", "integer").endObject().
 					startObject("audience").field("type", "nested").
-						startObject("properties").
-						startObject("authority").field("type","keyword").endObject().
-						startObject("status").field("type","keyword").endObject().
-						endObject().
+					startObject("properties").
+					startObject("authority").field("type","keyword").endObject().
+					startObject("status").field("type","keyword").endObject().
+					endObject().
 					endObject().
 					endObject().
 					endObject().
 					endObject()
-					);
+			);
 			client.indices().create(indexRequest);
 		}catch(Exception e) {
 			// index already exists
 			// throw new RuntimeException("Elastic search init failed",e);
 		}
-		
 	}
 
 	private List<HttpHost> getConfiguredHosts() {
