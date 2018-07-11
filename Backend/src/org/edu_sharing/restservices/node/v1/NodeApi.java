@@ -2000,14 +2000,68 @@ public class NodeApi  {
 	    public Response setOwner(
 	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@ApiParam(value = "username",required=false ) @QueryParam("mailtext")  String username,
+	    	@ApiParam(value = "username",required=false ) @QueryParam("username")  String username,
 			@Context HttpServletRequest req) {
 	    
 	    	try {
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.setOwner(node, username);   	
+		    	nodeDao.setOwner(username);   	
+		    	return Response.status(Response.Status.OK).build();
+		
+	    	} catch (DAOValidationException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (DAOSecurityException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (DAOMissingException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (Throwable t) {
+	    		
+	    		logger.error(t.getMessage(), t);
+	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+	    	}
+
+	    }
+		
+		@POST
+	    @Path("/nodes/{repository}/{node}/property")    
+	    
+	    @ApiOperation(
+	    	value = "Set single property of node.", 
+	    	notes = "Set single property of node.")
+	    
+	    @ApiResponses(
+	    	value = { 
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		    })
+
+	    public Response setProperty(
+	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@ApiParam(value = "property",required=true ) @QueryParam("property")  String property,
+	    	@ApiParam(value = "value",required=true ) @QueryParam("value")  String value,
+			@Context HttpServletRequest req) {
+	    
+	    	try {
+			
+		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+		    	nodeDao.setProperty(property, value);
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (DAOValidationException t) {

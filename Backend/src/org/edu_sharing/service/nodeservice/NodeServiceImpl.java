@@ -32,6 +32,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.Constants;
@@ -857,5 +858,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		else{
 			return nodeService.getTargetAssocs(ref,QName.createQName(assoc.getAssocName()));
 		}
+	}
+	
+	public void setProperty(String protocol, String storeId, String nodeId, String property, String value) {
+		property = NameSpaceTool.transformToLongQName(property);
+		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), QName.createQName(property),value);
 	}
 }
