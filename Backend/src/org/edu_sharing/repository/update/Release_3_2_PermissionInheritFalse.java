@@ -21,7 +21,7 @@ public class Release_3_2_PermissionInheritFalse implements Update {
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-	Logger logger = Logger.getLogger(Release_3_2_FillOriginalId.class);
+	Logger logger = Logger.getLogger(Release_3_2_PermissionInheritFalse.class);
 	
 	PrintWriter out;
 	
