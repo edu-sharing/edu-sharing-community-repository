@@ -1313,6 +1313,7 @@ public class NodeDao {
 
 	public List<NotifyEntry> getNotifys() throws DAOException {
 		try{
+			throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 			List<Notify> notifys = permissionService.getNotifyList(nodeId);
 			List<NotifyEntry> result = new ArrayList<>(notifys.size());
 			for(Notify notify : notifys){
@@ -1322,6 +1323,12 @@ public class NodeDao {
 		}
 		catch(Throwable t){
 			throw DAOException.mapping(t);
+		}
+	}
+
+	private void throwIfPermissionIsMissing(String permission) throws DAOSecurityException {
+		if(!permissionService.hasPermission(storeProtocol,storeId,nodeId,permission)){
+			throw new DAOSecurityException(new SecurityException("Current user has no "+permission+" on node "+nodeId));
 		}
 	}
 
@@ -1374,6 +1381,7 @@ public class NodeDao {
 	}
 
 	public List<NodeShare> getShares(String email) {
+		if(getNodeP)
 		ShareServiceImpl service = new ShareServiceImpl();
 		List<NodeShare> entries=new ArrayList<>();
 		for(Share share : service.getShares(this.nodeId)){
@@ -1386,6 +1394,7 @@ public class NodeDao {
 	public NodeShare createShare(long expiryDate) throws DAOException {
 		ShareServiceImpl service = new ShareServiceImpl();
 		try {
+			throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),service.createShare(nodeId, expiryDate));
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
