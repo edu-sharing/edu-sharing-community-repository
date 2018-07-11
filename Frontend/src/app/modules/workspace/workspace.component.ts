@@ -101,6 +101,7 @@ export class WorkspaceMainComponent implements EventListener{
     private isLoggedIn = false;
     public addNodesToCollection : Node[];
     public addNodesStream : Node[];
+    public variantNode : Node;
     private dropdownPosition: string;
     private dropdownLeft: string;
     private dropdownRight: string;
@@ -805,7 +806,13 @@ export class WorkspaceMainComponent implements EventListener{
             if (stream && !this.isSafe)
                 options.push(stream);
         }
-
+        if(nodes && nodes.length && allFiles) {
+            /*
+            let variant = ActionbarHelper.createOptionIfPossible('CREATE_VARIANT',nodes,this.connector,(node:Node)=>this.createVariant(node));
+            if (variant && !this.isSafe)
+                options.push(variant);
+            */
+        }
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
             let template = ActionbarHelper.createOptionIfPossible('NODE_TEMPLATE',nodes,this.connector,(node:Node)=>this.nodeTemplate(node));
@@ -1066,6 +1073,10 @@ export class WorkspaceMainComponent implements EventListener{
     let nodes=this.getNodeList(node);
     this.addNodesStream=nodes;
   }
+    private createVariant(node: Node) {
+        let nodes=this.getNodeList(node);
+        this.variantNode=nodes[0];
+    }
     private createContext(event:any=null){
         if(!this.createAllowed)
             return;

@@ -202,6 +202,24 @@ export class RestNodeService extends AbstractRestService{
     return this.connector.post(query,"",this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
+    /**
+     * Create a fork (variant) of a node
+     * @param target the target (parent) where the fork should be saved
+     * @param toCopy The element to fork
+     * @param repository
+     * @returns {Observable<R>}
+     */
+    public forkNode = (target : string,
+                       toFork : string,
+                       repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:target/children/_fork?source=:toFork",repository,
+            [
+                [":target",target],
+                [":toFork",toFork],
+            ]);
+        return this.connector.post(query,"",this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+    }
   public getNodeShares = (node : string,
                      email : string=null,
                      repository=RestConstants.HOME_REPOSITORY) : Observable<NodeShare[]> => {

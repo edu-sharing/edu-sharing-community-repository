@@ -203,7 +203,7 @@ public class MetadataTemplateRenderer {
 	}
 
 	private String getLicenseDescription(String licenseName) {
-		if(licenseName==null)
+		if(licenseName==null || licenseName.isEmpty())
 			licenseName="NONE";
 
 		if(licenseName.equals(CCConstants.COMMON_LICENSE_PDM)){

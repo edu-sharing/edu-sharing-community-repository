@@ -50,6 +50,7 @@ import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
+import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
@@ -732,7 +733,7 @@ public class NodeApi  {
     	
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, DELETE").build();
     }
-    
+
     @GET
     @Path("/nodes/{repository}/{node}/children")    
     
@@ -803,6 +804,62 @@ public class NodeApi  {
     	}
        
     }
+	@GET
+	@Path("/nodes/{repository}/{node}/assocs")
+
+	@ApiOperation(
+			value = "Get related nodes.",
+			notes = "Get nodes related based on an assoc.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntries.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getAssocs(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
+			@ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@ApiParam(value = "Either where the given node should be the \"SOURCE\" or the \"TARGET\"",required = true) @QueryParam("direction") AssocInfo.Direction direction,
+			@ApiParam(value = "Association name (e.g. ccm:forkio).") @QueryParam("assocName") String assocName,
+			@ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Context HttpServletRequest req) {
+
+		try {
+			Filter propFilter = new Filter(propertyFilter);
+
+			NodeEntries response=new NodeEntries();
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			List<NodeRef> children;
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
+			children = nodeDao.getAssocs(new AssocInfo(direction,assocName));
+
+
+			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
+
+			List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,null,propFilter);
+			//Collections.sort(children);
+			response=createResponseFromNodeList(response,sorted,skipCount,maxItems);
+
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		}
+		catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
     @DELETE
     @Path("/nodes/{repository}/{node}/shares/{shareId}")    
     
