@@ -17,6 +17,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.EmailValidator;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.policy.ScopeNodeWrongScopeException;
@@ -43,6 +44,7 @@ public class ShareServiceImpl implements ShareService {
 	public static final QName SHARES_ASPECT = QName.createQName(CCConstants.CCM_ASPECT_SHARES);
 	
 	public static final QName SHARE_PROP_EXPIRYDATE = QName.createQName(CCConstants.CCM_PROP_SHARE_EXPIRYDATE);
+	public static final QName SHARE_PROP_PASSWORD = QName.createQName(CCConstants.CCM_PROP_SHARE_PASSWORD);
 	public static final QName SHARE_PROP_SHARE_MAIL = QName.createQName(CCConstants.CCM_PROP_SHARE_MAIL);
 	public static final QName SHARE_PROP_SHARE_TOKEN = QName.createQName(CCConstants.CCM_PROP_SHARE_TOKEN);
 	public static final QName SHARE_PROP_DOWNLOAD_COUNTER = QName.createQName(CCConstants.CCM_PROP_SHARE_DOWNLOAD_COUNTER);
@@ -62,12 +64,12 @@ public class ShareServiceImpl implements ShareService {
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	}
 	
-	public Share createShare(String nodeId, long expiryDate) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException{
-			return getShare(nodeId, createShare(nodeId,new String[]{EMAIL_TYPE_LINK},expiryDate,null));
+	public Share createShare(String nodeId, long expiryDate, String password) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException, NodeDoesNotExsistException, PermissionFailedException{
+			return getShare(nodeId, createShare(nodeId,new String[]{EMAIL_TYPE_LINK},expiryDate,password,null));
 	}
 	
 	@Override
-	public String createShare(String nodeId, String[] emails, long expiryDate, String emailMessageLocale) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException,
+	public String createShare(String nodeId, String[] emails, long expiryDate, String password, String emailMessageLocale) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException,
 			NodeDoesNotExsistException, PermissionFailedException {
 		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE)) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
@@ -121,7 +123,8 @@ public class ShareServiceImpl implements ShareService {
 			Map<QName, Serializable> props = new HashMap<QName, Serializable>();
 			
 			props.put(SHARE_PROP_EXPIRYDATE, expiryDate);
-			props.put(SHARE_PROP_SHARE_MAIL, email);
+			props.put(SHARE_PROP_SHARE_MAIL, expiryDate);
+			props.put(SHARE_PROP_PASSWORD, encryptPassword(password));
 			
 			token = new KeyTool().getKey();
 			
@@ -162,7 +165,13 @@ public class ShareServiceImpl implements ShareService {
 		}
 		return token;
 	}
-	
+
+	public static String encryptPassword(String password) {
+		if(password==null || password.isEmpty())
+			return null;
+		return DigestUtils.sha1Hex(password);
+	}
+
 	private void throwIfScopedNode(NodeRef io) {
 		if(serviceRegistry.getNodeService().getProperty(io, QName.createQName(CCConstants.CCM_PROP_SCOPE_TYPE))!=null){
 			throw new ScopeNodeWrongScopeException("Not allowed to share a scoped node!");
@@ -183,6 +192,8 @@ public class ShareServiceImpl implements ShareService {
 		Map<QName,Serializable> props = new HashMap<QName,Serializable>();
 		props.put(SHARE_PROP_SHARE_TOKEN, share.getToken());
 		props.put(SHARE_PROP_EXPIRYDATE, share.getExpiryDate());
+		if(share.getPassword()!=null && !share.getPassword().isEmpty())
+			props.put(SHARE_PROP_PASSWORD, encryptPassword(share.getPassword()));
 		props.put(SHARE_PROP_SHARE_MAIL, share.getEmail());
 		props.put(SHARE_PROP_DOWNLOAD_COUNTER, share.getDownloadCount());
 		throwIfScopedNode(new NodeRef(Constants.storeRef,share.getIoNodeId()));
@@ -242,6 +253,7 @@ public class ShareServiceImpl implements ShareService {
 			share.setIoNodeId(nodeId);
 			share.setNodeId(shareNodeRef.getId());
 			share.setEmail((String)props.get(SHARE_PROP_SHARE_MAIL));
+			share.setPassword((String)props.get(SHARE_PROP_PASSWORD));
 			share.setExpiryDate((Long)props.get(SHARE_PROP_EXPIRYDATE));
 			share.setDownloadCount((Integer)props.get(SHARE_PROP_DOWNLOAD_COUNTER));
 			

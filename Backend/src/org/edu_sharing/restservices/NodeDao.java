@@ -1380,8 +1380,8 @@ public class NodeDao {
 		}
 	}
 
-	public List<NodeShare> getShares(String email) {
-		if(getNodeP)
+	public List<NodeShare> getShares(String email) throws DAOSecurityException {
+		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 		ShareServiceImpl service = new ShareServiceImpl();
 		List<NodeShare> entries=new ArrayList<>();
 		for(Share share : service.getShares(this.nodeId)){
@@ -1391,18 +1391,19 @@ public class NodeDao {
 		return entries;
 	}
 
-	public NodeShare createShare(long expiryDate) throws DAOException {
+	public NodeShare createShare(long expiryDate,String password) throws DAOException {
 		ShareServiceImpl service = new ShareServiceImpl();
 		try {
 			throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
-			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),service.createShare(nodeId, expiryDate));
+			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),service.createShare(nodeId, expiryDate,password));
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
 	
 	public void removeShare(String shareId) throws DAOException {
-    	ShareServiceImpl service=new ShareServiceImpl();
+		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
+		ShareServiceImpl service=new ShareServiceImpl();
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
     			service.removeShare(shareId);
@@ -1412,11 +1413,13 @@ public class NodeDao {
     	throw DAOException.mapping(new Exception("share "+shareId+" was not found on node "+nodeId));
 	}
 	
-	public NodeShare updateShare(String shareId, long expiryDate) throws DAOException {
+	public NodeShare updateShare(String shareId, long expiryDate, String password) throws DAOException {
+		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 		ShareServiceImpl service=new ShareServiceImpl();
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
     			share.setExpiryDate(expiryDate);
+    			share.setPassword(password);
     			service.updateShare(share);
     			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),share);
     		}

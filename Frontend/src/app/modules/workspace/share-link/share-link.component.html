@@ -37,7 +37,7 @@
                   </label>
                 </div>
               </div>
-              <input-password *ngIf="password" placeholder="{{'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER' | translate}}">
+              <input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" placeholder="{{edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER' | translate}}">
               </input-password>
 
             </div>
@@ -52,8 +52,8 @@
               </div>
 
             </div>
-            <div class="heading link-title">{{'WORKSPACE.SHARE_LINK.LINK' | translate}}</div>
-            <div class="info">
+            <label class="heading link-title">{{'WORKSPACE.SHARE_LINK.LINK' | translate}}</label>
+            <div class="info info-link">
               <div class="linkInput info-left">
                 <input type="text" [disabled]="!enabled" readonly="true" [(ngModel)]="currentShare.url">
               </div>

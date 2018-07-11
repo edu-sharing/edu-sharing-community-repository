@@ -869,6 +869,7 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @ApiParam(value = "share id",required=true ) @PathParam("shareId") String shareId,
 	    @ApiParam(value = "expiry date for this share, leave empty or -1 for unlimited",required=false,defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED ) @QueryParam("expiryDate") Long expiryDate,
+	    @ApiParam(value = "new password for share, leave empty if you don't want to change it",required=false,defaultValue="") @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -876,7 +877,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
 	    	
-	    	NodeShare response=nodeDao.updateShare(shareId,expiryDate==null?ShareService.EXPIRY_DATE_UNLIMITED:expiryDate);
+	    	NodeShare response=nodeDao.updateShare(shareId,expiryDate==null?ShareService.EXPIRY_DATE_UNLIMITED:expiryDate,password);
 	    	return Response.status(Response.Status.OK).entity(response).build();
     	}
     	catch (Throwable t) {
@@ -989,13 +990,14 @@ public class NodeApi  {
     	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @ApiParam(value = "expiry date for this share, leave empty or -1 for unlimited",required=false,defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED ) @QueryParam("expiryDate") Long expiryDate,
+	    @ApiParam(value = "password for this share, use none to not use a password",required=false,defaultValue="") @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
-	    	NodeShare response=nodeDao.createShare(expiryDate==null ? ShareService.EXPIRY_DATE_UNLIMITED : expiryDate);
+	    	NodeShare response=nodeDao.createShare(expiryDate==null ? ShareService.EXPIRY_DATE_UNLIMITED : expiryDate,password);
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
     	}

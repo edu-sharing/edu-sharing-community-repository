@@ -36,7 +36,13 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 
 		ServletOutputStream op = resp.getOutputStream();
 
+		if(true){
+			resp.sendRedirect(URLTool.getNgComponentsUrl()+"link-share?"+req.getQueryString());
+			return;
+		}
+
 		String token = req.getParameter("token");
+		String password = req.getParameter("password");
 
 		if (token == null) {
 			op.println("missing token");
@@ -85,7 +91,9 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 					return;
 				}
 			}
-			
+			if (share.getPassword()!=null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
+				resp.sendRedirect(URLTool.getNgMessageUrl("share_password")+"?nodeId="+nodeId+"&token="+token);
+			}
 			String wwwUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 			if(wwwUrl != null && !wwwUrl.trim().equals("")){
 				resp.sendRedirect(wwwUrl);

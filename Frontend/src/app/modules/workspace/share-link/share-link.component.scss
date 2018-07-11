@@ -52,7 +52,8 @@
   padding: 10px 0 5px;
 }
 input-password{
-  margin-top: 10px;
+  position: relative;
+  top: 10px;
 }
 .link-activate{
   color: black;
@@ -67,6 +68,9 @@ input-password{
 }
 .link-title{
   margin-top: 10px;
+}
+.info-link{
+  margin-top: -10px;
 }
 
 .copyLink{

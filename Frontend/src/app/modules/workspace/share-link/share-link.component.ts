@@ -29,7 +29,10 @@ export class WorkspaceShareLinkComponent  {
   public enabled=true;
   public expiry=false;
   public password=false;
+  public passwordString:string;
   public _expiryDate : Date;
+  private currentDate: number;
+  private edit: boolean;
   public set expiryDate(date:Date){
     this._expiryDate=date;
     this.setExpiry(true);
@@ -45,8 +48,11 @@ export class WorkspaceShareLinkComponent  {
     this.nodeService.getNodeShares(node.ref.id,RestConstants.SHARE_LINK).subscribe((data:NodeShare[])=>{
       this._expiryDate=new Date(new Date().getTime()+3600*24*1000);
       if(data.length){
+        this.edit=true;
         this.currentShare=data[0];
         this.expiry=data[0].expiryDate>0;
+        this.password=data[0].password;
+        this.currentDate=data[0].expiryDate;
         if(this.expiry) {
           this.expiryDate=new Date(data[0].expiryDate);
         }
@@ -60,6 +66,7 @@ export class WorkspaceShareLinkComponent  {
         }
       }
       else{
+        this.edit=false;
         this.nodeService.createNodeShare(node.ref.id).subscribe((data:NodeShare)=>{
           this.currentShare=data;
           this.loading=false;
@@ -108,10 +115,10 @@ export class WorkspaceShareLinkComponent  {
   public setDate(){
     this.setExpiry(true);
   }
-  private updateShare(date:number){
+  private updateShare(date=this.currentDate){
     console.log(date);
     this.currentShare.url=this.translate.instant('LOADING');
-    this.nodeService.updateNodeShare(this._node.ref.id,this.currentShare.shareId,date).subscribe((data:NodeShare)=>{
+    this.nodeService.updateNodeShare(this._node.ref.id,this.currentShare.shareId,date,this.password ? this.passwordString : "").subscribe((data:NodeShare)=>{
       this.currentShare=data;
       if(date==0)
         this.currentShare.url=this.translate.instant('WORKSPACE.SHARE_LINK.DISABLED');
@@ -121,9 +128,8 @@ export class WorkspaceShareLinkComponent  {
   public setExpiry(value:boolean){
     if(!this.enabled)
       return;
-    let date=value ? DateHelper.getDateFromDatepicker(this.expiryDate).getTime() : RestConstants.SHARE_EXPIRY_UNLIMITED;
-    this.updateShare(date);
-    console.log(date);
+    this.currentDate=value ? DateHelper.getDateFromDatepicker(this.expiryDate).getTime() : RestConstants.SHARE_EXPIRY_UNLIMITED;
+    this.updateShare();
   }
 
   public setPassword(){
@@ -131,6 +137,7 @@ export class WorkspaceShareLinkComponent  {
   /*
   Hier den Objekt mit einem Password versehen
   */
+    this.updateShare();
   }
   public constructor(
     private nodeService:RestNodeService,

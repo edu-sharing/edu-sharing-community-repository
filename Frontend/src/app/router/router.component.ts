@@ -21,6 +21,7 @@ import {MessagesComponent} from "../modules/messages/messages.component";
 import {UIConstants} from "../common/ui/ui-constants";
 import {StartupComponent} from '../modules/startup/startup.component';
 import {ShareAppComponent} from "../modules/share-app/share-app.component";
+import {LinkShareComponent} from "../modules/link-share/link-share.component";
 
 
 
@@ -109,6 +110,8 @@ export var ROUTES=[
     // messages
     { path: UIConstants.ROUTER_PREFIX+'messages/:message', component: MessagesComponent },
 
+    // link-share
+    { path: UIConstants.ROUTER_PREFIX+'link-share', component: LinkShareComponent },
   ]
 ;
 

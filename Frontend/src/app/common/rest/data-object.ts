@@ -137,6 +137,7 @@ export interface NodeShare {
   token: string;
   email: string;
   expiryDate: number;
+  password: boolean;
   invitedAt: number;
   downloadCount: number;
   url: string;

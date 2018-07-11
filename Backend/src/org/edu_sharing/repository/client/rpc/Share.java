@@ -28,7 +28,8 @@ public class Share implements Serializable{
 	String invitedAtFormated;
 	
 	String locale;
-	
+	private String password;
+
 	public Share() {
 		
 	}
@@ -128,4 +129,11 @@ public class Share implements Serializable{
 		this.invitedByCaption = invitedByCaption;
 	}
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }
