@@ -39,7 +39,7 @@
               </div>
               <div *ngIf="password" class="password-link">
                 <input type="{{input_type}}" id="PasswordInput" placeholder="{{'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER' | translate}}">
-                <i (click)="showPassword()" [class.eye-aktiv]="input_type == 'text'" class="material-icons eye">remove_red_eye</i>
+                <i (click)="showPassword()" [class.eye-aktiv]="input_type == 'text'" class="material-icons eye">{{input_type === 'text' ? 'visibility_off':'visibility'}}</i>
               </div>
 
             </div>
