@@ -51,22 +51,8 @@
 .link-info{
   padding: 10px 0 5px;
 }
-.password-link{
+input-password{
   margin-top: 10px;
-  position: relative;
-  .eye{
-    position: absolute;
-    top: 1px;
-    right: 0;
-    padding: 8px;
-    //background: white;
-    box-sizing: content-box;
-    color: $textLight;
-    cursor: pointer;
-  }
-  .eye-aktiv{
-    color: $primary;
-  }
 }
 .link-activate{
   color: black;
