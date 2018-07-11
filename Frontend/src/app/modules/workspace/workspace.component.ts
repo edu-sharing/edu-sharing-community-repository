@@ -812,9 +812,11 @@ export class WorkspaceMainComponent implements EventListener{
                 options.push(collection);
         }
         if(nodes && nodes.length && allFiles) {
+            /*
             let variant = ActionbarHelper.createOptionIfPossible('CREATE_VARIANT',nodes,this.connector,(node:Node)=>this.createVariant(node));
             if (variant && !this.isSafe)
                 options.push(variant);
+            */
         }
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
