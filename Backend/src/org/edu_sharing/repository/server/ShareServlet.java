@@ -33,13 +33,11 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-		ServletOutputStream op = resp.getOutputStream();
-
-		if(true){
-			resp.sendRedirect(URLTool.getNgComponentsUrl()+"link-share?"+req.getQueryString());
+		if(!"download".equals(req.getParameter("mode"))){
+			resp.sendRedirect(URLTool.getNgComponentsUrl()+"sharing?"+req.getQueryString());
 			return;
 		}
+		ServletOutputStream op = resp.getOutputStream();
 
 		String token = req.getParameter("token");
 		String password = req.getParameter("password");
@@ -92,14 +90,17 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 				}
 			}
 			if (share.getPassword()!=null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
-				resp.sendRedirect(URLTool.getNgMessageUrl("share_password")+"?nodeId="+nodeId+"&token="+token);
+				resp.sendRedirect(URLTool.getNgComponentsUrl()+"sharing?"+req.getQueryString());
 			}
 			String wwwUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 			if(wwwUrl != null && !wwwUrl.trim().equals("")){
 				resp.sendRedirect(wwwUrl);
 				return;
 			}
-			
+			// download child object (io) from a map
+			if(req.getParameter("childId")!=null && serviceRegistry.getNodeService().getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
+				nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, req.getParameter("childId"));
+			}
 			String fileName = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
 
 			ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
@@ -132,7 +133,7 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			op.close();
 			
 			share.setDownloadCount( (share.getDownloadCount() + 1) );
-			shareService.updateShare(share);
+			shareService.updateDownloadCount(share);
 
 		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);

@@ -1,0 +1,37 @@
+<global-progress *ngIf="loading"></global-progress>
+<div *ngIf="!loading && sharingInfo" class="container">
+    <div class="details">
+        <img class="icon" [src]="sharingInfo.node.iconURL" />
+        <div class="name">{{sharingInfo.node.name}}</div>
+    </div>
+    <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
+        <form (ngsubmit)="validatePassword()">
+            <input-password required="true" (keydown.enter)="validatePassword()" [(value)]="passwordInput"></input-password>
+            <div class="input-hint-bottom">{{'SHARING.ENTER_PASSWORD' | translate}}</div>
+        </form>
+    </div>
+    <div *ngIf="!sharingInfo.password || sharingInfo.passwordMatches" class="password-valid">
+        <div *ngIf="sharingInfo.password && sharingInfo.passwordMatches" class="password-correct">PASSWORD CORRECT</div>
+        <div *ngIf="sharingInfo.node.isDirectory">
+            <listTable
+                [nodes]="childs"
+                [columns]="columns"
+                [hasIcon]="true"
+                [hasCheckbox]="false"
+                [reorderColumns]="false"
+                [sortBy]="sort.sortBy"
+                [loadRepositories]="false"
+                [sortAscending]="sort.sortAscending"
+                [isClickable]="false"
+                [isLoading]="loadingChildren"
+                [options]="options"
+                (sortListener)="changeSort($event)"
+            ></listTable>
+        </div>
+        <div *ngIf="!sharingInfo.node.isDirectory">
+            <div class="btn waves-effect waves-light download" (click)="download()">
+                {{('SHARING.'+(sharingInfo.node.mediatype=='link' ? 'LINK' : 'DOWNLOAD')) | translate}}
+            </div>
+        </div>
+    </div>
+</div>

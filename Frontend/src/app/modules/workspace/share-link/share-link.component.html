@@ -37,7 +37,7 @@
                   </label>
                 </div>
               </div>
-              <input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" placeholder="{{edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER' | translate}}">
+              <input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" placeholder="{{(edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER') | translate}}">
               </input-password>
 
             </div>
@@ -53,9 +53,9 @@
 
             </div>
             <label class="heading link-title">{{'WORKSPACE.SHARE_LINK.LINK' | translate}}</label>
-            <div class="info info-link">
+            <div class="info" [class.link-enabled]="enabled">
               <div class="linkInput info-left">
-                <input type="text" [disabled]="!enabled" readonly="true" [(ngModel)]="currentShare.url">
+                <input type="text" #shareUrl [disabled]="!enabled" (click)="shareUrl.select()" readonly="true" [(ngModel)]="currentShare.url">
               </div>
               <div class="info-right copyLink">
                 <div (click)="copyClipboard()" class="btn-flat btn-shadow btn-icon btnVersion link-copy" *ngIf="enabled"> {{'WORKSPACE.SHARE_LINK.COPY_CLIPBOARD' |
@@ -63,7 +63,7 @@
               </div>
             </div>
         </div>
-          <div class="link-info">{{ 'WORKSPACE.SHARE_LINK.LINK_INFO' | translate}}</div>
+          <div class="link-info">{{('WORKSPACE.SHARE_LINK.LINK_INFO'+(_node.isDirectory ? '_FOLDER' : '')) | translate}}</div>
           <div class="link-downloads">{{ 'WORKSPACE.SHARE_LINK.LINK_DOWNLOADS' |
             translate:{count:currentShare.downloadCount} }}</div>
         </div>

@@ -47,7 +47,8 @@ export class WorkspaceShareLinkComponent  {
     this.loading=true;
     this.nodeService.getNodeShares(node.ref.id,RestConstants.SHARE_LINK).subscribe((data:NodeShare[])=>{
       this._expiryDate=new Date(new Date().getTime()+3600*24*1000);
-      if(data.length){
+      console.log(data);
+        if(data.length){
         this.edit=true;
         this.currentShare=data[0];
         this.expiry=data[0].expiryDate>0;
@@ -66,11 +67,7 @@ export class WorkspaceShareLinkComponent  {
         }
       }
       else{
-        this.edit=false;
-        this.nodeService.createNodeShare(node.ref.id).subscribe((data:NodeShare)=>{
-          this.currentShare=data;
-          this.loading=false;
-        },(error:any)=>this.toast.error(error))
+        this.createShare();
       }
     },(error:any)=>this.toast.error(error));
   }
@@ -104,10 +101,11 @@ export class WorkspaceShareLinkComponent  {
   }
   public setEnabled(value:boolean){
     if(value){
-      this.updateShare(RestConstants.SHARE_EXPIRY_UNLIMITED);
+      this.createShare();
+      //this.updateShare(RestConstants.SHARE_EXPIRY_UNLIMITED);
     }
     else{
-      this.updateShare(0);
+      this.deleteShare();
       this.expiry=false;
       this.password=false;
     }
@@ -151,4 +149,20 @@ export class WorkspaceShareLinkComponent  {
     Translation.applyToDateOptions(this.translate,this.dateOptions);
   }
 
+    private createShare() {
+      this.loading=true;
+      this.nodeService.createNodeShare(this._node.ref.id).subscribe((data:NodeShare)=>{
+        this.edit=false;
+        this.currentShare=data;
+        this.loading=false;
+      },(error:any)=>this.toast.error(error))
+    }
+
+    private deleteShare() {
+      this.loading=true;
+      this.nodeService.deleteNodeShare(this._node.ref.id,this.currentShare.shareId).subscribe(()=>{
+        (this.currentShare as any)={};
+        this.loading=false;
+      });
+    }
 }

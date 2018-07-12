@@ -226,6 +226,16 @@ export class RestNodeService extends AbstractRestService{
     return this.connector.put(query,"",this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
+    public deleteNodeShare = (node : string,
+                              share:string,
+                              repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/:share",repository,
+            [
+                [":node",node],
+                [":share",share]
+            ]);
+        return this.connector.delete(query,this.connector.getRequestOptions());
+    }
   public updateNodeShare = (node : string,
                              shareId : string,
                              expiryDate=RestConstants.SHARE_EXPIRY_UNLIMITED,

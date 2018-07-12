@@ -347,6 +347,11 @@
     "ACCEPT":"Akzeptieren & Fortfahren",
     "DECLINE":"Ablehnen"
   },
+  "SHARING":{
+    "TITLE":"Dateifreigabe",
+    "DOWNLOAD":"Herunterladen",
+    "LINK":"Zur Originalseite springen"
+  },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",
     "FIELD_REQUIRED":"Das Feld {{ name }} muss ausgefüllt sein",
