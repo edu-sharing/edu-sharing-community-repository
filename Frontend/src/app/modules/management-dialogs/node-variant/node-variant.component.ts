@@ -64,7 +64,7 @@ export class NodeVariantComponent  {
                       }
                   }
               };
-              this.toast.toast('NODE_VARIANT.CREATED',null,null,null,additional);
+              this.toast.toast('NODE_VARIANT.CREATED',{folder:this.breadcrumbs[this.breadcrumbs.length-1].name},null,null,additional);
               this.onDone.emit();
           },(error)=>{
               this.onLoading.emit(false);

@@ -9,6 +9,8 @@
 .noElements{
   text-align: center;
   color: $textLight;
+  display: inline-block;
+  width: 100%;
 }
 .breadcrumbFrame{
   float:left;
