@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -99,6 +100,17 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			}
 			// download child object (io) from a map
 			if(req.getParameter("childId")!=null && serviceRegistry.getNodeService().getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
+				boolean isChild=false;
+				for(ChildAssociationRef ref : serviceRegistry.getNodeService().getChildAssocs(nodeRef)){
+					if(ref.getChildRef().getId().equals(req.getParameter("childId"))){
+						isChild=true;
+						break;
+					}
+				}
+				if(!isChild){
+					resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
+					return;
+				}
 				nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, req.getParameter("childId"));
 			}
 			String fileName = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
