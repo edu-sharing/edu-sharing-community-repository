@@ -160,7 +160,8 @@
     "BREADCRUMB_INFO": "Save variant in:",
     "CHOOSE": "Storage Location",
     "FILE_PICKER_TITLE": "Choose storage location",
-    "CREATED": "New variant was created and saved in a folder <b>\"{{folder}}\"</b>"
+    "CREATED": "New variant was created and saved in a folder <b>\"{{folder}}\"</b>",
+    "CREATED_LINK": "show"
   },
   "NODE_REPORT":{
     "TITLE":"Report problem",
