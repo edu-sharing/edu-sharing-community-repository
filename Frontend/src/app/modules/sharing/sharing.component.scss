@@ -1,12 +1,27 @@
 @import "../../../styles/variables.scss";
-
+.container{
+  height: 100%;
+}
+.branding{
+  position: relative;
+  top: 5%;
+  height:100px;
+  text-align: center;
+  img{
+    width:auto;
+    height:100%;
+  }
+}
 .details{
-  display: flex;
-  align-items: center;
-  padding:30px 0;
-  justify-content: center;
+  padding: 80px 0 18px;
+  text-align: center;
+  .details-type{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .icon{
-    margin:0 20px;
+    margin-right: 12px;
     width:30px;
     height: auto;
   }
@@ -20,8 +35,20 @@
   display: flex;
   flex-direction: column;
 }
+.info{
+  padding: 20px 10px 10px;
+  text-align: center;
+
+  strong{
+    font-weight: bold;
+    display: block;
+  }
+}
+.download{
+  text-align: center;
+}
 powered-by{
   position: fixed;
   left: 0;
-  bottom: 8%;
+  bottom: 5%;
 }

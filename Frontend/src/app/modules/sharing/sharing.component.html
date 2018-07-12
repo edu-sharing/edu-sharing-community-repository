@@ -1,8 +1,12 @@
 <global-progress *ngIf="loading"></global-progress>
 <div *ngIf="!loading && sharingInfo" class="container">
+    <div class="branding"><img src="assets/images/logo.svg"></div>
     <div class="details">
-        <img class="icon" [src]="sharingInfo.node.iconURL" />
-        <div class="name">{{sharingInfo.node.name}}</div>
+        <div class="details-type">
+            <img class="icon" [src]="sharingInfo.node.iconURL" />
+            <div class="name">{{sharingInfo.node.name}}</div>
+        </div>
+        <div>von Max Mustermann freigegeben</div>
     </div>
     <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
         <form (ngsubmit)="validatePassword()">
@@ -28,9 +32,13 @@
                 (sortListener)="changeSort($event)"
             ></listTable>
         </div>
-        <div *ngIf="!sharingInfo.node.isDirectory">
-            <div class="btn waves-effect waves-light download" (click)="download()">
-                {{('SHARING.'+(sharingInfo.node.mediatype=='link' ? 'LINK' : 'DOWNLOAD')) | translate}}
+        <div *ngIf="!sharingInfo.node.isDirectory" class="info">
+           <strong>Der Download startet automatisch</strong>
+            Ansonsten betätigen Sie den Button!
+        </div>
+        <div *ngIf="!sharingInfo.node.isDirectory" class="download">
+            <div class="btn waves-effect waves-light btn-icon" (click)="download()">
+                <i class="material-icons">cloud_download</i>{{('SHARING.'+(sharingInfo.node.mediatype=='link' ? 'LINK' : 'DOWNLOAD')) | translate}}
             </div>
         </div>
     </div>
