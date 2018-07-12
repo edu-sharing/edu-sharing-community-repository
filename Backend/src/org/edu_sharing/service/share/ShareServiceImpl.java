@@ -123,7 +123,7 @@ public class ShareServiceImpl implements ShareService {
 			Map<QName, Serializable> props = new HashMap<QName, Serializable>();
 			
 			props.put(SHARE_PROP_EXPIRYDATE, expiryDate);
-			props.put(SHARE_PROP_SHARE_MAIL, expiryDate);
+			props.put(SHARE_PROP_SHARE_MAIL, email);
 			props.put(SHARE_PROP_PASSWORD, encryptPassword(password));
 			
 			token = new KeyTool().getKey();
@@ -186,7 +186,10 @@ public class ShareServiceImpl implements ShareService {
 	public void updateShare(String nodeId, String email, long expiryDate) throws EMailValidationException, ExpiryDateValidationException,
 			NodeDoesNotExsistException, PermissionFailedException {
 	}
-	
+	public void updateDownloadCount(Share share){
+		throwIfScopedNode(new NodeRef(Constants.storeRef,share.getIoNodeId()));
+		serviceRegistry.getNodeService().setProperty(new NodeRef(Constants.storeRef, share.getNodeId()), SHARE_PROP_DOWNLOAD_COUNTER,share.getDownloadCount());
+	}
 	@Override
 	public void updateShare(Share share) {
 		Map<QName,Serializable> props = new HashMap<QName,Serializable>();
@@ -210,36 +213,9 @@ public class ShareServiceImpl implements ShareService {
 		List<Share> result = new ArrayList<Share>();
 		for(ChildAssociationRef childRef : childNodeRefs){
 			Map<QName,Serializable> props =  serviceRegistry.getNodeService().getProperties(childRef.getChildRef());
-			Share share = new Share();
-			share.setIoNodeId(nodeId);
-			share.setNodeId(childRef.getChildRef().getId());
-			share.setEmail((String)props.get(SHARE_PROP_SHARE_MAIL));
-			share.setExpiryDate((Long)props.get(SHARE_PROP_EXPIRYDATE));
-			share.setDownloadCount((Integer)props.get(SHARE_PROP_DOWNLOAD_COUNTER));
-			
-			if(share.getExpiryDate() != null && share.getExpiryDate() != -1){
-				share.setExpiryDateFormated(new DateTool().formatDate(share.getExpiryDate(),DateFormat.LONG,null));
-			}
-			
-			share.setToken((String)props.get(SHARE_PROP_SHARE_TOKEN));
-			String creator = (String)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATOR));
-			share.setInvitedBy(creator);
-			NodeRef personNodeRef = serviceRegistry.getPersonService().getPerson(creator);
-			String firstName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_FIRSTNAME);
-			String lastName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_LASTNAME);
-			String email = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_EMAIL);
-			String invitedByCaption = firstName + " " +lastName+" (" +email+")";
-			share.setInvitedByCaption(invitedByCaption);
-			
-			share.setInvitedAt((Date)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATED)));
-			
-			if(share.getInvitedAt() != null){
-				share.setInvitedAtFormated(new DateTool().formatDate(share.getInvitedAt().getTime(),DateFormat.LONG,null));
-			}
-			
+			Share share = getNodeShareObject(nodeId,childRef.getChildRef());
 			result.add(share);
 		}
-		
 		return result.toArray(new Share[result.size()]);
 	}
 	
@@ -248,41 +224,45 @@ public class ShareServiceImpl implements ShareService {
 		List<ChildAssociationRef> childAssocRefs = serviceRegistry.getNodeService().getChildAssocsByPropertyValue(new NodeRef(Constants.storeRef,nodeId), SHARE_PROP_SHARE_TOKEN,token);
 		if(childAssocRefs.size() == 1){
 			NodeRef shareNodeRef = childAssocRefs.get(0).getChildRef();
-			Map<QName,Serializable> props =  serviceRegistry.getNodeService().getProperties(shareNodeRef);
-			Share share = new Share();
-			share.setIoNodeId(nodeId);
-			share.setNodeId(shareNodeRef.getId());
-			share.setEmail((String)props.get(SHARE_PROP_SHARE_MAIL));
-			share.setPassword((String)props.get(SHARE_PROP_PASSWORD));
-			share.setExpiryDate((Long)props.get(SHARE_PROP_EXPIRYDATE));
-			share.setDownloadCount((Integer)props.get(SHARE_PROP_DOWNLOAD_COUNTER));
-			
-			if(share.getExpiryDate() != null && share.getExpiryDate() != -1){
-				share.setExpiryDateFormated(new DateTool().formatDate(share.getExpiryDate(),DateFormat.LONG,null));
-			}
-			
-			share.setToken((String)props.get(SHARE_PROP_SHARE_TOKEN));
-			
-			String creator = (String)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATOR));
-			share.setInvitedBy(creator);
-			NodeRef personNodeRef = serviceRegistry.getPersonService().getPerson(creator);
-			String firstName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_FIRSTNAME);
-			String lastName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_LASTNAME);
-			String email = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_EMAIL);
-			String invitedByCaption = firstName + " " +lastName+" (" +email+")";
-			share.setInvitedByCaption(invitedByCaption);
-			
-			share.setInvitedAt((Date)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATED)));		
-			
-			if(share.getInvitedAt() != null){
-				share.setInvitedAtFormated(new DateTool().formatDate(share.getInvitedAt().getTime(),DateFormat.LONG,null));
-			}
-			
+			Share share = getNodeShareObject(nodeId, shareNodeRef);
 			return share;
 			
 		}else{
 			logger.error("invalid number of share objects for io:"+childAssocRefs.size()+" "+nodeId);
 			return null;
 		}
+	}
+
+	private Share getNodeShareObject(String nodeId, NodeRef shareNodeRef) {
+		Map<QName,Serializable> props =  serviceRegistry.getNodeService().getProperties(shareNodeRef);
+		Share share = new Share();
+		share.setIoNodeId(nodeId);
+		share.setNodeId(shareNodeRef.getId());
+		share.setEmail((String)props.get(SHARE_PROP_SHARE_MAIL));
+		share.setPassword((String)props.get(SHARE_PROP_PASSWORD));
+		share.setExpiryDate((Long)props.get(SHARE_PROP_EXPIRYDATE));
+		share.setDownloadCount((Integer)props.get(SHARE_PROP_DOWNLOAD_COUNTER));
+
+		if(share.getExpiryDate() != null && share.getExpiryDate() != -1){
+			share.setExpiryDateFormated(new DateTool().formatDate(share.getExpiryDate(),DateFormat.LONG,null));
+		}
+
+		share.setToken((String)props.get(SHARE_PROP_SHARE_TOKEN));
+
+		String creator = (String)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATOR));
+		share.setInvitedBy(creator);
+		NodeRef personNodeRef = serviceRegistry.getPersonService().getPerson(creator);
+		String firstName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_FIRSTNAME);
+		String lastName = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_LASTNAME);
+		String email = (String)serviceRegistry.getNodeService().getProperty(personNodeRef, ContentModel.PROP_EMAIL);
+		String invitedByCaption = firstName + " " +lastName+" (" +email+")";
+		share.setInvitedByCaption(invitedByCaption);
+
+		share.setInvitedAt((Date)props.get(QName.createQName(CCConstants.CM_PROP_C_CREATED)));
+
+		if(share.getInvitedAt() != null){
+			share.setInvitedAtFormated(new DateTool().formatDate(share.getInvitedAt().getTime(),DateFormat.LONG,null));
+		}
+		return share;
 	}
 }

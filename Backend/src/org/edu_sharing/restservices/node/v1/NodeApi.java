@@ -765,7 +765,6 @@ public class NodeApi  {
     	try {
     		Filter propFilter = new Filter(propertyFilter);
     		
-    		NodeEntries response=new NodeEntries();
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	if("-userhome-".equals(node)){
     			node = repoDao.getUserHome();
@@ -800,7 +799,7 @@ public class NodeApi  {
 
 			List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
 	    	//Collections.sort(children);
-	    	response=createResponseFromNodeList(response,sorted,skipCount,maxItems);
+			NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);
 	    
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
@@ -1006,7 +1005,8 @@ public class NodeApi  {
     	}
        
     }    
-    private NodeEntries createResponseFromNodeList(NodeEntries response,List<Node> sorted, Integer skipCount, Integer maxItems) {
+    public static NodeEntries createResponseFromNodeList(List<Node> sorted, Integer skipCount, Integer maxItems) {
+		NodeEntries response = new NodeEntries();
     	int min = (skipCount != null) ? Math.min(sorted.size(), skipCount) : 0;
     	int max = (maxItems != null) ? Math.min(sorted.size(), min + maxItems) : sorted.size();   
     		

@@ -19,4 +19,6 @@ public interface ShareService {
 	public Share[] getShares(String nodeId);
 	
 	public Share getShare(String nodeId, String token);
+
+	public void updateDownloadCount(Share share);
 }
