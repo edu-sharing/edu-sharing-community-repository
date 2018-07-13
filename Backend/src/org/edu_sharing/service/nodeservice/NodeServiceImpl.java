@@ -32,6 +32,7 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.Constants;
@@ -370,7 +371,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return null;
 	}
-	
+
+
+
 	private HashMap<String, Object> getPropertiesWithoutChildren(NodeRef nodeRef) {
 		Map<QName, Serializable> childPropMap = nodeService.getProperties(nodeRef);
 		HashMap<String, Object> resultProps = new HashMap<String, Object>();
@@ -845,5 +848,20 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return new MCAlfrescoAPIClient().getAlfrescoMimetype(new NodeRef(protocol,storeId,nodeId));
 		else
 			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ+" permission on node "+nodeId);
+	}
+	@Override
+	public List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc) {
+		NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+		if(assoc.getDirection().equals(AssocInfo.Direction.SOURCE)) {
+			return nodeService.getSourceAssocs(ref,QName.createQName(assoc.getAssocName()));
+		}
+		else{
+			return nodeService.getTargetAssocs(ref,QName.createQName(assoc.getAssocName()));
+		}
+	}
+	
+	public void setProperty(String protocol, String storeId, String nodeId, String property, String value) {
+		property = NameSpaceTool.transformToLongQName(property);
+		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), QName.createQName(property),value);
 	}
 }

@@ -30,6 +30,13 @@
   (onCancel)="closeReport()"
   (onDone)="closeReport()"
 ></node-report>
+<node-variant
+        *ngIf="nodeVariant"
+        [node]="nodeVariant"
+        (onLoading)="globalProgress=$event"
+        (onCancel)="closeVariant()"
+        (onDone)="closeVariant()"
+></node-variant>
 <collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"

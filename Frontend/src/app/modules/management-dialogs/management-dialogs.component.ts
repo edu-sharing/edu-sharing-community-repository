@@ -62,7 +62,9 @@ export class WorkspaceManagementDialogsComponent  {
     @Input() nodeWorkflow : Node;
     @Output() nodeWorkflowChange = new EventEmitter();
     @Input() nodeReport : Node;
-  @Output() nodeReportChange = new EventEmitter();
+    @Output() nodeReportChange = new EventEmitter();
+    @Input() nodeVariant : Node;
+    @Output() nodeVariantChange = new EventEmitter();
   @Input() nodeMetadata : Node;
     @Output() nodeMetadataChange = new EventEmitter();
     @Input() nodeTemplate : Node;
@@ -161,6 +163,12 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
+        if(this.nodeVariant!=null){
+            this.closeVariant();
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
       if(this.ltiObject){
         this.ltiObject=null;
         event.preventDefault();
@@ -376,6 +384,10 @@ export class WorkspaceManagementDialogsComponent  {
     this.nodeReport=null;
     this.nodeReportChange.emit(null);
   }
+    public closeVariant() {
+        this.nodeVariant=null;
+        this.nodeVariantChange.emit(null);
+    }
   private cancelAddToCollection(){
     this.dialogTitle=null;
     this.addToCollection=null;

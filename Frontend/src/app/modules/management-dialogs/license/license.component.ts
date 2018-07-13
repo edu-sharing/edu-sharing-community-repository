@@ -235,6 +235,8 @@ export class WorkspaceLicenseComponent  {
   }
   private readLicense() {
     let license=this.getValueForAll(RestConstants.CCM_PROP_LICENSE,"MULTI","NONE");
+    if(!license)
+      license="NONE";
     this.type=license;
     if(license.startsWith("CC_BY")){
       this.type="CC_BY";

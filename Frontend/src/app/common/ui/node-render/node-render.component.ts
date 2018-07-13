@@ -32,6 +32,7 @@ import {EventListener} from "../../../common/services/frame-events.service";
 import {ActionbarHelper} from "../actionbar/actionbar-helper";
 import {Response} from "@angular/http";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
+import {MainNavComponent} from "../main-nav/main-nav.component";
 
 declare var jQuery:any;
 declare var window: any;
@@ -90,6 +91,7 @@ export class NodeRenderComponent implements EventListener{
   childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
+  @ViewChild('mainnav') mainnav : MainNavComponent;
 
     public static close(location:Location) {
         location.back();
@@ -151,6 +153,7 @@ export class NodeRenderComponent implements EventListener{
           else {
             this.searchService.reinit=false;
             NodeRenderComponent.close(this.location);
+            this.mainnav.openSidenav();
           }
         }
       }
@@ -354,14 +357,12 @@ export class NodeRenderComponent implements EventListener{
       if(this.downloadUrl) {
           NodeHelper.downloadUrl(this.toast, this.connector.getCordovaService(), this.downloadUrl);
       } else {
-          this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
-              if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
-                  let nodes = [this.sequenceParent].concat(this.sequence.nodes);
-                  NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name);
-              } else {
-                  NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
-              }
-          });
+          if(this.sequence && this.sequence.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+              let nodes = [this.sequenceParent].concat(this.sequence.nodes);
+              NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name);
+          } else {
+              NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
+          }
       }
   }
 

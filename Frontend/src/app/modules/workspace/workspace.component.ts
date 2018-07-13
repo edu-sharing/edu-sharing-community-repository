@@ -99,6 +99,7 @@ export class WorkspaceMainComponent implements EventListener{
     public isSafe = false;
     private isLoggedIn = false;
     public addNodesToCollection : Node[];
+    public variantNode : Node;
     @ViewChild('dropdown') dropdownElement : ElementRef;
     private dropdownPosition: string;
     private dropdownLeft: string;
@@ -810,6 +811,13 @@ export class WorkspaceMainComponent implements EventListener{
             if (collection && !this.isSafe)
                 options.push(collection);
         }
+        if(nodes && nodes.length && allFiles) {
+            /*
+            let variant = ActionbarHelper.createOptionIfPossible('CREATE_VARIANT',nodes,this.connector,(node:Node)=>this.createVariant(node));
+            if (variant && !this.isSafe)
+                options.push(variant);
+            */
+        }
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
             let template = ActionbarHelper.createOptionIfPossible('NODE_TEMPLATE',nodes,this.connector,(node:Node)=>this.nodeTemplate(node));
@@ -1066,6 +1074,10 @@ export class WorkspaceMainComponent implements EventListener{
         let nodes=this.getNodeList(node);
         this.addNodesToCollection=nodes;
     }
+    private createVariant(node: Node) {
+        let nodes=this.getNodeList(node);
+        this.variantNode=nodes[0];
+    }
     private createContext(event:any=null){
         if(!this.createAllowed)
             return;
@@ -1124,14 +1136,13 @@ export class WorkspaceMainComponent implements EventListener{
     private toggleView() {
         this.viewType=1-this.viewType;
         this.refreshRoute();
-        /*
         if(this.viewType==0){
           this.viewToggle.icon='view_module';
         }
         else{
           this.viewToggle.icon='list';
         }
-        */
+
     }
 
     public listLTI() {

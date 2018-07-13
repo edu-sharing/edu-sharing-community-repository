@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -113,4 +114,8 @@ public interface NodeService {
 	void setTemplateStatus(String nodeId, Boolean enable) throws Throwable;
 
 	String getContentMimetype(String protocol, String storeId, String nodeId);
+
+	List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc);
+	
+	public void setProperty(String protocol, String storeId, String nodeId, String property, String value);
 }
