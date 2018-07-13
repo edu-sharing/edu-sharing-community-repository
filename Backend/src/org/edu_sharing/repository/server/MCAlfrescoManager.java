@@ -55,6 +55,7 @@ import org.edu_sharing.repository.update.Release_1_7_UnmountGroupFolders;
 import org.edu_sharing.repository.update.Release_3_2_DefaultScope;
 import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
 import org.edu_sharing.repository.update.Release_3_2_PermissionInheritFalse;
+import org.edu_sharing.repository.update.Release_4_2_PersonStatusUpdater;
 import org.edu_sharing.repository.update.SQLUpdater;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
@@ -113,6 +114,8 @@ public class MCAlfrescoManager implements ServletContextListener {
 			new Release_3_2_PermissionInheritFalse(null).execute();
 			
 			new SQLUpdater().execute();
+			
+			new Release_4_2_PersonStatusUpdater(null).execute();
 			
 			//init the system folders so that are created with a admin
 			UserEnvironmentTool uet = new UserEnvironmentTool(appInfo.getUsername());
