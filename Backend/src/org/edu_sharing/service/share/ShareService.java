@@ -1,5 +1,6 @@
 package org.edu_sharing.service.share;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.Share;
 
 public interface ShareService {
@@ -21,4 +22,6 @@ public interface ShareService {
 	public Share getShare(String nodeId, String token);
 
 	public void updateDownloadCount(Share share);
+
+	boolean isNodeAccessibleViaShare(NodeRef sharedNode, String accessNodeId);
 }

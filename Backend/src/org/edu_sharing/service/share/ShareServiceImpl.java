@@ -234,7 +234,17 @@ public class ShareServiceImpl implements ShareService {
 			return null;
 		}
 	}
-
+	@Override
+	public boolean isNodeAccessibleViaShare(NodeRef sharedNode, String accessNodeId){
+		boolean isChild=false;
+		for(ChildAssociationRef ref : serviceRegistry.getNodeService().getChildAssocs(sharedNode)){
+			if(ref.getChildRef().getId().equals(accessNodeId)){
+				isChild=true;
+				break;
+			}
+		}
+		return isChild;
+	}
 	private Share getNodeShareObject(String nodeId, NodeRef shareNodeRef) {
 		HashMap<String, Object> props;
 		Map<QName, Serializable> propsNative;

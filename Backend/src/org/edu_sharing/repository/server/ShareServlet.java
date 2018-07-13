@@ -100,14 +100,7 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			}
 			// download child object (io) from a map
 			if(req.getParameter("childId")!=null && serviceRegistry.getNodeService().getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
-				boolean isChild=false;
-				for(ChildAssociationRef ref : serviceRegistry.getNodeService().getChildAssocs(nodeRef)){
-					if(ref.getChildRef().getId().equals(req.getParameter("childId"))){
-						isChild=true;
-						break;
-					}
-				}
-				if(!isChild){
+				if(!shareService.isNodeAccessibleViaShare(nodeRef,req.getParameter("childId"))){
 					resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
 					return;
 				}
