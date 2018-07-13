@@ -1,5 +1,7 @@
-<div *ngIf="message">
-<h1>{{message | translate}}</h1>
-<h2>{{messageDetail | translate}}</h2>
-<div class="center link"><a (click)="openSearch()" class="clickable">{{'MESSAGES.GO_TO_SEARCH' | translate}}</a></div>
+<div class="message-container" *ngIf="message">
+    <div>
+        <h1>{{message | translate}}</h1>
+        <h2>{{messageDetail | translate}}</h2>
+        <div class="center link"><a (click)="openSearch()" class="clickable">{{'MESSAGES.GO_TO_SEARCH' | translate}}</a></div>
+    </div>
 </div>
