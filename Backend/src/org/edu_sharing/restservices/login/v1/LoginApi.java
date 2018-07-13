@@ -66,10 +66,13 @@ public class LoginApi  {
 			String username = (String)req.getSession().getAttribute(CCConstants.AUTH_USERNAME);
 			NodeRef authorityNodeRef = AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(username);
 			
-			String personStatus = NodeServiceFactory.getLocalService().getProperty(authorityNodeRef.getStoreRef().getProtocol(), authorityNodeRef.getStoreRef().getIdentifier(), 
+			String personStatus = NodeServiceFactory.getLocalService().getProperty(authorityNodeRef.getStoreRef().getProtocol(), 
+					authorityNodeRef.getStoreRef().getIdentifier(), 
 					authorityNodeRef.getId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
 			if(!personActiveStatus.equals(personStatus)) {
 				authenticated = false;
+				authTool.logoutWithoutSecurityContext(authTool.getTicketFromSession(req.getSession()));
+				req.getSession().invalidate();
 			}
 		}
     	
