@@ -187,7 +187,7 @@
   "NODE_VARIANT":{
     "TITLE": "Neue Variante anlegen für {{name}}",
     "NEW_VARIANT":"Name der Variante:",
-    "DEFAULT_NAME":"Variante_von_{{name}}",
+    "DEFAULT_NAME":"Variante von {{name}}",
     "BREADCRUMB_INFO": "Variante speichern in:",
     "CHOOSE": "Speicherort ändern",
     "FILE_PICKER_TITLE": "Speicherort wählen",
