@@ -28,6 +28,6 @@ export class PoweredByComponent {
     */
   }
   open(){
-    window.open("https://www.edu-sharing.com");
+    window.open("https://edu-sharing.com/");
   }
 }

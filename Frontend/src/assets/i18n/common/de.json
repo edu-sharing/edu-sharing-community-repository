@@ -353,7 +353,10 @@
   "SHARING":{
     "TITLE":"Dateifreigabe",
     "DOWNLOAD":"Herunterladen",
-    "LINK":"Zur Originalseite springen"
+    "LINK":"Zur Originalseite springen",
+    "ENTER_PASSWORD": "weiter",
+    "SHARING.ERROR_INVALID_PASSWORD":"Ungültiges Passwort",
+    "PASSWORD_CORRECT": "Passwort korrekt"
   },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",

@@ -1,46 +1,52 @@
 <global-progress *ngIf="loading"></global-progress>
 <div *ngIf="!loading && sharingInfo" class="container">
-    <div class="branding"><img src="assets/images/logo.svg"></div>
-    <div class="details">
-        <div class="details-type">
-            <img class="icon" [src]="sharingInfo.node.iconURL" />
-            <div class="name">{{sharingInfo.node.name}}</div>
+
+    <div class="container-inside">
+        <div class="branding"><img src="assets/images/logo.svg"></div>
+        <div class="details" [ngClass]="{'details-opacity' : !(!sharingInfo.password || sharingInfo.passwordMatches)}">
+            <div class="details-type">
+                <img class="icon" [src]="sharingInfo.node.iconURL" />
+                <div class="name">{{sharingInfo.node.name}}</div>
+            </div>
+            <!-- @:TODO Torsten hier noch richtige Info einfügen -->
+            <div class="owner">Erstellt und freigegeben von Max Mustermann</div>
         </div>
-        <div>von Max Mustermann freigegeben</div>
-    </div>
-    <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
-        <form (ngsubmit)="validatePassword()">
-            <input-password required="true" (keydown.enter)="validatePassword()" [(value)]="passwordInput"></input-password>
-            <div class="input-hint-bottom">{{'SHARING.ENTER_PASSWORD' | translate}}</div>
-        </form>
-    </div>
-    <div *ngIf="!sharingInfo.password || sharingInfo.passwordMatches" class="password-valid">
-        <div *ngIf="sharingInfo.password && sharingInfo.passwordMatches" class="password-correct">PASSWORD CORRECT</div>
-        <div *ngIf="sharingInfo.node.isDirectory">
-            <listTable
-                [nodes]="childs"
-                [columns]="columns"
-                [hasIcon]="true"
-                [hasCheckbox]="false"
-                [reorderColumns]="false"
-                [sortBy]="sort.sortBy"
-                [loadRepositories]="false"
-                [sortAscending]="sort.sortAscending"
-                [isClickable]="false"
-                [isLoading]="loadingChildren"
-                [options]="options"
-                (sortListener)="changeSort($event)"
-            ></listTable>
+        <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
+            <form (ngsubmit)="validatePassword()">
+                <input-password required="true" (keydown.enter)="validatePassword()" [(value)]="passwordInput"></input-password>
+                <div class="btn waves-effect waves-light" (click)="validatePassword()">{{'SHARING.ENTER_PASSWORD' | translate}}</div>
+            </form>
         </div>
-        <div *ngIf="!sharingInfo.node.isDirectory" class="info">
-           <strong>Der Download startet automatisch</strong>
-            Ansonsten betätigen Sie den Button!
-        </div>
-        <div *ngIf="!sharingInfo.node.isDirectory" class="download">
-            <div class="btn waves-effect waves-light btn-icon" (click)="download()">
-                <i class="material-icons">cloud_download</i>{{('SHARING.'+(sharingInfo.node.mediatype=='link' ? 'LINK' : 'DOWNLOAD')) | translate}}
+        <div *ngIf="!sharingInfo.password || sharingInfo.passwordMatches" class="password-valid">
+            <div *ngIf="sharingInfo.password && sharingInfo.passwordMatches && !sharingInfo.node.isDirectory" class="password-correct"><i class="material-icons">done</i>{{'SHARING.PASSWORD_CORRECT' | translate}}</div>
+            <div *ngIf="sharingInfo.node.isDirectory">
+                <div class="folder">
+                    <listTable
+                            [nodes]="childs"
+                            [columns]="columns"
+                            [hasIcon]="true"
+                            [hasCheckbox]="false"
+                            [reorderColumns]="false"
+                            [sortBy]="sort.sortBy"
+                            [loadRepositories]="false"
+                            [sortAscending]="sort.sortAscending"
+                            [isClickable]="false"
+                            [isLoading]="loadingChildren"
+                            [options]="options"
+                            (sortListener)="changeSort($event)"
+                    ></listTable>
+                </div>
+
+            </div>
+            <div class="download">
+                <div class="btn waves-effect waves-light btn-icon" (click)="download()">
+                    <!-- @:TODO Torsten hier noch "Download als ZIP" für Ordner -->
+                    <i class="material-icons">cloud_download</i>{{('SHARING.'+(sharingInfo.node.mediatype=='link' ? 'LINK' : 'DOWNLOAD')) | translate}}
+                </div>
             </div>
         </div>
     </div>
+
+
     <powered-by mode="color"></powered-by>
 </div>
