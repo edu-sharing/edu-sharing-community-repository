@@ -848,7 +848,7 @@ public class NodeApi  {
 
 			List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,null,propFilter);
 			//Collections.sort(children);
-			response=createResponseFromNodeList(response,sorted,skipCount,maxItems);
+			response=createResponseFromNodeList(sorted,skipCount,maxItems);
 
 
 			return Response.status(Response.Status.OK).entity(response).build();
