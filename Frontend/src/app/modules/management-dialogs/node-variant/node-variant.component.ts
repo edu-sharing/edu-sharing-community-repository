@@ -52,6 +52,8 @@ export class NodeVariantComponent  {
   }
 
   public create(){
+      if(!this.breadcrumbs || !this.breadcrumbs.length)
+          return;
       this.onLoading.emit(true);
       this.nodeApi.forkNode(this.breadcrumbs[this.breadcrumbs.length-1].ref.id,this._node.ref.id).subscribe((created)=>{
           this.nodeApi.editNodeMetadata(created.node.ref.id,RestHelper.createNameProperty(this.variantName)).subscribe(()=>{
