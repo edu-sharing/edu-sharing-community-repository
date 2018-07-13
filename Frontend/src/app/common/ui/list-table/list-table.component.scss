@@ -1029,6 +1029,6 @@ $orderAnimationTime:$transitionNormal*5;
   .cardList .row_8,
   .cardList .row_9,
   .cardList .row_10{
-    width:auto;
+    width: calc(100% - 180px);
   }
 }

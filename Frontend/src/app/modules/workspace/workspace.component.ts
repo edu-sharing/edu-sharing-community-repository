@@ -1134,14 +1134,13 @@ export class WorkspaceMainComponent implements EventListener{
     private toggleView() {
         this.viewType=1-this.viewType;
         this.refreshRoute();
-        /*
         if(this.viewType==0){
           this.viewToggle.icon='view_module';
         }
         else{
           this.viewToggle.icon='list';
         }
-        */
+
     }
 
     public listLTI() {

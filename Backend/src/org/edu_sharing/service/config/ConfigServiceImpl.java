@@ -95,7 +95,7 @@ public class ConfigServiceImpl implements ConfigService{
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		InputStream is = getConfigInputStream();
 		if(is==null)
-			throw new IOException("shared/classes/client.config.xml file missing");
+			throw new IOException("client.config.xml file missing");
 		Config config = (Config)jaxbUnmarshaller.unmarshal(is);
 		is.close();
 		return config;
