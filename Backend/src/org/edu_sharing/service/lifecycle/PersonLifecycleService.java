@@ -17,7 +17,13 @@ import org.springframework.context.ApplicationContext;
  * 
  * Filter in personsearch (invite, workflow - non active)
  * 
- * validate session only active
+ * validate session only active, 
+ * webdav auth, share auth ....
+ * 
+ * on create person set personstatus to 'active'
+ * 
+ * job that sets active status for existing persons when edu-sharing property 'person_active_status' is set
+ * 
  * 
  * 
  */
