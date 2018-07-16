@@ -70,6 +70,9 @@ export class WorkspaceFileUploadSelectComponent  {
   public selectFile(){
     this.file.nativeElement.click();
   }
+  public onDrop(fileList:any){
+      this.onFileSelected.emit(fileList);
+  }
   public filesSelected(event:any) : void {
     this.onFileSelected.emit(event.target.files);
   }
