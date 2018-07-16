@@ -156,7 +156,7 @@
   "NODE_VARIANT":{
     "TITLE": "Create new variant for {{name}}",
     "NEW_VARIANT":"New Title:",
-    "DEFAULT_NAME":"New_variant_{{name}}",
+    "DEFAULT_NAME":"Variant of {{name}}",
     "BREADCRUMB_INFO": "Save variant in:",
     "CHOOSE": "Storage Location",
     "FILE_PICKER_TITLE": "Choose storage location",
