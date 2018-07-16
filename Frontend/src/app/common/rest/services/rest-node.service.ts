@@ -233,24 +233,38 @@ export class RestNodeService extends AbstractRestService{
   }
   public createNodeShare = (node : string,
                             expiryDate=RestConstants.SHARE_EXPIRY_UNLIMITED,
+                            password="",
                             repository=RestConstants.HOME_REPOSITORY) : Observable<NodeShare> => {
-    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/?expiryDate=:expiryDate",repository,
+    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/?expiryDate=:expiryDate&password=:password",repository,
     [
       [":node",node],
-      [":expiryDate",""+expiryDate]
+      [":expiryDate",""+expiryDate],
+      [":password",password]
     ]);
     return this.connector.put(query,"",this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
+    public deleteNodeShare = (node : string,
+                              share:string,
+                              repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/:share",repository,
+            [
+                [":node",node],
+                [":share",share]
+            ]);
+        return this.connector.delete(query,this.connector.getRequestOptions());
+    }
   public updateNodeShare = (node : string,
                              shareId : string,
                              expiryDate=RestConstants.SHARE_EXPIRY_UNLIMITED,
+                             password="",
                              repository=RestConstants.HOME_REPOSITORY) : Observable<NodeShare> => {
-    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/:shareId?expiryDate=:expiryDate",repository,
+    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/:shareId?expiryDate=:expiryDate&password=:password",repository,
       [
         [":node",node],
         [":shareId",shareId],
-        [":expiryDate",""+expiryDate]
+        [":expiryDate",""+expiryDate],
+        [":password",password]
       ]);
     return this.connector.post(query,"",this.connector.getRequestOptions())
       .map((response: Response) => response.json());

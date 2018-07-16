@@ -3481,7 +3481,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public void createShare(String nodeId, String[] emails, long expiryDate) throws Exception {
 		ShareService shareService = new ShareServiceImpl();
 		String locale = (String) Context.getCurrentInstance().getRequest().getSession().getAttribute(CCConstants.AUTH_LOCALE);
-		shareService.createShare(nodeId, emails, expiryDate, locale);
+		shareService.createShare(nodeId, emails, expiryDate, null, locale);
 	}
 
 	public Share[] getShares(String nodeId) {

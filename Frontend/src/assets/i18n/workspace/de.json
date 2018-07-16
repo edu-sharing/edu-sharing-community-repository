@@ -202,12 +202,18 @@
     "SHARE_LINK":{
       "TITLE":"Link für {{ name }} freigeben",
       "EXPIRY_TITLE":"Ablaufdatum für den Link angeben",
+      "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
+      "PASSWORD":"Passwortschutz",
+      "PASSWORD_INFO":"Dieser Link wird mit einem Passwort geschützt",
+      "PASSWORD_PLACEHOLDER":"Passwort bestimmen...",
+      "PASSWORD_PLACEHOLDER_EDIT":"Leer lassen, um das aktuelle Passwort zu behalten",
       "DISABLED":"Linkfreigabe ist deaktiviert",
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "LINK":"Link zum Objekt",
       "ACTIVATE":"Linkfreigabe aktivieren",
       "COPY_CLIPBOARD":"Link kopieren",
       "LINK_INFO":"Jeder, der Zugriff auf den Link hat, darf das Objekt herunterladen.",
+      "LINK_INFO_FOLDER":"Jeder, der Zugriff auf den Link hat, darf alle Dateien des Ordners herunterladen. Auf Unterordner kann nicht zugegriffen werden.",
       "LINK_DOWNLOADS":"Bisherige Downloads: {{ count }}",
       "COPIED_CLIPBOARD":"Link wurde in die Zwischenablage kopiert",
       "COPIED_CLIPBOARD_ERROR":"Link konnte nicht kopiert werden. Bitte markieren und kopieren Sie den Link manuell"

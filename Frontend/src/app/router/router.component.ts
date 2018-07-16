@@ -21,6 +21,7 @@ import {MessagesComponent} from "../modules/messages/messages.component";
 import {UIConstants} from "../common/ui/ui-constants";
 import {StartupComponent} from '../modules/startup/startup.component';
 import {ShareAppComponent} from "../modules/share-app/share-app.component";
+import {SharingComponent} from "../modules/sharing/sharing.component";
 
 
 
@@ -75,7 +76,6 @@ export var ROUTES=[
     { path: '', component: StartupComponent },
     { path: 'app', component: LoginAppComponent },
     { path: 'app/share', component: ShareAppComponent },
-    { path: UIConstants.ROUTER_PREFIX+'sharing', component: ShareAppComponent },
     { path: UIConstants.ROUTER_PREFIX+'test/mds',component: MdsTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'test/rest',component: RestTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node', component: NodeRenderComponent},
@@ -109,6 +109,8 @@ export var ROUTES=[
     // messages
     { path: UIConstants.ROUTER_PREFIX+'messages/:message', component: MessagesComponent },
 
+    // link-share
+    { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
   ]
 ;
 

@@ -326,6 +326,14 @@
     "ACCEPT":"Accept & Continue",
     "DECLINE":"Decline"
   },
+  "SHARING":{
+    "TITLE": "Download Page",
+    "DOWNLOAD": "Download",
+    "LINK": "To original page",
+    "ENTER_PASSWORD": "next",
+    "SHARING.ERROR_INVALID_PASSWORD": "invalid password",
+    "PASSWORD_CORRECT": "Password correct"
+  },
   "TOAST":{
     "NODE_LOCKED":"The document is currently used by an other user and can not be opened",
     "FIELD_REQUIRED":"The field {{ name }} is required",

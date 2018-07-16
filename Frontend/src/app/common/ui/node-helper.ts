@@ -508,7 +508,7 @@ export class NodeHelper{
       this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
       "../eduservlet/download?appId="+
       encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString),fileName);
+      "&nodeIds="+encodeURIComponent(nodesString)+"&fileName="+encodeURIComponent(fileName),fileName);
   }
 
   static getLRMIProperty(data: any, item: ListItem) {

@@ -133,10 +133,17 @@ export interface Pagination {
   from: number;
   count: number;
 }
+export interface SharingInfo{
+  password: boolean;
+  passwordMatches: boolean;
+  invitedBy: Person;
+  node: Node;
+}
 export interface NodeShare {
   token: string;
   email: string;
   expiryDate: number;
+  password: boolean;
   invitedAt: number;
   downloadCount: number;
   url: string;

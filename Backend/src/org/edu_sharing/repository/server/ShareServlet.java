@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -33,10 +34,14 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+		if(!"download".equals(req.getParameter("mode"))){
+			resp.sendRedirect(URLTool.getNgComponentsUrl()+"sharing?"+req.getQueryString());
+			return;
+		}
 		ServletOutputStream op = resp.getOutputStream();
 
 		String token = req.getParameter("token");
+		String password = req.getParameter("password");
 
 		if (token == null) {
 			op.println("missing token");
@@ -85,13 +90,22 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 					return;
 				}
 			}
-			
+			if (share.getPassword()!=null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
+				resp.sendRedirect(URLTool.getNgComponentsUrl()+"sharing?"+req.getQueryString());
+			}
 			String wwwUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 			if(wwwUrl != null && !wwwUrl.trim().equals("")){
 				resp.sendRedirect(wwwUrl);
 				return;
 			}
-			
+			// download child object (io) from a map
+			if(req.getParameter("childId")!=null && serviceRegistry.getNodeService().getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
+				if(!shareService.isNodeAccessibleViaShare(nodeRef,req.getParameter("childId"))){
+					resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
+					return;
+				}
+				nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, req.getParameter("childId"));
+			}
 			String fileName = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
 
 			ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
@@ -124,7 +138,7 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			op.close();
 			
 			share.setDownloadCount( (share.getDownloadCount() + 1) );
-			shareService.updateShare(share);
+			shareService.updateDownloadCount(share);
 
 		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);

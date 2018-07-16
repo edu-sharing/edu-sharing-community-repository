@@ -355,13 +355,17 @@ span.thumb{
 .collection-item-seperate-bottom {
   border-bottom:1px solid #ccc!important;
 }
+.ngx-datepicker-container .ngx-datepicker-calendar-container{
+  top: 10px !important;
+}
 /* ng2-datepicker */
 .ngx-datepicker-input{
+  padding: 0!important;
   color:$textPrimary!important;
-  border:none!important;
-  padding-top: 0!important;
-  padding-bottom: 0!important;
-  border-bottom: 1px solid $inputBorderColor!important;
+  margin-top: 10px !important;
+  text-align: center;
+  width: 298px !important;
+  cursor: pointer;
 }
 
 /* material angular2 */
@@ -444,6 +448,13 @@ span.thumb{
       padding: 5px 20px 13px 20px;
       border-bottom: none;
     }
+  }
+  /* ng2-datepicker */
+  .ngx-datepicker-input {
+      width: auto !important;
+  }
+  .ngx-datepicker-container .ngx-datepicker-calendar-container {
+    left: -2% !important;
   }
 
 }

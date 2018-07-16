@@ -179,12 +179,17 @@
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",
       "EXPIRY_TITLE":"Set expiry date",
-      "DISABLED":"Link sharing is diabled",
       "EXPIRY_INFO":"After this date the link won't be accessible for anyone",
+      "DISABLED":"Link sharing is diabled",
+      "PASSWORD":"Password Protect",
+      "PASSWORD_INFO":"Then this link will be password protected",
+      "PASSWORD_PLACEHOLDER":"Set password...",
+      "PASSWORD_PLACEHOLDER_EDIT":"Leave empty to keep current",
       "LINK":"Link to object",
       "ACTIVATE":"Activate sharing",
       "COPY_CLIPBOARD":"Copy link",
       "LINK_INFO":"Everyone who has access to this link can download the content",
+      "LINK_INFO_FOLDER":"Everyone who has access to this link can download all contents in this folder. Sub-Folders can not be accessed.",
       "LINK_DOWNLOADS":"Number downloads: {{ count }}",
       "COPIED_CLIPBOARD":"Link copied to clipboard",
       "COPIED_CLIPBOARD_ERROR":"Failed to copy link. Please mark and copy it manually"

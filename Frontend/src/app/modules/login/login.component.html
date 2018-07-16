@@ -17,11 +17,12 @@
       <form (ngSubmit)="login()" #loginForm>
       <div *ngIf="showUsername">
         <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-        <input #usernameInput type="text" requried name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
+        <input #usernameInput type="text" requried name="username" id="username" (keyup.enter)="checkConditions()" [(ngModel)]="username" autofocus/>
       </div>
       <div>
         <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
-      <input #passwordInput requried type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/>
+      <!--<input #passwordInput requried type="password" name="password" id="password" (keydown.enter)="login()" (change)="checkConditions()" [(ngModel)]="password"/>-->
+        <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
       </div>
       </form>
       <div class="register" *ngIf="config.registerUrl">
@@ -35,8 +36,6 @@
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
   </div>
-  <div class="powered center" *ngIf="config.branding">
-    {{ 'LOGIN.POWERED_BY' | translate}}
-  </div>
+  <powered-by mode="white"></powered-by>
   </div>
   </div>
