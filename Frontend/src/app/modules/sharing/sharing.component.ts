@@ -43,14 +43,14 @@ export class SharingComponent {
   loadingChildren=true;
   passwordInput:string;
   private params: Params;
-  private sharingInfo: SharingInfo;
-  private childs: Node[];
-  private columns:ListItem[]=[];
-  private sort= {
+  sharingInfo: SharingInfo;
+  childs: Node[];
+  columns:ListItem[]=[];
+  sort= {
       sortBy: RestConstants.CM_NAME,
       sortAscending: true
   };
-  private options:OptionItem[]=[];
+  options:OptionItem[]=[];
   constructor(
     private router : Router,
     private route : ActivatedRoute,
