@@ -93,16 +93,18 @@ export class SharingComponent {
     download(child : Node = null){
       let node=this.params['nodeId'];
       let token=this.params['token'];
+      let url = this.connector.getAbsoluteEndpointUrl() + "../share?mode=download&token=" + encodeURIComponent(token) + "&password=" + encodeURIComponent(this.passwordInput) + "&nodeId=" + encodeURIComponent(node);
       if(child==null && this.sharingInfo.node.isDirectory){
-          NodeHelper.downloadNodes(this.toast,this.connector,this.childs,this.sharingInfo.node.name+".zip");
+          let ids = RestHelper.getNodeIds(this.childs).join(",");
+          url+= "&childIds=" + encodeURIComponent(ids);
       }
       else {
-          let url = this.connector.getAbsoluteEndpointUrl() + "../share?mode=download&nodeId=" + encodeURIComponent(node) + "&token=" + encodeURIComponent(token) + "&password=" + encodeURIComponent(this.passwordInput);
           if (child != null) {
-              url += "&childId=" + child.ref.id;
+              url += "&childIds=" + encodeURIComponent(child.ref.id);
           }
-          window.open(url);
       }
+        window.open(url);
+
     }
     private changeSort(sort:any){
         this.sort=sort;

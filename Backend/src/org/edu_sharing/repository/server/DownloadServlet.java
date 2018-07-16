@@ -52,16 +52,21 @@ public class DownloadServlet extends HttpServlet{
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
-		String appId = req.getParameter("appId");
 		String nodeIds = req.getParameter("nodeIds");
-		String parentNodeId = req.getParameter("parentNodeId");
-		String token = req.getParameter("token"); // token for share link
-		String password = req.getParameter("password"); // password for share link
 		String zipName = req.getParameter("fileName");
+		downloadZip(resp, nodeIds.split(","), null, null, null, zipName);
+		
+	}
+
+	public static void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws IOException {
 		if(zipName==null || zipName.isEmpty())
 			zipName="Download.zip";
 
-		String[] nodeIdsSplit=nodeIds.split(",");
+		if(nodeIds == null || nodeIds.length==0){
+			String message = "missing nodeIds";
+			resp.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,message);
+			return;
+		}
 
 		Share share=null;
 		ShareService shareService=new ShareServiceImpl();
@@ -77,7 +82,7 @@ public class DownloadServlet extends HttpServlet{
 				resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
 				return;
 			}
-			for(String node : nodeIdsSplit){
+			for(String node : nodeIds){
 				if(!shareService.isNodeAccessibleViaShare(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId),node)){
 					resp.sendRedirect(URLTool.getNgMessageUrl("security_error"));
 					return;
@@ -85,42 +90,35 @@ public class DownloadServlet extends HttpServlet{
 
 			}
 		}
-		
-		
+
+
+		/*
 		if(appId == null || appId.trim().equals("")){
 			String message = "missing appId";
 			logger.error(message);
 			resp.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,message);
 			return;
 		}
-		
-		
-		if(nodeIds == null || nodeIds.trim().equals("")){
-			String message = "missing nodeIds";
-			logger.error(message);
-			resp.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,message);
-			return;
-		}
-		
-		
-		
+		*/
+
+
+
 		ServletOutputStream op = resp.getOutputStream();
-		
+
 		ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
 
 		ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-		ApplicationInfo  homeAppInfo = ApplicationInfoList.getHomeRepository();
+		ApplicationInfo homeAppInfo = ApplicationInfoList.getHomeRepository();
 
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(buffer);
 		zos.setMethod( ZipOutputStream.DEFLATED );
-		
 
 
 		try{
 			AuthenticationUtil.RunAsWork<Boolean> work= () ->{
 				String errors="";
-				for(String nodeId : nodeIdsSplit){
+				for(String nodeId : nodeIds){
 					try{
 						NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
 						/**
@@ -180,14 +178,16 @@ public class DownloadServlet extends HttpServlet{
 				result=work.doWork();
 			}
 			if(result) {
+				resp.setHeader("Content-type","application/octet-stream");
+				resp.setHeader("Content-Transfer-Encoding","binary");
 				resp.setHeader("Content-Disposition","attachment; filename=\""+cleanName(zipName)+"\"");
+				resp.setHeader("Content-Length",""+buffer.size());
 				resp.getOutputStream().write(buffer.toByteArray());
 			}
 		}
 		catch(Throwable t){
 			t.printStackTrace();
 		}
-		
 	}
 
 	public static String cleanName(String name) {
