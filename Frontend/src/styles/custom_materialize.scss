@@ -98,7 +98,7 @@ select,
 textarea.materialize-textarea,
 input[type=search]{
   height:3rem;
-
+  -webkit-appearance: none;
   border: 1px solid #ccc;
   padding: 0 0.75em;
   width:calc(100% - 1.5em);
