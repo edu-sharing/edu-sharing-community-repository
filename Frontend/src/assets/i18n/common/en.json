@@ -319,9 +319,12 @@
   "SHARING":{
     "TITLE": "Download Page",
     "DOWNLOAD": "Download",
+    "DOWNLOAD_ZIP": "Download as Zip",
     "LINK": "To original page",
+    "INVITED_AND_CREATED_BY":"Created and shared by {{inviter}}",
+    "INVITED_PLUS_CREATED_BY":"Shared by {{inviter}}, created by {{creator}}",
     "ENTER_PASSWORD": "next",
-    "SHARING.ERROR_INVALID_PASSWORD": "invalid password",
+    "ERROR_INVALID_PASSWORD": "invalid password",
     "PASSWORD_CORRECT": "Password correct"
   },
   "TOAST":{
