@@ -26,7 +26,9 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.plexus.util.FileUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -53,7 +55,12 @@ public class DownloadServlet extends HttpServlet{
 		String appId = req.getParameter("appId");
 		String nodeIds = req.getParameter("nodeIds");
 		String parentNodeId = req.getParameter("parentNodeId");
-		String token = req.getParameter("token");
+		String token = req.getParameter("token"); // token for share link
+		String password = req.getParameter("password"); // password for share link
+		String zipName = req.getParameter("fileName");
+		if(zipName==null || zipName.isEmpty())
+			zipName="Download.zip";
+
 		String[] nodeIdsSplit=nodeIds.split(",");
 
 		Share share=null;
@@ -63,6 +70,9 @@ public class DownloadServlet extends HttpServlet{
 				share = shareService.getShare(parentNodeId, token);
 				if (share == null)
 					throw new Exception();
+			if (share.getPassword()!=null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
+				throw new Exception();
+			}
 			}catch(Throwable t){
 				resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
 				return;
@@ -170,6 +180,7 @@ public class DownloadServlet extends HttpServlet{
 				result=work.doWork();
 			}
 			if(result) {
+				resp.setHeader("Content-Disposition","attachment; filename=\""+cleanName(zipName)+"\"");
 				resp.getOutputStream().write(buffer.toByteArray());
 			}
 		}
@@ -178,5 +189,9 @@ public class DownloadServlet extends HttpServlet{
 		}
 		
 	}
-	
+
+	public static String cleanName(String name) {
+		return name.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
+	}
+
 }

@@ -8,8 +8,8 @@
                 <img class="icon" [src]="sharingInfo.node.iconURL" />
                 <div class="name">{{sharingInfo.node.name}}</div>
             </div>
-            <!-- @:TODO Torsten hier noch richtige Info einfügen -->
-            <div class="owner">Erstellt und freigegeben von Max Mustermann</div>
+            <div class="owner" *ngIf="inviterIsAuthor()">{{'SHARING.INVITED_AND_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy)} }}</div>
+            <div class="owner" *ngIf="!inviterIsAuthor()">{{'SHARING.INVITED_PLUS_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy),creator:getPersonName(sharingInfo.node.createdBy)} }}</div>
         </div>
         <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
             <form (ngsubmit)="validatePassword()">
@@ -41,7 +41,7 @@
             <div class="download">
                 <div class="btn waves-effect waves-light btn-icon" (click)="download()">
                     <!-- @:TODO Torsten hier noch "Download als ZIP" für Ordner -->
-                    <i class="material-icons">cloud_download</i>{{('SHARING.'+(sharingInfo.node.mediatype=='link' ? 'LINK' : 'DOWNLOAD')) | translate}}
+                    <i class="material-icons">cloud_download</i>{{('SHARING.'+(sharingInfo.node.mediatype=='link' ? 'LINK' : (sharingInfo.node.isDirectory ? 'DOWNLOAD_ZIP' : 'DOWNLOAD'))) | translate}}
                 </div>
             </div>
         </div>

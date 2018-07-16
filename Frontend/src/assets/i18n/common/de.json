@@ -353,7 +353,10 @@
   "SHARING":{
     "TITLE":"Dateifreigabe",
     "DOWNLOAD":"Herunterladen",
+    "DOWNLOAD_ZIP":"Als ZIP Herunterladen",
     "LINK":"Zur Originalseite springen",
+    "INVITED_AND_CREATED_BY":"Erstellt und freigegeben von {{inviter}}",
+    "INVITED_PLUS_CREATED_BY":"Freigegeben von {{inviter}}, erstellt von {{creator}}",
     "ENTER_PASSWORD": "weiter",
     "SHARING.ERROR_INVALID_PASSWORD":"Ungültiges Passwort",
     "PASSWORD_CORRECT": "Passwort korrekt"

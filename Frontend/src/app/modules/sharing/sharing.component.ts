@@ -10,7 +10,7 @@ import {RestMetadataService} from '../../common/rest/services/rest-metadata.serv
 import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Node, NodeList, LoginResult, SharingInfo} from "../../common/rest/data-object";
+import {Node, NodeList, LoginResult, SharingInfo, Person} from "../../common/rest/data-object";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
 import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
 import {UIHelper} from "../../common/ui/ui-helper";
@@ -24,6 +24,9 @@ import {ListItem} from "../../common/ui/list-item";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {RestSharingService} from "../../common/rest/services/rest-sharing.service";
 import {Toast} from "../../common/ui/toast";
+import {ConfigurationHelper} from "../../common/rest/configuration-helper";
+import {Helper} from "../../common/helper";
+import {NodeHelper} from "../../common/ui/node-helper";
 
 
 
@@ -90,11 +93,16 @@ export class SharingComponent {
     download(child : Node = null){
       let node=this.params['nodeId'];
       let token=this.params['token'];
-      let url=this.connector.getAbsoluteEndpointUrl()+"../share?mode=download&nodeId="+encodeURIComponent(node)+"&token="+encodeURIComponent(token)+"&password="+encodeURIComponent(this.passwordInput);
-      if(child!=null){
-            url+="&childId="+child.ref.id;
+      if(child==null && this.sharingInfo.node.isDirectory){
+          NodeHelper.downloadNodes(this.toast,this.connector,this.childs,this.sharingInfo.node.name+".zip");
       }
-      window.open(url);
+      else {
+          let url = this.connector.getAbsoluteEndpointUrl() + "../share?mode=download&nodeId=" + encodeURIComponent(node) + "&token=" + encodeURIComponent(token) + "&password=" + encodeURIComponent(this.passwordInput);
+          if (child != null) {
+              url += "&childId=" + child.ref.id;
+          }
+          window.open(url);
+      }
     }
     private changeSort(sort:any){
         this.sort=sort;
@@ -110,5 +118,11 @@ export class SharingComponent {
             this.childs=nodes.nodes;
             this.loadingChildren=false;
         });
+    }
+    inviterIsAuthor(){
+      return Helper.objectEquals(this.sharingInfo.invitedBy,this.sharingInfo.node.createdBy);
+    }
+    getPersonName(person:Person){
+        return ConfigurationHelper.getPersonWithConfigDisplayName(person,this.config);
     }
 }
