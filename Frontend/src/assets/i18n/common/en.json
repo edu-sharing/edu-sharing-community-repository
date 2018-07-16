@@ -325,6 +325,7 @@
     "INVITED_PLUS_CREATED_BY":"Shared by {{inviter}}, created by {{creator}}",
     "ENTER_PASSWORD": "next",
     "ERROR_INVALID_PASSWORD": "invalid password",
+    "PASSWORD": "Password",
     "PASSWORD_CORRECT": "Password correct"
   },
   "TOAST":{

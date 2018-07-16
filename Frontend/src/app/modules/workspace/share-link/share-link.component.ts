@@ -143,6 +143,7 @@ export class WorkspaceShareLinkComponent  {
     private toast:Toast,
   ){
     this.dateOptions={};
+    this.dateOptions.minDate=new Date(Date.now() - 1000 * 3600 * 24); // Minimal selectable date
     this.dateOptions.minYear=new Date().getFullYear();
     this.dateOptions.maxYear=new Date(new Date().getTime() * 1000 * 3600 * 365).getFullYear();
     //this.dateOptions.format="DD.MM.YYYY";

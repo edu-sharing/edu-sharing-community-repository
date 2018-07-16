@@ -700,7 +700,7 @@ public class NodeDao {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
 		
-		data.setType(NameSpaceTool.transformToShortQName(this.type));
+		data.setType(getType());
 		data.setIsDirectory(isDirectory());
 		data.setAspects(NameSpaceTool.transFormToShortQName(this.aspects));
 
@@ -739,6 +739,10 @@ public class NodeDao {
 		}
 		
 		return data;
+	}
+
+	public String getType() {
+		return NameSpaceTool.transformToShortQName(this.type);
 	}
 
 	private String getMetadataSet() {
@@ -1484,13 +1488,20 @@ public class NodeDao {
 			nodes.add(NodeDao.getNode(repoDao, child.getId(),propFilter));
     	}
     	for(int i=0;i<nodes.size();i++){
-    		String type=(String)nodes.get(i).getNativeProperties(null).get(CCConstants.CCM_PROP_MAP_TYPE);
+			String nodeType=(String)nodes.get(i).getType();
+			String type=(String)nodes.get(i).getNativeProperties(null).get(CCConstants.CCM_PROP_MAP_TYPE);
     		String name=nodes.get(i).getName();
     		if(".DS_Store".equals(name) || "._.DS_Store".equals(name)){
         		nodes.remove(i);
         		i--;
         		continue;
         	}
+        	// filter nodes for link inivitation
+			if(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SHARE).equals(nodeType)){
+				nodes.remove(i);
+				i--;
+				continue;
+			}
         	// filter the metadata template file
         	if(nodes.get(i).getAspectsNative().contains(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE)) {
 				nodes.remove(i);
