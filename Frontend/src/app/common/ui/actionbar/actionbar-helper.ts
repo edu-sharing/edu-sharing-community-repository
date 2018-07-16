@@ -35,16 +35,15 @@ export class ActionbarHelper{
           option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE);
       }
     }
-  if(type=='CREATE_VARIANT') {
+    if(type=='CREATE_VARIANT') {
       if (NodeHelper.allFiles(nodes)) {
           option = new OptionItem("WORKSPACE.OPTION.VARIANT", "call_split", callback);
-          /*
-          option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
+
+          option.isEnabled = !nodes[0] || nodes[0].size>0;
           option.enabledCallback = (node: Node) => {
-              let list = ActionbarHelper.getNodes(nodes, node);
-              return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH);
+              return node.size>0;
           }
-          */
+
       }
   }
     if(type=='ADD_TO_COLLECTION') {
