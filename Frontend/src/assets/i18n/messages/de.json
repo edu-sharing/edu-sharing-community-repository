@@ -5,15 +5,17 @@
     "share_expired":"Dieser Link ist abgelaufen",
     "share_file_deleted":"Die Datei wurde gelöscht",
     "invalid_share":"Ungültiger Link",
+    "security_error":"Zugang verweigert",
     "share_empty":"Die Datei kann nicht geladen werden",
     "SHARING_ERROR":"Freigeben fehlgeschlagen",
     "DETAILS":{
       "share_expired":"Die Linkfreigabe ist abgelaufen oder wurde vom Besitzer des Materials beendet",
       "share_file_deleted":"Die Linkfreigabe zeigt auf eine bereits gelöschte Datei. Bitte kontaktieren Sie den Autor",
       "invalid_share":"Der angegebene Link ist ungültig",
+      "security_error":"Der Zugriff auf den gewünschten Bereich bzw. die gewünschte Ressource ist leider nicht möglich",
       "share_empty":"Der Link zeigt auf eine inkompatible Datei oder eine Datei ohne Inhalt",
       "SHARING_ERROR":"edu-sharing kann aktuell leider nur Dateien begrenzter Größe teilen. Bitte versuchen Sie es mit einer anderen Datei",
-      "INVALID":""
+      "INVALID":"If this error keeps showing, please contact the operator of this system"
     }
   }
 }

@@ -224,6 +224,12 @@ export class ListTableComponent implements EventListener{
    */
   @Input() listClass="list";
   /**
+   * Should the list table fetch the repo list (useful to detect remote repo nodes)
+   * Must be set at initial loading!
+   * @type {boolean}
+   */
+  @Input() loadRepositories=true;
+  /**
    *  For collection elements only, tells if the current user can delete the given item
    *  Function should return a boolean
    * @type {boolean}
@@ -328,11 +334,16 @@ export class ListTableComponent implements EventListener{
               private sanitizer: DomSanitizer) {
     this.id=Math.random();
     frame.addListener(this);
+    setTimeout(()=>this.loadRepos());
+  }
+  loadRepos(){
+    if(!this.loadRepositories)
+      return;
     this.locator.locateApi().subscribe(()=>{
-      this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
-        this.repositories=data.repositories;
-        this.cd.detectChanges();
-      });
+        this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
+          this.repositories=data.repositories;
+          this.cd.detectChanges();
+        });
     });
   }
   onEvent(event:string,data:any){

@@ -48,6 +48,8 @@
   import {DropdownComponent} from "./common/ui/dropdown/dropdown.component";
   import {TutorialComponent} from "./common/ui/tutorial/tutorial.component";
   import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
+  import {InputPasswordComponent} from "./common/ui/input-password/input-password.component";
+  import {PoweredByComponent} from "./common/ui/powered-by/powered-by.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -78,6 +80,7 @@ export const DECLARATIONS = [
       CollectionChooserComponent,
       BreadcrumbsComponent,
       ActionbarComponent,
+      InputPasswordComponent,
       DropdownComponent,
       NodeInfoComponent,
       SmallCollectionComponent,
@@ -95,6 +98,7 @@ export const DECLARATIONS = [
       ModalDialogToastComponent,
       ToolListComponent,
       ToucheventDirective,
+      PoweredByComponent,
       BannerComponent,
       InfiniteScrollDirective,
       KeysPipe,

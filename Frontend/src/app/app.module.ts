@@ -20,6 +20,7 @@ import {DECLARATIONS_STREAM} from "./modules/stream/declarations";
 import {DECLARATIONS_PROFILES} from "./modules/profiles/declarations";
 import {DECLARATIONS_STARTUP} from './modules/startup/declarations';
 import {DECLARATIONS_SHARE_APP} from "./modules/share-app/declarations";
+import {DECLARATIONS_SHARING} from "./modules/sharing/declarations";
 
 
 
@@ -45,6 +46,7 @@ import {DECLARATIONS_SHARE_APP} from "./modules/share-app/declarations";
     DECLARATIONS_UPLOAD,
     DECLARATIONS_PROFILES,
     DECLARATIONS_MESSAGES,
+    DECLARATIONS_SHARING,
     DECLARATIONS_SHARE_APP
   ],
   imports: [

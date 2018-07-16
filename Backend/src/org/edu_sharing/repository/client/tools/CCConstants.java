@@ -659,6 +659,7 @@ public class CCConstants {
 	 * share props
 	 */
 	public final static String CCM_PROP_SHARE_EXPIRYDATE = "{http://www.campuscontent.de/model/1.0}share_expirydate";
+	public final static String CCM_PROP_SHARE_PASSWORD = "{http://www.campuscontent.de/model/1.0}share_password";
 	public final static String CCM_PROP_SHARE_MAIL = "{http://www.campuscontent.de/model/1.0}share_mail";
 	public final static String CCM_PROP_SHARE_TOKEN = "{http://www.campuscontent.de/model/1.0}share_token";
 	public final static String CCM_PROP_SHARE_DOWNLOAD_COUNTER = "{http://www.campuscontent.de/model/1.0}share_download_counter";

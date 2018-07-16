@@ -32,6 +32,7 @@ import {EventListener} from "../../../common/services/frame-events.service";
 import {ActionbarHelper} from "../actionbar/actionbar-helper";
 import {Response} from "@angular/http";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
+import {MainNavComponent} from "../main-nav/main-nav.component";
 
 declare var jQuery:any;
 declare var window: any;
@@ -93,6 +94,7 @@ export class NodeRenderComponent implements EventListener{
   childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
+  @ViewChild('mainnav') mainnav : MainNavComponent;
   @ViewChild('commentsRef') commentsRef : ElementRef;
 
     public static close(location:Location) {
@@ -155,6 +157,7 @@ export class NodeRenderComponent implements EventListener{
           else {
             this.searchService.reinit=false;
             NodeRenderComponent.close(this.location);
+            this.mainnav.openSidenav();
           }
         }
       }

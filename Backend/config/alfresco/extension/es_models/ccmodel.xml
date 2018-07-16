@@ -233,6 +233,9 @@
 				<property name="ccm:share_expirydate">
 					<type>d:long</type>
 				</property>
+				<property name="ccm:share_password">
+					<type>d:text</type>
+				</property>
 				<property name="ccm:share_mail">
 					<type>d:text</type>
 				</property>

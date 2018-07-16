@@ -1779,14 +1779,14 @@ export class MdsComponent{
   }
   private addChildobjectFile(event:any){
     this.addChildobject=false;
-    console.log(event);
-    let file=event[0];
-    let data={
-        icon:RestHelper.guessMediatypeIconForFile(this.connector,file),
-        name:file.name,
-        file:file
+    for(let file of event) {
+        let child = {
+            icon: RestHelper.guessMediatypeIconForFile(this.connector, file),
+            name: file.name,
+            file: file
+        }
+        this.childobjects.push(child);
     }
-    this.childobjects.push(data);
     this.refreshChildobjects();
   }
   private renderChildobjects(widget: any) {

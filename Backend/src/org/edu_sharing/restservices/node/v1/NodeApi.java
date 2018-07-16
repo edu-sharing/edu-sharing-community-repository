@@ -766,7 +766,6 @@ public class NodeApi  {
     	try {
     		Filter propFilter = new Filter(propertyFilter);
     		
-    		NodeEntries response=new NodeEntries();
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	node=NodeDao.mapNodeConstants(repoDao,node);
 	    	List<NodeRef> children;
@@ -793,7 +792,7 @@ public class NodeApi  {
 
 			List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
 	    	//Collections.sort(children);
-	    	response=createResponseFromNodeList(response,sorted,skipCount,maxItems);
+			NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);
 	    
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
@@ -849,7 +848,7 @@ public class NodeApi  {
 
 			List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,null,propFilter);
 			//Collections.sort(children);
-			response=createResponseFromNodeList(response,sorted,skipCount,maxItems);
+			response=createResponseFromNodeList(sorted,skipCount,maxItems);
 
 
 			return Response.status(Response.Status.OK).entity(response).build();
@@ -918,6 +917,7 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @ApiParam(value = "share id",required=true ) @PathParam("shareId") String shareId,
 	    @ApiParam(value = "expiry date for this share, leave empty or -1 for unlimited",required=false,defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED ) @QueryParam("expiryDate") Long expiryDate,
+	    @ApiParam(value = "new password for share, leave empty if you don't want to change it",required=false,defaultValue="") @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -925,7 +925,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
 	    	
-	    	NodeShare response=nodeDao.updateShare(shareId,expiryDate==null?ShareService.EXPIRY_DATE_UNLIMITED:expiryDate);
+	    	NodeShare response=nodeDao.updateShare(shareId,expiryDate==null?ShareService.EXPIRY_DATE_UNLIMITED:expiryDate,password);
 	    	return Response.status(Response.Status.OK).entity(response).build();
     	}
     	catch (Throwable t) {
@@ -1034,13 +1034,14 @@ public class NodeApi  {
     	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @ApiParam(value = "expiry date for this share, leave empty or -1 for unlimited",required=false,defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED ) @QueryParam("expiryDate") Long expiryDate,
+	    @ApiParam(value = "password for this share, use none to not use a password",required=false,defaultValue="") @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
-	    	NodeShare response=nodeDao.createShare(expiryDate==null ? ShareService.EXPIRY_DATE_UNLIMITED : expiryDate);
+	    	NodeShare response=nodeDao.createShare(expiryDate==null ? ShareService.EXPIRY_DATE_UNLIMITED : expiryDate,password);
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
     	}
@@ -1049,7 +1050,8 @@ public class NodeApi  {
     	}
        
     }    
-    private NodeEntries createResponseFromNodeList(NodeEntries response,List<Node> sorted, Integer skipCount, Integer maxItems) {
+    public static NodeEntries createResponseFromNodeList(List<Node> sorted, Integer skipCount, Integer maxItems) {
+		NodeEntries response = new NodeEntries();
     	int min = (skipCount != null) ? Math.min(sorted.size(), skipCount) : 0;
     	int max = (maxItems != null) ? Math.min(sorted.size(), min + maxItems) : sorted.size();   
     		
@@ -1988,14 +1990,68 @@ public class NodeApi  {
 	    public Response setOwner(
 	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@ApiParam(value = "username",required=false ) @QueryParam("mailtext")  String username,
+	    	@ApiParam(value = "username",required=false ) @QueryParam("username")  String username,
 			@Context HttpServletRequest req) {
 	    
 	    	try {
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.setOwner(node, username);   	
+		    	nodeDao.setOwner(username);   	
+		    	return Response.status(Response.Status.OK).build();
+		
+	    	} catch (DAOValidationException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (DAOSecurityException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (DAOMissingException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (Throwable t) {
+	    		
+	    		logger.error(t.getMessage(), t);
+	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+	    	}
+
+	    }
+		
+		@POST
+	    @Path("/nodes/{repository}/{node}/property")    
+	    
+	    @ApiOperation(
+	    	value = "Set single property of node.", 
+	    	notes = "Set single property of node.")
+	    
+	    @ApiResponses(
+	    	value = { 
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		    })
+
+	    public Response setProperty(
+	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@ApiParam(value = "property",required=true ) @QueryParam("property")  String property,
+	    	@ApiParam(value = "value",required=true ) @QueryParam("value")  String value,
+			@Context HttpServletRequest req) {
+	    
+	    	try {
+			
+		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+		    	nodeDao.setProperty(property, value);
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (DAOValidationException t) {

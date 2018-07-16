@@ -51,8 +51,9 @@
 <workspace-file-upload-select
   *ngIf="addChildobject"
   [priority]="2"
-  [multiple]="false"
-  [supportsDrop]="false"
+  [multiple]="true"
+  [showLti]="false"
+  [supportsDrop]="true"
   (onCancel)="addChildobject=false"
   (onFileSelected)="addChildobjectFile($event)"
   (onLinkSelected)="addChildobjectLink($event)"

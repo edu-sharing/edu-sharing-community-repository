@@ -35,7 +35,8 @@ public class ApiApplication extends ResourceConfig {
 		org.edu_sharing.restservices.statistic.v1.StatisticApi.class,
 		org.edu_sharing.restservices.archive.v1.ArchiveApi.class,
 		org.edu_sharing.restservices.clientutils.v1.ClientUtilsApi.class,
-		org.edu_sharing.restservices.tool.v1.ToolApi.class
+		org.edu_sharing.restservices.tool.v1.ToolApi.class,
+		org.edu_sharing.restservices.sharing.v1.SharingApi.class
 	};
 	
 	public ApiApplication() {

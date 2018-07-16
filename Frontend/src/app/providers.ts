@@ -23,6 +23,7 @@ import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 import {RestCommentsService} from "./common/rest/services/rest-comments.service";
 import {RestStreamService} from "./common/rest/services/rest-stream.service";
 import {RestUtilitiesService} from "./common/rest/services/rest-utilities.service";
+import {RestSharingService} from "./common/rest/services/rest-sharing.service";
 
 
 export const PROVIDERS=[
@@ -47,6 +48,7 @@ export const PROVIDERS=[
   RestUtilitiesService,
   TemporaryStorageService,
   RestMetadataService,
+  RestSharingService,
   SessionStorageService,
   ConfigurationService,
   UIService,

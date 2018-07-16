@@ -282,4 +282,10 @@ public class NodeServiceAdapter implements NodeService {
 	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName) {
 		return null;
 	}
+
+	@Override
+	public void setProperty(String protocol, String storeId, String nodeId, String property, String value) {
+		// TODO Auto-generated method stub
+
+	}
 }

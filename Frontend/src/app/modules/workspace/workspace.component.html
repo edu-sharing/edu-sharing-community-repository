@@ -1,6 +1,6 @@
 <div class="dialog darken dropZone" fileDrop
      (onFileDrop)="onFileDrop($event)"
-     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !showUploadSelect">
+     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !hasOpenWindows()">
   <div>
     <i class="material-icons" *ngIf="!searchQuery && createAllowed && !filesToUpload">cloud_upload</i>
     <i class="material-icons" *ngIf="!(!searchQuery && createAllowed && !filesToUpload)">cloud_off</i>

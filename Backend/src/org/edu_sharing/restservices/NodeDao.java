@@ -1352,6 +1352,7 @@ public class NodeDao {
 
 	public List<NotifyEntry> getNotifys() throws DAOException {
 		try{
+			throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 			List<Notify> notifys = permissionService.getNotifyList(nodeId);
 			List<NotifyEntry> result = new ArrayList<>(notifys.size());
 			for(Notify notify : notifys){
@@ -1361,6 +1362,12 @@ public class NodeDao {
 		}
 		catch(Throwable t){
 			throw DAOException.mapping(t);
+		}
+	}
+
+	private void throwIfPermissionIsMissing(String permission) throws DAOSecurityException {
+		if(!permissionService.hasPermission(storeProtocol,storeId,nodeId,permission)){
+			throw new DAOSecurityException(new SecurityException("Current user has no "+permission+" on node "+nodeId));
 		}
 	}
 
@@ -1412,7 +1419,8 @@ public class NodeDao {
 		}
 	}
 
-	public List<NodeShare> getShares(String email) {
+	public List<NodeShare> getShares(String email) throws DAOSecurityException {
+		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 		ShareServiceImpl service = new ShareServiceImpl();
 		List<NodeShare> entries=new ArrayList<>();
 		for(Share share : service.getShares(this.nodeId)){
@@ -1422,17 +1430,19 @@ public class NodeDao {
 		return entries;
 	}
 
-	public NodeShare createShare(long expiryDate) throws DAOException {
+	public NodeShare createShare(long expiryDate,String password) throws DAOException {
 		ShareServiceImpl service = new ShareServiceImpl();
 		try {
-			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),service.createShare(nodeId, expiryDate));
+			throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
+			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),service.createShare(nodeId, expiryDate,password));
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
 	
 	public void removeShare(String shareId) throws DAOException {
-    	ShareServiceImpl service=new ShareServiceImpl();
+		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
+		ShareServiceImpl service=new ShareServiceImpl();
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
     			service.removeShare(shareId);
@@ -1442,11 +1452,13 @@ public class NodeDao {
     	throw DAOException.mapping(new Exception("share "+shareId+" was not found on node "+nodeId));
 	}
 	
-	public NodeShare updateShare(String shareId, long expiryDate) throws DAOException {
+	public NodeShare updateShare(String shareId, long expiryDate, String password) throws DAOException {
+		throwIfPermissionIsMissing(CCConstants.PERMISSION_CHANGEPERMISSIONS);
 		ShareServiceImpl service=new ShareServiceImpl();
     	for(Share share : service.getShares(this.nodeId)){
     		if(share.getNodeId().equals(shareId)){
     			share.setExpiryDate(expiryDate);
+    			share.setPassword(password);
     			service.updateShare(share);
     			return new NodeShare(new org.alfresco.service.cmr.repository.NodeRef(NodeDao.storeRef,this.nodeId),share);
     		}
@@ -1721,10 +1733,14 @@ public class NodeDao {
 		}
 	}
 	
-	public void setOwner(String nodeId, String username) {
-		nodeService.setOwner(nodeId, username);
+	public void setOwner(String username) {
+		nodeService.setOwner( this.getId(), username);
 	}
 
+	public void setProperty(String property, String value) {
+		nodeService.setProperty(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier(), this.getId(), property, value);	
+	}
+	
 	public NodeDao createFork(String sourceId) throws DAOException {
 		try {
 			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, false);
