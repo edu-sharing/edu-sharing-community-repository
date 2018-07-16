@@ -37,7 +37,7 @@ export class WorkspaceFileUploadSelectComponent  {
    */
   @Input() supportsDrop = true;
   @Input() isFileOver=false;
-  @Input() showPicker=false;
+    @Input() showPicker=false;
   /**
    * Show the lti option and support generation of lti files?
    * @type {boolean}
@@ -100,6 +100,7 @@ export class WorkspaceFileUploadSelectComponent  {
     link=link.trim();
     this.disabled=!link;
     this.ltiAllowed=true;
+    /*
     if(this.cleanupUrlForLti(link)) {
         this.searchService.search([{
             property: "url",
@@ -116,6 +117,7 @@ export class WorkspaceFileUploadSelectComponent  {
                 }
             });
     }
+    */
   }
   public parentChoosed(event:Node[]){
     this.parent=event[0].ref.id;
