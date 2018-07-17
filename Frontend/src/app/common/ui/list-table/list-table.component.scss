@@ -42,6 +42,7 @@ $borderRadius:2px;
   transition: $transitionNormal all;
   opacity: 1;
   color: $primary!important;
+  display: none!important;
 }
 .disabled{
   color:$textVeryLight!important;
@@ -185,7 +186,7 @@ $badgeWidth:250px;
   min-width: 60px;
 }
 .node_sys_node-uuid{
-  min-width: 250px;
+  min-width: 150px;
 }
 .node_virtual_usagecount{
   min-width: 150px;
@@ -841,27 +842,33 @@ $orderAnimationTime:$transitionNormal*5;
     }
   }
 }
-
 @media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
-  .moreAlways{
-    display:none!important;
+  .moreAlways {
+    display: none !important;
   }
+}
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
   .row_2,.editColumns{
     display:none!important;
   }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+@media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .row_3{
     display:none!important;
   }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
+@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
   .row_4{
     display:none!important;
   }
 }
-@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
+@media screen and (max-width: ($mobileWidth+$mobileStage*7)) {
   .row_5{
+    display:none!important;
+  }
+}
+@media all and (max-width: ($mobileWidth+$mobileStage*8)) {
+  .row_6{
     display:none!important;
   }
 }
@@ -875,11 +882,6 @@ $orderAnimationTime:$transitionNormal*5;
 .row_14,
 .row_15{
   display:none!important;
-}
-@media all and (max-width: ($mobileWidth+$mobileStage*7)) {
-  .row_6{
-    display:none!important;
-  }
 }
 .cardList .row .column {
   display: block;
