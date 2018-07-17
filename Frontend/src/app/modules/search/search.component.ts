@@ -76,6 +76,7 @@ export class SearchComponent {
   view = ListTableComponent.VIEW_TYPE_GRID;
   searchFail: boolean = false;
   public nodeReport: Node;
+  public nodeVariant: Node;
   public currentRepository:string=RestConstants.HOME_REPOSITORY;
   public currentRepositoryObject:Repository;
 
@@ -630,6 +631,9 @@ export class SearchComponent {
           if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
               options.push(collection);
       }
+      let variant = ActionbarHelper.createOptionIfPossible('CREATE_VARIANT',nodes,this.connector,(node:Node)=>this.nodeVariant=ActionbarHelper.getNodes(nodes,node)[0]);
+      if (variant)
+          options.push(variant);
 
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));

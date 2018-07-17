@@ -84,7 +84,7 @@ export class NodeVariantComponent  {
 
     private updateBreadcrumbs(id: string) {
       this.chooseDirectory=false;
-        this.nodeApi.getNodeParents(id).subscribe((parents)=>{
+        this.nodeApi.getNodeParents(id,false).subscribe((parents)=>{
             this.breadcrumbs=parents.nodes.reverse();
         })
     }

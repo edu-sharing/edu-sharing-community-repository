@@ -63,9 +63,11 @@ $side:20px;
 }
 
 .description{
-  color:$textLight;
+  color: $textMain;
   font-size:90%;
   float:left;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 .descriptionValue{
   white-space: pre-wrap;
@@ -107,10 +109,15 @@ $side:20px;
 canvas{
   margin: 20px 0;
 }
-
-.statistik_value{
+listTable{
+  float:left;
+  width:100%;
+  padding: 10px 0 30px;
+}
+.statistic-value{
   margin-left: 47px;
-  margin-top: -13px;
+  margin-top: -22px;
+  margin-bottom: 10px;
   width: 110%;
 
   .point{
@@ -126,8 +133,12 @@ canvas{
   }
 }
 
-.usage_count{
+.usage-count{
   margin: 20px 0;
+  float: left;
+}
+.usage-counter{
+  font-weight: bold;
 }
 .preview{
   width:calc(100% + 24px);

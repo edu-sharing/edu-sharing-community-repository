@@ -1735,7 +1735,11 @@ public class NodeDao {
 			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, false);
 			permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
 					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
-			nodeService.createAssoc(sourceId,newNode.getId(),CCConstants.CCM_ASSOC_FORKIO);
+			nodeService.addAspect(newNode.getId(),CCConstants.CCM_ASPECT_FORKED);
+			nodeService.setProperty(newNode.getStoreRef().getProtocol(),newNode.getStoreRef().getIdentifier(),newNode.getId(),CCConstants.CCM_PROP_FORKED_ORIGIN,
+					new org.alfresco.service.cmr.repository.NodeRef(storeProtocol,storeId,sourceId));
+			nodeService.setProperty(newNode.getStoreRef().getProtocol(),newNode.getStoreRef().getIdentifier(),newNode.getId(),CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
+					nodeService.getProperty(storeProtocol,storeId,sourceId,CCConstants.LOM_PROP_LIFECYCLE_VERSION));
 			return new NodeDao(repoDao, newNode.getId());
 		}catch(Throwable t){
 			throw DAOException.mapping(t);

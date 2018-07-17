@@ -860,7 +860,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 	}
 	
-	public void setProperty(String protocol, String storeId, String nodeId, String property, String value) {
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
 		property = NameSpaceTool.transformToLongQName(property);
 		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), QName.createQName(property),value);
 	}

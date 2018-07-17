@@ -1,6 +1,7 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -267,7 +268,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 	
 	@Override
-	public void setProperty(String protocol, String storeId, String nodeId, String property, String value) {
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
 		// TODO Auto-generated method stub
 		
 	}
