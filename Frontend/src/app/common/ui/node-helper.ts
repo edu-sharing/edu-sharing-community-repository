@@ -505,10 +505,11 @@ export class NodeHelper{
       return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
 
     let nodesString=RestHelper.getNodeIds(nodes).join(",");
-      this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
-      "../eduservlet/download?appId="+
-      encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString)+"&fileName="+encodeURIComponent(fileName),fileName);
+    let url=connector.getAbsoluteEndpointUrl()+
+        "../eduservlet/download?appId="+
+        encodeURIComponent(nodes[0].ref.repo)+
+        "&nodeIds="+encodeURIComponent(nodesString)+"&fileName="+encodeURIComponent(fileName);
+    this.downloadUrl(toast,connector.getCordovaService(),url,fileName);
   }
 
   static getLRMIProperty(data: any, item: ListItem) {
