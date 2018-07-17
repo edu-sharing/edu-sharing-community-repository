@@ -76,9 +76,9 @@
      [parentNode]="metadataParent"
      (onCancel)="closeEditor(false)"
      (onDone)="closeEditor(true,$event)"
-     (openLicense)="nodeLicense=[nodeMetadata]"
+     (openLicense)="nodeLicense=[nodeMetadata];editorPending=true;"
      (openTemplate)="nodeTemplate=nodeMetadata"
-     (openContributor)="nodeContributor=nodeMetadata"
+     (openContributor)="nodeContributor=nodeMetadata;editorPending=true;"
 ></mds>
 <node-template *ngIf="nodeTemplate"
      [nodeId]="nodeTemplate.ref.id"
