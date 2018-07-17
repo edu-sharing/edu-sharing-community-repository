@@ -743,13 +743,15 @@ export class MdsComponent{
           }
         }catch(e){}
         if(widget.id=='author'){
-          /*if(properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]){
+          if(properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]
+              && properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0]
+              && new VCard(properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0]).getDisplayName()){
             this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_PERSON);
           }
           else
             this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_FREETEXT);
-            */
-          this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_FREETEXT);
+
+          //this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_FREETEXT);
         }
         if(widget.type=='vcard'){
           if(!props)
