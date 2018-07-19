@@ -29,7 +29,7 @@ import {SearchService} from "../../../modules/search/search.service";
 import {Helper} from "../../helper";
 import {RestHelper} from "../../rest/rest-helper";
 import {EventListener} from "../../../common/services/frame-events.service";
-import {ActionbarHelper} from "../actionbar/actionbar-helper";
+import {ActionbarHelperService} from "../../services/actionbar-helper";
 import {Response} from "@angular/http";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
@@ -76,6 +76,7 @@ export class NodeRenderComponent implements EventListener{
   public nodeShareLink: Node;
   public nodeWorkflow: Node;
   public nodeDelete: Node[];
+  public nodeVariant: Node;
   public addToCollection: Node[];
   public nodeReport: Node;
   private editor: string;
@@ -194,6 +195,7 @@ export class NodeRenderComponent implements EventListener{
       private searchStorage : SearchService,
       private toolService: RestToolService,
       private frame : FrameEventsService,
+      private actionbar : ActionbarHelperService,
       private toast : Toast,
       private cd: ChangeDetectorRef,
       private title : Title,
@@ -366,89 +368,101 @@ export class NodeRenderComponent implements EventListener{
       }
   }
 
-  private openConnector(list:ConnectorList,newWindow=true) {
+  private openConnector(newWindow=true) {
     if(RestToolService.isLtiObject(this._node)){
       this.toolService.openLtiObject(this._node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.frame,this.toast,list, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node, this.connectors.getCurrentList(),null,null,null,newWindow);
     }
   }
 
   private checkConnector() {
     this.connector.isLoggedIn().subscribe((login:LoginResult)=>{
-      if(!this.isCollectionRef()){
-        let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login,this._node));
-        openFolder.isEnabled=false;
-        this.nodeApi.getNodeParents(this._node.parent.id,false,[],this._node.parent.repo).subscribe((data:NodeList)=>{
-          openFolder.isEnabled = true;
-        });
-        if(this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config,"workspace"))
-          this.options.push(openFolder);
-
-        let edit=new OptionItem('WORKSPACE.OPTION.EDIT','info_outline',()=>this.nodeMetadata=this._node);
-        edit.isEnabled=this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1 && this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT;
-        if(this.version==RestConstants.NODE_VERSION_CURRENT)
-          this.options.push(edit);
-        this.isOpenable=false;
-      }
-      else{
-        let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login,this._node));
-        openFolder.isEnabled = false;
-        this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node:NodeWrapper)=>{
-
-          this.nodeApi.getNodeParents( node.node.parent.id,false,[], node.node.parent.repo).subscribe((data:NodeList)=>{
-            openFolder.isEnabled = true;
-            //.isEnabled = data.node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
-          });
+        this.connectors.list().subscribe((data:ConnectorList)=>{
+            this.initAfterConnector(login);
         },(error:any)=>{
+            this.initAfterConnector(login);
         });
-        this.options.push(openFolder);
-      }
-      let addCollection=new OptionItem('WORKSPACE.OPTION.COLLECTION','layers',()=>this.addToCollection=[this._node]);
-      addCollection.isEnabled=this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH)!=-1 && this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT;
-      this.options.push(addCollection);
-        let share = ActionbarHelper.createOptionIfPossible('INVITE',[this._node],this.connector,(node:Node)=>this.nodeShare=this._node);
-        if(share){
-            share.isSeperate=true;
-            this.options.push(share);
-        }
-        let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',[this._node],this.connector,(node: Node) => this.nodeShareLink=this._node);
-        if (shareLink && !this.isSafe)
-            this.options.push(shareLink);
-        let workflow = ActionbarHelper.createOptionIfPossible('WORKFLOW',[this._node],this.connector,(node:Node)=>this.nodeWorkflow=this._node);
-        if(workflow){
-            this.options.push(workflow);
-        }
-      if (this.config.instant("nodeReport", false)) {
-        let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
-        this.options.push(nodeReport);
-      }
-        let del=ActionbarHelper.createOptionIfPossible('DELETE',[this._node],this.connector,(node : Node) => this.nodeDelete=[this._node]);
-        if(del){
-            this.options.push(del);
-        }
-
-      this.isOpenable=false;
-      this.connectors.list().subscribe((data:ConnectorList)=>{
-        if(this.version==RestConstants.NODE_VERSION_CURRENT && RestConnectorsService.connectorSupportsEdit(data,this._node) || RestToolService.isLtiObject(this._node)){
-          let view=new OptionItem("WORKSPACE.OPTION.VIEW", "launch",()=>this.openConnector(data,true));
-          //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
-          this.options.splice(0,0,view);
-          this.options=Helper.deepCopyArray(this.options);
-          this.isOpenable=true;
-          if(this.editor && RestConnectorsService.connectorSupportsEdit(data,this._node).id==this.editor){
-            this.openConnector(data,false);
-          }
-          this.postprocessHtml();
-        }
-      },(error:any)=>{
-      });
       this.options=Helper.deepCopyArray(this.options);
     });
   }
 
-  private goToWorkspace(login:LoginResult,node:Node) {
+    private initAfterConnector(login: LoginResult) {
+        if (!this.isCollectionRef()) {
+            let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
+            openFolder.isEnabled = false;
+            this.nodeApi.getNodeParents(this._node.parent.id, false, [], this._node.parent.repo).subscribe((data: NodeList) => {
+                openFolder.isEnabled = true;
+            });
+            if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
+                this.options.push(openFolder);
+
+            let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', () => this.nodeMetadata = this._node);
+            edit.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1 && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
+            if (this.version == RestConstants.NODE_VERSION_CURRENT)
+                this.options.push(edit);
+            this.isOpenable = false;
+        }
+        else {
+            let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
+            openFolder.isEnabled = false;
+            this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node: NodeWrapper) => {
+
+                this.nodeApi.getNodeParents(node.node.parent.id, false, [], node.node.parent.repo).subscribe((data: NodeList) => {
+                    openFolder.isEnabled = true;
+                    //.isEnabled = data.node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
+                });
+            }, (error: any) => {
+            });
+            this.options.push(openFolder);
+        }
+        let addCollection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', [this._node], () => this.addToCollection = [this._node]);
+        if (addCollection) {
+            addCollection.showAsAction = false;
+            addCollection.isEnabled = this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
+            this.options.push(addCollection);
+        }
+        let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', [this._node], () => this.nodeVariant = this._node);
+        if (variant) {
+            this.options.push(variant);
+        }
+
+        let share = this.actionbar.createOptionIfPossible('INVITE', [this._node], (node: Node) => this.nodeShare = this._node);
+        if (share) {
+            share.showAsAction = false;
+            share.isSeperate = true;
+            this.options.push(share);
+        }
+
+        let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', [this._node], (node: Node) => this.nodeWorkflow = this._node);
+        if (workflow) {
+            this.options.push(workflow);
+        }
+        if (this.config.instant("nodeReport", false)) {
+            let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
+            this.options.push(nodeReport);
+        }
+        let del = this.actionbar.createOptionIfPossible('DELETE', [this._node], (node: Node) => this.nodeDelete = [this._node]);
+        if (del) {
+            this.options.push(del);
+        }
+
+        this.isOpenable = false;
+        if (this.version == RestConstants.NODE_VERSION_CURRENT && this.connectors.connectorSupportsEdit(this._node) || RestToolService.isLtiObject(this._node)) {
+            let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", () => this.openConnector( true));
+            //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
+            this.options.splice(0, 0, view);
+            this.options = Helper.deepCopyArray(this.options);
+            this.isOpenable = true;
+            if (this.editor && this.connectors.connectorSupportsEdit(this._node).id == this.editor) {
+                this.openConnector(false);
+            }
+            this.postprocessHtml();
+        }
+    }
+
+    private goToWorkspace(login:LoginResult,node:Node) {
       UIHelper.goToWorkspace(this.nodeApi,this.router,login,node);
   }
 

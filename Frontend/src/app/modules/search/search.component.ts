@@ -42,12 +42,12 @@ import {ListItem} from "../../common/ui/list-item";
 import {MdsComponent} from "../../common/ui/mds/mds.component";
 import {RequestObject} from "../../common/rest/request-object";
 import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
-import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {WorkspaceManagementDialogsComponent} from "../management-dialogs/management-dialogs.component";
 import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {UIService} from '../../common/services/ui.service';
+import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 
 
 @Component({
@@ -155,6 +155,7 @@ export class SearchComponent {
     private iam:RestIamService,
     private search: RestSearchService,
     private collectionApi : RestCollectionService,
+    private actionbar : ActionbarHelperService,
     private nodeApi: RestNodeService,
     private toast : Toast,
     private translate : TranslateService,
@@ -592,7 +593,7 @@ export class SearchComponent {
     }
     let options=[];
     if(this.searchService.reurl) {
-      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelper.getNodes(this.selection,node)[0],this.searchService.reurl));
+      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelperService.getNodes(this.selection,node)[0],this.searchService.reurl));
       apply.enabledCallback=((node:Node)=> {
         return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
       });
@@ -603,7 +604,7 @@ export class SearchComponent {
     if (this.addToCollection) {
       if (fromList || nodes && nodes.length) {
         let addTo = new OptionItem(fromList ? "SEARCH.ADD_TO_COLLECTION_SHORT" : "SEARCH.ADD_TO_COLLECTION", "layers", (node: Node) => {
-          this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(this.selection,node), () => {
+          this.addToCollectionList(this.addToCollection, ActionbarHelperService.getNodes(this.selection,node), () => {
             this.switchToCollections(this.addToCollection.ref.id);
           });
         });
@@ -621,8 +622,8 @@ export class SearchComponent {
       return options;
     }
     if(fromList || nodes && nodes.length) {
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
-        this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
+      let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => {
+          this.addNodesToCollection = ActionbarHelperService.getNodes(nodes, node);
       });
       if(collection) {
           collection.showCallback = (node: Node) => {
@@ -631,12 +632,12 @@ export class SearchComponent {
           if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
               options.push(collection);
       }
-      let variant = ActionbarHelper.createOptionIfPossible('CREATE_VARIANT',nodes,this.connector,(node:Node)=>this.nodeVariant=ActionbarHelper.getNodes(nodes,node)[0]);
+      let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', nodes, (node: Node) => this.nodeVariant = ActionbarHelperService.getNodes(nodes, node)[0]);
       if (variant)
           options.push(variant);
 
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
-        this.addToStore(ActionbarHelper.getNodes(nodes,node));
+        this.addToStore(ActionbarHelperService.getNodes(nodes,node));
       });
       nodeStore.showCallback=(node:Node)=>{
         return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
@@ -670,8 +671,7 @@ export class SearchComponent {
         }
       }
 
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,this.connector,
-        (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,ActionbarHelper.getNodes(nodes,node)));
+      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
       if (download)
         options.push(download);
 
@@ -1065,8 +1065,7 @@ export class SearchComponent {
               this.mdsId = this.mdsSets[0].id;
               if (param['mds'] && Helper.indexOfObjectArray(this.mdsSets,'id',param['mds'])!=-1)
                 this.mdsId = param['mds'];
-            }
-            catch(e){
+            }catch(e){
               console.warn("got invalid mds list from repository:");
               console.warn(this.mdsSets);
               console.warn("will continue with default mds");

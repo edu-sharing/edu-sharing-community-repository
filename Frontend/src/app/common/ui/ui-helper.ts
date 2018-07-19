@@ -22,6 +22,7 @@ import {PlatformLocation} from "@angular/common";
 import {ListItem} from './list-item';
 import {CordovaService} from "../services/cordova.service";
 import {OptionItem} from "./actionbar/option-item";
+import {RestConnectorService} from "../rest/services/rest-connector.service";
 export class UIHelper{
 
   public static evaluateMediaQuery(type:string,value:number){
@@ -242,23 +243,27 @@ export class UIHelper{
         UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,true);
       });
   }
-  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,connectorList:ConnectorList,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
+  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,node : Node,connectorList:ConnectorList=connector.getCurrentList(),type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
     if(connectorType==null){
-      connectorType=RestConnectorsService.connectorSupportsEdit(connectorList,node);
+      connectorType=connector.connectorSupportsEdit(node,connectorList);
     }
+    console.log(connectorList);
     let isCordova=connector.getRestConnector().getCordovaService().isRunningCordova();
-    if(win==null && newWindow && !isCordova)
-      win=window.open("");
+    if(win==null && newWindow) {
+        win = UIHelper.getNewWindow(connector.getRestConnector());
+    }
 
-    connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
+      connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
       if(result.isLocked) {
         toast.error(null, "TOAST.NODE_LOCKED");
         win.close();
         return;
       }
       connector.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
-          if(win)
-            win.location.href=url;
+          if(win) {
+              win.location.href = url;
+              console.log(win);
+          }
           else if(isCordova){
             UIHelper.openBlankWindow(url,connector.getRestConnector().getCordovaService());
           }
@@ -269,12 +274,14 @@ export class UIHelper{
               events.addWindow(win);
           }
         },
-        (error:string)=>{
+        (error)=>{
+          console.warn(error);
           toast.error(null,error);
           if(win)
             win.close();
         });
     },(error:any)=> {
+      console.warn(error);
       toast.error(error);
       if(win)
         win.close();
@@ -414,5 +421,16 @@ export class UIHelper{
                 result.push(option);
         }
         return result;
+    }
+
+    /**
+     * open a window (blank) to prevent popup blocking
+     * @param {RestConnectorService} connector
+     * @returns {any}
+     */
+    public static getNewWindow(connector:RestConnectorService) {
+        if(connector.getCordovaService().isRunningCordova())
+            return null;
+        return window.open("");
     }
 }

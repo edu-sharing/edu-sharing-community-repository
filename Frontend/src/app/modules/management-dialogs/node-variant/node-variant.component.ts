@@ -3,8 +3,8 @@ import {RestConnectorService} from "../../../common/rest/services/rest-connector
 import {Toast} from "../../../common/ui/toast";
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
-  NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
-  LoginResult
+    NodeWrapper, Node, NodePermissions, LocalPermissionsResult, Permission,
+    LoginResult, Connector
 } from "../../../common/rest/data-object";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {UIHelper} from "../../../common/ui/ui-helper";
@@ -15,6 +15,10 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
 import {RestConstants} from '../../../common/rest/rest-constants';
 import {Router} from '@angular/router';
 import {RestHelper} from '../../../common/rest/rest-helper';
+import {RestConnectorsService} from "../../../common/rest/services/rest-connectors.service";
+import {FrameEventsService} from "../../../common/services/frame-events.service";
+import {WorkspaceMainComponent} from "../../workspace/workspace.component";
+import {NodeHelper} from "../../../common/ui/node-helper";
 
 @Component({
   selector: 'node-variant',
@@ -30,9 +34,11 @@ export class NodeVariantComponent  {
   chooseDirectory = false;
   breadcrumbs: Node[];
   variantName : string;
+  openViaConnector: Connector;
   @Input() set node(node : Node){
     this._node=node;
     this.variantName=this.translate.instant('NODE_VARIANT.DEFAULT_NAME',{name:this._node.name});
+    this.openViaConnector=this.connectors.connectorSupportsEdit(node);
   }
   @Output() onLoading=new EventEmitter();
   @Output() onCancel=new EventEmitter();
@@ -41,8 +47,10 @@ export class NodeVariantComponent  {
     private connector : RestConnectorService,
     private iam : RestIamService,
     private translate : TranslateService,
+    private connectors : RestConnectorsService,
     private config : ConfigurationService,
     private toast : Toast,
+    private events : FrameEventsService,
     private router : Router,
     private nodeApi : RestNodeService) {
       this.updateBreadcrumbs(RestConstants.INBOX);
@@ -54,27 +62,41 @@ export class NodeVariantComponent  {
   public create(){
       if(!this.breadcrumbs || !this.breadcrumbs.length)
           return;
+      let win:any=null;
+      if(this.openViaConnector){
+          win=UIHelper.getNewWindow(this.connector);
+      }
       this.onLoading.emit(true);
       this.nodeApi.forkNode(this.breadcrumbs[this.breadcrumbs.length-1].ref.id,this._node.ref.id).subscribe((created)=>{
-          this.nodeApi.editNodeMetadata(created.node.ref.id,RestHelper.createNameProperty(this.variantName)).subscribe(()=>{
+          this.nodeApi.editNodeMetadata(created.node.ref.id,RestHelper.createNameProperty(this.variantName)).subscribe((edited)=>{
               this.onLoading.emit(false);
-              let additional={
-                  link:{
-                      caption:'NODE_VARIANT.CREATED_LINK',
-                      callback:()=>{
-                          UIHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.connector.getCurrentLogin(),this.breadcrumbs[this.breadcrumbs.length-1].ref.id);
+              if(this.openViaConnector){
+                  UIHelper.openConnector(this.connectors,this.events,this.toast,edited.node,this.connectors.getCurrentList(),null,win);
+                  UIHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.connector.getCurrentLogin(),this.breadcrumbs[this.breadcrumbs.length-1].ref.id);
+              }
+              else {
+                  let additional={
+                      link:{
+                          caption:'NODE_VARIANT.CREATED_LINK',
+                          callback:()=>{
+                              UIHelper.goToWorkspaceFolder(this.nodeApi,this.router,this.connector.getCurrentLogin(),this.breadcrumbs[this.breadcrumbs.length-1].ref.id);
+                          }
                       }
-                  }
-              };
-              this.toast.toast('NODE_VARIANT.CREATED',{folder:this.breadcrumbs[this.breadcrumbs.length-1].name},null,null,additional);
+                  };
+                  this.toast.toast('NODE_VARIANT.CREATED', {folder: this.breadcrumbs[this.breadcrumbs.length - 1].name}, null, null, additional);
+              }
               this.onDone.emit();
           },(error)=>{
               this.onLoading.emit(false);
-              this.toast.error(error);
+              NodeHelper.handleNodeError(this.toast,this.variantName,error);
+              if(win)
+                  win.close();
           });
       },(error)=>{
           this.onLoading.emit(false);
-          this.toast.error(error);
+          NodeHelper.handleNodeError(this.toast,this.variantName,error);
+          if(win)
+              win.close();
       });
   }
 

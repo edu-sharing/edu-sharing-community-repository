@@ -34,7 +34,6 @@ import {UIConstants} from "../../common/ui/ui-constants";
 import {ListItem} from "../../common/ui/list-item";
 import {AddElement, ListTableComponent} from "../../common/ui/list-table/list-table.component";
 import {RestMdsService} from "../../common/rest/services/rest-mds.service";
-import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {NodeHelper} from "../../common/ui/node-helper";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsHelper} from "../../common/rest/mds-helper";
@@ -45,6 +44,7 @@ import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
+import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 
 // component class
 @Component({
@@ -120,6 +120,7 @@ export class CollectionsMainComponent implements GwtEventListener {
         private organizationService : RestOrganizationService,
         private iamService : RestIamService,
         private mdsService : RestMdsService,
+      private actionbar : ActionbarHelperService,
       private storage : SessionStorageService,
       private connector : RestConnectorService,
         private route:ActivatedRoute,
@@ -368,13 +369,13 @@ export class CollectionsMainComponent implements GwtEventListener {
         if (!fromList) {
             if (nodes && nodes.length) {
                 if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
-                    let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
+                    let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOther = ActionbarHelperService.getNodes(nodes, node));
                     if (collection)
                         options.push(collection);
                 }
                 if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
                     let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE', 'remove_circle_outline', (node: Node) => {
-                        this.deleteMultiple(ActionbarHelper.getNodes(nodes, node));
+                        this.deleteMultiple(ActionbarHelperService.getNodes(nodes, node));
                     });
                     if (remove)
                         options.push(remove);
@@ -382,8 +383,7 @@ export class CollectionsMainComponent implements GwtEventListener {
             }
         }
         if (fromList) {
-            let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector,
-                (node: Node) => this.addToOtherCollection(node));
+            let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOtherCollection(node));
             if (collection) {
                 collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
                 options.push(collection);
@@ -391,22 +391,21 @@ export class CollectionsMainComponent implements GwtEventListener {
         }
       if (fromList || nodes && nodes.length) {
 
-            let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes, this.connector,
-                (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelper.getNodes(nodes, node)));
+            let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
             if (download)
                 options.push(download);
       }
       if(fromList) {
-          let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
+          let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelperService.getNodes(nodes, node)[0]));
           remove.showCallback = (node: Node) => {
-              return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
+              return NodeHelper.getNodesRight(ActionbarHelperService.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
           };
           if(remove)
             options.push(remove);
       }
       if(fromList || nodes && nodes.length==1) {
           if (this.config.instant("nodeReport", false)) {
-              let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes, node)[0]);
+              let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelperService.getNodes(nodes, node)[0]);
               if(report)
                 options.push(report);
           }
@@ -498,7 +497,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
     // gets called by user if something went wrong to start fresh from beginning
     resetCollections() : void {
-        var url = window.location.href;
+        let url = window.location.href;
         url = url.substring(0,url.indexOf("collections")+11);
         window.location.href = url;
         return;

@@ -191,6 +191,8 @@
     "BREADCRUMB_INFO": "Variante speichern in:",
     "CHOOSE": "Speicherort ändern",
     "FILE_PICKER_TITLE": "Speicherort wählen",
+    "CREATE":"Anlegen",
+    "CREATE_EDIT":"Anlegen & Öffnen",
     "CREATED": "Die Variante wurde angelegt und in <b>\"{{folder}}\"</b> Ordner gespeichert",
     "CREATED_LINK": "anzeigen"
   },

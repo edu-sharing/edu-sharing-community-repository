@@ -31,7 +31,7 @@ import {trigger} from "@angular/animations";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
-import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
+import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {Helper} from "../../common/helper";
 import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {DateHelper} from '../../common/ui/DateHelper';
@@ -215,6 +215,7 @@ export class WorkspaceMainComponent implements EventListener{
                 private storage : TemporaryStorageService,
                 private config: ConfigurationService,
                 private connectors : RestConnectorsService,
+                private actionbar : ActionbarHelperService,
                 private collectionApi : RestCollectionService,
                 private toolService : RestToolService,
                 private session : SessionStorageService,
@@ -321,7 +322,7 @@ export class WorkspaceMainComponent implements EventListener{
 
     }
     private editConnector(node : Node=null,type : Filetype=null,win : any = null,connectorType : Connector = null){
-        UIHelper.openConnector(this.connectors,this.event,this.toast,this.connectorList,this.getNodeList(node)[0],type,win,connectorType);
+        UIHelper.openConnector(this.connectors,this.event,this.toast,this.getNodeList(node)[0],this.connectorList,type,win,connectorType);
     }
     private handleDrop(event:any){
         for(let s of event.source) {
@@ -792,11 +793,11 @@ export class WorkspaceMainComponent implements EventListener{
         if(fromList){
             view.showAlways = true;
             view.showCallback=((node:Node)=>{
-                return RestConnectorsService.connectorSupportsEdit(this.connectorList, node) != null;
+                return this.connectors.connectorSupportsEdit(node,this.connectorList) != null;
             });
             options.push(view);
         }
-        else if(nodes && nodes.length==1 && RestConnectorsService.connectorSupportsEdit(this.connectorList,nodes[0])){
+        else if(nodes && nodes.length==1 && this.connectors.connectorSupportsEdit(nodes[0],this.connectorList)){
             options.push(view);
         }
         if(nodes && nodes.length==1 && !savedSearch){
@@ -807,21 +808,21 @@ export class WorkspaceMainComponent implements EventListener{
                 options.push(edit);
         }
         if(nodes && nodes.length && allFiles) {
-            let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,this.connector,(node:Node)=>this.addToCollection(node));
+            let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
             if (collection && !this.isSafe)
                 options.push(collection);
         }
         if(nodes && nodes.length && allFiles) {
-            let variant = ActionbarHelper.createOptionIfPossible('CREATE_VARIANT',nodes,this.connector,(node:Node)=>this.createVariant(node));
+            let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT',nodes, (node: Node) => this.createVariant(node));
             if (variant && !this.isSafe)
                 options.push(variant);
         }
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
-            let template = ActionbarHelper.createOptionIfPossible('NODE_TEMPLATE',nodes,this.connector,(node:Node)=>this.nodeTemplate(node));
+            let template = this.actionbar.createOptionIfPossible('NODE_TEMPLATE', nodes, (node: Node) => this.nodeTemplate(node));
             if(template)
                 options.push(template);
-            share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,this.connector,(node: Node) => this.shareNode(node));
+            share=this.actionbar.createOptionIfPossible('INVITE', nodes, (node: Node) => this.shareNode(node));
             if(share) {
                 share.isEnabled = share.isEnabled && (
                     (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
@@ -846,7 +847,7 @@ export class WorkspaceMainComponent implements EventListener{
             contributor.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
             if(nodes && !nodes[0].isDirectory && !this.isSafe)
                 options.push(contributor);
-            let workflow = ActionbarHelper.createOptionIfPossible('WORKFLOW',nodes,this.connector,(node:Node)=>this.manageWorkflowNode(node));
+            let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', nodes, (node: Node) => this.manageWorkflowNode(node));
             if(workflow)
                 options.push(workflow);
 
@@ -860,7 +861,7 @@ export class WorkspaceMainComponent implements EventListener{
 
         }
         if(fromList || nodes && nodes.length) {
-            let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes, this.connector, (node: Node) => this.downloadNode(node));
+            let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => this.downloadNode(node));
             if (download)
                 options.push(download);
         }
@@ -869,7 +870,7 @@ export class WorkspaceMainComponent implements EventListener{
             cut.isSeperate = true;
             options.push(cut);
             options.push(new OptionItem("WORKSPACE.OPTION.COPY", "content_copy", (node: Node) => this.cutCopyNode(node, true)));
-            let del=ActionbarHelper.createOptionIfPossible('DELETE',nodes,this.connector,(node : Node) => this.deleteNodes(node));
+            let del=this.actionbar.createOptionIfPossible('DELETE', nodes, (node: Node) => this.deleteNodes(node));
             if(del){
                 options.push(del);
             }
@@ -976,7 +977,7 @@ export class WorkspaceMainComponent implements EventListener{
             else if(RestToolService.isLtiObject(node)){
                 this.toolService.openLtiObject(node);
             }
-            else if(useConnector && RestConnectorsService.connectorSupportsEdit(this.connectorList,node)){
+            else if(useConnector && this.connectors.connectorSupportsEdit(node,this.connectorList)){
                 this.editConnector(node);
             }
             else {
