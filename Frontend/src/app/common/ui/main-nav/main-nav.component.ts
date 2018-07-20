@@ -538,11 +538,14 @@ export class MainNavComponent {
     this.licenseAgreement=false;
     if(this.licenseAgreementNode)
       this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
+    else
+      this.session.set('licenseAgreement','0.0');
   }
   private showLicenseAgreement() {
-    if(!this.config.licenseAgreement || this.isGuest)
+    if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin)
       return;
     this.session.get('licenseAgreement',false).subscribe((version:string)=>{
+      console.log("user accepted agreement at version "+version);
       this.licenseAgreementHTML=null;
       let nodeId:string=null;
       for(let node of this.config.licenseAgreement.nodeId) {
@@ -565,6 +568,8 @@ export class MainNavComponent {
             this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
         });
       },(error:any)=>{
+          if(version==='0.0')
+            return;
           this.licenseAgreement=true;
           this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
       })
