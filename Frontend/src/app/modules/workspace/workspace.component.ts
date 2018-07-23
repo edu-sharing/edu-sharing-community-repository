@@ -899,13 +899,13 @@ export class WorkspaceMainComponent implements EventListener{
         if (nodes && nodes.length) {
             let cut=new OptionItem("WORKSPACE.OPTION.CUT", "content_cut", (node: Node) => this.cutCopyNode(node, false));
             cut.isSeperate = true;
+            cut.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE) && (this.root=='MY_FILES' || this.root=='SHARED_FILES');
             options.push(cut);
             options.push(new OptionItem("WORKSPACE.OPTION.COPY", "content_copy", (node: Node) => this.cutCopyNode(node, true)));
             let del=new OptionItem("WORKSPACE.OPTION.DELETE","delete", (node : Node) => this.deleteNode(node));
             del.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
             del.isSeperate=true;
             options.push(del);
-
             let custom=this.config.instant("nodeOptions");
             NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.currentNodes, nodes, options,(load:boolean)=>this.globalProgress=load);
         }
