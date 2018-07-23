@@ -1,14 +1,11 @@
 package org.edu_sharing.alfresco.policy;
 
-import java.io.Serializable;
 import java.util.Map;
 
-import org.alfresco.repo.copy.CopyBehaviourCallback;
-import org.alfresco.repo.copy.CopyDetails;
 import org.alfresco.repo.copy.CopyServicePolicies.OnCopyCompletePolicy;
-import org.alfresco.repo.copy.DefaultCopyBehaviourCallback;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
@@ -39,7 +36,14 @@ public class OnCopyIOPolicy implements OnCopyCompletePolicy{
 		nodeService.setProperty(targetNodeRef, versionProp, "1.0");
 		
 		QName publishedAspect = QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED);
-		if(nodeService.hasAspect(targetNodeRef, publishedAspect)) {
+		
+		QName collectionAspect = QName.createQName(CCConstants.CCM_ASPECT_COLLECTION);
+		
+		ChildAssociationRef childNodeRef = nodeService.getPrimaryParent(targetNodeRef);
+		boolean parentIsCollection = nodeService.hasAspect(childNodeRef.getParentRef(), collectionAspect);
+		
+		if(nodeService.hasAspect(targetNodeRef, publishedAspect) 
+				&& !parentIsCollection) {
 			nodeService.removeAspect(targetNodeRef, publishedAspect);
 		}
 	}

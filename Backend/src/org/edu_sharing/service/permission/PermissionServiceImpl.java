@@ -397,6 +397,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				} catch (SQLException e) {
 					logger.error("sql error while creating handle id",e);
 					return;
+				}catch(Exception e) {
+					logger.error(e.getMessage(),e);
+					return;
 				}
 			}
 			
