@@ -866,6 +866,7 @@ export class WorkspaceMainComponent implements EventListener{
         if (nodes && nodes.length) {
             let cut=new OptionItem("WORKSPACE.OPTION.CUT", "content_cut", (node: Node) => this.cutCopyNode(node, false));
             cut.isSeperate = true;
+            cut.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE) && (this.root=='MY_FILES' || this.root=='SHARED_FILES');
             options.push(cut);
             options.push(new OptionItem("WORKSPACE.OPTION.COPY", "content_copy", (node: Node) => this.cutCopyNode(node, true)));
             let del=ActionbarHelper.createOptionIfPossible('DELETE',nodes,this.connector,(node : Node) => this.deleteNodes(node));

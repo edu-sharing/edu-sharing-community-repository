@@ -73,10 +73,15 @@ export class SharingComponent {
              this.sharingService.getInfo(params['nodeId'],params['token']).subscribe((result)=>{
                  this.loading=false;
                  this.sharingInfo=result;
+                 if(result.expired){
+                     this.router.navigate([UIConstants.ROUTER_PREFIX,'messages','share_expired']);
+                     return;
+                 }
                  this.loadChildren();
              },(error)=>{
+                 console.warn(error);
+                 this.router.navigate([UIConstants.ROUTER_PREFIX,'messages','share_expired']);
                  this.loading=false;
-                 this.toast.error(error);
              })
           });
       });

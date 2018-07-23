@@ -38,6 +38,8 @@ export class BreadcrumbsComponent{
    * @param homeId
    */
   @Input() set homeId(homeId : string){
+    if(!homeId)
+      return;
     this.node.getChildren(homeId).subscribe((data:NodeList)=>{
       this.mainParents=data.nodes;
       this.findMainParent();

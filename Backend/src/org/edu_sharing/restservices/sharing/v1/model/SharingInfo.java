@@ -4,11 +4,15 @@ import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.Person;
+import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
+
+import java.util.Date;
 
 public class SharingInfo {
     private boolean passwordMatches;
     private boolean password;
+    private boolean expired;
     private Person invitedBy = null;
     private Node node;
     public SharingInfo(Share share, Node node, String passwordCheck) {
@@ -17,7 +21,9 @@ public class SharingInfo {
         if(passwordCheck!=null && !passwordCheck.isEmpty()){
             this.passwordMatches=ShareServiceImpl.encryptPassword(passwordCheck).equals(share.getPassword());
         }
-        this.node=node;
+        this.expired=share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED && new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()));
+        if(!this.expired)
+            this.node=node;
     }
 
     private Person convertToPerson(Share share) {
@@ -60,5 +66,13 @@ public class SharingInfo {
 
     public void setNode(Node node) {
         this.node = node;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
     }
 }

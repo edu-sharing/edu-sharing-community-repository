@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -77,6 +78,12 @@ public class DownloadServlet extends HttpServlet{
 					throw new Exception();
 			if (share.getPassword()!=null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
 				throw new Exception();
+			}
+			if (share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED) {
+				if (new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()))) {
+					resp.sendRedirect(URLTool.getNgMessageUrl("share_expired"));
+					return;
+				}
 			}
 			}catch(Throwable t){
 				resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));

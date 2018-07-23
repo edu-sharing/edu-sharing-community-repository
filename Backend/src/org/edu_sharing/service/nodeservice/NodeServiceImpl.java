@@ -435,7 +435,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	
 	protected String getValue(String type, String prop, Object _value, String metadataSetId) {
 
-		MetadataSetModelProperty mdsmProp = getMetadataSetModelProperty(metadataSetId, type, prop);
+		//MetadataSetModelProperty mdsmProp = getMetadataSetModelProperty(metadataSetId, type, prop);
 
 		if (_value instanceof List && ((List) _value).size() > 0) {
 			String result = null;
@@ -444,7 +444,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					result += CCConstants.MULTIVALUE_SEPARATOR;
 				if (value != null) {
 					if (value instanceof MLText) {
-						String tmpStr = getMLTextString(value, mdsmProp);
+						String tmpStr = getMLTextString(value);
 						if (result != null)
 							result += tmpStr;
 						else
@@ -467,7 +467,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		} else if (_value instanceof Number) {
 			return _value.toString();
 		} else if (_value instanceof MLText) {
-			return getMLTextString(_value, mdsmProp);
+			return getMLTextString(_value);
 		} else {
 			return _value.toString();
 		}
@@ -495,13 +495,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	
-	protected String getMLTextString(Object _mlText, MetadataSetModelProperty mdsmp) {
+	protected String getMLTextString(Object _mlText) {
 
 		if (_mlText instanceof MLText) {
 
 			MLText mlText = (MLText) _mlText;
 
-			if (mdsmp == null || (mdsmp != null && !mdsmp.getMultilang())) {
+			if (true /*mdsmp == null || (mdsmp != null && !mdsmp.getMultilang())*/) {
 				return mlText.getDefaultValue();
 			}
 
@@ -875,7 +875,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return nodeService.getTargetAssocs(ref,QName.createQName(assoc.getAssocName()));
 		}
 	}
-	
+
 	public void setProperty(String protocol, String storeId, String nodeId, String property, String value) {
 		property = NameSpaceTool.transformToLongQName(property);
 		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), QName.createQName(property),value);

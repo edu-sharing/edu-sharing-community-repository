@@ -38,11 +38,10 @@ public class OAIPMHLOMValidator extends OAIPMHLOMImporter{
 		});
 	}
 
-	@Override
-	protected void handleGetRecordStuff(String result, String cursor, String set, String identifier) {
+	protected void handleGetRecordStuff(String cursor, String set, String identifier) {
 		try{
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document doc = builder.parse(new InputSource(new StringReader(result)));
+			Document doc = getRecordAsDoc(identifier);
 			String errorcode = (String)xpath.evaluate("/OAI-PMH/error", doc, XPathConstants.STRING);
 			if(errorcode == null || errorcode.trim().equals("")){
 				logger.debug("everything is ok with identifier:"+identifier);
