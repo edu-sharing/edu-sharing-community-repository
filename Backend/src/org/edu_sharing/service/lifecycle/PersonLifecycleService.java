@@ -24,6 +24,19 @@ import org.springframework.context.ApplicationContext;
  * 
  * job that sets active status for existing persons when edu-sharing property 'person_active_status' is set
  * 
+ * user_home remove with/without cc -> with: move cc content to cc_user space (hiarachical date folders structure)
+ * 
+ * 
+ * all files in shared content will be deleted except OER(cc) content:
+ * student, external, teacher trainee's
+ * instance owner becomes owner
+ * Collections -> delete?
+ * 
+ * 
+ * InviteHistory: delete or rename
+ * 
+ * filtered in invite dialogs
+ * 
  * 
  * 
  */
@@ -48,6 +61,7 @@ public class PersonLifecycleService {
 	
 	public static String PERSON_STATUS_TODELETE = "todelete";
 	
+	boolean keepOERFilesInUserHome = false;
 	
 	
 	public void deletePersons() {
