@@ -106,7 +106,7 @@ export class WorkspaceExplorerComponent  {
       [query,query,query,query,query],[],RestConstants.COMBINE_MODE_OR,RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS, request).subscribe((data : NodeList) => this.addNodes(data,true));*/
     let criterias:any=[];
     criterias.push({'property': RestConstants.PRIMARY_SEARCH_CRITERIA, 'values': [query]});
-    this.search.search(criterias,[],request,RestConstants.CONTENT_TYPE_ALL,RestConstants.HOME_REPOSITORY,
+    this.search.search(criterias,[],request,this.connector.getCurrentLogin() && this.connector.getCurrentLogin().isAdmin ? RestConstants.CONTENT_TYPE_ALL : RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS,RestConstants.HOME_REPOSITORY,
       RestConstants.DEFAULT,[],'workspace').subscribe((data:NodeList)=>{
       this.addNodes(data,true);
     },(error:any)=>{

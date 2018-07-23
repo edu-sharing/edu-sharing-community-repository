@@ -657,11 +657,10 @@ public class CollectionServiceImpl implements CollectionService{
 				if(SearchScope.TYPE_EDITORIAL.name().equals(scope)){
 					queryString += " AND @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
 				}
-				List<NodeRef> returnVal = new ArrayList<NodeRef>();
+				List<NodeRef> returnVal = new ArrayList<>();
 				List<NodeRef> nodeRefs = client.searchNodeRefs(queryString,eduGroupScope);
 				for(NodeRef nodeRef : nodeRefs){
-					String parent = client.getParent(nodeRef).getParentRef().getId();
-					if(Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
+					if(isSubCollection(nodeRef)){
 						continue;
 					}
 					returnVal.add(nodeRef);
@@ -679,7 +678,14 @@ public class CollectionServiceImpl implements CollectionService{
 			throw new RuntimeException(e);
 		}
 	}
-	
+
+	private boolean isSubCollection(NodeRef nodeRef) {
+		return AuthenticationUtil.runAsSystem(() ->{
+			String parent = client.getParent(nodeRef).getParentRef().getId();
+			return Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION);
+		});
+	}
+
 	public void setScope(Collection collection) throws Exception {
 		String collectionId = collection.getNodeId();
 		String scope = collection.getScope();
