@@ -93,7 +93,6 @@ export class NodeListComponent {
     }
     public searchField() : void{
         this.currentQuery=this.query;
-        this.offset=0;
         this.list=null;
         if(this.query=="")
           this.searchAll();
