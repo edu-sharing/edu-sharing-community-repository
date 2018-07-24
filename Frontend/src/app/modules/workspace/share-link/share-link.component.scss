@@ -83,7 +83,7 @@ input-password{
   top: 0;
   right: 0;
 }
-@media screen and (max-width: $mobileWidth - $mobileStage){
+@media screen and (max-width: ($mobileWidth - $mobileStage)){
   .small-switch{
     position: relative;
   }
