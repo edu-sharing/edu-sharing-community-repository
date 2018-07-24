@@ -12,6 +12,7 @@
   "SAVE" : "save",
   "APPLY" : "apply",
   "CANCEL" : "cancel",
+  "YES_DELETE" : "Yes, delete",
   "RENAME" : "rename",
   "USER_GUEST" : "guest",
   "IMPRINT" : "Imprint",
