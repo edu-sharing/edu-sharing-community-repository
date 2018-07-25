@@ -64,6 +64,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   public permissionsUser : Permission[];
   public permissionsGroup : Permission[];
   private newPermissions : Permission[]=[];
+  inheritAccessDenied = false;
   public owner : Permission;
   public linkEnabled : Permission;
   public linkDisabled : Permission;
@@ -152,7 +153,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.initialState=this.getState();
         }
 
-      }, (error: any) => this.toast.error(error));
+      }, (error: any) => {
+          this.inheritAccessDenied=true;
+      });
       this.nodeApi.getNodeParents(node.ref.id).subscribe((data: NodeList) => {
         this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
       });
