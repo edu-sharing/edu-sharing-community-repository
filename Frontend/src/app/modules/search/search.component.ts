@@ -108,6 +108,7 @@ export class SearchComponent {
   private _mdsId: string;
   private isSearching = false;
   private groupedRepositories: Repository[];
+  private enabledRepositories: string[];
   public get mdsId(){
     return this._mdsId;
   }
@@ -340,6 +341,7 @@ export class SearchComponent {
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
       parameters:parameters && Object.keys(parameters) ? JSON.stringify(parameters) : null,
+      repositoryFilter:this.getEnabledRepositories().join(","),
       mds:mds,repository:repository,
       mdsExtended:this.mdsExtended,
       reurl:this.searchService.reurl}});
@@ -799,7 +801,7 @@ export class SearchComponent {
     }
     return {status:true};
   }
-  private searchRepository(repos: Repository[],criterias:any,init:boolean,position=0,count=0) {
+  private searchRepository(repos: any[],criterias:any,init:boolean,position=0,count=0) {
     if(position>0 && position>=repos.length) {
       this.searchService.numberofresults = count;
       this.searchService.showspinner = false;
@@ -808,6 +810,10 @@ export class SearchComponent {
     }
 
     let repo=repos[position];
+    if(!repo.enabled){
+        this.searchRepository(repos,criterias,init,position+1,count);
+        return;
+    }
     /*
     let properties=[RestConstants.CM_MODIFIED_DATE,
       RestConstants.CM_CREATOR,
@@ -872,7 +878,10 @@ export class SearchComponent {
         for (let repo of this.repositories) {
             if (repo.id == RestConstants.ALL || repo.id == 'MORE')
                 continue;
-            this.repositoryIds.push({id: repo.id, title: repo.title, enabled: true});
+            this.repositoryIds.push({
+                id: repo.id,
+                title: repo.title,
+                enabled: this.enabledRepositories ? this.enabledRepositories.indexOf(repo.id)!=-1 : true});
         }
         this.updateGroupedRepositories();
     }
@@ -1015,6 +1024,12 @@ export class SearchComponent {
 
         if(param['query'])
           this.searchService.searchTerm=param['query'];
+        if(param['repositoryFilter']) {
+            this.enabledRepositories = param['repositoryFilter'].split(",");
+            // do a reload of the repos
+            this.repositoryIds=[];
+        }
+
         let paramRepo=param['repository'];
         if(!paramRepo){
             paramRepo=RestConstants.HOME_REPOSITORY;
@@ -1079,5 +1094,17 @@ export class SearchComponent {
         if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
             this.currentRepository=this.currentRepositoryObject.id;
         }
+    }
+
+    private getEnabledRepositories() {
+        if(this.repositoryIds && this.repositoryIds.length){
+            let result=[];
+            for(let repo of this.repositoryIds){
+                console.log(repo);
+                if(repo.enabled) result.push(repo.id);
+            }
+            return result;
+        }
+        return null;
     }
 }
