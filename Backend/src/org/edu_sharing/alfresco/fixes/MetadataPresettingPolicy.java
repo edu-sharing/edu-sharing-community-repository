@@ -3,8 +3,10 @@ package org.edu_sharing.alfresco.fixes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.copy.CopyServicePolicies;
 import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.node.NodeServicePolicies.BeforeDeleteNodePolicy;
 import org.alfresco.repo.node.NodeServicePolicies.OnCreateNodePolicy;
@@ -27,6 +29,8 @@ import org.edu_sharing.restservices.shared.Mds;
 
 public class MetadataPresettingPolicy implements
 		NodeServicePolicies.OnCreateNodePolicy,
+		CopyServicePolicies.OnCopyCompletePolicy,
+		NodeServicePolicies.OnMoveNodePolicy,
 		NodeServicePolicies.BeforeDeleteNodePolicy {
 
 	private static final Log logger = LogFactory
@@ -75,7 +79,13 @@ public class MetadataPresettingPolicy implements
 
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME,
 				CONTENT_TYPE, new JavaBehaviour(this, "onCreateNode"));
-		
+
+		policyComponent.bindClassBehaviour(NodeServicePolicies.OnMoveNodePolicy.QNAME,
+				CONTENT_TYPE, new JavaBehaviour(this, "onMoveNode"));
+
+		policyComponent.bindClassBehaviour(CopyServicePolicies.OnCopyCompletePolicy.QNAME,
+				CONTENT_TYPE, new JavaBehaviour(this, "onCopyComplete"));
+
 		policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME,
 				ContentModel.TYPE_CONTENT, new JavaBehaviour(this, "onCreateNode"));
 
@@ -107,10 +117,22 @@ public class MetadataPresettingPolicy implements
 	}
 
 	@Override
-	public void onCreateNode(ChildAssociationRef childAssocRef) {
+	public void onCopyComplete(QName qName, NodeRef nodeRef, NodeRef copy, boolean b, Map<NodeRef, NodeRef> map) {
+		inheritMetadata(copy,nodeService.getPrimaryParent(copy).getParentRef());
+	}
 
-		NodeRef targetRef = childAssocRef.getChildRef();
-		
+	@Override
+	public void onMoveNode(ChildAssociationRef source, ChildAssociationRef target) {
+		inheritMetadata(target.getChildRef(),target.getParentRef());
+	}
+
+	@Override
+	public void onCreateNode(ChildAssociationRef childAssocRef) {
+		inheritMetadata(childAssocRef.getChildRef(),childAssocRef.getParentRef());
+	}
+
+	private void inheritMetadata(NodeRef targetRef,NodeRef parentRef) {
+		logger.info("Starting inherit metadata for "+targetRef+" inside folder "+parentRef);
 		if (ContentModel.TYPE_CONTENT.equals(nodeService.getType(targetRef))) {
 			nodeService.setType(targetRef, CONTENT_TYPE);
 		}
@@ -118,12 +140,6 @@ public class MetadataPresettingPolicy implements
 		if (!CONTENT_TYPE.equals(nodeService.getType(targetRef))) {
 			return;
 		}
-		
-		logger.debug("childAssocRef:" + childAssocRef +" nodeIdchild:" +  childAssocRef.getChildRef().getId());
-		
-
-		NodeRef parentRef = childAssocRef.getParentRef();
-
 		Boolean status = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CCM_PROP_METADATA_PRESETTING_STATUS));
 		if (nodeService.hasAspect(parentRef, ASPECT_TYPE) && status!=null && status) {
 
@@ -137,16 +153,15 @@ public class MetadataPresettingPolicy implements
 				return;
 			}
 
-			NodeRef sourceRef = templates.get(0).getTargetRef();
+			NodeRef templateRef = templates.get(0).getTargetRef();
 
-			if (!nodeService.exists(sourceRef)) {
+			if (!nodeService.exists(templateRef)) {
 				logger.error("metadataPresettingPolicy for folder(" + parentRef
-						+ ") failed: template (" + sourceRef
+						+ ") failed: template (" + templateRef
 						+ ") doesn't exist.");
 				return;
 			}
 
-			@SuppressWarnings("unchecked")
 			/*
 			List<QName> props = (List<QName>) nodeService.getProperty(
 					parentRef, ASPECT_PROP);
@@ -165,25 +180,44 @@ public class MetadataPresettingPolicy implements
 
 			}
 			*/
-			String mdsId=CCConstants.metadatasetdefault_id;
-			String mdsProp = (String)nodeService.getProperty(
-					parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
-			if(mdsProp!=null && !mdsProp.trim().isEmpty()){
-				mdsId=mdsProp;
-			}
-			try {
-				MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsId,"default");
-				for(MetadataWidget widget : mds.getWidgetsByTemplate("io_template")){
-					QName prop = QName.createQName(CCConstants.getValidGlobalName(widget.getId()));
-					Serializable value = nodeService.getProperty(sourceRef, prop);
-					if(value!=null)
-						nodeService.setProperty(targetRef,prop,value);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			inheritMetadata(parentRef,templateRef,targetRef);
 		}
+	}
 
+	private void inheritMetadata(NodeRef parentRef,NodeRef templateRef,NodeRef targetRef){
+
+		String mdsId=CCConstants.metadatasetdefault_id;
+		String mdsProp = (String)nodeService.getProperty(
+				parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+		if(mdsProp!=null && !mdsProp.trim().isEmpty()){
+			mdsId=mdsProp;
+		}
+		try {
+			MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsId,"default");
+			for(MetadataWidget widget : mds.getWidgetsByTemplate("io_template")){
+				QName prop = QName.createQName(CCConstants.getValidGlobalName(widget.getId()));
+				Serializable value = nodeService.getProperty(templateRef, prop);
+				Serializable current = nodeService.getProperty(targetRef, prop);
+				if(value!=null) {
+					// mutli value: try to merge the values
+					if(widget.isMultivalue() && current!=null && current instanceof List && value instanceof List){
+						List currentList = (List) current;
+						List valueList = (List) value;
+						for(Object v : valueList){
+							if(!currentList.contains(v)){
+								currentList.add(v);
+							}
+						}
+						nodeService.setProperty(targetRef,prop, (Serializable) currentList);
+					}
+					else{
+						nodeService.setProperty(targetRef, prop, value);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
