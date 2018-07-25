@@ -12,7 +12,6 @@
                     <div *ngIf="!inviterIsAuthor()">{{'SHARING.INVITED_PLUS_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy),creator:getPersonName(sharingInfo.node.createdBy)} }}</div>
                 </div>
             </div>
-
         </div>
         <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
             <form (ngsubmit)="validatePassword()">
@@ -24,6 +23,11 @@
         <div *ngIf="!sharingInfo.password || sharingInfo.passwordMatches" class="password-valid">
             <div *ngIf="sharingInfo.password && sharingInfo.passwordMatches && !sharingInfo.node.isDirectory" class="password-correct"><i class="material-icons">done</i>{{'SHARING.PASSWORD_CORRECT' | translate}}</div>
             <div *ngIf="sharingInfo.node.isDirectory">
+                <div class="download-top">
+                    <div class="btn waves-effect waves-light btn-icon" (click)="download()">
+                        <i class="material-icons">cloud_download</i>{{'SHARING.DOWNLOAD_ZIP' | translate}}
+                    </div>
+                </div>
                 <div class="folder">
                     <listTable
                             [nodes]="childs"
@@ -44,13 +48,10 @@
             </div>
             <div class="download">
                 <div class="btn waves-effect waves-light btn-icon" (click)="download()">
-                    <!-- @:TODO Torsten hier noch "Download als ZIP" für Ordner -->
                     <i class="material-icons">cloud_download</i>{{('SHARING.'+(sharingInfo.node.mediatype=='link' ? 'LINK' : (sharingInfo.node.isDirectory ? 'DOWNLOAD_ZIP' : 'DOWNLOAD'))) | translate}}
                 </div>
             </div>
         </div>
     </div>
-
-
     <powered-by mode="color"></powered-by>
 </div>

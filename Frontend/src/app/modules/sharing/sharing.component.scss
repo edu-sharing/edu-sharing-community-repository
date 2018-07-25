@@ -87,6 +87,12 @@
   margin-top: 10px;
   text-align: center;
 }
+
+.download-top{
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
 powered-by{
   position: fixed;
   left: 0;
@@ -112,7 +118,15 @@ powered-by{
   .password-required{
     width: 100%;
   }
-  .branding,powered-by{
+  .branding{
+    margin-bottom: -30px;
+    text-align: right;
+    img{
+      width: 100px;
+      height: auto;
+    }
+  }
+  powered-by{
     display: none;
   }
   .folder{
@@ -120,5 +134,11 @@ powered-by{
     margin-top: 0;
     width: 110%;
     left: -5%;
+  }
+}
+
+@media screen and (max-height:($mobileHeightLandscape)) {
+  .branding{
+    display: none;
   }
 }
