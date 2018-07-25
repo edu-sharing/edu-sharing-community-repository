@@ -361,6 +361,7 @@
     "ENTER_PASSWORD": "weiter",
     "ERROR_INVALID_PASSWORD":"Ungültiges Passwort",
     "PASSWORD": "Passwort",
+    "PASSWORD_PLACEHOLDER": "Passwort eingeben ...",
     "PASSWORD_CORRECT": "Passwort korrekt"
   },
   "TOAST":{

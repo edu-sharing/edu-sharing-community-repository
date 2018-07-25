@@ -6,15 +6,18 @@
         <div class="details" [ngClass]="{'details-opacity' : !(!sharingInfo.password || sharingInfo.passwordMatches)}">
             <div class="details-type">
                 <img class="icon" [src]="sharingInfo.node.iconURL" />
-                <div class="name">{{sharingInfo.node.name}}</div>
+                <div>
+                    <div class="name">{{sharingInfo.node.name}}</div>
+                    <div *ngIf="inviterIsAuthor()">{{'SHARING.INVITED_AND_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy)} }}</div>
+                    <div *ngIf="!inviterIsAuthor()">{{'SHARING.INVITED_PLUS_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy),creator:getPersonName(sharingInfo.node.createdBy)} }}</div>
+                </div>
             </div>
-            <div class="owner" *ngIf="inviterIsAuthor()">{{'SHARING.INVITED_AND_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy)} }}</div>
-            <div class="owner" *ngIf="!inviterIsAuthor()">{{'SHARING.INVITED_PLUS_CREATED_BY' | translate:{inviter:getPersonName(sharingInfo.invitedBy),creator:getPersonName(sharingInfo.node.createdBy)} }}</div>
+
         </div>
         <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
             <form (ngsubmit)="validatePassword()">
                 <label for="password">{{'SHARING.PASSWORD' | translate}}</label>
-                <input-password required="true" id="password" (keydown.enter)="validatePassword()" [(value)]="passwordInput"></input-password>
+                <input-password required="true" id="password" (keydown.enter)="validatePassword()" [(value)]="passwordInput" placeholder="{{'SHARING.PASSWORD_PLACEHOLDER' | translate}}"></input-password>
                 <div class="btn waves-effect waves-light" (click)="validatePassword()">{{'SHARING.ENTER_PASSWORD' | translate}}</div>
             </form>
         </div>
