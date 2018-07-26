@@ -128,9 +128,14 @@
           <div class="inheritDisabled" *ngIf="!inherited">
             {{'WORKSPACE.INHERIT_DISABLED' | translate }}
           </div>
-          <div class="inheritEmpty" *ngIf="inherited && !inherit.length">
+            <div class="inheritDisabled" *ngIf="inherited && inheritAccessDenied">
+                {{'WORKSPACE.INHERIT_ACCESS_DENIED' | translate }}
+            </div>
+          <div class="inheritEmpty" *ngIf="inherited && !inherit.length && !inheritAccessDenied">
             {{'WORKSPACE.INHERIT_EMPTY' | translate }}
           </div>
+
+
         </div>
         <div class="groupName" *ngIf="permissionsGroup && permissionsGroup.length">{{'WORKSPACE.SHARE.GROUP_GROUPS' | translate}}</div>
         <div class="normal">

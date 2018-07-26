@@ -421,13 +421,17 @@ public class NodeApi  {
 	    				break;
 	    			}
 	    		}
-	    		last=NodeDao.getNode(repoDao, last.getParent().getId(),filter).asNode();
 	    		if(collection && !fullPath){
-	    			if(!last.getMediatype().equals("collection")){
+					Node finalLast = last;
+					last=AuthenticationUtil.runAsSystem(()-> NodeDao.getNode(repoDao, finalLast.getParent().getId(),filter).asNode());
+					if(!last.getMediatype().equals("collection")){
 	    				response.setScope("COLLECTION");
 	    				break;
 	    			}
 	    		}
+	    		else{
+					last=NodeDao.getNode(repoDao, last.getParent().getId(),filter).asNode();
+				}
 	    		parents.add(last);
 	    	}
 	    	

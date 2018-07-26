@@ -241,9 +241,11 @@ public class RepoFactory {
 			repositoryMetadataSets.clear();
 			defaultMetadataSet = null;
 		}
+		/*
 		if (repositoryMetadataSets.size() == 0) {
 			fillMetadatasets(repositoryMetadataSets);
 		}
+		*/
 		logger.debug("returning");
 		return repositoryMetadataSets;
 	}
@@ -255,7 +257,7 @@ public class RepoFactory {
 	 */
 	public static void refreshMetadataSets(){
 		HashMap<String, MetadataSets> newRepositoryMetadataSets = new HashMap<String, MetadataSets>();
-		fillMetadatasets(newRepositoryMetadataSets);
+		//fillMetadatasets(newRepositoryMetadataSets);
 		
 		//umhängen aber arauf achten das niemand drauf zu greift
 		synchronized(repositoryMetadataSets){
@@ -268,6 +270,7 @@ public class RepoFactory {
 	 * adds metdatasets to param repositoryMetadataSets without clearing it
 	 * @param repositoryMetadataSets
 	 */
+	/*
 	private static void fillMetadatasets(HashMap<String, MetadataSets> repositoryMetadataSets){
 		for (String key : ApplicationInfoList.getApplicationInfos().keySet()) {
 			ApplicationInfo tmpAppInfo = ApplicationInfoList.getRepositoryInfoById(key);
@@ -289,6 +292,7 @@ public class RepoFactory {
 			}
 		}
 	}
+	*/
 
 	private static HashMap<String, MetadataSets> repositoryMetadataSets = new HashMap<String, MetadataSets>();
 
@@ -313,7 +317,6 @@ public class RepoFactory {
 				return repMetadataSets.get(key);
 			}
 		}
-		logger.info("No MetadataSets found for repositoryId:" + repositoryId);
 		return null;
 	}
 	public static List<MetadataSetInfo> getMetadataSetsV2ForRepository(String repositoryId) throws Exception {

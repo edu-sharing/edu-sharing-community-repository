@@ -49,9 +49,8 @@ export class WorkspaceManagementDialogsComponent  {
         this.dialogCancelable=true;
         this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(nodeDelete.length==1 ? "_SINGLE" : "");
         this.dialogMessageParameters={name:nodeDelete[0].name};
-        this.dialogButtons=DialogButton.getOkCancel(() => {
-            this.dialogTitle = null;
-        }, ()=>this.deleteConfirmed(nodeDelete));
+        this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
+        this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
     }
     @Output() nodeDeleteChange = new EventEmitter();
     @Output() onDelete = new EventEmitter();
@@ -87,6 +86,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
   public createMetadata: string;
+  public editorPending = false;
   public metadataParent: Node;
   public ltiToolConfig : Node;
   public ltiObject: Node;
@@ -301,7 +301,11 @@ export class WorkspaceManagementDialogsComponent  {
    this.showUploadSelectChange.emit(false);
  }
  public closeContributor(){
-   this.nodeContributor=null
+     if(this.editorPending){
+         this.editorPending=false;
+         this.nodeMetadata=this.nodeContributor;
+     }
+   this.nodeContributor=null;
    this.nodeContributorChange.emit(null);
  }
   private closeLtiTools() {
@@ -317,6 +321,10 @@ export class WorkspaceManagementDialogsComponent  {
             this.onUploadFilesProcessed.emit(this.nodeLicense);
         this.wasUploaded = false;
     }
+      if(this.editorPending){
+          this.editorPending=false;
+          this.nodeMetadata=this.nodeLicense[0];
+      }
     this.nodeLicense=null;
     this.nodeLicenseOnUpload=false;
     this.nodeLicenseChange.emit(null);

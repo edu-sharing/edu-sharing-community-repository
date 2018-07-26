@@ -41,8 +41,8 @@ export class NodeListComponent {
       this.sortBy=this._columns[0].name;
   };
   @Input() options : OptionItem[];
-  private sortBy : string;
-  private sortAscending=true;
+  @Input() sortBy : string;
+  @Input() sortAscending=true;
   @Input() set reload(reload:Boolean){
     if(reload)
       this.doReload();
@@ -51,8 +51,6 @@ export class NodeListComponent {
   public hasSearched = false;
   public selected:Node[] = [];
     @Input() fullscreenLoading=false;
-    // current list loading offset
-    private offset = 0;
 
     // the current node which has an overlay menu open
     public currentMore : Node;
@@ -95,7 +93,6 @@ export class NodeListComponent {
     }
     public searchField() : void{
         this.currentQuery=this.query;
-        this.offset=0;
         this.list=null;
         if(this.query=="")
           this.searchAll();
@@ -111,14 +108,14 @@ export class NodeListComponent {
 
 
     private doReload() : void{
-      this.offset=0;
-      this.list=null;
-      this.search(this.hasSearched);
+      setTimeout(()=> {
+          this.list = null;
+          this.search(this.hasSearched);
+      });
     }
     private searchAll() : void{
         this.hasSearched=false;
         this.currentQuery="*";
-        this.offset=0;
         this.doReload();
     }
     private redo() : void{
@@ -135,7 +132,7 @@ export class NodeListComponent {
     this.isLoading=true;
     console.log('search '+this.currentQuery);
 
-    this.parent.loadData(this.currentQuery,this.offset,this.sortBy,this.sortAscending)
+    this.parent.loadData(this.currentQuery,this.list ? this.list.length : 0,this.sortBy,this.sortAscending)
             .subscribe(
 				(data:ArchiveSearch) => this.display(data,searched),
               (error:any) => this.handleErrors(error),
@@ -148,7 +145,7 @@ export class NodeListComponent {
     private display(data : ArchiveSearch,searched : boolean){
       console.log(data);
       let list=data.nodes;
-        if(this.offset!=0){
+        if(this.list){
           this.list=this.list.concat(list);
         }
         else{
@@ -157,8 +154,6 @@ export class NodeListComponent {
             if(this.list.length==0)
                 this.list=null;
         }
-        this.offset+=this.connector.numberPerRequest;
-
 
         this.hasSearched=searched;
         this.isLoading=false;

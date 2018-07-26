@@ -630,6 +630,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_REPL_GENERAL_IDENTIFIER = "{http://www.campuscontent.de/model/1.0}general_identifier";
 
+	public final static String CCM_PROP_IO_SUBSOURCE_ID = "{http://www.campuscontent.de/model/1.0}subsource_id";
+
 	public final static String CCM_PROP_IO_CREATE_VERSION = "{http://www.campuscontent.de/model/1.0}create_version";
 
 	public final static String CCM_PROP_IO_VERSION_COMMENT = "{http://www.campuscontent.de/model/1.0}version_comment";

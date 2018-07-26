@@ -370,7 +370,7 @@ label.notify p{
   }
 
 }
-@media screen and (max-width: $mobileWidth - $mobileStage*2) {
+@media screen and (max-width: ($mobileWidth - $mobileStage*2)) {
   .groupHeading{
     flex-direction:column;
     padding-bottom:5px;

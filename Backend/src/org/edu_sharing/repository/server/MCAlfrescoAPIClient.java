@@ -893,7 +893,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	protected String getValue(String type, String prop, Object _value, String metadataSetId) {
 
-		MetadataSetModelProperty mdsmProp = getMetadataSetModelProperty(metadataSetId, type, prop);
+		//MetadataSetModelProperty mdsmProp = getMetadataSetModelProperty(metadataSetId, type, prop);
 
 		if (_value instanceof List && ((List) _value).size() > 0) {
 			String result = null;
@@ -902,7 +902,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					result += CCConstants.MULTIVALUE_SEPARATOR;
 				if (value != null) {
 					if (value instanceof MLText) {
-						String tmpStr = getMLTextString(value, mdsmProp);
+						String tmpStr = getMLTextString(value);
 						if (result != null)
 							result += tmpStr;
 						else
@@ -925,13 +925,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		} else if (_value instanceof Number) {
 			return _value.toString();
 		} else if (_value instanceof MLText) {
-			return getMLTextString(_value, mdsmProp);
+			return getMLTextString(_value);
 		} else {
 			return _value.toString();
 		}
 
 	}
-
+	/*
 	MetadataSetModelProperty getMetadataSetModelProperty(String metadataSetId, String type, String prop) {
 		MetadataSetModelProperty mdsmProp = null;
 
@@ -955,8 +955,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 		return mdsmProp;
 	}
-
-	protected String getMLTextString(Object _mlText, MetadataSetModelProperty mdsmp) {
+	*/
+	protected String getMLTextString(Object _mlText) {
 
 		if (_mlText instanceof MLText) {
 
@@ -964,7 +964,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 			// when description does not exist then return default value
 			// when description exists bit there is no multilang the return value 
-			if (mdsmp == null || (mdsmp != null && !mdsmp.getMultilang())) {
+			if (true /*mdsmp == null || (mdsmp != null && !mdsmp.getMultilang())*/) {
 				return mlText.getDefaultValue();
 			}
 

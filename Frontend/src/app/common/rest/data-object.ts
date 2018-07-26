@@ -151,6 +151,7 @@ export interface Pagination {
 }
 export interface SharingInfo{
   password: boolean;
+  expired: boolean;
   passwordMatches: boolean;
   invitedBy: Person;
   node: Node;
