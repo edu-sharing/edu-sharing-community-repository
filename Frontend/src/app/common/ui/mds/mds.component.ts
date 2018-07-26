@@ -164,7 +164,7 @@ export class MdsComponent{
           this.mds = data;
           this.variables=variables;
           this.currentNode = node.node;
-          for (let property in this.currentNode.properties) {
+          for(let property in this.currentNode.properties) {
             this.properties.push(property);
           }
           this.properties.sort();

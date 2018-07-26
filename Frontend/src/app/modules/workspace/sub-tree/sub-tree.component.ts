@@ -10,6 +10,7 @@ import {UIService} from '../../../common/services/ui.service';
 import {UIAnimation} from '../../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {Helper} from '../../../common/helper';
+import {UIHelper} from '../../../common/ui/ui-helper';
 
 @Component({
   selector: 'workspace-sub-tree',
@@ -143,7 +144,7 @@ export class WorkspaceSubTreeComponent  {
     if(!data) {
       return;
     }
-    this.onDrop.emit({target:target,source:data,event:event});
+    UIHelper.handleDropEvent(this.storage,this.ui,event,target,this.onDrop);
   }
   private isSelected(node : Node){
     return this.selectedNode==node.ref.id || (this.isOpen(node) && this.selectedPath[this.selectedPath.length-1]==node.ref.id && this.selectedNode==null);

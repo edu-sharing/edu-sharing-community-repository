@@ -68,7 +68,7 @@
 
         <div *ngIf="sendMessages" class="groupMessage">
           <label for="message">{{'WORKSPACE.SHARE.MESSAGE' | translate}}</label>
-          <input type="text" id="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
+          <input type="text" id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
         <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}<p>{{'WORKSPACE.NOTIFY_INFO' | translate}}</p></label>
         </div>
         <div class="publish" *ngIf="!isSafe">
@@ -113,7 +113,7 @@
               <!-- <img class="inherit" src="assets/images/inherit.svg" /> -->
             </label></div>
           </div>
-          <div class="inherit" [class.crossed]="!inherited" *ngIf="inherited">
+          <div class="inherit" [class.crossed]="!inherited" *ngIf="inherited && inherit && inherit.length">
             <div *ngFor="let permission of inherit" class="groupEntry">
               <workspace-share-permission
                 [permission]="permission"
@@ -126,9 +126,14 @@
           <div class="inheritDisabled" *ngIf="!inherited">
             {{'WORKSPACE.INHERIT_DISABLED' | translate }}
           </div>
-          <div class="inheritEmpty" *ngIf="inherited && !inherit.length">
+            <div class="inheritDisabled" *ngIf="inherited && inheritAccessDenied">
+                {{'WORKSPACE.INHERIT_ACCESS_DENIED' | translate }}
+            </div>
+          <div class="inheritEmpty" *ngIf="inherited && !inherit.length && !inheritAccessDenied">
             {{'WORKSPACE.INHERIT_EMPTY' | translate }}
           </div>
+
+
         </div>
         <div class="groupName" *ngIf="permissionsGroup && permissionsGroup.length">{{'WORKSPACE.SHARE.GROUP_GROUPS' | translate}}</div>
         <div class="normal">
