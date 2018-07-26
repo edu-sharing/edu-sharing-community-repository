@@ -636,7 +636,7 @@ export class SearchComponent {
           if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
               options.push(collection);
       }
-      if(fromList || nodes && nodes.length) {
+      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories)) {
           let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM', nodes, this.connector, (node: Node) => this.addToStream(node));
           if (stream)
               options.push(stream);
