@@ -121,7 +121,7 @@
                         [folder]="addFolderName"
                         [parent]="currentFolder"
                         (onCancel)="addFolderName=null"
-  (onFolderAdded)="addFolder($event)"
+                        (onFolderAdded)="addFolder($event)"
   ></workspace-add-folder>
 
   <workspace-create-connector *ngIf="createConnectorName!=null"
