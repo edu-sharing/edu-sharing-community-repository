@@ -142,7 +142,7 @@ public class PersonLifecycleService {
 	}
 	
 	private boolean keepSharedContent(String role){
-		
+		return false;
 	}
 	private void deleteUserHome(NodeRef personNodeRef, boolean keepCC) {
 		NodeRef homeFolder = getHomeFolder(personNodeRef);
