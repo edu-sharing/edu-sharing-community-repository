@@ -12,6 +12,7 @@
   "SAVE" : "save",
   "APPLY" : "apply",
   "CANCEL" : "cancel",
+  "YES_DELETE" : "Yes, delete",
   "RENAME" : "rename",
   "USER_GUEST" : "guest",
   "IMPRINT" : "Imprint",
@@ -326,6 +327,7 @@
     "ENTER_PASSWORD": "next",
     "ERROR_INVALID_PASSWORD": "invalid password",
     "PASSWORD": "Password",
+    "PASSWORD_PLACEHOLDER": "Enter password ...",
     "PASSWORD_CORRECT": "Password correct"
   },
   "TOAST":{

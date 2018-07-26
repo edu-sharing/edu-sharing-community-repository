@@ -49,9 +49,8 @@ export class WorkspaceManagementDialogsComponent  {
         this.dialogCancelable=true;
         this.dialogMessage="WORKSPACE.DELETE_MESSAGE"+(nodeDelete.length==1 ? "_SINGLE" : "");
         this.dialogMessageParameters={name:nodeDelete[0].name};
-        this.dialogButtons=DialogButton.getOkCancel(() => {
-            this.dialogTitle = null;
-        }, ()=>this.deleteConfirmed(nodeDelete));
+        this.dialogButtons=DialogButton.getCancel(()=> {this.dialogTitle = null});
+        this.dialogButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_PRIMARY,()=>{this.deleteConfirmed(nodeDelete)}));
     }
     @Output() nodeDeleteChange = new EventEmitter();
     @Output() onDelete = new EventEmitter();

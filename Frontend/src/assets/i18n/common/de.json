@@ -12,6 +12,7 @@
   "SAVE" : "Speichern",
   "APPLY" : "Übernehmen",
   "CANCEL" : "Abbrechen",
+  "YES_DELETE" : "Ja, löschen",
   "RENAME" : "Umbenennen",
   "USERMENU": "Nutzermenü",
   "USER_GUEST" : "Gast",
@@ -360,6 +361,7 @@
     "ENTER_PASSWORD": "weiter",
     "ERROR_INVALID_PASSWORD":"Ungültiges Passwort",
     "PASSWORD": "Passwort",
+    "PASSWORD_PLACEHOLDER": "Passwort eingeben ...",
     "PASSWORD_CORRECT": "Passwort korrekt"
   },
   "TOAST":{

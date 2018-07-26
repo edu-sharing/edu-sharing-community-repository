@@ -604,6 +604,9 @@ export class ListTableComponent implements EventListener{
     return node.collection ? node.collection : node
   }
   public isHomeNode(node : any){
+    // repos not loaded or not availale. assume true so that small images are loaded
+    if(!this.repositories)
+        return true;
     return RestNetworkService.isFromHomeRepo(node,this.repositories);
   }
   public getIconUrl(node : any){

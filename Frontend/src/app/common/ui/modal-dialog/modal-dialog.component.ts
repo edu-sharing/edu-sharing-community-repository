@@ -104,9 +104,12 @@ export class DialogButton {
   public static getOk(ok : Function) : DialogButton[]{
     return DialogButton.getSingleButton("OK",ok);
   }
-  public static getSingleButton(label:string,ok : Function) : DialogButton[]{
+    public static getCancel(cancel : Function) : DialogButton[]{
+        return DialogButton.getSingleButton("CANCEL",cancel,DialogButton.TYPE_CANCEL);
+    }
+  public static getSingleButton(label:string,ok : Function,type = DialogButton.TYPE_PRIMARY) : DialogButton[]{
     return [
-      new DialogButton(label,DialogButton.TYPE_PRIMARY,ok),
+      new DialogButton(label,type,ok),
     ];
   }
   public static getYesNo(no : Function,yes : Function) : DialogButton[]{
