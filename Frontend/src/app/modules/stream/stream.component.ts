@@ -187,7 +187,13 @@ export class StreamComponent {
 
   onScroll() {
     console.log("scrolled!!");
-    //this.getJSON().subscribe(data => this.streams = this.streams.concat(data['stream']), error => console.log(error));
+    //this.updateDataFromJSON(STREAM_STATUS.OPEN);
+    let curStat = this.menuOption === 'new' ? STREAM_STATUS.OPEN : STREAM_STATUS.READ;
+    let sortWay = this.menuOption === 'new' ? true : false;
+    this.getJSON(curStat, sortWay).subscribe(data => {
+      console.log("r, data: ",data['stream']);
+      this.streams = this.streams.concat(data['stream']);
+    }, error => console.log(error));
   }
 
   toggleMenuOptions() {
@@ -270,6 +276,8 @@ export class StreamComponent {
 
   updateDataFromJSON(streamStatus: any) {
     this.imagesLoaded = 0;
+    //this.imagesLoaded = this.streams.length;
+    console.log("imageLoaded: ",this.imagesLoaded);
     if (streamStatus == STREAM_STATUS.OPEN) {
       let openStreams: any[];
       let progressStreams: any[];
@@ -277,7 +285,9 @@ export class StreamComponent {
         openStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
         this.getSimpleJSON(STREAM_STATUS.PROGRESS, true).subscribe(data => {
           progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
+          console.log("streams received: ",  progressStreams.concat(openStreams));
           this.streams = progressStreams.concat(openStreams);
+          console.log("objs: ",this.streams);
           this.imagesToLoad = this.streams.length;
         });
       }, error => console.log(error));
@@ -308,8 +318,9 @@ export class StreamComponent {
 
   }
 
-  public getJSON(streamStatus: any): Observable<any> {
-    let request:any={offset:this.streams ? this.streams.length : 0};
+  public getJSON(streamStatus: any, sortAscendingCreated: boolean = false): Observable<any> {
+    console.log(this.streams.length);
+    let request:any={offset: (this.streams ? this.streams.length : 0), sortBy:["priority","created"],sortAscending:[false,sortAscendingCreated]};
     return this.streamService.getStream(streamStatus,this.searchQuery,{},request);
   }
 
