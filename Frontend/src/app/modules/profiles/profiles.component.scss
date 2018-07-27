@@ -52,8 +52,11 @@ $path:'../../../assets/images/';
     }
     .editAvatar{
       position: absolute;
-      left: calc(50% + 80px);
+      left: calc(50% + 60px);
       top: 85px;
+      >i{
+        padding:0 20px;
+      }
     }
   }
   .about,.stats,.authorityName,.changePassword{
