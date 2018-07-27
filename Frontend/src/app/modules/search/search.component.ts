@@ -598,12 +598,12 @@ export class SearchComponent {
     if (this.addToCollection) {
       if (fromList || nodes && nodes.length) {
         let addTo = new OptionItem(fromList ? "SEARCH.ADD_TO_COLLECTION_SHORT" : "SEARCH.ADD_TO_COLLECTION", "layers", (node: Node) => {
-          this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(this.selection,node), () => {
+          this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(nodes,node), () => {
             this.switchToCollections(this.addToCollection.ref.id);
           });
         });
-        addTo.isEnabled = NodeHelper.getNodesRight(this.selection, RestConstants.ACCESS_CC_PUBLISH);
-        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH)};
+        addTo.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH) && RestNetworkService.allFromHomeRepo(nodes, this.repositories);
+        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH) && RestNetworkService.isFromHomeRepo(node,this.repositories)};
 
         options.push(addTo);
       }
