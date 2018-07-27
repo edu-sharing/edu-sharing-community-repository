@@ -3,7 +3,7 @@
   (onCancel)="showProfile=false"
 ></user-profile>
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
-<!-- <tutorial [element]="tutorialElement" [heading]="'USER_TUTORIAL_HEADING'" [description]="'USER_TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial> -->
+<tutorial [element]="tutorialElement" [heading]="'USER_TUTORIAL_HEADING'" [description]="'USER_TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial>
 
 <div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
 <div class="card center-card card-scroll card-high card-wide card-action" *ngIf="licenseAgreement" [@cardAnimation]="licenseAgreement">
