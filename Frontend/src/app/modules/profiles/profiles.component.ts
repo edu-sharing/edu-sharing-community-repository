@@ -4,7 +4,7 @@ import {Translation} from "../../common/translation";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {TranslateService} from "@ngx-translate/core";
-import {Title} from "@angular/platform-browser";
+import {DomSanitizer, Title} from "@angular/platform-browser";
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
@@ -49,6 +49,7 @@ export class ProfilesComponent {
               private translate: TranslateService,
               private router: Router,
               private config: ConfigurationService,
+              private sanitizer: DomSanitizer,
               private storage : SessionStorageService,
               private iamService: RestIamService) {
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
@@ -64,7 +65,6 @@ export class ProfilesComponent {
     this.connector.isLoggedIn().subscribe((login)=> {
         this.iamService.getUser(authority).subscribe((profile: IamUser) => {
             this.user = profile.person;
-            this.editProfile = this.editProfile;// && profile.editProfile;
             let name = new AuthorityNamePipe(this.translate).transform(this.user, null);
             UIHelper.setTitle('PROFILES.TITLE', this.title, this.translate, this.config, {name: name});
             this.globalProgress = false;
@@ -84,10 +84,7 @@ export class ProfilesComponent {
     if(event.srcElement.files && event.srcElement.files.length){
       this.avatarFile=event.srcElement.files[0];
       let reader = new FileReader();
-      reader.onload = (e:any) => {
-        this.avatarImage=e.target.result;
-      }
-      reader.readAsDataURL(this.avatarFile);
+      this.avatarImage=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(this.avatarFile));
     }
   }
   public beginEdit(){

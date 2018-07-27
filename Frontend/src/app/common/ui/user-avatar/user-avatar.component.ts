@@ -8,6 +8,7 @@ import {Comment, Person, UserProfile, UserSimple} from '../../rest/data-object';
 import {RestConstants} from '../../rest/rest-constants';
 import {Router} from '@angular/router';
 import {UIConstants} from '../ui-constants';
+import {DomSanitizer} from "@angular/platform-browser";
 
 @Component({
     selector: 'user-avatar',
@@ -34,13 +35,9 @@ export class UserAvatarComponent {
             this._customImage=null;
             return;
         }
-        var reader = new FileReader();
-        reader.onload = (e:any) => {
-            this._customImage=e.target.result;
-        }
-        reader.readAsDataURL(customImage);
+        this._customImage=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(customImage));
     };
-    constructor(private router : Router) {
+    constructor(private router : Router, private sanitizer : DomSanitizer) {
     }
     isEditorialUser(){
         return this.user.profile && this.user.profile.types && this.user.profile.types.indexOf(RestConstants.GROUP_TYPE_EDITORIAL)!=-1;
