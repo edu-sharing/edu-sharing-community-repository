@@ -178,12 +178,7 @@ public class FolderTemplatesImpl implements FolderTemplates {
 
 		}
 
-		int numresult = 2;
-
-		glist = this.permissionService.findGroups(this.eduGroup.getGroupname(), true, 0, numresult);
-		Group g = glist.getData().get(0);
-
-		String groupNodeId = g.getNodeId();
+		String groupNodeId = eduGroup.getGroupId();
 
 		UserEnvironmentTool uit = new UserEnvironmentTool(ApplicationInfoList.getHomeRepository().getAppId(),
 				this.repoClient.getAuthenticationInfo());
