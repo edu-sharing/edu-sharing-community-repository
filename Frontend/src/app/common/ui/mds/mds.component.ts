@@ -93,7 +93,7 @@ export class MdsComponent{
     this._setId=setId;
   }
   @Input() set invalidate(invalidate:Boolean){
-    if(invalidate)
+    if(invalidate.valueOf())
       setTimeout(()=>this.loadMds(),5);
   }
 
