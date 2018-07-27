@@ -14,6 +14,7 @@ export class InputPasswordComponent{
     @Input() placeholder="";
     @Output() change = new EventEmitter();
     @Output() keydown = new EventEmitter();
+    @Output() keyup = new EventEmitter();
     @ViewChild('input') nativeInput : ElementRef;
     public set _value(_value:string){
       this.value=_value;
