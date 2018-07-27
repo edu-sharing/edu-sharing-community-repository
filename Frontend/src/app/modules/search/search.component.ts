@@ -993,7 +993,8 @@ export class SearchComponent {
   private invalidateMds() {
     if(this.currentRepository==RestConstants.ALL){
       console.log("all repositories, invalidate manually");
-      this.onMdsReady();
+        this.reloadMds=new Boolean(false);
+        this.onMdsReady();
     }
     else{
       console.log("invalidate mds");
