@@ -158,8 +158,10 @@ export class StreamComponent {
               document.cookie = "scroll="+"seen";
             }
             if (params.mode === 'new') {
-              document.cookie = "scroll="+"new";
-              this.toast.toast('STREAM.TOAST.SEEN');
+              if (e[1].urlAfterRedirects === '/components/stream?mode=new'){
+                document.cookie = "scroll="+"new";
+                this.toast.toast('STREAM.TOAST.SEEN');
+              }
             }
           });
           this.routerSubscription.unsubscribe();
