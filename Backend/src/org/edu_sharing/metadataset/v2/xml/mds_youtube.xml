@@ -19,7 +19,7 @@
 			<template>
 				<id>search</id>
 				<html><![CDATA[
-              
+              	<div>{{no_search_filters}}</div>
 				]]></html>
 			</template>
 			<template>
