@@ -253,7 +253,7 @@ public class SearchServiceImpl implements SearchService {
 						parameters
 								.setQuery(
 										"(@cm\\:authorityName:\"*" + param + "*\"" + 
-										" OR @cm\\:displayName:\"*" + param + "*\"" + 
+										" OR @cm\\:authorityDisplayName:\"*" + param + "*\"" + 
 										") AND @ccm\\:edu_homedir:\"workspace://*\"");
 						ResultSet edugroups = searchService.query(parameters);
 
