@@ -41,6 +41,12 @@ export class DropdownComponent{
    */
   @Input() callbackObject:any;
 
+    /**
+     * Should disabled ("greyed out") options be shown or hidden?
+     * @type {boolean}
+     */
+    @Input() showDisabled = true;
+
   hide(){
     this._show=false;
     this.showChange.emit(false);

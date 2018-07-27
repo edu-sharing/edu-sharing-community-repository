@@ -106,6 +106,7 @@
       }
     },
     "INHERIT_DISABLED":"Inherition is currently disabled",
+    "INHERIT_ACCESS_DENIED":"Inherited rights can not be shown since you don't have access to the parent element",
     "INHERIT_EMPTY":"The parent folder has currently no permissions.\nPermissions will be applied as soon as they are added to the parent folder.",
     "PERMISSION_AUTHORITY_EXISTS":"The chosen user/group already has access. Check the current permissions at \"Invited\"",
     "PERMISSIONS_UPDATED":"Permissions updated",

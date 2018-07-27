@@ -87,12 +87,14 @@ public class SearchToken {
 			return MetadataSearchHelper.getLuceneString(query,searchCriterias,parameters);
 		}
 		if(searchCriterias!=null){
-			logger.warn("Using legacy search method");
-			QueryBuilder queryBuilder = new QueryBuilder();
+			logger.warn("Using lucene string only search");
+			/*QueryBuilder queryBuilder = new QueryBuilder();
 			queryBuilder.setSearchCriterias(searchCriterias);
 			if(luceneString==null || luceneString.trim().isEmpty())
 				return queryBuilder.getSearchString();
 			return "("+queryBuilder.getSearchString()+") AND ("+luceneString+")";
+			*/
+			return luceneString+" "+MetadataSearchHelper.convertSearchCriteriasToLucene(searchCriterias);
 		}
 		return luceneString;
 	}

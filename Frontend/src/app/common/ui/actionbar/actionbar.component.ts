@@ -52,7 +52,8 @@ export class ActionbarComponent{
    */
   @Input() set options(options : OptionItem[]){
     options=UIHelper.filterValidOptions(this.ui,Helper.deepCopyArray(options));
-    options=this.filterDisabled(options);
+    // this will fail if an option is altered after it was added (e.g. node-render show in folder)
+    //options=this.filterDisabled(options);
     if(options==null){
       this.optionsAlways=[];
       this.optionsMenu=[];
