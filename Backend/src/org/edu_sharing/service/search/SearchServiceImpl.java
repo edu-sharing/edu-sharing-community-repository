@@ -253,9 +253,12 @@ public class SearchServiceImpl implements SearchService {
 						parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 						if (sort != null)
 							sort.applyToSearchParameters(parameters);
+						String param = QueryParser.escape(pattern == null ? "" : pattern);
 						parameters
-								.setQuery("@cm\\:authorityName:\"*" + QueryParser.escape(pattern == null ? "" : pattern)
-										+ "*\"" + " AND @ccm\\:edu_homedir:\"workspace://*\"");
+								.setQuery(
+										"(@cm\\:authorityName:\"*" + param + "*\"" + 
+										" OR @cm\\:displayName:\"*" + param + "*\"" + 
+										") AND @ccm\\:edu_homedir:\"workspace://*\"");
 						ResultSet edugroups = searchService.query(parameters);
 
 						for (ResultSetRow row : edugroups) {
