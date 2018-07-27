@@ -511,7 +511,7 @@ public class AdminServiceImpl implements AdminService  {
 	 	ft.setTemplate(template,group, folderId);
 	 	List<String> slist = ft.getMessage();
 	 	String error=slist.toString();
-	 	if(!error.isEmpty())
+	 	if(slist.size()>0 && !error.isEmpty())
 	 		throw new Exception(error);
 	}
 	@Override
