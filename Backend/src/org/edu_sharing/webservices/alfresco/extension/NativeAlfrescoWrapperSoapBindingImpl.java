@@ -1131,7 +1131,7 @@ public class NativeAlfrescoWrapperSoapBindingImpl implements org.edu_sharing.web
 		try {
 			
 			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
-			permissionService.setPermissions(nodeId, aces);
+			permissionService.setPermissions(nodeId, Arrays.asList(aces));
 			
 		} catch(Throwable e) {
 			logger.error(e.getMessage(), e);

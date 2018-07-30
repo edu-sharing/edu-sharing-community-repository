@@ -857,7 +857,7 @@ public class NodeDao {
 			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
 			permissionService.setPermissions(
 					nodeId, 
-					aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]), 
+					aces,
 					permissions.isInherited(), 
 					mailText, sendMail, sendCopy,createHandle);
 			
