@@ -246,7 +246,7 @@
    </filter-mapping>
    <filter-mapping>
        <filter-name>Edu-Sharing Guest Filter</filter-name>
-       <url-pattern>/eduservlet/sitemap*</url-pattern>
+       <url-pattern>/eduservlet/sitemap</url-pattern>
    </filter-mapping>
    
    <filter-mapping>
