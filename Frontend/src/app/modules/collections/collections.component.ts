@@ -397,7 +397,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       if(fromList) {
           let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
           remove.showCallback = (node: Node) => {
-              return this.isAllowedToDeleteNodes(ActionbarHelper.getNodes(nodes, node);
+              return this.isAllowedToDeleteNodes(ActionbarHelper.getNodes(nodes, node));
           };
           if(remove)
             options.push(remove);
