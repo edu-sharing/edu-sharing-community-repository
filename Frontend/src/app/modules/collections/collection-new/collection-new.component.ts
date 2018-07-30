@@ -43,7 +43,7 @@ export class CollectionNewComponent {
   public hasCustomScope: boolean;
   public COLORS1=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A'];
   public COLORS2=['#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
-  public isLoading:boolean = true;
+  public isLoading = true;
   public showPermissions = false;
   private currentCollection:Collection;
   public newCollectionType:string;
@@ -237,7 +237,7 @@ export class CollectionNewComponent {
     }
 
     newCollectionCancel() : void {
-        var id = this.parentId;
+        let id = this.parentId;
         if (id==null) id = this.editId;
         this.navigateToCollectionId(id);
     }
@@ -247,7 +247,7 @@ export class CollectionNewComponent {
 
     imageDataChanged(event:any) : void {
         // get files and check if available
-        var files = event.target.files;
+        let files = event.target.files;
         if (typeof files == "undefined") {
             console.log("files = undefined -> ignoring");
             return;
@@ -258,10 +258,10 @@ export class CollectionNewComponent {
         }
 
         // get first file
-        var file:File = files[0];
+        let file:File = files[0];
 
         // check if file type is correct
-        var validType = false;
+        let validType = false;
         if (file.type.startsWith("image")) validType = true;
         //if (file.type=="image/jpeg") validType = true;
         //if (file.type=="image/gif") validType = true;
