@@ -1090,22 +1090,22 @@ export class SearchComponent {
       });
   }
 
-    private updateCurrentRepositoryId() {
-        this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
-        if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
-            this.currentRepository=this.currentRepositoryObject.id;
-        }
-    }
+  private updateCurrentRepositoryId() {
+      this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
+      if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
+          this.currentRepository=this.currentRepositoryObject.id;
+      }
+  }
 
-    private getEnabledRepositories() {
-        if(this.repositoryIds && this.repositoryIds.length){
-            let result=[];
-            for(let repo of this.repositoryIds){
-                console.log(repo);
-                if(repo.enabled) result.push(repo.id);
-            }
-            return result;
-        }
-        return null;
-    }
+  private getEnabledRepositories() {
+      if(this.repositoryIds && this.repositoryIds.length){
+          let result=[];
+          for(let repo of this.repositoryIds){
+              console.log(repo);
+              if(repo.enabled) result.push(repo.id);
+          }
+          return result;
+      }
+      return null;
+  }
 }
