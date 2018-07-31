@@ -61,7 +61,7 @@ public class OrganizationDao {
 		GroupProfile profile=new GroupProfile();
 		profile.setDisplayName(orgName);
 		String authorityName=create(repoDao,orgName,profile,scope);
-		return OrganizationDao.get(repoDao, authorityName);
+		return getInstant(repoDao, PermissionService.GROUP_PREFIX + authorityName);
 	}
 	/**
 	 * returns Groupname
@@ -79,6 +79,15 @@ public class OrganizationDao {
 			throw DAOException.mapping(t);
 		}		
 	}
+    public static OrganizationDao getInstant(RepositoryDao repoDao, String groupName) throws DAOException {
+
+        try {
+            return new OrganizationDao(repoDao,AuthorityServiceFactory.getAuthorityService(repoDao.getId()).getEduGroup(groupName));
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+
+    }
 	public static OrganizationDao get(RepositoryDao repoDao, String groupName) throws DAOException {
 
 		try {
