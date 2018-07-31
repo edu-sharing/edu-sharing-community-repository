@@ -223,6 +223,8 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_TOOL_INSTANCE = "{http://www.campuscontent.de/model/1.0}tool_instance";
 
+	public final static String CCM_TYPE_SERVICE_NODE = "{http://www.campuscontent.de/model/1.0}service_node";
+
 	public final static String LOM_TYPE_IDENTIFIER ="{http://www.campuscontent.de/model/lom/1.0}identifier";
 
 	public final static String LOM_TYPE_EDUCATIONAL = "{http://www.campuscontent.de/model/lom/1.0}educational";
@@ -387,7 +389,12 @@ public class CCConstants {
 
 	public final static String CCM_PROP_TOOL_INSTANCE_SECRET = "{http://www.campuscontent.de/model/1.0}tool_instance_secret";
 
-	public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
+    public final static String CCM_PROP_SERVICE_NODE_NAME = "{http://www.campuscontent.de/model/1.0}service_node_name";
+    public final static String CCM_PROP_SERVICE_NODE_DESCRIPTION = "{http://www.campuscontent.de/model/1.0}service_node_description";
+    public final static String CCM_PROP_SERVICE_NODE_TYPE = "{http://www.campuscontent.de/model/1.0}service_node_type";
+    public final static String CCM_PROP_SERVICE_NODE_DATA = "{http://www.campuscontent.de/model/1.0}service_node_data";
+
+    public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 
 	public final static String CCM_ASPECT_SHARES = "{http://www.campuscontent.de/model/1.0}shares";
 
@@ -1068,6 +1075,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE = "EDUSYSTEM_TEMPLATE";
 
+	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE = "EDUSYSTEM_SERVICE";
+
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS = "EDUSYSTEM_TOOLPERMISSIONS";
 
 	public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE = "EDUSYSTEM_VALUESPACE";
@@ -1272,6 +1281,8 @@ public class CCConstants {
 	public final static String I18n_SYSTEMFOLDER_TOOLPERMISSIONS = "systemfolder_toolpermissions";
 
 	public final static String I18n_SYSTEMFOLDER_TEMPLATE = "systemfolder_template";
+
+	public final static String I18n_SYSTEMFOLDER_SERVICE = "systemfolder_service";
 
 	public final static String I18n_SYSTEMFOLDER_VALUESPACE = "systemfolder_valuespace";
 
