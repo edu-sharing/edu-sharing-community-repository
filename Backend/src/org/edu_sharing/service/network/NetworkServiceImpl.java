@@ -64,18 +64,16 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public StoredService updateService(String id, Service service) throws Throwable {
-        return AuthenticationUtil.runAsSystem(()->{
-            try{
-                String parent=new UserEnvironmentTool().getEdu_SharingServiceFolder();
-                String node = nodeService.findNodeByName(parent, id);
-                HashMap<String, String[]> props = generateProps(id,service);
-                nodeService.updateNode(node,props);
-                return new StoredService(id,service);
-            }
-            catch(Throwable t){
-                throw new RuntimeException(t);
-            }
-        });
+        try{
+            String parent=new UserEnvironmentTool().getEdu_SharingServiceFolder();
+            String node = nodeService.findNodeByName(parent, id);
+            HashMap<String, String[]> props = generateProps(id,service);
+            nodeService.updateNode(node,props);
+            return new StoredService(id,service);
+        }
+        catch(Throwable t){
+            throw new RuntimeException(t);
+        }
     }
     private String generateId(Service service) {
         return DigestUtils.sha1Hex(service.getUrl());
