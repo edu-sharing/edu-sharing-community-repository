@@ -61,7 +61,7 @@ public class OrganizationDao {
 		GroupProfile profile=new GroupProfile();
 		profile.setDisplayName(orgName);
 		String authorityName=create(repoDao,orgName,profile,scope);
-		return OrganizationDao.get(repoDao, PermissionService.GROUP_PREFIX + authorityName);
+		return OrganizationDao.get(repoDao, authorityName.substring(AuthorityService.ORG_GROUP_PREFIX.length()));
 	}
 	/**
 	 * returns Groupname
