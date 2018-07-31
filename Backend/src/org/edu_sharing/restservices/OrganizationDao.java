@@ -56,11 +56,11 @@ public class OrganizationDao {
 				
 	}
 	
-	public static GroupDao create(RepositoryDao repoDao, String orgName,String scope) throws DAOException {
+	public static OrganizationDao create(RepositoryDao repoDao, String orgName,String scope) throws DAOException {
 		GroupProfile profile=new GroupProfile();
 		profile.setDisplayName(orgName);
 		String authorityName=create(repoDao,orgName,profile,scope);
-		return GroupDao.getGroup(repoDao, authorityName);
+		return OrganizationDao.get(repoDao, PermissionService.GROUP_PREFIX + authorityName);
 	}
 	/**
 	 * returns Groupname
