@@ -19,6 +19,7 @@ public class Urlset {
         public static class Video{
             @XmlElement(namespace = "http://www.google.com/schemas/sitemap-video/1.1") public String content_loc;
             @XmlElement(namespace = "http://www.google.com/schemas/sitemap-video/1.1") public String thumbnail_loc;
+            @XmlElement(namespace = "http://www.google.com/schemas/sitemap-video/1.1") public String title;
         }
     }
 }
