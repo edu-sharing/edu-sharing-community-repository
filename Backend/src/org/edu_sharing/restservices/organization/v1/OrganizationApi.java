@@ -122,7 +122,7 @@ public class OrganizationApi  {
     
     @ApiResponses(
     	value = { 
-    		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Group.class),        
+    		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Organization.class),        
 	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -140,7 +140,7 @@ public class OrganizationApi  {
     	try {
 
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	Group group = OrganizationDao.create(repoDao, organization,scope).asGroup();
+	    	Organization group = OrganizationDao.create(repoDao, organization,scope).asOrganization();
 	    	
 	    	return Response.status(Response.Status.OK).entity(group).build();
 	

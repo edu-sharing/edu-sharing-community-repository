@@ -21,6 +21,7 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.organization.OrganizationService;
 import org.edu_sharing.service.organization.OrganizationServiceFactory;
+import org.edu_sharing.service.organization.OrganizationServiceImpl;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 
@@ -56,11 +57,11 @@ public class OrganizationDao {
 				
 	}
 	
-	public static GroupDao create(RepositoryDao repoDao, String orgName,String scope) throws DAOException {
+	public static OrganizationDao create(RepositoryDao repoDao, String orgName,String scope) throws DAOException {
 		GroupProfile profile=new GroupProfile();
 		profile.setDisplayName(orgName);
 		String authorityName=create(repoDao,orgName,profile,scope);
-		return GroupDao.getGroup(repoDao, authorityName);
+		return OrganizationDao.get(repoDao, authorityName.substring(AuthorityService.ORG_GROUP_PREFIX.length()));
 	}
 	/**
 	 * returns Groupname
