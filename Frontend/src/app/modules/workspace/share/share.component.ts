@@ -34,7 +34,7 @@ import {UIConstants} from '../../../common/ui/ui-constants';
 })
 export class WorkspaceShareComponent implements AfterViewInit{
   ngAfterViewInit(): void {
-    UIHelper.setFocusOnCard();
+    setTimeout(()=>UIHelper.setFocusOnCard());
   }
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
@@ -60,7 +60,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private currentType=[RestConstants.ACCESS_CONSUMER,RestConstants.ACCESS_CC_PUBLISH];
   private inherited : boolean;
   private notifyUsers = true;
-  private notifyMessage = "";
+  private notifyMessage : string;
   private inherit : Permission[]=[];
   private permissions : Permission[]=[];
   public permissionsUser : Permission[];

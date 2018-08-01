@@ -431,6 +431,7 @@ export class MainNavComponent implements AfterViewInit{
       return;
     }
     if(this.config.logout) {
+      let sessionData=this.connector.getCurrentLogin();
       if(this.config.logout.ajax){
         this.http.get(this.config.logout.url).subscribe(()=>{
           this.finishLogout();
@@ -441,11 +442,21 @@ export class MainNavComponent implements AfterViewInit{
       else {
         if(this.config.logout.destroySession){
           this.connector.logout().subscribe((response) => {
-            window.location.href = this.config.logout.url;
+            if(sessionData.currentScope==RestConstants.SAFE_SCOPE){
+              this.finishLogout();
+            }
+            else {
+              window.location.href = this.config.logout.url;
+            }
           });
         }
         else {
-          window.location.href = this.config.logout.url;
+          if(sessionData.currentScope==RestConstants.SAFE_SCOPE){
+              this.finishLogout();
+          }
+          else {
+              window.location.href = this.config.logout.url;
+          }
         }
       }
     }

@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -28,6 +29,7 @@ import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -52,11 +54,11 @@ public class DownloadServlet extends HttpServlet{
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		String nodeIds = req.getParameter("nodeIds");
 		String zipName = req.getParameter("fileName");
 		downloadZip(resp, nodeIds.split(","), null, null, null, zipName);
-		
+
 	}
 
 	public static void downloadZip(HttpServletResponse resp, String[] nodeIds, String parentNodeId, String token, String password, String zipName) throws IOException {
@@ -124,7 +126,7 @@ public class DownloadServlet extends HttpServlet{
 
 		try{
 			AuthenticationUtil.RunAsWork<Boolean> work= () ->{
-				String errors="";
+			List<String> errors=new ArrayList<>();
 				for(String nodeId : nodeIds){
 					try{
 						NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
@@ -137,32 +139,40 @@ public class DownloadServlet extends HttpServlet{
 							nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, refNodeId);
 							isCollectionRef = true;
 						}
-						String filename = (String)serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CM_NAME));
-						String wwwurl = (String)serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
-						if(wwwurl!=null){
-							errors += filename+": Is a link and can not be downloaded\r\n";
-							continue;
-						}
-						ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
-						if(reader==null){
-							errors += filename+": Has no content\r\n";
-							continue;
-						}
-						InputStream is = reader.getContentInputStream();
-						resp.setContentType("application/zip");
+						AuthenticationUtil.RunAsWork work= () ->{
+                        						String filename = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CM_NAME));
+                        						String wwwurl = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
+                        						if(wwwurl!=null){
+                        							errors.add( filename+": Is a link and can not be downloaded" );
+                        							return null;
+                        						}
+                        						ContentReader reader = serviceRegistry.getContentService().getReader(finalNodeRef, ContentModel.PROP_CONTENT);
+                        						if(reader==null){
+                        							errors.add( filename+": Has no content" );
+                        							return null;
+                        						}
+                        						InputStream is = reader.getContentInputStream();
+                        						resp.setContentType("application/zip");
 
-						DataInputStream in = new DataInputStream(is);
+                        						DataInputStream in = new DataInputStream(is);
 
-						ZipEntry entry = new ZipEntry(filename);
-						zos.putNextEntry(entry);
-						byte[] buf=new byte[1024];
-						while(true){
-							int l=in.read(buf);
-							if(l<=0)
-								break;
-							zos.write(buf,0,l);
-						}
-						in.close();
+                        						ZipEntry entry = new ZipEntry(filename);
+                        						zos.putNextEntry(entry);
+                        						byte[] buffer=new byte[1024];
+                        						while(true){
+                        							int l=in.read(buffer);
+                        							if(l<=0)
+                        								break;
+                        							zos.write(buffer,0,l);
+                        						}
+                        						in.close();
+                        						return null;
+                        					};
+                        					if(isCollectionRef)
+                        						AuthenticationUtil.runAsSystem(work);
+                        					else
+                        						work.doWork();
+
 					}catch(Throwable t){
 						t.printStackTrace();
 						resp.sendRedirect(URLTool.getNgMessageUrl("INVALID"));

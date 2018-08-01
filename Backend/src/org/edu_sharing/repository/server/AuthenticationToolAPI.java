@@ -172,7 +172,7 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		if(currentTicket != null){
 			try{
 				authenticationService.validate(currentTicket);
-				result = new HashMap<String,String>();
+				result = new HashMap<>();
 				result.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
 				result.put(CCConstants.AUTH_TICKET, currentTicket);
 			}catch(AuthenticationException e){
@@ -189,9 +189,11 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 				return false;
 			}
 			authenticationService.validate(ticket);
+
+			log.info("User logged in: "+authenticationService.getCurrentUserName()+", ticket: "+ticket);
 			return true;
 		}catch(AuthenticationException e){
-			log.info(e.getMessage());
+			log.info(e.getMessage()+", ticket: "+ticket);
 		}
 		return false;
 	}

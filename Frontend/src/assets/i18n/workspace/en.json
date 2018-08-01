@@ -131,6 +131,8 @@
       },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
+        "METADATA_UPDATE": "Updated metadata",
+        "CONTENT_UPDATE": "Updated content",
         "EDITOR_UPLOAD": "File updated by editor",
         "NODE_PUBLISHED": "File published"
       }
@@ -143,7 +145,7 @@
       "AUTHOR_FIRST":"Author: First name",
       "AUTHOR_LAST":"Last name",
       "KEYWORDS":"Add keywords",
-      "HINT_ENTER":"Press enter add keywords.",
+      "HINT_ENTER":"Press enter to add keywords.",
       "AS_VERSION":"as Version",
       "VERSION":"Version",
       "VERSION_COMMENT":"Add version comment",

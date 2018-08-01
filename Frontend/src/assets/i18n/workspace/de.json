@@ -137,6 +137,8 @@
       },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "Datei wurde erstellt",
+        "METADATA_UPDATE": "Metadaten aktualisiert",
+        "CONTENT_UPDATE": "Inhalt aktualisiert",
         "EDITOR_UPLOAD": "Datei wurde durch Editor {{editor}} aktualisiert",
         "NODE_PUBLISHED": "Datei wurde veröffentlicht"
       }

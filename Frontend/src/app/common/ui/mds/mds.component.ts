@@ -102,7 +102,7 @@ export class MdsComponent{
     this._setId=setId;
   }
   @Input() set invalidate(invalidate:Boolean){
-    if(invalidate)
+    if(invalidate.valueOf())
       setTimeout(()=>this.loadMds(),5);
   }
 
@@ -652,7 +652,7 @@ export class MdsComponent{
         return;
       }
     }
-    for(var key in values){
+    for(let key in values){
       properties[key]=values[key];
     }
     if(this.currentNode)
@@ -664,14 +664,15 @@ export class MdsComponent{
       version = comment.value;
       files = (document.getElementById('fileSelect') as any).files;
       let display = document.getElementById('versionGroup').style.display;
-      if (version && display == 'none')
-        version = '';
-      if(display!='none' && !version){
-        comment.className+=' invalid';
-        this.toast.error(null,'TOAST.FIELD_REQUIRED',{name:this.translate.instant('VERSION_COMMENT')});
-        return;
+      if(!version.trim()){
+          if(files.length){
+            version=RestConstants.COMMENT_CONTENT_UPDATE;
+          }
+          else{
+            version=RestConstants.COMMENT_METADATA_UPDATE;
+          }
       }
-    }catch (e){}
+    }catch (e){console.info(e);}
 
     this.globalProgress=true;
     if(version){
@@ -1816,9 +1817,6 @@ export class MdsComponent{
               document.getElementById('selectedFileContent').innerHTML=this.files[0].name;
             }
             document.getElementById('selectedFile').style.display=valid ? '' : 'none';
-            document.getElementById('versionChooser').style.display=valid ? 'none' : '';
-            document.getElementById('versionGroup').style.display=valid ? '' : 'none';
-            document.getElementById('versionCheckbox').checked=false;
             document.getElementById('selectFileBtn').style.display=valid ? 'none' : '';
           " />
             <label for="comment">`+this.translate.instant('WORKSPACE.EDITOR.VERSION')+`</label>
@@ -1828,17 +1826,13 @@ export class MdsComponent{
     html+=`
               <div id="selectedFile" class="badge" style="display:none;"><span id="selectedFileContent"></span>
               <i class="material-icons clickable" onclick="
+              document.getElementById('fileSelect').value = null;
               document.getElementById('selectedFile').style.display='none';
-              document.getElementById('versionChooser').style.display='';
-              document.getElementById('versionGroup').style.display='none';
               document.getElementById('selectFileBtn').style.display='';
               ">cancel</i></div>
-              <span id="versionChooser"><input type="checkbox" id="versionCheckbox" onchange="
-                document.getElementById('versionGroup').style.display=this.checked ? '' : 'none';
-              " class="filled-in"> <label for="versionCheckbox">`+this.translate.instant('WORKSPACE.EDITOR.AS_VERSION')+`</label></span>
 
             </div>
-            <div id="versionGroup" style="display:none;">
+            <div id="versionGroup">
             <input type="text" class="comment" id="comment" placeholder="`+this.translate.instant('WORKSPACE.EDITOR.VERSION_COMMENT')+`" required />
               <div class="input-hint-bottom"`+this.translate.instant('FIELD_MUST_BE_FILLED')+`</div>
             </div>
