@@ -1802,8 +1802,12 @@ export class MdsComponent{
     else {
         let html=`<div class="mdsLicense">`
         let isSafe=this.connector.getCurrentLogin() && this.connector.getCurrentLogin().currentScope!=null;
+        let canDelete=(this.currentNode && this.currentNode.access.indexOf(RestConstants.ACCESS_DELETE)!=-1);
         if(isSafe || !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE)){
             html+=`<div class="mdsNoPermissions">`+this.translate.instant('MDS.LICENSE_NO_PERMISSIONS'+(isSafe ? '_SAFE' : ''))+`</div>`;
+        }
+        else if(!canDelete){
+            html+=`<div class="mdsNoPermissions">`+this.translate.instant('MDS.LICENSE_NO_PERMISSIONS_MATERIAL')+`</div>`;
         }
         else {
             html += `<a class="clickable licenseLink" onclick="window.mdsComponentRef.component.openLicenseDialog();">` +

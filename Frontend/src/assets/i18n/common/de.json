@@ -325,6 +325,7 @@
     "LICENSE_LINK":"Lizenz verwalten",
     "TEMPLATE_LINK":"Metadaten-Vorlage verwalten",
     "CONTRIBUTOR_LINK":"Weitere Beteiligte",
+    "LICENSE_NO_PERMISSIONS_MATERIAL":"Sie besitzen keine Berechtigungen, um dieses Material zu lizenzieren",
     "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
     "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern"
   },
