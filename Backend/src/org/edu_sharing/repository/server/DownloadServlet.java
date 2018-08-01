@@ -119,14 +119,13 @@ public class DownloadServlet extends HttpServlet{
 		ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		ApplicationInfo homeAppInfo = ApplicationInfoList.getHomeRepository();
 
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		ZipOutputStream zos = new ZipOutputStream(buffer);
+		ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
+		ZipOutputStream zos = new ZipOutputStream(bufferOut);
 		zos.setMethod( ZipOutputStream.DEFLATED );
 
-
+        List<String> errors=new ArrayList<>();
 		try{
-			AuthenticationUtil.RunAsWork<Boolean> work= () ->{
-			List<String> errors=new ArrayList<>();
+			AuthenticationUtil.RunAsWork<Boolean> runAll= () ->{
 				for(String nodeId : nodeIds){
 					try{
 						NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
@@ -139,67 +138,67 @@ public class DownloadServlet extends HttpServlet{
 							nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, refNodeId);
 							isCollectionRef = true;
 						}
-						AuthenticationUtil.RunAsWork work= () ->{
-                        						String filename = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CM_NAME));
-                        						String wwwurl = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
-                        						if(wwwurl!=null){
-                        							errors.add( filename+": Is a link and can not be downloaded" );
-                        							return null;
-                        						}
-                        						ContentReader reader = serviceRegistry.getContentService().getReader(finalNodeRef, ContentModel.PROP_CONTENT);
-                        						if(reader==null){
-                        							errors.add( filename+": Has no content" );
-                        							return null;
-                        						}
-                        						InputStream is = reader.getContentInputStream();
-                        						resp.setContentType("application/zip");
+						NodeRef finalNodeRef = nodeRef;
+                        AuthenticationUtil.RunAsWork work= () ->{
+                            String filename = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CM_NAME));
+                            String wwwurl = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
+                            if(wwwurl!=null){
+                                errors.add( filename+": Is a link and can not be downloaded" );
+                                return null;
+                            }
+                            ContentReader reader = serviceRegistry.getContentService().getReader(finalNodeRef, ContentModel.PROP_CONTENT);
+                            if(reader==null){
+                                errors.add( filename+": Has no content" );
+                                return null;
+                            }
+                            InputStream is = reader.getContentInputStream();
+                            resp.setContentType("application/zip");
 
-                        						DataInputStream in = new DataInputStream(is);
+                            DataInputStream in = new DataInputStream(is);
 
-                        						ZipEntry entry = new ZipEntry(filename);
-                        						zos.putNextEntry(entry);
-                        						byte[] buffer=new byte[1024];
-                        						while(true){
-                        							int l=in.read(buffer);
-                        							if(l<=0)
-                        								break;
-                        							zos.write(buffer,0,l);
-                        						}
-                        						in.close();
-                        						return null;
-                        					};
-                        					if(isCollectionRef)
-                        						AuthenticationUtil.runAsSystem(work);
-                        					else
-                        						work.doWork();
-
+                            ZipEntry entry = new ZipEntry(filename);
+                            zos.putNextEntry(entry);
+                            byte[] buffer=new byte[1024];
+                            while(true){
+                                int l=in.read(buffer);
+                                if(l<=0)
+                                    break;
+                                zos.write(buffer,0,l);
+                            }
+                            in.close();
+                            return null;
+                        };
+                        if(isCollectionRef)
+                            AuthenticationUtil.runAsSystem(work);
+                        else
+                            work.doWork();
 					}catch(Throwable t){
 						t.printStackTrace();
 						resp.sendRedirect(URLTool.getNgMessageUrl("INVALID"));
 						return false;
 					}
 				}
-				if(errors.length()>0){
+				if(errors.size()>0){
 					ZipEntry entry = new ZipEntry("Info.txt");
 					zos.putNextEntry(entry);
-					zos.write(errors.getBytes());
+                    zos.write(StringUtils.join(errors,"\r\n").getBytes());
 				}
 				zos.close();
 				return true;
 			};
 			boolean result;
 			if(share!=null){
-				result=AuthenticationUtil.runAsSystem(work);
+				result=AuthenticationUtil.runAsSystem(runAll);
 			}
 			else{
-				result=work.doWork();
+				result=runAll.doWork();
 			}
 			if(result) {
 				resp.setHeader("Content-type","application/octet-stream");
 				resp.setHeader("Content-Transfer-Encoding","binary");
 				resp.setHeader("Content-Disposition","attachment; filename=\""+cleanName(zipName)+"\"");
-				resp.setHeader("Content-Length",""+buffer.size());
-				resp.getOutputStream().write(buffer.toByteArray());
+				resp.setHeader("Content-Length",""+bufferOut.size());
+				resp.getOutputStream().write(bufferOut.toByteArray());
 			}
 		}
 		catch(Throwable t){
