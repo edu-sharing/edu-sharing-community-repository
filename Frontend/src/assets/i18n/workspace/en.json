@@ -126,6 +126,8 @@
       "USAGE_COUNT":"Total uses",
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
+        "METADATA_UPDATE": "Updated metadata",
+        "CONTENT_UPDATE": "Updated content",
         "EDITOR_UPLOAD": "File updated by editor",
         "NODE_PUBLISHED": "File published"
       }
