@@ -77,6 +77,7 @@ export class WorkspaceMetadataComponent  {
           if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD
               || version.comment==RestConstants.COMMENT_METADATA_UPDATE
               || version.comment==RestConstants.COMMENT_CONTENT_UPDATE
+              || version.comment==RestConstants.COMMENT_LICENSE_UPDATE
               || version.comment==RestConstants.COMMENT_NODE_PUBLISHED
               || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
             let parameters = version.comment.split(",");
