@@ -29,21 +29,21 @@
 	            <include name="svnjavahl.jar"/>
 	            <include name="svnkit.jar"/> -->
 	        	<include name="svnClientAdapter.jar"/>
-	        	
+
 	        	<include name="svnkit/*.jar"/>
 	        </fileset>
-	    </path> 
+	    </path>
 
-	<target name="release">
-		
+	<target name="release" description="Build Release">
+
 		<!--incrementimng build number-->
 		<buildnumber file="build.number"/>
-		
+
 		<!--loading new build number (with prefix to get the new one)-->
 		<property file="build.number" prefix="tmp"></property>
 		
 	
-		<copyfile src="version.html.template" dest="${src.dir}/org/edu_sharing/repository/public/version.html" forceoverwrite="true"/>
+		<copyfile src="version.html.template" dest="${src.dir}/org/edu_sharing/repository/public/version.html" forceoverwrite="true" />
 		
 		<tstamp>
   			<format property="TODAY" pattern="yyyy-MM-dd"/>
@@ -58,7 +58,7 @@
 		<replaceregexp match="build.number=[0-9]*" replace="build.number=${tmp.build.number}" flags="gs" byline="true">
 			<fileset dir="." includes="version.properties"/>
 		</replaceregexp>
-		
+
 		<exec executable="git" outputproperty="git.result">
 			<arg value="log" />
 			<arg value="-n1" />
@@ -74,7 +74,7 @@
 		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
 		<antcall target="release-extension-gitinfo"></antcall>
-		
+
 		<copyfile src="${src.dir}/org/edu_sharing/repository/public/version.html" dest="${gwt-war.dir}/${gwt-rename-to}/version.html" />
 		<delete dir="${release.foldername}" />
 		<mkdir dir="${release.foldername}" />
@@ -89,11 +89,11 @@
 		<antcall target="release-extension-public"></antcall>
 		<antcall target="release-ng"></antcall>
 		<antcall target="release-extension-ng"></antcall>
-		
+
 		<condition property="extension-name" value="${extension-name}" else="">
 		        <isset property="extension-name"/>
 		</condition>
-		
+
 		<zip destfile="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" basedir="." includes="${release.foldername}/**">
 		</zip>
 		<copy file="${release.foldername}/${release.foldername}${extension-name}_${mainversion}.${git.result}.zip" todir="release"> </copy>
@@ -101,9 +101,9 @@
 		
 		<!--clean up version tmp file -->
 		<delete file="version_tmp.properties"></delete>
-		
+
 	</target>
-	
+
 	<target name="release-extension-gitinfo" if="extension-name">
 		<exec executable="git" outputproperty="git.extension.result" dir="${extensions.path}${extension-name}">
 					<arg value="log" />
@@ -111,12 +111,12 @@
 					<arg value="--format=%ad-%h" />
 					<arg value="--date=short" />
 		</exec>
-		
+
 		<replaceregexp match="git.extension.commit:[a-zA-Z0-9\- ]*\&lt;br/\&gt;" replace="git.extension.commit: ${git.extension.result}\&lt;br/\&gt;" flags="gs" byline="true">
 			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
 	</target>
-	
+
 	<!-- overwrite the config stuff-->
 	<target name="release-extension-config" if="extension-name">
 		<echo>extension is active: ${extension-name}</echo>
@@ -137,7 +137,7 @@
 			<string value="${module.gwt.package}" />
 			<filterchain>
 				<replaceregex pattern="\." replace="/" flags="g" />
-			</filterchain>  
+			</filterchain>
 		</loadresource>
 		<echo message="module path: ${module.gwt.path}" />
 		<copy overwrite="true" failonerror="false" todir="${release.foldername}/war/edu_sharing">
@@ -145,7 +145,7 @@
 			</fileset>
 		</copy>
 	</target>
-	<target name="release-ng" unless="extension-name">
+	<target name="release-ng">
 			<copy overwrite="true" failonerror="true" todir="${release.foldername}/war/edu_sharing">
 				<fileset dir="ng" includes="**">
 				</fileset>
@@ -157,26 +157,26 @@
 			</fileset>
 		</copy>
 	</target>
-	
+
 	<!-- take the current extension with the release -->
 		<target name="release-src-extension" if="extension-name">
 			<echo>extension is active: ${extension-name}</echo>
 			<mkdir dir="${release-src.foldername}/${extensions.path}${extension-name}" />
 			<copy todir="${release-src.foldername}/${extensions.path}${extension-name}" overwrite="true">
-				<fileset dir="${extensions.path}${extension-name}" includes="src/**,test/**,war/**,build.xml,build.properties,.classpath,.project">	
+				<fileset dir="${extensions.path}${extension-name}" includes="src/**,test/**,war/**,build.xml,build.properties,.classpath,.project">
 				</fileset>
 			</copy>
 		</target>
 
 	<target name="release-src">
-		
+
 		<!--incrementimng build number-->
 		<buildnumber file="build.number"/>
-		
+
 		<!--loading new build number (with prefix to get the new one)-->
 		<property file="build.number" prefix="tmp"></property>
-		
-	
+
+
 		<!--writing build.number to version.html so that the svn revision in this file will be updated to the main main revision-->
 		<echo>${tmp.build.number}</echo>
 		<replaceregexp match="build.number: [0-9]*\&lt;br/\&gt;" replace="build.number: ${tmp.build.number}\&lt;br/\&gt;" flags="gs" byline="true">
@@ -186,33 +186,33 @@
 		<replaceregexp match="build.number=[0-9]*" replace="build.number=${tmp.build.number}" flags="gs" byline="true">
 			<fileset dir="." includes="version.properties"/>
 		</replaceregexp>
-		
+
 		<!--<exec executable="version.bat"></exec>-->
 		<copyfile src="${src.dir}/org/edu_sharing/repository/public/version.html" dest="${gwt-war.dir}/${gwt-rename-to}/version.html" />
 		<!--<input addproperty="terminated" message="Did you have set the right License Header? " validargs="y,n"/>
-			<condition property="do.abort">			
+			<condition property="do.abort">
 			    <not><equals arg1="y" arg2="${terminated}"/></not>
 	        </condition>
 			<fail if="do.abort">Aborted by user.</fail>-->
-		
+
 		<input
 				    message="SVN commit. Leave comment blank to skip. comment:"
 				    addproperty="commit.comment"
 				  />
-				
+
 		<condition property="do.svn.commit">
 			<not>
 		    	<equals arg1="" arg2="${commit.comment}"/>
 			</not>
 		</condition>
-		
+
 		<antcall target="svncommit"></antcall>
-		
+
 		<!-- replace the extension name with the current active extension -->
 		<replaceregexp match="version.extension:[a-zA-Z ]*\&lt;br/\&gt;" replace="version.extension: ${extension-name}\&lt;br/\&gt;" flags="gs" byline="true">
 		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
-		
+
 		<!-- create dollar free version of revision property -->
 		<copy file="version.properties" tofile="version_tmp.properties">
 			<filterchain>
@@ -225,10 +225,10 @@
 			</filterchain>
 		</copy>
 		<loadproperties srcfile="version_tmp.properties"/>
-		
+
 		<echo>${version.svnrevision}</echo>
 		<echo>${clean_version.svnrevision}</echo>
-		
+
 		<copyfile src="${src.dir}/org/edu_sharing/repository/public/version.html" dest="${gwt-war.dir}/${gwt-rename-to}/version.html" />
 
 		<delete dir="${release-src.foldername}" />
@@ -238,9 +238,9 @@
 				<fileset dir="." includes="${includesrelease-src}" excludes="${excluderelase-src},${exluderelease}">
 				</fileset>
 		</copy>
-		
+
 		<antcall target="release-src-extension"></antcall>
-		
+
 		<!--
 		 replace standard header with current license header
 		 -->
@@ -252,26 +252,26 @@
 		<zip destfile="${release-src.foldername}/${release-src.foldername}${extension-name}_${mainversion}.${clean_version.svnrevision}.zip" basedir="." includes="${release-src.foldername}/**">
 			</zip>
 			<copy file="${release-src.foldername}/${release-src.foldername}${extension-name}_${mainversion}.${clean_version.svnrevision}.zip" todir="release"> </copy>
-			
+
 		<!--<zip destfile="${release-src.foldername}/${release-src.foldername}_${mainversion}.${version.svnrevision}.zip" basedir="." includes="${release-src.foldername}/**">
 		</zip>
 		<copy file="${release-src.foldername}/${release-src.foldername}_${mainversion}.${version.svnrevision}.zip" todir="release"> </copy>
 		-->
-		
+
 		<!--clean up version tmp file -->
 		<delete file="version_tmp.properties"></delete>
 	</target>
-	
-	
-	
-	
+
+
+
+
 	<!--
 		example for replaceregexp
 		http://www.richardnichols.net/2009/08/automatically-updating-your-source-file-headers-with-ants-replaceregexp/
-		
+
 		regex um header mit package zu matchen(mit QuickREx getestet, Punkt matched keine newlinebreaks daher: \s\S)
 		/\*[\s\S]*\*/[\s\S]*package
-		
+
 		<target name="replace_headers">
     	<loadfile property="javaheader" srcFile="lib/standardheader.txt"/>
     	<replaceregexp match="(/\*.*\*/.*)??^package " flags="sm" replace="${javaheader}${line.separator}package ">
