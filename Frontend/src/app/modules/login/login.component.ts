@@ -67,8 +67,13 @@ export class LoginComponent  implements OnInit{
             this.scope=null;
           this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
             if(data.currentScope){
-              this.connector.logout().subscribe(()=>{}); // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
-              data.statusCode=null;
+              this.isLoading=true;
+              this.connector.logout().subscribe(()=>{
+                  this.isLoading=false;
+                  if(configService.instant("loginUrl")) {
+                    window.location.href = configService.instant("loginUrl");
+                }
+              });
             }
             else if(data.currentScope==this.scope){
               if(data.statusCode==RestConstants.STATUS_CODE_OK && params['local']!="true"){
