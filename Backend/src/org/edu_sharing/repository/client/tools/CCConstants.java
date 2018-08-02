@@ -1731,7 +1731,9 @@ public class CCConstants {
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACE_I18N_PREFIX = "taxonid_valuespace_i18n_prefix";
 
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE = "resolve_website_title";
-	
+
+	public static String EDU_SHARING_PROPERTIES_ENABLE_STATISTICS_API= "enable_statistics_api";
+
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS = "initial_dbscripts";
 	
 	/**

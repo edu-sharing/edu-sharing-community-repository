@@ -45,7 +45,9 @@ public class StatisticApi {
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response get(
 			@ApiParam(value = "context, the node where to start", required = true, defaultValue = "-root-") @PathParam("context") String context,
-			@ApiParam(value = "filter", required = true) Filter filter, @ApiParam(value = "properties") @QueryParam("properties") List<String> properties, @Context HttpServletRequest req) {
+			@ApiParam(value = "filter", required = true) Filter filter, @ApiParam(value = "properties")
+            @QueryParam("properties") List<String> properties,
+            @Context HttpServletRequest req) {
 
 		try {
 			Statistics statistics = new StatisticDao().get(context, properties, filter);
@@ -69,10 +71,11 @@ public class StatisticApi {
 	    	})
 
 	    public Response getGlobalStatistics(
-				@ApiParam(value = "additional properties to build facettes and count values", required = false) @QueryParam("properties") List<String> properties) {
+                @ApiParam(value = "primary property to build facettes and count+group values", required = false) @QueryParam("group") String group,
+                @ApiParam(value = "additional properties to build facettes and count+sub-group values", required = false) @QueryParam("subGroup") List<String> subGroup) {
 
 	    	try {
-		    	StatisticsGlobal statistics=StatisticDao.getGlobal(properties);
+		    	StatisticsGlobal statistics=StatisticDao.getGlobal(group,subGroup);
 		    	return Response.status(Response.Status.OK).entity(statistics).build();
 		    	
 			} catch (Throwable t) {
