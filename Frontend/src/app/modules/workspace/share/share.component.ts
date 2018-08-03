@@ -283,7 +283,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
         this.onClose.emit(permissions);
         return;
       }
-      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.doiActive && this.publishActive).subscribe(() => {
+      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
           this.onLoading.emit(false);
           this.onClose.emit(permissions);
           this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
