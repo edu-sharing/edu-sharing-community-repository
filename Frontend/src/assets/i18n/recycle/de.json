@@ -9,7 +9,7 @@
     "DELETE": {
       "CONFIRM_TITLE": "Objekt wirklich endgültig löschen?",
       "CONFIRM_MESSAGE": "Wenn Sie Objekte endgültig löschen, können Sie diese später nicht mehr wiederherstellen.",
-      "NOT_ASK_AGAIN": "Diese Sitzung nicht nochmal fragen",
+      "NOT_ASK_AGAIN": "In dieser Sitzung nicht noch einmal fragen",
       "YES": "Ja, löschen",
       "CANCEL": "Abbrechen"
     },

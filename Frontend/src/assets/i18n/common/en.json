@@ -300,6 +300,7 @@
     "LICENSE_LINK":"manage license",
     "TEMPLATE_LINK":"Manage metadata template",
     "CONTRIBUTOR_LINK":"Additional Contributors",
+    "LICENSE_NO_PERMISSIONS_MATERIAL":"You have insufficient permissions to license this material",
     "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
     "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment"
   },

@@ -841,7 +841,7 @@ export class WorkspaceMainComponent implements EventListener{
         }
         if(nodes) {
             let license = new OptionItem("WORKSPACE.OPTION.LICENSE", "copyright", (node: Node) => this.editLicense(node));
-            license.isEnabled = !this.isSafe && allFiles && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
+            license.isEnabled = !this.isSafe && allFiles && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
             if (license.isEnabled)
                 options.push(license);
         }
