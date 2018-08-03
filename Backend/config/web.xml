@@ -261,6 +261,10 @@
 	      <url-pattern>/index.html</url-pattern>
    </filter-mapping>
    <filter-mapping>
+       <filter-name>Edu-Sharing Authentication Filter</filter-name>
+       <url-pattern>/components/*</url-pattern>
+   </filter-mapping>
+   <filter-mapping>
 	      <filter-name>Edu-Sharing Authentication Filter</filter-name>
 	      <url-pattern>/index.jsp</url-pattern>
    </filter-mapping>

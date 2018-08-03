@@ -200,7 +200,7 @@ export class CollectionsMainComponent {
   public get orderActive(){
     return this._orderActive;
   }
-  navigate(id:string="",addToOther=""){
+  navigate(id="",addToOther=""){
     let params:any={};
     params.scope=this.tabSelected;
     params.id=id;
@@ -368,7 +368,7 @@ export class CollectionsMainComponent {
                     if (collection)
                         options.push(collection);
                 }
-                if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
+                if (this.isAllowedToDeleteNodes(nodes)) {
                     let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE', 'remove_circle_outline', (node: Node) => {
                         this.deleteMultiple(ActionbarHelper.getNodes(nodes, node));
                     });
@@ -395,7 +395,7 @@ export class CollectionsMainComponent {
       if(fromList) {
           let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
           remove.showCallback = (node: Node) => {
-              return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
+              return this.isAllowedToDeleteNodes(ActionbarHelper.getNodes(nodes, node));
           };
           if(remove)
             options.push(remove);
@@ -492,13 +492,13 @@ export class CollectionsMainComponent {
     return;
   }
 
-  // gets called by user if something went wrong to start fresh from beginning
-  resetCollections() : void {
-    var url = window.location.href;
-    url = url.substring(0,url.indexOf("collections")+11);
-    window.location.href = url;
-    return;
-  }
+    // gets called by user if something went wrong to start fresh from beginning
+    resetCollections() : void {
+        let url = window.location.href;
+        url = url.substring(0,url.indexOf("collections")+11);
+        window.location.href = url;
+        return;
+    }
 
   refreshContent(callback:Function=null) : void {
     if (!this.isReady) return;
@@ -568,36 +568,36 @@ export class CollectionsMainComponent {
     // set thru router so that browser back button can work
     this.navigate(collection.ref.id);
 
-  }
-  deleteReference(content:EduData.CollectionReference|EduData.Node){
-    this.contentDetailObject=content;
-    this.deleteFromCollection();
-  }
-  canDelete(node:EduData.CollectionReference){
-    return RestHelper.hasAccessPermission(node,'Delete');
-  }
-  onContentClick(content:EduData.CollectionReference,force=false) : void {
-    this.contentDetailObject=content;
-    if (content.originalId==null && !force) {
-      this.dialogTitle="COLLECTIONS.ORIGINAL_MISSING";
-      this.dialogMessage="COLLECTIONS.ORIGINAL_MISSING_INFO";
-      this.dialogCancelable=true;
-      this.dialogButtons=[];
-      if (this.isAllowedToDeleteCollection()) {
-        this.dialogButtons.push(new DialogButton('COLLECTIONS.DETAIL.REMOVE',DialogButton.TYPE_CANCEL,()=>this.deleteFromCollection(()=>this.closeDialog())));
-      }
-      this.dialogButtons.push(new DialogButton('COLLECTIONS.OPEN_MISSING',DialogButton.TYPE_PRIMARY,()=>this.onContentClick(content,true)));
-      return;
     }
-    this.nodeService.getNodeMetadata(content.ref.id).subscribe((data:NodeWrapper)=>{
-      this.contentDetailObject=data.node;
+    deleteReference(content:EduData.CollectionReference|EduData.Node){
+      this.contentDetailObject=content;
+      this.deleteFromCollection();
+    }
+    canDelete(node:EduData.CollectionReference){
+      return RestHelper.hasAccessPermission(node,'Delete');
+    }
+    onContentClick(content:any,force=false) : void {
+      this.contentDetailObject=content;
+      if (content.originalId==null && !force) {
+        this.dialogTitle="COLLECTIONS.ORIGINAL_MISSING";
+        this.dialogMessage="COLLECTIONS.ORIGINAL_MISSING_INFO";
+        this.dialogCancelable=true;
+        this.dialogButtons=[];
+        if (this.isAllowedToDeleteNodes([content])) {
+          this.dialogButtons.push(new DialogButton('COLLECTIONS.DETAIL.REMOVE',DialogButton.TYPE_CANCEL,()=>this.deleteFromCollection(()=>this.closeDialog())));
+        }
+        this.dialogButtons.push(new DialogButton('COLLECTIONS.OPEN_MISSING',DialogButton.TYPE_PRIMARY,()=>this.onContentClick(content,true)));
+        return;
+      }
+      this.nodeService.getNodeMetadata(content.ref.id).subscribe((data:NodeWrapper)=>{
+        this.contentDetailObject=data.node;
 
         // remember the scroll Y before displaying content
         this.lastScrollY = window.scrollY;
         /*if(data.node.downloadUrl)
           this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", () => this.downloadMaterial()));
          */
-        if(data.node.access.indexOf(RestConstants.ACCESS_DELETE)!=-1) {
+        if(this.isAllowedToDeleteNodes([content])) {
           this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
             NodeRenderComponent.close(this.location);
           })));
@@ -817,4 +817,8 @@ export class CollectionsMainComponent {
       this.toast.error(error);
     });
   }
+
+    private isAllowedToDeleteNodes(nodes: Node[]) {
+        return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
+    }
 }

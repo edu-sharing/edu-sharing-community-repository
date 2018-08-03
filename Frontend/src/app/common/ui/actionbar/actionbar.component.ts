@@ -98,7 +98,6 @@ export class ActionbarComponent{
   }
   private click(option : OptionItem){
     if(!option.isEnabled) {
-      console.log("click");
       if(option.disabledCallback) {
           option.disabledCallback(this.node);
       }

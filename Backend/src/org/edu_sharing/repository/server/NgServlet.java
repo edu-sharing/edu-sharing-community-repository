@@ -50,7 +50,7 @@ public class NgServlet extends HttpServlet {
 			String nodeId = path[path.length - 1];
 			JSONObject lrmi = LRMITool.getLRMIJson(nodeId);
 			String data = "<script type=\"application/ld+json\">";
-			data += lrmi.toString();
+			data += lrmi.toString(2);
 			data += "</script>";
 			return addToHead(data, html);
 		}catch(Throwable t){

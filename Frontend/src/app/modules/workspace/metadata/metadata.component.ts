@@ -85,7 +85,12 @@ export class WorkspaceMetadataComponent{
             this.versions=data.versions.reverse();
             for(let version of this.versions) {
                 if(version.comment){
-                    if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD || version.comment==RestConstants.COMMENT_NODE_PUBLISHED || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
+                    if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD
+                        || version.comment==RestConstants.COMMENT_METADATA_UPDATE
+                        || version.comment==RestConstants.COMMENT_CONTENT_UPDATE
+                        || version.comment==RestConstants.COMMENT_LICENSE_UPDATE
+                        || version.comment==RestConstants.COMMENT_NODE_PUBLISHED
+                        || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
                         let parameters = version.comment.split(",");
                         let editor = "";
                         if (parameters.length > 1)

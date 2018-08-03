@@ -175,6 +175,9 @@ export class RestConstants {
   public static LUCENE_SCORE = "score";
 
   public static COMMENT_MAIN_FILE_UPLOAD="MAIN_FILE_UPLOAD";
+  public static COMMENT_METADATA_UPDATE="METADATA_UPDATE";
+  public static COMMENT_CONTENT_UPDATE="CONTENT_UPDATE";
+  public static COMMENT_LICENSE_UPDATE="LICENSE_UPDATE";
   public static COMMENT_EDITOR_UPLOAD="EDITOR_UPLOAD";
   public static COMMENT_NODE_PUBLISHED="NODE_PUBLISHED";
   public static ACCESS_ADD_CHILDREN="AddChildren";

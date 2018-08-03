@@ -34,7 +34,7 @@ import {UIConstants} from '../../../common/ui/ui-constants';
 })
 export class WorkspaceShareComponent implements AfterViewInit{
   ngAfterViewInit(): void {
-    UIHelper.setFocusOnCard();
+    setTimeout(()=>UIHelper.setFocusOnCard());
   }
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Comment","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
@@ -61,7 +61,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private currentType=[RestConstants.ACCESS_CONSUMER,RestConstants.ACCESS_CC_PUBLISH];
   private inherited : boolean;
   private notifyUsers = true;
-  private notifyMessage = "";
+  private notifyMessage : string;
   private inherit : Permission[]=[];
   private permissions : Permission[]=[];
   public permissionsUser : Permission[];
@@ -294,7 +294,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
         this.onClose.emit(permissions);
         return;
       }
-      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.doiActive && this.publishActive).subscribe(() => {
+      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
           this.onLoading.emit(false);
           this.onClose.emit(permissions);
           this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');

@@ -70,7 +70,7 @@
 
         <div *ngIf="sendMessages" class="groupMessage">
           <label for="message">{{'WORKSPACE.SHARE.MESSAGE' | translate}}</label>
-          <input type="text" id="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
+          <input type="text" id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
         <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}<p>{{'WORKSPACE.NOTIFY_INFO' | translate}}</p></label>
         </div>
         <div class="publish" *ngIf="!isSafe">

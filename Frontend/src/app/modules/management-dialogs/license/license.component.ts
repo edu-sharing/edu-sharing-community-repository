@@ -200,7 +200,7 @@ export class WorkspaceLicenseComponent  {
       authors[0]=this.authorVCard.toVCardString();
       prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=authors;
       i++;
-      this.nodeApi.editNodeMetadata(node.ref.id, prop).subscribe(() => {
+      this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe(() => {
         this.savePermissions(node);
         if(i==this._nodes.length){
           this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');

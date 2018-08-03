@@ -119,6 +119,8 @@ export class WorkspaceTreeComponent  {
     if(!this.storage.get(TemporaryStorageService.LIST_DRAG_DATA)) {
       return;
     }
+    event.preventDefault();
+    event.stopPropagation();
     this.dragHover=null;
     if(target==this.RECYCLE) {
       this.onDeleteNodes.emit(this.storage.get(TemporaryStorageService.LIST_DRAG_DATA).nodes);

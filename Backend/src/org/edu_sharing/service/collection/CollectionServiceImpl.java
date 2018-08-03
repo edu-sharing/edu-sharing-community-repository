@@ -697,13 +697,7 @@ public class CollectionServiceImpl implements CollectionService{
 		List<org.edu_sharing.repository.client.rpc.ACE> aces=new ArrayList<>();
 		if(acl.getAces()!=null)
 			aces.addAll(Arrays.asList(acl.getAces()));
-		
-		org.edu_sharing.repository.client.rpc.ACE ace=new org.edu_sharing.repository.client.rpc.ACE();
-		ace.setAuthority(AuthenticationUtil.getFullyAuthenticatedUser());
-		ace.setAuthorityType(Authority.Type.USER.name());
-		ace.setPermission(CCConstants.PERMISSION_COORDINATOR);
-		aces.add(ace);
-		
+
 		if(custom){
 			
 			if(!collection.isLevel0()) // TODO: don't allow inherition on root level -> this variable seems to be inverted?!
@@ -743,13 +737,13 @@ public class CollectionServiceImpl implements CollectionService{
 			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 				@Override
 				public Void doWork() throws Exception {
-					permissionService.setPermissions(collectionId, aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]),aclFinal.isInherited());
+					permissionService.setPermissions(collectionId, aces,aclFinal.isInherited());
 					return null;
 				}
 			});
 		}
 		else{
-			permissionService.setPermissions(collectionId, aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]),aclFinal.isInherited());
+			permissionService.setPermissions(collectionId, aces,aclFinal.isInherited());
 		}
 	
 	}
