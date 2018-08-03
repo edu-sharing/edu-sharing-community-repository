@@ -89,7 +89,11 @@ public class DownloadServlet extends HttpServlet{
 					if(serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 						String refNodeId = (String)serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
 						nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, refNodeId);
-						isCollectionRef = true;
+
+						// Simply try to fetch content (to check if READ_CONTENT is present)
+                        ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
+
+                        isCollectionRef = true;
 					}
 					NodeRef finalNodeRef = nodeRef;
 					AuthenticationUtil.RunAsWork work= () ->{

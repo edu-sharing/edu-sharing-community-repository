@@ -295,7 +295,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 				permissionsNodeId = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
 							
 			}
-			if(!client.hasPermissions(permissionsNodeId, userName, new String[] {CCConstants.PERMISSION_CONSUMER})) {
+			if(!client.hasPermissions(permissionsNodeId, userName, new String[] {CCConstants.PERMISSION_READ_ALL})) {
 				rir.setHasContentLicense(false);
 			}	
 			
