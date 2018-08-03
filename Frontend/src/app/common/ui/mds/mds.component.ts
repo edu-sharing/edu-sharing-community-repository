@@ -1848,12 +1848,15 @@ export class MdsComponent{
   }
 
   private addAuthorValue(properties: any) {
-    if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_FREETEXT){
-      this.currentWidgets.push({id:RestConstants.CCM_PROP_AUTHOR_FREETEXT,type:'textarea'});
+    if(document.getElementById(RestConstants.CCM_PROP_AUTHOR_FREETEXT) || document.getElementById(RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR)) {
+        //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_FREETEXT)
+        if (Helper.indexOfObjectArray(this.currentWidgets, 'id', RestConstants.CCM_PROP_AUTHOR_FREETEXT) == -1) {
+            this.currentWidgets.push({id: RestConstants.CCM_PROP_AUTHOR_FREETEXT, type: 'textarea'});
+        }
+        //if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_PERSON)
+        if (Helper.indexOfObjectArray(this.currentWidgets, 'id', RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR) == -1) {
+            this.currentWidgets.push({id: RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR, type: 'vcard'});
+        }
     }
-    if(this.activeAuthorType==MdsComponent.AUTHOR_TYPE_PERSON){
-      this.currentWidgets.push({id:RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,type:'vcard'});
-    }
-
   }
 }
