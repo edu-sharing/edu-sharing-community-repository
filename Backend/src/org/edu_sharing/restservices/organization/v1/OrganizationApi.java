@@ -124,13 +124,13 @@ public class OrganizationApi  {
 
 	public Response getOrganization(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "ID of organization",required=true, defaultValue="-home-" ) @PathParam("organization") String organization,
+			@ApiParam(value = "ID of organization",required=true) @PathParam("organization") String organization,
 			@Context HttpServletRequest req) {
 
 		try {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			return Response.status(Response.Status.OK).entity(OrganizationDao.getInstant(repoDao,organization)).build();
+			return Response.status(Response.Status.OK).entity(OrganizationDao.getInstant(repoDao,organization).asOrganization()).build();
 
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
