@@ -221,7 +221,7 @@ public class AdminServiceImpl implements AdminService  {
 				if(ace!=null)
 					newAce.add(ace);
 			}
-			permissionService.setPermissions(nodeId, newAce.toArray(new ACE[0]));
+			permissionService.setPermissions(nodeId, newAce);
 		}
 	}
 
