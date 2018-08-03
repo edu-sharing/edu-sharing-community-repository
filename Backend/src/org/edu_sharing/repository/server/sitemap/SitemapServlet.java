@@ -111,7 +111,7 @@ public class SitemapServlet extends HttpServlet{
             else {
                 Urlset.Url.Image image = new Urlset.Url.Image();
                 image.loc = URLTool.getPreviewServletUrl(ref);
-                url.image.add(image);
+                //url.image.add(image);
             }
             //getPreviewServletUrl
             set.url.add(url);
