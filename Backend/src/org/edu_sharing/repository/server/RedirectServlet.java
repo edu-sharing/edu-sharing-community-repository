@@ -28,9 +28,13 @@
 package org.edu_sharing.repository.server;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -44,6 +48,8 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.authentication.Context;
@@ -53,6 +59,9 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.springframework.beans.propertyeditors.URLEditor;
 
 public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 
@@ -134,7 +143,20 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 					params = URLDecoder.decode(params);
 					System.out.println("adding params to render url:" + params);
 					renderServiceUrl = (renderServiceUrl.contains("?")) ? renderServiceUrl + "&" + params : renderServiceUrl + "?" + params;
-				}
+                    try {
+                        List<NameValuePair> parsed = URLEncodedUtils.parse(params, Charset.defaultCharset());
+                        for(NameValuePair pair : parsed){
+                            if(pair.getName().equals("display") && pair.getValue().equals("download")){
+                                // Track download action for node
+                                TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),TrackingService.EventType.DOWNLOAD_MATERIAL);
+                                break;
+                            }
+                        }
+                        logger.info(parsed);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
 				
 				String version = req.getParameter("version");
 				if(version != null && !version.trim().equals("")){

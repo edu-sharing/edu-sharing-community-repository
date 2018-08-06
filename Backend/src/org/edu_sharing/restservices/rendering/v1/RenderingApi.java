@@ -14,6 +14,8 @@ import javax.ws.rs.core.Response;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
@@ -31,6 +33,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
 
 @Path("/rendering/v1")
@@ -128,17 +132,21 @@ public class RenderingApi {
 			@Override
 			public Response doWork() throws Exception {	
 				try {
-						RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-						if (repoDao == null) {
-							return Response.status(Response.Status.NOT_FOUND).build();
-						}
-						String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion,parameters);
-						
-						Node nodeJson = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter()).asNode();
-						String mimeType = nodeJson.getMimetype();
-						
-						
-						RenderingDetailsEntry response = new RenderingDetailsEntry();
+                    RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+                    if (repoDao == null) {
+                        return Response.status(Response.Status.NOT_FOUND).build();
+                    }
+                    String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion,parameters);
+
+                    NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
+                    Node nodeJson = nodeDao.asNode();
+                    String mimeType = nodeJson.getMimetype();
+
+                    if(repoDao.isHomeRepo())
+                        TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node),TrackingService.EventType.VIEW_MATERIAL);
+
+
+                    RenderingDetailsEntry response = new RenderingDetailsEntry();
 						response.setDetailsSnippet(detailsSnippet);
 						response.setMimeType(mimeType);
 						response.setNode(nodeJson);

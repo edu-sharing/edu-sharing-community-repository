@@ -43,6 +43,8 @@ import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 
@@ -143,6 +145,8 @@ public class DownloadServlet extends HttpServlet{
                             isCollectionRef = true;
 						}
 						NodeRef finalNodeRef = nodeRef;
+
+                        TrackingServiceFactory.getTrackingService().trackActivityOnNode(nodeRef,TrackingService.EventType.DOWNLOAD_MATERIAL);
                         AuthenticationUtil.RunAsWork work= () ->{
                             String filename = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CM_NAME));
                             String wwwurl = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));

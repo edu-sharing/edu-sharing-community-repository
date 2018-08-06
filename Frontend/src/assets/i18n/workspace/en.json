@@ -127,7 +127,8 @@
       "USAGE_TYPE": {
         "LMS": "LMS-Courses",
         "COLLECTION": "Collections",
-        "DOWNLOAD": "Downloads"
+        "DOWNLOAD": "Downloads",
+        "VIEW": "Views"
       },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
