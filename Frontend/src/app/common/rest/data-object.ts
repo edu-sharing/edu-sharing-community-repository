@@ -80,6 +80,12 @@ export interface Application {
   xml: string;
 }
 
+export interface Service {
+    id: string;
+    name: string;
+    url: string;
+    logo: string;
+}
 
 export interface Preview {
   data: Blob; // image, may null, see @NodeHelper.appendImageData

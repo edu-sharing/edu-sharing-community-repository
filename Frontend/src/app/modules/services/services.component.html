@@ -1,0 +1,27 @@
+<main-nav
+        [title]="'SERVICES.TITLE'"
+        [currentScope]="'services'"
+        [searchEnabled]="false"
+></main-nav>
+<div id="register-service">
+    <h4>{{'SERVICES.REGISTER' | translate }}</h4>
+    <form (ngSubmit)="registerService()">
+        <input type="text" name="serviceUrl" class="serviceUrl" [(ngModel)]="serviceUrl" placeholder="{{'SERVICES.URL' | translate}}">
+        <a class="btn waves-effect waves-light" (click)="registerService()">{{'SERVICES.REGISTER' | translate}}</a>
+    </form>http://localhost/sandbox/json.php
+</div>
+<div id="registered-services" class="table">
+    <h4>{{'SERVICES.REGISTERED_SERVICES' | translate }}</h4>
+    <div class="tableRow header">
+        <div>{{'SERVICES.LOGO' | translate}}</div>
+        <div>{{'SERVICES.NAME' | translate}}</div>
+        <div>{{'SERVICES.URL' | translate}}</div>
+        <div>{{'SERVICES.ID' | translate}}</div>
+    </div>
+    <div *ngFor="let service of registeredServices" class="tableRow">
+        <div><img class="service-logo" src="{{service.logo}}"></div>
+        <div>{{service.name}}</div>
+        <div>{{service.url}}</div>
+        <div>{{service.id}}</div>
+    </div>
+</div>

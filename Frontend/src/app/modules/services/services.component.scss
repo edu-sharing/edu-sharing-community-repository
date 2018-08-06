@@ -1,0 +1,39 @@
+@import "../../../styles/variables.scss";
+
+#register-service {
+  position: relative;
+  padding-top:$mainnavHeight + 70px;
+  width:50%;
+  margin: auto;
+}
+
+#registered-services {
+  margin: auto;
+  margin-top: 50px;
+  width:50%;
+}
+
+.tableRow{
+  display:table-row;
+  background-color: #fff;
+  div{
+    display:table-cell;
+    padding:5px 10px;
+    vertical-align: middle;
+    word-break: break-all;
+    border-bottom: 1px solid $cardSeperatorLineColor;
+    .material-icons{
+      color:$textLight;
+    }
+  }
+}
+
+.header{
+  color: $textLight;
+  background-color: transparent;
+}
+
+.service-logo {
+  max-height: 20px;
+  max-width: 50px;
+}

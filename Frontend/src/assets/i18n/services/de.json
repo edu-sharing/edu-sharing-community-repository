@@ -1,0 +1,18 @@
+{
+  "SERVICES":{
+    "TITLE": "Services",
+    "REGISTER": "Neuen Service registrieren",
+    "REGISTERED_SERVICES": "Bereits registrierte Services",
+    "URL": "URL",
+    "LOGO":"Logo",
+    "NAME":"Name",
+    "ID":"ID",
+    "REGISTERED":"Der Service wurde erfolgreich regostriert",
+    "ERROR": {
+      "LOADJSON":"Die Service URL konnte nicht geöffnet werden",
+      "REGISTERED":"Der Service konnte nicht registriert werden (JSON Format Error oder ähnliches)",
+      "DUPLICATE":"Diese Service URL wurde bereits registriert",
+      "ENTERURL": "Geben Sie eine URL ein"
+    }
+  }
+}
