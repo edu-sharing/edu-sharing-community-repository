@@ -4,10 +4,6 @@
     padding-top: $mainnavHeight;
 }
 
-.removepadding{
-    padding-left: 0 !important;
-}
-
 @media screen and (max-width: 330px){
     .stream-title{
         font-weight: bold;
@@ -15,7 +11,15 @@
         padding-left: 20px;
     }
     .choose-menu-main {
-        display: none;
+        padding-left: 0 !important;
+        position: absolute;
+        top: 125px;
+        left: 20px;
+        background-color: white;
+        border-color: #eee;
+        border-style: solid;
+        border-width: 1px;
+        z-index: 1;
     }
     .remove-horizontal-padding {
         padding: 0;
@@ -23,6 +27,9 @@
     .stream-container{
         padding-top: $mainnavHeight;
         padding-bottom: $mainnavHeight;
+    }
+    .hideMenu {
+        display: none;
     }
 }
 
@@ -34,7 +41,15 @@
         padding-left: 20px;
     }
     .choose-menu-main {
-        display: none;
+        padding-left: 0 !important;
+        position: absolute;
+        top: 125px;
+        left: 20px;
+        background-color: white;
+        border-color: #eee;
+        border-style: solid;
+        border-width: 1px;
+        z-index: 1;
     }
     .remove-horizontal-padding {
         padding: 0;
@@ -42,6 +57,9 @@
     .stream-container{
         padding-top: $mainnavHeight;
         padding-bottom: $mainnavHeight;
+    }
+    .hideMenu {
+        display: none;
     }
 }
 
@@ -51,34 +69,19 @@
         font-size: 28px;
         padding-left: 20px;
     }
-    .arrow-menu-display {
-        display: none;
-    }
     .arrow-menu-arrow {
         display: none;
     }
+    .choose-menu-main {
+        padding-left: 0 !important;
+        padding-top: 15px;
+    }
 }
-.arrow-menu-display {
-
-    cursor: pointer;
-}
-
 
 .arrow-menu-arrow {
     font-size: 1.5rem;
     color: gray;
     cursor: pointer;
-}
-
-.mobile-menu {
-    position: absolute;
-    top: 125px;
-    left: 20px;
-    background-color: white;
-    border-color: #eee;
-    border-style: solid;
-    border-width: 1px;
-    z-index: 1;
 }
 
 .stream-emptytxt{
