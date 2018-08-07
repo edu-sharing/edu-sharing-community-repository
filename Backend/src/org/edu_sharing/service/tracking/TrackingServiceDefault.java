@@ -1,5 +1,6 @@
 package org.edu_sharing.service.tracking;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -35,7 +36,12 @@ public class TrackingServiceDefault implements TrackingService{
             value=0;
 
         value++;
-        nodeService.setProperty(nodeRef,QName.createQName(EVENT_PROPERTY_MAPPING.get(type)),value);
+
+        Integer finalValue = value;
+        AuthenticationUtil.runAsSystem(()->{
+            nodeService.setProperty(nodeRef, QName.createQName(EVENT_PROPERTY_MAPPING.get(type)), finalValue);
+            return null;
+        });
         return true;
     }
 }
