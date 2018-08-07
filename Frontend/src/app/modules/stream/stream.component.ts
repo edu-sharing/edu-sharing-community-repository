@@ -40,6 +40,7 @@ import {CordovaService} from '../../common/services/cordova.service';
 import 'rxjs/add/operator/pairwise';
 import { Subscription } from 'rxjs/Subscription';
 import { RoutesRecognized } from '@angular/router';
+import * as moment from 'moment';
 
 
 @Component({
@@ -53,25 +54,7 @@ import { RoutesRecognized } from '@angular/router';
 
 
 export class StreamComponent {
-  today() {
-      var d = new Date();
-      var weekday = d.getDay();
-      var dd = d.getDate(); 
-      var mm = d.getMonth()+1; //January is 0!
-      var yyyy = String(d.getFullYear());
-      var outstring = '';
-      if (weekday == 0) outstring += 'Sonntag, der ';
-      if (weekday == 1) outstring += 'Montag, der ';
-      if (weekday == 2) outstring += 'Dienstag, der ';
-      if (weekday == 3) outstring += 'Mittwoch, der ';
-      if (weekday == 4) outstring += 'Donnerstag, der ';
-      if (weekday == 5) outstring += 'Freitag, der ';
-      if (weekday == 6) outstring += 'Samstag, der ';
-      if(dd<10) {outstring += '0'+String(dd);} else {outstring += String(dd);}
-      outstring += '. ';
-      if(mm<10) {outstring += '0'+String(mm);} else {outstring +=  String(mm);}
-      return outstring + '. ' + String(yyyy);
-  }
+
   connectorList: ConnectorList;
   createConnectorName: string;
   createConnectorType: Connector;
@@ -92,6 +75,7 @@ export class StreamComponent {
   allImagesLoaded = false;
   shouldOpen = false;
   routerSubscription: Subscription;
+  dateToDisplay: string;
 
   moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','arrow_upward',(node: Node)=>{
     this.updateStream(node, STREAM_STATUS.PROGRESS).subscribe( (data) => {
@@ -139,6 +123,7 @@ export class StreamComponent {
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
         this.connector.isLoggedIn().subscribe(data => {
             console.log(data);
+            this.dateToDisplay = moment().locale(translate.currentLang).format('dddd, MMMM Do YYYY');
             this.createAllowed=data.statusCode==RestConstants.STATUS_CODE_OK;
         });
           this.connectors.list().subscribe(list=>{
