@@ -2,10 +2,11 @@ import {Injectable} from "@angular/core";
 import {RestConstants} from "../rest-constants";
 import {Observable} from "rxjs";
 import {RestConnectorService} from "./rest-connector.service";
-import {IamUsers, IamAuthorities, OrganizationOrganizations, NetworkRepositories, Repository,Node} from "../data-object";
+import {IamUsers, IamAuthorities, OrganizationOrganizations, NetworkRepositories, Repository, Node, Application} from "../data-object";
 import {Response} from "@angular/http";
 import {Helper} from "../../helper";
 import {AbstractRestService} from "./abstract-rest-service";
+import {Service} from "../data-object";
 
 @Injectable()
 export class RestNetworkService extends AbstractRestService{
@@ -62,4 +63,17 @@ export class RestNetworkService extends AbstractRestService{
     }
     return false;
   }
+
+    public addService = (jsondata:string): Observable<any> => {
+        let query=this.connector.createUrl("network/:version/services",null);
+        return this.connector.post(query,jsondata,this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+    }
+
+    public getServices = (): Observable<Service[]> => {
+        let query=this.connector.createUrl("network/:version/services",null);
+        return this.connector.get(query,this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+    }
+
 }
