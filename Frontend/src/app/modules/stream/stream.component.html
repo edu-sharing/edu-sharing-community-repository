@@ -32,16 +32,17 @@
             <span id="stream-title-date" class="stream-title-date col s12 m12">
                 {{dateToDisplay}}
             </span>
-            
+
         </div>
-        <div class="stream-emptytxt" *ngIf="!allImagesLoaded">
+        <div *ngIf="streams.length === 0 && imagesToLoad !== 0"><spinner></spinner></div>
+        <!--<div class="stream-emptytxt" *ngIf="!allImagesLoaded">
                 <div *ngIf="imagesToLoad !== 0"><spinner></spinner></div>
-        </div>
+        </div>-->
         <div class="stream-emptytxt" *ngIf="streams.length === 0">
             <div *ngIf="imagesToLoad === 0">{{'STREAM.OBJECT.NOMATERIALS' | translate }} </div>    
         </div>    
        
-        <div *ngFor="let strm of streams" [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'" [hidden]="!allImagesLoaded">
+        <div *ngFor="let strm of streams" [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'" >
            <div class="row row-nomargin" >
                 <div class="stream-box-title col s10" (click)="onStreamObjectClick(strm)"> <span *ngIf="strm.properties['add_to_stream_title']">{{ strm.properties['add_to_stream_title'] }}</span> <span *ngIf="!strm.properties['add_to_stream_title']">{{ 'STREAM.OBJECT.NOTITLE' | translate }}</span> </div>
                 <div class="stream-box-main-vert col s2">
