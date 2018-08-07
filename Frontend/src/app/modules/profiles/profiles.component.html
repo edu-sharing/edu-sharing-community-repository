@@ -37,6 +37,9 @@
         <input type="email" [(ngModel)]="userEdit.profile.email" placeholder="{{'USER.email' | translate}}">
       </div>
     </div>
+    <div class="save">
+      <div *ngIf="edit" class="btn-flat waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
+    </div>
   </div>
   <div class="statsBackground">
     <div class="stats">
@@ -98,8 +101,5 @@
       <input type="password" id="passwordRepeat" name="passwordRepeat" [(ngModel)]="passwordRepeat" required="true">
     </div>
   </div>
-  </div>
-  <div class="save">
-    <div *ngIf="edit" class="btn waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
   </div>
 </div>

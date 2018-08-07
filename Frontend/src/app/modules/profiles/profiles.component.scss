@@ -137,7 +137,9 @@ $path:'../../../assets/images/';
   }
   .save{
     width:100%;
-    padding-right: 20px;
+    .btn-flat:hover{
+      background-color: #eee;
+    }
     div {
       float: right;
     }
