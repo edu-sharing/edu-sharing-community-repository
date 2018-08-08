@@ -239,6 +239,8 @@ public class CCConstants {
 
 	public final static String SYS_PROP_NODE_UID = "{http://www.alfresco.org/model/system/1.0}node-uuid";
 
+	public final static String SYS_PROP_NODE_DBID = "{http://www.alfresco.org/model/system/1.0}node-dbid";
+
 	public final static String SYS_PROP_STORE_PROTOCOL = "{http://www.alfresco.org/model/system/1.0}store-protocol";
 
 	public final static String SYS_PROP_STORE_IDENTIFIER = "{http://www.alfresco.org/model/system/1.0}store-identifier";
@@ -1750,8 +1752,10 @@ public class CCConstants {
 
 	public static String EDU_SHARING_PROPERTIES_ENABLE_STATISTICS_API= "enable_statistics_api";
 
+	public static String EDU_SHARING_PROPERTIES_PROPERTY_CORE_DBSCRIPTS = "core_dbscripts";
+
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS = "initial_dbscripts";
-	
+
 	/**
 	 * @return <namespace,localnamespace>
 	 */

@@ -8,11 +8,11 @@ public class TrackingServiceFactory {
 
     public static TrackingService getTrackingService() {
 		try {
-			return (TrackingService) Class.forName(TrackingService.class.getName()+"JSONImpl").newInstance();
+			return (TrackingService) Class.forName(TrackingService.class.getName()+"Custom").newInstance();
 		}catch(Throwable t) {
-		    logger.info("no custom tracking service found, will use default implementation");
+		    logger.info("no class "+TrackingService.class.getName()+"Custom"+" found, will use default implementation for tracking");
 			//throw new RuntimeException(t);
-            return new TrackingServiceDefault();
+            return new TrackingServiceImpl();
 
         }
 	}

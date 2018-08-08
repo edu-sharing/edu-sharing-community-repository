@@ -28,8 +28,6 @@
 package org.edu_sharing.repository.server;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
@@ -61,7 +59,6 @@ import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
-import org.springframework.beans.propertyeditors.URLEditor;
 
 public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 

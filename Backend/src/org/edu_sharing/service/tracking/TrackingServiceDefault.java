@@ -5,15 +5,16 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
-import org.apache.poi.ss.formula.functions.Even;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class TrackingServiceDefault implements TrackingService{
+public abstract class TrackingServiceDefault implements TrackingService{
     private final NodeService nodeService;
     public static Map<EventType,String> EVENT_PROPERTY_MAPPING=new HashMap<>();
     static{
@@ -30,6 +31,11 @@ public class TrackingServiceDefault implements TrackingService{
     }
 
     @Override
+    public boolean trackActivityOnUser(String authorityName, EventType type) {
+        return false;
+    }
+
+    @Override
     public boolean trackActivityOnNode(NodeRef nodeRef, EventType type) {
         Integer value= (Integer) nodeService.getProperty(nodeRef,QName.createQName(EVENT_PROPERTY_MAPPING.get(type)));
         if(value==null)
@@ -43,5 +49,16 @@ public class TrackingServiceDefault implements TrackingService{
             return null;
         });
         return true;
+    }
+
+    /**
+     * remove / annonymize / print the username for tracking
+     * @return
+     */
+    protected String getTrackedUsername(String username) {
+        if(username==null)
+            username=AuthenticationUtil.getFullyAuthenticatedUser();
+        // TODO: Filter property value and change logic accrodingly
+        return null; // do not log anything user specific
     }
 }

@@ -7,6 +7,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
 public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 
@@ -23,7 +25,10 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 				e.printStackTrace();
 			}
 		}
-		session.setAttribute(CCConstants.AUTH_USERNAME, username);
+		if(username!=null && !username.equals(session.getAttribute(CCConstants.AUTH_USERNAME))) {
+            session.setAttribute(CCConstants.AUTH_USERNAME, username);
+            TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,TrackingService.EventType.LOGIN_USER_SESSION);
+        }
 		session.setAttribute(CCConstants.AUTH_TICKET, ticket);
 		session.setAttribute(CCConstants.AUTH_TYPE, authType);
 	}

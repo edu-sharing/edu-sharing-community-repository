@@ -15,6 +15,8 @@ import org.edu_sharing.repository.server.tools.cache.ShibbolethSessionsCache;
 import org.edu_sharing.repository.server.tools.security.AllSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 public class SessionListener implements HttpSessionListener{
@@ -36,7 +38,7 @@ public class SessionListener implements HttpSessionListener{
 	
 	@Override
 	public void sessionDestroyed(HttpSessionEvent event) {
-		
+		trackLogout(event);
 		EditLockServiceFactory.getEditLockService().unlockBySession(event.getSession().getId());
 				
 		//try to clean up Shibboleth Sessions
@@ -76,10 +78,19 @@ public class SessionListener implements HttpSessionListener{
 		
 		logger.debug("jsessionid:"+sessionId+" ticket:"+ticket+" ssoSessionId:"+ssoSessionId);
 		logger.debug("AllSessions:"+AllSessions.size() + " ShibbolethSessions.size():"+ShibbolethSessions.size() + " ShibbolethSessionsCache.size():"+ShibbolethSessionsCache.size());
-		
+
 	}
-	
-	public  void logoutWithoutSecurityContext(final String ticket){
+
+    private void trackLogout(HttpSessionEvent event) {
+        boolean possibleSessionTimeout = (System.currentTimeMillis()-event.getSession().getLastAccessedTime()) >= (event.getSession().getMaxInactiveInterval()*1000);
+        String username = (String) event.getSession().getAttribute(CCConstants.AUTH_USERNAME);
+        if(username!=null){
+            TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,
+                    possibleSessionTimeout ? TrackingService.EventType.LOGOUT_USER_TIMEOUT : TrackingService.EventType.LOGOUT_USER_REGULAR);
+        }
+    }
+
+    public  void logoutWithoutSecurityContext(final String ticket){
 		RunAsWork<Void> ra = new RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
