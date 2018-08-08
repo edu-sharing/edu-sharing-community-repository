@@ -10,6 +10,7 @@ import {NgDatepickerModule} from "ng2-datepicker";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 
 
 export const IMPORTS=[
@@ -18,6 +19,7 @@ export const IMPORTS=[
     FormsModule,
     HttpModule,
     HttpClientModule,
+    LazyLoadImageModule,
     NgDatepickerModule,
     TranslateModule.forRoot({
         loader:{

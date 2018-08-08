@@ -185,6 +185,17 @@
     cursor: pointer;
     line-height: 0;
     padding-top: 67%;
+    background-size: cover;
+}
+
+.stream-box-image::before{
+    display: block;
+    position: relative;
+    background-image: linear-gradient(to bottom, transparent 70%, black 115%);
+    margin-top: -150px;
+    height: 150px;
+    width: 100%;
+    content: '';
 }
 
 .mask1 {
