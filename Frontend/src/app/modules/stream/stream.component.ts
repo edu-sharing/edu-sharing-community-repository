@@ -71,8 +71,6 @@ export class StreamComponent {
   actionOptions:OptionItem[]=[];
   pageOffset: number;
   imagesToLoad = -1;
-  imagesLoaded = 0;
-  allImagesLoaded = false;
   shouldOpen = false;
   routerSubscription: Subscription;
   dateToDisplay: string;
@@ -202,24 +200,16 @@ export class StreamComponent {
     this.collectionOption.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
   }
 
-  finishedLoad() {
-    this.imagesLoaded++;
-    console.log("to load: ", this.imagesToLoad);
-    console.log("images loaded", this.imagesLoaded);
-    if (this.imagesLoaded === this.imagesToLoad) {
-      this.allImagesLoaded = true;
-      this.scrollToDown();
-    }
-  }
-
   scrollToDown() {
     console.log(this.getCookie("jumpToScrollPosition"));
     let pos = Number(this.getCookie("jumpToScrollPosition"));
     let whichScroll = this.getCookie("scroll");
     console.log("which: ", whichScroll);
     if (whichScroll !== "noScroll"){
-      console.log("scroll to: ",pos);
-      window.scrollTo(0,pos);
+      setTimeout(function() {
+        console.log("scroll to: ",pos);
+        window.scrollTo(0,pos);
+      }, 2900);
     }
     document.cookie = "scroll="+"noScroll";
   }
@@ -242,7 +232,6 @@ export class StreamComponent {
 
   menuOptions(option: any) {
     this.menuOption = option;
-    this.allImagesLoaded = false;
     this.imagesToLoad = -1;
     if (option === 'new') {
       this.streams = [];
@@ -262,9 +251,6 @@ export class StreamComponent {
   }
 
   updateDataFromJSON(streamStatus: any) {
-    this.imagesLoaded = 0;
-    //this.imagesLoaded = this.streams.length;
-    console.log("imageLoaded: ",this.imagesLoaded);
     if (streamStatus == STREAM_STATUS.OPEN) {
       let openStreams: any[];
       let progressStreams: any[];
@@ -276,6 +262,7 @@ export class StreamComponent {
           this.streams = progressStreams.concat(openStreams);
           console.log("objs: ",this.streams);
           this.imagesToLoad = this.streams.length;
+          this.scrollToDown();
         });
       }, error => console.log(error));
     }
@@ -283,13 +270,10 @@ export class StreamComponent {
       this.getSimpleJSON(streamStatus).subscribe(data => {
         this.streams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
         this.imagesToLoad = this.streams.length;
+        this.scrollToDown();
       }, error => console.log(error));
     }
 
-  }
-
-  refresh(): void {
-    window.location.reload();
   }
 
   onStreamObjectClick(node: any) {
