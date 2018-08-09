@@ -5,12 +5,19 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.UrlTool;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.service.network.model.Service;
 import org.edu_sharing.service.network.model.StoredService;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +37,7 @@ public class NetworkServiceImpl implements NetworkService {
                 List<ChildAssociationRef> services = nodeService.getChildrenChildAssociationRef(
                         new UserEnvironmentTool().getEdu_SharingServiceFolder());
                 Collection<StoredService> result=new ArrayList<>();
+                result.add(getOwnService());
                 for(ChildAssociationRef service : services){
                     HashMap<String, Object> props = nodeService.getProperties(service.getChildRef().getStoreRef().getProtocol(), service.getChildRef().getStoreRef().getIdentifier(), service.getChildRef().getId());
                     String data= (String) props.get(CCConstants.CCM_PROP_SERVICE_NODE_DATA);
@@ -43,6 +51,44 @@ public class NetworkServiceImpl implements NetworkService {
                 throw new RuntimeException(t);
             }
         });
+    }
+
+    @Override
+    public StoredService getOwnService() {
+        try{
+        Service service = new Service();
+        ClassLoader classLoader = Thread.currentThread()
+                .getContextClassLoader();
+        URL url = classLoader.getResource("service-description.json");
+
+        service = new Gson().fromJson(new FileReader(Paths.get(url.toURI()).toFile()),service.getClass());
+
+        service.setUrl(URLTool.getBaseUrl());
+        service.setIcon(URLTool.getNgAssetsUrl()+"images/app-icon.svg");
+        service.setLogo(URLTool.getNgAssetsUrl()+"images/logo.svg");
+
+        Collection<Service.Interface> interfaces=service.getInterfaces();
+        Service.Interface api=new Service.Interface();
+        api.setFormat(Service.Interface.Format.Json);
+        api.setType(Service.Interface.Type.Generic_Api);
+        api.setUrl(URLTool.getRestServiceUrl());
+        interfaces.add(api);
+        Service.Interface statistics=new Service.Interface();
+        statistics.setFormat(Service.Interface.Format.Json);
+        statistics.setType(Service.Interface.Type.Statistics);
+        statistics.setUrl(URLTool.getRestServiceUrl()+"statistic/v1/public");
+        interfaces.add(statistics);
+        Service.Interface sitemap=new Service.Interface();
+        sitemap.setFormat(Service.Interface.Format.XML);
+        sitemap.setType(Service.Interface.Type.Sitemap);
+        sitemap.setUrl(URLTool.getEduservletUrl()+"sitemap");
+        interfaces.add(sitemap);
+        service.setInterfaces(interfaces);
+        return new StoredService(generateId(service),service);
+        }catch(Throwable t){
+            t.printStackTrace();
+            return null;
+        }
     }
 
     @Override

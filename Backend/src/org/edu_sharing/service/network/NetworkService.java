@@ -9,6 +9,8 @@ public interface NetworkService {
 
 	Collection<StoredService> getServices() throws Throwable;
 
+    StoredService getOwnService();
+
     StoredService addService(Service service) throws Throwable;
 
     StoredService updateService(String id, Service service) throws Throwable;

@@ -164,6 +164,9 @@ public class URLTool{
 	public static String getNgComponentsUrl(){
 		return getBaseUrl()+"/components/";
 	}
+    public static String getNgAssetsUrl(){
+        return getBaseUrl()+"/assets/";
+    }
 	public static String getUploadFormLink(String repositoryId, String nodeId){
 		String result = getBaseUrl(repositoryId);
 		
@@ -338,4 +341,12 @@ public class URLTool{
 		
 		return url;
 	}
+
+    public static String getRestServiceUrl() {
+        return getBaseUrl()+"/rest/";
+    }
+
+    public static String getEduservletUrl() {
+        return getBaseUrl()+"/eduservlet/";
+    }
 }

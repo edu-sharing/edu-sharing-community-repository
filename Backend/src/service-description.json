@@ -1,0 +1,31 @@
+{
+  "name":"",
+  "primaryLanguage":"de",
+  "description":[
+    {
+      "language":"de",
+      "value":""
+    }
+  ],
+  "type":"Repository",
+  "audience":[
+    {
+      "id":"teacher"
+    }
+  ],
+  "public":false,
+  "coverage":"Organization",
+  "creationdate":0,
+  "about":[],
+  "provider":{
+    "name":"",
+    "country":"DE",
+    "location":{
+      "longitude":0,
+      "latitude":0
+    },
+    "url":"",
+    "email":"",
+    "admin":""
+  }
+}

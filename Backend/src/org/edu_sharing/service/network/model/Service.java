@@ -2,6 +2,7 @@ package org.edu_sharing.service.network.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -10,12 +11,11 @@ public class Service {
     private String url,icon,logo,country,primaryLanguage,type;
     private Collection<Description> description;
     private Collection<Audience> audience;
-    private Collection<String> scope;
     private boolean isPublic;
     private Coverage coverage;
     private Provider provider;
     private long creationdate;
-    private Collection<Interface> interfaces;
+    private Collection<Interface> interfaces=new ArrayList<>();
 
     public String getName() {
         return name;
@@ -95,14 +95,6 @@ public class Service {
 
     public void setAudience(Collection<Audience> audience) {
         this.audience = audience;
-    }
-
-    public Collection<String> getScope() {
-        return scope;
-    }
-
-    public void setScope(Collection<String> scope) {
-        this.scope = scope;
     }
 
     public boolean isPublic() {
@@ -288,12 +280,12 @@ public class Service {
             this.format = format;
         }
 
-        enum Format {
+        public enum Format {
             Json,
             XML,
             Text
         }
-        enum Type {
+        public enum Type {
             Search,
             Sitemap,
             Statistics,
@@ -301,7 +293,7 @@ public class Service {
             Generic_Api,
         }
     }
-    enum Coverage{
+    public enum Coverage{
         Organization,
         City,
         State,
