@@ -158,7 +158,18 @@ public class Service {
     }
 
     public static class Provider {
+
         private String name,country,url,email,admin;
+
+        private Location location;
+
+        public Location getLocation() {
+            return location;
+        }
+
+        public void setLocation(Location location) {
+            this.location = location;
+        }
 
         public String getName() {
             return name;
@@ -198,6 +209,26 @@ public class Service {
 
         public void setAdmin(String admin) {
             this.admin = admin;
+        }
+
+        private static class Location {
+            private String longitude,latitude;
+
+            public String getLongitude() {
+                return longitude;
+            }
+
+            public void setLongitude(String longitude) {
+                this.longitude = longitude;
+            }
+
+            public String getLatitude() {
+                return latitude;
+            }
+
+            public void setLatitude(String latitude) {
+                this.latitude = latitude;
+            }
         }
     }
     public static class Audience {
