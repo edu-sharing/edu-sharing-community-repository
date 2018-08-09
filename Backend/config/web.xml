@@ -388,13 +388,7 @@
         <servlet-class>
             org.edu_sharing.repository.server.SuggestServiceImpl
         </servlet-class> 
-    </servlet> 
-    <servlet>
-        <servlet-name>CollectionService</servlet-name>
-        <servlet-class>
-            org.edu_sharing.repository.server.CollectionServiceImpl
-        </servlet-class> 
-    </servlet> 
+    </servlet>
     <servlet>
         <servlet-name>CCCreate</servlet-name>
         <servlet-class>
@@ -595,10 +589,6 @@
     <servlet-mapping> 
         <servlet-name>SuggestService</servlet-name>
         <url-pattern>/eduservlet/suggestservice</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-    	<servlet-name>CollectionService</servlet-name>
-    	<url-pattern>/eduservlet/collectionservice</url-pattern>
     </servlet-mapping>
     
     <servlet-mapping> 

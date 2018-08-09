@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.alfresco.repo.domain.node.NodeEntity;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -36,30 +37,13 @@ import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
+import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeShare;
 import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
 import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
-import org.edu_sharing.restservices.shared.ACE;
-import org.edu_sharing.restservices.shared.ACL;
-import org.edu_sharing.restservices.shared.Authority;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Group;
-import org.edu_sharing.restservices.shared.GroupProfile;
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeAccess;
-import org.edu_sharing.restservices.shared.NodePermissions;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeRemote;
-import org.edu_sharing.restservices.shared.NodeSearch;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
-import org.edu_sharing.restservices.shared.NodeVersion;
-import org.edu_sharing.restservices.shared.NodeVersionRef;
-import org.edu_sharing.restservices.shared.Person;
-import org.edu_sharing.restservices.shared.Preview;
-import org.edu_sharing.restservices.shared.UserProfile;
-import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -401,8 +385,24 @@ public class NodeDao {
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
-	
-	private String renameNode(String oldName,int number){
+
+    public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
+        NodeEntries result=new NodeEntries();
+        List<Node> nodes=new ArrayList<>();
+        for(int i=skipCount;i<Math.min(children.size(),skipCount+maxItems);i++){
+            nodes.add(NodeDao.getNode(repoDao,children.get(i).getId(),propFilter).asNode());
+        }
+
+        Pagination pagination=new Pagination();
+        pagination.setFrom(skipCount);
+        pagination.setCount(nodes.size());
+        pagination.setTotal(children.size());
+        result.setPagination(pagination);
+        result.setNodes(nodes);
+        return result;
+    }
+
+    private String renameNode(String oldName,int number){
 		String[] split=oldName.split("\\.");
 		int i=split.length-2;
 		i=Math.max(0, i);
@@ -492,9 +492,9 @@ public class NodeDao {
 		}
 	}
 	public List<NodeRef> getChildren() throws DAOException {
-		return getChildren(null);
+		return getChildren(null,null,new SortDefinition());
 	}
-	public List<NodeRef> getChildren(String assocName) throws DAOException {
+	public List<NodeRef> getChildren(String assocName, List<String> filter, SortDefinition sortDefinition) throws DAOException {
 
 		try {
 			List<NodeRef> result = new ArrayList<NodeRef>();
@@ -503,7 +503,7 @@ public class NodeDao {
 			if(assocName!=null && !assocName.isEmpty()){
 				assocName=CCConstants.getValidGlobalName(assocName);
 			}
-			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRefAssoc(getId(),assocName)) {
+			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRefAssoc(getId(),assocName,filter,sortDefinition)) {
 	
 				NodeRef ref = new NodeRef();
 				ref.setRepo(this.repoDao.getId());

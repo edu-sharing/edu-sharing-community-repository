@@ -9,6 +9,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface NodeService {
 
@@ -42,10 +43,10 @@ public interface NodeService {
 	public String getOrCreateUserSavedSearch();
 
 	default List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
-		return getChildrenChildAssociationRefAssoc(parentID,null);
+		return getChildrenChildAssociationRefAssoc(parentID,null, null, new SortDefinition());
 	}
 
-    public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName);
+    public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
 
 	public void createVersion(String nodeId, HashMap _properties) throws Exception;
 	

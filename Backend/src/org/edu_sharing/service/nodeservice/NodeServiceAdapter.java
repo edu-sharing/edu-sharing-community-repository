@@ -13,6 +13,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 public class NodeServiceAdapter implements NodeService {
 	
@@ -262,7 +263,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName) {
+	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition) {
 		return null;
 	}
 	
