@@ -12,8 +12,10 @@ public class TrackingDAO {
     public static List<TrackingNode> getNodeStatistics(Date fromDate, Date toDate) throws DAOException {
         List<StatisticEntryNode> tracks = TrackingServiceFactory.getTrackingService().getNodeStatisics(fromDate,toDate);
         List<TrackingNode> result = new ArrayList<>();
-        for(StatisticEntryNode track : tracks){
-            result.add(new TrackingNode(NodeDao.getNode(RepositoryDao.getHomeRepository(),track.getNode()).asNode(),track.getCounts()));
+        if(tracks!=null) {
+            for (StatisticEntryNode track : tracks) {
+                result.add(new TrackingNode(NodeDao.getNode(RepositoryDao.getHomeRepository(), track.getNode()).asNode(), track.getCounts()));
+            }
         }
         return result;
     }
