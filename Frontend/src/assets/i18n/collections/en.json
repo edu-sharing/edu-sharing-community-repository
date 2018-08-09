@@ -87,7 +87,7 @@
 
   "collections_content" : "Content",
   "collections_noContentAvailable" : "No content available yet.",
-  "collections_howToAddContent" : "Use the search engine to find contents for your collection. Just click on it and choose the option 'Add'.",
+  "collections_howToAddContent" : "Just click on the \"ADD MATERIAL\" button and use the search engine to find contents for your collection.",
 
   "collectionNew_preview" : "preview of the collection",
   "collectionNew_setColor" : "color of the collection:",

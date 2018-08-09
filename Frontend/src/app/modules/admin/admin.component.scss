@@ -206,7 +206,7 @@
   }
 }
 .toolkit{
-  max-width: 900px;
+  max-width: 1200px;
   a.btn{
     float:right;
   }
@@ -217,12 +217,13 @@
     min-height: 80px;
   }
   .catalina{
+    margin-bottom: 40px;
     label{
       position: relative;
       top:10px;
     }
     textarea {
-      min-height: 200px;
+      min-height: 600px;
     }
     .btn-flat{
       margin-bottom: 10px;

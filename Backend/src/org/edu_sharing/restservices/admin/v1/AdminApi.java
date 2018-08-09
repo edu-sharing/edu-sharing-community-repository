@@ -1,13 +1,8 @@
 package org.edu_sharing.restservices.admin.v1;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -30,12 +25,7 @@ import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.CollectionDao;
-import org.edu_sharing.restservices.DAOException;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.admin.v1.model.AdminStatistics;
 import org.edu_sharing.restservices.admin.v1.model.CollectionsResult;
 import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
@@ -50,6 +40,7 @@ import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.SearchResult;
+import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
@@ -58,6 +49,9 @@ import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.statistic.StatisticServiceFactory;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
@@ -200,6 +194,31 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+    @GET
+    @Path("/statistics/nodes")
+
+    @ApiOperation(value = "get statistics for node actions")
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = TrackingNode[].class),
+            @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+            @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+            @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+            @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+    public Response getStatisticsNode(@Context HttpServletRequest req,
+    			@ApiParam(value = "date range from", required = false) @QueryParam("dateFrom") Long dateFrom,
+    			@ApiParam(value = "date range to", required = false) @QueryParam("dateTo") Long dateTo
+              ) {
+        try {
+            // load instance to validate session
+            AdminService service = AdminServiceFactory.getInstance();
+            List<TrackingNode> tracks=TrackingDAO.getNodeStatistics(new Date(dateFrom),new Date(dateTo));
+            return Response.ok().entity(tracks).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
 
 	@GET
 	@Path("/applications/{xml}")

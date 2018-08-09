@@ -1480,7 +1480,7 @@ public class MCAlfrescoServiceImpl extends RemoteServiceServlet implements MCAlf
 	public void setPermissions(String repositoryid, String nodeId, ACE[] aces) throws CCException {
 		try{
 			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(repositoryid);
-			permissionService.setPermissions(nodeId, aces);
+			permissionService.setPermissions(nodeId, Arrays.asList(aces));
 			
 			HashMap<String,String> authenticationInfo = null;
 			try{

@@ -241,6 +241,8 @@ public class CCConstants {
 
 	public final static String SYS_PROP_NODE_UID = "{http://www.alfresco.org/model/system/1.0}node-uuid";
 
+	public final static String SYS_PROP_NODE_DBID = "{http://www.alfresco.org/model/system/1.0}node-dbid";
+
 	public final static String SYS_PROP_STORE_PROTOCOL = "{http://www.alfresco.org/model/system/1.0}store-protocol";
 
 	public final static String SYS_PROP_STORE_IDENTIFIER = "{http://www.alfresco.org/model/system/1.0}store-identifier";
@@ -296,7 +298,7 @@ public class CCConstants {
 	public final static String CM_PROP_PERSON_ESORIGINALUID = "{http://www.alfresco.org/model/content/1.0}esoriginaluid";
 	
 	public final static String CM_PROP_PERSON_ESPERSONSTATUS = "{http://www.alfresco.org/model/content/1.0}espersonstatus";
-	
+
 	public final static String CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION = "{http://www.alfresco.org/model/content/1.0}eduSchoolPrimaryAffiliation";
 
 	public final static String CCM_PROP_PERSON_PREFERENCES = "{http://www.campuscontent.de/model/1.0}userPreferences";
@@ -378,7 +380,7 @@ public class CCConstants {
 	public final static String CCM_ASPECT_GROUPEXTENSION = "{http://www.campuscontent.de/model/1.0}groupExtension";
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPTYPE = "{http://www.campuscontent.de/model/1.0}groupType";
-	
+
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPSOURCE = "{http://www.campuscontent.de/model/1.0}groupSource";
 
 	public final static String CCM_PROP_AUTHOR_FREETEXT = "{http://www.campuscontent.de/model/1.0}author_freetext";
@@ -403,6 +405,10 @@ public class CCConstants {
 	public static final String CCM_PROP_WF_RECEIVER = "{http://www.campuscontent.de/model/1.0}wf_receiver";
 
 	public static final String CCM_PROP_WF_STATUS = "{http://www.campuscontent.de/model/1.0}wf_status";
+
+	public static final String CCM_PROP_TRACKING_DOWNLOADS = "{http://www.campuscontent.de/model/1.0}tracking_downloads";
+
+	public static final String CCM_PROP_TRACKING_VIEWS = "{http://www.campuscontent.de/model/1.0}tracking_views";
 
 
 	public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
@@ -653,11 +659,11 @@ public class CCConstants {
 	 * published
 	 */
 	public final static String CCM_ASPECT_PUBLISHED = "{http://www.campuscontent.de/model/1.0}published";
-	
+
 	public final static String CCM_PROP_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";
-	
-	public final static String CCM_PROP_PUBLISHED_HANDLE_ID = "{http://www.campuscontent.de/model/1.0}published_handle_id";	
-	
+
+	public final static String CCM_PROP_PUBLISHED_HANDLE_ID = "{http://www.campuscontent.de/model/1.0}published_handle_id";
+
 	/**
 	 * share props
 	 */
@@ -726,7 +732,7 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING = "TOOLPERMISSION_COLLECTION_PINNING";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_CONFIDENTAL = "TOOLPERMISSION_CONFIDENTAL";
-	
+
 	public final static String CCM_VALUE_TOOLPERMISSION_HANDLESERVICE = "TOOLPERMISSION_HANDLESERVICE";
 
 	/**
@@ -906,7 +912,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPLICATIONSOURCEID = "{http://www.campuscontent.de/model/1.0}replicationsourceid";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestamp";
 	public final static String CCM_PROP_IO_REPLICATION_MODIFIED = "{http://www.campuscontent.de/model/1.0}replicationmodified";
-	
+
 	//replicationsourcetimestampFORMATED is an generated prop, to keep the original
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMPFORMATED = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestampFORMATED";
 
@@ -1754,9 +1760,13 @@ public class CCConstants {
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACE_I18N_PREFIX = "taxonid_valuespace_i18n_prefix";
 
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE = "resolve_website_title";
-	
+
+	public static String EDU_SHARING_PROPERTIES_ENABLE_STATISTICS_API= "enable_statistics_api";
+
+	public static String EDU_SHARING_PROPERTIES_PROPERTY_CORE_DBSCRIPTS = "core_dbscripts";
+
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS = "initial_dbscripts";
-	
+
 	/**
 	 * @return <namespace,localnamespace>
 	 */

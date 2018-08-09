@@ -1,9 +1,6 @@
 package org.edu_sharing.service.statistic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -66,8 +63,6 @@ public class StatisticServiceImpl implements StatisticService {
 
 	@Override
 	public Statistics get(String context, List<String> properties, Filter filter) throws Throwable {
-
-		
 			String query = "";
 
 			if (context != null) {
@@ -121,7 +116,7 @@ public class StatisticServiceImpl implements StatisticService {
 	}
 	@Override
 	public List<Map<String, Integer>> countFacettesForQuery(String mdsId, String queryId, String type, String customLucene,
-			List<String> facettes) throws Throwable {
+			Collection<String> facettes) throws Throwable {
 		String lucene=getLucene(mdsId,queryId,type,customLucene);
 		SearchParameters searchParameters = new ESSearchParameters();
 		for(String field : facettes) {

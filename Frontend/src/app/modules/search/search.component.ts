@@ -604,12 +604,12 @@ export class SearchComponent {
     if (this.addToCollection) {
       if (fromList || nodes && nodes.length) {
         let addTo = new OptionItem(fromList ? "SEARCH.ADD_TO_COLLECTION_SHORT" : "SEARCH.ADD_TO_COLLECTION", "layers", (node: Node) => {
-          this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(this.selection,node), () => {
+          this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(nodes,node), () => {
             this.switchToCollections(this.addToCollection.ref.id);
           });
         });
-        addTo.isEnabled = NodeHelper.getNodesRight(this.selection, RestConstants.ACCESS_CC_PUBLISH);
-        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH)};
+        addTo.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH) && RestNetworkService.allFromHomeRepo(nodes, this.repositories);
+        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH) && RestNetworkService.isFromHomeRepo(node,this.repositories)};
 
         options.push(addTo);
       }
@@ -1001,7 +1001,8 @@ export class SearchComponent {
   private invalidateMds() {
     if(this.currentRepository==RestConstants.ALL){
       console.log("all repositories, invalidate manually");
-      this.onMdsReady();
+        this.reloadMds=new Boolean(false);
+        this.onMdsReady();
     }
     else{
       console.log("invalidate mds");
@@ -1097,22 +1098,22 @@ export class SearchComponent {
       });
   }
 
-    private updateCurrentRepositoryId() {
-        this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
-        if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
-            this.currentRepository=this.currentRepositoryObject.id;
-        }
-    }
+  private updateCurrentRepositoryId() {
+      this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
+      if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
+          this.currentRepository=this.currentRepositoryObject.id;
+      }
+  }
 
-    private getEnabledRepositories() {
-        if(this.repositoryIds && this.repositoryIds.length){
-            let result=[];
-            for(let repo of this.repositoryIds){
-                console.log(repo);
-                if(repo.enabled) result.push(repo.id);
-            }
-            return result;
-        }
-        return null;
-    }
+  private getEnabledRepositories() {
+      if(this.repositoryIds && this.repositoryIds.length){
+          let result=[];
+          for(let repo of this.repositoryIds){
+              console.log(repo);
+              if(repo.enabled) result.push(repo.id);
+          }
+          return result;
+      }
+      return null;
+  }
 }

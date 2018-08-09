@@ -924,7 +924,7 @@ export class CordovaService {
    }
 
    openInAppBrowser(url:string){
-       let win:any=window.open(url,"_blank","location=no");
+       let win:any=window.open(url,"_blank","location=no,zoom=no");
        win.addEventListener( "loadstop", ()=> {
            // register iframe handling
            win.executeScript({code:`

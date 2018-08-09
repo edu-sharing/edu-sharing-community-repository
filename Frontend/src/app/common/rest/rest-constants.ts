@@ -97,6 +97,8 @@ export class RestConstants {
   public static CCM_PROP_LINKTYPE = "ccm:linktype";
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
   public static CCM_PROP_AUTHORITY_GROUPTYPE="ccm:groupType";
+  public static CCM_PROP_TRACKING_VIEWS="ccm:tracking_views";
+  public static CCM_PROP_TRACKING_DOWNLOADS="ccm:tracking_downloads";
   public static CCM_PROP_CHILDOBJECT_ORDER = "ccm:childobject_order";
   public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
   public static CCM_PROP_TOOL_INSTANCE_KEY="ccm:tool_instance_key";
@@ -172,6 +174,9 @@ export class RestConstants {
   public static LUCENE_SCORE = "score";
 
   public static COMMENT_MAIN_FILE_UPLOAD="MAIN_FILE_UPLOAD";
+  public static COMMENT_METADATA_UPDATE="METADATA_UPDATE";
+  public static COMMENT_CONTENT_UPDATE="CONTENT_UPDATE";
+  public static COMMENT_LICENSE_UPDATE="LICENSE_UPDATE";
   public static COMMENT_EDITOR_UPLOAD="EDITOR_UPLOAD";
   public static COMMENT_NODE_PUBLISHED="NODE_PUBLISHED";
   public static ACCESS_ADD_CHILDREN="AddChildren";
