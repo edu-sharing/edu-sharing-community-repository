@@ -47,10 +47,7 @@ import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
-import org.edu_sharing.service.nodeservice.AssocInfo;
-import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -1364,49 +1361,44 @@ public class NodeDao {
 		}
 	}
 
-	public static List<NodeRef> getFilesSharedByMe(RepositoryDao repoDao) throws DAOException {
+	public static List<NodeRef> getFilesSharedByMe(RepositoryDao repoDao,List<String> filter,SortDefinition sortDefinition) throws DAOException {
 		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 		try {
 			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedByMe();
-			List<NodeRef> result=new ArrayList(refs.size());
-			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
-				result.add(new NodeRef(repoDao.getId(),ref.getId()));
-			}
-			return result;
+            refs=sortAlfrescoRefs(refs,filter,sortDefinition);
+            return convertAlfrescoNodeRef(repoDao,refs);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
-	
-	/**
+
+    public static List<org.alfresco.service.cmr.repository.NodeRef> sortAlfrescoRefs(List<org.alfresco.service.cmr.repository.NodeRef> refs, List<String> filter, SortDefinition sortDefinition) {
+        return ((NodeServiceImpl)NodeServiceFactory.getLocalService()).sortNodeRefList(refs,filter,sortDefinition);
+    }
+
+    /**
 	 * All files the current user is a receiver of the workflow
 	 * @param repoDao
 	 * @return
 	 * @throws DAOException
 	 */
-	public static List<NodeRef> getWorkflowReceive(RepositoryDao repoDao) throws DAOException {
+	public static List<NodeRef> getWorkflowReceive(RepositoryDao repoDao,List<String> filter, SortDefinition sortDefinition) throws DAOException {
 		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 		try {
 			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getWorkflowReceive(AuthenticationUtil.getFullyAuthenticatedUser());
-			List<NodeRef> result=new ArrayList(refs.size());
-			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
-				result.add(new NodeRef(repoDao.getId(),ref.getId()));
-			}
-			return result;
+			refs=NodeDao.sortAlfrescoRefs(refs,filter,sortDefinition);
+			return convertAlfrescoNodeRef(repoDao,refs);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
 	
-	public static List<NodeRef> getFilesSharedToMe(RepositoryDao repoDao) throws DAOException {
+	public static List<NodeRef> getFilesSharedToMe(RepositoryDao repoDao, List<String> filter, SortDefinition sortDefinition) throws DAOException {
 		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 		try {
 			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedToMe();
-			List<NodeRef> result=new ArrayList(refs.size());
-			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
-				result.add(new NodeRef(repoDao.getId(),ref.getId()));
-			}
-			return result;
+            refs=NodeDao.sortAlfrescoRefs(refs,filter,sortDefinition);
+            return convertAlfrescoNodeRef(repoDao,refs);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
@@ -1471,7 +1463,14 @@ public class NodeDao {
  	public void createVersion(String comment) throws DAOException, Exception {
 		this.changePropertiesWithVersioning(getAllProperties(), comment);
 	}
- 	
+
+    public static List<org.alfresco.service.cmr.repository.NodeRef> convertApiNodeRef(List<NodeRef> refs) {
+        List<org.alfresco.service.cmr.repository.NodeRef> converted=new ArrayList<>(refs.size());
+        for(NodeRef ref : refs){
+            converted.add(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,ref.getId()));
+        }
+        return converted;
+    }
  	public static List<NodeRef> convertAlfrescoNodeRef(RepositoryDao repoDao,List<org.alfresco.service.cmr.repository.NodeRef> refs){
  		List<NodeRef> converted=new ArrayList<>(refs.size());
  		for(org.alfresco.service.cmr.repository.NodeRef ref : refs){

@@ -780,30 +780,24 @@ public class NodeApi  {
             if("-shared_files-".equals(node)){
 		    	User person = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson();
 		    	children = person.getSharedFolders();
-                List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
-                response=createResponseFromNodeList(sorted,skipCount,maxItems);
-	    	}
+		    	List<org.alfresco.service.cmr.repository.NodeRef> converted=NodeDao.convertApiNodeRef(children);
+                children=NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(converted,filter,sortDefinition));
+
+            }
 	    	else if("-my_shared_files-".equals(node)){
-	    		children = NodeDao.getFilesSharedByMe(repoDao);
-                List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
-                response=createResponseFromNodeList(sorted,skipCount,maxItems);
-	    	}
+	    		children = NodeDao.getFilesSharedByMe(repoDao,filter,sortDefinition);
+            }
 	    	else if("-workflow_receive-".equals(node)){
-	    		children = NodeDao.getWorkflowReceive(repoDao);
-                List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
-                response=createResponseFromNodeList(sorted,skipCount,maxItems);
+	    		children = NodeDao.getWorkflowReceive(repoDao,filter,sortDefinition);
 	    	}
 	    	else if("-to_me_shared_files-".equals(node)){
-	    		children = NodeDao.getFilesSharedToMe(repoDao);
-                List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
-                response=createResponseFromNodeList(sorted,skipCount,maxItems);
+	    		children = NodeDao.getFilesSharedToMe(repoDao,filter,sortDefinition);
 	    	}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
 	    		children = nodeDao.getChildren(assocName,filter,sortDefinition);
-                response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount,maxItems);
             }
-
+            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount,maxItems);
 			//List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
 	    	//Collections.sort(children);
 			//NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);

@@ -676,8 +676,119 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);		
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
+    public List<ChildAssociationRef> sortChildNodeRefList(List<ChildAssociationRef> list,List<String> filter, SortDefinition sortDefinition){
+        if(filter!=null && filter.size()>0){
+            List<ChildAssociationRef> filtered = new ArrayList<>();
+            for(ChildAssociationRef node : list){
+                if(!shouldFilter(node.getChildRef(),filter)){
+                    filtered.add(node);
+                }
+            }
+            list=filtered;
+        }
+        HashMap<String,Object> cache=new HashMap();
+        Collections.sort(list, (o1, o2) -> {
+            return sortNodes(cache,o1.getChildRef(),o2.getChildRef(),sortDefinition);
+        });
+        return list;
+    }
+    public List<NodeRef> sortNodeRefList(List<NodeRef> list,List<String> filter, SortDefinition sortDefinition){
+	    // make a copy so we have a modifiable list object
+	    list=new ArrayList<>(list);
+        if(filter!=null && filter.size()>0){
+            List<NodeRef> filtered = new ArrayList<>();
+            for(NodeRef node : list){
+                if(!shouldFilter(node,filter)){
+                    filtered.add(node);
+                }
+            }
+            list=filtered;
+        }
+        HashMap<String,Object> cache=new HashMap();
+        Collections.sort(list, (o1, o2) -> {
+            return sortNodes(cache,o1,o2,sortDefinition);
+        });
+        return list;
+    }
+    private int sortNodes(HashMap<String, Object> cache, NodeRef n1, NodeRef n2, SortDefinition sortDefinition) {
+        String type1=nodeService.getType(n1).toString();
+        String type2=nodeService.getType(n2).toString();
+        if(typeIsDirectory(type1)!=typeIsDirectory(type2)){
+            return typeIsDirectory(type1) ? -1 : 1;
+        }
+        if(!sortDefinition.hasContent())
+            return 0;
+        for(SortDefinition.SortDefinitionEntry entry : sortDefinition.getSortDefinitionEntries()){
+            QName prop = QName.createQName(CCConstants.getValidGlobalName(entry.getProperty()));
+            Object prop1,prop2;
+            String key1=n1.toString()+prop.toString();
+            String key2=n2.toString()+prop.toString();
+            if(cache.containsKey(key1)){
+                prop1=cache.get(key1);
+            }
+            else{
+                prop1 = nodeService.getProperty(n1, prop);
+                cache.put(key1,prop1);
+            }
+            if(cache.containsKey(key2)){
+                prop2=cache.get(key2);
+            }
+            else{
+                prop2 = nodeService.getProperty(n2, prop);
+                cache.put(key2,prop2);
+            }
+            int compare=0;
+            if(prop1==null || prop2==null)
+                continue;
 
-	@Override
+            // some int fields are parsed as string. make sure to compare them correctly
+            // e.g. for collection sorting
+
+            String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
+            if(fieldType.equals(Integer.class.getName())){
+                if(prop1 instanceof String && prop2 instanceof String){
+                    compare=Integer.compare(Integer.parseInt((String)prop1),Integer.parseInt((String)prop2));
+                }
+            }
+
+            if(compare==0) {
+                if (prop1 instanceof String && prop2 instanceof String) {
+                    compare = ((String) prop1).compareToIgnoreCase((String) prop2);
+                } else if (prop1 instanceof Date && prop2 instanceof Date) {
+                    compare = ((Date) prop1).compareTo((Date) prop2);
+                } else if (prop1 instanceof Comparable && prop2 instanceof Comparable) {
+                    compare = ((Comparable) prop1).compareTo((Comparable) prop2);
+                }
+            }
+
+            if(!entry.isAscending())
+                compare*=-1;
+            if(compare!=0)
+                return compare;
+        }
+        return 0;
+    }
+
+    private boolean shouldFilter(NodeRef node, List<String> filter) {
+        boolean shouldFilter = true;
+        for(String f : filter) {
+            boolean isDirectory = typeIsDirectory(nodeService.getType(node).toString());
+            if(f.equals("folders") && isDirectory){
+                shouldFilter=false;
+                break;
+            }
+            if(f.equals("files") && !isDirectory){
+                shouldFilter=false;
+                break;
+            }
+            if(f.startsWith("mime:")){
+                throw new IllegalArgumentException("Filtering by mime: is currently not supported");
+            }
+        }
+        return shouldFilter;
+    }
+
+    @Override
 	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String assocName, List<String> filter, SortDefinition sortDefinition){
 		NodeRef parentNodeRef = getParentRef(parentID);
         List<ChildAssociationRef> result;
@@ -687,72 +798,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		else{
             result=nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
 		}
-        if(filter!=null && filter.size()>0){
-            List<ChildAssociationRef> filtered = new ArrayList<>();
-            for(ChildAssociationRef node : result){
-                boolean add = false;
-                for(String f : filter) {
-                    boolean isDirectory = typeIsDirectory(nodeService.getType(node.getChildRef()).toString());
-                    if(f.equals("folders") && isDirectory){
-                        add=true;
-                        break;
-                    }
-                    if(f.equals("files") && !isDirectory){
-                        add=true;
-                        break;
-                    }
-                    if(f.startsWith("mime:")){
-                        throw new IllegalArgumentException("Filtering by mime: is currently not supported");
-                    }
-                }
-                if(add){
-                    filtered.add(node);
-                }
-            }
-            result=filtered;
-        }
-        if(sortDefinition.hasContent()){
-            Collections.sort(result, (o1, o2) -> {
-                for(SortDefinition.SortDefinitionEntry entry : sortDefinition.getSortDefinitionEntries()){
-                    String type1=nodeService.getType(o1.getChildRef()).toString();
-                    String type2=nodeService.getType(o2.getChildRef()).toString();
-                    if(typeIsDirectory(type1)!=typeIsDirectory(type2)){
-                        return typeIsDirectory(type1) ? -1 : 1;
-                    }
-                    QName prop = QName.createQName(CCConstants.getValidGlobalName(entry.getProperty()));
-                    Object prop1=nodeService.getProperty(o1.getChildRef(),prop);
-                    Object prop2=nodeService.getProperty(o2.getChildRef(),prop);
-                    int compare=0;
-                    if(prop1==null || prop2==null)
-                        continue;
-
-                    // some int fields are parsed as string. make sure to compare them correctly
-                    // e.g. for collection sorting
-                    String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
-                    if(fieldType.equals(Integer.class.getName())){
-                        if(prop1 instanceof String && prop2 instanceof String){
-                            compare=Integer.compare(Integer.parseInt((String)prop1),Integer.parseInt((String)prop2));
-                        }
-                    }
-                    if(compare==0) {
-                        if (prop1 instanceof String && prop2 instanceof String) {
-                            compare = ((String) prop1).compareToIgnoreCase((String) prop2);
-                        } else if (prop1 instanceof Date && prop2 instanceof Date) {
-                            compare = ((Date) prop1).compareTo((Date) prop2);
-                        } else if (prop1 instanceof Comparable && prop2 instanceof Comparable) {
-                            compare = ((Comparable) prop1).compareTo((Comparable) prop2);
-                        }
-                    }
-
-                    if(!entry.isAscending())
-                        compare*=-1;
-                    if(compare!=0)
-                        return compare;
-                }
-                return 0;
-            });
-        }
-
+        result=sortChildNodeRefList(result,filter,sortDefinition);
         return result;
 	}
 
