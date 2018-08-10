@@ -347,10 +347,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return null;
 	}
-	
-	public HashMap<String, HashMap<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
-		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
-		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+    public List<ChildAssociationRef> getChildrenAssocsByType(StoreRef store, String nodeId, String type) {
+        List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+        return childAssocList;
+    }
+
+    public HashMap<String, HashMap<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
+        HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
+        List<ChildAssociationRef> childAssocList = getChildrenAssocsByType(store,nodeId,type);
 		for (ChildAssociationRef child : childAssocList) {
 
 			String childType = nodeService.getType(child.getChildRef()).toString();
@@ -364,14 +368,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return result;
 	}
-	
-	public HashMap<String, Object> getChild(StoreRef store, String parentId, String type, String property, String value) {
-		HashMap<String, HashMap<String, Object>> children = this.getChildrenByType(store, parentId, type);
-		for (String childNodeId : children.keySet()) {
-			HashMap<String, Object> childProps = children.get(childNodeId);
-			String propValue = (String) childProps.get(property);
+
+	@Override
+	public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
+		List<ChildAssociationRef> children = this.getChildrenAssocsByType(store, parentId, type);
+		for (ChildAssociationRef child : children) {
+			Serializable propValue = nodeService.getProperty(child.getChildRef(),QName.createQName(property));
 			if (propValue != null && propValue.equals(value))
-				return childProps;
+				return child.getChildRef();
 		}
 		return null;
 	}
@@ -676,40 +680,43 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);		
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
-    public List<ChildAssociationRef> sortChildNodeRefList(List<ChildAssociationRef> list,List<String> filter, SortDefinition sortDefinition){
-        if(filter!=null && filter.size()>0){
-            List<ChildAssociationRef> filtered = new ArrayList<>();
-            for(ChildAssociationRef node : list){
-                if(!shouldFilter(node.getChildRef(),filter)){
-                    filtered.add(node);
-                }
-            }
-            list=filtered;
-        }
-        HashMap<String,Object> cache=new HashMap();
-        Collections.sort(list, (o1, o2) -> {
-            return sortNodes(cache,o1.getChildRef(),o2.getChildRef(),sortDefinition);
-        });
-        return list;
-    }
-    public List<NodeRef> sortNodeRefList(List<NodeRef> list,List<String> filter, SortDefinition sortDefinition){
+
+    public <T>List<T> sortNodeRefList(List<T> list,List<String> filter, SortDefinition sortDefinition){
 	    // make a copy so we have a modifiable list object
 	    list=new ArrayList<>(list);
         if(filter!=null && filter.size()>0){
-            List<NodeRef> filtered = new ArrayList<>();
-            for(NodeRef node : list){
-                if(!shouldFilter(node,filter)){
-                    filtered.add(node);
+            List<T> filtered = new ArrayList<>();
+            for(T obj : list){
+                if(!shouldFilter(getAsNode(obj),filter)){
+                    filtered.add(obj);
                 }
             }
             list=filtered;
         }
         HashMap<String,Object> cache=new HashMap();
         Collections.sort(list, (o1, o2) -> {
-            return sortNodes(cache,o1,o2,sortDefinition);
+            return sortNodes(cache,getAsNode(o1),getAsNode(o2),sortDefinition);
         });
         return list;
     }
+
+    private <T> NodeRef getAsNode(T obj) {
+        NodeRef node;
+        if(obj instanceof ChildAssociationRef){
+            node=((ChildAssociationRef) obj).getChildRef();
+        }
+        else if(obj instanceof AssociationRef){
+            node=((AssociationRef) obj).getTargetRef();
+        }
+        else if(obj instanceof NodeRef){
+            node= (NodeRef) obj;
+        }
+        else{
+            throw new IllegalArgumentException("Given type not supported");
+        }
+        return node;
+    }
+
     private int sortNodes(HashMap<String, Object> cache, NodeRef n1, NodeRef n2, SortDefinition sortDefinition) {
         String type1=nodeService.getType(n1).toString();
         String type2=nodeService.getType(n2).toString();
@@ -798,7 +805,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		else{
             result=nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
 		}
-        result=sortChildNodeRefList(result,filter,sortDefinition);
+        result=sortNodeRefList(result,filter,sortDefinition);
         return result;
 	}
 

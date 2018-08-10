@@ -1,6 +1,7 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,13 +63,12 @@ public class NodeServiceAdapter implements NodeService {
 		return null;
 	}
 
-	@Override
-	public HashMap<String, Object> getChild(StoreRef store, String parentId, String type, String property,
-			String value) {
-		return null;
-	}
+    @Override
+    public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
+        return null;
+    }
 
-	@Override
+    @Override
 	public void setOwner(String nodeId, String username) {
 	}
 

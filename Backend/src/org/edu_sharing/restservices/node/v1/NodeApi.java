@@ -797,7 +797,7 @@ public class NodeApi  {
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
 	    		children = nodeDao.getChildren(assocName,filter,sortDefinition);
             }
-            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount,maxItems);
+            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
 			//List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
 	    	//Collections.sort(children);
 			//NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);
@@ -848,16 +848,11 @@ public class NodeApi  {
 			node=NodeDao.mapNodeConstants(repoDao,node);
 			List<NodeRef> children;
 
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
-			children = nodeDao.getAssocs(new AssocInfo(direction,assocName));
+            SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
 
-
-			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
-
-			List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,null,propFilter);
-			//Collections.sort(children);
-			response=createResponseFromNodeList(sorted,skipCount,maxItems);
-
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
+			children = nodeDao.getAssocs(new AssocInfo(direction,assocName),null,sortDefinition);
+            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
 
 			return Response.status(Response.Status.OK).entity(response).build();
 

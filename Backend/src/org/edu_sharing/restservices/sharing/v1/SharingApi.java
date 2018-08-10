@@ -99,8 +99,8 @@ public class SharingApi {
 				List<NodeRef> children=SharingDao.getChildren(repoDao, node, token, password);
 				List<String> filter=new ArrayList<>();
 				filter.add("files");
-				List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,null);
-				NodeEntries response = NodeApi.createResponseFromNodeList(sorted, skipCount, maxItems);
+				children=NodeDao.sortApiNodeRefs(repoDao,children,filter,sortDefinition);
+				NodeEntries response = NodeDao.convertToRest(repoDao,null,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
 				return Response.status(Response.Status.OK).entity(response).build();
 			});
 		} catch (Throwable t) {
