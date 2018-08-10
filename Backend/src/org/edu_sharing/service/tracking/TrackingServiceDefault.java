@@ -5,8 +5,10 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.springframework.context.ApplicationContext;
 
@@ -58,7 +60,14 @@ public abstract class TrackingServiceDefault implements TrackingService{
     protected String getTrackedUsername(String username) {
         if(username==null)
             username=AuthenticationUtil.getFullyAuthenticatedUser();
-        // TODO: Filter property value and change logic accrodingly
-        return null; // do not log anything user specific
+
+        String mode=RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_TRACKING_USER);
+        if(mode==null)
+            return null;
+        if(mode.equalsIgnoreCase("obfuscate"))
+            return DigestUtils.sha1Hex(username);
+        if(mode.equalsIgnoreCase("full"))
+            return username;
+        return null;
     }
 }
