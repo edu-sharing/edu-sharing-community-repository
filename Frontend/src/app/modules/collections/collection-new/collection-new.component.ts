@@ -170,7 +170,7 @@ export class CollectionNewComponent {
       this.currentCollection.scope=this.newCollectionScope;
       this.isLoading=true;
       if(this.permissions){
-        this.permissions.inherited=false;
+        this.permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,false);
         this.nodeService.setNodePermissions(this.currentCollection.ref.id,this.permissions).subscribe(()=>{
           this.permissions=null;
           this.saveCollection();
