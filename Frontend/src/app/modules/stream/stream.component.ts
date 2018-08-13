@@ -254,12 +254,15 @@ export class StreamComponent {
     if (streamStatus == STREAM_STATUS.OPEN) {
       let openStreams: any[];
       let progressStreams: any[];
+      let unSortedStream: any[];
       this.getSimpleJSON(STREAM_STATUS.OPEN, true).subscribe(data => {
         openStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
         this.getSimpleJSON(STREAM_STATUS.PROGRESS, true).subscribe(data => {
           progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
           console.log("streams received: ",  progressStreams.concat(openStreams));
-          this.streams = progressStreams.concat(openStreams);
+          unSortedStream = progressStreams.concat(openStreams);
+          this.randomizeTop(unSortedStream,3);
+          this.streams = unSortedStream;
           console.log("objs: ",this.streams);
           this.imagesToLoad = this.streams.length;
           this.scrollToDown();
@@ -274,6 +277,13 @@ export class StreamComponent {
       }, error => console.log(error));
     }
 
+  }
+
+  randomizeTop(array: any, quantity: number) {
+      for (let i = quantity; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+      }
   }
 
   onStreamObjectClick(node: any) {
