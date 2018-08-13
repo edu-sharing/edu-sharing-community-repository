@@ -68,7 +68,34 @@ import org.w3c.dom.NodeList;
  * @author rudi start jobs, start scheduling of an job, stop scheduling of a job
  */
 public class JobHandler {
-	
+
+	private static List<JobInfo> jobs = new ArrayList<>();
+
+	public boolean cancelJob(String jobName) throws SchedulerException {
+		boolean result=quartzScheduler.interrupt(jobName, null);
+		return result;
+	}
+	public void finishJob(JobDetail jobDetail, JobInfo.Status status) {
+		for(JobInfo job : jobs){
+			if(job.getJobDetail().equals(jobDetail) && job.getStatus().equals(JobInfo.Status.Running)){
+				job.setStatus(status);
+				job.setFinishTime(System.currentTimeMillis());
+				return;
+			}
+		}
+		throw new IllegalArgumentException("Job "+jobDetail.getFullName()+" was not found");
+	}
+
+	public void updateJobName(JobDetail jobDetail, String name) {
+		for(JobInfo info : jobs){
+			if(info.getJobDetail().equals(jobDetail)){
+				jobDetail.setName(name);
+				info.setJobDetail(jobDetail);
+				return;
+			}
+		}
+	}
+
 	public class JobConfig {
 		
 		Class jobClass = null;
@@ -262,7 +289,6 @@ public class JobHandler {
 
 			@Override
 			public String getName() {
-				logger.info("JobListener.getName");
 				return "edu-sharing joblistener";
 			}
 		});
@@ -373,7 +399,26 @@ public class JobHandler {
 		}
 
 	}
-	
+	public List<JobInfo> getAllJobs() throws SchedulerException {
+		List<JobInfo> result=jobs;
+		/*
+		List running=getRunningJobs();
+		for(JobInfo info : result) {
+			boolean isRunning=false;
+			for (Object run : running) {
+				JobExecutionContext context = (JobExecutionContext) run;
+				if(context.getJobDetail().equals(info.getJobDetail())){
+					isRunning=true;
+				}
+			}
+			info.setStatus(isRunning ? JobInfo.Status.Running : JobInfo.Status.Finished);
+		}
+		*/
+		return result;
+	}
+	public  List getRunningJobs() throws SchedulerException {
+		return quartzScheduler.getCurrentlyExecutingJobs();
+	}
 	/**
 	 * 
 	 * This is for immediate job excecution. when it's called a new job with an
@@ -428,7 +473,8 @@ public class JobHandler {
 
 		quartzScheduler.addJobListener(iJobListener);
 		quartzScheduler.scheduleJob(jobDetail, trigger);
-
+		JobInfo info=new JobInfo(jobDetail);
+		jobs.add(info);
 		/**
 		 * the job is executed asynchronous. we want to give the
 		 * user information if the job was vetoed(i.e. cause another job runs).

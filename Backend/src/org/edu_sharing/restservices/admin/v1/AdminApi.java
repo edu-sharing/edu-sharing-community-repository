@@ -32,7 +32,6 @@ import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
 import org.edu_sharing.restservices.admin.v1.model.UploadResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
-import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Group;
@@ -45,13 +44,11 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.GlobalGroup;
+import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.statistic.StatisticServiceFactory;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
-import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.swagger.annotations.Api;
@@ -157,6 +154,44 @@ public class AdminApi {
 				result.add(entry);
 			}
 			return Response.ok().entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@GET
+	@Path("/jobs")
+
+	@ApiOperation(value = "get all running jobs")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = JobInfo[].class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getJobs(@Context HttpServletRequest req) {
+		try {
+			return Response.ok().entity(AdminServiceFactory.getInstance().getJobs()).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@DELETE
+	@Path("/jobs/{job}")
+
+	@ApiOperation(value = "cancel a running job")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response cancelJob(@Context HttpServletRequest req,
+							  @PathParam("job") String name) {
+		try {
+			AdminServiceFactory.getInstance().cancelJob(name);
+			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}

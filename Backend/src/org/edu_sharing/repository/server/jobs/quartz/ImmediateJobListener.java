@@ -62,7 +62,7 @@ public class ImmediateJobListener implements JobListener {
 		try{
 			
 			System.out.println("ImmediateJobListener VETOED!");
-			
+			JobHandler.getInstance().finishJob(jobExecutionContext.getJobDetail(),JobInfo.Status.Aborted);
 			vetoBy = (String)jobExecutionContext.getJobDetail().getJobDataMap().get(JobHandler.VETO_BY_KEY);
 			
 			jobExecutionContext.getScheduler().deleteJob(this.jobName, null);
@@ -81,6 +81,7 @@ public class ImmediateJobListener implements JobListener {
 		try{
 			jobExecutionContext.getScheduler().deleteJob(this.jobName, null);
 			jobExecutionContext.getScheduler().removeJobListener(this.jobName);
+			JobHandler.getInstance().finishJob(jobExecutionContext.getJobDetail(),((AbstractJob)jobExecutionContext.getJobInstance()).isInterrupted() ? JobInfo.Status.Aborted : JobInfo.Status.Finished);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
