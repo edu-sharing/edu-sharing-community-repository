@@ -69,6 +69,7 @@ import org.w3c.dom.NodeList;
  */
 public class JobHandler {
 
+	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
 	private static List<JobInfo> jobs = new ArrayList<>();
 
 	public boolean cancelJob(String jobName) throws SchedulerException {
@@ -475,6 +476,8 @@ public class JobHandler {
 		quartzScheduler.scheduleJob(jobDetail, trigger);
 		JobInfo info=new JobInfo(jobDetail);
 		jobs.add(info);
+		while(jobs.size()>MAX_JOB_LOG_COUNT)
+			jobs.remove(0);
 		/**
 		 * the job is executed asynchronous. we want to give the
 		 * user information if the job was vetoed(i.e. cause another job runs).

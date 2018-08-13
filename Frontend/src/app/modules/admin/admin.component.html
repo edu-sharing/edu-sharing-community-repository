@@ -253,9 +253,9 @@
                     </div>
                     <div class="job-col col-time">
                         <div class="date">
-                            {{job.startTime | formatDate}}
+                            {{job.startTime | formatDate:{time:true} }}
                             <span *ngIf="job.finishTime">
-                                - {{job.finishTime | formatDate}}
+                                - {{job.finishTime | formatDate:{time:true} }}
                             </span>
                         </div>
                         <div class="job-status {{job.status.toLowerCase()}}">
@@ -281,7 +281,7 @@
                                  [class.status-warning]="entry.level.syslogEquivalent<=4"
                             >
                                 <div class="log-level">{{'ADMIN.JOBS.LOG_LEVEL_'+entry.level.syslogEquivalent | translate}}</div>
-                                <div class="log-date">{{entry.date | formatDate}}</div>
+                                <div class="log-date">{{entry.date | formatDate:{time:true} }}</div>
                                 <div class="log-message">{{entry.message}}</div>
                             </div>
                         </div>

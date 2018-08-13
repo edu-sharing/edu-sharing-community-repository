@@ -56,7 +56,7 @@ public class RemoveImportedObjectsJob extends AbstractJob{
 	
 	public void run() {
 		try {
-			new PersistentHandlerEdusharing().removeAllImportedObjects();
+			new PersistentHandlerEdusharing(this).removeAllImportedObjects();
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}

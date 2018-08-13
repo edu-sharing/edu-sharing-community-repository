@@ -32,16 +32,17 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.quartz.Job;
+import org.quartz.*;
 
-public abstract class AbstractJob implements Job {
+public abstract class AbstractJob implements Job,InterruptableJob {
 	
 	protected Log logger = LogFactory.getLog(AbstractJob.class);
 	
 	boolean isStarted = false;
 	
 	protected Class[] allJobs =  new Class[] { ImporterJob.class, RefreshCacheJob.class,RemoveDeletedImportsJob.class,RemoveImportedObjectsJob.class,GetAllDamagedObjects.class,RefreshPublisherListJob.class, TrackingJob.class, ExporterJob.class,RefreshValuespaceFileJob.class};
-	
+	protected boolean isInterrupted=false;
+
 	//important for immediate executed Jobs so that we can give an user feedback if the job was vetoed
 	//boolean vetoed = false;
 	
@@ -53,7 +54,6 @@ public abstract class AbstractJob implements Job {
 		this.isStarted = isStarted;
 	}
 
-
 	public abstract Class[] getJobClasses();
 	
 	protected synchronized void addJobClass(Class job) {
@@ -61,6 +61,13 @@ public abstract class AbstractJob implements Job {
 		list.add(job);
 		allJobs = list.toArray(new Class[list.size()]);
 	}
-	
-	
+
+	public boolean isInterrupted() {
+		return isInterrupted;
+	}
+
+	@Override
+	public void interrupt() throws UnableToInterruptJobException {
+		isInterrupted = true;
+	}
 }

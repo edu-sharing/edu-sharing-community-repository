@@ -49,6 +49,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -82,7 +83,8 @@ public class OAIPMHLOMImporter implements Importer{
 	String oai_base_url = null;
 	
 	String urlGetRecors = "";
-	
+	private ImporterJob job;
+
 	/**
 	 * @param oai_base_url
 	 * @param recordHandler
@@ -205,6 +207,10 @@ public class OAIPMHLOMImporter implements Importer{
 	}
 	
 	public void updateWithIdentifiersList(String url,String set) throws Throwable{
+		if(job!=null && job.isInterrupted()){
+			logger.warn("Will cancel oai fetching, job is aborted");
+			return;
+		}
 		logger.info("url:"+url);
 		String queryResult = new HttpQueryTool().query(url);
 		if(queryResult != null){
@@ -245,6 +251,9 @@ public class OAIPMHLOMImporter implements Importer{
 				logger.info("no more resumption. import finished!");
 			}
 		}
+		else{
+			logger.warn("Result for query url "+url+" was empty!");
+		}
 	}
 	
 	
@@ -256,6 +265,10 @@ public class OAIPMHLOMImporter implements Importer{
 			nrOfRs = nodeList.getLength();
 		}
 		for(int i = 0; i < nrOfRs;i++){
+			if(job!=null && job.isInterrupted()){
+				logger.warn("Will cancel identifier reading, job is aborted");
+				return;
+			}
 			Node headerNode = nodeList.item(i);
 			String identifier = (String)xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
 			String timeStamp = (String)xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
@@ -302,7 +315,12 @@ public class OAIPMHLOMImporter implements Importer{
 			}
 		}
 	}
-	
+
+	@Override
+	public void setJob(ImporterJob importerJob) {
+		this.job = importerJob;
+	}
+
 	public static final int MAX_PER_RESUMPTION = 5000;
 	
 	protected void handleGetRecordStuff( String cursor, String set, String identifier){

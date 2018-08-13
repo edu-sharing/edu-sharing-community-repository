@@ -309,6 +309,7 @@
   .no-jobs{
     font-size: 120%;
     color:$textVeryLight;
+    text-align: center;
   }
   .job{
     display:flex;
@@ -321,20 +322,29 @@
     }
     .row-detail{
       background-color: #fff;
+      padding-bottom: 10px;
+      width:100%;
       .log{
         font-weight: bold;
         padding:10px 10px;
       }
+      .job-col{
+        width: 100%;
+      }
       .job-row{
         padding:2px 20px;
+        width: 100%;
       }
     }
     .log-level{
       min-width:70px;
+      color: $textLight;
+      font-weight: bold;
       text-transform: uppercase;
     }
     .log-date{
       min-width:100px;
+      color: $textLight;
     }
     .log-message{
       white-space: pre-wrap;

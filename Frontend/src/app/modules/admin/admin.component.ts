@@ -192,7 +192,7 @@ export class AdminComponent {
         });
         this.reloadJobStatus();
         setInterval(()=>{
-            if(this.tab=='JOBS2')
+            if(this.tab=='JOBS')
                 this.reloadJobStatus();
         },5000);
         this.admin.getOAIClasses().subscribe((classes:string[])=>{
@@ -451,7 +451,13 @@ export class AdminComponent {
       this.storage.set('admin_oai',this.oai);
     }
     this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,this.oai.file,this.oai.oaiIds).subscribe(()=>{      this.globalProgress=false;
-      this.toast.toast('ADMIN.IMPORT.OAI_STARTED');
+        let additional:any={
+            link:{
+                caption:"ADMIN.IMPORT.OPEN_JOBS",
+                callback:()=>this.setTab('JOBS')
+            },
+        };
+      this.toast.toast('ADMIN.IMPORT.OAI_STARTED',null,null,null, additional);
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);

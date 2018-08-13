@@ -17,6 +17,7 @@ import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.SchoolContextServiceImpl;
+import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
@@ -202,7 +203,12 @@ public class WpImporter implements Importer{
 	public void startImport(String[] oaiIDs, String set) {
 		logger.error("not implemented yet");
 	}
-	
+
+	@Override
+	public void setJob(ImporterJob importerJob) {
+
+	}
+
 	public static void main(String[] args){
 		Importer i = new WpImporter();
 		i.setBaseUrl("http://127.0.0.1/wordpress/wp-json/wp/v2/");
