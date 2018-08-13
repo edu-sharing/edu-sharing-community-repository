@@ -91,7 +91,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			if (children != null) {
 				for (Object setKey : children.keySet()) {
 					if(job!=null && job.isInterrupted()){
-						getLogger().warn("Job is aborted");
+						getLogger().info("Job is aborted");
 						return;
 					}
 					String name = (String) ((HashMap) children.get(setKey)).get(CCConstants.CM_NAME);

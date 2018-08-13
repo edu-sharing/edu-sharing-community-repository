@@ -74,6 +74,13 @@ public class JobHandler {
 
 	public boolean cancelJob(String jobName) throws SchedulerException {
 		boolean result=quartzScheduler.interrupt(jobName, null);
+		if(!result){
+			try {
+				finishJob(quartzScheduler.getJobDetail(jobName, null), JobInfo.Status.Aborted);
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+		}
 		return result;
 	}
 	public void finishJob(JobDetail jobDetail, JobInfo.Status status) {
@@ -259,13 +266,18 @@ public class JobHandler {
 
 				if (exception != null) {
 					logger.error("Job execution failed", exception);
+					Logger.getLogger(context.getJobInstance().getClass()).error(exception);
 				}
 
 				Job job = context.getJobInstance();
 				logger.info("JobListener.jobWasExecuted " + job.getClass());
+				JobInfo.Status status = JobInfo.Status.Finished;
 				if (job instanceof AbstractJob) {
 					((AbstractJob) job).setStarted(false);
+					status=((AbstractJob) job).isInterrupted() ? JobInfo.Status.Aborted : JobInfo.Status.Finished;
 				}
+				finishJob(context.getJobDetail(),status);
+
 			}
 
 			@Override
@@ -275,7 +287,7 @@ public class JobHandler {
 				if (job instanceof AbstractJob) {
 					((AbstractJob) job).setStarted(true);
 				}
-
+				registerJob(context.getJobDetail());
 			}
 
 			@Override
@@ -400,6 +412,14 @@ public class JobHandler {
 		}
 
 	}
+
+	private void registerJob(JobDetail jobDetail) {
+		JobInfo info=new JobInfo(jobDetail);
+		jobs.add(info);
+		while(jobs.size()>MAX_JOB_LOG_COUNT)
+			jobs.remove(0);
+	}
+
 	public List<JobInfo> getAllJobs() throws SchedulerException {
 		List<JobInfo> result=jobs;
 		/*
@@ -474,10 +494,6 @@ public class JobHandler {
 
 		quartzScheduler.addJobListener(iJobListener);
 		quartzScheduler.scheduleJob(jobDetail, trigger);
-		JobInfo info=new JobInfo(jobDetail);
-		jobs.add(info);
-		while(jobs.size()>MAX_JOB_LOG_COUNT)
-			jobs.remove(0);
 		/**
 		 * the job is executed asynchronous. we want to give the
 		 * user information if the job was vetoed(i.e. cause another job runs).

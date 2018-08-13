@@ -208,7 +208,7 @@ public class OAIPMHLOMImporter implements Importer{
 	
 	public void updateWithIdentifiersList(String url,String set) throws Throwable{
 		if(job!=null && job.isInterrupted()){
-			logger.warn("Will cancel oai fetching, job is aborted");
+			logger.info("Will cancel oai fetching, job is aborted");
 			return;
 		}
 		logger.info("url:"+url);
@@ -266,7 +266,7 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 		for(int i = 0; i < nrOfRs;i++){
 			if(job!=null && job.isInterrupted()){
-				logger.warn("Will cancel identifier reading, job is aborted");
+				logger.info("Will cancel identifier reading, job is aborted");
 				return;
 			}
 			Node headerNode = nodeList.item(i);

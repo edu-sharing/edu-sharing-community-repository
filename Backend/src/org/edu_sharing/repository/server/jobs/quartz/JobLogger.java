@@ -36,7 +36,6 @@ public class JobLogger extends ConsoleAppender {
     protected void subAppend(LoggingEvent event) {
         super.subAppend(event);
         if(event.getLoggerName().equals(JobHandler.class.getName())){
-            System.out.println("ignore jobhandler");
             return;
         }
         try {
@@ -49,18 +48,15 @@ public class JobLogger extends ConsoleAppender {
                     message+="\n\n" + StringUtils.join(event.getThrowableStrRep(),"\n");
                 }
                 if(clazz.equals(event.getLoggerName())){
-                    System.out.println("job found for "+event.getLoggerName());
-                    job.addLog(new JobInfo.LogEntry(event.getLevel(),event.timeStamp,message));
+                    job.addLog(new JobInfo.LogEntry(event.getLevel(),event.timeStamp,event.getLoggerName(),message));
                 }
                 // importer job mapping
                 if(clazz.equals(ImporterJob.class.getName()) && event.getLoggerName().startsWith("org.edu_sharing.repository.server.importer")){
-                    System.out.println("import job found for "+event.getLoggerName());
-                    job.addLog(new JobInfo.LogEntry(event.getLevel(),event.timeStamp,message));
+                    job.addLog(new JobInfo.LogEntry(event.getLevel(),event.timeStamp,event.getLoggerName(),message));
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("no job found for "+event.getLoggerName());
     }
 }

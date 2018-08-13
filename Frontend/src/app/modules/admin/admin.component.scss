@@ -288,7 +288,7 @@
   }
 }
 .jobs{
-  max-width: 1000px;
+  max-width: 1200px;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -312,11 +312,15 @@
     text-align: center;
   }
   .job{
+    &:not(:last-child){
+      border-bottom: 1px solid $cardSeperatorLineColor;
+    }
     display:flex;
     width:100%;
     >div{
       width: 100%;
     }
+
     .job-main{
       padding:10px 20px;
     }
@@ -344,6 +348,12 @@
     }
     .log-date{
       min-width:100px;
+      color: $textLight;
+    }
+    .log-class{
+      min-width:170px;
+      max-width:170px;
+      @include shortenText();
       color: $textLight;
     }
     .log-message{
@@ -386,17 +396,17 @@
       width:40px;
       color:$textLight;
     }
-    .status-warning{
-      background-color: #ffffd8;
-    }
-    .status-error{
-      background-color: #ffdcd8;
-    }
     .status-fine{
       background-color: #dcffd8;
     }
     .status-aborted{
       background-color: #eee;
+    }
+    .status-warning{
+      background-color: #ffffd8;
+    }
+    .status-error{
+      background-color: #ffdcd8;
     }
   }
 
@@ -443,6 +453,11 @@
 @media all and (max-width: $mobileWidth+$mobileStage*2) {
   .applications{
     .type,.repoType,.subtype{
+      display: none;
+    }
+  }
+  .jobs{
+    .log-class,.log-level{
       display: none;
     }
   }

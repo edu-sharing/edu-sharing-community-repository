@@ -194,7 +194,7 @@ export class AdminComponent {
         setInterval(()=>{
             if(this.tab=='JOBS')
                 this.reloadJobStatus();
-        },5000);
+        },10000);
         this.admin.getOAIClasses().subscribe((classes:string[])=>{
           this.oaiClasses=classes;
           this.storage.get('admin_oai').subscribe((data:any)=>{

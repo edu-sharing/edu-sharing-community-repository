@@ -20,14 +20,24 @@ public class JobInfo {
         Finished
     }
     public static class LogEntry{
+        private String className;
         private Level level;
         private long date;
         private String message;
 
-        public LogEntry(Level level, long date, String message) {
+        public LogEntry(Level level, long date, String className, String message) {
             this.level=level;
             this.date = date;
+            this.className = className;
             this.message=message;
+        }
+
+        public String getClassName() {
+            return className;
+        }
+
+        public void setClassName(String className) {
+            this.className = className;
         }
 
         public long getDate() {
