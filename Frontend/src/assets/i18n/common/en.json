@@ -110,14 +110,20 @@
   "GOTO_LOGIN": "Go to login",
   "GOTO":"go to",
   "SIDEBAR":{
-    "WORKSPACE_OLD":"old workspace",
     "WORKSPACE":"Workspace",
     "SEARCH":"Search",
     "COLLECTIONS":"Collections",
     "SECURE":"Safe",
     "PERMISSIONS":"User management",
     "LOGIN":"Login",
-    "ADMIN":"Admin-Tools"
+    "ADMIN":"Admin-Tools",
+    "WORKSPACE_SHORT":"Workspace",
+    "SEARCH_SHORT":"Search",
+    "COLLECTIONS_SHORT":"Collections",
+    "SECURE_SHORT":"Safe",
+    "PERMISSIONS_SHORT":"Users",
+    "LOGIN_SHORT":"Login",
+    "ADMIN_SHORT":"Admin"
   },
   "WORKFLOW":{
     "100_unchecked":"No status",
