@@ -88,6 +88,7 @@ public class MetadataReaderV2 {
                 MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
                 mds.overrideWith(mdsOverride);
             } catch (IOException e) {
+            	logger.info(e.getMessage(), e);
             }
             mdsCache.put(id, mds);
             return mds;
