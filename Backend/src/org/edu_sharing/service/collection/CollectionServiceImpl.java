@@ -691,17 +691,17 @@ public class CollectionServiceImpl implements CollectionService{
 		String scope = collection.getScope();
 		boolean custom=(scope==null || scope.equals(Scope.CUSTOM.name()));
 		org.edu_sharing.repository.client.rpc.ACL acl=new org.edu_sharing.repository.client.rpc.ACL();
-		if(custom){
-			acl=client.getPermissions(collectionId);
-		}
+
 		List<org.edu_sharing.repository.client.rpc.ACE> aces=new ArrayList<>();
 		if(acl.getAces()!=null)
 			aces.addAll(Arrays.asList(acl.getAces()));
 
 		if(custom){
 			
-			if(!collection.isLevel0()) // TODO: don't allow inherition on root level -> this variable seems to be inverted?!
-				acl.setInherited(false);
+			if(!collection.isLevel0()) { // TODO: don't allow inherition on root level -> this variable seems to be inverted?!
+				permissionService.setPermissionInherit(collectionId, false);
+				return;
+			}
 
 		}
 		else{
@@ -732,7 +732,7 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 		
 		final ACL aclFinal = acl;
-		if(!custom && scope.equals(Scope.MY.name())){
+		if(scope.equals(Scope.MY.name())){
 			// We need to set inherition
 			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 				@Override
@@ -742,10 +742,6 @@ public class CollectionServiceImpl implements CollectionService{
 				}
 			});
 		}
-		else{
-			permissionService.setPermissions(collectionId, aces,aclFinal.isInherited());
-		}
-	
 	}
 
 	/**
