@@ -52,7 +52,9 @@ public interface PermissionService {
 	public void setPermissions(String nodeId, List<ACE> aces) throws Exception;
 	
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
-	
+
+	void setPermissionInherit(String nodeId, boolean inheritPermission) throws Exception;
+
 	public void addPermissions(String nodeId, ACE[] aces) throws Exception;
 	
 	public void removePermissions(String nodeId, ACE[] aces) throws Exception;

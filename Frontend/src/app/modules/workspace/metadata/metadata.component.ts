@@ -271,7 +271,7 @@ export class WorkspaceMetadataComponent{
         //this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.VIEW"));
 
         this.stats.points=[];
-        this.stats.points.push(2+this.usages.length-this.usagesCollection.length);
+        this.stats.points.push(this.usages.length-this.usagesCollection.length);
         this.stats.points.push(this.usagesCollection.length);
         //this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] : 0);
         //this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] : 0);
