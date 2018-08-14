@@ -107,7 +107,8 @@
        [class.disabled]="button.isDisabled"
        tabindex="0"
        title="{{'GOTO' | translate}} {{button.name | translate}}">
-    <i *ngIf="button.icon" class="material-icons">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}"> <span>{{button.name | translate}}</span>
+    <i *ngIf="button.icon" class="material-icons">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}">
+      <span>{{(button.isCustom ? button.name : button.name+"_SHORT") | translate}}</span>
   </div>
 </div>
 <search-node-store

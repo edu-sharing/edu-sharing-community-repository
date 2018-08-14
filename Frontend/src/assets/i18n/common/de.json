@@ -136,7 +136,6 @@
     "CHILDREN_NONE":"Dieses Element besitzt keine Child Objekte"
   },
   "SIDEBAR":{
-    "WORKSPACE_OLD":"Klassischer Workspace",
     "WORKSPACE":"Workspace",
     "SEARCH":"Suchumgebung",
     "COLLECTIONS":"Sammlungen",
@@ -144,7 +143,14 @@
     "SECURE":"Safe",
     "PERMISSIONS":"Nutzerverwaltung",
     "LOGIN":"Login",
-    "ADMIN":"Admin-Tools"
+    "ADMIN":"Admin-Tools",
+    "WORKSPACE_SHORT":"Workspace",
+    "SEARCH_SHORT":"Suche",
+    "COLLECTIONS_SHORT":"Sammlungen",
+    "SECURE_SHORT":"Safe",
+    "PERMISSIONS_SHORT":"Nutzer",
+    "LOGIN_SHORT":"Login",
+    "ADMIN_SHORT":"Admin"
   },
   "WORKFLOW":{
     "100_unchecked":"Kein Status",
