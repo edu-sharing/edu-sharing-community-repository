@@ -3,7 +3,7 @@
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div *ngIf="_nodes && _nodes.length==1" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:_nodes[0].name} }}</div>
-      <div *ngIf="_nodes && _nodes.length!=1" class="card-title">{{'WORKSPACE.LICENSE.TITLE_MULTI' | translate:{count:count} }}</div>
+      <div *ngIf="_nodes && _nodes.length!=1" class="card-title">{{'WORKSPACE.LICENSE.TITLE_MULTI' | translate:{count:_nodes.length} }}</div>
       <div *ngIf="_properties && !_nodes" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:_properties['cm:name']} }}</div>
       <spinner *ngIf="loading"></spinner>
       <div *ngIf="(_nodes || _properties) && !loading" class="card-scroll">

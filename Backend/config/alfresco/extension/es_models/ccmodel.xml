@@ -537,7 +537,19 @@
 			</properties>
 		</aspect>
 
-		<aspect name="ccm:iometadata">
+        <aspect name="ccm:tracking">
+            <title>Metadata for simple tracking/statistics information</title>
+            <properties>
+                <property name="ccm:tracking_downloads">
+                    <type>d:int</type>
+                </property>
+                <property name="ccm:tracking_views">
+                    <type>d:int</type>
+                </property>
+            </properties>
+        </aspect>
+
+        <aspect name="ccm:iometadata">
 			<title>Metadata for an information object</title>
 			<parent>ccm:basemetadata</parent>
 			<properties>

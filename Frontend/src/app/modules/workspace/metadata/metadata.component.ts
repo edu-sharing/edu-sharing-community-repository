@@ -49,9 +49,11 @@ export class WorkspaceMetadataComponent{
   stats:any= {
       labels: [],
       points: [],
-      colors: ['rgba(230, 178, 71, .8)', 'rgba(151, 91, 93, .8)', 'rgba(27, 102, 49, .8)']
+      pointsIcons: ["input","layers","cloud_download","remove_red_eye"],
+      colors: ['rgba(230, 178, 71, .8)', 'rgba(151, 91, 93, .8)', 'rgba(27, 102, 49, .8)','rgba(102,167,217,.8)']
   };
 
+  statsTotalPoints: number;
   @Input() isAdmin:boolean;
   @Input() set node(node : string){
     this._node=node;
@@ -266,10 +268,14 @@ export class WorkspaceMetadataComponent{
         this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.LMS"));
         this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.COLLECTION"));
         //this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD"));
+        //this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.VIEW"));
+
         this.stats.points=[];
-        this.stats.points.push(this.usages.length-this.usagesCollection.length);
+        this.stats.points.push(2+this.usages.length-this.usagesCollection.length);
         this.stats.points.push(this.usagesCollection.length);
-        //this.stats.points.push(0);
+        //this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] : 0);
+        //this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] : 0);
+        this.statsTotalPoints=this.stats.points.reduce((a:any,b:any)=>parseInt(a,10)+parseInt(b,10), 0);
         this.canvas = document.getElementById('myChart');
         this.ctx = this.canvas.getContext('2d');
         // FontFamily
@@ -299,6 +305,11 @@ export class WorkspaceMetadataComponent{
                     }
                 },
                 scales: {
+                    xAxes: [{
+                        ticks: {
+                            display: false
+                        }
+                    }],
                     yAxes: [{
                         ticks: {
                             beginAtZero:true,

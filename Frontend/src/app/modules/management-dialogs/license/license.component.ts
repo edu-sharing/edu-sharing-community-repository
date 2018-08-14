@@ -75,7 +75,6 @@ export class WorkspaceLicenseComponent  {
                      "uk","hu"];
   public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
-  count: number;
   _nodes:Node[];
   private permissions: LocalPermissionsResult;
   public loading=true;

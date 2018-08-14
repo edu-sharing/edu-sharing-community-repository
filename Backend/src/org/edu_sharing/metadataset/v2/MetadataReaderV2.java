@@ -40,58 +40,61 @@ public class MetadataReaderV2 {
 	}
 	
 	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet,String locale) throws Exception{
-		MetadataReaderV2 reader;
-		MetadataSetV2 mds;
-		String mdsNameDefault="mds";
-		if(appId.getMetadatsetsV2()!=null){
-			mdsNameDefault=appId.getMetadatsetsV2()[0];
-			if(mdsNameDefault.toLowerCase().endsWith(".xml"))
-				mdsNameDefault=mdsNameDefault.substring(0,mdsNameDefault.length()-4);
-		}
-		String mdsName=mdsNameDefault;
-		if(!mdsSet.equals("-default-") && !mdsSet.equals(CCConstants.metadatasetdefault_id)){
-			if(appId.getMetadatsetsV2()!=null && Arrays.asList(appId.getMetadatsetsV2()).contains(mdsSet)){
-				mdsName=mdsSet;
-				if(mdsName.toLowerCase().endsWith(".xml"))
-					mdsName=mdsName.substring(0,mdsName.length()-4);
-			}
-			else{
-				throw new IllegalArgumentException("Invalid mds set "+mdsSet+", was not found in the list of mds sets of appid "+appId.getAppId());
-			}
-		}
-		String id=appId.getAppId()+"_"+mdsName+"_"+locale;
-		if(mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
-			return mdsCache.get(id);
-		reader=new MetadataReaderV2(mdsNameDefault+".xml",locale);
-		mds=reader.getMetadatasetForFile(mdsNameDefault);
-		mds.setRepositoryId(appId.getAppId());
-		if(mds.getInherit()!=null && !mds.getInherit().isEmpty()) {
-			String inheritName=mds.getInherit()+".xml";
-			reader=new MetadataReaderV2(inheritName,locale);
-			MetadataSetV2 mdsInherit = reader.getMetadatasetForFile(inheritName);
-			try{
-				reader=new MetadataReaderV2(mds.getInherit()+"_override.xml",locale);
-				MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(inheritName);
-				mdsInherit.overrideWith(mdsOverride);
-			}catch(IOException e){
-			}
-			mdsInherit.overrideWith(mds);
-			mds=mdsInherit;
-		}
-		if(!mdsName.equals(mdsNameDefault)){
-			reader=new MetadataReaderV2(mdsName+".xml",locale);
-			MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
-			mds.overrideWith(mdsOverride);
-		}
-		try{
-			reader=new MetadataReaderV2(mdsName+"_override.xml",locale);
-			MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
-			mds.overrideWith(mdsOverride);
-		}
-		catch(IOException e){
-		}
-		mdsCache.put(id, mds);
-		return mds;
+        MetadataReaderV2 reader;
+        MetadataSetV2 mds;
+        String mdsNameDefault = "mds";
+        if (appId.getMetadatsetsV2() != null) {
+            mdsNameDefault = appId.getMetadatsetsV2()[0];
+            if (mdsNameDefault.toLowerCase().endsWith(".xml"))
+                mdsNameDefault = mdsNameDefault.substring(0, mdsNameDefault.length() - 4);
+        }
+        String mdsName = mdsNameDefault;
+        if (!mdsSet.equals("-default-") && !mdsSet.equals(CCConstants.metadatasetdefault_id)) {
+            if (appId.getMetadatsetsV2() != null && Arrays.asList(appId.getMetadatsetsV2()).contains(mdsSet)) {
+                mdsName = mdsSet;
+                if (mdsName.toLowerCase().endsWith(".xml"))
+                    mdsName = mdsName.substring(0, mdsName.length() - 4);
+            } else {
+                throw new IllegalArgumentException("Invalid mds set " + mdsSet + ", was not found in the list of mds sets of appid " + appId.getAppId());
+            }
+        }
+	    try {
+            String id = appId.getAppId() + "_" + mdsName + "_" + locale;
+            if (mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
+                return mdsCache.get(id);
+            reader = new MetadataReaderV2(mdsNameDefault + ".xml", locale);
+            mds = reader.getMetadatasetForFile(mdsNameDefault);
+            mds.setRepositoryId(appId.getAppId());
+            if (mds.getInherit() != null && !mds.getInherit().isEmpty()) {
+                String inheritName = mds.getInherit() + ".xml";
+                reader = new MetadataReaderV2(inheritName, locale);
+                MetadataSetV2 mdsInherit = reader.getMetadatasetForFile(inheritName);
+                try {
+                    reader = new MetadataReaderV2(mds.getInherit() + "_override.xml", locale);
+                    MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(inheritName);
+                    mdsInherit.overrideWith(mdsOverride);
+                } catch (IOException e) {
+                }
+                mdsInherit.overrideWith(mds);
+                mds = mdsInherit;
+            }
+            if (!mdsName.equals(mdsNameDefault)) {
+                reader = new MetadataReaderV2(mdsName + ".xml", locale);
+                MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
+                mds.overrideWith(mdsOverride);
+            }
+            try {
+                reader = new MetadataReaderV2(mdsName + "_override.xml", locale);
+                MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
+                mds.overrideWith(mdsOverride);
+            } catch (IOException e) {
+            	logger.info(e.getMessage(), e);
+            }
+            mdsCache.put(id, mds);
+            return mds;
+        }catch(Throwable t){
+	        throw new RuntimeException("Unexpected error while parsing metadataset "+mdsSet+", isDefault "+(mdsName.equals(mdsNameDefault)),t);
+        }
 	}
 	
 	private MetadataQueries getQueries() throws Exception {

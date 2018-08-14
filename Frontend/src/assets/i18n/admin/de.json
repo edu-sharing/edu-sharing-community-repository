@@ -9,6 +9,7 @@
       "APPLICATIONS":"Quellen",
       "UPDATE":"Server Update",
       "IMPORT":"Import",
+      "JOBS":"Aufgaben",
       "TOOLKIT":"Tool Kit",
       "BROWSER":"Browser",
       "FOLDERTEMPLATES": "Ordnervorlagen"
@@ -78,6 +79,7 @@
       "COLLECTION_START":"Import starten",
       "OAI":"OAI Data",
       "OAI_STARTED":"OAI Import-Job gestartet",
+      "OPEN_JOBS":"Status anzeigen",
       "OAI_URL":"OAI Base URL",
       "OAI_NO_URL":"OAI Base URL fehlt",
       "OAI_SET":"OAI Set/Catalog ID",
@@ -91,7 +93,6 @@
       "OAI_IMPORTER_CLASS_NAME":"Importer Class Name",
       "OAI_RECORD_HANDLER_CLASS_NAME":"Record Handler Class Name",
       "OAI_BINARY_HANDLER_CLASS_NAME":"Binary Handler Class Name",
-      "OAI_STARTED":"OAI Import-Job gestartet",
       "OAI_START":"OAI Import",
       "OAI_SAVE":"Werte für nächsten Import speichern",
       "ADMINISTRATION":"Import Administration",
@@ -120,8 +121,8 @@
       "UPLOAD_TEMP_START":"Hochladen",
       "UPLOAD_TEMP_DONE":"Datei wurde unter {{filename}} auf dem Server abgelegt",
       "JOB_CLASS":"Klassenname der Job-Klasse:",
-      "JOB_STARTED":"Der Job wurde gestartet. Überprüfen Sie die catalina.out für den Status",
-      "START_JOB":"Job ausführen"
+      "JOB_STARTED":"Die Aufgabe wurde gestartet. Überprüfen Sie die Aufgabenliste, um den Status einzusehen",
+      "START_JOB":"Aufgabe ausführen"
     },
     "BROWSER":{
       "LUCENE_SEARCH":"Suche via Lucene",
@@ -131,6 +132,24 @@
       "LUCENE_COUNT":"Anzahl Treffer:",
       "LUCENE_START":"Suchen",
       "ADD_AUTHORITY":"Authority suchen..."
+    },
+    "JOBS":{
+      "LOG":"Log-Einträge",
+      "LIST":"Bisherige Aufgaben",
+      "NO_JOBS":"Es wurden noch keine Aufgaben ausgeführt. Aufgaben werden z.B. durch einen Importvorgang angelegt",
+      "TOAST_CANCELED":"Die Aufgabe wurde abgebrochen. Es kann jedoch einen Moment dauern, bis der Status aktualisiert wird.",
+      "CANCEL_TITLE":"Aufgabe abbrechen?",
+      "CANCEL_MESSAGE":"Das Abbrechen einer Aufgabe kann zu einem inkonsistenten Datenzustand oder sogar Datenverlust führen.\n\nSind Sie wirklich sicher, dass Sie die Aufgabe abbrechen möchten?",
+      "WITH_WARNINGS":"(hat Warnungen)",
+      "WITH_ERRORS":"(hat Fehler)",
+      "Aborted":"Abgebrochen",
+      "Finished":"Abgeschlossen",
+      "Running":"Wird ausgeführt...",
+      "LOG_LEVEL_7":"Debug",
+      "LOG_LEVEL_6":"Info",
+      "LOG_LEVEL_4":"Warning",
+      "LOG_LEVEL_3":"Error",
+      "LOG_LEVEL_0":"Fatal"
     },
     "FOLDERTEMPLATES":{
       "EDUGROUP": "Organisation",

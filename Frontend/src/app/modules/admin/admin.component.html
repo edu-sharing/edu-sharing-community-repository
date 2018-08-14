@@ -52,6 +52,9 @@
       <li class="clickable tab col s3" (click)="setTab('IMPORT')">
         <a [class.active]="tab=='IMPORT'" >{{'ADMIN.TAB.IMPORT' | translate}}</a>
       </li>
+      <li class="clickable tab col s3" (click)="setTab('JOBS')">
+        <a [class.active]="tab=='JOBS'" >{{'ADMIN.TAB.JOBS' | translate}}</a>
+      </li>
       <li class="clickable tab col s3" (click)="setTab('TOOLKIT')">
         <a [class.active]="tab=='TOOLKIT'" >{{'ADMIN.TAB.TOOLKIT' | translate}}</a>
       </li>
@@ -221,6 +224,74 @@
     <div class="propertyGroup"><a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.IMPORT.PROPERTY_VALUESPACE' | translate}}</a><input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.IMPORT.PROPERTY_NAME' | translate}}"></div>
   </div>
 </div>
+<div *ngIf="tab=='JOBS'" class="content jobs">
+    <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
+    <div class="group">
+        <form (ngSubmit)="startJob()">
+            <div class="inputGroupGrow">
+                <div class="info">{{'ADMIN.TOOLKIT.JOB_CLASS' | translate }}</div>
+                <input type="text" name="jobClass" [(ngModel)]="job.class" placeholder="org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob">
+            </div>
+            <textarea name="jobParams" class="jobParams" [(ngModel)]="job.params" placeholder='{"param1":"value1","param2":"value2"}'></textarea>
+            <div class="btn-flat btn-shadow" (click)="startJob()">{{'ADMIN.TOOLKIT.START_JOB' | translate }}</div>
+        </form>
+    </div>
+    <div class="heading"><i class="material-icons">history</i><span>{{'ADMIN.JOBS.LIST' | translate}}</span></div>
+    <div class="group">
+        <div class="reload"><i class="material-icons clickable" (click)="reloadJobStatus()">refresh</i></div>
+        <div class="no-jobs" *ngIf="!jobs || !jobs.length">{{'ADMIN.JOBS.NO_JOBS' | translate}}</div>
+        <div *ngFor="let job of jobs;let i=index" class="job">
+            <div class="job-col">
+                <div class="job-row job-main"
+                     [class.status-error]="job.worstLevel.syslogEquivalent<=3"
+                     [class.status-warning]="job.worstLevel.syslogEquivalent<=4"
+                     [class.status-fine]="job.worstLevel.syslogEquivalent>=6"
+                     [class.status-aborted]="job.status=='Aborted'">
+                    <div class="job-col col-name">
+                        <div class="name">{{job.jobDetail.name}}</div>
+                        <div class="class">{{job.jobDetail.jobClass}}</div>
+                    </div>
+                    <div class="job-col col-time">
+                        <div class="date">
+                            {{job.startTime | formatDate:{time:true} }}
+                            <span *ngIf="job.finishTime">
+                                - {{job.finishTime | formatDate:{time:true} }}
+                            </span>
+                        </div>
+                        <div class="job-status {{job.status.toLowerCase()}}">
+                            <span>
+                                {{'ADMIN.JOBS.'+job.status | translate}}
+                                <span *ngIf="job.worstLevel.syslogEquivalent==4">{{'ADMIN.JOBS.WITH_WARNINGS' | translate}}</span>
+                                <span *ngIf="job.worstLevel.syslogEquivalent<4">{{'ADMIN.JOBS.WITH_ERRORS' | translate}}</span>
+                            </span>
+                            <spinner-small *ngIf="job.status=='Running'"></spinner-small>
+                            <i class="material-icons cancel clickable" *ngIf="job.status=='Running'" (click)="cancelJob(job)">close</i>
+                        </div>
+                    </div>
+                    <div class="job-col col-more" [class.clickable]="job.log && job.log.length" (click)="job.log && job.log.length ? jobsOpen[i]=jobsOpen[i] ? false : true : null">
+                        <i class="material-icons" *ngIf="job.log && job.log.length">{{jobsOpen[i] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</i>
+                    </div>
+                </div>
+                <div class="job-row row-detail" *ngIf="jobsOpen[i]">
+                    <div class="job-col">
+                        <div class="log">{{'ADMIN.JOBS.LOG' | translate}}</div>
+                        <div class="log-data">
+                            <div *ngFor="let entry of job.log" class="job-row"
+                                 [class.status-error]="entry.level.syslogEquivalent<=3"
+                                 [class.status-warning]="entry.level.syslogEquivalent<=4"
+                            >
+                                <div class="log-level">{{'ADMIN.JOBS.LOG_LEVEL_'+entry.level.syslogEquivalent | translate}}</div>
+                                <div class="log-date">{{entry.date | formatDate:{time:true} }}</div>
+                                <div class="log-class">{{ entry.className.split(".")[entry.className.split(".").length-1] }}</div>
+                                <div class="log-message">{{entry.message}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div *ngIf="tab=='TOOLKIT'" class="content toolkit">
   <div class="heading"><i class="material-icons">refresh</i><span>{{'ADMIN.TOOLKIT.REFRESH_APP' | translate}}</span></div>
   <div class="group">
@@ -236,17 +307,6 @@
     <form (ngSubmit)="getCacheInfo()">
       <input type="text" name="cacheInfo" class="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
       <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
-    </form>
-  </div>
-  <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
-  <div class="group">
-    <form (ngSubmit)="startJob()">
-      <div class="inputGroupGrow">
-        <div class="info">{{'ADMIN.TOOLKIT.JOB_CLASS' | translate }}</div>
-        <input type="text" name="jobClass" [(ngModel)]="job.class" placeholder="org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob">
-      </div>
-      <textarea name="jobParams" class="jobParams" [(ngModel)]="job.params" placeholder='{"param1":"value1","param2":"value2"}'></textarea>
-      <div class="btn-flat btn-shadow" (click)="startJob()">{{'ADMIN.TOOLKIT.START_JOB' | translate }}</div>
     </form>
   </div>
   <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
