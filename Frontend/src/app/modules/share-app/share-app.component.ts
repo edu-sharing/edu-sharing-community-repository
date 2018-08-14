@@ -260,7 +260,7 @@ export class ShareAppComponent {
             }
         }
         this.title = this.translate.instant('SHARE_APP.TEXT_SNIPPET')+" "+
-            DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+"."+filetype;
+            DateHelper.formatDate(this.translate,new Date().getTime(),{showAlwaysTime:true,useRelativeLabels:false})+"."+filetype;
         this.file = (new Blob([this.uri], {
             type: this.mimetype
         }) as any);
