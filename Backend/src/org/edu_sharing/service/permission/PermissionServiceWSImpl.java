@@ -182,6 +182,11 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
+	public void setPermissionInherit(String nodeId, boolean inheritPermission) throws Exception {
+		this.setPermissions(nodeId, Arrays.asList(getPermissions(nodeId).getAces()),inheritPermission);
+	}
+
+	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {
 		try {
