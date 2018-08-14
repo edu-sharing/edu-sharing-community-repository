@@ -8,7 +8,10 @@ export class NodeDatePipe implements PipeTransform {
     let time=false;
     if(args && args.time)
       time=args.time;
-    return DateHelper.formatDate(this.translate,value,time);
+    let relative=true;
+    if(args && args.relative!==null)
+        relative=args.relative;
+    return DateHelper.formatDate(this.translate,value,time,relative);
   }
   constructor(private translate : TranslateService){}
 }
