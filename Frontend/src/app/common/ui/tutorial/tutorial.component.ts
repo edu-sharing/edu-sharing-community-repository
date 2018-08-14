@@ -120,12 +120,12 @@ export class TutorialComponent implements OnInit {
             }
             if (diffX > 0) {
                 this.pos.left = Math.min(window.innerWidth-pos.width,diffX) + "px";
-                this.pos.top = Math.max(0,(y-pos.height/2)) + "px";
+                this.pos.top = Math.max(0,(window.innerHeight/2-pos.height/2)) + "px";
                 this.pos.width = (window.innerWidth-y-size) + "px";
             }
             if (diffY > 0) {
                 this.pos.top = Math.min(window.innerHeight-pos.height,diffY) + "px";
-                this.pos.left = Math.max(0,(x-pos.width/2)) + "px";
+                this.pos.left = Math.max(0,(window.innerWidth/2-pos.width/2)) + "px";
             }
         });
     },1000/30);
