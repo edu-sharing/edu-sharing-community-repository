@@ -3,6 +3,7 @@ package org.edu_sharing.service.lifecycle;
 
 
 import java.security.acl.Owner;
+import java.util.Arrays;
 import java.util.List;
 
 import org.alfresco.model.ContentModel;
@@ -21,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
+
 
 /**
  * Konzept LöschJob -> status todelete
@@ -49,10 +51,20 @@ import org.springframework.context.ApplicationContext;
  * 
  * filtered in invite dialogs
  * 
- * 
+ * cause of owner (first/lastname) remove file from properties cache
  * 
  */
 public class PersonLifecycleService {
+	
+	public static String ROLE_STUDENT = "student";
+	public static String ROLE_EXTERNAL = "external";
+	public static String ROLE_TEACHER_TRAINEES = "teacher_trainees";
+	public String[] ROLE_GROUP_REMOVE_SHARED = {ROLE_STUDENT,ROLE_EXTERNAL,ROLE_TEACHER_TRAINEES};
+	
+	public static String ROLE_TEACHER = "teacher";
+	public static String ROLE_STAFF = "staff";
+	public String[] ROLE_GROUP_KEEP_SHARED = {ROLE_TEACHER,ROLE_STAFF};
+	
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -119,24 +131,44 @@ public class PersonLifecycleService {
 		for(ChildAssociationRef childAssoc : childAssocs) {
 			String mapType = (String)nodeService.getProperty(childAssoc.getChildRef(), QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
 			if(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)){
-				deleteSharedContent(childAssoc.getChildRef(), role, username);
+				/**
+				 * @TODO find out instance owner
+				 */
+				deleteSharedContent(childAssoc.getChildRef(), role, username,"admin");
 			}
 		}
 	}
 	
-	private void deleteSharedContent(NodeRef parent, String role, String user){
+	private void deleteSharedContent(NodeRef parent, String role, String user, String instanceOwner){
 		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(parent);
 		for(ChildAssociationRef childAssoc : childAssocs) {
+			NodeRef nodeRef = childAssoc.getChildRef();
+			
 			QName nodeType = nodeService.getType(childAssoc.getChildRef());
+			
 			if(nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_IO))){
-				
-				String owner = (String)ownableService.getOwner(childAssoc.getChildRef());
+				String owner = (String)ownableService.getOwner(nodeRef);
 				if(owner.equals(user)) {
+					String licenseKey = (String)nodeService.getProperty(nodeRef, 
+							QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
 					
+					if(!licenseKey.startsWith("CC_")) {
+						if(Arrays.asList(ROLE_GROUP_REMOVE_SHARED).contains(role)) {
+							/**
+							 * remove without archiving
+							 */
+							nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
+							nodeService.deleteNode(nodeRef);
+						}if(Arrays.asList(ROLE_GROUP_KEEP_SHARED).contains(role)) {
+							ownableService.setOwner(nodeRef, instanceOwner);
+						}
+					}else {
+						ownableService.setOwner(nodeRef, instanceOwner);
+					}
 				}
 			}
 			if(nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
-				
+				deleteSharedContent(nodeRef, role, user, instanceOwner);
 			}
 		}
 	}
