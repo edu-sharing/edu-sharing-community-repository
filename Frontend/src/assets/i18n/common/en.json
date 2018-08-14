@@ -124,6 +124,7 @@
     "WORKSPACE_SHORT":"Workspace",
     "SEARCH_SHORT":"Search",
     "COLLECTIONS_SHORT":"Collections",
+    "STREAM_SHORT":"Stream",
     "SECURE_SHORT":"Safe",
     "PERMISSIONS_SHORT":"Users",
     "LOGIN_SHORT":"Login",
