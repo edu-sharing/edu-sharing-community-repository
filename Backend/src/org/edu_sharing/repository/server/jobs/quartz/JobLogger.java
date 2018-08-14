@@ -29,7 +29,6 @@ public class JobLogger extends ConsoleAppender {
     }
 
     private void init() {
-        System.out.println("Inited logger for jobs");
     }
 
     @Override
