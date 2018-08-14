@@ -47,8 +47,8 @@ export class TutorialComponent implements OnInit {
   }
   wasTutorialShown(heading:string){
     let item=localStorage.getItem('TUTORIAL.'+heading);
-    //return item;
-    return false;
+    return item;
+    //return false;
   }
   setTutorialShown(heading:string){
     localStorage.setItem('TUTORIAL.'+heading,"true");
