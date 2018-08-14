@@ -125,6 +125,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		 * remove the inherited from the old and new
 		 */
 		List<ACE> acesNew = new ArrayList<ACE>(aces);
+		acesNew=addCollectionCoordinatorPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),acesNew);
 		Iterator<ACE> acesNewIter = acesNew.iterator();
 		while (acesNewIter.hasNext()) {
 			ACE ace = acesNewIter.next();
@@ -604,6 +605,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			logger.info("setInheritParentPermissions " + inheritPermission);
 			permissionsService.setInheritParentPermissions(nodeRef, inheritPermission);
 		}
+	}
+	@Override
+	public void setPermissionInherit(String nodeId,boolean inheritPermission) throws Exception {
+		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
+		permissionService.setInheritParentPermissions(nodeRef,inheritPermission);
 	}
 
 	private List<ACE> addCollectionCoordinatorPermission(NodeRef nodeRef, List<ACE> aces) {
