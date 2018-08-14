@@ -19,6 +19,7 @@
       "LIST_PARENT_FOLDER_MISSING": "Der ursprüngliche Speicherort ist nicht verfügbar:",
       "UNDERSTAND": "Verstanden",
       "FALLBACK_PARENT_NOT_EXISTS": "wurde nach Dokumente verschoben",
+      "FALLBACK_PARENT_NO_PERMISSION": "wurde nach Dokumente verschoben",
       "DUPLICATENAME": "wurde umbenannt",
       "FINE": "Ok"
     },

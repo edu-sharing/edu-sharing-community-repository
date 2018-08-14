@@ -19,7 +19,7 @@ export class TutorialComponent implements OnInit {
   background: SafeStyle;
   show = false;
   private interval: any;
-  padding:any={};
+  pos:any={};
   @Input() rgbColor = [0,0,0];
   //@Input() rgbColor = [72,112,142];
   @Input() showSkip = true;
@@ -96,22 +96,38 @@ export class TutorialComponent implements OnInit {
             if(!this.tutorial || !this.tutorial.nativeElement)
                 return;
             let pos=this.tutorial.nativeElement.getBoundingClientRect();
-            this.padding={};
-            let spaceX=(window.innerWidth-x+size)*window.innerHeight;
-            let spaceY=(window.innerHeight-y+size)*window.innerWidth;
-            if(spaceX>spaceY) {
-                let diffX=TutorialComponent.PADDING_TOLERANCE + x+size-pos.left;
-                if (diffX > 0) {
-                    this.padding.left = diffX + "px";
-                }
+            this.pos={};
+            let space:number[]=[]
+            space.push((window.innerWidth-x-size)*window.innerHeight);
+            space.push((window.innerHeight-y-size)*window.innerWidth);
+            space.push((x-size)*window.innerHeight);
+            space.push((y-size)*window.innerWidth);
+
+            let maxIndex=space.indexOf(Math.max(...space));
+            let diffX=0,diffY=0;
+            console.log(space);
+            if(maxIndex==0) {
+                diffX=x+size;
             }
-            else{
-                let diffY=TutorialComponent.PADDING_TOLERANCE + y+size-pos.top;
-                if (diffY > 0) {
-                    this.padding.top = diffY + "px";
-                }
+            if(maxIndex==1){
+                diffY=y+size;
+            }
+            if(maxIndex==2) {
+                diffX=1;
+            }
+            if(maxIndex==3) {
+                diffY=1;
+            }
+            if (diffX > 0) {
+                this.pos.left = Math.min(window.innerWidth-pos.width,diffX) + "px";
+                this.pos.top = Math.max(0,(window.innerHeight/2-pos.height/2)) + "px";
+                this.pos.width = (window.innerWidth-y-size) + "px";
+            }
+            if (diffY > 0) {
+                this.pos.top = Math.min(window.innerHeight-pos.height,diffY) + "px";
+                this.pos.left = Math.max(0,(window.innerWidth/2-pos.width/2)) + "px";
             }
         });
-    },1000/60);
+    },1000/30);
   }
 }

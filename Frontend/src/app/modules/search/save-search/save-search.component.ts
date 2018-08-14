@@ -35,6 +35,6 @@ export class SearchSaveSearchComponent {
     this.onSave.emit(this._name);
   }
   private setName(searchQuery: string=null) {
-    this._name=(searchQuery ? searchQuery : this.translate.instant('SEARCH.SAVE_SEARCH.UNKNOWN_QUERY'))+" - "+DateHelper.formatDate(this.translate,Date.now(),true,false);
+    this._name=(searchQuery ? searchQuery : this.translate.instant('SEARCH.SAVE_SEARCH.UNKNOWN_QUERY'))+" - "+DateHelper.formatDate(this.translate,Date.now(),{showAlwaysTime:true,useRelativeLabels:false});
   }
 }
