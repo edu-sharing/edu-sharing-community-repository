@@ -1,6 +1,7 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface NodeService {
 
@@ -31,7 +33,7 @@ public interface NodeService {
 
 	public HashMap<String, String[]> getNameProperty(String name);
 	
-	public HashMap<String, Object> getChild(StoreRef store, String parentId, String type, String property, String value);
+	public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
 	
 	public void setOwner(String nodeId, String username);
 	
@@ -42,10 +44,10 @@ public interface NodeService {
 	public String getOrCreateUserSavedSearch();
 
 	default List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID){
-		return getChildrenChildAssociationRefAssoc(parentID,null);
+		return getChildrenChildAssociationRefAssoc(parentID,null, null, new SortDefinition());
 	}
 
-    public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName);
+    public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
 
 	public void createVersion(String nodeId, HashMap _properties) throws Exception;
 	
@@ -85,7 +87,7 @@ public interface NodeService {
 
 	public void removeAspect(String nodeId, String aspect);
 
-	public void updateNodeNative(String nodeId, HashMap<String, Object> _props);
+    public void updateNodeNative(String nodeId, HashMap<String, Object> _props);
 
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property);
 
