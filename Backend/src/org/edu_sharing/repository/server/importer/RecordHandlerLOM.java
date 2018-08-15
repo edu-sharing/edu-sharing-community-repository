@@ -72,7 +72,7 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		this.metadataSetId = metadataSetId;
 	}
 	public void handleRecord(Node nodeRecord, String cursor, String set) throws Throwable {
-		logger.debug("starting...");
+		logger.debug("starting handleRecord()");
 
 		toSafeMap.clear();
 
@@ -184,7 +184,7 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 							tmpLCList.add(entity);
 							replLifecycleContributer.put(lc_property, tmpLCList);
 						}else{
-							logger.error("can not map lifecycle contributer role "+role+" to edu-sharing property");
+							logger.warn("can not map lifecycle contributer role "+role+" to edu-sharing property");
 						}
 					}
 				}
@@ -517,12 +517,10 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		 */
 		
 
-		logger.debug("returning");
-		
+
 	}
 	
 	public HashMap getMultiLangValue(Node node) throws XPathExpressionException {
-		logger.debug("starting");
 		HashMap result = new HashMap();
 		if (node != null) {
 			NodeList langList = (NodeList) xpath.evaluate("string", node, XPathConstants.NODESET);
@@ -541,12 +539,10 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 				}
 			}
 		}
-		logger.debug("returning");
 		return result;
 	}
 
 	public List getMultivalue(Node parent, String nodeName) throws XPathExpressionException {
-		logger.debug("starting");
 		if (parent == null){
 			logger.debug("returning null cause parent == null");
 			return null;
@@ -571,7 +567,6 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 				}
 			}
 		}
-		logger.debug("returning");
 		if (result.size() > 0)
 			return result;
 		else
@@ -579,7 +574,6 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 	}
 
 	public ArrayList<HashMap<String, Object>> getContributes(Node parent) throws XPathExpressionException {
-		logger.debug("starting");
 		ArrayList<HashMap<String, Object>> result = new ArrayList<HashMap<String, Object>>();
 		NodeList contributes = (NodeList) xpath.evaluate("contribute", parent, XPathConstants.NODESET);
 		for (int i = 0; i < contributes.getLength(); i++) {
@@ -615,7 +609,6 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 			// @TODO contributeRoleSource
 			result.add(map);
 		}
-		logger.debug("returning");
 		if (result.size() > 0)
 			return result;
 		else
@@ -623,9 +616,7 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 	}
 	
 	private String adaptValue(String value) {
-		logger.debug("starting");
 		String result = org.htmlparser.util.Translate.decode(value);
-		logger.debug("returning");
 		return result;
 	}
 	

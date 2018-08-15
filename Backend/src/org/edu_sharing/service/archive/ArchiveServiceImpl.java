@@ -182,7 +182,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		if(!client.hasPermissions(destinationParentId, new String[]{CCConstants.PERMISSION_ADD_CHILDREN})){
 			try{
 				destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
-				restoreResult.setRestoreStatus(RESTORESTATUS_DUPLICATENAME);
+				restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NO_PERMISSION);
 			}catch(Throwable e){
 				logger.error(e.getMessage(), e);
 			}

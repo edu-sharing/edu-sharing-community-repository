@@ -133,7 +133,8 @@
       "USAGE_TYPE": {
         "LMS": "LMS-Kurse",
         "COLLECTION": "Sammlungen",
-        "DOWNLOAD": "Downloads"
+        "DOWNLOAD": "Downloads",
+        "VIEW": "Aufrufe"
       },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "Datei wurde erstellt",

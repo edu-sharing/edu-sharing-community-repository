@@ -22,6 +22,9 @@
   mds{
     flex-grow: 1;
   }
+  .search{
+    width: calc(100% - #{$cardPadding});
+  }
   .audience {
     h4 {
       font-size: 12pt;

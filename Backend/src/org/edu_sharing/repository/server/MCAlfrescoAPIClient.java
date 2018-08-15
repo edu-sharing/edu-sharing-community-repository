@@ -1568,7 +1568,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if (childs != null) {
 				properties.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT, "" + childs.size());
 			}
-			List<ChildAssociationRef> comments = CommentServiceFactory.getCommentService().getComments(nodeRef.getId());
+			List<NodeRef> comments = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_COMMENT);
 			if (comments != null) {
 				properties.put(CCConstants.VIRT_PROP_COMMENTCOUNT,comments.size());
 			}

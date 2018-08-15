@@ -1,5 +1,7 @@
 package org.edu_sharing.repository.server.importer;
 
+import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
+
 public interface Importer {
 	
 	public void setBaseUrl(String baseUrl);
@@ -21,5 +23,6 @@ public interface Importer {
 	public void startImport() throws Throwable;
 	
 	public void startImport(String[] oaiIDs, String set);
-	
+
+	public void setJob(ImporterJob importerJob);
 }

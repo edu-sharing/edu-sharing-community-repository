@@ -14,10 +14,15 @@ import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.service.admin.model.GlobalGroup;
+import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.admin.model.ToolPermission;
 
 public interface AdminService {
+
+    List<JobInfo> getJobs() throws Throwable;
+
+	void cancelJob(String jobName) throws Throwable;
 
 	void refreshApplicationInfo();
 

@@ -17,6 +17,15 @@ export class RestAdminService extends AbstractRestService{
   constructor(connector : RestConnectorService) {
     super(connector);
   }
+    public getJobs = (): Observable<any> => {
+        let query=this.connector.createUrl("admin/:version/jobs",null);
+        return this.connector.get(query,this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+    }
+    public cancelJob = (job:string): Observable<any> => {
+        let query=this.connector.createUrl("admin/:version/jobs/:job",null,[[":job",job]]);
+        return this.connector.delete(query,this.connector.getRequestOptions());
+    }
 
   public getToolpermissions = (authority:string) : Observable<any> => {
       let query=this.connector.createUrl("admin/:version/toolpermissions/:authority",null,[

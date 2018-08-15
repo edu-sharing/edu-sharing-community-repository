@@ -1,5 +1,5 @@
 <div class="tutorial" *ngIf="show" [@fade]="show" [style.background]="background">
-    <div #tutoral [style.paddingLeft]="padding.left" [style.paddingTop]="padding.top" class="align-tutorial" [class.align-tutorial-end]="alignEnd">
+    <div #tutoral [style.left]="pos.left" [style.top]="pos.top" [style.width]="pos.width" class="align-tutorial">
         <div class="heading">{{heading | translate}}</div>
         <div class="description">{{description | translate}}</div>
         <div class="buttons">

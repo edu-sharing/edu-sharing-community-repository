@@ -65,7 +65,7 @@
   "EDIT_ACCOUNT":"Manage account",
   "DEFAULT_METADATASET":"Default-Metadataset ({{name}})",
   "NO_MATCHES" : "No matches found",
-  "NO_CC_PUBLISH" : "Missing permission for publishing",
+  "NO_CC_PUBLISH" : "no publishing permissions for object",
   "ADD_TO_RECENT_COLLECTION":"Add to recent collection",
   "SEARCH_COLLECTIONS":"Search collection...",
   "ASK_CC_PUBLISH" : "Ask",
@@ -113,7 +113,6 @@
   "GOTO_LOGIN": "Go to login",
   "GOTO":"go to",
   "SIDEBAR":{
-    "WORKSPACE_OLD":"old workspace",
     "WORKSPACE":"Workspace",
     "SEARCH":"Search",
     "COLLECTIONS":"Collections",
@@ -121,7 +120,15 @@
     "SECURE":"Safe",
     "PERMISSIONS":"User management",
     "LOGIN":"Login",
-    "ADMIN":"Admin-Tools"
+    "ADMIN":"Admin-Tools",
+    "WORKSPACE_SHORT":"Workspace",
+    "SEARCH_SHORT":"Search",
+    "COLLECTIONS_SHORT":"Collections",
+    "STREAM_SHORT":"Stream",
+    "SECURE_SHORT":"Safe",
+    "PERMISSIONS_SHORT":"Users",
+    "LOGIN_SHORT":"Login",
+    "ADMIN_SHORT":"Admin"
   },
   "WORKFLOW":{
     "100_unchecked":"No status",

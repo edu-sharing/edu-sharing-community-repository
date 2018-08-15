@@ -241,6 +241,8 @@ public class CCConstants {
 
 	public final static String SYS_PROP_NODE_UID = "{http://www.alfresco.org/model/system/1.0}node-uuid";
 
+	public final static String SYS_PROP_NODE_DBID = "{http://www.alfresco.org/model/system/1.0}node-dbid";
+
 	public final static String SYS_PROP_STORE_PROTOCOL = "{http://www.alfresco.org/model/system/1.0}store-protocol";
 
 	public final static String SYS_PROP_STORE_IDENTIFIER = "{http://www.alfresco.org/model/system/1.0}store-identifier";
@@ -402,8 +404,12 @@ public class CCConstants {
 
 	public static final String CCM_PROP_WF_STATUS = "{http://www.campuscontent.de/model/1.0}wf_status";
 
+	public static final String CCM_PROP_TRACKING_DOWNLOADS = "{http://www.campuscontent.de/model/1.0}tracking_downloads";
 
-	public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
+	public static final String CCM_PROP_TRACKING_VIEWS = "{http://www.campuscontent.de/model/1.0}tracking_views";
+
+
+    public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
 	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";
 	public static String CCM_WF_STATUS_VALUE_HASFLAWS="300_hasflaws";
 	public static String CCM_WF_STATUS_VALUE_CHECKED="400_checked";
@@ -1768,9 +1774,13 @@ public class CCConstants {
 
 	public static String EDU_SHARING_PROPERTIES_ENABLE_STATISTICS_API= "enable_statistics_api";
 
+	public static String EDU_SHARING_PROPERTIES_PROPERTY_CORE_DBSCRIPTS = "core_dbscripts";
+
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS = "initial_dbscripts";
-	
-	/**
+
+    public static final String EDU_SHARING_PROPERTIES_PROPERTY_TRACKING_USER = "tracking_user";
+
+    /**
 	 * @return <namespace,localnamespace>
 	 */
 	public static HashMap<String, String> getNameSpaceMap() {

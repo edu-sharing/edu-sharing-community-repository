@@ -47,6 +47,11 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
+	public void setPermissionInherit(String nodeId, boolean inheritPermission) throws Exception {
+
+	}
+
+	@Override
 	public void addPermissions(String nodeId, ACE[] aces) throws Exception {
 	}
 

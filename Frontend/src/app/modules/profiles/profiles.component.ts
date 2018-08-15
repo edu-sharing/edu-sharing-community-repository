@@ -1,5 +1,5 @@
 
-import {Component} from "@angular/core";
+import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from "../../common/translation";
 import {UIHelper} from "../../common/ui/ui-helper";
 import {SessionStorageService} from "../../common/services/session-storage.service";
@@ -41,7 +41,7 @@ export class ProfilesComponent {
   private editProfile: boolean;
   private editProfileUrl: string;
   private avatarImage: any;
-
+  @ViewChild('avatar') avatarElement : ElementRef;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private title: Title,
@@ -81,9 +81,8 @@ export class ProfilesComponent {
     });
   }
   public updateAvatar(event:any){
-    if(event.srcElement.files && event.srcElement.files.length){
-      this.avatarFile=event.srcElement.files[0];
-      let reader = new FileReader();
+    if(this.avatarElement.nativeElement.files && this.avatarElement.nativeElement.files.length){
+      this.avatarFile=this.avatarElement.nativeElement.files[0];
       this.avatarImage=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(this.avatarFile));
     }
   }
