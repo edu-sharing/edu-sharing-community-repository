@@ -231,6 +231,7 @@ export class RestConstants {
 
   public static POSSIBLE_SORT_BY_FIELDS=[RestConstants.CM_NAME,
     RestConstants.CM_MODIFIED_DATE,
+    RestConstants.LOM_PROP_TITLE,
     RestConstants.CM_PROP_C_CREATED,
     RestConstants.CM_CREATOR,
     RestConstants.NODE_ID,
