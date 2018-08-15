@@ -68,8 +68,8 @@ public class MetadataTemplateRenderer {
 				+ "<div class='mdsContent'>";
 		String content=template.getHtml();
 		
-		for(MetadataWidget widget : mds.getWidgets()){
-			widget=mds.findWidgetForTemplate(widget.getId(),template.getId());
+		for(MetadataWidget srcWidget : mds.getWidgets()){
+			MetadataWidget widget=mds.findWidgetForTemplateAndCondition(srcWidget.getId(),template.getId(),properties);
 			int start=content.indexOf("<"+widget.getId());
 			if(start==-1)
 				continue;
