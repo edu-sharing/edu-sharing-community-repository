@@ -745,29 +745,41 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 cache.put(key2,prop2);
             }
             int compare=0;
-            if(prop1==null || prop2==null)
-                continue;
+            if(prop1==null && prop2!=null) {
+				try {
+					prop1=prop2.getClass().getConstructor().newInstance();
+				}catch(Throwable t){}
 
-            // some int fields are parsed as string. make sure to compare them correctly
-            // e.g. for collection sorting
+			}
+            else if(prop1!=null && prop2==null) {
+				try {
+					prop2=prop1.getClass().getConstructor().newInstance();
+				}catch(Throwable t){}
+			}
+			if(prop1==null && prop2==null){
+            	continue;
+			}
+            else {
+				// some int fields are parsed as string. make sure to compare them correctly
+				// e.g. for collection sorting
 
-            String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
-            if(fieldType.equals(Integer.class.getName())){
-                if(prop1 instanceof String && prop2 instanceof String){
-                    compare=Integer.compare(Integer.parseInt((String)prop1),Integer.parseInt((String)prop2));
-                }
-            }
+				String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
+				if (fieldType.equals(Integer.class.getName())) {
+					if (prop1 instanceof String && prop2 instanceof String) {
+						compare = Integer.compare(Integer.parseInt((String) prop1), Integer.parseInt((String) prop2));
+					}
+				}
 
-            if(compare==0) {
-                if (prop1 instanceof String && prop2 instanceof String) {
-                    compare = ((String) prop1).compareToIgnoreCase((String) prop2);
-                } else if (prop1 instanceof Date && prop2 instanceof Date) {
-                    compare = ((Date) prop1).compareTo((Date) prop2);
-                } else if (prop1 instanceof Comparable && prop2 instanceof Comparable) {
-                    compare = ((Comparable) prop1).compareTo((Comparable) prop2);
-                }
-            }
-
+				if (compare == 0) {
+					if (prop1 instanceof String && prop2 instanceof String) {
+						compare = ((String) prop1).compareToIgnoreCase((String) prop2);
+					} else if (prop1 instanceof Date && prop2 instanceof Date) {
+						compare = ((Date) prop1).compareTo((Date) prop2);
+					} else if (prop1 instanceof Comparable && prop2 instanceof Comparable) {
+						compare = ((Comparable) prop1).compareTo((Comparable) prop2);
+					}
+				}
+			}
             if(!entry.isAscending())
                 compare*=-1;
             if(compare!=0)
