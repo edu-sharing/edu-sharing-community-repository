@@ -740,7 +740,7 @@ export class ListTableComponent implements EventListener{
   }
 
     handleKeyboard(event:any) {
-        if(event.key=="ArrowUp" || event.key=="ArrowDown"){
+        if(this.viewType==ListTableComponent.VIEW_TYPE_LIST && (event.key=="ArrowUp" || event.key=="ArrowDown")){
             let next=event.key=="ArrowDown";
             let elements:any=document.getElementsByClassName("node-row");
             for(let i=0;i<elements.length;i++){
