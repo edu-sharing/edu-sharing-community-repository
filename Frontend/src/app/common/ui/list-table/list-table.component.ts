@@ -738,6 +738,25 @@ export class ListTableComponent implements EventListener{
   public getItemCssClass(item:ListItem){
     return item.type.toLowerCase()+"_"+item.name.replace(":","_");
   }
+
+    handleKeyboard(event:any) {
+        if(event.key=="ArrowUp" || event.key=="ArrowDown"){
+            let next=event.key=="ArrowDown";
+            let elements:any=document.getElementsByClassName("node-row");
+            for(let i=0;i<elements.length;i++){
+                let element=elements.item(i);
+                if(element==event.srcElement){
+                    if(next && i<elements.length-1)
+                        elements.item(i+1).focus();
+                    if(!next && i>0){
+                        elements.item(i-1).focus();
+                    }
+                }
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
 }
 export class AddElement{
   constructor(public label:string,public icon="add"){}
