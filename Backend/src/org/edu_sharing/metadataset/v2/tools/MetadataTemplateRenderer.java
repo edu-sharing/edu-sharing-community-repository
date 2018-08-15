@@ -179,7 +179,9 @@ public class MetadataTemplateRenderer {
 					if(!value.trim().isEmpty())
 						empty=false;
 					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-						value=widget.getFormat().replace("${value}",value);
+						if(widget.getFormat().contains("${value}")) {
+							value = widget.getFormat().replace("${value}", value);
+						}
 					}
 					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
 						widgetHtml+="<a href=\""+value+"\" target=\""+widget.getLink()+"\">";
