@@ -123,7 +123,7 @@
                         <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
                 </div>
             </div>
-            <div class="row waves-effect"
+            <div class="row waves-effect node-row"
                  [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
                  [class.noPermissions]="noPermissions(node)"
                  [class.selected]="getSelectedPos(node)!=-1"
@@ -135,6 +135,7 @@
                  (contextmenu)="contextMenu($event,node)"
                  (dragover)="allowDrag($event,node)"
                  (dragenter)="allowDrag($event,node)"
+                 (keydown)="handleKeyboard($event)"
                  (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
                 <div *ngIf="viewType==1 && node.properties && node.properties['virtual:childobjectcount']>0" class="childobjectCount">
                     <span>{{node.properties['virtual:childobjectcount']*1+1}}</span><i class="material-icons">filter_none</i>
