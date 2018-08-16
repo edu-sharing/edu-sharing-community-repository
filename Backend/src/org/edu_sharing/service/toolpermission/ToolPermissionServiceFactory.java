@@ -14,9 +14,16 @@ public class ToolPermissionServiceFactory {
 	static Logger logger = Logger.getLogger(ToolPermissionServiceFactory.class);
 	
 	static ToolPermissionService tps = null;
-	
+	public static List<String> getAllDefaultAllowedToolpermissions(){
+		List<String> toInit=getAllPredefinedToolPermissions();
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL); // safe
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL); // editorial collections
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM); // curriculum collections
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING); // pin collections
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE); // use handle id
+		return toInit;
+	}
 	public static List<String> getAllPredefinedToolPermissions(){
-		// @TODO Torsten: wouldn't it be much easier if we just return/copy an instance of ToolPermissionService.validToolPermissions?
 		List<String> toInit=new ArrayList<String>();
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
@@ -41,17 +48,21 @@ public class ToolPermissionServiceFactory {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
 
-		
+		addConnectorToolpermissions(toInit);
+		return toInit;
+	}
+
+	private static void addConnectorToolpermissions(List<String> toInit) {
 		ConnectorList connectorList =  ConnectorServiceFactory.getConnectorService().getConnectorList();
 		for(Connector c : connectorList.getConnectors()){
 			String tp = CCConstants.CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX + c.getId();
 			toInit.add(tp);
-			
+
 			String tp_safe = tp + "_safe";
 			toInit.add(tp_safe);
 		}
-		return toInit;
 	}
+
 	public static ToolPermissionService getInstance(){
 		if( tps == null){
 			 tps = new ToolPermissionService();
