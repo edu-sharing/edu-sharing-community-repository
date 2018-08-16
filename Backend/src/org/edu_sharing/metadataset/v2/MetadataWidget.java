@@ -22,6 +22,8 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	private static String[] MULTIVALUE_WIDGETS=new String[]{
 			"vcard",
+			"checkboxHorizontal",
+			"checkboxVertical",
 			"multivalueTree",
 			"multivalueBadges",
 			"multivalueFixedBadges",

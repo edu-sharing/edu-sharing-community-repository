@@ -4,6 +4,7 @@ import com.ibm.icu.text.SimpleDateFormat;
 import jersey.repackaged.com.google.common.collect.Lists;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 
-
 /**
  * Class for rendering mds templates for the RenderService as html
  * Needs the active mds and the node properties
@@ -30,6 +30,7 @@ public class MetadataTemplateRenderer {
 	private static final String GROUP_MULTIVALUE_DELIMITER = "[+]";
 	private MetadataSetV2 mds;
 	private Map<String, String[]> properties;
+	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
 
 	public MetadataTemplateRenderer(MetadataSetV2 mds,Map<String,String[]> properties) {
 		this.mds = mds;
@@ -68,8 +69,8 @@ public class MetadataTemplateRenderer {
 				+ "<div class='mdsContent'>";
 		String content=template.getHtml();
 		
-		for(MetadataWidget widget : mds.getWidgets()){
-			widget=mds.findWidgetForTemplate(widget.getId(),template.getId());
+		for(MetadataWidget srcWidget : mds.getWidgets()){
+			MetadataWidget widget=mds.findWidgetForTemplateAndCondition(srcWidget.getId(),template.getId(),properties);
 			int start=content.indexOf("<"+widget.getId());
 			if(start==-1)
 				continue;
@@ -169,7 +170,14 @@ public class MetadataTemplateRenderer {
 						if(widget.getType().equals("multivalueGroup")) {
                             value=formatGroupValue(value,widget);
                         }
-                    }
+						if(widget.getType().equals("checkbox")) {
+							try{
+								value = MetadataHelper.getTranslation(new Boolean(value) ? "boolean_yes" : "boolean_no");
+							}catch(Throwable t){
+								logger.info("Error parsing value "+value+" for checkbox widget "+widget.getId(),t);
+							}
+						}
+					}
 					if(valuesMap.containsKey(value))
 						value=valuesMap.get(value).getCaption();
 					widgetHtml+="<div>";
