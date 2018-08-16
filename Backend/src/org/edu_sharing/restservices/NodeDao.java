@@ -396,8 +396,6 @@ public class NodeDao {
 		this.hasPermissions = new PermissionServiceHelper(permissionService).hasAllPermissions(storeProtocol, storeId, nodeId);
 	}
 
-	private String renameNode(String oldName,int number){
-
     public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
         NodeEntries result=new NodeEntries();
         List<Node> nodes=new ArrayList<>();
