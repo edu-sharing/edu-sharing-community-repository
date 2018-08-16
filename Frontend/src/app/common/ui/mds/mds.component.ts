@@ -244,7 +244,7 @@ export class MdsComponent{
         let badges=document.getElementById(id);
         let elements:any=badges.childNodes;
         let add=true;
-        for(var i=0;i<elements.length;i++){
+        for(let i=0;i<elements.length;i++){
           if(elements[i].getAttribute('data-value')==searchField.value){
             add=false;
           }
