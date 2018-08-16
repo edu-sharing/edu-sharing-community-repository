@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.jobs.quartz;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggingEvent;
+import org.edu_sharing.repository.server.tools.cache.ShibbolethSessionsCache;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -12,6 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 public class JobLogger extends ConsoleAppender {
+
+    public static final List<Class> IGNORABLE_JOBS = new ArrayList<Class>();
+    static{
+        IGNORABLE_JOBS.add(SystemStatisticJob.class);
+    }
 
     public static String getLogsForJob(String className){
         String result="";

@@ -149,9 +149,6 @@ import org.edu_sharing.repository.client.rpc.SearchResult;
 import org.edu_sharing.repository.client.rpc.SearchToken;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSet;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetModelProperty;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetModelType;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQuery;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueryProperty;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSets;
@@ -785,12 +782,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		
 		return sr;
 	}
-	
+
 	@Override
 	public HashMap<String, HashMap<String, Object>> search(String luceneString, boolean eduGroupContext)
 			throws Throwable {
 		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
-		List<NodeRef> nodeRefs = searchNodeRefs(luceneString,eduGroupContext);
+		SearchParameters token=new SearchParameters();
+		token.setQuery(luceneString);
+		List<NodeRef> nodeRefs = searchNodeRefs(token,eduGroupContext);
 		for (NodeRef nodeRef : nodeRefs) {
 			try{
 				HashMap<String, Object> props = getProperties(nodeRef.getId());
@@ -801,48 +800,50 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 		return result;
 	}
-	
-	public List<NodeRef> searchNodeRefs(String luceneString, boolean eduGroupContext){
-		
-		ResultSet resultSet = null;
-		if(eduGroupContext){
-			
-			Set<String> authoritiesForUser = authorityService.getAuthorities();
-			List<String> eduGroupNames = Arrays.asList(EduGroupCache.getNames());
-			
-			List<String> eduGroupNamesOfUser = new ArrayList<String>();
-			for (String authority : authoritiesForUser) {
-				if(eduGroupNames.contains(authority)){
-					eduGroupNamesOfUser.add(authority);
-				}
-			}
-			
-			if(eduGroupNamesOfUser.size()==0){
-				// user has no org -> so no results
-				return new ArrayList<NodeRef>();
-			}
-			
-			ESSearchParameters essp = new ESSearchParameters();
-			essp.setAuthorities(eduGroupNamesOfUser.toArray(new String[eduGroupNamesOfUser.size()]));
-			essp.setQuery(luceneString);
-			essp.setLanguage(SearchService.LANGUAGE_LUCENE);
-			essp.addStore(storeRef);
-			essp.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
-			resultSet = searchService.query(essp);
-			
-		} else {
-			
-			SearchParameters parameters=new SearchParameters();
-			parameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-			parameters.setQuery(luceneString);
-			parameters.addStore(storeRef);
-			parameters.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
-			resultSet = searchService.query(parameters);
-			
-		}
-		
-		return resultSet.getNodeRefs();
-	}
+
+    public List<NodeRef> searchNodeRefs(SearchParameters token, boolean eduGroupContext){
+
+        ResultSet resultSet = null;
+        if(eduGroupContext){
+
+            Set<String> authoritiesForUser = authorityService.getAuthorities();
+            List<String> eduGroupNames = Arrays.asList(EduGroupCache.getNames());
+
+            List<String> eduGroupNamesOfUser = new ArrayList<String>();
+            for (String authority : authoritiesForUser) {
+                if(eduGroupNames.contains(authority)){
+                    eduGroupNamesOfUser.add(authority);
+                }
+            }
+
+            if(eduGroupNamesOfUser.size()==0){
+                // user has no org -> so no results
+                return new ArrayList<NodeRef>();
+            }
+
+            ESSearchParameters essp = new ESSearchParameters();
+            essp.setAuthorities(eduGroupNamesOfUser.toArray(new String[eduGroupNamesOfUser.size()]));
+            essp.setQuery(token.getQuery());
+            essp.setLanguage(SearchService.LANGUAGE_LUCENE);
+            essp.addStore(storeRef);
+            for(SearchParameters.SortDefinition def : token.getSortDefinitions()) {
+                essp.addSort(def);
+            }
+            resultSet = searchService.query(essp);
+
+        } else {
+
+            SearchParameters parameters=new SearchParameters();
+            parameters.setLanguage(SearchService.LANGUAGE_LUCENE);
+            parameters.setQuery(token.getQuery());
+            parameters.addStore(storeRef);
+            parameters.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
+            resultSet = searchService.query(parameters);
+
+        }
+
+        return resultSet.getNodeRefs();
+    }
 	
 
 	public String[] searchNodeIds(String luceneString) {

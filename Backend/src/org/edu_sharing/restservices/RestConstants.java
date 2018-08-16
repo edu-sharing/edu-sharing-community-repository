@@ -13,7 +13,7 @@ public class RestConstants {
 	public static final String MESSAGE_NODE_ID="ID of node";
 	public static final String MESSAGE_MAX_ITEMS=	"maximum items per page";
 	public static final String MESSAGE_SKIP_COUNT=	"skip a number of items";
-	public static final String MESSAGE_FILTER=		"filter by type files,folders or mime:any";
+	public static final String MESSAGE_FILTER=		"filter by type files,folders";
 	public static final String MESSAGE_SORT_PROPERTIES="sort properties";	
 	public static final String MESSAGE_SORT_ASCENDING="sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index";
 	public static final ApiResponse[] RETURN_TYPES = null;
@@ -25,7 +25,7 @@ public class RestConstants {
 	public static final String HTTP_404="Ressources are not found.";
 	public static final String HTTP_409="Duplicate Entity/Node conflict (Node with same name exists)";
 	public static final String HTTP_500="Fatal error occured.";
-	public static final String VALUES_FILTER = "files,folders,mime:<mime-type>";
+	public static final String VALUES_FILTER = "files,folders";
 	public static final String VALUES_SORT_PROPERTIES = "cm:name,cm:modifiedDate";
 	public static final int DEFAULT_MAX_ITEMS = 10;
 	public static final String MESSAGE_PROPERTY_FILTER = "property filter for result nodes (or \"-all-\" for all properties)";

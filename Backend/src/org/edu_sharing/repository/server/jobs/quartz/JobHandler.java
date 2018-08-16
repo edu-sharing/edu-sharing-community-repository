@@ -69,7 +69,7 @@ import org.w3c.dom.NodeList;
  */
 public class JobHandler {
 
-	private static final int MAX_JOB_LOG_COUNT = 100; // maximal number of jobs to store for history and gui
+	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
 	private static List<JobInfo> jobs = new ArrayList<>();
 
 	public boolean cancelJob(String jobName) throws SchedulerException {
@@ -414,6 +414,8 @@ public class JobHandler {
 	}
 
 	private void registerJob(JobDetail jobDetail) {
+		if(JobLogger.IGNORABLE_JOBS.contains(jobDetail.getJobClass()))
+			return;
 		JobInfo info=new JobInfo(jobDetail);
 		jobs.add(info);
 		while(jobs.size()>MAX_JOB_LOG_COUNT)

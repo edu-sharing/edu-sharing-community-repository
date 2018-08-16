@@ -585,7 +585,7 @@ public class MetadataReaderV2 {
 		return bundle;
 	}
 
-	private static String getTranslation(String i18n,String key,String fallback,String locale){
+	public static String getTranslation(String i18n, String key, String fallback, String locale){
 		String defaultValue=key;
 		if(fallback!=null)
 			defaultValue=fallback;

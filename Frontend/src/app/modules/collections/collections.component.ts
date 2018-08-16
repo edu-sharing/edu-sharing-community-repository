@@ -138,23 +138,22 @@ export class CollectionsMainComponent {
       })
     });
 
-    this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-      if(data.isValidLogin && data.currentScope==null) {
-        this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
-        this.isGuest=data.isGuest;
-        if(data.isValidLogin){
-          this.organizationService.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
-            this.hasOrganizations=data.organizations.length>0;
+      this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+        if(data.isValidLogin && data.currentScope==null) {
+          this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
+          this.isGuest=data.isGuest;
+          if(data.isValidLogin){
+            this.organizationService.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
+              this.hasOrganizations=data.organizations.length>0;
+            });
+          }
+          this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
+            this.hasEditorial=data.collections.length>0;
           });
-        }
-        this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
-          console.log(data);
-          this.hasEditorial=data.collections.length>0;
-        });
-        this.initialize();
-      }else
-        RestHelper.goToLogin(this.router,this.config);
-    },(error:any)=> RestHelper.goToLogin(this.router,this.config));
+          this.initialize();
+        }else
+          RestHelper.goToLogin(this.router,this.config);
+      },(error:any)=> RestHelper.goToLogin(this.router,this.config));
 
   }
   public isMobile(){
@@ -511,26 +510,27 @@ export class CollectionsMainComponent {
     // set correct scope
     let scope=this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
 
-    this.collectionService.getCollectionContent(this.collectionContent.collection.ref.id,
-      scope,
-      [RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR],
-      {sortBy: [
-          RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
-          RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
-          RestConstants.CM_MODIFIED_DATE
-        ],
-        sortAscending: [false,true,false]
-      },
-      this.collectionContent.collection.ref.repo
-    ).subscribe((collection:EduData.CollectionContent) => {
-      console.log(collection);
-      this.lastError = null;
-      // transfere sub collections and content
-      this.collectionContent.collections = collection.collections;
-      this.collectionContent.references = collection.references;
-      this.collectionContentOriginal=Helper.deepCopy(this.collectionContent);
-      // add an empty collection for the "add new colleciton" card
-      //if (this.isAllowedToEditCollection()) this.collectionContent.collections.unshift(new EduData.Collection());
+        this.collectionService.getCollectionContent(this.collectionContent.collection.ref.id,
+          scope,
+          [RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR],
+          {sortBy: [
+            RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+            RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+            RestConstants.CM_MODIFIED_DATE
+           ],
+            sortAscending: [false,true,false],
+            count:RestConstants.COUNT_UNLIMITED
+          },
+          this.collectionContent.collection.ref.repo
+        ).subscribe((collection:EduData.CollectionContent) => {
+            console.log(collection);
+            this.lastError = null;
+            // transfere sub collections and content
+            this.collectionContent.collections = collection.collections;
+            this.collectionContent.references = collection.references;
+            this.collectionContentOriginal=Helper.deepCopy(this.collectionContent);
+            // add an empty collection for the "add new colleciton" card
+            //if (this.isAllowedToEditCollection()) this.collectionContent.collections.unshift(new EduData.Collection());
 
 
             //this.sortCollectionContent();
