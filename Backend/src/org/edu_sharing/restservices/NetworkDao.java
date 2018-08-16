@@ -30,4 +30,12 @@ public class NetworkDao {
             throw DAOException.mapping(t);
         }
     }
+
+    public static StoredService getOwnService() throws DAOException {
+        try {
+            return NetworkServiceFactory.getNetworkService().getOwnService();
+        }catch(Throwable t){
+            throw DAOException.mapping(t);
+        }
+    }
 }

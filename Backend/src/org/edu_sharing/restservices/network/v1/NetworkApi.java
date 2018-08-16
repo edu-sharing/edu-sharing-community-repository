@@ -83,7 +83,30 @@ public class NetworkApi {
 
         return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
     }
-
+    @GET
+    @Path("/service")
+    @ApiOperation(
+            value = "Get own service.",
+            notes = "Get the servic entry from the current repository.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StoredService.class),
+                    @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+                    @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+                    @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+                    @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+                    @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+            })
+    public Response getService(
+            @Context HttpServletRequest req
+    ) {
+        try {
+            StoredService response = NetworkDao.getOwnService();
+            return Response.status(Response.Status.OK).entity(response).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
     @GET
     @Path("/services")
     @ApiOperation(
