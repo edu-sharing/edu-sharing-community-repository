@@ -74,6 +74,7 @@ export class StreamComponent {
   shouldOpen = false;
   routerSubscription: Subscription;
   dateToDisplay: string;
+  amountToRandomize: number;
 
   moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','arrow_upward',(node: Node)=>{
     this.updateStream(node, STREAM_STATUS.PROGRESS).subscribe( (data) => {
@@ -128,6 +129,7 @@ export class StreamComponent {
               this.connectorList=list;
           });
       });
+      this.amountToRandomize = 4;
       this.setStreamMode();
       this.routerSubscription = this.router.events
       .filter(e => e instanceof RoutesRecognized)
@@ -261,7 +263,7 @@ export class StreamComponent {
           progressStreams = data['stream'].filter( (n : any) => n.nodes.length !== 0);
           console.log("streams received: ",  progressStreams.concat(openStreams));
           unSortedStream = progressStreams.concat(openStreams);
-          this.randomizeTop(unSortedStream,3);
+          unSortedStream.length >= this.amountToRandomize ? this.randomizeTop(unSortedStream,this.amountToRandomize) : console.log('not big enough to randomize');
           this.streams = unSortedStream;
           console.log("objs: ",this.streams);
           this.imagesToLoad = this.streams.length;
@@ -280,6 +282,7 @@ export class StreamComponent {
   }
 
   randomizeTop(array: any, quantity: number) {
+      quantity = (quantity > 0) ? quantity - 1 : 0;
       for (let i = quantity; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [array[i], array[j]] = [array[j], array[i]];
