@@ -280,6 +280,7 @@
       "OER":"OER",
       "NOT_OER":"Kein OER",
       "SCHULFUNK_NAME":"Schulfunk (§47 UrhG)",
+      "UNTERRICHTS_UND_LEHRMEDIEN_NAME":"§60b Unterrichts- und Lehrmedien",
       "EDU_NAME":"edu-sharing Lizenzen",
       "CUSTOM_NAME":"eigene Lizenz definieren",
       "CURRENT":"Aktuell ausgewählte Lizenz",
@@ -329,7 +330,8 @@
         "CC_0":"Dieses Werk ist gemeinfrei.<br />Keine Attributierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
         "COPYRIGHT_FREE":"Das Werk ist kostenfrei zugänglich.<br />Nutzung und Quellenangabe gemäß den allgemeingültigen gesetzlichen Regelungen (UrhG).",
         "COPYRIGHT_LICENSE":"Das Werk darf ausschließlich vom lizenzierten Nutzerkreis gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
-        "SCHULFUNK":"Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis."
+        "SCHULFUNK":"Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
+        "UNTERRICHTS_UND_LEHRMEDIEN":"Hersteller von Unterrichts- und Lehrmedien dürfen für solche Sammlungen bis zu 10 Prozent eines veröffentlichten Werkes vervielfältigen, verbreiten und öffentlich zugänglich machen.<br />§ 60a Absatz 2 und 3 ist entsprechend anzuwenden.<br />Unterrichts- und Lehrmedien im Sinne dieses Gesetzes sind Sammlungen, die Werke einer größeren Anzahl von Urhebern vereinigen und ausschließlich zur Veranschaulichung des Unterrichts und der Lehre an Bildungseinrichtungen (§ 60a) zu nicht kommerziellen Zwecken geeignet, bestimmt und entsprechend gekennzeichnet sind."
       }
     },
     "TOAST":{

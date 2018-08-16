@@ -66,7 +66,7 @@ export class WorkspaceLicenseComponent  {
                      "in","it","ca","hr","mt","mk","nl",
                      "no","pl","pt","ro","es","th",
                      "uk","hu"];
-  public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","COPYRIGHT","CUSTOM"];
+  public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
   count: number;
   _nodes:Node[];
