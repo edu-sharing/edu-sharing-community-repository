@@ -94,7 +94,7 @@ public class SearchToken {
 				return queryBuilder.getSearchString();
 			return "("+queryBuilder.getSearchString()+") AND ("+luceneString+")";
 			*/
-			return luceneString+" "+MetadataSearchHelper.convertSearchCriteriasToLucene(searchCriterias);
+			return MetadataSearchHelper.convertSearchCriteriasToLucene(luceneString,searchCriterias);
 		}
 		return luceneString;
 	}

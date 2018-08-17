@@ -91,6 +91,8 @@ public class JobHandler {
 				return;
 			}
 		}
+		if(JobLogger.IGNORABLE_JOBS.contains(jobDetail.getJobClass()))
+			return;
 		throw new IllegalArgumentException("Job "+jobDetail.getFullName()+" was not found");
 	}
 
