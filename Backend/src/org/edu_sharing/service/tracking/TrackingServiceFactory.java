@@ -10,7 +10,7 @@ public class TrackingServiceFactory {
 		try {
 			return (TrackingService) Class.forName(TrackingService.class.getName()+"Custom").newInstance();
 		}catch(Throwable t) {
-		    logger.info("no class "+TrackingService.class.getName()+"Custom"+" found, will use default implementation for tracking");
+		    logger.debug("no class "+TrackingService.class.getName()+"Custom"+" found, will use default implementation for tracking");
 			//throw new RuntimeException(t);
             return new TrackingServiceImpl();
 

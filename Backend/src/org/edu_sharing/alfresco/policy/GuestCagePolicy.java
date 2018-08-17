@@ -60,7 +60,9 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 		//String currentUser = eduSharingWebappUser.get();
 		//System.out.println("guest current: "+currentUser);
 
-		if(!AuthenticationUtil.isRunAsUserTheSystemUser() && AuthenticationUtil.getFullyAuthenticatedUser() != null && AuthenticationUtil.getFullyAuthenticatedUser().equals(ApplicationInfoList.getHomeRepository().getGuest_username())){
+		if(AuthenticationUtil.getFullyAuthenticatedUser() != null
+				&& AuthenticationUtil.getFullyAuthenticatedUser().equals(ApplicationInfoList.getHomeRepository().getGuest_username())
+				&& !AuthenticationUtil.isRunAsUserTheSystemUser()){
 			throw new GuestPermissionDeniedException("guest has no permissions to do that");
 		}
 	}

@@ -1,6 +1,5 @@
 package org.edu_sharing.service.collection;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -21,6 +20,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
@@ -45,10 +45,10 @@ import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.restservices.CollectionDao;
-import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
+import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -58,6 +58,7 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -636,10 +637,11 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 	
 	@Override
-	public List<NodeRef> getChildReferences(String parentId, String scope) {
+	public List<NodeRef> getChildReferences(String parentId, String scope, SortDefinition sortDefinition) {
 		try{
 			if(parentId == null){
-				
+                SearchParameters searchParams=new SearchParameters();
+                sortDefinition.applyToSearchParameters(searchParams);
 				/**
 				 * @TODO owner + inherit off -> node will be found even if search is done in edu-group context 
 				 * level 0 nodes -> maybe cache level 0 with an node property
@@ -658,7 +660,8 @@ public class CollectionServiceImpl implements CollectionService{
 					queryString += " AND @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
 				}
 				List<NodeRef> returnVal = new ArrayList<>();
-				List<NodeRef> nodeRefs = client.searchNodeRefs(queryString,eduGroupScope);
+                searchParams.setQuery(queryString);
+				List<NodeRef> nodeRefs = client.searchNodeRefs(searchParams,eduGroupScope);
 				for(NodeRef nodeRef : nodeRefs){
 					if(isSubCollection(nodeRef)){
 						continue;
@@ -667,7 +670,7 @@ public class CollectionServiceImpl implements CollectionService{
 				}
 				return returnVal;
 			}else{
-				List<ChildAssociationRef> children =  client.getChildrenChildAssociationRef(parentId);
+				List<ChildAssociationRef> children =  nodeService.getChildrenChildAssociationRefAssoc(parentId,null,null,sortDefinition);
 				List<NodeRef> returnVal = new ArrayList<NodeRef>();
 				for(ChildAssociationRef child : children){
 					returnVal.add(child.getChildRef());
@@ -691,17 +694,17 @@ public class CollectionServiceImpl implements CollectionService{
 		String scope = collection.getScope();
 		boolean custom=(scope==null || scope.equals(Scope.CUSTOM.name()));
 		org.edu_sharing.repository.client.rpc.ACL acl=new org.edu_sharing.repository.client.rpc.ACL();
-		if(custom){
-			acl=client.getPermissions(collectionId);
-		}
+
 		List<org.edu_sharing.repository.client.rpc.ACE> aces=new ArrayList<>();
 		if(acl.getAces()!=null)
 			aces.addAll(Arrays.asList(acl.getAces()));
 
 		if(custom){
 			
-			if(!collection.isLevel0()) // TODO: don't allow inherition on root level -> this variable seems to be inverted?!
-				acl.setInherited(false);
+			if(!collection.isLevel0()) { // TODO: don't allow inherition on root level -> this variable seems to be inverted?!
+				permissionService.setPermissionInherit(collectionId, false);
+				return;
+			}
 
 		}
 		else{
@@ -732,7 +735,7 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 		
 		final ACL aclFinal = acl;
-		if(!custom && scope.equals(Scope.MY.name())){
+		if(scope.equals(Scope.MY.name())){
 			// We need to set inherition
 			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 				@Override
@@ -742,10 +745,6 @@ public class CollectionServiceImpl implements CollectionService{
 				}
 			});
 		}
-		else{
-			permissionService.setPermissions(collectionId, aces,aclFinal.isInherited());
-		}
-	
 	}
 
 	/**
@@ -799,7 +798,7 @@ public class CollectionServiceImpl implements CollectionService{
 
 	@Override
 	public void setOrder(String parentId, String[] nodes) {
-		List<NodeRef> refs=getChildReferences(parentId, null);
+		List<NodeRef> refs=getChildReferences(parentId, null, new SortDefinition());
 		int order=0;
 		
 		String mode=CCConstants.COLLECTION_ORDER_MODE_CUSTOM;

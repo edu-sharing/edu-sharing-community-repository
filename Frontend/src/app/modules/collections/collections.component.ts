@@ -152,7 +152,6 @@ export class CollectionsMainComponent implements GwtEventListener {
             });
           }
           this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
-            console.log(data);
             this.hasEditorial=data.collections.length>0;
           });
           this.initialize();
@@ -525,7 +524,8 @@ export class CollectionsMainComponent implements GwtEventListener {
             RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
             RestConstants.CM_MODIFIED_DATE
            ],
-            sortAscending: [false,true,false]
+            sortAscending: [false,true,false],
+            count:RestConstants.COUNT_UNLIMITED
           },
           this.collectionContent.collection.ref.repo
         ).subscribe((collection:EduData.CollectionContent) => {

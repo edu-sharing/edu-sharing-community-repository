@@ -8,6 +8,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -37,6 +38,7 @@ import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -84,7 +86,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
 	};
-	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
+    private DictionaryService dictionaryService;
+    String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	MetadataSets metadataSets = RepoFactory.getMetadataSetsForRepository(repositoryId);
 	private ServiceRegistry serviceRegistry = null;
 	private NodeService nodeService = null;
@@ -100,6 +103,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		nodeService = serviceRegistry.getNodeService();
+		dictionaryService = serviceRegistry.getDictionaryService();
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
 		application=ApplicationInfoList.getRepositoryInfoById(appId);
 		HashMap homeAuthInfo = null;
@@ -347,10 +351,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return null;
 	}
-	
-	public HashMap<String, HashMap<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
-		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
-		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+    public List<ChildAssociationRef> getChildrenAssocsByType(StoreRef store, String nodeId, String type) {
+        List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+        return childAssocList;
+    }
+
+    public HashMap<String, HashMap<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
+        HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
+        List<ChildAssociationRef> childAssocList = getChildrenAssocsByType(store,nodeId,type);
 		for (ChildAssociationRef child : childAssocList) {
 
 			String childType = nodeService.getType(child.getChildRef()).toString();
@@ -364,14 +372,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return result;
 	}
-	
-	public HashMap<String, Object> getChild(StoreRef store, String parentId, String type, String property, String value) {
-		HashMap<String, HashMap<String, Object>> children = this.getChildrenByType(store, parentId, type);
-		for (String childNodeId : children.keySet()) {
-			HashMap<String, Object> childProps = children.get(childNodeId);
-			String propValue = (String) childProps.get(property);
+
+	@Override
+	public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
+		List<ChildAssociationRef> children = this.getChildrenAssocsByType(store, parentId, type);
+		for (ChildAssociationRef child : children) {
+			Serializable propValue = nodeService.getProperty(child.getChildRef(),QName.createQName(property));
 			if (propValue != null && propValue.equals(value))
-				return childProps;
+				return child.getChildRef();
 		}
 		return null;
 	}
@@ -677,18 +685,151 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
 
-	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID,String assocName){
+    public <T>List<T> sortNodeRefList(List<T> list,List<String> filter, SortDefinition sortDefinition){
+	    // make a copy so we have a modifiable list object
+	    list=new ArrayList<>(list);
+        if(filter!=null && filter.size()>0){
+            List<T> filtered = new ArrayList<>();
+            for(T obj : list){
+                if(!shouldFilter(getAsNode(obj),filter)){
+                    filtered.add(obj);
+                }
+            }
+            list=filtered;
+        }
+        HashMap<String,Object> cache=new HashMap();
+        Collections.sort(list, (o1, o2) -> {
+            return sortNodes(cache,getAsNode(o1),getAsNode(o2),sortDefinition);
+        });
+        return list;
+    }
+
+    private <T> NodeRef getAsNode(T obj) {
+        NodeRef node;
+        if(obj instanceof ChildAssociationRef){
+            node=((ChildAssociationRef) obj).getChildRef();
+        }
+        else if(obj instanceof AssociationRef){
+            node=((AssociationRef) obj).getTargetRef();
+        }
+        else if(obj instanceof NodeRef){
+            node= (NodeRef) obj;
+        }
+        else{
+            throw new IllegalArgumentException("Given type not supported");
+        }
+        return node;
+    }
+
+    private int sortNodes(HashMap<String, Object> cache, NodeRef n1, NodeRef n2, SortDefinition sortDefinition) {
+        String type1=nodeService.getType(n1).toString();
+        String type2=nodeService.getType(n2).toString();
+        if(typeIsDirectory(type1)!=typeIsDirectory(type2)){
+            return typeIsDirectory(type1) ? -1 : 1;
+        }
+        if(!sortDefinition.hasContent())
+            return 0;
+        for(SortDefinition.SortDefinitionEntry entry : sortDefinition.getSortDefinitionEntries()){
+            QName prop = QName.createQName(CCConstants.getValidGlobalName(entry.getProperty()));
+            Object prop1,prop2;
+            String key1=n1.toString()+prop.toString();
+            String key2=n2.toString()+prop.toString();
+            if(cache.containsKey(key1)){
+                prop1=cache.get(key1);
+            }
+            else{
+                prop1 = nodeService.getProperty(n1, prop);
+                cache.put(key1,prop1);
+            }
+            if(cache.containsKey(key2)){
+                prop2=cache.get(key2);
+            }
+            else{
+                prop2 = nodeService.getProperty(n2, prop);
+                cache.put(key2,prop2);
+            }
+            int compare=0;
+            if(prop1==null && prop2!=null) {
+				try {
+					prop1=prop2.getClass().getConstructor().newInstance();
+				}catch(Throwable t){}
+
+			}
+            else if(prop1!=null && prop2==null) {
+				try {
+					prop2=prop1.getClass().getConstructor().newInstance();
+				}catch(Throwable t){}
+			}
+			if(prop1==null && prop2==null){
+            	continue;
+			}
+            else {
+				// some int fields are parsed as string. make sure to compare them correctly
+				// e.g. for collection sorting
+
+				String fieldType = dictionaryService.getProperty(prop).getDataType().getJavaClassName();
+				if (fieldType.equals(Integer.class.getName())) {
+					if (prop1 instanceof String && prop2 instanceof String) {
+						compare = Integer.compare(Integer.parseInt((String) prop1), Integer.parseInt((String) prop2));
+					}
+				}
+
+				if (compare == 0) {
+					if (prop1 instanceof String && prop2 instanceof String) {
+						compare = ((String) prop1).compareToIgnoreCase((String) prop2);
+					} else if (prop1 instanceof Date && prop2 instanceof Date) {
+						compare = ((Date) prop1).compareTo((Date) prop2);
+					} else if (prop1 instanceof Comparable && prop2 instanceof Comparable) {
+						compare = ((Comparable) prop1).compareTo((Comparable) prop2);
+					}
+				}
+			}
+            if(!entry.isAscending())
+                compare*=-1;
+            if(compare!=0)
+                return compare;
+        }
+        return 0;
+    }
+
+    private boolean shouldFilter(NodeRef node, List<String> filter) {
+        boolean shouldFilter = true;
+        for(String f : filter) {
+            boolean isDirectory = typeIsDirectory(nodeService.getType(node).toString());
+            if(f.equals("folders") && isDirectory){
+                shouldFilter=false;
+                break;
+            }
+            if(f.equals("files") && !isDirectory){
+                shouldFilter=false;
+                break;
+            }
+            if(f.startsWith("mime:")){
+                throw new IllegalArgumentException("Filtering by mime: is currently not supported");
+            }
+        }
+        return shouldFilter;
+    }
+
+    @Override
+	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String assocName, List<String> filter, SortDefinition sortDefinition){
 		NodeRef parentNodeRef = getParentRef(parentID);
-		if(assocName==null || assocName.isEmpty()){
-			return nodeService.getChildAssocs(parentNodeRef);
+        List<ChildAssociationRef> result;
+        if(assocName==null || assocName.isEmpty()){
+            result=nodeService.getChildAssocs(parentNodeRef);
 		}
 		else{
-			return nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
+            result=nodeService.getChildAssocs(parentNodeRef,QName.createQName(assocName),RegexQNamePattern.MATCH_ALL);
 		}
+        result=sortNodeRefList(result,filter,sortDefinition);
+        return result;
 	}
 
-	private NodeRef getParentRef(String parentID) {
+    private boolean typeIsDirectory(String type) {
+        return type.equals(CCConstants.CM_TYPE_FOLDER) || type.equals(CCConstants.CCM_TYPE_MAP);
+    }
+
+    private NodeRef getParentRef(String parentID) {
 		if (parentID == null) {
 
 			String startParentId = apiClient.getRootNodeId();

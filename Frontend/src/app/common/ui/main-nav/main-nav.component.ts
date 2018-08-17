@@ -552,8 +552,10 @@ export class MainNavComponent implements AfterViewInit{
       let pos=button.position;
       if(pos<0)
         pos=this.sidebarButtons.length-pos;
+      button.isCustom=true;
       this.sidebarButtons.splice(pos,0,button);
     }
+    console.log(this.sidebarButtons);
   }
 
   private finishLogout() {

@@ -69,7 +69,7 @@ export class ConfigurationHelper {
     }
     return metadatasets;
   }
-  public static filterValidRepositories(repositories: Repository[], config: ConfigurationService) {
+  public static filterValidRepositories(repositories: Repository[], config: ConfigurationService,onlyLocal : boolean) {
     let validRepositories = config.instant("availableRepositories");
     if (validRepositories && validRepositories.length) {
       for (let i = 0; i < repositories.length; i++) {
@@ -81,6 +81,14 @@ export class ConfigurationHelper {
         }
       }
     }
+      if (onlyLocal) {
+          for (let i = 0; i < repositories.length; i++) {
+              if (!repositories[i].isHomeRepo) {
+                  repositories.splice(i, 1);
+                  i--;
+              }
+          }
+      }
     return repositories;
   }
 }
