@@ -69,7 +69,7 @@ public class StatisticDao {
 				if(count>0) {
 					StatisticsGlobal.KeyGroup entry=new StatisticsGlobal.KeyGroup();
 					entry.key = g;
-					entry.displayName = I18nAngular.getTranslationAngular("workspace", "WORKSPACE.LICENSE." + g + "_NAME");
+					entry.displayName = I18nAngular.getTranslationAngular("common", "LICENSE." + g);
 					entry.count = count;
 					groups.add(entry);
 					entry.subGroups =getFacettes(lucene,subGroup);
