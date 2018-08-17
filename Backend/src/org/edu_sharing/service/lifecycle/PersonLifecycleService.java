@@ -2,7 +2,6 @@ package org.edu_sharing.service.lifecycle;
 
 
 
-import java.security.acl.Owner;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,6 +20,8 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.authentication.ScopeUserHomeService;
+import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 
@@ -52,6 +53,10 @@ import org.springframework.context.ApplicationContext;
  * filtered in invite dialogs
  * 
  * cause of owner (first/lastname) remove file from properties cache
+ * 
+ * 
+ * @TODO find out instance owner
+ * @TODO delete userhome keep CC
  * 
  */
 public class PersonLifecycleService {
@@ -110,11 +115,26 @@ public class PersonLifecycleService {
 			String status = (String)nodeService.getProperty(nodeRef, 
 					QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
 			String role = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
+			String userName = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
 			if(status != null && PERSON_STATUS_TODELETE.equals(status)) {
 				
+				/**
+				 * remove scope safe
+				 */
+				logger.info("deleting safe shared folders for " + userName);
+				deleteSharedContent(nodeRef, role, CCConstants.CCM_VALUE_SCOPE_SAFE);
+				logger.info("deleting safe userhome folders for " + userName);
+				deleteScopeUserHome(userName, CCConstants.CCM_VALUE_SCOPE_SAFE, false);
 				
-				deleteSharedContent(nodeRef, role);
-				deleteUserHome(nodeRef,false);
+				/**
+				 * remove default
+				 */
+				logger.info("deleting shared folders for " + userName);
+				deleteSharedContent(nodeRef, role, null);
+				logger.info("deleting userhome folders for " + userName);
+				deleteUserHome(nodeRef, false);
+				
+				logger.info("deleting person");
 				personService.deletePerson(nodeRef,true);
 			}
 		}
@@ -123,10 +143,16 @@ public class PersonLifecycleService {
 		}
 	}
 	
-	private void deleteSharedContent(NodeRef personNodeRef, String role) {
+	private void deleteSharedContent(NodeRef personNodeRef, String role, String scope) {
 		String username = (String)nodeService.getProperty(personNodeRef, 
 				QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-		NodeRef homeFolder = getHomeFolder(personNodeRef);
+		NodeRef homeFolder = null;
+		if(scope == null) {
+			homeFolder = getHomeFolder(personNodeRef);
+		}else {
+			ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
+			homeFolder = scopeUserHomeService.getUserHome(username, scope);
+		}
 		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(homeFolder);
 		for(ChildAssociationRef childAssoc : childAssocs) {
 			String mapType = (String)nodeService.getProperty(childAssoc.getChildRef(), QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
@@ -138,6 +164,7 @@ public class PersonLifecycleService {
 			}
 		}
 	}
+	
 	
 	private void deleteSharedContent(NodeRef parent, String role, String user, String instanceOwner){
 		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(parent);
@@ -173,6 +200,24 @@ public class PersonLifecycleService {
 		}
 	}
 	
+	private void deleteScopeUserHome(String username, String scope, boolean keepCC) {
+		ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
+		NodeRef homeFolder = scopeUserHomeService.getUserHome(username, scope);
+		if(keepCC) {
+			//@TODO
+			logger.info("not implemented yet");
+			return;
+		}else {
+			/**
+			 * remove without archiving
+			 */
+			nodeService.addAspect(homeFolder, ContentModel.ASPECT_TEMPORARY, null);
+			nodeService.deleteNode(homeFolder);
+		}
+	}
+	
+	
+	
 	private boolean keepSharedContent(String role){
 		return false;
 	}
@@ -180,6 +225,7 @@ public class PersonLifecycleService {
 		NodeRef homeFolder = getHomeFolder(personNodeRef);
 		
 		if(keepCC) {
+			//@TODO
 			logger.info("not implemented yet");
 			return;
 		}else {
