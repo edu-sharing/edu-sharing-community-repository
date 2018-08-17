@@ -8,6 +8,7 @@ import org.edu_sharing.alfresco.service.AuthorityService;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.statistic.v1.model.Filter;
@@ -40,7 +41,7 @@ public class StatisticDao {
 	public static StatisticsGlobal getGlobal(String group, List<String> subGroup) throws DAOException {
 		try {
             String activate=RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_ENABLE_STATISTICS_API);
-            if(activate==null || !new Boolean(activate)){
+            if(activate==null || !new Boolean(activate) && !new MCAlfrescoAPIClient().isAdmin()){
                 throw new SecurityException("enable_statistics_api is not set to true in edu-sharing.properties. No access allowed");
             }
             if(subGroup==null) {
@@ -64,15 +65,15 @@ public class StatisticDao {
             statistics.setOverall(overall);
             for(String g : getPrimaryGroup(group)) {
 				String lucene=escapeProperty(getGroupProperty(group))+":\""+g+"\"";
-				StatisticsGlobal.KeyGroup entry=new StatisticsGlobal.KeyGroup();
-                entry.key=g;
-                entry.displayName=I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE."+g+"_NAME");
-				entry.count=countElements(lucene);
-				if(entry.count>0) {
+				int count=countElements(lucene);
+				if(count>0) {
+					StatisticsGlobal.KeyGroup entry=new StatisticsGlobal.KeyGroup();
+					entry.key = g;
+					entry.displayName = I18nAngular.getTranslationAngular("workspace", "WORKSPACE.LICENSE." + g + "_NAME");
+					entry.count = count;
 					groups.add(entry);
+					entry.subGroups =getFacettes(lucene,subGroup);
 				}
-				entry.subGroups =getFacettes(lucene,subGroup);
-
 			}
 			statistics.setGroups(groups);
             statistics.setUser(getUser());
