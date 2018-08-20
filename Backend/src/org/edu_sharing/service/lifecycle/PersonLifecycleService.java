@@ -64,10 +64,16 @@ import com.google.gwt.i18n.client.Constants;
  * 
  * 
  * @TODO find out instance owner
+ * @TODO changing owner to instanceowner, remove old contributer
+ * --> no username use firstName and lastName
+ * 		Problems: user with same name, and marriage
  * @TODO delete userhome keep CC
  * @TODO instanceowner instead of creator in gui (workspace column)
  * @TODO Collections (only level 0?)
- * 
+ * @TODO shared content config ROLE_GROUP_REMOVE_SHARED delete cc vs not delete cc
+ * @TODO function for changing owner of colletion to another user (asking new user?)
+ * @TODO check if Folders must be deleted in shared area, check if basket is necessary
+ * @TODO filter for TODELETE_STATUS already in search query
  */
 public class PersonLifecycleService {
 	
@@ -239,7 +245,8 @@ public class PersonLifecycleService {
 	public void deleteCollections(String userName) {
 
 		SearchParameters sp = new SearchParameters();
-		sp.setQuery("ASPECT:\"ccm:collection\" AND @ccm\\:collectionlevel0:true AND OWNER:\""+userName+"\"");
+		//sp.setQuery("ASPECT:\"ccm:collection\" AND @ccm\\:collectionlevel0:true AND OWNER:\""+userName+"\"");
+		sp.setQuery("ASPECT:\"ccm:collection\" AND OWNER:\""+userName+"\"");
 		sp.setSkipCount(0);
 		sp.setMaxItems(-1);
 		sp.addStore(MCAlfrescoAPIClient.storeRef);
