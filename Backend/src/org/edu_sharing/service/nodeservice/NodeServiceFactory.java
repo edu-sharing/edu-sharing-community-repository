@@ -2,6 +2,7 @@ package org.edu_sharing.service.nodeservice;
 
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 public class NodeServiceFactory {
 
@@ -11,7 +12,9 @@ public class NodeServiceFactory {
 		ApplicationInfo appInfo = (appId == null) ? ApplicationInfoList.getHomeRepository() : ApplicationInfoList.getRepositoryInfoById(appId);
 		
 		if(appInfo.getNodeService() == null || appInfo.getNodeService().trim().equals("")){
-			nodeService = new NodeServiceImpl(appId);
+			//nodeService = new NodeServiceImpl(appId);
+			return getLocalService();
+
 		}else{
 			try{
 				Class clazz = Class.forName(appInfo.getNodeService());
@@ -27,6 +30,6 @@ public class NodeServiceFactory {
 	}
 
 	public static NodeService getLocalService() {
-		return new NodeServiceImpl(ApplicationInfoList.getHomeRepository().getAppId());
+		return (NodeService)ApplicationContextFactory.getApplicationContext().getBean("nodeService");
 	}
 }

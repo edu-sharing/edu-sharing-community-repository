@@ -94,7 +94,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	Repository repositoryHelper = null;
 
 	MCAlfrescoAPIClient apiClient;
-	
+
+	public NodeServiceImpl() {
+		this(ApplicationInfoList.getHomeRepository().getAppId());
+	}
+
 	public NodeServiceImpl(String appId) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);

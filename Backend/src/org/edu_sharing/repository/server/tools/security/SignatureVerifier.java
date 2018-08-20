@@ -9,9 +9,11 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.PermissionServiceInterceptor;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.permission.PermissionService;
 
 public class SignatureVerifier {
 
@@ -121,15 +123,15 @@ public class SignatureVerifier {
 	 * @param runAsWork
 	 * @throws Exception 
 	 */
-	public static <T> T runAsAuthByUsage(String nodeId, HttpSession httpSession, RunAsWork<T> runAsWork){
+	public static <T> T runAsAuthByUsage(String nodeId, HttpSession httpSession, RunAsWork<T> runAsWork) {
 		String authSingleUseNodeId = (String)httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
 		String authSingleUseTs = (String)httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP);
-		if(authSingleUseNodeId != null 
-				&& authSingleUseNodeId.equals(nodeId) 
-				&& Long.parseLong(authSingleUseTs) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
-				return AuthenticationUtil.runAsSystem(runAsWork);
-		}else {
-			return AuthenticationUtil.runAs(runAsWork, AuthenticationUtil.getFullyAuthenticatedUser());
+		//PermissionServiceInterceptor.setSession(new PermissionServiceInterceptor.SignatureDetails(authSingleUseNodeId,Long.parseLong(authSingleUseTs)));
+		//return AuthenticationUtil.runAsSystem(runAsWork);
+		try {
+			return runAsWork.doWork();
+		}catch(Exception e){
+			throw new RuntimeException(e);
 		}
 	}
 	
