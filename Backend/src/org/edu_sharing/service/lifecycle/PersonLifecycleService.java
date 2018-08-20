@@ -2,6 +2,7 @@ package org.edu_sharing.service.lifecycle;
 
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,9 +21,16 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.collection.CollectionService;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.springframework.context.ApplicationContext;
+
+import com.google.gdata.data.dublincore.Language;
+import com.google.gwt.i18n.client.Constants;
 
 
 /**
@@ -57,6 +65,8 @@ import org.springframework.context.ApplicationContext;
  * 
  * @TODO find out instance owner
  * @TODO delete userhome keep CC
+ * @TODO instanceowner instead of creator in gui (workspace column)
+ * @TODO Collections (only level 0?)
  * 
  */
 public class PersonLifecycleService {
@@ -112,34 +122,46 @@ public class PersonLifecycleService {
 		sp.setMaxItems(maxItems);
 		ResultSet rs = searchService.query(sp);
 		for(NodeRef nodeRef : rs.getNodeRefs()) {
-			String status = (String)nodeService.getProperty(nodeRef, 
-					QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
-			String role = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
-			String userName = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
-			if(status != null && PERSON_STATUS_TODELETE.equals(status)) {
-				
-				/**
-				 * remove scope safe
-				 */
-				logger.info("deleting safe shared folders for " + userName);
-				deleteSharedContent(nodeRef, role, CCConstants.CCM_VALUE_SCOPE_SAFE);
-				logger.info("deleting safe userhome folders for " + userName);
-				deleteScopeUserHome(userName, CCConstants.CCM_VALUE_SCOPE_SAFE, false);
-				
-				/**
-				 * remove default
-				 */
-				logger.info("deleting shared folders for " + userName);
-				deleteSharedContent(nodeRef, role, null);
-				logger.info("deleting userhome folders for " + userName);
-				deleteUserHome(nodeRef, false);
-				
-				logger.info("deleting person");
-				personService.deletePerson(nodeRef,true);
-			}
+			deletePerson(nodeRef);
 		}
 		if(rs.hasMore()) {
 			deletePersons(skipCount + maxItems);
+		}
+	}
+	
+	public void deletePerson(String username) {
+		NodeRef personNodeRef = personService.getPerson(username);
+		deletePerson(personNodeRef);
+	}
+	
+	public void deletePerson(NodeRef personNodeRef) {
+		String status = (String)nodeService.getProperty(personNodeRef, 
+				QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
+		String role = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION));
+		String userName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_USERNAME));
+		if(status != null && PERSON_STATUS_TODELETE.equals(status)) {
+			
+			/**
+			 * remove scope safe
+			 */
+			logger.info("deleting safe shared folders for " + userName);
+			deleteSharedContent(personNodeRef, role, CCConstants.CCM_VALUE_SCOPE_SAFE);
+			logger.info("deleting safe userhome folders for " + userName);
+			deleteScopeUserHome(userName, CCConstants.CCM_VALUE_SCOPE_SAFE, false);
+			
+			/**
+			 * remove default
+			 */
+			logger.info("deleting collections for " + userName);
+			deleteCollections(userName);
+			logger.info("deleting shared folders for " + userName);
+			deleteSharedContent(personNodeRef, role, null);
+			logger.info("deleting userhome folders for " + userName);
+			deleteUserHome(personNodeRef, false);
+			
+			logger.info("deleting person");
+			nodeService.addAspect(personNodeRef, ContentModel.ASPECT_TEMPORARY, null);
+			personService.deletePerson(personNodeRef,true);
 		}
 	}
 	
@@ -153,14 +175,16 @@ public class PersonLifecycleService {
 			ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
 			homeFolder = scopeUserHomeService.getUserHome(username, scope);
 		}
-		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(homeFolder);
-		for(ChildAssociationRef childAssoc : childAssocs) {
-			String mapType = (String)nodeService.getProperty(childAssoc.getChildRef(), QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
-			if(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)){
-				/**
-				 * @TODO find out instance owner
-				 */
-				deleteSharedContent(childAssoc.getChildRef(), role, username,"admin");
+		if(homeFolder != null) {
+			List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(homeFolder);
+			for(ChildAssociationRef childAssoc : childAssocs) {
+				String mapType = (String)nodeService.getProperty(childAssoc.getChildRef(), QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
+				if(CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)){
+					/**
+					 * @TODO find out instance owner
+					 */
+					deleteSharedContent(childAssoc.getChildRef(), role, username,"admin");
+				}
 			}
 		}
 	}
@@ -176,10 +200,20 @@ public class PersonLifecycleService {
 			if(nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_IO))){
 				String owner = (String)ownableService.getOwner(nodeRef);
 				if(owner.equals(user)) {
-					String licenseKey = (String)nodeService.getProperty(nodeRef, 
+					ArrayList<String> licenseKeys = (ArrayList<String>)nodeService.getProperty(nodeRef, 
 							QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
 					
-					if(!licenseKey.startsWith("CC_")) {
+					
+					boolean isCCLicense = false;
+					if(licenseKeys != null) {
+						for(String license : licenseKeys) {
+							if(license.startsWith("CC_")) {
+								isCCLicense = true;
+							}
+						}
+					}
+					
+					if(!isCCLicense) {
 						if(Arrays.asList(ROLE_GROUP_REMOVE_SHARED).contains(role)) {
 							/**
 							 * remove without archiving
@@ -188,9 +222,11 @@ public class PersonLifecycleService {
 							nodeService.deleteNode(nodeRef);
 						}if(Arrays.asList(ROLE_GROUP_KEEP_SHARED).contains(role)) {
 							ownableService.setOwner(nodeRef, instanceOwner);
+							new RepositoryCache().remove(nodeRef.getId());
 						}
 					}else {
 						ownableService.setOwner(nodeRef, instanceOwner);
+						new RepositoryCache().remove(nodeRef.getId());
 					}
 				}
 			}
@@ -200,9 +236,29 @@ public class PersonLifecycleService {
 		}
 	}
 	
+	public void deleteCollections(String userName) {
+
+		SearchParameters sp = new SearchParameters();
+		sp.setQuery("ASPECT:\"ccm:collection\" AND @ccm\\:collectionlevel0:true AND OWNER:\""+userName+"\"");
+		sp.setSkipCount(0);
+		sp.setMaxItems(-1);
+		sp.addStore(MCAlfrescoAPIClient.storeRef);
+		sp.setLanguage(SearchService.LANGUAGE_LUCENE);
+		ResultSet rs = searchService.query(sp);
+		for(NodeRef nodeRef : rs.getNodeRefs()) {
+			String collection = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_NAME));
+			logger.info("deleteing collection:" + collection);
+			nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
+			nodeService.deleteNode(nodeRef);
+		}
+	}
+	
 	private void deleteScopeUserHome(String username, String scope, boolean keepCC) {
 		ScopeUserHomeService scopeUserHomeService = ScopeUserHomeServiceFactory.getScopeUserHomeService();
 		NodeRef homeFolder = scopeUserHomeService.getUserHome(username, scope);
+		if(homeFolder == null) {
+			return;
+		}
 		if(keepCC) {
 			//@TODO
 			logger.info("not implemented yet");
