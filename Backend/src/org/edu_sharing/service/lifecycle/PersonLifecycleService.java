@@ -4,7 +4,9 @@ package org.edu_sharing.service.lifecycle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
@@ -22,15 +24,11 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
-import org.edu_sharing.service.collection.CollectionService;
-import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.springframework.context.ApplicationContext;
-
-import com.google.gdata.data.dublincore.Language;
-import com.google.gwt.i18n.client.Constants;
 
 
 /**
@@ -64,16 +62,19 @@ import com.google.gwt.i18n.client.Constants;
  * 
  * 
  * @TODO find out instance owner
- * @TODO changing owner to instanceowner, remove old contributer
- * --> no username use firstName and lastName
- * 		Problems: user with same name, and marriage
+ * 
  * @TODO delete userhome keep CC
  * @TODO instanceowner instead of creator in gui (workspace column)
  * @TODO Collections (only level 0?)
  * @TODO shared content config ROLE_GROUP_REMOVE_SHARED delete cc vs not delete cc
  * @TODO function for changing owner of collection to another user (asking new user?)
  * @TODO check if Folders must be deleted in shared area, check if basket is necessary
+ * 
+ * Test
  * @TODO filter for TODELETE_STATUS already in search query
+ * @TODO changing owner to instanceowner, remove old contributer
+ * --> no username use firstName and lastName
+ * 		Problems: user with same name, and marriage
  */
 public class PersonLifecycleService {
 	
@@ -112,6 +113,8 @@ public class PersonLifecycleService {
 	
 	boolean keepOERFilesInUserHome = false;
 	
+	boolean keepSharedCCFilesForNonTeachers = true;
+	
 	Logger logger = Logger.getLogger(PersonLifecycleService.class);
 	
 	//public static String ROLE_
@@ -123,7 +126,7 @@ public class PersonLifecycleService {
 	
 	private void deletePersons(int skipCount) {
 		SearchParameters sp = new SearchParameters();
-		sp.setQuery("TYPE:\"cm:person\"");
+		sp.setQuery("TYPE:\"cm:person\" AND @cm\\:espersonstatus:" + PERSON_STATUS_TODELETE);
 		sp.setSkipCount(skipCount);
 		sp.setMaxItems(maxItems);
 		ResultSet rs = searchService.query(sp);
@@ -221,18 +224,16 @@ public class PersonLifecycleService {
 					
 					if(!isCCLicense) {
 						if(Arrays.asList(ROLE_GROUP_REMOVE_SHARED).contains(role)) {
-							/**
-							 * remove without archiving
-							 */
-							nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
-							nodeService.deleteNode(nodeRef);
+							deleteNode(nodeRef);
 						}else if(Arrays.asList(ROLE_GROUP_KEEP_SHARED).contains(role)) {
-							ownableService.setOwner(nodeRef, instanceOwner);
-							new RepositoryCache().remove(nodeRef.getId());
+							setOwner(nodeRef, instanceOwner);
 						}
 					}else {
-						ownableService.setOwner(nodeRef, instanceOwner);
-						new RepositoryCache().remove(nodeRef.getId());
+						if(keepSharedCCFilesForNonTeachers) {
+							setOwner(nodeRef, instanceOwner);
+						}else {
+							deleteNode(nodeRef);
+						}
 					}
 				}
 			}
@@ -240,6 +241,59 @@ public class PersonLifecycleService {
 				deleteSharedContent(nodeRef, role, user, instanceOwner);
 			}
 		}
+	}
+	
+	private void setOwner(NodeRef nodeRef, String owner) {
+		ownableService.setOwner(nodeRef, owner);
+		new RepositoryCache().remove(nodeRef.getId());
+	}
+	
+	private void deleteNode(NodeRef nodeRef) {
+		/**
+		 * remove without archiving
+		 */
+		nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
+		nodeService.deleteNode(nodeRef);
+	}
+	
+	public void removeContributer(NodeRef nodeRef, String username){
+		NodeRef personNodeRef = personService.getPerson(username);
+		String firstName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_FIRSTNAME));
+		String lastName = (String)nodeService.getProperty(personNodeRef, QName.createQName(CCConstants.CM_PROP_PERSON_LASTNAME));
+		
+		QName qnameAuthor = QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
+		QName qnameMetadata = QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
+		List<String> contributerAuthor = (List<String>)nodeService.getProperty(nodeRef, qnameAuthor);
+		List<String> contributerMetadata = (List<String>)nodeService.getProperty(nodeRef,qnameMetadata);
+		for(String author : contributerAuthor) {
+			if(contains(VCardConverter.vcardToHashMap(author),firstName,lastName) ) {
+				contributerAuthor.remove(author);
+			}
+		}
+		nodeService.setProperty(nodeRef, qnameAuthor, (ArrayList)contributerAuthor);
+		
+		for(String metadataContributer : contributerMetadata) {
+			if(contains(VCardConverter.vcardToHashMap(metadataContributer),firstName,lastName) ) {
+				contributerMetadata.remove(metadataContributer);
+			}
+		}
+		nodeService.setProperty(nodeRef, qnameMetadata, (ArrayList)contributerMetadata);
+		
+	}
+	
+	private boolean contains(ArrayList<HashMap<String, Object>> vcardList, String firstName, String lastName) {
+		
+		if(vcardList != null && vcardList.size() > 0) {
+			Map<String,Object> vcard = vcardList.iterator().next();
+			String vcFirstName = (String)vcard.get(CCConstants.VCARD_GIVENNAME);
+			String vcLastName = (String)vcard.get(CCConstants.VCARD_SURNAME);
+			
+			if(firstName.equals(vcFirstName) && lastName.equals(vcLastName)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public void deleteCollections(String userName) {

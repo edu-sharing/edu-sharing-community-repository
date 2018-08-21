@@ -256,7 +256,7 @@ export class MdsComponent{
         let badges=document.getElementById(this.getWidgetDomId(widget));
         let elements:any=badges.childNodes;
         let add=true;
-        for(var i=0;i<elements.length;i++){
+        for(let i=0;i<elements.length;i++){
           if(elements[i].getAttribute('data-value')==searchField.value){
             add=false;
           }
@@ -1251,7 +1251,7 @@ export class MdsComponent{
               `+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
-    if(allowCustom && !openCallback){
+    if(allowCustom && !openCallback && !widget.bottomCaption){
       html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;

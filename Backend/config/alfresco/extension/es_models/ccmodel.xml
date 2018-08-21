@@ -492,6 +492,10 @@
 				<property name="ccm:topic">
 					<type>d:text</type>
 				</property>
+				<property name="ccm:topics">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
 				<property name="ccm:license">
 					<type>d:text</type>
 					<multiple>true</multiple>
