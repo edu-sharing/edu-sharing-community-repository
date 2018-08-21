@@ -20,6 +20,9 @@ $sidenavWidth:300px;
     top:$mainnavHeight;
     width:calc(25% - 20px);
     text-transform: uppercase;
+    &.no-mainnav{
+      top:0;
+    }
   }
 
 }
@@ -40,6 +43,9 @@ $sidenavWidth:300px;
   ul{
     border-bottom: none;
   }
+}
+.rowRepositories.no-mainnav{
+  top:0;
 }
 .sidenav .row{
   margin:0 -30px;
@@ -229,16 +235,19 @@ a, a:hover, a:visited, a:active, button {
 
 
 .top {
-    position: fixed;
-    background-color: #fff;
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-    top: $mainnavHeight+48px;
-    z-index: 12;
-    width:100%;
-    height:$secondaryBarHeight;
-    @include materialShadow();
+  position: fixed;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  top: $mainnavHeight+48px;
+  z-index: 12;
+  width:100%;
+  height:$secondaryBarHeight;
+  @include materialShadow();
+  &.no-mainnav{
+    top:48px;
+  }
 }
 small-collection{
   position: absolute;
@@ -248,6 +257,9 @@ small-collection{
 }
 .topNoRepositories{
   top: $mainnavHeight;
+  &.no-mainnav{
+    top:0;
+  }
 }
 .mdsSelect{
   float:left;
@@ -310,16 +322,22 @@ small-collection{
 }
 
 .results {
-    margin-top:200px;
+    margin-top:$mainnavHeight+130px;
     padding-bottom: 20px;
     text-align: left;
     min-height: 1000px;
     display: inline-block;
     width: 100%;
     overflow-x: hidden;
+  &.no-mainnav{
+    margin-top: 130px;
+  }
 }
 .resultsNoRepositories{
-  margin-top: 155px;
+  margin-top: $mainnavHeight+85px;
+  &.no-mainnav{
+    margin-top: 85px;
+  }
 }
 
 .a11y-hidden-label {
