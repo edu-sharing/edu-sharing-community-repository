@@ -71,7 +71,7 @@ import com.google.gwt.i18n.client.Constants;
  * @TODO instanceowner instead of creator in gui (workspace column)
  * @TODO Collections (only level 0?)
  * @TODO shared content config ROLE_GROUP_REMOVE_SHARED delete cc vs not delete cc
- * @TODO function for changing owner of colletion to another user (asking new user?)
+ * @TODO function for changing owner of collection to another user (asking new user?)
  * @TODO check if Folders must be deleted in shared area, check if basket is necessary
  * @TODO filter for TODELETE_STATUS already in search query
  */
@@ -226,7 +226,7 @@ public class PersonLifecycleService {
 							 */
 							nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
 							nodeService.deleteNode(nodeRef);
-						}if(Arrays.asList(ROLE_GROUP_KEEP_SHARED).contains(role)) {
+						}else if(Arrays.asList(ROLE_GROUP_KEEP_SHARED).contains(role)) {
 							ownableService.setOwner(nodeRef, instanceOwner);
 							new RepositoryCache().remove(nodeRef.getId());
 						}
