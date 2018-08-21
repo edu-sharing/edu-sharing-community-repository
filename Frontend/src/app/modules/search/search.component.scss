@@ -305,6 +305,10 @@ small-collection{
   height: calc(100% - #{$mainnavHeight} - 110px - 70px);
   transition: $transitionNormal all ease;
   @include iosScrolling();
+  &.no-mainnav{
+    top:110px;
+    height: calc(100% - 110px - 70px);
+  }
 }
 .sidenavHidden{
   transform: translateX(-100%);
@@ -313,6 +317,10 @@ small-collection{
 .sidenavNoRepositories{
   top:$mainnavHeight+65px;
   height: calc(100% - #{$mainnavHeight} - 65px - 70px);
+  &.no-mainnav{
+    top:65px;
+    height: calc(100% - 65px - 70px);
+  }
 }
 .contentSidenav{
   margin-left: $sidenavWidth;

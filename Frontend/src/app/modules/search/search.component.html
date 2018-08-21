@@ -67,7 +67,7 @@
   </div>
 <div class="sidenavContainer">
   <div class="apply" *ngIf="searchService.sidenavOpened && !isMdsLoading()"><actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar><a *ngIf="rendered" class="btn" tabindex="0" (keyup.enter)="saveValues()" (click)="saveValues()">{{'SEARCH.APPLY_FILTER' | translate}}</a></div>
-  <div #sidenav class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories || repositories.length<=2" [class.sidenavHidden]="!searchService.sidenavOpened" [@fromLeft]="searchService.sidenavOpened">
+  <div #sidenav class="sidenav scrollWithBanner" [class.no-mainnav]="!mainnav" [class.sidenavNoRepositories]="!repositories || repositories.length<=2" [class.sidenavHidden]="!searchService.sidenavOpened" [@fromLeft]="searchService.sidenavOpened">
      <div class="row tab-group" *ngIf="!isGuest">
        <div class="col s12">
          <ul class="tabs">
