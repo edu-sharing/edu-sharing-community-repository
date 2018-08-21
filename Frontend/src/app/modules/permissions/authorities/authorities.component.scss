@@ -10,7 +10,7 @@ input[type=search]{
 }
 .topFrame{
   position:fixed;
-  z-index:0;
+  z-index:1;
   width: 100%;
   top:65px+$mainnavHeight;
   display:flex;

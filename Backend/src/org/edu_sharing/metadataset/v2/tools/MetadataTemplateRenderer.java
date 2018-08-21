@@ -137,6 +137,8 @@ public class MetadataTemplateRenderer {
 								"'>";
 						if(link!=null)
 							value+="</a>";
+						value+="<div class='licenseName'>" +getLicenseName(licenseName) +"</div>";
+
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
 							value+="<div class='licenseDescription'>"+StringEscapeUtils.escapeHtml(licenseDescription)+"</div>";
@@ -211,7 +213,18 @@ public class MetadataTemplateRenderer {
 		html+="</div></div>";
 		return html;
 	}
+	private String getLicenseName(String licenseName) {
+		if(licenseName==null || licenseName.isEmpty())
+			licenseName="NONE";
 
+		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)) {
+			licenseName=CCConstants.COMMON_LICENSE_CC_BY;
+		}
+		if(licenseName.equals(CCConstants.COMMON_LICENSE_PDM)){
+			licenseName=CCConstants.COMMON_LICENSE_CC_ZERO;
+		}
+		return I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE."+licenseName+"_NAME");
+	}
 	private String getLicenseDescription(String licenseName) {
 		if(licenseName==null || licenseName.isEmpty())
 			licenseName="NONE";
