@@ -50,8 +50,7 @@
     "object-literal-sort-keys": false,
     "one-line": [
       true,
-      "check-open-brace",
-      "check-catch"
+      "check-open-brace"
     ],
     "radix": true,
     "semicolon": [

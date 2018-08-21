@@ -184,6 +184,8 @@ public class UserEnvironmentTool {
 	}
 	
 	public String getEdu_SharingTemplateFolder() throws Throwable{
+	    return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE,CCConstants.I18n_SYSTEMFOLDER_TEMPLATE);
+	    /*
 		String systemFolderId = getEdu_SharingSystemFolderBase();
 		HashMap<String, Object> edu_SharingSystemFolderTemplate = mcBaseClient.getChild(systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE);
 		String result = null;
@@ -204,7 +206,30 @@ public class UserEnvironmentTool {
 			result = (String)edu_SharingSystemFolderTemplate.get(CCConstants.SYS_PROP_NODE_UID);
 		}
 		return result;
+		*/
 	}
+	public String getOrCreateSystemFolderByName(String constantName,String i18nId) throws Throwable {
+        String result;
+        String systemFolderId = getEdu_SharingSystemFolderBase();
+        HashMap<String, Object> edu_SharingSystemFolderTemplate = mcBaseClient.getChild(systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, constantName);
+        if(edu_SharingSystemFolderTemplate == null){
+            String systemFolderName = I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_TEMPLATE);
+            HashMap<String,Object> newEdu_SharingSysMapProps  = new HashMap();
+            newEdu_SharingSysMapProps.put(CCConstants.CM_NAME, systemFolderName);
+
+            HashMap<String,String> i18nTitle = new HashMap();
+            i18nTitle.put("de_DE", I18nServer.getTranslationDefaultResourcebundle(i18nId, "de_DE"));
+            i18nTitle.put("en_EN", I18nServer.getTranslationDefaultResourcebundle(i18nId, "en_EN"));
+            i18nTitle.put("en_US", I18nServer.getTranslationDefaultResourcebundle(i18nId, "en_US"));
+
+            newEdu_SharingSysMapProps.put(CCConstants.CM_PROP_C_TITLE, i18nTitle);
+            newEdu_SharingSysMapProps.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE);
+            result = mcBaseClient.createNode(systemFolderId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
+        }else{
+            result = (String)edu_SharingSystemFolderTemplate.get(CCConstants.SYS_PROP_NODE_UID);
+        }
+        return result;
+    }
 	
 	
 	/**

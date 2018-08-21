@@ -511,7 +511,19 @@
 			</properties>
 		</aspect>
 
-		<aspect name="ccm:iometadata">
+        <aspect name="ccm:tracking">
+            <title>Metadata for simple tracking/statistics information</title>
+            <properties>
+                <property name="ccm:tracking_downloads">
+                    <type>d:int</type>
+                </property>
+                <property name="ccm:tracking_views">
+                    <type>d:int</type>
+                </property>
+            </properties>
+        </aspect>
+
+        <aspect name="ccm:iometadata">
 			<title>Metadata for an information object</title>
 			<parent>ccm:basemetadata</parent>
 			<properties>
@@ -1208,6 +1220,22 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
+				<!-- free accessible content -->
+				<property name="ccm:public_access">
+					<type>d:boolean</type>
+					<multiple>false</multiple>
+				</property>
+				<!-- Lerneinheit-ID -->
+				<property name="ccm:learnunit_id">
+					<type>d:text</type>
+					<multiple>false</multiple>
+				</property>
+				<!-- checklist for editorial content status -->
+				<property name="ccm:editorial_checklist">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+
 
 			</properties>
 		</aspect>

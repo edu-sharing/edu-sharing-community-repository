@@ -3,7 +3,6 @@ package org.edu_sharing.service.admin;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -57,11 +56,8 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.ExcelLOMImporter;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
-import org.edu_sharing.repository.server.jobs.quartz.ExporterJob;
-import org.edu_sharing.repository.server.jobs.quartz.ImmediateJobListener;
-import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
+import org.edu_sharing.repository.server.jobs.quartz.*;
 import org.edu_sharing.repository.server.jobs.quartz.JobHandler.JobConfig;
-import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
@@ -89,16 +85,15 @@ import org.edu_sharing.repository.update.Release_4_2_PersonStatusUpdater;
 import org.edu_sharing.repository.update.SystemFolderNameToDisplayName;
 import org.edu_sharing.repository.update.Update;
 import org.edu_sharing.service.admin.model.GlobalGroup;
+import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
-import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.io.Files;
-import com.sun.star.uno.RuntimeException;
 
 public class AdminServiceImpl implements AdminService  {
 	
@@ -150,7 +145,16 @@ public class AdminServiceImpl implements AdminService  {
 		writePublisherToMDSXml(result,StringUtils.join(vcardProps,","),valueSpaceProp,ignoreValues,authInfo);
 		return writer.toString();
 	}
-	
+	@Override
+	public List<JobInfo> getJobs() throws Throwable {
+		return JobHandler.getInstance().getAllJobs();
+	}
+	@Override
+	public void cancelJob(String jobName) throws Throwable {
+		if(!JobHandler.getInstance().cancelJob(jobName)){
+			throw new Exception("Job could not be canceled. Scheduler returned false");
+		}
+	}
 	public void writePublisherToMDSXml(Result result,String vcardProps, String valueSpaceProp, String ignoreValues, HashMap authInfo) throws Throwable {
 		
 		List<String> ignoreValuesList = null;
@@ -525,7 +529,7 @@ public class AdminServiceImpl implements AdminService  {
 	 	ft.setTemplate(template,group, folderId);			
 	 	List<String> slist = ft.getMessage();
 	 	String error=slist.toString();
-	 	if(!error.isEmpty())
+	 	if(slist.size()>0 && !error.isEmpty())
 	 		throw new Exception(error);
 	}
 	@Override

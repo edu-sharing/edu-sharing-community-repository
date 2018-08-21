@@ -105,12 +105,13 @@ public class SitemapServlet extends HttpServlet{
                 Urlset.Url.Video video = new Urlset.Url.Video();
                 video.thumbnail_loc = URLTool.getPreviewServletUrl(ref);
                 video.content_loc = URLTool.getRenderServiceURL(ref.getNodeId(),false);
+                video.title = nodeService.getProperty(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId(),CCConstants.CM_NAME);
                 url.video.add(video);
             }
             else {
                 Urlset.Url.Image image = new Urlset.Url.Image();
                 image.loc = URLTool.getPreviewServletUrl(ref);
-                url.image.add(image);
+                //url.image.add(image);
             }
             //getPreviewServletUrl
             set.url.add(url);

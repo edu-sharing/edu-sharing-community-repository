@@ -12,12 +12,9 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.DAOMissingException;
-import org.edu_sharing.restservices.DAOSecurityException;
-import org.edu_sharing.restservices.DAOValidationException;
-import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.network.v1.model.RepoEntries;
+import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Repo;
 
@@ -41,14 +38,14 @@ public class NetworkApi  {
     	notes = "Get repositories.")
     
     @ApiResponses(
-    	value = { 
-    		@ApiResponse(code = 200, message = "OK.", response = RepoEntries.class),        
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
-    	})
+    	value = {
+                @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = WorkflowHistory[].class),
+                @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+                @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+                @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+                @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+                @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+        })
 
     public Response getRepositories(
 		@Context HttpServletRequest req) {
@@ -77,25 +74,8 @@ public class NetworkApi  {
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+    		return ErrorResponse.createResponse(t);
     	}
 
     }

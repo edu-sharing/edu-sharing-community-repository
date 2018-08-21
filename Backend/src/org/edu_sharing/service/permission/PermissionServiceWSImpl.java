@@ -1,10 +1,7 @@
 package org.edu_sharing.service.permission;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -43,7 +40,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
 			Boolean sendCopy, Boolean createHandle) throws Throwable {
 	}
 
@@ -171,22 +168,27 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public void setPermissions(String nodeId, org.edu_sharing.repository.client.rpc.ACE[] aces) throws Exception {
+	public void setPermissions(String nodeId, List<ACE> aces) throws Exception {
 		try {
 			NativeAlfrescoWrapper naw = EduWebServiceFactory.getNativeAlfrescoWrapper(appInfo.getWebServiceHotUrl());
-			naw.setPermissions(nodeId, aces);
+			naw.setPermissions(nodeId, aces.toArray(new ACE[aces.size()]));
 		} catch (RemoteException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 
 	@Override
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermission) throws Exception {
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) throws Exception {
 	}
 
 	@Override
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission)
 			throws Exception {
+	}
+
+	@Override
+	public void setPermissionInherit(String nodeId, boolean inheritPermission) throws Exception {
+		this.setPermissions(nodeId, Arrays.asList(getPermissions(nodeId).getAces()),inheritPermission);
 	}
 
 	@Override

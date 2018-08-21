@@ -45,12 +45,8 @@ public class DuplicateFinder {
 	public boolean valueForPropIsTaken(HashMap<String,HashMap<String,Object>> nodes, String property, String value){
 		for(Map.Entry<String,HashMap<String,Object>> entryNode : nodes.entrySet()){
 			HashMap<String,Object> properties = entryNode.getValue();
-			for(Map.Entry<String,Object> entryProp : properties.entrySet()){
-				
-				if(entryProp.getKey().equals(property) && entryProp.getValue() != null && entryProp.getValue().equals(value)){
-					return true;
-				}
-			}
+			if(properties.get(property)!=null && properties.get(property) instanceof String && value.equalsIgnoreCase((String)properties.get(property)))
+				return true;
 		}
 		return false;
 	}
@@ -118,7 +114,7 @@ public class DuplicateFinder {
 		String value0 = (splitted.length > 0 )? splitted[0] : value;
 		String result = value;
 		while(valueForPropIsTaken(nodes, CCConstants.CM_NAME, result)){
-			result = value0 + cm_name_exists_counter;
+			result = value0 + " - " + cm_name_exists_counter;
 			if(splitted.length > 1){
 				for(int i = 1; i < splitted.length;i++){
 					result = result +"."+splitted[i];

@@ -236,8 +236,8 @@ public class IamApi  {
 	    	NodeEntries result=new NodeEntries();
 	    	List<NodeRef> refList = personDao.getNodeList(list);
 	    	if(refList!=null){
-	    		List<Node> nodes = NodeDao.sortAndFilterByType(repoDao,refList,sortDefinition,null,propFilter);
-	    		result.setNodes(nodes);
+                refList=NodeDao.sortApiNodeRefs(repoDao,refList,null,sortDefinition);
+	    	    result=NodeDao.convertToRest(repoDao,propFilter,refList,0,Integer.MAX_VALUE);
 	    	}
 	    	return Response.status(Response.Status.OK).entity(result).build();
 		}catch(Throwable t){

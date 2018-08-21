@@ -277,12 +277,11 @@ public class MetadataSearchHelper {
 				andQuery=" AND (" + lucene + ")";
 			lucene=query.getParent().getBasequery()+andQuery;
 		}
-		lucene += convertSearchCriteriasToLucene(searchCriterias);
+		lucene = convertSearchCriteriasToLucene(lucene,searchCriterias);
 		return lucene;
 	}
 
-	public static String convertSearchCriteriasToLucene(SearchCriterias searchCriterias) {
-		String lucene="";
+	public static String convertSearchCriteriasToLucene(String lucene,SearchCriterias searchCriterias) {
 		String searchTypesString = null;
 		String searchAspectsString = null;
 		if(searchCriterias!=null){

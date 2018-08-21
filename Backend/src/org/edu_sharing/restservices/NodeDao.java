@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.alfresco.repo.domain.node.NodeEntity;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -36,37 +37,17 @@ import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
+import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeShare;
 import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
 import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
-import org.edu_sharing.restservices.shared.ACE;
-import org.edu_sharing.restservices.shared.ACL;
-import org.edu_sharing.restservices.shared.Authority;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Group;
-import org.edu_sharing.restservices.shared.GroupProfile;
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeAccess;
-import org.edu_sharing.restservices.shared.NodePermissions;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeRemote;
-import org.edu_sharing.restservices.shared.NodeSearch;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette;
 import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
-import org.edu_sharing.restservices.shared.NodeVersion;
-import org.edu_sharing.restservices.shared.NodeVersionRef;
-import org.edu_sharing.restservices.shared.Person;
-import org.edu_sharing.restservices.shared.Preview;
-import org.edu_sharing.restservices.shared.UserProfile;
-import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
-import org.edu_sharing.service.nodeservice.AssocInfo;
-import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
@@ -330,8 +311,8 @@ public class NodeDao {
 	 */
 	public static NodeDao getByParent(RepositoryDao repoDao, String parentId,String type,String name) throws Throwable {
 		NodeService nodeService = NodeServiceFactory.getNodeService(repoDao.getId());
-		HashMap<String, Object> properties = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId,type,CCConstants.CM_NAME, name);
-		return new NodeDao(repoDao,(String)properties.get(CCConstants.SYS_PROP_NODE_UID));
+		org.alfresco.service.cmr.repository.NodeRef ref = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId,type,CCConstants.CM_NAME, name);
+		return new NodeDao(repoDao,ref.getId());
 	}
 	private NodeDao(RepositoryDao repoDao, String nodeId, Filter filter) throws Throwable {
 
@@ -401,8 +382,28 @@ public class NodeDao {
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
-	
-	private String renameNode(String oldName,int number){
+
+    public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {
+        NodeEntries result=new NodeEntries();
+        List<Node> nodes=new ArrayList<>();
+        for(int i=skipCount;i<Math.min(children.size(),skipCount+maxItems);i++){
+            nodes.add(NodeDao.getNode(repoDao,children.get(i).getId(),propFilter).asNode());
+        }
+
+        Pagination pagination=new Pagination();
+        pagination.setFrom(skipCount);
+        pagination.setCount(nodes.size());
+        pagination.setTotal(children.size());
+        result.setPagination(pagination);
+        result.setNodes(nodes);
+        return result;
+    }
+
+    public static List<NodeRef> sortApiNodeRefs(RepositoryDao repoDao, List<NodeRef> refList, List<String> filter, SortDefinition sortDefinition) {
+        return NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(NodeDao.convertApiNodeRef(refList), filter, sortDefinition));
+    }
+
+    private String renameNode(String oldName,int number){
 		String[] split=oldName.split("\\.");
 		int i=split.length-2;
 		i=Math.max(0, i);
@@ -492,9 +493,9 @@ public class NodeDao {
 		}
 	}
 	public List<NodeRef> getChildren() throws DAOException {
-		return getChildren(null);
+		return getChildren(null,null,new SortDefinition());
 	}
-	public List<NodeRef> getChildren(String assocName) throws DAOException {
+	public List<NodeRef> getChildren(String assocName, List<String> filter, SortDefinition sortDefinition) throws DAOException {
 
 		try {
 			List<NodeRef> result = new ArrayList<NodeRef>();
@@ -503,7 +504,7 @@ public class NodeDao {
 			if(assocName!=null && !assocName.isEmpty()){
 				assocName=CCConstants.getValidGlobalName(assocName);
 			}
-			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRefAssoc(getId(),assocName)) {
+			for (ChildAssociationRef childRef : nodeService.getChildrenChildAssociationRefAssoc(getId(),assocName,filter,sortDefinition)) {
 	
 				NodeRef ref = new NodeRef();
 				ref.setRepo(this.repoDao.getId());
@@ -525,12 +526,14 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-	public List<NodeRef> getAssocs(AssocInfo assoc) throws DAOException {
+	public List<NodeRef> getAssocs(AssocInfo assoc,List<String> filter,SortDefinition sortDefinition) throws DAOException {
 
 		try {
 			List<NodeRef> result = new ArrayList<NodeRef>();
 			assoc.setAssocName(CCConstants.getValidGlobalName(assoc.getAssocName()));
-			for (AssociationRef childRef : nodeService.getNodesByAssoc(getId(),assoc)) {
+            List<AssociationRef> assocs = nodeService.getNodesByAssoc(getId(), assoc);
+            assocs=((NodeServiceImpl)NodeServiceFactory.getLocalService()).sortNodeRefList(assocs,filter,sortDefinition);
+			for (AssociationRef childRef : assocs) {
 
 				NodeRef ref = new NodeRef();
 				ref.setRepo(this.repoDao.getId());
@@ -911,7 +914,7 @@ public class NodeDao {
 			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
 			permissionService.setPermissions(
 					nodeId, 
-					aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]), 
+					aces,
 					permissions.isInherited(), 
 					mailText, sendMail, sendCopy,createHandle);
 			
@@ -1364,49 +1367,44 @@ public class NodeDao {
 		}
 	}
 
-	public static List<NodeRef> getFilesSharedByMe(RepositoryDao repoDao) throws DAOException {
+	public static List<NodeRef> getFilesSharedByMe(RepositoryDao repoDao,List<String> filter,SortDefinition sortDefinition) throws DAOException {
 		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 		try {
 			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedByMe();
-			List<NodeRef> result=new ArrayList(refs.size());
-			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
-				result.add(new NodeRef(repoDao.getId(),ref.getId()));
-			}
-			return result;
+            refs=sortAlfrescoRefs(refs,filter,sortDefinition);
+            return convertAlfrescoNodeRef(repoDao,refs);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
-	
-	/**
+
+    public static List<org.alfresco.service.cmr.repository.NodeRef> sortAlfrescoRefs(List<org.alfresco.service.cmr.repository.NodeRef> refs, List<String> filter, SortDefinition sortDefinition) {
+        return ((NodeServiceImpl)NodeServiceFactory.getLocalService()).sortNodeRefList(refs,filter,sortDefinition);
+    }
+
+    /**
 	 * All files the current user is a receiver of the workflow
 	 * @param repoDao
 	 * @return
 	 * @throws DAOException
 	 */
-	public static List<NodeRef> getWorkflowReceive(RepositoryDao repoDao) throws DAOException {
+	public static List<NodeRef> getWorkflowReceive(RepositoryDao repoDao,List<String> filter, SortDefinition sortDefinition) throws DAOException {
 		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 		try {
 			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getWorkflowReceive(AuthenticationUtil.getFullyAuthenticatedUser());
-			List<NodeRef> result=new ArrayList(refs.size());
-			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
-				result.add(new NodeRef(repoDao.getId(),ref.getId()));
-			}
-			return result;
+			refs=NodeDao.sortAlfrescoRefs(refs,filter,sortDefinition);
+			return convertAlfrescoNodeRef(repoDao,refs);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}
 	
-	public static List<NodeRef> getFilesSharedToMe(RepositoryDao repoDao) throws DAOException {
+	public static List<NodeRef> getFilesSharedToMe(RepositoryDao repoDao, List<String> filter, SortDefinition sortDefinition) throws DAOException {
 		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 		try {
 			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedToMe();
-			List<NodeRef> result=new ArrayList(refs.size());
-			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
-				result.add(new NodeRef(repoDao.getId(),ref.getId()));
-			}
-			return result;
+            refs=NodeDao.sortAlfrescoRefs(refs,filter,sortDefinition);
+            return convertAlfrescoNodeRef(repoDao,refs);
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
@@ -1471,7 +1469,14 @@ public class NodeDao {
  	public void createVersion(String comment) throws DAOException, Exception {
 		this.changePropertiesWithVersioning(getAllProperties(), comment);
 	}
- 	
+
+    public static List<org.alfresco.service.cmr.repository.NodeRef> convertApiNodeRef(List<NodeRef> refs) {
+        List<org.alfresco.service.cmr.repository.NodeRef> converted=new ArrayList<>(refs.size());
+        for(NodeRef ref : refs){
+            converted.add(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,ref.getId()));
+        }
+        return converted;
+    }
  	public static List<NodeRef> convertAlfrescoNodeRef(RepositoryDao repoDao,List<org.alfresco.service.cmr.repository.NodeRef> refs){
  		List<NodeRef> converted=new ArrayList<>(refs.size());
  		for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
@@ -1480,167 +1485,7 @@ public class NodeDao {
  		return converted;
  	}
 
- 	public static List<Node> sortAndFilterByType(RepositoryDao repoDao, List<NodeRef> children,SortDefinition sort, List<String> filter,Filter propFilter) throws DAOException {
-		DictionaryService dictionaryService = ((ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY)).getDictionaryService();
-
-		List<NodeDao> nodes=new ArrayList<NodeDao>(children.size());
-    	for(NodeRef child : children){
-			nodes.add(NodeDao.getNode(repoDao, child.getId(),propFilter));
-    	}
-    	for(int i=0;i<nodes.size();i++){
-			String nodeType=(String)nodes.get(i).getType();
-			String type=(String)nodes.get(i).getNativeProperties(null).get(CCConstants.CCM_PROP_MAP_TYPE);
-    		String name=nodes.get(i).getName();
-    		if(".DS_Store".equals(name) || "._.DS_Store".equals(name)){
-        		nodes.remove(i);
-        		i--;
-        		continue;
-        	}
-        	// filter nodes for link inivitation
-			if(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SHARE).equals(nodeType)){
-				nodes.remove(i);
-				i--;
-				continue;
-			}
-        	// filter the metadata template file
-        	if(nodes.get(i).getAspectsNative().contains(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE)) {
-				nodes.remove(i);
-				i--;
-				continue;
-			}
-    		if(type==null)
-    			continue;
-    		if(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(type) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(type)){
-    			nodes.remove(i);
-    			i--;
-    		}
-    	}
-    	if(sort!=null && sort.hasContent()){
-    		final DAOException[] exception=new DAOException[1];
-    		Collections.sort(nodes,new Comparator<NodeDao>() {
-				@Override
-				public int compare(NodeDao o1, NodeDao o2) {
-					
-					if(o1.isDirectory()!=o2.isDirectory()){
-						return o1.isDirectory() ? -1 : 1;
-					}
-					HashMap<String, Object> o1props=null;
-					HashMap<String, Object> o2props=null;
-					try{
-						o1props=o1.getNativeProperties();
-						o2props=o2.getNativeProperties();
-					}catch(DAOException e){
-						e.printStackTrace();
-						return 0;
-					}
-					for(SortDefinitionEntry criteria : sort.getSortDefinitionEntries()){
-						int value=0;
-						String property=CCConstants.getValidGlobalName(criteria.getProperty());
-
-						Object prop1=null,prop2=null;
-							
-						prop1=o1props.get(property);
-						prop2=o2props.get(property);
-						if(o1props.containsKey(property+CCConstants.ISO8601_SUFFIX)) {
-							prop1=o1props.get(property+CCConstants.ISO8601_SUFFIX);
-							prop2=o2props.get(property+CCConstants.ISO8601_SUFFIX);
-						}
-						
-						// TODO: Use Node and nodeProps to get values for sorting!
-						
-						if(prop1==null || prop2==null){
-							//exception[0]=DAOException.mapping(new InvalidParameterException("Sort criteria "+criteria.getProperty()+" not found"));
-							//break;
-						}
-						if(prop1==null || !(prop1 instanceof Comparable))
-							prop1="";
-						if(prop2==null || !(prop2 instanceof Comparable))
-							prop2="";
-						if(prop1 instanceof String) {
-							prop1=((String) prop1).toLowerCase();
-						}
-						if(prop2 instanceof String) {
-							prop2=((String) prop2).toLowerCase();
-						}
-						try {
-							String fieldType = dictionaryService.getProperty(QName.createQName(property)).getDataType().getJavaClassName();
-
-							prop1=castPropertyByType(fieldType,prop1);
-							prop2=castPropertyByType(fieldType,prop2);
-
-						}catch(Throwable t){ //  conversion can fail in some cases (null pointer, wrong data types stored
-						}
-						if(criteria.isAscending())
-							value=((Comparable)prop1).compareTo(prop2);
-						else
-							value=((Comparable)prop2).compareTo(prop1);
-							
-						if(value!=0)
-							return value;
-					}
-					return 0;
-				}
-    			
-			});
-    		if(exception[0]!=null)
-    			throw exception[0];
-    	}
-    	List<Node> converted=new ArrayList<>(nodes.size());
-    	for(NodeDao node : nodes){
-    		converted.add(node.asNode());
-    	}
-    	if(filter==null || filter.size()==0)
-    		return converted;
-    	if(filter.size()==1 && filter.get(0).isEmpty())
-    		return converted;
-    	List<Node> filtered=new ArrayList<Node>();
-
-		for(Node node : converted){
-			boolean add=false;
-			for(String f : filter){
-				if(f.equals("folders") && node.isDirectory()){
-					add=true;
-					break;	
-				}
-				if(f.equals("files") && !node.isDirectory()){
-					add=true;
-					break;	
-				}
-				if(f.startsWith("mime:") && node.getMimetype()!=null){
-					String mime=f.substring(5).toLowerCase();
-					if(mime.endsWith("*")){
-						if(node.getMimetype().startsWith(mime.substring(0,mime.length()-1))){
-							add=true;
-							break;
-						}
-					}
-					else if(mime.equals(node.getMimetype())){
-						add=true;
-						break;
-					}
-				}
-			}
-			if(add)
-				filtered.add(node);
-		}
-		return filtered;
-	}
-
-	private static Object castPropertyByType(String fieldType, Object prop) {
-		if(prop==null)
-			return null;
-		if(prop instanceof String){
-			String str= (String) prop;
-			if(fieldType.equals(Integer.class.getName())){
-				if(str.isEmpty())
-					return Integer.valueOf(0);
-				return Integer.valueOf(str);
-			}
-		}
-		return prop;
-	}
-
-	public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
+    public void reportNode(String reason, String userEmail, String userComment) throws DAOException {
 		try{
 			NotificationServiceFactory.getNotificationService(repoDao.getApplicationInfo().getAppId())
 			.notifyNodeIssue(nodeId, reason, userEmail, userComment);

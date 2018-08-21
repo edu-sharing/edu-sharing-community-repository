@@ -152,7 +152,6 @@ export class CollectionsMainComponent implements GwtEventListener {
             });
           }
           this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
-            console.log(data);
             this.hasEditorial=data.collections.length>0;
           });
           this.initialize();
@@ -204,7 +203,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     public get orderActive(){
       return this._orderActive;
     }
-    navigate(id:string="",addToOther=""){
+    navigate(id="",addToOther=""){
       let params:any={};
       params.scope=this.tabSelected;
       params.id=id;
@@ -372,7 +371,7 @@ export class CollectionsMainComponent implements GwtEventListener {
                     if (collection)
                         options.push(collection);
                 }
-                if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
+                if (this.isAllowedToDeleteNodes(nodes)) {
                     let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE', 'remove_circle_outline', (node: Node) => {
                         this.deleteMultiple(ActionbarHelper.getNodes(nodes, node));
                     });
@@ -399,7 +398,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       if(fromList) {
           let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
           remove.showCallback = (node: Node) => {
-              return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
+              return this.isAllowedToDeleteNodes(ActionbarHelper.getNodes(nodes, node));
           };
           if(remove)
             options.push(remove);
@@ -498,7 +497,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
     // gets called by user if something went wrong to start fresh from beginning
     resetCollections() : void {
-        var url = window.location.href;
+        let url = window.location.href;
         url = url.substring(0,url.indexOf("collections")+11);
         window.location.href = url;
         return;
@@ -525,7 +524,8 @@ export class CollectionsMainComponent implements GwtEventListener {
             RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
             RestConstants.CM_MODIFIED_DATE
            ],
-            sortAscending: [false,true,false]
+            sortAscending: [false,true,false],
+            count:RestConstants.COUNT_UNLIMITED
           },
           this.collectionContent.collection.ref.repo
         ).subscribe((collection:EduData.CollectionContent) => {
@@ -582,14 +582,14 @@ export class CollectionsMainComponent implements GwtEventListener {
     canDelete(node:EduData.CollectionReference){
       return RestHelper.hasAccessPermission(node,'Delete');
     }
-    onContentClick(content:EduData.CollectionReference,force=false) : void {
+    onContentClick(content:any,force=false) : void {
       this.contentDetailObject=content;
       if (content.originalId==null && !force) {
         this.dialogTitle="COLLECTIONS.ORIGINAL_MISSING";
         this.dialogMessage="COLLECTIONS.ORIGINAL_MISSING_INFO";
         this.dialogCancelable=true;
         this.dialogButtons=[];
-        if (this.isAllowedToDeleteCollection()) {
+        if (this.isAllowedToDeleteNodes([content])) {
           this.dialogButtons.push(new DialogButton('COLLECTIONS.DETAIL.REMOVE',DialogButton.TYPE_CANCEL,()=>this.deleteFromCollection(()=>this.closeDialog())));
         }
         this.dialogButtons.push(new DialogButton('COLLECTIONS.OPEN_MISSING',DialogButton.TYPE_PRIMARY,()=>this.onContentClick(content,true)));
@@ -603,7 +603,7 @@ export class CollectionsMainComponent implements GwtEventListener {
         /*if(data.node.downloadUrl)
           this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", () => this.downloadMaterial()));
          */
-        if(data.node.access.indexOf(RestConstants.ACCESS_DELETE)!=-1) {
+        if(this.isAllowedToDeleteNodes([content])) {
           this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
             NodeRenderComponent.close(this.location);
           })));
@@ -827,4 +827,8 @@ export class CollectionsMainComponent implements GwtEventListener {
       this.toast.error(error);
     });
   }
+
+    private isAllowedToDeleteNodes(nodes: Node[]) {
+        return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
+    }
 }

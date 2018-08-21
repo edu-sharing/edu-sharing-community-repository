@@ -10,14 +10,13 @@
   width: 100%;
   height:100%;
   color:#fff;
-  display:flex;
   padding: 10%;
-  align-items: center;
-  justify-content: center;
   text-shadow:0 0 10px rgba(0,0,0,0.7);
   >.align-tutorial{
     /* align-self: flex-start; */
-    width: 100%;
+    position: absolute;
+    width: auto;
+    padding:90px;
     max-width: 700px;
     >div{
       width: 100%;
@@ -48,5 +47,8 @@
 @media screen and (max-width: ($mobileTabSwitchWidth)) {
   .tutorial {
     font-size: 14px;
+    >.align-tutorial{
+      padding:30px;
+    }
   }
 }

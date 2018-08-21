@@ -43,6 +43,7 @@ import javax.xml.xpath.XPathFactory;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetValueKatalog;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
@@ -56,7 +57,7 @@ import org.w3c.dom.NodeList;
 
 public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 
-	Log logger = LogFactory.getLog(RecordHandlerLOMWithSubObjects.class);
+	Logger logger = Logger.getLogger(RecordHandlerLOMWithSubObjects.class);
 	XPathFactory pfactory = XPathFactory.newInstance();
 	XPath xpath = pfactory.newXPath();
 
@@ -100,7 +101,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 
 	public void handleRecord(Node nodeRecord, String cursor, String set) throws Throwable {
 		
-		logger.debug("starting...");
 		xpath.reset();
 		
 		toSafeMap.clear();
@@ -290,7 +290,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 							replLifecycleContributer.put(lc_property, tmpLCList);
 							
 						}else{
-							logger.error("can not map lifecycle contributer role "+role+" to edu-sharing property");
+							logger.warn("can not map lifecycle contributer role "+role+" to edu-sharing property");
 						}
 					}
 				
@@ -870,8 +870,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			}
 
 		}
-
-		logger.debug("returning");
 	}
 
 	
@@ -907,7 +905,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 	
 	
 	public List getMultivalue(Node parent, String nodeName) throws XPathExpressionException {
-		logger.debug("starting");
 		if (parent == null){
 			logger.debug("returning null cause parent == null");
 			return null;
@@ -936,7 +933,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 				}
 			}
 		}
-		logger.debug("returning");
 		if (result.size() > 0)
 			return result;
 		else
@@ -944,7 +940,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 	}
 
 	public ArrayList<HashMap<String, Object>> getContributes(Node parent) throws XPathExpressionException {
-		logger.debug("starting");
 		ArrayList<HashMap<String, Object>> result = new ArrayList<HashMap<String, Object>>();
 		NodeList contributes = (NodeList) xpath.evaluate("contribute", parent, XPathConstants.NODESET);
 		for (int i = 0; i < contributes.getLength(); i++) {
@@ -977,7 +972,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			// @TODO contributeRoleSource
 			result.add(map);
 		}
-		logger.debug("returning");
 		if (result.size() > 0)
 			return result;
 		else
@@ -1037,9 +1031,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 	}
 
 	private String adaptValue(String value) {
-		logger.debug("starting");
 		String result = org.htmlparser.util.Translate.decode(value);
-		logger.debug("returning");
 		return result;
 	}
 	

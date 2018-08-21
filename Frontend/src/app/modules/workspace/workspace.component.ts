@@ -247,7 +247,7 @@ export class WorkspaceMainComponent implements EventListener{
     private openCamera(){
         this.cordova.getPhotoFromCamera((data:any)=>{
             console.log(data);
-            let name=this.translate.instant('SHARE_APP.IMAGE')+" "+DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+".jpg";
+            let name=this.translate.instant('SHARE_APP.IMAGE')+" "+DateHelper.formatDate(this.translate,new Date().getTime(),{showAlwaysTime:true,useRelativeLabels:false})+".jpg";
             let blob:any=Helper.base64toBlob(data,"image/jpeg");
             blob.name=name;
             let list:any={};
@@ -841,7 +841,7 @@ export class WorkspaceMainComponent implements EventListener{
         }
         if(nodes) {
             let license = new OptionItem("WORKSPACE.OPTION.LICENSE", "copyright", (node: Node) => this.editLicense(node));
-            license.isEnabled = !this.isSafe && allFiles && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
+            license.isEnabled = !this.isSafe && allFiles && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
             if (license.isEnabled)
                 options.push(license);
         }

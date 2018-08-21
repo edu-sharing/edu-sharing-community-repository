@@ -244,6 +244,10 @@
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/rest/*</url-pattern>
    </filter-mapping>
+   <filter-mapping>
+       <filter-name>Edu-Sharing Guest Filter</filter-name>
+       <url-pattern>/eduservlet/sitemap</url-pattern>
+   </filter-mapping>
    
    <filter-mapping>
        <filter-name>Edu-Sharing Authentication Filter</filter-name>
@@ -255,6 +259,10 @@
    <filter-mapping>
 	      <filter-name>Edu-Sharing Authentication Filter</filter-name>
 	      <url-pattern>/index.html</url-pattern>
+   </filter-mapping>
+   <filter-mapping>
+       <filter-name>Edu-Sharing Authentication Filter</filter-name>
+       <url-pattern>/components/*</url-pattern>
    </filter-mapping>
    <filter-mapping>
 	      <filter-name>Edu-Sharing Authentication Filter</filter-name>
@@ -380,13 +388,7 @@
         <servlet-class>
             org.edu_sharing.repository.server.SuggestServiceImpl
         </servlet-class> 
-    </servlet> 
-    <servlet>
-        <servlet-name>CollectionService</servlet-name>
-        <servlet-class>
-            org.edu_sharing.repository.server.CollectionServiceImpl
-        </servlet-class> 
-    </servlet> 
+    </servlet>
     <servlet>
         <servlet-name>CCCreate</servlet-name>
         <servlet-class>
@@ -587,10 +589,6 @@
     <servlet-mapping> 
         <servlet-name>SuggestService</servlet-name>
         <url-pattern>/eduservlet/suggestservice</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-    	<servlet-name>CollectionService</servlet-name>
-    	<url-pattern>/eduservlet/collectionservice</url-pattern>
     </servlet-mapping>
     
     <servlet-mapping> 

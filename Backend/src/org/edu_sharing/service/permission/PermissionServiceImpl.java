@@ -116,7 +116,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param sendMail
 	 * @param sendCopy
 	 */
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
 			Boolean sendCopy, Boolean createHandle) throws Throwable {
 
 		ACL currentACL = repoClient.getPermissions(nodeId);
@@ -124,7 +124,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		/**
 		 * remove the inherited from the old and new
 		 */
-		List<ACE> acesNew = new ArrayList<ACE>(Arrays.asList(aces));
+		List<ACE> acesNew = new ArrayList<ACE>(aces);
+		acesNew=addCollectionCoordinatorPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),acesNew);
 		Iterator<ACE> acesNewIter = acesNew.iterator();
 		while (acesNewIter.hasNext()) {
 			ACE ace = acesNewIter.next();
@@ -532,7 +533,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return AuthenticationUtil.runAs(runsWork, appInfo.getUsername());
 	}
 
-	public void setPermissions(String nodeId, ACE[] aces) throws Exception {
+	public void setPermissions(String nodeId, List<ACE> aces) throws Exception {
 		setPermissions(nodeId, aces, null);
 	}
 
@@ -545,7 +546,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param inheritPermission
 	 * @throws Exception
 	 */
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermission) throws Exception {
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) throws Exception {
 
 		if (inheritPermission != null) {
 			boolean shared = isSharedNode(nodeId);
@@ -564,7 +565,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		String authorityAdministrator = getAdminAuthority(nodeRef);
 
 		PermissionService permissionsService = this.serviceRegistry.getPermissionService();
-
+		aces=addCollectionCoordinatorPermission(nodeRef,aces);
 		if (aces != null) {
 			for (ACE ace : aces) {
 
@@ -605,6 +606,26 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			permissionsService.setInheritParentPermissions(nodeRef, inheritPermission);
 		}
 	}
+	@Override
+	public void setPermissionInherit(String nodeId,boolean inheritPermission) throws Exception {
+		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
+		permissionService.setInheritParentPermissions(nodeRef,inheritPermission);
+	}
+
+	private List<ACE> addCollectionCoordinatorPermission(NodeRef nodeRef, List<ACE> aces) {
+		if(!nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)))
+			return aces;
+
+		org.edu_sharing.repository.client.rpc.ACE coordinator=new org.edu_sharing.repository.client.rpc.ACE();
+		coordinator.setAuthority(AuthenticationUtil.getFullyAuthenticatedUser());
+		coordinator.setAuthorityType(org.edu_sharing.restservices.shared.Authority.Type.USER.name());
+		coordinator.setPermission(CCConstants.PERMISSION_COORDINATOR);
+		if(aces!=null && aces.contains(coordinator))
+			return aces;
+		List<ACE> newAces = new ArrayList<>(aces);
+		newAces.add(coordinator);
+		return newAces;
+	}
 
 	/**
 	 * returns admin authority if context is an edugroup
@@ -632,7 +653,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return authorityAdministrator;
 	}
 
-	private boolean containslocalPerm(ACE[] aces, String eduAuthority, String eduPermission) {
+	private boolean containslocalPerm(List<ACE> aces, String eduAuthority, String eduPermission) {
 		logger.info("eduAuthority:" + eduAuthority + " eduPermission:" + eduPermission);
 		if (aces == null)
 			return false;
@@ -651,10 +672,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	private void checkCanManagePermissions(String node, String authority) throws Exception {
 		ACE ace = new ACE();
 		ace.setAuthority(authority);
-		checkCanManagePermissions(node, new ACE[] { ace });
+		checkCanManagePermissions(node, Arrays.asList(new ACE[] { ace }));
 	}
 
-	private void checkCanManagePermissions(String nodeId, ACE[] aces) throws Exception {
+	private void checkCanManagePermissions(String nodeId, List<ACE> aces) throws Exception {
 		boolean hasUsers = false, hasAll = false;
 		if (aces != null) {
 			for (ACE ace : aces) {
@@ -741,7 +762,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 					public Void execute() throws Throwable {
 
-						checkCanManagePermissions(nodeId, aces);
+						checkCanManagePermissions(nodeId, Arrays.asList(aces));
 						NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 						PermissionService permissionsService = serviceRegistry.getPermissionService();
 
@@ -777,7 +798,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				new RetryingTransactionCallback<Void>() {
 					public Void execute() throws Throwable {
 
-						checkCanManagePermissions(nodeId, aces);
+						checkCanManagePermissions(nodeId, Arrays.asList(aces));
 
 						NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 						PermissionService permissionsService = serviceRegistry.getPermissionService();
