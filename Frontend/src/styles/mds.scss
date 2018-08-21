@@ -190,6 +190,7 @@ mds .mdsGroup{
   .widget_duration{
     width: 100%;
     float: left;
+    padding-top: 10px;
   }
   .widget_multivalueGroup{
     .widgetGroup{
@@ -205,7 +206,7 @@ mds .mdsGroup{
   }
   .widget_duration div.inputField{
     padding-top: 5px;
-    width:40px;
+    width:50px;
     float:left;
     text-align: center;
   }
@@ -214,13 +215,15 @@ mds .mdsGroup{
   }
   .widget_duration div.inputField label{
     font-size:70%;
+    position: relative;
+    top: -10px;
   }
   .widget_duration div.inputField span{
     position: relative;
     top:18px;
   }
   .widget_duration div.inputSlider{
-    width:calc(100% - 130px);
+    width:calc(100% - 170px);
     float:right;
     position: relative;
     top:35px;
