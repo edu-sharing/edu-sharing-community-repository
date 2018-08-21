@@ -224,4 +224,14 @@ public class PermissionServiceWSImpl implements PermissionService {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission) {
+		return false;
+	}
+
+	@Override
+	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String authority, String[] permissions) {
+		return null;
+	}
 }

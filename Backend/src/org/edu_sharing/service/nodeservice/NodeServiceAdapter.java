@@ -14,6 +14,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 public class NodeServiceAdapter implements NodeService {
@@ -271,5 +272,10 @@ public class NodeServiceAdapter implements NodeService {
 	public void setProperty(String protocol, String storeId, String nodeId, String property, String value) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId) {
+		return null;
 	}
 }

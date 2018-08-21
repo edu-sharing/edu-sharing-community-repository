@@ -1,53 +1,102 @@
 package org.edu_sharing.service.nodeservice;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
+import org.edu_sharing.service.InsufficientPermissionException;
+import org.springframework.context.ApplicationContext;
 
 public class NodeServiceInterceptor implements MethodInterceptor {
-
+    
     public void init(){
-
+        
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         String methodName=invocation.getMethod().getName();
-        if(methodName.equals("getProperty") || methodName.equals("getProperties") || methodName.equals("getAspects") || methodName.equals("getOwner")) {
+        if(methodName.equals("getProperty") ||
+                methodName.equals("getContentMimetype") ||
+                methodName.equals("getPreview") ||
+                methodName.equals("getProperties") ||
+                methodName.equals("getAspects") ||
+                methodName.equals("getOwner")) {
             String nodeId = (String) invocation.getArguments()[2];
-            return handleInvocation(nodeId, invocation);
+            return handleInvocation(nodeId, invocation,false);
+        }
+        if(methodName.equals("getChildrenChildAssociationRefAssoc") ||
+                methodName.equals("getType") ||
+                methodName.equals("getVersionHistory")){
+            String nodeId = (String) invocation.getArguments()[0];
+            return handleInvocation(nodeId,invocation,false);
         }
         return invocation.proceed();
     }
 
-    public static Object handleInvocation(String nodeId, MethodInvocation invocation) throws Throwable {
-        System.out.println("Node "+nodeId+" -> will run as system");
-        if(hasSignature(nodeId) || hasUsage(nodeId)) {
-            return AuthenticationUtil.runAsSystem(() -> {
+    public static Object handleInvocation(String nodeId, MethodInvocation invocation, boolean onlyOnError) throws Throwable {
+        if(onlyOnError){
+            try{
+                return invocation.proceed();
+            }
+            catch(AccessDeniedException|InsufficientPermissionException t)
+            {
+                // catch exception, check
+                System.out.println("Method threw "+t.getMessage()+", will check signature");
+                return runAsSystem(nodeId,invocation);
+            }
+        }
+        else{
+            return runAsSystem(nodeId,invocation);
+        }
+
+
+    }
+    private static Object runAsSystem(String nodeId,MethodInvocation invocation) throws Throwable {
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        NodeService nodeService = serviceRegistry.getNodeService();
+        while(nodeId!=null) {
+            if (hasSignature(nodeId) || hasUsage(nodeId)) {
+                System.out.println("Node "+nodeId+" -> will run as system");
+                return AuthenticationUtil.runAsSystem(() -> {
+                    try {
+                        return invocation.proceed();
+                    } catch (Throwable throwable) {
+                        throw new RuntimeException(throwable);
+                    }
+                });
+            }
+
+            // we'll check if any of the nodes in the parent hierarchy may has an usage -> so it is allowed as well
+            final String nodeIdFinal=nodeId;
+            nodeId=AuthenticationUtil.runAsSystem(()->{
                 try {
-                    return invocation.proceed();
-                } catch (Throwable throwable) {
-                    throw new RuntimeException(throwable);
+                    return nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeIdFinal)).getParentRef().getId();
+                }catch(Throwable t2){
+                    return null;
                 }
             });
         }
         return invocation.proceed();
-
-
     }
 
     private static boolean hasSignature(String nodeId) {
         String authSingleUseNodeId = Context.getCurrentInstance().getSessionAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
         String authSingleUseTs = Context.getCurrentInstance().getSessionAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP);
-        System.out.println("Usage node "+authSingleUseNodeId+" "+authSingleUseTs);
         if(authSingleUseNodeId==null || authSingleUseTs==null)
             return false;
         long timestamp=Long.parseLong(authSingleUseTs);
         return (authSingleUseNodeId.equals(nodeId)
-                && timestamp > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS));
+                && timestamp > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS*10));
     }
 
     private static boolean hasUsage(String nodeId) {

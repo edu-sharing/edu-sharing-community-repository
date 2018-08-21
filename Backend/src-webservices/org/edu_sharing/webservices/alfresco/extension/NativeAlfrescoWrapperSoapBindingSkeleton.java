@@ -7,6 +7,8 @@
 
 package org.edu_sharing.webservices.alfresco.extension;
 
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+
 public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper, org.apache.axis.wsdl.Skeleton {
     private org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper impl;
     private static java.util.Map _myOperations = new java.util.Hashtable();
@@ -1556,9 +1558,9 @@ public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing
         return ret;
     }
 
-    public org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException
+    public GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException
     {
-        org.edu_sharing.repository.client.rpc.GetPreviewResult ret = impl.getPreviewUrl(storeProtocol, storeIdentifier, nodeId);
+        GetPreviewResult ret = impl.getPreviewUrl(storeProtocol, storeIdentifier, nodeId);
         return ret;
     }
 

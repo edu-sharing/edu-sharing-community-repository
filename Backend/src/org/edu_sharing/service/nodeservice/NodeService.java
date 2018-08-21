@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface NodeService {
@@ -120,4 +121,6 @@ public interface NodeService {
 	List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc);
 	
 	public void setProperty(String protocol, String storeId, String nodeId, String property, String value);
+
+    GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId);
 }
