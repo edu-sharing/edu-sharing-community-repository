@@ -52,7 +52,7 @@
     </div>
   </div>
   <div class="topBarSearch" [class.noScope]="!showScope">
-  <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled">
+  <form (ngSubmit)="doSearch()" autocomplete="off" *ngIf="searchEnabled" role="search">
     <div class="searchInputGroup">
       <input #search name="search" type="search" [(ngModel)]="searchQuery" (change)="searchQueryChange.emit(searchQuery)"
              title="{{searchPlaceholder | translate}}" placeholder="{{searchPlaceholder | translate}}" />

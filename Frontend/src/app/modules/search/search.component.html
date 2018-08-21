@@ -1,5 +1,5 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
-  <main-nav #mainNav
+  <main-nav *ngIf="mainnav" #mainNav
     [title]="'SEARCH.TITLE'"
     [currentScope]="'search'"
     [searchEnabled]="true"
@@ -12,7 +12,7 @@
     (onSearch)="routeAndClearSearch($event)"
   ></main-nav>
 
-  <div class="rowRepositories row tab-group row-dark scrollWithBanner" *ngIf="repositories && repositories.length>2">
+  <div class="rowRepositories row tab-group row-dark scrollWithBanner" [class.no-mainnav]="!mainnav" *ngIf="repositories && repositories.length>2">
     <div class="col s12">
       <ul class="tabs tabsRepositories tabs-fixed-width">
         <li class="clickable tab col s3" *ngFor="let repo of repositories.length<=4 ? repositories : repositories.slice(0,3)" tabindex="0" (keyup.enter)="setRepository(repo.id)" (click)="setRepository(repo.id)">
@@ -45,7 +45,7 @@
       </ul>
     </div>
   </div>
-  <div class="top scrollWithBanner" [class.topNoRepositories]="!(repositories && repositories.length>2)">
+  <div class="top scrollWithBanner" [class.topNoRepositories]="!(repositories && repositories.length>2)" [class.no-mainnav]="!mainnav">
     <div class="extendedSearch">
         <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="searchService.sidenavOpened=!searchService.sidenavOpened" (click)="searchService.sidenavOpened=!searchService.sidenavOpened" class="pointed filtertoggler">
           <span>{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
@@ -67,7 +67,7 @@
   </div>
 <div class="sidenavContainer">
   <div class="apply" *ngIf="searchService.sidenavOpened && !isMdsLoading()"><actionbar [options]="mdsActions" [numberOfAlwaysVisibleOptions]="2"></actionbar><a *ngIf="rendered" class="btn" tabindex="0" (keyup.enter)="saveValues()" (click)="saveValues()">{{'SEARCH.APPLY_FILTER' | translate}}</a></div>
-  <div #sidenav class="sidenav scrollWithBanner" [class.sidenavNoRepositories]="!repositories || repositories.length<=2" [class.sidenavHidden]="!searchService.sidenavOpened" [@fromLeft]="searchService.sidenavOpened">
+  <div #sidenav class="sidenav scrollWithBanner" [class.no-mainnav]="!mainnav" [class.sidenavNoRepositories]="!repositories || repositories.length<=2" [class.sidenavHidden]="!searchService.sidenavOpened" [@fromLeft]="searchService.sidenavOpened">
      <div class="row tab-group" *ngIf="!isGuest">
        <div class="col s12">
          <ul class="tabs">
@@ -188,7 +188,7 @@
    </div>
 
    <div class="content_wrapper" [class.content_wrapper_grouped]="currentRepository=='-all-' && groupResults" [class.contentSidenav]="searchService.sidenavOpened">
-    <div class="results alignWithBanner" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
+    <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
       <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0 && !addToCollection">
         <div class="collectionsHeading">
           <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})<a *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
@@ -277,7 +277,7 @@
   [(addToCollection)]="addNodesToCollection"
 ></workspace-management>
 <div *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false">
-  <div class="collection">
+  <div class="collection" [class.no-mainnav]="!mainnav">
     <a class="collection-item"
        *ngFor="let repo of repositories.slice(3)"
        [class.active]="currentRepository==repo.id"
