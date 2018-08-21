@@ -43,13 +43,16 @@ public class ToolPermissionService {
 	
 	NodeService nodeService = serviceRegistry.getNodeService();
 	
-	org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getNodeService(ApplicationInfoList.getHomeRepository().getAppId());
+	org.edu_sharing.service.nodeservice.NodeService eduNodeService;
 	
 	AuthenticationService authService = serviceRegistry.getAuthenticationService();
 
 	private static String toolPermissionFolder=null;
-	
-	
+
+
+	public void setEduNodeService(org.edu_sharing.service.nodeservice.NodeService eduNodeService) {
+		this.eduNodeService = eduNodeService;
+	}
 	public boolean hasToolPermissionForConnector(String connectorId){
    		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 		String scope=authTool.getScope();
@@ -282,6 +285,14 @@ public class ToolPermissionService {
 			}
 		}catch(Throwable t){
 			// may fails when no session is active, not an issue
+		}
+	}
+
+	public void init(){
+		try {
+			initToolPermissions(ToolPermissionServiceFactory.getAllPredefinedToolPermissions());
+		} catch (Throwable throwable) {
+			throw new RuntimeException(throwable);
 		}
 	}
 }

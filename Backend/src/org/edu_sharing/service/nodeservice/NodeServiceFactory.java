@@ -12,7 +12,6 @@ public class NodeServiceFactory {
 		ApplicationInfo appInfo = (appId == null) ? ApplicationInfoList.getHomeRepository() : ApplicationInfoList.getRepositoryInfoById(appId);
 		
 		if(appInfo.getNodeService() == null || appInfo.getNodeService().trim().equals("")){
-			//nodeService = new NodeServiceImpl(appId);
 			return getLocalService();
 
 		}else{

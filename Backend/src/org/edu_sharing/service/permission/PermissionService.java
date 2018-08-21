@@ -72,6 +72,11 @@ public interface PermissionService {
 
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission);
 
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission);
+
+	HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String authority,
+											   String[] permissions);
+
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions);
 	
 	public ACL getPermissions(String nodeId) throws Exception;

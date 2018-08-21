@@ -8,6 +8,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.connector.Connector;
 import org.edu_sharing.service.connector.ConnectorList;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
+import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.spring.ApplicationContextFactory;
 
 public class ToolPermissionServiceFactory {
 
@@ -52,8 +54,10 @@ public class ToolPermissionServiceFactory {
 		return toInit;
 	}
 	public static ToolPermissionService getInstance(){
+		return (ToolPermissionService) ApplicationContextFactory.getApplicationContext().getBean("toolPermissionService");
+		/*
 		if( tps == null){
-			 tps = new ToolPermissionService();
+			 tps = (ToolPermissionService) ApplicationContextFactory.getApplicationContext().getBean("toolPermissionService");
 			 			
 			try{
 				tps.initToolPermissions(getAllPredefinedToolPermissions());
@@ -62,8 +66,8 @@ public class ToolPermissionServiceFactory {
 				return null;
 			}
 		}
-		
 		return tps;
+		*/
 	}
 	
 	
