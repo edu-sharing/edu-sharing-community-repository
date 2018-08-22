@@ -1092,8 +1092,8 @@ export class MdsComponent{
   }
   private mdsUpdateSuggests(id:string,showMore=false){
     let widget=this.getWidget(id);
-    let list=document.getElementById(this.getWidgetDomId(id)+'_suggestions');
-    let element:any=document.getElementById(this.getWidgetDomId(id)+'_suggestionsInput');
+    let list=document.getElementById(this.getWidgetDomId(widget)+'_suggestions');
+    let element:any=document.getElementById(this.getWidgetDomId(widget)+'_suggestionsInput');
     let elements=list.getElementsByTagName('a');
     if(showMore){
       list.className+=' suggestionListAll';
@@ -1128,7 +1128,7 @@ export class MdsComponent{
         if(!widget.values && value.displayString){
           caption=value.displayString;
         }
-        list.innerHTML+=this.getListEntry(this.getWidgetDomId(id),key,caption,false,element.value);
+        list.innerHTML+=this.getListEntry(this.getWidgetDomId(widget),key,caption,false,element.value);
         i++;
       }
       if(i==0){
