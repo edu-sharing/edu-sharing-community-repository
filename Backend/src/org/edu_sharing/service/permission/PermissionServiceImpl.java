@@ -230,9 +230,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		
 		
 		boolean publishToOAI = false;
-		for(ACE ace : acesToAdd) {
-			if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
-				publishToOAI = true;
+		
+		String license = (String)serviceRegistry.getNodeService().getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId), QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
+		if(license != null && license.startsWith("CC_")) {
+			for(ACE ace : acesToAdd) {
+				if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+					publishToOAI = true;
+				}
 			}
 		}
 		if(publishToOAI) {
