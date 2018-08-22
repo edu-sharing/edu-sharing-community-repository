@@ -1350,7 +1350,7 @@ export class MdsComponent{
               <div class="inputField"><span>:</span></div>
               <div class="inputField">
               <label for="`+id+`_minutes">`+this.translate.instant('INPUT_MINUTES')+`</label>
-              <input type="number" min="0" max="60" id="`+widget.id+`_minutes" onchange="
+              <input type="number" min="0" max="60" id="`+id+`_minutes" onchange="
               document.getElementById('`+id+`').noUiSlider.set(
               document.getElementById('`+id+`_hours').value*60+
               document.getElementById('`+id+`_minutes').value*1);
