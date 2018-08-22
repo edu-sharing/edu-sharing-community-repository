@@ -28,14 +28,14 @@ import {RestConstants} from "../../common/rest/rest-constants";
 })
 export class ServicesComponent {
 
-    public serviceUrl:string;
-    public registeredServices:Service[] = [];
-    public stats: any = {};
-    private loading:number = 0;
+    serviceUrl:string;
+    registeredServices:Service[] = [];
+    stats: any = {};
+    loading:number = 0;
     interfaces = ["Search","Sitemap","Statistics","OAI","Generic_Api"];
-    private statsUrlAggregated: SafeResourceUrl;
-    private statsUrlLicenses: SafeResourceUrl;
-    private statsUrlMaterials: SafeResourceUrl;
+    statsUrlAggregated: SafeResourceUrl;
+    statsUrlLicenses: SafeResourceUrl;
+    statsUrlMaterials: SafeResourceUrl;
     tab:String = 'LICENSES';
     constructor(
         private router : Router,
