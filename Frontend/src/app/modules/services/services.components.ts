@@ -55,7 +55,6 @@ export class ServicesComponent {
 
 
         this.configService.getAll().subscribe((data: any) => {
-            this.config = data;
             this.refreshServiceList();
         });
     }
@@ -102,8 +101,8 @@ export class ServicesComponent {
                 this.statsUrlMaterials = '';
                 return;
             }
-            this.statsUrlLicenses = this.sanitizer.bypassSecurityTrustResourceUrl(this.config.services.visualization + '?charts=licenses&statsUrl=' + service.statisticsInterface + '?subGroup=fileFormat');
-            this.statsUrlMaterials = this.sanitizer.bypassSecurityTrustResourceUrl(this.config.services.visualization + '?charts=formats&statsUrl=' + service.statisticsInterface + '?subGroup=fileFormat');
+            this.statsUrlLicenses = this.sanitizer.bypassSecurityTrustResourceUrl(this.configService.instant('services.visualization') + '?charts=licenses&statsUrl=' + service.statisticsInterface + '?subGroup=fileFormat');
+            this.statsUrlMaterials = this.sanitizer.bypassSecurityTrustResourceUrl(this.configService.instant('services.visualization') + '?charts=formats&statsUrl=' + service.statisticsInterface + '?subGroup=fileFormat');
 
             for(let s of this.registeredServices) {
                 s.active = false;
@@ -160,7 +159,7 @@ export class ServicesComponent {
                 else
                     stats.groups.push({key:this.stats[key].label, displayName: this.stats[key].label, count:this.stats[key].count});
             }
-            this.statsUrlAggregated = this.sanitizer.bypassSecurityTrustResourceUrl(this.config.services.visualization + '?charts=licenses&stats=' + JSON.stringify(stats));
+            this.statsUrlAggregated = this.sanitizer.bypassSecurityTrustResourceUrl(this.configService.instant('services.visualization') + '?charts=licenses&stats=' + JSON.stringify(stats));
             this.statsUrlLicenses = this.statsUrlAggregated;
             }
     }
