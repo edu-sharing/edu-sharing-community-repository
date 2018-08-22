@@ -195,36 +195,47 @@ public class OAILOMExporter {
 			string.setAttribute("language", "en");
 		}
 		
-		List<String> taxonIds = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID));
-		if(taxonIds != null){
+		List<String> taxonIds = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID));	
+		List<String> classificationKeyword = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
+		if(taxonIds != null || classificationKeyword != null){
 			Element classification = createAndAppendElement("classification", lom);
 			Element purpose = createAndAppendElement("purpose", classification);
 			createAndAppendElement("source", purpose,"LOMv1.0");
 			createAndAppendElement("value", purpose,"discipline");
 			
-			Element taxonPath = createAndAppendElement("taxonPath", classification);
-			Element tpSource = createAndAppendElement("source", taxonPath);
-			Element tpSourceString = createAndAppendElement("string", tpSource,"EAF Thesaurus");
-			tpSourceString.setAttribute("language", "x-t-eaf");
-			try{
-				List<MetadataSetValueKatalog> mdsValueKata = new MetadataReader().getValuespace("/org/edu_sharing/metadataset/valuespace_eaf_discipline.xml", "org.edu_sharing.metadataset.valuespaces_i18n", null, "{http://www.campuscontent.de/model/1.0}taxonid");
-				for(String taxonId:taxonIds){
-					Element taxon = createAndAppendElement("taxon", taxonPath);
-					createAndAppendElement("id", taxon,taxonId);
-					//ask eaf kataolog todo allow other kataloges
-					
-					for(MetadataSetValueKatalog cata : mdsValueKata){
-						if(cata.getKey().equals(taxonId)){
-							Element entry = createAndAppendElement("entry", taxon);
-							Element string = createAndAppendElement("string", entry,cata.getCaption());
-							//<string language="de">Sachkunde</string>
-							string.setAttribute("language", "de");
+			if(classificationKeyword != null) {
+				for(String kw : classificationKeyword) {
+					Element keyword = createAndAppendElement("keyword", classification);
+					Element kwStrEle = createAndAppendElement("string", keyword,kw);
+					if(kwStrEle != null)kwStrEle.setAttribute("language", "de");
+				}	
+			}
+			
+			if(taxonIds != null) {
+				Element taxonPath = createAndAppendElement("taxonPath", classification);
+				Element tpSource = createAndAppendElement("source", taxonPath);
+				Element tpSourceString = createAndAppendElement("string", tpSource,"EAF Thesaurus");
+				tpSourceString.setAttribute("language", "x-t-eaf");
+				try{
+					List<MetadataSetValueKatalog> mdsValueKata = new MetadataReader().getValuespace("/org/edu_sharing/metadataset/valuespace_eaf_discipline.xml", "org.edu_sharing.metadataset.valuespaces_i18n", null, "{http://www.campuscontent.de/model/1.0}taxonid");
+					for(String taxonId:taxonIds){
+						Element taxon = createAndAppendElement("taxon", taxonPath);
+						createAndAppendElement("id", taxon,taxonId);
+						//ask eaf kataolog todo allow other kataloges
+						
+						for(MetadataSetValueKatalog cata : mdsValueKata){
+							if(cata.getKey().equals(taxonId)){
+								Element entry = createAndAppendElement("entry", taxon);
+								Element string = createAndAppendElement("string", entry,cata.getCaption());
+								//<string language="de">Sachkunde</string>
+								string.setAttribute("language", "de");
+							}
 						}
+								
 					}
-							
+				}catch(Throwable e){
+					logger.error(e.getMessage(), e);
 				}
-			}catch(Throwable e){
-				logger.error(e.getMessage(), e);
 			}
 		}
 		

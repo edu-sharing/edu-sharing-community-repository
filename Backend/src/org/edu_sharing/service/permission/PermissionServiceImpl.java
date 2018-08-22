@@ -57,6 +57,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.exporter.OAILOMExporter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
@@ -69,6 +70,7 @@ import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -225,6 +227,19 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if(createHandle) {
 			createHandle(AuthorityType.EVERYONE,nodeId);
 		}
+		
+		
+		boolean publishToOAI = false;
+		for(ACE ace : acesToAdd) {
+			if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+				publishToOAI = true;
+			}
+		}
+		if(publishToOAI) {
+			OAIExporterService service = new OAIExporterService();
+			if(service.available()) service.export(nodeId);
+		}
+		
 
 	}
 
