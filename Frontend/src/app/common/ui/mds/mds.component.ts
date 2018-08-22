@@ -1514,9 +1514,12 @@ export class MdsComponent{
       caption=this.getCaption(widget);
     }
     let idLong=widget.id+(template.rel ? '_'+template.rel : '')+'_container';
-    html+='<div id="'+idLong+'" class="'+idLong+'"';
+    html+='<div id="'+idLong+'" class="'+idLong+'';
     if(this.isExtendedWidget(widget)){
-      html+=' class="mdsExtendedGroup" style="display:none"';
+      html+=' mdsExtendedGroup" style="display:none"';
+    }
+    else{
+      html+='"';
     }
     html+='>';
     if(widget.type!='checkbox')
