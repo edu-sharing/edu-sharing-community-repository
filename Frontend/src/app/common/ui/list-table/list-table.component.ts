@@ -345,7 +345,7 @@ export class ListTableComponent implements EventListener{
   }
   onEvent(event:string,data:any){
     if(event==FrameEventsService.EVENT_PARENT_SCROLL){
-      this.scroll();
+      this.scroll(false);
     }
   }
   @HostListener('document:keydown', ['$event'])
@@ -565,7 +565,14 @@ export class ListTableComponent implements EventListener{
     option.callback(node);
     this.dropdown=null;
   }
-  public scroll(){
+  public scroll(fromUser:boolean){
+    if(!fromUser){
+      // check if there is a footer
+      let elements=document.getElementsByTagName('footer');
+      console.log(elements);
+      if(elements.length && elements.item(0).innerHTML.trim())
+        return;
+    }
     this.loadMore.emit();
   }
   private contextMenu(event:any,node : Node){
