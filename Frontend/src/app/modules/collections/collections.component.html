@@ -180,6 +180,7 @@
     (onCloseAddToCollection)="closeAddToOther()"
   ></workspace-management>
 </div>
+<app-footer [scope]="'collections'" class="alignWithBanner"></app-footer>
 </div>
 <!-- collection header -->
 <div *ngIf="(!isRootLevelCollection()) && (!isLoading) && isReady && (tabSelected.length>=-1)"
@@ -252,7 +253,6 @@
     </div>
 
   </div>
-
 
 </div>
 
