@@ -272,6 +272,10 @@ table, div {
   .collections-pin-button custom-icon g{
     fill: #6b6b6b;
   }
+  footer{
+    float:left;
+    width:100%;
+  }
 }
 
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {

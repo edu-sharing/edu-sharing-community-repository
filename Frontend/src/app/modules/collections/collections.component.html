@@ -179,8 +179,8 @@
     [(addToCollection)]="addToOther"
     (onCloseAddToCollection)="closeAddToOther()"
   ></workspace-management>
+  <app-footer [scope]="'collections'" class="alignWithBanner"></app-footer>
 </div>
-<app-footer [scope]="'collections'" class="alignWithBanner"></app-footer>
 </div>
 <!-- collection header -->
 <div *ngIf="(!isRootLevelCollection()) && (!isLoading) && isReady && (tabSelected.length>=-1)"
