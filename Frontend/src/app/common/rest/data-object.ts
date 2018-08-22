@@ -81,10 +81,13 @@ export interface Application {
 }
 
 export interface Service {
+    active: boolean;
     id: string;
     name: string;
     url: string;
     logo: string;
+    interfaces: any[];
+    statisticsInterface: string;
 }
 
 export interface Preview {

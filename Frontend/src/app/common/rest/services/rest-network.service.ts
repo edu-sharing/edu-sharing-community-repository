@@ -76,4 +76,9 @@ export class RestNetworkService extends AbstractRestService{
             .map((response: Response) => response.json());
     }
 
+    public getStatistics = (url:string): Observable<any> => {
+        return this.connector.get(url,this.connector.getRequestOptions(), false)
+            .map((response: Response) => response.json());
+    }
+
 }
