@@ -107,3 +107,9 @@
 #chartAggregated {
   padding-top: 48px;
 }
+
+@media screen and (max-width: ($mobileWidth + $mobileStage*5)) {
+  #topWrapper,#registered-services{
+    width:90%;
+  }
+}
