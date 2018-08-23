@@ -48,6 +48,10 @@
   margin: auto;
   margin-top: 50px;
   width:50%;
+
+  i {
+    line-height: inherit;
+  }
 }
 
 .tableRow{
@@ -81,9 +85,6 @@
 .interface {
   width: 44px;
   text-align: center;
-  i {
-    line-height: inherit;
-  }
 }
 
 .interface.header {
