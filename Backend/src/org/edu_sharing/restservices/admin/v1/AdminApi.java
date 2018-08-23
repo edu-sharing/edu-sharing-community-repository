@@ -409,9 +409,11 @@ public class AdminApi {
 	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
 	public Response refreshEduGroupCache(
+			@ApiParam(value="keep existing", defaultValue="false") @QueryParam("keepExisting") Boolean keepExisting,
 			@Context HttpServletRequest req){
 		try {
-			AdminServiceFactory.getInstance().refreshEduGroupCache();
+			System.out.println("keepExisting:" + keepExisting);
+			AdminServiceFactory.getInstance().refreshEduGroupCache(keepExisting);
 	    	return Response.ok().build();		
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
