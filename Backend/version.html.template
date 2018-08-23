@@ -4,11 +4,12 @@
 edu sharing repository 
 <br/>
 <br/>
-build.number: 24<br/> 
-build.date: 2018-01-05<br/>
-version.main: 4.1.0 <br/>
+build.date: <br/>
+version.main: 4.1.0<br/>
 version.extension: Extension<br/>
-git.commit: 2018-01-05-bd7c1eb<br/>
-git.extension.commit: no-extension<br/>
+git.commit: <br/>
+git.branch: <br/>
+git.extension.commit: no-extension<br/><br/>
+git.log: <br/>
 </body>
 </html>
