@@ -12,7 +12,7 @@
 		<editProfile>true</editProfile>
 		<nodeReport>true</nodeReport>
 		<services>
-			<visualization>http://appserver7.metaventis.com:3001/</visualization>
+			<visualization>https://appserver7.metaventis.com/stat/</visualization>
 		</services>
 	</values>
 	<contexts>
