@@ -8,14 +8,22 @@ import java.util.Date;
 
 public class Service {
     private String name;
-    private String url,icon,logo,country,primaryLanguage,type;
-    private Collection<Description> description;
+    private String url,icon,logo,inLanguage,type;
+    private String description;
     private Collection<Audience> audience;
-    private boolean isPublic;
-    private Coverage coverage;
+    private boolean isAccessibleForFree;
     private Provider provider;
-    private long creationdate;
+    private String startDate;
     private Collection<Interface> interfaces=new ArrayList<>();
+    private Collection<String> about=new ArrayList<>();
+
+    public Collection<String> getAbout() {
+        return about;
+    }
+
+    public void setAbout(Collection<String> about) {
+        this.about = about;
+    }
 
     public String getName() {
         return name;
@@ -23,14 +31,6 @@ public class Service {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Coverage getCoverage() {
-        return coverage;
-    }
-
-    public void setCoverage(Coverage coverage) {
-        this.coverage = coverage;
     }
 
     public String getUrl() {
@@ -57,20 +57,12 @@ public class Service {
         this.logo = logo;
     }
 
-    public String getCountry() {
-        return country;
+    public String getInLanguage() {
+        return inLanguage;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getPrimaryLanguage() {
-        return primaryLanguage;
-    }
-
-    public void setPrimaryLanguage(String primaryLanguage) {
-        this.primaryLanguage = primaryLanguage;
+    public void setInLanguage(String inLanguage) {
+        this.inLanguage = inLanguage;
     }
 
     public String getType() {
@@ -81,11 +73,11 @@ public class Service {
         this.type = type;
     }
 
-    public Collection<Description> getDescription() {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(Collection<Description> description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -97,12 +89,12 @@ public class Service {
         this.audience = audience;
     }
 
-    public boolean isPublic() {
-        return isPublic;
+    public boolean isAccessibleForFree() {
+        return isAccessibleForFree;
     }
 
-    public void setPublic(boolean aPublic) {
-        isPublic = aPublic;
+    public void setAccessibleForFree(boolean accessibleForFree) {
+        isAccessibleForFree = accessibleForFree;
     }
 
     public Provider getProvider() {
@@ -113,12 +105,12 @@ public class Service {
         this.provider = provider;
     }
 
-    public long getCreationdate() {
-        return creationdate;
+    public String getStartDate() {
+        return startDate;
     }
 
-    public void setCreationdate(long creationdate) {
-        this.creationdate = creationdate;
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
     }
 
     public Collection<Interface> getInterfaces() {
@@ -151,32 +143,16 @@ public class Service {
 
     public static class Provider {
 
-        private String name,country,url,email,admin;
-
+        private String legalName,url,email;
+        private AreaServed areaServed;
         private Location location;
 
-        public Location getLocation() {
-            return location;
+        public String getLegalName() {
+            return legalName;
         }
 
-        public void setLocation(Location location) {
-            this.location = location;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getCountry() {
-            return country;
-        }
-
-        public void setCountry(String country) {
-            this.country = country;
+        public void setLegalName(String legalName) {
+            this.legalName = legalName;
         }
 
         public String getUrl() {
@@ -195,48 +171,86 @@ public class Service {
             this.email = email;
         }
 
-        public String getAdmin() {
-            return admin;
+        public AreaServed getAreaServed() {
+            return areaServed;
         }
 
-        public void setAdmin(String admin) {
-            this.admin = admin;
+        public void setAreaServed(AreaServed areaServed) {
+            this.areaServed = areaServed;
         }
 
+        public Location getLocation() {
+            return location;
+        }
+
+        public void setLocation(Location location) {
+            this.location = location;
+        }
+
+        public enum AreaServed{
+            Organization,
+            City,
+            State,
+            Country,
+            Continent,
+            World
+
+        }
         private static class Location {
-            private String longitude,latitude;
+            private Geo geo;
 
-            public String getLongitude() {
-                return longitude;
+            public Geo getGeo() {
+                return geo;
             }
 
-            public void setLongitude(String longitude) {
-                this.longitude = longitude;
+            public void setGeo(Geo geo) {
+                this.geo = geo;
             }
 
-            public String getLatitude() {
-                return latitude;
-            }
+            private static class Geo {
+                private Double longitude, latitude;
+                private String addressCountry;
 
-            public void setLatitude(String latitude) {
-                this.latitude = latitude;
+                public Double getLongitude() {
+                    return longitude;
+                }
+
+                public void setLongitude(Double longitude) {
+                    this.longitude = longitude;
+                }
+
+                public Double getLatitude() {
+                    return latitude;
+                }
+
+                public void setLatitude(Double latitude) {
+                    this.latitude = latitude;
+                }
+
+                public String getAddressCountry() {
+                    return addressCountry;
+                }
+
+                public void setAddressCountry(String addressCountry) {
+                    this.addressCountry = addressCountry;
+                }
             }
         }
     }
     public static class Audience {
-        private String id;
+        private String name;
 
-        public String getId() {
-            return id;
+        public String getName() {
+            return name;
         }
 
-        public void setId(String id) {
-            this.id = id;
+        public void setName(String name) {
+            this.name = name;
         }
     }
 
     public static class Interface {
-        private String url,set,metadataPrefix;
+        private String url,set,metadataPrefix,documentation;
         private Format format;
         private Type type;
 
@@ -280,6 +294,14 @@ public class Service {
             this.format = format;
         }
 
+        public String getDocumentation() {
+            return documentation;
+        }
+
+        public void setDocumentation(String documentation) {
+            this.documentation = documentation;
+        }
+
         public enum Format {
             Json,
             XML,
@@ -292,14 +314,5 @@ public class Service {
             OAI,
             Generic_Api,
         }
-    }
-    public enum Coverage{
-        Organization,
-        City,
-        State,
-        Country,
-        Continent,
-        World
-
     }
 }

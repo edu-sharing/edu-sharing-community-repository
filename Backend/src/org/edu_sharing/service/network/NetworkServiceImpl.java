@@ -72,6 +72,7 @@ public class NetworkServiceImpl implements NetworkService {
         api.setFormat(Service.Interface.Format.Json);
         api.setType(Service.Interface.Type.Generic_Api);
         api.setUrl(URLTool.getRestServiceUrl());
+        api.setDocumentation(URLTool.getBaseUrl()+"/swagger/index.html");
         interfaces.add(api);
         Service.Interface statistics=new Service.Interface();
         statistics.setFormat(Service.Interface.Format.Json);
@@ -131,9 +132,7 @@ public class NetworkServiceImpl implements NetworkService {
 
         String json=new Gson().toJson(service);
         props.put(CCConstants.CCM_PROP_SERVICE_NODE_NAME,new String[]{service.getName()});
-        props.put(CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
-                service.getDescription().stream().map(d -> d.getValue()).collect(Collectors.toList()).toArray(new String[0])
-        );
+        props.put(CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,new String[]{service.getDescription()});
         props.put(CCConstants.CCM_PROP_SERVICE_NODE_TYPE,new String[]{service.getType()});
         props.put(CCConstants.CCM_PROP_SERVICE_NODE_DATA,new String[]{json});
         return props;

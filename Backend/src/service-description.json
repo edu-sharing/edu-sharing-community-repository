@@ -1,31 +1,27 @@
 {
   "name":"",
-  "primaryLanguage":"de",
-  "description":[
-    {
-      "language":"de",
-      "value":""
-    }
-  ],
+  "inLanguage":"de",
+  "description":"",
   "type":"Repository",
   "audience":[
     {
-      "id":"teacher"
+      "name":"teacher"
     }
   ],
-  "public":false,
+  "isAccessibleForFree":false,
   "coverage":"Organization",
-  "creationdate":0,
+  "startDate":"",
   "about":[],
   "provider":{
     "name":"",
-    "country":"DE",
     "location":{
-      "longitude":0,
-      "latitude":0
+      "geo": {
+        "addressCountry": "de",
+        "longitude": 0,
+        "latitude": 0
+      }
     },
     "url":"",
-    "email":"",
-    "admin":""
+    "email":""
   }
 }
