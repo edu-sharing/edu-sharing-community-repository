@@ -89,6 +89,7 @@ public class Service {
         this.audience = audience;
     }
 
+    @JsonProperty("isAccessibleForFree")
     public boolean isAccessibleForFree() {
         return isAccessibleForFree;
     }
