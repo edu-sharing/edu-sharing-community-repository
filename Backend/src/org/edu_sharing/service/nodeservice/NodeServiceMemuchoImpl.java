@@ -1,22 +1,21 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.util.HashMap;
-import org.edu_sharing.service.search.SearchServiceDDBImpl;
-import org.edu_sharing.service.search.SearchServiceKhanImpl;
+import org.edu_sharing.service.search.SearchServiceMemuchoImpl;
 
-public class NodeServiceKhanImpl extends NodeServiceAdapter{
-
+public class NodeServiceMemuchoImpl extends NodeServiceAdapter{
 
 
 
-	public NodeServiceKhanImpl(String appId) {
+
+	public NodeServiceMemuchoImpl(String appId) {
 		super(appId);
 	}
 
 	@Override
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 
-		SearchServiceKhanImpl searchservice = new SearchServiceKhanImpl(this.appId);
+		SearchServiceMemuchoImpl searchservice = new SearchServiceMemuchoImpl(this.appId);
 		return null;//searchservice.getProperties(nodeId);
 
 	}
