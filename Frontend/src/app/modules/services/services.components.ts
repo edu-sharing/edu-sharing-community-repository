@@ -101,7 +101,7 @@ export class ServicesComponent {
                 this.statsUrlMaterials = '';
                 return;
             }
-            this.statsUrlLicenses = this.sanitizer.bypassSecurityTrustResourceUrl(this.configService.instant('services.visualization') + '?charts=licenses&statsUrl=' + service.statisticsInterface + '?subGroup=fileFormat');
+            this.statsUrlLicenses = this.sanitizer.bypassSecurityTrustResourceUrl(this.configService.instant('services.visualization') + '?charts=licenses&statsUrl=' + service.statisticsInterface);
             this.statsUrlMaterials = this.sanitizer.bypassSecurityTrustResourceUrl(this.configService.instant('services.visualization') + '?charts=formats&statsUrl=' + service.statisticsInterface + '?subGroup=fileFormat');
 
             for(let s of this.registeredServices) {
