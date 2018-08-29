@@ -42,7 +42,7 @@
         <div></div>
     </div>
     <div *ngFor="let service of registeredServices" class="tableRow" (click)="setChart(service)" [class.active]="service.active" >
-        <div><img class="service-logo" src="{{service.logo}}"></div>
+        <div class="service-logo"><img class="service-logo" src="{{service.logo}}"></div>
         <div>{{service.name}}</div>
         <div>{{service.url}}</div>
         <div>{{service.type}}</div>

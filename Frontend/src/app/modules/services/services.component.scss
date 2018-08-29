@@ -2,7 +2,7 @@
 
 #topWrapper {
   padding-top:$mainnavHeight + 70px;
-  width:50%;
+  width:75%;
   position: relative;
   margin: auto;
   display:flex;
@@ -47,7 +47,7 @@
 #registered-services {
   margin: auto;
   margin-top: 50px;
-  width:50%;
+  width:75%;
 
   i {
     line-height: inherit;
@@ -85,6 +85,10 @@
 .interface {
   width: 44px;
   text-align: center;
+}
+
+.service-logo {
+text-align: center;
 }
 
 .interface.header {
