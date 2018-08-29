@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -33,9 +34,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
+
+
 public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 
-	private static final String MEMUCHO_API = "";
+	private static final String MEMUCHO_API = "http://stage.memucho.de/api/edusharing/search?pageSize=100&term=";
+	//http://stage.memucho.de/api/edusharing/topic?id=
 
 	Logger logger = Logger.getLogger(SearchServiceMemuchoImpl.class);
 
@@ -46,40 +50,18 @@ public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 		this.repositoryId = appInfo.getAppId();
 	}
 
-	public static HttpsURLConnection openMemuchoUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
-		HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+	public static HttpURLConnection openMemuchoUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-		// TODO!
-		TrustManager[] trustAllCerts = new TrustManager[]{
-			    new X509TrustManager() {
-			        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-			            return null;
-			        }
-			        public void checkClientTrusted(
-			            java.security.cert.X509Certificate[] certs, String authType) {
-			        }
-			        public void checkServerTrusted(
-			            java.security.cert.X509Certificate[] certs, String authType) {
-			        }
-			    }
-			};
-		SSLContext sc = SSLContext.getInstance("SSL");
-	    sc.init(null, trustAllCerts, new java.security.SecureRandom());
-		connection.setSSLSocketFactory(sc.getSocketFactory());
-		connection.setHostnameVerifier(new HostnameVerifier() {
-		    public boolean verify(String hostname, SSLSession session) {
-		      return true;
-		    }
-		  });
 		return connection;
 	}
-	public static SearchResultNodeRef searchMemucho( String path, String searchWord, String repositoryId) throws Exception {
+	public static SearchResultNodeRef searchMemucho( String searchWord, String repositoryId) throws Exception {
 
-		String url = MEMUCHO_API + path;
+		String url = MEMUCHO_API + searchWord;
 		String jsonString;
 
 		URL urlURL = new URL(url);
-		HttpsURLConnection connection = openMemuchoUrl(urlURL);
+		HttpURLConnection connection = openMemuchoUrl(urlURL);
 		connection.connect();
 		InputStream is = connection.getInputStream();
 		StringBuilder responseStrBuilder = new StringBuilder();
@@ -92,7 +74,7 @@ public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 		jsonString = responseStrBuilder.toString();
 		JSONObject result = new JSONObject(jsonString);
 
-		JSONArray array = result.getJSONArray("children");
+		JSONArray array = result.getJSONArray("Items");
 		SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
 		List<NodeRef> data=new ArrayList<>();
 		searchResultNodeRef.setData(data);
@@ -100,7 +82,21 @@ public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 		for (int i = 0; i < array.length(); i++) {
 			JSONObject json = array.getJSONObject(i);
 				HashMap<String, Object> properties = new HashMap<>();
-				properties.put(CCConstants.SYS_PROP_NODE_UID, json.getString("id"));
+			properties.put(CCConstants.SYS_PROP_NODE_UID, json.getString("TopicId"));
+			properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, json.getString("Name"));
+			properties.put(CCConstants.CM_NAME, json.getString("Name"));
+			properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,  json.getString("Licence"));
+			properties.put(CCConstants.CCM_PROP_IO_WWWURL, json.getString("ItemUrl"));
+			properties.put(CCConstants.CM_PROP_C_MODIFIED, System.currentTimeMillis());
+			String author=VCardTool.nameToVCard(json.getString("Author"));
+			properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR,author);
+			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, json.getString("ImageUrl"));
+			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"memucho");
+			properties.put(CCConstants.CONTENTURL,json.getString("ItemUrl"));
+			properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,json.getString("ItemUrl"));
+
+
+				/*properties.put(CCConstants.SYS_PROP_NODE_UID, json.getString("id"));
 				properties.put(CCConstants.CM_PROP_C_MODIFIED, System.currentTimeMillis());
 				properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, json.getString("title"));
 				//properties.put(CCConstants.LOM_PROP_GENERAL_KEYWORD,json.getString("tags").replace(", ",CCConstants.MULTIVALUE_SEPARATOR));
@@ -122,7 +118,7 @@ public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 				//properties.put(CCConstants.CM_ASSOC_THUMBNAILS, json.getString("previewURL"));
 				properties.put(CCConstants.CM_ASSOC_THUMBNAILS, json.getString("icon_large"));
 				properties.put(CCConstants.DOWNLOADURL, json.getString("url"));
-				System.out.println("asdakdugaksdugaskudg");
+				System.out.println("asdakdugaksdugaskudg");*/
 				System.out.println(json.toString());
 
 				NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId,
@@ -145,14 +141,14 @@ public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 		boolean editorsChoice=false;
 		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
 		if(searchWordCriteria == null){
-			searchWordCriteria = new String[] {"*"};
+			searchWordCriteria = new String[] {""};
 		}
 		String searchWord = searchWordCriteria[0];
 		HttpsURLConnection connection=null;
 
 		try {
 
-			return searchMemucho("", searchWord, this.repositoryId);
+			return searchMemucho(searchWord, this.repositoryId);
 		}
 		catch(IOException e){
 			InputStream is=connection.getErrorStream();
