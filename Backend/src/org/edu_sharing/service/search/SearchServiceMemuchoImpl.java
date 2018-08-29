@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 
-	private static final String MEMUCHO_API = "http://stage.memucho.de/api/edusharing/search?pageSize=100&term=";
+	private static final String MEMUCHO_API = "https://memucho.de/api/edusharing/search?pageSize=100&term=";
 	//http://stage.memucho.de/api/edusharing/topic?id=
 
 	Logger logger = Logger.getLogger(SearchServiceMemuchoImpl.class);
@@ -51,10 +51,32 @@ public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 	}
 
 	public static HttpURLConnection openMemuchoUrl(URL url) throws KeyManagementException, IOException, NoSuchAlgorithmException{
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
+		HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+		TrustManager[] trustAllCerts = new TrustManager[]{
+			    new X509TrustManager() {
+			        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+			            return null;
+			        }
+			        public void checkClientTrusted(
+			            java.security.cert.X509Certificate[] certs, String authType) {
+			        }
+			        public void checkServerTrusted(
+			            java.security.cert.X509Certificate[] certs, String authType) {
+			        }
+			    }
+			};
+		SSLContext sc = SSLContext.getInstance("SSL");
+	    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		connection.setSSLSocketFactory(sc.getSocketFactory());
+		connection.setHostnameVerifier(new HostnameVerifier() {
+		    public boolean verify(String hostname, SSLSession session) {
+		      return true;
+		    }
+		  });
 		return connection;
+
 	}
+
 	public static SearchResultNodeRef searchMemucho( String searchWord, String repositoryId) throws Exception {
 
 		String url = MEMUCHO_API + searchWord;
@@ -94,33 +116,7 @@ public class SearchServiceMemuchoImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"memucho");
 			properties.put(CCConstants.CONTENTURL,json.getString("ItemUrl"));
 			properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION,json.getString("ItemUrl"));
-
-
-				/*properties.put(CCConstants.SYS_PROP_NODE_UID, json.getString("id"));
-				properties.put(CCConstants.CM_PROP_C_MODIFIED, System.currentTimeMillis());
-				properties.put(CCConstants.LOM_PROP_GENERAL_TITLE, json.getString("title"));
-				//properties.put(CCConstants.LOM_PROP_GENERAL_KEYWORD,json.getString("tags").replace(", ",CCConstants.MULTIVALUE_SEPARATOR));
-				//properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "image/jpeg");
-				//properties.put(CCConstants.ALFRESCO_MIMETYPE,properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
-				properties.put(CCConstants.CM_NAME, json.getString("title"));
-				properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, CCConstants.COMMON_LICENSE_CC_BY_NC_SA);
-				//properties.put(CCConstants.CM_PROP_C_CREATOR,json.getString("user"));
-				//properties.put(CCConstants.NODECREATOR_FIRSTNAME,json.getString("user"));
-				//properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,json.getString("user"));
-				//String author=VCardTool.nameToVCard(json.getString("author_key"));
-				//properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR,author);
-				//properties.put(CCConstants.VIRT_PROP_USAGECOUNT,json.getInt("downloads"));
-				properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE, "Memucho");
-				properties.put(CCConstants.CONTENTURL, json.getString("url"));
-				properties.put(CCConstants.CCM_PROP_IO_WWWURL, json.getString("url"));
-				properties.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, json.getString("url"));
-				properties.put(CCConstants.VIRT_PROP_PERMALINK, json.getString("url"));
-				//properties.put(CCConstants.CM_ASSOC_THUMBNAILS, json.getString("previewURL"));
-				properties.put(CCConstants.CM_ASSOC_THUMBNAILS, json.getString("icon_large"));
-				properties.put(CCConstants.DOWNLOADURL, json.getString("url"));
-				System.out.println("asdakdugaksdugaskudg");*/
-				System.out.println(json.toString());
-
+System.out.println(json);
 				NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId,
 						Constants.storeRef.getProtocol(),
 						Constants.storeRef.getIdentifier(), properties);
