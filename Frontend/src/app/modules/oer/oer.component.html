@@ -1,15 +1,16 @@
+<div>
 <div class="header">
   <img src="assets/images/layout/oer_bg.jpg">
   <div class="headerGradient"></div>
 </div>
-<main-nav
-    [title]="'SEARCH.TITLE'"
-    [currentScope]="'oer'"
-    [searchEnabled]="true"
-    [searchPlaceholder]="'OER.SEARCH'"
-    [canOpen]="true"
-    [searchQuery]="currentQuery"
-    (onSearch)="routeSearch($event.query)"
+  <main-nav
+          [title]="'SEARCH.TITLE'"
+          [currentScope]="'oer'"
+          [searchEnabled]="true"
+          [searchPlaceholder]="'OER.SEARCH'"
+          [canOpen]="true"
+          [searchQuery]="currentQuery"
+          (onSearch)="routeSearch($event.query)"
   ></main-nav>
 <div class="heading">
   <h1>{{'OER.HEADING_TITLE' | translate}}</h1>
@@ -91,3 +92,5 @@
 
   </div>
 </div>
+</div>
+<app-footer [scope]="'oer'"></app-footer>
