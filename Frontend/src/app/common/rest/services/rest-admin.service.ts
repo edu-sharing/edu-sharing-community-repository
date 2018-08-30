@@ -174,7 +174,7 @@ export class RestAdminService extends AbstractRestService{
   }
 
   private readRepositoryVersion(s: string) {
-    return "build.number"+s.split("build.number")[1].split("</body>")[0].replace(/<br\/>/g,"");
+    return s.split("</body>")[0].replace(/<br\/>/g,"");
   }
 
   public getApplicationXML(xml:string) {
