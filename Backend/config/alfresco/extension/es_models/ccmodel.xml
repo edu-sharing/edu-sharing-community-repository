@@ -1239,8 +1239,15 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
-
-
+				<!-- ccm:oerinteractivitytype -->
+				<property name="ccm:oer_interactivitytype">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>			
+				<property name="ccm:educational_use">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
 			</properties>
 		</aspect>
 
