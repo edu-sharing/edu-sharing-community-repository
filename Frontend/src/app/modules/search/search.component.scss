@@ -123,14 +123,17 @@ $sidenavWidth:300px;
   color: rgba(255, 255, 255, 1);
 }
 
-.content_wrapper {
-  transition: all $transitionNormal;
-  text-align: center;
-  margin: 0 10px;
-  min-height: 100%;
+.content-with-footer {
   position: absolute;
   top: 0;
-  width: calc(100% - 20px);
+  width: 100%;
+  .content_wrapper {
+    transition: all $transitionNormal;
+    text-align: center;
+    margin: 0 10px;
+    min-height: 100%;
+    width: calc(100% - 20px);
+  }
 }
 
 md-sidenav-container,.sidenav,#top {
