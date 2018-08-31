@@ -12,6 +12,10 @@ h2{
 }
 .receivers{
   margin-bottom: 20px;
+  width: 100%;
+  >div{
+    float: left;
+  }
 }
 .historyLabel{
   font-weight: bold;
