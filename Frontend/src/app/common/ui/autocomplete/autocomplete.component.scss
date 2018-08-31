@@ -9,14 +9,6 @@
 .searchInput {
   width: 100%;
 }
-.suggestbox .material-icons{
-  position:relative;
-  top:6px;
-}
-.suggestbox .name{
-  position:relative;
-  top:0px;
-}
 
 .searchInput::-webkit-input-placeholder {
   color: #6f6f6f;
@@ -52,10 +44,22 @@
 }
 
 .suggestbox > li > a {
-  display: inline-block;
+  display: flex;
+  align-items: center;
   width: 100%;
   padding:4px 12px 8px 12px;
   cursor: pointer;
+  >.data{
+    display: flex;
+    flex-direction: column;
+    padding:0 8px;
+    >.secondary{
+      font-size: 80%;
+      opacity: 0.75;
+      margin-top: -5px;
+      min-height: 5px;
+    }
+  }
 }
 
 .activeItem {

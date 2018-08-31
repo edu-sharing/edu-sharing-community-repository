@@ -19,6 +19,7 @@ import {FrameEventsService} from "./common/services/frame-events.service";
 import {RestAdminService} from "./common/rest/services/rest-admin.service";
 import {RestNetworkService} from "./common/rest/services/rest-network.service";
 import {RestToolService} from "./common/rest/services/rest-tool.service";
+import {PermissionNamePipe} from "./common/ui/permission-name.pipe";
 
 
 export const PROVIDERS=[
@@ -39,6 +40,7 @@ export const PROVIDERS=[
   RestOrganizationService,
   RestToolService,
   TemporaryStorageService,
+  PermissionNamePipe,
   RestMetadataService,
   SessionStorageService,
   ConfigurationService,

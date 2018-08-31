@@ -17,6 +17,8 @@ import {TranslateService} from "ng2-translate";
 import {NodeHelper} from "../../../common/ui/node-helper";
 import {RestHelper} from "../../../common/rest/rest-helper";
 import {Helper} from "../../../common/helper";
+import {AuthorityNamePipe} from "../../../common/ui/authority-name.pipe";
+import {PermissionNamePipe} from "../../../common/ui/permission-name.pipe";
 
 @Component({
   selector: 'workspace-share',
@@ -83,6 +85,7 @@ export class WorkspaceShareComponent  {
         for (let user of authorities.authorities) {
           let group = user.profile.displayName != null;
           let item = new SuggestItem(user.authorityName, group ? user.profile.displayName : NodeHelper.getUserDisplayName(user), group ? 'group' : 'person', '');
+          item.secondaryTitle = this.namePipe.transform(user,{field:'secondary'});
           item.originalObject = user;
           ret.push(item);
         }
@@ -304,6 +307,7 @@ export class WorkspaceShareComponent  {
   constructor(private nodeApi : RestNodeService,
               private translate : TranslateService,
               private applicationRef : ApplicationRef,
+              private namePipe : PermissionNamePipe,
               private toast : Toast,
               private iam : RestIamService,
               private connector:RestConnectorService){
