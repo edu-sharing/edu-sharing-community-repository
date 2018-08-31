@@ -6,8 +6,12 @@
     </form>
  <ul class="suggestbox" *ngIf="showSuggestions">
      <li *ngFor="let suggestion of _suggestions">
-         <a (click)="handleSuggestClick(suggestion)" [class.activeItem]="activeItem==suggestion.index" title="{{SUGGESTION | translate}} {{suggestion.title}}">
-           <span *ngIf="suggestion.materialIcon" class="material-icons">{{suggestion.materialIcon}}</span> <span class="name">{{suggestion.title}}</span>
+         <a (click)="handleSuggestClick(suggestion)" [class.activeItem]="activeItem==suggestion.index" title="{{'SUGGESTION' | translate}} {{suggestion.title}}">
+           <span *ngIf="suggestion.materialIcon" class="material-icons">{{suggestion.materialIcon}}</span>
+             <span class="data">
+                 <span class="primary">{{suggestion.title}}</span>
+                 <span class="secondary">{{suggestion.secondaryTitle}}</span>
+             </span>
          </a>
      </li>
  </ul>

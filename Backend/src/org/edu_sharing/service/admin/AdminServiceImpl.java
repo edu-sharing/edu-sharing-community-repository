@@ -473,8 +473,12 @@ public class AdminServiceImpl implements AdminService  {
 	}
 	
 	@Override
-	public void refreshEduGroupCache(){
-		EduGroupCache.refresh();
+	public void refreshEduGroupCache(boolean keepExisting){
+		if(keepExisting) {
+			EduGroupCache.refreshByKeepExisting();
+		}else{
+			EduGroupCache.refresh();
+		}
 	}
 	
 	@Override
