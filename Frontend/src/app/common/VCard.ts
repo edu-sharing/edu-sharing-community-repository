@@ -120,6 +120,8 @@ export class VCard{
     return this.lines.join("\n");
   }
   public getDisplayName(){
+    this.givenname=this.givenname ? this.givenname : "";
+    this.surname=this.surname ? this.surname : "";
     let string=this.givenname+" "+this.surname;
     if(string.trim()=='')
       return this.org;
