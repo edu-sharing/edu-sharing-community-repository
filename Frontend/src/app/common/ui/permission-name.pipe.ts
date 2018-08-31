@@ -11,8 +11,6 @@ export class PermissionNamePipe implements PipeTransform {
       if(field=='secondary'){
         field=this.config.instant('userSecondaryDisplayName',null);
       }
-      console.log(field);
-      console.log(permission);
 
       if(field=='email') {
           if(permission.user){
