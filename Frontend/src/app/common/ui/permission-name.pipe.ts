@@ -9,7 +9,7 @@ export class PermissionNamePipe implements PipeTransform {
     if(args && args['field']){
       let field=args['field'];
       if(field=='secondary'){
-        field=this.config.instant('userSecondaryDisplayName','email')
+        field=this.config.instant('userSecondaryDisplayName',null);
       }
       console.log(field);
       console.log(permission);
