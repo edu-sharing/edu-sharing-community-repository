@@ -18,6 +18,7 @@ import {NodeHelper} from "../../../common/ui/node-helper";
 import {AuthorityNamePipe} from "../../../common/ui/authority-name.pipe";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {RestHelper} from "../../../common/rest/rest-helper";
+import {PermissionNamePipe} from "../../../common/ui/permission-name.pipe";
 
 @Component({
   selector: 'workspace-workflow',
@@ -83,6 +84,7 @@ export class WorkspaceWorkflowComponent  {
         var ret:SuggestItem[] = [];
         for (let user of users.users){
           let item=new SuggestItem(user.authorityName,user.profile.firstName+" "+user.profile.lastName, 'person', '');
+          item.secondaryTitle = this.namePipe.transform(user,{field:'secondary'});
           item.originalObject=user;
           ret.push(item);
         }
@@ -159,6 +161,7 @@ export class WorkspaceWorkflowComponent  {
   public constructor(
     private nodeService:RestNodeService,
     private translate:TranslateService,
+    private namePipe:PermissionNamePipe,
     private iam:RestIamService,
     private connector:RestConnectorService,
     private toast:Toast,
