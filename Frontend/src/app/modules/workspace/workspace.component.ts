@@ -774,7 +774,7 @@ export class WorkspaceMainComponent implements EventListener{
             options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
         }
         if (nodes && nodes.length == 1) {
-            if(this.reurl && !nodes[0].isDirectory){
+            if(this.reurl){
                 let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.storage,this.getNodeList(node)[0],this.reurl));
                 apply.showAsAction=true;
                 apply.enabledCallback=((node:Node)=> {
