@@ -35,9 +35,12 @@ public interface AdminService {
 
 	CacheInfo getCacheInfo(String name);
 	
+	public void removeCacheEntry(Integer index, String beanName);
+	
 	public CacheCluster getCacheCluster();
 
 	public List<CacheCluster> getCacheClusters();
+	
 
 	List<GlobalGroup> getGlobalGroups() throws Throwable;
 

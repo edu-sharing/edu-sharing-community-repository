@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.text.Collator;
@@ -34,6 +35,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -484,6 +486,22 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public CacheInfo getCacheInfo(String name){
 		return CacheManagerFactory.getCacheInfo(name);
+	}
+	
+	@Override
+	public void removeCacheEntry(Integer index, String beanName) {
+		SimpleCache simpleCache = (SimpleCache)AlfAppContextGate.getApplicationContext().getBean(beanName);
+		int idx = 0;
+		Serializable keyToRemove = null;
+		for(Object key : simpleCache.getKeys()) {
+			if(idx == index) {
+				keyToRemove = (Serializable)key;
+			}
+		}
+		
+		if(keyToRemove != null) {
+			simpleCache.remove(keyToRemove);
+		}
 	}
 	
 	@Override

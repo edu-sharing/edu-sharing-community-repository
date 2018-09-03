@@ -131,7 +131,7 @@ public class CollectionDao {
 					NodeRef ref=child.getRef();
 					collRef.setRef(ref);
 										
-					String shortproporiginal = CCConstants.getValidLocalName(CCConstants.CM_ASSOC_ORIGINAL);
+					String shortproporiginal = CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_ORIGINAL);
 					if(!filter.getProperties().contains(shortproporiginal)){
 						filter.getProperties().add(shortproporiginal);
 					}
