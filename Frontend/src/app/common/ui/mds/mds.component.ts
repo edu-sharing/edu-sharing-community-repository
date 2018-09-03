@@ -1463,7 +1463,7 @@ export class MdsComponent{
 
     for(let option of widget.values){
       let id=this.getWidgetDomId(widget)+'_'+option.id;
-      html+='<input type="radio" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.id==widget.defaultvalue ? ' checked' : '')+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+option.caption+'</label>';
+      html+='<input type="radio" name="'+this.getWidgetDomId(widget)+'" id="'+id+'" value="'+option.id+'"'+(option.id==widget.defaultvalue ? ' checked' : '')+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+option.caption+'</label>';
     }
     html+='</fieldset>';
     return html;
