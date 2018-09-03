@@ -140,7 +140,7 @@ public class AlfServicesWrapper implements UsageDAO{
 			HashMap<String, Object> usage = getUsage(lmsId, courseId, nodeId.getId(), resourceId);
 			if(usage!=null)
 				return usage;
-			nodeId=nodeService.getPrimaryParent(nodeId).getChildRef();
+			nodeId=nodeService.getPrimaryParent(nodeId).getParentRef();
 		}
 		return null;
 	}
