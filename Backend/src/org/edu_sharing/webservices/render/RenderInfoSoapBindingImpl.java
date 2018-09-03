@@ -83,9 +83,11 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
 			RenderInfoResult result = getBaseData(userName, nodeId, version, client);
 			UsageDAO usageDao = new AlfServicesWrapper();
-			HashMap<String, Object> usageMap =  usageDao.getUsage(lmsId, courseId, nodeId, resourceId);
-			if(usageMap != null){
-				result.setUsage(transform(new UsageService().getUsageResult(usageMap)));
+			if(lmsId!=null && courseId!=null) {
+				HashMap<String, Object> usageMap = usageDao.getUsageOnNodeOrParents(lmsId, courseId, nodeId, resourceId);
+				if (usageMap != null) {
+					result.setUsage(transform(new UsageService().getUsageResult(usageMap)));
+				}
 			}
 			return result;
 			

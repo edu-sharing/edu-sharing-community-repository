@@ -5,7 +5,9 @@ import java.util.HashMap;
 public interface UsageDAO {
 	
 	public HashMap<String, HashMap<String, Object>> getUsages(String nodeId);
-	
+
+	HashMap<String, Object> getUsageOnNodeOrParents(String lmsId, String courseId, String objectNodeId, String resourceId) throws Exception;
+
 	public HashMap<String, Object> getUsage(String lmsId, String courseId, String objectNodeId, String resourceId) throws Exception;
 	
 	public HashMap<String, Object> getUsage(String usageId) throws Exception;

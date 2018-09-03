@@ -133,6 +133,19 @@ public class AlfServicesWrapper implements UsageDAO{
 		return resultProps;
 	}
 
+	@Override
+	public HashMap<String, Object> getUsageOnNodeOrParents(String lmsId, String courseId, String objectNodeId, String resourceId) throws Exception {
+		NodeRef nodeId=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,objectNodeId);
+		while(nodeId!=null) {
+			HashMap<String, Object> usage = getUsage(lmsId, courseId, nodeId.getId(), resourceId);
+			if(usage!=null)
+				return usage;
+			nodeId=nodeService.getPrimaryParent(nodeId).getChildRef();
+		}
+		return null;
+	}
+
+	@Override
 	public HashMap<String, Object> getUsage(String lmsId, String courseId, String objectNodeId, String resourceId) throws Exception {
 		HashMap<String, HashMap<String, Object>> children = getChildrenByType(objectNodeId, CCConstants.CCM_TYPE_USAGE);
 		for (String key : children.keySet()) {
