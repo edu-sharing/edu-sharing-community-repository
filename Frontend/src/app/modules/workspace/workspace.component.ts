@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {RestNodeService} from "../../common/rest/services/rest-node.service";
@@ -136,6 +136,12 @@ export class WorkspaceMainComponent implements EventListener{
         if(this.isSafe){
             this.connector.logoutSync();
         }
+    }
+    @HostListener('window:scroll', ['$event'])
+    handleScroll(event: Event) {
+        let scroll=(window.pageYOffset || document.documentElement.scrollTop);
+        if(scroll>0)
+            this.storage.set( 'workspace_scroll', scroll);
     }
     @HostListener('document:keyup', ['$event'])
     handleKeyboardEventUp(event: KeyboardEvent) {
@@ -945,6 +951,7 @@ export class WorkspaceMainComponent implements EventListener{
                 this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
                 this.createAllowed = NodeHelper.getNodesRight([this.currentFolder], RestConstants.ACCESS_ADD_CHILDREN);
                 this.actionOptions = this.getOptions(this.selection, false);
+                this.recoverScrollposition();
             }, (error: any) => {
                 this.currentFolder = {ref: {id: id}};
                 this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
@@ -1156,5 +1163,9 @@ export class WorkspaceMainComponent implements EventListener{
 
     hasOpenWindows() {
         return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
+    }
+    private recoverScrollposition() {
+        console.log("recover scroll "+this.storage.get('workspace_scroll',0));
+        window.scrollTo(0,this.storage.get('workspace_scroll',0));
     }
 }
