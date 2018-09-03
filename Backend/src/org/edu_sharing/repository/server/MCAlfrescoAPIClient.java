@@ -1153,15 +1153,15 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		
 		// checking if it is form type content
 		boolean isSubOfContent = serviceRegistry.getDictionaryService().isSubClass(QName.createQName(nodeType), QName.createQName(CCConstants.CM_TYPE_CONTENT));
-		
+
+		logger.debug("setting external URL");
+		String redirectServletLink = this.getRedirectServletLink(repId, nodeRef.getId());
+
+		redirectServletLink = URLTool.addOAuthAccessToken(redirectServletLink);
+		propsCopy.put(CCConstants.CONTENTURL, redirectServletLink);
+
 		// external URL
 		if (isSubOfContent) {
-			
-			logger.debug("setting external URL");
-			String redirectServletLink = this.getRedirectServletLink(repId, nodeRef.getId());
-			
-			redirectServletLink = URLTool.addOAuthAccessToken(redirectServletLink);
-			propsCopy.put(CCConstants.CONTENTURL, redirectServletLink);
 
 			String commonLicenseKey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 			boolean downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
