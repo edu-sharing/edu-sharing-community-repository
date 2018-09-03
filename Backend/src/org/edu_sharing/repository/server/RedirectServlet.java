@@ -54,6 +54,8 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.rendering.RenderingTool;
@@ -293,7 +295,8 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 
 	private String setUrlParameters(String appId, String nodeId, ApplicationInfo repInfo, String redirectUrl)
 			throws Throwable {
-		HashMap<String, Object> props = NodeServiceFactory.getNodeService(appId).getProperties(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId);
+		NodeService nodeService = NodeServiceFactory.getNodeService(appId);
+		HashMap<String, Object> props = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId);
 		
 		if (props != null) {
 			String title = (String) props.get(CCConstants.LOM_PROP_GENERAL_TITLE);
@@ -341,7 +344,13 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 			if(version != null && !version.trim().equals("")){
 				redirectUrl = UrlTool.setParamEncode(redirectUrl, "v", version);
 			}
-			
+
+			boolean isDirectory = MimeTypesV2.isDirectory(props);
+			redirectUrl = UrlTool.setParamEncode(redirectUrl, "isDirectory", isDirectory+"");
+
+			String type = CCConstants.getValidLocalName(nodeService.getType(nodeId));
+			redirectUrl = UrlTool.setParamEncode(redirectUrl, "nodeType", type);
+
 			//if it's a remoteObject(no alfresco) make it possible for the lms to show some type icons, license info a.s.o
 			String repoType = repInfo.getRepositoryType();
 			if(repoType != null && !repoType.trim().equals("")){
