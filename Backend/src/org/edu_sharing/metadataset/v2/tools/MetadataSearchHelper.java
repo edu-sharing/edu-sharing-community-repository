@@ -3,7 +3,12 @@ package org.edu_sharing.metadataset.v2.tools;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
@@ -12,16 +17,27 @@ import org.alfresco.service.cmr.search.SearchParameters.FieldFacet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.MetadataQueries;
+import org.edu_sharing.metadataset.v2.MetadataQuery;
+import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.rpc.SQLKeyword;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.SearchServiceImpl;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -29,6 +45,9 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.sun.star.lang.IllegalArgumentException;
 
 public class MetadataSearchHelper {
+	
+	static Logger logger = Logger.getLogger(MetadataSearchHelper.class);
+	
 	public static String getLuceneSearchQuery(MetadataQueries queries, String queryId, Map<String,String[]> parameters) throws IllegalArgumentException{
 		return getLuceneSearchQuery(queries.findQuery(queryId), parameters);
 	}
@@ -117,7 +136,7 @@ public class MetadataSearchHelper {
 		//return "("+queries.getBasequery()+") AND ("+parameter.getStatement().replace("${value}","*"+QueryParser.escape(value)+"*")+")";
 		return parameter.getStatement(value).replace("${value}","*"+QueryParser.escape(value)+"*");		
 	}
-	private static List<? extends  SuggestOracle.Suggestion> getSuggestionsSolr(MetadataQueryParameter parameter, MetadataWidget widget, String value)  {
+	private static List<? extends  SuggestOracle.Suggestion> getSuggestionsSolr(MetadataQueryParameter parameter, MetadataWidget widget, String value, org.edu_sharing.restservices.search.v1.model.SearchParameters searchParametersRest, MetadataSetV2 mds, String query)  {
 
 		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -130,7 +149,32 @@ public class MetadataSearchHelper {
 		searchParameters.setSkipCount(0);
 		searchParameters.setMaxItems(1);
 
-		searchParameters.setQuery("(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")");
+		String luceneQuery = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")";
+		if(searchParametersRest != null) {
+			
+			Map<String,String[]> criteriasMap=new HashMap<>();
+			for(MdsQueryCriteria criteria : searchParametersRest.getCriterias()){
+				criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
+			}
+			
+			MetadataQueries queries = mds.getQueries();
+			MetadataQuery queryObj = queries.findQuery(query);
+			queryObj.setApplyBasequery(false);
+			queryObj.setBasequery(null);
+			
+			SearchCriterias scParam = new SearchCriterias();
+			scParam.setRepositoryId(mds.getRepositoryId());
+			scParam.setMetadataSetId(mds.getId());
+			scParam.setMetadataSetQuery(query);
+			try {
+				luceneQuery = "(" + luceneQuery + ") AND " +  MetadataSearchHelper.getLuceneString(queryObj,scParam, criteriasMap);
+				//System.out.println("MetadataSearchHelper lucenequery suggest:" +luceneQuery);
+			} catch (IllegalArgumentException e) {
+				logger.error(e.getMessage(), e);
+			} 
+			
+		}
+		searchParameters.setQuery(luceneQuery);
 
 		String facetName = "@" + parameter.getName();
 		List<String> facets = parameter.getFacets() == null ? Arrays.asList(new String[]{facetName}) : parameter.getFacets();
@@ -170,7 +214,7 @@ public class MetadataSearchHelper {
 		
 	}
 
-	public static List<? extends  SuggestOracle.Suggestion> getSuggestions(String repoId,MetadataSetV2 mds,String queryId,String parameterId,String value) throws IllegalArgumentException  {
+	public static List<? extends  SuggestOracle.Suggestion> getSuggestions(String repoId,MetadataSetV2 mds,String queryId,String parameterId,String value, org.edu_sharing.restservices.search.v1.model.SearchParameters searchParameters) throws IllegalArgumentException  {
 		MetadataWidget widget=mds.findWidget(parameterId);
 		
 		String source=widget.getSuggestionSource();
@@ -182,7 +226,7 @@ public class MetadataSearchHelper {
 		 * remote repo
 		 */
 		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
-			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value);
+			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, searchParameters);
 		}
 		
 		/**
@@ -190,7 +234,7 @@ public class MetadataSearchHelper {
 		 */
 		if(source.equals(MetadataReaderV2.SUGGESTION_SOURCE_SOLR)){
 			MetadataQueryParameter parameter = getParameter(mds.getQueries(),queryId,parameterId);
-			return getSuggestionsSolr(parameter, widget, value);
+			return getSuggestionsSolr(parameter, widget, value, searchParameters, mds, queryId);
 		}
 		if(source.equals(MetadataReaderV2.SUGGESTION_SOURCE_MDS)){
 			return getSuggestionsMds(widget, value);

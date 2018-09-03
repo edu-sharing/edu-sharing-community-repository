@@ -21,6 +21,7 @@ import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.mds.v1.model.MdsEntries;
 import org.edu_sharing.restservices.mds.v1.model.MdsEntriesV2;
 import org.edu_sharing.restservices.mds.v1.model.MdsEntry;
+import org.edu_sharing.restservices.mds.v1.model.SuggestionParam;
 import org.edu_sharing.restservices.mds.v1.model.Suggestions;
 import org.edu_sharing.restservices.mds.v1.model.ValueParameters;
 import org.edu_sharing.restservices.shared.ErrorResponse;
@@ -256,16 +257,15 @@ public class MdsApi {
     public Response getValuesV2(
         	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
         	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
-        	@ApiParam(value = "value",required=true ) ValueParameters parameters,
+        	@ApiParam(value = "suggestionParam",required=false ) SuggestionParam suggestionParam,
     		@Context HttpServletRequest req) {
-        	
         	try {
-        			    		    	
-    	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);	    	
+     	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);	    	
     	    	MdsDaoV2 mds = MdsDaoV2.getMds(repoDao, mdsId);
-    	    	
-    	    	
-    	    	Suggestions response = mds.getSuggestions(parameters.getQuery(), parameters.getProperty(), parameters.getPattern());
+    	    	Suggestions response = mds.getSuggestions(suggestionParam.getValueParameters().getQuery(), 
+    	    			suggestionParam.getValueParameters().getProperty(), 
+    	    			suggestionParam.getValueParameters().getPattern(),
+    	    			suggestionParam.getSearchParameters());
     	    	  	
     	    	return Response.status(Response.Status.OK).entity(response).build();
     	
