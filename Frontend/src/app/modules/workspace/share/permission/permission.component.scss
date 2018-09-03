@@ -9,6 +9,20 @@
     padding: 1px 0;
     align-items: center;
   }
+  >.name{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    padding:0 8px;
+    height: 40px;
+    >.secondary{
+      font-size: 80%;
+      color:$textLight;
+      margin-top: -3px;
+      min-height: 3px;
+    }
+  }
 }
 .publish{
   padding: 0 5px;

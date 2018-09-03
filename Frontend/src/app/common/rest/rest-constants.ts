@@ -93,6 +93,7 @@ export class RestConstants {
   public static CCM_PROP_CCRESSOURCETYPE = "ccm:ccressourcetype";
   public static CCM_PROP_CCRESSOURCESUBTYPE = "ccm:ccresourcesubtype";
   public static CCM_PROP_CCRESSOURCEVERSION = "ccm:ccressourceversion";
+  public static CCM_PROP_REPLICATIONMODIFIED = "ccm:replicationmodified";
   public static CCM_PROP_EDUCATIONALTYPICALAGERANGE = "ccm:educationaltypicalagerange";
   public static CCM_PROP_COLLECTION_PINNED_STATUS = "ccm:collection_pinned_status";
   public static CCM_PROP_COLLECTION_PINNED_ORDER = "ccm:collection_pinned_order";
@@ -135,7 +136,9 @@ export class RestConstants {
                             RestConstants.CM_MODIFIED_DATE,
                             RestConstants.CM_PROP_C_CREATED,
                             RestConstants.CCM_PROP_EAF_PRODUCTIONYEAR,
-                            RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL];
+                            RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL,
+                            RestConstants.CCM_PROP_REPLICATIONMODIFIED
+    ];
 
 
   public static STATUS_CODE_OK = "OK";

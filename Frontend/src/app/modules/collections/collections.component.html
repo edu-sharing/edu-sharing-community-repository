@@ -181,11 +181,14 @@
     [(addToCollection)]="addToOther"
     (onCloseAddToCollection)="closeAddToOther()"
   ></workspace-management>
+  <app-footer [scope]="'collections'" class="alignWithBanner"></app-footer>
 </div>
 </div>
 <!-- collection header -->
 <div *ngIf="(!isRootLevelCollection()) && (!isLoading) && isReady && (tabSelected.length>=-1)"
-     class="collections-header scrollWithBanner"
+     class="collections-header"
+     [class.alignWithBanner]="isMobileWidth()"
+     [class.scrollWithBanner]="!isMobileWidth()"
      [class.dark-color]="isBrightColor()"
      [style.background-color]="collectionContent.collection.color">
 

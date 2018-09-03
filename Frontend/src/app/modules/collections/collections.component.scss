@@ -91,9 +91,9 @@ table, div {
 }
 
 .collections-master-div {
-    padding-left: 15%;
-    padding-right: 10%;
-    padding-top: 20px;
+    padding:20px 10% 20px 15%;
+    float: left;
+    width: 100%;
 }
 
 .collections-header-textarea {
@@ -273,6 +273,10 @@ table, div {
 :host /deep/{
   .collections-pin-button custom-icon g{
     fill: #6b6b6b;
+  }
+  footer{
+    float:left;
+    width:100%;
   }
 }
 .breadcrumb-space{

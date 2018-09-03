@@ -159,6 +159,9 @@ export class CollectionsMainComponent {
   public isMobile(){
     return this.uiService.isMobile();
   }
+    public isMobileWidth(){
+        return window.innerWidth<UIConstants.MOBILE_WIDTH;
+    }
   public setCustomOrder(event:any){
     let checked=event.target.checked;
     this.collectionContent.collection.orderMode=checked ? RestConstants.COLLECTION_ORDER_MODE_CUSTOM : null;

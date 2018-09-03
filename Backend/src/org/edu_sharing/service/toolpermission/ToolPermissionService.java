@@ -165,19 +165,8 @@ public class ToolPermissionService {
         NodeRef sysObject = eduNodeService.getChild(Constants.storeRef, systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, CCConstants.CM_NAME, toolPermission);
 		
 		if(sysObject == null){
-			
-			logger.info("ToolPermission" + toolPermission+ " does not exsist. will create it.");
-			HashMap props = new HashMap();
-			props.put(CCConstants.CM_NAME, toolPermission);
-			String result = eduNodeService.createNodeBasic(systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, props);
-			//set admin as owner cause if it was created by runAs with admin the current user not the runas on is taken
-			eduNodeService.setOwner(result, ApplicationInfoList.getHomeRepository().getUsername());
-			if(!toolPermission.equals(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL)){
-				eduNodeService.setPermissions(result,PermissionService.ALL_AUTHORITIES, new String[]{CCConstants.PERMISSION_READ}, false);
-			}
-			else{
-				eduNodeService.setPermissions(result, null,null, false);
-			}
+
+			String result = createToolpermission(toolPermission, systemFolderId);
 	
 			return result;
 			
@@ -187,7 +176,24 @@ public class ToolPermissionService {
 			return nodeId;
 		}
 	}
-	
+
+	private String createToolpermission(String toolPermission, String systemFolderId) throws Exception {
+		logger.info("ToolPermission" + toolPermission+ " does not exists. will create it.");
+		HashMap props = new HashMap();
+		props.put(CCConstants.CM_NAME, toolPermission);
+		String result = eduNodeService.createNodeBasic(systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, props);
+		//set admin as owner cause if it was created by runAs with admin the current user not the runas on is taken
+		eduNodeService.setOwner(result, ApplicationInfoList.getHomeRepository().getUsername());
+		if(ToolPermissionServiceFactory.getAllDefaultAllowedToolpermissions().contains(toolPermission)){
+			logger.info("ToolPermission" + toolPermission+ " is allowed by default. Will set GROUP_EVERYONE.");
+			eduNodeService.setPermissions(result,PermissionService.ALL_AUTHORITIES, new String[]{CCConstants.PERMISSION_READ}, false);
+		}
+		else{
+			eduNodeService.setPermissions(result, null,null, false);
+		}
+		return result;
+	}
+
 	private String getEdu_SharingSystemFolderBase() throws Throwable{
 		if(!isAdmin()){
 			throw new Exception("Admin group required");

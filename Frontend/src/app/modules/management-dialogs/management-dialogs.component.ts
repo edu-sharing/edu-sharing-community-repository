@@ -448,6 +448,7 @@ export class WorkspaceManagementDialogsComponent  {
 
     private showMetadataAfterUpload(event: Node[]) {
         this.nodeMetadata=event[0];
+        this.nodeMetadataChange.emit(event[0]);
         this.nodeMetadataAllowReplace=false;
         this.nodeDeleteOnCancel=true;
         this.nodeDeleteOnCancelChange.emit(true);

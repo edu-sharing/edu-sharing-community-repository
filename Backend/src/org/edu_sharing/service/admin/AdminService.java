@@ -32,13 +32,16 @@ public interface AdminService {
 
 	String runUpdate(String updateId, boolean execute) throws Exception;
 
-	void refreshEduGroupCache();
+
 
 	CacheInfo getCacheInfo(String name);
 	
+	public void removeCacheEntry(Integer index, String beanName);
+
 	public CacheCluster getCacheCluster();
-	
+
 	public List<CacheCluster> getCacheClusters();
+
 
 	List<GlobalGroup> getGlobalGroups() throws Throwable;
 
@@ -75,7 +78,7 @@ public interface AdminService {
 	Collection<NodeRef> getActiveNodeLocks();
 
 	void applyTemplate(String template, String group, String folderId) throws Throwable;
-	
+
 	List<String> getCatalinaOut() throws IOException;
 
 	int importCollections(String parent, InputStream is) throws Throwable;
@@ -83,11 +86,13 @@ public interface AdminService {
 	String uploadTemp(String name, InputStream is) throws Exception;
 
 	void startJob(String jobClass, HashMap<String, Object> params) throws Exception;
-	
+
 	Map<String, ToolPermission> getToolpermissions(String authority) throws Throwable;
 
 	void setToolpermissions(String authority,
 			Map<String, ToolPermission.Status> toolpermissions) throws Throwable;
+
+	void refreshEduGroupCache(boolean keepExisting);
 
 
 }

@@ -5,6 +5,7 @@ import {NodeHelper} from "../node-helper";
 import {Authority, IamAuthorities} from "../../rest/data-object";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {RestConstants} from "../../rest/rest-constants";
+import {PermissionNamePipe} from '../permission-name.pipe';
 
 @Component({
   selector: 'authority-search-input',
@@ -40,7 +41,7 @@ export class AuthoritySearchInputComponent{
     authority.authorityType=RestConstants.AUTHORITY_TYPE_UNKNOWN;
     this.onChooseAuthority.emit(authority);
   }
-  constructor(private iam : RestIamService){
+  constructor(private iam : RestIamService,private namePipe : PermissionNamePipe){
 
   }
   public updateSuggestions(event : any){
@@ -49,11 +50,12 @@ export class AuthoritySearchInputComponent{
       (authorities:IamAuthorities)=>{
         if(this.lastSuggestionSearch!=event.input)
           return;
-        var ret:SuggestItem[] = [];
+        let ret:SuggestItem[] = [];
         for (let user of authorities.authorities) {
           let group = user.profile.displayName != null;
           let item = new SuggestItem(user.authorityName, group ? user.profile.displayName : NodeHelper.getUserDisplayName(user), group ? 'group' : 'person', '');
           item.originalObject = user;
+          item.secondaryTitle = this.namePipe.transform(user,{field:'secondary'});
           ret.push(item);
         }
         this.authoritySuggestions=ret;

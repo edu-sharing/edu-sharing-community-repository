@@ -1,3 +1,3 @@
 <header *ngIf="banner && banner.url && banner.components.indexOf(scope)!=-1"
         class="banner" [style.background-image]="'url('+banner.url+')'"></header>
-<app-header *ngIf="banner && banner.components.indexOf(scope)!=-1"></app-header>
+<app-header *ngIf="banner && banner.components.indexOf(scope)!=-1" [scope]="scope"></app-header>

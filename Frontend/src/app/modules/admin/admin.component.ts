@@ -214,12 +214,14 @@ export class AdminComponent {
         this.admin.getRepositoryVersion().subscribe((data:string)=>{
           this.repositoryVersion=data;
         },(error:any)=>{
-          this.repositoryVersion='Error accessing version information. Are you in dev mode?';
+            console.info(error);
+            this.repositoryVersion="Error accessing version information. Are you in dev mode?";
         });
         this.admin.getNgVersion().subscribe((data:string)=>{
           this.ngVersion=data;
         },(error:any)=>{
-          this.ngVersion='Error accessing version information. Are you in dev mode?';
+            console.info(error);
+            this.ngVersion="Error accessing version information. Are you in dev mode?";
         });
       });
     });
