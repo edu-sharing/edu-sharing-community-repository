@@ -1248,7 +1248,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 						String[] keys=new ValueTool().getMultivalue((String) entry.getValue());
 						String[] values=new String[keys.length];
 						for(int i=0;i<keys.length;i++)
-							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : null;
+							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
 						addAndOverwriteDateMap.put(entry.getKey() + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values,CCConstants.MULTIVALUE_SEPARATOR));
 					}
 				

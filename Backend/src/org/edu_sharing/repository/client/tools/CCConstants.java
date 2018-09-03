@@ -647,7 +647,11 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_SEARCH_CONTEXT = "{http://www.campuscontent.de/model/1.0}search_context";
 	
 	public final static String CCM_PROP_IO_EDITORIAL_STATE = "{http://www.campuscontent.de/model/1.0}editorial_state";
-	
+
+	public final static String CCM_PROP_IO_EDITORIAL_CHECKLIST = "{http://www.campuscontent.de/model/1.0}editorial_checklist";
+
+	public final static String CCM_PROP_IO_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";
+
 	/**
 	 * published
 	 */
@@ -1569,12 +1573,12 @@ public class CCConstants {
 	}
 
 	public final static String COMMON_LICENSE_CC_ZERO_LINK = "https://creativecommons.org/publicdomain/zero/1.0/deed.${locale}";
-	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_SA_LINK = "https://creativecommons.org/licenses/by-sa/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_ND_LINK = "https://creativecommons.org/licenses/by-nd/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_NC_LINK = "https://creativecommons.org/licenses/by-nc/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_NC_SA_LINK = "https://creativecommons.org/licenses/by-nc-sa/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_NC_ND_LINK = "https://creativecommons.org/licenses/by-nc-nd/${version}/deed.en";
+	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_SA_LINK = "https://creativecommons.org/licenses/by-sa/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_ND_LINK = "https://creativecommons.org/licenses/by-nd/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_NC_LINK = "https://creativecommons.org/licenses/by-nc/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_NC_SA_LINK = "https://creativecommons.org/licenses/by-nc-sa/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_NC_ND_LINK = "https://creativecommons.org/licenses/by-nc-nd/${version}/deed.${locale}";
 	public final static String COMMON_LICENSE_EDU_LINK = "http://edu-sharing.net/licenses/edu-nc-nd/1.0/de";
 	public final static String COMMON_LICENSE_CUSTOM_LINK = "http://edu-sharing.net/licenses/custom-licence/1.0/de";
 

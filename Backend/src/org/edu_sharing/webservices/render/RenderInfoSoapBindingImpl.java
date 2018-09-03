@@ -317,6 +317,11 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		//set default
 		rir.setHasContentLicense(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, CCConstants.PERMISSION_READ_ALL));
+		//Has the user alf permissions on the node? -> check if he also has read_all permissions
+		if(client.hasPermissions(nodeId, userName, new String[] {CCConstants.PERMISSION_READ}))
+			rir.setHasContentLicense(client.hasPermissions(nodeId, userName, new String[] {CCConstants.PERMISSION_READ_ALL}));
+		else // otherwise, we currently assume the material is embedded in a course (usage), so do allow read access
+			rir.setHasContentLicense(true);
 		String cost = (String)props.get(CCConstants.CCM_PROP_IO_CUSTOM_LICENSE_KEY);
 		if(cost != null && (cost.contains("license_rp") || cost.contains("license_none"))) {
 			

@@ -46,6 +46,7 @@ import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
+import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -450,36 +451,67 @@ public class AdminApi {
 	}
 
 	@POST
-	@Path("/refreshEduGroupCache")
+	@Path("/cache/refreshEduGroupCache")
 
 	@ApiOperation(value = "Refresh the Edu Group Cache", notes = "Refresh the Edu Group Cache.")
-
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response refreshEduGroupCache(@Context HttpServletRequest req) {
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response refreshEduGroupCache(
+            @ApiParam(value="keep existing", defaultValue="false") @QueryParam("keepExisting") Boolean keepExisting,
+            @Context HttpServletRequest req){
 		try {
-			AdminServiceFactory.getInstance().refreshEduGroupCache();
-			return Response.ok().build();
+            AdminServiceFactory.getInstance().refreshEduGroupCache(keepExisting);
+	    	return Response.ok().build();		
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
 	}
 
 	@OPTIONS
-	@Path("/refreshEduGroupCache")
+	@Path("/cache/refreshEduGroupCache")
 	@ApiOperation(hidden = true, value = "")
 
 	public Response options4() {
 
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}
+	
+	@POST
+	@Path("/cache/removeCacheEntry")
+
+	@ApiOperation(value = "remove cache entry", notes = "remove cache entry")
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	    })
+	public Response removeCacheEntry(
+            @ApiParam(value="cacheIndex", defaultValue="false") @QueryParam("cacheIndex") Integer cacheIndex,
+            @ApiParam(value="bean", defaultValue="false") @QueryParam("bean") String bean,
+            @Context HttpServletRequest req){
+		try {
+            AdminServiceFactory.getInstance().removeCacheEntry(cacheIndex, bean);
+	    	return Response.ok().build();		
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	
 
 	@GET
-	@Path("/cacheInfo/{id}")
+	@Path("/cache/cacheInfo/{id}")
 
 	@ApiOperation(value = "Get information about a cache", notes = "Get information about a cache.")
 
@@ -905,9 +937,9 @@ public class AdminApi {
 		} catch (Exception e) {
 			return ErrorResponse.createResponse(e);
 		}
-		
+
 	}
-	
+
 	@OPTIONS
 	@Path("/job")
 	@ApiOperation(hidden = true, value = "")
@@ -916,7 +948,7 @@ public class AdminApi {
 
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
 	}
-	
+
 	@GET
 	@Path("/lucene")
 	@Consumes({ "application/json" })
@@ -941,10 +973,10 @@ public class AdminApi {
 			@Context HttpServletRequest req) {
 
 		try {
-			
+
 			//check that there is an admin
 			AdminServiceFactory.getInstance();
-			
+
 			Filter filter = new Filter(propertyFilter);
 			RepositoryDao repoDao = RepositoryDao.getRepository("-home-");
 
@@ -990,5 +1022,28 @@ public class AdminApi {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}
 
+	
+	@DELETE
+	@Path("/deletePerson")
 
+	@ApiOperation(value = "delete person", notes = "delete person.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response deletePerson(
+			@ApiParam(value = "username", required = true) @QueryParam("username") String username,
+		
+			@Context HttpServletRequest req) {
+		try {
+			new PersonLifecycleService().deletePerson(username);
+			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	
 }

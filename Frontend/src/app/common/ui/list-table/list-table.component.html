@@ -32,7 +32,7 @@
     </div>
 </div>
 <div class="dialog dialogOptions" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
-<div [className]="'list '+listClass" infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll()">
+<div [className]="'list '+listClass" infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)">
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
 
@@ -217,7 +217,7 @@
                 <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)"><a [class.disabled]="!optionIsValid(_options[0],node)" (click)="callOption(_options[0],node)"><i class="material-icons">{{_options[0].icon}}</i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
             </div>
         </div>
-        <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll()">
+        <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll(true)">
             <i class="material-icons">refresh</i>
             <div>{{'LOAD_MORE' | translate}}</div>
         </div>

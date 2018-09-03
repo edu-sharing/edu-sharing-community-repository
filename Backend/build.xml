@@ -36,43 +36,68 @@
 
 	<target name="release" description="Build Release">
 
-		<!--incrementimng build number-->
-		<buildnumber file="build.number"/>
-
-		<!--loading new build number (with prefix to get the new one)-->
-		<property file="build.number" prefix="tmp"></property>
-
-
 		<copyfile src="version.html.template" dest="${src.dir}/org/edu_sharing/repository/public/version.html" forceoverwrite="true" />
 
 		<tstamp>
   			<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss"/>
 		</tstamp>
-		<replaceregexp match="build.number: [0-9]*\&lt;br/\&gt;" replace="build.number: ${tmp.build.number}\&lt;br/\&gt;" flags="gs" byline="true">
-			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
-		</replaceregexp>
 		<replaceregexp match="build.date: .*\&lt;br/\&gt;" replace="build.date: ${TODAY}\&lt;br/\&gt;" flags="gs" byline="true">
 			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
-		<!--writing build.number to version.properties so that the svn revision in this file will be updated to the main main revision (is used in release file)-->
-		<replaceregexp match="build.number=[0-9]*" replace="build.number=${tmp.build.number}" flags="gs" byline="true">
-			<fileset dir="." includes="version.properties"/>
-		</replaceregexp>
 
+		<!-- name for zip file -->
 		<exec executable="git" outputproperty="git.result">
 			<arg value="log" />
 			<arg value="-n1" />
 			<arg value="--format=%ad-%h" />
 			<arg value="--date=short" />
 		</exec>
+		<!-- current version in version.html-->
+		<exec executable="git" outputproperty="git.version">
+			<arg value="log" />
+			<arg value="-n1" />
+			<arg value="--format=%ad (%h)" />
+			<arg value="--date=format:%Y-%m-%d %H:%M" />
+		</exec>
+		<!-- current branch in version.html-->
+		<exec executable="git" outputproperty="git.branch">
+			<arg value="branch" />
+		</exec>
+		<script language="javascript">
+			var before = project.getProperty("git.branch");
+			var split=before.split("\n");
+			for(var i=0;i&lt;split.length;i++){
+				if(split[i].startsWith("*")){
+					project.setProperty("git.branch", split[i].substring(1).trim());
+				}
+			}
+		</script>
+		<!-- version history in version.html-->
+		<exec executable="git" outputproperty="git.log">
+			<arg value="log" />
+			<arg value="-n10" />
+			<arg value="--format=%ad (%h): %s" />
+			<arg value="--date=format:%Y-%m-%d %H:%M" />
+		</exec>
+		<script language="javascript">
+			var before = project.getProperty("git.log");
+			project.setProperty("git.log", before.replaceAll("\n", "\&lt;br/\&gt;"));
+		</script>
+
 		<echo>${git.result}</echo>
 		<echo>the extension: ${extension-name}</echo>
 		<!-- replace the extension name with the current active extension -->
 		<replaceregexp match="version.extension:[a-zA-Z ]*\&lt;br/\&gt;" replace="version.extension: ${extension-name}\&lt;br/\&gt;" flags="gs" byline="true">
 		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
-		<replaceregexp match="git.commit:[a-zA-Z0-9\- ]*\&lt;br/\&gt;" replace="git.commit: ${git.result}\&lt;br/\&gt;" flags="gs" byline="true">
+		<replaceregexp match="git.commit:[a-zA-Z0-9\- ]*\&lt;br/\&gt;" replace="git.commit: ${git.version}\&lt;br/\&gt;" flags="gs" byline="true">
 		    <fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
+		</replaceregexp>
+		<replaceregexp match="git.branch:[a-zA-Z0-9\- ]*\&lt;br/\&gt;" replace="git.branch: ${git.branch}\&lt;br/\&gt;" flags="gs" byline="true">
+			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
+		</replaceregexp>
+		<replaceregexp match="git.log:[a-zA-Z0-9\- ]*\&lt;br/\&gt;" replace="git.log: \&lt;br/\&gt;${git.log}\&lt;br/\&gt;" flags="gs" byline="true">
+			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
 		</replaceregexp>
 		<antcall target="release-extension-gitinfo"></antcall>
 
@@ -170,23 +195,6 @@
 		</target>
 
 	<target name="release-src">
-
-		<!--incrementimng build number-->
-		<buildnumber file="build.number"/>
-
-		<!--loading new build number (with prefix to get the new one)-->
-		<property file="build.number" prefix="tmp"></property>
-
-
-		<!--writing build.number to version.html so that the svn revision in this file will be updated to the main main revision-->
-		<echo>${tmp.build.number}</echo>
-		<replaceregexp match="build.number: [0-9]*\&lt;br/\&gt;" replace="build.number: ${tmp.build.number}\&lt;br/\&gt;" flags="gs" byline="true">
-			<fileset dir="${src.dir}/org/edu_sharing/repository/public/" includes="version.html"/>
-		</replaceregexp>
-		<!--writing build.number to version.properties so that the svn revision in this file will be updated to the main main revision (is used in release file)-->
-		<replaceregexp match="build.number=[0-9]*" replace="build.number=${tmp.build.number}" flags="gs" byline="true">
-			<fileset dir="." includes="version.properties"/>
-		</replaceregexp>
 
 		<!--<exec executable="version.bat"></exec>-->
 		<copyfile src="${src.dir}/org/edu_sharing/repository/public/version.html" dest="${gwt-war.dir}/${gwt-rename-to}/version.html" />

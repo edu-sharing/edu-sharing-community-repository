@@ -98,6 +98,19 @@ public class EduGroupCache {
 		}		
 	}
 	
+	public static void refreshByKeepExisting(){
+		synchronized(EduGroupCache.cache){
+			logger.info("size before refresh:"+EduGroupCache.cache.getKeys().size());
+			//EduGroupCache.cache.clear();
+			for(NodeRef eduGroupNodeRef : getEduGroupNodeRefs()){
+				if(!EduGroupCache.cache.contains(eduGroupNodeRef)) {
+					EduGroupCache.cache.put(eduGroupNodeRef, serviceRegistry.getNodeService().getProperties(eduGroupNodeRef));
+				}
+			}
+			logger.info("size after refresh:"+EduGroupCache.cache.getKeys().size());
+		}		
+	}
+	
 	private static List<NodeRef> getEduGroupNodeRefs(){
 		List<NodeRef> result = new ArrayList<NodeRef>();
 		NodeRef rootNode = serviceRegistry.getNodeService().getRootNode(new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore"));

@@ -256,7 +256,7 @@ export class MdsComponent{
         let badges=document.getElementById(this.getWidgetDomId(widget));
         let elements:any=badges.childNodes;
         let add=true;
-        for(var i=0;i<elements.length;i++){
+        for(let i=0;i<elements.length;i++){
           if(elements[i].getAttribute('data-value')==searchField.value){
             add=false;
           }
@@ -1092,8 +1092,8 @@ export class MdsComponent{
   }
   private mdsUpdateSuggests(id:string,showMore=false){
     let widget=this.getWidget(id);
-    let list=document.getElementById(this.getWidgetDomId(id)+'_suggestions');
-    let element:any=document.getElementById(this.getWidgetDomId(id)+'_suggestionsInput');
+    let list=document.getElementById(this.getWidgetDomId(widget)+'_suggestions');
+    let element:any=document.getElementById(this.getWidgetDomId(widget)+'_suggestionsInput');
     let elements=list.getElementsByTagName('a');
     if(showMore){
       list.className+=' suggestionListAll';
@@ -1128,7 +1128,7 @@ export class MdsComponent{
         if(!widget.values && value.displayString){
           caption=value.displayString;
         }
-        list.innerHTML+=this.getListEntry(this.getWidgetDomId(id),key,caption,false,element.value);
+        list.innerHTML+=this.getListEntry(this.getWidgetDomId(widget),key,caption,false,element.value);
         i++;
       }
       if(i==0){
@@ -1251,7 +1251,7 @@ export class MdsComponent{
               `+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
-    if(allowCustom && !openCallback){
+    if(allowCustom && !openCallback && !widget.bottomCaption){
       html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;
@@ -1350,7 +1350,7 @@ export class MdsComponent{
               <div class="inputField"><span>:</span></div>
               <div class="inputField">
               <label for="`+id+`_minutes">`+this.translate.instant('INPUT_MINUTES')+`</label>
-              <input type="number" min="0" max="60" id="`+widget.id+`_minutes" onchange="
+              <input type="number" min="0" max="60" id="`+id+`_minutes" onchange="
               document.getElementById('`+id+`').noUiSlider.set(
               document.getElementById('`+id+`_hours').value*60+
               document.getElementById('`+id+`_minutes').value*1);
@@ -1463,7 +1463,7 @@ export class MdsComponent{
 
     for(let option of widget.values){
       let id=this.getWidgetDomId(widget)+'_'+option.id;
-      html+='<input type="radio" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.id==widget.defaultvalue ? ' checked' : '')+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+option.caption+'</label>';
+      html+='<input type="radio" name="'+this.getWidgetDomId(widget)+'" id="'+id+'" value="'+option.id+'"'+(option.id==widget.defaultvalue ? ' checked' : '')+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+option.caption+'</label>';
     }
     html+='</fieldset>';
     return html;
