@@ -170,6 +170,18 @@ export class SearchComponent {
     private temporaryStorageService: TemporaryStorageService
   ) {
   }
+  public getValuesForMds(){
+      // add the primary search word to the currentValuesAll so that the mds is aware of it
+      let values=Helper.deepCopy(this.currentValues);
+      if(!values){
+          values=[];
+      }
+      if(this.searchService.searchTerm){
+          values[RestConstants.PRIMARY_SEARCH_CRITERIA]=[this.searchService.searchTerm];
+      }
+      console.log(values);
+      return values;
+  }
   public setRepository(repository:string){
     this.routeSearch(this.searchService.searchTerm,repository,null,null);
     //this.currentRepository=repository;

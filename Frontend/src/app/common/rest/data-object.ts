@@ -582,6 +582,7 @@ export interface MdsValues{
   query : string;
   property : string;
   pattern : string;
+  searchParameters : any;
 }
 
 export interface Parent {

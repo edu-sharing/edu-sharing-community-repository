@@ -1106,7 +1106,12 @@ export class MdsComponent{
       group=RestConstants.DEFAULT_QUERY_NAME;
     }
     this.lastMdsQuery=element.value;
-    this.mdsService.getValues({query:group,property:id,pattern:element.value},this._setId,this._repository).subscribe((data:MdsValueList)=>{
+    this.mdsService.getValues({
+        query:group,
+        property:id,
+        pattern:element.value,
+        searchParameters:Helper.arrayJoin(this._currentValues,this.getValues())
+    },this._setId,this._repository).subscribe((data:MdsValueList)=>{
       if(this.lastMdsQuery!=element.value)
         return;
 
