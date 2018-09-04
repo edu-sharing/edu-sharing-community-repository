@@ -387,7 +387,8 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		return properties;
 	}
 	@Override
-	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, 
+			String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		
 		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
 		
@@ -541,6 +542,8 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 			searchToken.setQueryString(uri);
 			
+			
+			System.out.println("ddb url:" + uri);
 			return searchDDB(repositoryId,APIKey,uri);
 			
 		}
