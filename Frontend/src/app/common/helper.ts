@@ -137,6 +137,8 @@ export class Helper {
   }
 
   public static deepCopy(data: any) {
+    if(data==null)
+      return null;
     return JSON.parse(JSON.stringify(data));
   }
   public static deepCopyArray(data: any[]) {
