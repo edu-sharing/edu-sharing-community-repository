@@ -425,13 +425,13 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						//int count = facetteVal.getInt("count");
 						String val = facetteVal.getString("value");
 						//check for cleaner results
-						if(val.toLowerCase().contains(value.toLowerCase())) {					
+						//if(val.toLowerCase().contains(value.toLowerCase())) {					
 							SuggestFacetDTO dto = new SuggestFacetDTO();
 							dto.setFacet(val);
 							dto.setDisplayString(val);
 	
 							result.add(dto);
-						}
+						//}
 					}
 					
 					
@@ -448,7 +448,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		
 		String url = "";
 		
-		url += getPath(criterias, from, maxResults);
+		url += getPath(criterias, from, maxResults,true);
 		if(facets != null && facets.size() > 0) {
 			url += "&facet=";
 			int i = 0;
@@ -490,7 +490,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		try {
 
 
-			String uri = getPath(criterias,searchToken.getFrom(),searchToken.getMaxResult());
+			String uri = getPath(criterias,searchToken.getFrom(),searchToken.getMaxResult(),false);
 			searchToken.setQueryString(uri);
 			
 			
@@ -516,7 +516,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 	}	
 	
-	private String getPath(Map<String, String[]> criterias, int from, int maxResults) throws UnsupportedEncodingException {
+	private String getPath(Map<String, String[]> criterias, int from, int maxResults, boolean fuzzy) throws UnsupportedEncodingException {
 		
 		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
 
@@ -530,8 +530,19 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			searchWord="";
 		}
 
+		
+		for(Map.Entry<String, String[]> entry : criterias.entrySet()) {
+			String[] values = criterias.get(entry.getKey());
+			if(values != null && values.length > 0) {
+				String value = values[0];
+				if(!value.trim().equals("")) {
+					if(fuzzy) value += "*";
+					extSearch.add(entry.getKey() +":("+value+")");
+				}
+			}
+		}
 
- 		if(criterias.containsKey("title")) {
+ 		/*if(criterias.containsKey("title")) {
  			String ddbTitle =criterias.get("title")[0];
  			if (!ddbTitle.equals("") ){
  				extSearch.add("title:("+ddbTitle+")");
@@ -550,7 +561,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
  			if (!ddbPerson.equals("") ){
  				extSearch.add("affiliate:("+ddbPerson+")");
  			}
- 		}
+ 		}*/
 		
 		
 
