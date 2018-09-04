@@ -31,6 +31,10 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.permission.PermissionService;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -108,8 +112,10 @@ public class DownloadServlet extends HttpServlet{
 
 		ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
 
-		ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		ApplicationInfo homeAppInfo = ApplicationInfoList.getHomeRepository();
+
+		NodeService nodeService = NodeServiceFactory.getLocalService();
+		PermissionService permissionService = PermissionServiceFactory.getLocalService();
 
 		ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bufferOut);
@@ -120,39 +126,42 @@ public class DownloadServlet extends HttpServlet{
 			AuthenticationUtil.RunAsWork<Boolean> runAll= () ->{
 				for(String nodeId : nodeIds){
 					try{
-						NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
 						/**
 						 * Collection change nodeRef to original
 						 */
 						boolean isCollectionRef=false;
-						if(serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
-							String refNodeId = (String)serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
-							nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, refNodeId);
+						if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+							String refNodeId = (String)nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+							nodeId = refNodeId;
 
-                            // Simply try to fetch content (to check if READ_CONTENT is present)
-                            ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
-
-                            isCollectionRef = true;
+							// check if PERMISSION_READ_ALL (read content) is present
+							if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_READ_ALL)){
+								throw new SecurityException();
+							}
+							isCollectionRef = true;
 						}
-						NodeRef finalNodeRef = nodeRef;
+						String finalNodeId = nodeId;
 
-                        TrackingServiceFactory.getTrackingService().trackActivityOnNode(nodeRef,TrackingService.EventType.DOWNLOAD_MATERIAL);
+                        TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),TrackingService.EventType.DOWNLOAD_MATERIAL);
                         AuthenticationUtil.RunAsWork work= () ->{
-                            String filename = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CM_NAME));
-                            String wwwurl = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
+                            String filename = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,CCConstants.CM_NAME);
+                            String wwwurl = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,CCConstants.CCM_PROP_IO_WWWURL);
                             if(wwwurl!=null){
                                 errors.add( filename+": Is a link and can not be downloaded" );
                                 return null;
                             }
-                            ContentReader reader = serviceRegistry.getContentService().getReader(finalNodeRef, ContentModel.PROP_CONTENT);
-                            if(reader==null){
+							InputStream reader = null;
+							try {
+								reader = nodeService.getContent(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId, ContentModel.PROP_CONTENT.toString());
+							} catch (Throwable t) {
+							}
+							if(reader==null){
                                 errors.add( filename+": Has no content" );
                                 return null;
                             }
-                            InputStream is = reader.getContentInputStream();
                             resp.setContentType("application/zip");
 
-                            DataInputStream in = new DataInputStream(is);
+                            DataInputStream in = new DataInputStream(reader);
 
                             ZipEntry entry = new ZipEntry(filename);
                             zos.putNextEntry(entry);

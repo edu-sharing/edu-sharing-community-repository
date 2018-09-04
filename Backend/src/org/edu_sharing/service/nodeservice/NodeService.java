@@ -2,6 +2,7 @@ package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -60,7 +61,10 @@ public interface NodeService {
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable;
 
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String contentProp) throws Throwable;
-	
+
+	public default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect){
+		return Arrays.asList(getAspects(storeProtocol,storeId,nodeId)).contains(aspect);
+	}
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId);
 	
 	public void addAspect(String nodeId, String aspect);
