@@ -358,7 +358,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		rir.setPreviewUrl(previewUrl);
 		rir.setMimeTypeUrl(new MimeTypes(clientBaseUrl).getIconUrl(props, Theme.getThemeId()));
 		rir.setAspects(client.getAspects(nodeId));
-		
+		rir.setDirectory(MimeTypesV2.isDirectory(props));
 		addMetadataTemplate(rir,locale,nodeType,props,appInfo);
 
 		return rir;

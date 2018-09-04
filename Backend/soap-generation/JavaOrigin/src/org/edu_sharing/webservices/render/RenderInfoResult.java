@@ -22,6 +22,8 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	Boolean userReadAllowed;
 	
 	Boolean hasContentLicense;
+
+	Boolean isDirectory;
 	
 	UsageResult usage;
 	
@@ -214,5 +216,13 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 
 	public void setIconUrl(String iconUrl) {
 		this.iconUrl = iconUrl;
+	}
+
+	public Boolean getDirectory() {
+		return isDirectory;
+	}
+
+	public void setDirectory(Boolean directory) {
+		isDirectory = directory;
 	}
 }
