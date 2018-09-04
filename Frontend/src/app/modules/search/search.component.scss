@@ -272,7 +272,7 @@ small-collection{
   width:calc(100% + 40px);
   >div {
     width: 100%;
-    padding: 10px 10px;
+    padding: 10px 15px;
     margin: 0 -20px;
     margin-top: 20px;
     background-color: #fff;
@@ -286,7 +286,8 @@ small-collection{
         color: $textLight;
         font-size: 16px;
         vertical-align: top;
-        padding-top: 9px;
+        padding-top: 13px;
+        padding-right: 10px;
       }
     }
     .info {
