@@ -190,6 +190,9 @@ a.edusharing_rendering_content{
 }
 
 :host /deep/ {
+  .mdsWidget .comment .avatarCircle{
+    cursor:default!important;;
+  }
   .nodeDetails {
     margin:15px;
     color: $primary;
