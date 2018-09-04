@@ -399,6 +399,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		for(MdsQueryCriteria crit : criterias) {
 			criteriasAsMap.put(crit.getProperty(), crit.getValues().toArray(new String[crit.getValues().size()]));
 		}
+		criteriasAsMap.put(parameterId, new String[] {value});
 		
 		
 		
@@ -423,8 +424,8 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						JSONObject facetteVal = (JSONObject)facetValues.get(j);
 						//int count = facetteVal.getInt("count");
 						String val = facetteVal.getString("value");
-						
-						if(val.contains(value)) {					
+						//check for cleaner results
+						if(val.toLowerCase().contains(value.toLowerCase())) {					
 							SuggestFacetDTO dto = new SuggestFacetDTO();
 							dto.setFacet(val);
 							dto.setDisplayString(val);
