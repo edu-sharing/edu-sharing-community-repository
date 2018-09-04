@@ -150,7 +150,7 @@ public class MetadataSearchHelper {
 		searchParameters.setMaxItems(1);
 
 		String luceneQuery = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")";
-		if(criterias != null) {
+		if(criterias != null && criterias.size() > 0 ) {
 			
 			Map<String,String[]> criteriasMap=new HashMap<>();
 			for(MdsQueryCriteria criteria : criterias){
