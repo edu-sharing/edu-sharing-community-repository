@@ -122,7 +122,7 @@ export class StreamComponent {
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
         this.connector.isLoggedIn().subscribe(data => {
             console.log(data);
-            this.dateToDisplay = moment().locale(translate.currentLang).format('dddd, MMMM Do YYYY');
+            this.dateToDisplay = moment().locale(translate.currentLang).format('dddd, DD. MMMM YYYY');
             this.createAllowed=data.statusCode==RestConstants.STATUS_CODE_OK;
         });
           this.connectors.list().subscribe(list=>{
