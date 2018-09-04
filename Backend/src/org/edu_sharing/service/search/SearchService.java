@@ -84,7 +84,7 @@ public interface SearchService {
 
 	SearchToken getLastSearchToken() throws Throwable;
 	
-	public default List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, SearchParameters searchParameters) {
+	public default List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		return null;	
 	}
 		

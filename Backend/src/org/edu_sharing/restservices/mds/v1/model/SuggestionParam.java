@@ -1,11 +1,13 @@
 package org.edu_sharing.restservices.mds.v1.model;
 
-import org.edu_sharing.restservices.search.v1.model.SearchParameters;
+import java.util.List;
+
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 public class SuggestionParam {
 	ValueParameters valueParameters;
 	
-	SearchParameters searchParameters;
+	List<MdsQueryCriteria> criterias;
 
 	public ValueParameters getValueParameters() {
 		return valueParameters;
@@ -15,12 +17,12 @@ public class SuggestionParam {
 		this.valueParameters = valueParameters;
 	}
 
-	public SearchParameters getSearchParameters() {
-		return searchParameters;
+	public List<MdsQueryCriteria> getCriterias() {
+		return criterias;
 	}
-
-	public void setSearchParameters(SearchParameters searchParameters) {
-		this.searchParameters = searchParameters;
+	
+	public void setCriterias(List<MdsQueryCriteria> criterias) {
+		this.criterias = criterias;
 	}
 	
 	

@@ -265,7 +265,7 @@ public class MdsApi {
     	    	Suggestions response = mds.getSuggestions(suggestionParam.getValueParameters().getQuery(), 
     	    			suggestionParam.getValueParameters().getProperty(), 
     	    			suggestionParam.getValueParameters().getPattern(),
-    	    			suggestionParam.getSearchParameters());
+    	    			suggestionParam.getCriterias());
     	    	  	
     	    	return Response.status(Response.Status.OK).entity(response).build();
     	

@@ -136,7 +136,7 @@ public class MetadataSearchHelper {
 		//return "("+queries.getBasequery()+") AND ("+parameter.getStatement().replace("${value}","*"+QueryParser.escape(value)+"*")+")";
 		return parameter.getStatement(value).replace("${value}","*"+QueryParser.escape(value)+"*");		
 	}
-	private static List<? extends  SuggestOracle.Suggestion> getSuggestionsSolr(MetadataQueryParameter parameter, MetadataWidget widget, String value, org.edu_sharing.restservices.search.v1.model.SearchParameters searchParametersRest, MetadataSetV2 mds, String query)  {
+	private static List<? extends  SuggestOracle.Suggestion> getSuggestionsSolr(MetadataQueryParameter parameter, MetadataWidget widget, String value, List<MdsQueryCriteria> criterias, MetadataSetV2 mds, String query)  {
 
 		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -150,10 +150,10 @@ public class MetadataSearchHelper {
 		searchParameters.setMaxItems(1);
 
 		String luceneQuery = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")";
-		if(searchParametersRest != null) {
+		if(criterias != null) {
 			
 			Map<String,String[]> criteriasMap=new HashMap<>();
-			for(MdsQueryCriteria criteria : searchParametersRest.getCriterias()){
+			for(MdsQueryCriteria criteria : criterias){
 				criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
 			}
 			
@@ -214,7 +214,7 @@ public class MetadataSearchHelper {
 		
 	}
 
-	public static List<? extends  SuggestOracle.Suggestion> getSuggestions(String repoId,MetadataSetV2 mds,String queryId,String parameterId,String value, org.edu_sharing.restservices.search.v1.model.SearchParameters searchParameters) throws IllegalArgumentException  {
+	public static List<? extends  SuggestOracle.Suggestion> getSuggestions(String repoId,MetadataSetV2 mds,String queryId,String parameterId,String value, List<MdsQueryCriteria> criterias) throws IllegalArgumentException  {
 		MetadataWidget widget=mds.findWidget(parameterId);
 		
 		String source=widget.getSuggestionSource();
@@ -226,7 +226,7 @@ public class MetadataSearchHelper {
 		 * remote repo
 		 */
 		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
-			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, searchParameters);
+			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
 		}
 		
 		/**
@@ -234,7 +234,7 @@ public class MetadataSearchHelper {
 		 */
 		if(source.equals(MetadataReaderV2.SUGGESTION_SOURCE_SOLR)){
 			MetadataQueryParameter parameter = getParameter(mds.getQueries(),queryId,parameterId);
-			return getSuggestionsSolr(parameter, widget, value, searchParameters, mds, queryId);
+			return getSuggestionsSolr(parameter, widget, value, criterias, mds, queryId);
 		}
 		if(source.equals(MetadataReaderV2.SUGGESTION_SOURCE_MDS)){
 			return getSuggestionsMds(widget, value);
