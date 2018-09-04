@@ -968,6 +968,7 @@ public class NodeApi  {
 	    	
 	    	RepositoryDao repoDaoHome = RepositoryDao.getRepository(RepositoryDao.HOME);
 			node=NodeDao.mapNodeConstants(repoDaoHome,node);
+			parent=NodeDao.mapNodeConstants(repoDaoHome,parent);
 
 			NodeDao nodeDao=NodeDao.getNode(repoDao, node).importNode(parent);
 	    	NodeEntry response=new NodeEntry();
