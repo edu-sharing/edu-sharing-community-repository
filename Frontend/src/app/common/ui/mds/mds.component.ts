@@ -1113,9 +1113,7 @@ export class MdsComponent{
             property: id,
             pattern: element.value,
         },
-        searchParameters:{
-            criterias:RestSearchService.convertCritierias(Helper.arrayJoin(this._currentValues,this.getValues()))
-        }
+        criterias:RestSearchService.convertCritierias(Helper.arrayJoin(this._currentValues,this.getValues()))
     },this._setId,this._repository).subscribe((data:MdsValueList)=>{
       if(this.lastMdsQuery!=element.value)
         return;

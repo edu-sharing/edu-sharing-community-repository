@@ -584,7 +584,7 @@ export interface  MdsValuesParameters {
 }
 export interface MdsValues{
   valueParameters:MdsValuesParameters;
-  searchParameters : any;
+  criterias : any;
 }
 
 export interface Parent {
