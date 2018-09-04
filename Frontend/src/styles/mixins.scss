@@ -23,8 +23,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  line-height: 1em;        /* fallback */
-  max-height: $N+em;       /* fallback */
+  line-height: 1.25em;        /* fallback */
+  max-height: $N*1.25+em;       /* fallback */
   -webkit-box-orient: vertical;
   -webkit-line-clamp: $N; /* number of lines to show */
 }
