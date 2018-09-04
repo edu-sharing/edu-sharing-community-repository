@@ -71,13 +71,20 @@ export class RestConstants {
   public static CCM_PROP_CCRESSOURCETYPE = "ccm:ccressourcetype";
   public static CCM_PROP_CCRESSOURCESUBTYPE = "ccm:ccresourcesubtype";
   public static CCM_PROP_CCRESSOURCEVERSION = "ccm:ccressourceversion";
+  public static CCM_PROP_REPLICATIONMODIFIED = "ccm:replicationmodified";
   public static CCM_PROP_IO_WWWURL = "ccm:wwwurl";
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";
   public static VIRTUAL_PROP_USAGECOUNT = "virtual:usagecount";
   public static GROUP_PREFIX="GROUP_";
 
-  public static DATE_FIELDS=[RestConstants.CM_ARCHIVED_DATE,RestConstants.CM_MODIFIED_DATE,RestConstants.CM_PROP_C_CREATED,RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL];
+  public static DATE_FIELDS=[
+      RestConstants.CM_ARCHIVED_DATE,
+      RestConstants.CM_MODIFIED_DATE,
+      RestConstants.CM_PROP_C_CREATED,
+      RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL,
+      RestConstants.CCM_PROP_REPLICATIONMODIFIED,
+  ];
 
 
   public static STATUS_CODE_OK = "OK";

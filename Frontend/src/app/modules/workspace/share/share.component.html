@@ -46,9 +46,13 @@
         <div class="group groupToInvite">
           <div class="toInvite">
             <div class="badge" *ngFor="let permission of newPermissions">
-              <span>{{permission | permissionName}}</span>
+              <div class="badge-group">
+                <span class="primary">{{permission | permissionName}}</span>
+                <span class="secondary">{{permission | permissionName:{field:'secondary'} }}</span>
+              </div>
                 <i class="material-icons clickable" (click)="removePermission(permission)">cancel</i>
               </div>
+
           </div>
           <div class="typeButton" *ngIf="newPermissions && newPermissions.length">
             <div class="btn-flat btn-shadow" *ngIf="currentType.length==0" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align-icon">help_outline</i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>

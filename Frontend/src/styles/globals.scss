@@ -28,12 +28,13 @@ a{
   opacity:0;
 }
 .badge{
-  border-radius: 15px;
+  border-radius: 25px;
   background: #eee;
   padding: 5px 15px;
   height:auto;
   margin: 2px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   span{
     display:table-cell;
     vertical-align: middle;
@@ -42,13 +43,23 @@ a{
   i{
     color:$textLight;
     position: relative;
-    top: 0px;
-    left: 11px;
+    top: 0;
+    left: 7px;
     display:table-cell;
     vertical-align: middle;
   }
   .badgeIconLeft{
     left:0;
+  }
+  .badge-group{
+    display: flex;
+    flex-direction: column;
+    >.secondary{
+      font-size: 80%;
+      color: $textLight;
+      margin-top: -3px;
+      min-height: 3px;
+    }
   }
 }
 .workflowStatus{

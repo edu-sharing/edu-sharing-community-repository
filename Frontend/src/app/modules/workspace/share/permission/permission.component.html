@@ -1,6 +1,9 @@
 <div class="container" [class.added]="added">
 <div class="icon"><i class="type material-icons">{{_permission.authority.authorityType=='USER' ? "person" : _permission.authority.authorityType=='LINK' ? "link" : "group"}}{{added ? "_add" : "" }}</i></div>
-<div class="name">{{_permission | permissionName}}</div>
+<div class="name">
+  <span class="primary">{{_permission | permissionName}}</span>
+  <span class="secondary">{{_permission | permissionName:{field:'secondary'} }}</span>
+</div>
 <div class="permission" [class.clickable]="!readOnly && !isEveryone && !invalidPermission" [class.readOnly]="readOnly">
   <div class="publish">
     <i class="material-icons" *ngIf="_permission.permissions.indexOf('Coordinator')>-1 || _permission.permissions.indexOf('CCPublish')>-1" title="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate}}">public</i>

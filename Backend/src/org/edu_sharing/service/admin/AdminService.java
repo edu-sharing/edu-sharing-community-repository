@@ -26,7 +26,7 @@ public interface AdminService {
 
 	String runUpdate(String updateId, boolean execute) throws Exception;
 
-	void refreshEduGroupCache();
+	
 
 	CacheInfo getCacheInfo(String name);
 	
@@ -69,5 +69,7 @@ public interface AdminService {
 	Collection<NodeRef> getActiveNodeLocks();
 
 	List<String> getCatalinaOut() throws IOException;
+
+	void refreshEduGroupCache(boolean keepExisting);
 	
 }
