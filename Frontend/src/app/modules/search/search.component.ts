@@ -179,7 +179,6 @@ export class SearchComponent {
       if(this.searchService.searchTerm){
           values[RestConstants.PRIMARY_SEARCH_CRITERIA]=[this.searchService.searchTerm];
       }
-      console.log(values);
       return values;
   }
   public setRepository(repository:string){
@@ -965,10 +964,7 @@ export class SearchComponent {
     if(!addAll)
       return criterias;
     if(properties) {
-      for (let property in properties) {
-        if(properties[property] && properties[property].length)
-          criterias.push({'property':property,'values':properties[property]});
-      }
+        criterias=criterias.concat(RestSearchService.convertCritierias(properties));
     }
     return criterias;
   }

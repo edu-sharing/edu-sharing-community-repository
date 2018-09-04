@@ -346,7 +346,9 @@ export class NodeHelper{
   public static getUserDisplayName(user:AuthorityProfile|User){
     return (user.profile.firstName+" "+user.profile.lastName).trim();
   }
-
+    static isSavedSearchObject(node: Node) {
+        return node.mediatype=='saved_search';
+    }
   /**
    * Get an attribute (property) from a node
    * The attribute will be cached add the object
