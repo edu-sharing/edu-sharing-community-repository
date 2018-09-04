@@ -20,7 +20,7 @@
                 <id>affiliate</id>
                  <type>multivalueFixedBadges</type>
                 <caption>Person/Organisation</caption>
-                <placeholder>z.B. Kandinsky</placeholder>
+                <placeholder>z.B. Goethe, Johann Wolfgang von</placeholder>
       </widget>
       <!-- new -->
       <widget>
