@@ -257,7 +257,7 @@ public class MdsApi {
     public Response getValuesV2(
         	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
         	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
-        	@ApiParam(value = "suggestionParam",required=false ) SuggestionParam suggestionParam,
+        	@ApiParam(value = "suggestionParam") SuggestionParam suggestionParam,
     		@Context HttpServletRequest req) {
         	try {
      	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);	    	
