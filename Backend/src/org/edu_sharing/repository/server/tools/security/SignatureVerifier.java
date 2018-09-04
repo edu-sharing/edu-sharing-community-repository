@@ -113,27 +113,4 @@ public class SignatureVerifier {
 			return new Result(HttpServletResponse.SC_OK, "OK");
 		
 	}
-
-	/**
-	 * Checks if the given node is currently accessed via auth by usage and if so, runs the task as system
-	 * Otherwise (default), the task will run as the current user
-	 * @param nodeId
-	 * @param httpSession
-	 * @param runAsWork
-	 * @throws Exception 
-	 */
-	public static <T> T runAsAuthByUsage(String nodeId, HttpSession httpSession, RunAsWork<T> runAsWork) {
-		String authSingleUseNodeId = (String)httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
-		String authSingleUseTs = (String)httpSession.getAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP);
-		//PermissionServiceInterceptor.setSession(new PermissionServiceInterceptor.SignatureDetails(authSingleUseNodeId,Long.parseLong(authSingleUseTs)));
-		//return AuthenticationUtil.runAsSystem(runAsWork);
-		try {
-			return runAsWork.doWork();
-		}catch(Exception e){
-			throw new RuntimeException(e);
-		}
-	}
-	
-	
-	
 }

@@ -31,13 +31,13 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                 methodName.equals("getAspects") ||
                 methodName.equals("getOwner")) {
             String nodeId = (String) invocation.getArguments()[2];
-            return handleInvocation(nodeId, invocation,false);
+            return handleInvocation(nodeId, invocation,true);
         }
         if(methodName.equals("getChildrenChildAssociationRefAssoc") ||
                 methodName.equals("getType") ||
                 methodName.equals("getVersionHistory")){
             String nodeId = (String) invocation.getArguments()[0];
-            return handleInvocation(nodeId,invocation,false);
+            return handleInvocation(nodeId,invocation,true);
         }
         return invocation.proceed();
     }
@@ -64,6 +64,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         NodeService nodeService = serviceRegistry.getNodeService();
+        int i = 0;
         while(nodeId!=null) {
             if (hasSignature(nodeId) || hasUsage(nodeId)) {
                 System.out.println("Node "+nodeId+" -> will run as system");
@@ -85,18 +86,21 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                     return null;
                 }
             });
+            // only one parent at the moment
+            if(i++>=1) {
+                break;
+            }
         }
         return invocation.proceed();
     }
 
     private static boolean hasSignature(String nodeId) {
-        String authSingleUseNodeId = Context.getCurrentInstance().getSessionAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
-        String authSingleUseTs = Context.getCurrentInstance().getSessionAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP);
-        if(authSingleUseNodeId==null || authSingleUseTs==null)
+        if(Context.getCurrentInstance()==null)
             return false;
-        long timestamp=Long.parseLong(authSingleUseTs);
-        return (authSingleUseNodeId.equals(nodeId)
-                && timestamp > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS*10));
+        String authSingleUseNodeId = Context.getCurrentInstance().getSessionAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
+        if(authSingleUseNodeId==null)
+            return false;
+        return authSingleUseNodeId.equals(nodeId);
     }
 
     private static boolean hasUsage(String nodeId) {

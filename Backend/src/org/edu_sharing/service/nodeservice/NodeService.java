@@ -49,7 +49,9 @@ public interface NodeService {
 		return getChildrenChildAssociationRefAssoc(parentID,null, null, new SortDefinition());
 	}
 
-    public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
+	<T>List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition);
+
+	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
 
 	public void createVersion(String nodeId, HashMap _properties) throws Exception;
 	

@@ -278,4 +278,9 @@ public class NodeServiceAdapter implements NodeService {
 	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId) {
 		return null;
 	}
+
+	@Override
+	public <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition) {
+		return list;
+	}
 }

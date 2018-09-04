@@ -19,7 +19,6 @@ public class PermissionServiceInterceptor implements MethodInterceptor {
         String methodName=invocation.getMethod().getName();
         if(methodName.equals("hasPermission") || methodName.equals("hasAllPermissions")) {
             String nodeId = (String) invocation.getArguments()[2];
-            System.out.println("invoke "+methodName+" "+nodeId);
             return NodeServiceInterceptor.handleInvocation(nodeId, invocation,false);
         }
         return invocation.proceed();

@@ -74,16 +74,17 @@ public class DownloadServlet extends HttpServlet{
 				share = shareService.getShare(parentNodeId, token);
 				if (share == null)
 					throw new Exception();
-			if (share.getPassword()!=null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
-				throw new Exception();
-			}
-			if (share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED) {
-				if (new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()))) {
-					resp.sendRedirect(URLTool.getNgMessageUrl("share_expired"));
-					return;
+				if (share.getPassword()!=null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
+					throw new Exception();
 				}
-			}
+				if (share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED) {
+					if (new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()))) {
+						resp.sendRedirect(URLTool.getNgMessageUrl("share_expired"));
+						return;
+					}
+				}
 			}catch(Throwable t){
+				t.printStackTrace();
 				resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
 				return;
 			}

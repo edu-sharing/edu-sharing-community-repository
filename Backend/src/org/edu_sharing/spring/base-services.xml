@@ -54,12 +54,12 @@
 	<bean id="permissionServiceInterceptor" class="org.edu_sharing.service.permission.PermissionServiceInterceptor"
 		  init-method="init"/>
 
-	<bean id="toolPermissionService" class="org.springframework.aop.framework.ProxyFactoryBean" >
+	<bean id="toolPermissionService" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="targetName">
 			<value>toolPermissionServiceImpl</value>
 		</property>
 	</bean>
-	<bean id="toolPermissionServiceImpl" class="org.edu_sharing.service.toolpermission.ToolPermissionService">
+	<bean id="toolPermissionServiceImpl" class="org.edu_sharing.service.toolpermission.ToolPermissionService" init-method="init">
 		<property name="eduNodeService">
 			<ref bean="nodeService" />
 		</property>

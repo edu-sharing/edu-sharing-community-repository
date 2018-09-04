@@ -360,8 +360,10 @@ public class RenderingProxy extends HttpServlet {
 		 */
 		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
 			HttpSession session = req.getSession(true);
-			req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
-			req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
+			if(Long.parseLong(ts) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
+				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
+				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
+			}
 
 			//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
 			AuthenticationToolAPI authTool = new AuthenticationToolAPI();

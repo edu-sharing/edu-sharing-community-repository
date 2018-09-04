@@ -685,6 +685,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
 
+	@Override
     public <T>List<T> sortNodeRefList(List<T> list,List<String> filter, SortDefinition sortDefinition){
 	    // make a copy so we have a modifiable list object
 	    list=new ArrayList<>(list);
