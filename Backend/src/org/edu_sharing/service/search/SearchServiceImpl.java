@@ -234,6 +234,7 @@ public class SearchServiceImpl implements SearchService {
 			throws Exception {
 		try {
 			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
+			boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
 			return AuthenticationUtil.runAsSystem(new RunAsWork<SearchResult<EduGroup>>() {
 
 				@Override
@@ -277,7 +278,7 @@ public class SearchServiceImpl implements SearchService {
 								boolean add = false;
 								for (String group : memberships) {
 									if (group.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
-											|| AuthenticationUtil.isRunAsUserTheSystemUser()
+											|| isSystemUser
 											|| group.equals(eduGroup.getGroupname())) {
 										add = true;
 										break;
