@@ -165,9 +165,10 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 			}
 
-			authService.authenticate(ApplicationInfoList.getHomeRepository().getUsername(), ApplicationInfoList.getHomeRepository().getPassword().toCharArray());
-			ticket = authService.getCurrentTicket();
-			invalidateTicket = true;
+			//authService.authenticate(ApplicationInfoList.getHomeRepository().getUsername(), ApplicationInfoList.getHomeRepository().getPassword().toCharArray());
+			//ticket = authService.getCurrentTicket();
+            //invalidateTicket = true;
+            ((HttpServletRequest)req).getSession(true).setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID,nodeId);
 		}
 		else if (accessToken != null && !accessToken.trim().equals("")) {
 			//oAuth
