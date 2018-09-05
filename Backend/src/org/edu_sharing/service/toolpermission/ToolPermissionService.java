@@ -26,6 +26,10 @@ import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.connector.Connector;
+import org.edu_sharing.service.connector.ConnectorList;
+import org.edu_sharing.service.connector.ConnectorService;
+import org.edu_sharing.service.connector.ConnectorServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -37,12 +41,13 @@ public class ToolPermissionService {
 	Logger logger = Logger.getLogger(ToolPermissionService.class);
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-	
-	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-	PermissionService permissionService = serviceRegistry.getPermissionService();
-	
-	NodeService nodeService = serviceRegistry.getNodeService();
-	
+
+	private ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+	private PermissionService permissionService = serviceRegistry.getPermissionService();
+
+	private NodeService nodeService = serviceRegistry.getNodeService();
+	private ConnectorService connectorService;
+
 	org.edu_sharing.service.nodeservice.NodeService eduNodeService;
 	
 	AuthenticationService authService = serviceRegistry.getAuthenticationService();
@@ -181,7 +186,7 @@ public class ToolPermissionService {
 		String result = eduNodeService.createNodeBasic(systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, props);
 		//set admin as owner cause if it was created by runAs with admin the current user not the runas on is taken
 		eduNodeService.setOwner(result, ApplicationInfoList.getHomeRepository().getUsername());
-		if(ToolPermissionServiceFactory.getAllDefaultAllowedToolpermissions().contains(toolPermission)){
+		if(getAllDefaultAllowedToolpermissions().contains(toolPermission)){
 			logger.info("ToolPermission" + toolPermission+ " is allowed by default. Will set GROUP_EVERYONE.");
 			eduNodeService.setPermissions(result,PermissionService.ALL_AUTHORITIES, new String[]{CCConstants.PERMISSION_READ}, false);
 		}
@@ -296,9 +301,57 @@ public class ToolPermissionService {
 
 	public void init(){
 		try {
-			initToolPermissions(ToolPermissionServiceFactory.getAllPredefinedToolPermissions());
+			initToolPermissions(getAllPredefinedToolPermissions());
 		} catch (Throwable throwable) {
 			throw new RuntimeException(throwable);
+		}
+	}
+	public List<String> getAllDefaultAllowedToolpermissions(){
+		List<String> toInit=getAllPredefinedToolPermissions();
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL); // safe
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL); // editorial collections
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM); // curriculum collections
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING); // pin collections
+		toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE); // use handle id
+		return toInit;
+	}
+	public List<String> getAllPredefinedToolPermissions(){
+		List<String> toInit=new ArrayList<String>();
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE);
+
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SAFE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_SHARE_SAFE);
+
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_HISTORY);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_LICENSE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_UNCHECKEDCONTENT);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_WORKSPACE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
+
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
+
+		addConnectorToolpermissions(toInit);
+		return toInit;
+	}
+
+	private void addConnectorToolpermissions(List<String> toInit) {
+		ConnectorList connectorList =  ConnectorServiceFactory.getConnectorList();
+		for(Connector c : connectorList.getConnectors()){
+			String tp = CCConstants.CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX + c.getId();
+			toInit.add(tp);
+
+			String tp_safe = tp + "_safe";
+			toInit.add(tp_safe);
 		}
 	}
 }

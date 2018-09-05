@@ -129,7 +129,7 @@ public class MCAlfrescoManager implements ServletContextListener {
 			uet.getEdu_SharingTemplateFolder();
 			
 			//init ToolPermisssions
-			ToolPermissionServiceFactory.getInstance();
+			ToolPermissionServiceFactory.getInstance().init();
 			
 			if (appInfo.getTrackingBufferSize() > 0) {
 				

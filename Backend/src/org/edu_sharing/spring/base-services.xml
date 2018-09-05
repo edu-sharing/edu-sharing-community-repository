@@ -59,12 +59,11 @@
 			<value>toolPermissionServiceImpl</value>
 		</property>
 	</bean>
-	<bean id="toolPermissionServiceImpl" class="org.edu_sharing.service.toolpermission.ToolPermissionService" init-method="init">
+	<bean id="toolPermissionServiceImpl" class="org.edu_sharing.service.toolpermission.ToolPermissionService">
 		<property name="eduNodeService">
 			<ref bean="nodeService" />
 		</property>
 	</bean>
-
 
 	<bean id="collectionServiceConfig" class="org.edu_sharing.service.collection.CollectionServiceConfig">
 		<property name="pattern">
