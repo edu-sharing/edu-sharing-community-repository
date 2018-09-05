@@ -16,6 +16,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 
@@ -155,14 +156,36 @@ public class OrganisationService {
 		return null;
 	}
 	
-	public List<String> getMyOrganisations(){
+	public List<String> getMyOrganisations(boolean scoped){
 		Set<String> authorities = authorityService.getContainingAuthorities(AuthorityType.GROUP, AuthenticationUtil.getFullyAuthenticatedUser(), true);
 		List<String> organisations = new ArrayList<String>();
 		for (String authority : authorities) {
 			NodeRef nodeRefAuthority = authorityService.getAuthorityNodeRef(authority);
 			if (nodeService.hasAspect(nodeRefAuthority, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
-				organisations.add(authority);
-			}
+				
+				String eduGroupScope = (String)nodeService.getProperty(nodeRefAuthority, QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME));
+				
+				boolean add = false;
+				if(authorities.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS) 
+						|| authorities.contains(authority)) {
+					add = true;
+				}
+				
+				if(scoped) {
+					String currentScope = NodeServiceInterceptor.getEduSharingScope();
+					if(eduGroupScope == null && currentScope != null) {
+						add=false;
+					}
+					if(eduGroupScope != null && !eduGroupScope.equals(currentScope)) {
+						add=false;
+					}
+						
+				}
+				
+				if (add) {
+					organisations.add(authority);
+				}
+			}	
 		}
 		return organisations;
 	}

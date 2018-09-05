@@ -577,11 +577,14 @@ export interface MdsValueList {
   values: MdsValue[];
 }
 
-
+export interface  MdsValuesParameters {
+    query : string;
+    property : string;
+    pattern : string;
+}
 export interface MdsValues{
-  query : string;
-  property : string;
-  pattern : string;
+  valueParameters:MdsValuesParameters;
+  criterias : any;
 }
 
 export interface Parent {
