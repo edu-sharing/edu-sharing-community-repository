@@ -8,6 +8,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.Context;
@@ -16,7 +17,7 @@ import org.edu_sharing.service.InsufficientPermissionException;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceInterceptor implements MethodInterceptor {
-    
+    static Logger logger = Logger.getLogger(NodeServiceInterceptor.class);
     public void init(){
         
     }
@@ -50,7 +51,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             catch(AccessDeniedException|InsufficientPermissionException t)
             {
                 // catch exception, check
-                System.out.println("Method threw "+t.getMessage()+", will check signature");
+                logger.debug("Method threw "+t.getMessage()+", will check signature");
                 return runAsSystem(nodeId,invocation);
             }
         }
@@ -67,7 +68,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         int i = 0;
         while(nodeId!=null) {
             if (hasSignature(nodeId) || hasUsage(nodeId)) {
-                System.out.println("Node "+nodeId+" -> will run as system");
+                logger.debug("Node "+nodeId+" -> will run as system");
                 return AuthenticationUtil.runAsSystem(() -> {
                     try {
                         return invocation.proceed();
