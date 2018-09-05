@@ -1,12 +1,15 @@
 package org.edu_sharing.alfresco.service;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -150,6 +153,18 @@ public class OrganisationService {
 				return child.getChildRef();
 		}
 		return null;
+	}
+	
+	public List<String> getMyOrganisations(){
+		Set<String> authorities = authorityService.getContainingAuthorities(AuthorityType.GROUP, AuthenticationUtil.getFullyAuthenticatedUser(), true);
+		List<String> organisations = new ArrayList<String>();
+		for (String authority : authorities) {
+			NodeRef nodeRefAuthority = authorityService.getAuthorityNodeRef(authority);
+			if (nodeService.hasAspect(nodeRefAuthority, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
+				organisations.add(authority);
+			}
+		}
+		return organisations;
 	}
 
 	public void setEduAuthorityService(AuthorityService eduAuthorityService) {
