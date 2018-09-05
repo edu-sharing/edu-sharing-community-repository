@@ -905,7 +905,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		}else{
 
-			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations();
+			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
 		
 			/**
 			 * if there are no edugroups you you are not allowed to search global return
@@ -1032,7 +1032,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			addGlobalAuthoritySearchQuery(searchQuery);
 		} else {
 
-			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations();
+			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
 
 			/**
 			 * if there are no edugroups you you are not allowed to search global return
