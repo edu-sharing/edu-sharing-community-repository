@@ -14,6 +14,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
@@ -188,9 +189,12 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 					httpServletResponse.sendError(result.getStatuscode(), result.getMessage());
 					return;
 				}
-				
 			}
-			
+
+			// Signature is valid, store the node in the session parameters
+			HttpSession session = ((HttpServletRequest)req).getSession(true);
+			session.setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
+
 			/**
 			 * remote preview
 			 */

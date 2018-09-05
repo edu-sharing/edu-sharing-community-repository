@@ -329,8 +329,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	}
 
 	private void validatePermissions(StoreRef storeRef, String nodeId) {
-		HashMap<String, Boolean> result = PermissionServiceFactory.getLocalService().hasAllPermissions(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,new String[]{CCConstants.PERMISSION_READ_PREVIEW});
-		if(!result.get(CCConstants.PERMISSION_READ_PREVIEW))
+		boolean result = PermissionServiceFactory.getLocalService().hasPermission(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,CCConstants.PERMISSION_READ_PREVIEW);
+		if(!result)
 			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ_PREVIEW+" on "+nodeId);
 	}
 

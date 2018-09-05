@@ -43,6 +43,14 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         return invocation.proceed();
     }
 
+    /**
+     * When onlyOnError is set, make sure that the called method will not cause any side effects since it may be called twice
+     * @param nodeId
+     * @param invocation
+     * @param onlyOnError
+     * @return
+     * @throws Throwable
+     */
     public static Object handleInvocation(String nodeId, MethodInvocation invocation, boolean onlyOnError) throws Throwable {
         if(onlyOnError){
             try{
