@@ -940,6 +940,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 	}
 
+	@Override
 	public StringBuffer getFindUsersSearchString(HashMap<String, String> propVals, boolean globalContext) {
 
 		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
@@ -1093,6 +1094,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 	}
 
+	@Override
 	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
 		boolean fuzzyGroupSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
