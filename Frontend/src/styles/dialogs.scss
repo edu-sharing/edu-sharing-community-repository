@@ -19,6 +19,7 @@ $cardActionHeight:77px;
 .card{
   z-index:$dialogZIndex+1;
   background-color: #fff!important;
+  transition: all $transitionNormal;
 }
 .center-card{
   position:fixed!important;

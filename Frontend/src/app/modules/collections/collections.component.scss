@@ -325,7 +325,8 @@ table, div {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
     /*line-height: 1em;*/
-    max-height: 1.5em;
+    //max-height: 1.5em;
+    text-align: center;
     overflow: hidden;
   }
   .card-image-icon-container{
