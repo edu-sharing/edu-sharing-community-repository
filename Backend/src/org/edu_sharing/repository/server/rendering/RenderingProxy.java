@@ -35,6 +35,8 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
 
 public class RenderingProxy extends HttpServlet {
@@ -61,7 +63,19 @@ public class RenderingProxy extends HttpServlet {
 		String display = req.getParameter("display");
 		
 		String nodeId = req.getParameter("obj_id");
-		
+
+		String childobjectId = req.getParameter("childobject_id");
+
+		String parentId=nodeId;
+		if(childobjectId!=null){
+			boolean isChild=AuthenticationUtil.runAsSystem(()-> NodeServiceHelper.isChildOf(NodeServiceFactory.getLocalService(),childobjectId,parentId));
+			if(!isChild){
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"Node "+childobjectId+" is not a child of "+parentId);
+				return;
+			}
+			nodeId = childobjectId;
+		}
+
 		boolean doRedirect = true;
 		if("inline".equals(display)){
 			doRedirect = false;
@@ -116,7 +130,7 @@ public class RenderingProxy extends HttpServlet {
 			
 		if("window".equals(display)) {
 
-			openWindow(req, resp, nodeId, appInfoApplication, usernameDecrypted);
+			openWindow(req, resp, nodeId, parentId, appInfoApplication, usernameDecrypted);
 			return;
 		}
 		
@@ -327,7 +341,7 @@ public class RenderingProxy extends HttpServlet {
 		
 	}
 
-	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, ApplicationInfo appInfoApplication, String usernameDecrypted) throws IOException {
+	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo appInfoApplication, String usernameDecrypted) throws IOException {
 		String ts = req.getParameter("ts");
 		String uEncrypted = req.getParameter("u");
 
@@ -361,7 +375,7 @@ public class RenderingProxy extends HttpServlet {
 		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
 			HttpSession session = req.getSession(true);
 			if(Long.parseLong(ts) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
-				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
+				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, parentId);
 				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
 			}
 

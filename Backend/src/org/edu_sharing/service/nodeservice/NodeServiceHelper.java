@@ -76,4 +76,12 @@ public class NodeServiceHelper {
 		}
 		return result;		
 	}
+
+    public static boolean isChildOf(NodeService nodeService,String childId, String parentId) {
+		for(ChildAssociationRef ref : nodeService.getChildrenChildAssociationRef(parentId)){
+			if(ref.getChildRef().getId().equals(childId))
+				return true;
+		}
+		return false;
+    }
 }
