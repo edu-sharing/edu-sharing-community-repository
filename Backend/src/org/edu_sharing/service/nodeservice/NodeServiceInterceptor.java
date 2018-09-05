@@ -25,22 +25,27 @@ public class NodeServiceInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         String methodName=invocation.getMethod().getName();
+        int argumentId=-1;
         if(methodName.equals("getProperty") ||
                 methodName.equals("getContentMimetype") ||
                 methodName.equals("getPreview") ||
                 methodName.equals("getProperties") ||
                 methodName.equals("getAspects") ||
                 methodName.equals("getOwner")) {
-            String nodeId = (String) invocation.getArguments()[2];
-            return handleInvocation(nodeId, invocation,true);
+            argumentId=2;
+        }
+        if (methodName.equals("getChild")) {
+            argumentId=1;
         }
         if(methodName.equals("getChildrenChildAssociationRefAssoc") ||
                 methodName.equals("getType") ||
                 methodName.equals("getVersionHistory")){
-            String nodeId = (String) invocation.getArguments()[0];
-            return handleInvocation(nodeId,invocation,true);
+            argumentId=0;
         }
-        return invocation.proceed();
+        if(argumentId==-1)
+            return invocation.proceed();
+        String nodeId = (String) invocation.getArguments()[argumentId];
+        return handleInvocation(nodeId, invocation,true);
     }
 
     /**
