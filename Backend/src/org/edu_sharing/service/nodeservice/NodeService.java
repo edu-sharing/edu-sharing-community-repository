@@ -75,7 +75,7 @@ public interface NodeService {
 	
 	public void revertVersion(String nodeId, String verLbl) throws Exception;
 	
-	public HashMap<String, HashMap<String,Object>> getVersionHistory(String nodeId) throws Exception;
+	public HashMap<String, HashMap<String,Object>> getVersionHistory(String nodeId) throws Throwable;
 	/**
 	 * Import the node from a foreign repository to the local one, and return the local node Ref
 	 * @param nodeId

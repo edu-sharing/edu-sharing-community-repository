@@ -119,7 +119,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 	
 	@Override
-	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Exception {
+	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
 		return null;
 	}
 	

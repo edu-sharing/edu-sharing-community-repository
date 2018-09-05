@@ -962,12 +962,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	@Override
-	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Exception {
-		try{
-			return apiClient.getVersionHistory(nodeId);
-		}catch(Throwable e){
-			throw new Exception(e);
-		}
+	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
+		return apiClient.getVersionHistory(nodeId);
 	}
 	@Override
 	public String importNode(String nodeId,String localParent) throws Throwable {
