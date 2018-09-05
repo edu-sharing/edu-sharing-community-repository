@@ -28,8 +28,8 @@ export class WorkspaceFileUploadSelectComponent  {
    */
   @Input() showLti=true;
   private breadcrumbs: Node[];
-  private ltiAllowed:boolean;
-  private ltiActivated:boolean;
+  ltiAllowed:boolean;
+  ltiActivated:boolean;
   private ltiConsumerKey:string;
   private ltiSharedSecret:string;
   private ltiTool: Node;
