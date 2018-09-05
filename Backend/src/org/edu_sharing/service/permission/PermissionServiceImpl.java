@@ -38,6 +38,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -51,7 +52,6 @@ import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -60,9 +60,7 @@ import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
 import org.edu_sharing.repository.server.tools.I18nServer;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.StringTool;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
-import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -80,7 +78,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	private ToolPermissionService toolPermission;
 
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-
+	OrganisationService organisationService = (OrganisationService)applicationContext.getBean("eduOrganisationService");
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	AuthorityService authorityService = serviceRegistry.getAuthorityService();
 	MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
@@ -907,17 +905,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		}else{
 
-			Set<String> groupsOfUser = authorityService.getAuthorities();
-
-			List<String> eduGroupAuthorityNames = new ArrayList<String>();
-			try {
-				for (EduGroup eduGroup : SearchServiceFactory.getLocalService().getAllOrganizations(true).getData()) {
-						eduGroupAuthorityNames.add(eduGroup.getGroupname());
-				}
-			}catch(Throwable t) {
-				t.printStackTrace();
-			}
-
+			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations();
+		
 			/**
 			 * if there are no edugroups you you are not allowed to search global return
 			 * nothing
@@ -1043,14 +1032,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			addGlobalAuthoritySearchQuery(searchQuery);
 		} else {
 
-			List<String> eduGroupAuthorityNames = new ArrayList<String>();
-			try {
-				for (EduGroup eduGroup : SearchServiceFactory.getLocalService().getAllOrganizations(true).getData()) {
-						eduGroupAuthorityNames.add(eduGroup.getGroupname());
-				}
-			}catch(Throwable t) {
-				t.printStackTrace();
-			}
+			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations();
 
 			/**
 			 * if there are no edugroups you you are not allowed to search global return

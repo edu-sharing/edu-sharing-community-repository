@@ -788,6 +788,10 @@ public class SearchServiceImpl implements SearchService {
 		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(toSearch, globalContext);
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
 
+		if(findUsersQuery == null || findGroupsQuery == null) {
+			return new SearchResult<String>(new ArrayList<String>(), 0, 0);
+		}
+		
 		/**
 		 * don't find groups of scopes when no scope is provided
 		 */
@@ -797,7 +801,8 @@ public class SearchServiceImpl implements SearchService {
 			 * groups arent initialized with eduscope aspect and eduscopename
 			 * null
 			 */
-			findGroupsQuery.append(" AND NOT @ccm\\:eduscopename:\"*\"");
+			findGroupsQuery.append(" AND NOT @ccm\\:eduscopename:\"*\"");	
+			
 		}
 		
 		String finalQuery;
