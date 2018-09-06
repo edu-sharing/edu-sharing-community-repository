@@ -24,6 +24,7 @@ import {ProfilesComponent} from "../modules/profiles/profiles.component";
 import {StartupComponent} from '../modules/startup/startup.component';
 import {ShareAppComponent} from "../modules/share-app/share-app.component";
 import {SharingComponent} from "../modules/sharing/sharing.component";
+import {RegisterComponent} from '../modules/register/register.component';
 
 
 
@@ -96,6 +97,8 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'collections/collection/:mode/:id', component: CollectionNewComponent},
   // login
     { path: UIConstants.ROUTER_PREFIX+'login', component: LoginComponent },
+  // register
+    { path: UIConstants.ROUTER_PREFIX+'register', component: RegisterComponent },
   // admin
     { path: UIConstants.ROUTER_PREFIX+'admin', component: AdminComponent },
   // permissions
