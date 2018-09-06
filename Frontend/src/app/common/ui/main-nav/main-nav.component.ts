@@ -70,6 +70,7 @@ import {OptionItem} from "../actionbar/option-item";
  */
 export class MainNavComponent implements AfterViewInit{
   private static bannerPositionInterval: any;
+  private static ID_ATTRIBUTE_NAME='data-banner-id';
 
   @ViewChild('search') search : ElementRef;
   @ViewChild('sidebar') sidebar:ElementRef;
@@ -162,59 +163,73 @@ export class MainNavComponent implements AfterViewInit{
   }
     @HostListener('window:scroll', ['$event'])
     handleScroll(event: Event) {
-        let y=0;
-        try {
-            let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
-            y = rect.bottom-rect.top;
-        }catch(e){
-        }
         let elementsScroll=document.getElementsByClassName('scrollWithBanner');
         let elementsAlign=document.getElementsByClassName('alignWithBanner');
-        let elements=[];
+        let elements:any=[];
         for(let i=0;i<elementsScroll.length;i++) {
             elements.push(elementsScroll[i]);
         }
         for(let i=0;i<elementsAlign.length;i++) {
             elements.push(elementsAlign[i]);
         }
-        let ATTRIBUTE_NAME='data-banner-id';
         if(event==null) {
+            // re-init the positions, reset the elements
             this.scrollInitialPositions=[];
             for(let i=0;i<elements.length;i++) {
                 let element: any = elements[i];
                 element.style.position = null;
                 element.style.top = null;
-                if(!element.getAttribute(ATTRIBUTE_NAME)){
-                    element.setAttribute(ATTRIBUTE_NAME,Math.random());
-                }
-                if(this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)])
-                    continue;
-                // getComputedStyle does report wrong values in search sidenav
-                this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=window.getComputedStyle(element).getPropertyValue('top');
-                //this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=element.getBoundingClientRect().top;
+                // disable transition for instant refreshes
+                element.style.transition="none"
             }
-        }
-        if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
-            for(let i=0;i<elements.length;i++) {
-                let element:any=elements[i];
-                if(y==0){
-                    element.style.position=null;
-                    element.style.top=null;
-                    continue;
-                }
-                if(element.className.indexOf('alignWithBanner')!=-1){
-                    element.style.position = 'relative';
-                    if(event==null) {
-                        element.style.top = y + 'px';
+            // give the browser layout engine some time to remove the values, otherwise the elements will have not their initial positions
+            setTimeout(()=> {
+                for (let i = 0; i < elements.length; i++) {
+                    let element: any = elements[i];
+                    element.style.transition=null;
+                    if (!element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)) {
+                        element.setAttribute(MainNavComponent.ID_ATTRIBUTE_NAME, Math.random());
                     }
+                    if (this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])
+                        continue;
+                    // getComputedStyle does report wrong values in search sidenav
+                    this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)] = window.getComputedStyle(element).getPropertyValue('top');
+                    //this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=element.getBoundingClientRect().top;
                 }
-                else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
-                    element.style.position = 'fixed';
-                    element.style.top = this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)];
-                } else {
-                    element.style.position = 'absolute';
-                    element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)])+y + 'px';
+                console.log(this.scrollInitialPositions);
+                this.posScrollElements(elements);
+            });
+        }
+        else{
+            this.posScrollElements(elements);
+        }
+    }
+    posScrollElements(elements: any[]){
+        let y=0;
+        try {
+            let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
+            y = rect.bottom-rect.top;
+        }catch(e){
+        }
+        for(let i=0;i<elements.length;i++) {
+            let element:any=elements[i];
+            if(y==0){
+                element.style.position=null;
+                element.style.top=null;
+                continue;
+            }
+            if(element.className.indexOf('alignWithBanner')!=-1){
+                element.style.position = 'relative';
+                if(event==null) {
+                    element.style.top = y + 'px';
                 }
+            }
+            else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
+                element.style.position = 'fixed';
+                element.style.top = this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)];
+            } else {
+                element.style.position = 'absolute';
+                element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])+y + 'px';
             }
         }
         if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
