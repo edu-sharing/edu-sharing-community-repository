@@ -344,7 +344,7 @@ export class MainNavComponent implements AfterViewInit{
 
         let reurl=null;
         if(params["reurl"])
-          reurl={reurl:params["reurl"]};
+          reurl={reurl:params["reurl"],applyDirectories:params["applyDirectories"]};
         this.showNodeStore=params['nodeStore']=="true";
         if(!data.isGuest && this.canAccessWorkspace) {
           //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});

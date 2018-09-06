@@ -131,6 +131,7 @@ export class WorkspaceMainComponent implements EventListener{
     public shareLinkNode : Node;
     private viewType = 0;
     private infoToggle: OptionItem;
+    private reurlDirectories: boolean;
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event:any) {
         if(this.isSafe){
@@ -461,6 +462,7 @@ export class WorkspaceMainComponent implements EventListener{
                                 if(params['reurl']) {
                                     this.reurl = params['reurl'];
                                 }
+                                this.reurlDirectories = params['applyDirectories']=='true';
                                 this.createAllowed=this.root=='MY_FILES';
                                 this.mainnav=params['mainnav']=='false' ? false : true;
 
@@ -780,6 +782,9 @@ export class WorkspaceMainComponent implements EventListener{
                 apply.showAlways=true;
                 apply.enabledCallback=((node:Node)=> {
                     return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+                });
+                apply.showCallback=((node:Node)=> {
+                    return this.reurlDirectories || !node.isDirectory;
                 });
                 options.push(apply);
             }
