@@ -777,6 +777,7 @@ export class WorkspaceMainComponent implements EventListener{
             if(this.reurl){
                 let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.storage,this.getNodeList(node)[0],this.reurl));
                 apply.showAsAction=true;
+                apply.showAlways=true;
                 apply.enabledCallback=((node:Node)=> {
                     return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
                 });
@@ -792,7 +793,6 @@ export class WorkspaceMainComponent implements EventListener{
         }
         let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", (node: Node) => this.editConnector(node));
         if(fromList){
-            view.showAlways = true;
             view.showCallback=((node:Node)=>{
                 return RestConnectorsService.connectorSupportsEdit(this.connectorList, node) != null;
             });
