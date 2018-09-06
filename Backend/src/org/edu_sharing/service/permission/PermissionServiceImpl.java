@@ -62,6 +62,7 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -218,6 +219,26 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if(createHandle) {
 			createHandle(AuthorityType.EVERYONE,nodeId);
 		}
+
+
+		boolean publishToOAI = false;
+
+		List<String> licenseList = (List<String>)serviceRegistry.getNodeService().getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId), QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
+
+		for(String license : licenseList) {
+			if(license != null && license.startsWith("CC_")) {
+				for(ACE ace : acesToAdd) {
+					if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+						publishToOAI = true;
+					}
+				}
+			}
+		}
+		if(publishToOAI) {
+			OAIExporterService service = new OAIExporterService();
+			if(service.available()) service.export(nodeId);
+		}
+
 
 	}
 
@@ -1022,7 +1043,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}else{
 
 			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
-		
+
 			/**
 			 * if there are no edugroups you you are not allowed to search global return
 			 * nothing
