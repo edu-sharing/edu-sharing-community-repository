@@ -134,6 +134,10 @@ $sidenavWidth:300px;
     min-height: 100%;
     width: calc(100% - 20px);
   }
+  .contentSidenav{
+    margin-left: $sidenavWidth;
+    width:calc(100% - 20px - #{$sidenavWidth});
+  }
 }
 
 md-sidenav-container,.sidenav,#top {
@@ -327,10 +331,6 @@ small-collection{
     top:65px;
     height: calc(100% - 65px - 70px);
   }
-}
-.contentSidenav{
-  margin-left: $sidenavWidth;
-  width:calc(100% - 20px - #{$sidenavWidth});
 }
 #sub {
     padding-top: 20px;
