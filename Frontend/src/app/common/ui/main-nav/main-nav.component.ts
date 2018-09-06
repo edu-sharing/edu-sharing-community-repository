@@ -179,7 +179,7 @@ export class MainNavComponent implements AfterViewInit{
         }
         let ATTRIBUTE_NAME='data-banner-id';
         if(event==null) {
-            /*this.scrollInitialPositions=[];*/
+            this.scrollInitialPositions=[];
             for(let i=0;i<elements.length;i++) {
                 let element: any = elements[i];
                 element.style.position = null;
@@ -189,7 +189,9 @@ export class MainNavComponent implements AfterViewInit{
                 }
                 if(this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)])
                     continue;
+                // getComputedStyle does report wrong values in search sidenav
                 this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=window.getComputedStyle(element).getPropertyValue('top');
+                //this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=element.getBoundingClientRect().top;
             }
         }
         if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
