@@ -775,7 +775,7 @@ export class WorkspaceMainComponent implements EventListener{
         }
         if (nodes && nodes.length == 1) {
             if(this.reurl){
-                let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.storage,this.getNodeList(node)[0],this.reurl));
+                let apply=new OptionItem("APPLY", "redo", (node: Node) => this.applyNode(this.getNodeList(node)[0]));
                 apply.showAsAction=true;
                 apply.showAlways=true;
                 apply.enabledCallback=((node:Node)=> {
@@ -1156,5 +1156,22 @@ export class WorkspaceMainComponent implements EventListener{
 
     hasOpenWindows() {
         return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
+    }
+
+    private applyNode(node: Node,force=false) {
+        /*if(node.isDirectory && !force){
+            this.dialogTitle='WORKSPACE.APPLY_NODE.DIRECTORY_TITLE';
+            this.dialogCancelable=true;
+            this.dialogMessage='WORKSPACE.APPLY_NODE.DIRECTORY_MESSAGE';
+            this.dialogMessageParameters={name:node.name};
+            this.dialogButtons=DialogButton.getYesNo(()=>{
+                this.dialogTitle=null;
+            },()=>{
+                this.dialogTitle=null;
+                this.applyNode(node,true);
+            });
+            return;
+        }*/
+        NodeHelper.addNodeToLms(this.router,this.storage,node,this.reurl)
     }
 }
