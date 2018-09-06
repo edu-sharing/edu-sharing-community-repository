@@ -168,6 +168,16 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
+	public StringBuffer getFindUsersSearchString(HashMap<String, String> propVals, boolean globalContext) {
+		return null;
+	}
+
+	@Override
+	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
+		return null;
+	}
+
+	@Override
 	public void setPermissions(String nodeId, List<ACE> aces) throws Exception {
 		try {
 			NativeAlfrescoWrapper naw = EduWebServiceFactory.getNativeAlfrescoWrapper(appInfo.getWebServiceHotUrl());
