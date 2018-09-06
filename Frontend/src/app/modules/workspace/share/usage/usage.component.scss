@@ -1,0 +1,55 @@
+@import "../../../../../styles/variables.scss";
+
+
+.group{
+  width: 100%;
+}
+.container{
+  display: flex;
+  width:100%;
+  >div {
+    display: flex;
+    overflow: hidden;
+    padding: 1px 0;
+    align-items: center;
+  }
+  >.name{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    padding:0 8px;
+    height: 40px;
+    >.secondary{
+      font-size: 80%;
+      color:$textLight;
+      margin-top: -3px;
+      min-height: 3px;
+    }
+  }
+  .toggle{
+    color:$primary;
+    padding:0 5px;
+  }
+}
+.single{
+  display: flex;
+  padding-left:25px;
+}
+.all{
+  padding-bottom:5px;
+}
+.icon{
+  padding-right:5px;
+}
+.name{
+  flex-grow: 1;
+  padding:1px 5px!important;
+  @include shortenText();
+}
+.icon,.remove{
+  min-width: 24px;
+}
+.remove i,.type{
+  color:$textLight;
+}

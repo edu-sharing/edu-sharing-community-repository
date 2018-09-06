@@ -11,6 +11,17 @@ import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
 export class RestUsageService extends AbstractRestService{
+    public static getNodeUsagesByRepositoryType(list : UsageList){
+        let groups:any={};
+        for(let l of list.usages){
+            let type=l.appSubtype;
+            if(!groups[type])
+                groups[type]=[];
+            groups[type].push(l);
+        }
+        return groups;
+    }
+
     constructor(connector : RestConnectorService) {
         super(connector);
     }

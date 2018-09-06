@@ -185,19 +185,31 @@
                                     [readOnly]="true"
                                     [showDelete]="false"
         ></workspace-share-permission>
-        <div class="collections" *ngIf="collections && collections.length">
-          <div class="title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</div>
-          <div class="info">{{'WORKSPACE.SHARE.COLLECTIONS.INFO' | translate }}</div>
-          <div class="link" (click)="showCollections=true;reloadCollections()"><i class="material-icons">layers</i><div>{{'WORKSPACE.SHARE.COLLECTIONS.LINK' | translate }}</div><i class="material-icons">arrow_forward</i></div>
-        </div>
-        <!--
-        <workspace-share-permission *ngIf="showLink && !link"
-                                    class="groupEntry link"
-                                    [permission]="linkDisabled"
-                                    [readOnly]="true"
-                                    [showDelete]="false"
-        ></workspace-share-permission>
-        -->
+          <div class="groupName" *ngIf="usages">{{'WORKSPACE.SHARE.USAGES' | translate}}</div>
+          <div *ngIf="collections && collections.length" class="usage">
+              <workspace-share-usages
+                      class="usageEntry"
+                      [name]="'COLLECTION'"
+                      [usages]="collections"
+              ></workspace-share-usages>
+          </div>
+          <div *ngFor="let key of usages | keys" class="usage">
+              <workspace-share-usages *ngIf="key!='null'"
+                                          class="usageEntry"
+                                          [name]="key"
+                                          [usages]="usages[key]"
+              ></workspace-share-usages>
+          </div>
+
+
+          <!--
+          <workspace-share-permission *ngIf="showLink && !link"
+                                      class="groupEntry link"
+                                      [permission]="linkDisabled"
+                                      [readOnly]="true"
+                                      [showDelete]="false"
+          ></workspace-share-permission>
+          -->
       </div>
       <div *ngIf="tab==ADVANCED && permissionsUser && permissionsGroup" class="tabContent advanced">
         <h2 *ngIf="permissionsUser.length+permissionsGroup.length==0">

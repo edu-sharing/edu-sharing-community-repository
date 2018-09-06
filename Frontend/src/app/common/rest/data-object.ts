@@ -775,6 +775,8 @@ export interface Usage {
   courseId: string;
   distinctPersons: number;
   appId: string;
+  appType: string;
+  appSubtype: string;
   nodeId: string;
   parentNodeId: string;
   usageVersion: string;

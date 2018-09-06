@@ -5,7 +5,7 @@ import {
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
     Node, NodeList, NodePermissions, Permission, Permissions, LocalPermissions,
-    NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority, Collection
+    NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority, Collection, UsageList
 } from '../../../common/rest/data-object';
 import {Toast} from "../../../common/ui/toast";
 import {RestConstants} from "../../../common/rest/rest-constants";
@@ -33,9 +33,6 @@ import {UIConstants} from '../../../common/ui/ui-constants';
   ]
 })
 export class WorkspaceShareComponent implements AfterViewInit{
-  ngAfterViewInit(): void {
-    setTimeout(()=>UIHelper.setFocusOnCard());
-  }
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
     "Editor","Contributor","Collaborator","Coordinator",
@@ -92,8 +89,12 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private isSafe = false;
   collectionColumns=UIHelper.getDefaultCollectionColumns();
   collections: Collection[];
+  usages: any;
   showCollections = false;
 
+    ngAfterViewInit(): void {
+        setTimeout(()=>UIHelper.setFocusOnCard());
+    }
   public isCollection(){
     if(this._node==null)
       return true;
@@ -145,7 +146,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.doiDisabled = this.doiActive;
         }
       },(error:any)=>this.toast.error(error));
-      this.reloadCollections();
+      this.reloadUsages();
     }
     if(node.parent && node.parent.id) {
       this.nodeApi.getNodePermissions(node.parent.id).subscribe((data: NodePermissions) => {
@@ -449,9 +450,13 @@ export class WorkspaceShareComponent implements AfterViewInit{
     this.updatePublishState();
   }
 
-  reloadCollections() {
+    reloadUsages() {
     this.usageApi.getNodeUsagesCollection(this._node.ref.id).subscribe((data:Collection[])=>{
         this.collections=data;
+    });
+    this.usageApi.getNodeUsages(this._node.ref.id).subscribe((data:UsageList)=>{
+        this.usages = RestUsageService.getNodeUsagesByRepositoryType(data);
+        console.log(this.usages);
     });
   }
   openCollection(collection:Collection){
