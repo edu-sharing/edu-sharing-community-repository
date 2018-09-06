@@ -955,7 +955,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
-	
+
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:person");
 
 		StringBuffer subQuery = new StringBuffer();
@@ -1077,7 +1077,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if (subQuery.length() > 0) {
 			searchQuery.append(" AND (").append(subQuery).append(")");
 		}
-		
+
 		//cm:espersonstatus
 		String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
 		if(personActiveStatus != null && !personActiveStatus.trim().equals("")) {
