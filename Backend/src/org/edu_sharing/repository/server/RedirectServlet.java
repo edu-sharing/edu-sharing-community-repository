@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -350,6 +351,9 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 
 			String type = CCConstants.getValidLocalName(nodeService.getType(nodeId));
 			redirectUrl = UrlTool.setParamEncode(redirectUrl, "nodeType", type);
+
+			String iconUrl = new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getIcon(nodeService.getType(nodeId),props,Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId)));
+			redirectUrl = UrlTool.setParamEncode(redirectUrl, "iconUrl", iconUrl);
 
 			//if it's a remoteObject(no alfresco) make it possible for the lms to show some type icons, license info a.s.o
 			String repoType = repInfo.getRepositoryType();
