@@ -1,6 +1,11 @@
 {
   "REGISTER": {
     "TITLE": "Registration",
-    "REGISTER" : "Register"
+    "REGISTER": "Register",
+    "ORGANIZATION": "Organization",
+    "NEWSLETTER": "Receive news by e-mail",
+    "ACCEPT": "I agree with the processing of my given data",
+    "IMPRESSUM-LINK": "Further details",
+    "PL_NAME": "z.B. Sample..."
   }
 }

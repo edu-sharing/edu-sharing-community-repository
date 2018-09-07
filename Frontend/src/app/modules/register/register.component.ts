@@ -26,9 +26,68 @@ import {InputPasswordComponent} from "../../common/ui/input-password/input-passw
 })
 export class RegisterComponent{
   public isLoading=true;
+  public firstName="";
+  public lastName="";
+  public mail="";
+  public password="";
+  public org="";
+  public news = true;
+  public agree = false;
+
+  public checkConditions(){
+    //  TODO: @Simon;
+  }
+
+  public checkMail(){
+
+      const EMAIL_REGEXP = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+      if (this.mail && !EMAIL_REGEXP.test(this.mail)) {
+          return false;
+      } else {
+          return true;
+      }
+  }
+  public checkPasswort(){
+    //  TODO: @Simon;
+     /* Das Password muss mindestens 5 Zeichen lang sein
+      Das Passwort muss Großbuchstaben, Kleinbuchstaben und Zahlen beinhalten
+      Wenn es nicht der Fall ist dann Rot markieren und den Hinweis anzeigen lassen.   */
+
+  }
+
+  public setNews(value:boolean){
+      //TODO: @Simon
+      if(value){
+
+      } else{
+
+      }
+  }
+  public setAccept(value:boolean){
+      //TODO: @Simon
+      if(value){
+          this.agree = true;
+      } else{
+          this.agree = false;
+      }
+  }
+  private openImprint(){
+      //TODO: @Simon
+      // Link zur Impressum
+      // window.document.location.href=this.config.imprintUrl;
+  }
+
+
+  public canRegister(){
+      return this.firstName.trim() && this.mail.trim() && this.password
+          && this.agree;
+  }
 
   private register(){
+      //  TODO: @Simon;
   }
+
   constructor(private connector : RestConnectorService,
               private toast:Toast,
               private platformLocation: PlatformLocation,

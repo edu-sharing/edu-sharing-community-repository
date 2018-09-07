@@ -1,6 +1,15 @@
 {
   "REGISTER": {
     "TITLE": "Registrierung",
-    "REGISTER" : "Registrieren"
+    "ORGANIZATION_TITEL": "LaSiDig | DEKRA",
+    "REGISTER": "Registrieren",
+    "ORGANIZATION": "Organisation",
+    "NEWSLETTER": "Neuigkeiten per Mail erhalten",
+    "ACCEPT": "Ich bin mit der Verarbeitung meiner angegebenen Daten einverstanden",
+    "IMPRESSUM-LINK": "Weitere Informationen",
+    "PL_USER": "z.B. Max...",
+    "PL_NAME": "z.B. Musstermann...",
+    "PL_MAIL": "z.B. max@mail.com",
+    "PL_ORG": "z.B. DEKRA..."
   }
 }

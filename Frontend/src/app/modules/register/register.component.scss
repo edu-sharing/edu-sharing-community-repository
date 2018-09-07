@@ -1,1 +1,53 @@
 @import "../../../styles/variables.scss";
+
+.header-high{
+  background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 80px,transparent 80px,transparent 100%);
+}
+.card-title-info{
+  position: absolute;
+  top: 52px;
+  font-size: 9pt;
+  color: $textLight;
+  display: flex;
+  align-items: center;
+
+  img{
+    height: 20px;
+    width: auto;
+    margin-right: 14px;
+  }
+}
+.scroll-header-high{
+  top: 0;
+}
+
+label{
+  line-height: 17pt;
+}
+
+form{
+  label span{
+    color: $textLight;
+    font-size: 9pt;
+    text-transform: initial;
+    font-weight: normal;
+  }
+}
+//TODO @Simon hier noch richtige Classe für valid und non-valid input!
+.wrong{
+  border-color: $warning;
+}
+.valid{
+  border-color: $colorStatusPositive;
+  box-shadow:none !important;
+}
+.imprint{
+  display: block;
+  width: 100%;
+  text-align: right;
+  padding: 10px 0;
+}
+.card-action a{
+  width: 100%;
+  max-width: 100%;
+}
