@@ -501,11 +501,13 @@ export class WorkspaceShareComponent implements AfterViewInit{
         return 'PRIVATE';
   }
 
-    private updateUsages(permissions:Permission[],pos=0) {
+    private updateUsages(permissions:Permission[],pos=0,error=false) {
       if(pos==this.deletedUsages.length){
           this.onLoading.emit(false);
           this.onClose.emit(permissions);
-          this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
+          if(!error) {
+              this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
+          }
           return;
       }
         console.log(this.deletedUsages);
@@ -516,7 +518,15 @@ export class WorkspaceShareComponent implements AfterViewInit{
                 this.updateUsages(permissions,pos+1);
             },(error)=>{
                 this.toast.error(error);
+                this.updateUsages(permissions,pos+1,true);
+            });
+        }
+        else{
+            this.usageApi.deleteNodeUsage(this._node.ref.id,usage.nodeId).subscribe(()=>{
                 this.updateUsages(permissions,pos+1);
+            },(error)=>{
+                this.toast.error(error);
+                this.updateUsages(permissions,pos+1,true);
             });
         }
     }

@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.edu_sharing.restservices.collection.v1.model.Collection;
 
 public class Usages {
 
@@ -211,6 +212,17 @@ public class Usages {
 
 		public String getAppType() {
 			return appType;
+		}
+	}
+	public static class CollectionUsage extends Usage {
+		private Collection collection;
+
+		public Collection getCollection() {
+			return collection;
+		}
+
+		public void setCollection(Collection collection) {
+			this.collection = collection;
 		}
 	}
 }
