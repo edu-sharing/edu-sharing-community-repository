@@ -19,11 +19,15 @@ export class WorkspaceUsageComponent  {
     };
   @Input() name : string;
   @Input() usages : any[];
-  @Input() showDelete = false;
+  @Input() deleteList : any[];
+  @Output() deleteListChange = new EventEmitter();
+  @Input() showDelete = true;
   @Output() onRemoveAll = new EventEmitter();
   @Output() onRemove = new EventEmitter();
   showAll = false;
-
+    isDeleted(usage:any){
+        return this.deleteList.indexOf(usage)!=-1;
+    }
     getIcon(){
         let map=WorkspaceUsageComponent.ICON_MAP[this.name.toUpperCase()];
         if(map)
@@ -32,16 +36,17 @@ export class WorkspaceUsageComponent  {
     }
     getName(usage:any){
         // may be a collection
-        if(usage.title)
-            return usage.title;
+        if(usage.collection)
+            return usage.collection.title;
         return usage.courseId;
     }
-  public removeAll(){
-    if(this.showDelete)
-      this.onRemoveAll.emit();
-  }
     public remove(usage:any){
-        if(this.showDelete)
-            this.onRemove.emit(usage);
+        if(this.showDelete) {
+            if(this.isDeleted(usage))
+                this.deleteList.splice(this.deleteList.indexOf(usage),1);
+            else
+                this.deleteList.push(usage);
+            this.deleteListChange.emit(this.deleteList);
+        }
     }
 }

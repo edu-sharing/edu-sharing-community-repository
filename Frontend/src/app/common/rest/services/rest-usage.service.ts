@@ -6,7 +6,7 @@ import {RestConnectorService} from "./rest-connector.service";
 import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {RequestObject} from "../request-object";
-import {ArchiveRestore, ArchiveSearch, Node, Collection, UsageList} from "../data-object";
+import {ArchiveRestore, ArchiveSearch, Node, Collection, UsageList, CollectionUsage} from '../data-object';
 import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
@@ -39,7 +39,7 @@ export class RestUsageService extends AbstractRestService{
   }
     public getNodeUsagesCollection = (node : string,
                             repository=RestConstants.HOME_REPOSITORY
-    ): Observable<Collection[]> => {
+    ): Observable<CollectionUsage[]> => {
         // TODO does it need a repro?
         let query=this.connector.createUrl("usage/:version/usages/node/:node/collections",repository,
             [

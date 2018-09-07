@@ -5,17 +5,25 @@
             <span class="primary">{{('WORKSPACE.SHARE.USAGE_TYPE.'+name.toUpperCase()) | translate}} ({{usages.length}})</span>
             <i class="material-icons clickable toggle" (click)="showAll=!showAll">{{showAll ? 'keyboard_arrow_down' : 'keyboard_arrow_right'}}</i>
         </div>
-        <div class="remove clickable" tabindex="0" (keyup.enter)="removeAll()" (click)="removeAll()" [class.invisible]="!showDelete">
+        <!--<div class="remove clickable" tabindex="0" (keyup.enter)="removeAll()" (click)="removeAll()" [class.invisible]="!showDelete">
             <i class="material-icons">cancel</i>
-        </div>
+        </div>-->
     </div>
     <div class="all" *ngIf="showAll" [@cardAnimation]="showAll">
         <div class="single" *ngFor="let usage of usages">
-            <div class="name">
-                <span class="primary">{{getName(usage)}}</span>
+            <div class="deleted-info" *ngIf="isDeleted(usage)">
+                <div class="line"><hr></div>
+                <div class="info">{{'WORKSPACE.SHARE.DELETED' | translate}}</div>
+                <div class="line"><hr></div>
             </div>
-            <div class="remove clickable" tabindex="0" (keyup.enter)="remove(usage)" (click)="remove(usage)" [class.invisible]="!showDelete">
-                <i class="material-icons">cancel</i>
+            <div>
+                <div class="name">
+                    <span class="primary">{{getName(usage)}}</span>
+                </div>
+                <div class="remove clickable" tabindex="0" (keyup.enter)="remove(usage)" (click)="remove(usage)" [class.invisible]="!showDelete">
+                    <i class="material-icons" *ngIf="!isDeleted(usage)">cancel</i>
+                    <i class="material-icons" *ngIf="isDeleted(usage)">undo</i>
+                </div>
             </div>
         </div>
     </div>

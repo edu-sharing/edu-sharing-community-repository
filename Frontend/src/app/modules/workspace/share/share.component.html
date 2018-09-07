@@ -149,6 +149,7 @@
                                         [permission]="permission"
                                         [readOnly]="!permission.editable && !isNewPermission(permission)"
                                         [showDelete]="permission.editable || isNewPermission(permission)"
+                                        [isDeleted]="isDeleted(permission)"
                                         [isDirectory]="_node.isDirectory"
                                         [canPublish]="!isSafe"
                                         [added]="isNewPermission(permission)"
@@ -165,6 +166,7 @@
               [permission]="permission"
               [readOnly]="!permission.editable && !isNewPermission(permission)"
               [showDelete]="permission.editable || isNewPermission(permission)"
+              [isDeleted]="isDeleted(permission)"
               [isDirectory]="_node.isDirectory"
               [canPublish]="!isSafe"
               [added]="isNewPermission(permission)"
@@ -191,6 +193,7 @@
                       class="usageEntry"
                       [name]="'COLLECTION'"
                       [usages]="collections"
+                      [(deleteList)]="deletedUsages"
               ></workspace-share-usages>
           </div>
           <div *ngFor="let key of usages | keys" class="usage">
@@ -198,6 +201,7 @@
                                           class="usageEntry"
                                           [name]="key"
                                           [usages]="usages[key]"
+                                          [(deleteList)]="deletedUsages"
               ></workspace-share-usages>
           </div>
 

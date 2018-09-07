@@ -5,7 +5,7 @@ import {
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
     Node, NodeList, NodePermissions, Permission, Permissions, LocalPermissions,
-    NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority, Collection, UsageList
+    NodeWrapper, IamUsers, IamGroups, NodeShare, IamAuthorities, LoginResult, Authority, Collection, UsageList, CollectionUsage
 } from '../../../common/rest/data-object';
 import {Toast} from "../../../common/ui/toast";
 import {RestConstants} from "../../../common/rest/rest-constants";
@@ -22,6 +22,7 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
 import {RestUsageService} from '../../../common/rest/services/rest-usage.service';
 import {UIHelper} from '../../../common/ui/ui-helper';
 import {UIConstants} from '../../../common/ui/ui-constants';
+import {RestCollectionService} from '../../../common/rest/services/rest-collection.service';
 
 @Component({
   selector: 'workspace-share',
@@ -88,7 +89,10 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private originalPermissions: LocalPermissions;
   private isSafe = false;
   collectionColumns=UIHelper.getDefaultCollectionColumns();
-  collections: Collection[];
+  collections: CollectionUsage[];
+  // store authorities marked for deletion
+  public deletedPermissions:string[]=[];
+  public deletedUsages:any[]=[];
   usages: any;
   showCollections = false;
 
@@ -223,12 +227,22 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private chooseTypeList(p : Permission){
     this.showChooseTypeList=p;
   }
+  isDeleted(p : Permission){
+      return this.deletedPermissions.indexOf(p.authority.authorityName)!=-1;
+  }
   private removePermission(p : Permission){
-    if(this.newPermissions.indexOf(p)!=-1)
+      if(this.isDeleted(p))
+          this.deletedPermissions.splice(this.deletedPermissions.indexOf(p.authority.authorityName),1);
+      else
+          this.deletedPermissions.push(p.authority.authorityName);
+      this.updatePublishState();
+      /*
+      if(this.newPermissions.indexOf(p)!=-1)
       this.newPermissions.splice(this.newPermissions.indexOf(p),1);
     this.permissions.splice(this.permissions.indexOf(p),1);
     this.setPermissions(this.permissions);
     this.updatePublishState();
+    */
   }
   private setType(type : any){
     this.currentType=type.permissions;
@@ -289,15 +303,19 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private save(){
     if(this.permissions!=null) {
       this.onLoading.emit(true);
-      let permissions=RestHelper.copyAndCleanPermissions(this.permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
+      let permissions=Helper.deepCopy(this.permissions);
+      for(let permission of permissions){
+          if(this.isDeleted(permission)){
+              permissions.splice(permissions.indexOf(permission),1);
+          }
+      }
+      permissions=RestHelper.copyAndCleanPermissions(permissions,this.inherited && this.inheritAllowed && !this.disableInherition);
       if(!this.sendToApi) {
         this.onClose.emit(permissions);
         return;
       }
       this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
-          this.onLoading.emit(false);
-          this.onClose.emit(permissions);
-          this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
+          this.updateUsages(permissions);
         },
         (error : any)=> {
           this.toast.error(error);
@@ -308,6 +326,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   }
   constructor(private nodeApi : RestNodeService,
               private translate : TranslateService,
+              private collectionService : RestCollectionService,
               private applicationRef : ApplicationRef,
               private toast : Toast,
               private usageApi : RestUsageService,
@@ -420,7 +439,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   }
   private updatePublishState() {
     this.publishInherit=this.inherited && this.getAuthorityPos(this.inherit,RestConstants.AUTHORITY_EVERYONE)!=-1;
-    this.publishActive=this.publishInherit || this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE)!=-1;
+    this.publishActive=this.publishInherit || this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE)!=-1 && this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)==-1;
   }
 
   private getAuthorityPos(permissions: Permission[], authority: string) {
@@ -434,6 +453,10 @@ export class WorkspaceShareComponent implements AfterViewInit{
   }
   public setPublish(status:boolean){
     if(status){
+      if(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE)!=-1){
+          this.deletedPermissions.splice(this.deletedPermissions.indexOf(RestConstants.AUTHORITY_EVERYONE),1);
+          return;
+      }
       let perm=RestHelper.getAllAuthoritiesPermission();
       perm.permissions=[RestConstants.PERMISSION_CONSUMER];
       this.permissions.push(perm);
@@ -451,7 +474,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
   }
 
     reloadUsages() {
-    this.usageApi.getNodeUsagesCollection(this._node.ref.id).subscribe((data:Collection[])=>{
+    this.usageApi.getNodeUsagesCollection(this._node.ref.id).subscribe((data)=>{
         this.collections=data;
     });
     this.usageApi.getNodeUsages(this._node.ref.id).subscribe((data:UsageList)=>{
@@ -477,6 +500,26 @@ export class WorkspaceShareComponent implements AfterViewInit{
         }
         return 'PRIVATE';
   }
+
+    private updateUsages(permissions:Permission[],pos=0) {
+      if(pos==this.deletedUsages.length){
+          this.onLoading.emit(false);
+          this.onClose.emit(permissions);
+          this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
+          return;
+      }
+        console.log(this.deletedUsages);
+        let usage=this.deletedUsages[pos];
+        // collection
+        if(usage.collection){
+            this.collectionService.removeFromCollection(usage.resourceId,usage.collection.ref.id).subscribe(()=>{
+                this.updateUsages(permissions,pos+1);
+            },(error)=>{
+                this.toast.error(error);
+                this.updateUsages(permissions,pos+1);
+            });
+        }
+    }
 }
 /*
 class SearchData extends Subject<CompleterItem[]> implements CompleterData {

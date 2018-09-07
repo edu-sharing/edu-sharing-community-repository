@@ -64,6 +64,7 @@
       "GROUP_USERS":"These users have access:",
       "GROUP_GROUPS":"These groups have access:",
       "USAGES":"Used and shared in:",
+      "DELETED":"will be removed",
       "TYPE_VIEWER":"Viewer",
       "TYPE_VIEWER_DESCRIPTION":"can view item / details page",
       "TYPE_COWORKER":"Collaborator",
