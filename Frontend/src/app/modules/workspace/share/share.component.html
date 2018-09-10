@@ -187,7 +187,7 @@
                                     [readOnly]="true"
                                     [showDelete]="false"
         ></workspace-share-permission>
-          <div class="groupName" *ngIf="usages">{{'WORKSPACE.SHARE.USAGES' | translate}}</div>
+          <div class="groupName" *ngIf="hasUsages()">{{'WORKSPACE.SHARE.USAGES' | translate}}</div>
           <div *ngIf="collections && collections.length" class="usage">
               <workspace-share-usages
                       class="usageEntry"
