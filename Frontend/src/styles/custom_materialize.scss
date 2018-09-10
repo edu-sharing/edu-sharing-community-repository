@@ -136,17 +136,23 @@ input[type=radio]+label,
   margin-left: 0;
   text-transform: none;
 }
-input:not([type]):focus:not([readonly]),
-input[type=search]:focus:not([readonly]),
-input[type=email]:focus:not([readonly]),
-input[type=password]:focus:not([readonly]),
-input[type=number]:focus:not([readonly]),
-input[type=text]:focus:not([readonly]),
-.materialize-textarea:focus:not([readonly]){
+input:not([type]),
+input[type=search],
+input[type=email],
+input[type=password],
+input[type=number],
+input[type=text],
+.materialize-textarea{
   /*box-shadow: 0 1px 0 0 $primary!important;
   border-bottom: 1px solid $primary!important;*/
-  border:1px solid $primaryMediumLight!important;
-  box-shadow: none!important;
+  &:focus:not([readonly]) {
+    border-color:$primaryMediumLight !important;
+    box-shadow: none !important;
+  }
+  &.valid{
+    border-color:$colorStatusPositive !important;
+    box-shadow: none !important;
+  }
 }
 .materialize-textarea{
   overflow-y: auto!important;
