@@ -266,6 +266,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
     }
     return false;
   }
+  hasUsages(){
+      return this.usages && Object.keys(this.usages).length;
+  }
   public showHistory(){
     this.history=this._node;
   }
