@@ -38,6 +38,8 @@ import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.usage.Usage;
+import org.edu_sharing.service.usage.Usage2Service;
 
 public class RenderingProxy extends HttpServlet {
 
@@ -373,10 +375,19 @@ public class RenderingProxy extends HttpServlet {
 		 * doing edu ticket auth
 		 */
 		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
+			req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
 			HttpSession session = req.getSession(true);
 			if(Long.parseLong(ts) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
-				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, parentId);
-				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
+				try {
+					Usage usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), nodeId, req.getParameter("resource_id"));
+					if(usage==null)
+						throw new SecurityException("No usage found for course id "+req.getParameter("course_id")+" and resource id "+req.getParameter("resource_id"));
+					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, parentId);
+					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
+				}
+				catch (Throwable t){
+					logger.warn("Usage fetching failed for node "+nodeId+": "+t.getMessage());
+				}
 			}
 
 			//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
