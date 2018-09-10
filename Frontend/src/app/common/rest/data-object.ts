@@ -80,6 +80,15 @@ export interface Application {
   xml: string;
 }
 
+export interface Service {
+    active: boolean;
+    id: string;
+    name: string;
+    url: string;
+    logo: string;
+    interfaces: any[];
+    statisticsInterface: string;
+}
 
 export interface Preview {
   data: Blob; // image, may null, see @NodeHelper.appendImageData
@@ -577,11 +586,14 @@ export interface MdsValueList {
   values: MdsValue[];
 }
 
-
+export interface  MdsValuesParameters {
+    query : string;
+    property : string;
+    pattern : string;
+}
 export interface MdsValues{
-  query : string;
-  property : string;
-  pattern : string;
+  valueParameters:MdsValuesParameters;
+  criterias : any;
 }
 
 export interface Parent {
@@ -763,6 +775,8 @@ export interface Usage {
   courseId: string;
   distinctPersons: number;
   appId: string;
+  appType: string;
+  appSubtype: string;
   nodeId: string;
   parentNodeId: string;
   usageVersion: string;
@@ -774,7 +788,9 @@ export interface Usage {
 export interface UsageList {
   usages: Usage[];
 }
-
+export interface CollectionUsage extends Usage{
+    collection: Collection;
+}
 export interface Filetype {
   mimetype: string;
   filetype: string;

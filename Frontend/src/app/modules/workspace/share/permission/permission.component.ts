@@ -38,6 +38,7 @@ export class WorkspacePermissionComponent  {
   @Input() added = false;
   @Input() readOnly = true;
   @Input() showDelete = true;
+  @Input() isDeleted = false;
   @Input() isDirectory = false;
   @Input() canPublish = true;
   @Output() onRemove = new EventEmitter();

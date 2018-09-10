@@ -176,7 +176,7 @@ a.active{
 .crossed{
   text-decoration: line-through;
 }
-.groupEntry{
+.groupEntry,.usageEntry{
   width:100%;
   display:flex;
   background: #eee;
@@ -185,12 +185,14 @@ a.active{
   padding-left: 15px;
   padding-right: 5px;
   margin-bottom: 6px;
-  height: 35px;
   align-items: center;
   workspace-share-permission{
     width: 100%;
   }
   border:2px dashed transparent;
+}
+.groupEntry{
+  height: 35px;
 }
 .added{
   background: transparent;

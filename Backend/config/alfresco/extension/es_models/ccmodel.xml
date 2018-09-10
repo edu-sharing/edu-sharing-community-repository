@@ -368,6 +368,26 @@
        		<title>Tool Permission</title>
          	<parent>ccm:io</parent>
        </type>
+        <type name="ccm:service_node">
+            <title>Service discovery information object</title>
+            <parent>cm:cmobject</parent>
+            <properties>
+                <property name="ccm:service_node_name">
+                    <type>d:text</type>
+                </property>
+                <property name="ccm:service_node_description">
+                    <type>d:text</type>
+                    <multiple>true</multiple>
+                </property>
+                <property name="ccm:service_node_type">
+                    <type>d:text</type>
+                </property>
+                <!-- json object of the service node -->
+                <property name="ccm:service_node_data">
+                    <type>d:text</type>
+                </property>
+            </properties>
+        </type>
 		<type name="ccm:tool_instance">
        		<title>Tool Instance</title>
        		<parent>cm:cmobject</parent>

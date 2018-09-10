@@ -361,5 +361,6 @@
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.10-alfresco-patched.jar"/>
 	<classpathentry kind="lib" path="lib/handle-client.jar"/>
 	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
+	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/lib/postgresql-9.3-1102-jdbc41.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

@@ -1,0 +1,52 @@
+<main-nav
+        [title]="'SERVICES.TITLE'"
+        [currentScope]="'services'"
+        [searchEnabled]="false"
+></main-nav>
+
+<div id="topWrapper">
+    <div id="register-service">
+        <h4>{{'SERVICES.REGISTER' | translate }}</h4>
+        <form (ngSubmit)="registerService()">
+            <input type="text" name="serviceUrl" class="serviceUrl" [(ngModel)]="serviceUrl" placeholder="{{'SERVICES.URL' | translate}}">
+            <a class="btn waves-effect waves-light" (click)="registerService()">{{'SERVICES.REGISTER' | translate}}</a>
+        </form>
+    </div>
+    <div id="chart">
+        <div id="chartAggregated" *ngIf="statsUrlLicenses && !statsUrlMaterials">
+            <iframe class="chart" [src]='statsUrlLicenses'></iframe>
+        <!-- <div *ngIf="stats.all" id="sum"><div class="label">{{'SERVICES.MATERIALS' | translate}}</div><div class="count">{{stats.all.count}}</div></div> -->
+        </div>
+        <div id="chartService" *ngIf="statsUrlMaterials">
+            <ul class="tabs">
+                <li class="clickable tab" (click)="tab='LICENSES'">
+                    <a [class.active]="tab=='LICENSES'" >{{'SERVICES.TAB.LICENSES' | translate}}</a>
+                </li>
+                <li class="clickable tab" (click)="tab='MATERIALS'">
+                    <a [class.active]="tab=='MATERIALS'" >{{'SERVICES.TAB.MATERIALS' | translate}}</a>
+                </li>
+            </ul>
+            <iframe *ngIf="tab=='LICENSES'" class="chart" [src]='statsUrlLicenses'></iframe>
+            <iframe *ngIf="tab=='MATERIALS'" class="chart" [src]='statsUrlMaterials'></iframe>
+        </div>
+    </div>
+</div>
+<div id="registered-services" class="table">
+    <h4>{{'SERVICES.REGISTERED_SERVICES' | translate }}</h4>
+    <div class="tableRow header">
+        <div></div>
+        <div>{{'SERVICES.NAME' | translate}}</div>
+        <div>{{'SERVICES.URL' | translate}}</div>
+        <div>{{'SERVICES.TYPE' | translate}}</div>
+        <div *ngFor="let interface of interfaces" class="interface header"><span>{{('SERVICES.INTERFACE_TYPES.'+interface) | translate}}</span></div>
+        <div></div>
+    </div>
+    <div *ngFor="let service of registeredServices" class="tableRow" (click)="setChart(service)" [class.active]="service.active" >
+        <div class="service-logo"><img class="service-logo" src="{{service.logo}}"></div>
+        <div>{{service.name}}</div>
+        <div>{{service.url}}</div>
+        <div>{{service.type}}</div>
+        <div class="interface" *ngFor="let interface of interfaces" class="interface"><i class="material-icons">{{hasInterface(service,interface) ? 'check' : 'close'}}</i></div>
+        <div><a href="{{service.url}}" target="_blank"><i class="material-icons clickable">open_in_new</i></a></div>
+    </div>
+</div>

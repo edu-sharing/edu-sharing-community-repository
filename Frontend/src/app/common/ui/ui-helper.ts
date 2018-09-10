@@ -402,7 +402,9 @@ export class UIHelper{
             return null;
         let optionsFiltered:OptionItem[]=[];
         for(let option of options){
-            if((!option.onlyMobile || option.onlyMobile && ui.isMobile()) && (!option.mediaQueryType || option.mediaQueryType && UIHelper.evaluateMediaQuery(option.mediaQueryType,option.mediaQueryValue)))
+            if((!option.onlyMobile || option.onlyMobile && ui.isMobile()) &&
+                (!option.onlyDesktop || option.onlyDesktop && !ui.isMobile()) &&
+                (!option.mediaQueryType || option.mediaQueryType && UIHelper.evaluateMediaQuery(option.mediaQueryType,option.mediaQueryValue)))
                 optionsFiltered.push(option);
         }
         return optionsFiltered;

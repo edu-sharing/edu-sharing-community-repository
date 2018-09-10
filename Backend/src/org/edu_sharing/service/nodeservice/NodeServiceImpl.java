@@ -71,6 +71,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_LINKTYPE,
 			CCConstants.CCM_PROP_TOOL_INSTANCE_KEY,
 			CCConstants.CCM_PROP_TOOL_INSTANCE_SECRET,
+			CCConstants.CCM_PROP_SERVICE_NODE_NAME,
+			CCConstants.CCM_PROP_SERVICE_NODE_DESCRIPTION,
+			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
+			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
 			};
 	private static final String[] LICENSE_PROPS = new String[]{
 			CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION,
@@ -689,19 +693,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     public <T>List<T> sortNodeRefList(List<T> list,List<String> filter, SortDefinition sortDefinition){
 	    // make a copy so we have a modifiable list object
 	    list=new ArrayList<>(list);
-        if(filter!=null && filter.size()>0){
-            List<T> filtered = new ArrayList<>();
-            for(T obj : list){
-                if(!shouldFilter(getAsNode(obj),filter)){
-                    filtered.add(obj);
-                }
-            }
-            list=filtered;
-        }
+		List<T> filtered = new ArrayList<>();
+		for(T obj : list){
+			if(!shouldFilter(getAsNode(obj),filter)){
+				filtered.add(obj);
+			}
+		}
+		list=filtered;
+
         HashMap<String,Object> cache=new HashMap();
-        Collections.sort(list, (o1, o2) -> {
-            return sortNodes(cache,getAsNode(o1),getAsNode(o2),sortDefinition);
-        });
+        Collections.sort(list, (o1, o2) -> sortNodes(cache,getAsNode(o1),getAsNode(o2),sortDefinition));
         return list;
     }
 
@@ -794,9 +795,28 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     private boolean shouldFilter(NodeRef node, List<String> filter) {
-        boolean shouldFilter = true;
-        for(String f : filter) {
-            boolean isDirectory = typeIsDirectory(nodeService.getType(node).toString());
+		// filter nodes for link inivitation
+		String type=nodeService.getType(node).toString();
+		String mapType=(String)nodeService.getProperty(node,QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
+		String name=(String)nodeService.getProperty(node,QName.createQName(CCConstants.CM_NAME));
+		if(CCConstants.CCM_TYPE_SHARE.equals(type)){
+			return true;
+		}
+		// filter the metadata template file
+		if(nodeService.hasAspect(node,QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE))){
+			return true;
+		}
+		if(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(mapType) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)){
+			return true;
+		}
+		if(".DS_Store".equals(name) || "._.DS_Store".equals(name)){
+			return true;
+		}
+        if(filter==null || filter.size()==0)
+        	return false;
+		boolean shouldFilter = true;
+		for(String f : filter) {
+            boolean isDirectory = typeIsDirectory(type);
             if(f.equals("folders") && isDirectory){
                 shouldFilter=false;
                 break;
