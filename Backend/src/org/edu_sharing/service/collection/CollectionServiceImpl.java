@@ -143,13 +143,16 @@ public class CollectionServiceImpl implements CollectionService{
 			/**
 			 * use original
 			 */
+			String nodeId=originalNodeId;
 			if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
 				originalNodeId = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), originalNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
 			}
 			
 			String locale = (Context.getCurrentInstance() != null) ? Context.getCurrentInstance().getLocale() : "de_DE";
-			
-			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
+
+			// user must have CC_PUBLISH on either the original or a reference object
+			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})
+					&& client.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
 				String message = I18nServer.getTranslationDefaultResourcebundle("collection_no_publish_permission", locale);
 				throw new Exception(message);
 			}
