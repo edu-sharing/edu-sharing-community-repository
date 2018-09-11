@@ -14,6 +14,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.MLText;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO8601DateFormat;
 import org.apache.log4j.Logger;
@@ -28,6 +29,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 public class Usage2Service {
@@ -164,30 +166,21 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 				|| parentNodeId.trim().equals("")) {
 			throw new UsageException(UsageService.MISSING_PARAM);
 		}
-		
-		
-			
+
+		HashMap<String, Object> usage = AuthenticationUtil.runAsSystem(()->usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId));
+		// check if user has access on the node
+		if(usage == null){
+			boolean hasPublishPerm = PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parentNodeId, CCConstants.PERMISSION_CC_PUBLISH);
+			if(!hasPublishPerm){
+				logger.info("User "+user+" has no publish permission on "+resourceId);
+				throw new UsageException(UsageService.NO_CCPUBLISH_PERMISSION);
+			}
+		}
 		RunAsWork<Usage> runAs = new RunAsWork<Usage>() {
 			@Override
 			public Usage doWork() throws Exception {
 				try{
 					String version = _version;
-					logger.info("before alfServicesWrapper.hasPermissions");
-					
-					HashMap<String, Object> usage = usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId);
-					
-					//only check publish permission for new content so that an teacher who modifies the course/wysiwyg can safe changes of permission
-					if(usage == null){
-					
-						boolean hasPublishPerm = ((MCAlfrescoClient)RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(), 
-								(HashMap)null)).hasPermissions(parentNodeId, user, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
-						
-						if(!hasPublishPerm){
-							logger.info("User "+user+" has no publish permission on "+resourceId);
-							throw new UsageException(UsageService.NO_CCPUBLISH_PERMISSION);
-						}
-					}
-				
 					HashMap<String, Object> properties = new HashMap<String,  Object>();
 					
 					String guid = null;
