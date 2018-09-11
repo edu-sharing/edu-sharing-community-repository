@@ -3,6 +3,7 @@ import {Permission, Usage} from '../../../../common/rest/data-object';
 import {RestConstants} from "../../../../common/rest/rest-constants";
 import {UIAnimation} from '../../../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'workspace-share-usages',
@@ -38,6 +39,15 @@ export class WorkspaceUsageComponent  {
         // may be a collection
         if(usage.collection)
             return usage.collection.title;
+
+        let info = usage.usageXmlParams;
+        if(info && info.general.referencedInName!=null) {
+            return this.translation.instant('WORKSPACE.SHARE.USAGE_INFO',{
+                instance: info.general.referencedInInstance,
+                type: this.translation.instant('WORKSPACE.SHARE.USAGE_SUBTYPE.'+info.general.referencedInType.toUpperCase()),
+                name: info.general.referencedInName
+            });
+        }
         return usage.courseId;
     }
     public remove(usage:any){
@@ -48,5 +58,8 @@ export class WorkspaceUsageComponent  {
                 this.deleteList.push(usage);
             this.deleteListChange.emit(this.deleteList);
         }
+    }
+    constructor(private translation : TranslateService){
+
     }
 }
