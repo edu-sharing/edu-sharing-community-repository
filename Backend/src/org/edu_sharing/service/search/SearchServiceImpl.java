@@ -678,7 +678,7 @@ public class SearchServiceImpl implements SearchService {
 			searchParameters.setMaxItems(searchToken.getMaxResult());
 			if (searchToken.getSortDefinition() != null)
 				searchToken.getSortDefinition().applyToSearchParameters(searchParameters);
-			if (searchToken.getContentType().equals(ContentType.FILES) || searchToken.getContentType().equals(ContentType.FILES_AND_FOLDERS)) {
+			if (searchToken.getContentType().equals(ContentType.FILES)) {
 				((ESSearchParameters) searchParameters).setGroupBy("text@sd___@" + CCConstants.CCM_PROP_IO_ORIGINAL);
 				// group.truncate = If true, facet counts are based on the most
 				// relevant document of each group matching the query. The
