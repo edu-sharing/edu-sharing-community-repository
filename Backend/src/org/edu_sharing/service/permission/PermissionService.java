@@ -69,7 +69,9 @@ public interface PermissionService {
 	
 	
 	public void createNotifyObject(final String nodeId, final String user, final String event, final String action);
-	
+
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission);
+
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions);
 	
 	public ACL getPermissions(String nodeId) throws Exception;
