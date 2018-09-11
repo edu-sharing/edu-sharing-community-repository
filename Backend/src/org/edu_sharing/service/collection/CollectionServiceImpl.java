@@ -135,18 +135,22 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 	
 	@Override
-	public String addToCollection(String collectionId, String originalNodeId) throws Throwable {
+	public String addToCollection(String collectionId, String refNodeId) throws Throwable {
 		
 		try{
-			List<String> aspects = Arrays.asList(client.getAspects(originalNodeId));
+			List<String> aspects = Arrays.asList(client.getAspects(refNodeId));
 			
 			/**
 			 * use original
 			 */
-			String nodeId=originalNodeId;
+			String nodeId=refNodeId;
+			String originalNodeId;
 			if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-				originalNodeId = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), originalNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+				originalNodeId = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), refNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
 			}
+			else{
+                originalNodeId = refNodeId;
+            }
 			
 			String locale = (Context.getCurrentInstance() != null) ? Context.getCurrentInstance().getLocale() : "de_DE";
 
@@ -180,23 +184,27 @@ public class CollectionServiceImpl implements CollectionService{
 			HashMap<String,Object> props = client.getProperties(originalNodeId);
 			String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 			
-			/**
-			 * make a copy of the original. 
-			 * OnCopyCollectionRefPolicy cares about
-			 * - not duplicating the content
-			 * - ignore childs: usage and license data
-			 * - the preview child will be copied
-			 */
-			String refId = client.copyNode(originalNodeId, collectionId, true);
-			
-			client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
-			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-				@Override
-				public Void doWork() throws Exception {
-					permissionService.setPermissions(refId, null, true);
-					return null;
-				}
-			});
+
+			// we need to copy as system because the user may just has full access to the ref (which may has different metadata)
+            // we check the add children permissions before continuing
+			if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),collectionId,CCConstants.PERMISSION_ADD_CHILDREN)){
+			    throw new SecurityException("No permissions to add childrens to collection");
+            }
+
+            String refId=AuthenticationUtil.runAsSystem(() -> {
+                /**
+                 * make a copy of the original.
+                 * OnCopyCollectionRefPolicy cares about
+                 * - not duplicating the content
+                 * - ignore childs: usage and license data
+                 * - the preview child will be copied
+                 */
+                String created = client.copyNode(originalNodeId, collectionId, true);
+
+                client.setProperty(created, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
+                permissionService.setPermissions(created, null, true);
+                return created;
+            });
 			
 			client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
 			client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
