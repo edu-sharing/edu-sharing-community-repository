@@ -1463,6 +1463,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission) {
+		return hasAllPermissions(storeProtocol,storeId,nodeId,new String[]{permission}).get(permission);
+	}
+
+	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {
 		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();

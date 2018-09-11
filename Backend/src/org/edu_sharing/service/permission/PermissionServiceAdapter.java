@@ -83,7 +83,12 @@ public class PermissionServiceAdapter implements PermissionService {
 	@Override
 	public void createNotifyObject(String nodeId, String user, String event, String action) {
 	}
-	
+
+	@Override
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission) {
+		return 	ALLOWED_PERMISSIONS.contains(permission);
+	}
+
 	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {
