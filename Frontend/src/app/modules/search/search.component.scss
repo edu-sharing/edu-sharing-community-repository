@@ -327,6 +327,7 @@ small-collection{
 }
 .contentSidenav{
   margin-left: $sidenavWidth;
+  width:calc(100% - 20px - #{$sidenavWidth});
 }
 #sub {
     padding-top: 20px;
