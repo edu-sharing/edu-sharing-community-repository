@@ -197,7 +197,7 @@ public class CollectionServiceImpl implements CollectionService{
             });
             String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 
-            String refId=AuthenticationUtil.runAsSystem(() -> {
+            return AuthenticationUtil.runAsSystem(() -> {
                 /**
                  * make a copy of the original.
                  * OnCopyCollectionRefPolicy cares about
@@ -205,34 +205,34 @@ public class CollectionServiceImpl implements CollectionService{
                  * - ignore childs: usage and license data
                  * - the preview child will be copied
                  */
-                String created = client.copyNode(originalNodeId, collectionId, true);
+                String refId = client.copyNode(originalNodeId, collectionId, true);
 
-                client.setProperty(created, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
-                permissionService.setPermissions(created, null, true);
-                return created;
+                client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
+                permissionService.setPermissions(refId, null, true);
+				client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+				client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
+
+
+				/**
+				 * write content, so that the index tracking will be triggered
+				 * the overwritten NodeContentGet class checks if it' s an collection ref object
+				 * and switches the nodeId to original node, which is used for indexing
+				 */
+				client.writeContent(refId, new String("1").getBytes(), (String)props.get(CCConstants.ALFRESCO_MIMETYPE) , "utf-8", CCConstants.CM_PROP_CONTENT);
+
+				//set to original size
+				client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, (String)props.get(CCConstants.LOM_PROP_TECHNICAL_SIZE));
+
+				// run setUsage as admin because the user may not has cc_publish on the original node (but on the ref)
+				new Usage2Service().setUsageInternal(appInfo.getAppId(),
+						authInfo.get(CCConstants.AUTH_USERNAME),
+						appInfo.getAppId(),
+						collectionId,
+						originalNodeId, null, null, null, -1, versLabel, refId, null);
+				return refId;
             });
 			
-			client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
-			client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
-			
-			
-			/**
-			 * write content, so that the index tracking will be triggered
-			 * the overwritten NodeContentGet class checks if it' s an collection ref object
-			 * and switches the nodeId to original node, which is used for indexing
-			 */
-			client.writeContent(refId, new String("1").getBytes(), (String)props.get(CCConstants.ALFRESCO_MIMETYPE) , "utf-8", CCConstants.CM_PROP_CONTENT);
-			
-			//set to original size
-			client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, (String)props.get(CCConstants.LOM_PROP_TECHNICAL_SIZE));
-			
-			new Usage2Service().setUsage(appInfo.getAppId(), 
-					authInfo.get(CCConstants.AUTH_USERNAME), 
-					appInfo.getAppId(), 
-					collectionId, 
-					originalNodeId, null, null, null, -1, versLabel, refId, null);
-			
-			return refId;
+
 		
 		}catch(Throwable e){
 			throw e;
