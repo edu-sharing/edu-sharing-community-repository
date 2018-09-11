@@ -152,7 +152,7 @@ public class CollectionServiceImpl implements CollectionService{
 
 			// user must have CC_PUBLISH on either the original or a reference object
 			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})
-					&& client.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
+					&& !client.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
 				String message = I18nServer.getTranslationDefaultResourcebundle("collection_no_publish_permission", locale);
 				throw new Exception(message);
 			}
