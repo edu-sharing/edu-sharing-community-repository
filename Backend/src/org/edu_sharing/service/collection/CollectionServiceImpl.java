@@ -224,7 +224,7 @@ public class CollectionServiceImpl implements CollectionService{
 			client.writeContent(refId, new String("1").getBytes(), (String)props.get(CCConstants.ALFRESCO_MIMETYPE) , "utf-8", CCConstants.CM_PROP_CONTENT);
 			
 			//set to original size
-			client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, client.getProperty(Constants.storeRef, originalNodeId, CCConstants.LOM_PROP_TECHNICAL_SIZE));
+			client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, (String)props.get(CCConstants.LOM_PROP_TECHNICAL_SIZE));
 			
 			new Usage2Service().setUsage(appInfo.getAppId(), 
 					authInfo.get(CCConstants.AUTH_USERNAME), 
