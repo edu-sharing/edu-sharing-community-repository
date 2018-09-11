@@ -1,0 +1,37 @@
+<form (ngSubmit)="register()" #loginForm>
+    <div class="name-input">
+        <div>
+            <label for="username">{{'USER.firstName' | translate}}</label>
+            <input type="text" required name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" (keyup)="checkConditions()" [(ngModel)]="firstName"/>
+        </div>
+        <div class="last-name">
+            <label for="lastname">{{'USER.lastName' | translate}} <span>(optional)</span></label>
+            <input type="text" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="lastName"/>
+        </div>
+    </div>
+
+    <div>
+        <label for="email">{{'USER.email' | translate}}</label>
+        <input [ngClass]="{'valid': checkMail() && mail.trim(), 'invalid': !checkMail()}" type="email" required name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}" (keyup)="checkMail()" [(ngModel)]="mail"/>
+    </div>
+    <div>
+        <div *ngIf="password" class="strength">
+            <span class='{{password_strength}}'>{{'REGISTER.PW_'+password_strength | translate}}</span>
+        </div>
+        <label for="password">{{'USER.password' | translate}}</label>
+        <input-password [inputClass]="password_strength == 'strong' || password_strength == 'accept' || password_strength == 'medium' ? 'valid' : password_strength == 'weak' ? 'invalid' : null" id="password" required="true" (keyup)="checkPassword()" (keydown.enter)="register()" [(value)]="password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
+        <div class="hint">{{'REGISTER.HINT' | translate}}</div>
+    </div>
+    <div>
+        <label for="organization">{{'REGISTER.ORGANIZATION' | translate}}  <span>(optional)</span></label>
+        <input type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}}" [(ngModel)]="org"/>
+    </div>
+</form>
+<div>
+    <input id="newsletter" type="checkbox" [(ngModel)]="news" (change)="setNews(news)" class="filled-in">
+    <label for="newsletter">{{'REGISTER.NEWSLETTER' | translate}}</label>
+</div>
+<div class="accept">
+    <input id="accept" type="checkbox" class="filled-in" [(ngModel)]="agree" (change)="setAccept(agree)">
+    <label for="accept">{{'REGISTER.ACCEPT' | translate}}<a class="imprint" (click)="openImprint()">{{'REGISTER.IMPRESSUM-LINK' | translate}}</a></label>
+</div>

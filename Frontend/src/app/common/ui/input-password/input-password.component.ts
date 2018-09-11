@@ -10,6 +10,7 @@ export class InputPasswordComponent{
     @Input() id="passwordInput";
     @Input() required=false;
     @Input() value:string;
+    @Input() inputClass:string;
     @Output() valueChange = new EventEmitter();
     @Input() placeholder="";
     @Output() change = new EventEmitter();
