@@ -181,15 +181,21 @@ public class CollectionServiceImpl implements CollectionService{
 				}
 			}
 
-			HashMap<String,Object> props = client.getProperties(originalNodeId);
-			String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
-			
-
 			// we need to copy as system because the user may just has full access to the ref (which may has different metadata)
             // we check the add children permissions before continuing
 			if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),collectionId,CCConstants.PERMISSION_ADD_CHILDREN)){
 			    throw new SecurityException("No permissions to add childrens to collection");
             }
+
+            HashMap<String,Object> props = AuthenticationUtil.runAsSystem(()-> {
+                try {
+                    return client.getProperties(originalNodeId);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    return null;
+                }
+            });
+            String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
 
             String refId=AuthenticationUtil.runAsSystem(() -> {
                 /**
