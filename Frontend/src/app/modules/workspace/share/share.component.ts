@@ -285,7 +285,10 @@ export class WorkspaceShareComponent implements AfterViewInit{
     }
     permission.permissions=this.currentType;
     permission=Helper.deepCopy(permission);
-    if(!this.contains(this.permissions,permission,false)) {
+    if(this.deletedPermissions.indexOf(permission.authority.authorityName)!=-1){
+      this.deletedPermissions.splice(this.deletedPermissions.indexOf(permission.authority.authorityName),1);
+    }
+    else if(!this.contains(this.permissions,permission,false)) {
       this.newPermissions.push(permission);
       this.permissions.push(permission);
       this.setPermissions(this.permissions);
@@ -300,7 +303,15 @@ export class WorkspaceShareComponent implements AfterViewInit{
     return !this.contains(this.originalPermissions.permissions,p,true);
     //return this.contains(this.newPermissions,p);
   }
-  private save(){
+  filterDisabledPermissions(permissions:Permission[]){
+    let result=[];
+    for(let p of permissions){
+      if(this.deletedPermissions.indexOf(p.authority.authorityName)==-1)
+        result.push(p);
+    }
+    return result;
+  }
+    private save(){
     if(this.permissions!=null) {
       this.onLoading.emit(true);
       let permissions=Helper.deepCopy(this.permissions);

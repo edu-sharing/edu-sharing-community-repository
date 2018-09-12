@@ -42,7 +42,7 @@
 
         <div class="group groupToInvite">
           <div class="toInvite">
-            <div class="badge" *ngFor="let permission of newPermissions">
+            <div class="badge" *ngFor="let permission of filterDisabledPermissions(newPermissions)">
                 <div class="badge-group">
                     <span class="primary">{{permission | permissionName}}</span>
                     <span class="secondary">{{permission | permissionName:{field:'secondary'} }}</span>
