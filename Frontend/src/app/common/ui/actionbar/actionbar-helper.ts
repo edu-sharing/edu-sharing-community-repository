@@ -43,7 +43,7 @@ export class ActionbarHelper{
         option.showAsAction = true;
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelper.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH);
+          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH,true);
         }
         option.disabledCallback = () =>{
           connector.getToastService().error(null,'WORKSPACE.TOAST.ADD_TO_COLLECTION_DISABLED');
