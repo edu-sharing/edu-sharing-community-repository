@@ -65,6 +65,9 @@
    
    <bean name="eduSharingEditLockCache" factory-bean="cacheFactory" factory-method="createCache">
    		<constructor-arg value="cache.eduSharingEditLockCache"/> 
-   </bean> 
+   </bean>
 
+    <bean name="eduSharingRegisterUserCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingEditLockCache"/>
+    </bean>
 </beans>
