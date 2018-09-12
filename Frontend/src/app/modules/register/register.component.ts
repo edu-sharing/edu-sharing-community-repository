@@ -44,7 +44,29 @@ export class RegisterComponent{
             ){
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
-    });
-    this.isLoading=true;
-  }
+
+        this.route.url.subscribe((segments)=>{
+            for(let s of segments){
+                if(s.path=='done') {
+                    this.state = 'done';
+                    setTimeout(()=>this.setParams());
+                }
+            }
+        });
+        this.isLoading=true;
+        });
+    }
+      onRegisterDone(){
+          this.state='done';
+          this.registerDone.email=this.registerForm.mail;
+      }
+
+    private setParams() {
+        this.route.params.subscribe((params)=>{
+            if(params['email'])
+                this.registerDone.email=params['email'];
+            if(params['key'])
+                this.registerDone.keyUrl=params['key'];
+        });
+    }
 }

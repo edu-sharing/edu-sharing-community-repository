@@ -99,6 +99,8 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'login', component: LoginComponent },
   // register
     { path: UIConstants.ROUTER_PREFIX+'register', component: RegisterComponent },
+    { path: UIConstants.ROUTER_PREFIX+'register/done', component: RegisterComponent },
+    { path: UIConstants.ROUTER_PREFIX+'register/done/:key/:email', component: RegisterComponent },
   // admin
     { path: UIConstants.ROUTER_PREFIX+'admin', component: AdminComponent },
   // permissions

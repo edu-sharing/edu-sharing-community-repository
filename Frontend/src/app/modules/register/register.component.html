@@ -12,13 +12,13 @@
                 {{'REGISTER.ORGANIZATION_TITEL' | translate}}
             </div>
             <div class="card-scroll">
-                <app-register-form *ngIf="state=='register'" (onRegisterDone)="state='done'" #registerForm></app-register-form>
-                <app-register-done *ngIf="state=='done'" #registerDone></app-register-done>
+                <app-register-form *ngIf="state=='register'" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
+                <app-register-done *ngIf="state=='done'"  #registerDone></app-register-done>
             </div>
         </div>
         <div class="card-action">
             <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" (click)="registerForm.register()">{{'REGISTER.REGISTER' | translate }}</a>
-            <a *ngIf="state=='done'" class="btn-flat" (click)="registerDone.sendMail()">{{'DONE.SEND_MAIL' | translate }}</a>
+            <a *ngIf="state=='done' && registerDone && !registerDone.keyUrl" class="btn-flat" (click)="registerDone.sendMail()">{{'DONE.SEND_MAIL' | translate }}</a>
         </div>
 
     </div>
