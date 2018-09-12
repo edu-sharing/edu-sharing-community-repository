@@ -30,7 +30,13 @@ export class RegisterComponent{
   public isLoading=true;
 
   state = 'register';
-
+  public cancel(){
+      if (this.state == 'done'){
+          this.state = 'register';
+      } else {
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"login"]);
+      }
+  }
   constructor(private connector : RestConnectorService,
               private toast:Toast,
               private platformLocation: PlatformLocation,
@@ -56,6 +62,7 @@ export class RegisterComponent{
         this.isLoading=true;
         });
     }
+
       onRegisterDone(){
           this.state='done';
           this.registerDone.email=this.registerForm.mail;

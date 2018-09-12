@@ -50,7 +50,7 @@ export class RegisterFormComponent{
       }
     }
 
-    private register(){
+    public register(){
         //  TODO: @Simon;
         this.onRegisterDone.emit();
     }
