@@ -157,7 +157,8 @@ export class NodeRenderComponent implements EventListener{
           else {
             this.searchService.reinit=false;
             NodeRenderComponent.close(this.location);
-            this.mainnav.openSidenav();
+            // use a timeout to let the browser try to go back in history first
+            setTimeout(()=>this.mainnav.openSidenav(),250);
           }
         }
       }

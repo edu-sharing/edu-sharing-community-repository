@@ -64,6 +64,8 @@
       "GROUP_INHERIT":"Geerbte Rechte",
       "GROUP_USERS":"Folgende Nutzer haben Zugriff:",
       "GROUP_GROUPS":"Folgende Gruppen haben Zugriff:",
+      "USAGES":"Benutzt und freigegeben in:",
+      "DELETED":"wird gelöscht",
       "TYPE_VIEWER":"Betrachter",
       "TYPE_VIEWER_DESCRIPTION":"darf sehen",
       "TYPE_COWORKER":"Mitarbeiter",
@@ -105,10 +107,9 @@
         "REMOVED":"Entfernt",
         "EMPTY":"Es wurden noch keine Freigaben angepasst"
       },
-      "COLLECTIONS":{
-        "TITLE":"Zugriff über Sammlungen",
-        "INFO":"Das Material ist zusätzlich über öffentliche oder freigebene Sammlungen für Andere sichtbar.",
-        "LINK":"Sammlungen zeigen"
+      "USAGE_TYPE":{
+        "MOODLE":"Moodle-Kurse",
+        "COLLECTION":"Sammlungen"
       }
     },
     "INHERIT_DISABLED":"Rechtevererbung ist aktuell ausgeschaltet",
@@ -210,8 +211,8 @@
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "PASSWORD":"Passwortschutz",
       "PASSWORD_INFO":"Dieser Link wird mit einem Passwort geschützt",
-      "PASSWORD_PLACEHOLDER":"Passwort bestimmen...",
-      "PASSWORD_PLACEHOLDER_EDIT":"Leer lassen, um das aktuelle Passwort zu behalten",
+      "PASSWORD_PLACEHOLDER":"Passwort angeben...",
+      "PASSWORD_PLACEHOLDER_EDIT":"Es wird schon ein Passwort verwendet",
       "DISABLED":"Linkfreigabe ist deaktiviert",
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "LINK":"Link zum Objekt",

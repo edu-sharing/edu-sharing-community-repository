@@ -13,6 +13,7 @@ import {WorkspaceCreateConnector} from "./create-connector/create-connector.comp
 import {WorkspaceHistoryComponent} from "./share/history/history.component";
 import {WorkspaceShareLinkComponent} from "./share-link/share-link.component";
 import {WorkspaceWorkflowComponent} from "./workflow/workflow.component";
+import {WorkspaceUsageComponent} from './share/usage/usage.component';
 
 export const DECLARATIONS_WORKSPACE = [
   WorkspaceRoutingComponent,
@@ -26,6 +27,7 @@ export const DECLARATIONS_WORKSPACE = [
   WorkspaceShareLinkComponent,
   WorkspaceShareChooseTypeComponent,
   WorkspacePermissionComponent,
+  WorkspaceUsageComponent,
   WorkspaceHistoryComponent,
   WorkspaceEditorComponent,
   WorkspaceCreateConnector,

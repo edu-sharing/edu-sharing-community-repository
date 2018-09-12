@@ -102,7 +102,7 @@ a.active{
   margin: 20px -20px;
   padding:20px 20px;
   padding-right:30px;
-  background: $backgroundColor;
+  background: white;
   float: left;
   width: calc(100% + 40px);
   .publishElements{
@@ -140,6 +140,9 @@ a.active{
     }
   }
 }
+.publish-grey{
+  background: $backgroundColor;
+}
 .group{
   display:flex;
   width:100%;
@@ -176,7 +179,7 @@ a.active{
 .crossed{
   text-decoration: line-through;
 }
-.groupEntry{
+.groupEntry,.usageEntry{
   width:100%;
   display:flex;
   background: #eee;
@@ -185,12 +188,14 @@ a.active{
   padding-left: 15px;
   padding-right: 5px;
   margin-bottom: 6px;
-  height: 35px;
   align-items: center;
   workspace-share-permission{
     width: 100%;
   }
   border:2px dashed transparent;
+}
+.groupEntry{
+  height: 35px;
 }
 .added{
   background: transparent;
@@ -320,7 +325,7 @@ label.notify p{
     vertical-align: middle;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.5);
-    box-shadow: 1px 1px 15px 1px #d0d0d0;
+    box-shadow: 0 1px 3px 1px #d0d0d0;
     display: inline-table;
     padding: 3px;
     margin-right: 8px;

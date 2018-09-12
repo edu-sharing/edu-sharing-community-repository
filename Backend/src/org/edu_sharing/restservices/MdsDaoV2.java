@@ -17,6 +17,8 @@ import org.edu_sharing.restservices.mds.v1.model.ListV2;
 import org.edu_sharing.restservices.mds.v1.model.Suggestions;
 import org.edu_sharing.restservices.mds.v1.model.ViewV2;
 import org.edu_sharing.restservices.mds.v1.model.WidgetV2;
+import org.edu_sharing.restservices.search.v1.model.SearchParameters;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.MdsV2;
 import com.google.gwt.user.client.ui.SuggestOracle;
 
@@ -28,13 +30,13 @@ public class MdsDaoV2 {
 		return RepoFactory.getMetadataSetsV2ForRepository(repoDao.getId());
 	}
 	
-	public Suggestions getSuggestions(String queryId,String parameter,String value) throws DAOException{
+	public Suggestions getSuggestions(String queryId,String parameter,String value, List<MdsQueryCriteria> criterias) throws DAOException{
 		Suggestions result = new Suggestions();
 		ArrayList<Suggestions.Suggestion> suggestionsResult = new ArrayList<Suggestions.Suggestion>();
 		result.setValues(suggestionsResult);
 		try{
 			List<? extends SuggestOracle.Suggestion>  suggestions =		
-					MetadataSearchHelper.getSuggestions(this.repoDao.getId(), mds, queryId, parameter, value);
+					MetadataSearchHelper.getSuggestions(this.repoDao.getId(), mds, queryId, parameter, value, criterias);
 
 			for(SuggestOracle.Suggestion suggest : suggestions){
 				Suggestions.Suggestion suggestion = new Suggestions.Suggestion();

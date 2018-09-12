@@ -1,0 +1,27 @@
+{
+  "name":"",
+  "inLanguage":"de",
+  "description":"",
+  "type":"Repository",
+  "audience":[
+    {
+      "name":"teacher"
+    }
+  ],
+  "isAccessibleForFree":false,
+  "coverage":"Organization",
+  "startDate":"",
+  "about":[],
+  "provider":{
+    "name":"",
+    "location":{
+      "geo": {
+        "addressCountry": "de",
+        "longitude": 0,
+        "latitude": 0
+      }
+    },
+    "url":"",
+    "email":""
+  }
+}

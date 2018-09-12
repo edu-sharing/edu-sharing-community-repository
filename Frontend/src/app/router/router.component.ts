@@ -25,6 +25,7 @@ import {StartupComponent} from '../modules/startup/startup.component';
 import {ShareAppComponent} from "../modules/share-app/share-app.component";
 import {SharingComponent} from "../modules/sharing/sharing.component";
 import {RegisterComponent} from '../modules/register/register.component';
+import {ServicesComponent} from "../modules/services/services.components";
 
 
 
@@ -122,6 +123,8 @@ export var ROUTES=[
 
     // link-share
     { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
+    // services
+    { path: UIConstants.ROUTER_PREFIX+'services', component: ServicesComponent },
   ]
 ;
 

@@ -234,6 +234,7 @@ public class SearchServiceImpl implements SearchService {
 			throws Exception {
 		try {
 			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
+			boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
 			return AuthenticationUtil.runAsSystem(new RunAsWork<SearchResult<EduGroup>>() {
 
 				@Override
@@ -277,7 +278,7 @@ public class SearchServiceImpl implements SearchService {
 								boolean add = false;
 								for (String group : memberships) {
 									if (group.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
-											|| AuthenticationUtil.isRunAsUserTheSystemUser()
+											|| isSystemUser
 											|| group.equals(eduGroup.getGroupname())) {
 										add = true;
 										break;
@@ -810,6 +811,10 @@ public class SearchServiceImpl implements SearchService {
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
 		
 
+		if(findUsersQuery == null || findGroupsQuery == null) {
+			return new SearchResult<String>(new ArrayList<String>(), 0, 0);
+		}
+		
 		/**
 		 * don't find groups of scopes when no scope is provided
 		 */
@@ -819,7 +824,8 @@ public class SearchServiceImpl implements SearchService {
 			 * groups arent initialized with eduscope aspect and eduscopename
 			 * null
 			 */
-			findGroupsQuery.append(" AND NOT @ccm\\:eduscopename:\"*\"");
+			findGroupsQuery.append(" AND NOT @ccm\\:eduscopename:\"*\"");	
+			
 		}
 
 		String finalQuery;

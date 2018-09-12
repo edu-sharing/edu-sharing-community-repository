@@ -63,6 +63,8 @@
       "GROUP_INHERIT":"Inherited",
       "GROUP_USERS":"These users have access:",
       "GROUP_GROUPS":"These groups have access:",
+      "USAGES":"Used and shared in:",
+      "DELETED":"will be removed",
       "TYPE_VIEWER":"Viewer",
       "TYPE_VIEWER_DESCRIPTION":"can view item / details page",
       "TYPE_COWORKER":"Collaborator",
@@ -103,6 +105,10 @@
         "CHANGED":"Modified",
         "REMOVED":"Removed",
         "EMPTY":"No sharing history available"
+      },
+      "USAGE_TYPE":{
+        "MOODLE":"Moodle-Courses",
+        "COLLECTION":"Collections"
       }
     },
     "INHERIT_DISABLED":"Inherition is currently disabled",
@@ -189,7 +195,7 @@
       "PASSWORD":"Password Protect",
       "PASSWORD_INFO":"Then this link will be password protected",
       "PASSWORD_PLACEHOLDER":"Set password...",
-      "PASSWORD_PLACEHOLDER_EDIT":"Leave empty to keep current",
+      "PASSWORD_PLACEHOLDER_EDIT":"It already set a password",
       "LINK":"Link to object",
       "ACTIVATE":"Activate sharing",
       "COPY_CLIPBOARD":"Copy link",
