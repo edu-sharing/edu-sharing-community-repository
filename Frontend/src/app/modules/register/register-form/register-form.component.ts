@@ -128,7 +128,7 @@ export class RegisterFormComponent{
           this.agree = false;
       }
   }
-  private openImprint(){
+  public openImprint(){
       //TODO: @Simon
       // Link zur Impressum
       // window.document.location.href=this.config.imprintUrl;
