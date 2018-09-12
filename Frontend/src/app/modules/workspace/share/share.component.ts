@@ -307,7 +307,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
     //return this.contains(this.newPermissions,p);
   }
   filterDisabledPermissions(permissions:Permission[]){
-    let result=[];
+    let result:Permission[]=[];
+    if(!permissions)
+      return result;
     for(let p of permissions){
       if(this.deletedPermissions.indexOf(p.authority.authorityName)==-1)
         result.push(p);
