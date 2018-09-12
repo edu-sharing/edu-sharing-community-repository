@@ -102,7 +102,7 @@ a.active{
   margin: 20px -20px;
   padding:20px 20px;
   padding-right:30px;
-  background: $backgroundColor;
+  background: white;
   float: left;
   width: calc(100% + 40px);
   .publishElements{
@@ -139,6 +139,9 @@ a.active{
       margin-right: -100px;
     }
   }
+}
+.publish-grey{
+  background: $backgroundColor;
 }
 .group{
   display:flex;
