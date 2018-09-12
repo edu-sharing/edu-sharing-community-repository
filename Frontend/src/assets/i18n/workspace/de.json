@@ -212,7 +212,7 @@
       "PASSWORD":"Passwortschutz",
       "PASSWORD_INFO":"Dieser Link wird mit einem Passwort geschützt",
       "PASSWORD_PLACEHOLDER":"Passwort angeben...",
-      "PASSWORD_PLACEHOLDER_EDIT":"Es wird schon ein Passwort verwendet",
+      "PASSWORD_PLACEHOLDER_EDIT":"Passwort ist schon gesetzt",
       "DISABLED":"Linkfreigabe ist deaktiviert",
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "LINK":"Link zum Objekt",
