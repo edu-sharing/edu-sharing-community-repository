@@ -365,11 +365,10 @@ export class CollectionsMainComponent implements GwtEventListener {
         let options: OptionItem[] = [];
         if (!fromList) {
             if (nodes && nodes.length) {
-                if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
-                    let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
-                    if (collection)
-                        options.push(collection);
-                }
+                let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
+                if (collection)
+                    options.push(collection);
+
                 if (this.isAllowedToDeleteNodes(nodes)) {
                     let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE', 'remove_circle_outline', (node: Node) => {
                         this.deleteMultiple(ActionbarHelper.getNodes(nodes, node));
