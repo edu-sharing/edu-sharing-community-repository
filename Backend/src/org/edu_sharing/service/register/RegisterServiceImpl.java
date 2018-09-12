@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 
 import javax.servlet.ServletContext;
 import java.io.Serializable;
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class RegisterServiceImpl implements RegisterService {
         String subject=MailTemplate.getSubject("userRegister", currentLocale);
         String content=MailTemplate.getContent("userRegister", currentLocale,true);
         Map<String,String> replace=new HashMap<>();
-        replace.put("link",URLTool.getNgComponentsUrl()+"register/done/"+key);
+        replace.put("link",URLTool.getNgComponentsUrl()+"register/done/"+URLEncoder.encode(key)+"/"+ URLEncoder.encode(info.getEmail()));
         replace.put("key",key);
         Mail mail=new Mail();
         ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
@@ -74,6 +75,7 @@ public class RegisterServiceImpl implements RegisterService {
         map.put(ContentModel.PROP_USERNAME,authority);
         map.put(ContentModel.PROP_FIRSTNAME,info.getFirstName());
         map.put(ContentModel.PROP_LASTNAME,info.getLastName());
+        map.put(ContentModel.PROP_ORGANIZATION,info.getOrganization());
         map.put(ContentModel.PROP_EMAIL,info.getEmail());
         try {
             authService.createAuthentication(authority, info.getPassword().toCharArray());

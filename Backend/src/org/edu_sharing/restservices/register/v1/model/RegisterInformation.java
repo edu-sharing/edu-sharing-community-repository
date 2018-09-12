@@ -2,8 +2,11 @@ package org.edu_sharing.restservices.register.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
+
 public class RegisterInformation {
     private String firstName,lastName,email,password;
+    private String organization;
 
     @JsonProperty
     public String getFirstName() {
@@ -36,5 +39,14 @@ public class RegisterInformation {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @JsonProperty
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }
