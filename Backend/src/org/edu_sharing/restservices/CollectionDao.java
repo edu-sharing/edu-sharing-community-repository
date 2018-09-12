@@ -141,7 +141,11 @@ public class CollectionDao {
 					String[] prop=props.get(shortproporiginal);
 					final String originalId=prop!=null && prop.length>0 ? prop[0] : null;
 					collRef.setOriginalId(originalId);		
-
+					try{
+						collRef.setAccessOriginal(NodeDao.getNode(repoDao,originalId).asNode().getAccess());
+					}catch(Throwable t){
+						// user may has no access to the original, this is okay
+					}
 					AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 
 						@Override

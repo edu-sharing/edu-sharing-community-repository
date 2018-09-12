@@ -243,67 +243,6 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.selectTab(RestConstants.COLLECTIONSCOPE_ALL);
     }
 
-
-    // sorting collections and references
-    /*
-    sortCollectionContent() : void {
-        this.collectionContent.collections = this.collectionContent.collections.sort(
-            function(a:EduData.Collection,b:EduData.Collection):number {
-                // first sort by number of sub collections
-                if (a.childCollectionsCount!=b.childCollectionsCount) return  b.childCollectionsCount-a.childCollectionsCount;
-                // second sort by number of references
-                if (a.childReferencesCount!=b.childReferencesCount) return  b.childReferencesCount-a.childReferencesCount;
-                // third sort by date of creation
-                return 0;
-            }
-        );
-    }
-    */
-
-    // just show content (collections & references) that
-    // match the keyword in title ot description
-  /*
-    filterCollectionContent(keyword:string):void {
-
-       // put back all previous filtered out
-
-       this.collectionContent.references = this.collectionContent.references.concat(this.filteredOutReferences);
-       this.collectionContent.collections = this.collectionContent.collections.concat(this.filteredOutCollections);
-       this.filteredOutReferences = new Array<EduData.CollectionReference>();
-       this.filteredOutCollections = new Array<EduData.Collection>();
-
-       // filter collections
-       var filteredInCollections:Array<EduData.Collection> = new Array<EduData.Collection>();
-       this.collectionContent.collections.forEach((collection) => {
-           var isMatch:boolean = false;
-           if ((typeof collection.title != "undefined") && (collection.title.toLowerCase().indexOf(keyword.toLowerCase())>=0)) isMatch = true;
-           if ((typeof collection.description != "undefined") && (collection.description.toLowerCase().indexOf(keyword.toLowerCase())>=0)) isMatch = true;
-           if (isMatch) {
-               filteredInCollections.push(collection);
-           } else {
-               this.filteredOutCollections.push(collection);
-           }
-       });
-       this.collectionContent.collections = filteredInCollections;
-
-       // filter references
-       var filteredInReferences:Array<EduData.CollectionReference> = new Array<EduData.CollectionReference>();
-       this.collectionContent.references.forEach((reference) => {
-           var isMatch:boolean = false;
-           if ((typeof reference.reference.title != "undefined") && (reference.reference.title.toLowerCase().indexOf(keyword.toLowerCase())>=0)) isMatch = true;
-           if ((typeof reference.reference.description != "undefined") && (reference.reference.description.toLowerCase().indexOf(keyword.toLowerCase())>=0)) isMatch = true;
-           if (isMatch) {
-               filteredInReferences.push(reference);
-           } else {
-               this.filteredOutReferences.push(reference);
-           }
-       });
-       this.collectionContent.references = filteredInReferences;
-
-       this.sortCollectionContent();
-    }
-    */
-
     isRootLevelCollection():boolean {
         return !this.showCollection;
         /*

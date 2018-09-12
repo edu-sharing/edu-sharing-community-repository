@@ -8,6 +8,8 @@ import org.edu_sharing.restservices.shared.Preview;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 @ApiModel(description = "")
 public class CollectionReference extends CollectionBase {
 
@@ -17,7 +19,8 @@ public class CollectionReference extends CollectionBase {
 	
 
 	private Preview preview;
-	
+	private List<String> accessOriginal;
+
 	@ApiModelProperty(required = false, value = "")
 	@JsonProperty("originalId")
 	public String getOriginalId() {
@@ -49,4 +52,12 @@ public class CollectionReference extends CollectionBase {
 		return preview;
 	}
 
+	@JsonProperty
+    public void setAccessOriginal(List<String> accessOriginal) {
+        this.accessOriginal = accessOriginal;
+    }
+
+    public List<String> getAccessOriginal() {
+        return accessOriginal;
+    }
 }

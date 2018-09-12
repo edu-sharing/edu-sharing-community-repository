@@ -888,6 +888,7 @@ export class CollectionReference {
   reference:Node;
   originalId:string;
   access: string[];
+  accessOriginal: string[];
   previewUrl:string;
 
 }
@@ -921,7 +922,7 @@ export class CollectionContent {
   setCollectionID(id:string):void {
     if (this.collection==null) this.collection = new Collection();
     if (this.collection.ref==null) this.collection.ref = new NodeRef();
-    this.collection.ref.id = id;;
+    this.collection.ref.id = id;
   }
 
 }
