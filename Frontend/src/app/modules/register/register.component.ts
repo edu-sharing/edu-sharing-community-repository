@@ -15,9 +15,9 @@ import {UIConstants} from "../../common/ui/ui-constants";
 import {Helper} from "../../common/helper";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {PlatformLocation} from "@angular/common";
-
 import {CordovaService} from "../../common/services/cordova.service";
-import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
+import {RegisterFormComponent} from "./register-form/register-form.component";
+import {RegisterDoneComponent} from "./register-done/register-done.component";
 
 @Component({
   selector: 'app-register',
@@ -25,68 +25,11 @@ import {InputPasswordComponent} from "../../common/ui/input-password/input-passw
   styleUrls: ['register.component.scss']
 })
 export class RegisterComponent{
+  @ViewChild('registerForm') registerForm : RegisterFormComponent;
+  @ViewChild('registerDone') registerDone : RegisterDoneComponent;
   public isLoading=true;
-  public firstName="";
-  public lastName="";
-  public mail="";
-  public password="";
-  public org="";
-  public news = true;
-  public agree = false;
 
-  public checkConditions(){
-    //  TODO: @Simon;
-  }
-
-  public checkMail(){
-
-      const EMAIL_REGEXP = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-      if (this.mail && !EMAIL_REGEXP.test(this.mail)) {
-          return false;
-      } else {
-          return true;
-      }
-  }
-  public checkPasswort(){
-    //  TODO: @Simon;
-     /* Das Password muss mindestens 5 Zeichen lang sein
-      Das Passwort muss Großbuchstaben, Kleinbuchstaben und Zahlen beinhalten
-      Wenn es nicht der Fall ist dann Rot markieren und den Hinweis anzeigen lassen.   */
-
-  }
-
-  public setNews(value:boolean){
-      //TODO: @Simon
-      if(value){
-
-      } else{
-
-      }
-  }
-  public setAccept(value:boolean){
-      //TODO: @Simon
-      if(value){
-          this.agree = true;
-      } else{
-          this.agree = false;
-      }
-  }
-  private openImprint(){
-      //TODO: @Simon
-      // Link zur Impressum
-      // window.document.location.href=this.config.imprintUrl;
-  }
-
-
-  public canRegister(){
-      return this.firstName.trim() && this.mail.trim() && this.password
-          && this.agree;
-  }
-
-  private register(){
-      //  TODO: @Simon;
-  }
+  state = 'register';
 
   constructor(private connector : RestConnectorService,
               private toast:Toast,
@@ -101,7 +44,29 @@ export class RegisterComponent{
             ){
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
-    });
-    this.isLoading=true;
-  }
+
+        this.route.url.subscribe((segments)=>{
+            for(let s of segments){
+                if(s.path=='done') {
+                    this.state = 'done';
+                    setTimeout(()=>this.setParams());
+                }
+            }
+        });
+        this.isLoading=true;
+        });
+    }
+      onRegisterDone(){
+          this.state='done';
+          this.registerDone.email=this.registerForm.mail;
+      }
+
+    private setParams() {
+        this.route.params.subscribe((params)=>{
+            if(params['email'])
+                this.registerDone.email=params['email'];
+            if(params['key'])
+                this.registerDone.keyUrl=params['key'];
+        });
+    }
 }

@@ -1,11 +1,29 @@
 {
   "REGISTER": {
     "TITLE": "Registration",
-    "REGISTER": "Register",
     "ORGANIZATION": "Organization",
     "NEWSLETTER": "Receive news by e-mail",
     "ACCEPT": "I agree with the processing of my given data",
     "IMPRESSUM-LINK": "Further details",
-    "PL_NAME": "z.B. Sample..."
+    "PL_USER": "i.e. Max...",
+    "PL_NAME": "i.e. Sample...",
+    "PL_MAIL": "i.e. max@mail.com",
+    "PW_weak": "Too weak",
+    "PW_accept": "Acceptable",
+    "PW_medium": "Good",
+    "PW_strong": "Strong",
+    "PL_PASSWORD": "At least 5 different characters...",
+    "HINT": "Hint: Use numbers, special characters...",
+    "PL_ORG": "i.e. DEKRA...",
+    "REGISTER": "Register"
+  },
+  "DONE":{
+    "TITEL": "Almost ready",
+    "MAIL_INFO": "We have sent you an e-mail to ",
+    "MAIL_INFO2": "",
+    "MAIL_NOTE": "Click on the link in the email to confirm and accept your new account.",
+    "NO_MAIL": "No receive e-mail receive?",
+    "NO_MAIL_INFO": "check also your spam and junk E-Mail folders.",
+    "SEND_MAIL": "Send again"
   }
 }

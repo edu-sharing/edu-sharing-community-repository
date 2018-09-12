@@ -2,7 +2,7 @@ import {Component, Input, EventEmitter, Output, AfterViewInit} from '@angular/co
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
     Node, NodeList, NodeWrapper, NodePermissions, NodeVersions, UsageList,
-    Version, LoginResult, IamUser, Permission, Usage, Collection
+    Version, LoginResult, IamUser, Permission, Usage, Collection, CollectionUsage
 } from '../../../common/rest/data-object';
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
@@ -39,7 +39,7 @@ export class WorkspaceMetadataComponent{
   private tab=this.INFO;
   private permissions : any;
   private usages : Usage[];
-  private usagesCollection : Collection[];
+  private usagesCollection : CollectionUsage[];
   private nodeObject : Node;
   private versions : Version[];
   private versionsLoading=false;

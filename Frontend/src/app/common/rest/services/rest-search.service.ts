@@ -11,6 +11,14 @@ import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
 export class RestSearchService extends AbstractRestService{
+    static convertCritierias(properties:any[]){
+        let criterias=[];
+        for (let property in properties) {
+            if(properties[property] && properties[property].length)
+                criterias.push({'property':property,'values':properties[property]});
+        }
+        return criterias;
+    }
   constructor(connector : RestConnectorService) {
       super(connector);
   }
@@ -43,14 +51,11 @@ export class RestSearchService extends AbstractRestService{
     }
     return this.search(criterias,null,request,type, RestConstants.HOME_REPOSITORY,RestConstants.DEFAULT,[],queryId);
   }
-    search(criterias: any[],facettes:string[]=[], request: any=null,contentType=RestConstants.CONTENT_TYPE_FILES, repository = RestConstants.HOME_REPOSITORY, metadataset = RestConstants.DEFAULT,propertyFilter:string[]=[], query = 'ngsearch') : Observable<NodeList> {
-        let properties = '';
-        for(var i = 0; i < criterias.length; i++) {
-            if(i > 0)
-              properties += ',';
-            properties += '{"property":"'+criterias[i]['property']+'","values":'+JSON.stringify(criterias[i]['values'])+'}';
-        }
-        let body = '{"criterias":[' + properties + ']' + ',"facettes":'+JSON.stringify(facettes)+'}';
+    search(criterias: any[],facettes:string[]=[], request: any=null,contentType=RestConstants.CONTENT_TYPE_FILES, repository = RestConstants.HOME_REPOSITORY, metadataset = RestConstants.DEFAULT,propertyFilter:string[]=[], query = RestConstants.DEFAULT_QUERY_NAME) : Observable<NodeList> {
+        let body={
+            criterias:criterias,
+            facettes:facettes
+        };
 
       let q=this.connector.createUrlNoEscape('search/:version/queriesV2/:repository/:metadataset/:query/?contentType=:contentType&:request&:propertyFilter',repository,[
         [":metadataset",encodeURIComponent(metadataset)],
@@ -61,8 +66,4 @@ export class RestSearchService extends AbstractRestService{
       ]);
       return this.connector.post(q,body,this.connector.getRequestOptions()).map((response: Response) => response.json());
     }
-
-  static isSavedSearchObject(node: Node) {
-    return node.mediatype=='saved_search';
-  }
 }

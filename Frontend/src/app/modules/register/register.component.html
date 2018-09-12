@@ -1,50 +1,25 @@
 <div class="dialog darken valign-wrapper">
-    <div class="card card-high center-card card-action header-high">
+    <div class="card center-card card-action header-high">
+
         <div class="card-content">
             <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
             <div class="card-title">
                 {{'REGISTER.TITLE' | translate}}
             </div>
             <div class="card-title-info">
-                <img class="card-title-image" src='assets/images/app-icon.svg'>
+                <img class="card-title-image" src='assets/images/app-icon.svg' alt="{{'REGISTER.ORGANIZATION_TITEL' | translate}}">
                 <!-- TODO @Simon Hier sollen Repo speziefiesche Name der Organisation -->
-                {{'REGISTER.ORGANIZATION_TITEL' | translate}}</div>
-            <div class="card-scroll scroll-header-high">
-                <form (ngSubmit)="register()" #loginForm>
-                    <div>
-                        <label for="username">{{'USER.firstName' | translate}}</label>
-                        <input type="text" required name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" (keyup)="checkConditions()" [(ngModel)]="firstName"/>
-                    </div>
-                    <div>
-                        <label for="lastname">{{'USER.lastName' | translate}} <span>(optional)</span></label>
-                        <input type="text" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="lastName"/>
-                    </div>
-                    <div>
-                        <label for="email">{{'USER.email' | translate}}</label>
-                        <input [ngClass]="{'valid': checkMail() && mail.trim(), 'wrong': !checkMail()}" type="email" required name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}" (keyup)="checkMail()" [(ngModel)]="mail"/>
-                    </div>
-                    <div>
-                        <label for="password">{{'USER.password' | translate}}</label>
-                        <input-password id="password" required="true" (keyup)="checkPasswort()" (keydown.enter)="register()" [(value)]="password"></input-password>
-                    </div>
-                    <div>
-                        <label for="organization">{{'REGISTER.ORGANIZATION' | translate}}  <span>(optional)</span></label>
-                        <input type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}}" [(ngModel)]="org"/>
-                    </div>
-                </form>
-                <div>
-                    <input id="newsletter" type="checkbox" [(ngModel)]="news" (change)="setNews(news)" class="filled-in">
-                    <label for="newsletter">{{'REGISTER.NEWSLETTER' | translate}}</label>
-                </div>
-                <div class="accept">
-                    <input id="accept" type="checkbox" class="filled-in" [(ngModel)]="agree" (change)="setAccept(agree)">
-                    <label for="accept">{{'REGISTER.ACCEPT' | translate}}</label>
-                </div>
-                <a class="imprint" (click)="openImprint()">{{'REGISTER.IMPRESSUM-LINK' | translate}}</a>
+                {{'REGISTER.ORGANIZATION_TITEL' | translate}}
+            </div>
+            <div class="card-scroll">
+                <app-register-form *ngIf="state=='register'" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
+                <app-register-done *ngIf="state=='done'"  #registerDone></app-register-done>
             </div>
         </div>
         <div class="card-action">
-            <a class="waves-effect waves-light btn" [class.disabled]="!canRegister()" (click)="register()">{{'REGISTER.REGISTER' | translate }}</a>
+            <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" (click)="registerForm.register()">{{'REGISTER.REGISTER' | translate }}</a>
+            <a *ngIf="state=='done' && registerDone && !registerDone.keyUrl" class="btn-flat" (click)="registerDone.sendMail()">{{'DONE.SEND_MAIL' | translate }}</a>
         </div>
+
     </div>
 </div>

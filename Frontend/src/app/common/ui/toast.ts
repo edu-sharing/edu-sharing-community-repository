@@ -189,6 +189,7 @@ export class Toast{
       return;
     this.lastToastError=message+JSON.stringify(parameters);
     this.lastToastErrorTime=Date.now();
+    console.log(message);
     this.translate.get(message, parameters).subscribe((text: any) => {
       if (this.dialogTitle) {
         text += '<br /><a onclick="window[\'toastComponent\'].openDetails()">' + this.translate.instant("DETAILS") + '</a>';

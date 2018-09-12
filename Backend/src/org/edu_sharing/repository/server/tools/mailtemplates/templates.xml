@@ -93,6 +93,16 @@
 		]]>
 		</message>
 	</template>
+	<template name="userRegister">
+		<subject>Register</subject>
+		<message><![CDATA[
+			<h1>Hallo!</h1>
+			<div class="center"><a class="btn" href="{{link}}">Finish registration</a></div>
+			<br><br>
+			<div class="center">{{key}}</div>
+		]]>
+		</message>
+	</template>
 	<template name="nodeIssue">
 		<subject>{{reporterEmail}} reported a problem</subject>
 		<message><![CDATA[

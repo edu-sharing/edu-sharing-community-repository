@@ -26,10 +26,6 @@ export class RestMdsTestComponent {
       data => this.getSet=data,
       error => this.error=RestHelper.printError(error)
     )
-    mds.getValues({query:"*",property:"{http://www.campuscontent.de/model/1.0}remotenodeid",pattern:"*"}).subscribe(
-      data => this.getValues=data,
-      error => this.error=RestHelper.printError(error)
-    )
   }
 
 }
