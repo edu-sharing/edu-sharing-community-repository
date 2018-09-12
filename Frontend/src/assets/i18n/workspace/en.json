@@ -194,7 +194,7 @@
       "PASSWORD":"Password Protect",
       "PASSWORD_INFO":"Then this link will be password protected",
       "PASSWORD_PLACEHOLDER":"Set password...",
-      "PASSWORD_PLACEHOLDER_EDIT":"Leave empty to keep current",
+      "PASSWORD_PLACEHOLDER_EDIT":"It already set a password",
       "LINK":"Link to object",
       "ACTIVATE":"Activate sharing",
       "COPY_CLIPBOARD":"Copy link",

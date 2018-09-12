@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        <div class="group groupToInvite">
+        <div class="group groupToInvite" *ngIf="newPermissions && newPermissions.length">
           <div class="toInvite">
             <div class="badge" *ngFor="let permission of newPermissions">
                 <div class="badge-group">
@@ -72,12 +72,12 @@
 
         </div>
 
-        <div *ngIf="sendMessages" class="groupMessage">
+        <div *ngIf="sendMessages && newPermissions && newPermissions.length" class="groupMessage">
           <label for="message">{{'WORKSPACE.SHARE.MESSAGE' | translate}}</label>
           <input type="text" id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
         <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}<p>{{'WORKSPACE.NOTIFY_INFO' | translate}}</p></label>
         </div>
-        <div class="publish" *ngIf="!isSafe">
+        <div [ngClass]="{'publish-grey': newPermissions && newPermissions.length}" class="publish" *ngIf="!isSafe">
           <div class="publishElements">
           <div class="switch">
             <label>
