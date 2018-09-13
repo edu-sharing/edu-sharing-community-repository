@@ -18,6 +18,7 @@ import {PlatformLocation} from "@angular/common";
 import {CordovaService} from "../../common/services/cordova.service";
 import {RegisterFormComponent} from "./register-form/register-form.component";
 import {RegisterDoneComponent} from "./register-done/register-done.component";
+import {RegisterRequestComponent} from "./register-request/register-request.component";
 
 @Component({
   selector: 'app-register',
@@ -27,6 +28,7 @@ import {RegisterDoneComponent} from "./register-done/register-done.component";
 export class RegisterComponent{
   @ViewChild('registerForm') registerForm : RegisterFormComponent;
   @ViewChild('registerDone') registerDone : RegisterDoneComponent;
+  @ViewChild('request') request : RegisterRequestComponent;
   public isLoading=true;
 
   state = 'register';
