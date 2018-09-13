@@ -48,7 +48,8 @@ export class LoginComponent  implements OnInit{
     window.location.href=this.config.recoverPasswordUrl;
   }
   private register(){
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+      //this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+      window.location.href=this.config.registerUrl;
   }
   constructor(private connector : RestConnectorService,
               private toast:Toast,
