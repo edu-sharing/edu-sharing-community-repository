@@ -64,8 +64,9 @@ export class RegisterComponent{
     }
 
       onRegisterDone(){
+          let email=this.registerForm.info.email;
           this.state='done';
-          this.registerDone.email=this.registerForm.mail;
+          setTimeout(()=>this.registerDone.email=email);
       }
 
     private setParams() {

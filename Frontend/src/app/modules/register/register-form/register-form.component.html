@@ -2,29 +2,29 @@
     <div class="name-input">
         <div>
             <label for="username">{{'USER.firstName' | translate}}</label>
-            <input type="text" required name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" (keyup)="checkConditions()" [(ngModel)]="firstName"/>
+            <input type="text" required name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" (keyup)="checkConditions()" [(ngModel)]="info.firstName"/>
         </div>
         <div class="last-name">
             <label for="lastname">{{'USER.lastName' | translate}} <span>(optional)</span></label>
-            <input type="text" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="lastName"/>
+            <input type="text" name="lastname" id="lastname" placeholder="{{'REGISTER.PL_NAME' | translate}}" [(ngModel)]="info.lastName"/>
         </div>
     </div>
 
     <div>
         <label for="email">{{'USER.email' | translate}}</label>
-        <input required [ngClass]="{'valid': checkMail() && mail.trim(), 'invalid': !checkMail()}" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}" (keyup)="checkMail()" [(ngModel)]="mail"/>
+        <input required [ngClass]="{'valid': checkMail() && info.email.trim(), 'invalid': !checkMail()}" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}" (keyup)="checkMail()" [(ngModel)]="info.email"/>
     </div>
     <div>
-        <div *ngIf="password" class="strength">
+        <div *ngIf="info.password" class="strength">
             <span class='{{password_strength}}'>{{'REGISTER.PW_'+password_strength | translate}}</span>
         </div>
         <label for="password">{{'USER.password' | translate}}</label>
-        <input-password [inputClass]="password_strength == 'strong' || password_strength == 'accept' || password_strength == 'medium' ? 'valid' : password_strength == 'weak' ? 'invalid' : null" id="password" required="true" (keyup)="checkPassword()" (keydown.enter)="register()" [(value)]="password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
+        <input-password [inputClass]="password_strength == 'strong' || password_strength == 'accept' || password_strength == 'medium' ? 'valid' : password_strength == 'weak' ? 'invalid' : null" id="password" required="true" (keyup)="checkPassword()" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
         <div class="hint">{{'REGISTER.HINT' | translate}}</div>
     </div>
     <div>
         <label for="organization">{{'REGISTER.ORGANIZATION' | translate}}  <span>(optional)</span></label>
-        <input type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}}" [(ngModel)]="org"/>
+        <input type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}}" [(ngModel)]="info.organization"/>
     </div>
 </form>
 <div>
