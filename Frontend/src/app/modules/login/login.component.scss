@@ -6,7 +6,7 @@ md-input{
 powered-by{
   position: fixed;
   left: 0;
-  top: calc(15% + 500px);
+  top: calc(15% + 510px);
 }
 .branding{
   width:100%;
@@ -28,7 +28,7 @@ powered-by{
   }
   powered-by{
     position: fixed;
-    top:calc(15% + 395px);
+    top:calc(15% + 410px);
   }
 
   .branding{
@@ -43,9 +43,6 @@ powered-by{
   }
 }
 @media screen and (max-height: $mobileHeightWithKeyboard) {
-  powered-by{
-    display: none;
-  }
   .card{
     top: 0;
     bottom: 0;
