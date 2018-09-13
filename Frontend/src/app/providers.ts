@@ -25,6 +25,7 @@ import {RestStreamService} from "./common/rest/services/rest-stream.service";
 import {RestUtilitiesService} from "./common/rest/services/rest-utilities.service";
 import {RestSharingService} from "./common/rest/services/rest-sharing.service";
 import {PermissionNamePipe} from "./common/ui/permission-name.pipe";
+import {RestRegisterService} from './common/rest/services/rest-register.service';
 
 
 export const PROVIDERS=[
@@ -41,6 +42,7 @@ export const PROVIDERS=[
   RestMdsService,
   RestNodeService,
   RestSearchService,
+  RestRegisterService,
   RestStreamService,
   RestUsageService,
   RestOrganizationService,
