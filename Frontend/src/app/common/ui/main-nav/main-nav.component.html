@@ -94,7 +94,7 @@
   ></dropdown>
 </div>
 <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
-<div class="tab-nav" *ngIf="_currentScope!='render'">
+<div class="tab-nav" *ngIf="canOpen && _currentScope!='render'">
   <div *ngFor="let button of sidebarButtons" class="button" [class.selected]="_currentScope==button.scope"
        (click)="openButton(button)"
        (keyup.enter)="openButton(button)"
