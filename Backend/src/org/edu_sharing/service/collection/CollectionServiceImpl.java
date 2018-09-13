@@ -136,21 +136,28 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 	
 	@Override
-	public String addToCollection(String collectionId, String originalNodeId) throws Throwable {
+	public String addToCollection(String collectionId, String refNodeId) throws Throwable {
 		
 		try{
-			List<String> aspects = Arrays.asList(client.getAspects(originalNodeId));
+			List<String> aspects = Arrays.asList(client.getAspects(refNodeId));
 			
 			/**
 			 * use original
 			 */
+			String nodeId=refNodeId;
+			String originalNodeId;
 			if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-				originalNodeId = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), originalNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+				originalNodeId = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), refNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
 			}
+			else{
+                originalNodeId = refNodeId;
+            }
 			
 			String locale = (Context.getCurrentInstance() != null) ? Context.getCurrentInstance().getLocale() : "de_DE";
-			
-			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
+
+			// user must have CC_PUBLISH on either the original or a reference object
+			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})
+					&& !client.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
 				String message = I18nServer.getTranslationDefaultResourcebundle("collection_no_publish_permission", locale);
 				throw new Exception(message);
 			}
@@ -175,48 +182,58 @@ public class CollectionServiceImpl implements CollectionService{
 				}
 			}
 
-			HashMap<String,Object> props = client.getProperties(originalNodeId);
-			String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+			// we need to copy as system because the user may just has full access to the ref (which may has different metadata)
+            // we check the add children permissions before continuing
+			if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),collectionId,CCConstants.PERMISSION_ADD_CHILDREN)){
+			    throw new SecurityException("No permissions to add childrens to collection");
+            }
+
+            HashMap<String,Object> props = AuthenticationUtil.runAsSystem(()-> {
+                try {
+                    return client.getProperties(originalNodeId);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    return null;
+                }
+            });
+            String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+
+            return AuthenticationUtil.runAsSystem(() -> {
+                /**
+                 * make a copy of the original.
+                 * OnCopyCollectionRefPolicy cares about
+                 * - not duplicating the content
+                 * - ignore childs: usage and license data
+                 * - the preview child will be copied
+                 */
+                String refId = client.copyNode(originalNodeId, collectionId, true);
+
+                client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
+                permissionService.setPermissions(refId, null, true);
+				client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+				client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
+
+
+				/**
+				 * write content, so that the index tracking will be triggered
+				 * the overwritten NodeContentGet class checks if it' s an collection ref object
+				 * and switches the nodeId to original node, which is used for indexing
+				 */
+				client.writeContent(refId, new String("1").getBytes(), (String)props.get(CCConstants.ALFRESCO_MIMETYPE) , "utf-8", CCConstants.CM_PROP_CONTENT);
+
+				//set to original size
+				client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, (String)props.get(CCConstants.LOM_PROP_TECHNICAL_SIZE));
+
+				// run setUsage as admin because the user may not has cc_publish on the original node (but on the ref)
+				new Usage2Service().setUsageInternal(appInfo.getAppId(),
+						authInfo.get(CCConstants.AUTH_USERNAME),
+						appInfo.getAppId(),
+						collectionId,
+						originalNodeId, null, null, null, -1, versLabel, refId, null);
+				return refId;
+            });
 			
-			/**
-			 * make a copy of the original. 
-			 * OnCopyCollectionRefPolicy cares about
-			 * - not duplicating the content
-			 * - ignore childs: usage and license data
-			 * - the preview child will be copied
-			 */
-			String refId = client.copyNode(originalNodeId, collectionId, true);
-			
-			client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
-			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-				@Override
-				public Void doWork() throws Exception {
-					permissionService.setPermissions(refId, null, true);
-					return null;
-				}
-			});
-			
-			client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
-			client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
-			
-			
-			/**
-			 * write content, so that the index tracking will be triggered
-			 * the overwritten NodeContentGet class checks if it' s an collection ref object
-			 * and switches the nodeId to original node, which is used for indexing
-			 */
-			client.writeContent(refId, new String("1").getBytes(), (String)props.get(CCConstants.ALFRESCO_MIMETYPE) , "utf-8", CCConstants.CM_PROP_CONTENT);
-			
-			//set to original size
-			client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, client.getProperty(Constants.storeRef, originalNodeId, CCConstants.LOM_PROP_TECHNICAL_SIZE));
-			
-			new Usage2Service().setUsage(appInfo.getAppId(), 
-					authInfo.get(CCConstants.AUTH_USERNAME), 
-					appInfo.getAppId(), 
-					collectionId, 
-					originalNodeId, null, null, null, -1, versLabel, refId, null);
-			
-			return refId;
+
 		
 		}catch(Throwable e){
 			throw e;

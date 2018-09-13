@@ -347,7 +347,7 @@ export class CollectionNewComponent {
       if(type==RestConstants.COLLECTIONSCOPE_ALL){
         this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_ALL;
       }
-      if(type==RestConstants.COLLECTIONSCOPE_CUSTOM){
+      if(type==RestConstants.COLLECTIONSCOPE_CUSTOM || type==RestConstants.COLLECTIONTYPE_EDITORIAL){
         this.currentCollection.scope=RestConstants.COLLECTIONSCOPE_CUSTOM;
       }
       this.updateAvailableSteps();

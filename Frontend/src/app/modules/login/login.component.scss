@@ -16,6 +16,18 @@ powered-by{
 .register{
   color:$textLight;
 }
+.useUrl{
+  .goto{
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    padding-top: 5px;
+    i{
+      padding-left: 4px;
+      font-size: 20px;
+    }
+  }
+}
 @media screen and (max-height: ($mobileHeight)) {
   .card{
     top: 15%;

@@ -352,7 +352,7 @@ export class MainNavComponent implements AfterViewInit{
         return;
       }
       this.toolpermissions=data.toolPermissions;
-      this.canAccessWorkspace=this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
+      this.canAccessWorkspace=this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
 
       this.route.queryParams.subscribe((params: Params) => {
         let buttons:any=[];
