@@ -722,7 +722,13 @@ export interface  OAuthResult{
   // for local use
   expires_ts?:number;
 }
-
+export interface RegisterInformation{
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    organization: string;
+}
 export interface Permissions {
   localPermissions: LocalPermissionsResult;
   inheritedPermissions: Permission[];
