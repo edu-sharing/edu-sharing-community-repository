@@ -1,15 +1,25 @@
 <div class="dialog darken valign-wrapper">
-    <div class="card center-card">
+    <div class="card center-card card-action header-high">
+
         <div class="card-content">
-            <div class="card-title">{{'REGISTER.TITLE' | translate}}</div>
-            <div class="card-scroll ">
-                <form (ngSubmit)="login()" #loginForm>
-                    Test
-                </form>
+            <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+            <div class="card-title">
+                {{'REGISTER.TITLE' | translate}}
+            </div>
+            <div class="card-title-info">
+                <img class="card-title-image" src='assets/images/app-icon.svg' alt="{{'REGISTER.ORGANIZATION_TITEL' | translate}}">
+                <!-- TODO @Simon Hier sollen Repo speziefiesche Name der Organisation -->
+                {{'REGISTER.ORGANIZATION_TITEL' | translate}}
+            </div>
+            <div class="card-scroll">
+                <app-register-form *ngIf="state=='register'" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
+                <app-register-done *ngIf="state=='done'"  #registerDone></app-register-done>
             </div>
         </div>
         <div class="card-action">
-            <a class="waves-effect waves-light btn" (click)="register()">{{'REGISTER.REGISTER' | translate }}</a>
+            <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" (click)="registerForm.register()">{{'REGISTER.REGISTER' | translate }}</a>
+            <a *ngIf="state=='done' && registerDone && !registerDone.keyUrl" class="btn-flat" (click)="registerDone.sendMail()">{{'DONE.SEND_MAIL' | translate }}</a>
         </div>
+
     </div>
 </div>

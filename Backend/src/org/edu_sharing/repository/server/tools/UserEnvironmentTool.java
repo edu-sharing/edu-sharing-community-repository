@@ -44,13 +44,16 @@ public class UserEnvironmentTool {
 	private static Log logger = LogFactory.getLog(UserEnvironmentTool.class);
 	MCAlfrescoBaseClient mcBaseClient = null;
 	String username = null;
-	
-	/**
-	 * use this for running this class in an runAs context
-	 * @param appId
-	 * @param username
-	 * @throws Throwable
-	 */
+
+    public UserEnvironmentTool() throws Throwable {
+        this(AuthenticationUtil.getFullyAuthenticatedUser());
+    }
+        /**
+         * use this for running this class in an runAs context
+         * @param appId
+         * @param username
+         * @throws Throwable
+         */
 	public UserEnvironmentTool(String runAsUser) throws Throwable{
 		username = runAsUser;
 		mcBaseClient = (MCAlfrescoBaseClient)RepoFactory.getInstanceForRepo(ApplicationInfoList.getHomeRepository(), null);
@@ -97,7 +100,7 @@ public class UserEnvironmentTool {
 	}
 	
 	public String getEdu_SharingSystemFolderBase() throws Throwable{
-		if(!mcBaseClient.isAdmin()){
+		if(!mcBaseClient.isAdmin() && !AuthenticationUtil.isRunAsUserTheSystemUser()){
 			throw new Exception("Admin group required");
 		}
 		String companyHomeNodeId = mcBaseClient.getCompanyHomeNodeId();
@@ -182,7 +185,9 @@ public class UserEnvironmentTool {
 		}
 		return result;
 	}
-	
+    public String getEdu_SharingServiceFolder() throws Throwable {
+        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE, CCConstants.I18n_SYSTEMFOLDER_SERVICE);
+    }
 	public String getEdu_SharingTemplateFolder() throws Throwable{
 	    return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE,CCConstants.I18n_SYSTEMFOLDER_TEMPLATE);
 	    /*
@@ -213,7 +218,7 @@ public class UserEnvironmentTool {
         String systemFolderId = getEdu_SharingSystemFolderBase();
         HashMap<String, Object> edu_SharingSystemFolderTemplate = mcBaseClient.getChild(systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, constantName);
         if(edu_SharingSystemFolderTemplate == null){
-            String systemFolderName = I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_TEMPLATE);
+            String systemFolderName = I18nServer.getTranslationDefaultResourcebundle(i18nId);
             HashMap<String,Object> newEdu_SharingSysMapProps  = new HashMap();
             newEdu_SharingSysMapProps.put(CCConstants.CM_NAME, systemFolderName);
 
@@ -223,7 +228,7 @@ public class UserEnvironmentTool {
             i18nTitle.put("en_US", I18nServer.getTranslationDefaultResourcebundle(i18nId, "en_US"));
 
             newEdu_SharingSysMapProps.put(CCConstants.CM_PROP_C_TITLE, i18nTitle);
-            newEdu_SharingSysMapProps.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE);
+            newEdu_SharingSysMapProps.put(CCConstants.CCM_PROP_MAP_TYPE, constantName);
             result = mcBaseClient.createNode(systemFolderId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
         }else{
             result = (String)edu_SharingSystemFolderTemplate.get(CCConstants.SYS_PROP_NODE_UID);

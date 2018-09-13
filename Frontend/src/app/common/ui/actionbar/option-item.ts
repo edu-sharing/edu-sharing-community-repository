@@ -37,6 +37,11 @@ export class OptionItem {
    * @type {boolean}
    */
   public onlyMobile = false;
+    /**
+     * If true, only displayed on a desktop device (based on the navigator agent)
+     * @type {boolean}
+     */
+    public onlyDesktop = false;
   /**
    * You can set a media-query similar to CSS, see the MEDIA_QUERY constants in ui-constants
    * Use in combination with mediaQueryValue

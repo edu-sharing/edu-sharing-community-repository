@@ -14,6 +14,18 @@
 (scrolled)="onScroll()"
 (click)="closeMenuOptions()">
 <div class="row">
+    <div class="rowRepositories row tab-group row-dark scrollWithBanner arrow-menu-arrow">
+        <div class="col s12">
+            <ul class="tabs no-bgbottom tabsRepositories tabs-fixed-width">
+                <li class="clickable tab col s3" tabindex="0" (click)="goToOption('new')">
+                        <a [class.active]="menuOption == 'new' ? true : false"><span class="repositoryTitle">{{'STREAM.MENU.OPTION1' | translate }}</span></a>
+                </li>
+                <li class="clickable tab col s3" tabindex="0" (click)="goToOption('seen')">
+                        <a [class.active]="menuOption == 'seen' ? true : false"><span class="repositoryTitle">{{'STREAM.MENU.OPTION2' | translate }}</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
     <div class="col m4 l3 choose-menu-main" [ngClass]="showMenuOptions ? '' : 'hideMenu'">
             <div class="choose-menu" (click)="goToOption('new')" [ngClass]="menuOption == 'new' ? 'm-active' : 'm-inactive'">
                 <i class="menuic material-icons ">date_range</i> <div class="menu-icon-text">{{'STREAM.MENU.OPTION1' | translate }}</div>
@@ -21,13 +33,13 @@
             <div class="choose-menu" (click)="goToOption('seen')" [ngClass]="menuOption == 'seen' ? 'm-active' : 'm-inactive'">
                 <i class="menuic material-icons ">visibility</i> <div class="menu-icon-text">{{'STREAM.MENU.OPTION2' | translate }}</div>
             </div>
-    </div>  
+    </div>
     <div class="col s12 m7 l6 remove-horizontal-padding">
         <div class="margin-show">
 
         <div class="stream-header-left row stream-marginfix">
-            <div *ngIf="menuOption == 'new'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION1' | translate }} <i class="small material-icons arrow-menu-arrow " (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
-            <div *ngIf="menuOption == 'seen'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION2' | translate }} <i class="small material-icons arrow-menu-arrow" (click)="toggleMenuOptions()">keyboard_arrow_down</i> </div>
+            <div *ngIf="menuOption == 'new'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION1' | translate }}  </div>
+            <div *ngIf="menuOption == 'seen'" class="stream-title col s10 m12">{{'STREAM.MENU.OPTION2' | translate }}  </div>
             
             <span id="stream-title-date" class="stream-title-date col s12 m12">
                 {{dateToDisplay}}

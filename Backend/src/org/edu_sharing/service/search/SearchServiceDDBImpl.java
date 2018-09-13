@@ -31,6 +31,8 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.search.v1.model.SearchParameters;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRef;
@@ -384,19 +386,29 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			
 		return properties;
 	}
-	
-	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
+	@Override
+	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, 
+			String parameterId, String value, List<MdsQueryCriteria> criterias) {
 		
 		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
 		
 		List<String> facets = mds.getQueries().findQuery(queryId).findParameterByName(parameterId).getFacets();
 		//String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
-		String url = getUrl("/search","*",facets, 0, 0);
-		System.out.println("url:" + url);
+		
+		Map<String,String[]> criteriasAsMap = new HashMap<String,String[]>();
+		for(MdsQueryCriteria crit : criterias) {
+			criteriasAsMap.put(crit.getProperty(), crit.getValues().toArray(new String[crit.getValues().size()]));
+		}
+		criteriasAsMap.put(parameterId, new String[] {value});
+		
+		
 		
 		try {
+			String url = DDB_API + getPath(criteriasAsMap, 0, 0, facets);
+			System.out.println("url:" + url);
+			
 			String json = this.query(url);
-			System.out.println(json);
+			//System.out.println(json);
 			JSONObject jo = new JSONObject(json);
 	    	
 			JSONArray resultsArr = (JSONArray)jo.get("facets");
@@ -412,14 +424,14 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						JSONObject facetteVal = (JSONObject)facetValues.get(j);
 						//int count = facetteVal.getInt("count");
 						String val = facetteVal.getString("value");
-						
-						if(val.contains(value)) {					
+						//check for cleaner results
+						//if(val.toLowerCase().contains(value.toLowerCase())) {					
 							SuggestFacetDTO dto = new SuggestFacetDTO();
 							dto.setFacet(val);
 							dto.setDisplayString(val);
 	
 							result.add(dto);
-						}
+						//}
 					}
 					
 					
@@ -432,16 +444,11 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		return result;
 	}
 	
-	public String getUrl(String basePath, String query, List<String> facets, int offset, int rows){
-		String url = DDB_API + basePath;
+	public String getPath(Map<String, String[]> criterias, int from, int maxResults, List<String> facets) throws UnsupportedEncodingException{
 		
-		try {
-			url += "?oauth_consumer_key=" + URLEncoder.encode(APIKey, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		url += "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(query);
+		String url = "";
+		
+		url += getPath(criterias, from, maxResults,true);
 		if(facets != null && facets.size() > 0) {
 			url += "&facet=";
 			int i = 0;
@@ -453,9 +460,8 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 				}
 				
 			}
-		}
-		url += "&offset="+offset;
-		url += "&rows="+rows;
+		}		
+		
 		
 		return url;
 	}
@@ -478,67 +484,17 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
          * 		
          */
 
-		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
-
-		List<String> extSearch = new ArrayList<String>();
-		
- 		String searchWord = "";
- 		if(searchWordCriteria!=null && searchWordCriteria.length>0) {
- 			searchWord = searchWordCriteria[0];
- 		}
-		if (searchWord.equals("*") ){
-			searchWord="";
-		}
-
-		boolean retval;		
-
- 		if(criterias.containsKey("title")) {
- 			String ddbTitle =criterias.get("title")[0];
- 			if (!ddbTitle.equals("") ){
- 				extSearch.add("title:("+ddbTitle+")");
- 			}
- 		}
-
- 		if(criterias.containsKey("place")) {
- 			String ddbPlace =criterias.get("place")[0];
- 			if (!ddbPlace.equals("") ){
- 				extSearch.add("place:("+ddbPlace+")");
- 			}
- 		}
-
- 		if(criterias.containsKey("affiliate")) {
- 			String ddbPerson =criterias.get("affiliate")[0];
- 			if (!ddbPerson.equals("") ){
- 				extSearch.add("affiliate:("+ddbPerson+")");
- 			}
- 		}
 		
 		HttpsURLConnection connection=null;
-
-/*		if(searchToken.getFrom()%searchToken.getMaxResult()!=0)
-			throw new Exception("Pixabay only supports offsets which are dividable by the maxItems count");
-	*/	
-		String ext = "";
-		for (String s : extSearch) {
-		    if (!s.equals("") && !extSearch.get(extSearch.size() - 1).equals(s)){
-		     ext = ext+s +" AND ";	
-		    }else{
-			     ext = ext+s;	
-		    }
-		}
-		
 		
 		try {
 
 
-			String oauth  = "/search?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
-			String offset = "&offset="+searchToken.getFrom();
-			String rows = "&rows="+searchToken.getMaxResult();
-			
-			String uri=oauth+"&query="+org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(searchWord+" "+ext)+offset+rows;
-
+			String uri = getPath(criterias,searchToken.getFrom(),searchToken.getMaxResult(),false);
 			searchToken.setQueryString(uri);
 			
+			
+			System.out.println("ddb url:" + uri);
 			return searchDDB(repositoryId,APIKey,uri);
 			
 		}
@@ -559,6 +515,74 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		}
 
 	}	
+	
+	private String getPath(Map<String, String[]> criterias, int from, int maxResults, boolean fuzzy) throws UnsupportedEncodingException {
+		
+		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
+
+		List<String> extSearch = new ArrayList<String>();
+		
+ 		String searchWord = "";
+ 		if(searchWordCriteria!=null && searchWordCriteria.length>0) {
+ 			searchWord = searchWordCriteria[0];
+ 		}
+		if (searchWord.equals("*") ){
+			searchWord="";
+		}
+
+		
+		for(Map.Entry<String, String[]> entry : criterias.entrySet()) {
+			String[] values = criterias.get(entry.getKey());
+			if(values != null && values.length > 0) {
+				String value = values[0];
+				if(!value.trim().equals("")) {
+					if(fuzzy) value += "*";
+					extSearch.add(entry.getKey() +":("+value+")");
+				}
+			}
+		}
+
+ 		/*if(criterias.containsKey("title")) {
+ 			String ddbTitle =criterias.get("title")[0];
+ 			if (!ddbTitle.equals("") ){
+ 				extSearch.add("title:("+ddbTitle+")");
+ 			}
+ 		}
+
+ 		if(criterias.containsKey("place")) {
+ 			String ddbPlace =criterias.get("place")[0];
+ 			if (!ddbPlace.equals("") ){
+ 				extSearch.add("place:("+ddbPlace+")");
+ 			}
+ 		}
+
+ 		if(criterias.containsKey("affiliate")) {
+ 			String ddbPerson =criterias.get("affiliate")[0];
+ 			if (!ddbPerson.equals("") ){
+ 				extSearch.add("affiliate:("+ddbPerson+")");
+ 			}
+ 		}*/
+		
+		
+
+ 		String ext = "";
+		for (String s : extSearch) {
+		    if (!s.equals("") && !extSearch.get(extSearch.size() - 1).equals(s)){
+		     ext = ext+s +" AND ";	
+		    }else{
+			     ext = ext+s;	
+		    }
+		}
+		
+		String oauth  = "/search?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+		String offset = "&offset=" + from;
+		String rows = "&rows=" + maxResults;
+		
+		String queryStr = searchWord+" "+ext;
+		String uri=oauth+"&query="+org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(queryStr)+offset+rows;
+
+		return uri;
+	}
 	
 	public static void main(String[] args) {
 		try {

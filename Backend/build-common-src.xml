@@ -142,7 +142,7 @@
 		
 		<mkdir dir="${output.dir}" />
 		<copy todir="${output.dir}">
-			<fileset dir="${src.dir}" includes="**/*.xml, **/*.properties">	
+			<fileset dir="${src.dir}" includes="**/*.xml, **/*.properties, **/*.json">
 			</fileset>
 		</copy>
 		

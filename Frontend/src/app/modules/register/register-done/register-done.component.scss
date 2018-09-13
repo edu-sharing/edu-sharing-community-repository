@@ -1,0 +1,38 @@
+@import "../../../../styles/variables.scss";
+
+.done-info{
+  text-align: center;
+  img{
+    width: 176px;
+    height: auto;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  i{
+    font-size: 14pt;
+    margin-left: 2pt;
+    display: table-caption;
+    margin-bottom: -3px;
+    padding-right: 23px;
+  }
+  .mail-info{
+    margin-bottom:20px;
+
+    span{
+      cursor: pointer;
+      font-weight: bold;
+    }
+  }
+
+  b{
+    display: block;
+    margin-top: 20px;
+  }
+  small{
+    font-size: 100%;
+    color: $textLight;
+  }
+}

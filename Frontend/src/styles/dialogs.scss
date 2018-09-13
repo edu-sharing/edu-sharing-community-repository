@@ -19,6 +19,7 @@ $cardActionHeight:77px;
 .card{
   z-index:$dialogZIndex+1;
   background-color: #fff!important;
+  transition: all $transitionNormal;
 }
 .center-card{
   position:fixed!important;
@@ -70,7 +71,6 @@ $cardActionHeight:77px;
 .card-title{
   word-break: break-all;
   max-height: 48px;
-  align-items: start;
   overflow: hidden;
   display:flex;
   align-items:center;
@@ -84,6 +84,10 @@ $cardActionHeight:77px;
     width:auto;
     height:25px;
     margin-right:15px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 }
 .center-card .card-scroll{
@@ -113,6 +117,30 @@ input[type=search]{
   top:10%;
   bottom:10%;
 }
+
+.header-high{
+  background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 80px,transparent 80px,transparent 100%);
+
+  .card-title-info{
+    position: absolute;
+    top: 52px;
+    font-size: 9pt;
+    color: $textLight;
+    display: flex;
+    align-items: center;
+
+    img{
+      height: 20px;
+      width: auto;
+      margin-right: 14px;
+    }
+  }
+
+  .card-scroll{
+    top: 0;
+  }
+}
+
 .card-wide{
   width:650px;
   margin-left:-325px!important;

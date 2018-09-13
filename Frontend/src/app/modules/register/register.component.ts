@@ -15,9 +15,9 @@ import {UIConstants} from "../../common/ui/ui-constants";
 import {Helper} from "../../common/helper";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {PlatformLocation} from "@angular/common";
-
 import {CordovaService} from "../../common/services/cordova.service";
-import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
+import {RegisterFormComponent} from "./register-form/register-form.component";
+import {RegisterDoneComponent} from "./register-done/register-done.component";
 
 @Component({
   selector: 'app-register',
@@ -25,9 +25,17 @@ import {InputPasswordComponent} from "../../common/ui/input-password/input-passw
   styleUrls: ['register.component.scss']
 })
 export class RegisterComponent{
+  @ViewChild('registerForm') registerForm : RegisterFormComponent;
+  @ViewChild('registerDone') registerDone : RegisterDoneComponent;
   public isLoading=true;
 
-  private register(){
+  state = 'register';
+  public cancel(){
+      if (this.state == 'done'){
+          this.state = 'register';
+      } else {
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"login"]);
+      }
   }
   constructor(private connector : RestConnectorService,
               private toast:Toast,
@@ -42,7 +50,30 @@ export class RegisterComponent{
             ){
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
-    });
-    this.isLoading=true;
-  }
+
+        this.route.url.subscribe((segments)=>{
+            for(let s of segments){
+                if(s.path=='done') {
+                    this.state = 'done';
+                    setTimeout(()=>this.setParams());
+                }
+            }
+        });
+        this.isLoading=true;
+        });
+    }
+
+      onRegisterDone(){
+          this.state='done';
+          this.registerDone.email=this.registerForm.mail;
+      }
+
+    private setParams() {
+        this.route.params.subscribe((params)=>{
+            if(params['email'])
+                this.registerDone.email=params['email'];
+            if(params['key'])
+                this.registerDone.keyUrl=params['key'];
+        });
+    }
 }
