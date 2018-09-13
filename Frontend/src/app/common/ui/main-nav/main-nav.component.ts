@@ -347,7 +347,7 @@ export class MainNavComponent implements AfterViewInit{
 
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       if(!data.isValidLogin) {
-        this.canOpen=false;
+        this.canOpen=data.isGuest;
         this.checkConfig([]);
         return;
       }
