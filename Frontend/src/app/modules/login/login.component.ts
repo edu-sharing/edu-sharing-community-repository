@@ -1,24 +1,24 @@
 import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
-import {Toast} from "../../common/ui/toast";
-import {Router, Route, Params, ActivatedRoute, UrlSerializer} from "@angular/router";
-import {OAuthResult, LoginResult, AccessScope} from "../../common/rest/data-object";
-import {RouterComponent} from "../../router/router.component";
-import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../common/translation";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {RestConstants} from "../../common/rest/rest-constants";
-import {ConfigurationService} from "../../common/services/configuration.service";
-import {FrameEventsService} from "../../common/services/frame-events.service";
-import {Title} from "@angular/platform-browser";
-import {UIHelper} from "../../common/ui/ui-helper";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {Scope} from "@angular/core/src/profile/wtf_impl";
-import {UIConstants} from "../../common/ui/ui-constants";
-import {Helper} from "../../common/helper";
-import {RestHelper} from "../../common/rest/rest-helper";
-import {PlatformLocation} from "@angular/common";
+import {Toast} from '../../common/ui/toast';
+import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/router';
+import {OAuthResult, LoginResult, AccessScope} from '../../common/rest/data-object';
+import {RouterComponent} from '../../router/router.component';
+import {TranslateService} from '@ngx-translate/core';
+import {Translation} from '../../common/translation';
+import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
+import {RestConstants} from '../../common/rest/rest-constants';
+import {ConfigurationService} from '../../common/services/configuration.service';
+import {FrameEventsService} from '../../common/services/frame-events.service';
+import {Title} from '@angular/platform-browser';
+import {UIHelper} from '../../common/ui/ui-helper';
+import {SessionStorageService} from '../../common/services/session-storage.service';
+import {Scope} from '@angular/core/src/profile/wtf_impl';
+import {UIConstants} from '../../common/ui/ui-constants';
+import {Helper} from '../../common/helper';
+import {RestHelper} from '../../common/rest/rest-helper';
+import {PlatformLocation} from '@angular/common';
 
-import {CordovaService} from "../../common/services/cordova.service";
+import {CordovaService} from '../../common/services/cordova.service';
 
 @Component({
   selector: 'workspace-login',
@@ -26,19 +26,20 @@ import {CordovaService} from "../../common/services/cordova.service";
   styleUrls: ['login.component.scss']
 })
 export class LoginComponent  implements OnInit{
-  @ViewChild('passwordInput') passwordInput : ElementRef;
+    loginUrl: any;
+    @ViewChild('passwordInput') passwordInput : ElementRef;
   @ViewChild('usernameInput') usernameInput : ElementRef;
   @ViewChild('loginForm') loginForm : ElementRef;
 
   public isLoading=true;
   private disabled=false;
   private showUsername=true;
-  private username="";
-  private password="";
-  private scope="";
-  private next="";
+  private username='';
+  private password='';
+  private scope='';
+  private next='';
   public mainnav=true;
-  private caption="LOGIN.TITLE";
+  private caption='LOGIN.TITLE';
   private config: any={};
   private checkConditions(){
     this.disabled=!this.username;// || !this.password;
@@ -48,6 +49,9 @@ export class LoginComponent  implements OnInit{
   }
   private register(){
     window.location.href=this.config.registerUrl;
+  }
+  openLoginUrl(){
+      window.location.href=this.loginUrl;
   }
   constructor(private connector : RestConnectorService,
               private toast:Toast,
@@ -67,8 +71,8 @@ export class LoginComponent  implements OnInit{
       this.configService.getAll().subscribe((data:any)=>{
         this.config=data;
 
-        this.username=this.configService.instant("defaultUsername","");
-        this.password=this.configService.instant("defaultPassword","");
+        this.username=this.configService.instant('defaultUsername','');
+        this.password=this.configService.instant('defaultPassword','');
         this.route.queryParams.forEach((params: Params) => {
           this.connector.onAllRequestsReady().subscribe(()=>this.isLoading=false);
           this.scope=params['scope'];
@@ -80,13 +84,14 @@ export class LoginComponent  implements OnInit{
               data.statusCode=null;
             }
             else if(data.currentScope==this.scope){
-              if(data.statusCode==RestConstants.STATUS_CODE_OK && params['local']!="true"){
+              if(data.statusCode==RestConstants.STATUS_CODE_OK && params['local']!='true'){
                 this.goToNext();
               }
             }
-            if(params['local']!="true" && configService.instant("loginUrl") && data.statusCode!=RestConstants.STATUS_CODE_OK){
-              window.location.href=configService.instant("loginUrl");
-              return;
+              this.loginUrl=configService.instant('loginUrl');
+              if(params['local']!='true' && !configService.instant('loginAllowLocal',false) && this.loginUrl && data.statusCode!=RestConstants.STATUS_CODE_OK){
+                this.openLoginUrl();
+                return;
             }
           });
           this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
@@ -106,7 +111,7 @@ export class LoginComponent  implements OnInit{
                   }
                   else{
                     this.toast.error(null,'LOGIN.NO_ACCESS');
-                    this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
+                    this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace']);
                     //window.history.back();
                   }
                 },(error:any)=>{
@@ -150,11 +155,11 @@ export class LoginComponent  implements OnInit{
             this.goToNext();
           }
           else if(data==RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED || data==RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG){
-            this.toast.error(null,"LOGIN.SAFE_PREVIOUS");
+            this.toast.error(null,'LOGIN.SAFE_PREVIOUS');
             this.isLoading=false;
           }
           else{
-            this.toast.error(null,"LOGIN.ERROR");
+            this.toast.error(null,'LOGIN.ERROR');
             this.isLoading=false;
           }
         },
@@ -167,7 +172,7 @@ export class LoginComponent  implements OnInit{
 
   private goToNext() {
     if(this.next){
-      this.next=Helper.addGetParameter("fromLogin","true",this.next);
+      this.next=Helper.addGetParameter('fromLogin','true',this.next);
       UIHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,this.next);
       //window.location.assign(this.next);
     }

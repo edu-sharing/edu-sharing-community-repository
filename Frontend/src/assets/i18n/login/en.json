@@ -10,6 +10,8 @@
     "ERROR":"Invalid credentials",
     "REGISTER_TEXT":"No account yet?",
     "REGISTER_LINK":"Create one",
+    "USE_URL_TEXT":"Login via external provider (e.g. Shibboleth)",
+    "USE_URL_LINK":"Go to provider",
     "SAFE_PREVIOUS":"In order to login to the safe space, please login to the regular workspace first",
     "NO_ACCESS":"No permissions to access this area"
   },

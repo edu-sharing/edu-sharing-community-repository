@@ -322,7 +322,7 @@ export class MainNavComponent {
         return;
       }
       this.toolpermissions=data.toolPermissions;
-      this.canAccessWorkspace=this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
+      this.canAccessWorkspace=this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
 
       this.route.queryParams.subscribe((params: Params) => {
         let buttons:any=[];
