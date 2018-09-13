@@ -48,18 +48,15 @@ export class RegisterComponent{
               private storage : SessionStorageService,
               private route : ActivatedRoute,
             ){
+      this.route.params.subscribe((params)=>{
+          if(params['status']){
+              this.state = params['status'];
+              setTimeout(()=>this.setParams());
+          }
+      });
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
-
-        this.route.url.subscribe((segments)=>{
-            for(let s of segments){
-                if(s.path=='done') {
-                    this.state = 'done';
-                    setTimeout(()=>this.setParams());
-                }
-            }
-        });
-        this.isLoading=true;
+            this.isLoading=false;
         });
     }
 
