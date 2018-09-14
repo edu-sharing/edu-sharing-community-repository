@@ -229,10 +229,7 @@ table, div {
 .collections-edit-button {
     right: 63px;
 }
-.collections-pin-button {
-  right: 90px;
-}
-.collections-delete-button {
+.collections-delete-button,.collections-pin-button {
     right: 17px;
 }
 .collections-edit-button,
@@ -256,6 +253,9 @@ table, div {
   cursor: pointer;
   @include materialShadowBottom();
 }
+.collections-pin-button{
+  top: 10px;
+}
 .section-headline {
   float:left;
   width:100%;
@@ -272,7 +272,7 @@ table, div {
 }
 :host /deep/{
   .collections-pin-button custom-icon g{
-    fill: #6b6b6b;
+    fill: $primary;
   }
   footer{
     float:left;
