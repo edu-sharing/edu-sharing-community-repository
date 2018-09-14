@@ -12,7 +12,7 @@
 
     <div>
         <label for="email">{{'USER.email' | translate}}</label>
-        <input required [ngClass]="{'valid': checkMail() && info.email.trim(), 'invalid': !checkMail()}" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}" (keyup)="checkMail()" [(ngModel)]="info.email"/>
+        <input required [ngClass]="{'valid': checkMail(), 'invalid': !checkMail() && info.email.trim()}" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}" (keyup)="checkMail()" [(ngModel)]="info.email"/>
     </div>
     <div>
         <div *ngIf="info.password" class="strength">

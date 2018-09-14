@@ -45,6 +45,7 @@ export class LoginComponent  implements OnInit{
     this.disabled=!this.username;// || !this.password;
   }
   private recoverPassword(){
+    // this.router.navigate([UIConstants.ROUTER_PREFIX+"register","request"],);
     window.location.href=this.config.recoverPasswordUrl;
   }
   private register(){

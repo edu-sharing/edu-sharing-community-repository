@@ -20,11 +20,11 @@ export class RegisterDoneComponent{
         this.activate(keyUrl);
     }
 
-    private editMail() {
+    public editMail() {
         //TODO: @Simon
         // Zum Bearbeitung vom E-Mail
     }
-    private sendMail(){
+    public sendMail(){
         //TODO: @Simon
         // E-Mail erneut versenden
         console.log("E-Mail erneut versendet");

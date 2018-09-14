@@ -16,15 +16,26 @@
     "PL_PASSWORD": "Minimum 5 verschiedene Zeichen...",
     "HINT": "Tipp: Verwende Zahlen, Sonderzeichen...",
     "PL_ORG": "z.B. DEKRA...",
-    "REGISTER": "Registrieren"
+    "BUTTON": "Registrieren"
   },
   "DONE":{
-    "TITEL": "Fast fertig",
+    "TITLE": "Fast fertig",
     "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
     "MAIL_INFO2": "geschickt.",
     "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail, um Ihre neuer Acount zu bestätigen.",
     "NO_MAIL": "Keine E-Mail erhalten?",
     "NO_MAIL_INFO": "Sehen Sie auch im Spam-Ordner nach.",
     "SEND_MAIL": "Nochmal Senden"
+  },
+  "REQUEST":{
+    "TITLE": "Passwort vergessen?",
+    "INFO": "Geben Sie Ihre bei Anmeldung hinterlegte E-Mail-Adresse ein, um ein neues Passwort vergeben zu können.",
+    "PLACEHOLDER":"Ihre E-Mail Adresse",
+    "BUTTON":"Neues Passwort anfordern"
+  },
+  "RESET":{
+    "TITLE": "Passwort ändern",
+    "REST_INFO": "Geben Sie Ihr neues\nPasswort an",
+    "BUTTON": "Passwort ändern"
   }
 }

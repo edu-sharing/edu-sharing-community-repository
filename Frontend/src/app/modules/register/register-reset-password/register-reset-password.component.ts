@@ -25,5 +25,22 @@ import {InputPasswordComponent} from "../../../common/ui/input-password/input-pa
   styleUrls: ['register-reset-password.component.scss']
 })
 export class RegisterResetPasswordComponent{
+    public password_strength ="";
+    public new_password ="";
+    public checkPassword(){
+        this.password_strength = UIHelper.getPasswordStrengthString(this.new_password);
+        console.log(this.password_strength);
+    }
 
+    public linkRegister() {
+        this.router.navigate([UIConstants.ROUTER_PREFIX + "register"]);
+    }
+    public newPassword(){
+      /*New Password setzen*/
+    }
+    constructor(private connector: RestConnectorService,
+                private toast: Toast,
+                private router: Router
+    ) {
+    }
 }

@@ -1,0 +1,12 @@
+<div class="request-info">
+    <h4>{{'REQUEST.TITLE' | translate}}</h4>
+    <p>{{'REQUEST.INFO' | translate}}</p>
+</div>
+<div>
+    <label for="email">{{'USER.email' | translate}}</label>
+    <input required [ngClass]="{'valid': checkMail(), 'invalid': !checkMail() && email.trim()}" type="email" name="email" id="email" placeholder="{{'REQUEST.PLACEHOLDER' | translate}}" (keyup)="checkMail()" [(ngModel)]="email"/>
+</div>
+<div class="register">
+    {{'LOGIN.REGISTER_TEXT' | translate}}
+    <a (click)="linkRegister()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
+</div>

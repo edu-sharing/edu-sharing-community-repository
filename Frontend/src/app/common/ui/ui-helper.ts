@@ -92,15 +92,95 @@ export class UIHelper{
    * returns true if the given string seems to be an email
    * @param {string} email
    */
-  static isEmail(email: string) {
-    if(!email)
-      return false;
-    if(email.indexOf("@")==-1)
-      return false;
-    if(email.indexOf(".")==-1)
-      return false;
-    return true;
+  static isEmail(mail: string) {
+      if(!mail)
+        return false;
+      if (mail.trim()){
+          const EMAIL_REGEXP = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          if (mail && !EMAIL_REGEXP.test(mail)) {
+              return false;
+          } else {
+              return true;
+          }
+      } else {
+          return false;
+      }
   }
+
+    /**
+     * returns an factor indicating the strength of a password
+     * Higher values mean better password strength
+     * @param password
+     */
+    private static getPasswordStrength(password:string){
+        let strength: number;
+        // These are weighting factors
+        let flc = 1.0;  // lowercase factor
+        let fuc = 1.0;  // uppercase factor
+        let fnm = 1.3;  // number factor
+        let fsc = 1.5;  // special char factor
+        let spc_chars = '^`?()[]{/}+-=Â¦|~!@#$%&*_';
+
+        let regex_sc = new RegExp('['+spc_chars+']', 'g');
+
+        let lcase_count: any = password.match(/[a-z]/g);
+        lcase_count = (lcase_count) ? lcase_count.length : 0;
+        let ucase_count: any = password.match(/[A-Z]/g);
+        ucase_count = (ucase_count) ? ucase_count.length : 0;
+        let num_count: any = password.match(/[0-9]/g);
+        num_count = (num_count) ? num_count.length : 0;
+        let schar_count: any = password.match(regex_sc);
+        schar_count = (schar_count) ? schar_count.length : 0;
+        let avg: any = password.length / 4;
+
+        strength = ((lcase_count * flc + 1) * (ucase_count * fuc + 1) * (num_count * fnm + 1) * (schar_count * fsc + 1)) / (avg + 1);
+
+        console.log('Strengt: '+strength);
+        return strength;
+    }
+    /**
+     * returns an factor indicating the repeat of signd in a password
+     * Higher values mean better password strength
+     * @param password
+     */
+    private static detectPW(password:string){
+        let pw_parts = password.split('');
+        let i;
+        let ords = new Array();
+        for (i in pw_parts){
+            ords[i] = pw_parts[i].charCodeAt(0);
+        }
+        let accum = 0;
+        let lasti = ords.length-1;
+
+        for (let i=0; i < lasti; ++i){
+            accum += Math.abs(ords[i] - ords[i+1]);
+        }
+        console.log('detect: '+accum/lasti);
+        return accum/lasti;
+    }
+
+    /**
+     * returns the password strength as a string value
+     * weak, accept, medium, strong
+     * @param password
+     */
+    public static getPasswordStrengthString(password: string){
+        let min_length = 5;
+        if (password.length >= min_length && this.detectPW(password) > 0){
+            if (this.detectPW(password) > 5 && this.getPasswordStrength(password) > 5){
+                if (this.detectPW(password) > 10 && this.getPasswordStrength(password) > 10){
+                    return 'strong';
+                } else {
+                    return 'medium';
+                }
+            } else {
+                return 'accept';
+            }
+        } else {
+            return'weak';
+        }
+    }
 
   static routeToSearchNode(router: Router, node: Node) {
     let converted=UIHelper.convertSearchParameters(node);

@@ -15,6 +15,14 @@ powered-by{
 }
 .register{
   color:$textLight;
+  a{
+    text-transform: uppercase;
+    i{
+      font-size: 11pt;
+      position: relative;
+      top: 3px;
+    }
+  }
 }
 @media screen and (max-height: ($mobileHeight)) {
   .card{

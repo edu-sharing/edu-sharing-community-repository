@@ -1,0 +1,20 @@
+@import "../../../../styles/variables.scss";
+
+.request-info{
+  margin-bottom: 20px;
+  text-align: center;
+}
+h4{
+  margin-bottom: 20px;
+}
+.register{
+  color:$textLight;
+  a{
+    text-transform: uppercase;
+    i{
+      font-size: 11pt;
+      position: relative;
+      top: 3px;
+    }
+  }
+}

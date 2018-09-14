@@ -26,19 +26,26 @@ import {RegisterRequestComponent} from "./register-request/register-request.comp
   styleUrls: ['register.component.scss']
 })
 export class RegisterComponent{
-  @ViewChild('registerForm') registerForm : RegisterFormComponent;
-  @ViewChild('registerDone') registerDone : RegisterDoneComponent;
-  @ViewChild('request') request : RegisterRequestComponent;
-  public isLoading=true;
+    @ViewChild('registerForm') registerForm : RegisterFormComponent;
+    @ViewChild('registerDone') registerDone : RegisterDoneComponent;
+    @ViewChild('request') request : RegisterRequestComponent;
+    public isLoading=true;
+    state = 'register';
 
-  state = 'register';
-  public cancel(){
+    public cancel(){
       if (this.state == 'done'){
           this.state = 'register';
       } else {
           this.router.navigate([UIConstants.ROUTER_PREFIX+"login"]);
       }
   }
+
+    public requestDone(email: string ){
+        this.state = "reques-done";
+        console.log(email);
+    }
+
+
   constructor(private connector : RestConnectorService,
               private toast:Toast,
               private platformLocation: PlatformLocation,

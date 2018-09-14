@@ -4,7 +4,7 @@
         <div class="card-content">
             <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
             <div class="card-title">
-                {{'REGISTER.TITLE' | translate}}
+                {{(state=='request' ? 'REQUEST.TITLE' : state=='reset-password' ? 'RESET.TITLE' : 'REGISTER.TITLE') | translate}}
             </div>
             <div class="card-title-info">
                 <img class="card-title-image" src='assets/images/app-icon.svg' alt="{{'REGISTER.ORGANIZATION_TITEL' | translate}}">
@@ -13,15 +13,16 @@
             </div>
             <div class="card-scroll">
                 <app-register-form *ngIf="state=='register'" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
-                <app-register-done *ngIf="state=='done'"  #registerDone></app-register-done>
-                <app-register-require *ngIf="state=='require'"  #require></app-register-require>
+                <app-register-done *ngIf="state=='done' || state=='done-request'"  #registerDone></app-register-done>
+                <app-register-request *ngIf="state=='request'"  #request></app-register-request>
                 <app-register-reset-password *ngIf="state=='reset-password'"  #resetPassword></app-register-reset-password>
             </div>
         </div>
         <div class="card-action">
-            <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" (click)="registerForm.register()">{{'REGISTER.REGISTER' | translate }}</a>
+            <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" (click)="registerForm.register()">{{'REGISTER.BUTTON' | translate }}</a>
+            <a *ngIf="state=='request'" [class.disabled]="!request || !request.checkMail()" (click)="requestDone(request.email)" class="waves-effect waves-light btn">{{'REQUEST.BUTTON' | translate }}</a>
+            <a *ngIf="state=='reset-password'" [class.disabled]="!resetPassword || resetPassword.password_strength != 'weak'" class="waves-effect waves-light btn">{{'RESET.BUTTON' | translate }}</a>
             <a *ngIf="state=='done' && registerDone && !registerDone.keyUrl" class="btn-flat" (click)="registerDone.sendMail()">{{'DONE.SEND_MAIL' | translate }}</a>
         </div>
-
     </div>
 </div>
