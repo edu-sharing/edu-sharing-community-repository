@@ -268,7 +268,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 	
 	@Override
-	public void setProperty(String protocol, String storeId, String nodeId, String property, String value) {
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -180,7 +180,8 @@
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",
       "WORKFLOW":"Workflow",
-      "TEMPLATE":"Metadata Template"
+      "TEMPLATE":"Metadata Template",
+      "VARIANT": "Create variant"
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatic Metadata Inheritance",

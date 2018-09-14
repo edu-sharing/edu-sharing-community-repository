@@ -119,5 +119,5 @@ public interface NodeService {
 
 	List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc);
 	
-	public void setProperty(String protocol, String storeId, String nodeId, String property, String value);
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value);
 }

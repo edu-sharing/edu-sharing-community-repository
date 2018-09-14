@@ -107,17 +107,6 @@
 						<many>true</many>
 					</target>
 				</child-association>
-				<child-association name="ccm:forkio">
-					<source>
-						<mandatory>false</mandatory>
-						<many>true</many>
-					</source>
-					<target>
-						<class>ccm:io</class>
-						<mandatory>false</mandatory>
-						<many>true</many>
-					</target>
-				</child-association>
 			</associations>
 			<mandatory-aspects>
 				<aspect>ccm:iometadata</aspect>
@@ -1291,6 +1280,20 @@
 					</target>
 				</child-association>
 			</associations>
+		</aspect>
+
+		<aspect name="ccm:forked">
+			<title>A node that is a variant (forked) of a parent node</title>
+			<properties>
+				<property name="ccm:forked_origin">
+					<type>d:noderef</type>
+					<multiple>false</multiple>
+				</property>
+				<property name="ccm:forked_origin_version">
+					<type>d:text</type>
+					<multiple>false</multiple>
+				</property>
+			</properties>
 		</aspect>
 		
 		<aspect name="ccm:shares">

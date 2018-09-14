@@ -104,6 +104,7 @@ export class RestConstants {
   public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
   public static CCM_PROP_TOOL_INSTANCE_KEY="ccm:tool_instance_key";
   public static CCM_PROP_TOOL_INSTANCE_SECRET="ccm:tool_instance_secret";
+  public static CCM_PROP_FORKED_ORIGIN="ccm:forked_origin";
 
   public static LINKTYPE_USER_GENERATED="USER_GENERATED";
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";

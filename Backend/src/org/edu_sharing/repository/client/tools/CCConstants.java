@@ -346,10 +346,15 @@ public class CCConstants {
 	public final static String CCM_PROP_SAVED_SEARCH_QUERY = "{http://www.campuscontent.de/model/1.0}saved_search_query";
 	public final static String CCM_PROP_SAVED_SEARCH_PARAMETERS = "{http://www.campuscontent.de/model/1.0}saved_search_parameters";
 
+	public final static String CCM_PROP_FORKED_ORIGIN = "{http://www.campuscontent.de/model/1.0}forked_origin";
+	public final static String CCM_PROP_FORKED_ORIGIN_VERSION = "{http://www.campuscontent.de/model/1.0}forked_origin_version";
+
 	/*CCMODEL*/
 	public final static String CCM_ASPECT_USER_EXTENSION ="{http://www.campuscontent.de/model/1.0}userExtension";
 
 	public final static String CCM_ASPECT_LICENSES ="{http://www.campuscontent.de/model/1.0}licenses";
+
+	public final static String CCM_ASPECT_FORKED ="{http://www.campuscontent.de/model/1.0}forked";
 
 	public final static String CCM_ASPECT_COLLECTION = "{http://www.campuscontent.de/model/1.0}collection";
 
@@ -1114,9 +1119,6 @@ public class CCConstants {
 	public static final String CCM_ASSOC_USAGEASPECT_USAGES = "{http://www.campuscontent.de/model/1.0}usages";
 
 	public static final String CCM_ASSOC_CHILDIO = "{http://www.campuscontent.de/model/1.0}childio";
-
-	public static final String CCM_ASSOC_FORKIO = "{http://www.campuscontent.de/model/1.0}forkio";
-
 
 	/**
 	 * tempory, non persistent properties

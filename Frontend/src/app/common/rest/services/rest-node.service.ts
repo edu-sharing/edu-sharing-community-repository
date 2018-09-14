@@ -453,7 +453,7 @@ export class RestNodeService extends AbstractRestService{
    * @param properties The new node properties
    * @returns {Observable<R>}
    */
-  public editNodeMetadata = (node : string,properties : any,repository=RestConstants.HOME_REPOSITORY) : Observable<void> => {
+  public editNodeMetadata = (node : string,properties : any,repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
     let query = this.connector.createUrl("node/:version/nodes/:repository/:node/metadata", repository,
       [
         [":node", node],

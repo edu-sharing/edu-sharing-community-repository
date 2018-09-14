@@ -87,13 +87,42 @@
     <div class="description">{{'WORKSPACE.METADATA.USAGE_COUNT_TITLE' | translate}}</div>
 
 
-    <canvas id="myChart" width="280" height="300"></canvas>
-    <ul class="statistik_value">
+    <canvas id="myChart" width="300" height="200"></canvas>
+    <ul class="statistic-value">
       <li *ngFor="let point of stats.points;let i=index" class="point"><i class="material-icons">{{ stats.pointsIcons[i] }}</i> {{point}}</li>
 
     </ul>
-    <div class="description usage_count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <strong style="font-weight: bold;">{{statsTotalPoints}}</strong></div>
-
+    <div class="description usage-count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <span class="usage-counter">{{usages ? usages.length : 0}}</span></div>
+    <div class="description collections" *ngIf="usagesCollection && usagesCollection.length">{{'WORKSPACE.METADATA.COLLECTIONS' | translate:{count:usagesCollection.length} }}</div>
+    <listTable *ngIf="usagesCollection && usagesCollection.length"
+               [nodes]="usagesCollection"
+               [columns]="columnsCollections"
+               [viewType]="0"
+               [hasHeading]="false"
+               [hasIcon]="true"
+               [isClickable]="true"
+               (clickRow)="displayCollection($event)"
+    ></listTable>
+    <div class="description forkedParend" *ngIf="forkedParent">{{'WORKSPACE.METADATA.FORKED_PARENT' | translate}}</div>
+    <listTable *ngIf="forkedParent"
+               [nodes]="[forkedParent]"
+               [columns]="columns"
+               [viewType]="0"
+               [hasHeading]="false"
+               [hasIcon]="true"
+               [isClickable]="true"
+               (clickRow)="displayNode($event)"
+    ></listTable>
+    <div class="description forkedParend" *ngIf="forkedChilds && forkedChilds.length">{{'WORKSPACE.METADATA.FORKED_CHILDS' | translate:{count:forkedChilds.length} }}</div>
+    <listTable *ngIf="forkedChilds && forkedChilds.length"
+               [nodes]="forkedChilds"
+               [columns]="columns"
+               [viewType]="0"
+               [hasHeading]="false"
+               [hasIcon]="true"
+               [isClickable]="true"
+               (clickRow)="displayNode($event)"
+    ></listTable>
 
 
     <!--<div class="value">{{usageCount}}</div>-->

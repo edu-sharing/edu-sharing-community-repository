@@ -16,6 +16,7 @@ import {CordovaService} from '../services/cordova.service';
 import {RestConnectorService} from './services/rest-connector.service';
 
 export class RestHelper{
+    private static SPACES_STORE_REF = "workspace://SpacesStore/";
   public static getNodeIds(nodes : Node[]|Collection[]|CollectionReference[]): Array<string>{
     let data=new Array<string>(nodes.length);
     for(let i=0;i<nodes.length;i++){
@@ -296,8 +297,14 @@ export class RestHelper{
     }
 
   static createSpacesStoreRef(node: Node) {
-    return "workspace://SpacesStore/"+node.ref.id;
+    return RestHelper.SPACES_STORE_REF+node.ref.id;
   }
+    static removeSpacesStoreRef(id: string) {
+        if(id.startsWith(RestHelper.SPACES_STORE_REF)){
+            return id.substr(RestHelper.SPACES_STORE_REF.length);
+        }
+        return id;
+    }
 
   static getAllAuthoritiesPermission() {
     let perm=new Permission();

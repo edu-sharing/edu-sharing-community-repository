@@ -23,6 +23,7 @@ import {RestToolService} from "./common/rest/services/rest-tool.service";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 import {RestUtilitiesService} from "./common/rest/services/rest-utilities.service";
 import {RestSharingService} from "./common/rest/services/rest-sharing.service";
+import {ActionbarHelperService} from "./common/services/actionbar-helper";
 import {PermissionNamePipe} from "./common/ui/permission-name.pipe";
 
 
@@ -46,6 +47,7 @@ export const PROVIDERS=[
   RestToolService,
   RestUtilitiesService,
   TemporaryStorageService,
+  ActionbarHelperService,
   PermissionNamePipe,
   RestMetadataService,
   RestSharingService,

@@ -132,6 +132,9 @@
       "PERMALINK":"Link Zum Objekt",
       "USAGE_COUNT_TITLE":"Verwendungen",
       "USAGE_COUNT":"Verwendung insgesamt: ",
+      "COLLECTIONS":"In {{count}} Sammlung(en) enthalten",
+      "FORKED_PARENT":"Ist Variante von",
+      "FORKED_CHILDS":"Hat {{count}} Variante(n)",
       "USAGE_TYPE": {
         "LMS": "LMS-Kurse",
         "COLLECTION": "Sammlungen",
@@ -198,7 +201,9 @@
       "CONTRIBUTOR":"Beteiligte",
       "SHARE_LINK":"Download-Link freigeben",
       "WORKFLOW":"Workflow",
-      "TEMPLATE":"Metadaten Vorlage"
+      "TEMPLATE":"Metadaten Vorlage",
+      "VARIANT": "Variante anlegen",
+      "VARIANT_OPEN": "Als Variante öffnen"
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatische Übernahme von Metadaten",
