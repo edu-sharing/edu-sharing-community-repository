@@ -311,11 +311,12 @@ export class NodeRenderComponent implements EventListener{
             }
             else {
                 this._node=data.node;
-                this.getSequence();
-                jQuery('#nodeRenderContent').html(data.detailsSnippet);
-                this.postprocessHtml();
-                this.loadNode();
-                this.isLoading = false;
+                this.getSequence(()=>{
+                    jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                    this.postprocessHtml();
+                    this.loadNode();
+                    this.isLoading = false;
+                });
             }
             this.isLoading = false;
         },(error:any)=>{
@@ -475,9 +476,11 @@ export class NodeRenderComponent implements EventListener{
       this.downloadUrl=url;
   }
 
-    private getSequence() {
-        if(this.sequence)
-          return;
+    private getSequence(onFinish:Function) {
+        if(this.sequence){
+            onFinish();
+            return;
+        }
         if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data =>{
              this.sequenceParent = data.node;
@@ -485,6 +488,7 @@ export class NodeRenderComponent implements EventListener{
                    if(data.nodes.length > 0)
                     this.sequence = data;
                     setTimeout(()=>this.setScrollparameters(),100);
+                   onFinish();
                });
             });
         } else {
@@ -493,6 +497,7 @@ export class NodeRenderComponent implements EventListener{
                 if(data.nodes.length > 0)
                   this.sequence = data;
                   setTimeout(()=>this.setScrollparameters(),100);
+                onFinish();
             });
         }
     }
