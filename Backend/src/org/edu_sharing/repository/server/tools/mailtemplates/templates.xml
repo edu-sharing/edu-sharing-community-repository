@@ -67,6 +67,14 @@
 				padding:10px 25px;
 				box-shadow:0 2px 5px rgba(0,0,0,.5);
 			}
+			.input-field{
+				display:inline-block;
+				background:#fff;
+				border-radius:3px;
+				padding:5px 10px;
+				margin:5px;
+				border:1px solid #ccc;
+			}
 			a{
 				color:#48708e;
 				text-decoration:none;
@@ -94,12 +102,18 @@
 		</message>
 	</template>
 	<template name="userRegister">
-		<subject>Register</subject>
+		<subject>Account confirmation</subject>
 		<message><![CDATA[
-			<h1>Hallo!</h1>
+			<h1>Hello {{firstName}} {{lastName}}!</h1>
+			Thank you for your registration!<br><br>
+			To activate your account and login, click on the link below:
+			<br><br>
 			<div class="center"><a class="btn" href="{{link}}">Finish registration</a></div>
 			<br><br>
-			<div class="center">{{key}}</div>
+			Or you may copy the key below and enter it into your register confirmation dialog:<br>
+			<div class="center">
+				<div class="input-field">{{key}}</div>
+			</div>
 		]]>
 		</message>
 	</template>
