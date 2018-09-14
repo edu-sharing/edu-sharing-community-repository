@@ -448,19 +448,18 @@ export class NodeRenderComponent implements EventListener{
         if (del) {
             this.options.push(del);
         }
-
         this.isOpenable = false;
         if (this.version == RestConstants.NODE_VERSION_CURRENT && this.connectors.connectorSupportsEdit(this._node) || RestToolService.isLtiObject(this._node)) {
             let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", () => this.openConnector( true));
             //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
             this.options.splice(0, 0, view);
-            this.options = Helper.deepCopyArray(this.options);
             this.isOpenable = true;
             if (this.editor && this.connectors.connectorSupportsEdit(this._node).id == this.editor) {
                 this.openConnector(false);
             }
-            this.postprocessHtml();
         }
+        this.options = Helper.deepCopyArray(this.options);
+        this.postprocessHtml();
     }
 
     private goToWorkspace(login:LoginResult,node:Node) {
