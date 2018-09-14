@@ -39,7 +39,7 @@ public class CourseImporterJob extends AbstractJob {
 						Integer.parseInt(jobDataMap.getString(KEY_PORT)),
 						jobDataMap.getString(KEY_CONTEXT),
 						jobDataMap.getString(KEY_WSTOKEN),						
-						new PersistentHandlerEdusharing());				
+						new PersistentHandlerEdusharing(this));
 				break;
 				
 			case opal:
@@ -51,7 +51,7 @@ public class CourseImporterJob extends AbstractJob {
 						jobDataMap.getString(KEY_CONTEXT),
 						jobDataMap.getString(KEY_USER),
 						jobDataMap.getString(KEY_PASSWORD),
-						new PersistentHandlerEdusharing());				
+						new PersistentHandlerEdusharing(this));
 				break;
 			}
 		} catch (Throwable t) {

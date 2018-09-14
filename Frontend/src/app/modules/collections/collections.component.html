@@ -50,8 +50,6 @@
   </section>
   <div class="collections-master-div" [class.collections-master-div-notabs]="!isRootLevelCollection()">
 
-    <a *ngIf="!isLoading && isGuest" class="clickable switchToSearch" title="{{'COLLECTIONS.TO_SEARCH' | translate}}" tabindex="0" (click)="navigateToSearch()" (keypress)="($event.which === 13)?navigateToSearch():0">{{'COLLECTIONS.TO_SEARCH' | translate}} <i class="material-icons">arrow_forward</i></a>
-
 <!-- breadcrumbs -->
       <div class="breadcrumb-space" *ngIf="!isRootLevelCollection() && !isLoading">
           <breadcrumbs class="collections-breadcrumb"
@@ -63,9 +61,9 @@
           ></breadcrumbs>
       </div>
 
-
-
-<!-- content (collection cards) if not error -->
+      <a *ngIf="!isLoading && isGuest" class="clickable switchToSearch" title="{{'COLLECTIONS.TO_SEARCH' | translate}}" tabindex="0" (click)="navigateToSearch()" (keypress)="($event.which === 13)?navigateToSearch():0">{{'COLLECTIONS.TO_SEARCH' | translate}} <i class="material-icons">arrow_forward</i></a>
+      
+      <!-- content (collection cards) if not error -->
 
 <section class="collections-cards-div" *ngIf="((lastError==null) && (!isLoading))" >
 
@@ -181,11 +179,14 @@
     [(addToCollection)]="addToOther"
     (onCloseAddToCollection)="closeAddToOther()"
   ></workspace-management>
+  <app-footer [scope]="'collections'" class="alignWithBanner"></app-footer>
 </div>
 </div>
 <!-- collection header -->
 <div *ngIf="(!isRootLevelCollection()) && (!isLoading) && isReady && (tabSelected.length>=-1)"
-     class="collections-header scrollWithBanner"
+     class="collections-header"
+     [class.alignWithBanner]="isMobileWidth()"
+     [class.scrollWithBanner]="!isMobileWidth()"
      [class.dark-color]="isBrightColor()"
      [style.background-color]="collectionContent.collection.color">
 

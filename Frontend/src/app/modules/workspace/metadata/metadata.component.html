@@ -12,7 +12,7 @@
           </li>
           <!--Icon for Usages-->
           <li class="clickable tab col s4" (click)="setTab(PROPERTIES)" title="Statistik">
-            <a [class.active]="tab==PROPERTIES" alt="Statistik"><i class="material-icons">equalizer</i><div class="value-properties">{{usages ? usages.length : 0}}</div></a>
+            <a [class.active]="tab==PROPERTIES" alt="Statistik"><i class="material-icons">equalizer</i><div class="value-properties">{{statsTotalPoints}}</div></a>
           </li>
           <li class="clickable tab col s4" (click)="setTab(VERSIONS)" title="Version">
             <a [class.active]="tab==VERSIONS" alt="Version"><i class="material-icons">restore</i></a>
@@ -89,13 +89,13 @@
 
     <canvas id="myChart" width="300" height="200"></canvas>
     <ul class="statistic-value">
-      <li *ngFor="let point of stats.points" class="point">{{point}}</li>
+      <li *ngFor="let point of stats.points;let i=index" class="point"><i class="material-icons">{{ stats.pointsIcons[i] }}</i> {{point}}</li>
 
     </ul>
-    <div class="usage-count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <span class="usage-counter">{{usages ? usages.length : 0}}</span></div>
-    <div class="description collections" *ngIf="collections && collections.length">{{'WORKSPACE.METADATA.COLLECTIONS' | translate:{count:collections.length} }}</div>
-    <listTable *ngIf="collections && collections.length"
-               [nodes]="collections"
+    <div class="description usage-count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <span class="usage-counter">{{usages ? usages.length : 0}}</span></div>
+    <div class="description collections" *ngIf="usagesCollection && usagesCollection.length">{{'WORKSPACE.METADATA.COLLECTIONS' | translate:{count:usagesCollection.length} }}</div>
+    <listTable *ngIf="usagesCollection && usagesCollection.length"
+               [nodes]="usagesCollection"
                [columns]="columnsCollections"
                [viewType]="0"
                [hasHeading]="false"

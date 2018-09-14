@@ -19,6 +19,7 @@
 
   .btn{
     width: 100%;
+    margin-top: -5px;
   }
 }
 
@@ -34,7 +35,6 @@
 }
 .details{
   margin-bottom: 20px;
-  text-align: center;
   position: relative;
   width: 90%;
   left: 5%;
@@ -54,9 +54,6 @@
     height: 42px;
     word-break: break-all;
     overflow: hidden;
-  }
-  .owner{
-    margin-top: 5px;
   }
 }
 .details-opacity{
@@ -78,13 +75,23 @@
   margin-bottom: 10px;
 
   i{
-    margin-right: 5px;
+    margin-right: 10px;
+    border-radius: 50%;
+    border: 2px solid $colorStatusPositive;
+    padding: 2px;
+    display: table;
   }
 }
 
 .download{
   margin-top: 10px;
   text-align: center;
+}
+
+.download-top{
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 20px;
 }
 powered-by{
   position: fixed;
@@ -111,7 +118,15 @@ powered-by{
   .password-required{
     width: 100%;
   }
-  .branding,powered-by{
+  .branding{
+    margin-bottom: -30px;
+    text-align: right;
+    img{
+      width: 100px;
+      height: auto;
+    }
+  }
+  powered-by{
     display: none;
   }
   .folder{
@@ -119,5 +134,11 @@ powered-by{
     margin-top: 0;
     width: 110%;
     left: -5%;
+  }
+}
+
+@media screen and (max-height:($mobileHeightLandscape)) {
+  .branding{
+    display: none;
   }
 }

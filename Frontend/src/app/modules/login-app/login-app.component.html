@@ -25,7 +25,7 @@
             <div>
               <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
               <!-- input requried type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/> -->
-              <input-password id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
+              <input-password id="password" required="true" (keyup)="checkConditions()" (keydown.enter)="login()" [(value)]="password"></input-password>
             </div>
           </form>
           <!--

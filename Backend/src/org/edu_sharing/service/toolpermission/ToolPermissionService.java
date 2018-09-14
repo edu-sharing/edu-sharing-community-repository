@@ -154,40 +154,46 @@ public class ToolPermissionService {
 				return nodeId;
 		}
 		String systemFolderId = getEdu_SharingToolPermissionsFolder();
-		
-		
-		HashMap<String, Object> sysObject = eduNodeService.getChild(Constants.storeRef, systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, CCConstants.CM_NAME, toolPermission);
+
+
+        NodeRef sysObject = eduNodeService.getChild(Constants.storeRef, systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, CCConstants.CM_NAME, toolPermission);
 		
 		if(sysObject == null){
-			
-			logger.info("ToolPermission" + toolPermission+ " does not exsist. will create it.");
-			HashMap props = new HashMap();
-			props.put(CCConstants.CM_NAME, toolPermission);
-			String result = eduNodeService.createNodeBasic(systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, props);
-			//set admin as owner cause if it was created by runAs with admin the current user not the runas on is taken
-			eduNodeService.setOwner(result, ApplicationInfoList.getHomeRepository().getUsername());
-			if(!toolPermission.equals(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL)){
-				eduNodeService.setPermissions(result,PermissionService.ALL_AUTHORITIES, new String[]{CCConstants.PERMISSION_READ}, false);
-			}
-			else{
-				eduNodeService.setPermissions(result, null,null, false);
-			}
+
+			String result = createToolpermission(toolPermission, systemFolderId);
 	
 			return result;
 			
 		}else{
-			String nodeId=(String)sysObject.get(CCConstants.SYS_PROP_NODE_UID);
+			String nodeId=sysObject.getId();
 			toolPermissionNodeCache.put(toolPermission, nodeId);
 			return nodeId;
 		}
 	}
-	
+
+	private String createToolpermission(String toolPermission, String systemFolderId) throws Exception {
+		logger.info("ToolPermission" + toolPermission+ " does not exists. will create it.");
+		HashMap props = new HashMap();
+		props.put(CCConstants.CM_NAME, toolPermission);
+		String result = eduNodeService.createNodeBasic(systemFolderId, CCConstants.CCM_TYPE_TOOLPERMISSION, props);
+		//set admin as owner cause if it was created by runAs with admin the current user not the runas on is taken
+		eduNodeService.setOwner(result, ApplicationInfoList.getHomeRepository().getUsername());
+		if(ToolPermissionServiceFactory.getAllDefaultAllowedToolpermissions().contains(toolPermission)){
+			logger.info("ToolPermission" + toolPermission+ " is allowed by default. Will set GROUP_EVERYONE.");
+			eduNodeService.setPermissions(result,PermissionService.ALL_AUTHORITIES, new String[]{CCConstants.PERMISSION_READ}, false);
+		}
+		else{
+			eduNodeService.setPermissions(result, null,null, false);
+		}
+		return result;
+	}
+
 	private String getEdu_SharingSystemFolderBase() throws Throwable{
 		if(!isAdmin()){
 			throw new Exception("Admin group required");
 		}
 		String companyHomeNodeId = eduNodeService.getCompanyHome();
-		HashMap<String, Object> edu_SharingSysMap = eduNodeService.getChild(Constants.storeRef, companyHomeNodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
+		NodeRef edu_SharingSysMap = eduNodeService.getChild(Constants.storeRef, companyHomeNodeId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM);
 		
 		String result = null;
 		if(edu_SharingSysMap == null){
@@ -207,7 +213,7 @@ public class ToolPermissionService {
 			result = eduNodeService.createNodeBasic(companyHomeNodeId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
 			permissionService.setInheritParentPermissions(new NodeRef(Constants.storeRef,result),false);
 		}else{
-			result = (String)edu_SharingSysMap.get(CCConstants.SYS_PROP_NODE_UID);
+			result = edu_SharingSysMap.getId();
 		}
 		return result;
 	}
@@ -218,7 +224,7 @@ public class ToolPermissionService {
 			return toolPermissionFolder;
 		logger.info("fully: "+AuthenticationUtil.getFullyAuthenticatedUser() +" runAs:"+AuthenticationUtil.getRunAsUser());
 		String systemFolderId = getEdu_SharingSystemFolderBase();
-		HashMap<String, Object> edu_SharingSystemFolderToolPermissions = eduNodeService.getChild(Constants.storeRef, systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS);
+		NodeRef edu_SharingSystemFolderToolPermissions = eduNodeService.getChild(Constants.storeRef, systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS);
 		String result = null;
 		if(edu_SharingSystemFolderToolPermissions == null){
 			logger.info("ToolPermission Folder does not exsist. will create it.");
@@ -235,7 +241,7 @@ public class ToolPermissionService {
 			newEdu_SharingSysMapProps.put(CCConstants.CCM_PROP_MAP_TYPE, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOOLPERMISSIONS);
 			result = eduNodeService.createNodeBasic(systemFolderId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
 		}else{
-			result = (String)edu_SharingSystemFolderToolPermissions.get(CCConstants.SYS_PROP_NODE_UID);
+			result = edu_SharingSystemFolderToolPermissions.getId();
 		}
 		this.toolPermissionFolder=result;
 		return result;

@@ -2,7 +2,7 @@ import {Component, Input, EventEmitter, Output, AfterViewInit} from '@angular/co
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {
     Node, NodeList, NodeWrapper, NodePermissions, NodeVersions, UsageList,
-    Version, LoginResult, IamUser, Permission, Usage, Collection
+    Version, LoginResult, IamUser, Permission, Usage, Collection, CollectionUsage
 } from '../../../common/rest/data-object';
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
@@ -40,7 +40,7 @@ export class WorkspaceMetadataComponent{
   private tab=this.INFO;
   private permissions : any;
   private usages : Usage[];
-  private usagesCollection : Collection[];
+  private usagesCollection : CollectionUsage[];
   private nodeObject : Node;
   private versions : Version[];
   private versionsLoading=false;
@@ -52,13 +52,14 @@ export class WorkspaceMetadataComponent{
   stats:any= {
       labels: [],
       points: [],
-      colors: ['rgba(230, 178, 71, .8)', 'rgba(151, 91, 93, .8)', 'rgba(27, 102, 49, .8)']
+      pointsIcons: ["input","layers","cloud_download","remove_red_eye"],
+      colors: ['rgba(230, 178, 71, .8)', 'rgba(151, 91, 93, .8)', 'rgba(27, 102, 49, .8)','rgba(102,167,217,.8)']
   };
 
+  statsTotalPoints: number;
   @Input() isAdmin:boolean;
   forkedParent: Node;
   forkedChilds: Node[];
-  collections: Collection[];
   @Input() set node(node : string){
     this._node=node;
     this.load();
@@ -91,7 +92,12 @@ export class WorkspaceMetadataComponent{
             this.versions=data.versions.reverse();
             for(let version of this.versions) {
                 if(version.comment){
-                    if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD || version.comment==RestConstants.COMMENT_NODE_PUBLISHED || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
+                    if(version.comment==RestConstants.COMMENT_MAIN_FILE_UPLOAD
+                        || version.comment==RestConstants.COMMENT_METADATA_UPDATE
+                        || version.comment==RestConstants.COMMENT_CONTENT_UPDATE
+                        || version.comment==RestConstants.COMMENT_LICENSE_UPDATE
+                        || version.comment==RestConstants.COMMENT_NODE_PUBLISHED
+                        || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
                         let parameters = version.comment.split(",");
                         let editor = "";
                         if (parameters.length > 1)
@@ -125,10 +131,6 @@ export class WorkspaceMetadataComponent{
         }
         this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN],[RestHelper.createSpacesStoreRef(data.node)],["="]).subscribe((childs)=>{
             this.forkedChilds=childs.nodes;
-        });
-        this.usageApi.getNodeUsagesCollection(data.node.ref.id).subscribe((data:Collection[])=>{
-            this.collections=data;
-            console.log(data);
         });
         this.usageApi.getNodeUsages(this._node).subscribe((usages : UsageList) =>{
             this.usages=usages.usages;
@@ -289,10 +291,14 @@ export class WorkspaceMetadataComponent{
         this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.LMS"));
         this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.COLLECTION"));
         //this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD"));
+        //this.stats.labels.push(this.translate.instant("WORKSPACE.METADATA.USAGE_TYPE.VIEW"));
+
         this.stats.points=[];
         this.stats.points.push(this.usages.length-this.usagesCollection.length);
         this.stats.points.push(this.usagesCollection.length);
-        //this.stats.points.push(0);
+        //this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS] : 0);
+        //this.stats.points.push(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS] : 0);
+        this.statsTotalPoints=this.stats.points.reduce((a:any,b:any)=>parseInt(a,10)+parseInt(b,10), 0);
         this.canvas = document.getElementById('myChart');
         this.ctx = this.canvas.getContext('2d');
         // FontFamily
@@ -322,6 +328,11 @@ export class WorkspaceMetadataComponent{
                     }
                 },
                 scales: {
+                    xAxes: [{
+                        ticks: {
+                            display: false
+                        }
+                    }],
                     yAxes: [{
                         ticks: {
                             beginAtZero:true,

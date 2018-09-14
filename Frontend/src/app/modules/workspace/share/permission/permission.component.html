@@ -1,6 +1,15 @@
+<div class="group">
+<div class="deleted-info" *ngIf="isDeleted">
+    <div class="line"><hr></div>
+    <div class="info">{{'WORKSPACE.SHARE.DELETED' | translate}}</div>
+    <div class="line"><hr></div>
+</div>
 <div class="container" [class.added]="added">
 <div class="icon"><i class="type material-icons">{{_permission.authority.authorityType=='USER' ? "person" : _permission.authority.authorityType=='LINK' ? "link" : "group"}}{{added ? "_add" : "" }}</i></div>
-<div class="name">{{_permission | permissionName}}</div>
+<div class="name">
+  <span class="primary">{{_permission | permissionName}}</span>
+  <span class="secondary">{{_permission | permissionName:{field:'secondary'} }}</span>
+</div>
 <div class="permission" [class.clickable]="!readOnly && !isEveryone && !invalidPermission" [class.readOnly]="readOnly">
   <div class="publish">
     <i class="material-icons" *ngIf="_permission.permissions.indexOf('Coordinator')>-1 || _permission.permissions.indexOf('CCPublish')>-1" title="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate}}">public</i>
@@ -11,7 +20,7 @@
       <div class="select"></div>
     </div>
   </div>
-  <div *ngIf="!invalidPermission">
+  <div *ngIf="!invalidPermission" class="permission-type">
     <div *ngIf="_permission.permissions.indexOf('Owner')>-1" (click)="chooseType()"><i class="material-icons align">home</i> <span>{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</span>
       <div class="select"></div>
       </div>
@@ -33,7 +42,9 @@
   </div>
 </div>
 <div class="remove" tabindex="0" (keyup.enter)="remove()" (click)="remove()" [class.invisible]="!showDelete" [class.clickable]="!readOnly">
-  <i *ngIf="!inherit" class="material-icons">cancel</i>
+  <i *ngIf="!inherit && !isDeleted" class="material-icons">cancel</i>
+  <i *ngIf="!inherit && isDeleted" class="material-icons">undo</i>
   <img *ngIf="inherit" class="inherit" src="assets/images/inherit.svg" title="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"/>
+</div>
 </div>
 </div>

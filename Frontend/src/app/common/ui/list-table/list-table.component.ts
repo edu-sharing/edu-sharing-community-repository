@@ -345,7 +345,7 @@ export class ListTableComponent implements EventListener{
   }
   onEvent(event:string,data:any){
     if(event==FrameEventsService.EVENT_PARENT_SCROLL){
-      this.scroll();
+      this.scroll(false);
     }
   }
   @HostListener('document:keydown', ['$event'])
@@ -565,7 +565,14 @@ export class ListTableComponent implements EventListener{
     option.callback(node);
     this.dropdown=null;
   }
-  public scroll(){
+  public scroll(fromUser:boolean){
+    if(!fromUser){
+      // check if there is a footer
+      let elements=document.getElementsByTagName('footer');
+      console.log(elements);
+      if(elements.length && elements.item(0).innerHTML.trim())
+        return;
+    }
     this.loadMore.emit();
   }
   private contextMenu(event:any,node : Node){
@@ -604,6 +611,9 @@ export class ListTableComponent implements EventListener{
     return node.collection ? node.collection : node
   }
   public isHomeNode(node : any){
+    // repos not loaded or not availale. assume true so that small images are loaded
+    if(!this.repositories)
+        return true;
     return RestNetworkService.isFromHomeRepo(node,this.repositories);
   }
   public getIconUrl(node : any){
@@ -735,6 +745,25 @@ export class ListTableComponent implements EventListener{
   public getItemCssClass(item:ListItem){
     return item.type.toLowerCase()+"_"+item.name.replace(":","_");
   }
+
+    handleKeyboard(event:any) {
+        if(this.viewType==ListTableComponent.VIEW_TYPE_LIST && (event.key=="ArrowUp" || event.key=="ArrowDown")){
+            let next=event.key=="ArrowDown";
+            let elements:any=document.getElementsByClassName("node-row");
+            for(let i=0;i<elements.length;i++){
+                let element=elements.item(i);
+                if(element==event.srcElement){
+                    if(next && i<elements.length-1)
+                        elements.item(i+1).focus();
+                    if(!next && i>0){
+                        elements.item(i-1).focus();
+                    }
+                }
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
 }
 export class AddElement{
   constructor(public label:string,public icon="add"){}

@@ -24,6 +24,7 @@ import {UIAnimation} from '../ui-animation';
 import {DialogButton} from '../modal-dialog/modal-dialog.component';
 import {UIService} from '../../services/ui.service';
 import {ConfigurationHelper} from "../../rest/configuration-helper";
+import {RestSearchService} from '../../rest/services/rest-search.service';
 
 @Component({
   selector: 'mds',
@@ -102,7 +103,7 @@ export class MdsComponent{
     this._setId=setId;
   }
   @Input() set invalidate(invalidate:Boolean){
-    if(invalidate)
+    if(invalidate.valueOf())
       setTimeout(()=>this.loadMds(),5);
   }
 
@@ -256,7 +257,7 @@ export class MdsComponent{
         let badges=document.getElementById(this.getWidgetDomId(widget));
         let elements:any=badges.childNodes;
         let add=true;
-        for(var i=0;i<elements.length;i++){
+        for(let i=0;i<elements.length;i++){
           if(elements[i].getAttribute('data-value')==searchField.value){
             add=false;
           }
@@ -652,7 +653,7 @@ export class MdsComponent{
         return;
       }
     }
-    for(var key in values){
+    for(let key in values){
       properties[key]=values[key];
     }
     if(this.currentNode)
@@ -664,14 +665,15 @@ export class MdsComponent{
       version = comment.value;
       files = (document.getElementById('fileSelect') as any).files;
       let display = document.getElementById('versionGroup').style.display;
-      if (version && display == 'none')
-        version = '';
-      if(display!='none' && !version){
-        comment.className+=' invalid';
-        this.toast.error(null,'TOAST.FIELD_REQUIRED',{name:this.translate.instant('VERSION_COMMENT')});
-        return;
+      if(!version.trim()){
+          if(files.length){
+            version=RestConstants.COMMENT_CONTENT_UPDATE;
+          }
+          else{
+            version=RestConstants.COMMENT_METADATA_UPDATE;
+          }
       }
-    }catch (e){}
+    }catch (e){console.info(e);}
 
     this.globalProgress=true;
     if(version){
@@ -743,13 +745,15 @@ export class MdsComponent{
           }
         }catch(e){}
         if(widget.id=='author'){
-          /*if(properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]){
+          if(properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]
+              && properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0]
+              && new VCard(properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0]).getDisplayName()){
             this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_PERSON);
           }
           else
             this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_FREETEXT);
-            */
-          this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_FREETEXT);
+
+          //this.setActiveAuthor(MdsComponent.AUTHOR_TYPE_FREETEXT);
         }
         if(widget.type=='vcard'){
           if(!props)
@@ -1089,8 +1093,8 @@ export class MdsComponent{
   }
   private mdsUpdateSuggests(id:string,showMore=false){
     let widget=this.getWidget(id);
-    let list=document.getElementById(this.getWidgetDomId(id)+'_suggestions');
-    let element:any=document.getElementById(this.getWidgetDomId(id)+'_suggestionsInput');
+    let list=document.getElementById(this.getWidgetDomId(widget)+'_suggestions');
+    let element:any=document.getElementById(this.getWidgetDomId(widget)+'_suggestionsInput');
     let elements=list.getElementsByTagName('a');
     if(showMore){
       list.className+=' suggestionListAll';
@@ -1103,7 +1107,14 @@ export class MdsComponent{
       group=RestConstants.DEFAULT_QUERY_NAME;
     }
     this.lastMdsQuery=element.value;
-    this.mdsService.getValues({query:group,property:id,pattern:element.value},this._setId,this._repository).subscribe((data:MdsValueList)=>{
+    this.mdsService.getValues({
+        valueParameters: {
+            query: group,
+            property: id,
+            pattern: element.value,
+        },
+        criterias:RestSearchService.convertCritierias(Helper.arrayJoin(this._currentValues,this.getValues()))
+    },this._setId,this._repository).subscribe((data:MdsValueList)=>{
       if(this.lastMdsQuery!=element.value)
         return;
 
@@ -1125,7 +1136,7 @@ export class MdsComponent{
         if(!widget.values && value.displayString){
           caption=value.displayString;
         }
-        list.innerHTML+=this.getListEntry(this.getWidgetDomId(id),key,caption,false,element.value);
+        list.innerHTML+=this.getListEntry(this.getWidgetDomId(widget),key,caption,false,element.value);
         i++;
       }
       if(i==0){
@@ -1248,7 +1259,7 @@ export class MdsComponent{
               `+this.getWindowComponent()+`.openSuggestions('`+widget.id+`',null,false,`+(widget.values ? true : false)+`,true);
               ">...</a>`;
     html+=`</div>`;
-    if(allowCustom && !openCallback){
+    if(allowCustom && !openCallback && !widget.bottomCaption){
       html+='<div class="hint">'+this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER')+'</div>';
     }
     return html;
@@ -1347,7 +1358,7 @@ export class MdsComponent{
               <div class="inputField"><span>:</span></div>
               <div class="inputField">
               <label for="`+id+`_minutes">`+this.translate.instant('INPUT_MINUTES')+`</label>
-              <input type="number" min="0" max="60" id="`+widget.id+`_minutes" onchange="
+              <input type="number" min="0" max="60" id="`+id+`_minutes" onchange="
               document.getElementById('`+id+`').noUiSlider.set(
               document.getElementById('`+id+`_hours').value*60+
               document.getElementById('`+id+`_minutes').value*1);
@@ -1460,7 +1471,7 @@ export class MdsComponent{
 
     for(let option of widget.values){
       let id=this.getWidgetDomId(widget)+'_'+option.id;
-      html+='<input type="radio" name="'+widget.id+'" id="'+id+'" value="'+option.id+'"'+(option.id==widget.defaultvalue ? ' checked' : '')+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+option.caption+'</label>';
+      html+='<input type="radio" name="'+this.getWidgetDomId(widget)+'" id="'+id+'" value="'+option.id+'"'+(option.id==widget.defaultvalue ? ' checked' : '')+(option.disabled ? ' disabled' : '')+'> <label for="'+id+'">'+option.caption+'</label>';
     }
     html+='</fieldset>';
     return html;
@@ -1511,9 +1522,12 @@ export class MdsComponent{
       caption=this.getCaption(widget);
     }
     let idLong=widget.id+(template.rel ? '_'+template.rel : '')+'_container';
-    html+='<div id="'+idLong+'" class="'+idLong+'"';
+    html+='<div id="'+idLong+'" class="'+idLong+'';
     if(this.isExtendedWidget(widget)){
-      html+=' class="mdsExtendedGroup" style="display:none"';
+      html+=' mdsExtendedGroup" style="display:none"';
+    }
+    else{
+      html+='"';
     }
     html+='>';
     if(widget.type!='checkbox')
@@ -1779,14 +1793,14 @@ export class MdsComponent{
   }
   private addChildobjectFile(event:any){
     this.addChildobject=false;
-    console.log(event);
-    let file=event[0];
-    let data={
-        icon:RestHelper.guessMediatypeIconForFile(this.connector,file),
-        name:file.name,
-        file:file
+    for(let file of event) {
+        let child = {
+            icon: RestHelper.guessMediatypeIconForFile(this.connector, file),
+            name: file.name,
+            file: file
+        }
+        this.childobjects.push(child);
     }
-    this.childobjects.push(data);
     this.refreshChildobjects();
   }
   private renderChildobjects(widget: any) {
@@ -1814,9 +1828,6 @@ export class MdsComponent{
               document.getElementById('selectedFileContent').innerHTML=this.files[0].name;
             }
             document.getElementById('selectedFile').style.display=valid ? '' : 'none';
-            document.getElementById('versionChooser').style.display=valid ? 'none' : '';
-            document.getElementById('versionGroup').style.display=valid ? '' : 'none';
-            document.getElementById('versionCheckbox').checked=false;
             document.getElementById('selectFileBtn').style.display=valid ? 'none' : '';
           " />
             <label for="comment">`+this.translate.instant('WORKSPACE.EDITOR.VERSION')+`</label>
@@ -1826,17 +1837,13 @@ export class MdsComponent{
     html+=`
               <div id="selectedFile" class="badge" style="display:none;"><span id="selectedFileContent"></span>
               <i class="material-icons clickable" onclick="
+              document.getElementById('fileSelect').value = null;
               document.getElementById('selectedFile').style.display='none';
-              document.getElementById('versionChooser').style.display='';
-              document.getElementById('versionGroup').style.display='none';
               document.getElementById('selectFileBtn').style.display='';
               ">cancel</i></div>
-              <span id="versionChooser"><input type="checkbox" id="versionCheckbox" onchange="
-                document.getElementById('versionGroup').style.display=this.checked ? '' : 'none';
-              " class="filled-in"> <label for="versionCheckbox">`+this.translate.instant('WORKSPACE.EDITOR.AS_VERSION')+`</label></span>
 
             </div>
-            <div id="versionGroup" style="display:none;">
+            <div id="versionGroup">
             <input type="text" class="comment" id="comment" placeholder="`+this.translate.instant('WORKSPACE.EDITOR.VERSION_COMMENT')+`" required />
               <div class="input-hint-bottom"`+this.translate.instant('FIELD_MUST_BE_FILLED')+`</div>
             </div>
@@ -1955,8 +1962,12 @@ export class MdsComponent{
     else {
         let html=`<div class="mdsLicense">`
         let isSafe=this.connector.getCurrentLogin() && this.connector.getCurrentLogin().currentScope!=null;
+        let canDelete=(this.currentNode && this.currentNode.access.indexOf(RestConstants.ACCESS_DELETE)!=-1);
         if(isSafe || !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE)){
             html+=`<div class="mdsNoPermissions">`+this.translate.instant('MDS.LICENSE_NO_PERMISSIONS'+(isSafe ? '_SAFE' : ''))+`</div>`;
+        }
+        else if(!canDelete){
+            html+=`<div class="mdsNoPermissions">`+this.translate.instant('MDS.LICENSE_NO_PERMISSIONS_MATERIAL')+`</div>`;
         }
         else {
             html += `<a class="clickable licenseLink" onclick="`+this.getWindowComponent()+`.openLicenseDialog();">` +

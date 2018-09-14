@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.repository.server.importer;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URLEncoder;
@@ -34,6 +35,7 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -42,15 +44,18 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class OAIPMHLOMImporter implements Importer{
 	
@@ -78,7 +83,8 @@ public class OAIPMHLOMImporter implements Importer{
 	String oai_base_url = null;
 	
 	String urlGetRecors = "";
-	
+	private ImporterJob job;
+
 	/**
 	 * @param oai_base_url
 	 * @param recordHandler
@@ -201,6 +207,10 @@ public class OAIPMHLOMImporter implements Importer{
 	}
 	
 	public void updateWithIdentifiersList(String url,String set) throws Throwable{
+		if(job!=null && job.isInterrupted()){
+			logger.info("Will cancel oai fetching, job is aborted");
+			return;
+		}
 		logger.info("url:"+url);
 		String queryResult = new HttpQueryTool().query(url);
 		if(queryResult != null){
@@ -241,6 +251,9 @@ public class OAIPMHLOMImporter implements Importer{
 				logger.info("no more resumption. import finished!");
 			}
 		}
+		else{
+			logger.warn("Result for query url "+url+" was empty!");
+		}
 	}
 	
 	
@@ -252,6 +265,10 @@ public class OAIPMHLOMImporter implements Importer{
 			nrOfRs = nodeList.getLength();
 		}
 		for(int i = 0; i < nrOfRs;i++){
+			if(job!=null && job.isInterrupted()){
+				logger.info("Will cancel identifier reading, job is aborted");
+				return;
+			}
 			Node headerNode = nodeList.item(i);
 			String identifier = (String)xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
 			String timeStamp = (String)xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
@@ -265,12 +282,7 @@ public class OAIPMHLOMImporter implements Importer{
 			
 			if(persistentHandler.mustBePersisted(identifier, timeStamp)){
 				logger.info("identifier:" + identifier + " timeStamp: " + timeStamp+ " will be created/updated");
-				String url = oai_base_url+"?verb=GetRecord"+"&identifier="+identifier+"&metadataPrefix="+metadataPrefix;
-				
-				String result = new HttpQueryTool().query(url);
-				if(result != null && !result.trim().equals("")){
-					handleGetRecordStuff(result, cursor,set,identifier);				
-				}
+				handleGetRecordStuff(cursor,set,identifier);
 			}else {
 				logger.info("identifier:" + identifier + " timeStamp: " + timeStamp+ " will NOT be updated");
 			}
@@ -281,27 +293,46 @@ public class OAIPMHLOMImporter implements Importer{
 			}
 		}
 	}
+
+	private String getRecordAsString(String identifier) {
+		String url = getRecordUrl(identifier);
+		
+		String result = new HttpQueryTool().query(url);
+		return result;
+	}
+
+	private String getRecordUrl(String identifier) {
+		return oai_base_url+"?verb=GetRecord"+"&identifier="+identifier+"&metadataPrefix="+metadataPrefix;
+	}
 	
 	public void startImport(String[] oaiIDs, String set) {
 		for(String oaiID : oaiIDs) {
-			String url = oai_base_url+"?verb=GetRecord"+"&identifier="+oaiID+"&metadataPrefix="+metadataPrefix;
+			String url = getRecordUrl(oaiID);
 			logger.info("url record:"+url);
 			String result = new HttpQueryTool().query(url);
 			if(result != null && !result.trim().equals("")){
-				handleGetRecordStuff(result, "IDList",set,oaiID);				
+				handleGetRecordStuff("IDList",set,oaiID);
 			}
 		}
 	}
-	
+
+	@Override
+	public void setJob(ImporterJob importerJob) {
+		this.job = importerJob;
+	}
+
 	public static final int MAX_PER_RESUMPTION = 5000;
 	
-	protected void handleGetRecordStuff(String result, String cursor, String set, String identifier){
+	protected void handleGetRecordStuff( String cursor, String set, String identifier){
 		try{
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document doc = builder.parse(new InputSource(new StringReader(result)));
+			Document doc = getRecordAsDoc(identifier);
+			if(doc==null){
+				logger.info("Fetching of "+identifier+" failed, skipping entry!");
+				return;
+			}
 			String errorcode = (String)xpath.evaluate("/OAI-PMH/error", doc, XPathConstants.STRING);
 			if(errorcode == null || errorcode.trim().equals("")){
-				Node nodeRecord = (Node)xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
+				Node nodeRecord = getRecordNodeFromDoc(doc);
 				recordHandler.handleRecord(nodeRecord, cursor, set);
 				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
 				if(nodeId != null) {
@@ -321,7 +352,19 @@ public class OAIPMHLOMImporter implements Importer{
 			logger.error(e.getMessage(),e);
 		}
 	}
-		
+
+	public Node getRecordNodeFromDoc(Document doc) throws XPathExpressionException {
+		return (Node) xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
+	}
+
+	public Document getRecordAsDoc(String identifier) throws ParserConfigurationException, SAXException, IOException {
+		String result = getRecordAsString(identifier);
+		if(result==null)
+			return null;
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		return builder.parse(new InputSource(new StringReader(result)));
+	}
+
 	public static final String URLIMPORT_SIGN = "URLIMPORT";
 	
 	/**
@@ -408,6 +451,7 @@ public class OAIPMHLOMImporter implements Importer{
 	@Override
 	public void setRecordHandler(RecordHandlerInterface recordHandler) {
 		this.recordHandler = recordHandler;
+		this.recordHandler.setImporter(this);
 	}
 	
 	@Override

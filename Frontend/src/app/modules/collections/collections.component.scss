@@ -30,10 +30,10 @@ table, div {
 }
 .switchToSearch{
   position: relative;
-  top:-10px;
+  display: inline-block;
   font-weight: bold;
   text-transform: uppercase;
-  padding: 5px;
+  padding: 12px;
 }
 
 .switchToSearch i{
@@ -91,9 +91,9 @@ table, div {
 }
 
 .collections-master-div {
-    padding-left: 15%;
-    padding-right: 10%;
-    padding-top: 20px;
+    padding:20px 10% 20px 15%;
+    float: left;
+    width: 100%;
 }
 
 .collections-header-textarea {
@@ -254,7 +254,6 @@ table, div {
   padding: 9px;
   background-color: #fff;
   cursor: pointer;
-  z-index: 100;
   @include materialShadowBottom();
 }
 .section-headline {
@@ -274,6 +273,10 @@ table, div {
 :host /deep/{
   .collections-pin-button custom-icon g{
     fill: #6b6b6b;
+  }
+  footer{
+    float:left;
+    width:100%;
   }
 }
 .breadcrumb-space{
@@ -301,6 +304,12 @@ table, div {
     width:calc(100% - 10px)!important;
   }
 }
+
+@media screen and (max-width: ($mobileTabSwitchWidth)){
+  .switchToSearch{
+    display: none;
+  }
+}
 @media only screen and (max-width: $mobileWidth) {
     :host /deep/{
       .collections-master-div-notabs .subcollections{
@@ -309,7 +318,6 @@ table, div {
     }
   .section-headline{
     padding: 20px 0 12px;
-
   }
   .collection-new-preview-headline{
     overflow-wrap: break-word;
@@ -317,7 +325,8 @@ table, div {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
     /*line-height: 1em;*/
-    max-height: 1.5em;
+    //max-height: 1.5em;
+    text-align: center;
     overflow: hidden;
   }
   .card-image-icon-container{
@@ -338,9 +347,7 @@ table, div {
     .collections-master-div-notabs{
       margin-top:0;
     }
-    .switchToSearch{
-      float:right;
-    }
+
     .collections-header {
         margin-top: 0;
         top: unset;

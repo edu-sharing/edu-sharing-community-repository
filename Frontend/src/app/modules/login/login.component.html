@@ -25,6 +25,10 @@
         <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
       </div>
       </form>
+      <div class="useUrl" *ngIf="config.loginUrl">
+          <div>{{'LOGIN.USE_URL_TEXT' | translate}}</div>
+          <a (click)="openLoginUrl()" class="clickable goto"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></a>
+      </div>
       <div class="register" *ngIf="config.registerUrl">
         {{'LOGIN.REGISTER_TEXT' | translate}}
         <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>

@@ -628,6 +628,14 @@
 					<multiplejoin>AND</multiplejoin>
 				</property>
 			</query>
+			<query join="AND" id="archive" applyBasequery="false">
+				<property name="ngsearchword">
+					<statement>@cm\:name:"${value}"</statement>
+				</property>
+				<property name="user">
+					<statement>@sys\:archivedBy:"${value}"</statement>
+				</property>
+			</query>
 			<query join="AND" id="saved_search" applyBasequery="false">
 				<basequery>TYPE:"ccm:saved_search"</basequery>
 				<property name="ngsearchword">

@@ -5,6 +5,7 @@ public class Values{
 	@XmlElement public String[] supportedLanguages;
 	@XmlElement public String extension;
 	@XmlElement public String loginUrl;
+	@XmlElement public Boolean loginAllowLocal;
 	@XmlElement public String registerUrl;
 	@XmlElement public String recoverPasswordUrl;
 	@XmlElement	public String imprintUrl;
@@ -27,6 +28,7 @@ public class Values{
 	@XmlElement	public Boolean branding;
 	@XmlElement	public String siteTitle;
 	@XmlElement	public String userDisplayName;
+	@XmlElement	public String userSecondaryDisplayName;
 	@XmlElement	public String defaultUsername;
 	@XmlElement	public String defaultPassword;
 	@XmlElement	public Banner banner;
@@ -43,4 +45,5 @@ public class Values{
 	@XmlElement	public Guest guest;
 	@XmlElement	public Collections collections;
 	@XmlElement	public LicenseAgreement licenseAgreement;
+	@XmlElement	public Services services;
 }

@@ -1,6 +1,5 @@
 package org.edu_sharing.service.collection;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -21,6 +20,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
@@ -45,10 +45,10 @@ import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.restservices.CollectionDao;
-import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
+import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -58,6 +58,7 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -135,21 +136,28 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 	
 	@Override
-	public String addToCollection(String collectionId, String originalNodeId) throws Throwable {
+	public String addToCollection(String collectionId, String refNodeId) throws Throwable {
 		
 		try{
-			List<String> aspects = Arrays.asList(client.getAspects(originalNodeId));
+			List<String> aspects = Arrays.asList(client.getAspects(refNodeId));
 			
 			/**
 			 * use original
 			 */
+			String nodeId=refNodeId;
+			String originalNodeId;
 			if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-				originalNodeId = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), originalNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+				originalNodeId = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), refNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
 			}
+			else{
+                originalNodeId = refNodeId;
+            }
 			
 			String locale = (Context.getCurrentInstance() != null) ? Context.getCurrentInstance().getLocale() : "de_DE";
-			
-			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
+
+			// user must have CC_PUBLISH on either the original or a reference object
+			if(!client.hasPermissions(originalNodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})
+					&& !client.hasPermissions(nodeId, new String[]{CCConstants.PERMISSION_CC_PUBLISH})){
 				String message = I18nServer.getTranslationDefaultResourcebundle("collection_no_publish_permission", locale);
 				throw new Exception(message);
 			}
@@ -174,48 +182,58 @@ public class CollectionServiceImpl implements CollectionService{
 				}
 			}
 
-			HashMap<String,Object> props = client.getProperties(originalNodeId);
-			String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+			// we need to copy as system because the user may just has full access to the ref (which may has different metadata)
+            // we check the add children permissions before continuing
+			if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),collectionId,CCConstants.PERMISSION_ADD_CHILDREN)){
+			    throw new SecurityException("No permissions to add childrens to collection");
+            }
+
+            HashMap<String,Object> props = AuthenticationUtil.runAsSystem(()-> {
+                try {
+                    return client.getProperties(originalNodeId);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    return null;
+                }
+            });
+            String versLabel = (String)props.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+
+            return AuthenticationUtil.runAsSystem(() -> {
+                /**
+                 * make a copy of the original.
+                 * OnCopyCollectionRefPolicy cares about
+                 * - not duplicating the content
+                 * - ignore childs: usage and license data
+                 * - the preview child will be copied
+                 */
+                String refId = client.copyNode(originalNodeId, collectionId, true);
+
+                client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
+                permissionService.setPermissions(refId, null, true);
+				client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+				client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
+
+
+				/**
+				 * write content, so that the index tracking will be triggered
+				 * the overwritten NodeContentGet class checks if it' s an collection ref object
+				 * and switches the nodeId to original node, which is used for indexing
+				 */
+				client.writeContent(refId, new String("1").getBytes(), (String)props.get(CCConstants.ALFRESCO_MIMETYPE) , "utf-8", CCConstants.CM_PROP_CONTENT);
+
+				//set to original size
+				client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, (String)props.get(CCConstants.LOM_PROP_TECHNICAL_SIZE));
+
+				// run setUsage as admin because the user may not has cc_publish on the original node (but on the ref)
+				new Usage2Service().setUsageInternal(appInfo.getAppId(),
+						authInfo.get(CCConstants.AUTH_USERNAME),
+						appInfo.getAppId(),
+						collectionId,
+						originalNodeId, null, null, null, -1, versLabel, refId, null);
+				return refId;
+            });
 			
-			/**
-			 * make a copy of the original. 
-			 * OnCopyCollectionRefPolicy cares about
-			 * - not duplicating the content
-			 * - ignore childs: usage and license data
-			 * - the preview child will be copied
-			 */
-			String refId = client.copyNode(originalNodeId, collectionId, true);
-			
-			client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
-			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-				@Override
-				public Void doWork() throws Exception {
-					permissionService.setPermissions(refId, null, true);
-					return null;
-				}
-			});
-			
-			client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
-			client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
-			
-			
-			/**
-			 * write content, so that the index tracking will be triggered
-			 * the overwritten NodeContentGet class checks if it' s an collection ref object
-			 * and switches the nodeId to original node, which is used for indexing
-			 */
-			client.writeContent(refId, new String("1").getBytes(), (String)props.get(CCConstants.ALFRESCO_MIMETYPE) , "utf-8", CCConstants.CM_PROP_CONTENT);
-			
-			//set to original size
-			client.setProperty(refId, CCConstants.LOM_PROP_TECHNICAL_SIZE, client.getProperty(Constants.storeRef, originalNodeId, CCConstants.LOM_PROP_TECHNICAL_SIZE));
-			
-			new Usage2Service().setUsage(appInfo.getAppId(), 
-					authInfo.get(CCConstants.AUTH_USERNAME), 
-					appInfo.getAppId(), 
-					collectionId, 
-					originalNodeId, null, null, null, -1, versLabel, refId, null);
-			
-			return refId;
+
 		
 		}catch(Throwable e){
 			throw e;
@@ -636,10 +654,11 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 	
 	@Override
-	public List<NodeRef> getChildReferences(String parentId, String scope) {
+	public List<NodeRef> getChildReferences(String parentId, String scope, SortDefinition sortDefinition) {
 		try{
 			if(parentId == null){
-				
+                SearchParameters searchParams=new SearchParameters();
+                sortDefinition.applyToSearchParameters(searchParams);
 				/**
 				 * @TODO owner + inherit off -> node will be found even if search is done in edu-group context 
 				 * level 0 nodes -> maybe cache level 0 with an node property
@@ -657,18 +676,18 @@ public class CollectionServiceImpl implements CollectionService{
 				if(SearchScope.TYPE_EDITORIAL.name().equals(scope)){
 					queryString += " AND @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
 				}
-				List<NodeRef> returnVal = new ArrayList<NodeRef>();
-				List<NodeRef> nodeRefs = client.searchNodeRefs(queryString,eduGroupScope);
+				List<NodeRef> returnVal = new ArrayList<>();
+                searchParams.setQuery(queryString);
+				List<NodeRef> nodeRefs = client.searchNodeRefs(searchParams,eduGroupScope);
 				for(NodeRef nodeRef : nodeRefs){
-					String parent = client.getParent(nodeRef).getParentRef().getId();
-					if(Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
+					if(isSubCollection(nodeRef)){
 						continue;
 					}
 					returnVal.add(nodeRef);
 				}
 				return returnVal;
 			}else{
-				List<ChildAssociationRef> children =  client.getChildrenChildAssociationRef(parentId);
+				List<ChildAssociationRef> children =  nodeService.getChildrenChildAssociationRefAssoc(parentId,null,null,sortDefinition);
 				List<NodeRef> returnVal = new ArrayList<NodeRef>();
 				for(ChildAssociationRef child : children){
 					returnVal.add(child.getChildRef());
@@ -679,29 +698,30 @@ public class CollectionServiceImpl implements CollectionService{
 			throw new RuntimeException(e);
 		}
 	}
-	
+
+	private boolean isSubCollection(NodeRef nodeRef) {
+		return AuthenticationUtil.runAsSystem(() ->{
+			String parent = client.getParent(nodeRef).getParentRef().getId();
+			return Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION);
+		});
+	}
+
 	public void setScope(Collection collection) throws Exception {
 		String collectionId = collection.getNodeId();
 		String scope = collection.getScope();
 		boolean custom=(scope==null || scope.equals(Scope.CUSTOM.name()));
 		org.edu_sharing.repository.client.rpc.ACL acl=new org.edu_sharing.repository.client.rpc.ACL();
-		if(custom){
-			acl=client.getPermissions(collectionId);
-		}
+
 		List<org.edu_sharing.repository.client.rpc.ACE> aces=new ArrayList<>();
 		if(acl.getAces()!=null)
 			aces.addAll(Arrays.asList(acl.getAces()));
-		
-		org.edu_sharing.repository.client.rpc.ACE ace=new org.edu_sharing.repository.client.rpc.ACE();
-		ace.setAuthority(AuthenticationUtil.getFullyAuthenticatedUser());
-		ace.setAuthorityType(Authority.Type.USER.name());
-		ace.setPermission(CCConstants.PERMISSION_COORDINATOR);
-		aces.add(ace);
-		
+
 		if(custom){
 			
-			if(!collection.isLevel0()) // TODO: don't allow inherition on root level -> this variable seems to be inverted?!
-				acl.setInherited(false);
+			if(!collection.isLevel0()) { // TODO: don't allow inherition on root level -> this variable seems to be inverted?!
+				permissionService.setPermissionInherit(collectionId, false);
+				return;
+			}
 
 		}
 		else{
@@ -732,20 +752,16 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 		
 		final ACL aclFinal = acl;
-		if(!custom && scope.equals(Scope.MY.name())){
+		if(scope.equals(Scope.MY.name())){
 			// We need to set inherition
 			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 				@Override
 				public Void doWork() throws Exception {
-					permissionService.setPermissions(collectionId, aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]),aclFinal.isInherited());
+					permissionService.setPermissions(collectionId, aces,aclFinal.isInherited());
 					return null;
 				}
 			});
 		}
-		else{
-			permissionService.setPermissions(collectionId, aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]),aclFinal.isInherited());
-		}
-	
 	}
 
 	/**
@@ -799,7 +815,7 @@ public class CollectionServiceImpl implements CollectionService{
 
 	@Override
 	public void setOrder(String parentId, String[] nodes) {
-		List<NodeRef> refs=getChildReferences(parentId, null);
+		List<NodeRef> refs=getChildReferences(parentId, null, new SortDefinition());
 		int order=0;
 		
 		String mode=CCConstants.COLLECTION_ORDER_MODE_CUSTOM;

@@ -73,9 +73,8 @@ export class WorkspaceLicenseComponent  {
                      "in","it","ca","hr","mt","mk","nl",
                      "no","pl","pt","ro","es","th",
                      "uk","hu"];
-  public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","COPYRIGHT","CUSTOM"];
+  public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
-  count: number;
   _nodes:Node[];
   private permissions: LocalPermissionsResult;
   public loading=true;
@@ -200,7 +199,7 @@ export class WorkspaceLicenseComponent  {
       authors[0]=this.authorVCard.toVCardString();
       prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=authors;
       i++;
-      this.nodeApi.editNodeMetadata(node.ref.id, prop).subscribe(() => {
+      this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe(() => {
         this.savePermissions(node);
         if(i==this._nodes.length){
           this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');

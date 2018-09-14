@@ -12,6 +12,7 @@
   "SAVE" : "save",
   "APPLY" : "apply",
   "CANCEL" : "cancel",
+  "YES_DELETE" : "Yes, delete",
   "RENAME" : "rename",
   "USER_GUEST" : "guest",
   "IMPRINT" : "Imprint",
@@ -61,7 +62,7 @@
   "EDIT_ACCOUNT":"Manage account",
   "DEFAULT_METADATASET":"Default-Metadataset ({{name}})",
   "NO_MATCHES" : "No matches found",
-  "NO_CC_PUBLISH" : "Missing permission for publishing",
+  "NO_CC_PUBLISH" : "no publishing permissions for object",
   "ADD_TO_RECENT_COLLECTION":"Add to recent collection",
   "SEARCH_COLLECTIONS":"Search collection...",
   "ASK_CC_PUBLISH" : "Ask",
@@ -109,14 +110,20 @@
   "GOTO_LOGIN": "Go to login",
   "GOTO":"go to",
   "SIDEBAR":{
-    "WORKSPACE_OLD":"old workspace",
     "WORKSPACE":"Workspace",
     "SEARCH":"Search",
     "COLLECTIONS":"Collections",
     "SECURE":"Safe",
     "PERMISSIONS":"User management",
     "LOGIN":"Login",
-    "ADMIN":"Admin-Tools"
+    "ADMIN":"Admin-Tools",
+    "WORKSPACE_SHORT":"Workspace",
+    "SEARCH_SHORT":"Search",
+    "COLLECTIONS_SHORT":"Collections",
+    "SECURE_SHORT":"Safe",
+    "PERMISSIONS_SHORT":"Users",
+    "LOGIN_SHORT":"Login",
+    "ADMIN_SHORT":"Admin"
   },
   "WORKFLOW":{
     "100_unchecked":"No status",
@@ -309,6 +316,7 @@
     "LICENSE_LINK":"manage license",
     "TEMPLATE_LINK":"Manage metadata template",
     "CONTRIBUTOR_LINK":"Additional Contributors",
+    "LICENSE_NO_PERMISSIONS_MATERIAL":"You have insufficient permissions to license this material",
     "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
     "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment"
   },
@@ -329,9 +337,14 @@
   "SHARING":{
     "TITLE": "Download Page",
     "DOWNLOAD": "Download",
+    "DOWNLOAD_ZIP": "Download as Zip",
     "LINK": "To original page",
+    "INVITED_AND_CREATED_BY":"Created and shared by {{inviter}}",
+    "INVITED_PLUS_CREATED_BY":"Shared by {{inviter}}, created by {{creator}}",
     "ENTER_PASSWORD": "next",
-    "SHARING.ERROR_INVALID_PASSWORD": "invalid password",
+    "ERROR_INVALID_PASSWORD": "invalid password",
+    "PASSWORD": "Password",
+    "PASSWORD_PLACEHOLDER": "Enter password ...",
     "PASSWORD_CORRECT": "Password correct"
   },
   "TOAST":{

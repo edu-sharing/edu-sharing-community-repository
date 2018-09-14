@@ -46,6 +46,9 @@
 }
 .breadcrumbMobile{
   display:none;
+  .folder{
+    margin-top: -3px;
+  }
 }
 @media screen and (max-width: $mobileWidth) {
   .breadcrumbMobile{

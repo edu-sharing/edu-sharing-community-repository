@@ -154,7 +154,8 @@ export class NodeRenderComponent implements EventListener{
           else {
             this.searchService.reinit=false;
             NodeRenderComponent.close(this.location);
-            this.mainnav.openSidenav();
+            // use a timeout to let the browser try to go back in history first
+            setTimeout(()=>this.mainnav.openSidenav(),250);
           }
         }
       }
@@ -361,7 +362,7 @@ export class NodeRenderComponent implements EventListener{
       } else {
           if(this.sequence && this.sequence.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
               let nodes = [this.sequenceParent].concat(this.sequence.nodes);
-              NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name);
+              NodeHelper.downloadNodes(this.toast,this.connector,nodes, this.sequenceParent.name+".zip");
           } else {
               NodeHelper.downloadNode(this.toast, this.connector.getCordovaService(), this._node, this.version);
           }

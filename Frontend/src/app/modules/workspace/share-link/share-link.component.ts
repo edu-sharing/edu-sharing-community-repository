@@ -47,7 +47,7 @@ export class WorkspaceShareLinkComponent  {
     this.loading=true;
     this.nodeService.getNodeShares(node.ref.id,RestConstants.SHARE_LINK).subscribe((data:NodeShare[])=>{
       this._expiryDate=new Date(new Date().getTime()+3600*24*1000);
-      console.log(data);
+      // console.log(data);
         if(data.length){
         this.edit=true;
         this.currentShare=data[0];
@@ -114,13 +114,13 @@ export class WorkspaceShareLinkComponent  {
     this.setExpiry(true);
   }
   private updateShare(date=this.currentDate){
-    console.log(date);
+    // console.log(date);
     this.currentShare.url=this.translate.instant('LOADING');
     this.nodeService.updateNodeShare(this._node.ref.id,this.currentShare.shareId,date,this.password ? this.passwordString : "").subscribe((data:NodeShare)=>{
       this.currentShare=data;
       if(date==0)
         this.currentShare.url=this.translate.instant('WORKSPACE.SHARE_LINK.DISABLED');
-      console.log(data);
+        // console.log(data);
     });
   }
   public setExpiry(value:boolean){
@@ -143,6 +143,7 @@ export class WorkspaceShareLinkComponent  {
     private toast:Toast,
   ){
     this.dateOptions={};
+    this.dateOptions.minDate=new Date(Date.now() - 1000 * 3600 * 24); // Minimal selectable date
     this.dateOptions.minYear=new Date().getFullYear();
     this.dateOptions.maxYear=new Date(new Date().getTime() * 1000 * 3600 * 365).getFullYear();
     //this.dateOptions.format="DD.MM.YYYY";

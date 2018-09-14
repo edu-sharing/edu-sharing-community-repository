@@ -10,7 +10,7 @@ input[type=search]{
 }
 .topFrame{
   position:fixed;
-  z-index:8;
+  z-index:1;
   width: 100%;
   top:65px+$mainnavHeight;
   display:flex;
@@ -28,7 +28,7 @@ input[type=search]{
     @include limitLineCount(3);
   }
   actionbar{
-    min-width: 130px;
+    min-width: 170px;
   }
 }
 .memberActions{

@@ -121,14 +121,18 @@ export class NodeHelper{
 
   /**
    * returns true if all nodes have the requested right
+   * If originalRights is true, check the rights of the original object as well (either ref or original must match the right)
+   * (only works for collection refs)
    * @param nodes
    * @param right
    * @returns {boolean}
    */
-  public static getNodesRight(nodes : Node[],right : string){
+  public static getNodesRight(nodes :any[],right : string,originalRights=false){
     if(nodes==null)
       return true;
     for(let node of nodes){
+      if(originalRights && node.accessOriginal && node.accessOriginal.indexOf(right)!=-1)
+          continue;
       if(!node.access)
         return false;
       if(node.access.indexOf(right)==-1)
@@ -284,7 +288,7 @@ export class NodeHelper{
       icon='none';
     let LICENSE_ICONS=["cc-0","cc-by-nc","cc-by-nc-nd","cc-by-nc-sa","cc-by-nd",
       "cc-by-sa","cc-by","copyright-free","copyright-license","custom",
-      "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk"];
+      "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk","unterrichts-und-lehrmedien"];
     if(LICENSE_ICONS.indexOf(icon)==-1)
       icon='none';
     if(icon=='none' && !useNoneAsFallback)
@@ -313,8 +317,7 @@ export class NodeHelper{
    * @param translate
    * @returns {any}
    */
-  public static getLicenseNameByString(string:String,translate:TranslateService) {
-    let name=string.replace(/_/g,"-");
+  public static getLicenseNameByString(name:String,translate:TranslateService) {
     if(name=='CUSTOM')
       return translate.instant("LICENSE.CUSTOM");
     if(name==''){
@@ -322,12 +325,12 @@ export class NodeHelper{
     }
     if(name=='MULTI')
       return translate.instant("LICENSE.MULTI");
-    if(name=='SCHULFUNK')
-      return translate.instant("LICENSE.SCHULFUNK");
+    if(name=='SCHULFUNK' || name=='UNTERRICHTS_UND_LEHRMEDIEN')
+      return translate.instant("LICENSE."+name);
     if(name.startsWith("COPYRIGHT")){
-      return translate.instant("LICENSE."+string);
+      return translate.instant("LICENSE."+name);
     }
-    return name;
+    return name.replace(/_/g,"-");
   }
 
   /**
@@ -347,7 +350,9 @@ export class NodeHelper{
   public static getUserDisplayName(user:AuthorityProfile|User){
     return (user.profile.firstName+" "+user.profile.lastName).trim();
   }
-
+    static isSavedSearchObject(node: Node) {
+        return node.mediatype=='saved_search';
+    }
   /**
    * Get an attribute (property) from a node
    * The attribute will be cached add the object
@@ -505,10 +510,11 @@ export class NodeHelper{
       return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
 
     let nodesString=RestHelper.getNodeIds(nodes).join(",");
-      this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
-      "../eduservlet/download?appId="+
-      encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString)+"&fileName="+encodeURIComponent(fileName),fileName);
+    let url=connector.getAbsoluteEndpointUrl()+
+        "../eduservlet/download?appId="+
+        encodeURIComponent(nodes[0].ref.repo)+
+        "&nodeIds="+encodeURIComponent(nodesString)+"&fileName="+encodeURIComponent(fileName);
+    this.downloadUrl(toast,connector.getCordovaService(),url,fileName);
   }
 
   static getLRMIProperty(data: any, item: ListItem) {

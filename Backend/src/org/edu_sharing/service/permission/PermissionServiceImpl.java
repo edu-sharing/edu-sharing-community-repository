@@ -40,6 +40,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.OrganisationService;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
@@ -57,18 +58,11 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.DateTool;
-import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
-import org.edu_sharing.repository.server.tools.I18nServer;
-import org.edu_sharing.repository.server.tools.Mail;
-import org.edu_sharing.repository.server.tools.StringTool;
-import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.oai.OAIExporterService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -77,7 +71,7 @@ import org.springframework.context.ApplicationContext;
 
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
-	
+
 	public static final String NODE_PUBLISHED = "NODE_PUBLISHED";
 	private NodeService nodeService = null;
 	private PersonService personService;
@@ -85,7 +79,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	private ToolPermissionService toolPermission;
 
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-
+	OrganisationService organisationService = (OrganisationService)applicationContext.getBean("eduOrganisationService");
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	AuthorityService authorityService = serviceRegistry.getAuthorityService();
 	MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
@@ -116,7 +110,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param sendMail
 	 * @param sendCopy
 	 */
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
 			Boolean sendCopy, Boolean createHandle) throws Throwable {
 
 		ACL currentACL = repoClient.getPermissions(nodeId);
@@ -124,7 +118,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		/**
 		 * remove the inherited from the old and new
 		 */
-		List<ACE> acesNew = new ArrayList<ACE>(Arrays.asList(aces));
+		List<ACE> acesNew = new ArrayList<ACE>(aces);
+		acesNew=addCollectionCoordinatorPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),acesNew);
 		Iterator<ACE> acesNewIter = acesNew.iterator();
 		while (acesNewIter.hasNext()) {
 			ACE ace = acesNewIter.next();
@@ -219,11 +214,32 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
 					CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_CHANGE);
 		}
-		
-		
+
+
 		if(createHandle) {
 			createHandle(AuthorityType.EVERYONE,nodeId);
 		}
+
+
+		boolean publishToOAI = false;
+
+		List<String> licenseList = (List<String>)serviceRegistry.getNodeService().getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId), QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
+		if(licenseList!=null) {
+			for (String license : licenseList) {
+				if (license != null && license.startsWith("CC_")) {
+					for (ACE ace : acesToAdd) {
+						if (ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+							publishToOAI = true;
+						}
+					}
+				}
+			}
+		}
+		if(publishToOAI) {
+			OAIExporterService service = new OAIExporterService();
+			if(service.available()) service.export(nodeId);
+		}
+
 
 	}
 
@@ -267,7 +283,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
-			
+
 			if (AuthorityType.USER.equals(authorityType)) {
 				HashMap<String, String> personInfo = repoClient.getUserInfo(authority);
 
@@ -360,53 +376,56 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		permissionService.createNotifyObject(_nodeId, user, CCConstants.CCM_VALUE_NOTIFY_EVENT_PERMISSION,
 				CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 	}
-	
+
 	public void createHandle(AuthorityType authorityType, String _nodeId) {
 		if (AuthorityType.EVERYONE.equals(authorityType)) {
-			
-			String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId), 
+
+			String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId),
 					QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION) );
-			
-			String currentHandle =  (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId), 
+
+			String currentHandle =  (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId),
 					QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID) );
-			
+
 			/**
 			 * only create a new handle when version changed
 			 */
 			if(currentHandle != null && currentHandle.endsWith(version)) {
 				return;
 			}
-			
+
 			//get new version label
 			//use BigDecimal cause of rounding Problem with double
 			BigDecimal bd = BigDecimal.valueOf(Double.valueOf(version)).add(BigDecimal.valueOf(0.1));
 			String newVersion = bd.toString();
-			
+
 			HandleService handleService = null;
 			String handle = null;
-			
-			
+
+
 			if(toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
 				try {
 					 handleService = new HandleService();
 					 handle = handleService.generateHandle();
-					
+
 				}catch(HandleServiceNotConfiguredException e) {
 					logger.info("handle server not configured");
 					return;
 				} catch (SQLException e) {
 					logger.error("sql error while creating handle id",e);
 					return;
+				}catch(Exception e) {
+					logger.error(e.getMessage(),e);
+					return;
 				}
 			}
-			
+
 			Map<QName,Serializable> publishedProps = new HashMap<QName,Serializable>();
 			publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_DATE), new Date());
-			
+
 			if(handle != null) {
 				publishedProps.put(QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID), handle);
 			}
-			
+
 			NodeRef nodeRef = new NodeRef(Constants.storeRef,_nodeId);
 			if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED))) {
 				nodeService.addAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_PUBLISHED), publishedProps);
@@ -415,7 +434,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					nodeService.setProperty(nodeRef,entry.getKey(), entry.getValue());
 				}
 			}
-			
+
 			/**
 			 * create version for the published node
 			 */
@@ -529,7 +548,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return AuthenticationUtil.runAs(runsWork, appInfo.getUsername());
 	}
 
-	public void setPermissions(String nodeId, ACE[] aces) throws Exception {
+	public void setPermissions(String nodeId, List<ACE> aces) throws Exception {
 		setPermissions(nodeId, aces, null);
 	}
 
@@ -542,7 +561,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @param inheritPermission
 	 * @throws Exception
 	 */
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermission) throws Exception {
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) throws Exception {
 
 		if (inheritPermission != null) {
 			boolean shared = isSharedNode(nodeId);
@@ -561,7 +580,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		String authorityAdministrator = getAdminAuthority(nodeRef);
 
 		PermissionService permissionsService = this.serviceRegistry.getPermissionService();
-
+		aces=addCollectionCoordinatorPermission(nodeRef,aces);
 		if (aces != null) {
 			for (ACE ace : aces) {
 
@@ -602,6 +621,26 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			permissionsService.setInheritParentPermissions(nodeRef, inheritPermission);
 		}
 	}
+	@Override
+	public void setPermissionInherit(String nodeId,boolean inheritPermission) throws Exception {
+		NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
+		permissionService.setInheritParentPermissions(nodeRef,inheritPermission);
+	}
+
+	private List<ACE> addCollectionCoordinatorPermission(NodeRef nodeRef, List<ACE> aces) {
+		if(!nodeService.hasAspect(nodeRef,QName.createQName(CCConstants.CCM_ASPECT_COLLECTION)))
+			return aces;
+
+		org.edu_sharing.repository.client.rpc.ACE coordinator=new org.edu_sharing.repository.client.rpc.ACE();
+		coordinator.setAuthority(AuthenticationUtil.getFullyAuthenticatedUser());
+		coordinator.setAuthorityType(org.edu_sharing.restservices.shared.Authority.Type.USER.name());
+		coordinator.setPermission(CCConstants.PERMISSION_COORDINATOR);
+		if(aces!=null && aces.contains(coordinator))
+			return aces;
+		List<ACE> newAces = new ArrayList<>(aces);
+		newAces.add(coordinator);
+		return newAces;
+	}
 
 	/**
 	 * returns admin authority if context is an edugroup
@@ -629,7 +668,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return authorityAdministrator;
 	}
 
-	private boolean containslocalPerm(ACE[] aces, String eduAuthority, String eduPermission) {
+	private boolean containslocalPerm(List<ACE> aces, String eduAuthority, String eduPermission) {
 		logger.info("eduAuthority:" + eduAuthority + " eduPermission:" + eduPermission);
 		if (aces == null)
 			return false;
@@ -648,10 +687,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	private void checkCanManagePermissions(String node, String authority) throws Exception {
 		ACE ace = new ACE();
 		ace.setAuthority(authority);
-		checkCanManagePermissions(node, new ACE[] { ace });
+		checkCanManagePermissions(node, Arrays.asList(new ACE[] { ace }));
 	}
 
-	private void checkCanManagePermissions(String nodeId, ACE[] aces) throws Exception {
+	private void checkCanManagePermissions(String nodeId, List<ACE> aces) throws Exception {
 		boolean hasUsers = false, hasAll = false;
 		if (aces != null) {
 			for (ACE ace : aces) {
@@ -738,7 +777,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 					public Void execute() throws Throwable {
 
-						checkCanManagePermissions(nodeId, aces);
+						checkCanManagePermissions(nodeId, Arrays.asList(aces));
 						NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 						PermissionService permissionsService = serviceRegistry.getPermissionService();
 
@@ -774,7 +813,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				new RetryingTransactionCallback<Void>() {
 					public Void execute() throws Throwable {
 
-						checkCanManagePermissions(nodeId, aces);
+						checkCanManagePermissions(nodeId, Arrays.asList(aces));
 
 						NodeRef nodeRef = new NodeRef(Constants.storeRef, nodeId);
 						PermissionService permissionsService = serviceRegistry.getPermissionService();
@@ -841,7 +880,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				}
 
 				permissionsService.setPermission(new NodeRef(Constants.storeRef, nodeId), authority, permission, true);
-				
+
 			}
 		}
 
@@ -917,7 +956,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
-	
+
 		StringBuffer searchQuery = new StringBuffer("TYPE:cm\\:person");
 
 		StringBuffer subQuery = new StringBuffer();
@@ -1003,15 +1042,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			addGlobalAuthoritySearchQuery(searchQuery);
 
 		}else{
-			
-			List<String> eduGroupAuthorityNames = new ArrayList<String>();
-			try {
-				for (EduGroup eduGroup : SearchServiceFactory.getLocalService().getAllOrganizations(true).getData()) {
-						eduGroupAuthorityNames.add(eduGroup.getGroupname());
-				}
-			}catch(Throwable t) {
-				t.printStackTrace();
-			}
+
+			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
 
 			/**
 			 * if there are no edugroups you you are not allowed to search global return
@@ -1046,7 +1078,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if (subQuery.length() > 0) {
 			searchQuery.append(" AND (").append(subQuery).append(")");
 		}
-		
+
 		//cm:espersonstatus
 		String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
 		if(personActiveStatus != null && !personActiveStatus.trim().equals("")) {
@@ -1061,7 +1093,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	private void filterGuestAuthority(StringBuffer searchQuery) {
 		String guest=ApplicationInfoList.getHomeRepository().getGuest_username();
 		if(guest!=null && !guest.trim().isEmpty()){
-			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"" 
+			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\""
 							 + " AND NOT @cm\\:userName:\"guest\"");
 		}
 	}
@@ -1153,14 +1185,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			addGlobalAuthoritySearchQuery(searchQuery);
 		} else {
 
-			List<String> eduGroupAuthorityNames = new ArrayList<String>();
-			try {
-				for (EduGroup eduGroup : SearchServiceFactory.getLocalService().getAllOrganizations(true).getData()) {
-						eduGroupAuthorityNames.add(eduGroup.getGroupname());
-				}
-			}catch(Throwable t) {
-				t.printStackTrace();
-			}
+			List<String> eduGroupAuthorityNames = organisationService.getMyOrganisations(true);
 
 			/**
 			 * if there are no edugroups you you are not allowed to search global return

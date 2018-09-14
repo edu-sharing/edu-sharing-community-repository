@@ -149,9 +149,6 @@ import org.edu_sharing.repository.client.rpc.SearchResult;
 import org.edu_sharing.repository.client.rpc.SearchToken;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSet;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetModelProperty;
-import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetModelType;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQuery;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetQueryProperty;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSets;
@@ -784,12 +781,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		
 		return sr;
 	}
-	
+
 	@Override
 	public HashMap<String, HashMap<String, Object>> search(String luceneString, boolean eduGroupContext)
 			throws Throwable {
 		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
-		List<NodeRef> nodeRefs = searchNodeRefs(luceneString,eduGroupContext);
+		SearchParameters token=new SearchParameters();
+		token.setQuery(luceneString);
+		List<NodeRef> nodeRefs = searchNodeRefs(token,eduGroupContext);
 		for (NodeRef nodeRef : nodeRefs) {
 			try{
 				HashMap<String, Object> props = getProperties(nodeRef.getId());
@@ -800,48 +799,50 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 		return result;
 	}
-	
-	public List<NodeRef> searchNodeRefs(String luceneString, boolean eduGroupContext){
-		
-		ResultSet resultSet = null;
-		if(eduGroupContext){
-			
-			Set<String> authoritiesForUser = authorityService.getAuthorities();
-			List<String> eduGroupNames = Arrays.asList(EduGroupCache.getNames());
-			
-			List<String> eduGroupNamesOfUser = new ArrayList<String>();
-			for (String authority : authoritiesForUser) {
-				if(eduGroupNames.contains(authority)){
-					eduGroupNamesOfUser.add(authority);
-				}
-			}
-			
-			if(eduGroupNamesOfUser.size()==0){
-				// user has no org -> so no results
-				return new ArrayList<NodeRef>();
-			}
-			
-			ESSearchParameters essp = new ESSearchParameters();
-			essp.setAuthorities(eduGroupNamesOfUser.toArray(new String[eduGroupNamesOfUser.size()]));
-			essp.setQuery(luceneString);
-			essp.setLanguage(SearchService.LANGUAGE_LUCENE);
-			essp.addStore(storeRef);
-			essp.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
-			resultSet = searchService.query(essp);
-			
-		} else {
-			
-			SearchParameters parameters=new SearchParameters();
-			parameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-			parameters.setQuery(luceneString);
-			parameters.addStore(storeRef);
-			parameters.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
-			resultSet = searchService.query(parameters);
-			
-		}
-		
-		return resultSet.getNodeRefs();
-	}
+
+    public List<NodeRef> searchNodeRefs(SearchParameters token, boolean eduGroupContext){
+
+        ResultSet resultSet = null;
+        if(eduGroupContext){
+
+            Set<String> authoritiesForUser = authorityService.getAuthorities();
+            List<String> eduGroupNames = Arrays.asList(EduGroupCache.getNames());
+
+            List<String> eduGroupNamesOfUser = new ArrayList<String>();
+            for (String authority : authoritiesForUser) {
+                if(eduGroupNames.contains(authority)){
+                    eduGroupNamesOfUser.add(authority);
+                }
+            }
+
+            if(eduGroupNamesOfUser.size()==0){
+                // user has no org -> so no results
+                return new ArrayList<NodeRef>();
+            }
+
+            ESSearchParameters essp = new ESSearchParameters();
+            essp.setAuthorities(eduGroupNamesOfUser.toArray(new String[eduGroupNamesOfUser.size()]));
+            essp.setQuery(token.getQuery());
+            essp.setLanguage(SearchService.LANGUAGE_LUCENE);
+            essp.addStore(storeRef);
+            for(SearchParameters.SortDefinition def : token.getSortDefinitions()) {
+                essp.addSort(def);
+            }
+            resultSet = searchService.query(essp);
+
+        } else {
+
+            SearchParameters parameters=new SearchParameters();
+            parameters.setLanguage(SearchService.LANGUAGE_LUCENE);
+            parameters.setQuery(token.getQuery());
+            parameters.addStore(storeRef);
+            parameters.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
+            resultSet = searchService.query(parameters);
+
+        }
+
+        return resultSet.getNodeRefs();
+    }
 	
 
 	public String[] searchNodeIds(String luceneString) {
@@ -892,7 +893,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	protected String getValue(String type, String prop, Object _value, String metadataSetId) {
 
-		MetadataSetModelProperty mdsmProp = getMetadataSetModelProperty(metadataSetId, type, prop);
+		//MetadataSetModelProperty mdsmProp = getMetadataSetModelProperty(metadataSetId, type, prop);
 
 		if (_value instanceof List && ((List) _value).size() > 0) {
 			String result = null;
@@ -901,7 +902,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					result += CCConstants.MULTIVALUE_SEPARATOR;
 				if (value != null) {
 					if (value instanceof MLText) {
-						String tmpStr = getMLTextString(value, mdsmProp);
+						String tmpStr = getMLTextString(value);
 						if (result != null)
 							result += tmpStr;
 						else
@@ -924,13 +925,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		} else if (_value instanceof Number) {
 			return _value.toString();
 		} else if (_value instanceof MLText) {
-			return getMLTextString(_value, mdsmProp);
+			return getMLTextString(_value);
 		} else {
 			return _value.toString();
 		}
 
 	}
-
+	/*
 	MetadataSetModelProperty getMetadataSetModelProperty(String metadataSetId, String type, String prop) {
 		MetadataSetModelProperty mdsmProp = null;
 
@@ -954,8 +955,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 		return mdsmProp;
 	}
-
-	protected String getMLTextString(Object _mlText, MetadataSetModelProperty mdsmp) {
+	*/
+	protected String getMLTextString(Object _mlText) {
 
 		if (_mlText instanceof MLText) {
 
@@ -963,7 +964,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 			// when description does not exist then return default value
 			// when description exists bit there is no multilang the return value 
-			if (mdsmp == null || (mdsmp != null && !mdsmp.getMultilang())) {
+			if (true /*mdsmp == null || (mdsmp != null && !mdsmp.getMultilang())*/) {
 				return mlText.getDefaultValue();
 			}
 
@@ -1247,7 +1248,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 						String[] keys=new ValueTool().getMultivalue((String) entry.getValue());
 						String[] values=new String[keys.length];
 						for(int i=0;i<keys.length;i++)
-							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : null;
+							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
 						addAndOverwriteDateMap.put(entry.getKey() + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values,CCConstants.MULTIVALUE_SEPARATOR));
 					}
 				

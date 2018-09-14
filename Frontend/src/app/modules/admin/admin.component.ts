@@ -1,13 +1,13 @@
-import {Translation} from "../../common/translation";
-import {UIHelper} from "../../common/ui/ui-helper";
-import {ActivatedRoute, Router} from "@angular/router";
-import {Toast} from "../../common/ui/toast";
-import {ConfigurationService} from "../../common/services/configuration.service";
-import {Title} from "@angular/platform-browser";
-import {TranslateService} from "@ngx-translate/core";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Component, ViewChild, ElementRef} from "@angular/core";
+import {Translation} from '../../common/translation';
+import {UIHelper} from '../../common/ui/ui-helper';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Toast} from '../../common/ui/toast';
+import {ConfigurationService} from '../../common/services/configuration.service';
+import {Title} from '@angular/platform-browser';
+import {TranslateService} from '@ngx-translate/core';
+import {SessionStorageService} from '../../common/services/session-storage.service';
+import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
+import {Component, ViewChild, ElementRef} from '@angular/core';
 import {
     LoginResult,
     ServerUpdate,
@@ -17,19 +17,19 @@ import {
     Authority,
     NodeList,
     NodeWrapper
-} from "../../common/rest/data-object";
-import {RestAdminService} from "../../common/rest/services/rest-admin.service";
-import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
-import {Helper} from "../../common/helper";
-import {RestConstants} from "../../common/rest/rest-constants";
-import {UIConstants} from "../../common/ui/ui-constants";
-import {ListItem} from "../../common/ui/list-item";
-import {RestNodeService} from "../../common/rest/services/rest-node.service";
-import {SuggestItem} from "../../common/ui/autocomplete/autocomplete.component";
-import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
-import {RestSearchService} from "../../common/rest/services/rest-search.service";
-import {RestHelper} from "../../common/rest/rest-helper";
-import {Observable, Observer} from "rxjs/index";
+} from '../../common/rest/data-object';
+import {RestAdminService} from '../../common/rest/services/rest-admin.service';
+import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
+import {Helper} from '../../common/helper';
+import {RestConstants} from '../../common/rest/rest-constants';
+import {UIConstants} from '../../common/ui/ui-constants';
+import {ListItem} from '../../common/ui/list-item';
+import {RestNodeService} from '../../common/rest/services/rest-node.service';
+import {SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
+import {RestOrganizationService} from '../../common/rest/services/rest-organization.service';
+import {RestSearchService} from '../../common/rest/services/rest-search.service';
+import {RestHelper} from '../../common/rest/rest-helper';
+import {Observable, Observer} from 'rxjs/index';
 
 
 @Component({
@@ -51,6 +51,8 @@ export class AdminComponent {
   public cacheInfo:string;
   public oai:any={};
   public job:any={};
+  public jobs: any;
+  public jobsOpen: boolean[]=[];
   public lucene:any={offset:0,count:100};
   public oaiSave=true;
   public repositoryVersion:string;
@@ -68,7 +70,7 @@ export class AdminComponent {
   public xmlAppAdditionalPropertyValue:string;
   private parentNode: Node;
   private parentCollection: Node;
-  private parentCollectionType = "root";
+  private parentCollectionType = 'root';
   public catalina : string;
   private oaiClasses: string[];
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
@@ -86,7 +88,7 @@ export class AdminComponent {
     {name:'CCMAIL',file:RestConstants.CCMAIL_APPLICATION_XML},
   ]
   private static MULTILINE_PROPERTIES = [
-    "custom_html_headers","public_key"
+    'custom_html_headers','public_key'
   ];
   luceneNodes: Node[];
   searchColumns: ListItem[]=[];
@@ -97,7 +99,7 @@ export class AdminComponent {
   public eduGroupsSelected:SuggestItem[] = [];
 
   public startJob(){
-    this.storage.set("admin_job",this.job);
+    this.storage.set('admin_job',this.job);
     this.globalProgress=true;
     this.admin.startJob(this.job.class,this.job.params).subscribe(()=>{
         this.globalProgress=false;
@@ -112,7 +114,7 @@ export class AdminComponent {
     this.nodeInfo=node;
   }
   public searchLucene(){
-    this.storage.set("admin_lucene",this.lucene);
+    this.storage.set('admin_lucene',this.lucene);
     let authorities=[];
     if(this.lucene.authorities){
       for(let auth of this.lucene.authorities){
@@ -154,9 +156,9 @@ export class AdminComponent {
               private node: RestNodeService,
               private searchApi: RestSearchService,
               private organization: RestOrganizationService) {
-      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
-      this.searchColumns.push(new ListItem("NODE", RestConstants.NODE_ID));
-      this.searchColumns.push(new ListItem("NODE", RestConstants.CM_MODIFIED_DATE));
+      this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
+      this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
+      this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
         this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
@@ -167,7 +169,7 @@ export class AdminComponent {
       this.getTemplates();
       this.connector.isLoggedIn().subscribe((data: LoginResult) => {
         if (!data.isAdmin) {
-          this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
+          this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace']);
           return;
         }
         this.globalProgress=false;
@@ -182,37 +184,44 @@ export class AdminComponent {
         });
         this.refreshCatalina();
         this.refreshAppList();
-        this.storage.get("admin_job",this.job).subscribe((data:any)=>{
+        this.storage.get('admin_job',this.job).subscribe((data:any)=>{
           this.job=data;
         });
-        this.storage.get("admin_lucene",this.lucene).subscribe((data:any)=>{
+        this.storage.get('admin_lucene',this.lucene).subscribe((data:any)=>{
             this.lucene=data;
         });
+        this.reloadJobStatus();
+        setInterval(()=>{
+            if(this.tab=='JOBS')
+                this.reloadJobStatus();
+        },10000);
         this.admin.getOAIClasses().subscribe((classes:string[])=>{
           this.oaiClasses=classes;
-          this.storage.get("admin_oai").subscribe((data:any)=>{
+          this.storage.get('admin_oai').subscribe((data:any)=>{
             if(data)
               this.oai=data;
             else{
               this.oai={
                 className:classes[0],
-                importerClassName:"org.edu_sharing.repository.server.importer.OAIPMHLOMImporter",
-                recordHandlerClassName:"org.edu_sharing.repository.server.importer.RecordHandlerLOM"
+                importerClassName:'org.edu_sharing.repository.server.importer.OAIPMHLOMImporter',
+                recordHandlerClassName:'org.edu_sharing.repository.server.importer.RecordHandlerLOM'
               };
             }
             if(!this.oai.binaryHandlerClassName)
-              this.oai.binaryHandlerClassName="";
+              this.oai.binaryHandlerClassName='';
           });
         });
         this.admin.getRepositoryVersion().subscribe((data:string)=>{
           this.repositoryVersion=data;
         },(error:any)=>{
-          this.repositoryVersion="Error accessing version information. Are you in dev mode?";
+            console.info(error);
+            this.repositoryVersion="Error accessing version information. Are you in dev mode?";
         });
         this.admin.getNgVersion().subscribe((data:string)=>{
           this.ngVersion=data;
         },(error:any)=>{
-          this.ngVersion="Error accessing version information. Are you in dev mode?";
+            console.info(error);
+            this.ngVersion="Error accessing version information. Are you in dev mode?";
         });
       });
     });
@@ -220,7 +229,7 @@ export class AdminComponent {
   public isMultilineProperty(key:string){
     if(AdminComponent.MULTILINE_PROPERTIES.indexOf(key)!=-1)
       return true;
-    return this.xmlAppProperties[key].indexOf("\n")!=-1;
+    return this.xmlAppProperties[key].indexOf('\n')!=-1;
   }
   public downloadApp(app:Application){
     Helper.downloadContent(app.file,app.xml);
@@ -239,12 +248,12 @@ export class AdminComponent {
       this.toast.error(null,'ADMIN.IMPORT.CHOOSE_COLLECTIONS_XML');
       return;
     }
-    if(!this.parentCollection && this.parentCollectionType=="choose"){
+    if(!this.parentCollection && this.parentCollectionType=='choose'){
       this.toast.error(null,'ADMIN.IMPORT.CHOOSE_COLLECTION');
       return;
     }
     this.globalProgress=true;
-    this.admin.importCollections(this.collectionsFile,this.parentCollectionType=="root" ? RestConstants.ROOT : this.parentCollection.ref.id).subscribe((data:any)=>{
+    this.admin.importCollections(this.collectionsFile,this.parentCollectionType=='root' ? RestConstants.ROOT : this.parentCollection.ref.id).subscribe((data:any)=>{
       this.toast.toast('ADMIN.IMPORT.COLLECTIONS_IMPORTED',{count:data.count});
       this.globalProgress=false;
       this.collectionsFile=null;
@@ -326,11 +335,11 @@ export class AdminComponent {
   public removeApp(app:Application){
     this.dialogTitle='ADMIN.APPLICATIONS.REMOVE_TITLE';
     this.dialogMessage='ADMIN.APPLICATIONS.REMOVE_MESSAGE';
-    let info="";
+    let info='';
     for (let key in app) {
-      if(key=="xml")
+      if(key=='xml')
         continue;
-      info+=key+": "+(app as any)[key]+"\n";
+      info+=key+': '+(app as any)[key]+'\n';
     }
 
     this.dialogParameters={info:info};
@@ -350,7 +359,7 @@ export class AdminComponent {
     ];
   }
   public setTab(tab:string){
-    this.router.navigate(["./"],{queryParams:{mode:tab},relativeTo:this.route});
+    this.router.navigate(['./'],{queryParams:{mode:tab},relativeTo:this.route});
   }
   public pickDirectory(event : Node[]){
     this.parentNode=event[0];
@@ -366,7 +375,7 @@ export class AdminComponent {
       return;
     this.globalProgress=true;
     this.admin.addApplicationXml(file).subscribe((data:any)=>{
-      this.toast.toast("ADMIN.APPLICATIONS.APP_REGISTERED");
+      this.toast.toast('ADMIN.APPLICATIONS.APP_REGISTERED');
       this.refreshAppList();
       this.globalProgress=false;
       this.xmlSelect.nativeElement.value=null;
@@ -379,7 +388,7 @@ export class AdminComponent {
   public registerApp(){
     this.globalProgress=true;
     this.admin.addApplication(this.appUrl).subscribe((data:any)=>{
-      this.toast.toast("ADMIN.APPLICATIONS.APP_REGISTERED");
+      this.toast.toast('ADMIN.APPLICATIONS.APP_REGISTERED');
       this.refreshAppList();
       this.globalProgress=false;
       this.appUrl='';
@@ -393,7 +402,7 @@ export class AdminComponent {
     this.admin.getCacheInfo(this.cacheInfo).subscribe((data:CacheInfo)=>{
       this.globalProgress=false;
       this.dialogTitle=this.cacheInfo;
-      this.dialogMessage="size: "+data.size+"\nstatistic hits: "+data.statisticHits;
+      this.dialogMessage='size: '+data.size+'\nstatistic hits: '+data.statisticHits;
       this.dialogButtons=DialogButton.getOk(()=>{this.dialogTitle=null;});
     },(error:any)=>{
       this.globalProgress=false;
@@ -441,10 +450,16 @@ export class AdminComponent {
       return;
     this.globalProgress=true;
     if(this.oaiSave){
-      this.storage.set("admin_oai",this.oai);
+      this.storage.set('admin_oai',this.oai);
     }
     this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,this.oai.file,this.oai.oaiIds).subscribe(()=>{      this.globalProgress=false;
-      this.toast.toast('ADMIN.IMPORT.OAI_STARTED');
+        let additional:any={
+            link:{
+                caption:"ADMIN.IMPORT.OPEN_JOBS",
+                callback:()=>this.setTab('JOBS')
+            },
+        };
+      this.toast.toast('ADMIN.IMPORT.OAI_STARTED',null,null,null, additional);
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -514,7 +529,7 @@ export class AdminComponent {
 
   private refreshCatalina() {
     this.admin.getCatalina().subscribe((data:string[])=>{
-      this.catalina=data.reverse().join("\n");
+      this.catalina=data.reverse().join('\n');
       this.setCatalinaPosition();
     });
   }
@@ -635,8 +650,31 @@ export class AdminComponent {
 
     public gotoFoldertemplateFolder() {
         this.getTemplateFolderId().subscribe((id) => {
-            this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"],{queryParams:{id:id}});
+            this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace'],{queryParams:{id:id}});
         });
+    }
+
+    private cancelJob(job:any){
+      this.dialogTitle='ADMIN.JOBS.CANCEL_TITLE';
+      this.dialogMessage='ADMIN.JOBS.CANCEL_MESSAGE';
+      this.dialogButtons=DialogButton.getYesNo(()=>{
+          this.dialogTitle=null;
+      },()=> {
+          this.dialogTitle=null;
+          this.globalProgress=true;
+          this.admin.cancelJob(job.jobDetail.name).subscribe(() => {
+              this.toast.toast('ADMIN.JOBS.TOAST_CANCELED');
+              this.globalProgress=false;
+          }, (error) => {
+              this.toast.error(error);
+              this.globalProgress=false;
+          });
+      });
+    }
+    private reloadJobStatus() {
+        this.admin.getJobs().subscribe((jobs)=>{
+            this.jobs=jobs;
+        })
     }
 }
 

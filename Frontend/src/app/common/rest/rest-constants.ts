@@ -90,6 +90,7 @@ export class RestConstants {
   public static CCM_PROP_CCRESSOURCETYPE = "ccm:ccressourcetype";
   public static CCM_PROP_CCRESSOURCESUBTYPE = "ccm:ccresourcesubtype";
   public static CCM_PROP_CCRESSOURCEVERSION = "ccm:ccressourceversion";
+  public static CCM_PROP_REPLICATIONMODIFIED = "ccm:replicationmodified";
   public static CCM_PROP_EDUCATIONALTYPICALAGERANGE = "ccm:educationaltypicalagerange";
   public static CCM_PROP_COLLECTION_PINNED_STATUS = "ccm:collection_pinned_status";
   public static CCM_PROP_COLLECTION_PINNED_ORDER = "ccm:collection_pinned_order";
@@ -97,6 +98,8 @@ export class RestConstants {
   public static CCM_PROP_LINKTYPE = "ccm:linktype";
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
   public static CCM_PROP_AUTHORITY_GROUPTYPE="ccm:groupType";
+  public static CCM_PROP_TRACKING_VIEWS="ccm:tracking_views";
+  public static CCM_PROP_TRACKING_DOWNLOADS="ccm:tracking_downloads";
   public static CCM_PROP_CHILDOBJECT_ORDER = "ccm:childobject_order";
   public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
   public static CCM_PROP_TOOL_INSTANCE_KEY="ccm:tool_instance_key";
@@ -131,7 +134,9 @@ export class RestConstants {
                             RestConstants.CM_MODIFIED_DATE,
                             RestConstants.CM_PROP_C_CREATED,
                             RestConstants.CCM_PROP_EAF_PRODUCTIONYEAR,
-                            RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL];
+                            RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL,
+                            RestConstants.CCM_PROP_REPLICATIONMODIFIED
+    ];
 
 
   public static STATUS_CODE_OK = "OK";
@@ -173,6 +178,9 @@ export class RestConstants {
   public static LUCENE_SCORE = "score";
 
   public static COMMENT_MAIN_FILE_UPLOAD="MAIN_FILE_UPLOAD";
+  public static COMMENT_METADATA_UPDATE="METADATA_UPDATE";
+  public static COMMENT_CONTENT_UPDATE="CONTENT_UPDATE";
+  public static COMMENT_LICENSE_UPDATE="LICENSE_UPDATE";
   public static COMMENT_EDITOR_UPLOAD="EDITOR_UPLOAD";
   public static COMMENT_NODE_PUBLISHED="NODE_PUBLISHED";
   public static ACCESS_ADD_CHILDREN="AddChildren";
@@ -227,6 +235,7 @@ export class RestConstants {
 
   public static POSSIBLE_SORT_BY_FIELDS=[RestConstants.CM_NAME,
     RestConstants.CM_MODIFIED_DATE,
+    RestConstants.LOM_PROP_TITLE,
     RestConstants.CM_PROP_C_CREATED,
     RestConstants.CM_CREATOR,
     RestConstants.NODE_ID,

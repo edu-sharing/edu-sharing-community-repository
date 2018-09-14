@@ -48,6 +48,7 @@
   import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
   import {InputPasswordComponent} from "./common/ui/input-password/input-password.component";
   import {PoweredByComponent} from "./common/ui/powered-by/powered-by.component";
+  import {FooterComponent} from "./common/ui/footer/footer.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -96,6 +97,7 @@ export const DECLARATIONS = [
       ToucheventDirective,
       PoweredByComponent,
       BannerComponent,
+      FooterComponent,
       InfiniteScrollDirective,
       KeysPipe,
       CookieInfoComponent,

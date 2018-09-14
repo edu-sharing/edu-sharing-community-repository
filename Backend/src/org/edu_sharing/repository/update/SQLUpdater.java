@@ -51,29 +51,34 @@ public class SQLUpdater extends UpdateAbstract {
 	}
 	
 	private void execute(boolean test){
-		try {
-		String sqlScripts = RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS);
-		if(sqlScripts != null && sqlScripts.trim().length() > 0) {
-			String[] scripts = sqlScripts.split(",");
-			for(String script : scripts) {
-				
-				String sysProtocolEntry = ID + "_" + script;
-				HashMap<String, Object> entry = protocol.getSysUpdateEntry(sysProtocolEntry);
-				if(entry == null && !test) {
-					logger.info("running sql script " + script);
-					runSQLScript(script);
-					protocol.writeSysUpdateEntry(sysProtocolEntry);
-				}
-			}
-		}else {
-			logger.info("no scripts to execute defined");
-		}
-		}catch(Throwable e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-	
-	private void runSQLScript(String script) throws Exception{
+        executeScript(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_CORE_DBSCRIPTS,test);
+        executeScript(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS,test);
+    }
+
+    private void executeScript(String property,boolean test) {
+        try {
+        String sqlScripts = RepoFactory.getEdusharingProperty(property);
+        if(sqlScripts != null && sqlScripts.trim().length() > 0) {
+            String[] scripts = sqlScripts.split(",");
+            for(String script : scripts) {
+
+                String sysProtocolEntry = ID + "_" + script;
+                HashMap<String, Object> entry = protocol.getSysUpdateEntry(sysProtocolEntry);
+                if(entry == null && !test) {
+                    logger.info("running sql script " + script);
+                    runSQLScript(script);
+                    protocol.writeSysUpdateEntry(sysProtocolEntry);
+                }
+            }
+        }else {
+            logger.info("no scripts to execute defined in property "+property);
+        }
+        }catch(Throwable e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    private void runSQLScript(String script) throws Exception{
 		
 		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		Connection connection = dbAlf.getConnection();

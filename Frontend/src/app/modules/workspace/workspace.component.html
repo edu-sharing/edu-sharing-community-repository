@@ -1,6 +1,6 @@
 <div class="dialog darken dropZone" fileDrop
      (onFileDrop)="onFileDrop($event)"
-     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !showUploadSelect">
+     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !hasOpenWindows()">
   <div>
     <i class="material-icons" *ngIf="!searchQuery && createAllowed && !filesToUpload">cloud_upload</i>
     <i class="material-icons" *ngIf="!(!searchQuery && createAllowed && !filesToUpload)">cloud_off</i>
@@ -27,7 +27,7 @@
     [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
     [currentScope]="isSafe ? 'safe' : 'workspace'"
     [searchEnabled]="!isBlocked"
-    [searchPlaceholder]="'WORKSPACE.SEARCH'"
+    [searchPlaceholder]="isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH' "
     [canOpen]="mainnav"
     [searchQuery]="searchQuery"
     (onSearch)="doSearch($event)"
@@ -50,12 +50,6 @@
                 [buttons]="dialogButtons"
                 [priority]="10"
   ></modal-dialog>
-  <div class="dialog darken dropZone" *ngIf="fileIsOver && false">
-    <div>
-      <p><i class="material-icons">cloud_download</i></p>
-      <p>{{'WORKSPACE.DROP_FILES' | translate}}</p>
-    </div>
-  </div>
 
 
 
@@ -121,7 +115,7 @@
                         [folder]="addFolderName"
                         [parent]="currentFolder"
                         (onCancel)="addFolderName=null"
-  (onFolderAdded)="addFolder($event)"
+                        (onFolderAdded)="addFolder($event)"
   ></workspace-add-folder>
 
   <workspace-create-connector *ngIf="createConnectorName!=null"
@@ -140,8 +134,8 @@
                   [isSafe]="isSafe"
                   [options]="explorerOptions"
                   (onDrop)="handleDrop($event)"
-  (onSetRoot)="setRoot($event)"
-  (onOpenNode)="openNode($event)"
+                  (onSetRoot)="setRoot($event)"
+                  (onOpenNode)="openNode($event)"
                   (onDeleteNodes)="deleteNode=$event"
                   (onUpdateOptions)="updateOptions($event)"
   ></workspace-tree>

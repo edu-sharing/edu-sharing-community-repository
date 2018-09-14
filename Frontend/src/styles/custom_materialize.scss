@@ -98,7 +98,7 @@ select,
 textarea.materialize-textarea,
 input[type=search]{
   height:3rem;
-
+  -webkit-appearance: none;
   border: 1px solid #ccc;
   padding: 0 0.75em;
   width:calc(100% - 2em);
@@ -407,9 +407,8 @@ span.thumb{
   font-size: 8pt;
   min-width: 50px;
   label{
-    float: left;
     font-size: 6pt;
-    width: 100%;
+    margin-right: 5px;
   }
 }
 .noUi-connect{

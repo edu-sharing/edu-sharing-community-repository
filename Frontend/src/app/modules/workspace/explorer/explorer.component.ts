@@ -1,4 +1,4 @@
-import {Component, Input, EventEmitter, Output} from '@angular/core';
+import {Component, Input, EventEmitter, Output, OnDestroy, AfterViewInit} from '@angular/core';
 import {RestNodeService} from "../../../common/rest/services/rest-node.service";
 import {Node, NodeList, NodeWrapper} from "../../../common/rest/data-object";
 import {RestConstants} from "../../../common/rest/rest-constants";
@@ -10,13 +10,15 @@ import {SessionStorageService} from "../../../common/services/session-storage.se
 import {RestSearchService} from "../../../common/rest/services/rest-search.service";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {ListItem} from "../../../common/ui/list-item";
+import {TemporaryStorageService} from '../../../common/services/temporary-storage.service';
+import {StateAwareComponent} from '../../../common/directives/StateAwareComponent';
 
 @Component({
   selector: 'workspace-explorer',
   templateUrl: 'explorer.component.html',
   styleUrls: ['explorer.component.scss']
 })
-export class WorkspaceExplorerComponent  {
+export class WorkspaceExplorerComponent extends StateAwareComponent{
   public _nodes : Node[]=[];
   public sortBy : string=RestConstants.CM_NAME;
   public sortAscending=RestConstants.DEFAULT_SORT_ASCENDING;
@@ -41,8 +43,8 @@ export class WorkspaceExplorerComponent  {
   public _searchQuery : string = null;
   private _node : string;
   public hasMoreToLoad :boolean ;
-  private offset : number;
   private lastRequestSearch : boolean;
+
   @Input() selection : Node[];
   @Input() set current(current : string){
    this.setNodeId(current);
@@ -68,8 +70,11 @@ export class WorkspaceExplorerComponent  {
   public load(reset : boolean){
     if(this._node==null && !this._searchQuery)
       return;
+    if(this.loading){
+        setTimeout(()=>this.load(reset),10);
+        return;
+    }
     if(reset) {
-      this.offset = 0;
       this.hasMoreToLoad = true;
       this._nodes=[];
       this.onSelectionChanged.emit([]);
@@ -79,12 +84,9 @@ export class WorkspaceExplorerComponent  {
     else if(!this.hasMoreToLoad){
       return;
     }
-    else{
-      this.offset+=this.connector.numberPerRequest;
-    }
     this.loading=true;
     this.showLoading=true;
-	let request : any={offset:this.offset,propertyFilter:[
+	let request : any={offset:this._nodes.length,propertyFilter:[
 	  RestConstants.ALL
 	  /*RestConstants.CM_MODIFIED_DATE,
     RestConstants.CM_CREATOR,
@@ -106,7 +108,7 @@ export class WorkspaceExplorerComponent  {
       [query,query,query,query,query],[],RestConstants.COMBINE_MODE_OR,RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS, request).subscribe((data : NodeList) => this.addNodes(data,true));*/
     let criterias:any=[];
     criterias.push({'property': RestConstants.PRIMARY_SEARCH_CRITERIA, 'values': [query]});
-    this.search.search(criterias,[],request,RestConstants.CONTENT_TYPE_ALL,RestConstants.HOME_REPOSITORY,
+    this.search.search(criterias,[],request,this.connector.getCurrentLogin() && this.connector.getCurrentLogin().isAdmin ? RestConstants.CONTENT_TYPE_ALL : RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS,RestConstants.HOME_REPOSITORY,
       RestConstants.DEFAULT,[],'workspace').subscribe((data:NodeList)=>{
       this.addNodes(data,true);
     },(error:any)=>{
@@ -128,7 +130,7 @@ export class WorkspaceExplorerComponent  {
 
     private handleError(error: any) {
         if (error.status == 404)
-            this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node})
+            this.toast.error(null, "WORKSPACE.TOAST.NOT_FOUND", {id: this._node});
         else
             this.toast.error(error);
 
@@ -138,14 +140,10 @@ export class WorkspaceExplorerComponent  {
   private addNodes(data : NodeList,wasSearch:boolean){
     if(this.lastRequestSearch!=wasSearch)
       return;
-      let i=0;
       console.log(data);
       if(data && data.nodes) {
         this.totalCount=data.pagination.total;
-        for (let node of data.nodes) {
-          this._nodes.push(node);
-          i++;
-        }
+        this._nodes=this._nodes.concat(data.nodes);
       }
       if(data.pagination.total==this._nodes.length)
         this.hasMoreToLoad=false;
@@ -160,10 +158,12 @@ export class WorkspaceExplorerComponent  {
     private connector : RestConnectorService,
     private translate : TranslateService,
     private storage : SessionStorageService,
+    temporaryStorage : TemporaryStorageService,
     private config : ConfigurationService,
     private search : RestSearchService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
+    super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
     this.config.get("workspaceColumns").subscribe((data:string[])=> {
       this.storage.get("workspaceColumns").subscribe((columns:any[])=>{
         this.columns = this.getColumns(columns, data);

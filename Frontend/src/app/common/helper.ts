@@ -137,6 +137,8 @@ export class Helper {
   }
 
   public static deepCopy(data: any) {
+    if(data==null)
+      return null;
     return JSON.parse(JSON.stringify(data));
   }
   public static deepCopyArray(data: any[]) {
@@ -177,5 +179,23 @@ export class Helper {
 
         let blob = new Blob(byteArrays, {type: mimetype});
         return blob;
+    }
+
+    /**
+     * Join 2 arrays via the keys and return 1 array containing all keys from both arrays
+     * The array at pos 2 will have priority and override the keys in the first one
+     * @param array1
+     * @param array
+     */
+    static arrayJoin(array1: any, array2: any) {
+        if(array1==null)
+            return array2;
+        if(array2==null)
+            return array1;
+        let array:any=Helper.deepCopyArray(array1);
+        for(let key in array2){
+            array[key]=array2[key];
+        }
+        return array;
     }
 }

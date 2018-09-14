@@ -32,7 +32,7 @@
     </div>
 </div>
 <div class="dialog dialogOptions" *ngIf="dropdown" (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"></div>
-<div [className]="'list '+listClass" infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll()">
+<div [className]="'list '+listClass" infinite-scroll [scrollWindow]="scrollWindow" (scrolled)="scroll(false)">
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
 
@@ -121,7 +121,7 @@
                         <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
                 </div>
             </div>
-            <div class="row waves-effect"
+            <div class="row waves-effect node-row"
                  [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
                  [class.noPermissions]="noPermissions(node)"
                  [class.selected]="getSelectedPos(node)!=-1"
@@ -136,6 +136,7 @@
                  (contextmenu)="contextMenu($event,node)"
                  (dragover)="allowDrag($event,node)"
                  (dragenter)="allowDrag($event,node)"
+                 (keydown)="handleKeyboard($event)"
                  (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
                 <div *ngIf="viewType==1 && node.properties && node.properties['virtual:childobjectcount']>0" class="childobjectCount">
                     <span>{{node.properties['virtual:childobjectcount']*1+1}}</span><i class="material-icons">filter_none</i>
@@ -217,7 +218,7 @@
                 <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)"><a [class.disabled]="!optionIsValid(_options[0],node)" (click)="callOption(_options[0],node)"><i class="material-icons">{{_options[0].icon}}</i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
             </div>
         </div>
-        <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll()">
+        <div *ngIf="_nodes && _nodes.length && hasMore && !isLoading" class="clickable loadMore" (click)="scroll(true)">
             <i class="material-icons">refresh</i>
             <div>{{'LOAD_MORE' | translate}}</div>
         </div>

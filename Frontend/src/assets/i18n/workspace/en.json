@@ -8,6 +8,7 @@
     "TITLE_SAFE": "Safe",
     "NO_MATCHING_ITEMS": "No matching elements",
     "SEARCH": "Search for folders or items...",
+    "SAFE_SEARCH": "Search the safe…",
     "MY_FILES": "My content",
     "ADD": "Add",
     "ADD_OBJECT": "Add Material",
@@ -63,6 +64,8 @@
       "GROUP_INHERIT":"Inherited",
       "GROUP_USERS":"These users have access:",
       "GROUP_GROUPS":"These groups have access:",
+      "USAGES":"Used and shared in:",
+      "DELETED":"will be removed",
       "TYPE_VIEWER":"Viewer",
       "TYPE_VIEWER_DESCRIPTION":"can view item / details page",
       "TYPE_COWORKER":"Collaborator",
@@ -103,9 +106,14 @@
         "CHANGED":"Modified",
         "REMOVED":"Removed",
         "EMPTY":"No sharing history available"
+      },
+      "USAGE_TYPE":{
+        "MOODLE":"Moodle-Courses",
+        "COLLECTION":"Collections"
       }
     },
     "INHERIT_DISABLED":"Inherition is currently disabled",
+    "INHERIT_ACCESS_DENIED":"Inherited rights can not be shown since you don't have access to the parent element",
     "INHERIT_EMPTY":"The parent folder has currently no permissions.\nPermissions will be applied as soon as they are added to the parent folder.",
     "PERMISSION_AUTHORITY_EXISTS":"The chosen user/group already has access. Check the current permissions at \"Invited\"",
     "PERMISSIONS_UPDATED":"Permissions updated",
@@ -126,10 +134,14 @@
       "USAGE_TYPE": {
         "LMS": "LMS-Courses",
         "COLLECTION": "Collections",
-        "DOWNLOAD": "Downloads"
+        "DOWNLOAD": "Downloads",
+        "VIEW": "Views"
       },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
+        "METADATA_UPDATE": "Updated metadata",
+        "CONTENT_UPDATE": "Updated content",
+        "LICENSE_UPDATE": "Updated license",
         "EDITOR_UPLOAD": "File updated by editor",
         "NODE_PUBLISHED": "File published"
       }
@@ -142,7 +154,7 @@
       "AUTHOR_FIRST":"Author: First name",
       "AUTHOR_LAST":"Last name",
       "KEYWORDS":"Add keywords",
-      "HINT_ENTER":"Press enter add keywords.",
+      "HINT_ENTER":"Press enter to add keywords.",
       "AS_VERSION":"as Version",
       "VERSION":"Version",
       "VERSION_COMMENT":"Add version comment",
@@ -184,7 +196,7 @@
       "PASSWORD":"Password Protect",
       "PASSWORD_INFO":"Then this link will be password protected",
       "PASSWORD_PLACEHOLDER":"Set password...",
-      "PASSWORD_PLACEHOLDER_EDIT":"Leave empty to keep current",
+      "PASSWORD_PLACEHOLDER_EDIT":"Password is already set",
       "LINK":"Link to object",
       "ACTIVATE":"Activate sharing",
       "COPY_CLIPBOARD":"Copy link",
@@ -269,12 +281,12 @@
       "NOT_OER":"no OER",
       "SCHULFUNK_NAME":"German educational radio/television license (§47 UrhG)",
       "EDU_NAME":"edu-sharing Licenses",
-      "CUSTOM_NAME":"define custom license",
+      "CUSTOM_NAME":"other license",
       "CURRENT":"currently picked license",
       "VERSION":"version",
       "LOCALE":"locale",
       "RELEASE_WITHOUT_LICENSE":"In order to release an object you need to select a license",
-      "CUSTOM_RIGHTS":"Define your license...",
+      "CUSTOM_RIGHTS":"GNU GPL or other licenses...",
       "RELEASE":"Release object under this license",
       "RELEASE_MULTI":"Release {{count}} objects under this license",
       "CONTACT":"Other users may contact me for further licensing negotiations",

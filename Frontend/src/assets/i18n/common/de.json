@@ -12,6 +12,7 @@
   "SAVE" : "Speichern",
   "APPLY" : "Übernehmen",
   "CANCEL" : "Abbrechen",
+  "YES_DELETE" : "Ja, löschen",
   "RENAME" : "Umbenennen",
   "USERMENU": "Nutzermenü",
   "USER_GUEST" : "Gast",
@@ -132,14 +133,20 @@
     "CHILDREN_NONE":"Dieses Element besitzt keine Child Objekte"
   },
   "SIDEBAR":{
-    "WORKSPACE_OLD":"Klassischer Workspace",
     "WORKSPACE":"Workspace",
     "SEARCH":"Suchumgebung",
     "COLLECTIONS":"Sammlungen",
     "SECURE":"Safe",
     "PERMISSIONS":"Nutzerverwaltung",
     "LOGIN":"Login",
-    "ADMIN":"Admin-Tools"
+    "ADMIN":"Admin-Tools",
+    "WORKSPACE_SHORT":"Workspace",
+    "SEARCH_SHORT":"Suche",
+    "COLLECTIONS_SHORT":"Sammlungen",
+    "SECURE_SHORT":"Safe",
+    "PERMISSIONS_SHORT":"Nutzer",
+    "LOGIN_SHORT":"Login",
+    "ADMIN_SHORT":"Admin"
   },
   "WORKFLOW":{
     "100_unchecked":"Kein Status",
@@ -176,6 +183,15 @@
     "COPYRIGHT_FREE":"Copyright, freier Zugang",
     "COPYRIGHT_LICENSE":"Copyright, lizenzpflichtig",
     "SCHULFUNK":"Schulfunk (§47 UrhG)",
+    "UNTERRICHTS_UND_LEHRMEDIEN":"§60b Unterrichts- und Lehrmedien",
+    "CC_0":"CC-0",
+    "PDM":"PDM",
+    "CC_BY":"CC-BY",
+    "CC_BY_SA":"CC-BY-SA",
+    "CC_BY_NC":"CC-BY-NC",
+    "CC_BY_ND":"CC-BY-ND",
+    "CC_BY_NC_SA":"CC-BY-NC-SA",
+    "CC_BY_NC_ND":"CC-BY-NC-ND",
     "CUSTOM":"Andere Lizenz"
   },
   "COOKIE_INFO":{
@@ -342,6 +358,7 @@
     "LICENSE_LINK":"Lizenz verwalten",
     "TEMPLATE_LINK":"Metadaten-Vorlage verwalten",
     "CONTRIBUTOR_LINK":"Weitere Beteiligte",
+    "LICENSE_NO_PERMISSIONS_MATERIAL":"Sie besitzen keine Berechtigungen, um dieses Material zu lizenzieren",
     "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
     "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern",
     "ADD_CHILD_OBJECT":"Weitere Materialien hinzufügen",
@@ -362,12 +379,14 @@
   "SHARING":{
     "TITLE":"Dateifreigabe",
     "DOWNLOAD":"Herunterladen",
-    "DOWNLOAD_ZIP":"Als ZIP Herunterladen",
+    "DOWNLOAD_ZIP":"Als Zip Herunterladen",
     "LINK":"Zur Originalseite springen",
     "INVITED_AND_CREATED_BY":"Erstellt und freigegeben von {{inviter}}",
     "INVITED_PLUS_CREATED_BY":"Freigegeben von {{inviter}}, erstellt von {{creator}}",
     "ENTER_PASSWORD": "weiter",
-    "SHARING.ERROR_INVALID_PASSWORD":"Ungültiges Passwort",
+    "ERROR_INVALID_PASSWORD":"Ungültiges Passwort",
+    "PASSWORD": "Passwort",
+    "PASSWORD_PLACEHOLDER": "Passwort eingeben ...",
     "PASSWORD_CORRECT": "Passwort korrekt"
   },
   "TOAST":{

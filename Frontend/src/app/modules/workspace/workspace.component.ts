@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {RestNodeService} from "../../common/rest/services/rest-node.service";
@@ -137,6 +137,12 @@ export class WorkspaceMainComponent implements EventListener{
             this.connector.logoutSync();
         }
     }
+    @HostListener('window:scroll', ['$event'])
+    handleScroll(event: Event) {
+        let scroll=(window.pageYOffset || document.documentElement.scrollTop);
+        if(scroll>0)
+            this.storage.set( 'workspace_scroll', scroll);
+    }
     @HostListener('document:keyup', ['$event'])
     handleKeyboardEventUp(event: KeyboardEvent) {
         if(event.keyCode==91 || event.keyCode==93)
@@ -248,7 +254,7 @@ export class WorkspaceMainComponent implements EventListener{
     private openCamera(){
         this.cordova.getPhotoFromCamera((data:any)=>{
             console.log(data);
-            let name=this.translate.instant('SHARE_APP.IMAGE')+" "+DateHelper.formatDate(this.translate,new Date().getTime(),true,false)+".jpg";
+            let name=this.translate.instant('SHARE_APP.IMAGE')+" "+DateHelper.formatDate(this.translate,new Date().getTime(),{showAlwaysTime:true,useRelativeLabels:false})+".jpg";
             let blob:any=Helper.base64toBlob(data,"image/jpeg");
             blob.name=name;
             let list:any={};
@@ -581,6 +587,8 @@ export class WorkspaceMainComponent implements EventListener{
         this.onFileDrop(files);
     }
     public onFileDrop(files : FileList){
+        if(!this.showUploadSelect && this.hasOpenWindows())
+            return;
         if(this.searchQuery){
             this.toast.error(null,"WORKSPACE.TOAST.NOT_POSSIBLE_IN_SEARCH");
             return;
@@ -838,7 +846,7 @@ export class WorkspaceMainComponent implements EventListener{
         }
         if(nodes) {
             let license = new OptionItem("WORKSPACE.OPTION.LICENSE", "copyright", (node: Node) => this.editLicense(node));
-            license.isEnabled = !this.isSafe && allFiles && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_WRITE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
+            license.isEnabled = !this.isSafe && allFiles && NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE) && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_LICENSE);
             if (license.isEnabled)
                 options.push(license);
         }
@@ -868,6 +876,7 @@ export class WorkspaceMainComponent implements EventListener{
         if (nodes && nodes.length) {
             let cut=new OptionItem("WORKSPACE.OPTION.CUT", "content_cut", (node: Node) => this.cutCopyNode(node, false));
             cut.isSeperate = true;
+            cut.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE) && (this.root=='MY_FILES' || this.root=='SHARED_FILES');
             options.push(cut);
             options.push(new OptionItem("WORKSPACE.OPTION.COPY", "content_copy", (node: Node) => this.cutCopyNode(node, true)));
             let del=this.actionbar.createOptionIfPossible('DELETE', nodes, (node: Node) => this.deleteNodes(node));
@@ -941,6 +950,7 @@ export class WorkspaceMainComponent implements EventListener{
                 this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
                 this.createAllowed = NodeHelper.getNodesRight([this.currentFolder], RestConstants.ACCESS_ADD_CHILDREN);
                 this.actionOptions = this.getOptions(this.selection, false);
+                this.recoverScrollposition();
             }, (error: any) => {
                 this.currentFolder = {ref: {id: id}};
                 this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
@@ -971,7 +981,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
     private openNode(node : Node,useConnector=true) {
         if(!node.isDirectory){
-            if(RestSearchService.isSavedSearchObject(node)){
+            if(NodeHelper.isSavedSearchObject(node)){
                 UIHelper.routeToSearchNode(this.router,node);
             }
             else if(RestToolService.isLtiObject(node)){
@@ -1150,7 +1160,11 @@ export class WorkspaceMainComponent implements EventListener{
         this.showAddMobile=false;
     }
 
-    private hasOpenWindows() {
-        return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
+    hasOpenWindows() {
+        return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
+    }
+    private recoverScrollposition() {
+        console.log("recover scroll "+this.storage.get('workspace_scroll',0));
+        window.scrollTo(0,this.storage.get('workspace_scroll',0));
     }
 }

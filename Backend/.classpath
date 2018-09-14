@@ -150,7 +150,6 @@
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/cors-filter-1.9.3.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/dom4j-1.6.1.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/FastInfoset-1.2.2.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/fontbox-1.8.4.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/fop-0.94.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/freemarker-2.3.20-alfresco-patched.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/gdata-client-1.0-1.47.1.jar"/>
@@ -196,7 +195,6 @@
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jbpm-identity-3.3.1.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jbpm-jpdl-3.3.1-patched.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jdom-1.0.jar"/>
-	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jempbox-1.8.4.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jhighlight-1.0.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jibx-run-1.2.6.jar"/>
 	<classpathentry exported="true" kind="var" path="ALFRESCO_50d_WEBAPP_LIB/jid3lib-0.5.4.jar"/>
@@ -363,5 +361,6 @@
 	<classpathentry kind="lib" path="lib/pdfbox-1.8.10-alfresco-patched.jar"/>
 	<classpathentry kind="lib" path="lib/handle-client.jar"/>
 	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
+	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/lib/postgresql-9.3-1102-jdbc41.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

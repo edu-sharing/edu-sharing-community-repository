@@ -37,15 +37,15 @@ export class WorkspaceFileUploadSelectComponent  {
    */
   @Input() supportsDrop = true;
   @Input() isFileOver=false;
-  @Input() showPicker=false;
+    @Input() showPicker=false;
   /**
    * Show the lti option and support generation of lti files?
    * @type {boolean}
    */
   @Input() showLti=true;
   private breadcrumbs: Node[];
-  private ltiAllowed:boolean;
-  private ltiActivated:boolean;
+  ltiAllowed:boolean;
+  ltiActivated:boolean;
   private ltiConsumerKey:string;
   private ltiSharedSecret:string;
   private ltiTool: Node;
@@ -69,6 +69,9 @@ export class WorkspaceFileUploadSelectComponent  {
   }
   public selectFile(){
     this.file.nativeElement.click();
+  }
+  public onDrop(fileList:any){
+      this.onFileSelected.emit(fileList);
   }
   public filesSelected(event:any) : void {
     this.onFileSelected.emit(event.target.files);
@@ -100,6 +103,7 @@ export class WorkspaceFileUploadSelectComponent  {
     link=link.trim();
     this.disabled=!link;
     this.ltiAllowed=true;
+    /*
     if(this.cleanupUrlForLti(link)) {
         this.searchService.search([{
             property: "url",
@@ -116,6 +120,7 @@ export class WorkspaceFileUploadSelectComponent  {
                 }
             });
     }
+    */
   }
   public parentChoosed(event:Node[]){
     this.parent=event[0].ref.id;

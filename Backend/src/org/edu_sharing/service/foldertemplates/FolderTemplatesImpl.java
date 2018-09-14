@@ -165,8 +165,6 @@ public class FolderTemplatesImpl implements FolderTemplates {
 			return;
 		}
 
-		Result<List<Group>> glist;
-
 		if (!setEduGroup(eduGroupname)) {
 			return;
 		};
@@ -178,12 +176,7 @@ public class FolderTemplatesImpl implements FolderTemplates {
 
 		}
 
-		int numresult = 2;
-
-		glist = this.permissionService.findGroups(this.eduGroup.getGroupname(), true, 0, numresult);
-		Group g = glist.getData().get(0);
-
-		String groupNodeId = g.getNodeId();
+		String groupNodeId = eduGroup.getGroupId();
 
 		UserEnvironmentTool uit = new UserEnvironmentTool(ApplicationInfoList.getHomeRepository().getAppId(),
 				this.repoClient.getAuthenticationInfo());
@@ -205,7 +198,7 @@ public class FolderTemplatesImpl implements FolderTemplates {
 			fileformat = (String) tl.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT);
 
 			if (filename.equals(templateName) && fileformat.equals("text/xml")) {
-				fileNodeId = (String) tl.get("{http://www.alfresco.org/model/system/1.0}node-uuid");
+				fileNodeId = (String) tl.get(CCConstants.SYS_PROP_NODE_UID);
 			}
 			if (filename.equals("template.properties") && fileformat.equals("text/plain")) {
 				this.templatePropertiesFile = (String) tl.get(CCConstants.SYS_PROP_NODE_UID);
@@ -334,7 +327,6 @@ public class FolderTemplatesImpl implements FolderTemplates {
 			return "";
 		}
 		logger.info("found Group: " + n.getDisplayName());
-		loggingErrorHandler.getMessage().add("found Group: " + n.getDisplayName());
 		return n.getAuthorityName();
 
 	}
@@ -390,7 +382,7 @@ public class FolderTemplatesImpl implements FolderTemplates {
 						logger.error(e1.getMessage(),e1);
 					}
 
-					if (uid == "") {
+					if (uid.isEmpty()) {
 						try {
 							pnid = this.repoClient.createNode(parentid, CCConstants.CCM_TYPE_MAP, eduProps);
 							logger.info("folder: "+ name + " created ");

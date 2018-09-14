@@ -28,6 +28,7 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,9 +36,7 @@ import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.authentication.Context;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.importer.BinaryHandler;
 import org.edu_sharing.repository.server.importer.Importer;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
@@ -49,8 +48,11 @@ import org.quartz.JobExecutionException;
 
 public class ImporterJob extends AbstractJob {
 
+	public static Logger logger=Logger.getLogger(ImporterJob.class);
+	private JobExecutionContext context;
+
 	public ImporterJob() {
-		this.logger = LogFactory.getLog(ImporterJob.class);
+
 	}
 
 	@Override
@@ -113,9 +115,10 @@ public class ImporterJob extends AbstractJob {
 		String oaiIds = (String) jobDataMap.get(OAIConst.PARAM_OAI_IDS);
 		
 		String[] idArr = (oaiIds != null) ? oaiIds.split(",") : null;
-		
+
+		this.context = context;
+
 		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass,idArr);
-		logger.info("returns");
 	}
 
 	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
@@ -130,6 +133,9 @@ public class ImporterJob extends AbstractJob {
 			} else {
 				importer = new OAIPMHLOMImporter();
 			}
+			try {
+				JobHandler.getInstance().updateJobName(context.getJobDetail(),"Importer Job " +importer.getClass().getSimpleName()+" " + new URL(oaiBaseUrl).getHost());
+			}catch(Throwable t){}
 
 			RecordHandlerInterface recordHandler = null;
 			BinaryHandler binaryHandler = null;
@@ -157,10 +163,10 @@ public class ImporterJob extends AbstractJob {
 			importer.setMetadataPrefix(metadataPrefix);
 			importer.setNrOfRecords(-1);
 			importer.setNrOfResumptions(-1);
-			importer.setPersistentHandler(new PersistentHandlerEdusharing());
+			importer.setPersistentHandler(new PersistentHandlerEdusharing(this));
 			importer.setSet(sets[0]);
 			importer.setRecordHandler(recordHandler);
-
+			importer.setJob(this);
 			if (urlImport != null) {
 				RecordHandlerLOM recordHandlerLom = new RecordHandlerLOM(null);
 				((OAIPMHLOMImporter)importer).importOAIObjectsFromFile(urlImport, recordHandlerLom);
@@ -182,7 +188,7 @@ public class ImporterJob extends AbstractJob {
 			new RefreshCacheExecuter().excecute(null, true, null);
 
 		} catch (Throwable e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage(),e);
 			e.printStackTrace();
 		}
 	}

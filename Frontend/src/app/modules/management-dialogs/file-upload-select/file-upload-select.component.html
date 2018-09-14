@@ -1,11 +1,13 @@
 <div class="dialog darken" [style.z-index]="120 + priority" [@fade]="this"></div>
 <input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="multiple" (change)="filesSelected($event)" />
-<div class="card card-high center-card card-action" [style.z-index]="121 + priority" [@cardAnimation]="this">
+<div class="card center-card card-action" [style.z-index]="121 + priority" [class.card-high]="ltiAllowed && ltiActivated" [@cardAnimation]="this">
     <div class="card-content">
         <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
         <div class="card-title">{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}</div>
         <div class="card-scroll">
-            <div class="dropArea" [class.dropActive]="isFileOver">
+            <div class="dropArea" [class.dropActive]="isFileOver" fileDrop
+                 (onFileDrop)="onDrop($event)"
+                 (fileOver)="isFileOver=$event">
                 <div><i class="material-icons">cloud_upload</i></div>
                 <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}</div>
                 <div class="btn-flat btn-shadow" tabindex="0" (keyup.enter)="selectFile()" (click)="selectFile()">{{'WORKSPACE.SELECT_MATERIAL' | translate}}</div>

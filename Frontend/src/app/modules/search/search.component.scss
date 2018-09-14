@@ -2,12 +2,12 @@
 
 $sidenavWidth:300px;
 .switchToCollections{
-  float:left;
   font-weight:bold;
 }
 .extendedSearch,.switchToCollections{
   text-transform: uppercase;
   padding-top: 3px;
+  flex-grow: 1;
 }
 .repository{
   width:calc(100% - 10px);
@@ -20,6 +20,9 @@ $sidenavWidth:300px;
     top:$mainnavHeight;
     width:calc(25% - 20px);
     text-transform: uppercase;
+    &.no-mainnav{
+      top:0;
+    }
   }
 
 }
@@ -40,6 +43,9 @@ $sidenavWidth:300px;
   ul{
     border-bottom: none;
   }
+}
+.rowRepositories.no-mainnav{
+  top:0;
 }
 .sidenav .row{
   margin:0 -30px;
@@ -117,11 +123,21 @@ $sidenavWidth:300px;
   color: rgba(255, 255, 255, 1);
 }
 
-.content_wrapper {
-  transition: all $transitionNormal;
-  text-align: center;
-  margin: 0 10px;
-  min-height: 100%;
+.content-with-footer {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  .content_wrapper {
+    transition: all $transitionNormal;
+    text-align: center;
+    margin: 0 10px;
+    min-height: 100%;
+    width: calc(100% - 20px);
+  }
+  .contentSidenav{
+    margin-left: $sidenavWidth;
+    width:calc(100% - 20px - #{$sidenavWidth});
+  }
 }
 
 md-sidenav-container,.sidenav,#top {
@@ -229,16 +245,18 @@ a, a:hover, a:visited, a:active, button {
 
 
 .top {
-    position: fixed;
-    background-color: #fff;
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-    top: $mainnavHeight+48px;
-    z-index: 12;
-    width:100%;
-    height:$secondaryBarHeight;
-    @include materialShadow();
+  position: fixed;
+  background-color: #fff;
+  display: flex;
+  padding: 20px;
+  top: $mainnavHeight+48px;
+  z-index: 12;
+  width:100%;
+  height:$secondaryBarHeight;
+  @include materialShadow();
+  &.no-mainnav{
+    top:48px;
+  }
 }
 small-collection{
   position: absolute;
@@ -248,13 +266,16 @@ small-collection{
 }
 .topNoRepositories{
   top: $mainnavHeight;
+  &.no-mainnav{
+    top:0;
+  }
 }
 .mdsSelect{
   float:left;
   width:calc(100% + 40px);
   >div {
     width: 100%;
-    padding: 10px 10px;
+    padding: 10px 15px;
     margin: 0 -20px;
     margin-top: 20px;
     background-color: #fff;
@@ -268,7 +289,8 @@ small-collection{
         color: $textLight;
         font-size: 16px;
         vertical-align: top;
-        padding-top: 9px;
+        padding-top: 13px;
+        padding-right: 10px;
       }
     }
     .info {
@@ -293,6 +315,10 @@ small-collection{
   height: calc(100% - #{$mainnavHeight} - 180px);
   transition: $transitionNormal all ease;
   @include iosScrolling();
+  &.no-mainnav{
+    top:110px;
+    height: calc(100% - 110px - 70px);
+  }
 }
 .sidenavHidden{
   transform: translateX(-100%);
@@ -301,25 +327,32 @@ small-collection{
 .sidenavNoRepositories{
   top:$mainnavHeight+65px;
   height: calc(100% - #{$mainnavHeight} - 65px - 70px);
-}
-.contentSidenav{
-  margin-left: $sidenavWidth;
+  &.no-mainnav{
+    top:65px;
+    height: calc(100% - 65px - 70px);
+  }
 }
 #sub {
     padding-top: 20px;
 }
 
 .results {
-    margin-top:200px;
+    margin-top:$mainnavHeight+130px;
     padding-bottom: 20px;
     text-align: left;
     min-height: 1000px;
     display: inline-block;
     width: 100%;
     overflow-x: hidden;
+  &.no-mainnav{
+    margin-top: 130px;
+  }
 }
 .resultsNoRepositories{
-  margin-top: 155px;
+  margin-top: $mainnavHeight+85px;
+  &.no-mainnav{
+    margin-top: 85px;
+  }
 }
 
 .a11y-hidden-label {
@@ -572,9 +605,6 @@ div.dialog.darken {
       .list{
         width:max-content;
       }
-    }
-    .collections{
-      overflow-x: auto;
     }
     .tabsRepositories,.moreRepositories{
       .repositoryTitle{

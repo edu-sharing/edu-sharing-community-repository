@@ -11,6 +11,9 @@
 		<branding>true</branding>
 		<editProfile>true</editProfile>
 		<nodeReport>true</nodeReport>
+		<services>
+			<visualization>https://appserver7.metaventis.com/stat/</visualization>
+		</services>
 	</values>
 	<contexts>
 	</contexts>

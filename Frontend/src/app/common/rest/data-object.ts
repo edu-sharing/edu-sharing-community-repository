@@ -80,6 +80,15 @@ export interface Application {
   xml: string;
 }
 
+export interface Service {
+    active: boolean;
+    id: string;
+    name: string;
+    url: string;
+    logo: string;
+    interfaces: any[];
+    statisticsInterface: string;
+}
 
 export interface Preview {
   data: Blob; // image, may null, see @NodeHelper.appendImageData
@@ -135,6 +144,7 @@ export interface Pagination {
 }
 export interface SharingInfo{
   password: boolean;
+  expired: boolean;
   passwordMatches: boolean;
   invitedBy: Person;
   node: Node;
@@ -576,11 +586,14 @@ export interface MdsValueList {
   values: MdsValue[];
 }
 
-
+export interface  MdsValuesParameters {
+    query : string;
+    property : string;
+    pattern : string;
+}
 export interface MdsValues{
-  query : string;
-  property : string;
-  pattern : string;
+  valueParameters:MdsValuesParameters;
+  criterias : any;
 }
 
 export interface Parent {
@@ -762,6 +775,8 @@ export interface Usage {
   courseId: string;
   distinctPersons: number;
   appId: string;
+  appType: string;
+  appSubtype: string;
   nodeId: string;
   parentNodeId: string;
   usageVersion: string;
@@ -773,7 +788,9 @@ export interface Usage {
 export interface UsageList {
   usages: Usage[];
 }
-
+export interface CollectionUsage extends Usage{
+    collection: Collection;
+}
 export interface Filetype {
   mimetype: string;
   filetype: string;
@@ -896,6 +913,7 @@ export class CollectionReference {
   reference:Node;
   originalId:string;
   access: string[];
+  accessOriginal: string[];
   previewUrl:string;
 
 }
@@ -929,7 +947,7 @@ export class CollectionContent {
   setCollectionID(id:string):void {
     if (this.collection==null) this.collection = new Collection();
     if (this.collection.ref==null) this.collection.ref = new NodeRef();
-    this.collection.ref.id = id;;
+    this.collection.ref.id = id;
   }
 
 }

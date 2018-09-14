@@ -8,6 +8,7 @@
     "TITLE_SAFE": "Safe",
     "NO_MATCHING_ITEMS": "Keine Elemente entsprechen der Suchanfrage",
     "SEARCH": "Suchen...",
+    "SAFE_SEARCH": "Safe durchsuchen...",
     "MY_FILES": "Meine Inhalte",
     "ADD": "Neu",
     "ADD_OBJECT": "Neues Material",
@@ -64,6 +65,8 @@
       "GROUP_INHERIT":"Geerbte Rechte",
       "GROUP_USERS":"Folgende Nutzer haben Zugriff:",
       "GROUP_GROUPS":"Folgende Gruppen haben Zugriff:",
+      "USAGES":"Benutzt und freigegeben in:",
+      "DELETED":"wird gelöscht",
       "TYPE_VIEWER":"Betrachter",
       "TYPE_VIEWER_DESCRIPTION":"darf sehen",
       "TYPE_COWORKER":"Mitarbeiter",
@@ -105,13 +108,13 @@
         "REMOVED":"Entfernt",
         "EMPTY":"Es wurden noch keine Freigaben angepasst"
       },
-      "COLLECTIONS":{
-        "TITLE":"Zugriff über Sammlungen",
-        "INFO":"Das Material ist zusätzlich über öffentliche oder freigebene Sammlungen für Andere sichtbar.",
-        "LINK":"Sammlungen zeigen"
+      "USAGE_TYPE":{
+        "MOODLE":"Moodle-Kurse",
+        "COLLECTION":"Sammlungen"
       }
     },
     "INHERIT_DISABLED":"Rechtevererbung ist aktuell ausgeschaltet",
+    "INHERIT_ACCESS_DENIED":"Eventuell geerbte Rechte können nicht angezeigt werden, da Sie keinen Zugriff auf das darüberliegende Element besitzen",
     "INHERIT_EMPTY":"Es sind aktuell keine Berechtigungen am übergeordneten Ordner.\nSobald der übergeordnete Ordner Berechtigungen erhält, werden diese auf das Objekt angewendet.",
     "PERMISSION_AUTHORITY_EXISTS":"Der gewählte Nutzer/Gruppe hat bereits Zugriff. Überprüfen Sie die Berechtigungen unter \"Schon Eingeladen\"",
     "PERMISSIONS_UPDATED":"Freigaben wurden aktualisiert",
@@ -135,10 +138,14 @@
       "USAGE_TYPE": {
         "LMS": "LMS-Kurse",
         "COLLECTION": "Sammlungen",
-        "DOWNLOAD": "Downloads"
+        "DOWNLOAD": "Downloads",
+        "VIEW": "Aufrufe"
       },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "Datei wurde erstellt",
+        "METADATA_UPDATE": "Metadaten aktualisiert",
+        "CONTENT_UPDATE": "Inhalt aktualisiert",
+        "LICENSE_UPDATE": "Lizenz aktualisiert",
         "EDITOR_UPLOAD": "Datei wurde durch Editor {{editor}} aktualisiert",
         "NODE_PUBLISHED": "Datei wurde veröffentlicht"
       }
@@ -209,8 +216,8 @@
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "PASSWORD":"Passwortschutz",
       "PASSWORD_INFO":"Dieser Link wird mit einem Passwort geschützt",
-      "PASSWORD_PLACEHOLDER":"Passwort bestimmen...",
-      "PASSWORD_PLACEHOLDER_EDIT":"Leer lassen, um das aktuelle Passwort zu behalten",
+      "PASSWORD_PLACEHOLDER":"Passwort angeben...",
+      "PASSWORD_PLACEHOLDER_EDIT":"Passwort ist schon gesetzt",
       "DISABLED":"Linkfreigabe ist deaktiviert",
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "LINK":"Link zum Objekt",
@@ -298,13 +305,14 @@
       "OER":"OER",
       "NOT_OER":"Kein OER",
       "SCHULFUNK_NAME":"Schulfunk (§47 UrhG)",
+      "UNTERRICHTS_UND_LEHRMEDIEN_NAME":"§60b Unterrichts- und Lehrmedien",
       "EDU_NAME":"edu-sharing Lizenzen",
-      "CUSTOM_NAME":"eigene Lizenz definieren",
+      "CUSTOM_NAME":"Andere Lizenz",
       "CURRENT":"Aktuell ausgewählte Lizenz",
       "VERSION":"Version",
       "LOCALE":"Rechtsordnung",
       "RELEASE_WITHOUT_LICENSE":"Um ein Objekt freizugeben muss eine Lizenz definiert werden",
-      "CUSTOM_RIGHTS":"Lizenzbedingungen definieren...",
+      "CUSTOM_RIGHTS":"GNU GPL oder andere Lizenzen...",
       "RELEASE":"Objekt mit dieser Lizenz veröffentlichen",
       "RELEASE_MULTI":"{{count}} Objekte mit dieser Lizenz veröffentlichen",
       "CONTACT":"Andere Nutzende dürfen mich für weitere Lizenzverhandlungen kontaktieren",
@@ -347,7 +355,8 @@
         "CC_0":"Dieses Werk ist gemeinfrei.<br />Keine Attributierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
         "COPYRIGHT_FREE":"Das Werk ist kostenfrei zugänglich.<br />Nutzung und Quellenangabe gemäß den allgemeingültigen gesetzlichen Regelungen (UrhG).",
         "COPYRIGHT_LICENSE":"Das Werk darf ausschließlich vom lizenzierten Nutzerkreis gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
-        "SCHULFUNK":"Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis."
+        "SCHULFUNK":"Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
+        "UNTERRICHTS_UND_LEHRMEDIEN":"Hersteller von Unterrichts- und Lehrmedien dürfen für solche Sammlungen bis zu 10 Prozent eines veröffentlichten Werkes vervielfältigen, verbreiten und öffentlich zugänglich machen.<br />§ 60a Absatz 2 und 3 ist entsprechend anzuwenden.<br />Unterrichts- und Lehrmedien im Sinne dieses Gesetzes sind Sammlungen, die Werke einer größeren Anzahl von Urhebern vereinigen und ausschließlich zur Veranschaulichung des Unterrichts und der Lehre an Bildungseinrichtungen (§ 60a) zu nicht kommerziellen Zwecken geeignet, bestimmt und entsprechend gekennzeichnet sind."
       }
     },
     "TOAST":{

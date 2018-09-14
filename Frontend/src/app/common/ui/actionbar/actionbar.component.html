@@ -1,6 +1,8 @@
 <dropdown [(show)]="dropdown"
           [callbackObject]="node"
-          [options]="optionsMenu"></dropdown>
+          [options]="optionsMenu"
+          [showDisabled]="showDisabled"
+></dropdown>
 <div class="actionbar">
   <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
     <a *ngFor="let option of optionsToggle"
@@ -24,6 +26,7 @@
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.primary]="i==optionsAlways.length-1 && backgroundType=='primary'"
        [class.disabled]="!option.isEnabled"
+       [class.display-none]="!option.isEnabled && !showDisabled"
        class="actionAlways waves-effect waves-light"
        [class.btn-flat]="i!=optionsAlways.length-1 || style=='flat'"
        [class.btn]="i==optionsAlways.length-1 && style!='flat'"

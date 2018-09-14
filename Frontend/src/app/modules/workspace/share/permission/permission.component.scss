@@ -9,11 +9,54 @@
     padding: 1px 0;
     align-items: center;
   }
+  >.name{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    padding:0 8px;
+    height: 40px;
+    >.secondary{
+      font-size: 80%;
+      color:$textLight;
+      margin-top: -3px;
+      min-height: 3px;
+    }
+  }
+}
+.deleted-info{
+  // the outer boundary in share dialog has 15px + 5px padding
+  width:calc(100% + 20px);
+  height: 100%;
+  position: absolute;
+  align-items: center;
+  left:-15px;
+  top:0;
+  z-index: 1;
+  display: flex;
+  border-radius: 25px;
+  font-weight: bold;
+  background-color: rgba(255,255,255,0.6);
+  .line{
+    flex-grow: 1;
+    padding:0 15px;
+    &:last-child{
+      padding-right: 40px;
+    }
+    hr{
+      border: none;
+      background: #000;
+      height: 1px;
+    }
+  }
 }
 .publish{
   padding: 0 5px;
 }
-.container{
+.group{
+  position: relative;
+}
+.group,.container{
   width:100%;
 }
 .readOnly{
@@ -59,6 +102,10 @@
 }
 .icon,.remove{
   min-width: 24px;
+}
+.remove{
+  position: relative;
+  z-index: 2;
 }
 .remove i,.type{
   color:$textLight;

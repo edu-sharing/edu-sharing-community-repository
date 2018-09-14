@@ -421,13 +421,17 @@ public class NodeApi  {
 	    				break;
 	    			}
 	    		}
-	    		last=NodeDao.getNode(repoDao, last.getParent().getId(),filter).asNode();
 	    		if(collection && !fullPath){
-	    			if(!last.getMediatype().equals("collection")){
+					Node finalLast = last;
+					last=AuthenticationUtil.runAsSystem(()-> NodeDao.getNode(repoDao, finalLast.getParent().getId(),filter).asNode());
+					if(!last.getMediatype().equals("collection")){
 	    				response.setScope("COLLECTION");
 	    				break;
 	    			}
 	    		}
+	    		else{
+					last=NodeDao.getNode(repoDao, last.getParent().getId(),filter).asNode();
+				}
 	    		parents.add(last);
 	    	}
 	    	
@@ -735,29 +739,33 @@ public class NodeApi  {
 	    	node=NodeDao.mapNodeConstants(repoDao,node);
 	    	List<NodeRef> children;
 
-	    	if("-shared_files-".equals(node)){
+            SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
+
+            NodeEntries response;
+            if("-shared_files-".equals(node)){
 		    	User person = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson();
 		    	children = person.getSharedFolders();
-	    	}
+		    	List<org.alfresco.service.cmr.repository.NodeRef> converted=NodeDao.convertApiNodeRef(children);
+                children=NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(converted,filter,sortDefinition));
+
+            }
 	    	else if("-my_shared_files-".equals(node)){
-	    		children = NodeDao.getFilesSharedByMe(repoDao);
-	    	}
+	    		children = NodeDao.getFilesSharedByMe(repoDao,filter,sortDefinition);
+            }
 	    	else if("-workflow_receive-".equals(node)){
-	    		children = NodeDao.getWorkflowReceive(repoDao);
+	    		children = NodeDao.getWorkflowReceive(repoDao,filter,sortDefinition);
 	    	}
 	    	else if("-to_me_shared_files-".equals(node)){
-	    		children = NodeDao.getFilesSharedToMe(repoDao);
+	    		children = NodeDao.getFilesSharedToMe(repoDao,filter,sortDefinition);
 	    	}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
-	    		children = nodeDao.getChildren(assocName);
-	    	}
-	    	
-			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
-
-			List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
+	    		children = nodeDao.getChildren(assocName,filter,sortDefinition);
+            }
+            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
+			//List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
 	    	//Collections.sort(children);
-			NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);
+			//NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);
 	    
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
@@ -805,16 +813,11 @@ public class NodeApi  {
 			node=NodeDao.mapNodeConstants(repoDao,node);
 			List<NodeRef> children;
 
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
-			children = nodeDao.getAssocs(new AssocInfo(direction,assocName));
+            SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
 
-
-			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
-
-			List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,null,propFilter);
-			//Collections.sort(children);
-			response=createResponseFromNodeList(sorted,skipCount,maxItems);
-
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
+			children = nodeDao.getAssocs(new AssocInfo(direction,assocName),null,sortDefinition);
+            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
 
 			return Response.status(Response.Status.OK).entity(response).build();
 

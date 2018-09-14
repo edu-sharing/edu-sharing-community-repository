@@ -103,6 +103,10 @@
 			<param name="source-file-param" value="${output.dir}/homeApplication.properties.xml"/>
 			<param name="to-file-param" value="${webserver.home}/shared/classes/homeApplication.properties.xml"/>
 		</antcall>
+        <antcall target="copy-file-if-not-exist">
+            <param name="source-file-param" value="${output.dir}/service-description.json"/>
+            <param name="to-file-param" value="${webserver.home}/shared/classes/service-description.json"/>
+        </antcall>
 		<antcall target="copy-file-if-not-exist">
 			<param name="source-file-param" value="${output.dir}/ccapp-registry.properties.xml"/>
 		    <param name="to-file-param" value="${webserver.home}/shared/classes/ccapp-registry.properties.xml"/>
@@ -268,14 +272,14 @@
 		
 			<delete file="${webserver.home}/shared/classes/alfresco/extension/cc-context.xml">
 			</delete>
-			
-			<delete file="${webserver.home}/conf/Catalina/localhost/${webapp.name}.xml">
+			<delete dir="${webserver.home}/shared/classes/alfresco/extension"  includes="*-policies-context.xml"/>
+		<delete file="${webserver.home}/conf/Catalina/localhost/${webapp.name}.xml">
 			</delete>
 	</target>
 	
 	<target name="undeploy-classes">
 			<!--delete dir="${webserver.home}/shared/classes" includes="${api_not_hotdeployable}"/-->
-			<delete dir="${webserver.home}/shared/classes/org/edu_sharing" />
+		<delete dir="${webserver.home}/shared/classes/org/edu_sharing" />
 			<delete dir="${webserver.home}/webapps/alfresco/WEB-INF/classes/org/edu_sharing" />
 			<delete dir="${webserver.home}/webapps/${webapp.name}/WEB-INF/classes/" />
 	</target>

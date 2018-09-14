@@ -15,10 +15,8 @@ public class NodeEntries  {
   
   private List<Node> nodes = new ArrayList<Node>();
   private Pagination pagination = null;
-  private long requestTime = 0;
 
   public NodeEntries(){
-	  requestTime=System.currentTimeMillis();
   }
   
   /**
@@ -42,16 +40,6 @@ public class NodeEntries  {
   public void setPagination(Pagination pagination) {
     this.pagination = pagination;
   }
-  /**
-   **/
-  @ApiModelProperty(required = false, value = "")
-  @JsonProperty("requestTime")
-  public long getRequestTime() {
-    return (System.currentTimeMillis()-requestTime);
-  }
-  public void setRequestTime(int requestTime) {
-    this.requestTime = requestTime;
-  }
 
   @Override
   public String toString()  {
@@ -60,7 +48,6 @@ public class NodeEntries  {
     
     sb.append("  nodes: ").append(nodes).append("\n");
     sb.append("  pagination: ").append(pagination).append("\n");
-    sb.append("  requestTime: ").append(requestTime).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

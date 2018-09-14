@@ -4,6 +4,7 @@ import com.ibm.icu.text.SimpleDateFormat;
 import jersey.repackaged.com.google.common.collect.Lists;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 
-
 /**
  * Class for rendering mds templates for the RenderService as html
  * Needs the active mds and the node properties
@@ -30,6 +30,7 @@ public class MetadataTemplateRenderer {
 	private static final String GROUP_MULTIVALUE_DELIMITER = "[+]";
 	private MetadataSetV2 mds;
 	private Map<String, String[]> properties;
+	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
 
 	public MetadataTemplateRenderer(MetadataSetV2 mds,Map<String,String[]> properties) {
 		this.mds = mds;
@@ -68,8 +69,8 @@ public class MetadataTemplateRenderer {
 				+ "<div class='mdsContent'>";
 		String content=template.getHtml();
 		
-		for(MetadataWidget widget : mds.getWidgets()){
-			widget=mds.findWidgetForTemplate(widget.getId(),template.getId());
+		for(MetadataWidget srcWidget : mds.getWidgets()){
+			MetadataWidget widget=mds.findWidgetForTemplateAndCondition(srcWidget.getId(),template.getId(),properties);
 			int start=content.indexOf("<"+widget.getId());
 			if(start==-1)
 				continue;
@@ -136,6 +137,8 @@ public class MetadataTemplateRenderer {
 								"'>";
 						if(link!=null)
 							value+="</a>";
+						value+="<div class='licenseName'>" +getLicenseName(licenseName) +"</div>";
+
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
 							value+="<div class='licenseDescription'>"+StringEscapeUtils.escapeHtml(licenseDescription)+"</div>";
@@ -169,7 +172,14 @@ public class MetadataTemplateRenderer {
 						if(widget.getType().equals("multivalueGroup")) {
                             value=formatGroupValue(value,widget);
                         }
-                    }
+						if(widget.getType().equals("checkbox")) {
+							try{
+								value = MetadataHelper.getTranslation(new Boolean(value) ? "boolean_yes" : "boolean_no");
+							}catch(Throwable t){
+								logger.info("Error parsing value "+value+" for checkbox widget "+widget.getId(),t);
+							}
+						}
+					}
 					if(valuesMap.containsKey(value))
 						value=valuesMap.get(value).getCaption();
 					widgetHtml+="<div>";
@@ -179,7 +189,9 @@ public class MetadataTemplateRenderer {
 					if(!value.trim().isEmpty())
 						empty=false;
 					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-						value=widget.getFormat().replace("${value}",value);
+						if(widget.getFormat().contains("${value}")) {
+							value = widget.getFormat().replace("${value}", value);
+						}
 					}
 					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
 						widgetHtml+="<a href=\""+value+"\" target=\""+widget.getLink()+"\">";
@@ -201,7 +213,18 @@ public class MetadataTemplateRenderer {
 		html+="</div></div>";
 		return html;
 	}
+	private String getLicenseName(String licenseName) {
+		if(licenseName==null || licenseName.isEmpty())
+			licenseName="NONE";
 
+		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)) {
+			licenseName=CCConstants.COMMON_LICENSE_CC_BY;
+		}
+		if(licenseName.equals(CCConstants.COMMON_LICENSE_PDM)){
+			licenseName=CCConstants.COMMON_LICENSE_CC_ZERO;
+		}
+		return I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE."+licenseName+"_NAME");
+	}
 	private String getLicenseDescription(String licenseName) {
 		if(licenseName==null || licenseName.isEmpty())
 			licenseName="NONE";

@@ -157,116 +157,37 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		
 		return result;
 	}
-	
-	
+
+
 	public Usage setUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String _version, String resourceId, String xmlParams) throws UsageException{
 		if (user == null || user.trim().equals("") || lmsId == null || lmsId.trim().equals("") || courseId == null || courseId.trim().equals("") || parentNodeId == null
 				|| parentNodeId.trim().equals("")) {
 			throw new UsageException(UsageService.MISSING_PARAM);
 		}
-		
-		
-			
+
+
+
 		RunAsWork<Usage> runAs = new RunAsWork<Usage>() {
 			@Override
 			public Usage doWork() throws Exception {
 				try{
-					String version = _version;
 					logger.info("before alfServicesWrapper.hasPermissions");
-					
+
 					HashMap<String, Object> usage = usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId);
-					
+
 					//only check publish permission for new content so that an teacher who modifies the course/wysiwyg can safe changes of permission
 					if(usage == null){
-					
-						boolean hasPublishPerm = ((MCAlfrescoClient)RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(), 
+
+						boolean hasPublishPerm = ((MCAlfrescoClient)RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(),
 								(HashMap)null)).hasPermissions(parentNodeId, user, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
-						
+
 						if(!hasPublishPerm){
 							logger.info("User "+user+" has no publish permission on "+resourceId);
 							throw new UsageException(UsageService.NO_CCPUBLISH_PERMISSION);
 						}
 					}
-				
-					HashMap<String, Object> properties = new HashMap<String,  Object>();
-					
-					String guid = null;
-					NodeRef personRef = serviceRegistry.getPersonService().getPerson(user);
-					if(personRef != null){
-						Map<QName, Serializable> personProps = serviceRegistry.getNodeService().getProperties(personRef);
-						guid = (String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_GUID));
-					}
-					
-					if(guid == null){
-						guid = user;
-					}
-					
-					properties.put(CCConstants.CCM_PROP_USAGE_APPID, lmsId);
-					properties.put(CCConstants.CCM_PROP_USAGE_COURSEID, courseId);
-					properties.put(CCConstants.CCM_PROP_USAGE_PARENTNODEID, parentNodeId);
-					properties.put(CCConstants.CCM_PROP_USAGE_APPUSER, user);
-					properties.put(CCConstants.CCM_PROP_USAGE_APPUSERMAIL, userMail);
-					if(fromUsed != null){
-						properties.put(CCConstants.CCM_PROP_USAGE_FROM, ISO8601DateFormat.format(fromUsed.getTime()));
-					}
-					if(toUsed != null){
-						properties.put(CCConstants.CCM_PROP_USAGE_TO, ISO8601DateFormat.format(toUsed.getTime()));
-					}
-					properties.put(CCConstants.CCM_PROP_USAGE_MAXPERSONS, distinctPersons);
-					properties.put(CCConstants.CCM_PROP_USAGE_COUNTER, new Integer(1).toString());
-					
-					if(version == null || version.trim().equals("")){
-						
-						Object ov = serviceRegistry.getNodeService().getProperty(new NodeRef(AlfServicesWrapper.storeRef,parentNodeId),QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION));
-						
-						if(ov !=null){
-							version = (ov instanceof MLText) ? ((MLText)ov).getDefaultValue() : ov.toString();
-						}
-						version = (version == null) ? (String)serviceRegistry.getNodeService().getProperty(new NodeRef(AlfServicesWrapper.storeRef,parentNodeId),ContentModel.PROP_VERSION_LABEL) : version;
-					}
-					
-					if(version != null){
-						properties.put(CCConstants.CCM_PROP_USAGE_VERSION, version);
-					}
-					
-					properties.put(CCConstants.CCM_PROP_USAGE_RESSOURCEID, resourceId);
-					properties.put(CCConstants.CCM_PROP_USAGE_XMLPARAMS, xmlParams);
-					
-					if(guid != null){
-						properties.put(CCConstants.CCM_PROP_USAGE_GUID, guid);
-					}
-					
-			
-					// if null only set counter @TODO Unique constraint in Schema that
-					// prevents bypassing unique with standard alfresco services
-					
-					String usageNodeId = null;
-					if (usage != null) {
-						logger.info("usage != null");
-						String counter = (String) usage.get(CCConstants.CCM_PROP_USAGE_COUNTER);
-						
-						usageNodeId = (String) usage.get(CCConstants.SYS_PROP_NODE_UID);
-						logger.info("usageNodeId:" + usageNodeId);
-					
-						
-						logger.info("before updating usage with props:");
-						for(Map.Entry<String, Object> entry: properties.entrySet()){
-							logger.info("key:"+entry.getKey() +" val:"+entry.getValue());
-						}
-						
-						usageDao.updateUsage(usageNodeId, properties);
-					} else {
-						logger.info("usage is null");
-						usageNodeId = usageDao.createUsage(parentNodeId, properties);
-					}
-					
-					
-					Usage result = getUsageResult(usageDao.getUsage(usageNodeId));
-					
-					//remove IO from cache so that the gui gets the new usage count
-					new RepositoryCache().remove(parentNodeId);
-					
-					logger.info("returning");
+
+					Usage result = setUsageInternal(repoId,user,lmsId,courseId,parentNodeId,userMail,fromUsed,toUsed,distinctPersons,_version,resourceId,xmlParams);
 					
 					return result;
 				}catch(Throwable e){
@@ -278,8 +199,95 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		
 		return AuthenticationUtil.runAsSystem(runAs);
 	}
-	
-	
+
+	/**
+	 * this method will not run as system and will not check any permissions
+	 * used by collections
+	 */
+	public Usage setUsageInternal(String repoId, String user, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String version, String resourceId, String xmlParams) throws Exception{
+		HashMap<String, Object> properties = new HashMap<>();
+		HashMap<String, Object> usage = usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId);
+		String guid = null;
+		NodeRef personRef = serviceRegistry.getPersonService().getPerson(user);
+		if(personRef != null){
+			Map<QName, Serializable> personProps = serviceRegistry.getNodeService().getProperties(personRef);
+			guid = (String)personProps.get(QName.createQName(CCConstants.CM_PROP_PERSON_GUID));
+		}
+
+		if(guid == null){
+			guid = user;
+		}
+
+		properties.put(CCConstants.CCM_PROP_USAGE_APPID, lmsId);
+		properties.put(CCConstants.CCM_PROP_USAGE_COURSEID, courseId);
+		properties.put(CCConstants.CCM_PROP_USAGE_PARENTNODEID, parentNodeId);
+		properties.put(CCConstants.CCM_PROP_USAGE_APPUSER, user);
+		properties.put(CCConstants.CCM_PROP_USAGE_APPUSERMAIL, userMail);
+		if(fromUsed != null){
+			properties.put(CCConstants.CCM_PROP_USAGE_FROM, ISO8601DateFormat.format(fromUsed.getTime()));
+		}
+		if(toUsed != null){
+			properties.put(CCConstants.CCM_PROP_USAGE_TO, ISO8601DateFormat.format(toUsed.getTime()));
+		}
+		properties.put(CCConstants.CCM_PROP_USAGE_MAXPERSONS, distinctPersons);
+		properties.put(CCConstants.CCM_PROP_USAGE_COUNTER, new Integer(1).toString());
+
+		if(version == null || version.trim().equals("")){
+
+			Object ov = serviceRegistry.getNodeService().getProperty(new NodeRef(AlfServicesWrapper.storeRef,parentNodeId),QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+
+			if(ov !=null){
+				version = (ov instanceof MLText) ? ((MLText)ov).getDefaultValue() : ov.toString();
+			}
+			version = (version == null) ? (String)serviceRegistry.getNodeService().getProperty(new NodeRef(AlfServicesWrapper.storeRef,parentNodeId),ContentModel.PROP_VERSION_LABEL) : version;
+		}
+
+		if(version != null){
+			properties.put(CCConstants.CCM_PROP_USAGE_VERSION, version);
+		}
+
+		properties.put(CCConstants.CCM_PROP_USAGE_RESSOURCEID, resourceId);
+		properties.put(CCConstants.CCM_PROP_USAGE_XMLPARAMS, xmlParams);
+
+		if(guid != null){
+			properties.put(CCConstants.CCM_PROP_USAGE_GUID, guid);
+		}
+
+
+		// if null only set counter @TODO Unique constraint in Schema that
+		// prevents bypassing unique with standard alfresco services
+
+		String usageNodeId = null;
+		if (usage != null) {
+			logger.info("usage != null");
+			String counter = (String) usage.get(CCConstants.CCM_PROP_USAGE_COUNTER);
+
+			usageNodeId = (String) usage.get(CCConstants.SYS_PROP_NODE_UID);
+			logger.info("usageNodeId:" + usageNodeId);
+
+
+			logger.info("before updating usage with props:");
+			for(Map.Entry<String, Object> entry: properties.entrySet()){
+				logger.info("key:"+entry.getKey() +" val:"+entry.getValue());
+			}
+
+			usageDao.updateUsage(usageNodeId, properties);
+		} else {
+			logger.info("usage is null");
+			usageNodeId = usageDao.createUsage(parentNodeId, properties);
+		}
+
+
+		Usage result = getUsageResult(usageDao.getUsage(usageNodeId));
+
+		//remove IO from cache so that the gui gets the new usage count
+		new RepositoryCache().remove(parentNodeId);
+
+		logger.info("returning");
+		return result;
+	}
+
+
 	public List<Usage> getUsageByParentNodeId(String repoId, String user, String parentNodeId) throws UsageException {
 		logger.info("starting");
 		//admin Authentication 
@@ -330,7 +338,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		AuthenticationTool authTool = new AuthenticationToolAPI();
 		HashMap<String, String> currentAuthentication = null;
 		try {
-			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
+			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getRequest().getSession());
 		}catch(Exception e) {
 			//when run as
 		}
