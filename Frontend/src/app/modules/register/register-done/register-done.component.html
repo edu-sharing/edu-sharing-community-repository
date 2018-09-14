@@ -1,10 +1,14 @@
 <spinner *ngIf="loading"></spinner>
 <div class="done-info" *ngIf="!loading">
-    <img src="assets/images/register/register-conform.svg" alt="register-done">
-    <h3>{{'DONE.TITEL' | translate }}</h3>
+
+    <img *ngIf="inputState != 'done-request'" src="assets/images/register/register-conform.svg" alt="register-done">
+    <img *ngIf="inputState == 'done-request'"src="assets/images/register/register-done.svg" alt="request-done">
+    <h3>{{'DONE.TITLE' | translate }}</h3>
     <!--TODO: @Simon richtige E-Mail vom Nutzer anzeigen ist in  -->
     <p class="mail-info">{{'DONE.MAIL_INFO' | translate }} <span (click)='editMail()'>{{email}} <i *ngIf="!keyUrl" class='material-icons'>edit</i></span> {{'DONE.MAIL_INFO2' | translate }}</p>
-    <p>{{'DONE.MAIL_NOTE' | translate }}</p>
+    <p>
+        {{(inputState=='done-request' ? 'REQUEST' : 'DONE')+'.MAIL_NOTE' | translate}}
+    </p>
     <b>{{'DONE.NO_MAIL' | translate }}</b>
     <small>{{'DONE.NO_MAIL_INFO' | translate }}</small>
 </div>

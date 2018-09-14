@@ -19,6 +19,7 @@ import {CordovaService} from "../../common/services/cordova.service";
 import {RegisterFormComponent} from "./register-form/register-form.component";
 import {RegisterDoneComponent} from "./register-done/register-done.component";
 import {RegisterRequestComponent} from "./register-request/register-request.component";
+import {RegisterResetPasswordComponent} from "./register-reset-password/register-reset-password.component";
 
 @Component({
   selector: 'app-register',
@@ -29,22 +30,34 @@ export class RegisterComponent{
     @ViewChild('registerForm') registerForm : RegisterFormComponent;
     @ViewChild('registerDone') registerDone : RegisterDoneComponent;
     @ViewChild('request') request : RegisterRequestComponent;
+    @ViewChild('resetPassword') resetPassword : RegisterResetPasswordComponent;
     public isLoading=true;
     state = 'register';
 
     public cancel(){
       if (this.state == 'done'){
           this.state = 'register';
+      } else if(this.state == 'done-request'){
+          this.state = 'request';
       } else {
           this.router.navigate([UIConstants.ROUTER_PREFIX+"login"]);
       }
   }
 
     public requestDone(email: string ){
-        this.state = "reques-done";
+        /*TODO: @Simon*/
+        this.router.navigate([UIConstants.ROUTER_PREFIX + "register","done-request"]);
         console.log(email);
+        this.toast.toast("REGISTER.TOAST");
+        // this.toast.error(null, "");
     }
 
+    public newPassword(password:string){
+    //    TODO: @Simon
+    //    newPassword zu den Account
+        this.toast.toast("RESET.TOAST");
+        this.router.navigate([UIConstants.ROUTER_PREFIX+"login"]);
+    }
 
   constructor(private connector : RestConnectorService,
               private toast:Toast,
@@ -73,6 +86,7 @@ export class RegisterComponent{
           let email=this.registerForm.info.email;
           this.state='done';
           setTimeout(()=>this.registerDone.email=email);
+          this.toast.toast("REGISTER.TOAST");
       }
 
     private setParams() {

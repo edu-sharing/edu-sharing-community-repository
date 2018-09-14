@@ -27,13 +27,21 @@ import {InputPasswordComponent} from "../../../common/ui/input-password/input-pa
 export class RegisterResetPasswordComponent{
     public password_strength ="";
     public new_password ="";
+    public resetButton = false;
+
     public checkPassword(){
         this.password_strength = UIHelper.getPasswordStrengthString(this.new_password);
-        console.log(this.password_strength);
     }
 
     public linkRegister() {
         this.router.navigate([UIConstants.ROUTER_PREFIX + "register"]);
+    }
+    public buttonCheck(){
+        if (this.password_strength != "weak" && this.new_password.trim()){
+            return true;
+        } else {
+            return false;
+        }
     }
     public newPassword(){
       /*New Password setzen*/

@@ -1,4 +1,13 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
+import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
+import {Toast} from "../../../common/ui/toast";
+import {PlatformLocation} from "@angular/common";
+import {ActivatedRoute, Router, UrlSerializer} from "@angular/router";
+import {TranslateService} from "@ngx-translate/core";
+import {ConfigurationService} from "../../../common/services/configuration.service";
+import {Title} from "@angular/platform-browser";
+import {SessionStorageService} from "../../../common/services/session-storage.service";
+import {UIConstants} from "../../../common/ui/ui-constants";
 
 @Component({
   selector: 'app-register-done',
@@ -6,9 +15,10 @@ import {Component} from '@angular/core';
   styleUrls: ['register-done.component.scss']
 })
 export class RegisterDoneComponent{
-
+    @Input() inputState:string;
     loading=false;
-    email = '';
+    email = 'max@mustermann.de';
+    public img_src = "";
 
     private _keyUrl = '';
     get keyUrl(){
@@ -23,14 +33,23 @@ export class RegisterDoneComponent{
     public editMail() {
         //TODO: @Simon
         // Zum Bearbeitung vom E-Mail
+        if (this.inputState == 'done'){
+            this.router.navigate([UIConstants.ROUTER_PREFIX + "register"]);
+        } else {
+            this.router.navigate([UIConstants.ROUTER_PREFIX + "register","request"]);
+        }
     }
     public sendMail(){
         //TODO: @Simon
         // E-Mail erneut versenden
         console.log("E-Mail erneut versendet");
+        this.toast.toast("REGISTER.TOAST");
 
     }
-
+    constructor(private connector: RestConnectorService,
+                private toast: Toast,
+                private router: Router
+    ) {}
     private activate(keyUrl: string) {
 
     }

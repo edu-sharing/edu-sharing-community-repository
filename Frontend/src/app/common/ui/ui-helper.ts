@@ -135,7 +135,7 @@ export class UIHelper{
 
         strength = ((lcase_count * flc + 1) * (ucase_count * fuc + 1) * (num_count * fnm + 1) * (schar_count * fsc + 1)) / (avg + 1);
 
-        console.log('Strengt: '+strength);
+        // console.log('Strengt: '+strength);
         return strength;
     }
     /**
@@ -156,7 +156,7 @@ export class UIHelper{
         for (let i=0; i < lasti; ++i){
             accum += Math.abs(ords[i] - ords[i+1]);
         }
-        console.log('detect: '+accum/lasti);
+        // console.log('detect: '+accum/lasti);
         return accum/lasti;
     }
 
