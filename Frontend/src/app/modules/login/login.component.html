@@ -17,7 +17,7 @@
       <form (ngSubmit)="login()" #loginForm>
       <div *ngIf="showUsername">
         <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-        <input #usernameInput type="text" requried name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
+        <input #usernameInput type="text" requried name="username" id="username" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
       </div>
       <div>
         <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
