@@ -60,7 +60,7 @@
                 <div class="row">
                 <div class="receivers" *ngIf="i<history.length-1">
                 <label>{{'WORKSPACE.WORKFLOW.RECEIVERS' | translate}}</label>
-                  <div class="badge" *ngFor="let receiver of history[i+1].receiver"><i class="material-icons badgeIconLeft">person</i>
+                  <div class="badge" *ngFor="let receiver of history[i+1].receiver"><i class="material-icons badgeIconLeft">{{receiver.authorityType=='USER' ? "person" : "group"}}</i>
                       <div class="badge-group">
                           <span class="primary">{{receiver | authorityName}}</span>
                           <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
@@ -69,7 +69,8 @@
                 </div>
                 <div class="receivers" *ngIf="i>=history.length-1">
                   <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
-                  <div class="badge" *ngFor="let receiver of entry.receiver"><i class="material-icons badgeIconLeft">person</i>
+                  <div class="badge" *ngFor="let receiver of entry.receiver">
+                    <i class="material-icons badgeIconLeft">{{receiver.authorityType=='USER' ? "person" : "group"}}</i>
                       <div class="badge-group">
                           <span class="primary">{{receiver | authorityName}}</span>
                           <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
@@ -81,7 +82,7 @@
                 </div>
                 <div class="receivers" *ngIf="i<history.length-1">
                   <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
-                  <div class="badge" *ngFor="let receiver of entry.receiver"><i class="material-icons badgeIconLeft">person</i>
+                  <div class="badge" *ngFor="let receiver of entry.receiver"><i class="material-icons badgeIconLeft">{{receiver.authorityType=='USER' ? "person" : "group"}}</i>
                       <div class="badge-group">
                           <span class="primary">{{receiver | authorityName}}</span>
                           <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
