@@ -28,7 +28,7 @@
     "TOAST":"The e-mail has been sent"
   },
   "REQUEST": {
-    "TITLE": "Forgot Password?",
+    "TITLE": "Forgot log-in data?",
     "INFO": "Enter your e-mail address to assign a new password.",
     "PLACEHOLDER":"Your email address",
     "BUTTON":"request new password",

@@ -29,7 +29,7 @@
     "SEND_MAIL": "Nochmal Senden"
   },
   "REQUEST":{
-    "TITLE": "Passwort vergessen?",
+    "TITLE": "Daten vergessen?",
     "INFO": "Geben Sie Ihre E-Mail Adresse an, um anschließend ein neues Passwort vergeben zu können.",
     "PLACEHOLDER":"Ihre E-Mail Adresse",
     "BUTTON":"Neues Passwort anfordern",
