@@ -18,7 +18,6 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 		//ivalidate old ticket when it's not the same
 		if(currentTicket != null && !currentTicket.trim().equals("") && !currentTicket.equals(ticket)){
 			try{
-				log.info("old user:" + session.getAttribute(CCConstants.AUTH_USERNAME) + " oldTicket:" + currentTicket + " newUser:" + username + " newTicket:" + ticket);
 				this.logout(currentTicket);
 			}catch(Throwable e){
 				e.printStackTrace();
