@@ -229,7 +229,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					return null;
 				}
 			};
-			new RetryingTransactionHelper().doInTransaction(rthc);
+			
+			serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(rthc);
 			
 		}
 
