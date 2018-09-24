@@ -188,6 +188,7 @@ table, div {
 }
 
 .card-collection-image-container {
+    position: relative;
     text-align: center;
     vertical-align: middle;
     height: 200px;
@@ -195,12 +196,22 @@ table, div {
 }
 
 .card-image-icon-container {
+    position: relative;
     height: 210px;
     width: 100%;
     overflow: hidden;
     margin: auto;
     text-align: center;
     vertical-align: middle;
+}
+.big-edit-button{
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+  //background: #ff000042;
 }
 
 .collections-header  {

@@ -432,8 +432,10 @@ export class CollectionsMainComponent implements GwtEventListener {
     }
 
     buttonCollectionEdit() : void {
-        this.router.navigate([UIConstants.ROUTER_PREFIX+'collections/collection','edit',this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
-        return;
+        if (this.isAllowedToEditCollection()){
+            this.router.navigate([UIConstants.ROUTER_PREFIX+'collections/collection','edit',this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
+            return;
+        }
     }
 
     // gets called by user if something went wrong to start fresh from beginning

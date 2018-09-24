@@ -195,7 +195,7 @@
     <div *ngIf="collectionContent.collection.preview.isIcon" style="width: 250px; height: 200px; margin-left: auto;
     margin-right: auto;" >
       <div class="card-image-icon-container">
-        <div class="card-image-icon-circle">
+        <div class="card-image-icon-circle" [style.cursor]="isAllowedToEditCollection()? 'pointer' : 'auto'" (click)="buttonCollectionEdit()">
           <i class="material-icons" style="font-size: 75px; margin-top: 42px;" [style.color]="collectionContent.collection.color">layers</i>
         </div>
       </div>
@@ -204,7 +204,7 @@
     <div *ngIf="!collectionContent.collection.preview.isIcon" class="card-image-icon-container">
       <img class="collection-header-image" [src]="collectionContent.collection.preview.url+'&crop=true&width=400&height=350'" (error)="collectionContent.collection.previewUrl=null" style="width: 100%; height: auto;" role="presentation"/>
     </div>
-
+      <!--<div *ngIf="isAllowedToEditCollection()" (click)="buttonCollectionEdit()" class="big-edit-button"></div>-->
   </div>
   <div *ngIf="pinningAllowed && isAllowedToEditCollection() && collectionContent.collection.type=='EDITORIAL'" class="collections-pin-button"
        tabindex="0"
@@ -213,7 +213,7 @@
   >
     <custom-icon iconId="pin"></custom-icon>
   </div>
-  <div *ngIf="isAllowedToEditCollection() " class="collections-edit-button"
+  <div *ngIf="isAllowedToEditCollection()" class="collections-edit-button"
        tabindex="0"
        (keypress)="($event.which === 13)?buttonCollectionEdit():0"
        (click)="buttonCollectionEdit()"
