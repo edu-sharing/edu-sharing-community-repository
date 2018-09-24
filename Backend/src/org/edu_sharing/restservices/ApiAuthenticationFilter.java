@@ -59,8 +59,15 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		}
 				
 		HttpSession session = httpReq.getSession(true);
+		
+		logger.info("sessionid:" + session.getId() + "u:" + session.getAttribute(CCConstants.AUTH_USERNAME) + " t:" + session.getAttribute(CCConstants.AUTH_TICKET)+ " maxInactiveInterval:" + session.getMaxInactiveInterval());
+		
 		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
 		HashMap<String, String> validatedAuth = authTool.validateAuthentication(session);
+		
+		if(validatedAuth == null) {
+			logger.info("sessionid:" + session.getId() + " ticket is invalid");
+		}
 		
 		String locale = httpReq.getHeader("locale");
 		String authHdr = httpReq.getHeader("Authorization");

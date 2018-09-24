@@ -75,6 +75,17 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 	}
 	
 	public java.util.HashMap<String,String> createNewSession(String userName, String password) throws Exception {
+		
+		String oldUsername = null;
+		String oldTicket = null;
+		try {
+			oldUsername = authenticationService.getCurrentUserName();
+			oldTicket = authenticationService.getCurrentTicket();
+		}catch(Exception e) {
+			
+		}
+		log.info("un :" + userName + " old un:" + oldUsername + " oldTicket:" + oldTicket );
+		
 		authenticationService.authenticate(userName, password.toCharArray());
 		
 		HashMap<String,String> returnval = new HashMap<String,String>();
@@ -204,6 +215,17 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 	@Override
 	public void storeAuthInfoInSession(String username, String ticket, String authType, HttpSession session) {
 
+		String oldUsername = null;
+		String oldTicket = null;
+		try {
+			oldUsername = authenticationService.getCurrentUserName();
+			oldTicket = authenticationService.getCurrentTicket();
+		}catch(AuthenticationException e) {
+			
+		}
+		
+		log.info("un:" + username + " ticket:" + ticket + " old un:" + oldUsername + " oldTicket:" + oldTicket );
+		
 		authenticationService.validate(ticket);
 		super.storeAuthInfoInSession(authenticationService.getCurrentUserName(), ticket, authType, session);
 		
