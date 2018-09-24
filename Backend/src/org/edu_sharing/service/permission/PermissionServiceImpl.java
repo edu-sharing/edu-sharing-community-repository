@@ -22,6 +22,7 @@ import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.impl.acegi.FilteringResultSet;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -217,7 +218,19 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 
 		if(createHandle) {
-			createHandle(AuthorityType.EVERYONE,nodeId);
+			
+			/**
+			 * do in transaction so that handleid will not be safed on props when handleserver is misconfigured
+			 */
+			RetryingTransactionCallback<Void> rthc = new RetryingTransactionCallback<Void>() {
+				@Override
+				public Void execute() throws Throwable {
+					createHandle(AuthorityType.EVERYONE,nodeId);
+					return null;
+				}
+			};
+			new RetryingTransactionHelper().doInTransaction(rthc);
+			
 		}
 
 
