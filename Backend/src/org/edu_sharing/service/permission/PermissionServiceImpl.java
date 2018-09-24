@@ -377,7 +377,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 	}
 
-	public void createHandle(AuthorityType authorityType, String _nodeId) {
+	public void createHandle(AuthorityType authorityType, String _nodeId) throws Exception {
 		if (AuthorityType.EVERYONE.equals(authorityType)) {
 
 			String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId),
@@ -451,12 +451,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				logger.error(e1.getMessage(), e1);
 			}
 			if(handleService != null && handle != null) {
-				try {
-					String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
-					handleService.createHandle(handle,handleService.getDefautValues(contentLink));
-				}catch(Exception e) {
-					logger.error(e.getMessage());
-				}
+				
+				String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
+				handleService.createHandle(handle,handleService.getDefautValues(contentLink));
+				
 			}
 		}
 	}
