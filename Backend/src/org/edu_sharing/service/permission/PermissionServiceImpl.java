@@ -16,13 +16,13 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.impl.acegi.FilteringResultSet;
-import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -41,8 +41,8 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.service.OrganisationService;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -50,7 +50,6 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.Authority;
-import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Result;
@@ -59,12 +58,19 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.DateTool;
+import org.edu_sharing.repository.server.tools.Edu_SharingProperties;
+import org.edu_sharing.repository.server.tools.I18nServer;
+import org.edu_sharing.repository.server.tools.Mail;
+import org.edu_sharing.repository.server.tools.StringTool;
+import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.oai.OAIExporterService;
-import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -220,18 +226,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if(createHandle) {
 			
 			/**
-			 * do in transaction so that handleid will not be safed on props when handleserver is misconfigured
+			 * no transaction cause of
+			 * org.hibernate.HibernateException: connnection proxy not usable after transaction completion
+			 *
+			 * problem is when handle service fails
 			 */
-			RetryingTransactionCallback<Void> rthc = new RetryingTransactionCallback<Void>() {
-				@Override
-				public Void execute() throws Throwable {
-					createHandle(AuthorityType.EVERYONE,nodeId);
-					return null;
-				}
-			};
-			
-			serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(rthc);
-			
+			createHandle(AuthorityType.EVERYONE,nodeId);	
 		}
 
 
@@ -392,6 +392,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	public void createHandle(AuthorityType authorityType, String _nodeId) throws Exception {
+		
+		
 		if (AuthorityType.EVERYONE.equals(authorityType)) {
 
 			String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId),
@@ -419,16 +421,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			if(toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
 				try {
 					 handleService = new HandleService();
+					 /**
+					  * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
+					  */
+					 handleService.handleServiceAvailable();
 					 handle = handleService.generateHandle();
 
-				}catch(HandleServiceNotConfiguredException e) {
-					logger.info("handle server not configured");
-					return;
-				} catch (SQLException e) {
+				}catch (SQLException e) {
 					logger.error("sql error while creating handle id",e);
-					return;
-				}catch(Exception e) {
-					logger.error(e.getMessage(),e);
 					return;
 				}
 			}
