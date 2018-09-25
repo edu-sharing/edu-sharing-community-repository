@@ -30,7 +30,7 @@
   },
   "REQUEST":{
     "TITLE": "Daten vergessen?",
-    "INFO": "Geben Sie Ihre E-Mail Adresse an, um anschließend ein neues Passwort vergeben zu können.",
+    "INFO": "Geben Sie Ihre E-Mail Adresse an, um anschließend \n ein neues Passwort vergeben zu können.",
     "PLACEHOLDER":"Ihre E-Mail Adresse",
     "BUTTON":"Neues Passwort anfordern",
     "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail, um ein neues Passwort anzugeben"
