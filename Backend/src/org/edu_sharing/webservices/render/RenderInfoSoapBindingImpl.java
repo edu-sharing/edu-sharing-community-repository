@@ -240,7 +240,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		// child object: inherit all props from parent
 		if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
 			ChildAssociationRef parentRef = client.getParent(nodeRef);
-			Map<String,Object> propsParent = client.getPropertiesCached(parentRef.getParentRef(), true, true, false);
+			Map<String,Object> propsParent = new HashMap<String, Object>(client.getPropertiesCached(parentRef.getParentRef(), true, true, false));
 			// override it with the props from the child
 			for(Map.Entry<String,Object> entry : props.entrySet()){
 				propsParent.put(entry.getKey(),entry.getValue());
