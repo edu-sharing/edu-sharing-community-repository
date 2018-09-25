@@ -86,6 +86,7 @@ export class RestConstants {
   public static CCM_PROP_AUTHOR_FREETEXT = "ccm:author_freetext";
   public static CCM_PROP_EAF_PRODUCTIONYEAR = "ccm:eaf_productionyear";
   public static CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR_FN = "ccm:lifecyclecontributer_authorFN";
+  public static CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN = "ccm:lifecyclecontributer_publisherFN";
   public static CCM_PROP_EDITOR_TYPE = "ccm:editorType";
   public static CCM_PROP_CCRESSOURCETYPE = "ccm:ccressourcetype";
   public static CCM_PROP_CCRESSOURCESUBTYPE = "ccm:ccresourcesubtype";
