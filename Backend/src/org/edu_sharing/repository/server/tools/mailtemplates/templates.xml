@@ -12,9 +12,10 @@
 			body{
 				padding:20px;
 				background:#f6f6f6;
+				font-size: 12px;
 			}
 			.content{
-				max-width:600px;
+				max-width:500px;
 				margin:auto;
 				background:#fff;
 				box-shadow:0 2px 6px rgba(0,0,0,.5);
@@ -49,6 +50,9 @@
 				font-weight:bold;
 				padding-bottom:5px;
 			}
+			p{
+				line-height: 20px;
+			}
 			.rights{
 				padding:10px 5px;
 				color:#666;
@@ -66,13 +70,14 @@
 				text-transform:uppercase;
 				padding:10px 25px;
 				box-shadow:0 2px 5px rgba(0,0,0,.5);
+				display: inline-block;
+				width: 60%;
 			}
 			.input-field{
 				display:inline-block;
 				background:#fff;
 				border-radius:3px;
 				padding:5px 10px;
-				margin:5px;
 				border:1px solid #ccc;
 			}
 			a{
@@ -104,15 +109,35 @@
 	<template name="userRegister">
 		<subject>Account confirmation</subject>
 		<message><![CDATA[
-			<h1>Hello {{firstName}} {{lastName}}!</h1>
-			Thank you for your registration!<br><br>
-			To activate your account and login, click on the link below:
-			<br><br>
-			<div class="center"><a class="btn" href="{{link}}">Finish registration</a></div>
-			<br><br>
-			Or you may copy the key below and enter it into your register confirmation dialog:<br>
 			<div class="center">
-				<div class="input-field">{{key}}</div>
+				<h1>Hello {{firstName}} {{lastName}}!</h1>
+				<p>Thank you for your registration!</p>
+				<p>To activate your account and login, click on the link below:</p>
+				<a class="btn" href="{{link}}">Finish registration</a>
+				<p>
+					In case this email is not displayed correctly, please click » <a href="{{link}}">here</a> 
+				</p>
+				<div class="input-field"><a href="{{link}}">{{link}}</a></div>
+				<br><br><br>
+				<p>Best regards, you {{LaSiDig Team}}</p>
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="passwordRequest">
+		<subject>Password reset</subject>
+		<message><![CDATA[
+			<div class="center">
+				<h1>Hello {{firstName}} {{lastName}}!</h1>
+				<p>If you forgot your password for logging into<a href="{{url}}"> {{url}} </a>.</p>
+				<p>Click on this link to assign a new password.</p>
+				<a class="btn" href="{{link}}">Finish registration</a>
+				<p>
+					In case this email is not displayed correctly, please click » <a href="{{link}}">here</a> 
+				</p>
+				<div class="input-field"><a href="{{link}}">{{link}}</a></div>
+				<br><br><br>
+				<p>Best regards, you {{LaSiDig Team}}</p>
 			</div>
 		]]>
 		</message>

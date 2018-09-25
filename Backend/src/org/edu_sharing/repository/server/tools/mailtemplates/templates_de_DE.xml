@@ -23,6 +23,47 @@
 		]]>
 		</message>
 	</template>
+	<template name="userRegister">
+		<subject>Bitte bestätigen Sie Ihre E-Mail Adresse</subject>
+		<message><![CDATA[
+			<div class="center">
+				<h1>Hallo {{firstName}} {{lastName}}</h1>
+				<p>
+					Sie haben sich erfolgreich registriert. Bitte bestätige noch deine E-Mail Adresse, um die Registrierung abzuschließen und sich anzumelden.
+				</p>
+				<br>
+				<a class="btn" href="{{link}}">E-MAIL BESTÄTIGEN</a>
+				<br>
+				<p>
+					Sollte diese E-Mail nicht korrekt angezeigt werden, klicken Sie bitte » <a href="{{link}}">hier</a>
+				</p>
+				<div class="input-field"><a href="{{link}}">{{link}}</a></div>
+				<br><br><br>
+				<p>Viele Grüße, Ihr {{LaSiDig Team}}</p>
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="passwordRequest">
+		<subject>Passwort zurücksetzen</subject>
+		<message><![CDATA[
+			<div class="center">
+				<h1>Hallo {{firstName}} {{lastName}}</h1>
+				<p>Sie haben Ihre Daten zur Anmeldung auf <a href="{{url}}">{{url}}</a> vergessen?
+				</p>
+				<p>Betätigen Sie diesen Link, um anschließend ein neues Passwort vergeben zu können.</p>
+				<a class="btn" href="{{link}}">neues Passwort</a>
+				<br>
+				<p>
+					Sollte diese E-Mail nicht korrekt angezeigt werden, klicken Sie bitte » <a href="{{link}}">hier</a>
+				</p>
+				<div class="input-field"><a href="{{link}}">{{link}}</a></div>
+				<br><br><br>
+				<p>Viele Grüße, Ihr {{LaSiDig Team}}</p>
+			</div>
+		]]>
+		</message>
+	</template>
 	<template name="nodeIssue">
 		<subject>{{reporterEmail}} hat ein Problem gemeldet</subject>
 		<message><![CDATA[
