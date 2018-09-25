@@ -399,7 +399,7 @@ export class NodeHelper{
           if (typeof data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN] !== 'undefined' && data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN] != '') {
               let rawSrc = data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN].toString();
               let src = rawSrc.substring(rawSrc.lastIndexOf(":") + 1).toLowerCase();
-              src = src.replace(" ","");
+              src = src.replace(/\s/g,"");
               return '<img alt="' + src + '" src="' + NodeHelper.getSourceIconPath(src) + '">';
           }
           return '<img alt="" src="' + NodeHelper.getSourceIconPath('home') + '">';
