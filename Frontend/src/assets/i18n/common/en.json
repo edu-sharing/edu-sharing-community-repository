@@ -62,7 +62,7 @@
   "SHOW_IN_FOLDER":"Open storage location",
   "SORT_BY":"Sort by",
   "CLEAR_FILTERS":"Clear all filters",
-  "EDIT_ACCOUNT":"Manage account",
+  "EDIT_ACCOUNT":"Edit profile",
   "DEFAULT_METADATASET":"Default-Metadataset ({{name}})",
   "NO_MATCHES" : "No matches found",
   "NO_CC_PUBLISH" : "no publishing permissions for object",
