@@ -42,6 +42,10 @@ import org.json.simple.parser.JSONParser;
 			
 		</params>
 	</job>
+	
+	Admin Tools Toolkit:
+	org.edu_sharing.repository.server.jobs.quartz.ImporterJob
+	{"sets":"article,course,video,text-exercise","oai_base_url":"https://de.serlo.org/entity/api/json/export/","importer_class":"org.edu_sharing.repository.server.importer.SerloImporter","binary_handler":"org.edu_sharing.repository.server.importer.BinaryHandlerSerlo"}
  *
  */
 public class SerloImporter implements Importer{
