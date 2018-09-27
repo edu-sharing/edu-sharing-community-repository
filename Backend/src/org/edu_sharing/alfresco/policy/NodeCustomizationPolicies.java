@@ -461,38 +461,54 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			
 			String linktype = (String)after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
 			String previewImageBase64 = (linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) ? getPreviewFromURL(afterURL) : null;
-			if (previewImageBase64!=null) {
-
-				logger.info("---> GOT PREVIEW IMAGE BASE64: "+previewImageBase64.substring(21, 256)+" ...");
-				final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName("{http://www.campuscontent.de/model/1.0}userdefined_preview"), true);
-				contentWriter.addListener(new ContentStreamListener() {
-					@Override
-					public void contentStreamClosed() throws ContentIOException {
-						logger.info("Content Stream of preview Image was closed");
-						logger.info(" ContentData size:" + contentWriter.getContentData().getSize());
-						logger.info(" ContentData URL:" + contentWriter.getContentData().getContentUrl());
-						logger.info(" ContentData MimeTyp:" + contentWriter.getContentData().getMimetype());
-						logger.info(" ContentData ToString:" + contentWriter.getContentData().toString());
-					}
-				});
-				contentWriter.setMimetype("image/png");
-				byte[] imageData = Base64.decode(previewImageBase64.getBytes());
-				if (imageData.length==0) logger.warn("LENGTH OF IMAGE BYTE DATA IS 0 !! ");
-				try {
-					ByteArrayInputStream is = new ByteArrayInputStream(imageData);
-					contentWriter.putContent(is);
-				} catch (Exception e) {
-					logger.error("EXCEPTION:");
-					e.printStackTrace();
-				}
-				logger.info("---> OK IMAGE WRITTEN");
-				
-			} else {
-				logger.warn("---> NO PREVIEW IMAGE");
-			}
+			writeBase64Image(nodeRef,previewImageBase64);
 			
 		}
 		
+	}
+	
+	
+	
+	private void writeBase64Image(NodeRef nodeRef, String previewImageBase64) {
+		if (previewImageBase64!=null) {
+
+			logger.info("---> GOT PREVIEW IMAGE BASE64: "+previewImageBase64.substring(21, 256)+" ...");
+			final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName("{http://www.campuscontent.de/model/1.0}userdefined_preview"), true);
+			contentWriter.addListener(new ContentStreamListener() {
+				@Override
+				public void contentStreamClosed() throws ContentIOException {
+					logger.info("Content Stream of preview Image was closed");
+					logger.info(" ContentData size:" + contentWriter.getContentData().getSize());
+					logger.info(" ContentData URL:" + contentWriter.getContentData().getContentUrl());
+					logger.info(" ContentData MimeTyp:" + contentWriter.getContentData().getMimetype());
+					logger.info(" ContentData ToString:" + contentWriter.getContentData().toString());
+				}
+			});
+			contentWriter.setMimetype("image/png");
+			byte[] imageData = Base64.decode(previewImageBase64.getBytes());
+			if (imageData.length==0) logger.warn("LENGTH OF IMAGE BYTE DATA IS 0 !! ");
+			try {
+				ByteArrayInputStream is = new ByteArrayInputStream(imageData);
+				contentWriter.putContent(is);
+			} catch (Exception e) {
+				logger.error("EXCEPTION:");
+				e.printStackTrace();
+			}
+			logger.info("---> OK IMAGE WRITTEN");
+			
+		} else {
+			logger.warn("---> NO PREVIEW IMAGE");
+		}
+	}
+	
+	public  void generateWebsitePreview(NodeRef nodeRef, String url) {
+		if(nodeRef == null || url == null) {
+			return;
+		}
+		String previewImageBase64 = getPreviewFromURL(url);
+		if(previewImageBase64 != null) {
+			writeBase64Image(nodeRef, previewImageBase64);
+		}
 	}
 	
 	  /**
