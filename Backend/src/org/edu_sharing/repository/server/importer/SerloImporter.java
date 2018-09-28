@@ -292,7 +292,7 @@ public class SerloImporter implements Importer{
 				link = link.replaceAll("\\\\", "");
 				link = "https://de.serlo.org"+link;
 				eduProps.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, link);
-				
+				eduProps.put(CCConstants.CCM_PROP_IO_WWWURL, link);
 				//eduProps.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, "http://web-screenshot.serlo.org:2341/?url="+link+"&scale=0.4");
 				eduProps.put(CCConstants.LOM_PROP_GENERAL_KEYWORD, generalKeywords);
 				
