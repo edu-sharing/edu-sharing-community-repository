@@ -42,7 +42,7 @@ export class RegisterDoneComponent{
     public sendMail(){
         //TODO: @Simon
         // E-Mail erneut versenden
-        console.log("E-Mail erneut versendet");
+        console.log(this.email);
         this.toast.toast("REGISTER.TOAST");
 
     }

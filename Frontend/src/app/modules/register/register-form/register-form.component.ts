@@ -14,6 +14,7 @@ import {SessionStorageService} from '../../../common/services/session-storage.se
 import {PlatformLocation} from '@angular/common';
 
 import {RestRegisterService} from '../../../common/rest/services/rest-register.service';
+import {UIConstants} from "../../../common/ui/ui-constants";
 
 @Component({
   selector: 'app-register-form',
@@ -46,6 +47,11 @@ export class RegisterFormComponent{
 
   public checkConditions(){
     //  TODO: @Simon;
+      if(this.info.firstName.trim()){
+          return true;
+      } else{
+          return false;
+      }
   }
   public checkPassword(){
       this.password_strength = UIHelper.getPasswordStrengthString(this.info.password);
@@ -57,6 +63,7 @@ export class RegisterFormComponent{
         this.registerService.register(this.info).subscribe(()=>{
             this.onRegisterDone.emit();
             this.isLoading=false;
+            this.toast.toast("REGISTER.TOAST");
         },(error)=>{
             this.toast.error(error);
             this.isLoading=false;

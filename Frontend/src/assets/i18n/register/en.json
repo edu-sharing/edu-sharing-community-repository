@@ -15,10 +15,11 @@
     "PL_PASSWORD": "At least 5 different characters...",
     "HINT": "Hint: Use numbers, special characters...",
     "PL_ORG": "i.e. DEKRA...",
-    "BUTTON": "Register"
+    "BUTTON": "Register",
+    "TOAST":"The e-mail has been sent"
   },
   "DONE":{
-    "TITEL": "Almost ready",
+    "TITLE": "Almost ready",
     "MAIL_INFO": "We have sent you an e-mail to ",
     "MAIL_INFO2": "",
     "MAIL_NOTE": "Click on the link in the email to complete the registration",
@@ -36,7 +37,7 @@
   },
   "RESET":{
     "TITLE": "Change Password",
-    "REST_INFO": "Enter your new\npassword",
+    "REST_INFO": "Enter your new password",
     "BUTTON": "Change password",
     "TOAST": "The password has been changed"
   }

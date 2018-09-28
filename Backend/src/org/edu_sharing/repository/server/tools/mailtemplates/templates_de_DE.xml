@@ -29,8 +29,9 @@
 			<div class="center">
 				<h1>Hallo {{firstName}} {{lastName}}</h1>
 				<p>
-					Sie haben sich erfolgreich registriert. Bitte bestätige noch deine E-Mail Adresse, um die Registrierung abzuschließen und sich anzumelden.
+					Sie haben sich erfolgreich registriert.
 				</p>
+				<p>Klicken Sie auf folgenden Link, um die Registrierung abzuschließen und sich anzumelden.</p>
 				<br>
 				<a class="btn" href="{{link}}">E-MAIL BESTÄTIGEN</a>
 				<br>
