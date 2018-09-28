@@ -2,10 +2,13 @@ package org.edu_sharing.service.tracking;
 
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -24,6 +27,8 @@ public abstract class TrackingServiceDefault implements TrackingService{
     
     BehaviourFilter policyBehaviourFilter = null;
     
+    TransactionService transactionService = null;
+    
     static{
         EVENT_PROPERTY_MAPPING.put(EventType.DOWNLOAD_MATERIAL,CCConstants.CCM_PROP_TRACKING_DOWNLOADS);
         EVENT_PROPERTY_MAPPING.put(EventType.VIEW_MATERIAL,CCConstants.CCM_PROP_TRACKING_VIEWS);
@@ -33,6 +38,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
 
         ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        transactionService = serviceRegistry.getTransactionService();
         nodeService=serviceRegistry.getNodeService();
         policyBehaviourFilter = (BehaviourFilter)appContext.getBean("policyBehaviourFilter");
     }
@@ -52,10 +58,16 @@ public abstract class TrackingServiceDefault implements TrackingService{
 
         Integer finalValue = value;
         AuthenticationUtil.runAsSystem(()->{
-        	policyBehaviourFilter.disableBehaviour(nodeRef);
-			nodeService.setProperty(nodeRef, QName.createQName(EVENT_PROPERTY_MAPPING.get(type)), finalValue);
-            policyBehaviourFilter.enableBehaviour(nodeRef);
-            
+        	RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
+    		rth.doInTransaction(new RetryingTransactionCallback<Void>() {
+    			@Override
+    			public Void execute() throws Throwable {
+		        	policyBehaviourFilter.disableBehaviour(nodeRef);
+					nodeService.setProperty(nodeRef, QName.createQName(EVENT_PROPERTY_MAPPING.get(type)), finalValue);
+		            policyBehaviourFilter.enableBehaviour(nodeRef);
+	    			return null;
+    			}
+    		});
             return null;
         });
         return true;
