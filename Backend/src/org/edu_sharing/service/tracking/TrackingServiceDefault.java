@@ -1,5 +1,6 @@
 package org.edu_sharing.service.tracking;
 
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -18,7 +19,11 @@ import java.util.Map;
 
 public abstract class TrackingServiceDefault implements TrackingService{
     private final NodeService nodeService;
+    
     public static Map<EventType,String> EVENT_PROPERTY_MAPPING=new HashMap<>();
+    
+    BehaviourFilter policyBehaviourFilter = null;
+    
     static{
         EVENT_PROPERTY_MAPPING.put(EventType.DOWNLOAD_MATERIAL,CCConstants.CCM_PROP_TRACKING_DOWNLOADS);
         EVENT_PROPERTY_MAPPING.put(EventType.VIEW_MATERIAL,CCConstants.CCM_PROP_TRACKING_VIEWS);
@@ -27,9 +32,9 @@ public abstract class TrackingServiceDefault implements TrackingService{
     public TrackingServiceDefault() {
 
         ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
-
         ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
         nodeService=serviceRegistry.getNodeService();
+        policyBehaviourFilter = (BehaviourFilter)appContext.getBean("policyBehaviourFilter");
     }
 
     @Override
@@ -47,7 +52,10 @@ public abstract class TrackingServiceDefault implements TrackingService{
 
         Integer finalValue = value;
         AuthenticationUtil.runAsSystem(()->{
-            nodeService.setProperty(nodeRef, QName.createQName(EVENT_PROPERTY_MAPPING.get(type)), finalValue);
+        	policyBehaviourFilter.disableBehaviour(nodeRef);
+			nodeService.setProperty(nodeRef, QName.createQName(EVENT_PROPERTY_MAPPING.get(type)), finalValue);
+            policyBehaviourFilter.enableBehaviour(nodeRef);
+            
             return null;
         });
         return true;
