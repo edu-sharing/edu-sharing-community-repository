@@ -403,19 +403,17 @@ public class RenderingProxy extends HttpServlet {
 			return true;
 		}
 
-		String paramVersion=req.getParameter("version");
-		String version="/"+paramVersion;
+		String version=req.getParameter("version");
 
-		if(paramVersion==null) {
-			logger.warn("parameter version missing, will use latest (-1)");
-			version="";
+		if(version==null) {
+			logger.info("parameter version missing, will use latest (-1)");
 		}
 		try {
-			if(Double.parseDouble(paramVersion)<1)
-				version="";
+			if(Double.parseDouble(version)<1)
+				version=null;
 		}catch(Throwable t) {
-			logger.warn("parameter version is non-numeric ("+paramVersion+"), will use latest (-1)");
-			version="";
+			logger.warn("parameter version is non-numeric ("+version+"), will use latest (-1)");
+			version=null;
 		}
 
 		String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version);
