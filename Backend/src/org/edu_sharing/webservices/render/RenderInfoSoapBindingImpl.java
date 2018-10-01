@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.Store;
 import javax.servlet.http.HttpSession;
 import javax.xml.soap.SOAPException;
 
@@ -82,9 +83,11 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
 			RenderInfoResult result = getBaseData(userName, nodeId, version, client);
 			UsageDAO usageDao = new AlfServicesWrapper();
-			HashMap<String, Object> usageMap =  usageDao.getUsage(lmsId, courseId, nodeId, resourceId);
-			if(usageMap != null){
-				result.setUsage(transform(new UsageService().getUsageResult(usageMap)));
+			if(lmsId!=null && courseId!=null) {
+				HashMap<String, Object> usageMap = usageDao.getUsageOnNodeOrParents(lmsId, courseId, nodeId, resourceId);
+				if (usageMap != null) {
+					result.setUsage(transform(new UsageService().getUsageResult(usageMap)));
+				}
 			}
 			return result;
 			
@@ -146,8 +149,9 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 	
 	
 	private RenderInfoResult getBaseData(String userName, String nodeId, String version, MCAlfrescoAPIClient client) throws RemoteException, Throwable{
-		
-		if (!client.exists(nodeId)) {
+		NodeService nodeService=NodeServiceFactory.getLocalService();
+		org.edu_sharing.service.permission.PermissionService permissionService=PermissionServiceFactory.getLocalService();
+		if (!nodeService.exists(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId)) {
 			throw new RemoteException(EXCEPTION_NODE_DOES_NOT_EXISTS);
 		}
 		
@@ -167,7 +171,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			rir.setEduSchoolPrimaryAffiliation(primaryAffiliation);
 		}
 		
-		HashMap<String, Boolean> perms = client.hasAllPermissions(nodeId, userName, PermissionServiceHelper.PERMISSIONS);
+		HashMap<String, Boolean> perms = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, PermissionServiceHelper.PERMISSIONS);
 
 		rir.setPermissions(PermissionServiceHelper.getPermissionsAsString(perms).toArray(new String[0]));
 		rir.setPublishRight(new Boolean(perms.get(CCConstants.PERMISSION_CC_PUBLISH)));
@@ -175,7 +179,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		//this does not work anymore in alfresco-5.0.d:
 		//HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.ALL_AUTHORITIES, new String[]{PermissionService.READ});
-		HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.GUEST_AUTHORITY, new String[]{PermissionService.READ});
+		HashMap<String, Boolean> permsGuest = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, PermissionService.GUEST_AUTHORITY, new String[]{PermissionService.READ});
 		rir.setGuestReadAllowed(new Boolean(permsGuest.get(PermissionService.READ)));
 
 		HashMap versionProps = null;
@@ -288,7 +292,6 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		List<org.edu_sharing.webservices.types.Child> childrenConverted = new ArrayList<>();
 		List<Map<String, Object>> children = getChildNodes(nodeId);
-		NodeService nodeService = NodeServiceFactory.getLocalService();
 		for(Map<String, Object> child : children) {
 			org.edu_sharing.webservices.types.Child childConverted=new org.edu_sharing.webservices.types.Child();
 			String childId=(String) child.get(CCConstants.SYS_PROP_NODE_UID);
@@ -312,9 +315,10 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		 * maybe check mediacenter groupmembership when readContent vs readMetadata is important
 		 */
 		
+		//set default
 		//Has the user alf permissions on the node? -> check if he also has read_all permissions
-		if(client.hasPermissions(nodeId, userName, new String[] {CCConstants.PERMISSION_READ}))
-			rir.setHasContentLicense(client.hasPermissions(nodeId, userName, new String[] {CCConstants.PERMISSION_READ_ALL}));
+		if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, CCConstants.PERMISSION_READ))
+			rir.setHasContentLicense(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, CCConstants.PERMISSION_READ_ALL));
 		else // otherwise, we currently assume the material is embedded in a course (usage), so do allow read access
 			rir.setHasContentLicense(true);
 		String cost = (String)props.get(CCConstants.CCM_PROP_IO_CUSTOM_LICENSE_KEY);
@@ -322,10 +326,10 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			
 			String permissionsNodeId = nodeId;
 			if (Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-				permissionsNodeId = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+				permissionsNodeId = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId , CCConstants.CCM_PROP_IO_ORIGINAL);
 							
 			}
-			if(!client.hasPermissions(permissionsNodeId, userName, new String[] {CCConstants.PERMISSION_READ_ALL})) {
+			if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), permissionsNodeId, userName,CCConstants.PERMISSION_READ_ALL)) {
 				rir.setHasContentLicense(false);
 			}	
 			
@@ -354,7 +358,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		rir.setPreviewUrl(previewUrl);
 		rir.setMimeTypeUrl(new MimeTypes(clientBaseUrl).getIconUrl(props, Theme.getThemeId()));
 		rir.setAspects(client.getAspects(nodeId));
-		
+		rir.setDirectory(MimeTypesV2.isDirectory(props));
 		addMetadataTemplate(rir,locale,nodeType,props,appInfo);
 
 		return rir;

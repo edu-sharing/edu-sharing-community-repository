@@ -42,7 +42,6 @@ $borderRadius:2px;
   transition: $transitionNormal all;
   opacity: 1;
   color: $primary!important;
-  display: none!important;
 }
 .disabled{
   color:$textVeryLight!important;
@@ -558,9 +557,6 @@ $orderAnimationTime:$transitionNormal*5;
   margin:6px;
   position: relative;
   border-radius: $borderRadius;
-  .moreAlways{
-    display: none!important;
-  }
   .nodeDeleted{
     width: 100%;
     height: 100%;
@@ -754,14 +750,20 @@ $orderAnimationTime:$transitionNormal*5;
 .cardList .row .checkbox input+label {
   padding-left:22px;
 }
-.cardList .more{
-  position:absolute;
-  right:-10px;
-  top:$cardHeight - 40px;
-  @include fadeRight(#fff,20px);
-  padding-bottom: 5px;
-  a{
-    padding-left: 10px;
+.cardList{
+  .more{
+    position:absolute;
+    right:-10px;
+    top:$cardHeight - 40px;
+    @include fadeRight(#fff,20px);
+    padding-bottom: 5px;
+    a{
+      padding-left: 10px;
+    }
+  }
+  .moreAlways{
+    right: 30px;
+    z-index: 1;
   }
 }
 .cardList .moreSingle{

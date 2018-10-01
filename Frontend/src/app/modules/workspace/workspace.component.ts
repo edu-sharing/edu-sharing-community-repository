@@ -131,6 +131,7 @@ export class WorkspaceMainComponent implements EventListener{
     public shareLinkNode : Node;
     private viewType = 0;
     private infoToggle: OptionItem;
+    private reurlDirectories: boolean;
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event:any) {
         if(this.isSafe){
@@ -468,6 +469,7 @@ export class WorkspaceMainComponent implements EventListener{
                                 if(params['reurl']) {
                                     this.reurl = params['reurl'];
                                 }
+                                this.reurlDirectories = params['applyDirectories']=='true';
                                 this.createAllowed=this.root=='MY_FILES';
                                 this.mainnav=params['mainnav']=='false' ? false : true;
 
@@ -781,11 +783,15 @@ export class WorkspaceMainComponent implements EventListener{
             options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
         }
         if (nodes && nodes.length == 1) {
-            if(this.reurl && !nodes[0].isDirectory){
-                let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.storage,this.getNodeList(node)[0],this.reurl));
+            if(this.reurl){
+                let apply=new OptionItem("APPLY", "redo", (node: Node) => this.applyNode(this.getNodeList(node)[0]));
                 apply.showAsAction=true;
+                apply.showAlways=true;
                 apply.enabledCallback=((node:Node)=> {
                     return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+                });
+                apply.showCallback=((node:Node)=> {
+                    return this.reurlDirectories || !node.isDirectory;
                 });
                 options.push(apply);
             }
@@ -799,7 +805,6 @@ export class WorkspaceMainComponent implements EventListener{
         }
         let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", (node: Node) => this.editConnector(node));
         if(fromList){
-            view.showAlways = true;
             view.showCallback=((node:Node)=>{
                 return this.connectors.connectorSupportsEdit(node,this.connectorList) != null;
             });
@@ -1166,5 +1171,22 @@ export class WorkspaceMainComponent implements EventListener{
     private recoverScrollposition() {
         console.log("recover scroll "+this.storage.get('workspace_scroll',0));
         window.scrollTo(0,this.storage.get('workspace_scroll',0));
+    }
+
+    private applyNode(node: Node,force=false) {
+        /*if(node.isDirectory && !force){
+            this.dialogTitle='WORKSPACE.APPLY_NODE.DIRECTORY_TITLE';
+            this.dialogCancelable=true;
+            this.dialogMessage='WORKSPACE.APPLY_NODE.DIRECTORY_MESSAGE';
+            this.dialogMessageParameters={name:node.name};
+            this.dialogButtons=DialogButton.getYesNo(()=>{
+                this.dialogTitle=null;
+            },()=>{
+                this.dialogTitle=null;
+                this.applyNode(node,true);
+            });
+            return;
+        }*/
+        NodeHelper.addNodeToLms(this.router,this.storage,node,this.reurl)
     }
 }

@@ -66,6 +66,7 @@
       "GROUP_USERS":"Folgende Nutzer haben Zugriff:",
       "GROUP_GROUPS":"Folgende Gruppen haben Zugriff:",
       "USAGES":"Benutzt und freigegeben in:",
+      "USAGE_INFO":"{{instance}}: Verwendet in {{type}} {{name}}",
       "DELETED":"wird gelöscht",
       "TYPE_VIEWER":"Betrachter",
       "TYPE_VIEWER_DESCRIPTION":"darf sehen",
@@ -111,6 +112,10 @@
       "USAGE_TYPE":{
         "MOODLE":"Moodle-Kurse",
         "COLLECTION":"Sammlungen"
+      },
+      "USAGE_SUBTYPE":{
+        "COURSE":"Kurs",
+        "PAGE":"Seite"
       }
     },
     "INHERIT_DISABLED":"Rechtevererbung ist aktuell ausgeschaltet",

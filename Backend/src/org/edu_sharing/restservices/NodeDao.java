@@ -1379,7 +1379,7 @@ public class NodeDao {
 	}
 
     public static List<org.alfresco.service.cmr.repository.NodeRef> sortAlfrescoRefs(List<org.alfresco.service.cmr.repository.NodeRef> refs, List<String> filter, SortDefinition sortDefinition) {
-        return ((NodeServiceImpl)NodeServiceFactory.getLocalService()).sortNodeRefList(refs,filter,sortDefinition);
+        return NodeServiceFactory.getLocalService().sortNodeRefList(refs,filter,sortDefinition);
     }
 
     /**

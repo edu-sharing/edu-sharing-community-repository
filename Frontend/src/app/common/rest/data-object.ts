@@ -780,9 +780,17 @@ export interface Usage {
   nodeId: string;
   parentNodeId: string;
   usageVersion: string;
-  usageXmlParams: string;
+  usageXmlParams: UsageXmlParams;
   resourceId: string;
   guid: string;
+}
+export interface UsageXmlParams{
+    general: UsageXmlParamsGeneral;
+}
+export interface UsageXmlParamsGeneral {
+    referencedInName: string;
+    referencedInType: string;
+    referencedInInstance: string;
 }
 
 export interface UsageList {

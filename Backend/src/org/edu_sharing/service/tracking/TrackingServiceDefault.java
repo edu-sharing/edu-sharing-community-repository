@@ -6,13 +6,13 @@ import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
 import org.springframework.context.ApplicationContext;
 
@@ -21,14 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class TrackingServiceDefault implements TrackingService{
-    private final NodeService nodeService;
-    
+    private final org.edu_sharing.service.nodeservice.NodeService nodeService;
     public static Map<EventType,String> EVENT_PROPERTY_MAPPING=new HashMap<>();
-    
+
     BehaviourFilter policyBehaviourFilter = null;
-    
+
     TransactionService transactionService = null;
-    
+
     static{
         EVENT_PROPERTY_MAPPING.put(EventType.DOWNLOAD_MATERIAL,CCConstants.CCM_PROP_TRACKING_DOWNLOADS);
         EVENT_PROPERTY_MAPPING.put(EventType.VIEW_MATERIAL,CCConstants.CCM_PROP_TRACKING_VIEWS);
@@ -38,8 +37,8 @@ public abstract class TrackingServiceDefault implements TrackingService{
 
         ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        nodeService=NodeServiceFactory.getLocalService();
         transactionService = serviceRegistry.getTransactionService();
-        nodeService=serviceRegistry.getNodeService();
         policyBehaviourFilter = (BehaviourFilter)appContext.getBean("policyBehaviourFilter");
     }
 
@@ -50,24 +49,21 @@ public abstract class TrackingServiceDefault implements TrackingService{
 
     @Override
     public boolean trackActivityOnNode(NodeRef nodeRef, EventType type) {
-        Integer value= (Integer) nodeService.getProperty(nodeRef,QName.createQName(EVENT_PROPERTY_MAPPING.get(type)));
+        String value= nodeService.getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),EVENT_PROPERTY_MAPPING.get(type));
         if(value==null)
-            value=0;
+            value="0";
 
-        value++;
-
-        Integer finalValue = value;
+        long valueLong=Long.parseLong(value);
+        valueLong++;
+        final String finalValue=""+valueLong;
         AuthenticationUtil.runAsSystem(()->{
         	RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
-    		rth.doInTransaction(new RetryingTransactionCallback<Void>() {
-    			@Override
-    			public Void execute() throws Throwable {
-		        	policyBehaviourFilter.disableBehaviour(nodeRef);
-					nodeService.setProperty(nodeRef, QName.createQName(EVENT_PROPERTY_MAPPING.get(type)), finalValue);
-		            policyBehaviourFilter.enableBehaviour(nodeRef);
-	    			return null;
-    			}
-    		});
+    		rth.doInTransaction((RetryingTransactionCallback<Void>) () -> {
+                policyBehaviourFilter.disableBehaviour(nodeRef);
+                nodeService.setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),EVENT_PROPERTY_MAPPING.get(type), finalValue);
+                policyBehaviourFilter.enableBehaviour(nodeRef);
+                return null;
+            });
             return null;
         });
         return true;

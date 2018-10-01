@@ -8,6 +8,8 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionStatus;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -31,12 +33,10 @@ import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.NameSpaceTool;
-import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.Constants;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -98,7 +98,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	Repository repositoryHelper = null;
 
 	MCAlfrescoAPIClient apiClient;
-	
+
+	public NodeServiceImpl() {
+		this(ApplicationInfoList.getHomeRepository().getAppId());
+	}
+
 	public NodeServiceImpl(String appId) {
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -685,6 +689,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
 
+	@Override
     public <T>List<T> sortNodeRefList(List<T> list,List<String> filter, SortDefinition sortDefinition){
 	    // make a copy so we have a modifiable list object
 	    list=new ArrayList<>(list);
@@ -977,12 +982,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	
 	@Override
-	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Exception {
-		try{
-			return apiClient.getVersionHistory(nodeId);
-		}catch(Throwable e){
-			throw new Exception(e);
-		}
+	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
+		return apiClient.getVersionHistory(nodeId);
 	}
 	@Override
 	public String importNode(String nodeId,String localParent) throws Throwable {
@@ -1025,4 +1026,59 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		property = NameSpaceTool.transformToLongQName(property);
 		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), QName.createQName(property),value);
 	}
+
+	@Override
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId){
+
+		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
+		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
+		if(!getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){
+			return null;
+		}
+
+		String extThumbnail = getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_THUMBNAILURL);
+		if (extThumbnail != null && !extThumbnail.trim().equals("")) {
+			return new GetPreviewResult(extThumbnail, GetPreviewResult.TYPE_EXTERNAL, false);
+		}
+
+		String defaultImageUrl = URLTool.getBaseUrl() + "/"
+				+ CCConstants.DEFAULT_PREVIEW_IMG;
+
+		InputStream crUserDefinedPreview = null;
+		try{
+			/**
+			 * userdefined
+			 */
+			crUserDefinedPreview=this.getContent(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+			if (crUserDefinedPreview != null && crUserDefinedPreview.available() > 0) {
+				String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
+				return new GetPreviewResult(url, GetPreviewResult.TYPE_USERDEFINED, false);
+			}
+
+		}catch(Throwable t){
+			// may fails if the user does not has access for content
+		}
+
+
+		/**
+		 * generated and action active
+		 */
+		Action action = ActionObserver.getInstance().getAction(nodeRef, CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
+		if (action != null && action.getExecutionStatus().equals(ActionStatus.Running)) {
+			return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, true);
+		}
+
+		/**
+		 * generated and no action active
+		 */
+		NodeRef previewProps = getChild(storeRef, nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
+				CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
+		if (previewProps != null) {
+			String url = URLTool.getPreviewServletUrl(new NodeRef(storeRef, nodeId));
+			return new GetPreviewResult(url, GetPreviewResult.TYPE_GENERATED, false);
+		}
+
+		return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, false);
+	}
+
 }

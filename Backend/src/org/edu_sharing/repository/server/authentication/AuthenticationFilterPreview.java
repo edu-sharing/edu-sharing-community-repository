@@ -14,6 +14,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
@@ -76,8 +77,100 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 		String repoId = req.getParameter("repoId");
 		
 		String accessToken = req.getParameter(CCConstants.REQUEST_PARAM_ACCESSTOKEN);
-		
-		if (accessToken != null && !accessToken.trim().equals("")) {
+		if(req.getParameter("sig")!=null &&
+				req.getParameter("courseId")!=null &&
+				req.getParameter("resourceId")!=null){
+			//auth by usage and signature
+			//the repository the where content is stored
+
+			//the proxy Repository
+			String proxyRepId = req.getParameter("proxyRepId");
+			String sig = req.getParameter("sig");
+			if(sig == null || sig.trim().isEmpty()){
+				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing signature parameter (sig)");
+				return;
+			}
+			sig = sig.trim();
+			//sig= URLDecoder.decode(sig);
+			String ts = req.getParameter("ts");
+
+			//usage data
+			String appId = req.getParameter("appId");
+			String courseId =  req.getParameter("courseId");
+			String nodeId = req.getParameter("nodeId");
+			String resourceId = req.getParameter("resourceId");
+
+			//signed data
+			//String signed = appId + courseId + nodeId + resourceId + ts;
+
+			/**
+			 * when an remote LMS wants to get an object preview from this repo the proxy repo sends signed data
+			 */
+			String signed = req.getParameter("signed");
+			if(signed == null) signed = appId + ts;
+
+			if(repoId == null || repoId.trim().equals("")){
+				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing repId");
+				return;
+			}
+
+			/**
+			 * verify the signature
+			 */
+			ApplicationInfo tAppInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+			if (tAppInfo != null) {
+
+				SignatureVerifier.Result result = new SignatureVerifier().verify(appId, sig, signed, ts);
+				if(result.getStatuscode() != HttpServletResponse.SC_OK){
+					httpServletResponse.sendError(result.getStatuscode(),result.getMessage());
+					return;
+				}
+
+			} else {
+
+				if (proxyRepId == null) {
+					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing proxyRepId");
+					return;
+				}
+
+				SignatureVerifier.Result result = new SignatureVerifier().verify(proxyRepId, sig, signed, ts);
+				if(result.getStatuscode() != HttpServletResponse.SC_OK){
+					httpServletResponse.sendError(result.getStatuscode(), result.getMessage());
+					return;
+				}
+			}
+
+			/**
+			 * remote preview
+			 */
+			if (!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
+				remotePreview(req, httpServletResponse, repoId,null);
+				return;
+			}
+
+			/**
+			 * local preview check usage
+			 */
+			Usage2Service u2 = new Usage2Service();
+			try{
+
+				Usage usage = u2.getUsage(appId, courseId, nodeId, resourceId);
+
+				if(usage == null ){
+					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "No usage Found!");
+					return;
+				}
+
+			} catch(UsageException e) {
+				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			}
+
+			//authService.authenticate(ApplicationInfoList.getHomeRepository().getUsername(), ApplicationInfoList.getHomeRepository().getPassword().toCharArray());
+			//ticket = authService.getCurrentTicket();
+            //invalidateTicket = true;
+            ((HttpServletRequest)req).getSession(true).setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID,nodeId);
+		}
+		else if (accessToken != null && !accessToken.trim().equals("")) {
 			//oAuth
 			try {
 				
@@ -126,106 +219,11 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				
 				return;
 			}
-			
-		
-		}else{
-			
-			//auth by usage and signature
-			//the repository the where content is stored
-			
-			//the proxy Repository
-			String proxyRepId = req.getParameter("proxyRepId");
-			String sig = req.getParameter("sig");
-			if(sig == null || sig.trim().isEmpty()){
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing signature parameter (sig)");
-				return;
-			}
-			sig = sig.trim();
-			//sig= URLDecoder.decode(sig);
-			String ts = req.getParameter("ts");
-			
-			//usage data
-			String appId = req.getParameter("appId");
-			String courseId =  req.getParameter("courseId");
-			String nodeId = req.getParameter("nodeId");
-			String resourceId = req.getParameter("resourceId");
-			
-			//signed data
-			//String signed = appId + courseId + nodeId + resourceId + ts;
-			
-			/**
-			 * when an remote LMS wants to get an object preview from this repo the proxy repo sends signed data
-			 */
-			String signed = req.getParameter("signed");
-			if(signed == null) signed = appId + ts;
-			
-			if(repoId == null || repoId.trim().equals("")){
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing repId");
-				return;
-			}
-			
-			/**
-			 * verify the signature
-			 */
-			ApplicationInfo tAppInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-			if (tAppInfo != null) {
-				
-				SignatureVerifier.Result result = new SignatureVerifier().verify(appId, sig, signed, ts);
-				if(result.getStatuscode() != HttpServletResponse.SC_OK){
-					httpServletResponse.sendError(result.getStatuscode(),result.getMessage());
-					return;
-				}
-				
-			} else {
-				
-				if (proxyRepId == null) {
-					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,"missing proxyRepId");
-					return;
-				}
-				
-				SignatureVerifier.Result result = new SignatureVerifier().verify(proxyRepId, sig, signed, ts);
-				if(result.getStatuscode() != HttpServletResponse.SC_OK){
-					httpServletResponse.sendError(result.getStatuscode(), result.getMessage());
-					return;
-				}
-				
-			}
-			
-			/**
-			 * remote preview
-			 */
-			if (!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
-				remotePreview(req, httpServletResponse, repoId,null);
-				return;
-			}
-			
-			/**
-			 * local preview check usage
-			 */
-			Usage2Service u2 = new Usage2Service();
-			try{
-				
-				Usage usage = u2.getUsage(appId, courseId, nodeId, resourceId);
-
-				if(usage == null ){
-					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "No usage Found!");
-					return;
-				}
-	
-			} catch(UsageException e) {
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-			}
-		
-			authService.authenticate(ApplicationInfoList.getHomeRepository().getUsername(), ApplicationInfoList.getHomeRepository().getPassword().toCharArray());
-			ticket = authService.getCurrentTicket();
-			invalidateTicket = true;
-			
 		}
-		
 		try{
 			chain.doFilter(req, resp);
 		} finally {
-			
+
 			if (invalidateTicket) {
 				authService.invalidateTicket(ticket);
 			}else{
@@ -238,7 +236,6 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				}
 			}
 		}
-		
 	}
 	
 	private void remotePreview(ServletRequest req, HttpServletResponse httpServletResponse, String rep_id, String remoteTicket) throws IOException{
