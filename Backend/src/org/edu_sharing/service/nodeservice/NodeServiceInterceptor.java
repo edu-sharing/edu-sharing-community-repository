@@ -61,7 +61,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             try{
                 return invocation.proceed();
             }
-            catch(AccessDeniedException|InsufficientPermissionException t)
+            catch(AccessDeniedException|net.sf.acegisecurity.AccessDeniedException|InsufficientPermissionException t)
             {
                 // catch exception, check
                 logger.info("Method threw "+t.getMessage()+", will check signature");
