@@ -795,11 +795,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     private boolean shouldFilter(NodeRef node, List<String> filter) {
-		// filter nodes for link inivitation
+		// filter nodes for link inivitation and usages
 		String type=nodeService.getType(node).toString();
 		String mapType=(String)nodeService.getProperty(node,QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
 		String name=(String)nodeService.getProperty(node,QName.createQName(CCConstants.CM_NAME));
-		if(CCConstants.CCM_TYPE_SHARE.equals(type)){
+		if(CCConstants.CCM_TYPE_SHARE.equals(type) || CCConstants.CCM_TYPE_USAGE.equals(type)){
 			return true;
 		}
 		// filter the metadata template file
