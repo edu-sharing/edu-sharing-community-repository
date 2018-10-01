@@ -406,7 +406,7 @@ public class RenderingProxy extends HttpServlet {
 		String paramVersion=req.getParameter("version");
 		String version="/"+paramVersion;
 
-		if(paramVersion==null || !StringUtils.isNumeric(paramVersion)) {
+		if(paramVersion==null || !org.apache.commons.lang.math.NumberUtils.isNumber(paramVersion)) {
 			logger.warn("parameter version missing, will use latest (-1)");
 			version="";
 		}
