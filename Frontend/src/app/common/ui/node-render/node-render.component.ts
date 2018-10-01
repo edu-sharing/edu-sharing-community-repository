@@ -89,7 +89,6 @@ export class NodeRenderComponent implements EventListener{
   sequenceParent: Node;
   canScrollLeft: boolean = false;
   canScrollRight: boolean = false;
-  childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainnav') mainnav : MainNavComponent;
@@ -215,20 +214,27 @@ export class NodeRenderComponent implements EventListener{
           this.editor=params['editor'];
           this.fromLogin=params['fromLogin']=='true';
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
-          this.childobject_order = params['childobject_order'] ? params['childobject_order'] : -1;
+          let childobject = params['childobject'] ? params['childobject'] : null;
+          let childobject_order = params['childobject_order'] ? params['childobject_order'] : -1;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
               this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
               this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
-                if(params['version'])
-                  this.version=params['version'];
-                if(this.childobject_order > -1) {
+                if(params['version']) {
+                    this.version = params['version'];
+                }
+                if(childobject){
+                    setTimeout(()=>this.node = childobject,10);
+                }
+                else if(childobject_order > -1) {
                     this.nodeApi.getNodeChildobjects(params['node']).subscribe((data:NodeList)=>{
-                        let id = data.nodes[this.childobject_order].ref.id;
-                        if(this.childobject_order >= data.nodes.length)
-                          id = params['node'];
+                        let id = params['node'];
+                        if (childobject_order < data.nodes.length)
+                            id = data.nodes[childobject_order].ref.id;
+                        else
+                            console.warn("Error fetching child object position. Will ignore parameter and fetch main object");
                         setTimeout(()=>this.node = id,10);
                     });
                 } else {
