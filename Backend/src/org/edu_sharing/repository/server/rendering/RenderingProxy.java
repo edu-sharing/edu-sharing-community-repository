@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.rendering;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.cache.ShibbolethSessionsCache;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
@@ -43,7 +45,10 @@ import org.edu_sharing.service.usage.Usage2Service;
 
 public class RenderingProxy extends HttpServlet {
 
-	
+
+	private static final String[] ALLOWED_GET_PARAMS = new String[]{
+			"closeOnBack","childobject","childobject_order"
+	};
 	Logger logger = Logger.getLogger(RenderingProxy.class);
 	
 	@Override
@@ -422,7 +427,7 @@ public class RenderingProxy extends HttpServlet {
 		for(Object o : parameterMap.entrySet()) {
 			Map.Entry entry = (Map.Entry) o;
 			String key = (String)entry.getKey();
-			if(!(key.equals("closeOnBack") || key.equals("childobject_order"))) {
+			if(!Arrays.asList(ALLOWED_GET_PARAMS).contains(key)) {
 				continue;
 			}
 			String value;
