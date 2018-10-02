@@ -816,7 +816,7 @@ export class WorkspaceMainComponent implements EventListener{
             let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
             if (collection && !this.isSafe)
                 options.push(collection);
-            let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,this.connector,(node:Node)=>this.addToStream(node));
+            let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',nodes,(node:Node)=>this.addToStream(node));
             if (stream && !this.isSafe)
                 options.push(stream);
         }

@@ -304,14 +304,6 @@ export class CollectionsMainComponent {
        this.sortCollectionContent();
     }
     */
-
-  isRootLevelCollection():boolean {
-    return !this.showCollection;
-    /*
-    if (this.collectionContent==null) return false;
-    return this.collectionContent.getCollectionID()=='-root-';
-    */
-  }
     isRootLevelCollection():boolean {
         return !this.showCollection;
         /*

@@ -26,7 +26,6 @@ import {RestHelper} from "../../common/rest/rest-helper";
 import {ListItem} from "../../common/ui/list-item";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {NodeHelper} from "../../common/ui/node-helper"; //
-import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper"; //
 import {Observable} from 'rxjs/Rx';
 import {RestStreamService} from "../../common/rest/services/rest-stream.service";
 import {RestConnectorsService} from '../../common/rest/services/rest-connectors.service';
@@ -342,6 +341,6 @@ export class StreamComponent {
 
     }
     private editConnector(node:Node,type : Filetype=null,win : any = null,connectorType : Connector = null){
-        UIHelper.openConnector(this.connectors,this.event,this.toast,this.connectorList,node,type,win,connectorType);
+        UIHelper.openConnector(this.connectors,this.event,this.toast,node,this.connectorList,type,win,connectorType);
     }
 }

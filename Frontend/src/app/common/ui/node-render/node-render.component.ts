@@ -475,14 +475,14 @@ export class NodeRenderComponent implements EventListener{
             share.isSeperate = true;
             this.options.push(share);
         }
-        let shareLink = this.actionbar.createOptionIfPossible('SHARE_LINK',[this._node],this.connector,(node: Node) => this.nodeShareLink=this._node);
+        let shareLink = this.actionbar.createOptionIfPossible('SHARE_LINK',[this._node],(node: Node) => this.nodeShareLink=this._node);
         if (shareLink && !this.isSafe)
             this.options.push(shareLink);
-        let workflow = ActionbarHelper.createOptionIfPossible('WORKFLOW',[this._node],this.connector,(node:Node)=>this.nodeWorkflow=this._node);
+        let workflow = this.actionbar.createOptionIfPossible('WORKFLOW',[this._node],(node:Node)=>this.nodeWorkflow=this._node);
         if(workflow) {
             this.options.push(workflow);
         }
-        let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',[this._node],this.connector,(node:Node)=>this.addNodesStream=[this._node]);
+        let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',[this._node],(node:Node)=>this.addNodesStream=[this._node]);
         if(stream){
             this.options.push(stream);
         }
@@ -491,7 +491,7 @@ export class NodeRenderComponent implements EventListener{
         let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
         this.options.push(nodeReport);
       }
-        let del=this.actionbar.createOptionIfPossible('DELETE',[this._node],this.connector,(node : Node) => this.nodeDelete=[this._node]);
+        let del=this.actionbar.createOptionIfPossible('DELETE',[this._node],(node : Node) => this.nodeDelete=[this._node]);
         if(del){
             this.options.push(del);
         }

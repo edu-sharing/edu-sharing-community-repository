@@ -652,7 +652,7 @@ export class SearchComponent {
               options.push(collection);
       }
       if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories)) {
-        let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM', nodes, this.connector, (node: Node) => this.addToStream(node));
+        let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM', nodes, (node: Node) => this.addToStream(node));
         if (stream)
             options.push(stream);
       }
@@ -718,7 +718,7 @@ export class SearchComponent {
     return options;
   }
   private addToStream(node: Node) {
-      let nodes=ActionbarHelper.getNodes(this.selection,node);
+      let nodes=ActionbarHelperService.getNodes(this.selection,node);
       this.addNodesStream=nodes;
   }
 

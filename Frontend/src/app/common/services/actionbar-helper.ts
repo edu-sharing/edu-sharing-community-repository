@@ -88,7 +88,7 @@ export class ActionbarHelperService{
         option = new OptionItem("WORKSPACE.OPTION.STREAM", "event", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
         option.enabledCallback = (node: Node) => {
-          let list = ActionbarHelper.getNodes(nodes, node);
+          let list = ActionbarHelperService.getNodes(nodes, node);
           return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH);
         }
       }
