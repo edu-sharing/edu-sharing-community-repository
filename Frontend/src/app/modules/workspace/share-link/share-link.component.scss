@@ -2,6 +2,7 @@
 
 .info{
   display:table;
+  width: 100%;
   .info-left,.info-right{
     display: table-cell;
   }
@@ -13,7 +14,7 @@
     width:100%;
   }
   .info-right{
-    //float:right;
+    position: relative;
     text-align: right;
     .switch{
       float:right;
@@ -74,17 +75,6 @@ input-password{
 
 .copyLink{
   min-width: 135px;
-  position: relative;
-  top:5px;
+  top: 5px;
   text-transform: uppercase;
-}
-.small-switch{
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-@media screen and (max-width: ($mobileWidth - $mobileStage*3)){
-  .small-switch{
-    position: relative;
-  }
 }

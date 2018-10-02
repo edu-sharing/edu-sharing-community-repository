@@ -8,6 +8,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 public class Usages {
 
 	
@@ -52,7 +55,7 @@ public class Usages {
 
 	    private String usageVersion;
 
-	    private String usageXmlParams;
+	    private Parameters usageXmlParams;
 
 	    private String resourceId;
 	    
@@ -170,11 +173,11 @@ public class Usages {
 
 		@ApiModelProperty(required = false, value = "")
 		@JsonProperty("usageXmlParams")
-		public String getUsageXmlParams() {
+		public Parameters getUsageXmlParams() {
 			return usageXmlParams;
 		}
 
-		public void setUsageXmlParams(String usageXmlParams) {
+		public void setUsageXmlParams(Parameters usageXmlParams) {
 			this.usageXmlParams = usageXmlParams;
 		}
 
@@ -212,6 +215,20 @@ public class Usages {
 
 		public String getAppType() {
 			return appType;
+		}
+
+		@XmlRootElement(name = "usage")
+		public static class Parameters {
+			@XmlElement public General general;
+
+			public static class General {
+				@XmlElement
+				public String referencedInName;
+				@XmlElement
+				public String referencedInType;
+				@XmlElement
+				public String referencedInInstance;
+			}
 		}
 	}
 	public static class CollectionUsage extends Usage {

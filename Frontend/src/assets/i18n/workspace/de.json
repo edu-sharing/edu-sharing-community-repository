@@ -8,6 +8,7 @@
     "TITLE_SAFE": "Safe",
     "NO_MATCHING_ITEMS": "Keine Elemente entsprechen der Suchanfrage",
     "SEARCH": "Suchen...",
+    "SAFE_SEARCH": "Safe durchsuchen...",
     "MY_FILES": "Meine Inhalte",
     "ADD": "Neu",
     "ADD_OBJECT": "Neues Material",
@@ -65,6 +66,7 @@
       "GROUP_USERS":"Folgende Nutzer haben Zugriff:",
       "GROUP_GROUPS":"Folgende Gruppen haben Zugriff:",
       "USAGES":"Benutzt und freigegeben in:",
+      "USAGE_INFO":"{{instance}}: Verwendet in {{type}} {{name}}",
       "DELETED":"wird gelöscht",
       "TYPE_VIEWER":"Betrachter",
       "TYPE_VIEWER_DESCRIPTION":"darf sehen",
@@ -110,6 +112,10 @@
       "USAGE_TYPE":{
         "MOODLE":"Moodle-Kurse",
         "COLLECTION":"Sammlungen"
+      },
+      "USAGE_SUBTYPE":{
+        "COURSE":"Kurs",
+        "PAGE":"Seite"
       }
     },
     "INHERIT_DISABLED":"Rechtevererbung ist aktuell ausgeschaltet",
@@ -131,6 +137,9 @@
       "PERMALINK":"Link Zum Objekt",
       "USAGE_COUNT_TITLE":"Verwendungen",
       "USAGE_COUNT":"Verwendung insgesamt: ",
+      "COLLECTIONS":"In {{count}} Sammlung(en) enthalten",
+      "FORKED_PARENT":"Ist Variante von",
+      "FORKED_CHILDS":"Hat {{count}} Variante(n)",
       "USAGE_TYPE": {
         "LMS": "LMS-Kurse",
         "COLLECTION": "Sammlungen",
@@ -198,7 +207,9 @@
       "CONTRIBUTOR":"Beteiligte",
       "SHARE_LINK":"Download-Link freigeben",
       "WORKFLOW":"Workflow",
-      "TEMPLATE":"Metadaten Vorlage"
+      "TEMPLATE":"Metadaten Vorlage",
+      "VARIANT": "Variante anlegen",
+      "VARIANT_OPEN": "Als Variante öffnen"
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatische Übernahme von Metadaten",
@@ -212,7 +223,7 @@
       "PASSWORD":"Passwortschutz",
       "PASSWORD_INFO":"Dieser Link wird mit einem Passwort geschützt",
       "PASSWORD_PLACEHOLDER":"Passwort angeben...",
-      "PASSWORD_PLACEHOLDER_EDIT":"Es wird schon ein Passwort verwendet",
+      "PASSWORD_PLACEHOLDER_EDIT":"Passwort ist schon gesetzt",
       "DISABLED":"Linkfreigabe ist deaktiviert",
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "LINK":"Link zum Objekt",

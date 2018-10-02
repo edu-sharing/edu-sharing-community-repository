@@ -188,6 +188,7 @@ table, div {
 }
 
 .card-collection-image-container {
+    position: relative;
     text-align: center;
     vertical-align: middle;
     height: 200px;
@@ -195,12 +196,22 @@ table, div {
 }
 
 .card-image-icon-container {
+    position: relative;
     height: 210px;
     width: 100%;
     overflow: hidden;
     margin: auto;
     text-align: center;
     vertical-align: middle;
+}
+.big-edit-button{
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+  //background: #ff000042;
 }
 
 .collections-header  {
@@ -229,10 +240,7 @@ table, div {
 .collections-edit-button {
     right: 63px;
 }
-.collections-pin-button {
-  right: 90px;
-}
-.collections-delete-button {
+.collections-delete-button,.collections-pin-button {
     right: 17px;
 }
 .collections-edit-button,
@@ -256,6 +264,9 @@ table, div {
   cursor: pointer;
   @include materialShadowBottom();
 }
+.collections-pin-button{
+  top: 10px;
+}
 .section-headline {
   float:left;
   width:100%;
@@ -272,7 +283,7 @@ table, div {
 }
 :host /deep/{
   .collections-pin-button custom-icon g{
-    fill: #6b6b6b;
+    fill: $primary;
   }
   footer{
     float:left;

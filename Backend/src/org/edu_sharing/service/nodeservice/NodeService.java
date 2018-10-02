@@ -2,6 +2,7 @@ package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface NodeService {
@@ -52,7 +54,9 @@ public interface NodeService {
 		return getChildrenChildAssociationRefAssoc(parentID,null, null, new SortDefinition());
 	}
 
-	public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID, String childType);
+    <T>List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition);
+
+    public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID, String childType);
 
     public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
 
@@ -66,7 +70,10 @@ public interface NodeService {
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable;
 
 	public InputStream getContent(String storeProtocol, String storeId, String nodeId, String contentProp) throws Throwable;
-	
+
+	public default boolean hasAspect(String storeProtocol, String storeId, String nodeId, String aspect){
+		return Arrays.asList(getAspects(storeProtocol,storeId,nodeId)).contains(aspect);
+	}
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId);
 	
 	public void addAspect(String nodeId, String aspect);
@@ -75,7 +82,7 @@ public interface NodeService {
 	
 	public void revertVersion(String nodeId, String verLbl) throws Exception;
 	
-	public HashMap<String, HashMap<String,Object>> getVersionHistory(String nodeId) throws Exception;
+	public HashMap<String, HashMap<String,Object>> getVersionHistory(String nodeId) throws Throwable;
 	/**
 	 * Import the node from a foreign repository to the local one, and return the local node Ref
 	 * @param nodeId
@@ -126,5 +133,7 @@ public interface NodeService {
 
 	List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc);
 	
-	public void setProperty(String protocol, String storeId, String nodeId, String property, String value);
+	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value);
+
+    GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId);
 }

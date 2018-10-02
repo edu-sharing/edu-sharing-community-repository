@@ -302,7 +302,11 @@ public class OAIPMHLOMImporter implements Importer{
 	}
 
 	private String getRecordUrl(String identifier) {
-		return oai_base_url+"?verb=GetRecord"+"&identifier="+identifier+"&metadataPrefix="+metadataPrefix;
+		String url = oai_base_url+"?verb=GetRecord"+"&identifier="+identifier+"&metadataPrefix="+metadataPrefix;
+		if(oai_base_url.contains("sodis")) {
+			url+= "&set=" +sets[0];
+		}
+		return url;
 	}
 	
 	public void startImport(String[] oaiIDs, String set) {

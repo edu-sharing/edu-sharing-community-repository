@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server.rendering;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -32,14 +33,22 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.cache.ShibbolethSessionsCache;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.usage.Usage;
+import org.edu_sharing.service.usage.Usage2Service;
 
 public class RenderingProxy extends HttpServlet {
 
-	
+
+	private static final String[] ALLOWED_GET_PARAMS = new String[]{
+			"closeOnBack","childobject","childobject_order"
+	};
 	Logger logger = Logger.getLogger(RenderingProxy.class);
 	
 	@Override
@@ -61,7 +70,19 @@ public class RenderingProxy extends HttpServlet {
 		String display = req.getParameter("display");
 		
 		String nodeId = req.getParameter("obj_id");
-		
+
+		String childobjectId = req.getParameter("childobject_id");
+
+		String parentId=nodeId;
+		if(childobjectId!=null){
+			boolean isChild=AuthenticationUtil.runAsSystem(()-> NodeServiceHelper.isChildOf(NodeServiceFactory.getLocalService(),childobjectId,parentId));
+			if(!isChild){
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"Node "+childobjectId+" is not a child of "+parentId);
+				return;
+			}
+			nodeId = childobjectId;
+		}
+
 		boolean doRedirect = true;
 		if("inline".equals(display)){
 			doRedirect = false;
@@ -116,7 +137,7 @@ public class RenderingProxy extends HttpServlet {
 			
 		if("window".equals(display)) {
 
-			openWindow(req, resp, nodeId, appInfoApplication, usernameDecrypted);
+			openWindow(req, resp, nodeId, parentId, appInfoApplication, usernameDecrypted);
 			return;
 		}
 		
@@ -327,7 +348,7 @@ public class RenderingProxy extends HttpServlet {
 		
 	}
 
-	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, ApplicationInfo appInfoApplication, String usernameDecrypted) throws IOException {
+	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo appInfoApplication, String usernameDecrypted) throws IOException {
 		String ts = req.getParameter("ts");
 		String uEncrypted = req.getParameter("u");
 
@@ -359,9 +380,20 @@ public class RenderingProxy extends HttpServlet {
 		 * doing edu ticket auth
 		 */
 		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
+			req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
 			HttpSession session = req.getSession(true);
-			req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
-			req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
+			if(Long.parseLong(ts) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
+				try {
+					Usage usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), nodeId, req.getParameter("resource_id"));
+					if(usage==null)
+						throw new SecurityException("No usage found for course id "+req.getParameter("course_id")+" and resource id "+req.getParameter("resource_id"));
+					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, parentId);
+					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
+				}
+				catch (Throwable t){
+					logger.warn("Usage fetching failed for node "+nodeId+": "+t.getMessage());
+				}
+			}
 
 			//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
 			AuthenticationToolAPI authTool = new AuthenticationToolAPI();
@@ -376,19 +408,17 @@ public class RenderingProxy extends HttpServlet {
 			return true;
 		}
 
-		String paramVersion=req.getParameter("version");
-		String version="/"+paramVersion;
+		String version=req.getParameter("version");
 
-		if(paramVersion==null || !StringUtils.isNumeric(paramVersion)) {
-			logger.warn("parameter version missing, will use latest (-1)");
-			version="";
+		if(version==null) {
+			logger.info("parameter version missing, will use latest (-1)");
 		}
 		try {
-			if(Double.parseDouble(paramVersion)<1)
-				version="";
+			if(Double.parseDouble(version)<1)
+				version=null;
 		}catch(Throwable t) {
-			logger.warn("parameter version is non-numeric ("+paramVersion+"), will use latest (-1)");
-			version="";
+			logger.warn("parameter version is non-numeric ("+version+"), will use latest (-1)");
+			version=null;
 		}
 
 		String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version);
@@ -397,7 +427,7 @@ public class RenderingProxy extends HttpServlet {
 		for(Object o : parameterMap.entrySet()) {
 			Map.Entry entry = (Map.Entry) o;
 			String key = (String)entry.getKey();
-			if(!(key.equals("closeOnBack") || key.equals("childobject_order"))) {
+			if(!Arrays.asList(ALLOWED_GET_PARAMS).contains(key)) {
 				continue;
 			}
 			String value;

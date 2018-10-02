@@ -29,7 +29,7 @@ import {SearchService} from "../../../modules/search/search.service";
 import {Helper} from "../../helper";
 import {RestHelper} from "../../rest/rest-helper";
 import {EventListener} from "../../../common/services/frame-events.service";
-import {ActionbarHelper} from "../actionbar/actionbar-helper";
+import {ActionbarHelperService} from "../../services/actionbar-helper";
 import {Response} from "@angular/http";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
@@ -77,6 +77,7 @@ export class NodeRenderComponent implements EventListener{
   public nodeWorkflow: Node;
   public addNodesStream: Node[];
   public nodeDelete: Node[];
+  public nodeVariant: Node;
   public addToCollection: Node[];
   public nodeReport: Node;
   private editor: string;
@@ -91,7 +92,6 @@ export class NodeRenderComponent implements EventListener{
   canScrollLeft: boolean = false;
   canScrollRight: boolean = false;
   private queryParams: Params;
-  childobject_order: number = -1;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainnav') mainnav : MainNavComponent;
@@ -199,6 +199,7 @@ export class NodeRenderComponent implements EventListener{
       private searchStorage : SearchService,
       private toolService: RestToolService,
       private frame : FrameEventsService,
+      private actionbar : ActionbarHelperService,
       private toast : Toast,
       private cd: ChangeDetectorRef,
       private title : Title,
@@ -219,21 +220,28 @@ export class NodeRenderComponent implements EventListener{
           this.editor=params['editor'];
           this.fromLogin=params['fromLogin']=='true';
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
-          this.childobject_order = params['childobject_order'] ? params['childobject_order'] : -1;
           this.queryParams=params;
+          let childobject = params['childobject'] ? params['childobject'] : null;
+          let childobject_order = params['childobject_order'] ? params['childobject_order'] : -1;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
               this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
               this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
-                if(params['version'])
-                  this.version=params['version'];
-                if(this.childobject_order > -1) {
+                if(params['version']) {
+                    this.version = params['version'];
+                }
+                if(childobject){
+                    setTimeout(()=>this.node = childobject,10);
+                }
+                else if(childobject_order > -1) {
                     this.nodeApi.getNodeChildobjects(params['node']).subscribe((data:NodeList)=>{
-                        let id = data.nodes[this.childobject_order].ref.id;
-                        if(this.childobject_order >= data.nodes.length)
-                          id = params['node'];
+                        let id = params['node'];
+                        if (childobject_order < data.nodes.length)
+                            id = data.nodes[childobject_order].ref.id;
+                        else
+                            console.warn("Error fetching child object position. Will ignore parameter and fetch main object");
                         setTimeout(()=>this.node = id,10);
                     });
                 } else {
@@ -324,13 +332,13 @@ export class NodeRenderComponent implements EventListener{
                 this._node=data.node;
                 if(this.queryParams['comments'])
                     this.showComments();
-
-                this.getSequence();
-                jQuery('#nodeRenderContent').html(data.detailsSnippet);
-                this.postprocessHtml();
-                this.addComments();
-                this.loadNode();
-                this.isLoading = false;
+                this.getSequence(()=>{
+                    jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                    this.postprocessHtml();
+                    this.addComments();
+                    this.loadNode();
+                    this.isLoading = false;
+                });
             }
             this.isLoading = false;
         },(error:any)=>{
@@ -401,61 +409,80 @@ export class NodeRenderComponent implements EventListener{
       }
   }
 
-  private openConnector(list:ConnectorList,newWindow=true) {
+  private openConnector(newWindow=true) {
     if(RestToolService.isLtiObject(this._node)){
       this.toolService.openLtiObject(this._node);
     }
     else {
-      UIHelper.openConnector(this.connectors,this.frame,this.toast,list, this._node,null,null,null,newWindow);
+      UIHelper.openConnector(this.connectors,this.frame,this.toast, this._node, this.connectors.getCurrentList(),null,null,null,newWindow);
     }
   }
 
   private checkConnector() {
     this.connector.isLoggedIn().subscribe((login:LoginResult)=>{
-      if(!this.isCollectionRef()){
-        let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login,this._node));
-        openFolder.isEnabled=false;
-        this.nodeApi.getNodeParents(this._node.parent.id,false,[],this._node.parent.repo).subscribe((data:NodeList)=>{
-          openFolder.isEnabled = true;
-        });
-        if(this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config,"workspace"))
-          this.options.push(openFolder);
-
-        let edit=new OptionItem('WORKSPACE.OPTION.EDIT','info_outline',()=>this.nodeMetadata=this._node);
-        edit.isEnabled=this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1 && this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT;
-        if(this.version==RestConstants.NODE_VERSION_CURRENT)
-          this.options.push(edit);
-        this.isOpenable=false;
-      }
-      else{
-        let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login,this._node));
-        openFolder.isEnabled = false;
-        this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node:NodeWrapper)=>{
-
-          this.nodeApi.getNodeParents( node.node.parent.id,false,[], node.node.parent.repo).subscribe((data:NodeList)=>{
-            openFolder.isEnabled = true;
-            //.isEnabled = data.node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
-          });
+        this.connectors.list().subscribe((data:ConnectorList)=>{
+            this.initAfterConnector(login);
         },(error:any)=>{
+            this.initAfterConnector(login);
         });
-        this.options.push(openFolder);
-      }
-      let addCollection=new OptionItem('WORKSPACE.OPTION.COLLECTION','layers',()=>this.addToCollection=[this._node]);
-      addCollection.isEnabled=this._node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH)!=-1 && this._node.type!=RestConstants.CCM_TYPE_REMOTEOBJECT;
-      this.options.push(addCollection);
-        let share = ActionbarHelper.createOptionIfPossible('INVITE',[this._node],this.connector,(node:Node)=>this.nodeShare=this._node);
-        if(share){
-            share.isSeperate=true;
+      this.options=Helper.deepCopyArray(this.options);
+    });
+  }
+
+    private initAfterConnector(login: LoginResult) {
+        if (!this.isCollectionRef()) {
+            let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
+            openFolder.isEnabled = false;
+            this.nodeApi.getNodeParents(this._node.parent.id, false, [], this._node.parent.repo).subscribe((data: NodeList) => {
+                openFolder.isEnabled = true;
+            });
+            if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
+                this.options.push(openFolder);
+
+            let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', () => this.nodeMetadata = this._node);
+            edit.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1 && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
+            if (this.version == RestConstants.NODE_VERSION_CURRENT)
+                this.options.push(edit);
+            this.isOpenable = false;
+        }
+        else {
+            let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
+            openFolder.isEnabled = false;
+            this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node: NodeWrapper) => {
+
+                this.nodeApi.getNodeParents(node.node.parent.id, false, [], node.node.parent.repo).subscribe((data: NodeList) => {
+                    openFolder.isEnabled = true;
+                    //.isEnabled = data.node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
+                });
+            }, (error: any) => {
+            });
+            this.options.push(openFolder);
+        }
+        let addCollection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', [this._node], () => this.addToCollection = [this._node]);
+        if (addCollection) {
+            addCollection.showAsAction = false;
+            addCollection.isEnabled = this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
+            this.options.push(addCollection);
+        }
+        let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', [this._node], () => this.nodeVariant = this._node);
+        if (variant) {
+            this.options.push(variant);
+        }
+
+        let share = this.actionbar.createOptionIfPossible('INVITE', [this._node], (node: Node) => this.nodeShare = this._node);
+        if (share) {
+            share.showAsAction = false;
+            share.isSeperate = true;
             this.options.push(share);
         }
-        let shareLink = ActionbarHelper.createOptionIfPossible('SHARE_LINK',[this._node],this.connector,(node: Node) => this.nodeShareLink=this._node);
+        let shareLink = this.actionbar.createOptionIfPossible('SHARE_LINK',[this._node],this.connector,(node: Node) => this.nodeShareLink=this._node);
         if (shareLink && !this.isSafe)
             this.options.push(shareLink);
         let workflow = ActionbarHelper.createOptionIfPossible('WORKFLOW',[this._node],this.connector,(node:Node)=>this.nodeWorkflow=this._node);
         if(workflow) {
             this.options.push(workflow);
         }
-        let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',[this._node],this.connector,(node:Node)=>this.addNodesStream=[this._node]);
+        let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',[this._node],this.connector,(node:Node)=>this.addNodesStream=[this._node]);
         if(stream){
             this.options.push(stream);
         }
@@ -464,31 +491,25 @@ export class NodeRenderComponent implements EventListener{
         let nodeReport = new OptionItem('NODE_REPORT.OPTION', 'flag', () => this.nodeReport = this._node);
         this.options.push(nodeReport);
       }
-        let del=ActionbarHelper.createOptionIfPossible('DELETE',[this._node],this.connector,(node : Node) => this.nodeDelete=[this._node]);
+        let del=this.actionbar.createOptionIfPossible('DELETE',[this._node],this.connector,(node : Node) => this.nodeDelete=[this._node]);
         if(del){
             this.options.push(del);
         }
-
-      this.isOpenable=false;
-      this.connectors.list().subscribe((data:ConnectorList)=>{
-        if(this.version==RestConstants.NODE_VERSION_CURRENT && RestConnectorsService.connectorSupportsEdit(data,this._node) || RestToolService.isLtiObject(this._node)){
-          let view=new OptionItem("WORKSPACE.OPTION.VIEW", "launch",()=>this.openConnector(data,true));
-          //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
-          this.options.splice(0,0,view);
-          this.options=Helper.deepCopyArray(this.options);
-          this.isOpenable=true;
-          if(this.editor && RestConnectorsService.connectorSupportsEdit(data,this._node).id==this.editor){
-            this.openConnector(data,false);
-          }
-          this.postprocessHtml();
+        this.isOpenable = false;
+        if (this.version == RestConstants.NODE_VERSION_CURRENT && this.connectors.connectorSupportsEdit(this._node) || RestToolService.isLtiObject(this._node)) {
+            let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", () => this.openConnector( true));
+            //view.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE)!=-1;
+            this.options.splice(0, 0, view);
+            this.isOpenable = true;
+            if (this.editor && this.connectors.connectorSupportsEdit(this._node).id == this.editor) {
+                this.openConnector(false);
+            }
         }
-      },(error:any)=>{
-      });
-      this.options=Helper.deepCopyArray(this.options);
-    });
-  }
+        this.options = Helper.deepCopyArray(this.options);
+        this.postprocessHtml();
+    }
 
-  private goToWorkspace(login:LoginResult,node:Node) {
+    private goToWorkspace(login:LoginResult,node:Node) {
       UIHelper.goToWorkspace(this.nodeApi,this.router,login,node);
   }
 
@@ -515,9 +536,11 @@ export class NodeRenderComponent implements EventListener{
       this.downloadUrl=url;
   }
 
-    private getSequence() {
-        if(this.sequence)
-          return;
+    private getSequence(onFinish:Function) {
+        if(this.sequence){
+            onFinish();
+            return;
+        }
         if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data =>{
              this.sequenceParent = data.node;
@@ -525,6 +548,7 @@ export class NodeRenderComponent implements EventListener{
                    if(data.nodes.length > 0)
                     this.sequence = data;
                     setTimeout(()=>this.setScrollparameters(),100);
+                   onFinish();
                });
             });
         } else {
@@ -533,6 +557,7 @@ export class NodeRenderComponent implements EventListener{
                 if(data.nodes.length > 0)
                   this.sequence = data;
                   setTimeout(()=>this.setScrollparameters(),100);
+                onFinish();
             });
         }
     }

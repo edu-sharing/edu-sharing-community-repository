@@ -121,14 +121,18 @@ export class NodeHelper{
 
   /**
    * returns true if all nodes have the requested right
+   * If originalRights is true, check the rights of the original object as well (either ref or original must match the right)
+   * (only works for collection refs)
    * @param nodes
    * @param right
    * @returns {boolean}
    */
-  public static getNodesRight(nodes : Node[],right : string){
+  public static getNodesRight(nodes :any[],right : string,originalRights=false){
     if(nodes==null)
       return true;
     for(let node of nodes){
+      if(originalRights && node.accessOriginal && node.accessOriginal.indexOf(right)!=-1)
+          continue;
       if(!node.access)
         return false;
       if(node.access.indexOf(right)==-1)
@@ -391,6 +395,17 @@ export class NodeHelper{
         }
         return '<img alt="" src="'+NodeHelper.getSourceIconPath('home')+'">';
       }
+      if (item.name == RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN) {
+          if (typeof data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN] !== 'undefined' && data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN] != '') {
+              let rawSrc = data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN].toString();
+              let src = rawSrc.substring(rawSrc.lastIndexOf(":") + 1).toLowerCase();
+              src = src.replace(/\s/g,"");
+              return '<img alt="' + src + '" src="' + NodeHelper.getSourceIconPath(src) + '">';
+          }
+          return '<img alt="" src="' + NodeHelper.getSourceIconPath('home') + '">';
+      }
+
+
       return NodeHelper.getNodeAttribute(translate,config, data, item);
     }
     if(item.type=='COLLECTION'){

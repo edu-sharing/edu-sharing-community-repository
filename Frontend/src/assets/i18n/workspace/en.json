@@ -8,6 +8,7 @@
     "TITLE_SAFE": "Safe",
     "NO_MATCHING_ITEMS": "No matching elements",
     "SEARCH": "Search for folders or items...",
+    "SAFE_SEARCH": "Search the safe…",
     "MY_FILES": "My content",
     "ADD": "Add",
     "ADD_OBJECT": "Add Material",
@@ -180,7 +181,8 @@
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",
       "WORKFLOW":"Workflow",
-      "TEMPLATE":"Metadata Template"
+      "TEMPLATE":"Metadata Template",
+      "VARIANT": "Create variant"
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatic Metadata Inheritance",
@@ -195,7 +197,7 @@
       "PASSWORD":"Password Protect",
       "PASSWORD_INFO":"Then this link will be password protected",
       "PASSWORD_PLACEHOLDER":"Set password...",
-      "PASSWORD_PLACEHOLDER_EDIT":"It already set a password",
+      "PASSWORD_PLACEHOLDER_EDIT":"Password is already set",
       "LINK":"Link to object",
       "ACTIVATE":"Activate sharing",
       "COPY_CLIPBOARD":"Copy link",

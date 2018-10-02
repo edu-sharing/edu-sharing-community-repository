@@ -162,7 +162,7 @@ export class MainNavComponent implements AfterViewInit{
       }
   }
     @HostListener('window:scroll', ['$event'])
-    handleScroll(event: Event) {
+    handleScroll(event: any) {
         let elementsScroll=document.getElementsByClassName('scrollWithBanner');
         let elementsAlign=document.getElementsByClassName('alignWithBanner');
         let elements:any=[];
@@ -197,14 +197,14 @@ export class MainNavComponent implements AfterViewInit{
                     //this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=element.getBoundingClientRect().top;
                 }
                 console.log(this.scrollInitialPositions);
-                this.posScrollElements(elements);
+                this.posScrollElements(event,elements);
             });
         }
         else{
-            this.posScrollElements(elements);
+            this.posScrollElements(event,elements);
         }
     }
-    posScrollElements(elements: any[]){
+    posScrollElements(event:Event, elements: any[]){
         let y=0;
         try {
             let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
@@ -352,12 +352,12 @@ export class MainNavComponent implements AfterViewInit{
 
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       if(!data.isValidLogin) {
-        this.canOpen=false;
+        this.canOpen=data.isGuest;
         this.checkConfig([]);
         return;
       }
       this.toolpermissions=data.toolPermissions;
-      this.canAccessWorkspace=this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
+      this.canAccessWorkspace=this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
 
       this.route.queryParams.subscribe((params: Params) => {
         let buttons:any=[];
@@ -366,7 +366,7 @@ export class MainNavComponent implements AfterViewInit{
 
         let reurl=null;
         if(params["reurl"])
-          reurl={reurl:params["reurl"]};
+          reurl={reurl:params["reurl"],applyDirectories:params["applyDirectories"]};
         this.showNodeStore=params['nodeStore']=="true";
         if(!data.isGuest && this.canAccessWorkspace) {
           //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});

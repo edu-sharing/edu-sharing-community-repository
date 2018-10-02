@@ -1,4 +1,4 @@
-package org.edu_sharing.repository.client.rpc;
+package org.edu_sharing.service.nodeservice.model;
 
 import java.io.Serializable;
 

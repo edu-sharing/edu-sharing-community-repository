@@ -141,7 +141,7 @@ import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.repository.client.rpc.GetPreviewResult;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
@@ -1154,15 +1154,15 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		
 		// checking if it is form type content
 		boolean isSubOfContent = serviceRegistry.getDictionaryService().isSubClass(QName.createQName(nodeType), QName.createQName(CCConstants.CM_TYPE_CONTENT));
-		
+
+		logger.debug("setting external URL");
+		String redirectServletLink = this.getRedirectServletLink(repId, nodeRef.getId());
+
+		redirectServletLink = URLTool.addOAuthAccessToken(redirectServletLink);
+		propsCopy.put(CCConstants.CONTENTURL, redirectServletLink);
+
 		// external URL
 		if (isSubOfContent) {
-			
-			logger.debug("setting external URL");
-			String redirectServletLink = this.getRedirectServletLink(repId, nodeRef.getId());
-			
-			redirectServletLink = URLTool.addOAuthAccessToken(redirectServletLink);
-			propsCopy.put(CCConstants.CONTENTURL, redirectServletLink);
 
 			String commonLicenseKey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 			boolean downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;

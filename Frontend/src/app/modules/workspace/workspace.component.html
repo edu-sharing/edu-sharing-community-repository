@@ -27,7 +27,7 @@
     [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
     [currentScope]="isSafe ? 'safe' : 'workspace'"
     [searchEnabled]="!isBlocked"
-    [searchPlaceholder]="'WORKSPACE.SEARCH'"
+    [searchPlaceholder]="isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH' "
     [canOpen]="mainnav"
     [searchQuery]="searchQuery"
     (onSearch)="doSearch($event)"

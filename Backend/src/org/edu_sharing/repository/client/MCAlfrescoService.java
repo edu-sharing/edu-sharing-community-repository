@@ -40,7 +40,7 @@ import org.edu_sharing.repository.client.rpc.CheckForDuplicatesResult;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.EnvInfo;
 import org.edu_sharing.repository.client.rpc.GetPermissions;
-import org.edu_sharing.repository.client.rpc.GetPreviewResult;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.RepositoryInfo;
@@ -60,7 +60,6 @@ import org.edu_sharing.repository.client.tracking.TrackingEvent.ACTIVITY;
 import org.edu_sharing.repository.client.tracking.TrackingEvent.CONTEXT_ITEM;
 import org.edu_sharing.repository.client.tracking.TrackingEvent.PLACE;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 
 public interface MCAlfrescoService extends RemoteService {

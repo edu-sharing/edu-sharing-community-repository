@@ -20,6 +20,7 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 import {UIConstants} from "../../../common/ui/ui-constants";
 import {ListItem} from "../../../common/ui/list-item";
 import {ConfigurationHelper} from "../../../common/rest/configuration-helper";
+import {RestSearchService} from "../../../common/rest/services/rest-search.service";
 
 // Charts.js
 declare var Chart:any;
@@ -43,6 +44,8 @@ export class WorkspaceMetadataComponent{
   private nodeObject : Node;
   private versions : Version[];
   private versionsLoading=false;
+  private columns:ListItem[]=[];
+  private columnsCollections:ListItem[]=[];
   /*Chart.js*/
   canvas: any;
   ctx: any;
@@ -55,6 +58,8 @@ export class WorkspaceMetadataComponent{
 
   statsTotalPoints: number;
   @Input() isAdmin:boolean;
+  forkedParent: Node;
+  forkedChilds: Node[];
   @Input() set node(node : string){
     this._node=node;
     this.load();
@@ -117,7 +122,16 @@ export class WorkspaceMetadataComponent{
                 this.permissions=this.formatPermissions(login,data);
             });
         });
+        if(data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]){
+           this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0])).subscribe((parent)=>{
+              this.forkedParent=parent.node;
+           },(error)=>{
 
+           });
+        }
+        this.searchApi.searchByProperties([RestConstants.CCM_PROP_FORKED_ORIGIN],[RestHelper.createSpacesStoreRef(data.node)],["="]).subscribe((childs)=>{
+            this.forkedChilds=childs.nodes;
+        });
         this.usageApi.getNodeUsages(this._node).subscribe((usages : UsageList) =>{
             this.usages=usages.usages;
             this.usageApi.getNodeUsagesCollection(this._node).subscribe((collection)=>{
@@ -143,8 +157,14 @@ export class WorkspaceMetadataComponent{
     this.nodeObject.version=version;
     this.onDisplay.emit(this.nodeObject);
   }
+  private displayNode(node:Node){
+      this.router.navigate([UIConstants.ROUTER_PREFIX+"render",node.ref.id]);
+  }
+  private displayCollection(collection:Node){
+      UIHelper.goToCollection(this.router,collection);
+  }
   private openPermalink(){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"render",this.nodeObject.ref.id]);
+      this.displayNode(this.nodeObject);
   }
   private displayVersion(version : Version){
     if(this.isCurrentVersion(version))
@@ -200,8 +220,11 @@ export class WorkspaceMetadataComponent{
               private router: Router,
               private iamApi : RestIamService,
               private nodeApi : RestNodeService,
+              private searchApi : RestSearchService,
               private usageApi : RestUsageService,
               private toast : Toast) {
+      this.columns.push(new ListItem("NODE",RestConstants.CM_NAME));
+      this.columnsCollections.push(new ListItem("COLLECTION",'title'));
   }
   private restoreVersion(restore : Version){
     this.onRestore.emit(restore);

@@ -7,6 +7,8 @@
 
 package org.edu_sharing.webservices.alfresco.extension;
 
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+
 public interface NativeAlfrescoWrapper extends java.rmi.Remote {
     public void setProperty(java.lang.String nodeId, java.lang.String property, java.lang.String value) throws java.rmi.RemoteException;
     public java.lang.String getProperty(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId, java.lang.String property) throws java.rmi.RemoteException;
@@ -65,7 +67,7 @@ public interface NativeAlfrescoWrapper extends java.rmi.Remote {
     public void createShare(java.lang.String nodeId, java.lang.String[] emails, long expiryDate) throws java.rmi.RemoteException;
     public org.edu_sharing.repository.client.rpc.Share[] getShares(java.lang.String nodeId) throws java.rmi.RemoteException;
     public java.lang.String[] getMetadataSets() throws java.rmi.RemoteException;
-    public org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException;
+    public GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException;
     public java.lang.String getHomeFolderID(java.lang.String username) throws java.rmi.RemoteException;
     public void executeAction(java.lang.String nodeId, java.lang.String actionName, java.lang.String actionId, java.util.HashMap parameters, boolean async) throws java.rmi.RemoteException;
     public org.edu_sharing.webservices.alfresco.extension.SearchResult findUsers(org.edu_sharing.webservices.alfresco.extension.KeyValue[] searchProps, java.lang.String eduGroupNodeId, int from, int nrOfResults) throws java.rmi.RemoteException;

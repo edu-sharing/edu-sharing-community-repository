@@ -1,10 +1,13 @@
 package org.edu_sharing.restservices;
 
+import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -15,7 +18,13 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.usage.Usage2Service;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.ValidationEvent;
+import javax.xml.bind.ValidationEventHandler;
+
 public class UsageDao {
+	Logger logger = Logger.getLogger(UsageDao.class);
 
 
 	private final PermissionService permissionService;
@@ -72,7 +81,21 @@ public class UsageDao {
 		usageResult.setResourceId(usage.getResourceId());
 		usageResult.setUsageCounter(usage.getUsageCounter());
 		usageResult.setUsageVersion(usage.getUsageVersion());
-		usageResult.setUsageXmlParams(usage.getUsageXmlParams());
+        try{
+            JAXBContext jaxbContext = JAXBContext.newInstance(Usage.Parameters.class);
+
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            jaxbUnmarshaller.setEventHandler(new ValidationEventHandler() {
+				@Override
+				public boolean handleEvent(ValidationEvent event) {
+					// ignore all errors, try to parse what is possible
+					return true;
+				}
+			});
+            usageResult.setUsageXmlParams((Usage.Parameters) jaxbUnmarshaller.unmarshal(new StringReader(usage.getUsageXmlParams())));
+        }catch(Throwable t){
+        	logger.warn("Error converting usage xml "+usage.getUsageXmlParams(),t);
+		}
 		return usageResult;
 	}
 

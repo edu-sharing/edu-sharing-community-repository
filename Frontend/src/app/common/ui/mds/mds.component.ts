@@ -1779,8 +1779,8 @@ export class MdsComponent{
     }
     this.refreshChildobjects();
   }
-  private addChildobjectLink(link:string){
-      link=UIHelper.addHttpIfRequired(link);
+  private addChildobjectLink(event:any){
+      let link=UIHelper.addHttpIfRequired(event.link);
       this.addChildobject=false;
       console.log(event);
       let data={

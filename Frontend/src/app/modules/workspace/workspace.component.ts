@@ -31,7 +31,7 @@ import {trigger} from "@angular/animations";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {RestSearchService} from "../../common/rest/services/rest-search.service";
-import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
+import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 import {Helper} from "../../common/helper";
 import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {DateHelper} from '../../common/ui/DateHelper';
@@ -132,6 +132,7 @@ export class WorkspaceMainComponent implements EventListener{
     public shareLinkNode : Node;
     private viewType = 0;
     private infoToggle: OptionItem;
+    private reurlDirectories: boolean;
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event:any) {
         if(this.isSafe){
@@ -222,6 +223,7 @@ export class WorkspaceMainComponent implements EventListener{
                 private storage : TemporaryStorageService,
                 private config: ConfigurationService,
                 private connectors : RestConnectorsService,
+                private actionbar : ActionbarHelperService,
                 private collectionApi : RestCollectionService,
                 private toolService : RestToolService,
                 private session : SessionStorageService,
@@ -319,7 +321,7 @@ export class WorkspaceMainComponent implements EventListener{
 
     }
     private editConnector(node : Node=null,type : Filetype=null,win : any = null,connectorType : Connector = null){
-        UIHelper.openConnector(this.connectors,this.event,this.toast,this.connectorList,this.getNodeList(node)[0],type,win,connectorType);
+        UIHelper.openConnector(this.connectors,this.event,this.toast,this.getNodeList(node)[0],this.connectorList,type,win,connectorType);
     }
     private handleDrop(event:any){
         for(let s of event.source) {
@@ -459,6 +461,7 @@ export class WorkspaceMainComponent implements EventListener{
                                 if(params['reurl']) {
                                     this.reurl = params['reurl'];
                                 }
+                                this.reurlDirectories = params['applyDirectories']=='true';
                                 this.createAllowed=this.root=='MY_FILES';
                                 this.mainnav=params['mainnav']=='false' ? false : true;
 
@@ -772,11 +775,15 @@ export class WorkspaceMainComponent implements EventListener{
             options.push(new OptionItem("WORKSPACE.OPTION.PASTE", "content_paste", (node: Node) => this.pasteNode()));
         }
         if (nodes && nodes.length == 1) {
-            if(this.reurl && !nodes[0].isDirectory){
-                let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.storage,this.getNodeList(node)[0],this.reurl));
+            if(this.reurl){
+                let apply=new OptionItem("APPLY", "redo", (node: Node) => this.applyNode(this.getNodeList(node)[0]));
                 apply.showAsAction=true;
+                apply.showAlways=true;
                 apply.enabledCallback=((node:Node)=> {
                     return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
+                });
+                apply.showCallback=((node:Node)=> {
+                    return this.reurlDirectories || !node.isDirectory;
                 });
                 options.push(apply);
             }
@@ -790,13 +797,12 @@ export class WorkspaceMainComponent implements EventListener{
         }
         let view = new OptionItem("WORKSPACE.OPTION.VIEW", "launch", (node: Node) => this.editConnector(node));
         if(fromList){
-            view.showAlways = true;
             view.showCallback=((node:Node)=>{
-                return RestConnectorsService.connectorSupportsEdit(this.connectorList, node) != null;
+                return this.connectors.connectorSupportsEdit(node,this.connectorList) != null;
             });
             options.push(view);
         }
-        else if(nodes && nodes.length==1 && RestConnectorsService.connectorSupportsEdit(this.connectorList,nodes[0])){
+        else if(nodes && nodes.length==1 && this.connectors.connectorSupportsEdit(nodes[0],this.connectorList)){
             options.push(view);
         }
         if(nodes && nodes.length==1 && !savedSearch){
@@ -807,7 +813,7 @@ export class WorkspaceMainComponent implements EventListener{
                 options.push(edit);
         }
         if(nodes && nodes.length && allFiles) {
-            let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes,this.connector,(node:Node)=>this.addToCollection(node));
+            let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
             if (collection && !this.isSafe)
                 options.push(collection);
             let stream = ActionbarHelper.createOptionIfPossible('ADD_TO_STREAM',nodes,this.connector,(node:Node)=>this.addToStream(node));
@@ -815,18 +821,16 @@ export class WorkspaceMainComponent implements EventListener{
                 options.push(stream);
         }
         if(nodes && nodes.length && allFiles) {
-            /*
-            let variant = ActionbarHelper.createOptionIfPossible('CREATE_VARIANT',nodes,this.connector,(node:Node)=>this.createVariant(node));
+            let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT',nodes, (node: Node) => this.createVariant(node));
             if (variant && !this.isSafe)
                 options.push(variant);
-            */
         }
         let share:OptionItem;
         if (nodes && nodes.length == 1) {
-            let template = ActionbarHelper.createOptionIfPossible('NODE_TEMPLATE',nodes,this.connector,(node:Node)=>this.nodeTemplate(node));
+            let template = this.actionbar.createOptionIfPossible('NODE_TEMPLATE', nodes, (node: Node) => this.nodeTemplate(node));
             if(template)
                 options.push(template);
-            share=ActionbarHelper.createOptionIfPossible('INVITE',nodes,this.connector,(node: Node) => this.shareNode(node));
+            share=this.actionbar.createOptionIfPossible('INVITE', nodes, (node: Node) => this.shareNode(node));
             if(share) {
                 share.isEnabled = share.isEnabled && (
                     (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE) && !this.isSafe)
@@ -851,7 +855,7 @@ export class WorkspaceMainComponent implements EventListener{
             contributor.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE);
             if(nodes && !nodes[0].isDirectory && !this.isSafe)
                 options.push(contributor);
-            let workflow = ActionbarHelper.createOptionIfPossible('WORKFLOW',nodes,this.connector,(node:Node)=>this.manageWorkflowNode(node));
+            let workflow = this.actionbar.createOptionIfPossible('WORKFLOW', nodes, (node: Node) => this.manageWorkflowNode(node));
             if(workflow)
                 options.push(workflow);
 
@@ -865,7 +869,7 @@ export class WorkspaceMainComponent implements EventListener{
 
         }
         if(fromList || nodes && nodes.length) {
-            let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes, this.connector, (node: Node) => this.downloadNode(node));
+            let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => this.downloadNode(node));
             if (download)
                 options.push(download);
         }
@@ -875,7 +879,7 @@ export class WorkspaceMainComponent implements EventListener{
             cut.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_WRITE) && (this.root=='MY_FILES' || this.root=='SHARED_FILES');
             options.push(cut);
             options.push(new OptionItem("WORKSPACE.OPTION.COPY", "content_copy", (node: Node) => this.cutCopyNode(node, true)));
-            let del=ActionbarHelper.createOptionIfPossible('DELETE',nodes,this.connector,(node : Node) => this.deleteNodes(node));
+            let del=this.actionbar.createOptionIfPossible('DELETE', nodes, (node: Node) => this.deleteNodes(node));
             if(del){
                 options.push(del);
             }
@@ -983,7 +987,7 @@ export class WorkspaceMainComponent implements EventListener{
             else if(RestToolService.isLtiObject(node)){
                 this.toolService.openLtiObject(node);
             }
-            else if(useConnector && RestConnectorsService.connectorSupportsEdit(this.connectorList,node)){
+            else if(useConnector && this.connectors.connectorSupportsEdit(node,this.connectorList)){
                 this.editConnector(node);
             }
             else {
@@ -1166,5 +1170,22 @@ export class WorkspaceMainComponent implements EventListener{
     private recoverScrollposition() {
         console.log("recover scroll "+this.storage.get('workspace_scroll',0));
         window.scrollTo(0,this.storage.get('workspace_scroll',0));
+    }
+
+    private applyNode(node: Node,force=false) {
+        /*if(node.isDirectory && !force){
+            this.dialogTitle='WORKSPACE.APPLY_NODE.DIRECTORY_TITLE';
+            this.dialogCancelable=true;
+            this.dialogMessage='WORKSPACE.APPLY_NODE.DIRECTORY_MESSAGE';
+            this.dialogMessageParameters={name:node.name};
+            this.dialogButtons=DialogButton.getYesNo(()=>{
+                this.dialogTitle=null;
+            },()=>{
+                this.dialogTitle=null;
+                this.applyNode(node,true);
+            });
+            return;
+        }*/
+        NodeHelper.addNodeToLms(this.router,this.storage,node,this.reurl)
     }
 }

@@ -39,12 +39,13 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.rpc.GetPreviewResult;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
-import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
@@ -81,46 +82,40 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String nodeId = req.getParameter("nodeId");
-		
-		// Auth by usage, allow a specific node to render if the user has a current usage signature for it
-		SignatureVerifier.runAsAdminIfNodeIsAccessible(nodeId,req.getSession(),new RunAsWork<Void>() {
-					@Override
-					public Void doWork() throws Exception {
-						fetchNodeData(req,resp);
-						return null;
-					}	
-		});
+		fetchNodeData(req,resp);
 	}
 	
 	private void fetchNodeData(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		ServletOutputStream op = resp.getOutputStream();
 		String nodeId=null;
 
-		MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
-		
+		NodeService nodeService = NodeServiceFactory.getLocalService();
 		boolean isCollection=false;
+
+		final StoreRef storeRef;
+		String storeProtocol =  req.getParameter("storeProtocol");
+		String storeId = req.getParameter("storeId");
+		if(storeProtocol != null && storeId != null){
+			storeRef = new StoreRef(storeProtocol,storeId);
+		}
+		else{
+			storeRef = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+		}
+
 		try {
 			
 			nodeId = req.getParameter("nodeId");
 			String type = req.getParameter("type");
 			String version = req.getParameter("version");
-			
-			StoreRef storeRef = MCAlfrescoAPIClient.storeRef;
-			String storeProtocol =  req.getParameter("storeProtocol");
-			String storeId = req.getParameter("storeId");
-			if(storeProtocol != null && storeId != null){
-				storeRef = new StoreRef(storeProtocol,storeId);
-			}
-			
+
 			NodeRef nodeRef = new NodeRef(storeRef, nodeId);
-			QName nodeType = serviceRegistry.getNodeService().getType(nodeRef);
+			String nodeType = nodeService.getType(nodeId);
 			
 			// check nodetype for security reasons
 			String inNodeId=nodeId;
 			if (nodeId != null) {
 				try {
-					HashMap<String,Object> props = new MCAlfrescoAPIClient().getProperties(nodeId);
+					HashMap<String,Object> props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
 					
 					// For collections: Fetch the original object for preview
 					if(props.containsKey(CCConstants.CCM_PROP_IO_ORIGINAL)){
@@ -137,7 +132,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					// we need to check permissions and allow or deny access by using the READ_PREVIEW permission
 					validatePermissions(storeRef,inNodeId);
 					
-					if (nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_REMOTEOBJECT))) {
+					if (nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT)) {
 						
 						props=NodeServiceFactory.getNodeService((String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID))
 							.getProperties(storeProtocol, storeId, (String) props.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
@@ -154,9 +149,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						//throw new Exception();
 					}
 					
-					if (!nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_IO)) 
-							&& !nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_MAP))
-							&& !nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_SAVED_SEARCH))) {
+					if (!nodeType.equals(CCConstants.CCM_TYPE_IO)
+							&& !nodeType.equals(CCConstants.CCM_TYPE_MAP)
+							&& !nodeType.equals(CCConstants.CCM_TYPE_SAVED_SEARCH)) {
 						//resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "type is not an io and no map!");
 						//return;
 						throw new Exception();
@@ -170,7 +165,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				return;
 			}
 			
-			if(QName.createQName(CCConstants.CCM_TYPE_MAP).equals(nodeType)){
+			if(CCConstants.CCM_TYPE_MAP.equals(nodeType)){
 				if(deliverContentAsSystem(nodeRef, CCConstants.CCM_PROP_MAP_ICON, req, resp))
 					return;
 			}
@@ -191,7 +186,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				
 				GetPreviewResult getPrevResult = null;
 				if(version != null && !version.trim().equals("") && !isCollection){
-					HashMap<String, HashMap<String,Object>> versionHistory = repoClient.getVersionHistory(nodeId);
+					HashMap<String, HashMap<String,Object>> versionHistory = nodeService.getVersionHistory(nodeId);
 					if(versionHistory != null){
 						for(Map.Entry<String, HashMap<String,Object>> entry : versionHistory.entrySet()){
 							String tmpVers = (String)entry.getValue().get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
@@ -200,8 +195,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 								String vNodeId = (String)entry.getValue().get(CCConstants.SYS_PROP_NODE_UID);
 								System.out.println("vNodeId:"+vNodeId+ " entry key:"+entry.getKey());
 								
-								StoreRef sr = new StoreRef(VersionService.VERSION_STORE_PROTOCOL, "version2Store");
-								getPrevResult = repoClient.getPreviewUrl(sr, entry.getKey());
+								getPrevResult = nodeService.getPreview(VersionService.VERSION_STORE_PROTOCOL, "version2Store", entry.getKey());
 								
 							}
 							
@@ -216,12 +210,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						getPrevResult = AuthenticationUtil.runAsSystem(new RunAsWork<GetPreviewResult>() {
 							@Override
 							public GetPreviewResult doWork() throws Exception {
-								return repoClient.getPreviewUrl(MCAlfrescoAPIClient.storeRef, nodeIdFinal);
+								return nodeService.getPreview(storeRef.getProtocol(), storeRef.getIdentifier(), nodeIdFinal);
 							}
 						});
 					}
 					else{
-						getPrevResult = repoClient.getPreviewUrl(MCAlfrescoAPIClient.storeRef, nodeId);
+						getPrevResult = nodeService.getPreview(storeRef.getProtocol(),storeRef.getIdentifier(), nodeId);
 					}
 				}
 				
@@ -230,14 +224,14 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					if(AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
 						@Override
 						public Boolean doWork() throws IOException  {
-							return loadPreview(req, resp, op, nodeIdFinal, repoClient, getPrevResultFinal);
+							return loadPreview(req, resp, op, storeRef, nodeIdFinal, nodeService, getPrevResultFinal);
 						}
 					})){
 						return;
 					}
 				}
 				else{
-					if(loadPreview(req, resp, op, nodeId, repoClient, getPrevResult)){
+					if(loadPreview(req, resp, op, storeRef, nodeId, nodeService, getPrevResult)){
 						return;
 					}
 				}
@@ -258,21 +252,13 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						HashMap<String, Object> previewProps = null;
 						final String fnodeId = nodeId;
 						if(isCollection) {
-							previewProps = AuthenticationUtil.runAsSystem(new RunAsWork<HashMap<String, Object>>() {
-								@Override
-								public HashMap<String, Object> doWork() throws Exception {
-									return repoClient.getChild(fnodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
-											CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-								}
-							});
+							prevNodeRef = AuthenticationUtil.runAsSystem(
+									() -> nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,fnodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
+									CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png));
 						}else {
-							previewProps = repoClient.getChild(nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
+							prevNodeRef = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
 									CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
 						}
-						
-						 
-						String previewNodeId = (String) previewProps.get(CCConstants.SYS_PROP_NODE_UID);
-						prevNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, previewNodeId);
 					}
 					if (prevNodeRef != null) {
 						
@@ -301,7 +287,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 		} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
 			
-			MimeTypesV2 mime=new MimeTypesV2(repoClient.appInfo);
+			MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
 			String noPermImage=mime.getNoPermissionsPreview();
 			resp.sendRedirect(noPermImage);
 			return;
@@ -311,7 +297,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		/**
 		 * fallback to mime first, then default
 		 */
-		MimeTypesV2 mime=new MimeTypesV2(repoClient.appInfo);
+		MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
 		try{
 			HashMap<String,Object> props;
 			String[] aspects=new String[]{};
@@ -322,7 +308,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					@Override
 					public HashMap<String, Object> doWork() throws Exception {
 						try{
-							return repoClient.getProperties(nodeIdFinal);
+							return nodeService.getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeIdFinal);
 						}catch(Throwable t){
 							throw new Exception(t);
 						}
@@ -330,9 +316,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				});
 			}
 			else{
-				props=repoClient.getProperties(nodeId);
-				aspects=repoClient.getAspects(nodeId);
-				type = repoClient.getNodeType(nodeId);
+				props=nodeService.getProperties(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
+				aspects=nodeService.getAspects(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
+				type = nodeService.getType(nodeId);
 			}
 			resp.sendRedirect(mime.getPreview(type,props,Arrays.asList(aspects)));
 			return;
@@ -343,8 +329,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	}
 
 	private void validatePermissions(StoreRef storeRef, String nodeId) {
-		HashMap<String, Boolean> result = PermissionServiceFactory.getLocalService().hasAllPermissions(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,new String[]{CCConstants.PERMISSION_READ_PREVIEW});
-		if(!result.get(CCConstants.PERMISSION_READ_PREVIEW))
+		boolean result = PermissionServiceFactory.getLocalService().hasPermission(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId,CCConstants.PERMISSION_READ_PREVIEW);
+		if(!result)
 			throw new AccessDeniedException("No "+CCConstants.PERMISSION_READ_PREVIEW+" on "+nodeId);
 	}
 
@@ -369,13 +355,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	 * @param resp
 	 * @param op
 	 * @param nodeId
-	 * @param repoClient
 	 * @param getPrevResult
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean loadPreview(HttpServletRequest req, HttpServletResponse resp, ServletOutputStream op, String nodeId,
-			MCAlfrescoAPIClient repoClient, GetPreviewResult getPrevResult) throws IOException {
+	private boolean loadPreview(HttpServletRequest req, HttpServletResponse resp, ServletOutputStream op,StoreRef storeRef, String nodeId,
+			NodeService nodeService, GetPreviewResult getPrevResult) throws IOException {
 		
 		if(getPrevResult == null){
 			return false;
@@ -403,10 +388,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				property = CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW;
 			}
 			if (getPrevResult.getType().equals(GetPreviewResult.TYPE_GENERATED)) {
-				HashMap<String, Object> previewProps = repoClient.getChild(nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
+				prevNodeRef = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId, CCConstants.CM_TYPE_THUMBNAIL, CCConstants.CM_NAME,
 						CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-				String previewNodeId = (String) previewProps.get(CCConstants.SYS_PROP_NODE_UID);
-				prevNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, previewNodeId);
 			}
 			if (prevNodeRef != null) {
 				if(deliverContentAsSystem(prevNodeRef, property, req, resp))
@@ -416,8 +399,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		}
 		if (getPrevResult.getType().equals(GetPreviewResult.TYPE_DEFAULT)) {
 			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
-			ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, QName.createQName(CCConstants.CM_PROP_CONTENT));
-			if(reader!=null && reader.getMimetype().startsWith("image")) {
+			String mimetype=NodeServiceFactory.getLocalService().getContentMimetype(storeRef.getProtocol(), storeRef.getIdentifier(),nodeId);
+			if(mimetype!=null && mimetype.startsWith("image")) {
 				if(deliverContentAsSystem(nodeRef,  CCConstants.CM_PROP_CONTENT, req, resp))
 					return true;
 			}

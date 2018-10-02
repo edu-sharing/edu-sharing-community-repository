@@ -33,7 +33,6 @@ import {UIConstants} from "../../common/ui/ui-constants";
 import {ListItem} from "../../common/ui/list-item";
 import {AddElement, ListTableComponent} from "../../common/ui/list-table/list-table.component";
 import {RestMdsService} from "../../common/rest/services/rest-mds.service";
-import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {NodeHelper} from "../../common/ui/node-helper";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsHelper} from "../../common/rest/mds-helper";
@@ -44,6 +43,7 @@ import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
+import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 
 // component class
 @Component({
@@ -124,6 +124,7 @@ export class CollectionsMainComponent {
     private toast : Toast,
     private title:Title,
     private location:Location,
+    private actionbar : ActionbarHelperService,
     private config:ConfigurationService,
     private translationService: TranslateService) {
     this.collectionsColumns.push(new ListItem("COLLECTION", 'title'));
@@ -311,6 +312,13 @@ export class CollectionsMainComponent {
     return this.collectionContent.getCollectionID()=='-root-';
     */
   }
+    isRootLevelCollection():boolean {
+        return !this.showCollection;
+        /*
+        if (this.collectionContent==null) return false;
+        return this.collectionContent.getCollectionID()=='-root-';
+        */
+    }
 
   isAllowedToEditCollection() : boolean {
     // This seems to be wrong: He may has created a public collection and wants to edit it
@@ -366,13 +374,13 @@ export class CollectionsMainComponent {
         if (!fromList) {
             if (nodes && nodes.length) {
                 if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
-                    let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
+                    let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOther = ActionbarHelperService.getNodes(nodes, node));
                     if (collection)
                         options.push(collection);
                 }
                 if (this.isAllowedToDeleteNodes(nodes)) {
                     let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE', 'remove_circle_outline', (node: Node) => {
-                        this.deleteMultiple(ActionbarHelper.getNodes(nodes, node));
+                        this.deleteMultiple(ActionbarHelperService.getNodes(nodes, node));
                     });
                     if (remove)
                         options.push(remove);
@@ -380,8 +388,7 @@ export class CollectionsMainComponent {
             }
         }
         if (fromList) {
-            let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector,
-                (node: Node) => this.addToOtherCollection(node));
+            let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOtherCollection(node));
             if (collection) {
                 collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
                 options.push(collection);
@@ -389,22 +396,21 @@ export class CollectionsMainComponent {
         }
       if (fromList || nodes && nodes.length) {
 
-            let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes, this.connector,
-                (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelper.getNodes(nodes, node)));
+            let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
             if (download)
                 options.push(download);
       }
       if(fromList) {
-          let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
+          let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelperService.getNodes(nodes, node)[0]));
           remove.showCallback = (node: Node) => {
-              return this.isAllowedToDeleteNodes(ActionbarHelper.getNodes(nodes, node));
+              return this.isAllowedToDeleteNodes(ActionbarHelperService.getNodes(nodes, node));
           };
           if(remove)
             options.push(remove);
       }
       if(fromList || nodes && nodes.length==1) {
           if (this.config.instant("nodeReport", false)) {
-              let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes, node)[0]);
+              let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelperService.getNodes(nodes, node)[0]);
               if(report)
                 options.push(report);
           }
@@ -489,10 +495,12 @@ export class CollectionsMainComponent {
     })
   }
 
-  buttonCollectionEdit() : void {
-    this.router.navigate([UIConstants.ROUTER_PREFIX+'collections/collection','edit',this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
-    return;
-  }
+    buttonCollectionEdit() : void {
+        if (this.isAllowedToEditCollection()){
+            this.router.navigate([UIConstants.ROUTER_PREFIX+'collections/collection','edit',this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
+            return;
+        }
+    }
 
     // gets called by user if something went wrong to start fresh from beginning
     resetCollections() : void {

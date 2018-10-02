@@ -95,7 +95,7 @@ public class ConnectorServlet extends HttpServlet  {
 		
 		Connector connector = null;
 		if(connectorId != null) {
-			for(Connector con : ConnectorServiceFactory.getConnectorService().getConnectorList().getConnectors()){
+			for(Connector con : ConnectorServiceFactory.getConnectorList().getConnectors()){
 				if(con.getId().equals(connectorId)){
 					connector = con;
 				}

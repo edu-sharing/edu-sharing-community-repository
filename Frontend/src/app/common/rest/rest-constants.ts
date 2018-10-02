@@ -89,6 +89,7 @@ export class RestConstants {
   public static CCM_PROP_AUTHOR_FREETEXT = "ccm:author_freetext";
   public static CCM_PROP_EAF_PRODUCTIONYEAR = "ccm:eaf_productionyear";
   public static CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR_FN = "ccm:lifecyclecontributer_authorFN";
+  public static CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN = "ccm:lifecyclecontributer_publisherFN";
   public static CCM_PROP_EDITOR_TYPE = "ccm:editorType";
   public static CCM_PROP_CCRESSOURCETYPE = "ccm:ccressourcetype";
   public static CCM_PROP_CCRESSOURCESUBTYPE = "ccm:ccresourcesubtype";
@@ -107,6 +108,7 @@ export class RestConstants {
   public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
   public static CCM_PROP_TOOL_INSTANCE_KEY="ccm:tool_instance_key";
   public static CCM_PROP_TOOL_INSTANCE_SECRET="ccm:tool_instance_secret";
+  public static CCM_PROP_FORKED_ORIGIN="ccm:forked_origin";
 
   public static LINKTYPE_USER_GENERATED="USER_GENERATED";
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";

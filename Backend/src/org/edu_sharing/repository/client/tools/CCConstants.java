@@ -351,10 +351,15 @@ public class CCConstants {
 	public final static String CCM_PROP_COMMENT_REPLY = "{http://www.campuscontent.de/model/1.0}comment_reply";
 	public final static String CCM_PROP_COMMENT_CONTENT = "{http://www.campuscontent.de/model/1.0}comment_content";
 
+	public final static String CCM_PROP_FORKED_ORIGIN = "{http://www.campuscontent.de/model/1.0}forked_origin";
+	public final static String CCM_PROP_FORKED_ORIGIN_VERSION = "{http://www.campuscontent.de/model/1.0}forked_origin_version";
+
 	/*CCMODEL*/
 	public final static String CCM_ASPECT_USER_EXTENSION ="{http://www.campuscontent.de/model/1.0}userExtension";
 
 	public final static String CCM_ASPECT_LICENSES ="{http://www.campuscontent.de/model/1.0}licenses";
+
+	public final static String CCM_ASPECT_FORKED ="{http://www.campuscontent.de/model/1.0}forked";
 
 	public final static String CCM_ASPECT_COLLECTION = "{http://www.campuscontent.de/model/1.0}collection";
 
