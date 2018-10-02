@@ -192,16 +192,16 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		String allowedAuthTypes = ApplicationInfoList.getHomeRepository().getAllowedAuthenticationTypes();
 
 		// if true, redirect to shib
-		boolean allowesSSO = true;
+		boolean allowSSO = true;
 		try {
 			Config config=ConfigServiceFactory.getCurrentConfig(req);
 			if(config.values.loginUrl.contains("edu-sharing/shibboleth")) {
 				// client based redirect, disable server-side redirect (guest support)
-				allowesSSO = false;
+				allowSSO = false;
 			}
 		}catch(Exception e) {}
 		
-		if(allowedAuthTypes != null && !allowedAuthTypes.trim().equals("") && allowesSSO){
+		if(allowedAuthTypes != null && !allowedAuthTypes.trim().equals("") && allowSSO){
 			String shibbUrl = URLTool.addSSOPathWhenConfigured(URLTool.getBaseUrl()) + ( req.getQueryString() != null ? "?"+req.getQueryString() : "");
 			resp.sendRedirect(shibbUrl);
 		}else{
