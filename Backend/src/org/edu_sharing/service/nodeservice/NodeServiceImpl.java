@@ -689,6 +689,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
 
+	/**
+	 * Supported values for filter:
+	 * special: show all files which are usually not displayed anyway (usage, share, thumbnail)
+	 * files: return only files
+	 * @param list
+	 * @param filter
+	 * @param sortDefinition
+	 * @param <T>
+	 * @return
+	 */
 	@Override
     public <T>List<T> sortNodeRefList(List<T> list,List<String> filter, SortDefinition sortDefinition){
 	    // make a copy so we have a modifiable list object
@@ -796,10 +806,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     private boolean shouldFilter(NodeRef node, List<String> filter) {
 		// filter nodes for link inivitation and usages
+		if(filter==null)
+			filter=new ArrayList<>();
 		String type=nodeService.getType(node).toString();
 		String mapType=(String)nodeService.getProperty(node,QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
 		String name=(String)nodeService.getProperty(node,QName.createQName(CCConstants.CM_NAME));
-		if(CCConstants.CCM_TYPE_SHARE.equals(type) || CCConstants.CCM_TYPE_USAGE.equals(type)){
+		if(!filter.contains("special") && (
+				CCConstants.CCM_TYPE_SHARE.equals(type) ||
+				CCConstants.CCM_TYPE_USAGE.equals(type) ||
+				CCConstants.CM_TYPE_THUMBNAIL.equals(type))){
 			return true;
 		}
 		// filter the metadata template file
@@ -809,10 +824,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		if(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(mapType) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)){
 			return true;
 		}
-		if(".DS_Store".equals(name) || "._.DS_Store".equals(name)){
+		if(!filter.contains("special") && (".DS_Store".equals(name) || "._.DS_Store".equals(name))){
 			return true;
 		}
-        if(filter==null || filter.size()==0)
+        if(filter.size()==0)
         	return false;
 		boolean shouldFilter = true;
 		for(String f : filter) {
