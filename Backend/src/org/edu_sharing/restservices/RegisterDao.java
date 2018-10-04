@@ -19,4 +19,12 @@ public class RegisterDao {
             throw DAOException.mapping(t);
         }
     }
+
+    public static boolean resendMail(String mail) throws DAOException {
+        try {
+            return RegisterServiceFactory.getLocalService().resendRegisterMail(mail);
+        }catch(Throwable t){
+            throw DAOException.mapping(t);
+        }
+    }
 }

@@ -40,11 +40,9 @@ export class RegisterDoneComponent{
         }
     }
     public sendMail(){
-        //TODO: @Simon
-        // E-Mail erneut versenden
-        console.log(this.email);
-        this.toast.toast("REGISTER.TOAST");
-
+        this.register.resendMail(this.email).subscribe(()=>{
+            this.toast.toast("REGISTER.TOAST");
+        });
     }
     constructor(private connector: RestConnectorService,
                 private toast: Toast,

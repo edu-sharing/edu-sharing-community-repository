@@ -19,4 +19,8 @@ export class RestRegisterService extends AbstractRestService{
         let query = this.connector.createUrl("register/:version/activate/:key",null,[[":key",key]]);
         return this.connector.post(query, null, this.connector.getRequestOptions());
     }
+    public resendMail = (mail:string): Observable<Response> => {
+        let query = this.connector.createUrl("register/:version/resend/:mail",null,[[":mail",mail]]);
+        return this.connector.post(query, null, this.connector.getRequestOptions());
+    }
 }

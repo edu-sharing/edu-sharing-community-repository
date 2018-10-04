@@ -28,6 +28,7 @@ import javax.servlet.ServletContext;
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -114,10 +115,31 @@ public class RegisterServiceImpl implements RegisterService {
            throw new DuplicateAuthorityException();
         String value = addToCache(info);
         sendRegisterMail(info,value);
-
     }
-
+    @Override
+    public boolean resendRegisterMail(String mail) throws Exception {
+        String key=getKeyForMail(mail);
+        if(key!=null){
+            sendRegisterMail(registerUserCache.get(key),key);
+            return true;
+        }
+        return false;
+    }
+    private String getKeyForMail(String mail){
+        for (String cacheKey : registerUserCache.getKeys()) {
+            try {
+                if (registerUserCache.get(cacheKey).getEmail().equals(mail))
+                    return cacheKey;
+            }catch(Throwable t){
+                // it's possible to get class cast exceptions when hot deploying
+            }
+        }
+        return null;
+    }
     private String addToCache(RegisterInformation info) {
+        String existing=getKeyForMail(info.getEmail());
+        if(existing!=null)
+            return existing;
         while(true){
             String id=RandomStringUtils.random(KEY_LENGTH,true,true);
             if(registerUserCache.contains(id))

@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.register.v1.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class RegisterInformation {
     private String firstName,lastName,email,password;
@@ -48,5 +49,14 @@ public class RegisterInformation {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RegisterInformation that = (RegisterInformation) o;
+        return Objects.equals(email, that.email);
     }
 }
