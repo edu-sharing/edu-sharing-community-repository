@@ -112,14 +112,14 @@
 			<div class="center">
 				<h1>Hello {{firstName}} {{lastName}}!</h1>
 				<p>Thank you for your registration!</p>
-				<p>To activate your account and login, click on the link below:</p>
-				<a class="btn" href="{{link}}">Finish registration</a>
-				<p>
-					In case this email is not displayed correctly, please click » <a href="{{link}}">here</a> 
 				</p>
-				<div class="input-field"><a href="{{link}}">{{link}}</a></div>
-				<br><br><br>
-				<p>Best regards, you {{LaSiDig Team}}</p>
+					Copy the link below in the registration form to complete the registration:
+				<p>
+				</p>
+				<div class="center"><div class="input-field">{{key}}</div></div>
+				<br><br>
+				<p>Or click on the link below:</p>
+				<a class="btn" href="{{link}}">Finish registration</a>
 			</div>
 		]]>
 		</message>

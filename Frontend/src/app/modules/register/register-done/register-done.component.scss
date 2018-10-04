@@ -36,4 +36,12 @@
     font-size: 100%;
     color: $textLight;
   }
+  .keyForm{
+    display: flex;
+    width: 100%;
+    padding:20px 20px;
+    .btn{
+      float:initial;
+    }
+  }
 }

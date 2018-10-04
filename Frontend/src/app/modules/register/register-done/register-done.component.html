@@ -3,12 +3,18 @@
 
     <img *ngIf="inputState != 'done-request'" src="assets/images/register/register-conform.svg" alt="register-done">
     <img *ngIf="inputState == 'done-request'"src="assets/images/register/register-done.svg" alt="request-done">
-    <h3>{{'DONE.TITLE' | translate }}</h3>
-    <!--TODO: @Simon richtige E-Mail vom Nutzer anzeigen ist in  -->
-    <p class="mail-info">{{'DONE.MAIL_INFO' | translate }} <span (click)='editMail()'>{{email}} <i *ngIf="!keyUrl" class='material-icons'>edit</i></span> {{'DONE.MAIL_INFO2' | translate }}</p>
+    <h3>{{'REGISTER.DONE.TITLE' | translate }}</h3>
+    <p class="mail-info">{{'REGISTER.DONE.MAIL_INFO' | translate }} <span (click)='editMail()'>{{email}} <i *ngIf="!keyUrl" class='material-icons'>edit</i></span> {{'REGISTER.DONE.MAIL_INFO2' | translate }}</p>
+    <div *ngIf="!keyUrl" class="keyForm">
+        <form (ngSubmit)="keyInput.trim() ? activate(keyInput) : null">
+            <div>{{'REGISTER.DONE.ENTER_KEY' | translate}}</div>
+            <input type="text" name="key" [(ngModel)]="keyInput">
+            <div class="btn" [class.disabled]="!keyInput.trim()" (click)="activate(keyInput)">{{'REGISTER.DONE.ACTIVATE' | translate}}</div>
+        </form>
+    </div>
     <p>
-        {{(inputState=='done-request' ? 'REQUEST' : 'DONE')+'.MAIL_NOTE' | translate}}
+        {{(inputState=='done-request' ? 'REGISTER.REQUEST' : 'REGISTER.DONE')+'.MAIL_NOTE' | translate}}
     </p>
-    <b>{{'DONE.NO_MAIL' | translate }}</b>
-    <small>{{'DONE.NO_MAIL_INFO' | translate }}</small>
+    <b>{{'REGISTER.DONE.NO_MAIL' | translate }}</b>
+    <small>{{'REGISTER.DONE.NO_MAIL_INFO' | translate }}</small>
 </div>

@@ -8,6 +8,7 @@ import {ConfigurationService} from "../../../common/services/configuration.servi
 import {Title} from "@angular/platform-browser";
 import {SessionStorageService} from "../../../common/services/session-storage.service";
 import {UIConstants} from "../../../common/ui/ui-constants";
+import {RestRegisterService} from '../../../common/rest/services/rest-register.service';
 
 @Component({
   selector: 'app-register-done',
@@ -17,9 +18,8 @@ import {UIConstants} from "../../../common/ui/ui-constants";
 export class RegisterDoneComponent{
     @Input() inputState:string;
     loading=false;
-    email = 'max@mustermann.de';
-    public img_src = "";
-
+    email = '';
+    keyInput = '';
     private _keyUrl = '';
     get keyUrl(){
         return this._keyUrl;
@@ -48,9 +48,14 @@ export class RegisterDoneComponent{
     }
     constructor(private connector: RestConnectorService,
                 private toast: Toast,
+                private register: RestRegisterService,
                 private router: Router
     ) {}
     private activate(keyUrl: string) {
-
+        this.register.activate(keyUrl).subscribe(()=>{
+            this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
+        },(error:any)=>{
+            this.toast.error(error);
+        });
     }
 }

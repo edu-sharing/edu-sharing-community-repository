@@ -31,16 +31,14 @@
 				<p>
 					Sie haben sich erfolgreich registriert.
 				</p>
-				<p>Klicken Sie auf folgenden Link, um die Registrierung abzuschließen und sich anzumelden.</p>
+					Kopieren Sie den Code unten in das Registrierungs-Formular, um die Registrierung abzuschließen:
+				<p>
+				</p>
+				<div class="center"><div class="input-field">{{key}}</div></div>
+				<br><br>
+				<p>oder klicken Sie auf folgenden Link, um automatisch zur Seite weitergeleitet zu werden.</p>
 				<br>
 				<a class="btn" href="{{link}}">E-MAIL BESTÄTIGEN</a>
-				<br>
-				<p>
-					Sollte diese E-Mail nicht korrekt angezeigt werden, klicken Sie bitte » <a href="{{link}}">hier</a>
-				</p>
-				<div class="input-field"><a href="{{link}}">{{link}}</a></div>
-				<br><br><br>
-				<p>Viele Grüße, Ihr {{LaSiDig Team}}</p>
 			</div>
 		]]>
 		</message>

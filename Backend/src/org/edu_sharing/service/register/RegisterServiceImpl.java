@@ -66,7 +66,7 @@ public class RegisterServiceImpl implements RegisterService {
                 subject,content,replace);
 
     }
-    public boolean userExists(RegisterInformation info){
+    public boolean userExists(RegisterInformation info) throws Exception {
         return personService.personExists(info.getEmail());
     }
     @Override
@@ -89,7 +89,7 @@ public class RegisterServiceImpl implements RegisterService {
         authService.authenticate(info.getEmail(),info.getPassword().toCharArray());
     }
 
-    protected String storeUser(RegisterInformation info){
+    protected String storeUser(RegisterInformation info) throws Exception {
         return AuthenticationUtil.runAsSystem(()-> {
             Map<QName, Serializable> map = new HashMap<>();
             String authority = info.getEmail();

@@ -17,28 +17,28 @@
     "HINT": "Tipp: Verwende Zahlen, Sonderzeichen...",
     "PL_ORG": "z.B. DEKRA...",
     "BUTTON": "Registrieren",
-    "TOAST":"Die E-Mail wurde versendet"
-  },
-  "DONE":{
-    "TITLE": "Fast fertig",
-    "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
-    "MAIL_INFO2": "geschickt.",
-    "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail, um die Registrierung abzuschließen.",
-    "NO_MAIL": "Keine E-Mail erhalten?",
-    "NO_MAIL_INFO": "Sehen Sie auch im Spam-Ordner nach.",
-    "SEND_MAIL": "Nochmal Senden"
-  },
-  "REQUEST":{
-    "TITLE": "Daten vergessen?",
-    "INFO": "Geben Sie Ihre E-Mail Adresse an, um anschließend ein neues Passwort vergeben zu können.",
-    "PLACEHOLDER":"Ihre E-Mail Adresse",
-    "BUTTON":"Neues Passwort anfordern",
-    "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail, um ein neues Passwort anzugeben."
-  },
-  "RESET":{
-    "TITLE": "Passwort ändern",
-    "REST_INFO": "Geben Sie Ihr neues Passwort an",
-    "BUTTON": "Passwort ändern",
-    "TOAST": "Das Passwort wurde verändert"
+    "TOAST":"Die E-Mail wurde versendet",
+    "DONE":{
+      "TITLE": "Fast fertig",
+      "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
+      "MAIL_INFO2": "geschickt.",
+      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail, um die Registrierung abzuschließen.",
+      "NO_MAIL": "Keine E-Mail erhalten?",
+      "NO_MAIL_INFO": "Sehen Sie auch im Spam-Ordner nach.",
+      "SEND_MAIL": "Nochmal Senden"
+    },
+    "REQUEST":{
+      "TITLE": "Daten vergessen?",
+      "INFO": "Geben Sie Ihre E-Mail Adresse an, um anschließend ein neues Passwort vergeben zu können.",
+      "PLACEHOLDER":"Ihre E-Mail Adresse",
+      "BUTTON":"Neues Passwort anfordern",
+      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail, um ein neues Passwort anzugeben."
+    },
+    "RESET":{
+      "TITLE": "Passwort ändern",
+      "REST_INFO": "Geben Sie Ihr neues Passwort an",
+      "BUTTON": "Passwort ändern",
+      "TOAST": "Das Passwort wurde verändert"
+    }
   }
 }
