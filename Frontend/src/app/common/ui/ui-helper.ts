@@ -132,7 +132,7 @@ export class UIHelper{
         num_count = (num_count) ? num_count.length : 0;
         let schar_count: any = password.match(regex_sc);
         schar_count = (schar_count) ? schar_count.length : 0;
-        let avg: any = password.length / 4;
+        let avg: any = password.length / 2;
 
         strength = ((lcase_count * flc + 1) * (ucase_count * fuc + 1) * (num_count * fnm + 1) * (schar_count * fsc + 1)) / (avg + 1);
 
@@ -168,9 +168,10 @@ export class UIHelper{
      */
     public static getPasswordStrengthString(password: string){
         let min_length = 5;
-        if (password.length >= min_length && this.detectPW(password) > 0){
-            if (this.detectPW(password) > 5 && this.getPasswordStrength(password) > 5){
-                if (this.detectPW(password) > 10 && this.getPasswordStrength(password) > 10){
+        console.log("strength: "+this.getPasswordStrength(password));
+        if (password.length >= min_length){
+            if (this.getPasswordStrength(password) > 10){
+                if (this.getPasswordStrength(password) > 15){
                     return 'strong';
                 } else {
                     return 'medium';
