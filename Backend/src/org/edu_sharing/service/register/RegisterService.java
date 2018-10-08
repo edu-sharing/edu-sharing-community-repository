@@ -9,6 +9,8 @@ public interface RegisterService {
 
     void register(RegisterInformation info) throws DuplicateAuthorityException, Throwable;
 
+    boolean resendRegisterMail(String mail) throws Exception;
+
     class DuplicateAuthorityException extends Exception{
 
     }

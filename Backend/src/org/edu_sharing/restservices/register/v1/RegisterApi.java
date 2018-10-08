@@ -53,6 +53,28 @@ public class RegisterApi {
 		}
     }
 	@POST
+	@Path("/resend/{mail}")
+	@ApiOperation(
+			value = "Resend a registration mail for a given mail address",
+			notes = "The method will return false if there is no pending registration for the given mail"
+	)
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Boolean.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response resendMail(@Context HttpServletRequest req,
+							 @ApiParam(value = "The mail a registration is pending for and should be resend to",required=true ) @PathParam("mail") String mail
+	) {
+		try{
+			return Response.ok().entity(RegisterDao.resendMail(mail)).build();
+		}
+		catch(Throwable t){
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@POST
 	@Path("/activate/{key}")
 	@ApiOperation(
 			value = "Activate a new user (by using a supplied key)"
