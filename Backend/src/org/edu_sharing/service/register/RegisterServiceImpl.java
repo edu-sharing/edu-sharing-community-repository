@@ -2,6 +2,7 @@ package org.edu_sharing.service.register;
 
 import com.sun.star.lang.IllegalArgumentException;
 import io.swagger.models.auth.In;
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -68,7 +69,11 @@ public class RegisterServiceImpl implements RegisterService {
 
     }
     public boolean userExists(RegisterInformation info) throws Exception {
-        return personService.personExists(info.getEmail());
+        try {
+            return personService.personExists(info.getEmail());
+        }catch(AuthenticationCredentialsNotFoundException e){
+            return false;
+        }
     }
     @Override
     public String activate(String key) throws InvalidKeyException,Throwable {
