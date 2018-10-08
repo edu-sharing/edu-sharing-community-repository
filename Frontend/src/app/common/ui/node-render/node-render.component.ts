@@ -214,8 +214,7 @@ export class NodeRenderComponent implements EventListener{
           this.editor=params['editor'];
           this.fromLogin=params['fromLogin']=='true';
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
-          let childobject = params['childobject'] ? params['childobject'] : null;
-          let childobject_order = params['childobject_order'] ? params['childobject_order'] : -1;
+          let childobject = params['childobject_id'] ? params['childobject_id'] : null;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
@@ -228,16 +227,7 @@ export class NodeRenderComponent implements EventListener{
                 if(childobject){
                     setTimeout(()=>this.node = childobject,10);
                 }
-                else if(childobject_order > -1) {
-                    this.nodeApi.getNodeChildobjects(params['node']).subscribe((data:NodeList)=>{
-                        let id = params['node'];
-                        if (childobject_order < data.nodes.length)
-                            id = data.nodes[childobject_order].ref.id;
-                        else
-                            console.warn("Error fetching child object position. Will ignore parameter and fetch main object");
-                        setTimeout(()=>this.node = id,10);
-                    });
-                } else {
+                else {
                     setTimeout(()=>this.node = params['node'],10);
                 }
               });
