@@ -71,6 +71,7 @@ export class ActionbarComponent{
       this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
       this.optionsMenu=[];
     }
+    console.log(this.optionsMenu);
 
   }
 
@@ -134,5 +135,15 @@ export class ActionbarComponent{
               filtered.push(option);
       }
       return filtered;
+    }
+
+    canShowDropdown() {
+        if(!this.optionsMenu.length)
+          return false;
+        for(let option of this.optionsMenu){
+          if(option.isEnabled || this.node && option.enabledCallback && option.enabledCallback(this.node))
+            return true;
+        }
+        return false;
     }
 }
