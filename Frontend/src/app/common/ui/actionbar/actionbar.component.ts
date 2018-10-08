@@ -67,7 +67,7 @@ export class ActionbarComponent{
       this.optionsAlways=UIHelper.filterToggleOptions(options,false).slice(0,this.getNumberOptions());
     }
     this.optionsMenu=this.hideActionOptions(UIHelper.filterToggleOptions(options,false),this.optionsAlways);
-    if(this.optionsMenu.length<2){
+    if(this.optionsMenu.length<1){
       this.optionsAlways=this.optionsAlways.concat(this.optionsMenu);
       this.optionsMenu=[];
     }
