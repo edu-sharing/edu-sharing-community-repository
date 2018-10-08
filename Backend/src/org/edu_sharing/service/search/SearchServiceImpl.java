@@ -709,9 +709,6 @@ public class SearchServiceImpl implements SearchService {
 					searchParameters.addFieldFacet(fieldFacet);
 				}
 			}
-			if (searchToken.getSortDefinition() != null) {
-				searchToken.getSortDefinition().applyToSearchParameters(searchParameters);
-			}
 			ResultSet resultSet;
 			if (scoped)
 				resultSet = searchService.query(searchParameters);
