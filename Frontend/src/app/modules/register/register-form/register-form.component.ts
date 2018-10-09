@@ -19,7 +19,7 @@ import {RestRegisterService} from '../../../common/rest/services/rest-register.s
 })
 export class RegisterFormComponent{
     @Output() onRegisterDone=new EventEmitter();
-    public isLoading=true;
+    @Output() onLoading=new EventEmitter();
     public info : RegisterInformation = {
         firstName: '',
         lastName: '',
@@ -41,19 +41,19 @@ export class RegisterFormComponent{
   }
 
     public register(){
-        this.isLoading=true;
+        this.onLoading.emit(true);
         this.registerService.register(this.info).subscribe(()=>{
             this.onRegisterDone.emit();
-            this.isLoading=false;
+            this.onLoading.emit(false);
             this.toast.toast("REGISTER.TOAST");
         },(error)=>{
-            if(error._body.indexOf("DuplicateAuthorityException")!=-1){
+            if(UIHelper.errorContains(error,"DuplicateAuthorityException")){
                 this.mailValid = false;
                 this.toast.error(null,"REGISTER.TOAST_DUPLICATE");
             }else {
                 this.toast.error(error);
             }
-            this.isLoading=false;
+            this.onLoading.emit(false);
         });
     }
 
@@ -98,6 +98,5 @@ export class RegisterFormComponent{
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
         this.privacyUrl = this.configService.instant("privacyInformationUrl");
     });
-    this.isLoading=true;
   }
 }

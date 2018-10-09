@@ -13,7 +13,7 @@
                 {{'REGISTER.ORGANIZATION_TITLE' | translate}}
             </div>
             <div class="card-scroll">
-                <app-register-form [class.display-none]="!(state=='register')" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
+                <app-register-form [class.display-none]="!(state=='register')" (onLoading)="isLoading=$event" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
                 <app-register-done *ngIf="state=='done' || state=='done-request'" (onModify)="modifyData()" #registerDone></app-register-done>
                 <app-register-request *ngIf="state=='request'"  #request></app-register-request>
                 <app-register-reset-password *ngIf="state=='reset-password'"  #resetPassword></app-register-reset-password>

@@ -518,4 +518,17 @@ export class UIHelper{
             return null;
         return window.open("");
     }
+
+    /**
+     * returns true if the error message includes the given string
+     * @param error
+     * @param {string} data
+     * @returns {boolean}
+     */
+    static errorContains(error: any, data: string) {
+        try{
+            return JSON.parse(error._body).message.indexOf(data)!=-1;
+        }catch(e){}
+        return false;
+    }
 }

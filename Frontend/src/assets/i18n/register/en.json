@@ -18,6 +18,7 @@
     "BUTTON": "Register",
     "TOAST":"The e-mail has been sent",
     "TOAST_DUPLICATE": "This email address is already in use",
+    "TOAST_INVALID_KEY": "The activation key was already used or is invalid",
     "DONE":{
       "TITLE": "Almost ready",
       "MAIL_INFO": "We have sent you an e-mail to ",
