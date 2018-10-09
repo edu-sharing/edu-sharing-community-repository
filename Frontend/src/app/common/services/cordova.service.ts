@@ -208,7 +208,20 @@ export class CordovaService {
            let handleIntent=(intent:any)=> {
                // Do things
                console.log(intent);
-               if(intent && intent.extras){
+               if (intent && intent.action=="android.intent.action.VIEW") {
+                   let hit="/edu-sharing";
+                   let target=intent.data.substr(0,intent.data.indexOf(hit));
+                   let current=window.location.href.substr(0,window.location.href.indexOf(hit));
+                   if(target==current){
+                       console.log(target+"="+current+", go to request location "+intent.data);
+                       window.location.href=intent.data;
+                   }
+                   else{
+                       console.log(target+"!="+current+", logout and go to new location "+intent.data);
+                       this.resetAndGoToServerlist();
+                   }
+               }
+               else if(intent && intent.extras){
                    let uri=intent.extras["android.intent.extra.TEXT"];
                    if(uri){
                        this.lastIntent=intent;
@@ -253,17 +266,7 @@ export class CordovaService {
        }
    }
 
-   private deliverShareContent(URI:string) : void {
-      // just allow one share every 5 seconds to prevent double calling
-      if ((new Date().getTime() - this.lastShareTS) < 5000) {
-        console.log("BLOCK Share Event - just one per 5 seconds");
-        return;
-      }
-      this.lastShareTS = new Date().getTime();
-      this.observerShareContent.next(URI);
-   }
-
-
+   /*
    private resolveFileUri(URI:string, callbackResult:Function) : void {
 
      try {
@@ -308,6 +311,7 @@ export class CordovaService {
      }
 
    }
+   */
 
 
   /**********************************************************
@@ -1155,16 +1159,20 @@ export class CordovaService {
               console.warn(error);
               console.warn("cordova: invalid oauth, go back to server selection");
               this.reiniting = false;
-              this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
-              this.clearAllCookies();
-              this.restartCordova();
+              this.resetAndGoToServerlist();
               observer.error(null);
               observer.complete();
           });
       });
   }
 
-  // oAuth refresh tokens
+    private resetAndGoToServerlist() {
+        this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
+        this.clearAllCookies();
+        this.restartCordova();
+    }
+
+// oAuth refresh tokens
   private refreshOAuth(endpointUrl:string,oauth: OAuthResult): Observable<OAuthResult> {
 
     let url = endpointUrl + "../oauth2/token";
