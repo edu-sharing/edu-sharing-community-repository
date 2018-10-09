@@ -1,5 +1,5 @@
 <global-progress *ngIf="isLoading"></global-progress>
-<div *ngIf="!isLoading" class="dialog darken valign-wrapper">
+<div [class.display-none]="isLoading" class="dialog darken valign-wrapper">
     <div class="card center-card card-action header-high" [class.card-no-action]="state == 'done-request'">
 
         <div class="card-content">
@@ -8,8 +8,7 @@
                 {{(state=='request' || state=='done-request' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}
             </div>
             <div class="card-title-info">
-                <img class="card-title-image" src='assets/images/app-icon.svg' alt="{{'REGISTER.ORGANIZATION_TITEL' | translate}}">
-                <!-- TODO @Simon Hier sollen Repo speziefiesche Name der Organisation -->
+                <img class="card-title-image" src='assets/images/app-icon.svg' alt="{{'REGISTER.ORGANIZATION_TITLE' | translate}}">
                 {{'REGISTER.ORGANIZATION_TITLE' | translate}}
             </div>
             <div class="card-scroll">
@@ -28,7 +27,6 @@
             <a *ngIf="state=='request'" [class.disabled]="!request || !request.checkMail()" tabindex="0" (keyup.enter)="requestDone(request.email)" (click)="requestDone(request.email)" class="waves-effect waves-light btn">{{'REGISTER.REQUEST.BUTTON' | translate }}</a>
             <a *ngIf="state=='reset-password'" [class.disabled]="!resetPassword || !resetPassword.buttonCheck()" tabindex="0" (keyup.enter)="newPassword(resetPassword.new_password)" (click)="newPassword(resetPassword.new_password)" class="waves-effect waves-light btn">{{'REGISTER.RESET.BUTTON' | translate }}</a>
             <a *ngIf="state=='done' || state=='done-request' && registerDone && registerDone.keyInput" class="waves-effect waves-light btn" [class.disabled]="registerDone && !registerDone.keyInput.trim()" tabindex="0" (keyup.enter)="registerDone.activate(registerDone.keyInput)" (click)="registerDone.activate(registerDone.keyInput)">{{'REGISTER.DONE.ACTIVATE' | translate}}</a>
-            <a *ngIf="state=='done' || state=='done-request' && registerDone && registerDone.keyInput" class="waves-effect waves-light btn" [class.disabled]="registerDone && !registerDone.keyInput" tabindex="0" (keyup.enter)="registerDone.activate(registerDone.keyInput)" (click)="registerDone.activate(registerDone.keyInput)">{{'REGISTER.DONE.ACTIVATE' | translate}}</a>
         </div>
     </div>
 </div>
