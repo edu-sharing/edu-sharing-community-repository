@@ -19,6 +19,7 @@
     "BUTTON": "Registrieren",
     "TOAST":"Die E-Mail wurde versendet",
     "TOAST_DUPLICATE": "Diese E-Mail-Adresse wird bereits verwendet",
+    "TOAST_INVALID_KEY": "Der Aktivierungscode wurde bereits verwendet oder ist ungültig",
     "DONE":{
       "TITLE": "Fast fertig",
       "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",

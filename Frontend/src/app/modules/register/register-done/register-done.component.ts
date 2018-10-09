@@ -9,6 +9,7 @@ import {Title} from "@angular/platform-browser";
 import {SessionStorageService} from "../../../common/services/session-storage.service";
 import {UIConstants} from "../../../common/ui/ui-constants";
 import {RestRegisterService} from '../../../common/rest/services/rest-register.service';
+import {UIHelper} from "../../../common/ui/ui-helper";
 
 @Component({
   selector: 'app-register-done',
@@ -47,7 +48,13 @@ export class RegisterDoneComponent{
         this.register.activate(keyUrl).subscribe(()=>{
             this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
         },(error:any)=>{
-            this.toast.error(error);
+            if(UIHelper.errorContains(error,"InvalidKeyException")){
+                this.toast.error(null,"REGISTER.TOAST_INVALID_KEY");
+            }
+            else {
+                this.toast.error(error);
+            }
+            this.loading=false;
         });
     }
 }

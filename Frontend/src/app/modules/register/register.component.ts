@@ -69,7 +69,6 @@ export class RegisterComponent{
           if(params['status']){
               if (params['status'] == "done" || params['status'] == "done-request" || params['status'] == "request" || params['status'] == "reset-password") {
                   this.state = params['status'];
-                  setTimeout(()=>this.setParams());
               } else{
                   this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
               }
@@ -78,7 +77,8 @@ export class RegisterComponent{
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
             this.isLoading=false;
-        });
+            setTimeout(()=>this.setParams());
+    });
     }
 
       onRegisterDone(){
