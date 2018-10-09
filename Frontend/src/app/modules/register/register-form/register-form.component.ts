@@ -35,25 +35,11 @@ export class RegisterFormComponent{
     public news = true;
     public agree = false;
     public privacyUrl: string;
-    /*
-    public firstName="";
-    public lastName="";
-    public mail="";
-    public password="";
-    public org="";
-    */
-    public checkMail(){
-        return UIHelper.isEmail(this.info.email);
-    }
+    public mailValid: boolean;
 
-  public checkConditions(){
-    //  TODO: @Simon;
-      if(this.info.firstName.trim()){
-          return true;
-      } else{
-          return false;
-      }
-  }
+    public checkMail(){
+        this.mailValid = UIHelper.isEmail(this.info.email);
+    }
   public checkPassword(){
       this.password_strength = UIHelper.getPasswordStrengthString(this.info.password);
   }
@@ -67,6 +53,7 @@ export class RegisterFormComponent{
             this.toast.toast("REGISTER.TOAST");
         },(error)=>{
             if(error._body.indexOf("DuplicateAuthorityException")!=-1){
+                this.mailValid = false;
                 this.toast.error(null,"REGISTER.TOAST_DUPLICATE");
             }else {
                 this.toast.error(error);
@@ -96,7 +83,7 @@ export class RegisterFormComponent{
   }
 
     public canRegister(){
-        return this.info.firstName.trim() && this.checkMail() && this.info.password && this.password_strength != 'weak'
+        return this.info.firstName.trim() && this.mailValid && this.info.password && this.password_strength != 'weak'
             && this.agree;
     }
 

@@ -17,6 +17,7 @@
     "PL_ORG": "i.e. DEKRA...",
     "BUTTON": "Register",
     "TOAST":"The e-mail has been sent",
+    "TOAST_DUPLICATE": "This email address is already in use",
     "DONE":{
       "TITLE": "Almost ready",
       "MAIL_INFO": "We have sent you an e-mail to ",

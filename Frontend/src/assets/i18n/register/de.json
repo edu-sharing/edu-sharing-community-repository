@@ -18,6 +18,7 @@
     "PL_ORG": "z.B. DEKRA...",
     "BUTTON": "Registrieren",
     "TOAST":"Die E-Mail wurde versendet",
+    "TOAST_DUPLICATE": "Diese E-Mail-Adresse wird bereits verwendet",
     "DONE":{
       "TITLE": "Fast fertig",
       "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
