@@ -1,4 +1,5 @@
-<div class="dialog darken valign-wrapper">
+<global-progress *ngIf="isLoading"></global-progress>
+<div *ngIf="!isLoading" class="dialog darken valign-wrapper">
     <div class="card center-card card-action header-high">
 
         <div class="card-content" [ngClass]="{'non-card-action': state == 'done-request'}">
