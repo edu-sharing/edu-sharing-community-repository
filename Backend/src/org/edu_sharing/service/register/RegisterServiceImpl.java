@@ -1,7 +1,5 @@
 package org.edu_sharing.service.register;
 
-import com.sun.star.lang.IllegalArgumentException;
-import io.swagger.models.auth.In;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.cache.SimpleCache;
@@ -12,7 +10,6 @@ import org.alfresco.service.cmr.security.MutableAuthenticationService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.RandomStringUtils;
-import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
@@ -22,14 +19,12 @@ import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
-import org.edu_sharing.service.editlock.LockBy;
 import org.springframework.context.ApplicationContext;
 
 import javax.servlet.ServletContext;
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -104,6 +99,7 @@ public class RegisterServiceImpl implements RegisterService {
             map.put(ContentModel.PROP_LASTNAME, info.getLastName());
             map.put(ContentModel.PROP_ORGANIZATION, info.getOrganization());
             map.put(ContentModel.PROP_EMAIL, info.getEmail());
+            map.put(QName.createQName(CCConstants.CM_PROP_PERSON_ALLOW_NOTIFICATIONS), info.isAllowNotifications());
             try {
                 authService.createAuthentication(authority, info.getPassword().toCharArray());
                 NodeRef result = personService.createPerson(map);
