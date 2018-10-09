@@ -1,20 +1,16 @@
-import {Component, Input, EventEmitter, Output, ElementRef, ViewChild, OnInit} from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {Toast} from '../../../common/ui/toast';
-import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/router';
-import {OAuthResult, LoginResult, AccessScope, RegisterInformation} from '../../../common/rest/data-object';
+import {Router, ActivatedRoute, UrlSerializer} from '@angular/router';
+import {RegisterInformation} from '../../../common/rest/data-object';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../../common/translation';
 import {RestConnectorService} from '../../../common/rest/services/rest-connector.service';
-import {RestConstants} from '../../../common/rest/rest-constants';
 import {ConfigurationService} from '../../../common/services/configuration.service';
-import {FrameEventsService} from '../../../common/services/frame-events.service';
 import {Title} from '@angular/platform-browser';
 import {UIHelper} from '../../../common/ui/ui-helper';
 import {SessionStorageService} from '../../../common/services/session-storage.service';
 import {PlatformLocation} from '@angular/common';
-
 import {RestRegisterService} from '../../../common/rest/services/rest-register.service';
-import {UIConstants} from "../../../common/ui/ui-constants";
 
 @Component({
   selector: 'app-register-form',
@@ -45,7 +41,6 @@ export class RegisterFormComponent{
   }
 
     public register(){
-        //  TODO: @Simon;
         this.isLoading=true;
         this.registerService.register(this.info).subscribe(()=>{
             this.onRegisterDone.emit();
@@ -64,6 +59,7 @@ export class RegisterFormComponent{
 
   public setNews(value:boolean){
       //TODO: @Simon
+      // Vormerkung an der Personenprofil, dass man an diesen E-Mail Newsletter verschicken darf.
       if(value){
 
       } else{
@@ -71,7 +67,6 @@ export class RegisterFormComponent{
       }
   }
   public setAccept(value:boolean){
-      //TODO: @Simon
       if(value){
           this.agree = true;
       } else{

@@ -168,7 +168,7 @@ export class UIHelper{
      */
     public static getPasswordStrengthString(password: string){
         let min_length = 5;
-        console.log("strength: "+this.getPasswordStrength(password));
+        // console.log("strength: "+this.getPasswordStrength(password));
         if (password.length >= min_length){
             if (this.getPasswordStrength(password) > 10){
                 if (this.getPasswordStrength(password) > 15){

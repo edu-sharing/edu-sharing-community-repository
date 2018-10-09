@@ -2,7 +2,7 @@
     <div class="name-input">
         <div>
             <label for="username">{{'USER.firstName' | translate}} *</label>
-            <input [ngClass]="{'valid': info.firstName.trim()}" type="text" required name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" (keyup)="checkConditions()" [(ngModel)]="info.firstName"/>
+            <input [ngClass]="{'valid': info.firstName.trim()}" type="text" required name="username" id="username"  placeholder="{{'REGISTER.PL_USER' | translate}}" [(ngModel)]="info.firstName"/>
         </div>
         <div class="last-name">
             <label for="lastname">{{'USER.lastName' | translate}}</label>
