@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {Toast} from "../../../common/ui/toast";
 import {PlatformLocation} from "@angular/common";
@@ -16,7 +16,7 @@ import {RestRegisterService} from '../../../common/rest/services/rest-register.s
   styleUrls: ['register-done.component.scss']
 })
 export class RegisterDoneComponent{
-    @Input() inputState:string;
+    @Output() onModify = new EventEmitter();
     loading=false;
     email = '';
     keyInput = '';
@@ -31,13 +31,7 @@ export class RegisterDoneComponent{
     }
 
     public editMail() {
-        //TODO: @Simon
-        // Zum Bearbeitung vom E-Mail
-        if (this.inputState == 'done'){
-            this.router.navigate([UIConstants.ROUTER_PREFIX + "register"]);
-        } else {
-            this.router.navigate([UIConstants.ROUTER_PREFIX + "register","request"]);
-        }
+        this.onModify.emit();
     }
     public sendMail(){
         this.register.resendMail(this.email).subscribe(()=>{

@@ -34,8 +34,13 @@ $cardActionHeight:77px;
   height: calc(100% - #{$cardActionHeight});
   margin-bottom: 0;
 }
-.card .non-card-action{
-  height: 100%;
+.card.card-no-action{
+  .card-content {
+    height: 100%;
+  }
+  .card-action{
+    display: none!important;
+  }
   //padding-bottom: 40px;
 }
 

@@ -66,7 +66,11 @@ export class RegisterFormComponent{
             this.isLoading=false;
             this.toast.toast("REGISTER.TOAST");
         },(error)=>{
-            this.toast.error(error);
+            if(error._body.indexOf("DuplicateAuthorityException")!=-1){
+                this.toast.error(null,"REGISTER.TOAST_DUPLICATE");
+            }else {
+                this.toast.error(error);
+            }
             this.isLoading=false;
         });
     }

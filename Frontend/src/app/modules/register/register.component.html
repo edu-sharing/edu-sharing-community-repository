@@ -1,8 +1,8 @@
 <global-progress *ngIf="isLoading"></global-progress>
 <div *ngIf="!isLoading" class="dialog darken valign-wrapper">
-    <div class="card center-card card-action header-high">
+    <div class="card center-card card-action header-high" [class.card-no-action]="state == 'done-request'">
 
-        <div class="card-content" [ngClass]="{'non-card-action': state == 'done-request'}">
+        <div class="card-content">
             <div *ngIf="state == 'register' || state=='request'" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
             <div class="card-title">
                 {{(state=='request' || state=='done-request' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}
@@ -13,17 +13,17 @@
                 {{'REGISTER.ORGANIZATION_TITLE' | translate}}
             </div>
             <div class="card-scroll">
-                <app-register-form *ngIf="state=='register'" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
-                <app-register-done [inputState]="state" *ngIf="state=='done' || state=='done-request'"  #registerDone></app-register-done>
+                <app-register-form [class.display-none]="!(state=='register')" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
+                <app-register-done *ngIf="state=='done' || state=='done-request'" (onModify)="modifyData()" #registerDone></app-register-done>
                 <app-register-request *ngIf="state=='request'"  #request></app-register-request>
                 <app-register-reset-password *ngIf="state=='reset-password'"  #resetPassword></app-register-reset-password>
-                <div *ngIf="state != 'register'" class="register">
+                <div *ngIf="state != 'register' && state != 'done' && state != 'done-request'" class="register">
                     {{'LOGIN.REGISTER_TEXT' | translate}}
                     <a (click)="linkRegister()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
                 </div>
             </div>
         </div>
-        <div *ngIf="state != 'done-request'" class="card-action">
+        <div class="card-action">
             <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" tabindex="0" (keyup.enter)="registerForm.register()" (click)="registerForm.register()">{{'REGISTER.BUTTON' | translate }}</a>
             <a *ngIf="state=='request'" [class.disabled]="!request || !request.checkMail()" tabindex="0" (keyup.enter)="requestDone(request.email)" (click)="requestDone(request.email)" class="waves-effect waves-light btn">{{'REGISTER.REQUEST.BUTTON' | translate }}</a>
             <a *ngIf="state=='reset-password'" [class.disabled]="!resetPassword || !resetPassword.buttonCheck()" tabindex="0" (keyup.enter)="newPassword(resetPassword.new_password)" (click)="newPassword(resetPassword.new_password)" class="waves-effect waves-light btn">{{'REGISTER.RESET.BUTTON' | translate }}</a>

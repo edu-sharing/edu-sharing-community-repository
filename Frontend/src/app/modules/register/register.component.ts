@@ -73,8 +73,6 @@ export class RegisterComponent{
               } else{
                   this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
               }
-
-
           }
       });
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
@@ -97,5 +95,13 @@ export class RegisterComponent{
             if(params['key'])
                 this.registerDone.keyUrl=params['key'];
         });
+    }
+
+    modifyData() {
+        if (this.state == 'done'){
+            this.state='register';
+        } else {
+            this.state='request';
+        }
     }
 }
