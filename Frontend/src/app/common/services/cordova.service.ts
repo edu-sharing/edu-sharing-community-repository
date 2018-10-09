@@ -147,7 +147,7 @@ export class CordovaService {
                   (data: any) => {
                       // TODO: take URI and processes on share screen
                       // this.router.navigate(['share', URI]);
-                      this.router.navigate(['app', 'share'], {queryParams: data});
+                      this.router.navigate([UIConstants.ROUTER_PREFIX,'app', 'share'], {queryParams: data});
                   }, (error) => {
                       console.log("ERROR on new share event", error);
                   });
@@ -1300,6 +1300,6 @@ export class CordovaService {
     }
 
     private goToLogin() {
-        this.router.navigate(["app"],{queryParams:{next:window.location.href}});
+        this.router.navigate([UIConstants.ROUTER_PREFIX,"app"],{queryParams:{next:window.location.href}});
     }
 }
