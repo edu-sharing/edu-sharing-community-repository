@@ -67,9 +67,9 @@ export class LoginAppComponent  implements OnInit {
             return;
         }
         
-        this.route.queryParams.subscribe((params:string[])=>{
+        this.route.queryParams.subscribe((params)=>{
             this.locationNext=params['next'];
-        })
+        });
 
         // 1. Wait until Cordova is Ready
         this.cordova.subscribeServiceReady().subscribe(()=>{
@@ -90,7 +90,7 @@ export class LoginAppComponent  implements OnInit {
             console.log("INIT TranslationService .. START");
             this.init();
         });
-        
+
     }
 
     buttonExitApp() :void {
@@ -118,13 +118,13 @@ export class LoginAppComponent  implements OnInit {
 
     private login(){
 
-       
+
         /*
         // test camera
         this.cordova.getPhotoFromCamera(
         (win:any)=>{
             console.log("CAMERA WIN",win);
-        }, 
+        },
         (error:any, info:any)=>{
             console.log("CAMERA FAIL", error);
             console.dir(info);
@@ -170,7 +170,7 @@ export class LoginAppComponent  implements OnInit {
 
         });
         */
- 
+
     }
 
     private goToDefaultLocation() {
