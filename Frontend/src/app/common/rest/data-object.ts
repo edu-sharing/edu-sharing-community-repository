@@ -728,6 +728,7 @@ export interface RegisterInformation{
     email: string;
     password: string;
     organization: string;
+    allowNotifications: boolean;
 }
 export interface Permissions {
   localPermissions: LocalPermissionsResult;

@@ -8,6 +8,8 @@ import java.util.Objects;
 public class RegisterInformation {
     private String firstName,lastName,email,password;
     private String organization;
+    // general flag for indicating if user may receive mail notifications
+    private boolean allowNotifications;
 
     @JsonProperty
     public String getFirstName() {
@@ -51,6 +53,14 @@ public class RegisterInformation {
         this.organization = organization;
     }
 
+    @JsonProperty
+    public boolean isAllowNotifications() {
+        return allowNotifications;
+    }
+
+    public void setAllowNotifications(boolean allowNotifications) {
+        this.allowNotifications = allowNotifications;
+    }
 
     @Override
     public boolean equals(Object o) {

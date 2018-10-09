@@ -25,7 +25,8 @@ export class RegisterFormComponent{
         lastName: '',
         email: '',
         organization: '',
-        password: ''
+        password: '',
+        allowNotifications: false
     };
     public password_strength='';
     public news = true;
@@ -57,15 +58,6 @@ export class RegisterFormComponent{
         });
     }
 
-  public setNews(value:boolean){
-      //TODO: @Simon
-      // Vormerkung an der Personenprofil, dass man an diesen E-Mail Newsletter verschicken darf.
-      if(value){
-
-      } else{
-
-      }
-  }
   public setAccept(value:boolean){
       if(value){
           this.agree = true;

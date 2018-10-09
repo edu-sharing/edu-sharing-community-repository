@@ -1,14 +1,11 @@
 package org.edu_sharing.service.register;
 
-import com.sun.jndi.ldap.LdapClient;
-import com.sun.jndi.ldap.LdapCtxFactory;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
 
 import javax.naming.Context;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
 import javax.naming.directory.*;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;

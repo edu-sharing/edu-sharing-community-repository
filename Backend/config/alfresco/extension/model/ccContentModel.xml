@@ -362,6 +362,10 @@
 		       </index>
             </property>
 
+            <!-- edu-sharing customization whether the user is interested in receiving mail updates / notifications -->
+            <property name="cm:personallownotifications">
+               <type>d:boolean</type>
+            </property>
             <!-- edu-sharing customization description/about the user -->
             <property name="cm:personabout">
                <type>d:text</type>
