@@ -204,25 +204,9 @@ export class CordovaService {
    private registerOnShareContent() : void {
        if (this.isAndroid()) {
            console.log("register on share intent");
-           // only run once. Will loop otherwise if no auth is found and intent was send
-           let handleIntent=(intent:any)=> {
-               // Do things
-               console.log(intent);
-               if (intent && intent.action=="android.intent.action.VIEW") {
-                   let hit="/edu-sharing";
-                   let target=intent.data.substr(0,intent.data.indexOf(hit));
-                   let current=window.location.href.substr(0,window.location.href.indexOf(hit));
-                   if(target==current){
-                       console.log(target+"="+current+", go to request location "+intent.data);
-                       window.location.href=intent.data;
-                   }
-                   else{
-                       console.log(target+"!="+current+", logout and go to new location "+intent.data);
-                       this.resetAndGoToServerlist('url='+intent.data);
-                   }
-                   (window as any).plugins.intent.getCordovaIntent(null);
-               }
-               else if(intent && intent.extras){
+
+           let handleIntentBase=(intent:any)=>{
+                if(intent && intent.extras){
                    let uri=intent.extras["android.intent.extra.TEXT"];
                    if(uri){
                        this.lastIntent=intent;
@@ -245,8 +229,31 @@ export class CordovaService {
                    }
                }
            };
+           // only run once. Will loop otherwise if no auth is found and intent was send
+           let handleIntent=(intent:any)=> {
+               // Do things
+               console.log(intent);
+               if (intent && intent.action=="android.intent.action.VIEW") {
+                   let hit="/edu-sharing";
+                   let target=intent.data.substr(0,intent.data.indexOf(hit));
+                   let current=window.location.href.substr(0,window.location.href.indexOf(hit));
+                   if(target==current){
+                       console.log(target+"="+current+", go to request location "+intent.data);
+                       window.location.href=intent.data;
+                   }
+                   else{
+                       console.log(target+"!="+current+", logout and go to new location "+intent.data);
+                       this.resetAndGoToServerlist('url='+intent.data);
+                   }
+                   (window as any).plugins.intent.getCordovaIntent(null);
+               }
+               else{
+                   handleIntentBase(intent);
+               }
+
+           };
            console.log((window as any).plugins);
-           (window as any).plugins.intent.getCordovaIntent(handleIntent);
+           (window as any).plugins.intent.getCordovaIntent(handleIntentBase);
            (window as any).plugins.intent.setNewIntentHandler(handleIntent);
            /*
            (window as any).plugins.webintent.onNewIntent((uri:string)=> {
