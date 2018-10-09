@@ -218,8 +218,9 @@ export class CordovaService {
                    }
                    else{
                        console.log(target+"!="+current+", logout and go to new location "+intent.data);
-                       this.resetAndGoToServerlist();
+                       this.resetAndGoToServerlist('url='+intent.data);
                    }
+                   (window as any).plugins.intent.getCordovaIntent(null);
                }
                else if(intent && intent.extras){
                    let uri=intent.extras["android.intent.extra.TEXT"];
@@ -421,9 +422,11 @@ export class CordovaService {
     }
   }
 
-  restartCordova():void {
+  restartCordova(parameters=""):void {
     this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
-    window.location.replace("http://app-registry.edu-sharing.com/ng/?reset=true");
+    if(parameters)
+        parameters="&"+parameters;
+    window.location.replace("http://app-registry.edu-sharing.com/ng/?reset=true"+parameters);
     /*
     try {
       (navigator as any).splashscreen.show();
@@ -1166,10 +1169,10 @@ export class CordovaService {
       });
   }
 
-    private resetAndGoToServerlist() {
+    private resetAndGoToServerlist(parameters="") {
         this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
         this.clearAllCookies();
-        this.restartCordova();
+        this.restartCordova(parameters);
     }
 
 // oAuth refresh tokens
