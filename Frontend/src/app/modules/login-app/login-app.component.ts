@@ -184,7 +184,7 @@ export class LoginAppComponent  implements OnInit {
         }
     }
     getServerIcon(){
-        return this.serverurl+'assets/images/app-icon.svg';
+        return 'assets/images/app-icon.svg';
     }
     private init() {
         Translation.initializeCordova(this.translation,this.cordova).subscribe(()=>{
