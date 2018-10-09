@@ -22,7 +22,7 @@ public class NgServlet extends HttpServlet {
 			String head=home.getCustomHtmlHeaders();
 			File index=new File(req.getSession().getServletContext().getRealPath("index.html"));
 			String html=FileUtils.readFileToString(index);
-			int pos=html.indexOf("<head>")+6;
+			int pos=html.indexOf("</head>");
 			if(head!=null) {
 				html=html.substring(0,pos)+head+html.substring(pos);
 			}
