@@ -1292,6 +1292,6 @@ export class CordovaService {
     }
 
     private goToLogin() {
-        this.router.navigate([UIConstants.ROUTER_PREFIX,"login-app"],{queryParams:{next:window.location.href}});
+        this.router.navigate(["app"],{queryParams:{next:window.location.href}});
     }
 }
