@@ -1,7 +1,7 @@
 {
   "REGISTER": {
     "TITLE": "Registrierung",
-    "ORGANIZATION_TITLE": "LaSiDig | DEKRA",
+    "ORGANIZATION_TITLE": "edu-sharing",
     "ORGANIZATION": "Organisation",
     "NEWSLETTER": "Neuigkeiten per Mail erhalten",
     "ACCEPT": "Ich bin mit der Verarbeitung meiner angegebenen Daten einverstanden",
@@ -15,7 +15,7 @@
     "PW_strong": "Stark",
     "PL_PASSWORD": "Min. 5 verschiedene Zeichen...",
     "HINT": "Tipp: Verwende Zahlen, Sonderzeichen...",
-    "PL_ORG": "z.B. DEKRA...",
+    "PL_ORG": "z.B. edu-sharing...",
     "BUTTON": "Registrieren",
     "TOAST":"Die E-Mail wurde versendet",
     "TOAST_DUPLICATE": "Diese E-Mail-Adresse wird bereits verwendet",
