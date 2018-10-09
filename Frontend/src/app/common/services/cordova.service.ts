@@ -1138,6 +1138,13 @@ export class CordovaService {
               return;
           }
           console.log("cordova: refresh oAuth");
+          if(!this.oauth){
+              this.clearAllCookies();
+              this.restartCordova();
+              observer.error(null);
+              observer.complete();
+              return;
+          }
           this.reiniting = true;
           this.refreshOAuth(endpointUrl,this.oauth).subscribe(() => {
               console.info("cordova: oauth OK");
