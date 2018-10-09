@@ -221,8 +221,7 @@ export class NodeRenderComponent implements EventListener{
           this.fromLogin=params['fromLogin']=='true';
           this.repository=params['repository'] ? params['repository'] : RestConstants.HOME_REPOSITORY;
           this.queryParams=params;
-          let childobject = params['childobject'] ? params['childobject'] : null;
-          let childobject_order = params['childobject_order'] ? params['childobject_order'] : -1;
+          let childobject = params['childobject_id'] ? params['childobject_id'] : null;
           this.route.params.subscribe((params: Params) => {
             if(params['node']) {
               this.isRoute=true;
@@ -235,16 +234,7 @@ export class NodeRenderComponent implements EventListener{
                 if(childobject){
                     setTimeout(()=>this.node = childobject,10);
                 }
-                else if(childobject_order > -1) {
-                    this.nodeApi.getNodeChildobjects(params['node']).subscribe((data:NodeList)=>{
-                        let id = params['node'];
-                        if (childobject_order < data.nodes.length)
-                            id = data.nodes[childobject_order].ref.id;
-                        else
-                            console.warn("Error fetching child object position. Will ignore parameter and fetch main object");
-                        setTimeout(()=>this.node = id,10);
-                    });
-                } else {
+                else {
                     setTimeout(()=>this.node = params['node'],10);
                 }
               });
@@ -431,14 +421,16 @@ export class NodeRenderComponent implements EventListener{
 
     private initAfterConnector(login: LoginResult) {
         if (!this.isCollectionRef()) {
-            let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
-            openFolder.isEnabled = false;
-            this.nodeApi.getNodeParents(this._node.parent.id, false, [], this._node.parent.repo).subscribe((data: NodeList) => {
-                openFolder.isEnabled = true;
-            });
-            if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
-                this.options.push(openFolder);
+            if(!this.connector.getCurrentLogin().isGuest) {
+                let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
+                openFolder.isEnabled = false;
+                this.nodeApi.getNodeParents(this._node.parent.id, false, [], this._node.parent.repo).subscribe((data: NodeList) => {
+                    openFolder.isEnabled = true;
+                });
 
+                if (this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT && ConfigurationHelper.hasMenuButton(this.config, "workspace"))
+                    this.options.push(openFolder);
+            }
             let edit = new OptionItem('WORKSPACE.OPTION.EDIT', 'info_outline', () => this.nodeMetadata = this._node);
             edit.isEnabled = this._node.access.indexOf(RestConstants.ACCESS_WRITE) != -1 && this._node.type != RestConstants.CCM_TYPE_REMOTEOBJECT;
             if (this.version == RestConstants.NODE_VERSION_CURRENT)

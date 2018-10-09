@@ -824,6 +824,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             ESSearchParameters essp = new ESSearchParameters();
             essp.setAuthorities(eduGroupNamesOfUser.toArray(new String[eduGroupNamesOfUser.size()]));
             essp.setQuery(token.getQuery());
+            for(SearchParameters.SortDefinition sort : token.getSortDefinitions()){
+				essp.addSort(sort);
+			}
             essp.setLanguage(SearchService.LANGUAGE_LUCENE);
             essp.addStore(storeRef);
             for(SearchParameters.SortDefinition def : token.getSortDefinitions()) {
@@ -837,8 +840,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
             parameters.setLanguage(SearchService.LANGUAGE_LUCENE);
             parameters.setQuery(token.getQuery());
             parameters.addStore(storeRef);
-            parameters.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
-            resultSet = searchService.query(parameters);
+			for(SearchParameters.SortDefinition sort : token.getSortDefinitions()){
+				parameters.addSort(sort);
+			}
+			resultSet = searchService.query(parameters);
 
         }
 

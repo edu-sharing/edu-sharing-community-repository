@@ -754,13 +754,13 @@ public class CollectionServiceImpl implements CollectionService{
 		final ACL aclFinal = acl;
 		if(scope.equals(Scope.MY.name())){
 			// We need to set inherition
-			AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-				@Override
-				public Void doWork() throws Exception {
-					permissionService.setPermissions(collectionId, aces,aclFinal.isInherited());
-					return null;
-				}
+			AuthenticationUtil.runAsSystem((RunAsWork<Void>) () -> {
+				permissionService.setPermissions(collectionId, aces,aclFinal.isInherited());
+				return null;
 			});
+		}
+		else if(!custom){
+			permissionService.setPermissions(collectionId, aces,aclFinal.isInherited());
 		}
 	}
 

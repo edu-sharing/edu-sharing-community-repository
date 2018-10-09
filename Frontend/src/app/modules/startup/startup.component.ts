@@ -21,13 +21,13 @@ export class StartupComponent {
             this.cordova.subscribeServiceReady().subscribe(()=>{
 
                 // per default go to app
-                this.router.navigate(['app'],{replaceUrl:true});
+                this.router.navigate([UIConstants.ROUTER_PREFIX,'app'],{replaceUrl:true});
 
             });
 
         }
         else{
-            this.router.navigate([UIConstants.ROUTER_PREFIX+'login'],{replaceUrl:true});
+            this.router.navigate([UIConstants.ROUTER_PREFIX,'login'],{replaceUrl:true});
         }
     }
 }

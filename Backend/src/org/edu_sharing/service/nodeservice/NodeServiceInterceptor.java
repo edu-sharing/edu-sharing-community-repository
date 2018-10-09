@@ -27,10 +27,12 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         String methodName=invocation.getMethod().getName();
         int argumentId=-1;
         if(methodName.equals("getProperty") ||
+                methodName.equals("getContent") ||
                 methodName.equals("getContentMimetype") ||
                 methodName.equals("getPreview") ||
                 methodName.equals("getProperties") ||
                 methodName.equals("getAspects") ||
+                methodName.equals("hasAspect") ||
                 methodName.equals("getOwner")) {
             argumentId=2;
         }

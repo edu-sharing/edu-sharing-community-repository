@@ -42,6 +42,8 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.springframework.extensions.surf.util.URLEncoder;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 public class URLTool{
 
@@ -129,10 +131,23 @@ public class URLTool{
 		}
 		return previewURL;
 	}
-	
-	
+
 	public static String getBaseUrl(){
+		return getBaseUrl(false);
+	}
+	public static String getBaseUrl(boolean dynamic){
 		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
+		if(dynamic) {
+			HttpServletRequest req = Context.getCurrentInstance().getRequest();
+			String path=req.getScheme()+"://"+req.getServerName();
+			int port = req.getLocalPort();
+			if(port!=80 && port!=443){
+				path+=":"+port;
+			}
+			path+="/"+homeRepository.getWebappname();
+			return path;
+		}
+
 		return getBaseUrl(homeRepository.getAppId());
 	}
 	
@@ -162,10 +177,10 @@ public class URLTool{
 		return getNgComponentsUrl()+"messages/"+messageId;
 	}
 	public static String getNgComponentsUrl(){
-		return getBaseUrl()+"/components/";
+		return getBaseUrl(true)+"/components/";
 	}
     public static String getNgAssetsUrl(){
-        return getBaseUrl()+"/assets/";
+        return getBaseUrl(false)+"/assets/";
     }
 	public static String getUploadFormLink(String repositoryId, String nodeId){
 		String result = getBaseUrl(repositoryId);
@@ -310,13 +325,16 @@ public class URLTool{
 		
 	}
 
+	public static String getNgRenderNodeUrl(String nodeId,String version) {
+		return getNgRenderNodeUrl(nodeId, version, false);
+	}
 	/**
 	 * Get the url to the angular rendering component
 	 * @param nodeId
 	 * @param version may be null to use the latest
 	 * @return
 	 */
-	public static String getNgRenderNodeUrl(String nodeId,String version) {
+	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic) {
 		return getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.trim().isEmpty() ? "/"+version : "");
 	}
 	

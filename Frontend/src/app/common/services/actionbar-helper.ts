@@ -11,6 +11,7 @@ export class ActionbarHelperService{
       return node ? [node] : nodes;
   }
   constructor(
+    private connector : RestConnectorService,
     private connectors : RestConnectorsService
   ){}
   /**
@@ -45,7 +46,7 @@ export class ActionbarHelperService{
       }
     }
     if(type=='CREATE_VARIANT') {
-      if (NodeHelper.allFiles(nodes)) {
+      if (NodeHelper.allFiles(nodes) && !this.connector.getCurrentLogin().isGuest) {
         if(nodes && nodes.length && this.connectors.connectorSupportsEdit(nodes[0])){
             option = new OptionItem("WORKSPACE.OPTION.VARIANT_OPEN", "call_split", callback);
         }
@@ -62,7 +63,7 @@ export class ActionbarHelperService{
       }
     }
     if(type=='ADD_TO_COLLECTION') {
-      if (NodeHelper.allFiles(nodes)) {
+      if (NodeHelper.allFiles(nodes) && !this.connector.getCurrentLogin().isGuest) {
         option = new OptionItem("WORKSPACE.OPTION.COLLECTION", "layers", callback);
         option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH,true);
         option.showAsAction = true;

@@ -48,9 +48,9 @@ public class MailTemplate {
 		NodeService nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());
 		String mime=MimeTypesV2.getMimeType(nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
 		if(mime.equals(MimeTypesV2.MIME_DIRECTORY)){
-			return URLTool.getNgComponentsUrl()+"workspace/?id="+nodeId; 
+			return URLTool.getNgComponentsUrl()+"workspace/?id="+nodeId;
 		}
-		return 	URLTool.getNgComponentsUrl()+"render/"+nodeId+"?closeOnBack=true"; 	
+		return 	URLTool.getNgComponentsUrl()+"render/"+nodeId+"?closeOnBack=true";
 	}
 	private static String getChildContent(String locale,String template, String name) throws XPathExpressionException, SAXException, IOException, ParserConfigurationException {
 	    Document document = getXML(locale);

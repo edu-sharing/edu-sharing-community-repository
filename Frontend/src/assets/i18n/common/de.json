@@ -74,7 +74,7 @@
   "ORIGINAL_DELETED_INFO":"Nur Informationen sichtbar",
   "COMMON_API_ERROR": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut",
   "COMMON_API_ERROR_TITLE": "Fehlerdetails",
-  "RENDERSERVICE_API_ERROR":"Fehler beim Verbinden mit dem Renderservice. Bitte überprüfen Sie die Serverkonfiguration oder melden Sie diesen Fehler einen Administrator",
+  "RENDERSERVICE_API_ERROR":"Fehler beim Verbinden mit dem Renderservice. Bitte melden Sie diesen Fehler einen Administrator",
   "SYSTEM_FOLDER_DELETE_ERROR":"Dieser Ordner wurde vom System erstellt und kann nicht gelöscht werden",
   "TOOLPERMISSION_ERROR":"Ihnen fehlt für diesen Vorgang die notwendige Berechtigung",
   "TOOLPERMISSION_ERROR_TITLE":"Fehlende Berechtigung",
