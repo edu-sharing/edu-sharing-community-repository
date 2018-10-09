@@ -493,7 +493,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	}
 
 	public String getDomain() {
-		
+
 		if(domain == null) {
 			return host;
 		}
