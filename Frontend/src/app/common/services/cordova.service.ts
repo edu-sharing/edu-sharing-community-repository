@@ -1139,8 +1139,8 @@ export class CordovaService {
           }
           console.log("cordova: refresh oAuth");
           if(!this.oauth){
-              this.clearAllCookies();
-              this.restartCordova();
+              console.log("cordova: no oAuth, go to Login")
+              this.goToLogin();
               observer.error(null);
               observer.complete();
               return;
@@ -1291,4 +1291,7 @@ export class CordovaService {
         return cordova.file.applicationDirectory+'www/';
     }
 
+    private goToLogin() {
+        this.router.navigate([UIConstants.ROUTER_PREFIX,"login-app"],{queryParams:{next:window.location.href}});
+    }
 }
