@@ -15,7 +15,7 @@ import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {CordovaService} from './services/cordova.service';
 import * as moment from 'moment';
 
-export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','register','services','override'];
+export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','register','profiles','services','override'];
 
 export class Translation  {
   private static language : string;
