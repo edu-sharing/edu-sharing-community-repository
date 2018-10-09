@@ -1,19 +1,19 @@
 {
   "REGISTER": {
     "TITLE": "Registrierung",
-    "ORGANIZATION_TITEL": "LaSiDig | DEKRA",
+    "ORGANIZATION_TITLE": "LaSiDig | DEKRA",
     "ORGANIZATION": "Organisation",
     "NEWSLETTER": "Neuigkeiten per Mail erhalten",
     "ACCEPT": "Ich bin mit der Verarbeitung meiner angegebenen Daten einverstanden",
-    "IMPRESSUM-LINK": "Weitere Informationen",
+    "PRIVACY-LINK": "Weitere Informationen",
     "PL_USER": "z.B. Max...",
     "PL_NAME": "z.B. Musstermann...",
     "PL_MAIL": "z.B. max@mail.com",
     "PW_weak": "Zu schwach",
-    "PW_accept": "Akzeptabel",
+    "PW_accept": "Mittel",
     "PW_medium": "Gut",
     "PW_strong": "Stark",
-    "PL_PASSWORD": "Minimum 5 verschiedene Zeichen...",
+    "PL_PASSWORD": "Min. 5 verschiedene Zeichen...",
     "HINT": "Tipp: Verwende Zahlen, Sonderzeichen...",
     "PL_ORG": "z.B. DEKRA...",
     "BUTTON": "Registrieren",
@@ -22,10 +22,13 @@
       "TITLE": "Fast fertig",
       "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
       "MAIL_INFO2": "geschickt.",
-      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail, um die Registrierung abzuschließen.",
+      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie Aktivierungscode, um die Registrierung abzuschließen.",
       "NO_MAIL": "Keine E-Mail erhalten?",
       "NO_MAIL_INFO": "Sehen Sie auch im Spam-Ordner nach.",
-      "SEND_MAIL": "Nochmal Senden"
+      "SEND_MAIL": "Nochmal Senden",
+      "KEY_PL": "Aktivierungscode",
+      "ACTIVATE": "Anmelden",
+      "ACTIVATE_HINT": "Sie haben den Aktivierungscode in einer Bestätigungsmail erhalten"
     },
     "REQUEST":{
       "TITLE": "Daten vergessen?",
@@ -36,7 +39,7 @@
     },
     "RESET":{
       "TITLE": "Passwort ändern",
-      "REST_INFO": "Geben Sie Ihr neues Passwort an",
+      "REST_INFO": "Geben Sie Ihr \n neues Passwort an",
       "BUTTON": "Passwort ändern",
       "TOAST": "Das Passwort wurde verändert"
     }

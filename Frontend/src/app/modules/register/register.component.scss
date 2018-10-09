@@ -5,3 +5,17 @@
   max-width: 100%;
   text-align: center;
 }
+
+.register{
+  color:$textLight;
+  text-align: center;
+  margin-bottom: 10px;
+  a{
+    text-transform: uppercase;
+    i{
+      font-size: 11pt;
+      position: relative;
+      top: 3px;
+    }
+  }
+}

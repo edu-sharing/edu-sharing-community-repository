@@ -32,10 +32,6 @@ export class RegisterResetPasswordComponent{
     public checkPassword(){
         this.password_strength = UIHelper.getPasswordStrengthString(this.new_password);
     }
-
-    public linkRegister() {
-        this.router.navigate([UIConstants.ROUTER_PREFIX + "register"]);
-    }
     public buttonCheck(){
         if (this.password_strength != "weak" && this.new_password.trim()){
             return true;

@@ -19,8 +19,8 @@
             <span class='{{password_strength}}'>{{'REGISTER.PW_'+password_strength | translate}}</span>
         </div>
         <label for="password">{{'USER.password' | translate}} *</label>
-        <input-password [inputClass]="password_strength == 'strong' || password_strength == 'accept' || password_strength == 'medium' ? 'valid' : password_strength == 'weak' ? 'invalid' : null" id="password" required="true" (keyup)="checkPassword()" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
-        <div class="hint">{{'REGISTER.HINT' | translate}}</div>
+        <input-password [inputClass]="password_strength == 'strong' || password_strength == 'medium' ? 'valid' : password_strength == 'accept' ? 'middle' : password_strength == 'weak' ? 'invalid' : null" id="password" required="true" (keyup)="checkPassword()" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
+        <div class="input-hint-bottom">{{'REGISTER.HINT' | translate}}</div>
     </div>
     <div>
         <label for="organization">{{'REGISTER.ORGANIZATION' | translate}}</label>
@@ -33,5 +33,5 @@
 </div>
 <div class="accept">
     <input id="accept" type="checkbox" class="filled-in" [(ngModel)]="agree" (change)="setAccept(agree)">
-    <label for="accept">{{'REGISTER.ACCEPT' | translate}}<a class="imprint" (click)="openImprint()">{{'REGISTER.IMPRESSUM-LINK' | translate}}</a></label>
+    <label for="accept">{{'REGISTER.ACCEPT' | translate}}<a class="imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{'REGISTER.PRIVACY-LINK' | translate}}</a></label>
 </div>

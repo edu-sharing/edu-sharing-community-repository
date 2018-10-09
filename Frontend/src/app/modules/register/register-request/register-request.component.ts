@@ -23,10 +23,6 @@ export class RegisterRequestComponent {
         return UIHelper.isEmail(this.email);
     }
 
-    public linkRegister() {
-        this.router.navigate([UIConstants.ROUTER_PREFIX + "register"]);
-    }
-
     constructor(private connector: RestConnectorService,
                 private toast: Toast,
                 private router: Router

@@ -35,23 +35,18 @@ export class RegisterComponent{
     state = 'register';
 
     public cancel(){
-      if (this.state == 'done'){
-          this.state = 'register';
-      } else if(this.state == 'done-request'){
-          this.state = 'request';
-      } else {
-          this.router.navigate([UIConstants.ROUTER_PREFIX+"login"]);
-      }
-  }
+        this.router.navigate([UIConstants.ROUTER_PREFIX+"login"]);
+    }
 
     public requestDone(email: string ){
         /*TODO: @Simon*/
         this.router.navigate([UIConstants.ROUTER_PREFIX + "register","done-request"]);
-        console.log(email);
         this.toast.toast("REGISTER.TOAST");
         // this.toast.error(null, "");
     }
-
+    public linkRegister() {
+        this.router.navigate([UIConstants.ROUTER_PREFIX + "register"]);
+    }
     public newPassword(password:string){
     //    TODO: @Simon
     //    newPassword zu den Account
@@ -72,8 +67,14 @@ export class RegisterComponent{
             ){
       this.route.params.subscribe((params)=>{
           if(params['status']){
-              this.state = params['status'];
-              setTimeout(()=>this.setParams());
+              if (params['status'] == "done" || params['status'] == "done-request" || params['status'] == "request" || params['status'] == "reset-password") {
+                  this.state = params['status'];
+                  setTimeout(()=>this.setParams());
+              } else{
+                  this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+              }
+
+
           }
       });
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {

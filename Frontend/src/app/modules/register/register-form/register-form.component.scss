@@ -20,11 +20,8 @@ form{
     margin-left: 10px;
   }
 }
-.hint{
-  color: $textLight;
-  margin-top: -15px;
+.input-hint-bottom{
   margin-bottom: 15px;
-  margin-left: 0.75rem;
 }
 
 .strength{
@@ -42,10 +39,7 @@ form{
 .accept{
   color: #FF9800;
 }
-.medium{
-  color: $primary;
-}
-.strong{
+.medium, .strong{
   color: #37a574;
 }
 

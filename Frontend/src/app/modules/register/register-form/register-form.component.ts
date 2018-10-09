@@ -34,6 +34,7 @@ export class RegisterFormComponent{
     public password_strength='';
     public news = true;
     public agree = false;
+    public privacyUrl: string;
     /*
     public firstName="";
     public lastName="";
@@ -86,8 +87,8 @@ export class RegisterFormComponent{
           this.agree = false;
       }
   }
-  public openImprint(){
-      this.configService.get('config.imprintUrl').subscribe((url)=>window.open(url));
+  public openPrivacy(){
+      window.open(this.privacyUrl);
   }
 
     public canRegister(){
@@ -109,6 +110,7 @@ export class RegisterFormComponent{
             ){
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
+        this.privacyUrl = this.configService.instant("privacyInformationUrl");
     });
     this.isLoading=true;
   }

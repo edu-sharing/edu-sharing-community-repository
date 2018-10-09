@@ -36,12 +36,34 @@
     font-size: 100%;
     color: $textLight;
   }
+  .input-hint-bottom{
+    margin-bottom: 15px;
+  }
   .keyForm{
     display: flex;
     width: 100%;
     padding:20px 20px;
-    .btn{
-      float:initial;
+    form{
+      width: 100%;
+      input{
+        text-align: center;
+      }
     }
+  }
+
+  .send-mail{
+    float:initial;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: block;
+    padding: 0 2rem;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+}
+
+@media screen and (max-width: $mobileWidth) {
+  .done-info .keyForm{
+    padding: 10px 0;
   }
 }
