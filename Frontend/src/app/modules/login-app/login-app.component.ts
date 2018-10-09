@@ -42,6 +42,7 @@ export class LoginAppComponent  implements OnInit {
 
     servers: any;
     currentServer: any;
+    private locationNext: string;
 
     constructor(
         private toast:Toast,
@@ -65,6 +66,10 @@ export class LoginAppComponent  implements OnInit {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'login']);
             return;
         }
+        
+        this.route.queryParams.subscribe((params)=>{
+            this.locationNext=params['next'];
+        });
 
         // 1. Wait until Cordova is Ready
         this.cordova.subscribeServiceReady().subscribe(()=>{
@@ -85,7 +90,7 @@ export class LoginAppComponent  implements OnInit {
             console.log("INIT TranslationService .. START");
             this.init();
         });
-        
+
     }
 
     buttonExitApp() :void {
@@ -113,13 +118,13 @@ export class LoginAppComponent  implements OnInit {
 
     private login(){
 
-       
+
         /*
         // test camera
         this.cordova.getPhotoFromCamera(
         (win:any)=>{
             console.log("CAMERA WIN",win);
-        }, 
+        },
         (error:any, info:any)=>{
             console.log("CAMERA FAIL", error);
             console.dir(info);
@@ -165,13 +170,18 @@ export class LoginAppComponent  implements OnInit {
 
         });
         */
- 
+
     }
 
     private goToDefaultLocation() {
-        this.config.getAll().subscribe(()=> {
-            UIHelper.goToDefaultLocation(this.router, this.config,{replaceUrl:true});
-        });
+        if(this.locationNext){
+            window.location.replace(this.locationNext);
+        }
+        else {
+            this.config.getAll().subscribe(() => {
+                UIHelper.goToDefaultLocation(this.router, this.config, {replaceUrl: true});
+            });
+        }
     }
     getServerIcon(){
         return this.serverurl+'assets/images/app-icon.svg';

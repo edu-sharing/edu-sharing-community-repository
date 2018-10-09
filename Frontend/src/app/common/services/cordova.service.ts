@@ -147,7 +147,7 @@ export class CordovaService {
                   (data: any) => {
                       // TODO: take URI and processes on share screen
                       // this.router.navigate(['share', URI]);
-                      this.router.navigate(['app', 'share'], {queryParams: data});
+                      this.router.navigate([UIConstants.ROUTER_PREFIX,'app', 'share'], {queryParams: data});
                   }, (error) => {
                       console.log("ERROR on new share event", error);
                   });
@@ -204,11 +204,9 @@ export class CordovaService {
    private registerOnShareContent() : void {
        if (this.isAndroid()) {
            console.log("register on share intent");
-           // only run once. Will loop otherwise if no auth is found and intent was send
-           let handleIntent=(intent:any)=> {
-               // Do things
-               console.log(intent);
-               if(intent && intent.extras){
+
+           let handleIntentBase=(intent:any)=>{
+                if(intent && intent.extras){
                    let uri=intent.extras["android.intent.extra.TEXT"];
                    if(uri){
                        this.lastIntent=intent;
@@ -231,8 +229,31 @@ export class CordovaService {
                    }
                }
            };
+           // only run once. Will loop otherwise if no auth is found and intent was send
+           let handleIntent=(intent:any)=> {
+               // Do things
+               console.log(intent);
+               if (intent && intent.action=="android.intent.action.VIEW") {
+                   let hit="/edu-sharing";
+                   let target=intent.data.substr(0,intent.data.indexOf(hit));
+                   let current=window.location.href.substr(0,window.location.href.indexOf(hit));
+                   if(target==current){
+                       console.log(target+"="+current+", go to request location "+intent.data);
+                       window.location.href=intent.data;
+                   }
+                   else{
+                       console.log(target+"!="+current+", logout and go to new location "+intent.data);
+                       this.resetAndGoToServerlist('url='+intent.data);
+                   }
+                   (window as any).plugins.intent.getCordovaIntent(null);
+               }
+               else{
+                   handleIntentBase(intent);
+               }
+
+           };
            console.log((window as any).plugins);
-           (window as any).plugins.intent.getCordovaIntent(handleIntent);
+           (window as any).plugins.intent.getCordovaIntent(handleIntentBase);
            (window as any).plugins.intent.setNewIntentHandler(handleIntent);
            /*
            (window as any).plugins.webintent.onNewIntent((uri:string)=> {
@@ -253,17 +274,7 @@ export class CordovaService {
        }
    }
 
-   private deliverShareContent(URI:string) : void {
-      // just allow one share every 5 seconds to prevent double calling
-      if ((new Date().getTime() - this.lastShareTS) < 5000) {
-        console.log("BLOCK Share Event - just one per 5 seconds");
-        return;
-      }
-      this.lastShareTS = new Date().getTime();
-      this.observerShareContent.next(URI);
-   }
-
-
+   /*
    private resolveFileUri(URI:string, callbackResult:Function) : void {
 
      try {
@@ -308,6 +319,7 @@ export class CordovaService {
      }
 
    }
+   */
 
 
   /**********************************************************
@@ -417,9 +429,11 @@ export class CordovaService {
     }
   }
 
-  restartCordova():void {
+  restartCordova(parameters=""):void {
     this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
-    window.location.replace("http://app-registry.edu-sharing.com/ng/?reset=true");
+    if(parameters)
+        parameters="&"+parameters;
+    window.location.replace("http://app-registry.edu-sharing.com/ng/?reset=true"+parameters);
     /*
     try {
       (navigator as any).splashscreen.show();
@@ -1138,6 +1152,13 @@ export class CordovaService {
               return;
           }
           console.log("cordova: refresh oAuth");
+          if(!this.oauth){
+              console.log("cordova: no oAuth, go to Login")
+              this.goToLogin();
+              observer.error(null);
+              observer.complete();
+              return;
+          }
           this.reiniting = true;
           this.refreshOAuth(endpointUrl,this.oauth).subscribe(() => {
               console.info("cordova: oauth OK");
@@ -1148,16 +1169,20 @@ export class CordovaService {
               console.warn(error);
               console.warn("cordova: invalid oauth, go back to server selection");
               this.reiniting = false;
-              this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
-              this.clearAllCookies();
-              this.restartCordova();
+              this.resetAndGoToServerlist();
               observer.error(null);
               observer.complete();
           });
       });
   }
 
-  // oAuth refresh tokens
+    private resetAndGoToServerlist(parameters="") {
+        this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
+        this.clearAllCookies();
+        this.restartCordova(parameters);
+    }
+
+// oAuth refresh tokens
   private refreshOAuth(endpointUrl:string,oauth: OAuthResult): Observable<OAuthResult> {
 
     let url = endpointUrl + "../oauth2/token";
@@ -1284,4 +1309,7 @@ export class CordovaService {
         return cordova.file.applicationDirectory+'www/';
     }
 
+    private goToLogin() {
+        this.router.navigate([UIConstants.ROUTER_PREFIX,"app"],{queryParams:{next:window.location.href}});
+    }
 }
