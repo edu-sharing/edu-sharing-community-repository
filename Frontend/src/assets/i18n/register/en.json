@@ -38,7 +38,7 @@
       "INFO": "Enter your e-mail address to assign a new password.",
       "PLACEHOLDER":"Your email address",
       "BUTTON":"request new password",
-      "MAIL_NOTE": "Click on the link in the email to enter a new password."
+      "MAIL_NOTE": "Click on the link in the email or enter activation code to set a new password."
     },
     "RESET":{
       "TITLE": "Change Password",

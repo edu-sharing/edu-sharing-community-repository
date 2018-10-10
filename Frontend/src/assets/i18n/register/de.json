@@ -24,7 +24,7 @@
       "TITLE": "Fast fertig",
       "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
       "MAIL_INFO2": "geschickt.",
-      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie Aktivierungscode, um die Registrierung abzuschließen.",
+      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie die Aktivierungscode, um die Registrierung abzuschließen.",
       "NO_MAIL": "Keine E-Mail erhalten?",
       "NO_MAIL_INFO": "Sehen Sie auch im Spam-Ordner nach.",
       "SEND_MAIL": "Nochmal Senden",
@@ -37,7 +37,7 @@
       "INFO": "Geben Sie Ihre E-Mail Adresse an, um anschließend ein neues Passwort vergeben zu können.",
       "PLACEHOLDER":"Ihre E-Mail Adresse",
       "BUTTON":"Neues Passwort anfordern",
-      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail, um ein neues Passwort anzugeben."
+      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie die Aktivierungscode, um ein neues Passwort zu vergeben."
     },
     "RESET":{
       "TITLE": "Passwort ändern",

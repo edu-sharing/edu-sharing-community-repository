@@ -1,5 +1,5 @@
 @import "../../../styles/variables.scss";
-
+$path:'../../../assets/images/layout/';
 .card-action a{
   width: 100%;
   max-width: 100%;
@@ -18,4 +18,14 @@
       top: 3px;
     }
   }
+}
+
+.register-bg{
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: url($path + 'register.jpg') no-repeat center bottom;
+  background-size: cover;
 }
