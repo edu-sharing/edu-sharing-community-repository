@@ -1014,6 +1014,8 @@ export class SearchComponent {
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
+            // add to collection layout is only designed for GRIDS, otherwise missing permission info will fail
+            this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
             this.refreshListOptions();
             this.updateActionbar(null);
           });
