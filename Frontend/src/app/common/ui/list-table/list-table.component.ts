@@ -78,6 +78,8 @@ export class ListTableComponent implements EventListener{
      */
   };
 
+  @Output() nodesChange=new EventEmitter();
+
   /**
    * Set the columns to show, see @ListItem
    */
@@ -381,12 +383,13 @@ export class ListTableComponent implements EventListener{
       this.selectAll();
     }
   }
-  private exchange(node1:Node,node2:Node){
-    let i1=RestHelper.getRestObjectPositionInArray(node1,this._nodes);
-    let i2=RestHelper.getRestObjectPositionInArray(node2,this._nodes);
-
-    this._nodes.splice(i1,1,node2);
-    this._nodes.splice(i2,1,node1);
+  private move(array:any,i1:number,i2:number){
+    //let i1=RestHelper.getRestObjectPositionInArray(node1,this._nodes);
+    //let i2=RestHelper.getRestObjectPositionInArray(node2,this._nodes);
+    let node1=array[i1];
+    let node2=array[i2];
+    array.splice(i1,1);
+    array.splice(i2,0,node1);
   }
   private allowDrag(event:any,target:Node){
     if(this.orderElements){
@@ -395,7 +398,11 @@ export class ListTableComponent implements EventListener{
       if(source.view==this.id && source.node.ref.id!=target.ref.id){
         this.orderElementsActive=true;
         this.orderElementsActiveChange.emit(true);
-        this.exchange(source.node,target);
+        let targetPos=this._nodes.indexOf(target);
+        this._nodes=Helper.deepCopy(source.list);
+        this.move(this._nodes,source.offset,targetPos);
+        // inform the outer component's variable about the new order
+        this.nodesChange.emit(this._nodes);
         return;
       }
     }
@@ -501,7 +508,13 @@ export class ListTableComponent implements EventListener{
     try {
       event.dataTransfer.setDragImage(this.drag.nativeElement, 100, 20);
     }catch(e){}
-    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,{node:node,nodes:nodes,view:this.id});
+    this.storage.set(TemporaryStorageService.LIST_DRAG_DATA,{
+      list:Helper.deepCopy(this._nodes),
+        offset:this._nodes.indexOf(node),
+        node:node,
+        nodes:nodes,
+        view:this.id
+    });
     this.onSelectionChanged.emit(this.selectedNodes);
   }
   private dragStartColumn(event:any,index:number,column : ListItem){

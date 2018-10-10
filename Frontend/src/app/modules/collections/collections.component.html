@@ -139,7 +139,7 @@
                   (onAddElement)="switchToSearch()"
                   [canDelete]="canDelete"
                   (onDelete)="deleteReference($event)"
-                  [nodes]="collectionContent.references"
+                  [(nodes)]="collectionContent.references"
                 ></listTable>
 
                 <!-- NO CONTENT NOTICE -->
