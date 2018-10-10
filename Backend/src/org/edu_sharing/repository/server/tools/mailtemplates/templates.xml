@@ -2,7 +2,7 @@
 	<template name="header">
 		<message><![CDATA[
 			<div class="logo">
-			<img src="{{logo}}">
+			<img src="{{image:/images/logos/edu-sharing-mail.png}}">
 			</div>
 		]]>
 		</message>
