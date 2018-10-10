@@ -8,7 +8,6 @@ import {Connector} from "../../../common/rest/data-object";
 })
 export class WorkspaceCreateConnector  {
   @ViewChild('input') input : ElementRef;
-  public disabled=true;
   public type = 0;
   public _name="";
   public _connector : Connector;
@@ -30,12 +29,9 @@ export class WorkspaceCreateConnector  {
     this.onCancel.emit();
   }
   public create(){
-    if(this.disabled)
+    if(!this._name.trim())
       return;
     this.onCreate.emit({name:this._name,type:this.getType()});
-  }
-  public setState(event : any){
-    this.disabled=!this._name.trim();
   }
   constructor(){
   }
