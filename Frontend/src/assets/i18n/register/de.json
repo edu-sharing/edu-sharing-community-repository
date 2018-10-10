@@ -19,18 +19,19 @@
     "BUTTON": "Registrieren",
     "TOAST":"Die E-Mail wurde versendet",
     "TOAST_DUPLICATE": "Diese E-Mail-Adresse wird bereits verwendet",
+    "TOAST_INVALID_MAIL": "Für diese E-Mail-Adresse wurde kein Account gefunden",
     "TOAST_INVALID_KEY": "Der Aktivierungscode wurde bereits verwendet oder ist ungültig",
     "DONE":{
       "TITLE": "Fast fertig",
       "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
       "MAIL_INFO2": "geschickt.",
-      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie die Aktivierungscode, um die Registrierung abzuschließen.",
+      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie den Aktivierungscode, um die Registrierung abzuschließen.",
       "NO_MAIL": "Keine E-Mail erhalten?",
       "NO_MAIL_INFO": "Sehen Sie auch im Spam-Ordner nach.",
       "SEND_MAIL": "Nochmal Senden",
       "KEY_PL": "Aktivierungscode",
       "ACTIVATE": "Anmelden",
-      "ACTIVATE_HINT": "Sie haben den Aktivierungscode in einer Bestätigungsmail erhalten"
+      "ACTIVATE_HINT": "Sie haben den Code in einer Bestätigungsmail erhalten"
     },
     "REQUEST":{
       "TITLE": "Daten vergessen?",

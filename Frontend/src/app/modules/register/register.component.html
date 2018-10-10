@@ -1,12 +1,12 @@
 <div class="register-bg"></div>
 <global-progress *ngIf="isLoading"></global-progress>
 <div [class.display-none]="isLoading" class="dialog darken valign-wrapper">
-    <div class="card center-card card-action header-high" [class.card-no-action]="state == 'done-request'">
+    <div class="card center-card card-action header-high" [class.card-no-action]="state == 'done-reset'">
 
         <div class="card-content">
             <div *ngIf="state == 'register' || state=='request'" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
             <div class="card-title">
-                {{(state=='request' || state=='done-request' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}
+                {{(state=='request' || state=='done-reset' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}
             </div>
             <div class="card-title-info">
                 <img class="card-title-image" src='assets/images/app-icon.svg' alt="{{'REGISTER.ORGANIZATION_TITLE' | translate}}">
@@ -14,10 +14,10 @@
             </div>
             <div class="card-scroll">
                 <app-register-form [class.display-none]="!(state=='register')" (onLoading)="isLoading=$event" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
-                <app-register-done *ngIf="state=='done' || state=='done-request'" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
-                <app-register-request *ngIf="state=='request'"  #request></app-register-request>
+                <app-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
+                <app-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" (onLoading)="isLoading=$event" #request></app-register-request>
                 <app-register-reset-password *ngIf="state=='reset-password'"  #resetPassword></app-register-reset-password>
-                <div *ngIf="state != 'register' && state != 'done' && state != 'done-request'" class="register">
+                <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset'" class="register">
                     {{'LOGIN.REGISTER_TEXT' | translate}}
                     <a (click)="linkRegister()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
                 </div>
@@ -27,7 +27,7 @@
             <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" tabindex="0" (keyup.enter)="registerForm.register()" (click)="registerForm.register()">{{'REGISTER.BUTTON' | translate }}</a>
             <a *ngIf="state=='request'" [class.disabled]="!request || !request.checkMail()" tabindex="0" (keyup.enter)="requestDone(request.email)" (click)="requestDone(request.email)" class="waves-effect waves-light btn">{{'REGISTER.REQUEST.BUTTON' | translate }}</a>
             <a *ngIf="state=='reset-password'" [class.disabled]="!resetPassword || !resetPassword.buttonCheck()" tabindex="0" (keyup.enter)="newPassword(resetPassword.new_password)" (click)="newPassword(resetPassword.new_password)" class="waves-effect waves-light btn">{{'REGISTER.RESET.BUTTON' | translate }}</a>
-            <a *ngIf="state=='done' || state=='done-request' && registerDone && registerDone.keyInput" class="waves-effect waves-light btn" [class.disabled]="registerDone && !registerDone.keyInput.trim()" tabindex="0" (keyup.enter)="registerDone.activate(registerDone.keyInput)" (click)="registerDone.activate(registerDone.keyInput)">{{'REGISTER.DONE.ACTIVATE' | translate}}</a>
+            <a *ngIf="state=='done' || state=='done-reset' && registerDone && registerDone.keyInput" class="waves-effect waves-light btn" [class.disabled]="registerDone && !registerDone.keyInput.trim()" tabindex="0" (keyup.enter)="registerDone.activate(registerDone.keyInput)" (click)="registerDone.activate(registerDone.keyInput)">{{'REGISTER.DONE.ACTIVATE' | translate}}</a>
         </div>
     </div>
 </div>

@@ -39,10 +39,7 @@ export class RegisterComponent{
     }
 
     public requestDone(email: string ){
-        /*TODO: @Simon*/
-        this.router.navigate([UIConstants.ROUTER_PREFIX + "register","done-request"]);
-        this.toast.toast("REGISTER.TOAST");
-        // this.toast.error(null, "");
+        this.request.submit();
     }
     public linkRegister() {
         this.router.navigate([UIConstants.ROUTER_PREFIX + "register"]);
@@ -67,7 +64,7 @@ export class RegisterComponent{
             ){
       this.route.params.subscribe((params)=>{
           if(params['status']){
-              if (params['status'] == "done" || params['status'] == "done-request" || params['status'] == "request" || params['status'] == "reset-password") {
+              if (params['status'] == "done" || params['status'] == "done-reset" || params['status'] == "request" || params['status'] == "reset-password") {
                   this.state = params['status'];
               } else{
                   this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
@@ -103,5 +100,11 @@ export class RegisterComponent{
         } else {
             this.state='request';
         }
+    }
+
+    onPasswordRequested() {
+        let email=this.request.email;
+        this.state='done-reset';
+        setTimeout(()=>this.registerDone.email=email);
     }
 }
