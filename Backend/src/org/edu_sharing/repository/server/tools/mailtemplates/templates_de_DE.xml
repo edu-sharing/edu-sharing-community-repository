@@ -43,22 +43,21 @@
 		]]>
 		</message>
 	</template>
-	<template name="passwordRequest">
+	<template name="userRecoverPassword">
 		<subject>Passwort zurücksetzen</subject>
 		<message><![CDATA[
 			<div class="center">
 				<h1>Hallo {{firstName}} {{lastName}}</h1>
-				<p>Sie haben Ihre Daten zur Anmeldung auf <a href="{{url}}">{{url}}</a> vergessen?
+				<p>Sie haben Ihre Daten zur Anmeldung vergessen?
 				</p>
-				<p>Betätigen Sie diesen Link, um anschließend ein neues Passwort vergeben zu können.</p>
-				<a class="btn" href="{{link}}">neues Passwort</a>
-				<br>
+				</p>
+					Kopieren Sie den Code unten in das Formular, um Ihr Passwort neu zu vergeben:
 				<p>
-					Sollte diese E-Mail nicht korrekt angezeigt werden, klicken Sie bitte » <a href="{{link}}">hier</a>
 				</p>
-				<div class="input-field"><a href="{{link}}">{{link}}</a></div>
-				<br><br><br>
-				<p>Viele Grüße, Ihr {{LaSiDig Team}}</p>
+				<div class="center"><div class="input-field">{{key}}</div></div>
+				<p>oder klicken Sie auf folgenden Link, um anschließend ein neues Passwort vergeben zu können:</p>
+				<br>
+				<a class="btn" href="{{link}}">neues Passwort</a>
 			</div>
 		]]>
 		</message>
