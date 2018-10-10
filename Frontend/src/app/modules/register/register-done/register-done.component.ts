@@ -18,6 +18,7 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 })
 export class RegisterDoneComponent{
     @Output() onModify = new EventEmitter();
+    @Input() inputState:string;
     loading=false;
     email = '';
     keyInput = '';
