@@ -188,8 +188,8 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-    this.searchService.clear();
     this.initalized=true;
+    this.searchService.clear();
     if(this.searchService.reinit){
       this.searchService.init();
       this.initalized=false;
@@ -463,6 +463,7 @@ export class SearchComponent {
     };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
+    this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN, "search");
     this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id],{queryParams:queryParams});
   }
   switchToCollections(id=""){
