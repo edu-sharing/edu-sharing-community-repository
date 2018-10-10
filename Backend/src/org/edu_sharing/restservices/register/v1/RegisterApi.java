@@ -96,5 +96,26 @@ public class RegisterApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+	@POST
+	@Path("/recover/{mail}")
+	@ApiOperation(
+			value = "Send a mail to recover/reset password"
+	)
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Boolean.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response recoverPassword(@Context HttpServletRequest req,
+							 @ApiParam(value = "The mail (authority) of the user to recover",required=true ) @PathParam("mail") String mail
+	) {
+		try{
+			return Response.ok().entity(RegisterDao.recoverPassword(mail)).build();
+		}
+		catch(Throwable t){
+			return ErrorResponse.createResponse(t);
+		}
+	}
 }
 

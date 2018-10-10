@@ -70,4 +70,8 @@
     <bean name="eduSharingRegisterUserCache" factory-bean="cacheFactory" factory-method="createCache">
         <constructor-arg value="cache.eduSharingEditLockCache"/>
     </bean>
+
+    <bean name="eduSharingRecoverPasswordCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.eduSharingEditLockCache"/>
+    </bean>
 </beans>
