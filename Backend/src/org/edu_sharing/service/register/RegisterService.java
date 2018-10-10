@@ -5,6 +5,8 @@ import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
 import java.security.InvalidKeyException;
 
 public interface RegisterService {
+    void resetPassword(String key, String newPassword) throws Exception;
+
     boolean recoverPassword(String id) throws Exception;
 
     String activate(String key) throws InvalidKeyException,Throwable;

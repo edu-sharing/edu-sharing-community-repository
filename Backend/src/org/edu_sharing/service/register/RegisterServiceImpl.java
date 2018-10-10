@@ -33,7 +33,7 @@ import java.util.Map;
 public class RegisterServiceImpl implements RegisterService {
     private static int KEY_LENGTH = 16;
     public final static SimpleCache<String,RegisterInformation> registerUserCache = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingRegisterUserCache");
-    public final static SimpleCache<String,String> recoverPasswordCache = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingRecoverPasswordCache");
+    public final static SimpleCache<String,RegisterInformation> recoverPasswordCache = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingRecoverPasswordCache");
 
     private final PersonService personService;
     private final NodeService nodeService;
@@ -83,12 +83,29 @@ public class RegisterServiceImpl implements RegisterService {
     public boolean userExists(RegisterInformation info) throws Exception {
         return userExists(info.getEmail());
     }
+    @Override
+    public void resetPassword(String key, String newPassword) throws Exception {
+        RegisterInformation info = recoverPasswordCache.get(key);
+        if(info==null)
+            throw new InvalidKeyException();
+        AuthenticationUtil.runAsSystem(()-> {
+            setPassword(info,newPassword);
+            recoverPasswordCache.remove(key);
+            return null;
+        });
+    }
+
+    protected void setPassword(RegisterInformation info, String newPassword) throws Exception{
+        authService.setAuthentication(info.getEmail(), newPassword.toCharArray());
+    }
 
     @Override
     public boolean recoverPassword(String id) throws Exception {
         return AuthenticationUtil.runAsSystem(()-> {
             try {
                 RegisterInformation info = getPersonById(id);
+                if(info==null)
+                    return false;
                 String key = addToCacheNoDuplicate(info,recoverPasswordCache);
 
                 String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
@@ -173,17 +190,17 @@ public class RegisterServiceImpl implements RegisterService {
     }
     @Override
     public boolean resendRegisterMail(String mail) throws Exception {
-        String key=getKeyForMail(mail);
+        String key=getKeyForMail(mail,registerUserCache);
         if(key!=null){
             sendRegisterMail(registerUserCache.get(key),key);
             return true;
         }
         return false;
     }
-    private String getKeyForMail(String mail){
-        for (String cacheKey : registerUserCache.getKeys()) {
+    private String getKeyForMail(String mail,SimpleCache<String,RegisterInformation> cache){
+        for (String cacheKey : cache.getKeys()) {
             try {
-                if (registerUserCache.get(cacheKey).getEmail().equals(mail))
+                if (cache.get(cacheKey).getEmail().equals(mail))
                     return cacheKey;
             }catch(Throwable t){
                 // it's possible to get class cast exceptions when hot deploying
@@ -192,7 +209,7 @@ public class RegisterServiceImpl implements RegisterService {
         return null;
     }
     private String addToCacheNoDuplicate(RegisterInformation info,SimpleCache cache) {
-        String existing=getKeyForMail(info.getEmail());
+        String existing=getKeyForMail(info.getEmail(),cache);
         if(existing!=null)
             return existing;
         return addToCache(info, cache);

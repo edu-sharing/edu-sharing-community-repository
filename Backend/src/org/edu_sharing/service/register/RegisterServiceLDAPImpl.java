@@ -40,6 +40,14 @@ public class RegisterServiceLDAPImpl extends RegisterServiceImpl {
         LdapContext ctx = getLdapContext();
         String userDN = RegisterServiceFactory.getConfig().getProperty("ldap.baseDN");
 
+        Attributes attrs = getLDAPAttributes(info);
+
+        ctx.bind("uid="+info.getEmail()+","+userDN,null,attrs);
+        ctx.close();
+        return info.getEmail();
+    }
+
+    private Attributes getLDAPAttributes(RegisterInformation info) throws Exception {
         Attributes attrs = new BasicAttributes(true);
         Attribute objclass = new BasicAttribute("objectClass");
         objclass.add("inetOrgPerson");
@@ -54,13 +62,21 @@ public class RegisterServiceLDAPImpl extends RegisterServiceImpl {
         attrs.put("userPassword",convertPassword(info.getPassword()));
         if(info.getOrganization()!=null && !info.getOrganization().isEmpty())
             attrs.put("o",info.getOrganization());
+        return attrs;
+    }
 
-        ctx.bind("uid="+info.getEmail()+","+userDN,null,attrs);
-        ctx.close();
-        return info.getEmail();
+    @Override
+    protected void setPassword(RegisterInformation info, String newPassword) throws Exception{
+        LdapContext ctx = getLdapContext();
+        String userDN = RegisterServiceFactory.getConfig().getProperty("ldap.baseDN");
+        Attributes attrs = getLDAPAttributes(info);
+        attrs.put("userPassword",convertPassword(newPassword));
+        ctx.rebind("uid="+info.getEmail()+","+userDN,null,attrs);
     }
 
     private String convertPassword(String password) throws Exception {
+        if(password==null)
+            return null;
         String algorithm = RegisterServiceFactory.getConfig().getProperty("ldap.passwordAlgorithm");
         if("md5".equalsIgnoreCase(algorithm)){
             return "{MD5}"+Base64.getEncoder().encodeToString(DigestUtils.md5(password));

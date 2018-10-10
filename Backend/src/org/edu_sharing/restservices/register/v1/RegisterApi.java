@@ -60,7 +60,7 @@ public class RegisterApi {
 	)
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Boolean.class),
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
 					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 			})
 
@@ -68,7 +68,8 @@ public class RegisterApi {
 							 @ApiParam(value = "The mail a registration is pending for and should be resend to",required=true ) @PathParam("mail") String mail
 	) {
 		try{
-			return Response.ok().entity(RegisterDao.resendMail(mail)).build();
+			RegisterDao.resendMail(mail);
+			return Response.ok().build();
 		}
 		catch(Throwable t){
 			return ErrorResponse.createResponse(t);
@@ -103,7 +104,7 @@ public class RegisterApi {
 	)
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Boolean.class),
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
 					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
 			})
 
@@ -111,7 +112,31 @@ public class RegisterApi {
 							 @ApiParam(value = "The mail (authority) of the user to recover",required=true ) @PathParam("mail") String mail
 	) {
 		try{
-			return Response.ok().entity(RegisterDao.recoverPassword(mail)).build();
+			RegisterDao.recoverPassword(mail);
+			return Response.ok().build();
+		}
+		catch(Throwable t){
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@POST
+	@Path("/reset/{key}/{password}")
+	@ApiOperation(
+			value = "Send a mail to recover/reset password"
+	)
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response resetPassword(@Context HttpServletRequest req,
+									@ApiParam(value = "The key for the password reset request",required=true ) @PathParam("key") String key,
+									@ApiParam(value = "The new password for the user",required=true ) @PathParam("password") String password
+	) {
+		try{
+			RegisterDao.resetPassword(key,password);
+			return Response.ok().build();
 		}
 		catch(Throwable t){
 			return ErrorResponse.createResponse(t);

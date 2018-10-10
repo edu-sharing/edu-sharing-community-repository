@@ -19,16 +19,26 @@ public class RegisterDao {
             throw DAOException.mapping(t);
         }
     }
-    public static boolean recoverPassword(String mail) throws DAOException {
+    public static void recoverPassword(String mail) throws DAOException {
         try {
-            return RegisterServiceFactory.getLocalService().recoverPassword(mail);
+            if(!RegisterServiceFactory.getLocalService().recoverPassword(mail))
+                throw new SecurityException("Invalid mail address");
         }catch(Throwable t){
             throw DAOException.mapping(t);
         }
     }
-    public static boolean resendMail(String mail) throws DAOException {
+    public static void resetPassword(String key,String newPassword) throws DAOException {
         try {
-            return RegisterServiceFactory.getLocalService().resendRegisterMail(mail);
+            RegisterServiceFactory.getLocalService().resetPassword(key,newPassword);
+        }catch(Throwable t){
+            throw DAOException.mapping(t);
+        }
+    }
+    public static void resendMail(String mail) throws DAOException {
+        try {
+            if(!RegisterServiceFactory.getLocalService().resendRegisterMail(mail)){
+                throw new SecurityException("Invalid mail address");
+            }
         }catch(Throwable t){
             throw DAOException.mapping(t);
         }
