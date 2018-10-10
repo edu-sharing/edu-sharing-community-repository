@@ -155,7 +155,9 @@ export class NodeRenderComponent implements EventListener{
             this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
           }
           else {
-            this.searchService.reinit=false;
+            if(this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN)=="search") {
+                this.searchService.reinit = false;
+            }
             NodeRenderComponent.close(this.location);
             // use a timeout to let the browser try to go back in history first
             setTimeout(()=>this.mainnav.openSidenav(),250);

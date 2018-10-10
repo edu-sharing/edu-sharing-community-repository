@@ -608,7 +608,8 @@ export class CollectionsMainComponent {
         // set content for being displayed in detail
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,this.nodeOptions);
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,this.collectionContent.references);
-        this.router.navigate([UIConstants.ROUTER_PREFIX+"render",  content.ref.id]);
+        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,"collections");
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"render",  content.ref.id]);
         //this.navigate(this.collectionContent.collection.ref.id,content.ref.id);
         // add breadcrumb
 

@@ -115,6 +115,8 @@ export class SearchComponent {
   private isSearching = false;
   private groupedRepositories: Repository[];
   private enabledRepositories: string[];
+  // we only initalize the banner once to prevent flickering
+  private bannerInitalized = false;
   public get mdsId(){
     return this._mdsId;
   }
@@ -211,6 +213,7 @@ export class SearchComponent {
     });
     this.searchService.clear();
     this.initalized=true;
+    this.searchService.clear();
     if(this.searchService.reinit){
       this.searchService.init();
       this.initalized=false;
@@ -488,6 +491,7 @@ export class SearchComponent {
     };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
+    this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN, "search");
     this.router.navigate([UIConstants.ROUTER_PREFIX+'render', node.ref.id],{queryParams:queryParams});
   }
   switchToCollections(id=''){
@@ -776,8 +780,10 @@ export class SearchComponent {
       if(this.searchService.reinit)
         this.getSearch(this.searchService.searchTerm, true,this.currentValues);
     }
-    if(this.mainNavRef)
-      this.mainNavRef.refreshBanner();
+    if(this.mainNavRef && !this.bannerInitalized) {
+        this.mainNavRef.refreshBanner();
+        this.bannerInitalized=true;
+    }
     this.searchService.reinit=true;
   }
   private prepare(param:any) {
@@ -1050,6 +1056,8 @@ export class SearchComponent {
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
+            // add to collection layout is only designed for GRIDS, otherwise missing permission info will fail
+            this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
             this.refreshListOptions();
             this.updateActionbar(null);
           });

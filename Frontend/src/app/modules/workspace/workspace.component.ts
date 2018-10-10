@@ -681,6 +681,7 @@ export class WorkspaceMainComponent implements EventListener{
             this.currentNode=list[0];
             this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,this.nodeOptions);
             this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,this.currentNodes);
+            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,"workspace");
             this.router.navigate([UIConstants.ROUTER_PREFIX+"render", list[0].ref.id,list[0].version ? list[0].version : ""]);
         }
     }
