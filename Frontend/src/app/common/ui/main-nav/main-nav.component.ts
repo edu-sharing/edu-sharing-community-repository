@@ -304,8 +304,7 @@ export class MainNavComponent implements AfterViewInit{
     return null;
   }
   refreshBanner(){
-    this.handleScroll(null);
-    setTimeout(()=>this.handleScroll(null),10);
+    setTimeout(()=>this.handleScroll(null));
   }
   ngAfterViewInit() {
     this.refreshBanner();
