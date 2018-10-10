@@ -113,6 +113,8 @@ export class SearchComponent {
   private isSearching = false;
   private groupedRepositories: Repository[];
   private enabledRepositories: string[];
+  // we only initalize the banner once to prevent flickering
+  private bannerInitalized = false;
   public get mdsId(){
     return this._mdsId;
   }
@@ -763,8 +765,10 @@ export class SearchComponent {
       if(this.searchService.reinit)
         this.getSearch(this.searchService.searchTerm, true,this.currentValues);
     }
-    if(this.mainNavRef)
-      this.mainNavRef.refreshBanner();
+    if(this.mainNavRef && !this.bannerInitalized) {
+        this.mainNavRef.refreshBanner();
+        this.bannerInitalized=true;
+    }
     this.searchService.reinit=true;
   }
   private prepare(param:any) {
