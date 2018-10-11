@@ -96,9 +96,7 @@
       <label for="oldPassword">{{'OLD_PASSWORD' | translate }}</label>
       <input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="oldPassword" required="true">
       <label for="password">{{'NEW_PASSWORD' | translate }}</label>
-      <input type="password" id="password" name="password" [(ngModel)]="password" required="true">
-      <label for="passwordRepeat">{{'NEW_PASSWORD_REPEAT' | translate }}</label>
-      <input type="password" id="passwordRepeat" name="passwordRepeat" [(ngModel)]="passwordRepeat" required="true">
+      <input-password [(value)]="password" [required]="true" [id]="password"></input-password>
     </div>
   </div>
   </div>

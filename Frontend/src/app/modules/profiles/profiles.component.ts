@@ -36,7 +36,6 @@ export class ProfilesComponent {
   public changePassword: boolean;
   public oldPassword="";
   public password="";
-  public passwordRepeat="";
   private static PASSWORD_MIN_LENGTH = 5;
   private editProfile: boolean;
   private editProfileUrl: string;
@@ -97,7 +96,6 @@ export class ProfilesComponent {
     this.avatarFile=null;
     this.password="";
     this.oldPassword="";
-    this.passwordRepeat="";
   }
   public clearAvatar(){
     this.avatarFile=null;
@@ -110,11 +108,6 @@ export class ProfilesComponent {
     if(this.changePassword){
       if(this.password.length<ProfilesComponent.PASSWORD_MIN_LENGTH){
         this.toast.error(null,'PASSWORD_MIN_LENGTH',{length:ProfilesComponent.PASSWORD_MIN_LENGTH});
-        this.globalProgress=false;
-        return;
-      }
-      if(this.password!=this.passwordRepeat){
-        this.toast.error(null,'PASSWORD_NOT_MATCH');
         this.globalProgress=false;
         return;
       }
