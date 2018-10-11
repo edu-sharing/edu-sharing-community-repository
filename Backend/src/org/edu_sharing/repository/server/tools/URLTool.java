@@ -138,14 +138,19 @@ public class URLTool{
 	public static String getBaseUrl(boolean dynamic){
 		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
 		if(dynamic) {
-			HttpServletRequest req = Context.getCurrentInstance().getRequest();
-			String path=req.getScheme()+"://"+req.getServerName();
-			int port = req.getLocalPort();
-			if(port!=80 && port!=443){
-				path+=":"+port;
+			try {
+				HttpServletRequest req = Context.getCurrentInstance().getRequest();
+				String path = req.getScheme() + "://" + req.getServerName();
+				int port = req.getLocalPort();
+				if (port != 80 && port != 443) {
+					path += ":" + port;
+				}
+				path += "/" + homeRepository.getWebappname();
+				return path;
 			}
-			path+="/"+homeRepository.getWebappname();
-			return path;
+			catch(Throwable t){
+				logger.warn("Failed to get dynamic base url, will use the one defined in homeApp",t);
+			}
 		}
 
 		return getBaseUrl(homeRepository.getAppId());
