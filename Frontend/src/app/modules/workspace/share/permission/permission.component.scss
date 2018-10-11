@@ -5,17 +5,22 @@
   display: flex;
   >div {
     display: flex;
-    overflow: hidden;
-    padding: 1px 0;
+    padding: 3px 0;
     align-items: center;
   }
-  >.name{
+  >.permissionName{
     display: flex;
     flex-direction: column;
     align-items: start;
     justify-content: center;
-    padding:0 8px;
-    height: 40px;
+    min-height: 40px;
+    flex-grow: 1;
+    padding:3px 5px;
+    >.primary{
+      word-break: break-all;
+      max-height: 3rem;
+      overflow: hidden;
+    }
     >.secondary{
       font-size: 80%;
       color:$textLight;
@@ -79,11 +84,6 @@
 }
 .icon{
   padding-right:5px;
-}
-.name{
-  flex-grow: 1;
-  padding:1px 5px!important;
-  @include shortenText();
 }
 .typeAdd{
   position:absolute;

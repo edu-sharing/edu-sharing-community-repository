@@ -135,7 +135,7 @@ $sidenavWidth:300px;
     width: calc(100% - 20px);
   }
   .contentSidenav{
-    margin-left: $sidenavWidth;
+    margin-left: $sidenavWidth + 10px;
     width:calc(100% - 20px - #{$sidenavWidth});
   }
 }
