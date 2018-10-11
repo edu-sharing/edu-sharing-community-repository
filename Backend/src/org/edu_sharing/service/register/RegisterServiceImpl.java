@@ -90,7 +90,9 @@ public class RegisterServiceImpl implements RegisterService {
             throw new InvalidKeyException();
         AuthenticationUtil.runAsSystem(()-> {
             setPassword(info,newPassword);
+            info.setPassword(newPassword);
             recoverPasswordCache.remove(key);
+            authenticate(info);
             return null;
         });
     }
