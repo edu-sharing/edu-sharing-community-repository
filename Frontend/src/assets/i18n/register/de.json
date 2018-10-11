@@ -4,47 +4,47 @@
     "ORGANIZATION_TITLE": "edu-sharing",
     "ORGANIZATION": "Organisation",
     "NEWSLETTER": "Neuigkeiten per Mail erhalten",
-    "ACCEPT": "Ich bin mit der Verarbeitung meiner angegebenen Daten einverstanden",
+    "ACCEPT": "Ich bin mit der Verarbeitung meiner angegebenen Daten einverstanden.",
     "PRIVACY-LINK": "Weitere Informationen",
-    "PL_USER": "z.B. Max...",
-    "PL_NAME": "z.B. Musstermann...",
+    "PL_USER": "z.B. Max",
+    "PL_NAME": "z.B. Mustermann",
     "PL_MAIL": "z.B. max@mail.com",
     "PW_weak": "Zu schwach",
     "PW_accept": "Mittel",
     "PW_medium": "Gut",
     "PW_strong": "Stark",
-    "PL_PASSWORD": "Min. 5 verschiedene Zeichen...",
-    "HINT": "Tipp: Verwende Zahlen, Sonderzeichen...",
-    "PL_ORG": "z.B. edu-sharing...",
+    "PL_PASSWORD": "Min. 5 verschiedene Zeichen",
+    "HINT": "Tipp: Verwende Zahlen, Sonderzeichen, ...",
+    "PL_ORG": "z.B.",
     "BUTTON": "Registrieren",
-    "TOAST":"Die E-Mail wurde versendet",
-    "TOAST_DUPLICATE": "Diese E-Mail-Adresse wird bereits verwendet",
-    "TOAST_INVALID_MAIL": "Für diese E-Mail-Adresse wurde kein Account gefunden",
+    "TOAST":"Die E-Mail wurde versendet.",
+    "TOAST_DUPLICATE": "Diese E-Mail-Adresse wird bereits verwendet.",
+    "TOAST_INVALID_MAIL": "Für diese E-Mail-Adresse wurde kein Account gefunden.",
     "TOAST_INVALID_KEY": "Der Aktivierungscode wurde bereits verwendet oder ist ungültig",
     "DONE":{
-      "TITLE": "Fast fertig",
+      "TITLE": "Fast fertig!",
       "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
       "MAIL_INFO2": "geschickt.",
       "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie den Aktivierungscode, um die Registrierung abzuschließen.",
       "NO_MAIL": "Keine E-Mail erhalten?",
       "NO_MAIL_INFO": "Sehen Sie auch im Spam-Ordner nach.",
-      "SEND_MAIL": "Nochmal Senden",
+      "SEND_MAIL": "Erneut senden",
       "KEY_PL": "Aktivierungscode",
       "ACTIVATE": "Anmelden",
-      "ACTIVATE_HINT": "Sie haben den Code in einer Bestätigungsmail erhalten"
+      "ACTIVATE_HINT": "Sie haben den Code in einer Bestätigungsmail erhalten."
     },
     "REQUEST":{
-      "TITLE": "Daten vergessen?",
-      "INFO": "Geben Sie Ihre E-Mail Adresse an, um anschließend ein neues Passwort vergeben zu können.",
-      "PLACEHOLDER":"Ihre E-Mail Adresse",
+      "TITLE": "Passwort vergessen?",
+      "INFO": "Geben Sie Ihre E-Mail-Adresse an, um ein neues Passwort festzulegen.",
+      "PLACEHOLDER":"Ihre E-Mail-Adresse",
       "BUTTON":"Neues Passwort anfordern",
-      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie die Aktivierungscode, um ein neues Passwort zu vergeben."
+      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie den Aktivierungscode, um ein neues Passwort festzulegen."
     },
     "RESET":{
       "TITLE": "Passwort ändern",
-      "REST_INFO": "Geben Sie Ihr \n neues Passwort an",
+      "REST_INFO": "Geben Sie Ihr \n neues Passwort ein",
       "BUTTON": "Passwort ändern",
-      "TOAST": "Das Passwort wurde verändert"
+      "TOAST": "Das Passwort wurde verändert."
     }
   }
 }

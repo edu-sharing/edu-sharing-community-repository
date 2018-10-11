@@ -13,6 +13,7 @@
 				padding:20px;
 				background:#f6f6f6;
 				font-size: 12px;
+				min-width: 300px;
 			}
 			.content{
 				max-width:500px;
@@ -20,6 +21,9 @@
 				background:#fff;
 				box-shadow:0 2px 6px rgba(0,0,0,.5);
 				padding:20px;
+			}
+			.content img{
+				max-width: 100%;
 			}
 			.footer{
 				max-width:500px;
@@ -87,6 +91,15 @@
 			.center{
 				text-align:center;
 			}
+			@media only screen and (max-width: 400px)  {
+				body{
+					padding: 20px 0;
+				}
+				content{
+					width: 100%;
+				}
+
+			}
 		]]>
 		</style>
 	</template>
@@ -110,7 +123,7 @@
 		<subject>Account confirmation</subject>
 		<message><![CDATA[
 			<div class="center">
-				<h1>Hello {{firstName}} {{lastName}}!</h1>
+				<h1>Hello {{firstName}} {{lastName}},</h1>
 				<p>Thank you for your registration!</p>
 				</p>
 					Copy the link below in the registration form to complete the registration:
@@ -128,7 +141,7 @@
 		<subject>Password reset</subject>
 		<message><![CDATA[
 			<div class="center">
-				<h1>Hello {{firstName}} {{lastName}}!</h1>
+				<h1>Hello {{firstName}} {{lastName}},</h1>
 				<p>If you forgot your password for logging into<a href="{{url}}"> {{url}} </a>.</p>
 				<p>Click on this link to assign a new password.</p>
 				<a class="btn" href="{{link}}">Finish registration</a>

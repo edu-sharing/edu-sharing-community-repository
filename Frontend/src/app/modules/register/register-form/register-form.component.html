@@ -24,7 +24,7 @@
     </div>
     <div>
         <label for="organization">{{'REGISTER.ORGANIZATION' | translate}}</label>
-        <input [ngClass]="{'valid': info.organization.trim()}" type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}}" [(ngModel)]="info.organization"/>
+        <input [ngClass]="{'valid': info.organization.trim()}" type="text" name="organization" id="organization" placeholder="{{'REGISTER.PL_ORG' | translate}} {{'REGISTER.ORGANIZATION_TITLE' | translate}}" [(ngModel)]="info.organization"/>
     </div>
 </form>
 <div>

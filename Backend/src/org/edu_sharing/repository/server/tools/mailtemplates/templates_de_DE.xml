@@ -24,19 +24,20 @@
 		</message>
 	</template>
 	<template name="userRegister">
-		<subject>Bitte bestätigen Sie Ihre E-Mail Adresse</subject>
+		<subject>Bitte bestätigen Sie Ihre E-Mail-Adresse</subject>
 		<message><![CDATA[
 			<div class="center">
-				<h1>Hallo {{firstName}} {{lastName}}</h1>
+				<img src="{{image:/images/register/register-mail.png}}">
+				<h1>Hallo {{firstName}} {{lastName}},</h1>
 				<p>
-					Sie haben sich erfolgreich registriert.
+					Sie haben sich erfolgreich registriert!
 				</p>
-					Kopieren Sie den Code unten in das Registrierungs-Formular, um die Registrierung abzuschließen:
+					Kopieren Sie den folgenden Code in das Registrierungsformular, um die Registrierung abzuschließen.
 				<p>
 				</p>
 				<div class="center"><div class="input-field">{{key}}</div></div>
 				<br><br>
-				<p>oder klicken Sie auf folgenden Link, um automatisch zur Seite weitergeleitet zu werden.</p>
+				<p>Um sich automatisch anzumelden, klicken Sie auf &bdquo;E-Mail bestätigen&ldquo;.</p>
 				<br>
 				<a class="btn" href="{{link}}">E-MAIL BESTÄTIGEN</a>
 			</div>
@@ -47,15 +48,15 @@
 		<subject>Passwort zurücksetzen</subject>
 		<message><![CDATA[
 			<div class="center">
-				<h1>Hallo {{firstName}} {{lastName}}</h1>
-				<p>Sie haben Ihre Daten zur Anmeldung vergessen?
+				<img src="{{image:/images/register/register-mail.png}}">
+				<h1>Hallo {{firstName}} {{lastName}},</h1>
+				<p>Sie haben Ihr Passwort vergessen?
 				</p>
 				</p>
-					Kopieren Sie den Code unten in das Formular, um Ihr Passwort neu zu vergeben:
+					Kopieren Sie den folgenden Code in das Formular oder klicken Sie auf &bdquo;neues Passwort&ldquo; um ein neues Passwort festzulegen.
 				<p>
 				</p>
 				<div class="center"><div class="input-field">{{key}}</div></div>
-				<p>oder klicken Sie auf folgenden Link, um anschließend ein neues Passwort vergeben zu können:</p>
 				<br>
 				<a class="btn" href="{{link}}">neues Passwort</a>
 			</div>
