@@ -14,7 +14,7 @@
     "PW_medium": "Gut",
     "PW_strong": "Stark",
     "PL_PASSWORD": "Min. 5 verschiedene Zeichen",
-    "HINT": "Tipp: Verwende Zahlen, Sonderzeichen, ...",
+    "HINT": "Tipp: Verwende Zahlen, Sonderzeichen...",
     "PL_ORG": "z.B.",
     "BUTTON": "Registrieren",
     "TOAST":"Die E-Mail wurde versendet.",
@@ -24,19 +24,19 @@
     "TOAST_INVALID_RESET_KEY": "Der zuvor eingegebene Code ist abgelaufen oder ungültig",
     "DONE":{
       "TITLE": "Fast fertig!",
-      "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
-      "MAIL_INFO2": "geschickt.",
-      "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie den Aktivierungscode, um die Registrierung abzuschließen.",
+      "MAIL_INFO": "Wir haben eine Mail mit einem Link und einem Aktivierungscode \n an ",
+      "MAIL_INFO2": "gesendet.",
+      "MAIL_NOTE": "Um die Registrierung abzuschließen, müssen Sie die E-Mail nur noch bestätigen. Dazu können Sie entweder auf den enthaltenen Link klicken oder Sie kopieren den Aktivierungscode und fügen ihn hier ein.",
       "NO_MAIL": "Keine E-Mail erhalten?",
       "NO_MAIL_INFO": "Sehen Sie auch im Spam-Ordner nach.",
       "SEND_MAIL": "Erneut senden",
-      "KEY_PL": "Aktivierungscode",
+      "KEY_PL": "Aktivierungscode einfügen...",
       "ACTIVATE": "Anmelden",
       "ACTIVATE_HINT": "Sie haben den Code in einer Bestätigungsmail erhalten."
     },
     "REQUEST":{
       "TITLE": "Passwort vergessen?",
-      "INFO": "Geben Sie Ihre E-Mail-Adresse an, um ein neues Passwort festzulegen.",
+      "INFO": "Geben Sie Ihre E-Mail-Adresse ein, um ein neues Passwort festzulegen.",
       "PLACEHOLDER":"Ihre E-Mail-Adresse",
       "BUTTON":"Neues Passwort anfordern",
       "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie den Aktivierungscode, um ein neues Passwort festzulegen."
