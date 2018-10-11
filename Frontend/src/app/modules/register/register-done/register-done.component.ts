@@ -36,9 +36,22 @@ export class RegisterDoneComponent{
         this.onModify.emit();
     }
     public sendMail(){
-        this.register.resendMail(this.email).subscribe(()=>{
-            this.toast.toast("REGISTER.TOAST");
-        });
+        this.loading=true;
+        if(this.inputState=='done') {
+            this.register.resendMail(this.email).subscribe(() => {
+                this.toast.toast("REGISTER.TOAST");
+                this.loading=false;
+            },(error)=>{
+                this.loading=false;
+            });
+        }
+        else{
+            this.register.recoverPassword(this.email).subscribe(()=>{
+                this.loading=false;
+            },(error)=>{
+                this.loading=false;
+            });
+        }
     }
     constructor(private connector: RestConnectorService,
                 private toast: Toast,

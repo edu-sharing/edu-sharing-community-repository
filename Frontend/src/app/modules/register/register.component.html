@@ -27,7 +27,7 @@
             <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" tabindex="0" (keyup.enter)="registerForm.register()" (click)="registerForm.register()">{{'REGISTER.BUTTON' | translate }}</a>
             <a *ngIf="state=='request'" [class.disabled]="!request || !request.checkMail()" tabindex="0" (keyup.enter)="requestDone(request.email)" (click)="requestDone(request.email)" class="waves-effect waves-light btn">{{'REGISTER.REQUEST.BUTTON' | translate }}</a>
             <a *ngIf="state=='reset-password'" [class.disabled]="!resetPassword || !resetPassword.buttonCheck()" tabindex="0" (keyup.enter)="newPassword()" (click)="newPassword()" class="waves-effect waves-light btn">{{'REGISTER.RESET.BUTTON' | translate }}</a>
-            <a *ngIf="state=='done' || state=='done-reset' && registerDone" class="waves-effect waves-light btn" [class.disabled]="registerDone && !registerDone.keyInput.trim()" tabindex="0" (keyup.enter)="registerDone.activate(registerDone.keyInput)" (click)="registerDone.activate(registerDone.keyInput)">{{'REGISTER.DONE.ACTIVATE' | translate}}</a>
+            <a *ngIf="state=='done' || state=='done-reset' && registerDone" class="waves-effect waves-light btn" [class.disabled]="registerDone && !registerDone.keyInput.trim()" tabindex="0" (keyup.enter)="registerDone.activate(registerDone.keyInput)" (click)="registerDone.activate(registerDone.keyInput)">{{(status=='done' ? 'REGISTER.DONE.ACTIVATE' : 'NEXT') | translate}}</a>
         </div>
     </div>
 </div>

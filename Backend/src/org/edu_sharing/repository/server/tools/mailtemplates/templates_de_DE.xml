@@ -27,7 +27,7 @@
 		<subject>Bitte bestätigen Sie Ihre E-Mail-Adresse</subject>
 		<message><![CDATA[
 			<div class="center">
-				<img src="{{image:/images/register/register-mail.png}}">
+				<img src="{{image:/assets/images/register/register-mail.png}}">
 				<h1>Hallo {{firstName}} {{lastName}},</h1>
 				<p>
 					nur noch ein Schritt, um die Registrierung abzuschließen!
@@ -48,7 +48,7 @@
 		<subject>Passwort zurücksetzen</subject>
 		<message><![CDATA[
 			<div class="center">
-				<img src="{{image:/images/register/register-mail.png}}">
+				<img src="{{image:/assets/images/register/register-mail.png}}">
 				<h1>Hallo {{firstName}} {{lastName}},</h1>
 				<p>Sie haben Ihr Passwort vergessen?
 				</p>
