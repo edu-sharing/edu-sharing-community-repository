@@ -44,11 +44,8 @@ export class RegisterComponent{
     public linkRegister() {
         this.router.navigate([UIConstants.ROUTER_PREFIX + "register"]);
     }
-    public newPassword(password:string){
-    //    TODO: @Simon
-    //    newPassword zu den Account
-        this.toast.toast("RESET.TOAST");
-        this.router.navigate([UIConstants.ROUTER_PREFIX+"login"]);
+    public newPassword(){
+        this.resetPassword.newPassword();
     }
 
   constructor(private connector : RestConnectorService,
@@ -75,6 +72,11 @@ export class RegisterComponent{
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
             this.isLoading=false;
             setTimeout(()=>this.setParams());
+            this.connector.isLoggedIn().subscribe((data)=>{
+                if(data.statusCode=="OK"){
+                    UIHelper.goToDefaultLocation(this.router,this.configService);
+                }
+            });
     });
     }
 
@@ -89,8 +91,12 @@ export class RegisterComponent{
         this.route.params.subscribe((params)=>{
             if(params['email'])
                 this.registerDone.email=params['email'];
-            if(params['key'])
-                this.registerDone.keyUrl=params['key'];
+            if(params['key']) {
+                if(this.registerDone)
+                    this.registerDone.keyUrl = params['key'];
+                if(this.resetPassword)
+                    this.resetPassword.key = params['key'];
+            }
         });
     }
 

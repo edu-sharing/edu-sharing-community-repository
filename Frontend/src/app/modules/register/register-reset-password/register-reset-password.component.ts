@@ -18,6 +18,7 @@ import {PlatformLocation} from "@angular/common";
 
 import {CordovaService} from "../../../common/services/cordova.service";
 import {InputPasswordComponent} from "../../../common/ui/input-password/input-password.component";
+import {RestRegisterService} from "../../../common/rest/services/rest-register.service";
 
 @Component({
   selector: 'app-register-reset-password',
@@ -25,9 +26,10 @@ import {InputPasswordComponent} from "../../../common/ui/input-password/input-pa
   styleUrls: ['register-reset-password.component.scss']
 })
 export class RegisterResetPasswordComponent{
+    @Output() onLoading=new EventEmitter();
     public password_strength ="";
     public new_password ="";
-    public resetButton = false;
+    public key: string;
 
     public checkPassword(){
         this.password_strength = UIHelper.getPasswordStrengthString(this.new_password);
@@ -40,10 +42,22 @@ export class RegisterResetPasswordComponent{
         }
     }
     public newPassword(){
-      /*New Password setzen*/
+        this.onLoading.emit(true);
+        this.register.resetPassword(this.key,this.new_password).subscribe(()=>{
+            this.onLoading.emit(false);
+            this.toast.toast("REGISTER.RESET.TOAST");
+            this.router.navigate([UIConstants.ROUTER_PREFIX,"login"]);
+        },(error)=>{
+            this.onLoading.emit(false);
+            if(UIHelper.errorContains(error,"InvalidKeyException")) {
+                this.toast.error(null,"REGISTER.TOAST_INVALID_RESET_KEY");
+                this.router.navigate([UIConstants.ROUTER_PREFIX,"register","request"]);
+            }
+        });
     }
     constructor(private connector: RestConnectorService,
                 private toast: Toast,
+                private register: RestRegisterService,
                 private router: Router
     ) {
     }

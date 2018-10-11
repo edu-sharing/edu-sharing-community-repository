@@ -46,16 +46,21 @@ export class RegisterDoneComponent{
                 private router: Router
     ) {}
     private activate(keyUrl: string) {
-        this.register.activate(keyUrl).subscribe(()=>{
-            this.router.navigate([UIConstants.ROUTER_PREFIX+"workspace"]);
-        },(error:any)=>{
-            if(UIHelper.errorContains(error,"InvalidKeyException")){
-                this.toast.error(null,"REGISTER.TOAST_INVALID_KEY");
-            }
-            else {
-                this.toast.error(error);
-            }
-            this.loading=false;
-        });
+        if(this.inputState=='done') {
+            this.register.activate(keyUrl).subscribe(() => {
+                this.router.navigate([UIConstants.ROUTER_PREFIX + "workspace"]);
+            }, (error: any) => {
+                if (UIHelper.errorContains(error, "InvalidKeyException")) {
+                    this.toast.error(null, "REGISTER.TOAST_INVALID_KEY");
+                }
+                else {
+                    this.toast.error(error);
+                }
+                this.loading = false;
+            });
+        }
+        else{
+            this.router.navigate([UIConstants.ROUTER_PREFIX,"register","reset-password",this.keyInput]);
+        }
     }
 }
