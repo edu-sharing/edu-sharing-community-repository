@@ -326,7 +326,7 @@ small-collection{
   }
 }
 .contentSidenav{
-  margin-left: $sidenavWidth;
+  margin-left: calc(#{$sidenavWidth} + 10px);
   width:calc(100% - 20px - #{$sidenavWidth});
 }
 #sub {
