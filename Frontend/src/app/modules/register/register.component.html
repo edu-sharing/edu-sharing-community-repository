@@ -1,7 +1,7 @@
 <div class="register-bg"></div>
 <global-progress *ngIf="isLoading"></global-progress>
 <div [class.display-none]="isLoading" class="dialog darken valign-wrapper">
-    <div class="card center-card card-action header-high" [class.card-no-action]="state == 'done-reset'">
+    <div class="card center-card card-action header-high">
 
         <div class="card-content">
             <div *ngIf="state == 'register' || state=='request'" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
@@ -27,7 +27,7 @@
             <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" tabindex="0" (keyup.enter)="registerForm.register()" (click)="registerForm.register()">{{'REGISTER.BUTTON' | translate }}</a>
             <a *ngIf="state=='request'" [class.disabled]="!request || !request.checkMail()" tabindex="0" (keyup.enter)="requestDone(request.email)" (click)="requestDone(request.email)" class="waves-effect waves-light btn">{{'REGISTER.REQUEST.BUTTON' | translate }}</a>
             <a *ngIf="state=='reset-password'" [class.disabled]="!resetPassword || !resetPassword.buttonCheck()" tabindex="0" (keyup.enter)="newPassword()" (click)="newPassword()" class="waves-effect waves-light btn">{{'REGISTER.RESET.BUTTON' | translate }}</a>
-            <a *ngIf="state=='done' || state=='done-reset' && registerDone && registerDone.keyInput" class="waves-effect waves-light btn" [class.disabled]="registerDone && !registerDone.keyInput.trim()" tabindex="0" (keyup.enter)="registerDone.activate(registerDone.keyInput)" (click)="registerDone.activate(registerDone.keyInput)">{{'REGISTER.DONE.ACTIVATE' | translate}}</a>
+            <a *ngIf="state=='done' || state=='done-reset' && registerDone" class="waves-effect waves-light btn" [class.disabled]="registerDone && !registerDone.keyInput.trim()" tabindex="0" (keyup.enter)="registerDone.activate(registerDone.keyInput)" (click)="registerDone.activate(registerDone.keyInput)">{{'REGISTER.DONE.ACTIVATE' | translate}}</a>
         </div>
     </div>
 </div>
