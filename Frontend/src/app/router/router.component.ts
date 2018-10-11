@@ -102,6 +102,7 @@ export var ROUTES=[
   // register
     { path: UIConstants.ROUTER_PREFIX+'register', component: RegisterComponent },
     { path: UIConstants.ROUTER_PREFIX+'register/:status', component: RegisterComponent },
+    { path: UIConstants.ROUTER_PREFIX+'register/:status/:key', component: RegisterComponent },
     { path: UIConstants.ROUTER_PREFIX+'register/:status/:key/:email', component: RegisterComponent },
   // admin
     { path: UIConstants.ROUTER_PREFIX+'admin', component: AdminComponent },

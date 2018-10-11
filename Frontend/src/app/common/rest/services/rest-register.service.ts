@@ -27,4 +27,11 @@ export class RestRegisterService extends AbstractRestService{
         let query = this.connector.createUrl("register/:version/recover/:mail",null,[[":mail",mail]]);
         return this.connector.post(query, null, this.connector.getRequestOptions());
     }
+    public resetPassword = (key:string,password:string): Observable<Response> => {
+        let query = this.connector.createUrl("register/:version/reset/:key/:password",null,[
+            [":key",key],
+            [":password",password]
+        ]);
+        return this.connector.post(query, null, this.connector.getRequestOptions());
+    }
 }

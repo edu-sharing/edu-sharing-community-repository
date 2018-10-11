@@ -16,7 +16,7 @@
                 <app-register-form [class.display-none]="!(state=='register')" (onLoading)="isLoading=$event" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
                 <app-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
                 <app-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" (onLoading)="isLoading=$event" #request></app-register-request>
-                <app-register-reset-password *ngIf="state=='reset-password'"  #resetPassword></app-register-reset-password>
+                <app-register-reset-password *ngIf="state=='reset-password'" (onLoading)="isLoading=$event" #resetPassword></app-register-reset-password>
                 <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset'" class="register">
                     {{'LOGIN.REGISTER_TEXT' | translate}}
                     <a (click)="linkRegister()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
@@ -26,7 +26,7 @@
         <div class="card-action">
             <a *ngIf="state=='register'" class="waves-effect waves-light btn" [class.disabled]="!registerForm || !registerForm.canRegister()" tabindex="0" (keyup.enter)="registerForm.register()" (click)="registerForm.register()">{{'REGISTER.BUTTON' | translate }}</a>
             <a *ngIf="state=='request'" [class.disabled]="!request || !request.checkMail()" tabindex="0" (keyup.enter)="requestDone(request.email)" (click)="requestDone(request.email)" class="waves-effect waves-light btn">{{'REGISTER.REQUEST.BUTTON' | translate }}</a>
-            <a *ngIf="state=='reset-password'" [class.disabled]="!resetPassword || !resetPassword.buttonCheck()" tabindex="0" (keyup.enter)="newPassword(resetPassword.new_password)" (click)="newPassword(resetPassword.new_password)" class="waves-effect waves-light btn">{{'REGISTER.RESET.BUTTON' | translate }}</a>
+            <a *ngIf="state=='reset-password'" [class.disabled]="!resetPassword || !resetPassword.buttonCheck()" tabindex="0" (keyup.enter)="newPassword()" (click)="newPassword()" class="waves-effect waves-light btn">{{'REGISTER.RESET.BUTTON' | translate }}</a>
             <a *ngIf="state=='done' || state=='done-reset' && registerDone && registerDone.keyInput" class="waves-effect waves-light btn" [class.disabled]="registerDone && !registerDone.keyInput.trim()" tabindex="0" (keyup.enter)="registerDone.activate(registerDone.keyInput)" (click)="registerDone.activate(registerDone.keyInput)">{{'REGISTER.DONE.ACTIVATE' | translate}}</a>
         </div>
     </div>

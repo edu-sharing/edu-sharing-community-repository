@@ -21,6 +21,7 @@
     "TOAST_DUPLICATE": "Diese E-Mail-Adresse wird bereits verwendet",
     "TOAST_INVALID_MAIL": "Für diese E-Mail-Adresse wurde kein Account gefunden",
     "TOAST_INVALID_KEY": "Der Aktivierungscode wurde bereits verwendet oder ist ungültig",
+    "TOAST_INVALID_RESET_KEY": "Der zuvor eingegebene Code ist abgelaufen oder ungültig",
     "DONE":{
       "TITLE": "Fast fertig",
       "MAIL_INFO": "Wir haben Ihnen eine E-Mail an ",
