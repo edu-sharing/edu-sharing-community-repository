@@ -30,14 +30,14 @@
 				<img src="{{image:/images/register/register-mail.png}}">
 				<h1>Hallo {{firstName}} {{lastName}},</h1>
 				<p>
-					Sie haben sich erfolgreich registriert!
+					nur noch ein Schritt, um die Registrierung abzuschließen!
 				</p>
-					Kopieren Sie den folgenden Code in das Registrierungsformular, um die Registrierung abzuschließen.
+					Kopieren Sie diesen Aktivierungscode und fügen ihn in das Formular ein, um die Registrierung abzuschließen:
 				<p>
 				</p>
 				<div class="center"><div class="input-field">{{key}}</div></div>
 				<br><br>
-				<p>Um sich automatisch anzumelden, klicken Sie auf &bdquo;E-Mail bestätigen&ldquo;.</p>
+				<p>oder klicken Sie auf folgenden Link, um automatisch registriert und weitergeleitet zu werden:</p>
 				<br>
 				<a class="btn" href="{{link}}">E-MAIL BESTÄTIGEN</a>
 			</div>
