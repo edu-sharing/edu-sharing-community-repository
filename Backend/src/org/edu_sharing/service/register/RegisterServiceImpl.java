@@ -74,11 +74,7 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     public boolean userExists(String id) throws Exception {
-        try {
-            return personService.personExists(id);
-        }catch(AuthenticationCredentialsNotFoundException e){
-            return false;
-        }
+        return personService.personExists(id);
     }
     public boolean userExists(RegisterInformation info) throws Exception {
         return userExists(info.getEmail());
@@ -185,10 +181,14 @@ public class RegisterServiceImpl implements RegisterService {
     }
     @Override
     public void register(RegisterInformation info) throws DuplicateAuthorityException, Throwable{
-       if(userExists(info))
-           throw new DuplicateAuthorityException();
-        String value = addToCacheNoDuplicate(info,registerUserCache);
-        sendRegisterMail(info,value);
+        AuthenticationUtil.runAsSystem(()->{
+            if(userExists(info))
+                throw new DuplicateAuthorityException();
+            String value = addToCacheNoDuplicate(info,registerUserCache);
+            sendRegisterMail(info,value);
+            return null;
+        });
+
     }
     @Override
     public boolean resendRegisterMail(String mail) throws Exception {
