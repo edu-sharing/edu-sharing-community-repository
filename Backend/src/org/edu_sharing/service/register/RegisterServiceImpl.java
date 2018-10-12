@@ -181,13 +181,17 @@ public class RegisterServiceImpl implements RegisterService {
     }
     @Override
     public void register(RegisterInformation info) throws DuplicateAuthorityException, Throwable{
-        AuthenticationUtil.runAsSystem(()->{
-            if(userExists(info))
-                throw new DuplicateAuthorityException();
-            String value = addToCacheNoDuplicate(info,registerUserCache);
-            sendRegisterMail(info,value);
-            return null;
-        });
+        try {
+            AuthenticationUtil.runAsSystem(() -> {
+                if (userExists(info))
+                    throw new DuplicateAuthorityException();
+                String value = addToCacheNoDuplicate(info, registerUserCache);
+                sendRegisterMail(info, value);
+                return null;
+            });
+        }catch(RuntimeException e){
+            throw e.getCause();
+        }
 
     }
     @Override
