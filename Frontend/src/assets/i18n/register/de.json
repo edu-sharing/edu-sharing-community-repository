@@ -18,8 +18,8 @@
     "PL_ORG": "z.B.",
     "BUTTON": "Registrieren",
     "TOAST":"Die E-Mail wurde versendet.",
-    "TOAST_DUPLICATE": "Diese E-Mail-Adresse wird bereits verwendet.",
-    "TOAST_INVALID_MAIL": "Für diese E-Mail-Adresse wurde kein Account gefunden.",
+    "TOAST_DUPLICATE": "Diese E-Mail Adresse wird bereits verwendet.",
+    "TOAST_INVALID_MAIL": "Für diese E-Mail Adresse wurde kein Account gefunden.",
     "TOAST_INVALID_KEY": "Der Aktivierungscode wurde bereits verwendet oder ist ungültig",
     "TOAST_INVALID_RESET_KEY": "Der zuvor eingegebene Code ist abgelaufen oder ungültig",
     "DONE":{
@@ -36,8 +36,8 @@
     },
     "REQUEST":{
       "TITLE": "Passwort vergessen?",
-      "INFO": "Geben Sie Ihre E-Mail-Adresse ein, um ein neues Passwort festzulegen.",
-      "PLACEHOLDER":"Ihre E-Mail-Adresse",
+      "INFO": "Geben Sie Ihre E-Mail Adresse ein, um ein neues Passwort festzulegen.",
+      "PLACEHOLDER":"Ihre E-Mail Adresse",
       "BUTTON":"Neues Passwort anfordern",
       "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie den Aktivierungscode, um ein neues Passwort festzulegen."
     },

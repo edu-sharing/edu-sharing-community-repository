@@ -24,22 +24,21 @@
 		</message>
 	</template>
 	<template name="userRegister">
-		<subject>Bitte bestätigen Sie Ihre E-Mail-Adresse</subject>
+		<subject>Bitte bestätigen Sie Ihren Account</subject>
 		<message><![CDATA[
 			<div class="center">
 				<img src="{{image:/assets/images/register/register-mail.png}}">
 				<h1>Hallo {{firstName}} {{lastName}},</h1>
 				<p>
 					nur noch ein Schritt, um die Registrierung abzuschließen!
+					<br/>Klicken Sie auf den unteren Button, um die E-Mail Adresse zu bestätigen.
 				</p>
-					Kopieren Sie diesen Aktivierungscode und fügen ihn in das Formular ein, um die Registrierung abzuschließen:
+				<a class="btn" href="{{link}}">ACCOUNT BESTÄTIGEN</a>
 				<p>
+					Um die Registrierung abzuschließen, können Sie auch den Aktivierungscode kopieren und ihn in das Formular einfügen.
+				</p>
 				</p>
 				<div class="center"><div class="input-field">{{key}}</div></div>
-				<br><br>
-				<p>oder klicken Sie auf folgenden Link, um automatisch registriert und weitergeleitet zu werden:</p>
-				<br>
-				<a class="btn" href="{{link}}">E-MAIL BESTÄTIGEN</a>
 			</div>
 		]]>
 		</message>
@@ -50,10 +49,10 @@
 			<div class="center">
 				<img src="{{image:/assets/images/register/register-mail.png}}">
 				<h1>Hallo {{firstName}} {{lastName}},</h1>
-				<p>Sie haben Ihr Passwort vergessen?
+				<p>Du habst dein Passwort vergessen?
 				</p>
 				</p>
-					Kopieren Sie den folgenden Code in das Formular oder klicken Sie auf &bdquo;neues Passwort&ldquo; um ein neues Passwort festzulegen.
+					Kopiere den folgenden Code in das Formular oder klicke auf &bdquo;neues Passwort&ldquo; um ein neues Passwort festzulegen.
 				<p>
 				</p>
 				<div class="center"><div class="input-field">{{key}}</div></div>
