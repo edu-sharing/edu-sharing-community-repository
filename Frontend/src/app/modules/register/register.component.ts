@@ -64,13 +64,16 @@ export class RegisterComponent{
               if (params['status'] == "done" || params['status'] == "done-reset" || params['status'] == "request" || params['status'] == "reset-password") {
                   this.state = params['status'];
               } else{
-                  this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+                  this.router.navigate([UIConstants.ROUTER_PREFIX,"register"]);
               }
           }
       });
     Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
             this.isLoading=false;
+            if(!this.configService.instant("register.local",true)) {
+                this.router.navigate([UIConstants.ROUTER_PREFIX,"login"]);
+            }
             setTimeout(()=>this.setParams());
             this.connector.isLoggedIn().subscribe((data)=>{
                 if(data.statusCode=="OK"){
