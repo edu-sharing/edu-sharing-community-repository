@@ -20,7 +20,7 @@
        tabindex="0"
        (keyup.enter)="showDropdown()"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="optionsMenu.length"><a><i class="material-icons">more_vert</i></a></div>
+       *ngIf="canShowDropdown()"><a><i class="material-icons">more_vert</i></a></div>
 
   <div *ngFor="let option of optionsAlways.slice().reverse();let i=index;"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"

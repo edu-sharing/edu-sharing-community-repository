@@ -135,7 +135,7 @@ $sidenavWidth:300px;
     width: calc(100% - 20px);
   }
   .contentSidenav{
-    margin-left: $sidenavWidth;
+    margin-left: $sidenavWidth + 10px;
     width:calc(100% - 20px - #{$sidenavWidth});
   }
 }
@@ -618,6 +618,9 @@ div.dialog.darken {
     .content_wrapper {
         margin: 0;
     }
+  .contentSidenav{
+    width:calc(100% - 20px);
+  }
 
     #results {
         width: 100%;

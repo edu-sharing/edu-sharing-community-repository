@@ -219,7 +219,8 @@ export class OerComponent {
       this.render_options=[];
       this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
       this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.nodes[this.MATERIALS]);
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id]);
+        this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,"oer");
+        this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id]);
     }
    }
   private downloadNode(node:Node=this.displayedNode) {

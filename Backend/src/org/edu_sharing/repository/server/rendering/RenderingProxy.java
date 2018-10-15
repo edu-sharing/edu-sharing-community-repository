@@ -384,7 +384,7 @@ public class RenderingProxy extends HttpServlet {
 			HttpSession session = req.getSession(true);
 			if(Long.parseLong(ts) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
 				try {
-					Usage usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), nodeId, req.getParameter("resource_id"));
+					Usage usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), parentId, req.getParameter("resource_id"));
 					if(usage==null)
 						throw new SecurityException("No usage found for course id "+req.getParameter("course_id")+" and resource id "+req.getParameter("resource_id"));
 					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, parentId);

@@ -61,7 +61,7 @@ public class NgServlet extends HttpServlet {
 	}
 
 	private String addToHead(String head, String html) {
-		int pos=html.indexOf("<head>")+6;
+		int pos=html.indexOf("</head>");
 		html=html.substring(0,pos)+head+html.substring(pos);
 		return html;
 	}

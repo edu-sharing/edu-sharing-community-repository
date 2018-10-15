@@ -410,27 +410,16 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			mdsId = CCConstants.metadatasetdefault_id;
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(appInfo, mdsId,locale);
 		
-		HashMap<String, String[]> props2 = new HashMap<String, String[]>();
-		for(String key : props.keySet()){			
+		HashMap<String, String[]> propsConverted = new HashMap<String, String[]>();
+		for(String key : props.keySet()){
 			String keyLocal=CCConstants.getValidLocalName(key);
 			
 			if(props.get(key) == null) continue;
 			
 			String[] values=new ValueTool().getMultivalue(props.get(key).toString());
-			
-			if (values!=null && values.length > 0){
-				int i=0;
-				for(String value :values){
-					HashMap<String, Object> vcard = VCardConverter.getVCardHashMap(type, key, value);
-					if(vcard!=null)
-						values[i]=VCardConverter.getNameForVCard(key,vcard);
-					i++;
-				}
-			}
-			
-			props2.put(keyLocal, values);
+			propsConverted.put(keyLocal, values);
 		}
-		rir.setMdsTemplate(new MetadataTemplateRenderer(mds,props2).render("io_render"));
+		rir.setMdsTemplate(new MetadataTemplateRenderer(mds,propsConverted).render("io_render"));
 	}
 
 	String getHeaderValue(String key, MessageContext msgContext) throws SOAPException, AxisFault{
