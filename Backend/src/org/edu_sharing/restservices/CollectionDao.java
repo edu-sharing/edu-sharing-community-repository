@@ -133,6 +133,7 @@ public class CollectionDao {
 								NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao,originalId);
 								node.setCreatedBy(nodeDaoOriginal.asNode().getCreatedBy());
 							}catch(Throwable t){
+								collRef.setOriginalId(null);
 								// original maybe deleted
 							}
 							return null;
