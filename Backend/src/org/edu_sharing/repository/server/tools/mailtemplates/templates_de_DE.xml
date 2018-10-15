@@ -49,15 +49,16 @@
 			<div class="center">
 				<img src="{{image:/assets/images/register/register-mail.png}}">
 				<h1>Hallo {{firstName}} {{lastName}},</h1>
-				<p>Du habst dein Passwort vergessen?
+				<p>Sie haben den Passwort vergessen?
 				</p>
 				</p>
-					Kopiere den folgenden Code in das Formular oder klicke auf &bdquo;neues Passwort&ldquo; um ein neues Passwort festzulegen.
-				<p>
+					Klicken Sie auf den unteren Button, um ein neues Passwort festzulegen.
 				</p>
+				<a class="btn" href="{{link}}">neues Passwort</a>
+				<p>Alternativ, können Sie auch den Aktivierungscode kopieren und ihn in das Formular einfügen.</p>
 				<div class="center"><div class="input-field">{{key}}</div></div>
 				<br>
-				<a class="btn" href="{{link}}">neues Passwort</a>
+				
 			</div>
 		]]>
 		</message>
