@@ -45,18 +45,20 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         if(authorityName==null ||authorityName.equals(ApplicationInfoList.getHomeRepository().getGuest_username())){
             return false;
         }
-        return addToDatabase(TRACKING_INSERT_USER,statement -> {
-            statement.setString(1,super.getTrackedUsername(authorityName));
-            statement.setTimestamp(2,new Timestamp(System.currentTimeMillis()));
-            statement.setString(3,type.name());
-            JSONObject json = buildJson(authorityName, type);
-            PGobject obj = new PGobject();
-            obj.setType("json");
-            if(json!=null)
-                obj.setValue(json.toString());
-            statement.setObject(4, obj);
+        return AuthenticationUtil.runAsSystem(()-> {
+            return addToDatabase(TRACKING_INSERT_USER, statement -> {
+                statement.setString(1, super.getTrackedUsername(authorityName));
+                statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                statement.setString(3, type.name());
+                JSONObject json = buildJson(authorityName, type);
+                PGobject obj = new PGobject();
+                obj.setType("json");
+                if (json != null)
+                    obj.setValue(json.toString());
+                statement.setObject(4, obj);
 
-            return true;
+                return true;
+            });
         });
 
     }
@@ -64,20 +66,22 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     @Override
     public boolean trackActivityOnNode(NodeRef nodeRef, EventType type) {
         super.trackActivityOnNode(nodeRef,type);
-        return addToDatabase(TRACKING_INSERT_NODE,statement -> {
-            statement.setLong(1,(Long)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
-            statement.setString(2,nodeRef.getId());
-            statement.setString(3,super.getTrackedUsername(null));
-            statement.setDate(4,new Date(System.currentTimeMillis()));
-            statement.setString(5,type.name());
-            JSONObject json = buildJson(nodeRef, type);
-            PGobject obj = new PGobject();
-            obj.setType("json");
-            if(json!=null)
-                obj.setValue(json.toString());
-            statement.setObject(6, obj);
+        return AuthenticationUtil.runAsSystem(()-> {
+            return addToDatabase(TRACKING_INSERT_NODE, statement -> {
+                statement.setLong(1, (Long) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
+                statement.setString(2, nodeRef.getId());
+                statement.setString(3, super.getTrackedUsername(null));
+                statement.setDate(4, new Date(System.currentTimeMillis()));
+                statement.setString(5, type.name());
+                JSONObject json = buildJson(nodeRef, type);
+                PGobject obj = new PGobject();
+                obj.setType("json");
+                if (json != null)
+                    obj.setValue(json.toString());
+                statement.setObject(6, obj);
 
-            return true;
+                return true;
+            });
         });
     }
 
