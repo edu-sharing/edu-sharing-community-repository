@@ -137,7 +137,7 @@ public class MetadataTemplateRenderer {
 								"'>";
 						if(link!=null)
 							value+="</a>";
-						value+="<div class='licenseName'>" +getLicenseName(licenseName) +"</div>";
+						value+="<div class='licenseName'>" +getLicenseName(licenseName,properties) +"</div>";
 
 						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName) && properties.containsKey(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))) {
 							String licenseDescription=properties.get(CCConstants.getValidLocalName(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION))[0];
@@ -213,7 +213,7 @@ public class MetadataTemplateRenderer {
 		html+="</div></div>";
 		return html;
 	}
-	private String getLicenseName(String licenseName) {
+	private String getLicenseName(String licenseName, Map<String, String[]> properties) {
 		if(licenseName==null || licenseName.isEmpty())
 			licenseName="NONE";
 
@@ -223,7 +223,24 @@ public class MetadataTemplateRenderer {
 		if(licenseName.equals(CCConstants.COMMON_LICENSE_PDM)){
 			licenseName=CCConstants.COMMON_LICENSE_CC_ZERO;
 		}
-		return I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE."+licenseName+"_NAME");
+		String name=I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE."+licenseName+"_NAME");
+		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
+			String[] version=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION));
+			String data="";
+			if(version!=null && version.length>0 && version[0]!=null && !version[0].isEmpty()){
+				name+=" ("+version[0];
+				try{
+					if(Double.parseDouble(version[0])<4.0){
+						String[] locale=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE));
+						if(locale!=null && locale.length>0 && locale[0]!=null && !locale[0].isEmpty()) {
+							name += " - " + I18nAngular.getTranslationAngular("common","LANGUAGE."+locale[0]);
+						}
+					}
+				}catch(Throwable t){}
+				name+=")";
+			}
+		}
+		return name;
 	}
 	private String getLicenseDescription(String licenseName) {
 		if(licenseName==null || licenseName.isEmpty())
