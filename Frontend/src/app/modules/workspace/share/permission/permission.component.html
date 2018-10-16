@@ -1,6 +1,6 @@
 <div class="container" [class.added]="added">
 <div class="icon"><i class="type material-icons">{{_permission.authority.authorityType=='USER' ? "person" : _permission.authority.authorityType=='LINK' ? "link" : "group"}}{{added ? "_add" : "" }}</i></div>
-<div class="name">
+<div class="name" title="{{_permission | permissionName}}">
   <span class="primary">{{_permission | permissionName}}</span>
   <span class="secondary">{{_permission | permissionName:{field:'secondary'} }}</span>
 </div>
