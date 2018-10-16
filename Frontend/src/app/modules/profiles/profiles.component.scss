@@ -50,9 +50,10 @@ $path:'../../../assets/images/';
         left:-3px;
       }
     }
-    /*.edit-area{
+    .edit-area{
       cursor: pointer;
-    }*/
+      z-index: 2;
+    }
     .editAvatar{
       position: absolute;
       left: calc(50% + 60px);
