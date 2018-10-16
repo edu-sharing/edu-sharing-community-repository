@@ -14,6 +14,8 @@
     <img *ngIf="edit && avatarFile" class="profile-background" [src]="avatarImage">
     <a class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
     <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i class="material-icons">close</i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
+    <diV *ngIf="isMe && !edit && editProfile" class="profile-background edit-area" (click)="beginEdit()"></diV>
+    <!--<div *ngIf="isMe && edit" (click)="edit=false" class="profile-background edit-area"></div>-->
     <user-avatar *ngIf="!edit"
      [user]="user"
     ></user-avatar>
@@ -23,9 +25,10 @@
     ></user-avatar>
     <div *ngIf="edit" class="editAvatar">
       <input #avatar type="file" (change)="updateAvatar($event)" accept="image/*" class="hide">
-      <i class="material-icons clickable" (click)="avatar.click()">edit</i>
+      <i class="material-icons clickable new-avatar-pic" (click)="avatar.click()">photo_camera</i>
       <i *ngIf="hasAvatar()" class="material-icons clickable" (click)="clearAvatar()">delete</i>
     </div>
+
     <div *ngIf="!edit">
       <div class="name">{{user | authorityName}}</div>
       <div class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>

@@ -50,12 +50,35 @@ $path:'../../../assets/images/';
         left:-3px;
       }
     }
+    /*.edit-area{
+      cursor: pointer;
+    }*/
     .editAvatar{
       position: absolute;
       left: calc(50% + 60px);
       top: 85px;
+      user-select: none;
       >i{
-        padding:0 20px;
+        padding: 20px;
+        display: initial;
+        cursor: pointer;
+      }
+      .new-avatar-pic{
+        left: -120px;
+        font-size: 70px;
+        //opacity: 0.8;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        position: absolute;
+        top: -45px;
+        padding: 25px;
+        display: inline-table;
+        color: rgb(56, 56, 56);
+
+        &:hover{
+          /*background: black;
+          color: white;*/
+        }
       }
     }
   }
