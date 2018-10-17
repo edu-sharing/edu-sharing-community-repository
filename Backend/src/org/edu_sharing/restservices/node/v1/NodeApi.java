@@ -1773,7 +1773,8 @@ public class NodeApi  {
     	try {
 		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
 	    	NodePermissionEntry response = new NodePermissionEntry(); 
 	    	
