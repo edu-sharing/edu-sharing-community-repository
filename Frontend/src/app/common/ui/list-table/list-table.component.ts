@@ -143,7 +143,21 @@ export class ListTableComponent implements EventListener{
    * The event onAddElement will be called when the user selects this element
    */
   @Input() addElement : AddElement;
-  @Input() hasCheckbox : boolean;
+
+  private _hasCheckbox:boolean;
+  @Input() set hasCheckbox(hasCheckbox : boolean){
+    this._hasCheckbox=hasCheckbox;
+    if(!hasCheckbox){
+      // use a timeout to prevent a ExpressionChangedAfterItHasBeenCheckedError in the parent component
+      setTimeout(()=> {
+          this.selectedNodes = [];
+          this.onSelectionChanged.emit([]);
+      });
+    }
+  }
+  get hasCheckbox(){
+    return this._hasCheckbox;
+  }
   /**
    * Is a heading in table mode shown (when disabled, no sorting possible)
    * @type {boolean}
