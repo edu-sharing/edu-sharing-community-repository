@@ -66,7 +66,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             catch(AccessDeniedException|InsufficientPermissionException t)
             {
                 // catch exception, check
-                logger.info("Method threw "+t.getMessage()+", will check signature for node "+nodeId);
+                logger.info("Method threw "+t.getMessage()+", will check signature");
                 return runAsSystem(nodeId,invocation);
             }
         }
@@ -110,7 +110,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         return invocation.proceed();
     }
 
-    private static boolean MCAlfrescoAPIClienthasSignature(String nodeId) {
+    private static boolean hasSignature(String nodeId) {
         if(Context.getCurrentInstance()==null)
             return false;
         String authSingleUseNodeId = Context.getCurrentInstance().getSessionAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
