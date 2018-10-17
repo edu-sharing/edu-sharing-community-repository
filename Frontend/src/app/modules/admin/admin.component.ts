@@ -173,10 +173,11 @@ export class AdminComponent {
           return;
         }
         this.globalProgress=false;
-        this.tab='INFO';
         this.route.queryParams.subscribe((data:any)=>{
             if(data['mode'])
                 this.tab=data['mode'];
+            else
+              this.tab='INFO';
         });
         this.showWarning=true;
         this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
