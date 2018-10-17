@@ -364,7 +364,7 @@
 				<icon>description</icon>
 				<html><![CDATA[
 			  <preview>
-              <cm:name>
+              <cm:name caption="{{cm_name_map}}" placeholder="{{cm_name_map_placeholder}}">
               <template>
 				]]></html>
 			</template>
