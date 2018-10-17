@@ -898,7 +898,9 @@ export class SearchComponent {
       this.applyParameters(this.mdsRef.saveValues());
     }));
     if(this.applyMode){
-      let apply=new OptionItem('APPLY','redo',(node:Node)=>NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl));
+      let apply=new OptionItem('APPLY','redo',(node:Node)=>{
+        NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl)
+      });
       this.savedSearchOptions.push(apply);
     }
     else{
@@ -954,7 +956,7 @@ export class SearchComponent {
   }
   private loadSavedSearchNode(node:Node){
     this.sidenavTab=0;
-    UIHelper.routeToSearchNode(this.router,node);
+    UIHelper.routeToSearchNode(this.router,this.searchService,node);
     this.currentSavedSearch=node;
   }
   private goToSaveSearchWorkspace() {
