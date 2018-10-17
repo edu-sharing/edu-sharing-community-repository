@@ -59,7 +59,6 @@ export class Translation  {
             else if (data.indexOf(browserLang) != -1) {
               language = browserLang;
             }
-            console.log(language);
             if(!useStored)
               storage.set("language", language);
             if(language=="none"){
@@ -146,7 +145,6 @@ export class TranslationLoader implements TranslateLoader {
   public getTranslation(lang: string): Observable<any> {
     //return this.http.get(`${this.prefix}/common/${lang}${this.suffix}`)
     //  .map((res: Response) => res.json());
-      console.log(lang);
     if(lang=="none"){
         return new Observable<any>((observer : Observer<any>) => {
             observer.next({});
