@@ -93,7 +93,7 @@ export class UIHelper{
 
   static routeToSearchNode(router: Router, node: Node) {
     let converted=UIHelper.convertSearchParameters(node);
-    router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{query:converted.query,savedQuery:node.ref.id,repository:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],mds:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],parameters:JSON.stringify(converted.parameters)}});
+    router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{query:converted.query,repository:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],mds:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],parameters:JSON.stringify(converted.parameters)}});
   }
     public static goToCollection(router:Router,node:Node,extras:NavigationExtras={}) {
         extras.queryParams={id:node.ref.id};
