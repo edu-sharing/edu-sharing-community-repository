@@ -59,7 +59,7 @@
   (onLinkSelected)="addChildobjectLink($event)"
 ></workspace-file-upload-select>
 <modal-dialog
-              [priority]="2"
+              [priority]="1 + priority"
               [title]="dialogTitle"
               [message]="dialogMessage"
               [isCancelable]="true"
