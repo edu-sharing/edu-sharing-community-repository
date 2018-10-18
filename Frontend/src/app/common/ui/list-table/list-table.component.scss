@@ -511,6 +511,11 @@ $orderAnimationTime:$transitionNormal*5;
 .rowInner{
   max-height:1.5rem;
   overflow: hidden;
+  flex-grow:1;
+}
+.row-group{
+  display: flex;
+  align-items: center;
 }
 .cardSmallList{
   .row_1 .rowInner{
@@ -708,15 +713,11 @@ $orderAnimationTime:$transitionNormal*5;
 .cardList .row_4{
   float:left;
 }
-.cardList .childobjectCount{
-  position: absolute;
-  z-index: 1;
-  top:8px;
-  right:45px;
+.childobjectCount{
   background-color: #eee;
   border-radius:15px;
   width:45px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   padding:2px;
@@ -724,6 +725,15 @@ $orderAnimationTime:$transitionNormal*5;
     font-size: 8pt;
     margin-left: 4px;
   }
+}
+.row-group .childobjectCount{
+  margin-left: 5px;
+}
+.cardList .childobjectCount{
+  position: absolute;
+  z-index: 1;
+  top:8px;
+  right:45px;
 }
 .cardList .preview{
   height:160px;
@@ -968,7 +978,7 @@ $orderAnimationTime:$transitionNormal*5;
   }
   .cardList .childobjectCount {
     right:auto;
-    left:90px;
+    left:15px;
     top:23px;
   }
   .cardList .previewCollection{
