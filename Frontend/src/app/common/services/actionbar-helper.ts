@@ -46,7 +46,7 @@ export class ActionbarHelperService{
       }
     }
     if(type=='CREATE_VARIANT') {
-      if (NodeHelper.allFiles(nodes) && !this.connector.getCurrentLogin().isGuest) {
+      if (NodeHelper.allFiles(nodes) && nodes && nodes.length==1 && !this.connector.getCurrentLogin().isGuest) {
         if(nodes && nodes.length && this.connectors.connectorSupportsEdit(nodes[0])){
             option = new OptionItem("WORKSPACE.OPTION.VARIANT_OPEN", "call_split", callback);
         }
