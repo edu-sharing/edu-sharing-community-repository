@@ -68,22 +68,34 @@
       "SYSTEM_CHECKS":"Allgemeine Systemtests",
       "CHECK":{
         "RENDERING":{
-          "TITLE":"Repository + Renderservice Version",
+          "TITLE":"Repository + Renderingservice Version",
           "STATUS_OK":"Version beider Systeme stimmt überein: {{repository}}",
-          "STATUS_FAIL":"Version von Repository ({{repository}}) und Renderservice ({{renderservice}}) stimmen nicht überein oder Renderservice wurde nicht gefunden",
-          "SOLUTION":"Überprüfen Sie, ob ein Renderservice angebunden ist (Quellen) und ob die korrekte Version installiert ist"
+          "STATUS_FAIL":"Version von Repository ({{repository}}) und Renderingservice ({{renderservice}}) stimmen nicht überein oder Renderingservice wurde nicht gefunden. Inhalte werden möglicherweise falsch oder gar nicht angezeigt",
+          "SOLUTION":"Überprüfen Sie, ob ein Renderingservice angebunden ist (Quellen) und ob die korrekte Version installiert ist"
         },
         "COMPANY_HOME":{
           "TITLE":"Freigabe-Zustand des Hauptverzeichnisses",
           "STATUS_OK":"Das Hauptverzeichnis ist aktuell nicht öffentlich sichtbar und alle darunterliegende Verzeichnisse können beliebig veröffentlicht werden",
           "STATUS_FAIL":"Das Hauptverzeichnis ist öffentlich sichtbar und alle neu erstellten Dateien und Ordner, unabhängig vom Ort, können potentiell von allen Nutzern abgerufen werden",
-          "SOLUTION":"Navigieren Sie als Administrator zum \"Firmen-Home\" und entfernen Sie die öffentliche Freigabe. Überprüfen Sie anschließend, dass alle öffentlich verfügbaren Daten weiterhin abrufbar sind"
+          "SOLUTION":"Navigieren Sie als Administrator zum \"Firmen-Home\" und entfernen Sie die öffentliche Freigabe. Überprüfen Sie anschließend, dass alle Daten, die öffentlich verfügbar sein sollen, weiterhin abrufbar sind"
         },
         "JOBS_RUNNING":{
           "TITLE":"Laufende Hintergrundaufgaben",
           "STATUS_OK":"Aktuell sind keine Aufgaben im Hintergrund aktiv und die Systemleistung nicht beeinträchtigt",
           "STATUS_WARN":"Aktuell ist/sind {{count}} Aufgabe(n) im Hintergrund aktiv. Die Systemleistung wird möglicherweise negativ beeinflusst",
           "SOLUTION":"Überprüfen Sie laufende Aufgaben unter \"Aufgaben\", beenden Sie eventuell nicht mehr benötigte oder versuchen Sie die Anzahl aktueller Zugriffe zu minimieren"
+        },
+        "MAIL_SETUP":{
+          "TITLE":"Mailserver-Konfiguration",
+          "STATUS_OK":"Der Mailserver {{mail.smtp.server}} wird für das Versenden von E-Mails verwendet",
+          "STATUS_FAIL":"Es wurde noch kein Mailserver registriert",
+          "SOLUTION":"Wechseln Sie in den Bereich \"Quellen\" und bearbeiten Sie die Datei ccmail.properties.xml. Tragen Sie die korrekten Werte für Ihr Mail-System ein"
+        },
+        "MAIL_REPORT":{
+          "TITLE":"Problem-Melden Funktion",
+          "STATUS_OK":"Die Funktion ist aktiv, eingehende Anfragen werden an die Adresse {{mail.report.receiver}} versendet.",
+          "STATUS_FAIL":"Die Funktion ist aktiv, aber die Konfiguration ist ungültig.",
+          "SOLUTION":"Wechseln Sie in den Bereich \"Quellen\" und bearbeiten Sie die Datei ccmail.properties.xml. Fügen Sie \"mail.report.receiver\" hinzu und tragen Sie die E-Mail-Adresse für eingehende Anfragen ein"
         }
       }
     },

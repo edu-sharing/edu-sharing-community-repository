@@ -727,10 +727,29 @@ export class AdminComponent {
                 translate:{count:count}
             });
         });
+        this.admin.getApplicationXML(RestConstants.CCMAIL_APPLICATION_XML).subscribe((mail)=>{
+            if(this.config.instant("nodeReport",false)){
+                this.systemChecks.push({
+                    name:"MAIL_REPORT",
+                    status:mail['mail.report.receiver'] && mail['mail.smtp.server'] ? 'OK' : 'FAIL',
+                    translate:mail
+                });
+            }
+            this.systemChecks.push({
+                name:"MAIL_SETUP",
+                status:mail['mail.smtp.server'] ? 'OK' : 'FAIL',
+                translate:mail
+            });
+        });
     }
     getSystemChecks(){
       this.systemChecks.sort((a:any,b:any)=>{
-        return a.name.localeCompare(b.name);
+          let status:any={'FAIL':0,'WARN':1,'OK':2};
+          let statusA=status[a.status];
+          let statusB=status[b.status];
+          if(statusA!=statusB)
+              return statusA<statusB ? -1 : 1;
+          return a.name.localeCompare(b.name);
       });
       return this.systemChecks;
     }
