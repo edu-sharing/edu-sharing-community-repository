@@ -12,7 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -33,16 +35,14 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+		if(!"download".equals(req.getParameter("mode"))){
+			resp.sendRedirect(URLTool.getNgComponentsUrl()+"sharing?"+req.getQueryString());
+			return;
+		}
 		ServletOutputStream op = resp.getOutputStream();
 
 		String token = req.getParameter("token");
-
-		if (token == null) {
-			op.println("missing token");
-			return;
-		}
-
+		String password = req.getParameter("password");
 		String nodeId = req.getParameter("nodeId");
 
 		if (nodeId == null) {
@@ -50,9 +50,36 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			return;
 		}
 
+		final String[] childIds;
+		if(req.getParameter("childIds")!=null){
+			childIds=req.getParameter("childIds").split(",");
+		}
+		else{
+			childIds=null;
+		}
+		if (token == null) {
+			op.println("missing token");
+			return;
+		}
 		ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
 
 		ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+
+		NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
+
+		if(childIds!=null && childIds.length>1){
+			NodeRef finalNodeRef = nodeRef;
+			AuthenticationUtil.runAsSystem(() -> {
+				String fileName= (String) serviceRegistry.getNodeService().getProperty(finalNodeRef,QName.createQName(CCConstants.CM_NAME));
+				DownloadServlet.downloadZip(resp,childIds,nodeId,token,password,fileName+".zip");
+				return null;
+			});
+			return;
+		}
+
+
+
+
 		AuthenticationService authenticationService = serviceRegistry.getAuthenticationService();
 		// authentication
 		String adminUser = ApplicationInfoList.getHomeRepository().getUsername();
@@ -63,7 +90,6 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			authenticationService.authenticate(adminUser, adminPassword.toCharArray());
 			
 			
-			NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
 			if(!serviceRegistry.getNodeService().exists(nodeRef)){
 				resp.sendRedirect(URLTool.getNgMessageUrl("share_file_deleted"));
 				//op.println("File does not longer exist!");
@@ -85,14 +111,23 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 					return;
 				}
 			}
-			
+			if (share.getPassword()!=null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
+				resp.sendRedirect(URLTool.getNgComponentsUrl()+"sharing?"+req.getQueryString());
+			}
 			String wwwUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 			if(wwwUrl != null && !wwwUrl.trim().equals("")){
 				resp.sendRedirect(wwwUrl);
 				return;
 			}
-			
-			String fileName = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
+			// download child object (io) from a map
+			if(childIds!=null && serviceRegistry.getNodeService().getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
+				if(!shareService.isNodeAccessibleViaShare(nodeRef,childIds[0])){
+					resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
+					return;
+				}
+				nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, childIds[0]);
+			}
+			String nodeName = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
 
 			ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
 					ContentModel.PROP_CONTENT);
@@ -105,7 +140,7 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 
 			resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
 			resp.setContentLength((int) reader.getContentData().getSize());
-			resp.setHeader("Content-Disposition", "attachment; filename=\""+fileName+ "\"");
+			resp.setHeader("Content-Disposition", "attachment; filename=\""+nodeName+ "\"");
 
 			int length = 0;
 			//
@@ -124,7 +159,7 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			op.close();
 			
 			share.setDownloadCount( (share.getDownloadCount() + 1) );
-			shareService.updateShare(share);
+			shareService.updateDownloadCount(share);
 
 		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);

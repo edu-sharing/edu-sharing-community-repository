@@ -142,7 +142,7 @@
 		
 		<mkdir dir="${output.dir}" />
 		<copy todir="${output.dir}">
-			<fileset dir="${src.dir}" includes="**/*.xml, **/*.properties">	
+			<fileset dir="${src.dir}" includes="**/*.xml, **/*.properties, **/*.json">
 			</fileset>
 		</copy>
 		
@@ -344,6 +344,7 @@
 	</target>
 	
 	<target name="check-ng">
+		<echo>check ng ${user.dir}</echo>
 	    <available file="ng" property="ng.present"/>
 	</target>
 	

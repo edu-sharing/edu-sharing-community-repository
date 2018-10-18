@@ -8,9 +8,11 @@
   "OK" : "ok",
   "BACK": "back",
   "NEXT": "continue",
+  "SKIP": "skip",
   "SAVE" : "save",
   "APPLY" : "apply",
   "CANCEL" : "cancel",
+  "YES_DELETE" : "Yes, delete",
   "RENAME" : "rename",
   "USER_GUEST" : "guest",
   "IMPRINT" : "Imprint",
@@ -44,6 +46,7 @@
   "SELECT_ROOT_DISABLED" : "select element",
   "CLOSE" : "close",
   "DOWNLOAD": "download",
+  "DOWNLOAD_ALL": "download all",
   "LOAD_MORE":"Load more",
   "LOADING": "loading...",
   "INFORMATION": "information",
@@ -69,7 +72,7 @@
   "ORIGINAL_DELETED_INFO":"Only metadata accessable",
   "COMMON_API_ERROR": "An error occured. Please try again.",
   "COMMON_API_ERROR_TITLE": "Error details",
-  "RENDERSERVICE_API_ERROR":"error while reaching render service. Please check your server configuration or report this error.",
+  "RENDERSERVICE_API_ERROR":"error while reaching render service. Please report this error an administrator.",
   "SYSTEM_FOLDER_DELETE_ERROR":"This system folder can not be deleted",
   "TOOLPERMISSION_ERROR":"You have insufficient permissions for this task",
   "TOOLPERMISSION_ERROR_TITLE":"Insufficient permissions",
@@ -107,14 +110,20 @@
   "GOTO_LOGIN": "Go to login",
   "GOTO":"go to",
   "SIDEBAR":{
-    "WORKSPACE_OLD":"old workspace",
     "WORKSPACE":"Workspace",
     "SEARCH":"Search",
     "COLLECTIONS":"Collections",
     "SECURE":"Safe",
     "PERMISSIONS":"User management",
     "LOGIN":"Login",
-    "ADMIN":"Admin-Tools"
+    "ADMIN":"Admin-Tools",
+    "WORKSPACE_SHORT":"Workspace",
+    "SEARCH_SHORT":"Search",
+    "COLLECTIONS_SHORT":"Collections",
+    "SECURE_SHORT":"Safe",
+    "PERMISSIONS_SHORT":"Users",
+    "LOGIN_SHORT":"Login",
+    "ADMIN_SHORT":"Admin"
   },
   "WORKFLOW":{
     "100_unchecked":"No status",
@@ -150,6 +159,16 @@
     "MORE_LINK":"find out more",
     "DIALOG_TITLE":"Cookies",
     "DIALOG_MESSAGE":"Our website uses so-called cookies. Cookies do not cause any damage to your computer and do not contain any viruses.\nCookies are used to make our website more user-friendly, effective and secure. Cookies are small text files that are stored on your computer and saved by your browser. Most of the cookies we use are so-called \"session cookies\". They are automatically deleted at the end of your visit. Other cookies remain stored on your device until you delete them. These cookies enable us to recognize your browser the next time you visit our website.\nYou can set your browser so that you are informed about the usage of cookies and only allow cookies in individual cases, exclude the acceptance of cookies for certain cases or generally and activate the automatic deletion of cookies when closing the browser.\nWhen cookies are deactivated, the functionality of this website may be limited. "
+  },
+  "NODE_VARIANT":{
+    "TITLE": "Create new variant for {{name}}",
+    "NEW_VARIANT":"New Title:",
+    "DEFAULT_NAME":"Variant of {{name}}",
+    "BREADCRUMB_INFO": "Save variant in:",
+    "CHOOSE": "Storage Location",
+    "FILE_PICKER_TITLE": "Choose storage location",
+    "CREATED": "New variant was created and saved in a folder <b>\"{{folder}}\"</b>",
+    "CREATED_LINK": "show"
   },
   "NODE_REPORT":{
     "TITLE":"Report problem",
@@ -293,12 +312,15 @@
     "AUTHOR_FREETEXT_PLACEHOLDER":"Who are the authors of this work? How should they be attributed?",
     "AUTHOR_PERSON":"Author & Contributors",
     "LICENSE":"license",
+    "WORKFLOW":"workflow state",
     "LICENSE_LINK":"manage license",
     "TEMPLATE_LINK":"Manage metadata template",
     "CONTRIBUTOR_LINK":"Additional Contributors",
     "LICENSE_NO_PERMISSIONS_MATERIAL":"You have insufficient permissions to license this material",
     "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
-    "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment"
+    "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment",
+    "ADD_CHILD_OBJECT":"Weitere Materialien hinzufügen",
+    "ADD_CHILD_OBJECT_DESCRIPTION":"Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen"
   },
   
   "SHARE_APP":{
@@ -313,6 +335,19 @@
     "CHECKBOX":"I read the license agreement and accept it",
     "ACCEPT":"Accept & Continue",
     "DECLINE":"Decline"
+  },
+  "SHARING":{
+    "TITLE": "Download Page",
+    "DOWNLOAD": "Download",
+    "DOWNLOAD_ZIP": "Download as Zip",
+    "LINK": "To original page",
+    "INVITED_AND_CREATED_BY":"Created and shared by {{inviter}}",
+    "INVITED_PLUS_CREATED_BY":"Shared by {{inviter}}, created by {{creator}}",
+    "ENTER_PASSWORD": "next",
+    "ERROR_INVALID_PASSWORD": "invalid password",
+    "PASSWORD": "Password",
+    "PASSWORD_PLACEHOLDER": "Enter password ...",
+    "PASSWORD_CORRECT": "Password correct"
   },
   "TOAST":{
     "NODE_LOCKED":"The document is currently used by an other user and can not be opened",

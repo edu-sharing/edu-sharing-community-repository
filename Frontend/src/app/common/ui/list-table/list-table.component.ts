@@ -56,6 +56,7 @@ export class ListTableComponent implements EventListener{
   public static VIEW_TYPE_GRID = 1;
   public static VIEW_TYPE_GRID_SMALL = 2;
   @ViewChild('drag') drag : ElementRef;
+  @ViewChild('addElementRef') addElementRef : ElementRef;
 
 
   private optionsAlways:OptionItem[]=[];
@@ -103,7 +104,7 @@ export class ListTableComponent implements EventListener{
    * @param options
    */
   @Input() set options(options : OptionItem[]){
-    options=OptionItem.filterValidOptions(this.ui,options);
+    options=UIHelper.filterValidOptions(this.ui,options);
     this._options=[];
     if(!options)
       return;
@@ -116,6 +117,7 @@ export class ListTableComponent implements EventListener{
       if(option.showAlways)
         this.optionsAlways.push(option);
     }
+    console.log(this._options);
   }
 
   /**
@@ -238,6 +240,12 @@ export class ListTableComponent implements EventListener{
    */
   @Input() listClass="list";
   /**
+   * Should the list table fetch the repo list (useful to detect remote repo nodes)
+   * Must be set at initial loading!
+   * @type {boolean}
+   */
+  @Input() loadRepositories=true;
+  /**
    *  For collection elements only, tells if the current user can delete the given item
    *  Function should return a boolean
    * @type {boolean}
@@ -339,11 +347,16 @@ export class ListTableComponent implements EventListener{
               private sanitizer: DomSanitizer) {
     this.id=Math.random();
     frame.addListener(this);
+    setTimeout(()=>this.loadRepos());
+  }
+  loadRepos(){
+    if(!this.loadRepositories)
+      return;
     this.locator.locateApi().subscribe(()=>{
-      this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
-        this.repositories=data.repositories;
-        this.cd.detectChanges();
-      });
+        this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
+          this.repositories=data.repositories;
+          this.cd.detectChanges();
+        });
     });
   }
   onEvent(event:string,data:any){
@@ -759,6 +772,25 @@ export class ListTableComponent implements EventListener{
   public getItemCssClass(item:ListItem){
     return item.type.toLowerCase()+"_"+item.name.replace(":","_");
   }
+
+    handleKeyboard(event:any) {
+        if(this.viewType==ListTableComponent.VIEW_TYPE_LIST && (event.key=="ArrowUp" || event.key=="ArrowDown")){
+            let next=event.key=="ArrowDown";
+            let elements:any=document.getElementsByClassName("node-row");
+            for(let i=0;i<elements.length;i++){
+                let element=elements.item(i);
+                if(element==event.srcElement){
+                    if(next && i<elements.length-1)
+                        elements.item(i+1).focus();
+                    if(!next && i>0){
+                        elements.item(i-1).focus();
+                    }
+                }
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
 }
 export class AddElement{
   constructor(public label:string,public icon="add"){}

@@ -77,14 +77,84 @@ a, a:hover, a:visited, a:active {
   padding-top: 12px;
 }
 
-#nodeRenderContent,.nodeRenderLoading {
+#nodeRenderContentWrapper {
   background: #666;
-  height: auto;
   position: absolute;
   top:$mainnavHeight;
   width:100%;
+  height: calc(100% - #{$mainnavHeight});
+}
+
+#nodeRenderContent,.nodeRenderLoading {
+  height: auto;
+  position: relative;
+  width:100%;
   overflow-x: hidden;
 }
+
+#sequence {
+  padding: 30px 20px;
+  min-width: 100%;
+  text-align: center;
+  overflow:hidden;
+  position:relative;
+  white-space: nowrap;
+  .itemTitle {
+    color: #fff;
+    display: inline-block;
+    width: 100px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+    margin-bottom: -2px;
+  }
+  .wrapperouter {
+    display: inline-block;
+    position:relative;
+    margin: 0 10px;
+  .wrapper {
+    margin: 3px;
+    @include materialShadow();
+    img {
+      margin-bottom: -5px;
+      height: 75px;
+      width: 100px;
+    }
+  }
+  .wrapper.selected {
+    margin: 0;
+    border: 3px solid $primaryMediumLight;
+    @include materialShadowMediumLarge();
+  }
+  .wrapper.selected:after {
+    content: '';
+    position: absolute;
+    left: 43px;
+    top: 103px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid $primaryMediumLight;
+    clear: both;
+  }
+  }
+}
+.scroller {
+  position: absolute;
+  top: calc(8px + #{$mainnavHeight});
+  padding: 5px 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+.scroller.left {
+  left: 0;
+}
+.scroller.right {
+  right: 0;
+}
+
 .nodeRenderLoading{
   height: calc(100% - #{$mainnavHeight});
   overflow: hidden;
@@ -113,6 +183,10 @@ a.edusharing_rendering_content{
 }
 .edusharing_rendering_content_wrapper{
   min-height:500px;
+}
+
+.edusharing_rendering_content {
+  height: calc(100% - #{$mainnavHeight} - 130px) !important;
 }
 
 div.download {

@@ -205,15 +205,17 @@ input[type=search]{
   left:0%;
   margin-left:0!important;
 }
+@media screen and (max-width: ($mobileWidth + $mobileStage*2)) {
+  .card-wide{
+    @include fullsizeCard();
+  }
+}
 @media screen and (max-width: ($mobileWidth)) {
   .dialogOptions{
-    overflow: scroll;
+    overflow: auto;
     @include darken();
     z-index:151;
     background: linear-gradient(to top, #ffffff 0,#ffffff 120px,$darkenColor 120px,$darkenColor 100%);
-  }
-  .card-wide{
-    @include fullsizeCard();
   }
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {

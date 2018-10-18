@@ -4,21 +4,18 @@
 Built on Apr 22, 2006 (06:55:48 PDT)-->
  <wsdl:types>
   <schema elementFormDefault="qualified" targetNamespace="http://usage2.webservices.edu_sharing.org" xmlns="http://www.w3.org/2001/XMLSchema">
-   <element name="getUsage">
+   <element name="getUsagesByEduRef">
     <complexType>
      <sequence>
       <element name="eduRef" type="xsd:string"/>
-      <element name="lmsId" type="xsd:string"/>
-      <element name="courseId" type="xsd:string"/>
       <element name="user" type="xsd:string"/>
-      <element name="resourceId" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getUsageResponse">
+   <element name="getUsagesByEduRefResponse">
     <complexType>
      <sequence>
-      <element name="getUsageReturn" type="impl:Usage2Result"/>
+      <element maxOccurs="unbounded" name="getUsagesByEduRefReturn" type="impl:Usage2Result"/>
      </sequence>
     </complexType>
    </element>
@@ -85,18 +82,21 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
-   <element name="getUsagesByEduRef">
+   <element name="getUsage">
     <complexType>
      <sequence>
       <element name="eduRef" type="xsd:string"/>
+      <element name="lmsId" type="xsd:string"/>
+      <element name="courseId" type="xsd:string"/>
       <element name="user" type="xsd:string"/>
+      <element name="resourceId" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getUsagesByEduRefResponse">
+   <element name="getUsageResponse">
     <complexType>
      <sequence>
-      <element maxOccurs="unbounded" name="getUsagesByEduRefReturn" type="impl:Usage2Result"/>
+      <element name="getUsageReturn" type="impl:Usage2Result"/>
      </sequence>
     </complexType>
    </element>
@@ -115,12 +115,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    </wsdl:message>
 
-   <wsdl:message name="setUsageResponse">
-
-      <wsdl:part element="impl:setUsageResponse" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="getUsagesByEduRefRequest">
 
       <wsdl:part element="impl:getUsagesByEduRef" name="parameters"/>
@@ -130,6 +124,12 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    <wsdl:message name="getUsagesByEduRefResponse">
 
       <wsdl:part element="impl:getUsagesByEduRefResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="setUsageResponse">
+
+      <wsdl:part element="impl:setUsageResponse" name="parameters"/>
 
    </wsdl:message>
 
@@ -159,11 +159,11 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    <wsdl:portType name="Usage2">
 
-      <wsdl:operation name="getUsage">
+      <wsdl:operation name="getUsagesByEduRef">
 
-         <wsdl:input message="impl:getUsageRequest" name="getUsageRequest"/>
+         <wsdl:input message="impl:getUsagesByEduRefRequest" name="getUsagesByEduRefRequest"/>
 
-         <wsdl:output message="impl:getUsageResponse" name="getUsageResponse"/>
+         <wsdl:output message="impl:getUsagesByEduRefResponse" name="getUsagesByEduRefResponse"/>
 
          <wsdl:fault message="impl:Usage2Exception" name="Usage2Exception"/>
 
@@ -189,11 +189,11 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getUsagesByEduRef">
+      <wsdl:operation name="getUsage">
 
-         <wsdl:input message="impl:getUsagesByEduRefRequest" name="getUsagesByEduRefRequest"/>
+         <wsdl:input message="impl:getUsageRequest" name="getUsageRequest"/>
 
-         <wsdl:output message="impl:getUsagesByEduRefResponse" name="getUsagesByEduRefResponse"/>
+         <wsdl:output message="impl:getUsageResponse" name="getUsageResponse"/>
 
          <wsdl:fault message="impl:Usage2Exception" name="Usage2Exception"/>
 
@@ -205,17 +205,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
-      <wsdl:operation name="getUsage">
+      <wsdl:operation name="getUsagesByEduRef">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getUsageRequest">
+         <wsdl:input name="getUsagesByEduRefRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getUsageResponse">
+         <wsdl:output name="getUsagesByEduRefResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -277,17 +277,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getUsagesByEduRef">
+      <wsdl:operation name="getUsage">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getUsagesByEduRefRequest">
+         <wsdl:input name="getUsageRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getUsagesByEduRefResponse">
+         <wsdl:output name="getUsageResponse">
 
             <wsdlsoap:body use="literal"/>
 

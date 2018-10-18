@@ -34,20 +34,16 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 
-import org.apache.axis2.builder.unknowncontent.InputStreamDataSource;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.authentication.Context;
-
-
-
 
 
 public class Mail {
@@ -185,14 +181,8 @@ public class Mail {
 			
 			email.addTo(receiver);
 			email.setSubject(subject);
-			
-			String[] data=StringUtils.splitByWholeSeparator(message,"{{logo}}");
-			if(data.length>1){
-				String logo = context.getRealPath("/images/logos/edu-sharing-mail.png");
-				data[0]+="cid:"+email.embed(new File(logo));
-				message=StringUtils.join(data,"");
-			}
-			
+
+			message = replaceImages(context,email,message);
 			
 			email.setHtmlMsg(message);
 			email.send();
@@ -209,6 +199,22 @@ public class Mail {
 		}
 		
 
+	}
+
+	private String replaceImages(ServletContext context, HtmlEmail email, String message) throws EmailException {
+		Pattern pattern = Pattern.compile("\\{\\{image:(.*?)}}");
+		Matcher matcher = pattern.matcher(message);
+		// check all occurance
+		String result="";
+		int lastIndex=0;
+		while (matcher.find()) {
+			result+=message.substring(lastIndex,matcher.start());
+			String logo = context.getRealPath(matcher.group(1));
+			result+="cid:"+email.embed(new File(logo));
+			lastIndex=matcher.end();
+		}
+		result+=message.substring(lastIndex);
+		return result;
 	}
 
 	public void sendMail(String receiver, String subject, String message) throws EmailException {

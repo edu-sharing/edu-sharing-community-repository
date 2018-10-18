@@ -8,12 +8,15 @@ import {RestConstants} from "../rest-constants";
 import {
     NodeRef, NodeWrapper, NodePermissions, LocalPermissions, NodeVersions, NodeVersion, NodeList,
     NodePermissionsHistory,
-    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent, NodeTemplate
+    NodeLock, NodeShare, WorkflowEntry, ParentList, RenderDetails, NodeRemoteWrapper, NodeTextContent, Node,
+    NodeTemplate
 } from "../data-object";
 import {RestIamService} from "./rest-iam.service";
 import {FrameEventsService} from "../../services/frame-events.service";
 import {Toast} from "../../ui/toast";
 import {AbstractRestService} from "./abstract-rest-service";
+import {Observer} from "rxjs/Rx";
+import {Helper} from "../../helper";
 
 @Injectable()
 export class RestNodeService extends AbstractRestService{
@@ -86,11 +89,13 @@ export class RestNodeService extends AbstractRestService{
   public getChildren = (parent : string,
                         filter : string[]=[],
                         request : any = null,
+                        assocName : string = "",
                         repository=RestConstants.HOME_REPOSITORY) : Observable<NodeList> => {
-    let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository/:parent/children/?:filter&:request",repository,
+    let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository/:parent/children/?:filter&assocName=:assocName&:request",repository,
       [
         [":parent",encodeURIComponent(parent)],
         [":filter",RestHelper.getQueryStringForList("filter",filter)],
+        [":assocName",encodeURIComponent(assocName)],
         [":request",this.connector.createRequestString(request)],
       ]);
     return this.connector.get(query,this.connector.getRequestOptions())
@@ -144,13 +149,15 @@ export class RestNodeService extends AbstractRestService{
                         properties : any[],
                         renameIfExists = false,
                         versionComment = "",
+                        assocType = "",
                         repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
-    let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository/:parent/children/?type=:type&renameIfExists=:rename&versionComment=:versionComment&:aspects",repository,
+    let query=this.connector.createUrlNoEscape("node/:version/nodes/:repository/:parent/children/?type=:type&renameIfExists=:rename&assocType=:assocType&versionComment=:versionComment&:aspects",repository,
       [
         [":parent",encodeURIComponent(parent)],
         [":type",encodeURIComponent(type)],
         [":rename",encodeURIComponent(""+renameIfExists)],
         [":versionComment",encodeURIComponent(versionComment)],
+        [":assocType",encodeURIComponent(assocType)],
         [":aspects",RestHelper.getQueryStringForList("aspects",aspects)]
       ]);
     return this.connector.post(query,JSON.stringify(properties),this.connector.getRequestOptions())
@@ -195,6 +202,24 @@ export class RestNodeService extends AbstractRestService{
     return this.connector.post(query,"",this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
+    /**
+     * Create a fork (variant) of a node
+     * @param target the target (parent) where the fork should be saved
+     * @param toCopy The element to fork
+     * @param repository
+     * @returns {Observable<R>}
+     */
+    public forkNode = (target : string,
+                       toFork : string,
+                       repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:target/children/_fork?source=:toFork",repository,
+            [
+                [":target",target],
+                [":toFork",toFork],
+            ]);
+        return this.connector.post(query,"",this.connector.getRequestOptions())
+            .map((response: Response) => response.json());
+    }
   public getNodeShares = (node : string,
                      email : string=null,
                      repository=RestConstants.HOME_REPOSITORY) : Observable<NodeShare[]> => {
@@ -208,24 +233,38 @@ export class RestNodeService extends AbstractRestService{
   }
   public createNodeShare = (node : string,
                             expiryDate=RestConstants.SHARE_EXPIRY_UNLIMITED,
+                            password="",
                             repository=RestConstants.HOME_REPOSITORY) : Observable<NodeShare> => {
-    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/?expiryDate=:expiryDate",repository,
+    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/?expiryDate=:expiryDate&password=:password",repository,
     [
       [":node",node],
-      [":expiryDate",""+expiryDate]
+      [":expiryDate",""+expiryDate],
+      [":password",password]
     ]);
     return this.connector.put(query,"",this.connector.getRequestOptions())
       .map((response: Response) => response.json());
   }
+    public deleteNodeShare = (node : string,
+                              share:string,
+                              repository=RestConstants.HOME_REPOSITORY) : Observable<Response> => {
+        let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/:share",repository,
+            [
+                [":node",node],
+                [":share",share]
+            ]);
+        return this.connector.delete(query,this.connector.getRequestOptions());
+    }
   public updateNodeShare = (node : string,
                              shareId : string,
                              expiryDate=RestConstants.SHARE_EXPIRY_UNLIMITED,
+                             password="",
                              repository=RestConstants.HOME_REPOSITORY) : Observable<NodeShare> => {
-    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/:shareId?expiryDate=:expiryDate",repository,
+    let query=this.connector.createUrl("node/:version/nodes/:repository/:node/shares/:shareId?expiryDate=:expiryDate&password=:password",repository,
       [
         [":node",node],
         [":shareId",shareId],
-        [":expiryDate",""+expiryDate]
+        [":expiryDate",""+expiryDate],
+        [":password",password]
       ]);
     return this.connector.post(query,"",this.connector.getRequestOptions())
       .map((response: Response) => response.json());
@@ -414,7 +453,7 @@ export class RestNodeService extends AbstractRestService{
    * @param properties The new node properties
    * @returns {Observable<R>}
    */
-  public editNodeMetadata = (node : string,properties : any,repository=RestConstants.HOME_REPOSITORY) : Observable<void> => {
+  public editNodeMetadata = (node : string,properties : any,repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
     let query = this.connector.createUrl("node/:version/nodes/:repository/:node/metadata", repository,
       [
         [":node", node],
@@ -570,4 +609,26 @@ export class RestNodeService extends AbstractRestService{
         return this.connector.put(query,JSON.stringify(properties),this.connector.getRequestOptions())
             .map((response: Response) => response.json());
     }
+
+    /**
+     * Helper function to retrieve all childobjects of an io
+     * @param {string} nodeId
+     * @param {string} repository
+     * @returns {Observable<NodeList>}
+     */
+  public getNodeChildobjects(nodeId:string,repository=RestConstants.HOME_REPOSITORY){
+      return this.getChildren(nodeId,[],{count:RestConstants.COUNT_UNLIMITED,propertyFilter:[RestConstants.ALL],sortBy:[RestConstants.CCM_PROP_CHILDOBJECT_ORDER],sortAscending:[true]},RestConstants.CCM_ASSOC_CHILDIO,repository);
+      /*
+      return new Observable<NodeList>((observer : Observer<NodeList>)=>{
+          this.getChildren(nodeId,[],{count:RestConstants.COUNT_UNLIMITED,propertyFilter:[RestConstants.ALL],sortBy:[RestConstants.CCM_PROP_CHILDOBJECT_ORDER],sortAscending:[true]},repository).subscribe((childs:NodeList)=>{
+          childs.nodes = Helper.filterArray(childs.nodes,'type',RestConstants.CCM_TYPE_IO);
+          observer.next(childs);
+          observer.complete();
+      },(error:any)=>{
+          observer.error(error);
+          observer.complete();
+          });
+      });
+      */
+  }
 }

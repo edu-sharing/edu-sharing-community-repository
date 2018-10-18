@@ -10,13 +10,19 @@ package org.edu_sharing.webservices.render;
 public class RenderInfoResult  implements java.io.Serializable {
     private java.lang.String[] aspects;
 
+    private org.edu_sharing.webservices.types.Child[] children;
+
     private int contentHash;
+
+    private java.lang.Boolean directory;
 
     private java.lang.String eduSchoolPrimaryAffiliation;
 
     private java.lang.Boolean guestReadAllowed;
 
     private java.lang.Boolean hasContentLicense;
+
+    private java.lang.String iconUrl;
 
     private org.edu_sharing.webservices.types.KeyValue[] labels;
 
@@ -43,10 +49,13 @@ public class RenderInfoResult  implements java.io.Serializable {
 
     public RenderInfoResult(
            java.lang.String[] aspects,
+           org.edu_sharing.webservices.types.Child[] children,
            int contentHash,
+           java.lang.Boolean directory,
            java.lang.String eduSchoolPrimaryAffiliation,
            java.lang.Boolean guestReadAllowed,
            java.lang.Boolean hasContentLicense,
+           java.lang.String iconUrl,
            org.edu_sharing.webservices.types.KeyValue[] labels,
            java.lang.String mdsTemplate,
            java.lang.String mimeTypeUrl,
@@ -58,10 +67,13 @@ public class RenderInfoResult  implements java.io.Serializable {
            org.edu_sharing.webservices.usage.UsageResult usage,
            java.lang.Boolean userReadAllowed) {
            this.aspects = aspects;
+           this.children = children;
            this.contentHash = contentHash;
+           this.directory = directory;
            this.eduSchoolPrimaryAffiliation = eduSchoolPrimaryAffiliation;
            this.guestReadAllowed = guestReadAllowed;
            this.hasContentLicense = hasContentLicense;
+           this.iconUrl = iconUrl;
            this.labels = labels;
            this.mdsTemplate = mdsTemplate;
            this.mimeTypeUrl = mimeTypeUrl;
@@ -96,6 +108,26 @@ public class RenderInfoResult  implements java.io.Serializable {
 
 
     /**
+     * Gets the children value for this RenderInfoResult.
+     * 
+     * @return children
+     */
+    public org.edu_sharing.webservices.types.Child[] getChildren() {
+        return children;
+    }
+
+
+    /**
+     * Sets the children value for this RenderInfoResult.
+     * 
+     * @param children
+     */
+    public void setChildren(org.edu_sharing.webservices.types.Child[] children) {
+        this.children = children;
+    }
+
+
+    /**
      * Gets the contentHash value for this RenderInfoResult.
      * 
      * @return contentHash
@@ -112,6 +144,26 @@ public class RenderInfoResult  implements java.io.Serializable {
      */
     public void setContentHash(int contentHash) {
         this.contentHash = contentHash;
+    }
+
+
+    /**
+     * Gets the directory value for this RenderInfoResult.
+     * 
+     * @return directory
+     */
+    public java.lang.Boolean getDirectory() {
+        return directory;
+    }
+
+
+    /**
+     * Sets the directory value for this RenderInfoResult.
+     * 
+     * @param directory
+     */
+    public void setDirectory(java.lang.Boolean directory) {
+        this.directory = directory;
     }
 
 
@@ -172,6 +224,26 @@ public class RenderInfoResult  implements java.io.Serializable {
      */
     public void setHasContentLicense(java.lang.Boolean hasContentLicense) {
         this.hasContentLicense = hasContentLicense;
+    }
+
+
+    /**
+     * Gets the iconUrl value for this RenderInfoResult.
+     * 
+     * @return iconUrl
+     */
+    public java.lang.String getIconUrl() {
+        return iconUrl;
+    }
+
+
+    /**
+     * Sets the iconUrl value for this RenderInfoResult.
+     * 
+     * @param iconUrl
+     */
+    public void setIconUrl(java.lang.String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 
 
@@ -389,7 +461,13 @@ public class RenderInfoResult  implements java.io.Serializable {
             ((this.aspects==null && other.getAspects()==null) || 
              (this.aspects!=null &&
               java.util.Arrays.equals(this.aspects, other.getAspects()))) &&
+            ((this.children==null && other.getChildren()==null) || 
+             (this.children!=null &&
+              java.util.Arrays.equals(this.children, other.getChildren()))) &&
             this.contentHash == other.getContentHash() &&
+            ((this.directory==null && other.getDirectory()==null) || 
+             (this.directory!=null &&
+              this.directory.equals(other.getDirectory()))) &&
             ((this.eduSchoolPrimaryAffiliation==null && other.getEduSchoolPrimaryAffiliation()==null) || 
              (this.eduSchoolPrimaryAffiliation!=null &&
               this.eduSchoolPrimaryAffiliation.equals(other.getEduSchoolPrimaryAffiliation()))) &&
@@ -399,6 +477,9 @@ public class RenderInfoResult  implements java.io.Serializable {
             ((this.hasContentLicense==null && other.getHasContentLicense()==null) || 
              (this.hasContentLicense!=null &&
               this.hasContentLicense.equals(other.getHasContentLicense()))) &&
+            ((this.iconUrl==null && other.getIconUrl()==null) || 
+             (this.iconUrl!=null &&
+              this.iconUrl.equals(other.getIconUrl()))) &&
             ((this.labels==null && other.getLabels()==null) || 
              (this.labels!=null &&
               java.util.Arrays.equals(this.labels, other.getLabels()))) &&
@@ -451,7 +532,21 @@ public class RenderInfoResult  implements java.io.Serializable {
                 }
             }
         }
+        if (getChildren() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getChildren());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getChildren(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
         _hashCode += getContentHash();
+        if (getDirectory() != null) {
+            _hashCode += getDirectory().hashCode();
+        }
         if (getEduSchoolPrimaryAffiliation() != null) {
             _hashCode += getEduSchoolPrimaryAffiliation().hashCode();
         }
@@ -460,6 +555,9 @@ public class RenderInfoResult  implements java.io.Serializable {
         }
         if (getHasContentLicense() != null) {
             _hashCode += getHasContentLicense().hashCode();
+        }
+        if (getIconUrl() != null) {
+            _hashCode += getIconUrl().hashCode();
         }
         if (getLabels() != null) {
             for (int i=0;
@@ -541,10 +639,23 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("children");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "children"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "Child"));
+        elemField.setNillable(true);
+        elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("contentHash");
         elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "contentHash"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"));
         elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("directory");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "directory"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("eduSchoolPrimaryAffiliation");
@@ -562,6 +673,12 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField.setFieldName("hasContentLicense");
         elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "hasContentLicense"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("iconUrl");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "iconUrl"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();

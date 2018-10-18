@@ -73,13 +73,13 @@ public class MimeTypesV2 {
 		}
 		
 	}
-	public static boolean isDirectory(HashMap<String,Object> properties){
+	public static boolean isDirectory(Map<String,Object> properties){
 		String type=(String) properties.get(CCConstants.NODETYPE);
 		if(type == null) return false;
 		return type.equals(CCConstants.CCM_TYPE_MAP) 
 			|| type.equals(CCConstants.CM_TYPE_FOLDER);
 	}
-	public static boolean isCollection(HashMap<String,Object> properties){
+	public static boolean isCollection(Map<String,Object> properties){
 		String type=(String) properties.get(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE);
 		if(type == null) return false;
 		return true;
@@ -109,14 +109,14 @@ public class MimeTypesV2 {
 	 * Gets a full icon path for a small mime icon for the given node properties
 	 * @return
 	 */
-	public String getIcon(String nodeType,HashMap<String,Object> properties,List<String> aspects){
+	public String getIcon(String nodeType,Map<String,Object> properties,List<String> aspects){
 		return getIconPath()+getNodeType(nodeType,properties,aspects)+".svg";
 	}
 	/**
 	 * Gets a full preview path for a large mime image with background for the given node properties
 	 * @return
 	 */
-	public String getPreview(String nodeType,HashMap<String,Object> properties,List<String> aspects){
+	public String getPreview(String nodeType,Map<String,Object> properties,List<String> aspects){
 		return getPreviewPath()+getNodeType(nodeType,properties,aspects)+".svg";
 	}
 	/**
@@ -138,7 +138,7 @@ public class MimeTypesV2 {
 	 * @param properties
 	 * @return
 	 */
-	public static String getNodeType(String nodeType,HashMap<String,Object> properties,List<String> aspects){
+	public static String getNodeType(String nodeType,Map<String,Object> properties,List<String> aspects){
 		if(isCollection(properties))
 			return "collection";
 		if(isDirectory(properties))
@@ -173,10 +173,16 @@ public class MimeTypesV2 {
 	if(COMPRESSED.contains(mimetype)){
 		if(properties!=null) {
 		String ccressourcetype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
+		String ccressourcesubtype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE);
 			if("imsqti".equals(ccressourcetype))
 				return "file-qti";
 			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_H5P.equals(ccressourcetype))
 				return "file-h5p";
+			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_EDUHTML.equals(ccressourcetype)){
+				if("webgl".equals(ccressourcesubtype)) {
+					return "file-webgl";
+				}
+			}
 		}
 		return "file-zip";
 	}
@@ -327,7 +333,7 @@ public static HashMap<String, String> getExtensionMimeMap() {
 	 * If it won't find an alfresco mime type, it will guess it by the file ending
 	 * @return
 	 */
-	public static String getMimeType(HashMap<String, Object> properties) {
+	public static String getMimeType(Map<String, Object> properties) {
 		if(isDirectory(properties))
 			return MIME_DIRECTORY;
 		String mimeType=(String) properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT);

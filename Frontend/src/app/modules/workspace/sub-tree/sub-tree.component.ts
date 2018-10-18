@@ -10,7 +10,7 @@ import {UIService} from '../../../common/services/ui.service';
 import {UIAnimation} from '../../../common/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {Helper} from '../../../common/helper';
-import {UIHelper} from '../../../common/ui/ui-helper';
+import {UIHelper} from "../../../common/ui/ui-helper";
 
 @Component({
   selector: 'workspace-sub-tree',
@@ -40,8 +40,8 @@ export class WorkspaceSubTreeComponent  {
    * @param options
    */
   @Input() set options(options : OptionItem[]){
-    options=OptionItem.filterValidOptions(this.ui,options);
-    options=OptionItem.filterToggleOptions(options,false);
+    options=UIHelper.filterValidOptions(this.ui,options);
+    options=UIHelper.filterToggleOptions(options,false);
     this._options=options;
   }
   @Input() openPath : string[][]=[];

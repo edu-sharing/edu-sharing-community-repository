@@ -29,6 +29,9 @@ a{
 .center{
   margin: 0 auto;
 }
+.display-none{
+  display: none!important;
+}
 .invisible{
   opacity:0;
 }
@@ -112,6 +115,7 @@ a{
   text-transform: uppercase;
 }
 .input-hint-bottom{
+  margin: 0 0.75em;
   margin-top:-15px;
   color:$textLight;
   font-size: 0.8em;

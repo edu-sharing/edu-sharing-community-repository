@@ -1,0 +1,39 @@
+<div class="dialog darken" [@fade]="this"></div>
+<div class="card center-card card-action card-wide" [@cardAnimation]="this">
+  <div class="card-content">
+    <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div class="card-title" innerHTML="{{'NODE_VARIANT.TITLE' | translate : {name:_node.name} }}"></div>
+    <div *ngIf="_node" class="card-scroll">
+
+        <label for="variantName">{{'NODE_VARIANT.NEW_VARIANT' | translate}}</label>
+        <input type="text" id="variantName" [(ngModel)]="variantName">
+
+        <div class="breadcrumb-style">
+            <div class="breadcrumb-info">{{'NODE_VARIANT.BREADCRUMB_INFO' | translate}}</div>
+            <breadcrumbs
+                    [breadcrumbsAsNode]="breadcrumbs"
+                    [home]="'WORKSPACE.MY_FILES'"
+                    [clickable]="false"
+            ></breadcrumbs>
+            <div class="btn-flat btn-shadow btnVersion" (click)="chooseDirectory=true">{{'NODE_VARIANT.CHOOSE' | translate}}</div>
+        </div>
+
+    </div>
+  </div>
+
+  <div class="card-action">
+    <a class="waves-effect waves-light btn" [class.disabled]="!variantName.trim()" (click)="create()">{{'NODE_VARIANT.CREATE'+(this.openViaConnector ? '_EDIT' : '') | translate }}</a>
+    <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+  </div>
+</div>
+
+<file-chooser
+        *ngIf="chooseDirectory"
+        [title]="'NODE_VARIANT.FILE_PICKER_TITLE'"
+        [pickDirectory]="true"
+        [isCancelable]="true"
+        [writeRequired]="true"
+        [priority]="1"
+        (onCancel)="chooseDirectory=false"
+        (onChoose)="setDirectory($event)"
+></file-chooser>

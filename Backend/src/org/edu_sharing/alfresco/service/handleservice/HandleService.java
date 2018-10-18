@@ -68,6 +68,9 @@ public class HandleService {
 		return null;
 	}
 	
+	public void handleServiceAvailable() throws HandleException, IOException{
+		HSAdapterFactory.newInstance(id,idIndex,getPrivateKeyBytes(),null);
+	}
 	
 	public String createHandle(String handle, final HandleValue[] values) throws Exception {
 		HSAdapter adapter = HSAdapterFactory.newInstance(id,idIndex,getPrivateKeyBytes(),null);

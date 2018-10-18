@@ -338,7 +338,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		AuthenticationTool authTool = new AuthenticationToolAPI();
 		HashMap<String, String> currentAuthentication = null;
 		try {
-			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
+			currentAuthentication = authTool.validateAuthentication(Context.getCurrentInstance().getRequest().getSession());
 		}catch(Exception e) {
 			//when run as
 		}

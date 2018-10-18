@@ -16,7 +16,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {ActionbarHelper} from '../../../common/ui/actionbar/actionbar-helper';
+import {ActionbarHelperService} from "../../../common/services/actionbar-helper";
 
 @Component({
   selector: 'search-node-store',
@@ -47,6 +47,7 @@ export class SearchNodeStoreComponent {
               private router : Router,
               private config : ConfigurationService,
               private connector : RestConnectorService,
+              private actionbar : ActionbarHelperService,
               private temporaryStorageService : TemporaryStorageService,
               private translate : TranslateService,
               private iam : RestIamService,
@@ -76,7 +77,7 @@ export class SearchNodeStoreComponent {
   private updateActionOptions() {
     this.actionOptions=[];
     if(this.selected && this.selected.length){
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',this.selected,this.connector,(node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
+      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', this.selected, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, node ? [node] : this.selected));
       /*let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download",
         (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
         */

@@ -17,6 +17,7 @@ import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.SchoolContextServiceImpl;
+import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -295,7 +296,7 @@ public class SerloImporter implements Importer{
 				link = link.replaceAll("\\\\", "");
 				link = "https://de.serlo.org"+link;
 				eduProps.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, link);
-				
+				eduProps.put(CCConstants.CCM_PROP_IO_WWWURL, link);
 				//eduProps.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, "http://web-screenshot.serlo.org:2341/?url="+link+"&scale=0.4");
 				eduProps.put(CCConstants.LOM_PROP_GENERAL_KEYWORD, generalKeywords);
 				
@@ -330,5 +331,10 @@ public class SerloImporter implements Importer{
 	public void startImport(String[] oaiIDs, String set) {
 		logger.error("not implemented yet");
 	}
-	
+
+	@Override
+	public void setJob(ImporterJob importerJob) {
+
+	}
+
 }

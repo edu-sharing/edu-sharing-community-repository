@@ -43,5 +43,7 @@ public class Values{
 	@XmlElement	public Mainnav mainnav;
 	@XmlElement	public String searchSidenavMode;
 	@XmlElement	public Guest guest;
+	@XmlElement	public Collections collections;
 	@XmlElement	public LicenseAgreement licenseAgreement;
+	@XmlElement	public Services services;
 }

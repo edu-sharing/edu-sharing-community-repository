@@ -3,8 +3,10 @@ package org.edu_sharing.repository.server.rendering;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -31,14 +33,22 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.cache.ShibbolethSessionsCache;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.usage.Usage;
+import org.edu_sharing.service.usage.Usage2Service;
 
 public class RenderingProxy extends HttpServlet {
 
-	
+
+	private static final String[] ALLOWED_GET_PARAMS = new String[]{
+			"closeOnBack","childobject","childobject_order"
+	};
 	Logger logger = Logger.getLogger(RenderingProxy.class);
 	
 	@Override
@@ -60,7 +70,19 @@ public class RenderingProxy extends HttpServlet {
 		String display = req.getParameter("display");
 		
 		String nodeId = req.getParameter("obj_id");
-		
+
+		String childobjectId = req.getParameter("childobject_id");
+
+		String parentId=nodeId;
+		if(childobjectId!=null){
+			boolean isChild=AuthenticationUtil.runAsSystem(()-> NodeServiceHelper.isChildOf(NodeServiceFactory.getLocalService(),childobjectId,parentId));
+			if(!isChild){
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"Node "+childobjectId+" is not a child of "+parentId);
+				return;
+			}
+			nodeId = childobjectId;
+		}
+
 		boolean doRedirect = true;
 		if("inline".equals(display)){
 			doRedirect = false;
@@ -114,71 +136,8 @@ public class RenderingProxy extends HttpServlet {
 		}
 			
 		if("window".equals(display)) {
-			
-			if(uEncrypted == null) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no user provided");
-				return;
-			}
-			
-			String encTicket = req.getParameter("ticket");
-			if(encTicket == null) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no ticket provided");
-				return;
-			}
-			
-			String ticket = null;
-			Encryption enc = new Encryption("RSA");
-			try {
-				ticket = enc.decrypt(Base64.decodeBase64(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
-			}catch(GeneralSecurityException e) {
-				logger.error(e.getMessage(), e);
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
-				return;
-			}
-			
-			
-			
-			/**
-			 * when it's an lms the user who is in a course where the node is used (Angular path can not handle signatures) 
-			 * 
-			 * doing edu ticket auth
-			 */
-			if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
-				HttpSession session = req.getSession(true);
-				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
-				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
-				
-				//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
-				AuthenticationToolAPI authTool = new AuthenticationToolAPI();
-				if(authTool.validateTicket(ticket)) {
-					authTool.storeAuthInfoInSession(usernameDecrypted, ticket,CCConstants.AUTH_TYPE_DEFAULT, session);
-				}else {
-					logger.warn("ticket:" + ticket +" is not valid");
-					return;
-				}
-			}else {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
-				return;
-			}
 
-			String version=req.getParameter("version");
-
-			if(version==null) {
-				logger.info("parameter version missing, will use latest (-1)");
-			}
-			try {
-				if(Double.parseDouble(version)<1)
-					version=null;
-			}catch(Throwable t) {
-				logger.warn("parameter version is non-numeric ("+version+"), will use latest (-1)");
-				version=null;
-			}
-			String closeOnBack="";
-			if(req.getParameter("closeOnBack")!=null){
-				closeOnBack="?closeOnBack="+req.getParameter("closeOnBack");
-			}
-			String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version)+closeOnBack;
-			resp.sendRedirect(urlWindow);
+			openWindow(req, resp, nodeId, parentId, appInfoApplication, usernameDecrypted);
 			return;
 		}
 		
@@ -388,5 +347,99 @@ public class RenderingProxy extends HttpServlet {
 		}
 		
 	}
-	
+
+	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo appInfoApplication, String usernameDecrypted) throws IOException {
+		String ts = req.getParameter("ts");
+		String uEncrypted = req.getParameter("u");
+
+		if(uEncrypted == null) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no user provided");
+			return true;
+		}
+
+		String encTicket = req.getParameter("ticket");
+		if(encTicket == null) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no ticket provided");
+			return true;
+		}
+
+		String ticket = null;
+		Encryption enc = new Encryption("RSA");
+		try {
+			ticket = enc.decrypt(Base64.decodeBase64(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
+		}catch(GeneralSecurityException e) {
+			logger.error(e.getMessage(), e);
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
+			return true;
+		}
+
+
+		/**
+		 * when it's an lms the user who is in a course where the node is used (Angular path can not handle signatures)
+		 *
+		 * doing edu ticket auth
+		 */
+		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
+			req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
+			HttpSession session = req.getSession(true);
+			if(Long.parseLong(ts) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
+				try {
+					Usage usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), parentId, req.getParameter("resource_id"));
+					if(usage==null)
+						throw new SecurityException("No usage found for course id "+req.getParameter("course_id")+" and resource id "+req.getParameter("resource_id"));
+					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, parentId);
+					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
+				}
+				catch (Throwable t){
+					logger.warn("Usage fetching failed for node "+nodeId+": "+t.getMessage());
+				}
+			}
+
+			//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
+			AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+			if(authTool.validateTicket(ticket)) {
+				authTool.storeAuthInfoInSession(usernameDecrypted, ticket,CCConstants.AUTH_TYPE_DEFAULT, session);
+			}else {
+				logger.warn("ticket:" + ticket +" is not valid");
+				return true;
+			}
+		}else {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
+			return true;
+		}
+
+		String version=req.getParameter("version");
+
+		if(version==null) {
+			logger.info("parameter version missing, will use latest (-1)");
+		}
+		try {
+			if(Double.parseDouble(version)<1)
+				version=null;
+		}catch(Throwable t) {
+			logger.warn("parameter version is non-numeric ("+version+"), will use latest (-1)");
+			version=null;
+		}
+
+		String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version);
+
+		Map parameterMap = req.getParameterMap();
+		for(Object o : parameterMap.entrySet()) {
+			Map.Entry entry = (Map.Entry) o;
+			String key = (String)entry.getKey();
+			if(!Arrays.asList(ALLOWED_GET_PARAMS).contains(key)) {
+				continue;
+			}
+			String value;
+			if(entry.getValue() instanceof String[]){
+				value = ((String[])entry.getValue())[0];
+			}else{
+				value = (String)entry.getValue();
+			}
+			urlWindow = UrlTool.setParam(urlWindow,key,value);
+		}
+		resp.sendRedirect(urlWindow);
+		return false;
+	}
+
 }

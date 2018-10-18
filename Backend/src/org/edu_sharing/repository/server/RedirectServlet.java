@@ -29,8 +29,11 @@ package org.edu_sharing.repository.server;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -44,15 +47,21 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
 public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 
@@ -134,7 +143,20 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 					params = URLDecoder.decode(params);
 					System.out.println("adding params to render url:" + params);
 					renderServiceUrl = (renderServiceUrl.contains("?")) ? renderServiceUrl + "&" + params : renderServiceUrl + "?" + params;
-				}
+                    try {
+                        List<NameValuePair> parsed = URLEncodedUtils.parse(params, Charset.defaultCharset());
+                        for(NameValuePair pair : parsed){
+                            if(pair.getName().equals("display") && pair.getValue().equals("download")){
+                                // Track download action for node
+                                TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId),TrackingService.EventType.DOWNLOAD_MATERIAL);
+                                break;
+                            }
+                        }
+                        logger.info(parsed);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
 				
 				String version = req.getParameter("version");
 				if(version != null && !version.trim().equals("")){
@@ -274,7 +296,8 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 
 	private String setUrlParameters(String appId, String nodeId, ApplicationInfo repInfo, String redirectUrl)
 			throws Throwable {
-		HashMap<String, Object> props = NodeServiceFactory.getNodeService(appId).getProperties(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId);
+		NodeService nodeService = NodeServiceFactory.getNodeService(appId);
+		HashMap<String, Object> props = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId);
 		
 		if (props != null) {
 			String title = (String) props.get(CCConstants.LOM_PROP_GENERAL_TITLE);
@@ -322,7 +345,16 @@ public class RedirectServlet extends HttpServlet implements SingleThreadModel {
 			if(version != null && !version.trim().equals("")){
 				redirectUrl = UrlTool.setParamEncode(redirectUrl, "v", version);
 			}
-			
+
+			boolean isDirectory = MimeTypesV2.isDirectory(props);
+			redirectUrl = UrlTool.setParamEncode(redirectUrl, "isDirectory", isDirectory+"");
+
+			String type = CCConstants.getValidLocalName(nodeService.getType(nodeId));
+			redirectUrl = UrlTool.setParamEncode(redirectUrl, "nodeType", type);
+
+			String iconUrl = new MimeTypesV2(ApplicationInfoList.getHomeRepository()).getIcon(nodeService.getType(nodeId),props,Arrays.asList(nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId)));
+			redirectUrl = UrlTool.setParamEncode(redirectUrl, "iconUrl", iconUrl);
+
 			//if it's a remoteObject(no alfresco) make it possible for the lms to show some type icons, license info a.s.o
 			String repoType = repInfo.getRepositoryType();
 			if(repoType != null && !repoType.trim().equals("")){

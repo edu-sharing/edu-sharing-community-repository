@@ -340,6 +340,7 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
                 	 * edu-sharing FIX don't remove edu-sharing children
                 	 */
                 	if(!this.nodeService.getType(ref.getChildRef()).equals(QName.createQName(CCConstants.CCM_TYPE_USAGE))
+                        && !this.nodeService.hasAspect(ref.getChildRef(),QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)) // childobjects in >= 4.2
                         && !this.nodeService.getType(ref.getChildRef()).equals(QName.createQName(CCConstants.CCM_TYPE_ASSIGNED_LICENSE))){
                 		
                 		this.nodeService.removeChild(nodeRef, ref.getChildRef());

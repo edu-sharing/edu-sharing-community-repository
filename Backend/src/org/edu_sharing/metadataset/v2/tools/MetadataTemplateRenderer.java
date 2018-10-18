@@ -9,6 +9,7 @@ import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.tools.DateTool;
+import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.license.LicenseService;
 
 import java.lang.reflect.Field;
@@ -85,10 +86,14 @@ public class MetadataTemplateRenderer {
 				values=new String[]{"-"};
 				wasEmpty=true;
 			}
-			String widgetHtml="<div class='mdsWidget'"+attributes+"><div class='mdsWidgetCaption'>"+widget.getCaption()+"</div>";
+			String widgetHtml="<div class='mdsWidget";
+			if(widget.getType()!=null)
+				widgetHtml+=" mdsWidget_"+widget.getType() ;
+			widgetHtml+="'"+attributes+"><div class='mdsWidgetCaption'>"+widget.getCaption()+"</div>";
 			widgetHtml+="<div class='mdsWidgetContent mds_"+widget.getId().replace(":","_");
 			if(widget.isMultivalue())
 				widgetHtml+=" mdsWidgetMultivalue";
+
 			widgetHtml+="'>";
 			Map<String, MetadataKey> valuesMap = widget.getValuesAsMap();
 			boolean empty=true;
@@ -105,7 +110,7 @@ public class MetadataTemplateRenderer {
 					}
 					path=Lists.reverse(path);
 					int i=0;
-					widgetHtml+="<div>";
+					widgetHtml+="<div class='mdsValue'>";
 					empty=empty && path.size()==0;
 					for(String p : path) {
 						if(i>0) {
@@ -182,7 +187,31 @@ public class MetadataTemplateRenderer {
 					}
 					if(valuesMap.containsKey(value))
 						value=valuesMap.get(value).getCaption();
-					widgetHtml+="<div>";
+
+					boolean isLink=false;
+					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
+						widgetHtml+="<a href=\""+value+"\" target=\""+widget.getLink()+"\">";
+						isLink=true;
+					}
+					else if("vcard".equals(widget.getType())){
+						try {
+							HashMap<String, Object> data = VCardConverter.vcardToHashMap(value).get(0);
+							value = VCardConverter.getNameForVCard("",data);
+							if (data.get(CCConstants.VCARD_URL) != null) {
+								String url = data.get(CCConstants.VCARD_URL).toString();
+								if(!url.isEmpty()) {
+									if (!url.contains("://"))
+										url = "http://" + url;
+									widgetHtml += "<a href=\"" + url + "\" target=\"_blank\">";
+									isLink = true;
+								}
+							}
+						}catch(Throwable t){
+							// empty or invalid value
+						}
+					}
+
+					widgetHtml+="<div class='mdsValue'>";
 					if(widget.getIcon()!=null){
 						widgetHtml+=insertIcon(widget.getIcon());
 					}
@@ -193,14 +222,11 @@ public class MetadataTemplateRenderer {
 							value = widget.getFormat().replace("${value}", value);
 						}
 					}
-					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
-						widgetHtml+="<a href=\""+value+"\" target=\""+widget.getLink()+"\">";
-					}
 					widgetHtml+=value;
-					if(widget.getLink()!=null && !widget.getLink().isEmpty()) {
+					widgetHtml+="</div>";
+					if(isLink) {
 						widgetHtml+="</a>";
 					}
-					widgetHtml+="</div>";
 
 				}
 			}

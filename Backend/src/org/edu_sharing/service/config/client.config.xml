@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
 	<values>
-		<supportedLanguages>de</supportedLanguages>
-		<supportedLanguages>en</supportedLanguages>
 		<extension></extension>
 		<registerUrl></registerUrl>
 		<loginUrl></loginUrl>
@@ -11,6 +9,9 @@
 		<branding>true</branding>
 		<editProfile>true</editProfile>
 		<nodeReport>true</nodeReport>
+		<services>
+			<visualization>https://appserver7.metaventis.com/stat/</visualization>
+		</services>
 	</values>
 	<contexts>
 	</contexts>

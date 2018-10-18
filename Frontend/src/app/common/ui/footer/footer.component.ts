@@ -3,8 +3,8 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {ConfigurationService} from "../../services/configuration.service";
-import {ConfigurationHelper} from "../../rest/configuration-helper";
+import {ConfigurationService} from '../../services/configuration.service';
+import {ConfigurationHelper} from '../../rest/configuration-helper';
 
 @Component({
   selector: 'app-footer',
@@ -12,12 +12,17 @@ import {ConfigurationHelper} from "../../rest/configuration-helper";
   styleUrls: ['footer.component.scss']
 })
 export class FooterComponent {
-    @Input() scope:string;
+    banner: any;
+    _scope:string;
     public show: boolean;
-    constructor(private config:ConfigurationService) {
+    @Input() set scope(scope:string){
+        this._scope=scope;
         this.config.getAll().subscribe(()=>{
-            let banner = ConfigurationHelper.getBanner(this.config);
-            this.show=banner && banner.components.indexOf(this.scope)!=-1
+            this.banner = ConfigurationHelper.getBanner(this.config);
+            console.log(this.banner);
+            this.show=this.banner && this.banner.components.indexOf(this._scope)!=-1
         });
+    }
+    constructor(private config:ConfigurationService) {
     }
 }

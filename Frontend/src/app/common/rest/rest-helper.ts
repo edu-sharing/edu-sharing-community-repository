@@ -13,8 +13,10 @@ import {UIConstants} from "../ui/ui-constants";
 import NumberFormat = Intl.NumberFormat;
 import NumberFormatOptions = Intl.NumberFormatOptions;
 import {CordovaService} from '../services/cordova.service';
+import {RestConnectorService} from './services/rest-connector.service';
 
 export class RestHelper{
+    private static SPACES_STORE_REF = "workspace://SpacesStore/";
   public static getNodeIds(nodes : Node[]|Collection[]|CollectionReference[]): Array<string>{
     let data=new Array<string>(nodes.length);
     for(let i=0;i<nodes.length;i++){
@@ -295,8 +297,14 @@ export class RestHelper{
     }
 
   static createSpacesStoreRef(node: Node) {
-    return "workspace://SpacesStore/"+node.ref.id;
+    return RestHelper.SPACES_STORE_REF+node.ref.id;
   }
+    static removeSpacesStoreRef(id: string) {
+        if(id.startsWith(RestHelper.SPACES_STORE_REF)){
+            return id.substr(RestHelper.SPACES_STORE_REF.length);
+        }
+        return id;
+    }
 
   static getAllAuthoritiesPermission() {
     let perm=new Permission();
@@ -345,6 +353,24 @@ export class RestHelper{
             }
         }
         return null;
+    }
+    static guessMediatypeForFile(file: File){
+        if(file.type.startsWith("image"))
+            return "file-image";
+        if(file.type.startsWith("video"))
+            return "file-video";
+        if(file.type.startsWith("audio"))
+            return "file-audio";
+        if(file.type=="text/xml")
+            return "file-xml";
+        if(file.type=="text/plain")
+            return "file-txt";
+        if(file.type=="application/zip" || file.type=="application/x-zip-compressed")
+            return "file-zip";
+        return "file";
+    }
+    static guessMediatypeIconForFile(connector:RestConnectorService,file:File){
+        return connector.getThemeMimeIconSvg(this.guessMediatypeForFile(file)+'.svg');
     }
 
     static getRestObjectPositionInArray(search: any, haystack: any[]) {

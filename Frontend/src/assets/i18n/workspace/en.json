@@ -8,6 +8,7 @@
     "TITLE_SAFE": "Safe",
     "NO_MATCHING_ITEMS": "No matching elements",
     "SEARCH": "Search for folders or items...",
+    "SAFE_SEARCH": "Search the safe…",
     "MY_FILES": "My content",
     "ADD": "Add",
     "ADD_OBJECT": "Add Material",
@@ -63,6 +64,8 @@
       "GROUP_INHERIT":"Inherited",
       "GROUP_USERS":"These users have access:",
       "GROUP_GROUPS":"These groups have access:",
+      "USAGES":"Used and shared in:",
+      "DELETED":"will be removed",
       "TYPE_VIEWER":"Viewer",
       "TYPE_VIEWER_DESCRIPTION":"can view item / details page",
       "TYPE_COWORKER":"Collaborator",
@@ -103,6 +106,10 @@
         "CHANGED":"Modified",
         "REMOVED":"Removed",
         "EMPTY":"No sharing history available"
+      },
+      "USAGE_TYPE":{
+        "MOODLE":"Moodle-Courses",
+        "COLLECTION":"Collections"
       }
     },
     "INHERIT_DISABLED":"Inherition is currently disabled",
@@ -124,6 +131,12 @@
       "PERMALINK":"Link to object",
       "USAGE_COUNT_TITLE":"Usage",
       "USAGE_COUNT":"Total uses",
+      "USAGE_TYPE": {
+        "LMS": "LMS-Courses",
+        "COLLECTION": "Collections",
+        "DOWNLOAD": "Downloads",
+        "VIEW": "Views"
+      },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "File created",
         "METADATA_UPDATE": "Updated metadata",
@@ -167,7 +180,8 @@
       "CONTRIBUTOR":"Contributors",
       "SHARE_LINK":"Share download-link",
       "WORKFLOW":"Workflow",
-      "TEMPLATE":"Metadata Template"
+      "TEMPLATE":"Metadata Template",
+      "VARIANT": "Create variant"
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatic Metadata Inheritance",
@@ -177,12 +191,17 @@
     "SHARE_LINK":{
       "TITLE":"Share link of {{ name }}",
       "EXPIRY_TITLE":"Set expiry date",
-      "DISABLED":"Link sharing is diabled",
       "EXPIRY_INFO":"After this date the link won't be accessible for anyone",
+      "DISABLED":"Link sharing is diabled",
+      "PASSWORD":"Password Protect",
+      "PASSWORD_INFO":"Then this link will be password protected",
+      "PASSWORD_PLACEHOLDER":"Set password...",
+      "PASSWORD_PLACEHOLDER_EDIT":"Password is already set",
       "LINK":"Link to object",
       "ACTIVATE":"Activate sharing",
       "COPY_CLIPBOARD":"Copy link",
       "LINK_INFO":"Everyone who has access to this link can download the content",
+      "LINK_INFO_FOLDER":"Everyone who has access to this link can download all contents in this folder. Sub-Folders can not be accessed.",
       "LINK_DOWNLOADS":"Number downloads: {{ count }}",
       "COPIED_CLIPBOARD":"Link copied to clipboard",
       "COPIED_CLIPBOARD_ERROR":"Failed to copy link. Please mark and copy it manually"
@@ -256,20 +275,19 @@
       "TYPE":"Choose license",
       "NONE_NAME":"No license chosen",
       "COPYRIGHT_NAME":"protected by copyright law",
-      "COPYRIGHT_FREE_NAME":"protected by copyright law, open access",
-      "COPYRIGHT_LICENSE_NAME":"protected by copyright law, usage subject to license",
+      "CC_BY_NAME":"Creative Commons",
       "CC_0_NAME":"CC 0 / Public Domain",
       "ONLY_OER":"OER licenses only",
       "OER":"OER",
       "NOT_OER":"no OER",
       "SCHULFUNK_NAME":"German educational radio/television license (§47 UrhG)",
       "EDU_NAME":"edu-sharing Licenses",
-      "CUSTOM_NAME":"define custom license",
+      "CUSTOM_NAME":"other license",
       "CURRENT":"currently picked license",
       "VERSION":"version",
       "LOCALE":"locale",
       "RELEASE_WITHOUT_LICENSE":"In order to release an object you need to select a license",
-      "CUSTOM_RIGHTS":"Define your license...",
+      "CUSTOM_RIGHTS":"GNU GPL or other licenses...",
       "RELEASE":"Release object under this license",
       "RELEASE_MULTI":"Release {{count}} objects under this license",
       "CONTACT":"Other users may contact me for further licensing negotiations",

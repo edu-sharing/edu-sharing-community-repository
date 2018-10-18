@@ -3,6 +3,8 @@
     <div class="card-content">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
       <div class="card-title">{{'WORKSPACE.SHARE.TITLE' | translate }}</div>
+      <div class="share-link" (click)="openLink()"><i class="material-icons">link</i> <span>{{'WORKSPACE.OPTION.SHARE_LINK' | translate}}</span></div>
+
       <div class="row">
         <div class="col s12">
           <ul class="tabs">
@@ -38,9 +40,9 @@
           </div>
         </div>
 
-        <div class="group groupToInvite">
+        <div class="group groupToInvite" *ngIf="filterDisabledPermissions(newPermissions).length">
           <div class="toInvite">
-            <div class="badge" *ngFor="let permission of newPermissions">
+            <div class="badge" *ngFor="let permission of filterDisabledPermissions(newPermissions)">
                 <div class="badge-group">
                     <span class="primary">{{permission | permissionName}}</span>
                     <span class="secondary">{{permission | permissionName:{field:'secondary'} }}</span>
@@ -49,7 +51,7 @@
               </div>
 
           </div>
-          <div class="typeButton" *ngIf="newPermissions && newPermissions.length">
+          <div class="typeButton" *ngIf="filterDisabledPermissions(newPermissions).length">
             <div class="btn-flat btn-shadow" *ngIf="currentType.length==0" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align-icon">help_outline</i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
               <i class="material-icons align-icon right">keyboard_arrow_down</i></div>
             <div class="btn-flat btn-shadow" *ngIf="currentType.indexOf('Consumer')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align-icon">remove_red_eye</i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
@@ -70,12 +72,12 @@
 
         </div>
 
-        <div *ngIf="sendMessages" class="groupMessage">
+        <div *ngIf="sendMessages && filterDisabledPermissions(newPermissions).length" class="groupMessage">
           <label for="message">{{'WORKSPACE.SHARE.MESSAGE' | translate}}</label>
           <input type="text" id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
         <input type="checkbox" class="filled-in" id="notify" [(ngModel)]="notifyUsers"> <label for="notify" class="notify">{{'WORKSPACE.NOTIFY_TITLE' | translate}}<p>{{'WORKSPACE.NOTIFY_INFO' | translate}}</p></label>
         </div>
-        <div class="publish" *ngIf="!isSafe">
+        <div [ngClass]="{'publish-grey': filterDisabledPermissions(newPermissions).length}" class="publish" *ngIf="!isSafe">
           <div class="publishElements">
           <div class="switch">
             <label>
@@ -147,6 +149,7 @@
                                         [permission]="permission"
                                         [readOnly]="!permission.editable && !isNewPermission(permission)"
                                         [showDelete]="permission.editable || isNewPermission(permission)"
+                                        [isDeleted]="isDeleted(permission)"
                                         [isDirectory]="_node.isDirectory"
                                         [canPublish]="!isSafe"
                                         [added]="isNewPermission(permission)"
@@ -163,6 +166,7 @@
               [permission]="permission"
               [readOnly]="!permission.editable && !isNewPermission(permission)"
               [showDelete]="permission.editable || isNewPermission(permission)"
+              [isDeleted]="isDeleted(permission)"
               [isDirectory]="_node.isDirectory"
               [canPublish]="!isSafe"
               [added]="isNewPermission(permission)"
@@ -183,14 +187,33 @@
                                     [readOnly]="true"
                                     [showDelete]="false"
         ></workspace-share-permission>
-        <!--
-        <workspace-share-permission *ngIf="showLink && !link"
-                                    class="groupEntry link"
-                                    [permission]="linkDisabled"
-                                    [readOnly]="true"
-                                    [showDelete]="false"
-        ></workspace-share-permission>
-        -->
+          <div class="groupName" *ngIf="hasUsages()">{{'WORKSPACE.SHARE.USAGES' | translate}}</div>
+          <div *ngIf="collections && collections.length" class="usage">
+              <workspace-share-usages
+                      class="usageEntry"
+                      [name]="'COLLECTION'"
+                      [usages]="collections"
+                      [(deleteList)]="deletedUsages"
+              ></workspace-share-usages>
+          </div>
+          <div *ngFor="let key of usages | keys" class="usage">
+              <workspace-share-usages *ngIf="key!='null'"
+                                          class="usageEntry"
+                                          [name]="key"
+                                          [usages]="usages[key]"
+                                          [(deleteList)]="deletedUsages"
+              ></workspace-share-usages>
+          </div>
+
+
+          <!--
+          <workspace-share-permission *ngIf="showLink && !link"
+                                      class="groupEntry link"
+                                      [permission]="linkDisabled"
+                                      [readOnly]="true"
+                                      [showDelete]="false"
+          ></workspace-share-permission>
+          -->
       </div>
       <div *ngIf="tab==ADVANCED && permissionsUser && permissionsGroup" class="tabContent advanced">
         <h2 *ngIf="permissionsUser.length+permissionsGroup.length==0">
@@ -234,3 +257,18 @@
   [node]="linkNode"
   (onClose)="updateNodeLink();linkNode=null"
 ></workspace-share-link>
+
+<div class="dialog darken dialog-collections" [@fade]="showCollections" *ngIf="showCollections"></div>
+<div class="card center-card card-action card-high card-collections" [@cardAnimation]="showCollections" *ngIf="showCollections">
+  <div class="card-content">
+    <div class="card-cancel" (click)="showCollections=false"><i class="material-icons">close</i></div>
+    <span class="card-title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</span>
+    <listTable
+      (clickRow)="openCollection($event)"
+      [nodes]="collections"
+      [isClickable]="true"
+      [columns]="collectionColumns"
+      [viewType]="2"
+    ></listTable>
+  </div>
+</div>

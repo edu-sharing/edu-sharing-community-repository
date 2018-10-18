@@ -17,21 +17,24 @@
   padding-top:25px;
 }
 .timeout{
+  background-color: $toastLeftError;
+  color: white;
+  border-radius: 20pt;
   position: fixed;
-  left: 180px;
-  top: 21px;
+  top: 15px;
+  left: 200px;
+  font-size: 1rem;
+  padding: 10px 15px;
+  padding-left: 40px;
   z-index: 105;
-  font-size: 11px;
-  color: #fff;
-  padding: 5px 15px;
-  background-color: $workspaceTopBarBackground;
+
+  i{
+    position: absolute;
+    top: 7px;
+    left: 10px;
+  }
 }
-.timeout i{
-  font-size: 100%;
-  position: relative;
-  left: -8px;
-  top: 2px;
-}
+
 .tree,.explorer{
   display:table-cell;
 }
@@ -70,7 +73,7 @@
   z-index:85;
   position:fixed;
   right:25px;
-  bottom:25px;
+  bottom:25px+$mobileTabNavHeight;
   display:none;
 }
 .addDesktop,.addDesktopMenu{
@@ -207,7 +210,7 @@
   */
 }
 
-@media screen and (max-width: ($mobileWidth+$mobileStage*2)){
+@media screen and (max-width: ($mobileTabSwitchWidth)){
   .tree,
   .addDesktop{
     display:none;
@@ -221,6 +224,10 @@
   .breadcrumbFrame{
     padding-left:10px;
   }
+  .addDesktopMenu{
+    right:53px;
+    bottom:38px+$mobileTabNavHeight;
+  }
   .explorer{
     left:0;
     width:100%;
@@ -230,7 +237,7 @@
   }
   :host /deep/{
     workspace-explorer .list{
-      padding-bottom:80px;
+      padding-bottom:80px + $mobileTabNavHeight;
     }
   }
 }

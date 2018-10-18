@@ -30,10 +30,10 @@ table, div {
 }
 .switchToSearch{
   position: relative;
-  top:-10px;
+  display: inline-block;
   font-weight: bold;
   text-transform: uppercase;
-  padding: 5px;
+  padding: 12px;
 }
 
 .switchToSearch i{
@@ -71,7 +71,7 @@ table, div {
 
 .section-headline {
     color: #5F5F5F;
-    padding: 18px 15px;
+    padding: 20px 15px 12px;
 }
 
 .collections-breadcrumb {
@@ -91,9 +91,9 @@ table, div {
 }
 
 .collections-master-div {
-    padding-left: 15%;
-    padding-right: 10%;
-    padding-top: 20px;
+    padding:20px 10% 20px 15%;
+    float: left;
+    width: 100%;
 }
 
 .collections-header-textarea {
@@ -126,11 +126,12 @@ table, div {
   transform: translateY(-50%);
 }
 .collection-new-preview-headline {
-    font-size: 200%;
+  font-size: 180%;
+  padding-bottom: 15px;
 }
 
 .collection-new-preview-subline {
-  font-size: 120%;
+  //font-size: 120%;
   opacity: 0.85;
 }
 
@@ -187,6 +188,7 @@ table, div {
 }
 
 .card-collection-image-container {
+    position: relative;
     text-align: center;
     vertical-align: middle;
     height: 200px;
@@ -194,12 +196,22 @@ table, div {
 }
 
 .card-image-icon-container {
-    height: 200px;
+    position: relative;
+    height: 210px;
     width: 100%;
     overflow: hidden;
     margin: auto;
     text-align: center;
     vertical-align: middle;
+}
+.big-edit-button{
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+  //background: #ff000042;
 }
 
 .collections-header  {
@@ -226,13 +238,10 @@ table, div {
 
 
 .collections-edit-button {
-    right: 50px;
+    right: 63px;
 }
-.collections-pin-button {
-  right: 90px;
-}
-.collections-delete-button {
-    right: 10px;
+.collections-delete-button,.collections-pin-button {
+    right: 17px;
 }
 .collections-edit-button,
 .collections-pin-button,
@@ -245,14 +254,18 @@ table, div {
 }
 .collections-pin-button,.collections-edit-button,.collections-delete-button{
   position: absolute;
-  width:32px;
-  height:32px;
+  width:40px;
+  height:40px;
   top: 160px;
-  color: #6b6b6b;
+  color: $primary;
   border-radius: 50%;
-  padding: 5px;
+  padding: 9px;
   background-color: #fff;
   cursor: pointer;
+  @include materialShadowBottom();
+}
+.collections-pin-button{
+  top: 10px;
 }
 .section-headline {
   float:left;
@@ -270,14 +283,22 @@ table, div {
 }
 :host /deep/{
   .collections-pin-button custom-icon g{
-    fill: #6b6b6b;
+    fill: $primary;
   }
   footer{
     float:left;
     width:100%;
   }
 }
-
+.breadcrumb-space{
+  padding: 20px 50px;
+  padding-bottom: 0;
+  background: #fff;
+  margin-top: -40px;
+  margin-left: -40px;
+  margin-right: -16px;
+  @include materialShadow();
+}
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
 
     .table-tab-title-long {
@@ -294,6 +315,12 @@ table, div {
     width:calc(100% - 10px)!important;
   }
 }
+
+@media screen and (max-width: ($mobileTabSwitchWidth)){
+  .switchToSearch{
+    display: none;
+  }
+}
 @media only screen and (max-width: $mobileWidth) {
     :host /deep/{
       .collections-master-div-notabs .subcollections{
@@ -301,7 +328,7 @@ table, div {
       }
     }
   .section-headline{
-    padding: 18px 0;
+    padding: 20px 0 12px;
   }
   .collection-new-preview-headline{
     overflow-wrap: break-word;
@@ -316,9 +343,12 @@ table, div {
   .card-image-icon-container{
     margin-top: $mainnavHeight;
   }
+  .breadcrumb-space{
+    background: transparent;
+  }
     .collections-breadcrumb{
       position: absolute;
-      top: 259px+$mainnavHeight;
+      top: 239px+$mainnavHeight;
       right: 10px;
       max-width: calc(100% - 100px);
     }
@@ -328,9 +358,7 @@ table, div {
     .collections-master-div-notabs{
       margin-top:0;
     }
-    .switchToSearch{
-      float:right;
-    }
+
     .collections-header {
         margin-top: 0;
         top: unset;
@@ -386,4 +414,9 @@ table, div {
     .tab-group{
       max-width:1000px;
     }
+}
+@media only screen and (max-width: $mobileTabSwitchWidth) {
+  .collectionsContainer{
+    margin-bottom: $mobileTabNavHeight;
+  }
 }

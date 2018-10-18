@@ -33,7 +33,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -43,28 +42,23 @@ import javax.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
-import org.alfresco.repo.policy.BehaviourFilterImpl;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.VCardConverter;
-import org.edu_sharing.service.Constants;
+import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
 import org.springframework.context.ApplicationContext;
 
 public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
-	Log logger = LogFactory.getLog(PersistentHandlerEdusharing.class);
+	private final AbstractJob job;
 
 	MCAlfrescoBaseClient mcAlfrescoBaseClient = null;
 
@@ -80,9 +74,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-	public PersistentHandlerEdusharing() throws Throwable {
+	public PersistentHandlerEdusharing(AbstractJob job) throws Throwable {
 		mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
+		this.job = job;
 	}
+	public Logger getLogger(){
+	    return Logger.getLogger(job.getClass());
+    }
 
 	public void removeAllImportedObjects() throws Throwable {
 
@@ -92,22 +90,26 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			HashMap children = (HashMap) mcAlfrescoBaseClient.getChildren(importFolderNodeId);
 			if (children != null) {
 				for (Object setKey : children.keySet()) {
+					if(job!=null && job.isInterrupted()){
+						getLogger().info("Job is aborted");
+						return;
+					}
 					String name = (String) ((HashMap) children.get(setKey)).get(CCConstants.CM_NAME);
-					logger.info("removing set:" + name);
+					getLogger().info("removing set:" + name);
 					HashMap setCursorFolders = (HashMap) mcAlfrescoBaseClient.getChildren((String) setKey);
 					for (Object setCursorfolderId : setCursorFolders.keySet()) {
 						HashMap setCursorFolderProps = (HashMap) setCursorFolders.get(setCursorfolderId);
 						String setCursorFolderName = (String) setCursorFolderProps.get(CCConstants.CM_NAME);
-						logger.info("removing cursor folder:" + setCursorFolderName + " (set:" + name + ")");
+						getLogger().info("removing cursor folder:" + setCursorFolderName + " (set:" + name + ")");
 						mcAlfrescoBaseClient.removeNode((String) setCursorfolderId, (String) setKey);
 					}
 					// mcAlfrescoBaseClient.removeNode( (String)setKey,importFolderNodeId);
 				}
 			} else {
-				logger.info("importFolder has no children");
+				getLogger().info("importFolder has no children");
 			}
 		} else {
-			logger.info("no importFolder available");
+			getLogger().info("no importFolder available");
 		}
 	}
 
@@ -116,7 +118,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		try {
 			repositoryRoot = mcAlfrescoBaseClient.getRepositoryRoot();
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			getLogger().error(e.getMessage(), e);
 			return null;
 		}
 
@@ -127,19 +129,19 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	}
 
 	public String safe(Map newNodeProps, String cursor, String set) throws Throwable {
-		logger.info("called cursor:" + cursor + " set:" + set);
+		getLogger().info("called cursor:" + cursor + " set:" + set);
 
 		String replicationId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 		String lomCatalogId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
 		String timestamp = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
 
 		if (replicationId == null) {
-			logger.error("no replicationId in newNodeProps provided. will not safe/modify record.");
+			getLogger().error("no replicationId in newNodeProps provided. will not safe/modify record.");
 			return null;
 		}
 
 		if (lomCatalogId == null) {
-			logger.error("no lomCatalogId in newNodeProps provided. will not safe/modify record.");
+			getLogger().error("no lomCatalogId in newNodeProps provided. will not safe/modify record.");
 			return null;
 		}
 
@@ -203,7 +205,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		if (childProps != null) {
 
 			// update
-			logger.info("found one local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " childProps:"
+			getLogger().info("found one local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " childProps:"
 					+ childProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE) + " " + childProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)
 					+ " " + childProps.get(CCConstants.SYS_PROP_NODE_UID));
 			HashMap<String, Object> oldProps = childProps;
@@ -229,7 +231,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 					}
 
 				} catch (ParseException e) {
-					logger.error(e.getMessage() + " while comparing old and new timestamp for id:" + replicationId + " oldTimeStamp:" + oldTimeStamp
+					getLogger().error(e.getMessage() + " while comparing old and new timestamp for id:" + replicationId + " oldTimeStamp:" + oldTimeStamp
 							+ " newTimeStamp:" + newTimeStamp);
 
 					// if old date was damaged but new date is ok
@@ -240,18 +242,18 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				}
 			}
 
-			logger.info("oldTimeStamp:" + oldTimeStamp + " newTimeStamp:" + newTimeStamp);
+			getLogger().info("oldTimeStamp:" + oldTimeStamp + " newTimeStamp:" + newTimeStamp);
 			if (nodeMustBeUpdated) {
 				// @TODO update only when timestamp changed
 				// updateNode(alfResult.keySet().iterator().next(),newNodeProps);
-				logger.info(" newTimeStamp is after oldTimeStamp have to update object id:" + replicationId);
+				getLogger().info(" newTimeStamp is after oldTimeStamp have to update object id:" + replicationId);
 				updateNode((String) childProps.get(CCConstants.SYS_PROP_NODE_UID), newNodeProps);
 			} else if (licenseValidChanged) {
-				logger.info(" license valid changed. have to update object. oldLicenseValid:" + oldLicenseValid + " newLicenseValid:"
+				getLogger().info(" license valid changed. have to update object. oldLicenseValid:" + oldLicenseValid + " newLicenseValid:"
 						+ newLicenseValid);
 				updateNode((String) childProps.get(CCConstants.SYS_PROP_NODE_UID), newNodeProps);
 			} else {
-				logger.info(" newTimeStamp.equals(oldTimeStamp) I'll do nothing");
+				getLogger().info(" newTimeStamp.equals(oldTimeStamp) I'll do nothing");
 			}
 			setModifiedDate((String) childProps.get(CCConstants.SYS_PROP_NODE_UID), newNodeProps);
 			return (String) childProps.get(CCConstants.SYS_PROP_NODE_UID);
@@ -259,7 +261,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		} else {
 			// insert
 			String nodeId;
-			logger.info("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
+			getLogger().info("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
 			try{			
 				nodeId=createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
 			
@@ -312,7 +314,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			String importFolderNodeId = (String) importFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
 			return this.getAllNodesInImportfolder(importFolderNodeId);
 		} else {
-			logger.info("returns importFolderProps == null");
+			getLogger().info("returns importFolderProps == null");
 			return null;
 		}
 
@@ -320,10 +322,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 	public HashMap<String, HashMap<String, Object>> getAllNodesInImportfolder(String importFolderId) throws Throwable {
 		if (allNodesInImportfolder == null) {
-			logger.info("allNodesInImportfolder is null starting to initialize it");
+			getLogger().info("allNodesInImportfolder is null starting to initialize it");
 			allNodesInImportfolder = mcAlfrescoBaseClient.getChildrenRecursive(importFolderId, CCConstants.CCM_TYPE_IO);
 
-			logger.info("allNodesInImportfolder initialize finished! size:" + ((allNodesInImportfolder != null) ? allNodesInImportfolder.size() : 0));
+			getLogger().info("allNodesInImportfolder initialize finished! size:" + ((allNodesInImportfolder != null) ? allNodesInImportfolder.size() : 0));
 		}
 		return allNodesInImportfolder;
 	}
@@ -447,7 +449,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 					}
 				} else {
 					// it must be a Map
-					// logger.info("typekey:"+typekey);
+					// getLogger().info("typekey:"+typekey);
 					Map subNodeProps = (Map) nodeProps.get(typekey);
 					createNode(newNodeId, subNodeType, subNodeAssociation, subNodeProps);
 				}
@@ -473,7 +475,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 					if (replId != null && !replId.trim().equals("") && timestamp != null && !timestamp.trim().equals("")) {
 						replIdTimestampMap.put(replId, timestamp);
 					} else {
-						logger.error("cannot add nodeId " + entry.getKey() + " to replIdTimestampMap replId:" + replId + " timestamp:" + timestamp);
+						getLogger().error("cannot add nodeId " + entry.getKey() + " to replIdTimestampMap replId:" + replId + " timestamp:" + timestamp);
 					}
 				}
 
@@ -520,7 +522,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			}
 
 		} catch (ParseException e) {
-			logger.error(e.getMessage() + " while comparing old and new timestamp for id:" + replId + " oldTimeStamp:" + oldTimeStamp
+			getLogger().error(e.getMessage() + " while comparing old and new timestamp for id:" + replId + " oldTimeStamp:" + oldTimeStamp
 					+ " newTimeStamp:" + timeStamp);
 
 			// if old date was damaged but new date is ok

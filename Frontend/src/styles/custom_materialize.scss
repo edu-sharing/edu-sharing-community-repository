@@ -91,12 +91,51 @@ input[type="checkbox"].filled-in:checked+label:before{
 }
 input:not([type]),
 input[type=text],
+input[type=email],
+input[type=password],
 input[type=number],
 select,
+textarea.materialize-textarea,
 input[type=search]{
-  height:2.5rem;
+  height:3rem;
+  -webkit-appearance: none;
+  border: 1px solid #ccc;
+  padding: 0 0.75em;
+  width:calc(100% - 2em);
+  border-radius: 3px;
+  background-color: #fff;
+  &:disabled{
+    border-style:dashed;
+  }
+}
+select{
+  width:100%;
+}
+textarea.materialize-textarea{
+  padding: 0.75em;
+  width: calc(100% - 2em);
 }
 
+/*
+  TODO: Check if it is possible to combine with the input state
+ */
+label,label:active{
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 90%;
+  margin-bottom: 3px;
+  color:$textMain;
+  margin-left: 0.75em;
+}
+input[type=checkbox]+label,
+input[type=radio]+label,
+.switch >label{
+  font-weight: normal;
+  color:$textLight;
+  font-size: 1rem;
+  margin-left: 0;
+  text-transform: none;
+}
 input:not([type]):focus:not([readonly]),
 input[type=search]:focus:not([readonly]),
 input[type=email]:focus:not([readonly]),
@@ -104,8 +143,10 @@ input[type=password]:focus:not([readonly]),
 input[type=number]:focus:not([readonly]),
 input[type=text]:focus:not([readonly]),
 .materialize-textarea:focus:not([readonly]){
-  box-shadow: 0 1px 0 0 $primary!important;
-  border-bottom: 1px solid $primary!important;
+  /*box-shadow: 0 1px 0 0 $primary!important;
+  border-bottom: 1px solid $primary!important;*/
+  border:1px solid $primaryMediumLight!important;
+  box-shadow: none!important;
 }
 .materialize-textarea{
   overflow-y: auto!important;
@@ -124,13 +165,10 @@ select {
   -moz-appearance: none;
   appearance: none;
   display: inherit;
-  border: none;
-  border-bottom: 1px solid #aaa;
-  border-radius: 0;
   background-position: calc(100% - 10px);
 }
 select,.select-wrapper .caret{
-  background-color:transparent;
+  background-color:#fff;
   background-image:url('../assets/images/select-arrow.svg');
   background-size:8px;
   background-repeat: no-repeat;
@@ -190,7 +228,7 @@ input:focus:not([readonly])+label {
 input[type=text]:read-only:not(.select-dropdown),
 input[type=password]:read-only,
 input[type=search]:read-only{
-  border-bottom-style: dashed;
+  border-style: dashed;
 }
 /* materialize select dropdowns */
 .dropdown-content li>a, .dropdown-content li>span{
@@ -317,18 +355,17 @@ span.thumb{
 .collection-item-seperate-bottom {
   border-bottom:1px solid #ccc!important;
 }
-label,
-label:active{
-  font-size:1rem;
-  color:$textLight;
+.ngx-datepicker-container .ngx-datepicker-calendar-container{
+  top: 10px !important;
 }
 /* ng2-datepicker */
 .ngx-datepicker-input{
+  padding: 0!important;
   color:$textPrimary!important;
-  border:none!important;
-  padding-top: 0!important;
-  padding-bottom: 0!important;
-  border-bottom: 1px solid $inputBorderColor!important;
+  margin-top: 10px !important;
+  text-align: center;
+  width: 298px !important;
+  cursor: pointer;
 }
 
 /* material angular2 */
@@ -354,7 +391,7 @@ label:active{
   border: 2px solid $backgroundColor;
 }
 .noUi-target{
-  background: #999;
+  background: #ccc;
   border-radius: 4px;
   border:none;
   box-shadow: none;
@@ -370,18 +407,18 @@ label:active{
   font-size: 8pt;
   min-width: 50px;
   label{
-    float: left;
     font-size: 6pt;
-    width: 100%;
+    margin-right: 5px;
   }
 }
 .noUi-connect{
   margin-left: -10px;
   margin-right: 5px;
-  background-color: $primary;
+  background-color: $primaryMediumLight;
 }
 .noUi-base{
   right: -10px;
+  background-color: #ccc;
 }
 @media all and (max-width: ($mobileWidth)) {
   .collectionContainer {
@@ -410,6 +447,13 @@ label:active{
       padding: 5px 20px 13px 20px;
       border-bottom: none;
     }
+  }
+  /* ng2-datepicker */
+  .ngx-datepicker-input {
+      width: auto !important;
+  }
+  .ngx-datepicker-container .ngx-datepicker-calendar-container {
+    left: -2% !important;
   }
 
 }

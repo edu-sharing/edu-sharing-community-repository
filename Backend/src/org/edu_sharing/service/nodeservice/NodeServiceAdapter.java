@@ -1,17 +1,21 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 public class NodeServiceAdapter implements NodeService {
 	
@@ -23,6 +27,11 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public void updateNode(String nodeId, HashMap<String, String[]> props) throws Throwable {
+	}
+
+	@Override
+	public void createAssoc(String parentId, String childId, String assocName) {
+
 	}
 
 	@Override
@@ -55,13 +64,12 @@ public class NodeServiceAdapter implements NodeService {
 		return null;
 	}
 
-	@Override
-	public HashMap<String, Object> getChild(StoreRef store, String parentId, String type, String property,
-			String value) {
-		return null;
-	}
+    @Override
+    public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
+        return null;
+    }
 
-	@Override
+    @Override
 	public void setOwner(String nodeId, String username) {
 	}
 
@@ -72,11 +80,6 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public String getOrCreateUserInbox() {
-		return null;
-	}
-
-	@Override
-	public List<ChildAssociationRef> getChildrenChildAssociationRef(String parentID) {
 		return null;
 	}
 
@@ -116,7 +119,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 	
 	@Override
-	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Exception {
+	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
 		return null;
 	}
 	
@@ -250,4 +253,34 @@ public class NodeServiceAdapter implements NodeService {
 
 	}
 
+	@Override
+	public String getContentMimetype(String protocol, String storeId, String nodeId) {
+		return null;
+	}
+
+	@Override
+	public List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc) {
+		return null;
+	}
+
+	@Override
+	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition) {
+		return null;
+	}
+	
+	@Override
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId) {
+		return null;
+	}
+
+	@Override
+	public <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition) {
+		return list;
+	}
 }

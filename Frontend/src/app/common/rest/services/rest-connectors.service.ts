@@ -13,6 +13,11 @@ import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
 export class RestConnectorsService extends AbstractRestService{
+    private static MODE_NONE=0;
+    private static MODE_CREATE=1;
+    private static MODE_EDIT=2;
+
+  private currentList: ConnectorList;
   constructor(connector : RestConnectorService,
               public nodeApi : RestNodeService) {
       super(connector);
@@ -22,9 +27,9 @@ export class RestConnectorsService extends AbstractRestService{
                   ): Observable<ConnectorList> => {
     let query=this.connector.createUrl("connector/:version/connectors/:repository/list",repository);
           return this.connector.get(query,this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+      .map((response: Response) => response.json()).do((data)=>this.currentList=data);
   }
-  public static connectorSupportsEdit(connectorList:ConnectorList,node: Node) {
+  public connectorSupportsEdit(node: Node,connectorList:ConnectorList=this.currentList) {
     if(connectorList==null || connectorList.connectors==null)
       return null;
     for(let connector of connectorList.connectors){
@@ -34,9 +39,7 @@ export class RestConnectorsService extends AbstractRestService{
     return null;
   }
 
-  private static MODE_NONE=0;
-  private static MODE_CREATE=1;
-  private static MODE_EDIT=2;
+
   public static getFiletype(node:Node,connector:Connector,mode=this.MODE_NONE){
     for(let filetype of connector.filetypes){
       if(filetype.mimetype==node.mimetype && (mode==this.MODE_NONE || mode==this.MODE_EDIT && filetype.editable || mode==this.MODE_CREATE && filetype.creatable)) {
@@ -133,4 +136,8 @@ export class RestConnectorsService extends AbstractRestService{
       */
     });
   }
+
+    getCurrentList() {
+        return this.currentList;
+    }
 }

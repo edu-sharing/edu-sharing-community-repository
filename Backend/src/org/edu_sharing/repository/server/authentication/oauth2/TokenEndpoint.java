@@ -27,6 +27,8 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 public class TokenEndpoint extends HttpServlet {
@@ -87,6 +89,7 @@ public class TokenEndpoint extends HttpServlet {
 							.createNewSession(username, oauthRequest.getPassword());						
 
 						tokenService.createToken(username, accessToken, refreshToken, clientId,authInfo.get(CCConstants.AUTH_TICKET));
+                        TrackingServiceFactory.getTrackingService().trackActivityOnUser(username,TrackingService.EventType.LOGIN_USER_OAUTH_PASSWORD);
 						
 					} catch (Throwable e) {
 						
@@ -109,9 +112,10 @@ public class TokenEndpoint extends HttpServlet {
 							ticket = eduAuthenticationService.getCurrentTicket();
 						}
 						
-						tokenService.refreshToken(oauthRequest.getRefreshToken(), accessToken, refreshToken, clientId, ticket);
-						
-					} catch (Throwable e) {
+						Token newToken=tokenService.refreshToken(oauthRequest.getRefreshToken(), accessToken, refreshToken, clientId, ticket);
+                        TrackingServiceFactory.getTrackingService().trackActivityOnUser(newToken.getUsername(),TrackingService.EventType.LOGIN_USER_OAUTH_REFRESH_TOKEN);
+
+                    } catch (Throwable e) {
 						Logger.getLogger(TokenEndpoint.class).warn(e.toString());
 						throw OAuthProblemException.error(e.getMessage());
 					}

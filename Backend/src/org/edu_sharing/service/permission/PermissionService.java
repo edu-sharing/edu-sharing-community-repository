@@ -61,6 +61,10 @@ public interface PermissionService {
 	
 	public void removePermissions(String nodeId, String authority, String[] _permissions) throws Exception;
 
+    StringBuffer getFindUsersSearchString(HashMap<String, String> propVals, boolean globalContext);
+
+	StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext);
+
 	public Result<List<User>> findUsers(HashMap<String, String> propVals, boolean globalContext, int from, int nrOfResults);
 	
 	public Result<List<Authority>> findAuthorities(String searchWord, boolean globalContext, int from, int nrOfResults);
@@ -71,6 +75,11 @@ public interface PermissionService {
 	public void createNotifyObject(final String nodeId, final String user, final String event, final String action);
 
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission);
+
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission);
+
+	HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String authority,
+											   String[] permissions);
 
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions);
 	

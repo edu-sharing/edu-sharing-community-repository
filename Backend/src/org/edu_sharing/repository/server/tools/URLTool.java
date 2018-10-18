@@ -209,7 +209,9 @@ public class URLTool{
 	public static String getPreviewServletUrl(NodeRef node){
 		return getPreviewServletUrl(node.getId(), node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier());
 	}
-
+	public static String getPreviewServletUrl(org.edu_sharing.service.model.NodeRef node) {
+		return getPreviewServletUrl(node.getNodeId(), node.getStoreProtocol(), node.getStoreId());
+	}
 	
 	
 	
@@ -362,4 +364,12 @@ public class URLTool{
 		
 		return url;
 	}
+
+    public static String getRestServiceUrl() {
+        return getBaseUrl()+"/rest/";
+    }
+
+    public static String getEduservletUrl() {
+        return getBaseUrl()+"/eduservlet/";
+    }
 }

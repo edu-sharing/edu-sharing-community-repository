@@ -7,14 +7,16 @@
 
 package org.edu_sharing.webservices.alfresco.extension;
 
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
+
 public class GetPreviewUrlResponse  implements java.io.Serializable {
-    private org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrlReturn;
+    private GetPreviewResult getPreviewUrlReturn;
 
     public GetPreviewUrlResponse() {
     }
 
     public GetPreviewUrlResponse(
-           org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrlReturn) {
+           GetPreviewResult getPreviewUrlReturn) {
            this.getPreviewUrlReturn = getPreviewUrlReturn;
     }
 
@@ -24,7 +26,7 @@ public class GetPreviewUrlResponse  implements java.io.Serializable {
      * 
      * @return getPreviewUrlReturn
      */
-    public org.edu_sharing.repository.client.rpc.GetPreviewResult getGetPreviewUrlReturn() {
+    public GetPreviewResult getGetPreviewUrlReturn() {
         return getPreviewUrlReturn;
     }
 
@@ -34,7 +36,7 @@ public class GetPreviewUrlResponse  implements java.io.Serializable {
      * 
      * @param getPreviewUrlReturn
      */
-    public void setGetPreviewUrlReturn(org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrlReturn) {
+    public void setGetPreviewUrlReturn(GetPreviewResult getPreviewUrlReturn) {
         this.getPreviewUrlReturn = getPreviewUrlReturn;
     }
 

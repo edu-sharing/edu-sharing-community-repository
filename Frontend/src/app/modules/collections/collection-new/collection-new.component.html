@@ -89,14 +89,14 @@
                   <i class="material-icons icon-bottom">file_upload</i>
               </div>
 
-              <div *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)" class="card-collection-icon-container">
+              <div *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
                   <div style="height: 35px;"></div>
                   <div class="card-image-icon-container" [style.background-color]="currentCollection.color">
                       <i class="material-icons" style="font-size: 75px; margin-top: 44px;">layers</i>
                   </div>
               </div>
 
-              <div *ngIf="!imageData && (currentCollection.preview && !currentCollection.preview.isIcon)" class="card-collection-icon-container">
+              <div *ngIf="!imageData && (currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
                   <img [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'" class="card-image-preview"/>
               </div>
 
@@ -126,19 +126,12 @@
                       {{ 'collectionNew_setColor' | translate }}
                   </div>
 
-                  <div style="text-align: center;margin-top: 8px;">
-                      <div *ngFor="let color of COLORS1"(click)="setColor(color)"
+                  <div class="color-group" style="text-align: center;margin-top: 8px;">
+                      <div *ngFor="let color of COLORS"(click)="setColor(color)"
                            class="color-option"
                            [ngClass]="{'color-selected': (currentCollection.color==color)}"
                            [style.background-color]="color">&nbsp;</div>
                   </div>
-                  <div style="text-align: center;margin-top: 8px;">
-                    <div *ngFor="let color of COLORS2"(click)="setColor(color)"
-                         class="color-option"
-                         [ngClass]="{'color-selected': (currentCollection.color==color)}"
-                         [style.background-color]="color">&nbsp;</div>
-                  </div>
-
               </div>
           </div>
         </div>

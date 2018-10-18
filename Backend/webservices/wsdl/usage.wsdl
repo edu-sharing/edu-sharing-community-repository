@@ -6,23 +6,19 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
   <schema elementFormDefault="qualified" targetNamespace="http://usage.webservices.edu_sharing.org" xmlns="http://www.w3.org/2001/XMLSchema">
    <import namespace="http://lang.java"/>
    <import namespace="http://authentication.webservices.edu_sharing.org"/>
-   <element name="getUsage">
+   <element name="getUsageByParentNodeId">
     <complexType>
      <sequence>
       <element name="repositoryTicket" type="xsd:string"/>
       <element name="repositoryUsername" type="xsd:string"/>
-      <element name="lmsId" type="xsd:string"/>
-      <element name="courseId" type="xsd:string"/>
       <element name="parentNodeId" type="xsd:string"/>
-      <element name="appUser" type="xsd:string"/>
-      <element name="resourceId" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getUsageResponse">
+   <element name="getUsageByParentNodeIdResponse">
     <complexType>
      <sequence>
-      <element name="getUsageReturn" type="impl:UsageResult"/>
+      <element maxOccurs="unbounded" name="getUsageByParentNodeIdReturn" type="impl:UsageResult"/>
      </sequence>
     </complexType>
    </element>
@@ -48,6 +44,24 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    </complexType>
    <element name="fault" type="impl:UsageException"/>
    <element name="fault1" type="tns2:AuthenticationException"/>
+   <element name="usageAllowed">
+    <complexType>
+     <sequence>
+      <element name="repositoryTicket" type="xsd:string"/>
+      <element name="repositoryUsername" type="xsd:string"/>
+      <element name="nodeId" type="xsd:string"/>
+      <element name="lmsId" type="xsd:string"/>
+      <element name="courseId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="usageAllowedResponse">
+    <complexType>
+     <sequence>
+      <element name="usageAllowedReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
    <element name="setUsage">
     <complexType>
      <sequence>
@@ -70,59 +84,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
    <element name="setUsageResponse">
     <complexType/>
    </element>
-   <element name="deleteUsages">
-    <complexType>
-     <sequence>
-      <element name="repositoryTicket" type="xsd:string"/>
-      <element name="repositoryUsername" type="xsd:string"/>
-      <element name="appSessionId" type="xsd:string"/>
-      <element name="appCurrentUserId" type="xsd:string"/>
-      <element name="lmsId" type="xsd:string"/>
-      <element name="courseId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="deleteUsagesResponse">
-    <complexType>
-     <sequence>
-      <element name="deleteUsagesReturn" type="xsd:boolean"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="usageAllowed">
-    <complexType>
-     <sequence>
-      <element name="repositoryTicket" type="xsd:string"/>
-      <element name="repositoryUsername" type="xsd:string"/>
-      <element name="nodeId" type="xsd:string"/>
-      <element name="lmsId" type="xsd:string"/>
-      <element name="courseId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="usageAllowedResponse">
-    <complexType>
-     <sequence>
-      <element name="usageAllowedReturn" type="xsd:boolean"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getUsageByParentNodeId">
-    <complexType>
-     <sequence>
-      <element name="repositoryTicket" type="xsd:string"/>
-      <element name="repositoryUsername" type="xsd:string"/>
-      <element name="parentNodeId" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="getUsageByParentNodeIdResponse">
-    <complexType>
-     <sequence>
-      <element maxOccurs="unbounded" name="getUsageByParentNodeIdReturn" type="impl:UsageResult"/>
-     </sequence>
-    </complexType>
-   </element>
    <element name="deleteUsage">
     <complexType>
      <sequence>
@@ -144,6 +105,45 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
+   <element name="getUsage">
+    <complexType>
+     <sequence>
+      <element name="repositoryTicket" type="xsd:string"/>
+      <element name="repositoryUsername" type="xsd:string"/>
+      <element name="lmsId" type="xsd:string"/>
+      <element name="courseId" type="xsd:string"/>
+      <element name="parentNodeId" type="xsd:string"/>
+      <element name="appUser" type="xsd:string"/>
+      <element name="resourceId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="getUsageResponse">
+    <complexType>
+     <sequence>
+      <element name="getUsageReturn" type="impl:UsageResult"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="deleteUsages">
+    <complexType>
+     <sequence>
+      <element name="repositoryTicket" type="xsd:string"/>
+      <element name="repositoryUsername" type="xsd:string"/>
+      <element name="appSessionId" type="xsd:string"/>
+      <element name="appCurrentUserId" type="xsd:string"/>
+      <element name="lmsId" type="xsd:string"/>
+      <element name="courseId" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="deleteUsagesResponse">
+    <complexType>
+     <sequence>
+      <element name="deleteUsagesReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
   </schema>
   <schema elementFormDefault="qualified" targetNamespace="http://authentication.webservices.edu_sharing.org" xmlns="http://www.w3.org/2001/XMLSchema">
    <import namespace="http://usage.webservices.edu_sharing.org"/>
@@ -157,15 +157,15 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
   </schema>
  </wsdl:types>
 
-   <wsdl:message name="getUsageRequest">
-
-      <wsdl:part element="impl:getUsage" name="parameters"/>
-
-   </wsdl:message>
-
    <wsdl:message name="usageAllowedResponse">
 
       <wsdl:part element="impl:usageAllowedResponse" name="parameters"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getUsageRequest">
+
+      <wsdl:part element="impl:getUsage" name="parameters"/>
 
    </wsdl:message>
 
@@ -243,35 +243,11 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    <wsdl:portType name="Usage">
 
-      <wsdl:operation name="getUsage">
+      <wsdl:operation name="getUsageByParentNodeId">
 
-         <wsdl:input message="impl:getUsageRequest" name="getUsageRequest"/>
+         <wsdl:input message="impl:getUsageByParentNodeIdRequest" name="getUsageByParentNodeIdRequest"/>
 
-         <wsdl:output message="impl:getUsageResponse" name="getUsageResponse"/>
-
-         <wsdl:fault message="impl:UsageException" name="UsageException"/>
-
-         <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="setUsage">
-
-         <wsdl:input message="impl:setUsageRequest" name="setUsageRequest"/>
-
-         <wsdl:output message="impl:setUsageResponse" name="setUsageResponse"/>
-
-         <wsdl:fault message="impl:UsageException" name="UsageException"/>
-
-         <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="deleteUsages">
-
-         <wsdl:input message="impl:deleteUsagesRequest" name="deleteUsagesRequest"/>
-
-         <wsdl:output message="impl:deleteUsagesResponse" name="deleteUsagesResponse"/>
+         <wsdl:output message="impl:getUsageByParentNodeIdResponse" name="getUsageByParentNodeIdResponse"/>
 
          <wsdl:fault message="impl:UsageException" name="UsageException"/>
 
@@ -291,11 +267,11 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getUsageByParentNodeId">
+      <wsdl:operation name="setUsage">
 
-         <wsdl:input message="impl:getUsageByParentNodeIdRequest" name="getUsageByParentNodeIdRequest"/>
+         <wsdl:input message="impl:setUsageRequest" name="setUsageRequest"/>
 
-         <wsdl:output message="impl:getUsageByParentNodeIdResponse" name="getUsageByParentNodeIdResponse"/>
+         <wsdl:output message="impl:setUsageResponse" name="setUsageResponse"/>
 
          <wsdl:fault message="impl:UsageException" name="UsageException"/>
 
@@ -315,83 +291,47 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="getUsage">
+
+         <wsdl:input message="impl:getUsageRequest" name="getUsageRequest"/>
+
+         <wsdl:output message="impl:getUsageResponse" name="getUsageResponse"/>
+
+         <wsdl:fault message="impl:UsageException" name="UsageException"/>
+
+         <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="deleteUsages">
+
+         <wsdl:input message="impl:deleteUsagesRequest" name="deleteUsagesRequest"/>
+
+         <wsdl:output message="impl:deleteUsagesResponse" name="deleteUsagesResponse"/>
+
+         <wsdl:fault message="impl:UsageException" name="UsageException"/>
+
+         <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
+
+      </wsdl:operation>
+
    </wsdl:portType>
 
    <wsdl:binding name="usageSoapBinding" type="impl:Usage">
 
       <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
-      <wsdl:operation name="getUsage">
+      <wsdl:operation name="getUsageByParentNodeId">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getUsageRequest">
+         <wsdl:input name="getUsageByParentNodeIdRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getUsageResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-         <wsdl:fault name="UsageException">
-
-            <wsdlsoap:fault name="UsageException" use="literal"/>
-
-         </wsdl:fault>
-
-         <wsdl:fault name="AuthenticationException">
-
-            <wsdlsoap:fault name="AuthenticationException" use="literal"/>
-
-         </wsdl:fault>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="setUsage">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="setUsageRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="setUsageResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-         <wsdl:fault name="UsageException">
-
-            <wsdlsoap:fault name="UsageException" use="literal"/>
-
-         </wsdl:fault>
-
-         <wsdl:fault name="AuthenticationException">
-
-            <wsdlsoap:fault name="AuthenticationException" use="literal"/>
-
-         </wsdl:fault>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="deleteUsages">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="deleteUsagesRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="deleteUsagesResponse">
+         <wsdl:output name="getUsageByParentNodeIdResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -441,17 +381,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="getUsageByParentNodeId">
+      <wsdl:operation name="setUsage">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="getUsageByParentNodeIdRequest">
+         <wsdl:input name="setUsageRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="getUsageByParentNodeIdResponse">
+         <wsdl:output name="setUsageResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -482,6 +422,66 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
          </wsdl:input>
 
          <wsdl:output name="deleteUsageResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="UsageException">
+
+            <wsdlsoap:fault name="UsageException" use="literal"/>
+
+         </wsdl:fault>
+
+         <wsdl:fault name="AuthenticationException">
+
+            <wsdlsoap:fault name="AuthenticationException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getUsage">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getUsageRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getUsageResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="UsageException">
+
+            <wsdlsoap:fault name="UsageException" use="literal"/>
+
+         </wsdl:fault>
+
+         <wsdl:fault name="AuthenticationException">
+
+            <wsdlsoap:fault name="AuthenticationException" use="literal"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="deleteUsages">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="deleteUsagesRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="deleteUsagesResponse">
 
             <wsdlsoap:body use="literal"/>
 

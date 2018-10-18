@@ -205,6 +205,20 @@
        	  <filter-name>Edu Context Management Filter</filter-name>
           <url-pattern>/node/*</url-pattern>
    </filter-mapping>
+    <!-- filter for LRMI data in render view -->
+    <filter-mapping>
+        <filter-name>Edu Context Management Filter</filter-name>
+        <url-pattern>/components/render/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Guest Filter</filter-name>
+        <url-pattern>/components/render/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>Edu-Sharing Authentication Filter</filter-name>
+        <url-pattern>/components/render/*</url-pattern>
+    </filter-mapping>
+
    <filter-mapping>
        	  <filter-name>Edu Context Management Filter</filter-name>
           <url-pattern>/search</url-pattern>
@@ -229,6 +243,10 @@
    <filter-mapping>
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/rest/*</url-pattern>
+   </filter-mapping>
+   <filter-mapping>
+       <filter-name>Edu-Sharing Guest Filter</filter-name>
+       <url-pattern>/eduservlet/sitemap</url-pattern>
    </filter-mapping>
    
    <filter-mapping>
@@ -370,13 +388,7 @@
         <servlet-class>
             org.edu_sharing.repository.server.SuggestServiceImpl
         </servlet-class> 
-    </servlet> 
-    <servlet>
-        <servlet-name>CollectionService</servlet-name>
-        <servlet-class>
-            org.edu_sharing.repository.server.CollectionServiceImpl
-        </servlet-class> 
-    </servlet> 
+    </servlet>
     <servlet>
         <servlet-name>CCCreate</servlet-name>
         <servlet-class>
@@ -446,6 +458,14 @@
      <servlet>
     	<servlet-name>DownloadServlet</servlet-name>
     	<servlet-class>org.edu_sharing.repository.server.DownloadServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SitemapServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.sitemap.SitemapServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RobotsTXTServlet</servlet-name>
+        <servlet-class>org.edu_sharing.repository.server.sitemap.RobotsTXTServlet</servlet-class>
     </servlet>
     <servlet>
     	<servlet-name>ShareServlet</servlet-name>
@@ -570,10 +590,6 @@
         <servlet-name>SuggestService</servlet-name>
         <url-pattern>/eduservlet/suggestservice</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-    	<servlet-name>CollectionService</servlet-name>
-    	<url-pattern>/eduservlet/collectionservice</url-pattern>
-    </servlet-mapping>
     
     <servlet-mapping> 
         <servlet-name>CCCreate</servlet-name>
@@ -607,6 +623,14 @@
     <servlet-mapping>
      	<servlet-name>DownloadServlet</servlet-name>
      	<url-pattern>/eduservlet/download</url-pattern>   
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SitemapServlet</servlet-name>
+        <url-pattern>/eduservlet/sitemap</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RobotsTXTServlet</servlet-name>
+        <url-pattern>/robots.txt</url-pattern>
     </servlet-mapping>
 	<servlet-mapping>
     	<servlet-name>Connector</servlet-name>

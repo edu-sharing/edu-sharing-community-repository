@@ -80,6 +80,15 @@ export interface Application {
   xml: string;
 }
 
+export interface Service {
+    active: boolean;
+    id: string;
+    name: string;
+    url: string;
+    logo: string;
+    interfaces: any[];
+    statisticsInterface: string;
+}
 
 export interface Preview {
   data: Blob; // image, may null, see @NodeHelper.appendImageData
@@ -102,6 +111,7 @@ export class Node {
   modifiedAt: Date;
   modifiedBy: Person;
   access: string[];
+  iconURL: string;
   contentVersion: string;
   repositoryType: string;
   contentUrl: string;
@@ -132,10 +142,18 @@ export interface Pagination {
   from: number;
   count: number;
 }
+export interface SharingInfo{
+  password: boolean;
+  expired: boolean;
+  passwordMatches: boolean;
+  invitedBy: Person;
+  node: Node;
+}
 export interface NodeShare {
   token: string;
   email: string;
   expiryDate: number;
+  password: boolean;
   invitedAt: number;
   downloadCount: number;
   url: string;
@@ -568,11 +586,14 @@ export interface MdsValueList {
   values: MdsValue[];
 }
 
-
+export interface  MdsValuesParameters {
+    query : string;
+    property : string;
+    pattern : string;
+}
 export interface MdsValues{
-  query : string;
-  property : string;
-  pattern : string;
+  valueParameters:MdsValuesParameters;
+  criterias : any;
 }
 
 export interface Parent {
@@ -754,18 +775,30 @@ export interface Usage {
   courseId: string;
   distinctPersons: number;
   appId: string;
+  appType: string;
+  appSubtype: string;
   nodeId: string;
   parentNodeId: string;
   usageVersion: string;
-  usageXmlParams: string;
+  usageXmlParams: UsageXmlParams;
   resourceId: string;
   guid: string;
+}
+export interface UsageXmlParams{
+    general: UsageXmlParamsGeneral;
+}
+export interface UsageXmlParamsGeneral {
+    referencedInName: string;
+    referencedInType: string;
+    referencedInInstance: string;
 }
 
 export interface UsageList {
   usages: Usage[];
 }
-
+export interface CollectionUsage extends Usage{
+    collection: Collection;
+}
 export interface Filetype {
   mimetype: string;
   filetype: string;

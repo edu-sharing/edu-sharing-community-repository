@@ -1,0 +1,10 @@
+@import "../../../../styles/variables.scss";
+.moreOpen{
+  position:absolute;
+  right:20px;
+  width:$contextMenuWidth;
+  padding:0!important;
+}
+.moreOpen a{
+  text-align: left;
+}

@@ -7,7 +7,6 @@
 				<caption>cm_name</caption>
 				<placeholder>cm_name_placeholder</placeholder>
 				<bottomCaption>cm_name_bottom</bottomCaption>
-				<icon>description</icon>
 				<type>text</type>
 				<required>true</required>
 				<!-- <condition>!ccm:wwwurl</condition>  -->
@@ -338,6 +337,18 @@
               <author>
               <license>
               <version>
+              <childobjects>
+				]]></html>
+			</template>
+			<template>
+				<id>node_childobject</id>
+				<caption>dialog_upload_tab_basic</caption>
+				<icon>description</icon>
+				<html><![CDATA[
+              <ccm:wwwurl>
+              <cm:name>
+              <cclom:title>
+              <author>
 				]]></html>
 			</template>
 			<template>
@@ -519,6 +530,12 @@
 				</views>
 			</group>
 			<group>
+				<id>io_childobject</id>
+				<views>
+					<view>node_childobject</view>
+				</views>
+			</group>
+			<group>
 				<id>collection_editorial</id>
 				<views>
 					<view>collection_editorial</view>
@@ -568,7 +585,7 @@
 		<queries>
 			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
-			
+
 			<query join="AND"  id="ngsearch">
 				<basequery>ISNULL:@ccm\:tool_category</basequery>
 				<property name="ngsearchword">
@@ -595,6 +612,20 @@
 					<statement value="COPYRIGHT_OTHERS">@ccm\:commonlicense_key:"COPYRIGHT*" OR @ccm\:commonlicense_key:"SCHULFUNK"</statement>
 					<multiple>true</multiple>
 					<multiplejoin>OR</multiplejoin>
+				</property>
+				<property name="workflow">
+					<statement>@ccm\:wf_status:"${value}"</statement>
+					<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
+					<multiple>true</multiple>
+					<multiplejoin>OR</multiplejoin>
+				</property>
+			</query>
+			<query join="AND"  id="collections">
+				<property name="ngsearchword">
+					<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+					<exactMatching>false</exactMatching>
+					<multiple>true</multiple>
+					<multiplejoin>AND</multiplejoin>
 				</property>
 			</query>
 			<query join="AND" id="archive" applyBasequery="false">
@@ -627,7 +658,7 @@
 			</query>
 			<query join="AND"  id="workspace">
 		   		<property name="ngsearchword">
-				    <statement>NOT TYPE:"ccm:notify" AND NOT ASPECT:"ccm:collection_io_reference" AND NOT ASPECT:"ccm:collection" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				    <statement>NOT TYPE:"ccm:notify" AND NOT ASPECT:"ccm:collection_io_reference" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 				    <multiple>true</multiple>
 				    <multiplejoin>AND</multiplejoin>
 			    </property>

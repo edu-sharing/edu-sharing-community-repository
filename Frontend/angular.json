@@ -36,7 +36,8 @@
             "scripts": [
               "src/assets/js/jquery.1.12.4.min.js",
               "src/assets/js/nouislider.min.js",
-              "node_modules/materialize-css/dist/js/materialize.min.js"
+              "node_modules/materialize-css/dist/js/materialize.min.js",
+              "src/assets/js/chart.js"
             ]
           },
           "configurations": {

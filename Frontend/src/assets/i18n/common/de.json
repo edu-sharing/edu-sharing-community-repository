@@ -8,9 +8,11 @@
   "ADD":"Hinzufügen",
   "BACK": "Zurück",
   "NEXT": "Weiter",
+  "SKIP": "Überspringen",
   "SAVE" : "Speichern",
   "APPLY" : "Übernehmen",
   "CANCEL" : "Abbrechen",
+  "YES_DELETE" : "Ja, löschen",
   "RENAME" : "Umbenennen",
   "USERMENU": "Nutzermenü",
   "USER_GUEST" : "Gast",
@@ -44,6 +46,7 @@
   "CLOSE" : "Schließen",
   "INFORMATION": "Informationen",
   "DOWNLOAD": "Herunterladen",
+  "DOWNLOAD_ALL": "Alle herunterladen",
   "LOAD_MORE":"Weitere laden",
   "LOADING": "Lädt...",
   "TODAY" : "Heute",
@@ -68,7 +71,7 @@
   "ORIGINAL_DELETED_INFO":"Nur Informationen sichtbar",
   "COMMON_API_ERROR": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut",
   "COMMON_API_ERROR_TITLE": "Fehlerdetails",
-  "RENDERSERVICE_API_ERROR":"Fehler beim Verbinden mit dem Renderservice. Bitte überprüfen Sie die Serverkonfiguration oder melden Sie diesen Fehler einen Administrator",
+  "RENDERSERVICE_API_ERROR":"Fehler beim Verbinden mit dem Renderservice. Bitte melden Sie diesen Fehler einen Administrator",
   "SYSTEM_FOLDER_DELETE_ERROR":"Dieser Ordner wurde vom System erstellt und kann nicht gelöscht werden",
   "TOOLPERMISSION_ERROR":"Ihnen fehlt für diesen Vorgang die notwendige Berechtigung",
   "TOOLPERMISSION_ERROR_TITLE":"Fehlende Berechtigung",
@@ -108,6 +111,8 @@
   "NO_PERMISSIONS_FOR_SCOPE":"Keine Berechtigungen, um diesen Bereich anzuzeigen",
   "DATE_SELECT_YEAR":"Jahr wählen",
   "DATE_CLEAR":"Löschen",
+  "USER_TUTORIAL_HEADING":"Dein Profil",
+  "USER_TUTORIAL_DESCRIPTION":"Hier kannst du ein eigenes Profilbild angeben und zeigen, wer du bist und was du tust. Du entscheidest, was Andere sehen können.",
   "PROFILE_UPDATED":"Accountinformationen wurden aktualisiert",
   "CHANGE_PASSWORD":"Passwort ändern",
   "OLD_PASSWORD":"Altes Passwort",
@@ -128,14 +133,20 @@
     "CHILDREN_NONE":"Dieses Element besitzt keine Child Objekte"
   },
   "SIDEBAR":{
-    "WORKSPACE_OLD":"Klassischer Workspace",
     "WORKSPACE":"Workspace",
     "SEARCH":"Suchumgebung",
     "COLLECTIONS":"Sammlungen",
     "SECURE":"Safe",
     "PERMISSIONS":"Nutzerverwaltung",
     "LOGIN":"Login",
-    "ADMIN":"Admin-Tools"
+    "ADMIN":"Admin-Tools",
+    "WORKSPACE_SHORT":"Workspace",
+    "SEARCH_SHORT":"Suche",
+    "COLLECTIONS_SHORT":"Sammlungen",
+    "SECURE_SHORT":"Safe",
+    "PERMISSIONS_SHORT":"Nutzer",
+    "LOGIN_SHORT":"Login",
+    "ADMIN_SHORT":"Admin"
   },
   "WORKFLOW":{
     "100_unchecked":"Kein Status",
@@ -181,13 +192,25 @@
     "CC_BY_ND":"CC-BY-ND",
     "CC_BY_NC_SA":"CC-BY-NC-SA",
     "CC_BY_NC_ND":"CC-BY-NC-ND",
-    "CUSTOM":"Benutzerdefinierte Lizenz"
+    "CUSTOM":"Andere Lizenz"
   },
   "COOKIE_INFO":{
     "DESCRIPTION":"edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren und diese Seite verwenden, nehmen wir an, dass Sie damit einverstanden sind.",
     "MORE_LINK":"Weitere Informationen",
     "DIALOG_TITLE":"Cookies",
     "DIALOG_MESSAGE":"Die Internetseiten verwenden teilweise so genannte Cookies. Cookies richten auf Ihrem Rechner keinen Schaden an und enthalten keine Viren.\nCookies dienen dazu, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.\nCookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Die meisten der von uns verwendeten Cookies sind so genannte \"Session-Cookies\". Sie werden nach Ende Ihres Besuchs automatisch gelöscht. Andere Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese löschen.\nDiese Cookies ermöglichen es uns, Ihren Browser beim nächsten Besuch wiederzuerkennen.\nSie können Ihren Browser so einstellen, dass Sie über das Setzen von Cookies informiert werden und Cookies nur im Einzelfall erlauben, die Annahme von Cookies für bestimmte Fälle oder generell ausschließen sowie das automatische Löschen der Cookies beim Schließen des Browser aktivieren.\nBei der Deaktivierung von Cookies kann die Funktionalität dieser Website eingeschränkt sein."
+  },
+  "NODE_VARIANT":{
+    "TITLE": "Neue Variante anlegen für {{name}}",
+    "NEW_VARIANT":"Name der Variante:",
+    "DEFAULT_NAME":"Variante von {{name}}",
+    "BREADCRUMB_INFO": "Variante speichern in:",
+    "CHOOSE": "Speicherort ändern",
+    "FILE_PICKER_TITLE": "Speicherort wählen",
+    "CREATE":"Anlegen",
+    "CREATE_EDIT":"Anlegen & Öffnen",
+    "CREATED": "Die Variante wurde angelegt und in <b>\"{{folder}}\"</b> Ordner gespeichert",
+    "CREATED_LINK": "anzeigen"
   },
   "NODE_REPORT":{
     "TITLE":"Problem melden",
@@ -331,12 +354,15 @@
     "AUTHOR_FREETEXT_PLACEHOLDER":"Wer sind die Urheber des Werks? Wie sollen Sie genannt werden?",
     "AUTHOR_PERSON":"Autor & Beteiligte",
     "LICENSE":"Lizenz",
+    "WORKFLOW":"Workflow-Status",
     "LICENSE_LINK":"Lizenz verwalten",
     "TEMPLATE_LINK":"Metadaten-Vorlage verwalten",
     "CONTRIBUTOR_LINK":"Weitere Beteiligte",
     "LICENSE_NO_PERMISSIONS_MATERIAL":"Sie besitzen keine Berechtigungen, um dieses Material zu lizenzieren",
     "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
-    "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern"
+    "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern",
+    "ADD_CHILD_OBJECT":"Weitere Materialien hinzufügen",
+    "ADD_CHILD_OBJECT_DESCRIPTION":"Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen"
   },
   "SHARE_APP":{
     "TEXT_SNIPPET":"Notiz",
@@ -349,6 +375,19 @@
     "CHECKBOX":"Ich habe die oben genannten Bedingungen gelesen und akzeptiere diese",
     "ACCEPT":"Akzeptieren & Fortfahren",
     "DECLINE":"Ablehnen"
+  },
+  "SHARING":{
+    "TITLE":"Dateifreigabe",
+    "DOWNLOAD":"Herunterladen",
+    "DOWNLOAD_ZIP":"Als Zip Herunterladen",
+    "LINK":"Zur Originalseite springen",
+    "INVITED_AND_CREATED_BY":"Erstellt und freigegeben von {{inviter}}",
+    "INVITED_PLUS_CREATED_BY":"Freigegeben von {{inviter}}, erstellt von {{creator}}",
+    "ENTER_PASSWORD": "weiter",
+    "ERROR_INVALID_PASSWORD":"Ungültiges Passwort",
+    "PASSWORD": "Passwort",
+    "PASSWORD_PLACEHOLDER": "Passwort eingeben ...",
+    "PASSWORD_CORRECT": "Passwort korrekt"
   },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",

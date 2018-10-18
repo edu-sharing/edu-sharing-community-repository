@@ -15,7 +15,7 @@ import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {CordovaService} from './services/cordova.service';
 import * as moment from 'moment';
 
-export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','override'];
+export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','services','override'];
 
 export class Translation  {
   private static language : string;
@@ -28,7 +28,8 @@ export class Translation  {
     "de":"de_DE",
     "en":"en_US",
   };
-  private static DEFAULT_SUPPORTED_LANGUAGES = ["de","en"];
+  // none means that only labels should be shown (for dev)
+  private static DEFAULT_SUPPORTED_LANGUAGES = ["de","en","none"];
   public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
       config.get("supportedLanguages",Translation.DEFAULT_SUPPORTED_LANGUAGES).subscribe((data: string[]) => {
@@ -40,9 +41,9 @@ export class Translation  {
           return;
         }
         translate.addLangs(data);
-        translate.setDefaultLang(data[0]);
-        translate.use(data[0]);
-        Translation.setLanguage(data[0]);
+        //translate.setDefaultLang(data[0]);
+        //translate.use(data[0]);
+        //Translation.setLanguage(data[0]);
         storage.get("language").subscribe((storageLanguage)=> {
           route.queryParams.first().subscribe((params: any) => {
             let browserLang = translate.getBrowserLang();
@@ -60,6 +61,12 @@ export class Translation  {
             }
             if(!useStored)
               storage.set("language", language);
+            if(language=="none"){
+                translate.setDefaultLang(language);
+            }
+            else{
+                translate.setDefaultLang(data[0]);
+            }
             translate.use(language);
             Translation.setLanguage(language);
             translate.getTranslation(language).subscribe(()=>{
@@ -138,6 +145,13 @@ export class TranslationLoader implements TranslateLoader {
   public getTranslation(lang: string): Observable<any> {
     //return this.http.get(`${this.prefix}/common/${lang}${this.suffix}`)
     //  .map((res: Response) => res.json());
+    if(lang=="none"){
+        return new Observable<any>((observer : Observer<any>) => {
+            observer.next({});
+            observer.complete();
+            console.log("initalized without translation");
+        });
+    }
     let translations : any =[];
     let results=0;
     let maxCount=TRANSLATION_LIST.length;

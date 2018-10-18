@@ -404,5 +404,6 @@
 	<classpathentry kind="var" path="ALFRESCO_52_WEBAPPS_LIB/xstream-1.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/handle-client.jar"/>
 	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
+	<classpathentry kind="lib" path="/Applications/alfresco-5.0.d/tomcat/lib/postgresql-9.3-1102-jdbc41.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

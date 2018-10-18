@@ -1,6 +1,6 @@
 <div class="dialog darken dropZone" fileDrop
      (onFileDrop)="onFileDrop($event)"
-     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !showUploadSelect">
+     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !hasOpenWindows()">
   <div>
     <i class="material-icons" *ngIf="!searchQuery && createAllowed && !filesToUpload">cloud_upload</i>
     <i class="material-icons" *ngIf="!(!searchQuery && createAllowed && !filesToUpload)">cloud_off</i>
@@ -27,7 +27,7 @@
     [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
     [currentScope]="isSafe ? 'safe' : 'workspace'"
     [searchEnabled]="!isBlocked"
-    [searchPlaceholder]="'WORKSPACE.SEARCH'"
+    [searchPlaceholder]="isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH' "
     [canOpen]="mainnav"
     [searchQuery]="searchQuery"
     (onSearch)="doSearch($event)"
@@ -50,29 +50,7 @@
                 [buttons]="dialogButtons"
                 [priority]="10"
   ></modal-dialog>
-  <div class="dialog darken dropZone" *ngIf="fileIsOver && false">
-    <div>
-      <p><i class="material-icons">cloud_download</i></p>
-      <p>{{'WORKSPACE.DROP_FILES' | translate}}</p>
-    </div>
-  </div>
-  <workspace-share *ngIf="sharedNode"
-  [nodeId]="sharedNode.ref.id"
-  [sendMessages]="true"
-  (onLoading)="globalProgress=$event"
-  (onClose)="sharedNode=null"
-  ></workspace-share>
-  <workspace-workflow *ngIf="workflowNode"
-                         [nodeId]="workflowNode.ref.id"
-                         (onLoading)="globalProgress=$event"
-                      (onDone)="closeWorkflow()"
-                      (onClose)="workflowNode=null"
-  ></workspace-workflow>
-  <workspace-share-link *ngIf="shareLinkNode"
-                         [node]="shareLinkNode"
-                         (onLoading)="globalProgress=$event"
-                         (onClose)="shareLinkNode=null"
-  ></workspace-share-link>
+
 
 
   <div class="addMobile fixed-action-btn"
@@ -137,7 +115,7 @@
                         [folder]="addFolderName"
                         [parent]="currentFolder"
                         (onCancel)="addFolderName=null"
-  (onFolderAdded)="addFolder($event)"
+                        (onFolderAdded)="addFolder($event)"
   ></workspace-add-folder>
 
   <workspace-create-connector *ngIf="createConnectorName!=null"
@@ -156,9 +134,9 @@
                   [isSafe]="isSafe"
                   [options]="explorerOptions"
                   (onDrop)="handleDrop($event)"
-  (onSetRoot)="setRoot($event)"
-  (onOpenNode)="openNode($event)"
-                  (onDeleteNodes)="deleteNode($event)"
+                  (onSetRoot)="setRoot($event)"
+                  (onOpenNode)="openNode($event)"
+                  (onDeleteNodes)="deleteNode=$event"
                   (onUpdateOptions)="updateOptions($event)"
   ></workspace-tree>
 <breadcrumbs class="breadcrumbFrame" *ngIf="isLoggedIn"
@@ -201,6 +179,11 @@
 [(nodeMetadata)]="editNodeMetadata"
 [(nodeTemplate)]="editNodeTemplate"
 [(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
+[(nodeWorkflow)]="workflowNode"
+[(nodeVariant)]="variantNode"
+[(nodeShare)]="sharedNode"
+[(nodeDelete)]="deleteNode"
+[(nodeShareLink)]="shareLinkNode"
 [(filesToUpload)]="filesToUpload"
 [fileIsOver]="fileIsOver"
 [(showUploadSelect)]="showUploadSelect"
@@ -209,8 +192,10 @@
 [(nodeContributor)]="contributorNode"
 (onRefresh)="refresh()"
 (onUploadFileSelected)="uploadFiles($event)"
+(onUploadFilesProcessed)="afterUpload($event)"
 (onUpdateLicense)="updateLicense()"
 (onCloseMetadata)="closeMetadata()"
+(onDelete)="deleteDone()"
 >
 </workspace-management>
 

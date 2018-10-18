@@ -1,25 +1,24 @@
 <global-progress *ngIf="globalProgress && !embedded"></global-progress>
-<div class="dialog dialogMdsGlobal darken" *ngIf="!embedded" [@fade]="this"></div>
+<div class="dialog dialogMdsGlobal darken" [style.z-index]="120 + priority" *ngIf="!embedded" [@fade]="this"></div>
 <div *ngIf="!embedded">
   <div #jumpmarksRef class="card-jumpmarks" [innerHTML]="jumpmarks" *ngIf="(currentNode || createType) && jumpmarksCount>1">
 
   </div>
   <div class="card center-card card-action card-wide card-high mdsMainCard"
        [@cardAnimation]="this"
+       [style.z-index]="121 + priority"
        [class.mdsCardJumpmarks]="jumpmarksCount>1">
     <spinner class="loading" *ngIf="isLoading"></spinner>
-    <div class="card-content" *ngIf="(currentNode || createType) && !isLoading">
+    <div class="card-content" *ngIf="(currentNode || createType || _currentValues) && !isLoading">
       <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
-      <div class="card-title" *ngIf="currentNode">{{currentNode.name}}</div>
-      <div class="card-title" *ngIf="!currentNode">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
+      <div class="card-title" *ngIf="currentNode || _groupId">{{currentNode ? currentNode.name : _currentValues['cm:name']}}</div>
+      <div class="card-title" *ngIf="!(currentNode || _groupId)">{{"CREATE_NODE."+createType | translate:{parent:parentNode ? parentNode.name : ""} }}</div>
       <div class="card-scroll mdsCard" id="mdsScrollContainer" #mdsScrollContainer>
         <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()" [style.top]="mdsScrollContainer.scrollTop+'px'"></div>
         <div [innerHTML]="rendered"></div>
-
       </div>
-
     </div>
-    <div class="card-action" *ngIf="(currentNode || createType) && !isLoading">
+    <div class="card-action" *ngIf="(currentNode || createType || _currentValues) && !isLoading">
       <a class="btn" (click)="saveValues()">{{'SAVE' | translate}}</a>
       <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate}}</a>
     </div>
@@ -33,8 +32,34 @@
     <div *ngIf="renderedSuggestions" [innerHTML]="renderedSuggestions" class="suggestions"></div>
   </div>
 </div>
+<mds
+  *ngIf="editChildobject"
+  [priority]="2"
+  [groupId]="'io_childobject'"
+  [currentValues]="getChildobjectProperties(editChildobject)"
+  (onCancel)="editChildobject=null"
+  (onDone)="setChildobjectProperties($event)"
+  [invalidate]="editChildobject!=null"
+  ></mds>
+<workspace-license
+  *ngIf="editChildobjectLicense"
+  [priority]="2"
+  [properties]="getChildobjectProperties(editChildobjectLicense)"
+  (onDone)="setChildobjectProperties($event)"
+  (onCancel)="editChildobjectLicense=null"
+></workspace-license>
+<workspace-file-upload-select
+  *ngIf="addChildobject"
+  [priority]="2"
+  [multiple]="true"
+  [showLti]="false"
+  [supportsDrop]="true"
+  (onCancel)="addChildobject=false"
+  (onFileSelected)="addChildobjectFile($event)"
+  (onLinkSelected)="addChildobjectLink($event)"
+></workspace-file-upload-select>
 <modal-dialog
-              [priority]="2"
+              [priority]="1 + priority"
               [title]="dialogTitle"
               [message]="dialogMessage"
               [isCancelable]="true"

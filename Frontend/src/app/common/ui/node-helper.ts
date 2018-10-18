@@ -350,7 +350,9 @@ export class NodeHelper{
   public static getUserDisplayName(user:AuthorityProfile|User){
     return (user.profile.firstName+" "+user.profile.lastName).trim();
   }
-
+    static isSavedSearchObject(node: Node) {
+        return node.mediatype=='saved_search';
+    }
   /**
    * Get an attribute (property) from a node
    * The attribute will be cached add the object
@@ -393,6 +395,17 @@ export class NodeHelper{
         }
         return '<img alt="" src="'+NodeHelper.getSourceIconPath('home')+'">';
       }
+      if (item.name == RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN) {
+          if (typeof data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN] !== 'undefined' && data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN] != '') {
+              let rawSrc = data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN].toString();
+              let src = rawSrc.substring(rawSrc.lastIndexOf(":") + 1).toLowerCase();
+              src = src.replace(/\s/g,"");
+              return '<img alt="' + src + '" src="' + NodeHelper.getSourceIconPath(src) + '">';
+          }
+          return '<img alt="" src="' + NodeHelper.getSourceIconPath('home') + '">';
+      }
+
+
       return NodeHelper.getNodeAttribute(translate,config, data, item);
     }
     if(item.type=='COLLECTION'){
@@ -503,15 +516,16 @@ export class NodeHelper{
    * Download one or multiple nodes
    * @param node
    */
-  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[]) {
+  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[], fileName="download.zip") {
     if(nodes.length==1)
       return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
 
     let nodesString=RestHelper.getNodeIds(nodes).join(",");
-      this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
-      "../eduservlet/download?appId="+
-      encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString),"download.zip");
+    let url=connector.getAbsoluteEndpointUrl()+
+        "../eduservlet/download?appId="+
+        encodeURIComponent(nodes[0].ref.repo)+
+        "&nodeIds="+encodeURIComponent(nodesString)+"&fileName="+encodeURIComponent(fileName);
+    this.downloadUrl(toast,connector.getCordovaService(),url,fileName);
   }
 
   static getLRMIProperty(data: any, item: ListItem) {

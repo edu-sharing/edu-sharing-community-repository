@@ -215,7 +215,9 @@ export class PermissionsAuthoritiesComponent {
         if(this.orgs && this.orgs.canCreate){
           options.push(new OptionItem("PERMISSIONS.MENU_CREATE_USER", "add", (data: any) => this.createAuthority()));
         }
-        options.push(new OptionItem("PERMISSIONS.EXPORT_MEMBER", "cloud_download", (data: any) => this.downloadMembers()));
+        let download = new OptionItem("PERMISSIONS.EXPORT_MEMBER", "cloud_download", (data: any) => this.downloadMembers())
+        download.onlyDesktop=true;
+        options.push(download);
       }
     }
     if(!all && this._mode=='ORG' && this.orgs && this.orgs.canCreate){
