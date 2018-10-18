@@ -72,6 +72,21 @@
   <div class="version">{{ repositoryVersion }}</div>
   <div class="heading">{{'ADMIN.INFO.NG' | translate}}</div>
   <div class="version">{{ ngVersion }}</div>
+  <div class="heading">{{'ADMIN.INFO.SYSTEM_CHECKS' | translate}}</div>
+  <div class="checks">
+      <div class="reload"><i class="material-icons clickable" (click)="runChecks()">refresh</i></div>
+      <div *ngFor="let check of getSystemChecks()" class="check" [class.check-fail]="check.status=='FAIL'" [class.check-warn]="check.status=='WARN'">
+            <div class="data">
+                <div class="title">{{('ADMIN.INFO.CHECK.'+check.name+'.TITLE') | translate:check.translate }}</div>
+                <div class="description">{{('ADMIN.INFO.CHECK.'+check.name+'.STATUS_'+check.status) | translate:check.translate }}</div>
+                <div *ngIf="check.status!='OK'" class="solution">
+                    <i class="material-icons">forward</i>
+                    {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION') | translate:check.translate }}
+                </div>
+            </div>
+            <i class="material-icons">{{check.status=='OK' ? 'check' : 'error_outline'}}</i>
+        </div>
+    </div>
 </div>
 <div *ngIf="tab=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />

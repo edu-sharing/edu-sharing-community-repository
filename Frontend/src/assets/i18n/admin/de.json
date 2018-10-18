@@ -64,7 +64,28 @@
     },
     "INFO":{
       "REPOSITORY":"Repository-Version (Server-Side)",
-      "NG":"Angular/Interface-Version (Client-Side)"
+      "NG":"Angular/Interface-Version (Client-Side)",
+      "SYSTEM_CHECKS":"Allgemeine Systemtests",
+      "CHECK":{
+        "RENDERING":{
+          "TITLE":"Repository + Renderservice Version",
+          "STATUS_OK":"Version beider Systeme stimmt überein: {{repository}}",
+          "STATUS_FAIL":"Version von Repository ({{repository}}) und Renderservice ({{renderservice}}) stimmen nicht überein oder Renderservice wurde nicht gefunden",
+          "SOLUTION":"Überprüfen Sie, ob ein Renderservice angebunden ist (Quellen) und ob die korrekte Version installiert ist"
+        },
+        "COMPANY_HOME":{
+          "TITLE":"Freigabe-Zustand des Hauptverzeichnisses",
+          "STATUS_OK":"Das Hauptverzeichnis ist aktuell nicht öffentlich sichtbar und alle darunterliegende Verzeichnisse können beliebig veröffentlicht werden",
+          "STATUS_FAIL":"Das Hauptverzeichnis ist öffentlich sichtbar und alle neu erstellten Dateien und Ordner, unabhängig vom Ort, können potentiell von allen Nutzern abgerufen werden",
+          "SOLUTION":"Navigieren Sie als Administrator zum \"Firmen-Home\" und entfernen Sie die öffentliche Freigabe. Überprüfen Sie anschließend, dass alle öffentlich verfügbaren Daten weiterhin abrufbar sind"
+        },
+        "JOBS_RUNNING":{
+          "TITLE":"Laufende Hintergrundaufgaben",
+          "STATUS_OK":"Aktuell sind keine Aufgaben im Hintergrund aktiv und die Systemleistung nicht beeinträchtigt",
+          "STATUS_WARN":"Aktuell ist/sind {{count}} Aufgabe(n) im Hintergrund aktiv. Die Systemleistung wird möglicherweise negativ beeinflusst",
+          "SOLUTION":"Überprüfen Sie laufende Aufgaben unter \"Aufgaben\", beenden Sie eventuell nicht mehr benötigte oder versuchen Sie die Anzahl aktueller Zugriffe zu minimieren"
+        }
+      }
     },
     "IMPORT":{
       "EXCEL":"Import Excel Data",
