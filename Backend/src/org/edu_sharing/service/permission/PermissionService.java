@@ -40,19 +40,21 @@ public interface PermissionService {
 	 * @param sendCopy
 	 * @throws Throwable
 	 */
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, 
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions,
 			String mailText, Boolean sendMail, Boolean sendCopy, Boolean createHandle) throws Throwable;
 
 
 	List<Notify> getNotifyList(String nodeId) throws Throwable;
 		
 	
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermission) throws Exception;
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) throws Exception;
 	
-	public void setPermissions(String nodeId, ACE[] aces) throws Exception;
+	public void setPermissions(String nodeId, List<ACE> aces) throws Exception;
 	
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception;
-	
+
+	void setPermissionInherit(String nodeId, boolean inheritPermission) throws Exception;
+
 	public void addPermissions(String nodeId, ACE[] aces) throws Exception;
 	
 	public void removePermissions(String nodeId, ACE[] aces) throws Exception;
@@ -67,7 +69,9 @@ public interface PermissionService {
 	
 	
 	public void createNotifyObject(final String nodeId, final String user, final String event, final String action);
-	
+
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission);
+
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions);
 	
 	public ACL getPermissions(String nodeId) throws Exception;

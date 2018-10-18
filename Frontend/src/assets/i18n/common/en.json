@@ -59,7 +59,7 @@
   "EDIT_ACCOUNT":"Manage account",
   "DEFAULT_METADATASET":"Default-Metadataset ({{name}})",
   "NO_MATCHES" : "No matches found",
-  "NO_CC_PUBLISH" : "Missing permission for publishing",
+  "NO_CC_PUBLISH" : "no publishing permissions for object",
   "ADD_TO_RECENT_COLLECTION":"Add to recent collection",
   "SEARCH_COLLECTIONS":"Search collection...",
   "ASK_CC_PUBLISH" : "Ask",
@@ -123,27 +123,27 @@
     "400_checked":"Checked"
   },
   "NODE" : {
-    "cm:name": "Filename",
-    "description": "Description",
-    "mimetype": "File type",
-    "size": "Size",
-    "mediatype":"File type",
-    "ccm:commonlicense_key":"License",
-    "sys:node-uuid":"Node-ID",
-    "dimensions": "Image size",
-    "exif:dateTimeOriginal":"Recording date",
-    "cm:modified": "Last change",
-    "cm:created": "Creation date",
-    "cm:creator": "Created by",
-    "cclom:title": "Title",
-    "cclom:general_keyword": "Key words",
-    "cclom:duration": "Duration",
-    "sys:archivedDate": "Deleted",
-    "cclom:version": "Version",
-    "virtual:usagecount": "Usage count",
+    "cm:name": "filename",
+    "description": "description",
+    "mimetype": "file type",
+    "size": "size",
+    "mediatype":"file type",
+    "ccm:commonlicense_key":"license",
+    "sys:node-uuid":"node-id",
+    "dimensions": "image size",
+    "exif:dateTimeOriginal":"recording date",
+    "cm:modified": "last change",
+    "cm:created": "creation date",
+    "cm:creator": "created by",
+    "cclom:title": "title",
+    "cclom:general_keyword": "key words",
+    "cclom:duration": "duration",
+    "sys:archivedDate": "deleted",
+    "cclom:version": "version",
+    "virtual:usagecount": "usage count",
     "ccm:author_freetext":"General Author information",
-    "ccm:lifecyclecontributer_authorFN":"Author",
-    "ccm:wf_status":"Status"
+    "ccm:lifecyclecontributer_authorFN":"author",
+    "ccm:wf_status":"status"
   },
   "COOKIE_INFO":{
     "DESCRIPTION":"edu-sharing uses cookies to improve the user-friendliness of the site.\nIf you continue to use it, we'll assume you are ok with that.",
@@ -292,10 +292,11 @@
     "AUTHOR_FREETEXT":"General Author information",
     "AUTHOR_FREETEXT_PLACEHOLDER":"Who are the authors of this work? How should they be attributed?",
     "AUTHOR_PERSON":"Author & Contributors",
-    "LICENSE":"License",
-    "LICENSE_LINK":"Manage license",
+    "LICENSE":"license",
+    "LICENSE_LINK":"manage license",
     "TEMPLATE_LINK":"Manage metadata template",
     "CONTRIBUTOR_LINK":"Additional Contributors",
+    "LICENSE_NO_PERMISSIONS_MATERIAL":"You have insufficient permissions to license this material",
     "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
     "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment"
   },
@@ -303,14 +304,15 @@
   "SHARE_APP":{
     "TEXT_SNIPPET":"Note",
     "IMAGE":"Image",
-    "WILL_BE_SAVED_AT":"Will be stored at:",
+    "WILL_BE_SAVED_AT":"Will be stored at",
     "ADD_TO_COLLECTION":"Would you like to add the object to a collection?"
   },
   
   "LICENSE_AGREEMENT":{
     "TITLE":"License agreement",
     "CHECKBOX":"I read the license agreement and accept it",
-    "ACCEPT":"Accept & Continue"
+    "ACCEPT":"Accept & Continue",
+    "DECLINE":"Decline"
   },
   "TOAST":{
     "NODE_LOCKED":"The document is currently used by an other user and can not be opened",

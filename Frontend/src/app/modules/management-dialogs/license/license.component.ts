@@ -66,9 +66,10 @@ export class WorkspaceLicenseComponent  {
                      "in","it","ca","hr","mt","mk","nl",
                      "no","pl","pt","ro","es","th",
                      "uk","hu"];
-  public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","COPYRIGHT","CUSTOM"];
+  public ALL_LICENSE_TYPES=["NONE","CC_0","CC_BY","SCHULFUNK","UNTERRICHTS_UND_LEHRMEDIEN","COPYRIGHT","CUSTOM"];
   public licenseMainTypes:string[];
-  public _nodes:Node[];
+  count: number;
+  _nodes:Node[];
   private permissions: LocalPermissionsResult;
   public loading=true;
   private allowedLicenses: string[];
@@ -84,53 +85,68 @@ export class WorkspaceLicenseComponent  {
     return this.getLicenseProperty()=="CC_0" || this.getLicenseProperty()=="PDM"
       || this.getLicenseProperty()=="CC_BY" || this.getLicenseProperty()=="CC_BY_SA";
   }
+  public loadNodes(nodes:Node[],callback:Function,pos=0){
+    if(pos==nodes.length){
+      callback();
+      return;
+    }
+    this.nodeApi.getNodeMetadata(nodes[pos].ref.id,[RestConstants.ALL]).subscribe((node)=>{
+      this._nodes.push(node.node);
+      this.loadNodes(nodes,callback,pos+1);
+    },(error)=>{
+      this.toast.error(error);
+      this.cancel();
+    });
+  }
   @Input() set nodes(nodes : Node[]){
-      this.config.get("allowedLicenses").subscribe((data:string[])=>{
-        if(!data) {
-          this.licenseMainTypes = this.ALL_LICENSE_TYPES;
-          this.allowedLicenses = null;
-        }
-        else {
-          this.licenseMainTypes = [];
-          this.allowedLicenses = data;
-          for (let entry of data) {
-            if (entry.startsWith("CC_BY")) {
-              if (this.licenseMainTypes.indexOf("CC_BY") == -1)
-                this.licenseMainTypes.push("CC_BY");
+    this._nodes=[];
+    this.count=nodes.length;
+    this.loadNodes(nodes,()=>{
+        this.config.get("allowedLicenses").subscribe((data:string[])=>{
+            if(!data) {
+                this.licenseMainTypes = this.ALL_LICENSE_TYPES;
+                this.allowedLicenses = null;
             }
-            else if (entry == "CC_0" || entry == "PDM") {
-              if (this.licenseMainTypes.indexOf("CC_0") == -1)
-                this.licenseMainTypes.push("CC_0");
+            else {
+                this.licenseMainTypes = [];
+                this.allowedLicenses = data;
+                for (let entry of data) {
+                    if (entry.startsWith("CC_BY")) {
+                        if (this.licenseMainTypes.indexOf("CC_BY") == -1)
+                            this.licenseMainTypes.push("CC_BY");
+                    }
+                    else if (entry == "CC_0" || entry == "PDM") {
+                        if (this.licenseMainTypes.indexOf("CC_0") == -1)
+                            this.licenseMainTypes.push("CC_0");
+                    }
+                    else if (entry.startsWith("COPYRIGHT")) {
+                        this.licenseMainTypes.push("COPYRIGHT");
+                        if (data.indexOf(this.copyrightType) == -1)
+                            this.copyrightType = entry;
+                    }
+                    else if (this.ALL_LICENSE_TYPES.indexOf(entry) != -1) {
+                        this.licenseMainTypes.push(entry);
+                    }
+                }
             }
-            else if (entry.startsWith("COPYRIGHT")) {
-              this.licenseMainTypes.push("COPYRIGHT");
-              if (data.indexOf(this.copyrightType) == -1)
-                this.copyrightType = entry;
+            this.checkAllowRelease();
+            this.readLicense();
+            this.loading=false;
+            this.releaseMulti=null;
+            let i=0;
+            for(let node of this._nodes) {
+                i++;
+                this.nodeApi.getNodePermissions(node.ref.id).subscribe((permissions: NodePermissions) => {
+                    this.permissions = permissions.permissions.localPermissions;
+                    this.readPermissions(i==this._nodes.length);
+                    if(this._nodes.length==1) {
+                        this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions);
+                        this.doiDisabled = this.doiActive;
+                    }
+                });
             }
-            else if (this.ALL_LICENSE_TYPES.indexOf(entry) != -1) {
-              this.licenseMainTypes.push(entry);
-            }
-          }
-        }
-        this._nodes=nodes;
-        this.checkAllowRelease();
-        this.readLicense();
-        this.loading=false;
-        this.releaseMulti=null;
-        let i=0;
-        for(let node of this._nodes) {
-          i++;
-          this.nodeApi.getNodePermissions(node.ref.id).subscribe((permissions: NodePermissions) => {
-            this.permissions = permissions.permissions.localPermissions;
-            this.readPermissions(i==this._nodes.length);
-            if(this._nodes.length==1) {
-                this.doiActive = NodeHelper.isDOIActive(node, permissions.permissions);
-                this.doiDisabled = this.doiActive;
-            }
-          });
-        }
-      });
-
+        });
+    });
   }
   @Output() onCancel=new EventEmitter();
   @Output() onLoading=new EventEmitter();
@@ -169,7 +185,7 @@ export class WorkspaceLicenseComponent  {
       if(this.ccLocale)
         prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE]=[this.ccLocale];
     }
-    prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=[this.authorVCard.toVCardString()];
+    //prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0]=this.authorVCard.toVCardString();
     prop[RestConstants.CCM_PROP_AUTHOR_FREETEXT]=[this.authorFreetext];
 
     if(this.type=='CUSTOM') {
@@ -178,8 +194,13 @@ export class WorkspaceLicenseComponent  {
     let i=0;
     this.onLoading.emit(true);
     for(let node of this._nodes) {
+      let authors=this._nodes[i].properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];
+      if(!authors)
+          authors=[];
+      authors[0]=this.authorVCard.toVCardString();
+      prop[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]=authors;
       i++;
-      this.nodeApi.editNodeMetadata(node.ref.id, prop).subscribe(() => {
+      this.nodeApi.editNodeMetadataNewVersion(node.ref.id,RestConstants.COMMENT_LICENSE_UPDATE, prop).subscribe(() => {
         this.savePermissions(node);
         if(i==this._nodes.length){
           this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
@@ -192,12 +213,12 @@ export class WorkspaceLicenseComponent  {
       });
     }
   }
-  private getValueForAll(prop:string,fallbackNotIdentical="",fallbackIsEmpty=fallbackNotIdentical){
+  private getValueForAll(prop:string,fallbackNotIdentical:any="",fallbackIsEmpty=fallbackNotIdentical,asArray=false){
     let found=null;
     let foundAny=false;
     for(let node of this._nodes){
       let v=node.properties[prop];
-      let value=v ? v[0] : fallbackIsEmpty;
+      let value=v ? asArray ? v : v[0] : fallbackIsEmpty;
       if(foundAny && found!=value)
         return fallbackNotIdentical;
       found=value;
@@ -209,6 +230,8 @@ export class WorkspaceLicenseComponent  {
   }
   private readLicense() {
     let license=this.getValueForAll(RestConstants.CCM_PROP_LICENSE,"MULTI","NONE");
+    if(!license)
+      license="NONE";
     this.type=license;
     if(license.startsWith("CC_BY")){
       this.type="CC_BY";
@@ -341,7 +364,7 @@ export class WorkspaceLicenseComponent  {
       this.permissions.permissions.push(perm);
     }
     let permissions=RestHelper.copyAndCleanPermissions(this.permissions.permissions,this.permissions.inherited);
-    this.nodeApi.setNodePermissions(node.ref.id,permissions,false,"",false,this.doiActive && this.release).subscribe(()=>{
+    this.nodeApi.setNodePermissions(node.ref.id,permissions,false,"",false,this.doiPermission && this.doiActive && this.release).subscribe(()=>{
     },(error:any)=>this.toast.error(error));
   }
   private readPermissions(last:boolean) {
@@ -406,4 +429,10 @@ export class WorkspaceLicenseComponent  {
     this.type='CC_0';
     this.cc0Type='CC_0';
   }
+
+    changeRelease(release:boolean) {
+        if(release){
+          this.doiActive=true;
+        }
+    }
 }

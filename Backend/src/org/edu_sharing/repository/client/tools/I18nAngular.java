@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.client.tools;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.json.JSONObject;
@@ -12,6 +13,7 @@ import java.io.File;
  * Class to load language data from the angular i18n files (json)
  */
 public class I18nAngular {
+    public static Logger logger=Logger.getLogger(I18nAngular.class);
     public static String getTranslationAngular(String scope,String key){
         return getTranslationAngular(scope,key,new AuthenticationToolAPI().getCurrentLanguage());
     }
@@ -35,7 +37,7 @@ public class I18nAngular {
             String result=object.getString(list[list.length-1]);
             return result;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.info("No translation in Angular found for "+scope+" "+key);
             return key;
         }
     }

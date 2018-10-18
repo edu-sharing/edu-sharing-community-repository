@@ -190,29 +190,18 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		req.getSession().setAttribute(LOGIN_SUCCESS_REDIRECT_URL, loginSuccessRedirectUrl);
 		
 		String allowedAuthTypes = ApplicationInfoList.getHomeRepository().getAllowedAuthenticationTypes();
-		
-		boolean contextAllowesSSO = true;
+
+		// if true, redirect to shib
+		boolean allowSSO = true;
 		try {
-			Config config = ConfigServiceFactory.getCurrentConfig();
-			if(config != null) {
-				if(config.contexts != null) {
-					String reqDomain = req.getServerName();
-					for(Context context : config.contexts.context) {
-						
-						for(String currentDomain : context.domain) {
-							if(reqDomain.equals(currentDomain)) {
-								if(!(context.values.loginUrl != null && context.values.loginUrl.contains("edu-sharing/shibboleth"))){
-									contextAllowesSSO = false;
-								}
-							}
-						}
-						
-					}
-				}
+			Config config=ConfigServiceFactory.getCurrentConfig(req);
+			if(config.values.loginUrl.contains("edu-sharing/shibboleth")) {
+				// client based redirect, disable server-side redirect (guest support)
+				allowSSO = false;
 			}
 		}catch(Exception e) {}
 		
-		if(allowedAuthTypes != null && !allowedAuthTypes.trim().equals("") && contextAllowesSSO){
+		if(allowedAuthTypes != null && !allowedAuthTypes.trim().equals("") && allowSSO){
 			String shibbUrl = URLTool.addSSOPathWhenConfigured(URLTool.getBaseUrl()) + ( req.getQueryString() != null ? "?"+req.getQueryString() : "");
 			resp.sendRedirect(shibbUrl);
 		}else{

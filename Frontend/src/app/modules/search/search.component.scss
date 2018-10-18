@@ -20,6 +20,9 @@ $sidenavWidth:300px;
     top:$mainnavHeight;
     width:calc(25% - 20px);
     text-transform: uppercase;
+    &.no-mainnav{
+      top:0;
+    }
   }
 
 }
@@ -40,6 +43,9 @@ $sidenavWidth:300px;
   ul{
     border-bottom: none;
   }
+}
+.rowRepositories.no-mainnav{
+  top:0;
 }
 .sidenav .row{
   margin:0 -30px;
@@ -122,6 +128,9 @@ $sidenavWidth:300px;
   text-align: center;
   margin: 0 10px;
   min-height: 100%;
+  position: absolute;
+  top: 0;
+  width: calc(100% - 20px);
 }
 
 md-sidenav-container,.sidenav,#top {
@@ -229,16 +238,19 @@ a, a:hover, a:visited, a:active, button {
 
 
 .top {
-    position: fixed;
-    background-color: #fff;
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-    top: $mainnavHeight+48px;
-    z-index: 12;
-    width:100%;
-    height:$secondaryBarHeight;
-    @include materialShadow();
+  position: fixed;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  top: $mainnavHeight+48px;
+  z-index: 12;
+  width:100%;
+  height:$secondaryBarHeight;
+  @include materialShadow();
+  &.no-mainnav{
+    top:48px;
+  }
 }
 small-collection{
   position: absolute;
@@ -248,6 +260,9 @@ small-collection{
 }
 .topNoRepositories{
   top: $mainnavHeight;
+  &.no-mainnav{
+    top:0;
+  }
 }
 .mdsSelect{
   float:left;
@@ -293,6 +308,10 @@ small-collection{
   height: calc(100% - #{$mainnavHeight} - 110px - 70px);
   transition: $transitionNormal all ease;
   @include iosScrolling();
+  &.no-mainnav{
+    top:110px;
+    height: calc(100% - 110px - 70px);
+  }
 }
 .sidenavHidden{
   transform: translateX(-100%);
@@ -301,25 +320,36 @@ small-collection{
 .sidenavNoRepositories{
   top:$mainnavHeight+65px;
   height: calc(100% - #{$mainnavHeight} - 65px - 70px);
+  &.no-mainnav{
+    top:65px;
+    height: calc(100% - 65px - 70px);
+  }
 }
 .contentSidenav{
-  margin-left: $sidenavWidth;
+  margin-left: calc(#{$sidenavWidth} + 10px);
+  width:calc(100% - 20px - #{$sidenavWidth});
 }
 #sub {
     padding-top: 20px;
 }
 
 .results {
-    margin-top:200px;
+    margin-top:$mainnavHeight+130px;
     padding-bottom: 20px;
     text-align: left;
     min-height: 1000px;
     display: inline-block;
     width: 100%;
     overflow-x: hidden;
+  &.no-mainnav{
+    margin-top: 130px;
+  }
 }
 .resultsNoRepositories{
-  margin-top: 155px;
+  margin-top: $mainnavHeight+85px;
+  &.no-mainnav{
+    margin-top: 85px;
+  }
 }
 
 .a11y-hidden-label {
@@ -573,9 +603,6 @@ div.dialog.darken {
         width:max-content;
       }
     }
-    .collections{
-      overflow-x: auto;
-    }
     .tabsRepositories,.moreRepositories{
       .repositoryTitle{
         display: none;
@@ -588,6 +615,9 @@ div.dialog.darken {
     .content_wrapper {
         margin: 0;
     }
+  .contentSidenav{
+    width:calc(100% - 20px);
+  }
 
     #results {
         width: 100%;

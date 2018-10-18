@@ -11,6 +11,7 @@
     "MY_FILES": "Meine Inhalte",
     "ADD": "Neu",
     "ADD_OBJECT": "Neues Material",
+    "ADD_OBJECT_LTI": "Als LTI-Ressource einbinden",
     "ADD_CAMERA": "Bild aufnehmen",
     "ADD_EMPTY_OBJECT": "Neues Objekt",
     "ADD_OBJECT_TITLE": "Neues Material erstellen",
@@ -24,6 +25,11 @@
     "AUTOLOGOUT_INFO":"Ihre Sitzung wurde aufgrund von Inaktivität zu Ihrer Sicherheit automatisch beendet, da Sie mindestens {{ minutes }} Minuten nicht aktiv waren. Bitte melden Sie sich erneut an.",
     "ADD_FOLDER": "Neuer Ordner",
     "ADD_LTI": "LTI-Tools",
+    "LTI_HEADING": "Link als externe LTI-Ressource anlegen",
+    "LTI_INFO": "Geben sie die entsprechenden Daten an, um eine externe LTI-Ressource anzulegen",
+    "LTI_INFO_PRIVACY": "<b>Informationen zum Datenschutz:</b><br />Eventuell werden Namen und E-Mail-Adressen der Teilnehmer-/innen an den externen Anbieter übertragen. Fragen Sie den Anbieter.",
+    "LTI_CONSUMER_KEY": "Consumer Key",
+    "LTI_SHARED_SECRET": "Shared Secret",
     "SHARED_FILES": "Gemeinsame Inhalte",
     "MY_SHARED_FILES": "Von mir freigegeben",
     "TO_ME_SHARED_FILES": "Für mich freigegeben",
@@ -101,6 +107,7 @@
       }
     },
     "INHERIT_DISABLED":"Rechtevererbung ist aktuell ausgeschaltet",
+    "INHERIT_ACCESS_DENIED":"Eventuell geerbte Rechte können nicht angezeigt werden, da Sie keinen Zugriff auf das darüberliegende Element besitzen",
     "INHERIT_EMPTY":"Es sind aktuell keine Berechtigungen am übergeordneten Ordner.\nSobald der übergeordnete Ordner Berechtigungen erhält, werden diese auf das Objekt angewendet.",
     "PERMISSION_AUTHORITY_EXISTS":"Der gewählte Nutzer/Gruppe hat bereits Zugriff. Überprüfen Sie die Berechtigungen unter \"Schon Eingeladen\"",
     "PERMISSIONS_UPDATED":"Freigaben wurden aktualisiert",
@@ -119,6 +126,9 @@
       "USAGE_COUNT":"Anzahl der Verwendungen",
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "Datei wurde erstellt",
+        "METADATA_UPDATE": "Metadaten aktualisiert",
+        "CONTENT_UPDATE": "Inhalt aktualisiert",
+        "LICENSE_UPDATE": "Lizenz aktualisiert",
         "EDITOR_UPLOAD": "Datei wurde durch Editor {{editor}} aktualisiert",
         "NODE_PUBLISHED": "Datei wurde veröffentlicht"
       }
@@ -196,7 +206,8 @@
     },
     "WORKFLOW": {
       "TITLE": "Workflow für {{ name }}",
-      "RECEIVERS": "Zuständige(r)",
+      "RECEIVERS": "Nutzer/Redaktionsgruppe",
+      "RECEIVERS_HINT": "Wer ist verantwortlich?",
       "COMMENT": "Kommentar zum Workflow",
       "COMMENT_INFO": "Was sollte der Zuständige wissen? Was wurde geändert?",
       "RECEIVERS_NEXT":"übergeben an",
@@ -263,12 +274,15 @@
       "TYPE":"Lizenz wählen",
       "NONE_NAME":"Keine Lizenz gewählt",
       "COPYRIGHT_NAME":"Copyright-Lizenzen",
+      "COPYRIGHT_FREE_NAME":"Copyright, freier Zugang",
+      "COPYRIGHT_LICENSE_NAME":"Copyright, lizenzpflichtig",
       "CC_BY_NAME":"Creative Commons",
       "CC_0_NAME":"CC 0 / Public Domain (Gemeinfrei)",
       "ONLY_OER":"Nur OER-Lizenzen",
       "OER":"OER",
       "NOT_OER":"Kein OER",
       "SCHULFUNK_NAME":"Schulfunk (§47 UrhG)",
+      "UNTERRICHTS_UND_LEHRMEDIEN_NAME":"§60b Unterrichts- und Lehrmedien",
       "EDU_NAME":"edu-sharing Lizenzen",
       "CUSTOM_NAME":"eigene Lizenz definieren",
       "CURRENT":"Aktuell ausgewählte Lizenz",
@@ -318,7 +332,8 @@
         "CC_0":"Dieses Werk ist gemeinfrei.<br />Keine Attributierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
         "COPYRIGHT_FREE":"Das Werk ist kostenfrei zugänglich.<br />Nutzung und Quellenangabe gemäß den allgemeingültigen gesetzlichen Regelungen (UrhG).",
         "COPYRIGHT_LICENSE":"Das Werk darf ausschließlich vom lizenzierten Nutzerkreis gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
-        "SCHULFUNK":"Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis."
+        "SCHULFUNK":"Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
+        "UNTERRICHTS_UND_LEHRMEDIEN":"Hersteller von Unterrichts- und Lehrmedien dürfen für solche Sammlungen bis zu 10 Prozent eines veröffentlichten Werkes vervielfältigen, verbreiten und öffentlich zugänglich machen.<br />§ 60a Absatz 2 und 3 ist entsprechend anzuwenden.<br />Unterrichts- und Lehrmedien im Sinne dieses Gesetzes sind Sammlungen, die Werke einer größeren Anzahl von Urhebern vereinigen und ausschließlich zur Veranschaulichung des Unterrichts und der Lehre an Bildungseinrichtungen (§ 60a) zu nicht kommerziellen Zwecken geeignet, bestimmt und entsprechend gekennzeichnet sind."
       }
     },
     "TOAST":{
@@ -342,7 +357,9 @@
       "LICENSE_UPDATED":"Lizenzinformationen wurden aktualisiert",
       "CONTRIBUTOR_UPDATED":"Informationen zu Beteiligten wurden aktualisiert",
       "WORKFLOW_UPDATED":"Informationen zum Workflow wurden aktualisiert",
-      "METADATA_TEMPLATE_UPDATED":"Informationen zum Metadaten-Template wurden aktualisiert"
+      "METADATA_TEMPLATE_UPDATED":"Informationen zum Metadaten-Template wurden aktualisiert",
+      "LTI_FIELDS_REQUIRED":"Alle nötigen Felder müssen korrekt ausgefüllt sein, um eine LTI-Ressource anzulegen",
+      "LTI_FIELDS_REQUIRED_LINK":"Als normalen Link anlegen"
     }
   }
 }

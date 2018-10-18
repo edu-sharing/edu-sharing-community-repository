@@ -113,11 +113,11 @@ public class SSOAuthorityMapper {
 	boolean updateMemberships = true;
 	boolean debug = false;
 	String mappingGroupBuilderClass;
-	
+
 	CustomGroupMapping customGroupMapping;
-	
+
 	List<String> additionalAttributes = new ArrayList<String>();
-	
+
 	public void init(){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		
@@ -162,7 +162,7 @@ public class SSOAuthorityMapper {
 		
 		final String originalUsername = tmpUserName;
 		final String userName = (hashUserName) ? digest(tmpUserName) : tmpUserName;
-		
+
 		
 		RunAsWork<String> runAs = new RunAsWork<String>() {
 			@Override
@@ -255,7 +255,7 @@ public class SSOAuthorityMapper {
 							personProperties.put(ContentModel.PROP_FIRSTNAME, userName);
 							personProperties.put(ContentModel.PROP_LASTNAME, "");
 						}
-						
+
 						//so we can find out where the user comes from
 						if(appInfo != null && ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType())){
 							personProperties.put(QName.createQName(CCConstants.PROP_USER_REPOSITORYID), appInfo.getAppId());
@@ -264,7 +264,7 @@ public class SSOAuthorityMapper {
 						if(isHashUserName()) {
 							personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESORIGINALUID), originalUsername);
 						}
-						
+
 						personService.createPerson(personProperties);
 					} else if (updateUser) {
 
@@ -294,7 +294,7 @@ public class SSOAuthorityMapper {
 				String organisationDisplayName = null;
 				
 				String existingOrganisationName = null;
-				
+
 				MappingGroupBuilder mappingGroupBuilder = null;
 				if(mappingGroupBuilderClass != null && !mappingGroupBuilderClass.trim().equals("")) {
 					mappingGroupBuilder = MappingGroupBuilderFactory.instance(ssoAttributes, mappingGroupBuilderClass);
@@ -303,14 +303,14 @@ public class SSOAuthorityMapper {
 						if(organisationName != null) {
 							organisationDisplayName = mappingGroupBuilder.getOrganisation().getMapToDisplayName();
 							mappingGroups.addAll(mappingGroupBuilder.getMapTo());
-						}	
+						}
 					}
 				}
-				
+
 				if(customGroupMapping != null) {
 					customGroupMapping.map(ssoAttributes);
 				}
-				
+
 				/**
 				 * create eduGroup for affiliation
 				 */
@@ -319,7 +319,7 @@ public class SSOAuthorityMapper {
 					if(organisationDisplayName == null) {
 						organisationDisplayName = ssoAttributes.get(organisationParam + "name");
 					}
-					
+
 					if(organisationDisplayName == null) {
 						organisationDisplayName = organisationName;
 					}
@@ -330,10 +330,10 @@ public class SSOAuthorityMapper {
 					}
 					
 					if(existingOrganisationName == null) {
-						
+
 						String metadataSetId = ssoType.equals(SSO_TYPE_Shibboleth) ? HttpContext.getCurrentMetadataSet() : null;
-						
-						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName, metadataSetId);
+
+						existingOrganisationName = organisationService.createOrganization(organisationName, organisationDisplayName, metadataSetId,null);
 						existingOrganisationName = AuthorityType.GROUP.getPrefixString() + existingOrganisationName;
 					}
 					
@@ -382,7 +382,7 @@ public class SSOAuthorityMapper {
 						lmsGlobalGroupsList.add(mappingGroup);
 					}
 					
-					
+
 					mappingGroups.addAll(lmsGlobalGroupsList);
 				}
 				
@@ -624,11 +624,11 @@ public class SSOAuthorityMapper {
 	public void setHashGroupNames(boolean hashGroupNames) {
 		this.hashGroupNames = hashGroupNames;
 	}
-	
+
 	public boolean isHashUserName() {
 		return hashUserName;
 	}
-	
+
 	public void setHashUserName(boolean hashUserName) {
 		this.hashUserName = hashUserName;
 	}
@@ -660,15 +660,15 @@ public class SSOAuthorityMapper {
 	public void setGlobalGroupsParam(String globalGroupsParam) {
 		this.globalGroupsParam = globalGroupsParam;
 	}
-	
+
 	public void setMappingGroupBuilderClass(String mappingGroupBuilderClass) {
 		this.mappingGroupBuilderClass = mappingGroupBuilderClass;
 	}
-	
+
 	public String getMappingGroupBuilderClass() {
 		return mappingGroupBuilderClass;
 	}
-	
+
 	public void setCustomGroupMapping(CustomGroupMapping customGroupMapping) {
 		this.customGroupMapping = customGroupMapping;
 	}

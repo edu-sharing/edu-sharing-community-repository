@@ -3,6 +3,7 @@ package org.edu_sharing.service.archive;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -13,6 +14,10 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataQuery;
+import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -100,15 +105,8 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		}
 		
 		try{
-			
-			SearchToken searchToken = new SearchToken();
-			searchToken.setFrom(from);
-			searchToken.setMaxResult(maxResults);
-			searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
-			searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
-			searchToken.setLuceneString("@cm\\:name:\""+QueryParser.escape(searchWord) + "*\""+" AND ASPECT:\"sys:archived\"");
-			searchToken.setSortDefinition(sortDefinition);
-			searchToken.setContentType(ContentType.FILES_AND_FOLDERS);
+
+			SearchToken searchToken = getSearchToken(searchWord,null, from, maxResults, sortDefinition);
 			
 			return this.searchService.search(searchToken);
 		}catch(Throwable e){
@@ -117,21 +115,31 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		}
 		
 	}
-	
+
+	private SearchToken getSearchToken(String searchWord,String user, int from, int maxResults, SortDefinition sortDefinition) throws Exception {
+		SearchToken searchToken = new SearchToken();
+		searchToken.setFrom(from);
+		searchToken.setMaxResult(maxResults);
+		searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
+		searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
+		//searchToken.setQueryString("@cm\\:name:\""+QueryParser.escape(searchWord) + "*\""+" AND ASPECT:\"sys:archived\"");
+		MetadataQuery query = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id).findQuery("archive");
+		Map<String, String[]> params=new HashMap<>();
+		params.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{searchWord});
+		if(user!=null && !user.isEmpty()) {
+			params.put("user", new String[]{user});
+		}
+		searchToken.setMetadataQuery(query,params);
+		searchToken.setSortDefinition(sortDefinition);
+		searchToken.setContentType(ContentType.FILES_AND_FOLDERS);
+		return searchToken;
+	}
+
 	@Override
 	public SearchResultNodeRef search(String searchWord, String user, int from, int maxResults, SortDefinition sortDefinition) {
 		try{
-			
-			SearchToken searchToken = new SearchToken();
-			searchToken.setFrom(from);
-			searchToken.setMaxResult(maxResults);
-			searchToken.setStoreName(MCAlfrescoAPIClient.archiveStoreRef.getIdentifier());
-			searchToken.setStoreProtocol(MCAlfrescoAPIClient.archiveStoreRef.getProtocol());
-			searchToken.setLuceneString("@cm\\:name:\""+QueryParser.escape(searchWord) + "*\"" + " AND @sys\\:archivedBy:\"" + QueryParser.escape(user)+"\" AND ASPECT:\"sys:archived\"");
-			searchToken.setSortDefinition(sortDefinition);
-			searchToken.setContentType(ContentType.FILES_AND_FOLDERS);
+			SearchToken searchToken = getSearchToken(searchWord,user,from,maxResults,sortDefinition);
 			return this.searchService.search(searchToken);
-			
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
 			return null;
@@ -174,7 +182,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 		if(!client.hasPermissions(destinationParentId, new String[]{CCConstants.PERMISSION_ADD_CHILDREN})){
 			try{
 				destinationParentId = new UserEnvironmentTool(null,client.getAuthenticationInfo()).getDefaultUserDataFolder();
-				restoreResult.setRestoreStatus(RESTORESTATUS_DUPLICATENAME);
+				restoreResult.setRestoreStatus(RESTORESTATUS_FALLBACK_PARENT_NO_PERMISSION);
 			}catch(Throwable e){
 				logger.error(e.getMessage(), e);
 			}

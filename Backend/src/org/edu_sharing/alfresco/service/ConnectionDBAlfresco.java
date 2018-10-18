@@ -1,4 +1,4 @@
-package org.edu_sharing.service.suggest;
+package org.edu_sharing.alfresco.service;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

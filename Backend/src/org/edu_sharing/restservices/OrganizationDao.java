@@ -37,7 +37,7 @@ public class OrganizationDao {
 		}
 	}
 
-	public static String create(RepositoryDao repoDao, String groupName, String folderId) throws DAOException {
+	public static String create(RepositoryDao repoDao, String groupName, String folderId,String scope) throws DAOException {
 
 		try {
 			
@@ -57,11 +57,11 @@ public class OrganizationDao {
 				
 	}
 	
-	public static GroupDao create(RepositoryDao repoDao, String orgName) throws DAOException {
+	public static OrganizationDao create(RepositoryDao repoDao, String orgName,String scope) throws DAOException {
 		GroupProfile profile=new GroupProfile();
 		profile.setDisplayName(orgName);
-		String authorityName=create(repoDao,orgName,profile);
-		return GroupDao.getGroup(repoDao, authorityName);
+		String authorityName=create(repoDao,orgName,profile,scope);
+		return getInstant(repoDao, PermissionService.GROUP_PREFIX + authorityName);
 	}
 	/**
 	 * returns Groupname
@@ -71,14 +71,23 @@ public class OrganizationDao {
 	 * @return
 	 * @throws DAOException
 	 */
-	public static String create(RepositoryDao repoDao, String orgName, GroupProfile profile) throws DAOException {
+	public static String create(RepositoryDao repoDao, String orgName, GroupProfile profile,String scope) throws DAOException {
 		try {
 			OrganizationService organizationService = OrganizationServiceFactory.getOrganizationService(repoDao.getApplicationInfo().getAppId());
-			return organizationService.createOrganization(orgName, profile.getDisplayName(),HttpContext.getCurrentMetadataSet());
+			return organizationService.createOrganization(orgName, profile.getDisplayName(),HttpContext.getCurrentMetadataSet(),scope);
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}		
 	}
+    public static OrganizationDao getInstant(RepositoryDao repoDao, String groupName) throws DAOException {
+
+        try {
+            return new OrganizationDao(repoDao,AuthorityServiceFactory.getAuthorityService(repoDao.getId()).getEduGroup(groupName));
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+
+    }
 	public static OrganizationDao get(RepositoryDao repoDao, String groupName) throws DAOException {
 
 		try {

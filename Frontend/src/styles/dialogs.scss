@@ -19,6 +19,7 @@ $cardActionHeight:77px;
 .card{
   z-index:$dialogZIndex+1;
   background-color: #fff!important;
+  transition: all $transitionNormal;
 }
 .center-card{
   position:fixed!important;
@@ -231,6 +232,15 @@ input[type=search]{
 }
 @media screen and (max-height: ($mobileHeight)) {
   .card:not(.card-low), .card-high {
+    top: 0;
+    bottom: 0;
+    .scrollable{
+      height:100%;
+    }
+  }
+}
+@media screen and (max-height: ($mobileHeight - $mobileStage*2)) {
+  .card-low {
     top: 0;
     bottom: 0;
     .scrollable{

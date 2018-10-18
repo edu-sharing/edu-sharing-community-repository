@@ -174,7 +174,7 @@ export class RestAdminService extends AbstractRestService{
   }
 
   private readRepositoryVersion(s: string) {
-    return "build.number"+s.split("build.number")[1].split("</body>")[0].replace(/<br\/>/g,"");
+    return s.split("<body>")[1].split("</body>")[0].replace(/\n/g,"").replace(/<br\/>/g,"\n");
   }
 
   public getApplicationXML(xml:string) {
@@ -189,9 +189,11 @@ export class RestAdminService extends AbstractRestService{
   }
 
   public applyTemplate = (groupName:string, templateName:string) :Observable<any> => {
-      let query=this.connector.createUrl("admin/:version/applyTemplate",null,[]);
-      let params = JSON.stringify({template:templateName,group:groupName});
-      return this.connector.post(query,params,this.connector.getRequestOptions());
+      let query=this.connector.createUrl("admin/:version/applyTemplate?template=:template&group=:group",null,[
+          [":template",templateName],
+          [":group",groupName]
+      ]);
+      return this.connector.post(query,null,this.connector.getRequestOptions());
   }
 }
 

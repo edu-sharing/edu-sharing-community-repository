@@ -47,6 +47,7 @@ import {WorkspaceManagementDialogsComponent} from "../management-dialogs/managem
 import {ConfigurationHelper} from "../../common/rest/configuration-helper";
 import {MdsHelper} from "../../common/rest/mds-helper";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
+import {UIService} from '../../common/services/ui.service';
 
 
 @Component({
@@ -107,6 +108,7 @@ export class SearchComponent {
   private _mdsId: string;
   private isSearching = false;
   private groupedRepositories: Repository[];
+  private enabledRepositories: string[];
   public get mdsId(){
     return this._mdsId;
   }
@@ -159,6 +161,7 @@ export class SearchComponent {
     public searchService:SearchService,
     private title:Title,
     private config:ConfigurationService,
+    private uiService:UIService,
     private storage : SessionStorageService,
     private network : RestNetworkService,
     private temporaryStorageService: TemporaryStorageService
@@ -185,8 +188,8 @@ export class SearchComponent {
     this.updateActionbar(selection);
   }
    ngOnInit() {
-    this.searchService.clear();
     this.initalized=true;
+    this.searchService.clear();
     if(this.searchService.reinit){
       this.searchService.init();
       this.initalized=false;
@@ -326,6 +329,9 @@ export class SearchComponent {
     if(this.mdsRef) {
       parameters = this.getMdsValues();
     }
+    if(!query.cleared){
+      this.uiService.hideKeyboardIfMobile();
+    }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
   public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.getMdsValues()){
@@ -335,6 +341,7 @@ export class SearchComponent {
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
       parameters:parameters && Object.keys(parameters) ? JSON.stringify(parameters) : null,
+      repositoryFilter:this.getEnabledRepositories().join(","),
       mds:mds,repository:repository,
       mdsExtended:this.mdsExtended,
       reurl:this.searchService.reurl}});
@@ -456,6 +463,7 @@ export class SearchComponent {
     };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
+    this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN, "search");
     this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id],{queryParams:queryParams});
   }
   switchToCollections(id=""){
@@ -576,7 +584,7 @@ export class SearchComponent {
 
   private getOptions(nodes:Node[]=this.selection,fromList:boolean) {
     if(fromList && (!nodes || !nodes.length)){
-      nodes=[new Node()];
+      //nodes=[new Node()];
     }
     let options=[];
     if(this.searchService.reurl) {
@@ -589,14 +597,14 @@ export class SearchComponent {
       return options;
     }
     if (this.addToCollection) {
-      if (nodes && nodes.length) {
+      if (fromList || nodes && nodes.length) {
         let addTo = new OptionItem(fromList ? "SEARCH.ADD_TO_COLLECTION_SHORT" : "SEARCH.ADD_TO_COLLECTION", "layers", (node: Node) => {
-          this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(this.selection,node), () => {
+          this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(nodes,node), () => {
             this.switchToCollections(this.addToCollection.ref.id);
           });
         });
-        addTo.isEnabled = NodeHelper.getNodesRight(this.selection, RestConstants.ACCESS_CC_PUBLISH);
-        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH)};
+        addTo.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH) && RestNetworkService.allFromHomeRepo(nodes, this.repositories);
+        addTo.enabledCallback = (node:Node)=>{return NodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH) && RestNetworkService.isFromHomeRepo(node,this.repositories)};
 
         options.push(addTo);
       }
@@ -608,15 +616,17 @@ export class SearchComponent {
       }
       return options;
     }
-    if(nodes && nodes.length) {
+    if(fromList || nodes && nodes.length) {
       let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
         this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
       });
-      collection.showCallback = (node: Node) => {
-        return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node,this.allRepositories);
-      };
-      if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
-        options.push(collection);
+      if(collection) {
+          collection.showCallback = (node: Node) => {
+              return this.addToCollection == null && !this.isGuest && RestNetworkService.isFromHomeRepo(node, this.allRepositories);
+          };
+          if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
+              options.push(collection);
+      }
 
       let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
         this.addToStore(ActionbarHelper.getNodes(nodes,node));
@@ -643,7 +653,7 @@ export class SearchComponent {
         */
       }
 
-      if(nodes.length==1){
+      if(fromList || nodes && nodes.length==1){
         if(!this.isGuest && (fromList || RestNetworkService.supportsImport(nodes[0].ref.repo,this.allRepositories))) {
           let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(this.getCurrentNode(node)));
           save.showCallback=(node:Node)=>{
@@ -658,7 +668,7 @@ export class SearchComponent {
       if (download)
         options.push(download);
 
-      if(nodes.length==1 && this.config.instant("nodeReport",false)){
+      if((fromList || nodes && nodes.length==1) && this.config.instant("nodeReport",false)){
         let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
         report.showCallback=(node:Node)=>{
           return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
@@ -731,7 +741,8 @@ export class SearchComponent {
       if(this.searchService.reinit)
         this.getSearch(this.searchService.searchTerm, true,this.currentValues);
     }
-    this.mainNavRef.refreshBanner();
+    //if(this.mainNavRef)
+    //  this.mainNavRef.refreshBanner();
     this.searchService.reinit=true;
   }
   private prepare(param:any) {
@@ -758,13 +769,15 @@ export class SearchComponent {
       if(param['reurl']) {
         this.hasCheckbox=false;
       }
-      if(param['savedQuery']){
-          this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
-              this.currentSavedSearch=data.node;
-              this.sidenavTab=1;
-              this.invalidateMds();
-          });
-      }
+        if(param['savedQuery']){
+            this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
+                this.loadSavedSearchNode(data.node);
+            });
+        }
+        else{
+          this.invalidateMds();
+        }
+        this.searchService.init();
       this.refreshListOptions();
 
     });
@@ -792,7 +805,7 @@ export class SearchComponent {
     }
     return {status:true};
   }
-  private searchRepository(repos: Repository[],criterias:any,init:boolean,position=0,count=0) {
+  private searchRepository(repos: any[],criterias:any,init:boolean,position=0,count=0) {
     if(position>0 && position>=repos.length) {
       this.searchService.numberofresults = count;
       this.searchService.showspinner = false;
@@ -801,6 +814,10 @@ export class SearchComponent {
     }
 
     let repo=repos[position];
+    if(!repo.enabled){
+        this.searchRepository(repos,criterias,init,position+1,count);
+        return;
+    }
     /*
     let properties=[RestConstants.CM_MODIFIED_DATE,
       RestConstants.CM_CREATOR,
@@ -865,7 +882,10 @@ export class SearchComponent {
         for (let repo of this.repositories) {
             if (repo.id == RestConstants.ALL || repo.id == 'MORE')
                 continue;
-            this.repositoryIds.push({id: repo.id, title: repo.title, enabled: true});
+            this.repositoryIds.push({
+                id: repo.id,
+                title: repo.title,
+                enabled: this.enabledRepositories ? this.enabledRepositories.indexOf(repo.id)!=-1 : true});
         }
         this.updateGroupedRepositories();
     }
@@ -878,7 +898,9 @@ export class SearchComponent {
       this.applyParameters(this.mdsRef.saveValues());
     }));
     if(this.applyMode){
-      let apply=new OptionItem('APPLY','redo',(node:Node)=>NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl));
+      let apply=new OptionItem('APPLY','redo',(node:Node)=>{
+        NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl)
+      });
       this.savedSearchOptions.push(apply);
     }
     else{
@@ -934,7 +956,8 @@ export class SearchComponent {
   }
   private loadSavedSearchNode(node:Node){
     this.sidenavTab=0;
-    UIHelper.routeToSearchNode(this.router,node);
+    UIHelper.routeToSearchNode(this.router,this.searchService,node);
+    this.currentSavedSearch=node;
   }
   private goToSaveSearchWorkspace() {
     this.nodeApi.getNodeMetadata(RestConstants.SAVED_SEARCH).subscribe((data:NodeWrapper)=>{
@@ -957,7 +980,7 @@ export class SearchComponent {
         this.search.searchSimple('saved_search',[],this.savedSearchQuery,request,RestConstants.CONTENT_TYPE_ALL).subscribe((data: NodeList) => {
           this.savedSearch = data.nodes;
           this.savedSearchLoading=false;
-        });;
+        });
       }
     }
   }
@@ -977,7 +1000,8 @@ export class SearchComponent {
   private invalidateMds() {
     if(this.currentRepository==RestConstants.ALL){
       console.log("all repositories, invalidate manually");
-      this.onMdsReady();
+        this.reloadMds=new Boolean(false);
+        this.onMdsReady();
     }
     else{
       console.log("invalidate mds");
@@ -996,6 +1020,8 @@ export class SearchComponent {
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
+            // add to collection layout is only designed for GRIDS, otherwise missing permission info will fail
+            this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
             this.refreshListOptions();
             this.updateActionbar(null);
           });
@@ -1008,6 +1034,12 @@ export class SearchComponent {
 
         if(param['query'])
           this.searchService.searchTerm=param['query'];
+        if(param['repositoryFilter']) {
+            this.enabledRepositories = param['repositoryFilter'].split(",");
+            // do a reload of the repos
+            this.repositoryIds=[];
+        }
+
         let paramRepo=param['repository'];
         if(!paramRepo){
             paramRepo=RestConstants.HOME_REPOSITORY;
@@ -1053,24 +1085,32 @@ export class SearchComponent {
               console.warn("will continue with default mds");
               this.mdsId=RestConstants.DEFAULT;
             }
-            this.invalidateMds();
-            this.searchService.init();
             this.prepare(param);
 
           }
         },(error:any)=>{
           this.mdsId=RestConstants.DEFAULT;
-          this.invalidateMds();
-          this.searchService.init();
           this.prepare(param);
         });
       });
   }
 
-    private updateCurrentRepositoryId() {
-        this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
-        if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
-            this.currentRepository=this.currentRepositoryObject.id;
-        }
-    }
+  private updateCurrentRepositoryId() {
+      this.currentRepositoryObject=RestNetworkService.getRepositoryById(this.currentRepository,this.allRepositories);
+      if(this.currentRepository==RestConstants.HOME_REPOSITORY && this.currentRepositoryObject){
+          this.currentRepository=this.currentRepositoryObject.id;
+      }
+  }
+
+  private getEnabledRepositories() {
+      if(this.repositoryIds && this.repositoryIds.length){
+          let result=[];
+          for(let repo of this.repositoryIds){
+              console.log(repo);
+              if(repo.enabled) result.push(repo.id);
+          }
+          return result;
+      }
+      return null;
+  }
 }

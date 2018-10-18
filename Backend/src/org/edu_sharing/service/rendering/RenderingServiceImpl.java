@@ -64,8 +64,8 @@ public class RenderingServiceImpl implements RenderingService{
 			logger.debug(renderingServiceUrl);
 			return new HttpQueryTool().query(renderingServiceUrl);
 		}catch(Throwable t) {
-			String repository=VersionService.getVersion(VersionService.Type.REPOSITORY);
-			String rs=VersionService.getVersion(VersionService.Type.RENDERSERVICE);
+			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
+			String rs=VersionService.getVersionNoException(VersionService.Type.RENDERSERVICE);
 			String info="Repository version "+repository+", Renderservice version "+rs;
 			if(repository.equals(rs)) {
 				logger.info(info);

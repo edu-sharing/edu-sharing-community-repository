@@ -11,6 +11,7 @@ import {UIConstants} from "../ui/ui-constants";
 import {NavigationEnd, Router} from "@angular/router";
 import {FrameEventsService} from "./frame-events.service";
 import {Location} from '@angular/common';
+import {RestLocatorService} from "../rest/services/rest-locator.service";
 
 declare var cordova : any;
 
@@ -37,7 +38,6 @@ export class CordovaService {
   private appGoneBackgroundTS : number = null;
 
   private _oauth:OAuthResult;
-  public endpointUrl:string;
   private serviceIsReady = false;
 
   private lastShareTS:number = 0;
@@ -147,7 +147,7 @@ export class CordovaService {
                   (data: any) => {
                       // TODO: take URI and processes on share screen
                       // this.router.navigate(['share', URI]);
-                      this.router.navigate(['app', 'share'], {queryParams: data});
+                      this.router.navigate([UIConstants.ROUTER_PREFIX,'app', 'share'], {queryParams: data});
                   }, (error) => {
                       console.log("ERROR on new share event", error);
                   });
@@ -204,11 +204,9 @@ export class CordovaService {
    private registerOnShareContent() : void {
        if (this.isAndroid()) {
            console.log("register on share intent");
-           // only run once. Will loop otherwise if no auth is found and intent was send
-           let handleIntent=(intent:any)=> {
-               // Do things
-               console.log(intent);
-               if(intent && intent.extras){
+
+           let handleIntentBase=(intent:any)=>{
+                if(intent && intent.extras){
                    let uri=intent.extras["android.intent.extra.TEXT"];
                    if(uri){
                        this.lastIntent=intent;
@@ -231,8 +229,31 @@ export class CordovaService {
                    }
                }
            };
+           // only run once. Will loop otherwise if no auth is found and intent was send
+           let handleIntent=(intent:any)=> {
+               // Do things
+               console.log(intent);
+               if (intent && intent.action=="android.intent.action.VIEW") {
+                   let hit="/edu-sharing";
+                   let target=intent.data.substr(0,intent.data.indexOf(hit));
+                   let current=window.location.href.substr(0,window.location.href.indexOf(hit));
+                   if(target==current){
+                       console.log(target+"="+current+", go to request location "+intent.data);
+                       window.location.href=intent.data;
+                   }
+                   else{
+                       console.log(target+"!="+current+", logout and go to new location "+intent.data);
+                       this.resetAndGoToServerlist('url='+intent.data);
+                   }
+                   (window as any).plugins.intent.getCordovaIntent(null);
+               }
+               else{
+                   handleIntentBase(intent);
+               }
+
+           };
            console.log((window as any).plugins);
-           (window as any).plugins.intent.getCordovaIntent(handleIntent);
+           (window as any).plugins.intent.getCordovaIntent(handleIntentBase);
            (window as any).plugins.intent.setNewIntentHandler(handleIntent);
            /*
            (window as any).plugins.webintent.onNewIntent((uri:string)=> {
@@ -253,17 +274,7 @@ export class CordovaService {
        }
    }
 
-   private deliverShareContent(URI:string) : void {
-      // just allow one share every 5 seconds to prevent double calling
-      if ((new Date().getTime() - this.lastShareTS) < 5000) {
-        console.log("BLOCK Share Event - just one per 5 seconds");
-        return;
-      }
-      this.lastShareTS = new Date().getTime();
-      this.observerShareContent.next(URI);
-   }
-
-
+   /*
    private resolveFileUri(URI:string, callbackResult:Function) : void {
 
      try {
@@ -308,6 +319,7 @@ export class CordovaService {
      }
 
    }
+   */
 
 
   /**********************************************************
@@ -338,6 +350,7 @@ export class CordovaService {
       let device:any = (window as any).device;
       return device.platform=="iOS";
     } catch (e) {
+        console.error(e);
       console.log("FAIL on Plugin cordova-plugin-device (1)");
       return false;
     }
@@ -416,11 +429,17 @@ export class CordovaService {
     }
   }
 
-  restartCordova():void {
+  restartCordova(parameters=""):void {
+    this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
+    if(parameters)
+        parameters="&"+parameters;
+    window.location.replace("http://app-registry.edu-sharing.com/ng/?reset=true"+parameters);
+    /*
     try {
       (navigator as any).splashscreen.show();
     } catch (e) {}
     document.location.href = this.initialHref;
+    */
   }
 
 
@@ -563,7 +582,7 @@ export class CordovaService {
     }
 
     // if server address - sync with sharescreen
-    if (key==CordovaService.STORAGE_SERVER_OWN) {
+    if (key==CordovaService.STORAGE_SERVER_OWN && this.isIOS()) {
       try {
         this.iosShareScreenStoreValue(CordovaService.IOSSHARE_SERVER,value);
       } catch (e) {
@@ -611,10 +630,7 @@ export class CordovaService {
   loadStorage(){
     this.getPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,(data:string)=>{
         this._oauth = (data!=null) ? JSON.parse(data) : null;
-        this.getPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,(data:string)=>{
-            this.endpointUrl=data;
-            this.serviceIsReady=true;
-        });
+        this.serviceIsReady=true;
     });
   }
 
@@ -756,6 +772,7 @@ export class CordovaService {
       });
 
     } catch(error) {
+        console.error(error);
       errorCallback("FAIL-EXCEPTION",error);
     }
 
@@ -921,25 +938,36 @@ export class CordovaService {
    }
 
    openInAppBrowser(url:string){
-       let win:any=window.open(url,"_blank","location=no");
+       let win:any=window.open(url,"_blank","location=no,zoom=no");
        win.addEventListener( "loadstop", ()=> {
-           console.log("cordova init inapp window");
-           console.log(win.postMessage);
+           // register iframe handling
+           win.executeScript({code:`
+                var cordovaIframeList=document.getElementsByTagName('iframe');
+                function cordovaReceiveMessage(event){
+                    for(var i=0;i<cordovaIframeList.length;i++){
+                        if (cordovaIframeList[i].contentWindow === event.source) {
+                            window.opener.postMessage(event.data);
+                            return;
+                        }
+                    }
+                    for(var i=0;i<cordovaIframeList.length;i++){
+                        cordovaIframeList[i].contentWindow.postMessage(event.detail,'*');
+                    }
+                }
+                window.addEventListener("message", cordovaReceiveMessage, false);        
+           `});
            win.postMessage=(data:any)=>{
-               console.log("postMessage",data);
+               // Redirect post messages to new window
                win.executeScript({
                    code:`
                         var event = new CustomEvent('message',{detail:`+JSON.stringify(data)+`});
                         window.dispatchEvent(event);`
                },null);
-               var event = new Event('message');
-                //window.dispatchEvent(event);
            };
            this.events.addWindow(win);
            let loop = setInterval(()=>{
 
-               // Execute JavaScript to check for the existence of a name in the
-               // child browser's localStorage.
+               // Execute JavaScript to fetch message chain
                win.executeScript(
                    {
                        code: `
@@ -967,12 +995,14 @@ export class CordovaService {
                            if(e.event==FrameEventsService.EVENT_CORDOVA_CAMERA){
                                this.getPhotoFromCamera((data:any)=>{
                                    this.events.broadcastEvent(FrameEventsService.EVENT_CORDOVA_CAMERA_RESPONSE,data);
-                               },null);
+                               },()=>{
+                                   this.events.broadcastEvent(FrameEventsService.EVENT_CORDOVA_CAMERA_RESPONSE,null);
+                               });
                            }
                        }
                    }
                );
-           },500);
+           },100);
        });
        return win;
    }
@@ -1057,35 +1087,10 @@ export class CordovaService {
   public static TEST_TESTSKIPPED:string = "TESTSKIPPED";
   public static TEST_OK:string = "OK";
 
-  public setServerURL(url:string, doTesting:boolean): Observable<string> {
-    return new Observable<string>((observer: Observer<string>) => {
-
-      if (doTesting) {
-
-        // test URL TO API
-        this.setPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,url);
-        this.endpointUrl=url;
-        console.warn("TODO: TESTING OF URL NEEDED");
-        observer.next(CordovaService.TEST_OK);
-        observer.complete();
-
-      } else {
-      
-        // simply set API URL and OK
-        this.setPermanentStorage(CordovaService.STORAGE_SERVER_ENDPOINT,url);
-        this.endpointUrl=url;
-        observer.next(CordovaService.TEST_TESTSKIPPED);
-        observer.complete();
-      
-      }
-
-    });
-  }
-
   // oAuth login that is used when running as mobile app
-  public loginOAuth(username: string = "", password: string = ""): Observable<OAuthResult> {
+  public loginOAuth(endpointUrl:string, username: string = "", password: string = ""): Observable<OAuthResult> {
 
-    let url = this.endpointUrl + "../oauth2/token";
+    let url = endpointUrl + "../oauth2/token";
     let headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
     headers.append('Accept', '*/*');
@@ -1130,7 +1135,7 @@ export class CordovaService {
    * Cordova needs to refresh tokens
    */
   private reiniting=false;
-  public reinitStatus():Observable<void>{
+  public reinitStatus(endpointUrl:string):Observable<void>{
       return new Observable<void>((observer: Observer<void>) => {
 
           console.info("cordova: reinit");
@@ -1147,8 +1152,15 @@ export class CordovaService {
               return;
           }
           console.log("cordova: refresh oAuth");
+          if(!this.oauth){
+              console.log("cordova: no oAuth, go to Login")
+              this.goToLogin();
+              observer.error(null);
+              observer.complete();
+              return;
+          }
           this.reiniting = true;
-          this.refreshOAuth(this.oauth).subscribe(() => {
+          this.refreshOAuth(endpointUrl,this.oauth).subscribe(() => {
               console.info("cordova: oauth OK");
               this.reiniting = false;
               observer.next(null);
@@ -1157,19 +1169,23 @@ export class CordovaService {
               console.warn(error);
               console.warn("cordova: invalid oauth, go back to server selection");
               this.reiniting = false;
-              this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
-              this.clearAllCookies();
-              this.restartCordova();
+              this.resetAndGoToServerlist();
               observer.error(null);
               observer.complete();
           });
       });
   }
 
-  // oAuth refresh tokens
-  private refreshOAuth(oauth: OAuthResult): Observable<OAuthResult> {
+    private resetAndGoToServerlist(parameters="") {
+        this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, null);
+        this.clearAllCookies();
+        this.restartCordova(parameters);
+    }
 
-    let url = this.endpointUrl + "../oauth2/token";
+// oAuth refresh tokens
+  private refreshOAuth(endpointUrl:string,oauth: OAuthResult): Observable<OAuthResult> {
+
+    let url = endpointUrl + "../oauth2/token";
     let headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
     headers.append('Accept', '*/*');
@@ -1202,6 +1218,7 @@ export class CordovaService {
   * then use this method to get a cookie/session and subscribe on refreshes on oAuth tokens.
   * When the Observable an error mit "INVALID" - oAuth tokens are outdated and new login is needed. 
   */
+  /*
   public initOAuthSession(oauth: OAuthResult): Observable<OAuthResult> {
 
     return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
@@ -1239,9 +1256,10 @@ export class CordovaService {
     });
 
   }
+  */
 
     hasValidConfig() {
-        return this._oauth && this.endpointUrl;
+        return this._oauth;
     }
 
     getLanguage() {
@@ -1286,5 +1304,12 @@ export class CordovaService {
         else{
             (navigator as any).app.exitApp();
         }*/
+    }
+    getIndexPath() {
+        return cordova.file.applicationDirectory+'www/';
+    }
+
+    private goToLogin() {
+        this.router.navigate([UIConstants.ROUTER_PREFIX,"app"],{queryParams:{next:window.location.href}});
     }
 }

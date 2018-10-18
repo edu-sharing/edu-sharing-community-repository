@@ -22,6 +22,37 @@
                 <caption>Person/Organisation</caption>
                 <placeholder>z.B. Kandinsky</placeholder>
       </widget>
+      <!-- new -->
+      <widget>
+                <id>keywords</id>
+                 <type>multivalueFixedBadges</type>
+                <caption>Stichwort</caption>
+                <placeholder>z.B. Aufsatz</placeholder>
+      </widget>
+      <widget>
+                <id>language</id>
+                 <type>multivalueFixedBadges</type>
+                <caption>Sprache</caption>
+                <placeholder>z.B. Deutsch</placeholder>
+      </widget>
+       <widget>
+                <id>type</id>
+                 <type>multivalueFixedBadges</type>
+                <caption>Medientyp</caption>
+                <placeholder>z.B. Bild</placeholder>
+      </widget>
+      <widget>
+                <id>sector</id>
+                 <type>multivalueFixedBadges</type>
+                <caption>Sparte</caption>
+                <placeholder>z.B. Forschung</placeholder>
+      </widget>
+       <widget>
+                <id>provider</id>
+                 <type>multivalueFixedBadges</type>
+                <caption>Datengeber</caption>
+                <placeholder>z.B. Bundesarchiv</placeholder>
+      </widget>
 
     </widgets>
 	<templates>
@@ -72,6 +103,31 @@
 			<property name="affiliate">
 				<facets>
 					<facet>affiliate_fct</facet>
+				</facets>
+			</property>
+			<property name="keywords">
+				<facets>
+					<facet>keywords_fct</facet>
+				</facets>
+			</property>
+			<property name="language">
+				<facets>
+					<facet>language_fct</facet>
+				</facets>
+			</property>
+			<property name="type">
+				<facets>
+					<facet>type_fct</facet>
+				</facets>
+			</property>
+			<property name="sector">
+				<facets>
+					<facet>sector_fct</facet>
+				</facets>
+			</property>
+			<property name="provider">
+				<facets>
+					<facet>provider_fct</facet>
 				</facets>
 			</property>
 		</query>

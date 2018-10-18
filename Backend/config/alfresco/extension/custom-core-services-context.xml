@@ -574,7 +574,7 @@
     </bean>
     
     <!-- Preview Job -->
-     <bean id="tempFileCleanerTrigger" class="org.alfresco.util.CronTriggerBean">
+     <bean id="eduPreviewJobTrigger" class="org.alfresco.util.CronTriggerBean">
         <property name="jobDetail">
             <bean id="previewJob" class="org.springframework.scheduling.quartz.JobDetailBean">
                 <property name="jobClass">

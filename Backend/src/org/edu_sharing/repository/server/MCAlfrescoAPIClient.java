@@ -1247,7 +1247,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 						String[] keys=new ValueTool().getMultivalue((String) entry.getValue());
 						String[] values=new String[keys.length];
 						for(int i=0;i<keys.length;i++)
-							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : null;
+							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
 						addAndOverwriteDateMap.put(entry.getKey() + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values,CCConstants.MULTIVALUE_SEPARATOR));
 					}
 				
@@ -1594,7 +1594,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		// we can cache primary parent here, instead of parentid which differs
 		// from the content
-		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
+		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER) || nodeType.equals(CCConstants.CCM_TYPE_TOOL_INSTANCE)) {
 			ChildAssociationRef parentNodeRef = nodeService.getPrimaryParent(nodeRef);
 			properties.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, parentNodeRef.getParentRef().getId());
 		}

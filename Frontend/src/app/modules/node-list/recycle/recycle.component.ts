@@ -1,4 +1,4 @@
-import {Component, Input} from "@angular/core";
+import {Component, Input, ViewChild} from "@angular/core";
 import {RestArchiveService} from "../../../common/rest/services/rest-archive.service";
 import {RestConstants} from "../../../common/rest/rest-constants";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
@@ -14,18 +14,21 @@ import {ListItem} from "../../../common/ui/list-item";
   templateUrl: 'recycle.component.html'
 })
 export class RecycleMainComponent {
+  @ViewChild('list') list : NodeList;
   public toDelete:Node[] = [];
   public restoreResult:ArchiveRestore;
 
   @Input() isInsideWorkspace = false;
   @Input() searchWorkspace:string;
   public reload : Boolean;
+  public sortBy = RestConstants.CM_ARCHIVED_DATE;
+  public sortAscending = false;
   private selected:Node[] = [];
 
   public columns : ListItem[]=[];
   public options : OptionItem[]=[];
   public fullscreenLoading:boolean;
-  private loadData(currentQuery :string,offset : number,sortBy : string,sortAscending : boolean){
+  loadData(currentQuery :string,offset : number,sortBy : string,sortAscending : boolean){
     return this.archive.search(currentQuery,"",{propertyFilter:[RestConstants.CM_ARCHIVED_DATE],offset:offset,sortBy:[sortBy],sortAscending:sortAscending})
   }
   constructor(private archive : RestArchiveService,private toast : Toast,private translate : TranslateService,private service : TemporaryStorageService){

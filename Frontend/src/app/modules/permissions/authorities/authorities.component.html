@@ -10,68 +10,77 @@
                [title]="loadingTitle"
                [message]="loadingMessage"
 ></modal-loading>
-<div class="info" *ngIf="_mode!='ORG' && !embedded">
-  <div  *ngIf="!org">
-    {{'PERMISSIONS.INFO_GLOBAL_'+_mode | translate}}
-    <br>
-    <a class="clickable" (click)="setOrgTab()">{{'PERMISSIONS.CHOOSE_ORG' | translate}}</a>
+<div class="topFrame">
+  <div class="info">
+    <div  *ngIf="_mode!='ORG' && !embedded">
+      <div *ngIf="!org">
+        {{'PERMISSIONS.INFO_GLOBAL_'+_mode | translate}}
+        <br>
+        <a class="clickable" (click)="setOrgTab()">{{'PERMISSIONS.CHOOSE_ORG' | translate}}</a>
+      </div>
+      <div  *ngIf="org">
+        {{'PERMISSIONS.INFO_ORG_'+_mode | translate:{org:org.profile.displayName} }}
+        <br>
+        <span *ngIf="isAdmin">
+      <a class="clickable" (click)="deselectOrg()">{{'PERMISSIONS.NO_ORG' | translate}}</a>
+      |
+      </span>
+        <a class="clickable" (click)="setOrgTab()">{{'PERMISSIONS.CHOOSE_ORG' | translate}}</a>
+      </div>
+    </div>
   </div>
-  <div  *ngIf="org">
-    {{'PERMISSIONS.INFO_ORG_'+_mode | translate:{org:org.profile.displayName} }}
-    <br>
-    <span *ngIf="isAdmin">
-    <a class="clickable" (click)="deselectOrg()">{{'PERMISSIONS.NO_ORG' | translate}}</a>
-    |
-    </span>
-    <a class="clickable" (click)="setOrgTab()">{{'PERMISSIONS.CHOOSE_ORG' | translate}}</a>
-  </div>
-</div>
-
-<div class="actionbarFrame">
   <actionbar
-    [options]="optionsActionbar"
+          [options]="optionsActionbar"
   ></actionbar>
 </div>
-<div *ngIf="edit" class="dialog darken">
-  <div class="card center-card card-action">
+
+
+<div *ngIf="edit" [@fade]="edit" class="dialog darken"></div>
+  <div *ngIf="edit" [@cardAnimation]="edit" class="card center-card card-action">
     <div class="card-content">
-      <form (submit)="saveEdits()">
       <div class="card-cancel" (click)="cancelEdit()"><i class="material-icons">close</i></div>
-      <span class="card-title">{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}</span>
-        <div *ngIf="editId" class="editSystemName">
-          <label>{{'PERMISSIONS.INTERNAL_NAME' | translate}}</label>
-          <div class="infoText">{{edit.authorityName}}</div>
+      <div class="card-title">{{'PERMISSIONS.'+(editId==null ? 'CREATE' : 'EDIT') + '_' +_mode | translate }}</div>
+        <div class="card-scroll">
+          <form (submit)="saveEdits()">
+          <div *ngIf="editId" class="editSystemName">
+            <label>{{'PERMISSIONS.INTERNAL_NAME' | translate}}</label>
+            <div class="infoText">{{edit.authorityName}}</div>
+          </div>
+          <div *ngIf="_mode=='GROUP'">
+            <label for="groupName">{{'GROUP.displayName' | translate}}</label>
+            <input type="text" id="groupName" name="groupName" [(ngModel)]="edit.profile.displayName" autofocus required>
+            <label for="groupType">{{'GROUP.groupType' | translate}}</label>
+            <select id="groupType" name="groupType" [(ngModel)]="edit.profile.groupType">
+              <option *ngFor="let type of GROUP_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
+            </select>
+          </div>
+          <div *ngIf="_mode=='ORG'">
+            <label for="orgName">{{'ORG.displayName' | translate}}</label>
+            <input type="text" id="orgName" name="orgName" [(ngModel)]="edit.profile.displayName" autofocus required>
+            <label for="orgName">{{'ORG.groupType' | translate}}</label>
+            <select id="orgType" name="orgType" [(ngModel)]="edit.profile.groupType">
+              <option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
+            </select>
+            <div class="infoText">{{edit.folder}}</div>
+          </div>
+          <div *ngIf="_mode=='USER'">
+            <div *ngIf="!editId">
+              <label for="authorityName">{{'USER.authorityName' | translate}}</label>
+              <input type="text" id="authorityName" name="authorityName" [(ngModel)]="editDetails.authorityName" autofocus required>
+            </div>
+            <label for="firstName">{{'USER.firstName' | translate}}</label>
+            <input type="text" id="firstName" name="firstName" [(ngModel)]="edit.profile.firstName" required>
+            <label for="lastName">{{'USER.lastName' | translate}}</label>
+            <input type="text" id="lastName" name="lastName" [(ngModel)]="edit.profile.lastName" required>
+            <label for="email">{{'USER.email' | translate}}</label>
+            <input type="text" id="email" name="email" [(ngModel)]="edit.profile.email" required>
+            <div *ngIf="!editId">
+              <label for="password">{{'USER.password' | translate}}</label>
+              <input type="password" id="password" name="password" [(ngModel)]="editDetails.password">
+            </div>
+          </div>
+          </form>
         </div>
-      <div *ngIf="_mode=='GROUP'">
-        <label for="groupName">{{'GROUP.displayName' | translate}}</label>
-        <input type="text" id="groupName" name="groupName" [(ngModel)]="edit.profile.displayName" autofocus required>
-        <label for="groupType">{{'GROUP.groupType' | translate}}</label>
-        <select id="groupType" name="groupType" [(ngModel)]="edit.profile.groupType"><option *ngFor="let type of GROUP_TYPES">{{type}}</option></select>
-      </div>
-        <div *ngIf="_mode=='ORG'">
-          <label for="orgName">{{'ORG.displayName' | translate}}</label>
-          <input type="text" id="orgName" name="orgName" [(ngModel)]="edit.profile.displayName" autofocus required>
-          <label for="orgName">{{'ORG.groupType' | translate}}</label>
-          <select id="orgType" name="orgType" [(ngModel)]="edit.profile.groupType"><option *ngFor="let type of GROUP_TYPES">{{type}}</option></select>
-          <div class="infoText">{{edit.folder}}</div>
-        </div>
-      <div *ngIf="_mode=='USER'">
-        <div *ngIf="!editId">
-        <label for="authorityName">{{'USER.authorityName' | translate}}</label>
-        <input type="text" id="authorityName" name="authorityName" [(ngModel)]="editDetails.authorityName" autofocus required>
-        </div>
-        <label for="firstName">{{'USER.firstName' | translate}}</label>
-        <input type="text" id="firstName" name="firstName" [(ngModel)]="edit.profile.firstName" required>
-        <label for="lastName">{{'USER.lastName' | translate}}</label>
-        <input type="text" id="lastName" name="lastName" [(ngModel)]="edit.profile.lastName" required>
-        <label for="email">{{'USER.email' | translate}}</label>
-        <input type="text" id="email" name="email" [(ngModel)]="edit.profile.email" required>
-        <div *ngIf="!editId">
-          <label for="password">{{'USER.password' | translate}}</label>
-          <input type="password" id="password" name="password" [(ngModel)]="editDetails.password">
-        </div>
-      </div>
-      </form>
     </div>
 
     <div class="card-action">
@@ -79,7 +88,6 @@
       <a class="btn-flat" (click)="cancelEdit()">{{'CANCEL' | translate }}</a>
     </div>
   </div>
-</div>
 <div *ngIf="editMembers || addMembers" class="dialog darken">
   <div class="card center-card card-action card-high card-xwide">
     <div class="card-content">

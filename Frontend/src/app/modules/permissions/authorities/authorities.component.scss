@@ -8,11 +8,28 @@ input[type=search]{
   border-radius: 5pt;
   margin-left:42px;
 }
-.actionbarFrame{
+.topFrame{
   position:fixed;
-  z-index:8;
-  top:68px+$mainnavHeight;
-  right:10px;
+  z-index:1;
+  width: 100%;
+  top:65px+$mainnavHeight;
+  display:flex;
+  align-items: center;
+  padding:0 10px;
+  .info{
+    flex-grow: 1;
+    color:$textPrimary;
+    font-weight:bold;
+    line-height: 1.5em;
+    margin: 0 20px;
+    a{
+      text-transform: uppercase;
+    }
+    @include limitLineCount(3);
+  }
+  actionbar{
+    min-width: 170px;
+  }
 }
 .memberActions{
   height:50px;
@@ -36,16 +53,6 @@ input[type=search]{
 }
 .editSystemName{
   margin-bottom: 10px;
-}
-.info{
-  width:600px;
-  color:$textPrimary;
-  font-weight:bold;
-  margin-left:40px;
-  margin-top:18px;
-  a{
-    text-transform: uppercase;
-  }
 }
 .noElements{
   width:100%;

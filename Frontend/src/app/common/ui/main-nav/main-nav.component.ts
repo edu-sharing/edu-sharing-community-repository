@@ -67,7 +67,9 @@ import {Translation} from "../../translation";
 /**
  * An edu-sharing file-picker modal dialog
  */
-export class MainNavComponent {
+export class MainNavComponent{
+  private static ID_ATTRIBUTE_NAME='data-banner-id';
+
   @ViewChild('search') search : ElementRef;
   @ViewChild('sidebar') sidebar:ElementRef;
   @ViewChild('topbar') topbar:ElementRef;
@@ -114,29 +116,52 @@ export class MainNavComponent {
     }
     let elementsScroll=document.getElementsByClassName('scrollWithBanner');
     let elementsAlign=document.getElementsByClassName('alignWithBanner');
-    let elements=[];
+    let elements:any=[];
     for(let i=0;i<elementsScroll.length;i++) {
       elements.push(elementsScroll[i]);
     }
     for(let i=0;i<elementsAlign.length;i++) {
       elements.push(elementsAlign[i]);
     }
-    let ATTRIBUTE_NAME='data-banner-id';
     if(event==null) {
-      /*this.scrollInitialPositions=[];*/
+            // re-init the positions, reset the elements
+            this.scrollInitialPositions=[];
       for(let i=0;i<elements.length;i++) {
         let element: any = elements[i];
         element.style.position = null;
         element.style.top = null;
-        if(!element.getAttribute(ATTRIBUTE_NAME)){
-            element.setAttribute(ATTRIBUTE_NAME,Math.random());
+                // disable transition for instant refreshes
+                element.style.transition="none"
         }
-        if(this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)])
-          continue;
-        this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=window.getComputedStyle(element).getPropertyValue('top');
+            // give the browser layout engine some time to remove the values, otherwise the elements will have not their initial positions
+            setTimeout(()=> {
+                for (let i = 0; i < elements.length; i++) {
+                    let element: any = elements[i];
+                    element.style.transition=null;
+                    if (!element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)) {
+                        element.setAttribute(MainNavComponent.ID_ATTRIBUTE_NAME, Math.random());
+                    }
+                    if (this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])
+                     continue;
+                    // getComputedStyle does report wrong values in search sidenav
+                    this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)] = window.getComputedStyle(element).getPropertyValue('top');
+                    //this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=element.getBoundingClientRect().top;
+                }
+                console.log(this.scrollInitialPositions);
+                this.posScrollElements(event,elements);
+            });
       }
+        else{
+            this.posScrollElements(event,elements);
+        }
     }
-    if(/*this.topbar.nativeElement.classList.contains('topBar-search')*/ true) {
+    posScrollElements(event:Event, elements: any[]){
+        let y=0;
+        try {
+            let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
+            y = rect.bottom-rect.top;
+        }catch(e){
+        }
       for(let i=0;i<elements.length;i++) {
         let element:any=elements[i];
         if(y==0){
@@ -152,11 +177,10 @@ export class MainNavComponent {
         }
         else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
           element.style.position = 'fixed';
-          element.style.top = this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)];
+                element.style.top = this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)];
         } else {
           element.style.position = 'absolute';
-          element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)])+y + 'px';
-        }
+                element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])+y + 'px';
       }
     }
     if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
@@ -274,8 +298,7 @@ export class MainNavComponent {
     return null;
   }
   refreshBanner(){
-    this.handleScroll(null);
-    setTimeout(()=>this.handleScroll(null),10);
+    setTimeout(()=>this.handleScroll(null));
   }
   ngAfterViewInit() {
     this.refreshBanner();
@@ -322,7 +345,7 @@ export class MainNavComponent {
         return;
       }
       this.toolpermissions=data.toolPermissions;
-      this.canAccessWorkspace=this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
+      this.canAccessWorkspace=this.toolpermissions && this.toolpermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE)!=-1;
 
       this.route.queryParams.subscribe((params: Params) => {
         let buttons:any=[];
@@ -407,12 +430,11 @@ export class MainNavComponent {
   }
   private logout(){
     if(this.cordova.isRunningCordova()){
-      this.cordova.clearAllCookies();
-      this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS,null);
       this.cordova.restartCordova();
       return;
     }
     if(this.config.logout) {
+      let sessionData=this.connector.getCurrentLogin();
       if(this.config.logout.ajax){
         this.http.get(this.config.logout.url).subscribe(()=>{
           this.finishLogout();
@@ -423,11 +445,21 @@ export class MainNavComponent {
       else {
         if(this.config.logout.destroySession){
           this.connector.logout().subscribe((response) => {
-            window.location.href = this.config.logout.url;
+            if(sessionData.currentScope==RestConstants.SAFE_SCOPE){
+              this.finishLogout();
+            }
+            else {
+              window.location.href = this.config.logout.url;
+            }
           });
         }
         else {
-          window.location.href = this.config.logout.url;
+          if(sessionData.currentScope==RestConstants.SAFE_SCOPE){
+              this.finishLogout();
+          }
+          else {
+              window.location.href = this.config.logout.url;
+          }
         }
       }
     }
@@ -540,11 +572,14 @@ export class MainNavComponent {
     this.licenseAgreement=false;
     if(this.licenseAgreementNode)
       this.session.set('licenseAgreement',this.licenseAgreementNode.contentVersion);
+    else
+      this.session.set('licenseAgreement','0.0');
   }
   private showLicenseAgreement() {
-    if(!this.config.licenseAgreement || this.isGuest)
+    if(!this.config.licenseAgreement || this.isGuest || !this.connector.getCurrentLogin().isValidLogin)
       return;
     this.session.get('licenseAgreement',false).subscribe((version:string)=>{
+      console.log("user accepted agreement at version "+version);
       this.licenseAgreementHTML=null;
       let nodeId:string=null;
       for(let node of this.config.licenseAgreement.nodeId) {
@@ -567,6 +602,8 @@ export class MainNavComponent {
             this.licenseAgreementHTML = "Error loading content for license agreement node '" + nodeId + "'";
         });
       },(error:any)=>{
+          if(version==='0.0')
+            return;
           this.licenseAgreement=true;
           this.licenseAgreementHTML = "Error loading metadata for license agreement node '" + nodeId + "'";
       })

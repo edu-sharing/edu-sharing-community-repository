@@ -9,7 +9,7 @@
     "DELETE": {
       "CONFIRM_TITLE": "Objekt wirklich endgültig löschen?",
       "CONFIRM_MESSAGE": "Wenn Sie Objekte endgültig löschen, können Sie diese später nicht mehr wiederherstellen.",
-      "NOT_ASK_AGAIN": "Diese Sitzung nicht nochmal fragen",
+      "NOT_ASK_AGAIN": "In dieser Sitzung nicht noch einmal fragen",
       "YES": "Ja, löschen",
       "CANCEL": "Abbrechen"
     },
@@ -19,6 +19,7 @@
       "LIST_PARENT_FOLDER_MISSING": "Der ursprüngliche Speicherort ist nicht verfügbar:",
       "UNDERSTAND": "Verstanden",
       "FALLBACK_PARENT_NOT_EXISTS": "wurde nach Dokumente verschoben",
+      "FALLBACK_PARENT_NO_PERMISSION": "wurde nach Dokumente verschoben",
       "DUPLICATENAME": "wurde umbenannt",
       "FINE": "Ok"
     },

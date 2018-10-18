@@ -390,12 +390,13 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
 		
 		List<String> facets = mds.getQueries().findQuery(queryId).findParameterByName(parameterId).getFacets();
-		String url = getUrl("/search",value,facets, 0, 0);
-		
-		
+		//String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
+		String url = getUrl("/search","*",facets, 0, 0);
+		System.out.println("url:" + url);
 		
 		try {
 			String json = this.query(url);
+			System.out.println(json);
 			JSONObject jo = new JSONObject(json);
 	    	
 			JSONArray resultsArr = (JSONArray)jo.get("facets");
@@ -412,11 +413,13 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						//int count = facetteVal.getInt("count");
 						String val = facetteVal.getString("value");
 						
-						SuggestFacetDTO dto = new SuggestFacetDTO();
-						dto.setFacet(val);
-						dto.setDisplayString(val);
-
-						result.add(dto);
+						if(val.contains(value)) {					
+							SuggestFacetDTO dto = new SuggestFacetDTO();
+							dto.setFacet(val);
+							dto.setDisplayString(val);
+	
+							result.add(dto);
+						}
 					}
 					
 					
@@ -558,24 +561,17 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	}	
 	
 	public static void main(String[] args) {
-		
-		
-		
 		try {
 			String searchWord = "*";
-			String extendedSearch = "place:(Wolfenbüttel)";
+			String extendedSearch = "place:(Frankfurt)";
 			String oauthKey = "nVyX1bwLOAEpMVrzfEIf3xth5eTtVOaqZeeUUcUEQDNa4Oigs6y1438781244192";
 			String path = "/search";
 			path += "?oauth_consumer_key=" + URLEncoder.encode(oauthKey, "UTF-8");
 			path += "&query=" + org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(searchWord+" " +extendedSearch);
 			path += "&facet=place_fct";
 			path += "&offset="+0;
-			path += "&rows="+10;
+			path += "&rows="+0;
 			
-			List<String> list = new ArrayList<String>();
-			list.add("place_fct");
-			
-			//path = new SearchServiceDDBImpl("local").getSuggestionPath(list);
 			
 			URL url=new URL(DDB_API+path);
 			HttpsURLConnection connection = openDDBUrl(url);

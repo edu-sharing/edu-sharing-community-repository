@@ -152,7 +152,10 @@ export class OerComponent {
      criterias.push({'property': 'ngsearchword', 'values': [string]});
 
 
-     this.searchService.search(criterias,[], {sortBy:[RestConstants.CM_MODIFIED_DATE],sortAscending:false,offset:this.offsets[this.COLLECTIONS],propertyFilter:[RestConstants.ALL]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
+     this.searchService.search(criterias,[], {sortBy:[
+            RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+             RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+             RestConstants.CM_MODIFIED_DATE],sortAscending:[false,true,false],offset:this.offsets[this.COLLECTIONS],propertyFilter:[RestConstants.ALL]},RestConstants.CONTENT_TYPE_COLLECTIONS).subscribe(
        (data : NodeList) => {
          if(this.currentQuery!=originalQuery)
            return;
@@ -216,7 +219,8 @@ export class OerComponent {
       this.render_options=[];
       this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
       this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.nodes[this.MATERIALS]);
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id]);
+        this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,"oer");
+        this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id]);
     }
    }
   private downloadNode(node:Node=this.displayedNode) {

@@ -5,9 +5,28 @@
   display: flex;
   >div {
     display: flex;
-    overflow: hidden;
-    padding: 1px 0;
+    padding: 3px 0;
     align-items: center;
+  }
+  >.permissionName{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    min-height: 40px;
+    flex-grow: 1;
+    padding:3px 5px;
+    >.primary{
+      word-break: break-all;
+      max-height: 3rem;
+      overflow: hidden;
+    }
+    >.secondary{
+      font-size: 80%;
+      color:$textLight;
+      margin-top: -3px;
+      min-height: 3px;
+    }
   }
 }
 .publish{
@@ -36,11 +55,6 @@
 }
 .icon{
   padding-right:5px;
-}
-.name{
-  flex-grow: 1;
-  padding:1px 5px!important;
-  @include shortenText();
 }
 .typeAdd{
   position:absolute;

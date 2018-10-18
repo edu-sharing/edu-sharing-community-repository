@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 public class MetadataWidget extends MetadataTranslatable{
-	public static class Subwidget implements Serializable {
+
+    public static class Subwidget implements Serializable {
 		private String id;
 
 		public String getId() {
@@ -21,6 +22,8 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	private static String[] MULTIVALUE_WIDGETS=new String[]{
 			"vcard",
+			"checkboxHorizontal",
+			"checkboxVertical",
 			"multivalueTree",
 			"multivalueBadges",
 			"multivalueFixedBadges",
@@ -64,7 +67,8 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	private String id,type,caption,bottomCaption,icon,
 					placeholder,defaultvalue,template,
-					suggestionSource,suggestionQuery,unit,format;
+					suggestionSource,suggestionQuery,unit,format,
+					valuespaceSort="default";
 	private Integer min,max,defaultMin,defaultMax,step;
 	private boolean required,extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
 	private List<MetadataKey> values;
@@ -72,6 +76,16 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	
 	private Condition condition;
+	private String link;
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
 	public String getSuggestionQuery() {
 		return suggestionQuery;
 	}
@@ -210,7 +224,14 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setStep(Integer step) {
 		this.step = step;
 	}
-	
+	public void setValuespaceSort(String valuespaceSort) {
+		this.valuespaceSort = valuespaceSort;
+	}
+
+	public String getValuespaceSort() {
+		return valuespaceSort;
+	}
+
 	public boolean isAllowempty() {
 		return allowempty;
 	}

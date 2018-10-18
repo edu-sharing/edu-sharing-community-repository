@@ -381,6 +381,10 @@ public class CCConstants {
 
 	public final static String CCM_PROP_LINKTYPE = "{http://www.campuscontent.de/model/1.0}linktype";
 
+	public final static String CCM_PROP_TOOL_INSTANCE_KEY = "{http://www.campuscontent.de/model/1.0}tool_instance_key";
+
+	public final static String CCM_PROP_TOOL_INSTANCE_SECRET = "{http://www.campuscontent.de/model/1.0}tool_instance_secret";
+
 	public final static String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 
 	public final static String CCM_ASPECT_SHARES = "{http://www.campuscontent.de/model/1.0}shares";
@@ -617,6 +621,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_IO_REPL_GENERAL_IDENTIFIER = "{http://www.campuscontent.de/model/1.0}general_identifier";
 
+	public final static String CCM_PROP_IO_SUBSOURCE_ID = "{http://www.campuscontent.de/model/1.0}subsource_id";
+
 	public final static String CCM_PROP_IO_CREATE_VERSION = "{http://www.campuscontent.de/model/1.0}create_version";
 
 	public final static String CCM_PROP_IO_VERSION_COMMENT = "{http://www.campuscontent.de/model/1.0}version_comment";
@@ -632,7 +638,11 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_SEARCH_CONTEXT = "{http://www.campuscontent.de/model/1.0}search_context";
 	
 	public final static String CCM_PROP_IO_EDITORIAL_STATE = "{http://www.campuscontent.de/model/1.0}editorial_state";
-	
+
+	public final static String CCM_PROP_IO_EDITORIAL_CHECKLIST = "{http://www.campuscontent.de/model/1.0}editorial_checklist";
+
+	public final static String CCM_PROP_IO_PUBLISHED_DATE = "{http://www.campuscontent.de/model/1.0}published_date";
+
 	/**
 	 * published
 	 */
@@ -1545,12 +1555,12 @@ public class CCConstants {
 	}
 
 	public final static String COMMON_LICENSE_CC_ZERO_LINK = "https://creativecommons.org/publicdomain/zero/1.0/deed.${locale}";
-	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_SA_LINK = "https://creativecommons.org/licenses/by-sa/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_ND_LINK = "https://creativecommons.org/licenses/by-nd/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_NC_LINK = "https://creativecommons.org/licenses/by-nc/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_NC_SA_LINK = "https://creativecommons.org/licenses/by-nc-sa/${version}/deed.en";
-	public final static String COMMON_LICENSE_CC_BY_NC_ND_LINK = "https://creativecommons.org/licenses/by-nc-nd/${version}/deed.en";
+	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_SA_LINK = "https://creativecommons.org/licenses/by-sa/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_ND_LINK = "https://creativecommons.org/licenses/by-nd/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_NC_LINK = "https://creativecommons.org/licenses/by-nc/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_NC_SA_LINK = "https://creativecommons.org/licenses/by-nc-sa/${version}/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_BY_NC_ND_LINK = "https://creativecommons.org/licenses/by-nc-nd/${version}/deed.${locale}";
 	public final static String COMMON_LICENSE_EDU_LINK = "http://edu-sharing.net/licenses/edu-nc-nd/1.0/de";
 	public final static String COMMON_LICENSE_CUSTOM_LINK = "http://edu-sharing.net/licenses/custom-licence/1.0/de";
 
@@ -1725,7 +1735,9 @@ public class CCConstants {
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_TAXONID_VALUESPACE_I18N_PREFIX = "taxonid_valuespace_i18n_prefix";
 
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_RESOLVE_WEBSITE_TITLE = "resolve_website_title";
-	
+
+	public static String EDU_SHARING_PROPERTIES_ENABLE_STATISTICS_API= "enable_statistics_api";
+
 	public static String EDU_SHARING_PROPERTIES_PROPERTY_INITIAL_DBSCRIPTS = "initial_dbscripts";
 	
 	/**

@@ -42,6 +42,10 @@ import org.json.simple.parser.JSONParser;
 			
 		</params>
 	</job>
+	
+	Admin Tools Toolkit:
+	org.edu_sharing.repository.server.jobs.quartz.ImporterJob
+	{"sets":"article,course,video,text-exercise","oai_base_url":"https://de.serlo.org/entity/api/json/export/","importer_class":"org.edu_sharing.repository.server.importer.SerloImporter","binary_handler":"org.edu_sharing.repository.server.importer.BinaryHandlerSerlo"}
  *
  */
 public class SerloImporter implements Importer{
@@ -51,6 +55,8 @@ public class SerloImporter implements Importer{
 	String set = "serlo";
 	
 	PersistentHandlerInterface persistentHandler;
+	
+	BinaryHandler binaryHandler = new BinaryHandlerSerlo();
 	
 	String serloUrl;
 	
@@ -71,6 +77,7 @@ public class SerloImporter implements Importer{
 	
 	@Override
 	public void setBinaryHandler(BinaryHandler binaryHandler) {
+		this.binaryHandler = binaryHandler;
 	}
 	
 	@Override
@@ -147,7 +154,7 @@ public class SerloImporter implements Importer{
 				
 				
 				String name = jo.get("title").toString().replaceAll(RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
-				
+				name = name.trim();
 				eduProps.put(CCConstants.CM_NAME, name);
 				eduProps.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION, (String) jo.get("description"));
 				
@@ -288,7 +295,8 @@ public class SerloImporter implements Importer{
 				link = link.replaceAll("\\\\", "");
 				link = "https://de.serlo.org"+link;
 				eduProps.put(CCConstants.LOM_PROP_TECHNICAL_LOCATION, link);
-				eduProps.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, "http://web-screenshot.serlo.org:2341/?url="+link+"&scale=0.4");
+				
+				//eduProps.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, "http://web-screenshot.serlo.org:2341/?url="+link+"&scale=0.4");
 				eduProps.put(CCConstants.LOM_PROP_GENERAL_KEYWORD, generalKeywords);
 				
 				eduProps.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, CCConstants.COMMON_LICENSE_CC_BY_SA);
@@ -308,7 +316,8 @@ public class SerloImporter implements Importer{
 				//just for filling search widget
 				eduProps.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CONTENT_PROVIDER,"serlo");
 				
-				persistentHandler.safe(eduProps, null, "serlo_"+set);
+				String nodeId = persistentHandler.safe(eduProps, null, "serlo_"+set);
+				binaryHandler.safe(nodeId, eduProps, null);
 			}
 			
 		}catch(Throwable e){

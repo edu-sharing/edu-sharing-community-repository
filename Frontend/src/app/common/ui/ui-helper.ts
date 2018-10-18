@@ -22,6 +22,7 @@ import {RestNodeService} from "../rest/services/rest-node.service";
 import {PlatformLocation} from "@angular/common";
 import {AbstractRestService} from "../rest/services/abstract-rest-service";
 import {CordovaService} from "../services/cordova.service";
+import {SearchService} from "../../modules/search/search.service";
 export class UIHelper{
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
@@ -91,9 +92,15 @@ export class UIHelper{
     return true;
   }
 
-  static routeToSearchNode(router: Router, node: Node) {
+  static routeToSearchNode(router: Router,searchService:SearchService, node: Node) {
     let converted=UIHelper.convertSearchParameters(node);
-    router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{query:converted.query,savedQuery:node.ref.id,repository:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],mds:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],parameters:JSON.stringify(converted.parameters)}});
+    router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{
+      query:converted.query,
+      reurl:searchService ? searchService.reurl : null,
+      repository:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],
+      mds:node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],
+      parameters:JSON.stringify(converted.parameters)}
+    });
   }
     public static goToCollection(router:Router,node:Node,extras:NavigationExtras={}) {
         extras.queryParams={id:node.ref.id};

@@ -32,7 +32,7 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 })
 export class WorkspaceShareComponent implements AfterViewInit{
   ngAfterViewInit(): void {
-    UIHelper.setFocusOnCard();
+    setTimeout(()=>UIHelper.setFocusOnCard());
   }
   public ALL_PERMISSIONS=["All","Read","ReadPreview","ReadAll","Write","Delete",
     "DeleteChildren","DeleteNode","AddChildren","Consumer","ConsumerMetadata",
@@ -58,12 +58,13 @@ export class WorkspaceShareComponent implements AfterViewInit{
   private currentType=[RestConstants.ACCESS_CONSUMER,RestConstants.ACCESS_CC_PUBLISH];
   private inherited : boolean;
   private notifyUsers = true;
-  private notifyMessage = "";
+  private notifyMessage : string;
   private inherit : Permission[]=[];
   private permissions : Permission[]=[];
   public permissionsUser : Permission[];
   public permissionsGroup : Permission[];
   private newPermissions : Permission[]=[];
+  inheritAccessDenied = false;
   public owner : Permission;
   public linkEnabled : Permission;
   public linkDisabled : Permission;
@@ -152,7 +153,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.initialState=this.getState();
         }
 
-      }, (error: any) => this.toast.error(error));
+      }, (error: any) => {
+          this.inheritAccessDenied=true;
+      });
       this.nodeApi.getNodeParents(node.ref.id).subscribe((data: NodeList) => {
         this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
       });
@@ -280,7 +283,7 @@ export class WorkspaceShareComponent implements AfterViewInit{
         this.onClose.emit(permissions);
         return;
       }
-      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiActive && this.publishActive).subscribe(() => {
+      this.nodeApi.setNodePermissions(this._node.ref.id,permissions,this.notifyUsers && this.sendMessages,this.notifyMessage,false,this.doiPermission && this.allowDOI() && this.doiActive && this.publishActive).subscribe(() => {
           this.onLoading.emit(false);
           this.onClose.emit(permissions);
           this.toast.toast('WORKSPACE.PERMISSIONS_UPDATED');
@@ -422,6 +425,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
       let perm=RestHelper.getAllAuthoritiesPermission();
       perm.permissions=[RestConstants.PERMISSION_CONSUMER];
       this.permissions.push(perm);
+      if(this.doiPermission){
+        this.doiActive=true;
+      }
     }
     else{
       let i=this.getAuthorityPos(this.permissions,RestConstants.AUTHORITY_EVERYONE);

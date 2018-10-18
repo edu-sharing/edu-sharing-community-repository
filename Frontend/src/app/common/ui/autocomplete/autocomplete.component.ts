@@ -14,6 +14,7 @@ export class AutocompleteComponent{
 
   @Input() id: string;
   @Input() placeholder: string;
+  @Input() hintBottom: string;
   @Input() inputMinLength: number = 2;
   @Input() disabled=false;
   /**
@@ -129,6 +130,7 @@ itemChosen(item:SuggestItem) {
 export class SuggestItem {
   public index: number;
   public originalObject : any;
+  public secondaryTitle: string;
   constructor(public id: string, public title: string, public materialIcon: string, public iconUrl: string, public key?: string) {
   }
 

@@ -13,6 +13,7 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.rpc.SQLKeyword;
@@ -21,7 +22,6 @@ import org.edu_sharing.repository.client.rpc.SuggestFacetDTO;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.SearchServiceFactory;
-import org.edu_sharing.service.suggest.ConnectionDBAlfresco;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gwt.user.client.ui.SuggestOracle;

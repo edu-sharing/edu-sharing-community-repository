@@ -39,6 +39,7 @@ export class RestConstants {
 
   public static CCM_ASPECT_TOOL_DEFINITION = "ccm:tool_definition";
   public static CCM_ASPECT_TOOL_OBJECT = "ccm:tool_object";
+  public static CCM_ASPECT_TOOL_INSTANCE_LINK = "ccm:tool_instance_link";
   public static CCM_ASPECT_IO_REFERENCE = "ccm:collection_io_reference";
   public static CCM_ASPECT_METADATA_PRESETTING= "ccm:metadataPresetting";
   public static CCM_ASPECT_PUBLISHED = "ccm:published";
@@ -86,6 +87,7 @@ export class RestConstants {
   public static CCM_PROP_CCRESSOURCETYPE = "ccm:ccressourcetype";
   public static CCM_PROP_CCRESSOURCESUBTYPE = "ccm:ccresourcesubtype";
   public static CCM_PROP_CCRESSOURCEVERSION = "ccm:ccressourceversion";
+  public static CCM_PROP_REPLICATIONMODIFIED = "ccm:replicationmodified";
   public static CCM_PROP_EDUCATIONALTYPICALAGERANGE = "ccm:educationaltypicalagerange";
   public static CCM_PROP_COLLECTION_PINNED_STATUS = "ccm:collection_pinned_status";
   public static CCM_PROP_COLLECTION_PINNED_ORDER = "ccm:collection_pinned_order";
@@ -94,6 +96,8 @@ export class RestConstants {
   public static CCM_PROP_IO_ORIGINAL = "ccm:original";
   public static CCM_PROP_AUTHORITY_GROUPTYPE="ccm:groupType";
   public static CCM_PROP_PUBLISHED_HANDLE_ID="ccm:published_handle_id";
+  public static CCM_PROP_TOOL_INSTANCE_KEY="ccm:tool_instance_key";
+  public static CCM_PROP_TOOL_INSTANCE_SECRET="ccm:tool_instance_secret";
 
   public static LINKTYPE_USER_GENERATED="USER_GENERATED";
   public static CM_PROP_AUTHORITY_AUTHORITYNAME = "cm:authorityName";
@@ -122,7 +126,9 @@ export class RestConstants {
                             RestConstants.CM_MODIFIED_DATE,
                             RestConstants.CM_PROP_C_CREATED,
                             RestConstants.CCM_PROP_EAF_PRODUCTIONYEAR,
-                            RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL];
+                            RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL,
+                            RestConstants.CCM_PROP_REPLICATIONMODIFIED
+    ];
 
 
   public static STATUS_CODE_OK = "OK";
@@ -164,6 +170,9 @@ export class RestConstants {
   public static LUCENE_SCORE = "score";
 
   public static COMMENT_MAIN_FILE_UPLOAD="MAIN_FILE_UPLOAD";
+  public static COMMENT_METADATA_UPDATE="METADATA_UPDATE";
+  public static COMMENT_CONTENT_UPDATE="CONTENT_UPDATE";
+  public static COMMENT_LICENSE_UPDATE="LICENSE_UPDATE";
   public static COMMENT_EDITOR_UPLOAD="EDITOR_UPLOAD";
   public static COMMENT_NODE_PUBLISHED="NODE_PUBLISHED";
   public static ACCESS_ADD_CHILDREN="AddChildren";
@@ -257,7 +266,8 @@ export class RestConstants {
   public static CCM_PROP_SAVED_SEARCH_PARAMETERS="ccm:saved_search_parameters";
   public static GROUP_TYPE_ADMINISTRATORS="ORG_ADMINISTRATORS";
   public static GROUP_TYPE_EDITORIAL="EDITORIAL";
-  public static VALID_GROUP_TYPES = ["",RestConstants.GROUP_TYPE_ADMINISTRATORS,RestConstants.GROUP_TYPE_EDITORIAL];
+  public static VALID_GROUP_TYPES = [null,RestConstants.GROUP_TYPE_ADMINISTRATORS,RestConstants.GROUP_TYPE_EDITORIAL];
+  public static VALID_GROUP_TYPES_ORG = [null,RestConstants.GROUP_TYPE_EDITORIAL];
   public static COLLECTIONTYPE_DEFAULT = "default";
   public static COLLECTIONTYPE_EDITORIAL = "EDITORIAL";
   public static COLLECTIONTYPE_CURRICULUM = "CURRICULUM";

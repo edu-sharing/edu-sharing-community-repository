@@ -980,6 +980,10 @@ $orderAnimationTime:$transitionNormal*5;
     padding-top: 0 !important;
   }
 
+  .cardList .row_2{
+    margin-bottom: 10px;
+  }
+  /*
   .cardList .row .column.node_ccm_replicationsource {
     position: absolute;
     top: 80px;
@@ -992,6 +996,7 @@ $orderAnimationTime:$transitionNormal*5;
     left: 179px;
     text-align: left;
   }
+  */
 
   .cardList .row_2,
   .cardList .row_3,
@@ -1002,6 +1007,6 @@ $orderAnimationTime:$transitionNormal*5;
   .cardList .row_8,
   .cardList .row_9,
   .cardList .row_10{
-    width:auto;
+    width: calc(100% - 180px);
   }
 }

@@ -130,15 +130,15 @@ table, div {
 }
 
 .collection-new-preview-subline {
-    font-size: 120%;
-    margin-bottom: 16px;
-    opacity: 0.85;
+  font-size: 120%;
+  opacity: 0.85;
 }
 
 .collection-new-preview-infoline {
-    margin-left: -2px;
-    opacity: 0.85;
-    margin-bottom: 4px;
+  opacity: 0.85;
+  margin-top: 16px;
+  margin-left: -2px;
+  margin-bottom: 4px;
 }
 
 .collection-nocontent-container {
@@ -272,6 +272,10 @@ table, div {
   .collections-pin-button custom-icon g{
     fill: #6b6b6b;
   }
+  footer{
+    float:left;
+    width:100%;
+  }
 }
 
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
@@ -305,7 +309,8 @@ table, div {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
     /*line-height: 1em;*/
-    max-height: 1.5em;
+    //max-height: 1.5em;
+    text-align: center;
     overflow: hidden;
   }
   .card-image-icon-container{
@@ -338,7 +343,8 @@ table, div {
     }
 
     .collections-header-texttop {
-        text-align: center;
+        display: flex;
+        justify-content: center;
     }
 
     .table-tab-middle {

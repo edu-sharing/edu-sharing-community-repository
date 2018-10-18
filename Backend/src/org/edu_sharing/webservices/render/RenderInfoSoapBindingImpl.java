@@ -8,6 +8,7 @@
 package org.edu_sharing.webservices.render;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,7 +171,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		//HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.ALL_AUTHORITIES, new String[]{PermissionService.READ});
 		HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.GUEST_AUTHORITY, new String[]{PermissionService.READ});
 		rir.setGuestReadAllowed(new Boolean(permsGuest.get(PermissionService.READ)));
-		
+
 		HashMap versionProps = null;
 		boolean collectionRefOriginalDeleted = false;
 		
@@ -212,8 +213,8 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}else{
 			rir.setContentHash(client.getContentHash(nodeId,CCConstants.CM_PROP_CONTENT));
 		}
-		
-		
+
+
 		String locale = getHeaderValue("locale", MessageContext.getCurrentContext());
 
 		locale = (locale != null) ? locale : "en_EN";
@@ -226,6 +227,9 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		//properties without clientinfo cause of admin etc. ticket 
 		NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
 		Map<String,Object> props = (versionProps == null) ? client.getPropertiesCached(nodeRef, true, true, false) : versionProps;//client.getProperties(nodeId);
+		// fix axis bug that emoji crash: https://issues.apache.org/jira/browse/AXIS-2908
+		props=removeUTF16Chars(props);
+
 		String nodeType = (String)props.get(CCConstants.NODETYPE);
 		boolean isRemoteObject = CCConstants.CCM_TYPE_REMOTEOBJECT.equals(nodeType);
 		ApplicationInfo appInfo=ApplicationInfoList.getHomeRepository();
@@ -236,7 +240,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			HashMap<String, Object> propsNew = NodeServiceFactory.getNodeService(appInfo.getAppId()).getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), remoteId);
 			props.putAll(propsNew);
 		}
-		
+
 		if(collectionRefOriginalDeleted){
 			props.put(CCConstants.VIRT_PROP_ORIGINAL_DELETED, "true");
 		}
@@ -271,7 +275,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 				propsresult.add(new KeyValue(entry.getKey(),entry.getValue().toString()));
 			}
 		}
-		rir.setProperties(propsresult.toArray(new KeyValue[propsresult.size()]));	
+		rir.setProperties(propsresult.toArray(new KeyValue[propsresult.size()]));
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
 		
 		
@@ -281,8 +285,11 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		 * maybe check mediacenter groupmembership when readContent vs readMetadata is important
 		 */
 		
-		//set default
-		rir.setHasContentLicense(true);
+		//Has the user alf permissions on the node? -> check if he also has read_all permissions
+		if(client.hasPermissions(nodeId, userName, new String[] {CCConstants.PERMISSION_READ}))
+			rir.setHasContentLicense(client.hasPermissions(nodeId, userName, new String[] {CCConstants.PERMISSION_READ_ALL}));
+		else // otherwise, we currently assume the material is embedded in a course (usage), so do allow read access
+			rir.setHasContentLicense(true);
 		String cost = (String)props.get(CCConstants.CCM_PROP_IO_CUSTOM_LICENSE_KEY);
 		if(cost != null && (cost.contains("license_rp") || cost.contains("license_none"))) {
 			
@@ -291,7 +298,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 				permissionsNodeId = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
 							
 			}
-			if(!client.hasPermissions(permissionsNodeId, userName, new String[] {CCConstants.PERMISSION_CONSUMER})) {
+			if(!client.hasPermissions(permissionsNodeId, userName, new String[] {CCConstants.PERMISSION_READ_ALL})) {
 				rir.setHasContentLicense(false);
 			}	
 			
@@ -325,7 +332,30 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 
 		return rir;
 	}
+	private static HashMap<String, Object> removeUTF16Chars(Map<String, Object> props){
+		HashMap<String, Object> propsClean = new HashMap(props);
+		for(Map.Entry<String, Object> set : propsClean.entrySet()){
+			if(set.getValue() instanceof String){
+				String s= (String) set.getValue();
+				/*
+				// also matches "-"
+				s = s.replaceAll( "([\\ud800-\\udbff\\udc00-\\udfff])", "");
+				propsClean.put(set.getKey(),s);
+				*/
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < s.length(); i++) {
+					if (i<s.length()-1 && Character.isSurrogatePair(s.charAt(i), s.charAt(i + 1))) {
+						i++;
+						continue;
+					}
+					sb.append(s.charAt(i));
+				}
+				propsClean.put(set.getKey(),sb.toString());
 
+			}
+		}
+		return propsClean;
+	}
 	private void addMetadataTemplate(RenderInfoResult rir,String locale,String type, Map<String, Object> props,ApplicationInfo appInfo) throws Exception {
 		String mdsId = (String)props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		if(mdsId==null)

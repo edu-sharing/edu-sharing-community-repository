@@ -174,12 +174,10 @@ a.active{
   width:100%;
   display:flex;
   background: #eee;
-  width: 100%;
-  border-radius: 15px;
+  border-radius: 25px;
   padding-left: 15px;
   padding-right: 5px;
   margin-bottom: 6px;
-  height: 35px;
   align-items: center;
   workspace-share-permission{
     width: 100%;
@@ -219,11 +217,10 @@ a.active{
 .inheritEmpty{
   font-size:90%;
   color:$textLight;
-  padding-left:10px;
+  padding:20px 10px;
   font-style: italic;
   width: 100%;
   text-align: center;
-  float: left;
   white-space: pre-wrap;
 }
 img.inherit{

@@ -22,26 +22,33 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermissions, String mailText, Boolean sendMail,
-			Boolean sendCopy, Boolean createHandle) throws Throwable {
-	}
-
-	@Override
 	public List<Notify> getNotifyList(String nodeId) throws Throwable {
 		return null;
 	}
 
 	@Override
-	public void setPermissions(String nodeId, ACE[] aces, Boolean inheritPermission) throws Exception {
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermissions, String mailText, Boolean sendMail, Boolean sendCopy, Boolean createHandle) throws Throwable {
+
 	}
 
 	@Override
-	public void setPermissions(String nodeId, ACE[] aces) throws Exception {	
+	public void setPermissions(String nodeId, List<ACE> aces, Boolean inheritPermission) throws Exception {
+
+	}
+
+	@Override
+	public void setPermissions(String nodeId, List<ACE> aces) throws Exception {
+
 	}
 
 	@Override
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission)
 			throws Exception {
+	}
+
+	@Override
+	public void setPermissionInherit(String nodeId, boolean inheritPermission) throws Exception {
+
 	}
 
 	@Override
@@ -76,7 +83,12 @@ public class PermissionServiceAdapter implements PermissionService {
 	@Override
 	public void createNotifyObject(String nodeId, String user, String event, String action) {
 	}
-	
+
+	@Override
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission) {
+		return 	ALLOWED_PERMISSIONS.contains(permission);
+	}
+
 	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {

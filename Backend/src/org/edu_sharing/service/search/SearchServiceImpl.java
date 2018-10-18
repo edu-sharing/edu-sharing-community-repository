@@ -234,6 +234,7 @@ public class SearchServiceImpl implements SearchService {
 			throws Exception {
 		try {
 			Set<String> memberships = serviceRegistry.getAuthorityService().getAuthorities();
+			boolean isSystemUser = AuthenticationUtil.isRunAsUserTheSystemUser();
 			return AuthenticationUtil.runAsSystem(new RunAsWork<SearchResult<EduGroup>>() {
 
 				@Override
@@ -249,9 +250,12 @@ public class SearchServiceImpl implements SearchService {
 						parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
 						if (sort != null)
 							sort.applyToSearchParameters(parameters);
+						String param = QueryParser.escape(pattern == null ? "" : pattern);
 						parameters
-								.setQuery("@cm\\:authorityName:\"*" + QueryParser.escape(pattern == null ? "" : pattern)
-										+ "*\"" + " AND @ccm\\:edu_homedir:\"workspace://*\"");
+								.setQuery(
+										"(@cm\\:authorityName:\"*" + param + "*\"" + 
+										" OR @cm\\:authorityDisplayName:\"*" + param + "*\"" + 
+										") AND @ccm\\:edu_homedir:\"workspace://*\"");
 						ResultSet edugroups = searchService.query(parameters);
 
 						for (ResultSetRow row : edugroups) {
@@ -274,7 +278,7 @@ public class SearchServiceImpl implements SearchService {
 								boolean add = false;
 								for (String group : memberships) {
 									if (group.equals(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS)
-											|| AuthenticationUtil.isRunAsUserTheSystemUser()
+											|| isSystemUser
 											|| group.equals(eduGroup.getGroupname())) {
 										add = true;
 										break;
@@ -674,7 +678,7 @@ public class SearchServiceImpl implements SearchService {
 			searchParameters.setMaxItems(searchToken.getMaxResult());
 			if (searchToken.getSortDefinition() != null)
 				searchToken.getSortDefinition().applyToSearchParameters(searchParameters);
-			if (searchToken.getContentType().equals(ContentType.FILES) || searchToken.getContentType().equals(ContentType.FILES_AND_FOLDERS)) {
+			if (searchToken.getContentType().equals(ContentType.FILES)) {
 				((ESSearchParameters) searchParameters).setGroupBy("text@sd___@" + CCConstants.CCM_PROP_IO_ORIGINAL);
 				// group.truncate = If true, facet counts are based on the most
 				// relevant document of each group matching the query. The
@@ -807,6 +811,10 @@ public class SearchServiceImpl implements SearchService {
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);
 		
 
+		if(findUsersQuery == null || findGroupsQuery == null) {
+			return new SearchResult<String>(new ArrayList<String>(), 0, 0);
+		}
+		
 		/**
 		 * don't find groups of scopes when no scope is provided
 		 */
@@ -816,7 +824,8 @@ public class SearchServiceImpl implements SearchService {
 			 * groups arent initialized with eduscope aspect and eduscopename
 			 * null
 			 */
-			findGroupsQuery.append(" AND NOT @ccm\\:eduscopename:\"*\"");
+			findGroupsQuery.append(" AND NOT @ccm\\:eduscopename:\"*\"");	
+			
 		}
 
 		String finalQuery;

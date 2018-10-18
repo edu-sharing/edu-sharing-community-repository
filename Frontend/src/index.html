@@ -1,18 +1,38 @@
 <!doctype html>
 <html lang="de" xml:lang="de" xmlns="http://www.w3.org/1999/xhtml">
 <head>
+  <base href="/">
   <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png"/>
   <meta name="theme-color" content="#48708e">
   <meta charset="utf-8">
   <title>edu-sharing</title>
-  <base href="/">
+  <meta http-equiv="Content-Security-Policy" content="default-src *;img-src * data: blob:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'" />
 
-  <meta name="viewport" content="width=device-width, height=500, initial-scale=1, user-scalable=no">
-
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
   <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 </head>
 <body>
-  <router></router>
-  <script type="text/javascript" src="cordova.js"></script>
+  <router>
+    <style>
+      html,body{
+          height:100%;
+          margin: 0;
+          padding: 0;
+      }
+      .ng-loading{
+        width:100%;
+        height:100%;
+        background-color: #444;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .ng-loading img{
+        width:80%;
+        max-width: 300px;
+      }
+    </style>
+    <div class="ng-loading"><img src="assets/images/edu-sharing-loading.svg"></div>
+  </router>
 </body>
 </html>

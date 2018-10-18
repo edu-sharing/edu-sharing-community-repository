@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -22,6 +23,7 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -76,7 +78,7 @@ public class DownloadServlet extends HttpServlet{
 		String[] nodeIdsSplit=nodeIds.split(",");
 		
 		try{
-			String errors="";
+			List<String> errors=new ArrayList<>();
 			for(String nodeId : nodeIdsSplit){
 				try{
 					NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
@@ -87,42 +89,56 @@ public class DownloadServlet extends HttpServlet{
 					if(serviceRegistry.getNodeService().hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 						String refNodeId = (String)serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
 						nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, refNodeId);
-						isCollectionRef = true;
+
+						// Simply try to fetch content (to check if READ_CONTENT is present)
+                        ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
+
+                        isCollectionRef = true;
 					}
-					String filename = (String)serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CM_NAME));
-					String wwwurl = (String)serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
-					if(wwwurl!=null){
-						errors += filename+": Is a link and can not be downloaded\r\n";
-						continue;
-					}
-					ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
-					if(reader==null){
-						errors += filename+": Has no content\r\n";
-						continue;
-					}
-					InputStream is = reader.getContentInputStream();
-					resp.setContentType("application/zip");
-			
-					DataInputStream in = new DataInputStream(is);
-					
-					ZipEntry entry = new ZipEntry(filename);
-					zos.putNextEntry(entry);
-					byte[] buffer=new byte[1024];
-					while(true){
-						int l=in.read(buffer);
-						if(l<=0)
-							break;
-						zos.write(buffer,0,l);
-					}
-					in.close();
+					NodeRef finalNodeRef = nodeRef;
+					AuthenticationUtil.RunAsWork work= () ->{
+						String filename = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CM_NAME));
+						String wwwurl = (String)serviceRegistry.getNodeService().getProperty(finalNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
+						if(wwwurl!=null){
+							errors.add( filename+": Is a link and can not be downloaded" );
+							return null;
+						}
+						ContentReader reader = serviceRegistry.getContentService().getReader(finalNodeRef, ContentModel.PROP_CONTENT);
+						if(reader==null){
+							errors.add( filename+": Has no content" );
+							return null;
+						}
+						InputStream is = reader.getContentInputStream();
+						resp.setContentType("application/zip");
+
+						DataInputStream in = new DataInputStream(is);
+
+						ZipEntry entry = new ZipEntry(filename);
+						zos.putNextEntry(entry);
+						byte[] buffer=new byte[1024];
+						while(true){
+							int l=in.read(buffer);
+							if(l<=0)
+								break;
+							zos.write(buffer,0,l);
+						}
+						in.close();
+						return null;
+					};
+					if(isCollectionRef)
+						AuthenticationUtil.runAsSystem(work);
+					else
+						work.doWork();
+
 				}catch(Throwable t){
+					t.printStackTrace();
 					resp.sendError(HttpServletResponse.SC_PRECONDITION_FAILED,"Node does not exists or no permissions: "+nodeId);
 				}
 			}
-			if(errors.length()>0){
+			if(errors.size()>0){
 				ZipEntry entry = new ZipEntry("Info.txt");
 				zos.putNextEntry(entry);
-				zos.write(errors.getBytes());
+				zos.write(StringUtils.join(errors,"\r\n").getBytes());
 			}
 			zos.close();
 			

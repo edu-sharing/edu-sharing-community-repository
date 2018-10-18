@@ -172,7 +172,7 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		if(currentTicket != null){
 			try{
 				authenticationService.validate(currentTicket);
-				result = new HashMap<String,String>();
+				result = new HashMap<>();
 				result.put(CCConstants.AUTH_USERNAME, authenticationService.getCurrentUserName());
 				result.put(CCConstants.AUTH_TICKET, currentTicket);
 			}catch(AuthenticationException e){
@@ -189,9 +189,11 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 				return false;
 			}
 			authenticationService.validate(ticket);
+
+			log.info("User logged in: "+authenticationService.getCurrentUserName()+", ticket: "+ticket);
 			return true;
 		}catch(AuthenticationException e){
-			log.info(e.getMessage());
+			log.info(e.getMessage()+", ticket: "+ticket);
 		}
 		return false;
 	}
@@ -208,6 +210,13 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		//validate a second time cause super.storeAuthInfoInSession makes a logout when another tickets is in session
 		//i.e jession with ticket + basic auth in ApiAuthenticationFilter
 		authenticationService.validate(ticket);
+		
+		try {
+			HashMap<String, String> userInfo = getUserInfo(authenticationService.getCurrentUserName(), ticket);
+			session.setAttribute(CCConstants.AUTH_USERNAME_CAPTION, userInfo.get(CCConstants.AUTH_USERNAME_CAPTION));
+		}catch(Exception e) {
+			
+		}
 		
 		String locale = (String)session.getAttribute(CCConstants.AUTH_LOCALE);
 		if(locale == null){

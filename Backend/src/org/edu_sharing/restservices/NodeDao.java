@@ -18,6 +18,7 @@ import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
@@ -856,7 +857,7 @@ public class NodeDao {
 			org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(repoDao.getId());
 			permissionService.setPermissions(
 					nodeId, 
-					aces.toArray(new org.edu_sharing.repository.client.rpc.ACE[aces.size()]), 
+					aces,
 					permissions.isInherited(), 
 					mailText, sendMail, sendCopy,createHandle);
 			
@@ -1156,10 +1157,15 @@ public class NodeDao {
 					history.getEditor().setAuthorityName(json.getString("editor"));
 				}
 				JSONArray arr = json.getJSONArray("receiver");
-				UserSimple[] list = new UserSimple[arr.length()];
+				Authority[] list = new Authority[arr.length()];
 				for(int i = 0; i < arr.length(); i++){
 					try{
-						list[i]=new PersonDao(repoDao,arr.getString(i)).asPersonSimple();
+						String authority = arr.getString(i);
+						if(authority.startsWith(PermissionService.GROUP_PREFIX)) {
+							list[i]=new GroupDao(repoDao, authority).asGroup();
+						}else {
+							list[i]=new PersonDao(repoDao,authority).asPersonSimple();
+						}			
 					}catch(Throwable t){
 						// The user may has no permission or entry deleted
 						list[i] = new UserSimple();

@@ -1,18 +1,22 @@
 package org.edu_sharing.alfresco.service;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 
@@ -34,14 +38,14 @@ public class OrganisationService {
 	public static final String CCM_PROP_EDUGROUP_EDU_UNIQUENAME = "{http://www.campuscontent.de/model/1.0}edu_uniquename";
 	public static final QName QNAME_EDUGROUP = QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP);
 
-	
 	public String createOrganization(String orgName, String groupDisplayName) throws Exception {
-		return createOrganization(orgName, groupDisplayName, null);
+		return createOrganization(orgName, groupDisplayName, null, null);
 	}
-	
-	public String createOrganization(String orgName, String groupDisplayName, String metadataset) throws Exception {
-		
-		String groupName = eduAuthorityService.createOrUpdateGroup(AuthorityService.ORG_GROUP_PREFIX + orgName, groupDisplayName, null, true);
+
+	public String createOrganization(String orgName, String groupDisplayName,String metadataset, String scope) throws Exception {
+		orgName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
+        groupDisplayName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
+        String groupName = eduAuthorityService.createOrUpdateGroup(AuthorityService.ORG_GROUP_PREFIX + orgName, groupDisplayName, null, true);
 		
 		String authorityAdmins = eduAuthorityService.createOrUpdateGroup(AuthorityService.ADMINISTRATORS_GROUP, groupDisplayName + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, groupName, true);
 
@@ -69,6 +73,15 @@ public class OrganisationService {
 
 		permissionService.setPermission(orgFolder, PermissionService.GROUP_PREFIX + groupName, PermissionService.CONSUMER, true);
 		permissionService.setPermission(orgFolder, PermissionService.GROUP_PREFIX + authorityAdmins, PermissionService.COORDINATOR, true);
+
+		if(scope!=null && !scope.isEmpty()){
+			nodeService.setProperty(authorityService.getAuthorityNodeRef(PermissionService.GROUP_PREFIX + groupName), QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME),
+					CCConstants.CCM_VALUE_SCOPE_SAFE);
+			nodeService.setProperty(authorityService.getAuthorityNodeRef(PermissionService.GROUP_PREFIX + authorityAdmins), QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME),
+					CCConstants.CCM_VALUE_SCOPE_SAFE);
+			nodeService.setProperty(orgFolder, QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME),
+					CCConstants.CCM_VALUE_SCOPE_SAFE);
+		}
 
 		return groupName;
 	}
@@ -141,6 +154,40 @@ public class OrganisationService {
 				return child.getChildRef();
 		}
 		return null;
+	}
+	
+	public List<String> getMyOrganisations(boolean scoped){
+		Set<String> authorities = authorityService.getContainingAuthorities(AuthorityType.GROUP, AuthenticationUtil.getFullyAuthenticatedUser(), true);
+		List<String> organisations = new ArrayList<String>();
+		for (String authority : authorities) {
+			NodeRef nodeRefAuthority = authorityService.getAuthorityNodeRef(authority);
+			if (nodeService.hasAspect(nodeRefAuthority, QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP))) {
+				
+				String eduGroupScope = (String)nodeService.getProperty(nodeRefAuthority, QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME));
+				
+				boolean add = false;
+				if(authorities.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS) 
+						|| authorities.contains(authority)) {
+					add = true;
+				}
+				
+				if(scoped) {
+					String currentScope = NodeServiceInterceptor.getEduSharingScope();
+					if(eduGroupScope == null && currentScope != null) {
+						add=false;
+					}
+					if(eduGroupScope != null && !eduGroupScope.equals(currentScope)) {
+						add=false;
+					}
+						
+				}
+				
+				if (add) {
+					organisations.add(authority);
+				}
+			}	
+		}
+		return organisations;
 	}
 
 	public void setEduAuthorityService(AuthorityService eduAuthorityService) {

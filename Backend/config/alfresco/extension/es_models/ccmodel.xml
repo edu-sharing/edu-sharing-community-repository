@@ -354,17 +354,10 @@
        		<title>Tool Permission</title>
          	<parent>ccm:io</parent>
        </type>
-       
-       <type name="ccm:tool_instance">
+		<type name="ccm:tool_instance">
        		<title>Tool Instance</title>
        		<parent>cm:cmobject</parent>
          	<properties>
-         		<property name="ccm:tool_instance_key">
-         			<type>d:text</type>	
-         		</property>
-         		<property name="ccm:tool_instance_secret">
-         			<type>d:text</type>	
-         		</property>
          		<property name="ccm:tool_instance_params">
          			<type>d:text</type>	
          		</property>
@@ -387,11 +380,26 @@
          			<type>d:text</type>	
          		</property>
          	</properties>
+         	<mandatory-aspects>
+    			<aspect>ccm:eduscope</aspect>
+   			</mandatory-aspects>
        </type>
 	</types>
 
 
 	<aspects>
+
+		<aspect name="ccm:tool_instance_link">
+			<title>Tool Instance Link</title>
+			<properties>
+				<property name="ccm:tool_instance_key">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:tool_instance_secret">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
 
 		<aspect name="ccm:ressourceinfo">
 			<title>Aspect for additional resource Information like scorm, qti
@@ -469,6 +477,10 @@
 
 				<property name="ccm:topic">
 					<type>d:text</type>
+				</property>
+				<property name="ccm:topics">
+					<type>d:text</type>
+					<multiple>true</multiple>
 				</property>
 				<property name="ccm:license">
 					<type>d:text</type>
@@ -550,7 +562,7 @@
 				<property name="ccm:replicationmodified">
 					<type>d:date</type>
 				</property>
-				
+
 				<!-- for elixier objects thumbnail url -->
 				<property name="ccm:thumbnailurl">
 					<type>d:text</type>
@@ -719,6 +731,15 @@
 	                  <stored>false</stored>
 	                  <tokenised>false</tokenised>
 	               </index>
+				</property>
+				<!-- title of the sub source element -->
+				<property name="ccm:subsource_id">
+					<type>d:text</type>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
 				</property>
 			</properties>
 		</aspect>
@@ -1177,6 +1198,22 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
+				<!-- free accessible content -->
+				<property name="ccm:public_access">
+					<type>d:boolean</type>
+					<multiple>false</multiple>
+				</property>
+				<!-- Lerneinheit-ID -->
+				<property name="ccm:learnunit_id">
+					<type>d:text</type>
+					<multiple>false</multiple>
+				</property>
+				<!-- checklist for editorial content status -->
+				<property name="ccm:editorial_checklist">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+
 
 			</properties>
 		</aspect>
@@ -1608,6 +1645,6 @@
 	    		</property>
 	    	</properties>
 	    </aspect>
-	    
+
 	</aspects>
 </model>

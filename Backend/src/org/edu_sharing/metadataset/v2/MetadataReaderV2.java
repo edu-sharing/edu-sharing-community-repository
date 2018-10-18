@@ -40,58 +40,61 @@ public class MetadataReaderV2 {
 	}
 	
 	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet,String locale) throws Exception{
-		MetadataReaderV2 reader;
-		MetadataSetV2 mds;
-		String mdsNameDefault="mds";
-		if(appId.getMetadatsetsV2()!=null){
-			mdsNameDefault=appId.getMetadatsetsV2()[0];
-			if(mdsNameDefault.toLowerCase().endsWith(".xml"))
-				mdsNameDefault=mdsNameDefault.substring(0,mdsNameDefault.length()-4);
-		}
-		String mdsName=mdsNameDefault;
-		if(!mdsSet.equals("-default-") && !mdsSet.equals(CCConstants.metadatasetdefault_id)){
-			if(appId.getMetadatsetsV2()!=null && Arrays.asList(appId.getMetadatsetsV2()).contains(mdsSet)){
-				mdsName=mdsSet;
-				if(mdsName.toLowerCase().endsWith(".xml"))
-					mdsName=mdsName.substring(0,mdsName.length()-4);
-			}
-			else{
-				throw new IllegalArgumentException("Invalid mds set "+mdsSet+", was not found in the list of mds sets of appid "+appId.getAppId());
-			}
-		}
-		String id=appId.getAppId()+"_"+mdsName+"_"+locale;
-		if(mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
-			return mdsCache.get(id);
-		reader=new MetadataReaderV2(mdsNameDefault+".xml",locale);
-		mds=reader.getMetadatasetForFile(mdsNameDefault);
-		mds.setRepositoryId(appId.getAppId());
-		if(mds.getInherit()!=null && !mds.getInherit().isEmpty()) {
-			String inheritName=mds.getInherit()+".xml";
-			reader=new MetadataReaderV2(inheritName,locale);
-			MetadataSetV2 mdsInherit = reader.getMetadatasetForFile(inheritName);
-			try{
-				reader=new MetadataReaderV2(mds.getInherit()+"_override.xml",locale);
-				MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(inheritName);
-				mdsInherit.overrideWith(mdsOverride);
-			}catch(IOException e){
-			}
-			mdsInherit.overrideWith(mds);
-			mds=mdsInherit;
-		}
-		if(!mdsName.equals(mdsNameDefault)){
-			reader=new MetadataReaderV2(mdsName+".xml",locale);
-			MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
-			mds.overrideWith(mdsOverride);
-		}
-		try{
-			reader=new MetadataReaderV2(mdsName+"_override.xml",locale);
-			MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
-			mds.overrideWith(mdsOverride);
-		}
-		catch(IOException e){
-		}
-		mdsCache.put(id, mds);
-		return mds;
+        MetadataReaderV2 reader;
+        MetadataSetV2 mds;
+        String mdsNameDefault = "mds";
+        if (appId.getMetadatsetsV2() != null) {
+            mdsNameDefault = appId.getMetadatsetsV2()[0];
+            if (mdsNameDefault.toLowerCase().endsWith(".xml"))
+                mdsNameDefault = mdsNameDefault.substring(0, mdsNameDefault.length() - 4);
+        }
+        String mdsName = mdsNameDefault;
+        if (!mdsSet.equals("-default-") && !mdsSet.equals(CCConstants.metadatasetdefault_id)) {
+            if (appId.getMetadatsetsV2() != null && Arrays.asList(appId.getMetadatsetsV2()).contains(mdsSet)) {
+                mdsName = mdsSet;
+                if (mdsName.toLowerCase().endsWith(".xml"))
+                    mdsName = mdsName.substring(0, mdsName.length() - 4);
+            } else {
+                throw new IllegalArgumentException("Invalid mds set " + mdsSet + ", was not found in the list of mds sets of appid " + appId.getAppId());
+            }
+        }
+	    try {
+            String id = appId.getAppId() + "_" + mdsName + "_" + locale;
+            if (mdsCache.containsKey(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
+                return mdsCache.get(id);
+            reader = new MetadataReaderV2(mdsNameDefault + ".xml", locale);
+            mds = reader.getMetadatasetForFile(mdsNameDefault);
+            mds.setRepositoryId(appId.getAppId());
+            if (mds.getInherit() != null && !mds.getInherit().isEmpty()) {
+                String inheritName = mds.getInherit() + ".xml";
+                reader = new MetadataReaderV2(inheritName, locale);
+                MetadataSetV2 mdsInherit = reader.getMetadatasetForFile(inheritName);
+                try {
+                    reader = new MetadataReaderV2(mds.getInherit() + "_override.xml", locale);
+                    MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(inheritName);
+                    mdsInherit.overrideWith(mdsOverride);
+                } catch (IOException e) {
+                }
+                mdsInherit.overrideWith(mds);
+                mds = mdsInherit;
+            }
+            if (!mdsName.equals(mdsNameDefault)) {
+                reader = new MetadataReaderV2(mdsName + ".xml", locale);
+                MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
+                mds.overrideWith(mdsOverride);
+            }
+            try {
+                reader = new MetadataReaderV2(mdsName + "_override.xml", locale);
+                MetadataSetV2 mdsOverride = reader.getMetadatasetForFile(mdsName);
+                mds.overrideWith(mdsOverride);
+            } catch (IOException e) {
+            	logger.info(e.getMessage(), e);
+            }
+            mdsCache.put(id, mds);
+            return mds;
+        }catch(Throwable t){
+	        throw new RuntimeException("Unexpected error while parsing metadataset "+mdsSet+", isDefault "+(mdsName.equals(mdsNameDefault)),t);
+        }
 	}
 	
 	private MetadataQueries getQueries() throws Exception {
@@ -302,6 +305,8 @@ public class MetadataReaderV2 {
 					widget.setDefaultvalue(value); 
 				if(name.equals("format"))
 					widget.setFormat(value);
+				if(name.equals("link"))
+					widget.setLink(value);
 				if(name.equals("type"))
 					widget.setType(value);
 				if(name.equals("condition")) {
@@ -337,6 +342,9 @@ public class MetadataReaderV2 {
 				if(name.equals("valuespace_i18n_prefix")){
 					valuespaceI18nPrefix=value;
 				}
+				if(name.equals("valuespace_sort")){
+					widget.setValuespaceSort(value);
+				}
 				if(name.equals("valuespaceClient")){
 					widget.setValuespaceClient(value.equalsIgnoreCase("true"));				
 				}
@@ -360,7 +368,7 @@ public class MetadataReaderV2 {
 				String name=data.getNodeName();
 				String value=data.getTextContent();
 				if(name.equals("valuespace"))
-					widget.setValues(getValuespace(value,widget.getId(),valuespaceI18n,valuespaceI18nPrefix));
+					widget.setValues(getValuespace(value,widget,valuespaceI18n,valuespaceI18nPrefix));
 				if(name.equals("values"))
 					widget.setValues(getValues(data.getChildNodes(),valuespaceI18n,valuespaceI18nPrefix));
 				if(name.equals("subwidgets"))
@@ -371,14 +379,24 @@ public class MetadataReaderV2 {
 		return widgets;
 	}
 	
-	private List<MetadataKey> getValuespace(String value,String id, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
+	private List<MetadataKey> getValuespace(String value,MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
 		Document docValuespace = builder.parse(getFile(value,Filetype.VALUESPACE));
 		List<MetadataKey> keys=new ArrayList<>();
-		NodeList keysNode=(NodeList)xpath.evaluate("/valuespaces/valuespace[@property='"+id+"']/key",docValuespace, XPathConstants.NODESET);
+		NodeList keysNode=(NodeList)xpath.evaluate("/valuespaces/valuespace[@property='"+widget.getId()+"']/key",docValuespace, XPathConstants.NODESET);
 		if(keysNode.getLength()==0){
-			throw new Exception("No valuespace found in file "+value+": Searching for a node named /valuespaces/valuespace[@property='"+id+"']");
+			throw new Exception("No valuespace found in file "+value+": Searching for a node named /valuespaces/valuespace[@property='"+widget.getId()+"']");
 		}
-		return getValues(keysNode,valuespaceI18n,valuespaceI18nPrefix);
+		List<MetadataKey> list=getValues(keysNode,valuespaceI18n,valuespaceI18nPrefix);
+		if(!"default".equals(widget.getValuespaceSort())){
+			Collections.sort(list, (o1, o2) -> {
+				if("caption".equals(widget.getValuespaceSort())){
+					return o1.getCaption().compareTo(o2.getCaption());
+				}
+				logger.warn("Invalid value for valuespaceSort '"+widget.getValuespaceSort()+"' for widget '"+widget.getId()+"'");
+				return 0;
+			});
+		}
+		return list;
 	}
 	
 	private List<MetadataKey> getValues(NodeList keysNode, String valuespaceI18n, String valuespaceI18nPrefix) throws IOException {
@@ -567,7 +585,7 @@ public class MetadataReaderV2 {
 		return bundle;
 	}
 
-	private static String getTranslation(String i18n,String key,String fallback,String locale){
+	public static String getTranslation(String i18n, String key, String fallback, String locale){
 		String defaultValue=key;
 		if(fallback!=null)
 			defaultValue=fallback;

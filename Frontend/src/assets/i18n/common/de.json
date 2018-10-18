@@ -172,6 +172,15 @@
     "COPYRIGHT_FREE":"Copyright, freier Zugang",
     "COPYRIGHT_LICENSE":"Copyright, lizenzpflichtig",
     "SCHULFUNK":"Schulfunk (§47 UrhG)",
+    "UNTERRICHTS_UND_LEHRMEDIEN":"§60b Unterrichts- und Lehrmedien",
+    "CC_0":"CC-0",
+    "PDM":"PDM",
+    "CC_BY":"CC-BY",
+    "CC_BY_SA":"CC-BY-SA",
+    "CC_BY_NC":"CC-BY-NC",
+    "CC_BY_ND":"CC-BY-ND",
+    "CC_BY_NC_SA":"CC-BY-NC-SA",
+    "CC_BY_NC_ND":"CC-BY-NC-ND",
     "CUSTOM":"Benutzerdefinierte Lizenz"
   },
   "COOKIE_INFO":{
@@ -325,6 +334,7 @@
     "LICENSE_LINK":"Lizenz verwalten",
     "TEMPLATE_LINK":"Metadaten-Vorlage verwalten",
     "CONTRIBUTOR_LINK":"Weitere Beteiligte",
+    "LICENSE_NO_PERMISSIONS_MATERIAL":"Sie besitzen keine Berechtigungen, um dieses Material zu lizenzieren",
     "LICENSE_NO_PERMISSIONS":"Sie besitzen keine Berechtigungen, um Materialien zu lizenzieren",
     "LICENSE_NO_PERMISSIONS_SAFE":"Sie können im gesicherten Bereich die Lizenz des Materials nicht ändern"
   },
@@ -337,7 +347,8 @@
   "LICENSE_AGREEMENT":{
     "TITLE":"Nutzungsbedingungen",
     "CHECKBOX":"Ich habe die oben genannten Bedingungen gelesen und akzeptiere diese",
-    "ACCEPT":"Akzeptieren & Fortfahren"
+    "ACCEPT":"Akzeptieren & Fortfahren",
+    "DECLINE":"Ablehnen"
   },
   "TOAST":{
     "NODE_LOCKED":"Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",

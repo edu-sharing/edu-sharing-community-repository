@@ -1,6 +1,6 @@
 package org.edu_sharing.restservices.node.v1.model;
 
-import org.edu_sharing.restservices.shared.User;
+import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.UserSimple;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,7 +11,7 @@ public class WorkflowHistory {
 	@JsonProperty
 	private UserSimple editor;
 	@JsonProperty
-	private UserSimple[] receiver;
+	private Authority[] receiver;
 	@JsonProperty
 	private String status;
 	@JsonProperty
@@ -29,10 +29,10 @@ public class WorkflowHistory {
 	public void setEditor(UserSimple editor) {
 		this.editor = editor;
 	}
-	public UserSimple[] getReceiver() {
+	public Authority[] getReceiver() {
 		return receiver;
 	}
-	public void setReceiver(UserSimple[] receiver) {
+	public void setReceiver(Authority[] receiver) {
 		this.receiver = receiver;
 	}
 	public String getStatus() {

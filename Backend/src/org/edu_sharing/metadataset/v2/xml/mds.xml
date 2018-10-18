@@ -364,7 +364,7 @@
 				<icon>description</icon>
 				<html><![CDATA[
 			  <preview>
-              <cm:name>
+              <cm:name caption="{{cm_name_map}}" placeholder="{{cm_name_map_placeholder}}">
               <template>
 				]]></html>
 			</template>
@@ -373,10 +373,10 @@
 				<caption></caption>
 				<html><![CDATA[
 				<div style="width:40%;float:left;padding-right:30px;min-height:130px;">
-				  	<preview>
+				  	<preview style="width:100%;">
 		        </div>
 		        <div style="padding-top:40px;width:60%;float:left;font-weight:bold;">
-              		<cm:name caption="{{cm_toolname}}" placeholder="{{cm_toolname_placeholder}}" bottomCaption="" icon="build">
+              		<cclom:title caption="{{cm_toolname}}" placeholder="{{cm_toolname_placeholder}}" bottomCaption="" icon="build">
               	</div>
               	<div style="width:100%;float:left;">
               		<cclom:general_description type="textarea" placeholder="{{lom_prop_tool_description_placeholder}}">
@@ -566,13 +566,14 @@
 			</group>
 		</groups>
 		<queries>
-			<basequery>-TYPE:"ccm:toolpermission" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*"</basequery>
+			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 			
 			<query join="AND"  id="ngsearch">
 				<basequery>ISNULL:@ccm\:tool_category</basequery>
 				<property name="ngsearchword">
 					<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+					<exactMatching>false</exactMatching>
 					<multiple>true</multiple>
 					<multiplejoin>AND</multiplejoin>
 				</property>
@@ -596,6 +597,14 @@
 					<multiplejoin>OR</multiplejoin>
 				</property>
 			</query>
+			<query join="AND" id="archive" applyBasequery="false">
+				<property name="ngsearchword">
+					<statement>@cm\:name:"${value}"</statement>
+				</property>
+				<property name="user">
+					<statement>@sys\:archivedBy:"${value}"</statement>
+				</property>
+			</query>
 			<query join="AND" id="saved_search" applyBasequery="false">
 				<basequery>TYPE:"ccm:saved_search"</basequery>
 				<property name="ngsearchword">
@@ -610,9 +619,15 @@
 					<multiplejoin>AND</multiplejoin>
 				</property>	
 			</query>
+			<query join="AND"  id="tool_instances">
+				<basequery>TYPE:"ccm:tool_instance"</basequery>
+				<property name="url">
+					<statement>@ccm\:tool_instance_provider_url:"*${value}*"</statement>
+				</property>	
+			</query>
 			<query join="AND"  id="workspace">
 		   		<property name="ngsearchword">
-				    <statement>NOT ASPECT:"ccm:collection_io_reference" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
+				    <statement>NOT TYPE:"ccm:notify" AND NOT ASPECT:"ccm:collection_io_reference" AND NOT ASPECT:"ccm:collection" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 				    <multiple>true</multiple>
 				    <multiplejoin>AND</multiplejoin>
 			    </property>

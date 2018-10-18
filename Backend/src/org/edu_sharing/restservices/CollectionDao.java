@@ -129,7 +129,7 @@ public class CollectionDao {
 					NodeRef ref=child.getRef();
 					collRef.setRef(ref);
 										
-					String shortproporiginal = CCConstants.getValidLocalName(CCConstants.CM_ASSOC_ORIGINAL);
+					String shortproporiginal = CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_ORIGINAL);
 					if(!filter.getProperties().contains(shortproporiginal)){
 						filter.getProperties().add(shortproporiginal);
 					}
@@ -141,7 +141,11 @@ public class CollectionDao {
 					String[] prop=props.get(shortproporiginal);
 					final String originalId=prop!=null && prop.length>0 ? prop[0] : null;
 					collRef.setOriginalId(originalId);		
-
+					try{
+						collRef.setAccessOriginal(NodeDao.getNode(repoDao,originalId).asNode().getAccess());
+					}catch(Throwable t){
+						// user may has no access to the original, this is okay
+					}
 					AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 
 						@Override
@@ -150,6 +154,7 @@ public class CollectionDao {
 								NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao,originalId);
 								node.setCreatedBy(nodeDaoOriginal.asNode().getCreatedBy());
 							}catch(Throwable t){
+								collRef.setOriginalId(null);
 								// original maybe deleted
 							}
 							return null;

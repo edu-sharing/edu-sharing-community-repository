@@ -4,9 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
-import java.util.Properties;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
-
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 
 import net.handle.api.HSAdapter;
 import net.handle.api.HSAdapterFactory;
@@ -26,6 +30,7 @@ public class HandleService {
 	
 	
 	static String handleServerPrefix = null;
+	static String handleServerRepoId = null;
 	
 	String id = null;
 	Integer idIndex = 300;
@@ -37,6 +42,7 @@ public class HandleService {
 	public HandleService() throws HandleServiceNotConfiguredException{
 		if(this.handleServerAvailable()) {
 			handleServerPrefix = HandleServiceProperties.instance.getHandleServerPrefix();
+			handleServerRepoId = HandleServiceProperties.instance.getHandleServerRepoId();
 			privkeyPath = HandleServiceProperties.instance.getHandleServerPrivKey();
 			id = "0.NA/"+handleServerPrefix;
 		}else {
@@ -62,12 +68,6 @@ public class HandleService {
 		return null;
 	}
 	
-	public String createHandle(String nodeId, String version, final HandleValue[] values) throws Exception {
-		String handle = generateHandle(nodeId,version);
-		createHandle(handle,values);
-		
-		return handle;
-	}
 	
 	public String createHandle(String handle, final HandleValue[] values) throws Exception {
 		HSAdapter adapter = HSAdapterFactory.newInstance(id,idIndex,getPrivateKeyBytes(),null);
@@ -122,7 +122,9 @@ public class HandleService {
 	
 	public static void main(String[] args) {
 		
-		
+		String handleId = RandomStringUtils.randomAlphabetic(HANDLE_ID_LENGTH);
+		System.out.println(handleId);
+		if(true) return;
 		HandleService main;
 		try {
 			main = new HandleService();
@@ -157,10 +159,10 @@ public class HandleService {
 		}
 	}
 	
-	public String generateHandle(String nodeId, String version) {
-		if(version != null && version.trim().length() > 0)
-			return handleServerPrefix +"/" + nodeId + "-" +version;
-		else return handleServerPrefix +"/" + nodeId;
+	public String generateHandle() throws SQLException  {
+		
+		String id = HandleService.generateUniqueHandleId();
+		return handleServerPrefix +"/" + handleServerRepoId + id;
 	}
 	
 	public String getId() {
@@ -196,9 +198,65 @@ public class HandleService {
 		return new HandleValue[] {hvUrl,hvMail,hvAdmin};
 	}
 	
-
-
 	
+	
+
+	public static String HANDLE_TABLE = "EDU_HANDLE";
+	
+	public static String HANDLE_TABLE_ATT_ID = "ID";
+	
+	public static String HANDLE_QUERY_EXISTS = "select " + HANDLE_TABLE_ATT_ID + " from " + HANDLE_TABLE + " where " + HANDLE_TABLE_ATT_ID +"=?";
+	
+	public static String HANDLE_INSERT = "insert into " + HANDLE_TABLE +" (" + HANDLE_TABLE_ATT_ID + ") VALUES (?)";
+	
+	public static int HANDLE_ID_LENGTH = 8;
+	
+	public static synchronized String generateUniqueHandleId() throws SQLException{
+		String handleId = RandomStringUtils.randomAlphabetic(HANDLE_ID_LENGTH);
+		while(handleIdExists(handleId)) {
+			handleId = RandomStringUtils.randomAlphabetic(HANDLE_ID_LENGTH);
+		}
+		insertHandleId(handleId);
+		return handleId;
+	}
+	
+	private static boolean handleIdExists(String id) throws SQLException{
+		Connection con = null;
+		PreparedStatement statement = null;
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+		try{			
+			con = dbAlf.getConnection();
+			statement = con.prepareStatement(HANDLE_QUERY_EXISTS);
+			id = StringEscapeUtils.escapeSql(id);
+			statement.setString(1, id);
+			java.sql.ResultSet resultSet = statement.executeQuery();
+			if(resultSet.next()){
+				return true;
+			}else {
+				return false;
+			}
+		}finally {
+			dbAlf.cleanUp(con, statement);
+		}
+	}
+	
+	private static void insertHandleId(String id) throws SQLException{
+		Connection con = null;
+		PreparedStatement statement = null;
+		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+		try{			
+			con = dbAlf.getConnection();
+			statement = con.prepareStatement(HANDLE_INSERT);
+			
+			id = StringEscapeUtils.escapeSql(id);
+			statement.setString(1, id);
+			
+			statement.executeUpdate();
+			con.commit();
+		}finally {
+			dbAlf.cleanUp(con, statement);
+		}
+	}
 }
 
 

@@ -1,8 +1,6 @@
 package org.edu_sharing.metadataset.v2;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget.Subwidget;
@@ -231,17 +229,46 @@ public class MetadataSetV2 {
 		return usedWidgets;
 	}
 
-	public MetadataWidget findWidgetForTemplate(String widgetId,String template) {
-		  MetadataWidget fallback=null;
+	public MetadataWidget findWidgetForTemplateAndCondition(String widgetId, String template, Map<String, String[]> properties) {
+		  List<MetadataWidget> found=new ArrayList<>();
+		  boolean hasTemplate=false;
 		  for(MetadataWidget widget : widgets){
 		   if(widget.getId().equals(widgetId))
-		    fallback=widget;
-		   if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate()))
-		    return widget;
+			   found.add(widget);
+		   if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate())) {
+		   		if(!hasTemplate) found.clear();
+		   		hasTemplate=true;
+			   found.add(widget);
+		   }
 		  }
-		  if(fallback!=null)
-		   return fallback;
-		  throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
-		 }
-	
+		  if(found.size()==0)
+		  	throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+		  for(MetadataWidget widget : found) {
+			  boolean allowed = true;
+			  MetadataWidget.Condition cond = widget.getCondition();
+			  if (cond != null && cond.getType().equals(MetadataWidget.Condition.CONDITION_TYPE.PROPERTY)) {
+			  	  String[] value=properties.get(CCConstants.getValidGlobalName(cond.getValue()));
+				  boolean empty = isValueEmpty(value);
+
+			  	  allowed=empty==cond.isNegate();
+			  }
+			  if(allowed) {
+				  return widget;
+			  }
+		  }
+		  found.get(0).setHideIfEmpty(true);
+		  return found.get(0);
+	 }
+
+	private boolean isValueEmpty(String[] value) {
+		boolean empty=value==null || value.length==0;
+		if(!empty){
+			empty=true;
+			for(String check :value){
+				if(check!=null && !check.isEmpty())
+					empty=false;
+		}
+	  }
+		return empty;
+	}
 }

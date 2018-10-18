@@ -202,7 +202,7 @@ export class CollectionsMainComponent implements GwtEventListener {
     public get orderActive(){
       return this._orderActive;
     }
-    navigate(id:string="",addToOther=""){
+    navigate(id="",addToOther=""){
       let params:any={};
       params.scope=this.tabSelected;
       params.id=id;
@@ -242,67 +242,6 @@ export class CollectionsMainComponent implements GwtEventListener {
     selectTabAllCollections():void {
         this.selectTab(RestConstants.COLLECTIONSCOPE_ALL);
     }
-
-
-    // sorting collections and references
-    /*
-    sortCollectionContent() : void {
-        this.collectionContent.collections = this.collectionContent.collections.sort(
-            function(a:EduData.Collection,b:EduData.Collection):number {
-                // first sort by number of sub collections
-                if (a.childCollectionsCount!=b.childCollectionsCount) return  b.childCollectionsCount-a.childCollectionsCount;
-                // second sort by number of references
-                if (a.childReferencesCount!=b.childReferencesCount) return  b.childReferencesCount-a.childReferencesCount;
-                // third sort by date of creation
-                return 0;
-            }
-        );
-    }
-    */
-
-    // just show content (collections & references) that
-    // match the keyword in title ot description
-  /*
-    filterCollectionContent(keyword:string):void {
-
-       // put back all previous filtered out
-
-       this.collectionContent.references = this.collectionContent.references.concat(this.filteredOutReferences);
-       this.collectionContent.collections = this.collectionContent.collections.concat(this.filteredOutCollections);
-       this.filteredOutReferences = new Array<EduData.CollectionReference>();
-       this.filteredOutCollections = new Array<EduData.Collection>();
-
-       // filter collections
-       var filteredInCollections:Array<EduData.Collection> = new Array<EduData.Collection>();
-       this.collectionContent.collections.forEach((collection) => {
-           var isMatch:boolean = false;
-           if ((typeof collection.title != "undefined") && (collection.title.toLowerCase().indexOf(keyword.toLowerCase())>=0)) isMatch = true;
-           if ((typeof collection.description != "undefined") && (collection.description.toLowerCase().indexOf(keyword.toLowerCase())>=0)) isMatch = true;
-           if (isMatch) {
-               filteredInCollections.push(collection);
-           } else {
-               this.filteredOutCollections.push(collection);
-           }
-       });
-       this.collectionContent.collections = filteredInCollections;
-
-       // filter references
-       var filteredInReferences:Array<EduData.CollectionReference> = new Array<EduData.CollectionReference>();
-       this.collectionContent.references.forEach((reference) => {
-           var isMatch:boolean = false;
-           if ((typeof reference.reference.title != "undefined") && (reference.reference.title.toLowerCase().indexOf(keyword.toLowerCase())>=0)) isMatch = true;
-           if ((typeof reference.reference.description != "undefined") && (reference.reference.description.toLowerCase().indexOf(keyword.toLowerCase())>=0)) isMatch = true;
-           if (isMatch) {
-               filteredInReferences.push(reference);
-           } else {
-               this.filteredOutReferences.push(reference);
-           }
-       });
-       this.collectionContent.references = filteredInReferences;
-
-       this.sortCollectionContent();
-    }
-    */
 
     isRootLevelCollection():boolean {
         return !this.showCollection;
@@ -359,47 +298,53 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.optionsMaterials=this.getOptions(nodes,false);
     }
     getOptions(nodes:Node[]=null,fromList:boolean) {
-      if(fromList && (!nodes || !nodes.length)){
-        nodes=[new Node()];
+        if (fromList && (!nodes || !nodes.length)) {
+            //nodes = [new Node()];
+        }
+        let options: OptionItem[] = [];
+        if (!fromList) {
+            if (nodes && nodes.length) {
+                let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
+                if (collection)
+                    options.push(collection);
+
+                if (this.isAllowedToDeleteNodes(nodes)) {
+                    let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE', 'remove_circle_outline', (node: Node) => {
+                        this.deleteMultiple(ActionbarHelper.getNodes(nodes, node));
+                    });
+                    if (remove)
+                        options.push(remove);
+                }
+            }
+        }
+        if (fromList) {
+            let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector,
+                (node: Node) => this.addToOtherCollection(node));
+            if (collection) {
+                collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
+                options.push(collection);
+            }
+        }
+      if (fromList || nodes && nodes.length) {
+
+            let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes, this.connector,
+                (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelper.getNodes(nodes, node)));
+            if (download)
+                options.push(download);
       }
-      let options:OptionItem[]=[];
-      if(!fromList){
-          if(nodes && nodes.length) {
-              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
-                  let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
-                  options.push(collection);
-              }
-              if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_DELETE)) {
-                  let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE','remove_circle_outline',(node: Node)=>{
-                      this.deleteMultiple(ActionbarHelper.getNodes(nodes,node));
-                  });
-                  options.push(remove);
-              }
-          }
-      }
-      if(fromList) {
-          let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes,this.connector,
-              (node: Node) => this.addToOtherCollection(node));
-          if (collection) {
-              collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
-              options.push(collection);
-          }
-      }
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',nodes,this.connector,
-        (node:Node)=>NodeHelper.downloadNodes(this.toast,this.connector,ActionbarHelper.getNodes(nodes,node)));
-      if (download)
-        options.push(download);
       if(fromList) {
           let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
           remove.showCallback = (node: Node) => {
-              return NodeHelper.getNodesRight(ActionbarHelper.getNodes(nodes, node), RestConstants.ACCESS_DELETE);
+              return this.isAllowedToDeleteNodes(ActionbarHelper.getNodes(nodes, node));
           };
-          options.push(remove);
+          if(remove)
+            options.push(remove);
       }
       if(fromList || nodes && nodes.length==1) {
           if (this.config.instant("nodeReport", false)) {
               let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes, node)[0]);
-              options.push(report);
+              if(report)
+                options.push(report);
           }
       }
 
@@ -489,7 +434,7 @@ export class CollectionsMainComponent implements GwtEventListener {
 
     // gets called by user if something went wrong to start fresh from beginning
     resetCollections() : void {
-        var url = window.location.href;
+        let url = window.location.href;
         url = url.substring(0,url.indexOf("collections")+11);
         window.location.href = url;
         return;
@@ -568,14 +513,14 @@ export class CollectionsMainComponent implements GwtEventListener {
     canDelete(node:EduData.CollectionReference){
       return RestHelper.hasAccessPermission(node,'Delete');
     }
-    onContentClick(content:EduData.CollectionReference,force=false) : void {
+    onContentClick(content:any,force=false) : void {
       this.contentDetailObject=content;
       if (content.originalId==null && !force) {
         this.dialogTitle="COLLECTIONS.ORIGINAL_MISSING";
         this.dialogMessage="COLLECTIONS.ORIGINAL_MISSING_INFO";
         this.dialogCancelable=true;
         this.dialogButtons=[];
-        if (this.isAllowedToDeleteCollection()) {
+        if (this.isAllowedToDeleteNodes([content])) {
           this.dialogButtons.push(new DialogButton('COLLECTIONS.DETAIL.REMOVE',DialogButton.TYPE_CANCEL,()=>this.deleteFromCollection(()=>this.closeDialog())));
         }
         this.dialogButtons.push(new DialogButton('COLLECTIONS.OPEN_MISSING',DialogButton.TYPE_PRIMARY,()=>this.onContentClick(content,true)));
@@ -589,7 +534,7 @@ export class CollectionsMainComponent implements GwtEventListener {
         /*if(data.node.downloadUrl)
           this.nodeOptions.push(new OptionItem("DOWNLOAD", "cloud_download", () => this.downloadMaterial()));
          */
-        if(data.node.access.indexOf(RestConstants.ACCESS_DELETE)!=-1) {
+        if(this.isAllowedToDeleteNodes([content])) {
           this.nodeOptions.push(new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", () => this.deleteFromCollection(() => {
             NodeRenderComponent.close(this.location);
           })));
@@ -597,7 +542,8 @@ export class CollectionsMainComponent implements GwtEventListener {
         // set content for being displayed in detail
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS,this.nodeOptions);
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,this.collectionContent.references);
-        this.router.navigate([UIConstants.ROUTER_PREFIX+"render",  content.ref.id]);
+        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN,"collections");
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"render",  content.ref.id]);
         //this.navigate(this.collectionContent.collection.ref.id,content.ref.id);
         // add breadcrumb
 
@@ -813,4 +759,8 @@ export class CollectionsMainComponent implements GwtEventListener {
       this.toast.error(error);
     });
   }
+
+    private isAllowedToDeleteNodes(nodes: Node[]) {
+        return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
+    }
 }

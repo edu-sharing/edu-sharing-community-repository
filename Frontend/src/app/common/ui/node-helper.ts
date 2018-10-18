@@ -2,7 +2,7 @@ import {RestConstants} from "../rest/rest-constants";
 import {TranslateService} from "@ngx-translate/core";
 import {
     Node, Permission, Collection, User, LoginResult, AuthorityProfile, ParentList,
-    Repository, WorkflowDefinition, Permissions
+    Repository, WorkflowDefinition, Permissions, CollectionReference
 } from "../rest/data-object";
 import {FormatSizePipe} from "./file-size.pipe";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
@@ -121,14 +121,18 @@ export class NodeHelper{
 
   /**
    * returns true if all nodes have the requested right
+   * If originalRights is true, check the rights of the original object as well (either ref or original must match the right)
+   * (only works for collection refs)
    * @param nodes
    * @param right
    * @returns {boolean}
    */
-  public static getNodesRight(nodes : Node[],right : string){
+  public static getNodesRight(nodes :any[],right : string,originalRights=false){
     if(nodes==null)
       return true;
     for(let node of nodes){
+      if(originalRights && node.accessOriginal && node.accessOriginal.indexOf(right)!=-1)
+          continue;
       if(!node.access)
         return false;
       if(node.access.indexOf(right)==-1)
@@ -284,7 +288,7 @@ export class NodeHelper{
       icon='none';
     let LICENSE_ICONS=["cc-0","cc-by-nc","cc-by-nc-nd","cc-by-nc-sa","cc-by-nd",
       "cc-by-sa","cc-by","copyright-free","copyright-license","custom",
-      "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk"];
+      "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk","unterrichts-und-lehrmedien"];
     if(LICENSE_ICONS.indexOf(icon)==-1)
       icon='none';
     if(icon=='none' && !useNoneAsFallback)
@@ -313,8 +317,7 @@ export class NodeHelper{
    * @param translate
    * @returns {any}
    */
-  public static getLicenseNameByString(string:String,translate:TranslateService) {
-    let name=string.replace(/_/g,"-");
+  public static getLicenseNameByString(name:String,translate:TranslateService) {
     if(name=='CUSTOM')
       return translate.instant("LICENSE.CUSTOM");
     if(name==''){
@@ -322,12 +325,12 @@ export class NodeHelper{
     }
     if(name=='MULTI')
       return translate.instant("LICENSE.MULTI");
-    if(name=='SCHULFUNK')
-      return translate.instant("LICENSE.SCHULFUNK");
+    if(name=='SCHULFUNK' || name=='UNTERRICHTS_UND_LEHRMEDIEN')
+      return translate.instant("LICENSE."+name);
     if(name.startsWith("COPYRIGHT")){
-      return translate.instant("LICENSE."+string);
+      return translate.instant("LICENSE."+name);
     }
-    return name;
+    return name.replace(/_/g,"-");
   }
 
   /**
@@ -574,17 +577,30 @@ export class NodeHelper{
     ]);
   }
 
-  static allFiles(nodes: Node[]) {
+  static allFiles(nodes: any[]) {
     let allFiles=true;
     if(nodes) {
       for (let node of nodes) {
-        if (node.isDirectory)
+        if(!node)
+          continue;
+        if(node.reference)
+          node=node.reference;
+        if (node.isDirectory || node.type!=RestConstants.CCM_TYPE_IO)
           allFiles = false;
       }
     }
     return allFiles;
   }
-
+    static allFolders(nodes: Node[]) {
+        let allFolders=true;
+        if(nodes) {
+            for (let node of nodes) {
+                if (!node.isDirectory)
+                    allFolders = false;
+            }
+        }
+        return allFolders;
+    }
   static hasAnimatedPreview(node: Node) {
     return !node.preview.isIcon && (node.mediatype=="file-video" || node.mimetype=="image/gif");
   }
