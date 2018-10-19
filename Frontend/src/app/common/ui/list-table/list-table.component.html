@@ -108,7 +108,7 @@
                      [style.bottom]="dropdownBottom"
                      [style.right]="dropdownRight"
                 >
-                    <a class="collection-item"
+                    <a class="collection-item collection-item-{{option.name | replaceChars:{search:'.',replace:'-'} }}"
                        [class.collection-item-seperate-bottom]="option.isSeperateBottom && i"
                        [class.collection-item-seperate]="option.isSeperate && i"
                        *ngFor="let option of _options;let i=index"
