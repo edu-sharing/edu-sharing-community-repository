@@ -724,7 +724,7 @@ public class CollectionServiceImpl implements CollectionService{
 
 		if(custom){
 			
-			if(!collection.isLevel0()) { // TODO: don't allow inherition on root level -> this variable seems to be inverted?!
+			if(collection.isLevel0()) { // don't allow inherition on root level
 				permissionService.setPermissionInherit(collectionId, false);
 				return;
 			}
