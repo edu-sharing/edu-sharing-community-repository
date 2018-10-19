@@ -23,8 +23,8 @@ import {RestLocatorService} from "../../rest/services/rest-locator.service";
 })
 
 export class ApplyToLmsComponent{
-  private node: Node;
-  private reurl: string;
+  node: Node;
+  reurl: string;
 
   constructor(
     private connector : RestConnectorService,
