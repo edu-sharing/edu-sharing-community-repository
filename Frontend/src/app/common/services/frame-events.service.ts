@@ -93,7 +93,9 @@ export class FrameEventsService {
     }
     if (this.isRunningInFrame()) {
       window.parent.postMessage({event: event, data: data}, '*');
-    } else {
+    } else if(window.opener) {
+      window.opener.postMessage({event: event, data: data}, '*');
+    } else{
       window.postMessage({event: event, data: data}, '*');
     }
     for(let w of this.windows){
