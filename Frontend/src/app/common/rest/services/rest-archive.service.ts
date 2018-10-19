@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import 'rxjs/add/operator/map'
 import { Observable } from 'rxjs/Observable';
 import {RestConnectorService} from "./rest-connector.service";
@@ -24,15 +23,14 @@ export class RestArchiveService extends AbstractRestService{
                    person="",
                    request : any = null,
                    repository=RestConstants.HOME_REPOSITORY
-                  ): Observable<ArchiveSearch> => {
+                  ) => {
     let query=this.connector.createUrlNoEscape("archive/:version/search/:repository/:pattern/:person?:request",repository,
       [
         [":pattern",encodeURIComponent(pattern)],
         [":person",encodeURIComponent(person)],
         [":request",this.connector.createRequestString(request)]
       ]);
-    return this.connector.get(query,this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+    return this.connector.get<ArchiveSearch>(query,this.connector.getRequestOptions());
   }
   /**
    * Delete node(s) from the repository
@@ -53,14 +51,12 @@ export class RestArchiveService extends AbstractRestService{
    * @param toPath A path to restore node which parents are missing. A missing value won't restore these nodes
    * @param repository
    */
-  public restore = (nodes : Node[]|string[],toPath:string="",repository=RestConstants.HOME_REPOSITORY): Observable<ArchiveRestore> => {
+  public restore = (nodes : Node[]|string[],toPath:string="",repository=RestConstants.HOME_REPOSITORY) => {
     let query=this.connector.createUrlNoEscape("archive/:version/restore/:repository/?:nodes&target=:target",repository,
       [
         [":nodes",RestHelper.getQueryStringForList("archivedNodeIds",nodes)],
         [":target",encodeURIComponent(toPath)]
       ]);
-    return this.connector.post(query,"",this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
-
+    return this.connector.post<ArchiveRestore>(query,"",this.connector.getRequestOptions());
   }
 }

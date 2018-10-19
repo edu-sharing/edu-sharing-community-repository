@@ -1,6 +1,5 @@
 import {RestConstants} from "../rest-constants";
 import {Observer} from "rxjs/Observer";
-import {Headers, Http, RequestOptionsArgs, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import {Translation} from "../../translation";
 import {ActivatedRoute} from "@angular/router";
@@ -8,6 +7,7 @@ import {Injectable} from "@angular/core";
 import {subscribeOn} from "rxjs/operator/subscribeOn";
 import {CordovaService} from '../../services/cordova.service';
 import {environment} from "../../../../environments/environment";
+import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
 
 @Injectable()
 export class RestLocatorService {
@@ -32,7 +32,7 @@ export class RestLocatorService {
     this._endpointUrl = value;
   }
 
-  constructor(private http : Http,private cordova:CordovaService) {
+  constructor(private http : HttpClient,private cordova:CordovaService) {
   }
   public getCordova(){
     return this.cordova;
@@ -41,11 +41,10 @@ export class RestLocatorService {
     return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {
         let query = RestLocatorService.createUrl("config/:version/values", null);
-        this.http.get(this.endpointUrl + query, this.getRequestOptions())
-          .map((response: Response) => response.json())
+        this.http.get<any>(this.endpointUrl + query, this.getRequestOptions())
           .subscribe(response => {
-             this.setConfigValues(response.current);
-             observer.next(response);
+             this.setConfigValues(response.body.current);
+             observer.next(response.body);
              observer.complete();
         },(error:any)=>{
             observer.error(error);
@@ -58,10 +57,9 @@ export class RestLocatorService {
     return new Observable<string[]>((observer : Observer<string[]>) => {
       this.locateApi().subscribe(data => {
         let query = RestLocatorService.createUrl("config/:version/variables", null);
-        this.http.get(this.endpointUrl + query, this.getRequestOptions("application/json"))
-          .map((response: Response) => response.json())
-          .subscribe(response => {
-            observer.next(response.current);
+        this.http.get<any>(this.endpointUrl + query, this.getRequestOptions("application/json"))
+          .subscribe((response) => {
+            observer.next(response.body.current);
             observer.complete();
           },(error:any)=>{
             observer.error(error);
@@ -75,8 +73,7 @@ export class RestLocatorService {
       this.locateApi().subscribe(data => {
         let query = RestLocatorService.createUrl("config/:version/language", null);
         this.http.get(this.endpointUrl + query, this.getRequestOptions("application/json",null,null,lang))
-          .map((response: Response) => response.json())
-          .subscribe(response => {
+            .subscribe((response:any) => {
             observer.next(response.current);
             observer.complete();
           },(error:any)=>{
@@ -86,45 +83,45 @@ export class RestLocatorService {
       });
     });
   }
-  public getRequestOptions(contentType="application/json",username:string = null,password:string = null,locale=Translation.getISOLanguage()) : RequestOptionsArgs{
-    let headers = new Headers();
+  public getRequestOptions(contentType="application/json",username:string = null,password:string = null,locale=Translation.getISOLanguage()):
+      {headers? : HttpHeaders,withCredentials:true, responseType: 'json',observe: 'response'}{
+    let headers:any = {};
     if(contentType)
-      headers.append('Content-Type', contentType);
-    headers.append('Accept', 'application/json');
-    headers.append('locale',locale);
+      headers['Content-Type']=contentType;
+    headers['Accept']='application/json';
+    if(locale)
+        headers['locale']=locale;
     if(username!=null) {
-      headers.append('Authorization', "Basic " + btoa(username + ":" + password));
+        headers['Authorization'] ="Basic " + btoa(username + ":" + password);
     }
     else if(this.ticket!=null){
-      headers.append('Authorization', "EDU-TICKET " + this.ticket);
-      this.ticket=null;
+        headers['Authorization'] = "EDU-TICKET " + this.ticket;
+        this.ticket=null;
     }
     else if(this.cordova.oauth!=null){
-      headers.append('Authorization', "Bearer " + this.cordova.oauth.access_token);
+        headers['Authorization'] = "Bearer " + this.cordova.oauth.access_token;
     }
     else{
-      headers.append('Authorization',"");
+        headers['Authorization'] = "";
     }
     if(this.cordova.isRunningCordova()){
-      headers.append('DisableGuest','true');
+        headers['DisableGuest']='true';
     }
-
-    return {headers:headers,withCredentials:true}; // Warn: withCredentials true will ignore a Bearer from OAuth!
+    return {headers:headers,responseType: 'json',observe: 'response',withCredentials:true}; // Warn: withCredentials true will ignore a Bearer from OAuth!
   }
     private testEndpoint(url:string,local=true,observer:Observer<void>){
-        this.http.get(url+"_about", this.getRequestOptions(""))
-            .map((response:Response)=>response.json())
-            .subscribe((data:any)=> {
+        this.http.get<any>(url+"_about", this.getRequestOptions())
+            .subscribe((data)=> {
                     this._endpointUrl=url;
-                    this._apiVersion=data.version.major+data.version.minor/10;
+                    this._apiVersion=data.body.version.major+data.body.version.minor/10;
                     this.isLocating=false;
-                    this.themesUrl=data.themesUrl;
+                    this.themesUrl=data.body.themesUrl;
                     console.log("API version "+this.apiVersion+" "+this._endpointUrl);
                     observer.next(null);
                     observer.complete();
                     return;
                 },
-                (error:any)=>{
+                (error)=>{
                     if(error.status==RestConstants.HTTP_UNAUTHORIZED){
                         this._endpointUrl=url;
                         this.isLocating=false;
@@ -151,10 +148,10 @@ export class RestLocatorService {
               return;
           }
           else {
-              this.http.get("assets/endpoint.txt").map(response => response.text()).subscribe((data: any) => {
+              this.http.get("assets/endpoint.txt",{responseType:'text'}).subscribe((data: any) => {
                   this.testEndpoint(data, false, observer);
               }, (error: any) => {
-                  console.error("Could not contact locale rest endpoint and no url was found. Please create a file at assets/endpoint.txt and enter the url to your rest api");
+                  console.error("Could not contact locale rest endpoint and no url was found. Please create a file at assets/endpoint.txt and enter the url to your rest api",error);
               });
           }
       }

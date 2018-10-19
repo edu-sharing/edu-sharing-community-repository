@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import 'rxjs/add/operator/map'
 import { Observable } from 'rxjs/Observable';
 import {RestConnectorService} from "./rest-connector.service";
@@ -19,17 +18,16 @@ export class RestSharingService extends AbstractRestService{
         super(connector);
     }
 
-    getInfo(node:string, token:string, password = "", repository = RestConstants.HOME_REPOSITORY): Observable<SharingInfo> {
+    getInfo(node:string, token:string, password = "", repository = RestConstants.HOME_REPOSITORY) {
         let query=this.connector.createUrl('sharing/:version/sharing/:repository/:node/:token?password=:password', repository,
             [
                 [":node",node],
                 [":token",token],
                 [":password",password]
             ]);
-        return this.connector.get(query,this.connector.getRequestOptions())
-            .map((response: Response) => response.json());
+        return this.connector.get<SharingInfo>(query,this.connector.getRequestOptions());
     }
-    getChildren(node:string, token:string, password = "",request:any={}, repository = RestConstants.HOME_REPOSITORY): Observable<NodeList> {
+    getChildren(node:string, token:string, password = "",request:any={}, repository = RestConstants.HOME_REPOSITORY) {
         let query=this.connector.createUrlNoEscape('sharing/:version/sharing/:repository/:node/:token/children?password=:password&:request', repository,
             [
                 [":node",encodeURIComponent(node)],
@@ -37,8 +35,7 @@ export class RestSharingService extends AbstractRestService{
                 [":password",encodeURIComponent(password)],
                 [":request",this.connector.createRequestString(request)],
             ]);
-        return this.connector.get(query,this.connector.getRequestOptions())
-            .map((response: Response) => response.json());
+        return this.connector.get<NodeList>(query,this.connector.getRequestOptions());
     }
 
   

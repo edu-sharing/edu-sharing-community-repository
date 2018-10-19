@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import {RestNodeService} from "../rest/services/rest-node.service";
 import {RestConstants} from "../rest/rest-constants";
 import {RestHelper} from "../rest/rest-helper";

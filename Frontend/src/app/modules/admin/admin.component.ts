@@ -579,7 +579,7 @@ export class AdminComponent {
     public updateEduGroupSuggestions(event : any) {
         this.organization.getOrganizations(event.input).subscribe(
             (data:any)=>{
-                var ret:SuggestItem[] = [];
+                let ret:SuggestItem[] = [];
                 for (let orga of data.organizations) {
                     let item = new SuggestItem(orga.authorityName, orga.profile.displayName, 'group', '');
                     item.originalObject = orga;

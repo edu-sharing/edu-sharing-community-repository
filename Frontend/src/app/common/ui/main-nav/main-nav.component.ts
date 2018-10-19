@@ -21,7 +21,6 @@ import {SearchNodeStoreComponent} from "../../../modules/search/node-store/node-
 import {UIHelper} from "../ui-helper";
 import {UIConstants} from "../ui-constants";
 import {RestHelper} from "../../rest/rest-helper";
-import {Http} from "@angular/http";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
@@ -30,6 +29,7 @@ import {SessionStorageService} from "../../services/session-storage.service";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {Translation} from "../../translation";
 import {OptionItem} from "../actionbar/option-item";
+import {HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'main-nav',
@@ -336,7 +336,7 @@ export class MainNavComponent implements AfterViewInit{
               private configService : ConfigurationService,
               private storage : TemporaryStorageService,
               private session : SessionStorageService,
-              private http : Http,
+              private http : HttpClient,
               private org : RestOrganizationService,
               private router : Router,
               private route : ActivatedRoute,

@@ -9,7 +9,6 @@ import {Toast} from "./common/ui/toast";
 import {RestCollectionService} from "./common/rest/services/rest-collection.service";
 import {RestUsageService} from "./common/rest/services/rest-usage.service";
 import {TemporaryStorageService} from "./common/services/temporary-storage.service";
-import {RestMetadataService} from "./common/rest/services/rest-metadata.service";
 import {SessionStorageService} from "./common/services/session-storage.service";
 import {RestOrganizationService} from "./common/rest/services/rest-organization.service";
 import {UIService} from "./common/services/ui.service";
@@ -49,7 +48,6 @@ export const PROVIDERS=[
   TemporaryStorageService,
   ActionbarHelperService,
   PermissionNamePipe,
-  RestMetadataService,
   RestSharingService,
   SessionStorageService,
   ConfigurationService,
