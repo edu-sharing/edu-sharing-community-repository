@@ -1,5 +1,5 @@
 import {RouterModule} from "@angular/router";
-import {ToastyModule} from "ng2-toasty";
+import {ToastyModule} from "ngx-toasty";
 import {TranslateModule, TranslateLoader} from "@ngx-translate/core";
 import {FormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
