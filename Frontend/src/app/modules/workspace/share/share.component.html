@@ -109,7 +109,7 @@
           [readOnly]="true"
           [showDelete]="false"
         ></workspace-share-permission>
-        <div *ngIf="inheritAllowed || !disableInherition">
+        <div *ngIf="inheritAllowed && !disableInherition">
           <div class="groupHeading">
             <div class="groupName">{{'WORKSPACE.SHARE.GROUP_INHERIT' | translate}}</div>
             <div class="inheritCheck">
