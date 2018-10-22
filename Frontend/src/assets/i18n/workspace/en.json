@@ -277,6 +277,8 @@
       "NONE_NAME":"No license chosen",
       "COPYRIGHT_NAME":"protected by copyright law",
       "CC_BY_NAME":"Creative Commons",
+      "COPYRIGHT_FREE_NAME":"protected by copyright law, open access",
+      "COPYRIGHT_LICENSE_NAME":"protected by copyright law, usage subject to license",
       "CC_0_NAME":"CC 0 / Public Domain",
       "ONLY_OER":"OER licenses only",
       "OER":"OER",

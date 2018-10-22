@@ -983,7 +983,7 @@ export class WorkspaceMainComponent implements EventListener{
     private openNode(node : Node,useConnector=true) {
         if(!node.isDirectory){
             if(NodeHelper.isSavedSearchObject(node)){
-                UIHelper.routeToSearchNode(this.router,node);
+                UIHelper.routeToSearchNode(this.router,null,node);
             }
             else if(RestToolService.isLtiObject(node)){
                 this.toolService.openLtiObject(node);

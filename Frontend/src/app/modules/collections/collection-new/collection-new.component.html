@@ -49,7 +49,7 @@
         </div>
         <i class="material-icons next">keyboard_arrow_right</i>
       </div>
-      <div class="group" *ngIf="createEditorial || createCurriculum">
+      <div class="group" *ngIf="createEditorial">
         <div class="collection-item clickable" *ngIf="createEditorial" tabindex="0" (keyup.enter)="setCollectionType('EDITORIAL')" (click)="setCollectionType('EDITORIAL')">
           <div class="iconLeft"><i class="material-icons" style="color:#E9B42A;">star</i></div>
           <div class="content">

@@ -53,13 +53,17 @@
             <label for="groupName">{{'GROUP.displayName' | translate}}</label>
             <input type="text" id="groupName" name="groupName" [(ngModel)]="edit.profile.displayName" autofocus required>
             <label for="groupType">{{'GROUP.groupType' | translate}}</label>
-            <select id="groupType" name="groupType" [(ngModel)]="edit.profile.groupType"><option *ngFor="let type of GROUP_TYPES">{{type}}</option></select>
+            <select id="groupType" name="groupType" [(ngModel)]="edit.profile.groupType">
+              <option *ngFor="let type of GROUP_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
+            </select>
           </div>
           <div *ngIf="_mode=='ORG'">
             <label for="orgName">{{'ORG.displayName' | translate}}</label>
             <input type="text" id="orgName" name="orgName" [(ngModel)]="edit.profile.displayName" autofocus required>
             <label for="orgName">{{'ORG.groupType' | translate}}</label>
-            <select id="orgType" name="orgType" [(ngModel)]="edit.profile.groupType"><option *ngFor="let type of GROUP_TYPES">{{type}}</option></select>
+            <select id="orgType" name="orgType" [(ngModel)]="edit.profile.groupType">
+              <option *ngFor="let type of ORG_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
+            </select>
             <div class="infoText">{{edit.folder}}</div>
           </div>
           <div *ngIf="_mode=='USER'">

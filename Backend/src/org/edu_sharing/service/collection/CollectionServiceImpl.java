@@ -445,7 +445,16 @@ public class CollectionServiceImpl implements CollectionService{
 			/**
 			 * remove the collection
 			 */
-			String parent = client.getParents(collectionId, true).keySet().iterator().next();
+			// maybe it is a collection on root and someone else already created a collection that day
+			// this will result in an error, so we need to fetch the parent id as system
+			String parent = AuthenticationUtil.runAsSystem(()-> {
+				try {
+					return client.getParents(collectionId, true).keySet().iterator().next();
+				} catch (Throwable throwable) {
+					logger.warn(throwable);
+					return null;
+				}
+			});
 			client.removeNode(collectionId, parent);
 			
 		}catch(Throwable e){
@@ -718,7 +727,7 @@ public class CollectionServiceImpl implements CollectionService{
 
 		if(custom){
 			
-			if(!collection.isLevel0()) { // TODO: don't allow inherition on root level -> this variable seems to be inverted?!
+			if(collection.isLevel0()) { // don't allow inherition on root level
 				permissionService.setPermissionInherit(collectionId, false);
 				return;
 			}

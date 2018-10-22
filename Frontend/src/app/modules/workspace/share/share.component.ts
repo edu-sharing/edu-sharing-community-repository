@@ -169,7 +169,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
           this.inheritAccessDenied=true;
       });
       this.nodeApi.getNodeParents(node.ref.id).subscribe((data: NodeList) => {
-        this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
+        //this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
+        // changed in 4.1 to keep inherit state of collections
+        this.inheritAllowed = data.nodes.length > 1;
       });
     }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
