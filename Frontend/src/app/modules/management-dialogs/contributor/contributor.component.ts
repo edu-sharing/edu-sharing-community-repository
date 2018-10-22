@@ -7,11 +7,9 @@ import {Toast} from "../../../common/ui/toast";
 import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {Translation} from "../../../common/translation";
 import {TranslateService} from "@ngx-translate/core";
-import {DatepickerOptions} from "ng2-datepicker";
 import {DateHelper} from "../../../common/ui/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {NgDatepickerComponent} from "ng2-datepicker";
 
 @Component({
   selector: 'workspace-contributor',
@@ -24,7 +22,6 @@ import {NgDatepickerComponent} from "ng2-datepicker";
   ]
 })
 export class WorkspaceContributorComponent  {
-  @ViewChild('datepicker') datepicker : NgDatepickerComponent;
   public contributorLifecycle:any={};
   public contributorMetadata:any={};
   public rolesLifecycle=RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE;
@@ -45,7 +42,6 @@ export class WorkspaceContributorComponent  {
   public dialogParameters: any;
   public node: Node;
   public date : Date;
-  public dateOptions: DatepickerOptions;
   @Input() set nodeId(nodeId : string){
     this._nodeId=nodeId;
     this.loading=true;
@@ -102,7 +98,7 @@ export class WorkspaceContributorComponent  {
   }
   openDatepicker(){
       this.date=new Date();
-      setTimeout(()=>this.datepicker.toggle());
+      //setTimeout(()=>this.datepicker.toggle());
   }
   public editVCard(mode:string,vcard : VCard,scope:string){
     this.editMode=mode;
@@ -198,9 +194,6 @@ export class WorkspaceContributorComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
-    this.dateOptions={};
-    //this.dateOptions.format="DD.MM.YYYY";
-    Translation.applyToDateOptions(this.translate,this.dateOptions);
 
   }
 

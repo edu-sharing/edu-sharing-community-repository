@@ -41,6 +41,7 @@
   "SELECT_FILE" : "Datei wählen",
   "NO_MORE_ELEMENTS" : "Keine weiteren Elemente",
   "FIELD_MUST_BE_FILLED" : "Dieses Feld muss ausgefüllt sein",
+  "CHOOSE_DATE":"Datum wählen",
   "SELECT_COLLECTION" : "In '{{name}}' einsortieren",
   "SELECT_ROOT_DISABLED" : "Element wählen",
   "CLOSE" : "Schließen",

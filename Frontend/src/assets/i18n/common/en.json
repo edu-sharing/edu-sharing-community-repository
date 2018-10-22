@@ -42,6 +42,7 @@
   "SELECT_FILE" : "select file",
   "NO_MORE_ELEMENTS" : "no further elements",
   "FIELD_MUST_BE_FILLED" : "This field cannot be empty.",
+  "CHOOSE_DATE":"Choose date",
   "SELECT_COLLECTION" : "Add to '{{name}}'",
   "SELECT_ROOT_DISABLED" : "select element",
   "CLOSE" : "close",

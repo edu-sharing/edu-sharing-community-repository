@@ -6,7 +6,6 @@ import 'rxjs/add/observable/forkJoin';
 import 'rxjs/add/observable/concat';
 import {Observer} from "rxjs";
 import {ConfigurationService} from "./services/configuration.service";
-import {DatepickerOptions} from "ng2-datepicker";
 import {ActivatedRoute} from "@angular/router";
 import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
@@ -118,17 +117,6 @@ export class Translation  {
       return "DD.MM.YYYY";
     }
     return "YYYY/MM/DD";
-  }
-  static applyToDateOptions(translate:TranslateService,dateOptions: DatepickerOptions) {
-    //dateOptions.locale=moment.localeData(this.getLanguage());
-    dateOptions.displayFormat=Translation.getDateFormat();
-    dateOptions.firstCalendarDay=1;
-    dateOptions.locale=(moment.locale(this.getLanguage()) as any);
-    /*
-    dateOptions.todayText=translate.instant("TODAY");
-    dateOptions.clearText=translate.instant("DATE_CLEAR");
-    dateOptions.selectYearText=translate.instant("DATE_SELECT_YEAR");
-    */
   }
 }
 export function createTranslateLoader(http: HttpClient,locator:RestLocatorService) {

@@ -49,6 +49,7 @@
   import {InputPasswordComponent} from "./common/ui/input-password/input-password.component";
   import {PoweredByComponent} from "./common/ui/powered-by/powered-by.component";
   import {FooterComponent} from "./common/ui/footer/footer.component";
+  import {CalendarComponent} from "./common/ui/calendar/calendar.component";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -61,6 +62,7 @@ export const DECLARATIONS = [
       RestMdsTestComponent,
       AttributeHtmlPipe,
       CustomIconComponent,
+      CalendarComponent,
       DebugResultPipe,
       FormatSizePipe,
       NodeDatePipe,

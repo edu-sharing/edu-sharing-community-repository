@@ -3,7 +3,6 @@ import {RestMdsService} from "./common/rest/services/rest-mds.service";
 import {RestIamService} from "./common/rest/services/rest-iam.service";
 import {RestArchiveService} from "./common/rest/services/rest-archive.service";
 import {RestConnectorService} from "./common/rest/services/rest-connector.service";
-import {GwtInterfaceService} from "./common/services/gwt-interface.service";
 import {RestSearchService} from "./common/rest/services/rest-search.service";
 import {Toast} from "./common/ui/toast";
 import {RestCollectionService} from "./common/rest/services/rest-collection.service";
@@ -26,10 +25,9 @@ import {ActionbarHelperService} from "./common/services/actionbar-helper";
 import {PermissionNamePipe} from "./common/ui/permission-name.pipe";
 
 
-export const PROVIDERS=[
+export const PROVIDERS:any=[
   FrameEventsService,
   Toast,
-  GwtInterfaceService,
   RestLocatorService,
   RestConnectorService,
   RestConnectorsService,

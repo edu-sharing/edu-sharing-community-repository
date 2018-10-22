@@ -3,7 +3,7 @@
 /*
   Custom CSS for colors and looks which override the materializecss
 */
-.btn{
+.btn,button:focus{
   background-color:$primary!important;
   color:$textOnPrimary!important;
 }

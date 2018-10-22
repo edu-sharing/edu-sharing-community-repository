@@ -11,8 +11,14 @@
               <div class="info-left">
                 <div class="heading">{{'WORKSPACE.SHARE_LINK.EXPIRY_TITLE' | translate}}</div>
                 <div>{{'WORKSPACE.SHARE_LINK.EXPIRY_INFO' | translate}}</div>
-                <ng-datepicker class="datepickerShareLink" *ngIf="expiry" [(ngModel)]="expiryDate"
-                               [options]="dateOptions"></ng-datepicker>
+                <!--<mat-form-field>
+                  <input matInput [matDatepicker]="picker" readonly placeholder="{{'CHOOSE_DATE' | translate}}">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>-->
+                <calendar [(date)]="expiryDate" [minDate]="today"></calendar>
+                <!--<ng-datepicker class="datepickerShareLink" *ngIf="expiry" [(ngModel)]="expiryDate"
+                               [options]="dateOptions"></ng-datepicker>-->
               </div>
               <div class="info-right">
                 <div class="switch">
