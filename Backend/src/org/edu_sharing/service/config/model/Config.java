@@ -35,7 +35,7 @@ public class Config {
 			}
 			return (T) data;
 		}catch(Exception e){
-			logger.info(name+" not found: "+e.getMessage());
+			logger.debug(name+" not found: "+e.getMessage()+". Using default: "+defaultValue);
 			return defaultValue;
 		}
     }
