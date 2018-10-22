@@ -603,8 +603,10 @@ export class MdsComponent{
     }
     return properties;
   }
-  private checkFileExtension(callback:Function=null,values:any){
-    let ext1=this.currentNode.name.split('.');
+  private checkFileExtension(name:string,callback:Function=null,values:any){
+    if(values==null)
+      return true;
+    let ext1=name.split('.');
     let ext2=values[RestConstants.CM_NAME][0].split('.');
     let extV1=ext1[ext1.length-1];
     let extV2=ext2[ext2.length-1];
@@ -638,21 +640,28 @@ export class MdsComponent{
     return true;
   }
   public saveValues(callback:Function=null,force=false){
+      let properties:any={};
+      if(this.currentNode)
+          properties=this.currentNode.properties;
+    let values=this.getValues(properties);
+    // check if file extension changed and warn
+    if(!force){
+        // for regular nodes
+        if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.checkFileExtension(this.currentNode.name,callback,values)){
+            return;
+        }
+        // for childobjects
+        if(this._groupId=='io_childobject' && !this.checkFileExtension(this._currentValues[RestConstants.CM_NAME][0],callback,values)){
+            return;
+        }
+    }
     if(this.embedded || this.currentNode==null && this.createType==null){
       this.onDone.emit(this.getValues());
       return this.getValues();
     }
-    let properties:any={};
-    if(this.currentNode)
-      properties=this.currentNode.properties;
-    let values=this.getValues(properties);
     if(values==null)
       return;
-    if(!force){
-      if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.checkFileExtension(callback,values)){
-        return;
-      }
-    }
+
     for(let key in values){
       properties[key]=values[key];
     }

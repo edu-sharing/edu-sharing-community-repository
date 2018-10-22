@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
 	<values>
-		<supportedLanguages>de</supportedLanguages>
-		<supportedLanguages>en</supportedLanguages>
 		<extension></extension>
 		<loginUrl></loginUrl>
 		<editProfileUrl></editProfileUrl>

@@ -173,10 +173,16 @@ public class MimeTypesV2 {
 	if(COMPRESSED.contains(mimetype)){
 		if(properties!=null) {
 		String ccressourcetype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCETYPE);
+		String ccressourcesubtype=(String) properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE);
 			if("imsqti".equals(ccressourcetype))
 				return "file-qti";
 			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_H5P.equals(ccressourcetype))
 				return "file-h5p";
+			if(RessourceInfoExecuter.CCM_RESSOURCETYPE_EDUHTML.equals(ccressourcetype)){
+				if("webgl".equals(ccressourcesubtype)) {
+					return "file-webgl";
+				}
+			}
 		}
 		return "file-zip";
 	}

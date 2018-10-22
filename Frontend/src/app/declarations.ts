@@ -51,6 +51,7 @@
   import {InputPasswordComponent} from "./common/ui/input-password/input-password.component";
   import {PoweredByComponent} from "./common/ui/powered-by/powered-by.component";
   import {FooterComponent} from "./common/ui/footer/footer.component";
+  import {ReplaceCharsPipe} from "./common/ui/replace-chars.pipe";
 
 export const DECLARATIONS = [
       RestTestComponent,
@@ -68,6 +69,7 @@ export const DECLARATIONS = [
       NodeDatePipe,
       TimePipe,
       PermissionNamePipe,
+      ReplaceCharsPipe,
       AuthorityNamePipe,
       AutocompleteComponent,
       AuthoritySearchInputComponent,

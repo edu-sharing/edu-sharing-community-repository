@@ -43,10 +43,48 @@
   }
 }
 .info{
-  max-width: 600px;
+  max-width: 800px;
   .version{
     white-space: pre-line;
     padding:0 20px;
+  }
+  .checks{
+    position: relative;
+    .check {
+      display: flex;
+      flex-direction: row;
+      background-color: lighten($colorStatusPositive, 40%);
+      padding: 10px 10px;
+      margin:2px 0;
+      .data{
+        flex-grow: 1;
+      }
+      >div{
+        display: flex;
+        flex-direction: column;
+        div:first-child{
+          flex-grow: 1;
+        }
+        >div{
+          display:flex;
+          flex-direction: row;
+          align-items: center;
+          .material-icons{
+            margin-right: 5px;
+          }
+        }
+      }
+      .title {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      &.check-fail {
+        background-color: lighten($warning, 60%);
+      }
+      &.check-warn {
+        background-color: lighten($warningMedium, 50%);
+      }
+    }
   }
 }
 .applications{
@@ -297,15 +335,6 @@
     float:left;
     width:100%;
   }
-  .reload{
-    display: flex;
-    width: 100%;
-    justify-content: flex-end;
-    color:$textLight;
-    padding-bottom: 10px;
-    position: absolute;
-    top:-47px;
-  }
   .no-jobs{
     font-size: 120%;
     color:$textVeryLight;
@@ -417,6 +446,15 @@
     width:16px;
     height:16px;
   }
+}
+.reload{
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  color:$textLight;
+  padding-bottom: 10px;
+  position: absolute;
+  top:-47px;
 }
 .row{
   position: fixed;

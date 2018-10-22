@@ -258,10 +258,13 @@ export class NodeHelper{
     let options=rest.getRequestOptions();
     options.responseType=ResponseContentType.Blob;
 
-    rest.get(node.preview.url+"&quality="+quality,options,false).subscribe((data:Response)=>{
+    rest.get(node.preview.url+"&quality="+quality,options,false).subscribe((data)=>{
     //rest.get("http://localhost:8081/edu-sharing/rest/authentication/v1/validateSession",options,false).subscribe((data:Response)=>{
       node.preview.data=data.blob();
       observer.next(node);
+      observer.complete();
+    },(error)=>{
+      observer.error(error);
       observer.complete();
     });
   });

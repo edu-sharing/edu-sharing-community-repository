@@ -276,6 +276,7 @@
       "TYPE":"Choose license",
       "NONE_NAME":"No license chosen",
       "COPYRIGHT_NAME":"protected by copyright law",
+      "CC_BY_NAME":"Creative Commons",
       "CC_0_NAME":"CC 0 / Public Domain",
       "ONLY_OER":"OER licenses only",
       "OER":"OER",

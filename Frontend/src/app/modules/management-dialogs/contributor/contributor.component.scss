@@ -51,7 +51,7 @@ h2{
       display:flex;
       align-items: center;
       width:100%;
-      padding-top:6px;
+      padding-top:14px;
       margin-bottom: 24px;
       justify-content: center;
       >i{
@@ -60,6 +60,7 @@ h2{
     }
     ng-datepicker{
       flex-grow: 1;
+      margin-top: -10px;
     }
   }
 }

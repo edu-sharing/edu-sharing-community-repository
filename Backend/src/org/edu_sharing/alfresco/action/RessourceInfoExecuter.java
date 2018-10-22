@@ -60,60 +60,63 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	public static final String CCM_PROP_IO_RESOURCESUBTYPE = "{http://www.campuscontent.de/model/1.0}ccresourcesubtype";
 	public static final String CCM_RESSOURCETYPE_MOODLE = "moodle";
 	public static final String CCM_RESSOURCETYPE_H5P = "h5p";
+	public static final String CCM_RESSOURCETYPE_EDUHTML = "eduhtml";
 
-	protected void executeImpl(Action action, NodeRef actionedUponNodeRef) {
+	private ArchiveInputStream getZipInputStream(ContentReader contentreader) throws IOException {
+		InputStream is = contentreader.getContentInputStream();
 
-		Object obj = nodeService.getProperty(actionedUponNodeRef, ContentModel.PROP_CONTENT);
-		ContentReader contentreader = this.contentService.getReader(actionedUponNodeRef, ContentModel.PROP_CONTENT);
+		Tika tika = new Tika();
+		String type = tika.detect(is);
+		logger.info("type:" + type);
 
-		if (contentreader != null) {
-			logger.info(contentreader.getMimetype());
+		if(type == null) {
+			return null;
+		}
 
-			InputStream is = contentreader.getContentInputStream();
-
-			//PushbackInputStream pbis = new PushbackInputStream(is);
-
-			ArchiveInputStream zip = null;
-			ArchiveEntry current = null;
+		if(type.equals("application/gzip")) {
 
 			try {
-				
-				Tika tika = new Tika();
-				String type = tika.detect(is);
-				logger.info("type:" + type);
-				
-				if(type == null) {
-					return;
-				}
-				
-				if(type.equals("application/gzip")) {
-		
-					try {
-						final InputStream bis = new BufferedInputStream(is);
-						CompressorInputStream cis = null;
-						cis = new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.GZIP,
-									bis);
-						zip = new TarArchiveInputStream(cis);
-						
-					}catch(CompressorException e) {
-						logger.error(e.getMessage());
-						
-					}
-				}else if(type.equals("application/zip")) {
-					zip = new ZipArchiveInputStream(is, contentreader.getEncoding(), true);
-				}else {
-					logger.info("unknown format:" +  type);
-					return;
-				}
-				
+				final InputStream bis = new BufferedInputStream(is);
+				CompressorInputStream cis = null;
+				cis = new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.GZIP,
+						bis);
+				return new TarArchiveInputStream(cis);
 
-				while ((current = zip.getNextEntry()) != null) {
+			}catch(CompressorException e) {
+				logger.error(e.getMessage());
+
+			}
+		}else if(type.equals("application/zip")) {
+			return new ZipArchiveInputStream(is, contentreader.getEncoding(), true);
+		}else {
+			logger.info("unknown format:" +  type);
+		}
+		return null;
+	}
+	protected void executeImpl(Action action, NodeRef actionedUponNodeRef) {
+
+		ContentReader contentreader = this.contentService.getReader(actionedUponNodeRef, ContentModel.PROP_CONTENT);
+
+
+		if (contentreader != null) {
+			try{
+			logger.info(contentreader.getMimetype());
+
+			ArchiveInputStream zip = getZipInputStream(contentreader);
+			ArchiveEntry current = null;
+
+			while ((current = zip.getNextEntry()) != null) {
 					if (current.getName().equals("imsmanifest.xml")) {
 
 						process(zip, contentreader, actionedUponNodeRef);
 						zip.close();
 						return;
 
+					}
+					if (current.getName().equalsIgnoreCase("index.html") || current.getName().equalsIgnoreCase("index.htm")) {
+						zip.close();
+						proccessGenericHTML(actionedUponNodeRef);
+						return;
 					}
 
 					if (current.getName().equals("moodle.xml")) {
@@ -140,6 +143,32 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 			}
 		}
 
+	}
+
+	private void proccessGenericHTML(NodeRef nodeRef) {
+		nodeService.addAspect(nodeRef, QName.createQName(CCM_ASPECT_RESSOURCEINFO),
+				null);
+		nodeService.setProperty(nodeRef, QName.createQName(CCM_PROP_IO_RESSOURCETYPE),
+				CCM_RESSOURCETYPE_EDUHTML);
+
+		// check if file contains unity content (web gl)
+		try{
+			ContentReader contentreader = this.contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
+			ArchiveInputStream zip = getZipInputStream(contentreader);
+			while(true){
+				ArchiveEntry entry = zip.getNextEntry();
+				if(entry==null)
+					break;
+				if(entry.getName().equals("Build/UnityLoader.js")){
+
+					nodeService.setProperty(nodeRef, QName.createQName(CCM_PROP_IO_RESOURCESUBTYPE),
+						"webgl");
+				}
+			}
+		}
+		catch(Throwable t){
+			logger.info(t);
+		}
 	}
 
 	private void process(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {

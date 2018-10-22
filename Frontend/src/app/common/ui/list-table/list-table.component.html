@@ -108,7 +108,7 @@
                      [style.bottom]="dropdownBottom"
                      [style.right]="dropdownRight"
                 >
-                    <a class="collection-item"
+                    <a class="collection-item collection-item-{{option.name | replaceChars:{search:'.',replace:'-'} }}"
                        [class.collection-item-seperate-bottom]="option.isSeperateBottom && i"
                        [class.collection-item-seperate]="option.isSeperate && i"
                        *ngFor="let option of _options;let i=index"
@@ -208,7 +208,12 @@
                 </div>
                 <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)">
                     <div class="display-none" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
-                    <div class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
+                    <div class="row-group">
+                        <div class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
+                        <div *ngIf="i==0 && viewType==0 && node.properties && node.properties['virtual:childobjectcount']>0" class="childobjectCount">
+                            <span>{{node.properties['virtual:childobjectcount']*1+1}}</span><i class="material-icons">filter_none</i>
+                        </div>
+                    </div>
                 </div>
                 <div *ngFor="let option of optionsAlways"
                      class="more moreAlways column"

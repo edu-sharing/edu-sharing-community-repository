@@ -97,7 +97,7 @@ export class AdminComponent {
   public templates:string[];
   public eduGroupSuggestions:SuggestItem[];
   public eduGroupsSelected:SuggestItem[] = [];
-
+  systemChecks : any = [];
   public startJob(){
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -173,10 +173,11 @@ export class AdminComponent {
           return;
         }
         this.globalProgress=false;
-        this.tab='INFO';
         this.route.queryParams.subscribe((data:any)=>{
             if(data['mode'])
                 this.tab=data['mode'];
+            else
+              this.tab='INFO';
         });
         this.showWarning=true;
         this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
@@ -191,7 +192,8 @@ export class AdminComponent {
             this.lucene=data;
         });
         this.reloadJobStatus();
-        setInterval(()=>{
+        this.runChecks();
+          setInterval(()=>{
             if(this.tab=='JOBS')
                 this.reloadJobStatus();
         },10000);
@@ -675,6 +677,81 @@ export class AdminComponent {
         this.admin.getJobs().subscribe((jobs)=>{
             this.jobs=jobs;
         })
+    }
+
+    private runChecks() {
+        this.systemChecks=[];
+
+        // check versions render service
+        this.connector.getAbout().subscribe((about)=>{
+            this.systemChecks.push({
+              name:"RENDERING",
+              status:about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
+              translate:about.version
+            });
+        },(error)=>{
+            this.systemChecks.push({
+                name:"RENDERING",
+                status:"FAIL",
+                error:error
+            });
+        });
+        this.node.getNodePermissions(RestConstants.USERHOME).subscribe((data)=>{
+          let status='OK';
+          for(let perm of data.permissions.localPermissions.permissions){
+            if(perm.authority.authorityName==RestConstants.AUTHORITY_EVERYONE){
+              status='FAIL';
+            }
+          }
+          this.systemChecks.push({
+              name:"COMPANY_HOME",
+              status:status,
+          });
+        },(error)=>{
+            this.systemChecks.push({
+                name:"COMPANY_HOME",
+                status:"FAIL",
+                error:error
+            });
+        });
+        this.admin.getJobs().subscribe((jobs)=>{
+            let count=0;
+            for(let job of jobs){
+              if(job.status=='Running'){
+                count++;
+              }
+            }
+            this.systemChecks.push({
+                name:"JOBS_RUNNING",
+                status:count==0 ? 'OK' : 'WARN',
+                translate:{count:count}
+            });
+        });
+        this.admin.getApplicationXML(RestConstants.CCMAIL_APPLICATION_XML).subscribe((mail)=>{
+            if(this.config.instant("nodeReport",false)){
+                this.systemChecks.push({
+                    name:"MAIL_REPORT",
+                    status:mail['mail.report.receiver'] && mail['mail.smtp.server'] ? 'OK' : 'FAIL',
+                    translate:mail
+                });
+            }
+            this.systemChecks.push({
+                name:"MAIL_SETUP",
+                status:mail['mail.smtp.server'] ? 'OK' : 'FAIL',
+                translate:mail
+            });
+        });
+    }
+    getSystemChecks(){
+      this.systemChecks.sort((a:any,b:any)=>{
+          let status:any={'FAIL':0,'WARN':1,'OK':2};
+          let statusA=status[a.status];
+          let statusB=status[b.status];
+          if(statusA!=statusB)
+              return statusA<statusB ? -1 : 1;
+          return a.name.localeCompare(b.name);
+      });
+      return this.systemChecks;
     }
 }
 
