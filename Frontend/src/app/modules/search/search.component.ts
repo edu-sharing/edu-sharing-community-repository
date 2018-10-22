@@ -798,13 +798,15 @@ export class SearchComponent {
       if(param['reurl']) {
         this.hasCheckbox=false;
       }
-      if(param['savedQuery']){
-          this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
-              this.currentSavedSearch=data.node;
-              this.sidenavTab=1;
-              this.invalidateMds();
-          });
-      }
+        if(param['savedQuery']){
+            this.nodeApi.getNodeMetadata(param['savedQuery'],[RestConstants.ALL]).subscribe((data:NodeWrapper)=>{
+                this.loadSavedSearchNode(data.node);
+            });
+        }
+        else{
+          this.invalidateMds();
+        }
+        this.searchService.init();
       this.refreshListOptions();
 
     });
@@ -925,7 +927,9 @@ export class SearchComponent {
       this.applyParameters(this.mdsRef.saveValues());
     }));
     if(this.applyMode){
-      let apply=new OptionItem('APPLY','redo',(node:Node)=>NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl));
+      let apply=new OptionItem('APPLY','redo',(node:Node)=>{
+        NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,node,this.searchService.reurl)
+      });
       this.savedSearchOptions.push(apply);
     }
     else{
@@ -980,7 +984,8 @@ export class SearchComponent {
   }
   private loadSavedSearchNode(node:Node){
     this.sidenavTab=0;
-    UIHelper.routeToSearchNode(this.router,node);
+    UIHelper.routeToSearchNode(this.router,this.searchService,node);
+    this.currentSavedSearch=node;
   }
   private goToSaveSearchWorkspace() {
     this.nodeApi.getNodeMetadata(RestConstants.SAVED_SEARCH).subscribe((data:NodeWrapper)=>{
@@ -1003,7 +1008,7 @@ export class SearchComponent {
         this.search.searchSimple('saved_search',[],this.savedSearchQuery,request,RestConstants.CONTENT_TYPE_ALL).subscribe((data: NodeList) => {
           this.savedSearch = data.nodes;
           this.savedSearchLoading=false;
-        });;
+        });
       }
     }
   }
@@ -1108,15 +1113,11 @@ export class SearchComponent {
               console.warn('will continue with default mds');
               this.mdsId=RestConstants.DEFAULT;
             }
-            this.invalidateMds();
-            this.searchService.init();
             this.prepare(param);
 
           }
         },(error:any)=>{
           this.mdsId=RestConstants.DEFAULT;
-          this.invalidateMds();
-          this.searchService.init();
           this.prepare(param);
         });
       });
