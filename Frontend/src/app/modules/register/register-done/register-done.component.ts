@@ -59,6 +59,7 @@ export class RegisterDoneComponent{
                 private router: Router
     ) {}
     private activate(keyUrl: string) {
+        this.loading=true;
         if(this.inputState=='done') {
             this.register.activate(keyUrl).subscribe(() => {
                 this.router.navigate([UIConstants.ROUTER_PREFIX + "workspace"]);
