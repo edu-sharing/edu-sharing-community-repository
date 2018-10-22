@@ -62,6 +62,12 @@
 @mixin darken(){
   background-color:$darkenColor;
 }
+@mixin darkenLight(){
+  background-color:$darkenLightColor;
+}
+@mixin blurBackground($radius: 5px){
+  backdrop-filter: blur($radius);
+}
 @mixin  setGlobalFocus(){
   //respect element border radius
   @include  removeDefaultFocus();
