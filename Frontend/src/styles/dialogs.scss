@@ -132,8 +132,7 @@ input[type=search]{
   background: linear-gradient(to bottom, $actionDialogBackground 0%,$actionDialogBackground 80px,transparent 80px,transparent 100%);
 
   .card-title-info{
-    position: absolute;
-    top: 52px;
+    margin-top: -28px;
     font-size: 9pt;
     color: $textLight;
     display: flex;
