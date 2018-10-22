@@ -171,19 +171,24 @@ export class TranslationLoader implements TranslateLoader {
         }
         for (const obj of translations) {
           for (const key in obj) {
-            let path=key.split(".");
-            if(path.length==1) {
-              continue;
-            }
-            else if(path.length==2){
-              final[path[0]][path[1]]=obj[key];
-            }
-            else if(path.length==3){
-              final[path[0]][path[1]][path[2]]=obj[key];
-            }
-            else if(path.length==4){
-              final[path[0]][path[1]][path[2]][path[3]]=obj[key];
-            }
+              try {
+                  let path = key.split(".");
+                  if (path.length == 1) {
+                      continue;
+                  }
+                  else if (path.length == 2) {
+                      final[path[0]][path[1]] = obj[key];
+                  }
+                  else if (path.length == 3) {
+                      final[path[0]][path[1]][path[2]] = obj[key];
+                  }
+                  else if (path.length == 4) {
+                      final[path[0]][path[1]][path[2]][path[3]] = obj[key];
+                  }
+              }
+              catch (e) {
+                  console.error("error while language override of " + key, e);
+              }
           }
         }
         observer.next(final);
