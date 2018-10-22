@@ -73,6 +73,7 @@
 				{{if organisation}}
 					<p>Organisation des Nutzers: {{organisation}}</p>
 				{{endif}}
+				<a class="btn" href="{{link}}">Zur Nutzerverwaltung</a>
 			</div>
 		]]>
 		</message>

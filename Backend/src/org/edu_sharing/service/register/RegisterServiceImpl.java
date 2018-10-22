@@ -153,6 +153,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         try{
             Map<String, String> replace = new HashMap<>();
+            replace.put("link",URLTool.getNgComponentsUrl()+"permissions");
             addMailRegisterInfo(info, replace);
             Mail mail = new Mail();
             ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
