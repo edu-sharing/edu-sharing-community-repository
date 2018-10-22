@@ -12,6 +12,7 @@ import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterServiceImpl implements RegisterService {
+    static Logger logger = Logger.getLogger(RegisterServiceImpl.class);
     private static int KEY_LENGTH = 16;
     public final static SimpleCache<String,RegisterInformation> registerUserCache = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingRegisterUserCache");
     public final static SimpleCache<String,RegisterInformation> recoverPasswordCache = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingRecoverPasswordCache");
@@ -148,6 +150,24 @@ public class RegisterServiceImpl implements RegisterService {
         registerUserCache.remove(key);
         // authenticate the newly activated user automatically
         authenticate(info);
+
+        try{
+            Map<String, String> replace = new HashMap<>();
+            addMailRegisterInfo(info, replace);
+            Mail mail = new Mail();
+            ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+            String currentLocale = new AuthenticationToolAPI().getPrimaryLocale();
+            String subject = MailTemplate.getSubject("userRegisterInformation", currentLocale);
+            String content = MailTemplate.getContent("userRegisterInformation", currentLocale, true);
+            String receiver=(String)mail.getProperties().get("mail.register.receiver");
+            mail.sendMailHtml(
+                    context,
+                    receiver,
+                    subject,content, replace);
+        }catch(Throwable t){
+            logger.warn("Error sending register confirmation to admin",t);
+        }
+
         return result;
 
     }
