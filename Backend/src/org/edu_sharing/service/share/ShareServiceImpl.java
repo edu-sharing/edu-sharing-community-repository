@@ -72,6 +72,9 @@ public class ShareServiceImpl implements ShareService {
 		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE)) {
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
 		}
+		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK)) {
+			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK);
+		}
 		NodeService nodeService = serviceRegistry.getNodeService();
 		AuthenticationService authService = serviceRegistry.getAuthenticationService();
 		//email validation
