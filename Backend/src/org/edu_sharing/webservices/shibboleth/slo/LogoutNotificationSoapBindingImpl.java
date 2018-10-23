@@ -1,5 +1,6 @@
 package org.edu_sharing.webservices.shibboleth.slo;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 
 import org.apache.log4j.Logger;
@@ -8,9 +9,15 @@ import org.edu_sharing.repository.server.tools.cache.ShibbolethSessionsCache;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 
-public class LogoutNotificationSoapBindingImpl implements LogoutNotification{
+public class LogoutNotificationSoapBindingImpl implements LogoutNotification, Serializable{
 	
-	Logger logger = Logger.getLogger(LogoutNotificationSoapBindingImpl.class);
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	
+	transient Logger logger = Logger.getLogger(LogoutNotificationSoapBindingImpl.class);
 	
 	@Override
 	public OKType logoutNotification(String[] sessionIDs) throws RemoteException {
