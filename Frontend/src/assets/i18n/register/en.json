@@ -14,7 +14,7 @@
     "PW_medium": "Good",
     "PW_strong": "Strong",
     "PL_PASSWORD": "At least 5 different characters",
-    "HINT": "Hint: Use numbers, special characters, ...",
+    "HINT": "Hint: Use also numbers and special characters",
     "PL_ORG": "e.g.",
     "BUTTON": "Register",
     "TOAST":"The e-mail has been sent.",
@@ -35,7 +35,8 @@
       "ACTIVATE_HINT": "You received the activation code via e-mail."
     },
     "REQUEST": {
-      "TITLE": "Forgot your password?",
+      "TITLE": "Password request",
+      "HEADLINE": "Forgot your password?",
       "INFO": "Enter your e-mail adress to set a new password.",
       "PLACEHOLDER":"Your e-mail adress",
       "BUTTON":"request new password",
