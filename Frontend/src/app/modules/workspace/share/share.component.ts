@@ -171,6 +171,9 @@ export class WorkspaceShareComponent  {
       }, (error: any) => this.toast.error(error));
       this.nodeApi.getNodeParents(node.ref.id).subscribe((data: NodeList) => {
         this.inheritAllowed = data.nodes.length > 1;
+      },(error)=>{
+          // this can be caused if the node is somewhere at a location not fully visible to the user
+          this.inheritAllowed=true;
       });
     }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
