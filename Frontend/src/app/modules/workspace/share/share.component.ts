@@ -160,6 +160,9 @@ export class WorkspaceShareComponent implements AfterViewInit{
         //this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
         // changed in 4.1 to keep inherit state of collections
         this.inheritAllowed = data.nodes.length > 1;
+      },(error)=>{
+          // this can be caused if the node is somewhere at a location not fully visible to the user
+          this.inheritAllowed=true;
       });
     }
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
