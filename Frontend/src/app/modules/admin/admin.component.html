@@ -333,6 +333,22 @@
     </div>
     <a class="btn waves-effect waves-light" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</a>
   </div>
+    <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.TEST_MAIL' | translate}}</span></div>
+    <div class="group">
+        <form (ngSubmit)="testMail()">
+            <div class="inputGroupGrow">
+                <div class="info">{{'ADMIN.TOOLKIT.TEST_MAIL_RECEIVER' | translate }}</div>
+                <input type="email" name="receiver" [(ngModel)]="mailReceiver">
+            </div>
+            <div class="inputGroupGrow">
+                <div class="info">{{'ADMIN.TOOLKIT.TEST_MAIL_TEMPLATE' | translate }}</div>
+                <select name="template" [(ngModel)]="mailTemplate">
+                    <option *ngFor="let template of mailTemplates">{{template}}</option>
+                </select>
+            </div>
+            <a class="btn btn-shadow" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.TOOLKIT.TEST_MAIL_SEND' | translate }}</a>
+        </form>
+    </div>
   <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
   <div class="group catalina">
     <div class="btn-flat btn-shadow" (click)="refreshCatalina()"><i class="material-icons">refresh</i></div>

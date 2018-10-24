@@ -33,6 +33,7 @@ import {ListItem} from "../../../common/ui/list-item";
 })
 export class PermissionsAuthoritiesComponent {
   public GROUP_TYPES=RestConstants.VALID_GROUP_TYPES;
+  public ORG_TYPES=RestConstants.VALID_GROUP_TYPES_ORG;
   public list : any[]=[];
   public edit : any;
   private editDetails : any;
@@ -206,7 +207,7 @@ export class PermissionsAuthoritiesComponent {
     let list=this.getList(null);
     if(!all && !list.length){
       if(this._mode=='GROUP') {
-        options.push(new OptionItem("PERMISSIONS.MENU_CREATE_GROUP", "add", (data: any) => this.createAuthority()))
+        options.push(new OptionItem("PERMISSIONS.MENU_CREATE_GROUP", "add", (data: any) => this.createGroup()))
       }
       if(this._mode=='USER'){
         if(this.org)
@@ -585,8 +586,12 @@ export class PermissionsAuthoritiesComponent {
     this.editDetails={};
     this.editId=null;
   }
+  private createGroup(){
+      this.createAuthority();
+      this.edit.profile.groupType=null;
+  }
   private createOrg() {
-    this.createAuthority();
+    this.createGroup();
   }
 
   private addMembersFunction(data: any) {

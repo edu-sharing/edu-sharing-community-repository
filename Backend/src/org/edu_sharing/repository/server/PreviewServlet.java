@@ -37,7 +37,8 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.VersionService;
-import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.QName;import org.apache.james.mime4j.io.MaxHeaderLengthLimitException;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
@@ -52,6 +53,8 @@ import org.springframework.context.ApplicationContext;
 
 
 public class PreviewServlet extends HttpServlet implements SingleThreadModel {
+
+	private Logger logger = Logger.getLogger(PreviewServlet.class);
 
 	public static final String RESULT_TYPE_MIME_ICON = "mime_type";
 
@@ -292,7 +295,11 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			resp.sendRedirect(noPermImage);
 			return;
 		} catch (Throwable e) {
-			e.printStackTrace();
+			// smaller logging for collection ref (i.e. original may deleted, that occurs often)
+			if(isCollection)
+				logger.warn(e.getMessage());
+			else
+				logger.warn(e);
 		}
 		/**
 		 * fallback to mime first, then default

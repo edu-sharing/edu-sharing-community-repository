@@ -183,6 +183,14 @@ export class RestAdminService extends AbstractRestService{
     return this.connector.get<any>(query,this.connector.getRequestOptions());
   }
 
+  public testMail(receiver:string,template:string) {
+      let query=this.connector.createUrl("admin/:version/mail/:receiver/:template",null,[
+          [":receiver",receiver],
+          [":template",template],
+      ]);
+      return this.connector.post(query,null,this.connector.getRequestOptions());
+  }
+
   public updateApplicationXML(xml:string,homeAppProperties: any[]) {
     let query=this.connector.createUrl("admin/:version/applications/:xml",null,[[":xml",xml]]);
     return this.connector.put(query,JSON.stringify(homeAppProperties),this.connector.getRequestOptions());

@@ -41,6 +41,10 @@ import {Observable, Observer} from 'rxjs/index';
   ]
 })
 export class AdminComponent {
+  mailTemplates=[
+      "invited",
+      "nodeIssue"
+  ];
   public tab : string;
   public globalProgress=true;
   public appUrl:string;
@@ -98,6 +102,8 @@ export class AdminComponent {
   public eduGroupSuggestions:SuggestItem[];
   public eduGroupsSelected:SuggestItem[] = [];
   systemChecks : any = [];
+  mailReceiver: string;
+  mailTemplate: string;
   public startJob(){
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -752,6 +758,17 @@ export class AdminComponent {
           return a.name.localeCompare(b.name);
       });
       return this.systemChecks;
+    }
+
+    testMail() {
+        this.globalProgress=true;
+        this.admin.testMail(this.mailReceiver,this.mailTemplate).subscribe(()=>{
+          this.toast.toast('ADMIN.TOOLKIT.MAIL_SENT',{receiver:this.mailReceiver});
+            this.globalProgress=false;
+        },(error)=>{
+          this.toast.error(error);
+            this.globalProgress=false;
+        });
     }
 }
 

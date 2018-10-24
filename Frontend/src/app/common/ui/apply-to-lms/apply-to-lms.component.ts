@@ -23,8 +23,8 @@ import {RestLocatorService} from "../../rest/services/rest-locator.service";
 })
 
 export class ApplyToLmsComponent{
-  private node: Node;
-  private reurl: string;
+  node: Node;
+  reurl: string;
 
   constructor(
     private connector : RestConnectorService,
@@ -70,11 +70,14 @@ export class ApplyToLmsComponent{
     let reurl = this.reurl;
     console.log(reurl);
     let ccrepUrl='ccrep://'+encodeURIComponent(this.node.ref.repo)+'/'+encodeURIComponent(this.node.ref.id);
-    if(reurl=="IFRAME"){
+    if(reurl=="IFRAME" || reurl=="WINDOW"){
       (this.node as any).objectUrl=ccrepUrl;
       NodeHelper.appendImageData(this.connector,this.node).subscribe((data:Node)=>{
-        console.log(data);
         this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE,data);
+        window.history.back();
+      },(error)=>{
+        console.warn("failed to fetch image data",error);
+        this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE,this.node);
         window.history.back();
       });
       return;

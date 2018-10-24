@@ -303,6 +303,8 @@
       "TYPE":"Lizenz wählen",
       "NONE_NAME":"Keine Lizenz gewählt",
       "COPYRIGHT_NAME":"Copyright-Lizenzen",
+      "COPYRIGHT_FREE_NAME":"Copyright, freier Zugang",
+      "COPYRIGHT_LICENSE_NAME":"Copyright, lizenzpflichtig",
       "CC_BY_NAME":"Creative Commons",
       "CC_0_NAME":"CC 0 / Public Domain (Gemeinfrei)",
       "ONLY_OER":"Nur OER-Lizenzen",
