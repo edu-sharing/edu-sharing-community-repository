@@ -58,6 +58,7 @@ export class AdminComponent {
   public jobs: any;
   public jobsOpen: boolean[]=[];
   public lucene:any={offset:0,count:100};
+  public browseMode='NODEREF';
   public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
@@ -119,6 +120,17 @@ export class AdminComponent {
     console.log(node);
     this.nodeInfo=node;
   }
+    public searchNoderef() {
+        this.storage.set('admin_lucene', this.lucene);
+        this.globalProgress=true;
+        this.node.getNodeMetadata(this.lucene.noderef,[RestConstants.ALL]).subscribe((node)=>{
+            this.globalProgress=false;
+            this.luceneNodes=[node.node];
+        },(error)=>{
+            this.globalProgress=false;
+            this.toast.error(error);
+        });
+    }
   public searchLucene(){
     this.storage.set('admin_lucene',this.lucene);
     let authorities=[];

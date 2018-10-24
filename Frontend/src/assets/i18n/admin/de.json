@@ -163,7 +163,9 @@
       "MAIL_SENT":"Test-E-Mail an {{receiver}} gesendet"
     },
     "BROWSER":{
-      "LUCENE_SEARCH":"Suche via Lucene",
+      "NODE_BROWSER":"Node-Browser",
+      "MODE":"Modus:",
+      "NODEREF":"UUID der gesuchten Node:",
       "LUCENE_QUERY":"Lucene-Query:",
       "LUCENE_AUTHORITIES":"Suchen als folgende Authorities:",
       "LUCENE_OFFSET":"Start bei:",
