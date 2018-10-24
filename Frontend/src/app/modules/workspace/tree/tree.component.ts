@@ -61,9 +61,6 @@ export class WorkspaceTreeComponent  {
   private drop(event : any){
     this.onDrop.emit(event);
   }
-  public supportsWorkflow(){
-    return this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0;
-  }
   private updateOptions(event : Node){
     this.onUpdateOptions.emit(event);
   }

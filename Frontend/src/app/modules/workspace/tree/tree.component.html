@@ -71,7 +71,7 @@
     (onClick)="openNode($event)"
   ></workspace-sub-tree>
 </div>
-<div class="rootNode" *ngIf="supportsWorkflow()" [class.rootNodeSelected]="root==WORKFLOW_RECEIVE" (click)="setRoot(WORKFLOW_RECEIVE)">
+<div class="rootNode" [class.rootNodeSelected]="root==WORKFLOW_RECEIVE" (click)="setRoot(WORKFLOW_RECEIVE)">
   <i class="material-icons typeIcon">inbox</i>{{'WORKSPACE.WORKFLOW_RECEIVE' | translate}}
 </div>
 <div class="tree" *ngIf="root==WORKFLOW_RECEIVE">
