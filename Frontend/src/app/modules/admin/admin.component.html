@@ -346,7 +346,7 @@
                     <option *ngFor="let template of mailTemplates">{{template}}</option>
                 </select>
             </div>
-            <div class="btn-flat btn-shadow" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.TOOLKIT.TEST_MAIL_SEND' | translate }}</div>
+            <a class="btn btn-shadow" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.TOOLKIT.TEST_MAIL_SEND' | translate }}</a>
         </form>
     </div>
   <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
