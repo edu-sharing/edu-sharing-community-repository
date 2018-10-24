@@ -9,7 +9,7 @@
     "RECOVER_PASSWORD":"Login vergessen",
     "ERROR":"Zugangsdaten fehlerhaft",
     "REGISTER_TEXT":"Noch keinen Zugang?",
-    "REGISTER_LINK":"Zu Registrierung",
+    "REGISTER_LINK":"Zur Registrierung",
     "USE_URL_TEXT":"Über externen Anbieter anmelden (z.B. Shibboleth)",
     "USE_URL_LINK":"Zum Anbieter",
     "SAFE_PREVIOUS":"Um sich im geschützten Bereich anzumelden, melden Sie sich bitte zuerst im Workspace an",
