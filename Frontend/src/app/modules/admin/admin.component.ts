@@ -687,8 +687,8 @@ export class AdminComponent {
           log=result;
         }
         if(log.length<=100)
-            return log.reverse();
-        return log.slice(job.log.length-100);
+            return log;
+        return log.slice(0,100);
     }
     private cancelJob(job:any){
       this.dialogTitle='ADMIN.JOBS.CANCEL_TITLE';
