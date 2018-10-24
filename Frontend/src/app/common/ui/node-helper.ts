@@ -258,7 +258,7 @@ export class NodeHelper{
     let options:any=rest.getRequestOptions();
     options.responseType='blob';
 
-    rest.get(node.preview.url+"&quality="+quality,options,false).subscribe((data)=>{
+    rest.get(node.preview.url+"&quality="+quality,options,false).subscribe((data:HttpResponse<Blob>)=>{
     //rest.get("http://localhost:8081/edu-sharing/rest/authentication/v1/validateSession",options,false).subscribe((data:Response)=>{
       node.preview.data=data.body;
       observer.next(node);
