@@ -95,4 +95,5 @@ public interface AdminService {
 	void refreshEduGroupCache(boolean keepExisting);
 
 
+    void testMail(String receiver, String template);
 }

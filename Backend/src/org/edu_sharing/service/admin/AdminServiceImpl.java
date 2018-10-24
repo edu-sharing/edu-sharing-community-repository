@@ -26,6 +26,7 @@ import java.util.TreeSet;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
@@ -62,14 +63,10 @@ import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.collections.CollectionImporter;
 import org.edu_sharing.repository.server.jobs.quartz.*;
 import org.edu_sharing.repository.server.jobs.quartz.JobHandler.JobConfig;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
-import org.edu_sharing.repository.server.tools.NameSpaceTool;
-import org.edu_sharing.repository.server.tools.PropertiesHelper;
-import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.CacheManagerFactory;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
+import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.repository.update.ClassificationKWToGeneralKW;
 import org.edu_sharing.repository.update.Edu_SharingAuthoritiesUpdate;
 import org.edu_sharing.repository.update.Edu_SharingPersonEsuidUpdate;
@@ -572,7 +569,24 @@ public class AdminServiceImpl implements AdminService  {
 			EduGroupCache.refresh();
 		}
 	}
-	
+
+	@Override
+	public void testMail(String receiver, String template) {
+		try {
+			String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+			String subject = MailTemplate.getSubject(template, currentLocale);
+			String content = MailTemplate.getContent(template, currentLocale, true);
+			Mail mail = new Mail();
+			ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+			mail.sendMailHtml(
+					context,
+					receiver,
+					subject, content, null);
+		}catch(Throwable t){
+			throw new RuntimeException(t);
+		}
+	}
+
 	@Override
 	public CacheInfo getCacheInfo(String name){
 		return CacheManagerFactory.getCacheInfo(name);

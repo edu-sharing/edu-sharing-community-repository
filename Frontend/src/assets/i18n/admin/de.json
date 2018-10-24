@@ -155,7 +155,12 @@
       "UPLOAD_TEMP_DONE":"Datei wurde unter {{filename}} auf dem Server abgelegt",
       "JOB_CLASS":"Klassenname der Job-Klasse:",
       "JOB_STARTED":"Die Aufgabe wurde gestartet. Überprüfen Sie die Aufgabenliste, um den Status einzusehen",
-      "START_JOB":"Aufgabe ausführen"
+      "START_JOB":"Aufgabe ausführen",
+      "TEST_MAIL":"E-Mail-Templates testen",
+      "TEST_MAIL_RECEIVER":"Empfänger Test-E-Mail:",
+      "TEST_MAIL_TEMPLATE":"Template für E-Mail:",
+      "TEST_MAIL_SEND":"Senden",
+      "MAIL_SENT":"Test-E-Mail an {{receiver}} gesendet"
     },
     "BROWSER":{
       "LUCENE_SEARCH":"Suche via Lucene",
