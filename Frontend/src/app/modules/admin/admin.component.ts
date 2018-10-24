@@ -43,7 +43,10 @@ import {Observable, Observer} from 'rxjs/index';
 export class AdminComponent {
   mailTemplates=[
       "invited",
-      "nodeIssue"
+      "nodeIssue",
+      "userRegister",
+      "passwordRequest",
+      "userRegisterInformation"
   ];
   public tab : string;
   public globalProgress=true;
