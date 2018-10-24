@@ -37,8 +37,8 @@
 				text-align:center;
 			}
 			.logo img{
-				min-width:100px;
 				width:30%;
+				min-width:100px;
 				max-width:250px;
 				height:auto;
 				padding-bottom:20px;
@@ -144,7 +144,7 @@
 				<h1>Hello {{firstName}} {{lastName}},</h1>
 				<p>If you forgot your password for logging into<a href="{{url}}"> {{url}} </a>.</p>
 				<p>Click on this link to assign a new password.</p>
-				<a class="btn" href="{{link}}">Finish registration</a>
+				<a class="btn" href="{{link}}">new password</a>
 				<p>
 					In case this email is not displayed correctly, please click » <a href="{{link}}">here</a> 
 				</p>

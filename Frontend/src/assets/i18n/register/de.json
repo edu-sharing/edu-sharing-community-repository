@@ -14,7 +14,7 @@
     "PW_medium": "Gut",
     "PW_strong": "Stark",
     "PL_PASSWORD": "Min. 5 verschiedene Zeichen",
-    "HINT": "Tipp: Verwende Zahlen, Sonderzeichen...",
+    "HINT": "Tipp: Verwende auch Zahlen und Sonderzeichen",
     "PL_ORG": "z.B.",
     "BUTTON": "Registrieren",
     "TOAST":"Die E-Mail wurde versendet.",
@@ -35,8 +35,9 @@
       "ACTIVATE_HINT": "Sie haben den Code in einer Bestätigungsmail erhalten."
     },
     "REQUEST":{
-      "TITLE": "Passwort vergessen?",
-      "INFO": "Geben Sie Ihre E-Mail Adresse ein, um ein neues Passwort festzulegen.",
+      "TITLE": "Passwort anfordern",
+      "HEADLINE": "Passwort vergessen?",
+      "INFO": "Geben Sie Ihre E-Mail Adresse ein, um ein neues Passwort anzufordern.",
       "PLACEHOLDER":"Ihre E-Mail Adresse",
       "BUTTON":"Neues Passwort anfordern",
       "MAIL_NOTE": "Klicken Sie auf den Link in der E-Mail oder verwenden Sie den Aktivierungscode, um ein neues Passwort festzulegen."

@@ -64,12 +64,15 @@
 		</message>
 	</template>
 	<template name="userRegisterInformation">
-		<subject>Benutzer {{email}} hat sich registriert</subject>
+		<subject>Neuer Benutzer hat sich registriert</subject>
 		<message><![CDATA[
 			<div class="center">
-				<img src="{{image:/assets/images/register/register-mail.png}}">
-				<h1>Hallo,</h1>
-				<p>Ein neuer Benutzer hat sich im System registriert: {{firstName}} {{lastName}} ({{email}})</p>
+				<img src="{{image:/assets/images/register/new_user.png}}">
+				<h1>Ein neuer Nutzer hat sich im System registriert!</h1>
+				<p>
+				Name: {{firstName}} {{lastName}} 
+				<br>E-Mail: <a href="mailto:{{email}}">{{email}}</a>
+				</p>
 				{{if organisation}}
 					<p>Organisation des Nutzers: {{organisation}}</p>
 				{{endif}}
