@@ -398,6 +398,13 @@
     .job-row{
       display: flex;
       flex-direction: row;
+      align-items: center;
+    }
+    .log-level{
+      max-width: 400px;
+      >* {
+        padding: 10px 20px;
+      }
     }
     .job-col{
       display: flex;
