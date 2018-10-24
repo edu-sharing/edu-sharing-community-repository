@@ -137,15 +137,14 @@ public class ImporterJob extends AbstractJob {
 				JobHandler.getInstance().updateJobName(context.getJobDetail(),"Importer Job " +importer.getClass().getSimpleName()+" " + new URL(oaiBaseUrl).getHost());
 			}catch(Throwable t){}
 
-			RecordHandlerInterface recordHandler = null;
+			Constructor recordHandler = null;
 			BinaryHandler binaryHandler = null;
 
 			if (recordHandlerClass != null) {
 				Class tClass = Class.forName(recordHandlerClass);
-				Constructor constructor = tClass.getConstructor(String.class);
-				recordHandler = (RecordHandlerInterface) constructor.newInstance(metadataSetId);
+				recordHandler = tClass.getConstructor(String.class);
 			} else {
-				recordHandler = new RecordHandlerLOM(metadataSetId);
+				recordHandler = RecordHandlerLOM.class.getConstructor(String.class);
 			}
 			if (binaryHandlerClass != null) {
 				Class tClass = Class.forName(binaryHandlerClass);
@@ -165,6 +164,7 @@ public class ImporterJob extends AbstractJob {
 			importer.setNrOfResumptions(-1);
 			importer.setPersistentHandler(new PersistentHandlerEdusharing(this));
 			importer.setSet(sets[0]);
+			importer.setMetadataSetId(metadataSetId);
 			importer.setRecordHandler(recordHandler);
 			importer.setJob(this);
 			if (urlImport != null) {

@@ -2,11 +2,13 @@ package org.edu_sharing.repository.server.importer;
 
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 
+import java.lang.reflect.Constructor;
+
 public interface Importer {
 	
 	public void setBaseUrl(String baseUrl);
 	
-	public void setRecordHandler(RecordHandlerInterface recordHandler);
+	public void setRecordHandler(Constructor recordHandler);
 	
 	public void setPersistentHandler(PersistentHandlerInterface persistentHandler);
 	
@@ -25,4 +27,6 @@ public interface Importer {
 	public void startImport(String[] oaiIDs, String set);
 
 	public void setJob(ImporterJob importerJob);
+
+	public void setMetadataSetId(String metadataSetId);
 }

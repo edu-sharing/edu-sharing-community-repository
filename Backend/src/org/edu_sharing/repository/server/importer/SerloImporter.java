@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.importer;
 
+import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,7 +101,7 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void setRecordHandler(RecordHandlerInterface recordHandler) {
+	public void setRecordHandler(Constructor recordHandler) {
 		
 	}
 	
@@ -334,6 +335,11 @@ public class SerloImporter implements Importer{
 
 	@Override
 	public void setJob(ImporterJob importerJob) {
+
+	}
+
+	@Override
+	public void setMetadataSetId(String metadataSetId) {
 
 	}
 

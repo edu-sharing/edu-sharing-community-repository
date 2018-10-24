@@ -30,8 +30,13 @@ package org.edu_sharing.repository.server.importer;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,6 +52,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
@@ -70,7 +76,7 @@ public class OAIPMHLOMImporter implements Importer{
 	
 	public String metadataPrefix = "oai_elixier";//oai_lom
 	
-	private RecordHandlerInterface recordHandler;
+	private Constructor recordHandler;
 	
 	PersistentHandlerInterface persistentHandler;
 	
@@ -84,6 +90,7 @@ public class OAIPMHLOMImporter implements Importer{
 	
 	String urlGetRecors = "";
 	private ImporterJob job;
+	private String metadataSetId;
 
 	/**
 	 * @param oai_base_url
@@ -94,6 +101,7 @@ public class OAIPMHLOMImporter implements Importer{
 	 * @param sets
 	 * @throws Exception
 	 */
+	/*
 	public OAIPMHLOMImporter(String oai_base_url,PersistentHandlerInterface persistentHandler, RecordHandlerInterface recordHandler, BinaryHandler binaryHandler, int nrOfResumptions, int nrOfRecords, String metadataPrefix, String[] sets) throws Exception{
 		
 		this.oai_base_url = oai_base_url;
@@ -105,7 +113,7 @@ public class OAIPMHLOMImporter implements Importer{
 		this.sets = sets;
 		this.metadataPrefix = metadataPrefix;
 	}
-	
+	*/
 	public OAIPMHLOMImporter(){
 	}
 
@@ -149,7 +157,7 @@ public class OAIPMHLOMImporter implements Importer{
 				}
 				
 			});
-			importer.setRecordHandler(new RecordHandlerLOMTest());
+			importer.setRecordHandler(RecordHandlerLOMTest.class.getConstructor(String.class));
 			importer.setSet(sets[0]);
 			importer.startImport();
 		}catch(Throwable e){
@@ -194,10 +202,11 @@ public class OAIPMHLOMImporter implements Importer{
 			for(int i = 0; i < nrOfRs; i++){
 				logger.info("node:" + (i+1) +" from:"+nrOfRs);
 				Node nodeRecord = nodeList.item(i);
-				recordHandler.handleRecord(nodeRecord,cursor,set);
-				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
+				RecordHandlerInterface handler = getRecordHandler();
+				handler.handleRecord(nodeRecord,cursor,set);
+				String nodeId = persistentHandler.safe(handler.getProperties(), cursor, set);
 				if(binaryHandler != null){
-					binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
+					binaryHandler.safe(nodeId, handler.getProperties(),nodeRecord);
 				}
 				new MCAlfrescoAPIClient().createVersion(nodeId, null);
 			}
@@ -255,8 +264,8 @@ public class OAIPMHLOMImporter implements Importer{
 			logger.warn("Result for query url "+url+" was empty!");
 		}
 	}
-	
-	
+
+	private ExecutorService executor = Executors.newFixedThreadPool(4);
 	public void handleIdentifierList(Document docIdentifiers, String cursor, String set) throws Throwable{
 		NodeList nodeList = (NodeList)xpath.evaluate("/OAI-PMH/ListIdentifiers/header", docIdentifiers, XPathConstants.NODESET);
 		
@@ -264,34 +273,51 @@ public class OAIPMHLOMImporter implements Importer{
 		if(nrOfRs == -1 || nrOfRs > nodeList.getLength()){
 			nrOfRs = nodeList.getLength();
 		}
+		List<Callable<Void>> threads = new ArrayList<>();
+		final String authority = AuthenticationUtil.getFullyAuthenticatedUser();
 		for(int i = 0; i < nrOfRs;i++){
 			if(job!=null && job.isInterrupted()){
 				logger.info("Will cancel identifier reading, job is aborted");
 				return;
 			}
-			Node headerNode = nodeList.item(i);
-			String identifier = (String)xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
-			String timeStamp = (String)xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
-			
-			String status = (String)xpath.evaluate("@status", headerNode, XPathConstants.STRING);
-			if(status != null && status.trim().equals("deleted")){
-				
-				logger.info("Object with Identifier:"+identifier+" is deleted. Will continue with the next one");
-				continue;
-			}
-			
-			if(persistentHandler.mustBePersisted(identifier, timeStamp)){
-				logger.info("identifier:" + identifier + " timeStamp: " + timeStamp+ " will be created/updated");
-				handleGetRecordStuff(cursor,set,identifier);
-			}else {
-				logger.info("identifier:" + identifier + " timeStamp: " + timeStamp+ " will NOT be updated");
-			}
-			
 			if(i > MAX_PER_RESUMPTION){
 				logger.error("only " +MAX_PER_RESUMPTION +" for one resumption token are allowed here");
 				break;
 			}
+			final Node headerNode = nodeList.item(i);
+			threads.add(()->{
+				AuthenticationUtil.runAs(()-> {
+					try {
+						String identifier = (String) xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
+						String timeStamp = (String) xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
+						logger.info("import "+identifier+" "+timeStamp);
+						String status = (String) xpath.evaluate("@status", headerNode, XPathConstants.STRING);
+						if (status != null && status.trim().equals("deleted")) {
+
+							logger.info("Object with Identifier:" + identifier + " is deleted. Will continue with the next one");
+							return null;
+						}
+
+						if (persistentHandler.mustBePersisted(identifier, timeStamp)) {
+							logger.info("identifier:" + identifier + " timeStamp: " + timeStamp + " will be created/updated");
+							handleGetRecordStuff(cursor, set, identifier);
+						} else {
+							logger.info("identifier:" + identifier + " timeStamp: " + timeStamp + " will NOT be updated");
+						}
+					} catch (Throwable t) {
+						logger.warn(t);
+					}
+					return null;
+				},authority);
+				return null;
+			});
 		}
+		logger.info("Threads started");
+		// wait until all previously started threads have finished
+		long time=System.currentTimeMillis();
+		executor.invokeAll(threads);
+		time=(System.currentTimeMillis()-time);
+		logger.info("Threads finished ("+threads.size()+", "+(time/1000)+" s -> "+(time/threads.size())+"ms per entry)");
 	}
 
 	private String getRecordAsString(String identifier) {
@@ -337,11 +363,12 @@ public class OAIPMHLOMImporter implements Importer{
 			String errorcode = (String)xpath.evaluate("/OAI-PMH/error", doc, XPathConstants.STRING);
 			if(errorcode == null || errorcode.trim().equals("")){
 				Node nodeRecord = getRecordNodeFromDoc(doc);
-				recordHandler.handleRecord(nodeRecord, cursor, set);
-				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
+				RecordHandlerInterface handler = getRecordHandler();
+				handler.handleRecord(nodeRecord, cursor, set);
+				String nodeId = persistentHandler.safe(handler.getProperties(), cursor, set);
 				if(nodeId != null) {
 					if(binaryHandler != null){
-						binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
+						binaryHandler.safe(nodeId, handler.getProperties(),nodeRecord);
 					}
 					new MCAlfrescoAPIClient().createVersion(nodeId,null);
 				}
@@ -451,16 +478,29 @@ public class OAIPMHLOMImporter implements Importer{
 	public void setPersistentHandler(PersistentHandlerInterface persistentHandler) {
 		this.persistentHandler = persistentHandler;
 	}
-	
+
+	private RecordHandlerInterface getRecordHandler(){
+		try {
+			RecordHandlerInterface handler = (RecordHandlerInterface) this.recordHandler.newInstance(metadataSetId);
+			handler.setImporter(this);
+			return handler;
+		} catch (Exception e) {
+			logger.error(e);
+			return null;
+		}
+	}
 	@Override
-	public void setRecordHandler(RecordHandlerInterface recordHandler) {
+	public void setRecordHandler(Constructor recordHandler) {
 		this.recordHandler = recordHandler;
-		this.recordHandler.setImporter(this);
 	}
 	
 	@Override
 	public void setSet(String set) {
 		this.sets = new String[]{set};	
 	}
-	
+
+	@Override
+	public void setMetadataSetId(String metadataSetId) {
+		this.metadataSetId = metadataSetId;
+	}
 }

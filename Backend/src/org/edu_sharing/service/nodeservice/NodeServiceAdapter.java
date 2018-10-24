@@ -64,7 +64,12 @@ public class NodeServiceAdapter implements NodeService {
 		return null;
 	}
 
-    @Override
+	@Override
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types) {
+		return null;
+	}
+
+	@Override
     public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
         return null;
     }

@@ -376,8 +376,24 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return result;
 	}
-
 	@Override
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types) {
+		List<ChildAssociationRef> assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+		List<NodeRef> result=new ArrayList<>();
+		for(ChildAssociationRef assoc : assocs){
+			String type=nodeService.getType(assoc.getChildRef()).toString();
+			if(types==null || types.contains(type)){
+				result.add(assoc.getChildRef());
+			}
+			if(type.equals(CCConstants.CCM_TYPE_MAP)){
+				result.addAll(getChildrenRecursive(store,assoc.getChildRef().getId(),types));
+			}
+		}
+		logger.info("Get children recursive finished with "+result.size()+" nodes");
+		return result;
+	}
+
+		@Override
 	public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
 		List<ChildAssociationRef> children = this.getChildrenAssocsByType(store, parentId, type);
 		for (ChildAssociationRef child : children) {

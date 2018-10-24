@@ -52,6 +52,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -78,8 +79,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 	}
 	
 	public RecordHandlerLOMWithSubObjects(String metadataSetId, String metadataPrefix) {
-		logger.info("initializing...");
-		
+
 		this.askElixier = askElixier;
 		
 		this.metadataPrefix = metadataPrefix;
@@ -194,8 +194,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		String titleEntry = generalTitleI18n.get(0);
 		toSafeMap.put(CCConstants.LOM_PROP_GENERAL_TITLE, titleEntry);
 		String name = new String(titleEntry);
-		name = name.replaceAll(
-				RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+		name = NodeServiceHelper.cleanupCmName(name);
 
 		//replace ending dot with nothing
 		name = name.replaceAll("[\\.]*$", "");
