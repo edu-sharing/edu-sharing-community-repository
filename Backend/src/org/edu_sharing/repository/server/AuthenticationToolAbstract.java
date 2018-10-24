@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
@@ -78,10 +79,18 @@ public abstract class AuthenticationToolAbstract implements AuthenticationTool {
 	 */
 	public String getPrimaryLocale() {
 		try {
-			return ConfigServiceFactory.getCurrentConfig().getValue("supportedLanguages",new String[]{"de_DE"})[0];
+			String language=ConfigServiceFactory.getCurrentConfig().getValue("supportedLanguages",new String[]{"de"})[0];
+			return getLocaleFromLanguage(language);
 		} catch (Throwable t) {
 			log.warn("Error fetching the default language from config",t);
 			return "de_DE";
 		}
+	}
+
+	private String getLocaleFromLanguage(String language){
+		Map<String,String> locales = new HashMap<>();
+		locales.put("de","de_DE");
+		locales.put("en","en_US");
+		return locales.get(language);
 	}
 }
