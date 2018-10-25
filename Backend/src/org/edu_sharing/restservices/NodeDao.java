@@ -169,6 +169,15 @@ public class NodeDao {
 		}
 	}
 	
+	public static NodeSearch searchFingerprint(RepositoryDao repoDao, String nodeId, Filter filter) throws DAOException {
+		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
+		try {
+			return transform(repoDao,searchService.searchFingerPrint(nodeId),filter);
+		} catch (Throwable e) {
+			throw DAOException.mapping(e);
+		}
+	}
+	
 	public static NodeSearch search(RepositoryDao repoDao, String query,
 			int startIdx, int nrOfresults, List<String> facettes,
 			int facettesMinCount, int facettesLimit) throws DAOException {

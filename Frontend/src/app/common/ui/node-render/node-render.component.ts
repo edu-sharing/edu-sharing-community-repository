@@ -33,6 +33,7 @@ import {ActionbarHelperService} from "../../services/actionbar-helper";
 import {Response} from "@angular/http";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
+import {RestSearchService} from '../../rest/services/rest-search.service';
 
 declare var jQuery:any;
 declare var window: any;
@@ -89,9 +90,11 @@ export class NodeRenderComponent implements EventListener{
   sequenceParent: Node;
   canScrollLeft: boolean = false;
   canScrollRight: boolean = false;
+  public similarNodes: NodeList;
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainnav') mainnav : MainNavComponent;
+
 
     public static close(location:Location) {
         location.back();
@@ -194,6 +197,7 @@ export class NodeRenderComponent implements EventListener{
       private connector : RestConnectorService,
       private connectors : RestConnectorsService,
       private nodeApi : RestNodeService,
+      private searchApi : RestSearchService,
       private searchStorage : SearchService,
       private toolService: RestToolService,
       private frame : FrameEventsService,
@@ -297,6 +301,9 @@ export class NodeRenderComponent implements EventListener{
         if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
           this.downloadButton.name = 'DOWNLOAD_ALL';
         }
+    });
+    this.searchApi.searchFingerprint(this._node.ref.id).subscribe((nodes)=>{
+        this.similarNodes=nodes;
     });
   }
   private loadRenderData(){

@@ -31,7 +31,7 @@ import org.edu_sharing.webservices.alfresco.extension.RepositoryNode;
 import org.edu_sharing.webservices.alfresco.extension.SearchCriteria;
 import org.edu_sharing.webservices.util.EduWebServiceFactory;
 
-public class SearchServiceWSImpl implements SearchService {
+public class SearchServiceWSImpl extends SearchServiceAdapter {
 	
 	String appId;
 	
