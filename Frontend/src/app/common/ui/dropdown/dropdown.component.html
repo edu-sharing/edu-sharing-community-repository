@@ -5,7 +5,7 @@
   <div [@openOverlay]="_show"
        #dropdownRef
        class="moreOpen collection" (keydown.escape)="hide();$event.preventDefault();$event.stopPropagation();">
-      <a class="collection-item waves-effect"
+      <a class="collection-item waves-effect collection-item-{{option.name | replaceChars:{search:'.',replace:'-'} }}"
          *ngFor="let option of _options;let i=index;"
          [class.collection-item-seperate]="option.isSeperate"
          [class.collection-item-seperate-bottom]="option.isSeperateBottom && (i<_options.length-1 && !_options[i+1].isSeperate)"

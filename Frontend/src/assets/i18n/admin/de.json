@@ -155,10 +155,17 @@
       "UPLOAD_TEMP_DONE":"Datei wurde unter {{filename}} auf dem Server abgelegt",
       "JOB_CLASS":"Klassenname der Job-Klasse:",
       "JOB_STARTED":"Die Aufgabe wurde gestartet. Überprüfen Sie die Aufgabenliste, um den Status einzusehen",
-      "START_JOB":"Aufgabe ausführen"
+      "START_JOB":"Aufgabe ausführen",
+      "TEST_MAIL":"E-Mail-Templates testen",
+      "TEST_MAIL_RECEIVER":"Empfänger Test-E-Mail:",
+      "TEST_MAIL_TEMPLATE":"Template für E-Mail:",
+      "TEST_MAIL_SEND":"Senden",
+      "MAIL_SENT":"Test-E-Mail an {{receiver}} gesendet"
     },
     "BROWSER":{
-      "LUCENE_SEARCH":"Suche via Lucene",
+      "NODE_BROWSER":"Node-Browser",
+      "MODE":"Modus:",
+      "NODEREF":"UUID der gesuchten Node:",
       "LUCENE_QUERY":"Lucene-Query:",
       "LUCENE_AUTHORITIES":"Suchen als folgende Authorities:",
       "LUCENE_OFFSET":"Start bei:",
@@ -168,6 +175,7 @@
     },
     "JOBS":{
       "LOG":"Log-Einträge",
+      "LOG_LEVEL":"Filtern nach Schweregrad:",
       "LIST":"Bisherige Aufgaben",
       "NO_JOBS":"Es wurden noch keine Aufgaben ausgeführt. Aufgaben werden z.B. durch einen Importvorgang angelegt",
       "TOAST_CANCELED":"Die Aufgabe wurde abgebrochen. Es kann jedoch einen Moment dauern, bis der Status aktualisiert wird.",

@@ -38,11 +38,11 @@ export class DateHelper{
    * @param {string} format
    * @returns {string}
    */
-  public static formatDateByPattern(date: any,format:string) : string{
+  public static formatDateByPattern(date: number|any,format:string) : string{
     if(!isNumeric(date)) {
       return date;
     }
-    let dateObject = new Date(date * 1);
+    let dateObject = new Date((date as number) * 1);
     format=format.replace("y",""+dateObject.getFullYear());
     format=format.replace("M",""+DateHelper.fillDate(dateObject.getMonth()));
     format=format.replace("d",""+DateHelper.fillDate(dateObject.getDate()));
@@ -56,12 +56,12 @@ export class DateHelper{
    * @param showAlwaysTime
    * @returns {any}
    */
-  public static formatDate(translation : TranslateService,date: any,options:FormatOptions = new FormatOptions()) : string{
+  public static formatDate(translation : TranslateService,date: number|any,options:FormatOptions = new FormatOptions()) : string{
     try {
       if(!isNumeric(date)) {
         return date;
       }
-      let dateObject = new Date(date * 1);
+      let dateObject = new Date((date as number) * 1);
       let dateToday = new Date();
       let dateYesterday = new Date();
       dateYesterday.setDate(dateYesterday.getDate()-1);
@@ -126,7 +126,7 @@ export class DateHelper{
       */
     }
     catch(e){
-      return (date as string);
+      return (date as any);
     }
   }
   static getDateFromDatepicker(date:Date){
