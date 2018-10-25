@@ -48,13 +48,19 @@
     <div class="nodeRenderLoading" *ngIf="isLoading">
       <spinner></spinner>
     </div>
+
+    <div class="similarNodes" *ngIf="similarNodes && similarNodes.length > 0">
+      <div class="caption">Ähnliche Objekte</div>
+      <listTable (clickRow)="switchNode($event)"
+            [nodes]="similarNodes"
+            [viewType]="1"
+            [hasCheckbox]="false"
+            [isClickable]="true"
+            [columns]="similarNodeColumns"
+    ></listTable>
+    </div>
+
   </div>
-  <listTable
-    [nodes]="similarNodes"
-    [viewType]="1"
-    [hasCheckbox]="false"
-    [isClickable]="true"
-  ></listTable>
 </div>
 
 <workspace-management

@@ -68,7 +68,7 @@ export class RestSearchService extends AbstractRestService{
     }
 
     searchFingerprint(nodeid:string,request: any=null,repository = RestConstants.HOME_REPOSITORY) : Observable<NodeList> {
-        let q=this.connector.createUrlNoEscape('search/:version/queriesV1/:repository/fingerprint/:nodeid/?:request',repository,[
+        let q=this.connector.createUrlNoEscape('search/:version/queries/:repository/fingerprint/:nodeid/?:request',repository,[
             [":nodeid",encodeURIComponent(nodeid)],
             [":request",this.connector.createRequestString(request)]
         ]);

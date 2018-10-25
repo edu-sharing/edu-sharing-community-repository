@@ -34,6 +34,9 @@ import {Response} from "@angular/http";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
 import {RestSearchService} from '../../rest/services/rest-search.service';
+import {ListItem} from '../list-item';
+import {RestMdsService} from '../../rest/services/rest-mds.service';
+import {MdsHelper} from '../../rest/mds-helper';
 
 declare var jQuery:any;
 declare var window: any;
@@ -90,7 +93,7 @@ export class NodeRenderComponent implements EventListener{
   sequenceParent: Node;
   canScrollLeft: boolean = false;
   canScrollRight: boolean = false;
-  public similarNodes: NodeList;
+  public similarNodes: Node[];
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainnav') mainnav : MainNavComponent;
@@ -144,6 +147,7 @@ export class NodeRenderComponent implements EventListener{
       this.loadRenderData();
     }
     @Output() onClose=new EventEmitter();
+    similarNodeColumns: ListItem[]=[];
     private close(){
       if(this.isRoute) {
         if(this.closeOnBack){
@@ -196,6 +200,7 @@ export class NodeRenderComponent implements EventListener{
       private searchService : SearchService,
       private connector : RestConnectorService,
       private connectors : RestConnectorsService,
+      private mdsApi : RestMdsService,
       private nodeApi : RestNodeService,
       private searchApi : RestSearchService,
       private searchStorage : SearchService,
@@ -212,7 +217,11 @@ export class NodeRenderComponent implements EventListener{
       private temporaryStorageService: TemporaryStorageService) {
       (window as any).ngRender = {setDownloadUrl:(url:string)=>{this.setDownloadUrl(url)}};
       this.frame.addListener(this);
+
         Translation.initialize(translate,config,storage,route).subscribe(()=>{
+            this.mdsApi.getSet().subscribe((set)=>{
+                this.similarNodeColumns = MdsHelper.getColumns(set,'search');
+            });
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.route.queryParams.subscribe((params:Params)=>{
@@ -302,8 +311,9 @@ export class NodeRenderComponent implements EventListener{
           this.downloadButton.name = 'DOWNLOAD_ALL';
         }
     });
+    this.similarNodes=null;
     this.searchApi.searchFingerprint(this._node.ref.id).subscribe((nodes)=>{
-        this.similarNodes=nodes;
+        this.similarNodes=nodes.nodes;
     });
   }
   private loadRenderData(){
@@ -557,5 +567,10 @@ export class NodeRenderComponent implements EventListener{
     }
     private getNodeName(node:Node) {
       return RestHelper.getName(node);
+    }
+
+    public switchNode(node:Node){
+        UIHelper.scrollSmooth();
+        this.node=node;
     }
 }
