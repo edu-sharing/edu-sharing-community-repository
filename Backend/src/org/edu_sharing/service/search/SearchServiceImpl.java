@@ -779,7 +779,7 @@ public class SearchServiceImpl implements SearchService {
 		searchParameters.addStore(storeRef);
 
 		searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_FTS_ALFRESCO);
-		searchParameters.setQuery("FINGERPRINT:" + nodeId + "_80");
+		searchParameters.setQuery("FINGERPRINT:" + nodeId + "_50 AND NOT ID:\"workspace://SpacesStore/"+ nodeId + "\"");
 		searchParameters.setSkipCount(skipCount);
 		searchParameters.setMaxItems(maxItems);
 		
