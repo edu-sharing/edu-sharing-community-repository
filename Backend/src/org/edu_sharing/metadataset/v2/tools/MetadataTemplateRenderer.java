@@ -223,7 +223,7 @@ public class MetadataTemplateRenderer {
 		if(licenseName.equals(CCConstants.COMMON_LICENSE_PDM)){
 			licenseName=CCConstants.COMMON_LICENSE_CC_ZERO;
 		}
-		String name=I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE."+licenseName+"_NAME");
+		String name=I18nAngular.getTranslationAngular("common","LICENSE.GROUPS."+licenseName);
 		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
 			String[] version=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION));
 			String data="";
@@ -250,19 +250,19 @@ public class MetadataTemplateRenderer {
 			licenseName=CCConstants.COMMON_LICENSE_CC_ZERO;
 		}
 		if(licenseName.startsWith(CCConstants.COMMON_LICENSE_CC_BY)){
-			String result=I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION.CC_BY");
+			String result=I18nAngular.getTranslationAngular("common","LICENSE.DESCRIPTION.CC_BY");
 			if(licenseName.contains("SA")){
-				result+="\n"+I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION.CC_SHARE_SA");
+				result+="\n"+I18nAngular.getTranslationAngular("common","LICENSE.DESCRIPTION.CC_SHARE_SA");
 			}
 			if(licenseName.contains("ND")){
-				result+="\n"+I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION.CC_SHARE_ND");
+				result+="\n"+I18nAngular.getTranslationAngular("common","LICENSE.DESCRIPTION.CC_SHARE_ND");
 			}
 			if(licenseName.contains("NC")){
-				result+="\n"+I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION.CC_COMMERCIAL_NC");
+				result+="\n"+I18nAngular.getTranslationAngular("common","LICENSE.DESCRIPTION.CC_COMMERCIAL_NC");
 			}
 			return result;
 		}
-		return I18nAngular.getTranslationAngular("workspace","WORKSPACE.LICENSE.DESCRIPTION."+licenseName);
+		return I18nAngular.getTranslationAngular("common","LICENSE.DESCRIPTION."+licenseName);
 	}
 
 	private String formatGroupValue(String value,MetadataWidget widget) {

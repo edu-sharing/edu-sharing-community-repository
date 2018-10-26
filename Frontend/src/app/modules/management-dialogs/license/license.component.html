@@ -15,7 +15,7 @@
         </div>
         <div class="oerLicenses" *ngIf="oerMode">
           <div class="oerCC0">
-            <h4>{{'WORKSPACE.LICENSE.CC_0_NAME' | translate}}</h4>
+            <h4>{{'LICENSE.GROUPS.CC_0' | translate}}</h4>
             <div *ngIf="isAllowedLicense('CC_0')">
               <div class="radio">
                 <input type="radio" (ngModel)="type" [ngModel]="cc0Type" (change)="setCC0()" value="CC_0" id="CC_02">
@@ -38,7 +38,7 @@
             </div>
           </div>
           <div class="oerCCBY">
-            <h4>{{'WORKSPACE.LICENSE.CC_BY_NAME' | translate}}</h4>
+            <h4>{{'LICENSE.GROUPS.CC_BY' | translate}}</h4>
             <div *ngIf="isAllowedLicense('CC_BY')">
               <div class="radio">
                 <input type="radio" [ngModel]="type+(ccShare ? '_'+ccShare : '')" value="CC_BY" (change)="$event.target.checked ? setCCBy() : null" id="CC_BY">
@@ -65,14 +65,7 @@
         <div class="allLicenses" *ngIf="!oerMode">
           <label for="type" class="licenseTypeLabel">{{'WORKSPACE.LICENSE.TYPE' | translate}}</label>
           <select #selectLicense class="licenseType" id="type" type="text" [(ngModel)]="type">
-            <option *ngFor="let license of licenseMainTypes" [value]="license">{{ 'WORKSPACE.LICENSE.'+license+"_NAME" | translate}}</option>
-            <!--
-            <option value="">{{'WORKSPACE.LICENSE.NONE' | translate}}</option>
-            <option value="CC_BY">{{'WORKSPACE.LICENSE.CC_NAME' | translate}}</option>
-            <option value="CC_0">{{'WORKSPACE.LICENSE.CC0_NAME' | translate}}</option>
-            <option value="EDU">{{'WORKSPACE.LICENSE.EDU_NAME' | translate}}</option>
-            <option value="CUSTOM">{{'WORKSPACE.LICENSE.CUSTOM_NAME' | translate}}</option>
-            -->
+            <option *ngFor="let license of licenseMainTypes" [value]="license">{{ ('LICENSE.GROUPS.'+license) | translate}}</option>
           </select>
             <div>
           <div *ngIf="type=='CC_BY'" class="cc">
@@ -219,17 +212,17 @@
             </div>
           <div class="currentLicenseDescription">
             <div class="customLicenseDescription" *ngIf="type=='CUSTOM'">{{rightsDescription}}</div>
-            <div *ngIf="type!='CUSTOM' && type!='COPYRIGHT'" innerHTML="{{ 'WORKSPACE.LICENSE.DESCRIPTION.'+type | translate }}">
+            <div *ngIf="type!='CUSTOM' && type!='COPYRIGHT'" innerHTML="{{ 'LICENSE.DESCRIPTION.'+type | translate }}">
             </div>
             <div *ngIf="type=='COPYRIGHT'">
-              <div innerHTML="{{ 'WORKSPACE.LICENSE.DESCRIPTION.'+copyrightType | translate}}"></div>
+              <div innerHTML="{{ 'LICENSE.DESCRIPTION.'+copyrightType | translate}}"></div>
             </div>
             <div *ngIf="type=='CC_BY'">
               <div *ngIf="ccShare">
-                {{ 'WORKSPACE.LICENSE.DESCRIPTION.CC_SHARE_'+ccShare | translate}}
+                {{ 'LICENSE.DESCRIPTION.CC_SHARE_'+ccShare | translate}}
               </div>
               <div *ngIf="ccCommercial">
-                {{ 'WORKSPACE.LICENSE.DESCRIPTION.CC_COMMERCIAL_'+ccCommercial | translate}}
+                {{ 'LICENSE.DESCRIPTION.CC_COMMERCIAL_'+ccCommercial | translate}}
               </div>
               <div *ngIf="ccVersion!='4.0'">
                 {{ 'WORKSPACE.LICENSE.LOCALE' | translate:{locale:ccLocale} }} {{'LANGUAGE.'+(ccLocale ? ccLocale : 'INTERNATIONAL') | translate}}.

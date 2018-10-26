@@ -129,6 +129,9 @@ export class WorkspaceLicenseComponent  {
                     }
                 }
             }
+            for(let license of this.config.instant("customLicenses",[])){
+              this.licenseMainTypes.splice(license.position>=0 ? license.position : this.licenseMainTypes.length-license.position,0,license.id);
+            }
             this.checkAllowRelease();
             this.readLicense();
             this.loading=false;

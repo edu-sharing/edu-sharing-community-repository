@@ -286,11 +286,12 @@ export class NodeHelper{
     let icon=string.replace(/_/g,"-").toLowerCase();
     if(icon=='')
       icon='none';
+
     let LICENSE_ICONS=["cc-0","cc-by-nc","cc-by-nc-nd","cc-by-nc-sa","cc-by-nd",
       "cc-by-sa","cc-by","copyright-free","copyright-license","custom",
       "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk","unterrichts-und-lehrmedien"];
-    if(LICENSE_ICONS.indexOf(icon)==-1)
-      icon='none';
+    //if(LICENSE_ICONS.indexOf(icon)==-1)
+    //  icon='none';
     if(icon=='none' && !useNoneAsFallback)
       return null;
     return rest.getAbsoluteEndpointUrl()+"../ccimages/licenses/"+icon+".svg";
@@ -318,19 +319,11 @@ export class NodeHelper{
    * @returns {any}
    */
   public static getLicenseNameByString(name:String,translate:TranslateService) {
-    if(name=='CUSTOM')
-      return translate.instant("LICENSE.CUSTOM");
     if(name==''){
-      return translate.instant("LICENSE.NONE");
+      name="NONE";
     }
-    if(name=='MULTI')
-      return translate.instant("LICENSE.MULTI");
-    if(name=='SCHULFUNK' || name=='UNTERRICHTS_UND_LEHRMEDIEN')
-      return translate.instant("LICENSE."+name);
-    if(name.startsWith("COPYRIGHT")){
-      return translate.instant("LICENSE."+name);
-    }
-    return name.replace(/_/g,"-");
+    return translate.instant("LICENSE.NAMES."+name);
+    //return name.replace(/_/g,"-");
   }
 
   /**
