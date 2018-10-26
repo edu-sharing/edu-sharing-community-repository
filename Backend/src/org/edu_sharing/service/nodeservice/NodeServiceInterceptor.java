@@ -42,6 +42,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             argumentId=1;
         }
         if(methodName.equals("getChildrenChildAssociationRefAssoc") ||
+                methodName.equals("getChildrenChildAssociationRefType") ||
                 methodName.equals("getType") ||
                 methodName.equals("getVersionHistory")){
             argumentId=0;
