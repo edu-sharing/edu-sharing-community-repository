@@ -163,7 +163,9 @@
       "MAIL_SENT":"Test-E-Mail an {{receiver}} gesendet"
     },
     "BROWSER":{
-      "LUCENE_SEARCH":"Suche via Lucene",
+      "NODE_BROWSER":"Node-Browser",
+      "MODE":"Modus:",
+      "NODEREF":"UUID der gesuchten Node:",
       "LUCENE_QUERY":"Lucene-Query:",
       "LUCENE_AUTHORITIES":"Suchen als folgende Authorities:",
       "LUCENE_OFFSET":"Start bei:",
@@ -173,6 +175,7 @@
     },
     "JOBS":{
       "LOG":"Log-Einträge",
+      "LOG_LEVEL":"Filtern nach Schweregrad:",
       "LIST":"Bisherige Aufgaben",
       "NO_JOBS":"Es wurden noch keine Aufgaben ausgeführt. Aufgaben werden z.B. durch einen Importvorgang angelegt",
       "TOAST_CANCELED":"Die Aufgabe wurde abgebrochen. Es kann jedoch einen Moment dauern, bis der Status aktualisiert wird.",

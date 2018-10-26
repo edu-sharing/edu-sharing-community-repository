@@ -60,7 +60,9 @@ export class AdminComponent {
   public job:any={};
   public jobs: any;
   public jobsOpen: boolean[]=[];
+  public jobsLogFilter:any = [];
   public lucene:any={offset:0,count:100};
+  public browseMode='NODEREF';
   public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
@@ -122,6 +124,17 @@ export class AdminComponent {
     console.log(node);
     this.nodeInfo=node;
   }
+    public searchNoderef() {
+        this.storage.set('admin_lucene', this.lucene);
+        this.globalProgress=true;
+        this.node.getNodeMetadata(this.lucene.noderef,[RestConstants.ALL]).subscribe((node)=>{
+            this.globalProgress=false;
+            this.luceneNodes=[node.node];
+        },(error)=>{
+            this.globalProgress=false;
+            this.toast.error(error);
+        });
+    }
   public searchLucene(){
     this.storage.set('admin_lucene',this.lucene);
     let authorities=[];
@@ -664,7 +677,22 @@ export class AdminComponent {
             this.router.navigate([UIConstants.ROUTER_PREFIX+'workspace'],{queryParams:{id:id}});
         });
     }
+    getJobLog(job:any,pos:number){
+        let log=Helper.deepCopy(job.log).reverse();
 
+        if(this.jobsLogFilter[pos]){
+          let result:any=[];
+          for(let l of log){
+            if(l.level.syslogEquivalent>this.jobsLogFilter[pos])
+              continue;
+            result.push(l);
+          }
+          log=result;
+        }
+        if(log.length<=100)
+            return log;
+        return log.slice(0,100);
+    }
     private cancelJob(job:any){
       this.dialogTitle='ADMIN.JOBS.CANCEL_TITLE';
       this.dialogMessage='ADMIN.JOBS.CANCEL_MESSAGE';

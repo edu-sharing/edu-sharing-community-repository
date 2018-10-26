@@ -27,6 +27,7 @@
  */
 package org.edu_sharing.repository.server.importer;
 
+import java.lang.instrument.Instrumentation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,6 +47,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
@@ -319,13 +321,24 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 
 	}
+	public static class ObjectSizeFetcher {
+		private static Instrumentation instrumentation;
 
+		public static void premain(String args, Instrumentation inst) {
+			instrumentation = inst;
+		}
+
+		public static long getObjectSize(Object o) {
+			return instrumentation.getObjectSize(o);
+		}
+	}
 	public HashMap<String, HashMap<String, Object>> getAllNodesInImportfolder(String importFolderId) throws Throwable {
 		if (allNodesInImportfolder == null) {
 			getLogger().info("allNodesInImportfolder is null starting to initialize it");
 			allNodesInImportfolder = mcAlfrescoBaseClient.getChildrenRecursive(importFolderId, CCConstants.CCM_TYPE_IO);
 
 			getLogger().info("allNodesInImportfolder initialize finished! size:" + ((allNodesInImportfolder != null) ? allNodesInImportfolder.size() : 0));
+			getLogger().info("allNodesInImportfolder initialize finished! calculated size:" + ((allNodesInImportfolder != null) ? (ObjectSizeFetcher.getObjectSize(allNodesInImportfolder)/1024/1024)+" mb" : 0));
 		}
 		return allNodesInImportfolder;
 	}
