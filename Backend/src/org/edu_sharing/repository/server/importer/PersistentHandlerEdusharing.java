@@ -361,7 +361,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		// idea first delete all childs and create them new
 		HashMap children = mcAlfrescoBaseClient.getChildren(nodeId);
 		for (Object key : children.keySet()) {
-			mcAlfrescoBaseClient.removeNode((String) key, nodeId);
+			mcAlfrescoBaseClient.removeNode((String) key, nodeId,false);
 		}
 
 		HashMap<String, Object> simpleProps = new HashMap<String, Object>();
