@@ -27,6 +27,10 @@
  */
 package org.edu_sharing.repository.server.importer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.lang.instrument.Instrumentation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -43,6 +47,9 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -328,13 +335,24 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 
 	}
-
+	public static int estimateObjectSize(Object o){
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutput out = new ObjectOutputStream(bos);
+			out.writeObject(o);
+			out.flush();
+			return bos.size();
+		}catch(Throwable t){
+			return -1;
+		}
+	}
 	public List<NodeRef> getAllNodesInImportfolder(String importFolderId) throws Throwable {
 		if (allNodesInImportfolder == null) {
 			getLogger().info("allNodesInImportfolder is null starting to initialize it");
 			allNodesInImportfolder = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,importFolderId, Collections.singletonList(CCConstants.CCM_TYPE_IO));
 
 			getLogger().info("allNodesInImportfolder initialize finished! size:" + ((allNodesInImportfolder != null) ? allNodesInImportfolder.size() : 0));
+			getLogger().info("allNodesInImportfolder initialize finished! calculated size:" + ((allNodesInImportfolder != null) ? (estimateObjectSize(allNodesInImportfolder)/1024)+" kb" : 0));
 		}
 		return allNodesInImportfolder;
 	}
@@ -363,7 +381,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	}
 
 	private void createChildobjects(String nodeId, HashMap<String, Object> nodeProps) throws Throwable {
-		int childCount=0;
 		for (Object key : nodeProps.keySet()) {
 			String typekey = (String) key;
 			String[] splitted = typekey.split("#");
@@ -381,11 +398,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 					Map subNodeProps = (Map) nodeProps.get(typekey);
 					createNode(nodeId, subNodeType, subNodeAssociation, subNodeProps);
 				}
-				childCount++;
 			}
-		}
-		if(childCount>0){
-			getLogger().info("Created "+childCount+" childobjects for node "+nodeId);
 		}
 	}
 
@@ -404,7 +417,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				simpleProps.put(propKey, props.get(propKey));
 			}
 		}
-		
+
 		String newNodeId;
 		try {
 			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
