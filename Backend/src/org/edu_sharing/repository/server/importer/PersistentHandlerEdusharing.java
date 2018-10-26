@@ -109,7 +109,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 						HashMap setCursorFolderProps = (HashMap) setCursorFolders.get(setCursorfolderId);
 						String setCursorFolderName = (String) setCursorFolderProps.get(CCConstants.CM_NAME);
 						getLogger().info("removing cursor folder:" + setCursorFolderName + " (set:" + name + ")");
-						mcAlfrescoBaseClient.removeNode((String) setCursorfolderId, (String) setKey);
+						mcAlfrescoBaseClient.removeNode((String) setCursorfolderId, (String) setKey,false);
 					}
 					// mcAlfrescoBaseClient.removeNode( (String)setKey,importFolderNodeId);
 				}
@@ -419,6 +419,8 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 
 		String newNodeId;
+		// do not auto create versions (otherwise the node will get several versions e.g. during
+		simpleProps.put(CCConstants.CCM_PROP_IO_CREATE_VERSION,false);
 		try {
 			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
 		}catch(DuplicateChildNodeNameException e) {
