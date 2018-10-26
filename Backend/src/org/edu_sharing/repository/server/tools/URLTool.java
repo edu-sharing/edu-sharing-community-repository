@@ -149,7 +149,7 @@ public class URLTool{
 				return path;
 			}
 			catch(Throwable t){
-				logger.warn("Failed to get dynamic base url, will use the one defined in homeApp",t);
+				logger.warn("Failed to get dynamic base url, will use the one defined in homeApp");
 			}
 		}
 
