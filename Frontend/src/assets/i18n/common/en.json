@@ -80,6 +80,7 @@
   "TOOLPERMISSION_ERROR_FOOTER":"If you think that's an error, contact your administrator and and ask for permission {{permission}}",
   "TOOLPERMISSION":{
     "TOOLPERMISSION_INVITE":"The permission to share content",
+    "TOOLPERMISSION_INVITE_LINK":"The permission to create content links",
     "TOOLPERMISSION_INVITE_HISTORY":"The permission to view the sharing history",
     "TOOLPERMISSION_INVITED":"The permission to see the list of invited users",
     "TOOLPERMISSION_INVITE_SHARE":"The permission to share content in shared folders",
