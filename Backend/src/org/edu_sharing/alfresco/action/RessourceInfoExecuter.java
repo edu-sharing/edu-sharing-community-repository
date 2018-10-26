@@ -105,7 +105,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 			ArchiveInputStream zip = getZipInputStream(contentreader);
 			ArchiveEntry current = null;
 
-			while ((current = zip.getNextEntry()) != null) {
+			while (zip!=null && (current = zip.getNextEntry()) != null) {
 					if (current.getName().equals("imsmanifest.xml")) {
 
 						process(zip, contentreader, actionedUponNodeRef);

@@ -3602,6 +3602,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			
 						if (AuthorityType.getAuthorityType(alfAuthority).equals(AuthorityType.GROUP)) {
 							NodeRef groupNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(alfAuthority);
+							if(groupNodeRef == null) {
+								logger.warn("authority " + alfAuthority + " does not exist." + " will continue");
+								continue;
+							}
+							
 							Map<QName, Serializable> groupProps = nodeService.getProperties(groupNodeRef);
 							Group group = new Group();
 							group.setName(alfAuthority);
