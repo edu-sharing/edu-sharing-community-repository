@@ -321,18 +321,6 @@
         "CC0_INFO":"I am the sole holder of the copyright of this object chose to dedicate the work to the public domain by waiving all of my rights to the work worldwide under copyright law, including all related and neighbouring rights, to the extent allowed by law.",
         "PDM":"Public Domain Mark",
         "PDM_INFO":"This object is free of known restrictions covered by copyright law."
-      },
-      "DESCRIPTION":{
-        "NONE":"Usage and attribution according to the legal conditions specified in the object meta data or according to the general legal regulations.",
-        "MULTI":"The selected elements have different licenses.<br />Defining a license overwrites the license information of all items.",
-        "CC_BY":"The authors have to be credited in a manner specified by these.",
-        "CC_SHARE_ND":"Licensees may copy, distribute, display and perform only verbatim copies of the work, not derivative works and remixes based on it.",
-        "CC_SHARE_SA":"Licensees may copy, distribute, display, and perform the work and make derivative works and remixes based on it, as long as they distribute derivative works only under a license identical (\"not more restrictive\") to the license that governs the original work.",
-        "CC_COMMERCIAL_NC":"Licensees may copy, distribute, display, and perform the work and make derivative works and remixes based on it only for non-commercial purposes.",
-        "CC_0":"This work is dedicated to the public domain.<br /> You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission.",
-        "COPYRIGHT_FREE":"The work is accessible free of charge.<br />Use and attribution according to the generally applicable legal regulations.",
-        "COPYRIGHT_LICENSE":"The work may only be used by the licensed user group according to the conditions stipulated in the license agreement.<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices.",
-        "SCHULFUNK":"Access-restricted and time-limited offering for school radio according to §47 UrhG (German Act on Copyright and Related Rights).<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices."
       }
     },
     "TOAST":{

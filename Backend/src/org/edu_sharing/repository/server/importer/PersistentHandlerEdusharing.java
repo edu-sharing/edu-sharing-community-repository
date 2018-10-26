@@ -210,15 +210,16 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				// @TODO update only when timestamp changed
 				// updateNode(alfResult.keySet().iterator().next(),newNodeProps);
 				getLogger().info(" newTimeStamp is after oldTimeStamp have to update object id:" + replicationId);
-				updateNode((String) childId.getId(), newNodeProps);
-			} else if (licenseValidChanged) {
+                updateNode((String) childId.getId(), newNodeProps);
+                setModifiedDate((String) childId.getId(), newNodeProps);
+            } else if (licenseValidChanged) {
 				getLogger().info(" license valid changed. have to update object. oldLicenseValid:" + oldLicenseValid + " newLicenseValid:"
 						+ newLicenseValid);
-				updateNode((String) childId.getId(), newNodeProps);
-			} else {
+                updateNode((String) childId.getId(), newNodeProps);
+                setModifiedDate((String) childId.getId(), newNodeProps);
+            } else {
 				getLogger().info(" newTimeStamp.equals(oldTimeStamp) I'll do nothing");
 			}
-			setModifiedDate((String) childId.getId(), newNodeProps);
 			return (String) childId.getId();
 
 		} else {

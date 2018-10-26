@@ -179,21 +179,48 @@
     "ccm:wf_status":"Status"
   },
   "LICENSE":{
-    "NONE":"Keine oder unbekannte Lizenz",
-    "MULTI":"Unterschiedliche Lizenzen",
-    "COPYRIGHT_FREE":"Copyright, freier Zugang",
-    "COPYRIGHT_LICENSE":"Copyright, lizenzpflichtig",
-    "SCHULFUNK":"Schulfunk (§47 UrhG)",
-    "UNTERRICHTS_UND_LEHRMEDIEN":"§60b Unterrichts- und Lehrmedien",
-    "CC_0":"CC-0",
-    "PDM":"PDM",
-    "CC_BY":"CC-BY",
-    "CC_BY_SA":"CC-BY-SA",
-    "CC_BY_NC":"CC-BY-NC",
-    "CC_BY_ND":"CC-BY-ND",
-    "CC_BY_NC_SA":"CC-BY-NC-SA",
-    "CC_BY_NC_ND":"CC-BY-NC-ND",
-    "CUSTOM":"Andere Lizenz"
+    "NAMES": {
+      "NONE": "Keine oder unbekannte Lizenz",
+      "MULTI": "Unterschiedliche Lizenzen",
+      "COPYRIGHT_FREE": "Copyright, freier Zugang",
+      "COPYRIGHT_LICENSE": "Copyright, lizenzpflichtig",
+      "SCHULFUNK": "Schulfunk (§47 UrhG)",
+      "UNTERRICHTS_UND_LEHRMEDIEN": "§60b Unterrichts- und Lehrmedien",
+      "CC_0": "CC-0",
+      "PDM": "PDM",
+      "CC_BY": "CC-BY",
+      "CC_BY_SA": "CC-BY-SA",
+      "CC_BY_NC": "CC-BY-NC",
+      "CC_BY_ND": "CC-BY-ND",
+      "CC_BY_NC_SA": "CC-BY-NC-SA",
+      "CC_BY_NC_ND": "CC-BY-NC-ND",
+      "CUSTOM": "Andere Lizenz"
+    },
+    "DESCRIPTION":{
+      "NONE":"Nutzung und Quellenangabe gemäß den im Medium genannten Bedinungen bzw. gemäß der allgemeingültigen gesetzlichen Regelung (UrhG).",
+      "MULTI":"Die gewählten Elemente besitzen unterschiedliche Lizenzen.<br />Durch das Festlegen einer Lizenz werden die Lizeninformationen aller Elemente überschrieben",
+      "CC_BY":"Autor(in) muss genannt werden.",
+      "CC_SHARE_ND":"Keine Bearbeitung des Werks erlaubt.",
+      "CC_SHARE_SA":"Bearbeitung erlaubt, wenn es unter gleichen Bedinungen weitergegeben wird.",
+      "CC_COMMERCIAL_NC":"Keine kommerzielle Verwendung erlaubt.",
+      "CC_0":"Dieses Werk ist gemeinfrei.<br />Keine Attributierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
+      "COPYRIGHT_FREE":"Das Werk ist kostenfrei zugänglich.<br />Nutzung und Quellenangabe gemäß den allgemeingültigen gesetzlichen Regelungen (UrhG).",
+      "COPYRIGHT_LICENSE":"Das Werk darf ausschließlich vom lizenzierten Nutzerkreis gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
+      "SCHULFUNK":"Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
+      "UNTERRICHTS_UND_LEHRMEDIEN":"Hersteller von Unterrichts- und Lehrmedien dürfen für solche Sammlungen bis zu 10 Prozent eines veröffentlichten Werkes vervielfältigen, verbreiten und öffentlich zugänglich machen.<br />§ 60a Absatz 2 und 3 ist entsprechend anzuwenden.<br />Unterrichts- und Lehrmedien im Sinne dieses Gesetzes sind Sammlungen, die Werke einer größeren Anzahl von Urhebern vereinigen und ausschließlich zur Veranschaulichung des Unterrichts und der Lehre an Bildungseinrichtungen (§ 60a) zu nicht kommerziellen Zwecken geeignet, bestimmt und entsprechend gekennzeichnet sind."
+    },
+    "GROUPS":{
+      "NONE":"Keine Lizenz gewählt",
+      "COPYRIGHT":"Copyright-Lizenzen",
+      "COPYRIGHT_FREE":"Copyright, freier Zugang",
+      "COPYRIGHT_LICENSE":"Copyright, lizenzpflichtig",
+      "CC_BY":"Creative Commons",
+      "CC_0":"CC 0 / Public Domain (Gemeinfrei)",
+      "SCHULFUNK":"Schulfunk (§47 UrhG)",
+      "UNTERRICHTS_UND_LEHRMEDIEN":"§60b Unterrichts- und Lehrmedien",
+      "EDU":"edu-sharing Lizenzen",
+      "CUSTOM":"eigene Lizenz definieren"
+    }
   },
   "COOKIE_INFO":{
     "DESCRIPTION":"edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren und diese Seite verwenden, nehmen wir an, dass Sie damit einverstanden sind.",
