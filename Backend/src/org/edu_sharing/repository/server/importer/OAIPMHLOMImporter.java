@@ -265,7 +265,7 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 	}
 
-	private ExecutorService executor = Executors.newFixedThreadPool(4);
+	private ExecutorService executor = Executors.newFixedThreadPool(Math.max(1,Runtime.getRuntime().availableProcessors()/2));
 	public void handleIdentifierList(Document docIdentifiers, String cursor, String set) throws Throwable{
 		NodeList nodeList = (NodeList)xpath.evaluate("/OAI-PMH/ListIdentifiers/header", docIdentifiers, XPathConstants.NODESET);
 		

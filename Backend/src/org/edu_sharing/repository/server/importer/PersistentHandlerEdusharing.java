@@ -252,8 +252,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			importFolderId = (String) importFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
 		}
 
-		String oaiImportBasefolder = importFolderId;
-
 		if (set == null || set.trim().equals("")) {
 			set = "unknownset";
 		}
