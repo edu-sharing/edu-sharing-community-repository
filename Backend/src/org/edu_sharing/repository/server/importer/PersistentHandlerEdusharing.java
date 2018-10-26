@@ -27,6 +27,9 @@
  */
 package org.edu_sharing.repository.server.importer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.lang.instrument.Instrumentation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -321,15 +324,15 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 
 	}
-	public static class ObjectSizeFetcher {
-		private static Instrumentation instrumentation;
-
-		public static void premain(String args, Instrumentation inst) {
-			instrumentation = inst;
-		}
-
-		public static long getObjectSize(Object o) {
-			return instrumentation.getObjectSize(o);
+	public static int estimateObjectSize(Object o){
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutput out = new ObjectOutputStream(bos);
+			out.writeObject(o);
+			out.flush();
+			return bos.size();
+		}catch(Throwable t){
+			return -1;
 		}
 	}
 	public HashMap<String, HashMap<String, Object>> getAllNodesInImportfolder(String importFolderId) throws Throwable {
@@ -338,7 +341,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			allNodesInImportfolder = mcAlfrescoBaseClient.getChildrenRecursive(importFolderId, CCConstants.CCM_TYPE_IO);
 
 			getLogger().info("allNodesInImportfolder initialize finished! size:" + ((allNodesInImportfolder != null) ? allNodesInImportfolder.size() : 0));
-			getLogger().info("allNodesInImportfolder initialize finished! calculated size:" + ((allNodesInImportfolder != null) ? (ObjectSizeFetcher.getObjectSize(allNodesInImportfolder)/1024/1024)+" mb" : 0));
+			getLogger().info("allNodesInImportfolder initialize finished! calculated size:" + ((allNodesInImportfolder != null) ? (estimateObjectSize(allNodesInImportfolder)/1024)+" kb" : 0));
 		}
 		return allNodesInImportfolder;
 	}
