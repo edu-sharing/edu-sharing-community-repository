@@ -1,7 +1,7 @@
 <div class="register-bg"></div>
 <global-progress *ngIf="isLoading"></global-progress>
 <div [class.display-none]="isLoading" class="dialog darken valign-wrapper">
-    <div class="card center-card card-action header-high">
+    <div class="card center-card card-action header-high card-high">
 
         <div class="card-content">
             <div *ngIf="state == 'register' || state=='request'" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
