@@ -165,7 +165,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 					+ childProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE) + " " + childProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)
 					+ " " + childProps.get(CCConstants.SYS_PROP_NODE_UID));
 					*/
-			NodeRef oldProps = childId;
 			String oldTimeStamp = NodeServiceHelper.getProperty(childId,CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
 			String newTimeStamp = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
 

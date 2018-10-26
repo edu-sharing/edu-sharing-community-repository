@@ -275,11 +275,11 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 		List<Callable<Void>> threads = new ArrayList<>();
 		final String authority = AuthenticationUtil.getFullyAuthenticatedUser();
+		if(job!=null && job.isInterrupted()) {
+			logger.info("Will cancel identifier reading, job is aborted");
+			return;
+		}
 		for(int i = 0; i < nrOfRs;i++){
-			if(job!=null && job.isInterrupted()){
-				logger.info("Will cancel identifier reading, job is aborted");
-				return;
-			}
 			if(i > MAX_PER_RESUMPTION){
 				logger.error("only " +MAX_PER_RESUMPTION +" for one resumption token are allowed here");
 				break;
@@ -288,6 +288,9 @@ public class OAIPMHLOMImporter implements Importer{
 			threads.add(()->{
 				AuthenticationUtil.runAs(()-> {
 					try {
+						if(job!=null && job.isInterrupted()){
+							return null;
+						}
 						String identifier = (String) xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
 						String timeStamp = (String) xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
 						logger.info("import "+identifier+" "+timeStamp);
