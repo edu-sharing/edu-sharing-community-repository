@@ -175,6 +175,7 @@
     },
     "JOBS":{
       "LOG":"Log-Einträge",
+      "LOG_FILTER":"Filtern nach Inhalt:",
       "LOG_LEVEL":"Filtern nach Schweregrad:",
       "LIST":"Bisherige Aufgaben",
       "NO_JOBS":"Es wurden noch keine Aufgaben ausgeführt. Aufgaben werden z.B. durch einen Importvorgang angelegt",
