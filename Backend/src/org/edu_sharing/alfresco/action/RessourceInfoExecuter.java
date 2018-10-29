@@ -100,44 +100,45 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 		if (contentreader != null) {
 			try{
-			logger.info(contentreader.getMimetype());
+				logger.info(contentreader.getMimetype());
 
-			ArchiveInputStream zip = getZipInputStream(contentreader);
-			ArchiveEntry current = null;
+				ArchiveInputStream zip = getZipInputStream(contentreader);
+				ArchiveEntry current = null;
+				if(zip!=null) {
+					while ((current = zip.getNextEntry()) != null) {
+						if (current.getName().equals("imsmanifest.xml")) {
 
-			while (zip!=null && (current = zip.getNextEntry()) != null) {
-					if (current.getName().equals("imsmanifest.xml")) {
+							process(zip, contentreader, actionedUponNodeRef);
+							zip.close();
+							return;
 
-						process(zip, contentreader, actionedUponNodeRef);
-						zip.close();
-						return;
+						}
+						if (current.getName().equalsIgnoreCase("index.html") || current.getName().equalsIgnoreCase("index.htm")) {
+							zip.close();
+							proccessGenericHTML(actionedUponNodeRef);
+							return;
+						}
 
+						if (current.getName().equals("moodle.xml")) {
+							processMoodle(zip, contentreader, actionedUponNodeRef);
+							zip.close();
+							return;
+						}
+
+						if (current.getName().equals("moodle_backup.xml")) {
+							processMoodle2_0(zip, contentreader, actionedUponNodeRef);
+							zip.close();
+							return;
+						}
+						if (current.getName().equals("h5p.json")) {
+							processH5P(zip, contentreader, actionedUponNodeRef);
+							zip.close();
+							return;
+						}
 					}
-					if (current.getName().equalsIgnoreCase("index.html") || current.getName().equalsIgnoreCase("index.htm")) {
-						zip.close();
-						proccessGenericHTML(actionedUponNodeRef);
-						return;
-					}
 
-					if (current.getName().equals("moodle.xml")) {
-						processMoodle(zip, contentreader, actionedUponNodeRef);
-						zip.close();
-						return;
-					}
-
-					if (current.getName().equals("moodle_backup.xml")) {
-						processMoodle2_0(zip, contentreader, actionedUponNodeRef);
-						zip.close();
-						return;
-					}
-					if (current.getName().equals("h5p.json")) {
-						processH5P(zip, contentreader, actionedUponNodeRef);
-						zip.close();
-						return;
-					}
+					zip.close();
 				}
-
-				zip.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
