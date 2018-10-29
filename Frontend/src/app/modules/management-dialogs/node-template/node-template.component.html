@@ -4,7 +4,7 @@
             <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
         <div class="card-title">{{'WORKSPACE.OPTION.TEMPLATE' | translate:{name:node ? node.name : ''} }}</div>
         <spinner *ngIf="loading"></spinner>
-        <div class="card-scroll" *ngIf="!loading">
+        <div class="card-scroll" [class.no-scroll]="!enabled" *ngIf="!loading">
             <div class="switch">
                 <label>
                     <input type="checkbox" [(ngModel)]="enabled">
