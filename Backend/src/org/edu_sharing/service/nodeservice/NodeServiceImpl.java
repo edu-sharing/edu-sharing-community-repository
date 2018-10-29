@@ -226,7 +226,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
 			}
-			if(values==null)
+			if(values==null || values.length==0)
 				continue;
 			if(!widget.isMultivalue() && values.length>1)
 				throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID "+id+", widget type "+widget.getType());
