@@ -58,6 +58,7 @@ export class AdminComponent {
   public jobs: any;
   public jobsOpen: boolean[]=[];
   public jobsLogFilter:any = [];
+  public jobsLogLevel:any = [];
   public lucene:any={offset:0,count:100};
   public browseMode='NODEREF';
   public oaiSave=true;
@@ -677,18 +678,27 @@ export class AdminComponent {
     getJobLog(job:any,pos:number){
         let log=Helper.deepCopy(job.log).reverse();
 
-        if(this.jobsLogFilter[pos]){
+        if(this.jobsLogLevel[pos]){
           let result:any=[];
           for(let l of log){
-            if(l.level.syslogEquivalent>this.jobsLogFilter[pos])
+            if(l.level.syslogEquivalent>this.jobsLogLevel[pos])
               continue;
             result.push(l);
           }
           log=result;
         }
-        if(log.length<=100)
+        if(this.jobsLogFilter[pos]){
+            let result:any=[];
+            for(let l of log){
+                if(l.message.indexOf(this.jobsLogFilter[pos])==-1 && l.className.indexOf(this.jobsLogFilter[pos])==-1)
+                    continue;
+                result.push(l);
+            }
+            log=result;
+        }
+        if(log.length<=50)
             return log;
-        return log.slice(0,100);
+        return log.slice(0,50);
     }
     private cancelJob(job:any){
       this.dialogTitle='ADMIN.JOBS.CANCEL_TITLE';
