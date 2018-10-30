@@ -78,6 +78,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+	private String importFolderId;
 
 	public PersistentHandlerEdusharing(AbstractJob job) throws Throwable {
 		mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
@@ -85,6 +86,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		// prepare cache
 		getAllNodesInImportfolder();
 		getReplicationIdTimestampMap();
+		createImportFolder();
 	}
 	public Logger getLogger(){
 	    return Logger.getLogger(job.getClass());
@@ -246,19 +248,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 	private synchronized String createFolderStructure(String cursor, String set) throws Throwable {
 		// check if importfolder exists
-		String importFolderId;
-
-		String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
-		HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
-				OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
-		if (importFolderProps == null) {
-			HashMap newimportFolderProps = new HashMap();
-			newimportFolderProps.put(CCConstants.CM_NAME, OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
-			newimportFolderProps.put(CCConstants.CM_PROP_C_TITLE, OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
-			importFolderId = mcAlfrescoBaseClient.createNode(companyHomeId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
-		} else {
-			importFolderId = (String) importFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
-		}
 
 		if (set == null || set.trim().equals("")) {
 			set = "unknownset";
@@ -292,6 +281,21 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		return importFolderId;
 	}
 
+	private String createImportFolder() throws Throwable {
+		String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
+		HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
+				OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
+		if (importFolderProps == null) {
+			HashMap newimportFolderProps = new HashMap();
+			newimportFolderProps.put(CCConstants.CM_NAME, OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
+			newimportFolderProps.put(CCConstants.CM_PROP_C_TITLE, OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
+			importFolderId = mcAlfrescoBaseClient.createNode(companyHomeId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
+		} else {
+			importFolderId = (String) importFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
+		}
+		return importFolderId;
+	}
+
 	private synchronized void setModifiedDate(String nodeId,Map newNodeProps) throws NotSupportedException, SystemException, IllegalStateException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
 		if(newNodeProps.containsKey(CCConstants.CM_PROP_C_MODIFIED)){
 			NodeRef nodeRef=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
@@ -308,20 +312,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	}
 
 	private NodeRef getNodeIfExists(String nodeReplId,String importFolderId) throws Throwable {
-		if(replIdMap==null) {
-			replIdMap = new HashMap<>();
-			List<NodeRef> allNodesInImpFolder = this.getAllNodesInImportfolder(importFolderId);
-			if (allNodesInImpFolder != null) {
-				for (NodeRef entry : allNodesInImpFolder) {
-					String replSource = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
-					String replSourceId = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
-					replIdMap.put(replSource+":"+replSourceId,entry);
-				}
-			}
-			else{
-				getLogger().info("Initial import folder seems to be empty");
-			}
-		}
 		return replIdMap.getOrDefault(nodeReplId,null);
 	}
 
@@ -442,16 +432,17 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		if (replIdTimestampMap == null) {
 			try {
 				List<NodeRef> allNodes = getAllNodesInImportfolder();
+				replIdMap = new HashMap<>();
 				replIdTimestampMap = new HashMap<>();
 				for (NodeRef entry : allNodes) {
-
-					String replId = NodeServiceHelper.getProperty(entry,CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
+					String replSource = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
+					String replSourceId = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 					String timestamp = NodeServiceHelper.getProperty(entry,CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
-
-					if (replId != null && !replId.trim().equals("") && timestamp != null && !timestamp.trim().equals("")) {
-						replIdTimestampMap.put(replId, timestamp);
+					replIdMap.put(replSource+":"+replSourceId,entry);
+					if (replSource != null && !replSource.trim().equals("") && timestamp != null && !timestamp.trim().equals("")) {
+						replIdTimestampMap.put(replSourceId, timestamp);
 					} else {
-						getLogger().error("cannot add nodeId " + entry.getId() + " to replIdTimestampMap replId:" + replId + " timestamp:" + timestamp);
+						getLogger().error("cannot add nodeId " + entry.getId() + " to replIdTimestampMap replId:" + replSourceId + " timestamp:" + timestamp);
 					}
 				}
 				getLogger().info("Build timestamp map finished, size: "+replIdTimestampMap.size());
