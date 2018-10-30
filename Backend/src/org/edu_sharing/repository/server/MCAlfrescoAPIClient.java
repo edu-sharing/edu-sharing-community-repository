@@ -2495,7 +2495,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 	}
 
-	public void createVersion(String nodeId, HashMap _properties) throws Exception {
+	public synchronized void createVersion(String nodeId, HashMap _properties) throws Exception {
 
 		Map<String, Serializable> properties = null;
 		if (_properties != null) {

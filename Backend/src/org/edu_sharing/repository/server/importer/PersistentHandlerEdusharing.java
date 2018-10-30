@@ -146,6 +146,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		NodeRef childId = getNodeIfExists(nodeReplId,targetFolder);
 		getLogger().debug("child id "+nodeReplId+": "+childId);
 
+		String newTimeStamp = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
 		if (childId != null) {
 
 			// update
@@ -155,7 +156,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 					+ " " + childProps.get(CCConstants.SYS_PROP_NODE_UID));
 					*/
 			String oldTimeStamp = NodeServiceHelper.getProperty(childId,CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
-			String newTimeStamp = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
 
 			String oldLicenseValid = NodeServiceHelper.getProperty(childId,CCConstants.CCM_PROP_IO_LICENSE_VALID);
 			String newLicenseValid = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_LICENSE_VALID);
@@ -219,6 +219,8 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			setModifiedDate(nodeId,newNodeProps);
 			// add it to the replication id map
 			replIdMap.put(nodeReplId,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId));
+			// and the timestamp map
+			replIdTimestampMap.put(nodeReplId,newTimeStamp);
 			return nodeId;
 			
 		}
@@ -337,11 +339,12 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 	public void updateNode(String nodeId, Map props) throws Throwable {
 		// idea first delete all childs and create them new
-		HashMap children = mcAlfrescoBaseClient.getChildren(nodeId);
-		for (Object key : children.keySet()) {
-			mcAlfrescoBaseClient.removeNode((String) key, nodeId,false);
-		}
-
+        synchronized (this) {
+            HashMap children = mcAlfrescoBaseClient.getChildren(nodeId);
+            for (Object key : children.keySet()) {
+                mcAlfrescoBaseClient.removeNode((String) key, nodeId, false);
+            }
+        }
 		HashMap<String, Object> simpleProps = new HashMap<String, Object>();
 		HashMap<String, Object> nodeProps = new HashMap<String, Object>();
 		for (Object key : props.keySet()) {
