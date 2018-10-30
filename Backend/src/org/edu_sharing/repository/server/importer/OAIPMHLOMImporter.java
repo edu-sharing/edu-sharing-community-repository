@@ -265,10 +265,13 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 	}
 
-	private ExecutorService executor = Executors.newFixedThreadPool(Math.max(1,Runtime.getRuntime().availableProcessors()/2));
+	private ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors() * 2), r -> {
+		Thread t = new Thread(r);
+		t.setPriority(Thread.MIN_PRIORITY);
+		return t;
+	});
 	public void handleIdentifierList(Document docIdentifiers, String cursor, String set) throws Throwable{
 		NodeList nodeList = (NodeList)xpath.evaluate("/OAI-PMH/ListIdentifiers/header", docIdentifiers, XPathConstants.NODESET);
-		
 		int nrOfRs = this.nrOfRecords;
 		if(nrOfRs == -1 || nrOfRs > nodeList.getLength()){
 			nrOfRs = nodeList.getLength();
