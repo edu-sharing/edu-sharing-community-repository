@@ -17,6 +17,9 @@ md-input{
   width:100%;
   height:100px;
   text-align: center;
+  img{
+    max-height: 100px;
+  }
 }
 .register{
   color:$textLight;

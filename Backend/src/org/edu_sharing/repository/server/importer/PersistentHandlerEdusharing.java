@@ -99,7 +99,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 						HashMap setCursorFolderProps = (HashMap) setCursorFolders.get(setCursorfolderId);
 						String setCursorFolderName = (String) setCursorFolderProps.get(CCConstants.CM_NAME);
 						logger.info("removing cursor folder:" + setCursorFolderName + " (set:" + name + ")");
-						mcAlfrescoBaseClient.removeNode((String) setCursorfolderId, (String) setKey);
+						mcAlfrescoBaseClient.removeNode((String) setCursorfolderId, (String) setKey,false);
 					}
 					// mcAlfrescoBaseClient.removeNode( (String)setKey,importFolderNodeId);
 				}
@@ -333,7 +333,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		// idea first delete all childs and create them new
 		HashMap children = mcAlfrescoBaseClient.getChildren(nodeId);
 		for (Object key : children.keySet()) {
-			mcAlfrescoBaseClient.removeNode((String) key, nodeId);
+			mcAlfrescoBaseClient.removeNode((String) key, nodeId,false);
 		}
 
 		HashMap<String, Object> simpleProps = new HashMap<String, Object>();
@@ -421,8 +421,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		
 		simpleProps.remove("{http://www.campuscontent.de/model/1.0}replicationsource");
 	*/
-		
-		String newNodeId =null;
+
+		String newNodeId;
+		// do not auto create versions (otherwise the node will get several versions e.g. during binary handler or preview)
+		simpleProps.put(CCConstants.CCM_PROP_IO_CREATE_VERSION,false);
 		try {
 			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
 		}catch(DuplicateChildNodeNameException e) {
@@ -455,7 +457,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			}
 		}
 
-		mcAlfrescoBaseClient.createVersion(newNodeId, null);
 		return newNodeId;
 	}
 
