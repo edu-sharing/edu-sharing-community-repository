@@ -185,7 +185,8 @@ public class ImporterJob extends AbstractJob {
 			logger.info("finished import in " + (System.currentTimeMillis() - millisec) / 1000 + " secs");
 
 			// refresh cache after importing
-			new RefreshCacheExecuter().excecute(null, true, null);
+			if(!isInterrupted)
+				new RefreshCacheExecuter().excecute(null, true, null);
 
 		} catch (Throwable e) {
 			logger.error(e.getMessage(),e);

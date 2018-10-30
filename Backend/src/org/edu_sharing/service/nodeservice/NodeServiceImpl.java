@@ -256,7 +256,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				toSafe.put(id,widget.getDefaultvalue());
 				continue;
 			}
-			if(values==null)
+			if(values==null || values.length==0)
 				continue;
 			if(!widget.isMultivalue() && values.length>1)
 				throw new IllegalArgumentException("Multiple values given for a non-multivalue widget: ID "+id+", widget type "+widget.getType());
@@ -1052,7 +1052,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return nodeService.getTargetAssocs(ref,QName.createQName(assoc.getAssocName()));
 		}
 	}
-	
+
 	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
 		property = NameSpaceTool.transformToLongQName(property);
 		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), QName.createQName(property),value);

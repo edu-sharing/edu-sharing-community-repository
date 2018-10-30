@@ -420,7 +420,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 
 		String newNodeId;
-		// do not auto create versions (otherwise the node will get several versions e.g. during
+		// do not auto create versions (otherwise the node will get several versions e.g. during binary handler or preview)
 		simpleProps.put(CCConstants.CCM_PROP_IO_CREATE_VERSION,false);
 		try {
 			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
@@ -435,7 +435,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 		createChildobjects(newNodeId,nodeProps);
 
-		mcAlfrescoBaseClient.createVersion(newNodeId, null);
 		return newNodeId;
 	}
 

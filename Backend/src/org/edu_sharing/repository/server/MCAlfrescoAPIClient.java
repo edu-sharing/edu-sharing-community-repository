@@ -2242,11 +2242,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				contentWriter.addListener(new ContentStreamListener() {
 					@Override
 					public void contentStreamClosed() throws ContentIOException {
-						logger.info("Content Stream was closed");
-						logger.info(" ContentData size:" + contentWriter.getContentData().getSize());
-						logger.info(" ContentData URL:" + contentWriter.getContentData().getContentUrl());
-						logger.info(" ContentData MimeTyp:" + contentWriter.getContentData().getMimetype());
-						logger.info(" ContentData ToString:" + contentWriter.getContentData().toString());
+						logger.debug("Content Stream was closed");
+						logger.debug(" size:" + contentWriter.getContentData().getSize()+
+									", URL:" + contentWriter.getContentData().getContentUrl()+
+								 	", MimeType:" + contentWriter.getContentData().getMimetype()+"" +
+									", ContentData ToString:" + contentWriter.getContentData().toString());
 					}
 				});
 				
