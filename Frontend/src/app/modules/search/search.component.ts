@@ -1045,6 +1045,7 @@ export class SearchComponent {
     this.queryParamsSubscription = this.activatedRoute.queryParams.subscribe(
       (param: any) => {
         this.searchService.init();
+        this.mainNavRef.refreshBanner();
         if(param['addToCollection']){
           this.collectionApi.getCollection(param['addToCollection']).subscribe((data:CollectionWrapper)=>{
             this.addToCollection=data.collection;
