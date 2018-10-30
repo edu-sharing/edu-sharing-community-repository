@@ -65,7 +65,7 @@ import org.xml.sax.SAXException;
 
 public class OAIPMHLOMImporter implements Importer{
 
-	private static final int THREAD_COUNT = Math.max(1, Runtime.getRuntime().availableProcessors() * 2;
+	private static final int THREAD_COUNT = Math.max(1, Runtime.getRuntime().availableProcessors() * 2);
 	Logger logger = Logger.getLogger(OAIPMHLOMImporter.class);
 	
 	XPathFactory pfactory = XPathFactory.newInstance();
