@@ -200,6 +200,11 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 				// client based redirect, disable server-side redirect (guest support)
 				allowSSO = false;
 			}
+			
+			if(config.values.loginAllowLocal != null && config.values.loginAllowLocal) {
+				allowSSO = false;
+			}
+			
 
 		}catch(Throwable e) {
 			log.error(e.getMessage());
