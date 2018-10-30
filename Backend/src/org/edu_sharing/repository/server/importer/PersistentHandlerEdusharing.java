@@ -144,7 +144,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		// HashMap<String,Object> childProps = mcAlfrescoBaseClient.getChildRecursive(oaiImportBasefolder, CCConstants.CCM_TYPE_IO, searchProps);
 		String nodeReplId=lomCatalogId+":"+replicationId;
 		NodeRef childId = getNodeIfExists(nodeReplId,targetFolder);
-		getLogger().info("child id "+nodeReplId+": "+childId);
+		getLogger().debug("child id "+nodeReplId+": "+childId);
 
 		if (childId != null) {
 
@@ -187,7 +187,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				}
 			}
 
-			getLogger().info("oldTimeStamp:" + oldTimeStamp + " newTimeStamp:" + newTimeStamp);
 			if (nodeMustBeUpdated) {
 				// @TODO update only when timestamp changed
 				// updateNode(alfResult.keySet().iterator().next(),newNodeProps);
@@ -200,14 +199,14 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
                 updateNode((String) childId.getId(), newNodeProps);
                 setModifiedDate((String) childId.getId(), newNodeProps);
             } else {
-				getLogger().info(" newTimeStamp.equals(oldTimeStamp) I'll do nothing");
+				getLogger().debug(" newTimeStamp.equals(oldTimeStamp) I'll do nothing");
 			}
 			return (String) childId.getId();
 
 		} else {
 			// insert
 			String nodeId;
-			getLogger().info("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
+			getLogger().debug("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
 			try{			
 				nodeId=createNode(targetFolder, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
 			
@@ -225,30 +224,36 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 		
 	}
-
+    private Map<String,String> importFolderCursorIds=new HashMap<>();
 	private synchronized String createFolderStructure(String cursor, String set) throws Throwable {
-		// check if importfolder exists
+        if (set == null || set.trim().equals("")) {
+            set = "unknownset";
+        }
 
-		if (set == null || set.trim().equals("")) {
-			set = "unknownset";
-		}
+        // replace evil chars
+        set = set.replace(":", "_");
 
-		// replace evil chars
-		set = set.replace(":", "_");
+        if (cursor == null || cursor.trim().equals("")) {
+            cursor = "last";
+        }
+	    String searchId=set+":"+cursor;
+	    // use cache to prevent calling alfresco getChild multiple times
+	    if(importFolderCursorIds.containsKey(searchId))
+	        return importFolderCursorIds.get(searchId);
+
 		String folderId=importFolderId;
-		HashMap<String, Object> setChild = mcAlfrescoBaseClient.getChild(folderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, set);
-		if (setChild == null) {
-			HashMap newimportFolderProps = new HashMap();
-			newimportFolderProps.put(CCConstants.CM_NAME, set);
-			newimportFolderProps.put(CCConstants.CM_PROP_C_TITLE, set);
-			folderId = mcAlfrescoBaseClient.createNode(folderId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
-		} else {
-			folderId = (String) setChild.get(CCConstants.SYS_PROP_NODE_UID);
-		}
+        HashMap<String, Object> setChild = mcAlfrescoBaseClient.getChild(folderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, set);
+        if (setChild == null) {
+            HashMap newimportFolderProps = new HashMap();
+            newimportFolderProps.put(CCConstants.CM_NAME, set);
+            newimportFolderProps.put(CCConstants.CM_PROP_C_TITLE, set);
+            folderId = mcAlfrescoBaseClient.createNode(folderId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
+        } else {
+            folderId = (String) setChild.get(CCConstants.SYS_PROP_NODE_UID);
+        }
 
-		if (cursor == null || cursor.trim().equals("")) {
-			cursor = "last";
-		}
+
+
 		HashMap<String, Object> cursorChild = mcAlfrescoBaseClient.getChild(folderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, cursor);
 		if (cursorChild == null) {
 			HashMap newimportFolderProps = new HashMap();
@@ -258,6 +263,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		} else {
 			folderId = (String) cursorChild.get(CCConstants.SYS_PROP_NODE_UID);
 		}
+		importFolderCursorIds.put(searchId,folderId);
 		return folderId;
 	}
 

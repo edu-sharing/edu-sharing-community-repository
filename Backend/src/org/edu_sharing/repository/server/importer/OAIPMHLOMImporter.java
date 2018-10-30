@@ -299,7 +299,7 @@ public class OAIPMHLOMImporter implements Importer{
 						}
 						String identifier = (String) xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
 						String timeStamp = (String) xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
-						logger.info("import "+identifier+" "+timeStamp);
+						logger.debug("import "+identifier+" "+timeStamp);
 						String status = (String) xpath.evaluate("@status", headerNode, XPathConstants.STRING);
 						if (status != null && status.trim().equals("deleted")) {
 
@@ -311,7 +311,7 @@ public class OAIPMHLOMImporter implements Importer{
 							logger.info("identifier:" + identifier + " timeStamp: " + timeStamp + " will be created/updated");
 							handleGetRecordStuff(cursor, set, identifier);
 						} else {
-							logger.info("identifier:" + identifier + " timeStamp: " + timeStamp + " will NOT be updated");
+							logger.debug("identifier:" + identifier + " timeStamp: " + timeStamp + " will NOT be updated");
 						}
 					} catch (Throwable t) {
 						logger.warn(t);
@@ -363,11 +363,13 @@ public class OAIPMHLOMImporter implements Importer{
 	
 	protected void handleGetRecordStuff( String cursor, String set, String identifier){
 		try{
+			long time=System.currentTimeMillis();
 			Document doc = getRecordAsDoc(identifier);
 			if(doc==null){
 				logger.info("Fetching of "+identifier+" failed, skipping entry!");
 				return;
 			}
+			logger.info("Fetching oai "+identifier+" took "+(System.currentTimeMillis()-time)+" ms");
 			String errorcode = (String)xpath.evaluate("/OAI-PMH/error", doc, XPathConstants.STRING);
 			if(errorcode == null || errorcode.trim().equals("")){
 				Node nodeRecord = getRecordNodeFromDoc(doc);

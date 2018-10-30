@@ -131,8 +131,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			generalIdentifierToSafeMap.put(CCConstants.LOM_PROP_IDENTIFIER_CATALOG, tmpLomCatalogId);
 			
 			generalIdentifierList.add(generalIdentifierToSafeMap);
-		
-			logger.info("lomCatalogId:" + lomCatalogId + " replicationId:" + replicationId);
 		}
 
 		ArrayList<String> generalTitleI18n = getMultiLangValueNew((Node) xpath.evaluate("metadata/lom/general/title", nodeRecord, XPathConstants.NODE));
