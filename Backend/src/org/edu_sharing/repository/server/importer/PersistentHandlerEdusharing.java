@@ -30,7 +30,6 @@ package org.edu_sharing.repository.server.importer;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.lang.instrument.Instrumentation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -47,9 +46,6 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -86,7 +82,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		// prepare cache
 		getAllNodesInImportfolder();
 		getReplicationIdTimestampMap();
-		createImportFolder();
+		prepareImportFolder();
 	}
 	public Logger getLogger(){
 	    return Logger.getLogger(job.getClass());
@@ -94,10 +90,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 	public void removeAllImportedObjects() throws Throwable {
 
-		HashMap<String, Object> importFolderProps = getImportFolderProps();
-		if (importFolderProps != null) {
-			String importFolderNodeId = (String) importFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
-			HashMap children = (HashMap) mcAlfrescoBaseClient.getChildren(importFolderNodeId);
+		String importFolder = prepareImportFolder();
+		if (importFolder != null) {
+			HashMap children = (HashMap) mcAlfrescoBaseClient.getChildren(importFolder);
 			if (children != null) {
 				for (Object setKey : children.keySet()) {
 					if(job!=null && job.isInterrupted()){
@@ -123,21 +118,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 	}
 
-	private HashMap<String, Object> getImportFolderProps() throws Throwable {
-		String repositoryRoot = null;
-		try {
-			repositoryRoot = mcAlfrescoBaseClient.getRepositoryRoot();
-		} catch (Exception e) {
-			getLogger().error(e.getMessage(), e);
-			return null;
-		}
-
-		String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
-		HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
-				OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
-		return importFolderProps;
-	}
-
 	public String safe(Map newNodeProps, String cursor, String set) throws Throwable {
 		String replicationId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 		String lomCatalogId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
@@ -151,7 +131,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			getLogger().error("no lomCatalogId in newNodeProps provided. will not safe/modify record.");
 			return null;
 		}
-		String importFolderId = createFolderStructure(cursor, set);
+		String targetFolder = createFolderStructure(cursor, set);
 
 
 		// watch out if object was already imported
@@ -163,7 +143,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		// searchProps.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID, replicationId);
 		// HashMap<String,Object> childProps = mcAlfrescoBaseClient.getChildRecursive(oaiImportBasefolder, CCConstants.CCM_TYPE_IO, searchProps);
 		String nodeReplId=lomCatalogId+":"+replicationId;
-		NodeRef childId = getNodeIfExists(nodeReplId,importFolderId);
+		NodeRef childId = getNodeIfExists(nodeReplId,targetFolder);
 		getLogger().info("child id "+nodeReplId+": "+childId);
 
 		if (childId != null) {
@@ -229,13 +209,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			String nodeId;
 			getLogger().info("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
 			try{			
-				nodeId=createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
+				nodeId=createNode(targetFolder, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
 			
 			}catch(org.alfresco.service.cmr.repository.DuplicateChildNodeNameException e){
 				String name = (String)newNodeProps.get(CCConstants.CM_NAME);
 				name = name + System.currentTimeMillis();
 				newNodeProps.put(CCConstants.CM_NAME, name);
-				nodeId=createNode(importFolderId, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
+				nodeId=createNode(targetFolder, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
 			}
 			setModifiedDate(nodeId,newNodeProps);
 			// add it to the replication id map
@@ -255,33 +235,33 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 		// replace evil chars
 		set = set.replace(":", "_");
-
-		HashMap<String, Object> setChild = mcAlfrescoBaseClient.getChild(importFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, set);
+		String folderId=importFolderId;
+		HashMap<String, Object> setChild = mcAlfrescoBaseClient.getChild(folderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, set);
 		if (setChild == null) {
 			HashMap newimportFolderProps = new HashMap();
 			newimportFolderProps.put(CCConstants.CM_NAME, set);
 			newimportFolderProps.put(CCConstants.CM_PROP_C_TITLE, set);
-			importFolderId = mcAlfrescoBaseClient.createNode(importFolderId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
+			folderId = mcAlfrescoBaseClient.createNode(folderId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
 		} else {
-			importFolderId = (String) setChild.get(CCConstants.SYS_PROP_NODE_UID);
+			folderId = (String) setChild.get(CCConstants.SYS_PROP_NODE_UID);
 		}
 
 		if (cursor == null || cursor.trim().equals("")) {
 			cursor = "last";
 		}
-		HashMap<String, Object> cursorChild = mcAlfrescoBaseClient.getChild(importFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, cursor);
+		HashMap<String, Object> cursorChild = mcAlfrescoBaseClient.getChild(folderId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME, cursor);
 		if (cursorChild == null) {
 			HashMap newimportFolderProps = new HashMap();
 			newimportFolderProps.put(CCConstants.CM_NAME, cursor);
 			newimportFolderProps.put(CCConstants.CM_PROP_C_TITLE, cursor);
-			importFolderId = mcAlfrescoBaseClient.createNode(importFolderId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
+			folderId = mcAlfrescoBaseClient.createNode(folderId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
 		} else {
-			importFolderId = (String) cursorChild.get(CCConstants.SYS_PROP_NODE_UID);
+			folderId = (String) cursorChild.get(CCConstants.SYS_PROP_NODE_UID);
 		}
-		return importFolderId;
+		return folderId;
 	}
 
-	private String createImportFolder() throws Throwable {
+	private String prepareImportFolder() throws Throwable {
 		String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
 		HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
 				OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
@@ -296,18 +276,20 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		return importFolderId;
 	}
 
-	private synchronized void setModifiedDate(String nodeId,Map newNodeProps) throws NotSupportedException, SystemException, IllegalStateException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
+	private void setModifiedDate(String nodeId,Map newNodeProps) throws NotSupportedException, SystemException, IllegalStateException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
 		if(newNodeProps.containsKey(CCConstants.CM_PROP_C_MODIFIED)){
 			NodeRef nodeRef=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
 			BehaviourFilter filter=(BehaviourFilter)AlfAppContextGate.getApplicationContext().getBean("policyBehaviourFilter");
 			ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
-			UserTransaction tx = serviceRegistry.getTransactionService().getUserTransaction();
-			tx.begin();
-			filter.disableBehaviour(nodeRef,ContentModel.ASPECT_AUDITABLE);
+			synchronized (this) {
+				UserTransaction tx = serviceRegistry.getTransactionService().getUserTransaction();
+				tx.begin();
+				filter.disableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
 
-			mcAlfrescoBaseClient.setProperty(nodeId, CCConstants.CM_PROP_C_MODIFIED,(String) newNodeProps.get(CCConstants.CM_PROP_C_MODIFIED));
-			filter.enableBehaviour(nodeRef,ContentModel.ASPECT_AUDITABLE);
-			tx.commit();
+				mcAlfrescoBaseClient.setProperty(nodeId, CCConstants.CM_PROP_C_MODIFIED, (String) newNodeProps.get(CCConstants.CM_PROP_C_MODIFIED));
+				filter.enableBehaviour(nodeRef, ContentModel.ASPECT_AUDITABLE);
+				tx.commit();
+			}
 		}
 	}
 
@@ -316,10 +298,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	}
 
 	public List<NodeRef> getAllNodesInImportfolder() throws Throwable {
-		HashMap<String, Object> importFolderProps = getImportFolderProps();
-		if (importFolderProps != null) {
-			String importFolderNodeId = (String) importFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
-			return this.getAllNodesInImportfolder(importFolderNodeId);
+		String importFolder = prepareImportFolder();
+		if (importFolder != null) {
+			return this.getAllNodesInImportfolder(importFolder);
 		} else {
 			getLogger().info("returns importFolderProps == null");
 			return null;
