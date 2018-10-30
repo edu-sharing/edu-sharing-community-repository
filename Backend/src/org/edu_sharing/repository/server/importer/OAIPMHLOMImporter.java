@@ -64,7 +64,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class OAIPMHLOMImporter implements Importer{
-	
+
+	private static final int THREAD_COUNT = Math.max(1, Runtime.getRuntime().availableProcessors() * 2;
 	Logger logger = Logger.getLogger(OAIPMHLOMImporter.class);
 	
 	XPathFactory pfactory = XPathFactory.newInstance();
@@ -265,7 +266,8 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 	}
 
-	private ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors() * 2), r -> {
+	
+	private ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT, r -> {
 		Thread t = new Thread(r);
 		t.setPriority(Thread.MIN_PRIORITY);
 		return t;
@@ -282,6 +284,7 @@ public class OAIPMHLOMImporter implements Importer{
 			logger.info("Will cancel identifier reading, job is aborted");
 			return;
 		}
+		long time=System.currentTimeMillis();
 		for(int i = 0; i < nrOfRs;i++){
 			if(i > MAX_PER_RESUMPTION){
 				logger.error("only " +MAX_PER_RESUMPTION +" for one resumption token are allowed here");
@@ -318,9 +321,8 @@ public class OAIPMHLOMImporter implements Importer{
 				return null;
 			});
 		}
-		logger.info("Threads started");
+		logger.info("Threads started ("+THREAD_COUNT+")");
 		// wait until all previously started threads have finished
-		long time=System.currentTimeMillis();
 		executor.invokeAll(threads);
 		time=(System.currentTimeMillis()-time);
 		logger.info("Threads finished ("+threads.size()+", "+(time/1000)+" s -> "+(time/threads.size())+"ms per entry)");
