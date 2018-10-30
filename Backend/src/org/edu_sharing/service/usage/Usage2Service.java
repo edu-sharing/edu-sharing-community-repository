@@ -182,7 +182,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 								(HashMap)null)).hasPermissions(parentNodeId, user, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
 
 						if(!hasPublishPerm){
-							logger.info("User "+user+" has no publish permission on "+resourceId);
+							logger.info("User "+user+" has no publish permission on " + parentNodeId);
 							throw new UsageException(UsageService.NO_CCPUBLISH_PERMISSION);
 						}
 					}

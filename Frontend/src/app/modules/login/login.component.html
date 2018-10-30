@@ -39,7 +39,7 @@
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
   </div>
-  <div class="powered center" *ngIf="config.branding">
+  <div class="powered center" [class.powered-long]="config.loginUrl" *ngIf="config.branding">
     {{ 'LOGIN.POWERED_BY' | translate}}
   </div>
   </div>

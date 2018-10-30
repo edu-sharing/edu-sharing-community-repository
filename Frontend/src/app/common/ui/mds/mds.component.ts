@@ -1025,7 +1025,7 @@ export class MdsComponent{
     let multivalue=widget.type=='multivalueTree';
     document.getElementById(element.id+'_bg').className=element.checked ? 'treeSelected' : '';
     if(!multivalue) {
-      let inputs = document.getElementById('`+widget.id+`_tree').getElementsByTagName('input');
+      let inputs = document.getElementById(widget.id+'_tree').getElementsByTagName('input');
       for (let i = 0; i < inputs.length; i++) {
         if (inputs[i].id == element.id)
           continue;

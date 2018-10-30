@@ -437,6 +437,12 @@ export class MainNavComponent{
       let sessionData=this.connector.getCurrentLogin();
       if(this.config.logout.ajax){
         this.http.get(this.config.logout.url).subscribe(()=>{
+            if(this.config.logut.destroySession){
+                this.connector.logout().subscribe((response) => {
+                    this.finishLogout();
+                });
+                return;
+            }
           this.finishLogout();
         },(error:any)=>{
           this.toast.error(error);

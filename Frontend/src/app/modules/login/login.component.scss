@@ -10,10 +10,16 @@ md-input{
   top:calc(15% + 490px);
   color: $textVeryLight;
 }
+.powered-long{
+  top:calc(15% + 530px);
+}
 .branding{
   width:100%;
   height:100px;
   text-align: center;
+  img{
+    max-height: 100px;
+  }
 }
 .register{
   color:$textLight;

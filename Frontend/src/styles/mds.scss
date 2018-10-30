@@ -222,6 +222,11 @@ mds .mdsGroup{
       }
     }
   }
+  .widget_checkbox{
+    .input-hint-bottom{
+      margin-top: 0;
+    }
+  }
   > label,
   .widget_checkbox,
   .mdsVersion{
