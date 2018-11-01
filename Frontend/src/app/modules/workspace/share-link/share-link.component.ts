@@ -157,7 +157,7 @@ export class WorkspaceShareLinkComponent  {
       },(error:any)=>this.toast.error(error))
     }
 
-    private deleteShare() {ƒ
+    private deleteShare() {
       this.loading=true;
       this.nodeService.deleteNodeShare(this._node.ref.id,this.currentShare.shareId).subscribe(()=>{
         (this.currentShare as any)={};
