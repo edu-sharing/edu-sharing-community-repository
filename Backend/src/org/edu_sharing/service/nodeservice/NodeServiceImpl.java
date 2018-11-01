@@ -3,6 +3,7 @@ package org.edu_sharing.service.nodeservice;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
@@ -378,16 +379,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	@Override
 	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types) {
-		List<ChildAssociationRef> assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+		Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
+		List<ChildAssociationRef> assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId),typesConverted);
 		List<NodeRef> result=new ArrayList<>();
 		for(ChildAssociationRef assoc : assocs){
-			String type=nodeService.getType(assoc.getChildRef()).toString();
-			if(types==null || types.contains(type)){
-				result.add(assoc.getChildRef());
-			}
-			if(type.equals(CCConstants.CCM_TYPE_MAP)){
-				result.addAll(getChildrenRecursive(store,assoc.getChildRef().getId(),types));
-			}
+			result.add(assoc.getChildRef());
+		}
+		List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId), Collections.singleton(QName.createQName(CCConstants.CCM_TYPE_MAP)));
+		for(ChildAssociationRef map : maps){
+			result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types));
 		}
 		logger.info("Get children recursive finished with "+result.size()+" nodes");
 		return result;

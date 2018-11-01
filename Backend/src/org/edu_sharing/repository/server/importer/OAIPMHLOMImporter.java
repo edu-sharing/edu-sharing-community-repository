@@ -65,7 +65,9 @@ import org.xml.sax.SAXException;
 
 public class OAIPMHLOMImporter implements Importer{
 
-	private static final int THREAD_COUNT = Math.max(1, Runtime.getRuntime().availableProcessors());
+	// best thread scaling seems to be at a max at 4 threads
+	// check the cpu and choose between a thread count between 1 - 4
+	private static final int THREAD_COUNT = Math.max(1, Math.min(4,Runtime.getRuntime().availableProcessors()/2));
 	Logger logger = Logger.getLogger(OAIPMHLOMImporter.class);
 	
 	XPathFactory pfactory = XPathFactory.newInstance();
@@ -269,7 +271,7 @@ public class OAIPMHLOMImporter implements Importer{
 	
 	private ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT, r -> {
 		Thread t = new Thread(r);
-		t.setPriority(Thread.MIN_PRIORITY);
+		t.setPriority(Thread.NORM_PRIORITY-1);
 		return t;
 	});
 	public void handleIdentifierList(Document docIdentifiers, String cursor, String set) throws Throwable{
