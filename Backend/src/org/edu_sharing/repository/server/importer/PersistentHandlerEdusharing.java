@@ -413,19 +413,15 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		String newNodeId;
 		// do not auto create versions (otherwise the node will get several versions e.g. during binary handler or preview)
 		simpleProps.put(CCConstants.CCM_PROP_IO_CREATE_VERSION,false);
-		//TODO: Watch if this prevents Duplicate Id Exceptions in database
-		// otherwise, it can be removed since it will reduce performance slightly
-		synchronized (this) {
-			try {
-				newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
-			} catch (DuplicateChildNodeNameException e) {
-				simpleProps.put(CCConstants.CM_NAME, (String) simpleProps.get(CCConstants.CM_NAME) + System.currentTimeMillis());
-				newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
-			}
-			if (aspects != null) {
-				for (String aspect : aspects) {
-					mcAlfrescoBaseClient.addAspect(newNodeId, aspect);
-				}
+		try {
+			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+		} catch (DuplicateChildNodeNameException e) {
+			simpleProps.put(CCConstants.CM_NAME, (String) simpleProps.get(CCConstants.CM_NAME) + System.currentTimeMillis());
+			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
+		}
+		if (aspects != null) {
+			for (String aspect : aspects) {
+				mcAlfrescoBaseClient.addAspect(newNodeId, aspect);
 			}
 		}
 		createChildobjects(newNodeId,nodeProps);
