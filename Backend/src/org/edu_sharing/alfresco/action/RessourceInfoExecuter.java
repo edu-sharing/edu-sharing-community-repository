@@ -316,7 +316,8 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 		Document doc = new RessourceInfoTool().loadFromStream(is);
 		if ((contentreader.getMimetype().equals("application/zip")
 				|| contentreader.getMimetype().equals("application/save-as")
-				|| contentreader.getMimetype().equals("application/x-zip-compressed")) && doc != null) {
+				|| contentreader.getMimetype().equals("application/x-zip-compressed")
+				|| contentreader.getMimetype().equals("application/vnd.moodle.backup")) && doc != null) {
 			try {
 
 				XPathFactory pfactory = XPathFactory.newInstance();
