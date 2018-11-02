@@ -2231,7 +2231,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			final String property) throws Exception {
 
 		final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
-		logger.info("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
+		logger.debug("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
 
 		RetryingTransactionCallback callback = new RetryingTransactionCallback() {
 			@Override
