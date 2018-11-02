@@ -67,7 +67,7 @@ public class OAIPMHLOMImporter implements Importer{
 
 	// best thread scaling seems to be at a max at 4-8 threads
 	// check the cpu and choose between a thread count between 1 - 6, leaving 1 core from the cpu at least untouched
-	private static final int THREAD_COUNT = Math.max(1, Math.min(4,Runtime.getRuntime().availableProcessors()-1));
+	private static final int THREAD_COUNT = Math.max(1, Math.min(6,Runtime.getRuntime().availableProcessors()-1));
 	Logger logger = Logger.getLogger(OAIPMHLOMImporter.class);
 	
 	XPathFactory pfactory = XPathFactory.newInstance();
