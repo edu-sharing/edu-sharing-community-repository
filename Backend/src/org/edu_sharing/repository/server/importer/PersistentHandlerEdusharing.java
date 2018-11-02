@@ -46,6 +46,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -72,49 +73,56 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
 	
 	
-	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+	static ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+	static ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	private String importFolderId;
 
 	public PersistentHandlerEdusharing(AbstractJob job) throws Throwable {
 		mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 		this.job = job;
+		this.importFolderId=prepareImportFolder();
 		// prepare cache
 		getAllNodesInImportfolder();
 		getReplicationIdTimestampMap();
-		prepareImportFolder();
 	}
 	public Logger getLogger(){
 	    return Logger.getLogger(job.getClass());
     }
+	public static Logger getLogger(AbstractJob job){
+		return Logger.getLogger(job.getClass());
+	}
 
-	public void removeAllImportedObjects() throws Throwable {
-
+	public static void removeAllImportedObjects(AbstractJob job) throws Throwable {
+		MCAlfrescoAPIClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 		String importFolder = prepareImportFolder();
 		if (importFolder != null) {
 			HashMap children = (HashMap) mcAlfrescoBaseClient.getChildren(importFolder);
 			if (children != null) {
 				for (Object setKey : children.keySet()) {
 					if(job!=null && job.isInterrupted()){
-						getLogger().info("Job is aborted");
+						getLogger(job).info("Job is aborted");
 						return;
 					}
 					String name = (String) ((HashMap) children.get(setKey)).get(CCConstants.CM_NAME);
-					getLogger().info("removing set:" + name);
+					getLogger(job).info("removing set:" + name);
 					HashMap setCursorFolders = (HashMap) mcAlfrescoBaseClient.getChildren((String) setKey);
-					for (Object setCursorfolderId : setCursorFolders.keySet()) {
-						HashMap setCursorFolderProps = (HashMap) setCursorFolders.get(setCursorfolderId);
-						String setCursorFolderName = (String) setCursorFolderProps.get(CCConstants.CM_NAME);
-						getLogger().info("removing cursor folder:" + setCursorFolderName + " (set:" + name + ")");
-						mcAlfrescoBaseClient.removeNode((String) setCursorfolderId, (String) setKey,false);
-					}
+					TransactionService transactionService = serviceRegistry.getTransactionService();
+					transactionService.getRetryingTransactionHelper().doInTransaction(()-> {
+								for (Object setCursorfolderId : setCursorFolders.keySet()) {
+									HashMap setCursorFolderProps = (HashMap) setCursorFolders.get(setCursorfolderId);
+									String setCursorFolderName = (String) setCursorFolderProps.get(CCConstants.CM_NAME);
+									getLogger(job).info("removing cursor folder:" + setCursorFolderName + " (set:" + name + ")");
+									mcAlfrescoBaseClient.removeNode((String) setCursorfolderId, (String) setKey, false);
+								}
+								return null;
+							},false);
 					// mcAlfrescoBaseClient.removeNode( (String)setKey,importFolderNodeId);
 				}
 			} else {
-				getLogger().info("importFolder has no children");
+				getLogger(job).info("importFolder has no children");
 			}
 		} else {
-			getLogger().info("no importFolder available");
+			getLogger(job).info("no importFolder available");
 		}
 	}
 
@@ -269,10 +277,12 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		return folderId;
 	}
 
-	private String prepareImportFolder() throws Throwable {
+	private static String prepareImportFolder() throws Throwable {
+		MCAlfrescoAPIClient mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 		String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
 		HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
 				OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
+		String importFolderId;
 		if (importFolderProps == null) {
 			HashMap newimportFolderProps = new HashMap();
 			newimportFolderProps.put(CCConstants.CM_NAME, OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
