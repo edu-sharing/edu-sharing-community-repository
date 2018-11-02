@@ -242,31 +242,37 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 						} 
 					}catch(Throwable t){}
 				}
-				
-				Action thumbnailAction = actionService.createAction(CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
-				thumbnailAction.setTrackStatus(true);
-				thumbnailAction.setExecuteAsynchronously(true);
-				thumbnailAction.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-				thumbnailAction.setParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE, new Date());
-			
-				ActionObserver.getInstance().addAction(nodeRef, thumbnailAction);
-				
-				SimpleTrigger st = new SimpleTrigger();
-				st.setName("ImmediateTrigger");
-				st.setRepeatCount(0);
-				st.setStartTime(new Date(System.currentTimeMillis() + 500));
-				JobDetail jd = new JobDetail();
-				jd.setJobClass(PreviewJob.class);
-				jd.setName(PreviewJob.class.getName() + " Immediate " + System.currentTimeMillis());
-				
-				try {
-					scheduler.scheduleJob(jd,st);
-				}catch(ObjectAlreadyExistsException e) {
-					//only when debug, the job should only be executed as a singelton, so this exception is fine
-					logger.debug(e.getMessage());
-				}catch(SchedulerException e) {
-					logger.error(e.getMessage(),e);
-				}			
+				ContentReader thumbnail = contentService.getReader(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW));
+				if(thumbnail!=null && thumbnail.getContentData()!=null && thumbnail.getContentData().getSize()>0){
+					// this node has already a custom thumbnail, we do not need to create one
+					// this prevents especially the import from slowing down when using a Binary Handler
+				}
+				else {
+					Action thumbnailAction = actionService.createAction(CCConstants.ACTION_NAME_CREATE_THUMBNAIL);
+					thumbnailAction.setTrackStatus(true);
+					thumbnailAction.setExecuteAsynchronously(true);
+					thumbnailAction.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
+					thumbnailAction.setParameterValue(ActionObserver.ACTION_OBSERVER_ADD_DATE, new Date());
+
+					ActionObserver.getInstance().addAction(nodeRef, thumbnailAction);
+
+					SimpleTrigger st = new SimpleTrigger();
+					st.setName("ImmediateTrigger");
+					st.setRepeatCount(0);
+					st.setStartTime(new Date(System.currentTimeMillis() + 500));
+					JobDetail jd = new JobDetail();
+					jd.setJobClass(PreviewJob.class);
+					jd.setName(PreviewJob.class.getName() + " Immediate " + System.currentTimeMillis());
+
+					try {
+						scheduler.scheduleJob(jd, st);
+					} catch (ObjectAlreadyExistsException e) {
+						//only when debug, the job should only be executed as a singelton, so this exception is fine
+						logger.debug(e.getMessage());
+					} catch (SchedulerException e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
 			}
 			
 			logger.debug("will do the resourceinfo. noderef:"+nodeRef);
