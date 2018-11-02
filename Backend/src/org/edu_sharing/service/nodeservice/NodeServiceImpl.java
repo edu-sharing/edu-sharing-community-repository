@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -386,9 +387,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			result.add(assoc.getChildRef());
 		}
 		List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId), Collections.singleton(QName.createQName(CCConstants.CCM_TYPE_MAP)));
-		for(ChildAssociationRef map : maps){
-			result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types));
-		}
+		String user = AuthenticationUtil.getFullyAuthenticatedUser();
+		// run in parallel to increase performance
+		maps.parallelStream().forEach((map)->{
+			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types))
+			,user);
+		});
 		logger.info("Get children recursive finished with "+result.size()+" nodes");
 		return result;
 	}

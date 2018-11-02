@@ -42,6 +42,7 @@ import javax.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -431,20 +432,25 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	public HashMap<String, String> getReplicationIdTimestampMap() {
 		if (replIdTimestampMap == null) {
 			try {
+				String user=AuthenticationUtil.getFullyAuthenticatedUser();
 				List<NodeRef> allNodes = getAllNodesInImportfolder();
 				replIdMap = new HashMap<>();
 				replIdTimestampMap = new HashMap<>();
-				for (NodeRef entry : allNodes) {
-					String replSource = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
-					String replSourceId = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
-					String timestamp = NodeServiceHelper.getProperty(entry,CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
-					replIdMap.put(replSource+":"+replSourceId,entry);
-					if (replSource != null && !replSource.trim().equals("") && timestamp != null && !timestamp.trim().equals("")) {
-						replIdTimestampMap.put(replSourceId, timestamp);
-					} else {
-						getLogger().error("cannot add nodeId " + entry.getId() + " to replIdTimestampMap replId:" + replSourceId + " timestamp:" + timestamp);
-					}
-				}
+				// fetch data parallel for faster build up
+				allNodes.parallelStream().forEach((entry)->{
+					AuthenticationUtil.runAs(()-> {
+						String replSource = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
+						String replSourceId = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
+						String timestamp = NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP);
+						replIdMap.put(replSource + ":" + replSourceId, entry);
+						if (replSource != null && !replSource.trim().equals("") && timestamp != null && !timestamp.trim().equals("")) {
+							replIdTimestampMap.put(replSourceId, timestamp);
+						} else {
+							getLogger().error("cannot add nodeId " + entry.getId() + " to replIdTimestampMap replId:" + replSourceId + " timestamp:" + timestamp);
+						}
+						return null;
+					},user);
+				});
 				getLogger().info("Build timestamp map finished, size: "+replIdTimestampMap.size());
 
 			} catch (Throwable e) {
