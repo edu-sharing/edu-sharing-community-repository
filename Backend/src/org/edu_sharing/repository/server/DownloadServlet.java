@@ -100,6 +100,10 @@ public class DownloadServlet extends HttpServlet{
 						errors += filename+": Has no content\r\n";
 						continue;
 					}
+					if(!new MCAlfrescoAPIClient().downloadAllowed(nodeId)){
+						errors += filename+": Download not allowed\r\n";
+						continue;
+					}
 					InputStream is = reader.getContentInputStream();
 					resp.setContentType("application/zip");
 			
