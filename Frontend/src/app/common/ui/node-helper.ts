@@ -293,8 +293,8 @@ export class NodeHelper{
     let LICENSE_ICONS=["cc-0","cc-by-nc","cc-by-nc-nd","cc-by-nc-sa","cc-by-nd",
       "cc-by-sa","cc-by","copyright-free","copyright-license","custom",
       "edu-nc-nd-noDo","edu-nc-nd","edu-p-nr-nd-noDo","edu-p-nr-nd","none","pdm","schulfunk","unterrichts-und-lehrmedien"];
-    //if(LICENSE_ICONS.indexOf(icon)==-1)
-    //  icon='none';
+    if(LICENSE_ICONS.indexOf(icon)==-1 && !useNoneAsFallback)
+      return null;//icon='none';
     if(icon=='none' && !useNoneAsFallback)
       return null;
     return rest.getAbsoluteEndpointUrl()+"../ccimages/licenses/"+icon+".svg";
