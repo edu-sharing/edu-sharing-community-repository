@@ -35,8 +35,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 					if (!baseClient.isAdmin(currentUser) && !AuthenticationUtil.isRunAsUserTheSystemUser()) {
 						throw new AccessDeniedException(currentUser);
 					}
-					
-					return eduOrganisationService.createOrganization(orgName, groupDisplayName,scope);
+					try {
+						return eduOrganisationService.createOrganization(orgName, groupDisplayName,scope);
+					}catch(Throwable e) {
+						logger.error(e.getMessage(),e);
+						throw e;
+					}
 				}
 			});							
 	}

@@ -103,7 +103,7 @@ public class Release_1_7_SubObjectsToFlatObjects implements Update {
 		boolean isMLAware = new Boolean(isMLAwareString);
 		if(!isMLAware){
 			String errorMsg = "please set multilang to true in edu-sharing.properties to run this updater. This updater is important to otherwise you could loose data";
-			logError(errorMsg, new Exception(errorMsg));
+			log(errorMsg);
 			return;
 		}
 		
