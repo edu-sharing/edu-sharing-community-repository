@@ -1313,8 +1313,12 @@ public class NodeDao {
 		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getApplicationInfo().getAppId());
 		try {
 			List<org.alfresco.service.cmr.repository.NodeRef> refs = searchService.getFilesSharedToMe();
+			
+			int performanceMax = 100;
+			
 			List<NodeRef> result=new ArrayList(refs.size());
 			for(org.alfresco.service.cmr.repository.NodeRef ref : refs){
+				if(result.size() < performanceMax)
 				result.add(new NodeRef(repoDao.getId(),ref.getId()));
 			}
 			return result;
