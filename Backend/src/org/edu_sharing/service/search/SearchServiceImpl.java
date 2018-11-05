@@ -180,8 +180,11 @@ public class SearchServiceImpl implements SearchService {
 		SearchParameters parameters = new SearchParameters();
 		parameters.addStore(Constants.storeRef);
 		parameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
-		parameters.setMaxItems(Integer.MAX_VALUE);
+		//parameters.setMaxItems(Integer.MAX_VALUE);
+		parameters.setMaxItems(200);
 		parameters.addAllAttribute(CCConstants.CCM_PROP_AUTHORITYCONTAINER_EDUHOMEDIR);
+		parameters.addSort("@" + CCConstants.CM_PROP_C_MODIFIED, false);
+
 		// TODO: The amount of files seems to be HUGE, we need a better query for filtering!
 		parameters.setQuery("TYPE:\"" + CCConstants.CCM_TYPE_NOTIFY
 				+ "\" AND PATH:\"/app\\:company_home/ccm\\:Edu_Sharing_System/ccm\\:Edu_Sharing_Sys_Notify"+postfix+"//.\" AND NOT @cm\\:creator:\"" + QueryParser.escape(username) + "\"");
