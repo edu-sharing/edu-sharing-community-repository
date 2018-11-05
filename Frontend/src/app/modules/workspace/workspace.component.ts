@@ -815,9 +815,16 @@ export class WorkspaceMainComponent{
     if (nodes && nodes.length) {
       if(allFiles){
         let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download", (node: Node) => this.downloadNode(node));
-        download.enabledCallback=(node:Node)=>{
-          return nodes && nodes[0].downloadUrl && nodes[0].properties && !nodes[0].properties[RestConstants.CCM_PROP_IO_WWWURL];
-        }
+          download.enabledCallback = (node: Node) => {
+              let list:any = node ? [node] : nodes;
+              if(!list || !list.length)
+                  return false;
+              let item=list[0];
+              if(list[0].reference)
+                  item=list[0].reference;
+              return list && item.downloadUrl && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
+          }
+          download.isEnabled=download.enabledCallback(null);
         if(download.isEnabled)
           options.push(download);
       }
