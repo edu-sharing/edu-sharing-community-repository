@@ -53,9 +53,9 @@ public class PreviewJob implements Job {
 		}
 
 		// put it in a variable and copy it to prevent ConcurrentModificationException
+		ActionObserver.getInstance().removeInactiveActions();
 		HashMap<NodeRef, List<Action>> nodeActionsMap = new HashMap<>(ActionObserver.getInstance().getNodeActionsMap());
 		logger.info("starting, nodes with actions:" + nodeActionsMap.size());
-		ActionObserver.getInstance().removeInactiveActions();
 		
 		int countRunning = 0;
 		for(Map.Entry<NodeRef,List<Action>> entry : nodeActionsMap.entrySet())
