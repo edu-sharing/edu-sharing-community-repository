@@ -4,6 +4,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.config.model.KeyValuePair;
 import org.json.JSONObject;
 
 import javax.servlet.ServletContext;
@@ -28,6 +30,9 @@ public class I18nAngular {
     public static String getTranslationAngular(String scope,String key,String language){
         ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
         try {
+            String override=getTranslationFromOverride(key,language);
+            if(override!=null)
+                return override;
             String json=FileUtils.readFileToString(new File(context.getRealPath("/assets/i18n/"+scope+"/"+language+".json")),"UTF-8");
             JSONObject object=new JSONObject(json);
             String[] list=key.split("\\.");
@@ -40,6 +45,24 @@ public class I18nAngular {
             logger.info("No translation in Angular found for "+scope+" "+key);
             return key;
         }
+    }
+
+    /**
+     * try to find the given override string in the client.config
+     * will return null if it is not overriden
+     * @param key
+     * @param language
+     */
+    private static String getTranslationFromOverride(String key, String language) {
+        try {
+            for (KeyValuePair pair:ConfigServiceFactory.getLanguageData()) {
+                if(pair.key.equals(key))
+                    return pair.value;
+            }
+        }catch(Exception e){
+            logger.warn(e);
+        }
+        return null;
     }
 
 }

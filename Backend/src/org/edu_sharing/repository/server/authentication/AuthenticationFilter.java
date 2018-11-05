@@ -195,11 +195,20 @@ public class AuthenticationFilter implements javax.servlet.Filter {
 		boolean allowSSO = true;
 		try {
 			Config config=ConfigServiceFactory.getCurrentConfig(req);
-			if(config.values.loginUrl.contains("edu-sharing/shibboleth")) {
+			if(!(config.values.loginUrl != null && 
+					config.values.loginUrl.contains("edu-sharing/shibboleth"))){
 				// client based redirect, disable server-side redirect (guest support)
 				allowSSO = false;
 			}
-		}catch(Exception e) {}
+			
+			if(config.values.loginAllowLocal != null && config.values.loginAllowLocal) {
+				allowSSO = false;
+			}
+			
+
+		}catch(Throwable e) {
+			log.error(e.getMessage());
+		}
 		
 		if(allowedAuthTypes != null && !allowedAuthTypes.trim().equals("") && allowSSO){
 			String shibbUrl = URLTool.addSSOPathWhenConfigured(URLTool.getBaseUrl()) + ( req.getQueryString() != null ? "?"+req.getQueryString() : "");

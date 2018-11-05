@@ -73,8 +73,8 @@ public class ShareServiceImpl implements ShareService {
 	@Override
 	public String createShare(String nodeId, String[] emails, long expiryDate, String password, String emailMessageLocale) throws EMailValidationException, EMailSendFailedException, ExpiryDateValidationException,
 			NodeDoesNotExsistException, PermissionFailedException {
-		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE)) {
-			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE);
+		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK)) {
+			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_LINK);
 		}
 		NodeService nodeService = serviceRegistry.getNodeService();
 		AuthenticationService authService = serviceRegistry.getAuthenticationService();

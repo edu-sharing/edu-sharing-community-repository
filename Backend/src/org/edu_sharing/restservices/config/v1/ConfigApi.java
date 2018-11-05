@@ -124,6 +124,8 @@ public class ConfigApi {
 		return convertKeyValue(variables.variable);
 	}
 	private Map<String,String> convertKeyValue(List<org.edu_sharing.service.config.model.KeyValuePair> pairs) {
+		if(pairs==null)
+			return null;
 		Map<String,String> map=new HashMap<String, String>();
 		for(org.edu_sharing.service.config.model.KeyValuePair pair : pairs) {
 			map.put(pair.key, pair.value);
@@ -131,14 +133,6 @@ public class ConfigApi {
 		return map;
 	}
 	private Map<String,String> getActiveLanguage(List<org.edu_sharing.service.config.model.Language> languages) {
-		if(languages!=null && languages.size()>0) {
-			String language=new AuthenticationToolAPI().getCurrentLanguage();
-			for(org.edu_sharing.service.config.model.Language entry : languages) {
-				if(entry.language.equalsIgnoreCase(language))
-					return convertKeyValue(entry.string);
-			}
-			logger.debug("no language override entries found in config for language "+language);
-		}
-		return null;
+		return convertKeyValue(ConfigServiceFactory.getLanguageData(languages));
 	}
 }

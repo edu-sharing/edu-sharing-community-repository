@@ -49,10 +49,12 @@ export class WorkspaceShareLinkComponent  {
       this._expiryDate=new Date(new Date().getTime()+3600*24*1000);
       // console.log(data);
         if(data.length){
-        this.edit=true;
         this.currentShare=data[0];
         this.expiry=data[0].expiryDate>0;
         this.password=data[0].password;
+        if (this.password) {
+            this.edit=true;
+        };
         this.currentDate=data[0].expiryDate;
         if(this.expiry) {
           this.expiryDate=new Date(data[0].expiryDate);
@@ -110,9 +112,6 @@ export class WorkspaceShareLinkComponent  {
       this.password=false;
     }
   }
-  public setDate(){
-    this.setExpiry(true);
-  }
   private updateShare(date=this.currentDate){
     // console.log(date);
     this.currentShare.url=this.translate.instant('LOADING');
@@ -131,11 +130,10 @@ export class WorkspaceShareLinkComponent  {
   }
 
   public setPassword(){
-  //  TODO: @Simon
-  /*
-  Hier den Objekt mit einem Password versehen
-  */
-    this.updateShare();
+      if (!this.password) {
+          this.edit=false;
+      };
+      this.updateShare();
   }
   public constructor(
     private nodeService:RestNodeService,

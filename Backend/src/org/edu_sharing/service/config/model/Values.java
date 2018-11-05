@@ -22,6 +22,7 @@ public class Values{
 	@XmlElement	public ContextMenuEntry[] searchNodeOptions;
 	@XmlElement	public ContextMenuEntry[] nodeStoreOptions;
 	@XmlElement	public String[] allowedLicenses;
+	@XmlElement	public License[] customLicenses;
 	@XmlElement	public Workflow[] workflows;
 	@XmlElement	public Boolean licenseDialogOnUpload;
 	@XmlElement	public Boolean nodeReport;

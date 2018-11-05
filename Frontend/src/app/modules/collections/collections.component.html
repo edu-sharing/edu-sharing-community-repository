@@ -206,7 +206,7 @@
     </div>
       <!--<div *ngIf="isAllowedToEditCollection()" (click)="buttonCollectionEdit()" class="big-edit-button"></div>-->
   </div>
-  <div *ngIf="pinningAllowed && isAllowedToEditCollection() && collectionContent.collection.type=='EDITORIAL'" class="collections-pin-button"
+  <div *ngIf="pinningAllowed && isAllowedToEditCollection()" class="collections-pin-button"
        tabindex="0"
        (keypress)="($event.which === 13)?pinCollection():0"
        (click)="pinCollection()"

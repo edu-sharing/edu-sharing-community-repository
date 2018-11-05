@@ -45,7 +45,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 						throw new AccessDeniedException(currentUser);
 					}
 					
-					return eduOrganisationService.createOrganization(orgName, groupDisplayName, metadataSet, scope);
+					try {
+						return eduOrganisationService.createOrganization(orgName, groupDisplayName, metadataSet, scope);
+					}catch(Throwable e) {
+						logger.error(e.getMessage(),e);
+						throw e;
+					}
 				}
 			});							
 	}

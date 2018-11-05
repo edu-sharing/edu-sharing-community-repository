@@ -1135,7 +1135,19 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public HashMap<String, Object> getProperties(String storeProtocol, String storeId, String nodeId) throws Throwable {
 		return getProperties(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId));
 	}
+	public boolean downloadAllowed(String nodeId,String commonLicenseKey,String editorType){
+		boolean downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
 
+		//allow download for owner, performance only check owner if download not allowed
+		if(!downloadAllowed && isOwner(nodeId, authenticationInfo.get(CCConstants.AUTH_USERNAME))){
+			downloadAllowed = true;
+		}
+
+		if(editorType != null && editorType.toLowerCase().equals(ConnectorService.ID_TINYMCE.toLowerCase())){
+			downloadAllowed = false;
+		}
+		return downloadAllowed;
+	}
 	/**
 	 * this method calls getPropertiesCached and makes a copy from the returned
 	 * hashmap this hashmap will be modiefied with the data of the current
@@ -1170,17 +1182,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		if (isSubOfContent) {
 
 			String commonLicenseKey = (String)propsCopy.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
-			boolean downloadAllowed = (CCConstants.COMMON_LICENSE_EDU_P_NR_ND.equals(commonLicenseKey)) ? false : true;
-			
-			//allow download for owner, performance only check owner if download not allowed
-			if(!downloadAllowed && isOwner(nodeRef.getId(), authenticationInfo.get(CCConstants.AUTH_USERNAME))){
-				downloadAllowed = true;
-			}
-			
-			String editorType = (String)propsCopy.get(CCConstants.CCM_PROP_EDITOR_TYPE);
-			if(editorType != null && editorType.toLowerCase().equals(ConnectorService.ID_TINYMCE.toLowerCase())){
-				downloadAllowed = false;
-			}
+			boolean downloadAllowed = downloadAllowed(nodeRef.getId(),commonLicenseKey,(String)propsCopy.get(CCConstants.CCM_PROP_EDITOR_TYPE));
 			
 			if (propsCopy.get(CCConstants.ALFRESCO_MIMETYPE) != null && redirectServletLink != null && downloadAllowed) {
 				String params = URLEncoder.encode("display=download");
@@ -2247,11 +2249,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				contentWriter.addListener(new ContentStreamListener() {
 					@Override
 					public void contentStreamClosed() throws ContentIOException {
-						logger.info("Content Stream was closed");
-						logger.info(" ContentData size:" + contentWriter.getContentData().getSize());
-						logger.info(" ContentData URL:" + contentWriter.getContentData().getContentUrl());
-						logger.info(" ContentData MimeTyp:" + contentWriter.getContentData().getMimetype());
-						logger.info(" ContentData ToString:" + contentWriter.getContentData().toString());
+						logger.debug("Content Stream was closed");
+						logger.debug(" size:" + contentWriter.getContentData().getSize()+
+									", URL:" + contentWriter.getContentData().getContentUrl()+
+								 	", MimeType:" + contentWriter.getContentData().getMimetype()+"" +
+									", ContentData ToString:" + contentWriter.getContentData().toString());
 					}
 				});
 				
@@ -3607,6 +3609,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			
 						if (AuthorityType.getAuthorityType(alfAuthority).equals(AuthorityType.GROUP)) {
 							NodeRef groupNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(alfAuthority);
+							if(groupNodeRef == null) {
+								logger.warn("authority " + alfAuthority + " does not exist." + " will continue");
+								continue;
+							}
+							
 							Map<QName, Serializable> groupProps = nodeService.getProperties(groupNodeRef);
 							Group group = new Group();
 							group.setName(alfAuthority);
