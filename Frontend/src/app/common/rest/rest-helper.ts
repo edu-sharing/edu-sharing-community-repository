@@ -320,7 +320,7 @@ export class RestHelper{
     }
 
     config.get("loginUrl").subscribe((url:string)=> {
-      if(url && !scope){
+      if(url && !scope && !config.instant("loginAllowLocal",false)){
         window.location.href=url;
         return;
       }

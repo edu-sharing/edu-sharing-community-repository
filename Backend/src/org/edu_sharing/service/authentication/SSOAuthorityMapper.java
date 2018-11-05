@@ -160,8 +160,18 @@ public class SSOAuthorityMapper {
 			tmpUserName += "@" + tmpAppId;
 		}
 		
+		String ssoType = ssoAttributes.get(PARAM_SSO_TYPE);
+		if (ssoType == null) {
+			logErrorParams(PARAM_SSO_TYPE, ssoAttributes);
+			throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
+		}
+		
 		final String originalUsername = tmpUserName;
-		final String userName = (hashUserName) ? digest(tmpUserName) : tmpUserName;
+		
+		/**
+		 * moodle hashes the username
+		 */
+		final String userName = (hashUserName && !ssoType.equals(SSO_TYPE_AuthByApp)) ? digest(tmpUserName) : tmpUserName;
 
 		
 		RunAsWork<String> runAs = new RunAsWork<String>() {
@@ -175,11 +185,7 @@ public class SSOAuthorityMapper {
 				boolean hashGroupNames = isHashGroupNames();
 				boolean updateMemberships = isUpdateMemberships();
 
-				String ssoType = ssoAttributes.get(PARAM_SSO_TYPE);
-				if (ssoType == null) {
-					logErrorParams(PARAM_SSO_TYPE, ssoAttributes);
-					throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
-				}
+				
 
 				String appId = ssoAttributes.get(PARAM_APP_ID);
 				ApplicationInfo appInfo = (appId != null) ? ApplicationInfoList.getRepositoryInfoById(appId) : null;

@@ -1238,6 +1238,11 @@
 					<type>d:boolean</type>
 					<multiple>false</multiple>
 				</property>
+				<!-- restricted access (e.g. licensed content) -->
+				<property name="ccm:restricted_access">
+					<type>d:boolean</type>
+					<multiple>false</multiple>
+				</property>
 				<!-- Lerneinheit-ID -->
 				<property name="ccm:learnunit_id">
 					<type>d:text</type>

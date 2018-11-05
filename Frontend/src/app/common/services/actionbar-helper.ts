@@ -31,10 +31,14 @@ export class ActionbarHelperService{
           let list:any=ActionbarHelperService.getNodes(nodes, node);
           if(!list || !list.length)
             return false;
-          let item=list[0];
-          if(list[0].reference)
-            item=list[0].reference;
-          return list && item.downloadUrl && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
+            let isAllowed=false;
+            for(let item of list) {
+                if(item.reference)
+                    item = item.reference;
+                // if at least one is allowed -> allow download (download servlet will later filter invalid files)
+                isAllowed=isAllowed || list && item.downloadUrl && item.properties && !item.properties[RestConstants.CCM_PROP_IO_WWWURL];
+            }
+            return isAllowed;
         }
         option.isEnabled=option.enabledCallback(null);
       }

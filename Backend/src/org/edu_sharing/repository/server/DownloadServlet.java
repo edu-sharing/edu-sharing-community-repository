@@ -33,6 +33,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.ShareService;
@@ -160,6 +161,10 @@ public class DownloadServlet extends HttpServlet{
                                 errors.add( filename+": Has no content" );
                                 return null;
                             }
+							if(!NodeServiceHelper.downloadAllowed(finalNodeId)){
+								errors.add(filename+": Download not allowed");
+								return null;
+							}
                             resp.setContentType("application/zip");
 
                             DataInputStream in = new DataInputStream(reader);
