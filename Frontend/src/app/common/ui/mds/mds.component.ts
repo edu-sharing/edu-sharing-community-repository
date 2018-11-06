@@ -49,6 +49,7 @@ export class MdsComponent{
   @Input() embedded=false;
   private activeAuthorType: number;
   private jumpmarksCount: number;
+  public static TYPE_CHILDOBJECT = 'io_childobject';
   public static TYPE_TOOLDEFINITION = 'tool_definition';
   public static TYPE_TOOLINSTANCE = 'tool_instance';
   public static TYPE_SAVED_SEARCH = 'saved_search';
@@ -652,7 +653,7 @@ export class MdsComponent{
             return;
         }
         // for childobjects
-        if(this._groupId=='io_childobject' && !this.checkFileExtension(this._currentValues[RestConstants.CM_NAME][0],callback,values)){
+        if(this._groupId==MdsComponent.TYPE_CHILDOBJECT && !this.checkFileExtension(this._currentValues[RestConstants.CM_NAME][0],callback,values)){
             return;
         }
     }
@@ -2312,6 +2313,9 @@ export class MdsComponent{
             }
             this.properties.sort();
             let nodeGroup = this.currentNode.isDirectory ? 'map' : 'io';
+            if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
+                nodeGroup = MdsComponent.TYPE_CHILDOBJECT;
+            }
             if (this.currentNode.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) != -1) {
                 nodeGroup = MdsComponent.TYPE_TOOLDEFINITION;
             }

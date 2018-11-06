@@ -104,6 +104,7 @@ export class CollectionsMainComponent{
     private _orderActive: boolean;
     optionsMaterials:OptionItem[];
     tutorialElement: ElementRef;
+    private reurl: any;
   // default hides the tabs
 
     // inject services
@@ -122,6 +123,7 @@ export class CollectionsMainComponent{
         private route:ActivatedRoute,
         private uiService:UIService,
         private router : Router,
+        private tempStorage :TemporaryStorageService,
         private toast : Toast,
       private title:Title,
       private config:ConfigurationService,
@@ -209,6 +211,7 @@ export class CollectionsMainComponent{
       params.mainnav=this.mainnav;
       if(addToOther)
         params.addToOther=addToOther;
+      params.reurl=this.reurl;
       this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:params});
     }
     closeAddToOther(){
@@ -284,7 +287,6 @@ export class CollectionsMainComponent{
       if(this.frame.isRunningInFrame()) {
       }
       else{
-        //ApplyToLmsComponent.navigateToSearchUsingReurl(this.router);
         this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
       }
     }
@@ -298,9 +300,18 @@ export class CollectionsMainComponent{
         this.optionsMaterials=this.getOptions(nodes,false);
     }
     getOptions(nodes:Node[]=null,fromList:boolean) {
-        if (fromList && (!nodes || !nodes.length)) {
-            //nodes = [new Node()];
+        if(this.reurl){
+            // no action bar in apply mode
+            if(!fromList){
+                return [];
+            }
+            let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.tempStorage,ActionbarHelperService.getNodes(nodes,node)[0],this.reurl));
+            apply.enabledCallback=((node:Node)=> {
+                return NodeHelper.getNodesRight(ActionbarHelperService.getNodes(nodes,node),RestConstants.ACCESS_CC_PUBLISH);
+            });
+            return [apply];
         }
+
         let options: OptionItem[] = [];
         if (!fromList) {
             if (nodes && nodes.length) {
@@ -326,7 +337,6 @@ export class CollectionsMainComponent{
             }
         }
       if (fromList || nodes && nodes.length) {
-
             let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
             if (download)
                 options.push(download);
@@ -624,9 +634,6 @@ export class CollectionsMainComponent{
     }
 
   private initialize() {
-
-      this.listOptions = this.getOptions(null,true);
-
     // load user profile
     this.iamService.getUser().subscribe( iamUser => {
       // WIN
@@ -642,10 +649,13 @@ export class CollectionsMainComponent{
             this.tabSelected=params['scope'];
         else
             this.tabSelected=RestConstants.COLLECTIONSCOPE_MY;
+        this.reurl=params['reurl'];
         if(this.isGuest)
           this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
         if(params['mainnav'])
           this.mainnav=params['mainnav']!='false';
+
+        this.listOptions = this.getOptions(null,true);
 
         this._orderActive = false;
         this.infoTitle = null;

@@ -73,7 +73,7 @@
   "ORIGINAL_DELETED_INFO":"Only metadata accessable",
   "COMMON_API_ERROR": "An error occured. Please try again.",
   "COMMON_API_ERROR_TITLE": "Error details",
-  "RENDERSERVICE_API_ERROR":"error while reaching render service. Please report this error an administrator.",
+  "RENDERSERVICE_API_ERROR":"error while reaching rendering service. Please report this error an administrator.",
   "SYSTEM_FOLDER_DELETE_ERROR":"This system folder can not be deleted",
   "TOOLPERMISSION_ERROR":"You have insufficient permissions for this task",
   "TOOLPERMISSION_ERROR_TITLE":"Insufficient permissions",
