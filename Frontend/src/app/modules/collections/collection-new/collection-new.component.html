@@ -100,7 +100,7 @@
                   <img [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'" class="card-image-preview"/>
               </div>
 
-              <div *ngIf="imageData" class="card-collection-image-container">
+              <div *ngIf="imageData" class="card-collection-image-container" (keyup.enter)="file.click()" (click)="file.click()">
                   <div class="card-image-container">
                       <img [src]="imageData" class="card-image-preview" >
                   </div>

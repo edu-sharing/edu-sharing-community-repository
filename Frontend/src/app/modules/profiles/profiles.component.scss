@@ -64,21 +64,28 @@ $path:'../../../assets/images/';
         display: initial;
         cursor: pointer;
       }
-      .new-avatar-pic{
+
+      .new-avatar-button{
         left: -120px;
-        font-size: 70px;
-        //opacity: 0.8;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.6);
         position: absolute;
         top: -45px;
-        padding: 25px;
-        display: inline-table;
-        color: rgb(56, 56, 56);
-
-        &:hover{
-          /*background: black;
-          color: white;*/
+        height: 120px;
+        width: 120px;
+        cursor: pointer;
+        overflow: hidden;
+        span{
+          background: rgba(0, 0, 0, 0.7);
+          bottom: 0;
+          color: #fff;
+          font-size: 9pt;
+          font-weight: bold;
+          left: 0;
+          position: absolute;
+          padding-top: 7px;
+          padding-bottom: 10px;
+          text-align: center;
+          width: 100%;
         }
       }
     }

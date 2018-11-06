@@ -17,6 +17,7 @@
       "FIRST_NAME":"Bitte Vornamen angeben",
       "LAST_NAME":"Bitte Nachnamen angeben",
       "EMAIL":"Bitte E-Mail angeben"
-    }
+    },
+    "IMG_CHANGE":"Ändern"
   }
 }
