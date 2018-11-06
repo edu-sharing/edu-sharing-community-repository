@@ -110,6 +110,7 @@ user-profile{
 }
 .sidenavImage{
   height:200px;
+  @include unselectableText();
 }
 
 .topBar{
