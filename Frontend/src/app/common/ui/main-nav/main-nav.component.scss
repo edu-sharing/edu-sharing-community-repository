@@ -165,12 +165,16 @@ user-profile{
 .noScope{
   margin-left:60px;
 }
-
+.topBar{
+  @include placeholder{
+    color: mix($workspaceTopBarFontColor,$workspaceTopBarBackground,50%); //rgba(255,255,255,0.165);/* => #595959;*/
+  }
+}
 .topBar input,.topBar input:focus{
   padding: 0 40px;
   border-radius: 2px;
   width:100%;
-  background: mix($workspaceTopBarFontColor,$workspaceTopBarBackground,16%); //rgba(255,255,255,0.165);/* => #595959;*/
+  background: mix($workspaceTopBarFontColor,$workspaceTopBarBackground,12%); //rgba(255,255,255,0.165);/* => #595959;*/
   border:none!important;
   height:40px;
   box-shadow:none!important;
