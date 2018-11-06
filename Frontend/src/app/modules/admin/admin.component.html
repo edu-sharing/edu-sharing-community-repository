@@ -81,7 +81,12 @@
                 <div class="description">{{('ADMIN.INFO.CHECK.'+check.name+'.STATUS_'+check.status) | translate:check.translate }}</div>
                 <div *ngIf="check.status!='OK'" class="solution">
                     <i class="material-icons">forward</i>
+                    <div>
                     {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION') | translate:check.translate }}
+                    <a *ngIf="check.status!='OK' && check.callback" class="solution-link clickable" (click)="check.callback()">
+                        {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION_LINK') | translate:check.translate }}
+                    </a>
+                    </div>
                 </div>
             </div>
             <i class="material-icons">{{check.status=='OK' ? 'check' : 'error_outline'}}</i>

@@ -749,16 +749,9 @@ export class AdminComponent {
               status='FAIL';
             }
           }
-          this.systemChecks.push({
-              name:"COMPANY_HOME",
-              status:status,
-          });
+          this.systemChecks.push(this.createSystemCheck("COMPANY_HOME",status));
         },(error)=>{
-            this.systemChecks.push({
-                name:"COMPANY_HOME",
-                status:"FAIL",
-                error:error
-            });
+            this.systemChecks.push(this.createSystemCheck("COMPANY_HOME","FAIL",error));
         });
         this.admin.getJobs().subscribe((jobs)=>{
             let count=0;
@@ -787,6 +780,21 @@ export class AdminComponent {
                 translate:mail
             });
         });
+    }
+    private createSystemCheck(name: string, status: string,error: any = null) {
+        let check:any={
+            name:name,
+            status:status,
+            error:error
+        };
+        if(name=="COMPANY_HOME"){
+          check.callback=()=>{
+              this.node.getNodeMetadata(RestConstants.USERHOME).subscribe((node)=>{
+              UIHelper.goToWorkspaceFolder(this.node,this.router,null,node.node.parent.id);
+            });
+          }
+        }
+        return check;
     }
     getSystemChecks(){
       this.systemChecks.sort((a:any,b:any)=>{
