@@ -74,7 +74,7 @@ export class RestLocatorService {
         let query = RestLocatorService.createUrl("config/:version/language", null);
         this.http.get(this.endpointUrl + query, this.getRequestOptions("application/json",null,null,lang))
             .subscribe((response:any) => {
-            observer.next(response.current);
+            observer.next(response.body.current);
             observer.complete();
           },(error:any)=>{
             observer.error(error);
@@ -89,7 +89,7 @@ export class RestLocatorService {
                 let query = RestLocatorService.createUrl("config/:version/language/defaults", null);
                 this.http.get(this.endpointUrl + query, this.getRequestOptions("application/json",null,null,lang))
                     .subscribe(response => {
-                        observer.next(response);
+                        observer.next(response.body);
                         observer.complete();
                     },(error:any)=>{
                         observer.error(error);

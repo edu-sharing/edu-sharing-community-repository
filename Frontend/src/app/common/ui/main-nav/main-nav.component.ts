@@ -89,15 +89,13 @@ export class MainNavComponent implements AfterViewInit{
   canEditProfile: boolean;
   private licenseAgreementNode: Node;
   userMenuOptions: OptionItem[];
-  helpOptions: OptionItem[];
+  helpOptions: OptionItem[]=[];
   tutorialElement: ElementRef;
 
 
   public showEditProfile: boolean;
   public showProfile: boolean;
 
-  public helpUrl = 'http://docs.edu-sharing.com/confluence/edp/';
-  public whatsNewUrl = 'http://docs.edu-sharing.com/confluence/edp/de/was-ist-neu-in-edu-sharing';
   private toolpermissions: string[];
   public canAccessWorkspace = true;
   private scrollInitialPositions : any[]=[];
@@ -558,8 +556,6 @@ export class MainNavComponent implements AfterViewInit{
       this.config=data;
       this.editUrl=data["editProfileUrl"];
       this.showEditProfile=data["editProfile"];
-      this.helpUrl=this.configService.instant("helpUrl",this.helpUrl);
-      this.whatsNewUrl=this.configService.instant("whatsNewUrl",this.whatsNewUrl);
       this.hideButtons(buttons);
       this.addButtons(buttons);
       this.showLicenseAgreement();
@@ -654,17 +650,9 @@ export class MainNavComponent implements AfterViewInit{
           option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
       }
-      if(this.helpUrl){
-          let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
+      for(let option of this.getConfigMenuOptions()){
           option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-          this.userMenuOptions.push(option);
-      }
-      if(this.whatsNewUrl){
-          let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
-          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
-          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-          option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
       }
       if(this.config.imprintUrl){
@@ -693,14 +681,18 @@ export class MainNavComponent implements AfterViewInit{
     }
 
     private updateHelpOptions() {
-      this.helpOptions=[];
-      if(this.helpUrl){
-          let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
-          this.helpOptions.push(option);
+      this.helpOptions=this.getConfigMenuHelpOptions();
+    }
+
+    private getConfigMenuHelpOptions() {
+      if(!this.config.menuHelpOptions){
+          console.warn("config does not contain menuHelpOptions, will not display any options");
+          return [];
       }
-      if(this.whatsNewUrl){
-          let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
-          this.helpOptions.push(option);
-      }
+        let options:OptionItem[]=[];
+        for(let entry of this.config.menuOptions){
+            options.push(new OptionItem(entry.key,entry.icon,()=>window.open(entry.url)));
+        }
+        return options;
     }
 }

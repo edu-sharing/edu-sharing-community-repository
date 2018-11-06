@@ -164,6 +164,7 @@ export class TranslationLoader implements TranslateLoader {
     if(hasEndpoint && environment.production){
       maxCount=1;
       this.locator.getLanguageDefaults(Translation.LANGUAGES[lang]).subscribe((data: any) =>{
+        console.log(data);
         translations.push(data);
       });
     }
@@ -191,7 +192,8 @@ export class TranslationLoader implements TranslateLoader {
         for (const obj of translations) {
           for (const key in obj) {
             //copy all the fields
-            let path=key.split(".");
+
+              let path=key.split(".");
             if(path.length==1) {
               final[key] = obj[key];
             }
