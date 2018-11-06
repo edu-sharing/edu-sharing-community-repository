@@ -14,6 +14,7 @@ import {RestLocatorService} from "./rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {CordovaService} from './services/cordova.service';
 import * as moment from 'moment';
+import {environment} from "../../environments/environment";
 
 export var TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','services','override'];
 
@@ -135,6 +136,8 @@ export function createTranslateLoader(http: HttpClient,locator:RestLocatorServic
   return new TranslationLoader(http,locator);
 }
 export class TranslationLoader implements TranslateLoader {
+  private initializing = false;
+  private initializedLanguage: any;
   constructor(private http: HttpClient,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
   /**
    * Gets the translations from the server
@@ -143,6 +146,20 @@ export class TranslationLoader implements TranslateLoader {
    */
 
   public getTranslation(lang: string): Observable<any> {
+    if(this.initializing || this.initializedLanguage){
+        return new Observable<any>((observer : Observer<any>) => {
+            let callback = () => {
+                if (!this.initializedLanguage) {
+                    setTimeout(callback, 10);
+                    return;
+                }
+                observer.next(this.initializedLanguage);
+                observer.complete();
+            };
+            setTimeout(callback);
+        });
+    }
+    this.initializing=true;
     //return this.http.get(`${this.prefix}/common/${lang}${this.suffix}`)
     //  .map((res: Response) => res.json());
     if(lang=="none"){
@@ -152,15 +169,24 @@ export class TranslationLoader implements TranslateLoader {
             console.log("initalized without translation");
         });
     }
+    const hasEndpoint=!this.locator.getCordova().isRunningCordova() || this.locator.getCordova().hasValidConfig();
     let translations : any =[];
     let results=0;
     let maxCount=TRANSLATION_LIST.length;
-    for (let translation of TRANSLATION_LIST) {
-      this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
-        .subscribe((data : any) => translations.push(data));
-
+    if(hasEndpoint && environment.production){
+      maxCount=1;
+      this.locator.getLanguageDefaults(Translation.LANGUAGES[lang]).subscribe((data: any) =>{
+        translations.push(data);
+      });
     }
-    if(!this.locator.getCordova().isRunningCordova() || this.locator.getCordova().hasValidConfig()) {
+    else {
+      console.log("dev/app mode, loading translations locally");
+        for (let translation of TRANSLATION_LIST) {
+            this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
+                .subscribe((data: any) => translations.push(data));
+        }
+    }
+    if(hasEndpoint) {
       maxCount++;
       this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
           translations.push(data);
@@ -200,6 +226,8 @@ export class TranslationLoader implements TranslateLoader {
             }
           }
         }
+        this.initializedLanguage=final;
+        this.initializing=false;
         observer.next(final);
         observer.complete();
       };

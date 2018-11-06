@@ -86,6 +86,22 @@ export class RestLocatorService {
       });
     });
   }
+    public getLanguageDefaults(lang:string) : Observable<any>{
+        return new Observable<any>((observer : Observer<any>) => {
+            this.locateApi().subscribe(data => {
+                let query = RestLocatorService.createUrl("config/:version/language/defaults", null);
+                this.http.get(this.endpointUrl + query, this.getRequestOptions("application/json",null,null,lang))
+                    .map((response: Response) => response.json())
+                    .subscribe(response => {
+                        observer.next(response);
+                        observer.complete();
+                    },(error:any)=>{
+                        observer.error(error);
+                        observer.complete();
+                    });
+            });
+        });
+    }
   public getRequestOptions(contentType="application/json",username:string = null,password:string = null,locale=Translation.getISOLanguage()) : RequestOptionsArgs{
     let headers = new Headers();
     if(contentType)
