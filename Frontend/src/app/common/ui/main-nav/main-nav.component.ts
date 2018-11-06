@@ -554,6 +554,7 @@ export class MainNavComponent implements AfterViewInit{
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
       this.config=data;
+      this.updateHelpOptions();
       this.editUrl=data["editProfileUrl"];
       this.showEditProfile=data["editProfile"];
       this.hideButtons(buttons);
@@ -650,7 +651,7 @@ export class MainNavComponent implements AfterViewInit{
           option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
       }
-      for(let option of this.getConfigMenuOptions()){
+      for(let option of this.getConfigMenuHelpOptions()){
           option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
           this.userMenuOptions.push(option);
@@ -685,12 +686,12 @@ export class MainNavComponent implements AfterViewInit{
     }
 
     private getConfigMenuHelpOptions() {
-      if(!this.config.menuHelpOptions){
-          console.warn("config does not contain menuHelpOptions, will not display any options");
+      if(!this.config.helpMenuOptions){
+          console.warn("config does not contain helpMenuOptions, will not display any options");
           return [];
       }
         let options:OptionItem[]=[];
-        for(let entry of this.config.menuOptions){
+        for(let entry of this.config.helpMenuOptions){
             options.push(new OptionItem(entry.key,entry.icon,()=>window.open(entry.url)));
         }
         return options;

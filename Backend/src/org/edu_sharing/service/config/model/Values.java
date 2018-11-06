@@ -47,4 +47,5 @@ public class Values{
 	@XmlElement	public Collections collections;
 	@XmlElement	public LicenseAgreement licenseAgreement;
 	@XmlElement	public Services services;
+	@XmlElement	public HelpMenuOptions[] helpMenuOptions;
 }
