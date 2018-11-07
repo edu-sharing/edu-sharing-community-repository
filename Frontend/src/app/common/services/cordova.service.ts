@@ -1,7 +1,6 @@
 import { Injectable, HostListener } from "@angular/core";
 import { setTimeout } from "core-js/library/web/timers";
 import { Observable, Observer, ConnectableObservable } from "rxjs";
-import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
 
 import { OAuthResult, LoginResult, NodeRef } from '../rest/data-object';
 import { RestConstants } from '../rest/rest-constants';
@@ -12,6 +11,7 @@ import {NavigationEnd, Router} from "@angular/router";
 import {FrameEventsService} from "./frame-events.service";
 import {Location} from '@angular/common';
 import {RestLocatorService} from "../rest/services/rest-locator.service";
+import {HttpClient} from '@angular/common/http';
 
 declare var cordova : any;
 
@@ -62,8 +62,8 @@ export class CordovaService {
    * CONSTRUCTOR
    */
   constructor(
-    private http : Http,
     private router : Router,
+    private http : HttpClient,
     private location: Location,
     private events : FrameEventsService
   ) {
@@ -915,26 +915,6 @@ export class CordovaService {
          console.log("FAIL startContentDownload");
          failCallback("FAIL startContentDownload", err);
      }, true, {});
-       /*
-     if (this.isIOS()) {
-
-
-       
-     } else {
-
-       // Android
-       (window as any).cordovaHTTP.acceptAllCerts(true, () => {
-         (window as any).CordovaHttpPlugin.downloadFile(downloadURL, {}, {}, filePath, function (result: any) {
-           if(winCallback) winCallback(filePath);
-         }, function (response: any) {
-           console.log("FAIL startContentDownload");
-           failCallback("FAIL startContentDownload ANDROID", response);
-         });
-       }, (error: any) => {
-         failCallback("FAIL accepting all certs", error);
-       });
-
-     }*/
    }
 
    openInAppBrowser(url:string){
@@ -1038,36 +1018,6 @@ export class CordovaService {
    }
 
   /**********************************************************
-   * Basic Server Communication
-   **********************************************************
-   * Before app starts as app it needs to set server config.
-   * To manage this, some basic HTTP requests are needed.
-   * These are part of the cordova service, so that it can
-   * run seperate from the rest of the app, that needs this
-   * config before starting up.
-   */
-
-  // get the metadata about what servers that are part of the public listing
-  public getPublicServerList() : Observable<any> {
-    let url='http://app-registry.edu-sharing.com/servers.php?version=2.0';
-    let headers=new Headers();
-    headers.set('Accept','application/json');
-    let options={headers:headers};
-    return this.http.get(url,options)
-        .map((response: Response) => response.json());
-  }
-
-  // check connection to server
-  public getServerAbout(server:string) : Observable<any> {
-      let url=server+'rest/_about'
-      let headers=new Headers();
-      headers.set('Accept','application/json');
-      let options={headers:headers};
-      return this.http.get(url,options)
-          .map((response: Response) => response.json());
-  }
-
-  /**********************************************************
    * OAUTH Server Communication
    **********************************************************
    * The REST-Services depend on Configuration Service that already need config from a fixed server.
@@ -1091,9 +1041,7 @@ export class CordovaService {
   public loginOAuth(endpointUrl:string, username: string = "", password: string = ""): Observable<OAuthResult> {
 
     let url = endpointUrl + "../oauth2/token";
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/x-www-form-urlencoded');
-    headers.append('Accept', '*/*');
+    let headers = {'Content-Type':'application/x-www-form-urlencoded','Accept': '*/*'};
     let options = { headers: headers, withCredentials: false };
 
     let data = "client_id=eduApp&grant_type=password&client_secret=secret" +
@@ -1101,11 +1049,11 @@ export class CordovaService {
       "&password=" + encodeURIComponent(password);
 
     return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-      this.http.post(url, data, options).map((response: Response) => response.json()).subscribe(
+      this.http.post<OAuthResult>(url, data, options).subscribe(
         (oauth: OAuthResult) => {
 
           if (oauth == null) {
-            observer.error("INVALID_CREDENTIALS"); "LOGIN.ERROR"
+            observer.error("INVALID_CREDENTIALS"); // "LOGIN.ERROR"
             observer.complete();
             return;
           }
@@ -1186,17 +1134,15 @@ export class CordovaService {
   private refreshOAuth(endpointUrl:string,oauth: OAuthResult): Observable<OAuthResult> {
 
     let url = endpointUrl + "../oauth2/token";
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/x-www-form-urlencoded');
-    headers.append('Accept', '*/*');
+    let headers = {'Content-Type': 'application/x-www-form-urlencoded','Accept': '*/*'};
     let options = { headers: headers, withCredentials: false }
 
     let data = "grant_type=refresh_token&client_id=eduApp&client_secret=secret" +
       "&refresh_token=" + encodeURIComponent(oauth.refresh_token);
 
     return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-      this.http.post(url, data, options).map((response: Response) => response.json()).subscribe(
-        (oauthNew: OAuthResult) => {
+      this.http.post<OAuthResult>(url, data, options).subscribe(
+        (oauthNew) => {
 
           // set local expire ts on token
           this.oauth=oauthNew;

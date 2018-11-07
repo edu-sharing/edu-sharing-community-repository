@@ -3,7 +3,7 @@
 /*
   Custom CSS for colors and looks which override the materializecss
 */
-.btn{
+.btn,button:focus{
   background-color:$primary!important;
   color:$textOnPrimary!important;
 }
@@ -292,11 +292,12 @@ img.align-icon {
   background-color: $workspaceTopBarBackground;
 }
 .row-dark .tab a{
-  color:rgba(255,255,255,0.65)!important;
+  color:mix($workspaceTopBarBackground,$workspaceTopBarFontColor,45%)!important;
 }
 .row-dark .tab .active{
-  color:#fff!important;
+  color:$workspaceTopBarFontColor!important;
   background: linear-gradient(to top, $tabColorLight 0,$tabColorLight 5px,transparent 5px,transparent 5%);
+  font-weight: bold;
 }
 .collection .collection-item.active{
   color:$primary;

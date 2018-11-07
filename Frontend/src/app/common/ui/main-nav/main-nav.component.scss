@@ -9,7 +9,7 @@
   z-index:98;
   height: $mainnavHeight;
   background: $workspaceTopBarBackground;
-  color:$textOnPrimary;
+  color:$workspaceTopBarFontColor;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -39,10 +39,10 @@ user-profile{
   top: 5px;
   font-size:7pt;
   a{
-    color:$textVeryLight!important;
+    color:rgba(red($workspaceTopBarFontColor),green($workspaceTopBarFontColor),blue($workspaceTopBarFontColor),0.7)!important;
   }
   a:hover{
-    color:#fff!important;
+    color:$workspaceTopBarFontColor!important;
   }
   a:nth-child(2){
     margin-left: 5px;
@@ -110,6 +110,7 @@ user-profile{
 }
 .sidenavImage{
   height:200px;
+  @include unselectableText();
 }
 
 .topBar{
@@ -151,7 +152,7 @@ user-profile{
     */
     background-color: $toastLeft;
     border-radius: 50%;
-    color:$textOnPrimary;
+    color:$workspaceTopBarFontColor;
     font-weight: bold;
     font-size:11pt;
     text-align: center;
@@ -164,12 +165,16 @@ user-profile{
 .noScope{
   margin-left:60px;
 }
-
+.topBar{
+  @include placeholder{
+    color: mix($workspaceTopBarFontColor,$workspaceTopBarBackground,50%); //rgba(255,255,255,0.165);/* => #595959;*/
+  }
+}
 .topBar input,.topBar input:focus{
   padding: 0 40px;
   border-radius: 2px;
   width:100%;
-  background: rgba(255,255,255,0.165);/* => #595959;*/
+  background: mix($workspaceTopBarFontColor,$workspaceTopBarBackground,12%); //rgba(255,255,255,0.165);/* => #595959;*/
   border:none!important;
   height:40px;
   box-shadow:none!important;
@@ -354,7 +359,7 @@ user-profile{
     width:100%;
     bottom:0;
     display:flex;
-    background-color: #fff;
+    background-color: $workspaceTopBarFontColor;
     overflow-x: auto;
     height:$mobileTabNavHeight;
     @include materialShadow();

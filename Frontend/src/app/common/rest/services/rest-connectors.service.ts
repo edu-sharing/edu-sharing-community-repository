@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import 'rxjs/add/operator/map'
 import { Observable } from 'rxjs/Observable';
 import {RestConnectorService} from "./rest-connector.service";
@@ -24,10 +23,10 @@ export class RestConnectorsService extends AbstractRestService{
   }
 
   public list = (repository=RestConstants.HOME_REPOSITORY
-                  ): Observable<ConnectorList> => {
+                  ) => {
     let query=this.connector.createUrl("connector/:version/connectors/:repository/list",repository);
-          return this.connector.get(query,this.connector.getRequestOptions())
-      .map((response: Response) => response.json()).do((data)=>this.currentList=data);
+          return this.connector.get<ConnectorList>(query,this.connector.getRequestOptions())
+          .do((data)=>this.currentList=data);
   }
   public connectorSupportsEdit(node: Node,connectorList:ConnectorList=this.currentList) {
     if(connectorList==null || connectorList.connectors==null)
@@ -77,63 +76,6 @@ export class RestConnectorsService extends AbstractRestService{
       }
       observer.next(req);
       observer.complete();
-      /*
-      this.connector.getOAuthToken().subscribe((oauth: OAuthResult) => {
-          if (!oauth.access_token) {
-            observer.error("oauth failed");
-            observer.complete();
-            return;
-          }
-          if (type == null) {
-            type=RestConnectorsService.getFiletype(node,connectorType);
-          }
-          let send: any = {};
-          send["endpoint"] = this.connector.getAbsoluteEndpointUrl();
-          send["tool"] = connectorType.id;
-          send["accessToken"] = oauth.access_token;
-          send["refreshToken"] = oauth.refresh_token;
-          send["tokenExpires"] = oauth.expires_in;
-          send["filetype"] = type.filetype;
-          send["mimetype"] = node.mimetype;
-          send["node"] = node.ref.id;
-          let i = 0;
-          let req = connectorList.url.indexOf("?") != -1 ? "&" : "?";
-          let params: string[] = [];
-          // add mandatory params
-          params.push("endpoint");
-          params.push("tool");
-          params.push("node");
-          params.push("accessToken");
-          params.push("refreshToken");
-          params.push("tokenExpires");
-          if(connectorType.parameters) {
-            for (let param of connectorType.parameters)
-              params.push(param);
-          }
-          for (let param of params) {
-            if (!send[param]) {
-              observer.error("invalid parameter " + param + " for connector, not in known list");
-              observer.complete();
-              return;
-            }
-            if (i > 0) {
-              req += "&";
-            }
-            req += param + "=" + encodeURIComponent(send[param]);
-            i++;
-          }
-          console.log("main request "+req);
-
-          let url = connectorList.url + this.connector.createUrl(req, null);
-          observer.next(url);
-          observer.complete();
-        },
-        (error: any) => {
-          observer.error(error);
-          observer.complete();
-        }
-      );
-      */
     });
   }
 

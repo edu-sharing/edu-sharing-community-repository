@@ -14,7 +14,6 @@ import {RestIamService} from "../../common/rest/services/rest-iam.service";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {RestConstants} from "../../common/rest/rest-constants";
 
-import {GwtInterfaceService, GwtEventListener} from "../../common/services/gwt-interface.service";
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {CollectionContent, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
@@ -51,9 +50,8 @@ import {ActionbarHelperService} from "../../common/services/actionbar-helper";
   selector: 'app-collections',
   templateUrl: 'collections.component.html',
   styleUrls: ['collections.component.scss'],
-  providers: [GwtInterfaceService],
 })
-export class CollectionsMainComponent implements GwtEventListener {
+export class CollectionsMainComponent{
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('listCollections') listCollections :  ListTableComponent;
 
@@ -66,7 +64,6 @@ export class CollectionsMainComponent implements GwtEventListener {
     public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
     public isLoading:boolean = true;
     public isReady:boolean = false;
-    private clearSearchOnNextStateChange:boolean = false;
 
     public collectionContent:EduData.CollectionContent;
     private collectionContentOriginal: EduData.CollectionContent;
@@ -107,11 +104,11 @@ export class CollectionsMainComponent implements GwtEventListener {
     private _orderActive: boolean;
     optionsMaterials:OptionItem[];
     tutorialElement: ElementRef;
+    private reurl: any;
   // default hides the tabs
 
     // inject services
     constructor(
-      public gwtInterface:GwtInterfaceService,
       private frame : FrameEventsService,
       private temporaryStorageService : TemporaryStorageService,
         private location : Location,
@@ -126,6 +123,7 @@ export class CollectionsMainComponent implements GwtEventListener {
         private route:ActivatedRoute,
         private uiService:UIService,
         private router : Router,
+        private tempStorage :TemporaryStorageService,
         private toast : Toast,
       private title:Title,
       private config:ConfigurationService,
@@ -135,7 +133,6 @@ export class CollectionsMainComponent implements GwtEventListener {
             this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
             this.collectionContent = new EduData.CollectionContent();
             this.collectionContent.setCollectionID(RestConstants.ROOT);
-            this.gwtInterface.addListenerOfGwtEvents(this);
             Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
               UIHelper.setTitle('COLLECTIONS.TITLE',title,translationService,config);
               this.mdsService.getSet().subscribe((data:MdsMetadataset)=>{
@@ -214,6 +211,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       params.mainnav=this.mainnav;
       if(addToOther)
         params.addToOther=addToOther;
+      params.reurl=this.reurl;
       this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:params});
     }
     closeAddToOther(){
@@ -289,7 +287,6 @@ export class CollectionsMainComponent implements GwtEventListener {
       if(this.frame.isRunningInFrame()) {
       }
       else{
-        //ApplyToLmsComponent.navigateToSearchUsingReurl(this.router);
         this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
       }
     }
@@ -303,9 +300,18 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.optionsMaterials=this.getOptions(nodes,false);
     }
     getOptions(nodes:Node[]=null,fromList:boolean) {
-        if (fromList && (!nodes || !nodes.length)) {
-            //nodes = [new Node()];
+        if(this.reurl){
+            // no action bar in apply mode
+            if(!fromList){
+                return [];
+            }
+            let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.tempStorage,ActionbarHelperService.getNodes(nodes,node)[0],this.reurl));
+            apply.enabledCallback=((node:Node)=> {
+                return NodeHelper.getNodesRight(ActionbarHelperService.getNodes(nodes,node),RestConstants.ACCESS_CC_PUBLISH);
+            });
+            return [apply];
         }
+
         let options: OptionItem[] = [];
         if (!fromList) {
             if (nodes && nodes.length) {
@@ -331,7 +337,6 @@ export class CollectionsMainComponent implements GwtEventListener {
             }
         }
       if (fromList || nodes && nodes.length) {
-
             let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
             if (download)
                 options.push(download);
@@ -450,11 +455,6 @@ export class CollectionsMainComponent implements GwtEventListener {
         if (!this.isReady) return;
         this.isLoading=true;
         this.onSelection([]);
-        // clear search field in GWT top area
-        if (this.clearSearchOnNextStateChange) {
-            this.clearSearchOnNextStateChange=false;
-            this.gwtInterface.sendEvent("clearsearch", null);
-        }
 
         // set correct scope
         let scope=this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
@@ -634,9 +634,6 @@ export class CollectionsMainComponent implements GwtEventListener {
     }
 
   private initialize() {
-
-      this.listOptions = this.getOptions(null,true);
-
     // load user profile
     this.iamService.getUser().subscribe( iamUser => {
       // WIN
@@ -644,7 +641,6 @@ export class CollectionsMainComponent implements GwtEventListener {
       this.person = iamUser.person;
 
       // set app to ready state
-      this.gwtInterface.addListenerOfGwtEvents(this);
       this.isReady = true;
       // subscribe to parameters of url
       this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
@@ -653,10 +649,13 @@ export class CollectionsMainComponent implements GwtEventListener {
             this.tabSelected=params['scope'];
         else
             this.tabSelected=RestConstants.COLLECTIONSCOPE_MY;
+        this.reurl=params['reurl'];
         if(this.isGuest)
           this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
         if(params['mainnav'])
           this.mainnav=params['mainnav']!='false';
+
+        this.listOptions = this.getOptions(null,true);
 
         this._orderActive = false;
         this.infoTitle = null;

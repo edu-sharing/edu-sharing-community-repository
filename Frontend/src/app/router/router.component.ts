@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {RestTestComponent} from "../common/rest/directives/rest-test/rest-test.component";
 import {NodeRenderComponent} from "../common/ui/node-render/node-render.component";
 import {Router, ActivatedRoute} from "@angular/router";
 import { ApplyToLmsComponent} from "../common/ui/apply-to-lms/apply-to-lms.component";
@@ -80,7 +79,6 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'app/share', component: ShareAppComponent },
     { path: UIConstants.ROUTER_PREFIX+'sharing', component: SharingComponent },
     { path: UIConstants.ROUTER_PREFIX+'test/mds',component: MdsTestComponent},
-    { path: UIConstants.ROUTER_PREFIX+'test/rest',component: RestTestComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node', component: NodeRenderComponent},
     { path: UIConstants.ROUTER_PREFIX+'render/:node/:version', component: NodeRenderComponent},
     { path: UIConstants.ROUTER_PREFIX+'apply-to-lms/:repo/:node', component: ApplyToLmsComponent},

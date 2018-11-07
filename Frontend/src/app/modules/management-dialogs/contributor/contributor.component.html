@@ -86,8 +86,9 @@
         <div>
           <label for="date">{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}</label>
           <div class="datePicker">
-            <div *ngIf="!date" class="clickable" (click)="openDatepicker()"><i class="material-icons">date_range</i><div>{{'WORKSPACE.CONTRIBUTOR.CHOOSE_DATE' | translate}}</div></div>
-            <ng-datepicker #datepicker *ngIf="date" id="date" [options]="dateOptions" [(ngModel)]="date"></ng-datepicker>
+            <div *ngIf="!date" class="clickable" (click)="openDatepicker()"><i class="material-icons">date_range</i><div>{{'CHOOSE_DATE' | translate}}</div></div>
+            <calendar *ngIf="date" id="date" [(date)]="date"></calendar>
+            <!-- <ng-datepicker #datepicker *ngIf="date" id="date" [options]="dateOptions" [(ngModel)]="date"></ng-datepicker> -->
             <div *ngIf="date"><i class="material-icons clickable" (click)="date=null">clear</i></div>
           </div>
           <!-- <input type="date" id="date" [(ngModel)]="edit.contributeDate"> -->

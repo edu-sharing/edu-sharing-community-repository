@@ -1,7 +1,6 @@
 
 
 import {Injectable} from "@angular/core";
-import {Http, Response} from "@angular/http";
 import {Observer, Observable} from "rxjs";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestLocatorService} from "../rest/services/rest-locator.service";
@@ -13,7 +12,7 @@ import {Toast} from "../ui/toast";
 export class ConfigurationService {
   private data : any=null;
 
-  constructor(private http : Http,private toast:Toast,private locator : RestLocatorService) {
+  constructor(private toast:Toast,private locator : RestLocatorService) {
     //this.getAll().subscribe(()=>{});
   }
   public getLocator(){

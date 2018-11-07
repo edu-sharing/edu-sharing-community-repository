@@ -230,7 +230,6 @@
       "METADATACONTRIBUTOR":"Contributors of metadata",
       "SCOPE":"role",
       "DATE":"date  (optional)",
-      "CHOOSE_DATE":"Choose date",
       "MORE":"Add more data",
       "ORG_INFO":"Organization of contributor (optional)",
       "ADDRESS_INFO":"Address of contributor (optional)",

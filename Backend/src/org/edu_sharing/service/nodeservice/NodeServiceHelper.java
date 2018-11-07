@@ -11,6 +11,7 @@ import java.util.Objects;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
@@ -87,10 +88,20 @@ public class NodeServiceHelper {
     }
 
 	/**
-	 * shortcut using the local NodeService
+	 * return the property from a local stored node via a node ref (shortcut)
+	 * @param nodeRef
+	 * @param key
+	 * @return
 	 */
-	public static String getProperty(NodeRef nodeRef,String property) {
-		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),property);
+    public static String getProperty(NodeRef nodeRef,String key){
+		return NodeServiceFactory.getLocalService().getProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
-
+    public static boolean downloadAllowed(String nodeId){
+		NodeRef ref=new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+		return new MCAlfrescoAPIClient().downloadAllowed(
+				nodeId,
+				getProperty(ref,CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),
+				getProperty(ref,CCConstants.CCM_PROP_EDITOR_TYPE)
+		);
+	}
 }

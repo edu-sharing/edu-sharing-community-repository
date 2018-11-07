@@ -637,6 +637,9 @@ export class ListTableComponent implements EventListener{
   public getCollection(node : any){
     return node.collection ? node.collection : node
   }
+  private getReference(node: any) {
+      return node.reference ? node.reference : node;
+  }
   public isHomeNode(node : any){
     // repos not loaded or not availale. assume true so that small images are loaded
     if(!this.repositories)
@@ -644,7 +647,7 @@ export class ListTableComponent implements EventListener{
     return RestNetworkService.isFromHomeRepo(node,this.repositories);
   }
   public getIconUrl(node : any){
-    return node.reference ? node.reference.iconURL : node.iconURL;
+    return this.getReference(node).iconURL;
   }
   public isCollection(node : any){
     return node.collection || node.hasOwnProperty('childCollectionsCount');
