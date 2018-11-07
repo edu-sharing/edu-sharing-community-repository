@@ -323,11 +323,10 @@ public class OAIPMHLOMImporter implements Importer{
 				return null;
 			});
 		}
-		logger.info("Threads started ("+THREAD_COUNT+")");
 		// wait until all previously started threads have finished
 		executor.invokeAll(threads);
 		time=(System.currentTimeMillis()-time);
-		logger.info("Threads finished ("+threads.size()+", "+(time/1000)+" s -> "+(time/threads.size())+"ms per entry)");
+		logger.info(THREAD_COUNT+" Threads finished ("+threads.size()+", "+(time/1000)+" s -> "+(time/threads.size())+"ms per entry)");
 	}
 
 	private String getRecordAsString(String identifier) {
