@@ -157,7 +157,7 @@ public class RenderingProxy extends HttpServlet {
 					return;
 				}
 				
-				String[] roles = req.getParameterValues("roles");
+				String[] roles = req.getParameterValues("role");
 				if(roles != null && roles.length > 0) {
 					final String username = usernameDecrypted;
 					RunAsWork<Void> runAs = new RunAsWork<Void>() {
