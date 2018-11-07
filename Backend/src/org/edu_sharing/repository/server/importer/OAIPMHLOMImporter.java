@@ -370,7 +370,7 @@ public class OAIPMHLOMImporter implements Importer{
 				logger.info("Fetching of "+identifier+" failed, skipping entry!");
 				return;
 			}
-			logger.info("Fetching oai "+identifier+" took "+(System.currentTimeMillis()-time)+" ms");
+			logger.debug("Fetching oai "+identifier+" took "+(System.currentTimeMillis()-time)+" ms");
 			String errorcode = (String)xpath.evaluate("/OAI-PMH/error", doc, XPathConstants.STRING);
 			if(errorcode == null || errorcode.trim().equals("")){
 				Node nodeRecord = getRecordNodeFromDoc(doc);
