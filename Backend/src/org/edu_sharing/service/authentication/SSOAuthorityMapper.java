@@ -314,6 +314,7 @@ public class SSOAuthorityMapper {
 				}
 
 				if(customGroupMapping != null) {
+					customGroupMapping.setSSOAuthorityMapper(SSOAuthorityMapper.this);
 					customGroupMapping.map(ssoAttributes);
 				}
 
