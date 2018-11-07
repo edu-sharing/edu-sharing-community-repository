@@ -124,7 +124,7 @@ export function createTranslateLoader(http: HttpClient,locator:RestLocatorServic
   return new TranslationLoader(http,locator);
 }
 export class TranslationLoader implements TranslateLoader {
-  private initializing = false;
+  private initializing:string = null;
   private initializedLanguage: any;
   constructor(private http: HttpClient,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
   /**
@@ -134,7 +134,7 @@ export class TranslationLoader implements TranslateLoader {
    */
 
   public getTranslation(lang: string): Observable<any> {
-    if(this.initializing || this.initializedLanguage){
+    if(this.initializing==lang || this.initializedLanguage){
         return new Observable<any>((observer : Observer<any>) => {
             let callback = () => {
                 if (!this.initializedLanguage) {
@@ -147,7 +147,7 @@ export class TranslationLoader implements TranslateLoader {
             setTimeout(callback);
         });
     }
-    this.initializing=true;
+    this.initializing=lang;
     //return this.http.get(`${this.prefix}/common/${lang}${this.suffix}`)
     //  .map((res: Response) => res.json());
     if(lang=="none"){
@@ -163,6 +163,7 @@ export class TranslationLoader implements TranslateLoader {
     let maxCount=TRANSLATION_LIST.length;
     if(hasEndpoint && environment.production){
       maxCount=1;
+      console.log(Translation.LANGUAGES[lang]);
       this.locator.getLanguageDefaults(Translation.LANGUAGES[lang]).subscribe((data: any) =>{
         console.log(data);
         translations.push(data);
