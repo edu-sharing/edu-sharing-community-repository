@@ -1,8 +1,4 @@
 @import "../../../../styles/variables.scss";
-
-.actionbar{
-
-}
 .actionAlways,.more{
   float:right;
   padding:0 15px;
@@ -70,7 +66,6 @@
 .actionToggleDivider{
   border-left:1px solid #ddd;
 }
-
 .actionToggle a{
   padding:0 5px;
   color: $textLight;
@@ -81,6 +76,31 @@
   @include removeDefaultFocus();
   color: $primary;
 }
+
+.actionbar-round{
+  .more, .actionAlways {
+    background: white !important;
+    color: $primary !important;
+    border-radius: 50%;
+    display:block;
+    width:45px;
+    height:45px;
+    line-height:45px;
+    text-align: center;
+    @include materialShadowBottom();
+    i{
+      position: relative;
+      font-size: 24px;
+    }
+    span{
+      display: none;
+    }
+  }
+  .actionAlways i{
+    right: 4px !important;
+  }
+}
+
 @media screen and (max-width: ($mobileWidth+$mobileStage*4)){
   .actionAlwaysCaption{
     display: none;

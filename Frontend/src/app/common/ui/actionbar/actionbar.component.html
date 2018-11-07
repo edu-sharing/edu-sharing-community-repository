@@ -2,8 +2,9 @@
           [callbackObject]="node"
           [options]="optionsMenu"
           [showDisabled]="showDisabled"
+          [position]="dropdownPosition"
 ></dropdown>
-<div class="actionbar">
+<div [class.actionbar-round]="appearance=='round'">
   <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
     <a *ngFor="let option of optionsToggle"
        tabindex="0"

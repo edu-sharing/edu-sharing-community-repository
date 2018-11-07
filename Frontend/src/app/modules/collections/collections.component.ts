@@ -105,6 +105,7 @@ export class CollectionsMainComponent {
     private _orderActive: boolean;
     optionsMaterials:OptionItem[];
     tutorialElement: ElementRef;
+    optionsCollection:OptionItem[] = [];
   // default hides the tabs
 
   // inject services
@@ -138,7 +139,6 @@ export class CollectionsMainComponent {
         this.referencesColumns=MdsHelper.getColumns(data,'collectionReferences');
       })
     });
-
       this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
         if(data.isValidLogin && data.currentScope==null) {
           this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
@@ -358,6 +358,7 @@ export class CollectionsMainComponent {
     public onSelection(nodes:EduData.Node[]){
         this.optionsMaterials=this.getOptions(nodes,false);
     }
+
     getOptions(nodes:Node[]=null,fromList:boolean) {
         if (fromList && (!nodes || !nodes.length)) {
             //nodes = [new Node()];
@@ -469,7 +470,7 @@ export class CollectionsMainComponent {
     return false;
   }
 
-  buttonCollectionDelete() : void {
+  collectionDelete() : void {
     this.dialogTitle="COLLECTIONS.CONFIRM_DELETE";
     this.dialogMessage="COLLECTIONS.CONFIRM_DELETE_INFO";
     this.dialogCancelable=true;
@@ -487,7 +488,7 @@ export class CollectionsMainComponent {
     })
   }
 
-    buttonCollectionEdit() : void {
+    collectionEdit() : void {
         if (this.isAllowedToEditCollection()){
             this.router.navigate([UIConstants.ROUTER_PREFIX+'collections/collection','edit',this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
             return;
@@ -538,6 +539,7 @@ export class CollectionsMainComponent {
 
             //this.sortCollectionContent();
             this.isLoading=false;
+            this.setOptionsCollection();
             this.mainNavRef.refreshBanner();
             if(this.collectionContent.getCollectionID()==RestConstants.ROOT && this.isAllowedToEditCollection()) {
                 setTimeout(() => {
@@ -824,5 +826,26 @@ export class CollectionsMainComponent {
 
     private isAllowedToDeleteNodes(nodes: Node[]) {
         return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
+    }
+    private collectionPermissions(){
+        // TODO: Simon
+        /*We need editPermissions Function to invite people*/
+    }
+
+    private setOptionsCollection() {
+      if(this.isAllowedToEditCollection()){
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.EDIT", "edit",()=>this.collectionEdit()));
+      }
+      if(this.pinningAllowed && this.isAllowedToDeleteCollection()) {
+        /*TODO: Step
+        Font with pin-icon*/
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.PIN", "pin", () => this.pinCollection()));
+      }
+      if(this.isAllowedToEditCollection()) {
+          this.optionsCollection.push(new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", () => this.collectionPermissions()));
+      }
+      if(this.isAllowedToDeleteCollection()) {
+            this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.DELETE", "delete", () => this.collectionDelete()));
+      }
     }
 }

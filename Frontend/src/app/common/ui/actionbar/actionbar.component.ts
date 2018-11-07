@@ -27,10 +27,18 @@ export class ActionbarComponent{
    */
   @Input() numberOfAlwaysVisibleOptions=2;
   @Input() numberOfAlwaysVisibleOptionsMobile=1;
+  /**
+   * Appearance show actionbar as button or circles (collection)
+   * Appearance default = button;
+   * dropdownPosition is for position of dropdown (default = left)
+   */
+  @Input() appearance='button';
+  @Input() dropdownPosition="left";
   public optionsAlways : OptionItem[] = [];
   public optionsMenu : OptionItem[] = [];
   public optionsToggle : OptionItem[] = [];
   public dropdown = false;
+
   /**
    * backgroundType for color matching, either bright, dark or primary
    * @type {boolean}

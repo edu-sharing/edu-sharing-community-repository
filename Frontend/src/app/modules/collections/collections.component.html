@@ -195,7 +195,7 @@
     <div *ngIf="collectionContent.collection.preview.isIcon" style="width: 250px; height: 200px; margin-left: auto;
     margin-right: auto;" >
       <div class="card-image-icon-container">
-        <div class="card-image-icon-circle" [style.cursor]="isAllowedToEditCollection()? 'pointer' : 'auto'" (click)="buttonCollectionEdit()">
+        <div class="card-image-icon-circle" [style.cursor]="isAllowedToEditCollection()? 'pointer' : 'auto'" (click)="collectionEdit()">
           <i class="material-icons" style="font-size: 75px; margin-top: 42px;" [style.color]="collectionContent.collection.color">layers</i>
         </div>
       </div>
@@ -204,30 +204,14 @@
     <div *ngIf="!collectionContent.collection.preview.isIcon" class="card-image-icon-container">
       <img class="collection-header-image" [src]="collectionContent.collection.preview.url+'&crop=true&width=400&height=350'" (error)="collectionContent.collection.previewUrl=null" style="width: 100%; height: auto;" role="presentation"/>
     </div>
-      <!--<div *ngIf="isAllowedToEditCollection()" (click)="buttonCollectionEdit()" class="big-edit-button"></div>-->
+      <div *ngIf="isAllowedToEditCollection()" (click)="collectionEdit()" class="big-edit-button"></div>
   </div>
-  <div *ngIf="pinningAllowed && isAllowedToEditCollection()" class="collections-pin-button"
-       tabindex="0"
-       (keypress)="($event.which === 13)?pinCollection():0"
-       (click)="pinCollection()"
-  >
-    <custom-icon iconId="pin"></custom-icon>
-  </div>
-  <div *ngIf="isAllowedToEditCollection()" class="collections-edit-button"
-       tabindex="0"
-       (keypress)="($event.which === 13)?buttonCollectionEdit():0"
-       (click)="buttonCollectionEdit()"
-  >
-    <i class="material-icons" style="display:inline;">edit</i>
-  </div>
-
-  <div *ngIf="isAllowedToDeleteCollection()" class="collections-delete-button"
-       tabindex="0"
-       (keypress)="($event.which === 13)?buttonCollectionDelete():0"
-       (click)="buttonCollectionDelete()">
-    <i class="material-icons" style="display:inline;">delete</i>
-  </div>
-
+    <actionbar class="collection-option"
+               [options]="optionsCollection"
+               [numberOfAlwaysVisibleOptions]="1"
+               [appearance]="'round'"
+               [dropdownPosition]="'right'"
+    ></actionbar>
   <div class="collections-header-textarea">
 
     <div class="collection-new-preview-headline collections-header-texttop" style="overflow:hidden;">

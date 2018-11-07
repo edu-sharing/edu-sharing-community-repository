@@ -26,7 +26,7 @@
 
     <div *ngIf="edit" class="editAvatar">
       <input #avatar type="file" (change)="updateAvatar($event)" accept="image/*" class="hide">
-      <div class="new-avatar-button">
+      <div class="new-avatar-button" (click)="avatar.click()">
         <span>{{'PROFILES.IMG_CHANGE' | translate}}</span>
       </div>
       <i *ngIf="hasAvatar()" class="material-icons clickable" (click)="clearAvatar()">delete</i>
