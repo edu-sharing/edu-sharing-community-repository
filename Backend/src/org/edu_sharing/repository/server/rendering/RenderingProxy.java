@@ -3,6 +3,8 @@ package org.edu_sharing.repository.server.rendering;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,12 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.axis.AxisFault;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.NumberUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.myfaces.application.ApplicationImpl;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -156,6 +156,23 @@ public class RenderingProxy extends HttpServlet {
 					logger.warn("ticket:" + ticket +" is not valid");
 					return;
 				}
+				
+				String[] roles = req.getParameterValues("roles");
+				if(roles != null && roles.length > 0) {
+					final String username = usernameDecrypted;
+					RunAsWork<Void> runAs = new RunAsWork<Void>() {
+						@Override
+						public Void doWork() throws Exception {
+							MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
+							String personId = new MCAlfrescoAPIClient().getUserInfo(username).get(CCConstants.SYS_PROP_NODE_UID);
+							apiClient.setProperty(personId, CCConstants.PROP_USER_ESREMOTEROLES, new ArrayList<String>(Arrays.asList(roles)));
+							return null;
+						}
+					};
+					AuthenticationUtil.runAsSystem(runAs);
+					
+				}
+				
 			}else {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
 				return;

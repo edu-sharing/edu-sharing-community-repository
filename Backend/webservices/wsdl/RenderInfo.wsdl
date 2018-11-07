@@ -6,22 +6,19 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
   <schema elementFormDefault="qualified" targetNamespace="http://render.webservices.edu_sharing.org" xmlns="http://www.w3.org/2001/XMLSchema">
    <import namespace="http://usage.webservices.edu_sharing.org"/>
    <import namespace="http://types.webservices.edu_sharing.org"/>
-   <element name="getRenderInfoLMS">
+   <element name="getRenderInfoRepo">
     <complexType>
      <sequence>
       <element name="userName" type="xsd:string"/>
       <element name="nodeId" type="xsd:string"/>
-      <element name="lmsId" type="xsd:string"/>
-      <element name="courseId" type="xsd:string"/>
-      <element name="resourceId" type="xsd:string"/>
       <element name="version" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getRenderInfoLMSResponse">
+   <element name="getRenderInfoRepoResponse">
     <complexType>
      <sequence>
-      <element name="getRenderInfoLMSReturn" type="impl:RenderInfoResult"/>
+      <element name="getRenderInfoRepoReturn" type="impl:RenderInfoResult"/>
      </sequence>
     </complexType>
    </element>
@@ -50,23 +47,27 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element name="properties" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
      <element name="propertiesToolInstance" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
      <element name="publishRight" nillable="true" type="xsd:boolean"/>
+     <element name="remoteRoles" nillable="true" type="impl:ArrayOf_xsd_string"/>
      <element name="usage" nillable="true" type="tns3:UsageResult"/>
      <element name="userReadAllowed" nillable="true" type="xsd:boolean"/>
     </sequence>
    </complexType>
-   <element name="getRenderInfoRepo">
+   <element name="getRenderInfoLMS">
     <complexType>
      <sequence>
       <element name="userName" type="xsd:string"/>
       <element name="nodeId" type="xsd:string"/>
+      <element name="lmsId" type="xsd:string"/>
+      <element name="courseId" type="xsd:string"/>
+      <element name="resourceId" type="xsd:string"/>
       <element name="version" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="getRenderInfoRepoResponse">
+   <element name="getRenderInfoLMSResponse">
     <complexType>
      <sequence>
-      <element name="getRenderInfoRepoReturn" type="impl:RenderInfoResult"/>
+      <element name="getRenderInfoLMSReturn" type="impl:RenderInfoResult"/>
      </sequence>
     </complexType>
    </element>
@@ -130,14 +131,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    <wsdl:portType name="RenderInfo">
 
-      <wsdl:operation name="getRenderInfoLMS">
-
-         <wsdl:input message="impl:getRenderInfoLMSRequest" name="getRenderInfoLMSRequest"/>
-
-         <wsdl:output message="impl:getRenderInfoLMSResponse" name="getRenderInfoLMSResponse"/>
-
-      </wsdl:operation>
-
       <wsdl:operation name="getRenderInfoRepo">
 
          <wsdl:input message="impl:getRenderInfoRepoRequest" name="getRenderInfoRepoRequest"/>
@@ -146,29 +139,19 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
+      <wsdl:operation name="getRenderInfoLMS">
+
+         <wsdl:input message="impl:getRenderInfoLMSRequest" name="getRenderInfoLMSRequest"/>
+
+         <wsdl:output message="impl:getRenderInfoLMSResponse" name="getRenderInfoLMSResponse"/>
+
+      </wsdl:operation>
+
    </wsdl:portType>
 
    <wsdl:binding name="RenderInfoSoapBinding" type="impl:RenderInfo">
 
       <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-
-      <wsdl:operation name="getRenderInfoLMS">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="getRenderInfoLMSRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="getRenderInfoLMSResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
 
       <wsdl:operation name="getRenderInfoRepo">
 
@@ -181,6 +164,24 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
          </wsdl:input>
 
          <wsdl:output name="getRenderInfoRepoResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getRenderInfoLMS">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getRenderInfoLMSRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getRenderInfoLMSResponse">
 
             <wsdlsoap:body use="literal"/>
 

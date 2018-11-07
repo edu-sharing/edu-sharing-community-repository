@@ -44,6 +44,8 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	private java.lang.String[] permissions;
 	
 	String eduSchoolPrimaryAffiliation;
+	
+	String[] remoteRoles;
 
 	public Boolean getGuestReadAllowed() {
 		return guestReadAllowed;
@@ -195,4 +197,14 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
     public String getEduSchoolPrimaryAffiliation() {
 		return eduSchoolPrimaryAffiliation;
 	}
+    
+    public void setRemoteRoles(String[] remoteRoles) {
+		this.remoteRoles = remoteRoles;
+	}
+    
+    public String[] getRemoteRoles() {
+		return remoteRoles;
+	}
+    
+   
 }
