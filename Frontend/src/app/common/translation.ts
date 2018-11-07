@@ -218,7 +218,7 @@ export class TranslationLoader implements TranslateLoader {
           }
         }
         this.initializedLanguage=final;
-        this.initializing=false;
+        this.initializing=null;
         observer.next(final);
         observer.complete();
       };
