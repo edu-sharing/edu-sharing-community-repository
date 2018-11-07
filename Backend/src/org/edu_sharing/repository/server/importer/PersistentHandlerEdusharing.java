@@ -71,7 +71,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	HashMap<String, String> replIdTimestampMap = null;
 	HashMap<String, NodeRef> replIdMap = null;
 
-	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
 	
 	
 	static ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -467,7 +467,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	 * @param timeStamp
 	 * @return
 	 */
-	public boolean mustBePersisted(String replId, String timeStamp) {
+	public synchronized boolean mustBePersisted(String replId, String timeStamp) {
 
 		// we will not safe without replId
 		if (replId == null) {
@@ -477,12 +477,12 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
 
 		// we will not safe without timestamp
-		if (timeStamp == null) {
+		if (timeStamp == null || timeStamp.isEmpty()) {
 			return false;
 		}
 
 		// does not exist
-		if (oldTimeStamp == null) {
+		if (oldTimeStamp == null || oldTimeStamp.isEmpty()) {
 			return true;
 		}
 
@@ -504,6 +504,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				return true;
 			}
 
+		}
+		catch(Throwable t){
+			t.printStackTrace();
 		}
 		return false;
 	}
