@@ -295,11 +295,11 @@ public class OAIPMHLOMImporter implements Importer{
 			final Node headerNode = nodeList.item(i);
 			threads.add(()->{
 				AuthenticationUtil.runAs(()-> {
+					String identifier = (String) xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
 					try {
 						if(job!=null && job.isInterrupted()){
 							return null;
 						}
-						String identifier = (String) xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
 						String timeStamp = (String) xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
 						logger.debug("import "+identifier+" "+timeStamp);
 						String status = (String) xpath.evaluate("@status", headerNode, XPathConstants.STRING);
@@ -316,7 +316,7 @@ public class OAIPMHLOMImporter implements Importer{
 							logger.debug("identifier:" + identifier + " timeStamp: " + timeStamp + " will NOT be updated");
 						}
 					} catch (Throwable t) {
-						logger.warn(t);
+						logger.warn("Error while handling identifier "+identifier,t);
 					}
 					return null;
 				},authority);
