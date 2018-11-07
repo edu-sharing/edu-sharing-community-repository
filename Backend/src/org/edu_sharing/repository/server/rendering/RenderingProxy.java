@@ -318,9 +318,7 @@ public class RenderingProxy extends HttpServlet {
 				    	
 					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(appInfoApplication.getPublicKey()));
 					value = Base64.encodeBase64String(esuidEncrptedBytes);
-						
-					value = URLEncoder.encode(value, "UTF-8");
-			    	
+
 			    }catch(Exception e){
 				    	e.printStackTrace();
 				    	resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"remote user auth failed "+ rep_id);
@@ -337,15 +335,14 @@ public class RenderingProxy extends HttpServlet {
 					}
 					byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
 					value = Base64.encodeBase64String(userEncryptedBytes);
-					value = URLEncoder.encode(value, "UTF-8");
-					
+
 				}catch(Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
 				
 			}
-			
+			value = URLEncoder.encode(value, "UTF-8");
 			contentUrl = UrlTool.setParam(contentUrl, key, value);
 		}
 		
