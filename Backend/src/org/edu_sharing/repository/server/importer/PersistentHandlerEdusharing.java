@@ -174,7 +174,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			}
 
 			boolean nodeMustBeUpdated = false;
-			if (newTimeStamp != null && oldTimeStamp != null) {
+			if (newTimeStamp != null && oldTimeStamp != null && !newTimeStamp.isEmpty() && !oldTimeStamp.isEmpty()) {
 				Date newDate = null;
 				try {
 					newDate = sdf.parse(newTimeStamp);
