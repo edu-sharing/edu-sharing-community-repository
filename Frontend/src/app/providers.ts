@@ -8,7 +8,6 @@ import {Toast} from "./common/ui/toast";
 import {RestCollectionService} from "./common/rest/services/rest-collection.service";
 import {RestUsageService} from "./common/rest/services/rest-usage.service";
 import {TemporaryStorageService} from "./common/services/temporary-storage.service";
-import {RestMetadataService} from "./common/rest/services/rest-metadata.service";
 import {SessionStorageService} from "./common/services/session-storage.service";
 import {RestOrganizationService} from "./common/rest/services/rest-organization.service";
 import {UIService} from "./common/services/ui.service";
@@ -29,7 +28,7 @@ import {PermissionNamePipe} from "./common/ui/permission-name.pipe";
 import {RestRegisterService} from './common/rest/services/rest-register.service';
 
 
-export const PROVIDERS=[
+export const PROVIDERS:any=[
   FrameEventsService,
   Toast,
   RestLocatorService,
@@ -53,7 +52,6 @@ export const PROVIDERS=[
   TemporaryStorageService,
   ActionbarHelperService,
   PermissionNamePipe,
-  RestMetadataService,
   RestSharingService,
   SessionStorageService,
   ConfigurationService,

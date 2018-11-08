@@ -21,7 +21,6 @@ import {SearchNodeStoreComponent} from "../../../modules/search/node-store/node-
 import {UIHelper} from "../ui-helper";
 import {UIConstants} from "../ui-constants";
 import {RestHelper} from "../../rest/rest-helper";
-import {Http} from "@angular/http";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
@@ -30,6 +29,7 @@ import {SessionStorageService} from "../../services/session-storage.service";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {Translation} from "../../translation";
 import {OptionItem} from "../actionbar/option-item";
+import {HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'main-nav',
@@ -89,15 +89,13 @@ export class MainNavComponent implements AfterViewInit{
   canEditProfile: boolean;
   private licenseAgreementNode: Node;
   userMenuOptions: OptionItem[];
-  helpOptions: OptionItem[];
+  helpOptions: OptionItem[]=[];
   tutorialElement: ElementRef;
 
 
   public showEditProfile: boolean;
   public showProfile: boolean;
 
-  public helpUrl = 'http://docs.edu-sharing.com/confluence/edp/';
-  public whatsNewUrl = 'http://docs.edu-sharing.com/confluence/edp/de/was-ist-neu-in-edu-sharing';
   private toolpermissions: string[];
   public canAccessWorkspace = true;
   private scrollInitialPositions : any[]=[];
@@ -341,7 +339,7 @@ export class MainNavComponent implements AfterViewInit{
               private configService : ConfigurationService,
               private storage : TemporaryStorageService,
               private session : SessionStorageService,
-              private http : Http,
+              private http : HttpClient,
               private org : RestOrganizationService,
               private router : Router,
               private route : ActivatedRoute,
@@ -379,9 +377,9 @@ export class MainNavComponent implements AfterViewInit{
           });
         }
         buttons.push({path:'search',scope:'search',icon:"search",name:"SIDEBAR.SEARCH",queryParams:reurl});
-        buttons.push({path:'collections',scope:'collections',icon:"layers",name:"SIDEBAR.COLLECTIONS"});
+        buttons.push({path:'collections',scope:'collections',icon:"layers",name:"SIDEBAR.COLLECTIONS",queryParams:reurl});
         buttons.push({path:'stream',scope:'stream',icon:"event",name:"SIDEBAR.STREAM"});
-        if(data.isGuest){
+          if(data.isGuest){
           buttons.push({path:'login',scope:'login',icon:"person",name:"SIDEBAR.LOGIN"});
         }
         this.isGuest=data.isGuest;
@@ -562,10 +560,9 @@ export class MainNavComponent implements AfterViewInit{
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
       this.config=data;
+      this.updateHelpOptions();
       this.editUrl=data["editProfileUrl"];
       this.showEditProfile=data["editProfile"];
-      this.helpUrl=this.configService.instant("helpUrl",this.helpUrl);
-      this.whatsNewUrl=this.configService.instant("whatsNewUrl",this.whatsNewUrl);
       this.hideButtons(buttons);
       this.addButtons(buttons);
       this.showLicenseAgreement();
@@ -660,17 +657,9 @@ export class MainNavComponent implements AfterViewInit{
           option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
       }
-      if(this.helpUrl){
-          let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
+      for(let option of this.getConfigMenuHelpOptions()){
           option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
           option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-          this.userMenuOptions.push(option);
-      }
-      if(this.whatsNewUrl){
-          let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
-          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
-          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
-          option.isSeperateBottom=true;
           this.userMenuOptions.push(option);
       }
       if(this.config.imprintUrl){
@@ -696,14 +685,18 @@ export class MainNavComponent implements AfterViewInit{
     }
 
     private updateHelpOptions() {
-      this.helpOptions=[];
-      if(this.helpUrl){
-          let option=new OptionItem('ONLINE_HELP','help_outline',()=>this.showHelp(this.helpUrl));
-          this.helpOptions.push(option);
+      this.helpOptions=this.getConfigMenuHelpOptions();
+    }
+
+    private getConfigMenuHelpOptions() {
+      if(!this.config.helpMenuOptions){
+          console.warn("config does not contain helpMenuOptions, will not display any options");
+          return [];
       }
-      if(this.whatsNewUrl){
-          let option=new OptionItem('WHATS_NEW','lightbulb_outline',()=>this.showHelp(this.whatsNewUrl));
-          this.helpOptions.push(option);
-      }
+        let options:OptionItem[]=[];
+        for(let entry of this.config.helpMenuOptions){
+            options.push(new OptionItem(entry.key,entry.icon,()=>window.open(entry.url)));
+        }
+        return options;
     }
 }

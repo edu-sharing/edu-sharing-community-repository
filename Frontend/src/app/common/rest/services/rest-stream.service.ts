@@ -14,22 +14,20 @@ import {
 export class RestStreamService {
   constructor(private connector : RestConnectorService) {}
 
-  public getStream = (status:STREAM_STATUS = STREAM_STATUS.OPEN,queryString="",queryProperties:any={},request:any=null,repository=RestConstants.HOME_REPOSITORY): Observable<MdsMetadatasets> => {
+  public getStream = (status:STREAM_STATUS = STREAM_STATUS.OPEN,queryString="",queryProperties:any={},request:any=null,repository=RestConstants.HOME_REPOSITORY) => {
     let query=this.connector.createUrlNoEscape("stream/:version/search/:repository?status=:status&query=:query&:request",repository,[
       [":status",encodeURIComponent(status)],
       [":query",encodeURIComponent(queryString)],
       [":request",this.connector.createRequestString(request)]
     ]);
-    return this.connector.post(query,JSON.stringify(queryProperties),this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+    return this.connector.post<MdsMetadatasets>(query,JSON.stringify(queryProperties),this.connector.getRequestOptions());
 
   }
-  public addEntry = (entry:any,repository=RestConstants.HOME_REPOSITORY): Observable<any> => {
+  public addEntry = (entry:any,repository=RestConstants.HOME_REPOSITORY) => {
     let query=this.connector.createUrl("stream/:version/add/:repository",repository);
-    return this.connector.put(query,JSON.stringify(entry),this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+    return this.connector.put<any>(query,JSON.stringify(entry),this.connector.getRequestOptions());
   }
-  public updateStatus = (entry:string,authority:string,status:STREAM_STATUS,repository=RestConstants.HOME_REPOSITORY): Observable<Response> => {
+  public updateStatus = (entry:string,authority:string,status:STREAM_STATUS,repository=RestConstants.HOME_REPOSITORY) => {
     let query=this.connector.createUrl("stream/:version/status/:repository/:entry?authority=:authority&status=:status",repository,[
       [":entry",entry],
       [":authority",authority],

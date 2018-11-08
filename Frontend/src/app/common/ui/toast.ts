@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {ToastyService, ToastData} from "ng2-toasty";
+import {ToastyService, ToastData} from "ngx-toasty";
 import {RestConstants} from "../rest/rest-constants";
 import {RouterComponent} from "../../router/router.component";
 import {ConfigurationService} from "../services/configuration.service";
@@ -84,16 +84,13 @@ export class Toast{
    * Generates a toast error message
    */
   public error(errorObject : any,message="COMMON_API_ERROR",parameters: any = null,dialogTitle='',dialogMessage='',additional : any = null) : void {
-    let errorInfo="";
     let error=errorObject;
-    let jsonParse=null;
+    let errorInfo="";
+    let json:any=null;
     if(errorObject)
-      jsonParse=errorObject._body;
-    if(!jsonParse && errorObject)
-      jsonParse=errorObject.response;
-    let json:any;
+        json=errorObject.error;
+
     try {
-      json=JSON.parse(jsonParse);
       error=json.error+": "+json.message;
     }catch(e){}
     this.dialogTitle=dialogTitle;
@@ -102,11 +99,9 @@ export class Toast{
       this.dialogMessage = '';
       this.dialogTitle = 'COMMON_API_ERROR_TITLE';
       console.log(errorObject);
-      if (errorObject)
-        errorInfo = jsonParse;
       try {
-        let json = JSON.parse(jsonParse);
-        if (json.stacktraceArray) {
+        let error = json.error;
+        if (error.stacktraceArray) {
           errorInfo = json.stacktraceArray.join('\n');
         }
         if (json.error.indexOf("DAOToolPermissionException") != -1) {
@@ -125,9 +120,8 @@ export class Toast{
           this.dialogMessage = '';
           this.dialogTitle = 'COMMON_API_ERROR_TITLE';
           if (errorObject)
-            errorInfo = jsonParse;
+            errorInfo = JSON.stringify(json);
           try {
-            let json = JSON.parse(jsonParse);
             if (json.stacktraceArray) {
               errorInfo = json.stacktraceArray.join("\n");
             }

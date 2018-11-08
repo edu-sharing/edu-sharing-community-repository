@@ -34,7 +34,7 @@ import {UIHelper} from "../../../common/ui/ui-helper";
 @Component({
   selector: 'app-collection-new',
   templateUrl: 'collection-new.component.html',
-  styleUrls: ['collection-new.component.scss'],
+  styleUrls: ['collection-new.component.scss']
 })
 export class CollectionNewComponent {
   @ViewChild('mds') mds : MdsComponent;

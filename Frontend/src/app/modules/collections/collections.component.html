@@ -133,7 +133,7 @@
                   [options]="listOptions"
                   [isClickable]="true"
                   (onSelectionChanged)="onSelection($event)"
-                  [hasCheckbox]="!orderActive"
+                  [hasCheckbox]="!orderActive && !reurl"
                   [canDrop]="canDropOnRef"
                   (clickRow)="onContentClick($event.node)"
                   (onAddElement)="switchToSearch()"

@@ -7,7 +7,6 @@ import {
 import {FormatSizePipe} from "./file-size.pipe";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
-import {Response, ResponseContentType, Http} from "@angular/http";
 import {ConfigurationService} from "../services/configuration.service";
 import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
@@ -24,6 +23,8 @@ import {Helper} from "../helper";
 import {ConfigurationHelper} from "../rest/configuration-helper";
 import {CordovaService} from "../services/cordova.service";
 import {VCard} from "../VCard";
+import {HttpClient} from '@angular/common/http';
+import {HttpResponse} from '@angular/common/http/src/response';
 
 export class NodeHelper{
   /**
@@ -190,8 +191,7 @@ export class NodeHelper{
    * @param item
    * @returns {any}
    */
-  public static getCollectionAttribute(translate : TranslateService,collection : any,item : string) : string
-  {
+  public static getCollectionAttribute(translate : TranslateService,collection : any,item : string) : string{
     if(item=='info'){
       let childs=collection.childReferencesCount;
       let coll=collection.childCollectionsCount;
@@ -255,12 +255,12 @@ export class NodeHelper{
    */
   public static appendImageData(rest:RestConnectorService,node: Node,quality=60) : Observable<Node>{
   return new Observable<Node>((observer : Observer<Node>)=>{
-    let options=rest.getRequestOptions();
-    options.responseType=ResponseContentType.Blob;
+    let options:any=rest.getRequestOptions();
+    options.responseType='blob';
 
-    rest.get(node.preview.url+"&quality="+quality,options,false).subscribe((data)=>{
+    rest.get(node.preview.url+"&quality="+quality,options,false).subscribe((data:HttpResponse<Blob>)=>{
     //rest.get("http://localhost:8081/edu-sharing/rest/authentication/v1/validateSession",options,false).subscribe((data:Response)=>{
-      node.preview.data=data.blob();
+      node.preview.data=data.body;
       observer.next(node);
       observer.complete();
     },(error)=>{
@@ -432,7 +432,7 @@ export class NodeHelper{
    * @param options
    * @param progressCallback
    */
-  public static applyCustomNodeOptions(toast:Toast, http:Http, connector:RestConnectorService, custom: any,allNodes:Node[], selectedNodes: Node[], options: OptionItem[], progressCallback:Function,replaceUrl:any={}) {
+  public static applyCustomNodeOptions(toast:Toast, http:HttpClient, connector:RestConnectorService, custom: any,allNodes:Node[], selectedNodes: Node[], options: OptionItem[], progressCallback:Function,replaceUrl:any={}) {
     if (custom) {
       for (let c of custom) {
         if(c.remove){

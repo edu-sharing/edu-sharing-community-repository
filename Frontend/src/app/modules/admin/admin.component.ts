@@ -62,6 +62,7 @@ export class AdminComponent {
   public jobsOpen: boolean[]=[];
   public jobsLogFilter:any = [];
   public jobsLogLevel:any = [];
+  public jobsLogData:any = [];
   public lucene:any={offset:0,count:100};
   public browseMode='NODEREF';
   public oaiSave=true;
@@ -602,7 +603,7 @@ export class AdminComponent {
     public updateEduGroupSuggestions(event : any) {
         this.organization.getOrganizations(event.input).subscribe(
             (data:any)=>{
-                var ret:SuggestItem[] = [];
+                let ret:SuggestItem[] = [];
                 for (let orga of data.organizations) {
                     let item = new SuggestItem(orga.authorityName, orga.profile.displayName, 'group', '');
                     item.originalObject = orga;
@@ -699,9 +700,9 @@ export class AdminComponent {
             }
             log=result;
         }
-        if(log.length<=50)
+        if(log.length<=200)
             return log;
-        return log.slice(0,50);
+        return log.slice(0,200);
     }
     private cancelJob(job:any){
       this.dialogTitle='ADMIN.JOBS.CANCEL_TITLE';
@@ -723,6 +724,7 @@ export class AdminComponent {
     private reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs)=>{
             this.jobs=jobs;
+            this.updateJobLogs();
         })
     }
 
@@ -750,16 +752,9 @@ export class AdminComponent {
               status='FAIL';
             }
           }
-          this.systemChecks.push({
-              name:"COMPANY_HOME",
-              status:status,
-          });
+          this.systemChecks.push(this.createSystemCheck("COMPANY_HOME",status));
         },(error)=>{
-            this.systemChecks.push({
-                name:"COMPANY_HOME",
-                status:"FAIL",
-                error:error
-            });
+            this.systemChecks.push(this.createSystemCheck("COMPANY_HOME","FAIL",error));
         });
         this.admin.getJobs().subscribe((jobs)=>{
             let count=0;
@@ -789,6 +784,21 @@ export class AdminComponent {
             });
         });
     }
+    private createSystemCheck(name: string, status: string,error: any = null) {
+        let check:any={
+            name:name,
+            status:status,
+            error:error
+        };
+        if(name=="COMPANY_HOME"){
+          check.callback=()=>{
+              this.node.getNodeMetadata(RestConstants.USERHOME).subscribe((node)=>{
+              UIHelper.goToWorkspaceFolder(this.node,this.router,null,node.node.parent.id);
+            });
+          }
+        }
+        return check;
+    }
     getSystemChecks(){
       this.systemChecks.sort((a:any,b:any)=>{
           let status:any={'FAIL':0,'WARN':1,'OK':2};
@@ -810,6 +820,18 @@ export class AdminComponent {
           this.toast.error(error);
             this.globalProgress=false;
         });
+    }
+
+    private updateJobLogs() {
+      this.jobsLogData=[];
+      let i=0;
+      if(this.jobs) {
+          for (let job of this.jobs) {
+              this.jobsLogData.push(this.getJobLog(job, i));
+              i++;
+          }
+          console.log(this.jobsLogData);
+      }
     }
 }
 

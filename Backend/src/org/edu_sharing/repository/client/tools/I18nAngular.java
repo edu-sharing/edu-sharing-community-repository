@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import javax.servlet.ServletContext;
 import java.io.File;
+import java.util.Collection;
 
 /**
  * Class to load language data from the angular i18n files (json)
@@ -20,6 +21,25 @@ public class I18nAngular {
         return getTranslationAngular(scope,key,new AuthenticationToolAPI().getCurrentLanguage());
     }
 
+    public static JSONObject getLanguageStrings() throws Exception{
+        String language=new AuthenticationToolAPI().getCurrentLanguage();
+        ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+        File[] dirs = new File(context.getRealPath("/assets/i18n/")).listFiles(File::isDirectory);
+        JSONObject result=new JSONObject();
+        for(File dir : dirs) {
+            File i18n = new File(dir, language + ".json");
+            String json = FileUtils.readFileToString(i18n,"UTF-8");
+            JSONObject jsonObject = new JSONObject(json);
+            try {
+                for (String key : JSONObject.getNames(jsonObject)) {
+                    result.put(key, jsonObject.get(key));
+                }
+            }catch(NullPointerException e){
+                // the override is usually empty, can be ignored
+            }
+        }
+        return result;
+    }
     /**
      * Get the translation
      * @param scope equals the folder name in assets/i18n, e.g. workspace, common, search

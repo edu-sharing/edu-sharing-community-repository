@@ -8,7 +8,6 @@ import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialo
 import {Translation} from "../../../common/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {Helper} from "../../../common/helper";
-import { DatepickerOptions } from 'ng2-datepicker';
 import {DateHelper} from "../../../common/ui/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
@@ -25,7 +24,6 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
 export class WorkspaceShareLinkComponent  {
   public loading=true;
   public _node: Node;
-  public dateOptions: DatepickerOptions;
   public enabled=true;
   public expiry=false;
   public password=false;
@@ -33,6 +31,7 @@ export class WorkspaceShareLinkComponent  {
   public _expiryDate : Date;
   private currentDate: number;
   private edit: boolean;
+  public today = new Date();
   public set expiryDate(date:Date){
     this._expiryDate=date;
     this.setExpiry(true);
@@ -140,12 +139,12 @@ export class WorkspaceShareLinkComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
+    /*
     this.dateOptions={};
     this.dateOptions.minDate=new Date(Date.now() - 1000 * 3600 * 24); // Minimal selectable date
     this.dateOptions.minYear=new Date().getFullYear();
     this.dateOptions.maxYear=new Date(new Date().getTime() * 1000 * 3600 * 365).getFullYear();
-    //this.dateOptions.format="DD.MM.YYYY";
-    Translation.applyToDateOptions(this.translate,this.dateOptions);
+    */
   }
 
     private createShare() {

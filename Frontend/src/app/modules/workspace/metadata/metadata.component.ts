@@ -122,6 +122,9 @@ export class WorkspaceMetadataComponent{
                 this.permissions=this.formatPermissions(login,data);
             });
         });
+        this.usages=null;
+        this.forkedParent=null;
+        this.forkedChilds=null;
         if(data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]){
            this.nodeApi.getNodeMetadata(RestHelper.removeSpacesStoreRef(data.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0])).subscribe((parent)=>{
               this.forkedParent=parent.node;
