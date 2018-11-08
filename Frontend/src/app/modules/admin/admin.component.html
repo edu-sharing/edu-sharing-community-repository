@@ -219,20 +219,34 @@
   </div>
   <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.OAI' | translate}}</span></div>
   <div class="oai">
-    <input type="text" [(ngModel)]="oai.url" placeholder="{{'ADMIN.IMPORT.OAI_URL' | translate}}">
-    <input type="text" [(ngModel)]="oai.set" placeholder="{{'ADMIN.IMPORT.OAI_SET' | translate}}">
-    <input type="text" [(ngModel)]="oai.prefix" placeholder="{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}">
-    <input type="text" [(ngModel)]="oai.metadata" placeholder="{{'ADMIN.IMPORT.OAI_METADATA' | translate}}">
-    <input type="text" [(ngModel)]="oai.file" placeholder="{{'ADMIN.IMPORT.OAI_FILE' | translate}}">
-    <input type="text" [(ngModel)]="oai.oaiIds" placeholder="{{'ADMIN.IMPORT.OAI_IDS' | translate}}">
-    <select [(ngModel)]="oai.className">
-      <option *ngFor="let option of oaiClasses">{{ option }}</option>
-    </select>
-    <input type="text" [(ngModel)]="oai.importerClassName" placeholder="{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}">
-    <input type="text" [(ngModel)]="oai.recordHandlerClassName" placeholder="{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}">
-    <input type="text" [(ngModel)]="oai.binaryHandlerClassName" placeholder="{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}">
+    <label for="OAI_URL">{{'ADMIN.IMPORT.OAI_URL' | translate}}</label>
+    <input type="text" id="OAI_URL" [(ngModel)]="oai.url">
+    <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_URL_EXAMPLE' | translate}}</div>
+    <label for="OAI_SET">{{'ADMIN.IMPORT.OAI_SET' | translate}}</label>
+    <input type="text" id="OAI_SET" [(ngModel)]="oai.set">
+      <label for="OAI_PREFIX">{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}</label>
+      <input type="text" id="OAI_PREFIX" [(ngModel)]="oai.prefix">
+      <label for="OAI_METADATA">{{'ADMIN.IMPORT.OAI_METADATA' | translate}}</label>
+      <input type="text" id="OAI_METADATA" [(ngModel)]="oai.metadata">
+      <label for="OAI_FILE">{{'ADMIN.IMPORT.OAI_FILE' | translate}}</label>
+      <input type="text" id="OAI_FILE" [(ngModel)]="oai.file">
+      <label for="OAI_IDS">{{'ADMIN.IMPORT.OAI_IDS' | translate}}</label>
+      <input type="text" id="OAI_IDS" [(ngModel)]="oai.oaiIds">
+      <label for="OAI_CLASS_NAME">{{'ADMIN.IMPORT.OAI_CLASS_NAME' | translate}}</label>
+      <select id="OAI_CLASS_NAME" [(ngModel)]="oai.className">
+        <option *ngFor="let option of oaiClasses">{{ option }}</option>
+      </select>
+      <label for="OAI_SET">{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}</label>
+      <input type="text" id="OAI_IMPORTER_CLASS_NAME" [(ngModel)]="oai.importerClassName">
+    <label for="OAI_RECORD_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}</label>
+    <input type="text" id="OAI_RECORD_HANDLER_CLASS_NAME" [(ngModel)]="oai.recordHandlerClassName">
+    <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
+
+    <label for="OAI_BINARY_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}</label>
+    <input type="text" id="OAI_BINARY_HANDLER_CLASS_NAME" [(ngModel)]="oai.binaryHandlerClassName">
+    <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
     <div class="oaiSave">
-      <input type="checkbox" id="oaiSave" class="filled-in" [(ngModel)]="oaiSave"><label for="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</label>
+        <input type="checkbox" id="oaiSave" class="filled-in" [(ngModel)]="oaiSave"><label for="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</label>
     </div>
     <a class="btn-flat btn-shadow" (click)="removeImports()">{{'ADMIN.IMPORT.REMOVE_IMPORTS' | translate}}</a>
     <a class="btn waves-effect waves-light" (click)="oaiImport()">{{'ADMIN.IMPORT.OAI_START' | translate}}</a>

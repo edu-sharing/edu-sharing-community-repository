@@ -78,8 +78,12 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void setBinaryHandler(BinaryHandler binaryHandler) {
-		this.binaryHandler = binaryHandler;
+	public void setBinaryHandler(Constructor<BinaryHandler> binaryHandler) {
+		try {
+			this.binaryHandler = binaryHandler.newInstance();
+		} catch (Exception e) {
+			logger.error(e);
+		}
 	}
 	
 	@Override
@@ -101,7 +105,7 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void setRecordHandler(Constructor recordHandler) {
+	public void setRecordHandler(Constructor<RecordHandlerInterface> recordHandler) {
 		
 	}
 	
@@ -329,7 +333,7 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void startImport(String[] oaiIDs, String set) {
+	public void startImport(String[] oaiIDs) {
 		logger.error("not implemented yet");
 	}
 

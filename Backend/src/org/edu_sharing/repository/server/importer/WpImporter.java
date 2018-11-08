@@ -88,7 +88,7 @@ public class WpImporter implements Importer{
 	}
 	
 	@Override
-	public void setBinaryHandler(BinaryHandler binaryHandler) {
+	public void setBinaryHandler(Constructor<BinaryHandler> binaryHandler) {
 	}
 	
 	@Override
@@ -110,7 +110,7 @@ public class WpImporter implements Importer{
 	}
 	
 	@Override
-	public void setRecordHandler(Constructor recordHandler) {
+	public void setRecordHandler(Constructor<RecordHandlerInterface> recordHandler) {
 		
 	}
 	
@@ -194,7 +194,7 @@ public class WpImporter implements Importer{
 	}
 	
 	@Override
-	public void startImport(String[] oaiIDs, String set) {
+	public void startImport(String[] oaiIDs) {
 		logger.error("not implemented yet");
 	}
 
