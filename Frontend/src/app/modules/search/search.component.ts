@@ -2,7 +2,6 @@
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
 import 'rxjs/add/operator/map';
 import { SearchService } from './search.service';
-import {HttpModule, Http} from '@angular/http';
 import { WindowRefService } from './window-ref.service';
 import { Subscription } from 'rxjs/Subscription';
 import { SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
@@ -10,7 +9,6 @@ import {Router, ActivatedRoute} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../common/translation';
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
-import {RestMetadataService} from '../../common/rest/services/rest-metadata.service';
 import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
@@ -48,13 +46,14 @@ import {MdsHelper} from '../../common/rest/mds-helper';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {UIService} from '../../common/services/ui.service';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
+import {HttpClient} from '@angular/common/http';
 
 
 @Component({
   selector: 'app-search',
   templateUrl: 'search.component.html',
   styleUrls: ['search.component.scss'],
-  providers: [HttpModule, WindowRefService, RestMetadataService],
+  providers: [WindowRefService],
   animations: [
     trigger('fromLeft', UIAnimation.fromLeft()),
   ]
@@ -154,7 +153,7 @@ export class SearchComponent {
 
   constructor(
     private router : Router,
-    private http : Http,
+    private http : HttpClient,
     private connector:RestConnectorService,
     private RestNodeService: RestNodeService,
     private mdsService:RestMdsService,

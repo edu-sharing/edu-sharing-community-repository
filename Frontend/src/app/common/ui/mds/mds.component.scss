@@ -58,18 +58,7 @@
   }
 }
 @media screen and (max-width: ($mobileWidth + $mobileStage*2)) {
-  .mdsMainCard {
-    margin-left: -325px!important;
-  }
   .mdsCardJumpmarks{
-    margin-left:0;
-  }
-  .card-jumpmarks{
-    display: none;
-  }
-}
-@media screen and (max-width: ($mobileWidth)) {
-  .mdsMainCard {
     margin-left: 0!important;
   }
 }

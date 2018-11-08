@@ -6,7 +6,6 @@ import 'rxjs/add/observable/forkJoin';
 import 'rxjs/add/observable/concat';
 import {Observer} from "rxjs";
 import {ConfigurationService} from "./services/configuration.service";
-import {DatepickerOptions} from "ng2-datepicker";
 import {ActivatedRoute} from "@angular/router";
 import {SessionStorageService} from "./services/session-storage.service";
 import 'rxjs/add/operator/first'
@@ -14,6 +13,7 @@ import {RestLocatorService} from "./rest/services/rest-locator.service";
 import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {CordovaService} from './services/cordova.service';
 import * as moment from 'moment';
+import {environment} from "../../environments/environment";
 
 export let TRANSLATION_LIST=['common','admin','recycle','workspace', 'search','collections','login','permissions','oer','messages','register','profiles','services','stream','override'];
 
@@ -119,22 +119,13 @@ export class Translation  {
     }
     return "YYYY/MM/DD";
   }
-  static applyToDateOptions(translate:TranslateService,dateOptions: DatepickerOptions) {
-    //dateOptions.locale=moment.localeData(this.getLanguage());
-    dateOptions.displayFormat=Translation.getDateFormat();
-    dateOptions.firstCalendarDay=1;
-    dateOptions.locale=(moment.locale(this.getLanguage()) as any);
-    /*
-    dateOptions.todayText=translate.instant("TODAY");
-    dateOptions.clearText=translate.instant("DATE_CLEAR");
-    dateOptions.selectYearText=translate.instant("DATE_SELECT_YEAR");
-    */
-  }
 }
 export function createTranslateLoader(http: HttpClient,locator:RestLocatorService) {
   return new TranslationLoader(http,locator);
 }
 export class TranslationLoader implements TranslateLoader {
+  private initializing:string = null;
+  private initializedLanguage: any;
   constructor(private http: HttpClient,private locator : RestLocatorService, private prefix: string = "assets/i18n", private suffix: string = ".json") { }
   /**
    * Gets the translations from the server
@@ -143,6 +134,20 @@ export class TranslationLoader implements TranslateLoader {
    */
 
   public getTranslation(lang: string): Observable<any> {
+    if(this.initializing==lang || this.initializedLanguage){
+        return new Observable<any>((observer : Observer<any>) => {
+            let callback = () => {
+                if (!this.initializedLanguage) {
+                    setTimeout(callback, 10);
+                    return;
+                }
+                observer.next(this.initializedLanguage);
+                observer.complete();
+            };
+            setTimeout(callback);
+        });
+    }
+    this.initializing=lang;
     //return this.http.get(`${this.prefix}/common/${lang}${this.suffix}`)
     //  .map((res: Response) => res.json());
     if(lang=="none"){
@@ -152,15 +157,26 @@ export class TranslationLoader implements TranslateLoader {
             console.log("initalized without translation");
         });
     }
+    const hasEndpoint=!this.locator.getCordova().isRunningCordova() || this.locator.getCordova().hasValidConfig();
     let translations : any =[];
     let results=0;
     let maxCount=TRANSLATION_LIST.length;
-    for (let translation of TRANSLATION_LIST) {
-      this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
-        .subscribe((data : any) => translations.push(data));
-
+    if(hasEndpoint && environment.production){
+      maxCount=1;
+      console.log(Translation.LANGUAGES[lang]);
+      this.locator.getLanguageDefaults(Translation.LANGUAGES[lang]).subscribe((data: any) =>{
+        console.log(data);
+        translations.push(data);
+      });
     }
-    if(!this.locator.getCordova().isRunningCordova() || this.locator.getCordova().hasValidConfig()) {
+    else {
+      console.log("dev/app mode, loading translations locally");
+        for (let translation of TRANSLATION_LIST) {
+            this.http.get(`${this.prefix}/${translation}/${lang}${this.suffix}`)
+                .subscribe((data: any) => translations.push(data));
+        }
+    }
+    if(hasEndpoint) {
       maxCount++;
       this.locator.getConfigLanguage(Translation.LANGUAGES[lang]).subscribe((data: any) => {
           translations.push(data);
@@ -177,7 +193,8 @@ export class TranslationLoader implements TranslateLoader {
         for (const obj of translations) {
           for (const key in obj) {
             //copy all the fields
-            let path=key.split(".");
+
+              let path=key.split(".");
             if(path.length==1) {
               final[key] = obj[key];
             }
@@ -205,6 +222,8 @@ export class TranslationLoader implements TranslateLoader {
               }
           }
         }
+        this.initializedLanguage=final;
+        this.initializing=null;
         observer.next(final);
         observer.complete();
       };

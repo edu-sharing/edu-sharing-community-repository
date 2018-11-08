@@ -7,11 +7,9 @@ import {Toast} from "../../../common/ui/toast";
 import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialog/modal-dialog.component";
 import {Translation} from "../../../common/translation";
 import {TranslateService} from "@ngx-translate/core";
-import {DatepickerOptions} from "ng2-datepicker";
 import {DateHelper} from "../../../common/ui/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {NgDatepickerComponent} from "ng2-datepicker";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 
 @Component({

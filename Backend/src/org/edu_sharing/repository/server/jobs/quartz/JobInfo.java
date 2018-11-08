@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JobInfo {
+    private static final int MAX_LOG_ENTRIES = 5000;
+
     public JobInfo(JobDetail jobDetail) {
         setJobDetail(jobDetail);
         setStartTime(System.currentTimeMillis());
@@ -83,6 +85,9 @@ public class JobInfo {
         this.log.add(entry);
         if(entry.level.isGreaterOrEqual(worstLevel)){
             worstLevel=entry.level;
+        }
+        if(this.log.size()>MAX_LOG_ENTRIES){
+            this.log.remove(0);
         }
     }
 

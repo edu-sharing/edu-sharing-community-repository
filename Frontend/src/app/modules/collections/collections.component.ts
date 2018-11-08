@@ -16,7 +16,7 @@ import {RestConstants} from "../../common/rest/rest-constants";
 
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {CollectionContent, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
+import {Collection, CollectionContent, LoginResult, MdsMetadataset} from '../../common/rest/data-object';
 import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
 import {OrganizationOrganizations} from "../../common/rest/data-object";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
@@ -61,10 +61,9 @@ export class CollectionsMainComponent {
   public dialogMessage : string;
   public dialogButtons : DialogButton[];
 
-  public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
-  public isLoading:boolean = true;
-  public isReady:boolean = false;
-  private clearSearchOnNextStateChange:boolean = false;
+    public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
+    public isLoading:boolean = true;
+    public isReady:boolean = false;
 
   public collectionContent:EduData.CollectionContent;
   private collectionContentOriginal: EduData.CollectionContent;
@@ -105,7 +104,16 @@ export class CollectionsMainComponent {
     private _orderActive: boolean;
     optionsMaterials:OptionItem[];
     tutorialElement: ElementRef;
+    private reurl: any;
     optionsCollection:OptionItem[] = [];
+    private _collectionShare: Collection;
+    set collectionShare(collectionShare: Collection){
+        this._collectionShare=collectionShare;
+        this.refreshAll();
+    }
+    get collectionShare(){
+        return this._collectionShare;
+    }
   // default hides the tabs
 
   // inject services
@@ -126,6 +134,7 @@ export class CollectionsMainComponent {
     private title:Title,
     private location:Location,
     private actionbar : ActionbarHelperService,
+    private tempStorage :TemporaryStorageService,
     private config:ConfigurationService,
     private translationService: TranslateService) {
     this.collectionsColumns.push(new ListItem("COLLECTION", 'title'));
@@ -210,7 +219,8 @@ export class CollectionsMainComponent {
     params.mainnav=this.mainnav;
     if(addToOther)
       params.addToOther=addToOther;
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:params});
+    params.reurl=this.reurl;
+      this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:params});
   }
   closeAddToOther(){
     this.navigate(this.collectionContent.collection.ref.id);
@@ -338,17 +348,16 @@ export class CollectionsMainComponent {
     //  return RestHelper.getPrivacyScope(collection);
   }
 
-  navigateToSearch(){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{mainnav:this.mainnav}});
-  }
-  switchToSearch() : void {
-    if(this.frame.isRunningInFrame()) {
+    navigateToSearch(){
+      this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{mainnav:this.mainnav}});
     }
-    else{
-      //ApplyToLmsComponent.navigateToSearchUsingReurl(this.router);
-      this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
+    switchToSearch() : void {
+      if(this.frame.isRunningInFrame()) {
+      }
+      else{
+        this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
+      }
     }
-  }
     public isBrightColor(){
         return ColorHelper.getColorBrightness(this.collectionContent.collection.color)>ColorHelper.BRIGHTNESS_THRESHOLD_COLLECTIONS;
     }
@@ -360,9 +369,18 @@ export class CollectionsMainComponent {
     }
 
     getOptions(nodes:Node[]=null,fromList:boolean) {
-        if (fromList && (!nodes || !nodes.length)) {
-            //nodes = [new Node()];
+        if(this.reurl){
+            // no action bar in apply mode
+            if(!fromList){
+                return [];
+            }
+            let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.tempStorage,ActionbarHelperService.getNodes(nodes,node)[0],this.reurl));
+            apply.enabledCallback=((node:Node)=> {
+                return NodeHelper.getNodesRight(ActionbarHelperService.getNodes(nodes,node),RestConstants.ACCESS_CC_PUBLISH);
+            });
+            return [apply];
         }
+
         let options: OptionItem[] = [];
         if (!fromList) {
             if (nodes && nodes.length) {
@@ -388,7 +406,6 @@ export class CollectionsMainComponent {
             }
         }
       if (fromList || nodes && nodes.length) {
-
             let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
             if (download)
                 options.push(download);
@@ -503,13 +520,10 @@ export class CollectionsMainComponent {
         return;
     }
 
-  refreshContent(callback:Function=null) : void {
-    if (!this.isReady) return;
-    this.isLoading=true;
-    // clear search field in GWT top area
-    if (this.clearSearchOnNextStateChange) {
-      this.clearSearchOnNextStateChange=false;
-    }
+    refreshContent(callback:Function=null) : void {
+        if (!this.isReady) return;
+        this.isLoading=true;
+        this.onSelection([]);
 
     // set correct scope
     let scope=this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
@@ -697,6 +711,7 @@ export class CollectionsMainComponent {
 
       this.person = iamUser.person;
 
+      // set app to ready state
       this.isReady = true;
       // subscribe to parameters of url
       this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
@@ -705,10 +720,13 @@ export class CollectionsMainComponent {
             this.tabSelected=params['scope'];
         else
             this.tabSelected=RestConstants.COLLECTIONSCOPE_MY;
+        this.reurl=params['reurl'];
         if(this.isGuest)
           this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
         if(params['mainnav'])
           this.mainnav=params['mainnav']!='false';
+
+        this.listOptions = this.getOptions(null,true);
 
         this._orderActive = false;
         this.infoTitle = null;
@@ -828,8 +846,7 @@ export class CollectionsMainComponent {
         return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
     }
     private collectionPermissions(){
-        // TODO: Simon
-        /*We need editPermissions Function to invite people*/
+        this._collectionShare=this.collectionContent.collection;
     }
 
     private setOptionsCollection() {

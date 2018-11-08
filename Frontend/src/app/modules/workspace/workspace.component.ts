@@ -26,7 +26,6 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {FrameEventsService} from "../../common/services/frame-events.service";
 import {Title} from "@angular/platform-browser";
 import {UIHelper} from "../../common/ui/ui-helper";
-import {Http,Response} from "@angular/http";
 import {trigger} from "@angular/animations";
 import {RestToolService} from "../../common/rest/services/rest-tool.service";
 import {UIConstants} from "../../common/ui/ui-constants";
@@ -37,6 +36,7 @@ import {RestMdsService} from '../../common/rest/services/rest-mds.service';
 import {DateHelper} from '../../common/ui/DateHelper';
 import {CordovaService} from "../../common/services/cordova.service";
 import {EventListener} from "../../common/services/frame-events.service";
+import {HttpClient} from '@angular/common/http';
 
 @Component({
     selector: 'workspace-main',
@@ -219,6 +219,7 @@ export class WorkspaceMainComponent implements EventListener{
     constructor(private toast : Toast,
                 private route : ActivatedRoute,
                 private router : Router,
+                private http : HttpClient,
                 private translate : TranslateService,
                 private storage : TemporaryStorageService,
                 private config: ConfigurationService,
@@ -232,7 +233,6 @@ export class WorkspaceMainComponent implements EventListener{
                 private node : RestNodeService,
                 private ui : UIService,
                 private title : Title,
-                private http : Http,
                 private event : FrameEventsService,
                 private connector : RestConnectorService,
                 private cordova : CordovaService

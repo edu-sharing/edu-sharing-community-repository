@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import {Headers, Http, RequestOptions, RequestOptionsArgs, Response} from "@angular/http";
 import {RestConstants} from "../rest-constants";
 import {RestHelper} from "../rest-helper";
 import {Observable, Observer} from "rxjs";
@@ -14,6 +13,7 @@ import {ConfigurationService} from "../../services/configuration.service";
 import {RestLocatorService} from "./rest-locator.service";
 import {CordovaService} from '../../services/cordova.service';
 import {Toast} from "../../ui/toast";
+import {HttpClient} from '@angular/common/http';
 
 /**
  * The main connector. Manages the API Endpoint as well as common api parameters and url generation
@@ -28,6 +28,7 @@ export class RestConnectorService {
   private _logoutTimeout: number;
   private _autoLogin = true;
   public _scope: string;
+  private toolPermissions: string[];
   private themesUrl="../themes/default/";
 
   get autoLogin(): boolean {
@@ -61,11 +62,11 @@ export class RestConnectorService {
   get logoutTimeout(){
     return this._logoutTimeout;
   }
-  public getRequestOptions(contentType="application/json",username:string = null,password:string = null) : RequestOptionsArgs{
+  public getRequestOptions(contentType="application/json",username:string = null,password:string = null){
     return this.locator.getRequestOptions(contentType,username,password);
   }
   constructor(private router:Router,
-              private http : Http,
+              private http : HttpClient,
               private config: ConfigurationService,
               private locator: RestLocatorService,
               private toast : Toast,
@@ -104,15 +105,15 @@ export class RestConnectorService {
   }
 
 
-  public getOAuthToken() : Observable<OAuthResult>{
+  public getOAuthToken(){
   let url=this.createUrl("../oauth2/token",null);
   //"grant_type=password&client_id=eduApp&client_secret=secret&username=admin&password=admin"
   return new Observable<OAuthResult>((observer : Observer<OAuthResult>)=>{
-    this.post(url,"client_id=eduApp&grant_type=client_credentials&client_secret=secret"
+    this.post<OAuthResult>(url,"client_id=eduApp&grant_type=client_credentials&client_secret=secret"
       //"&username="+encodeURIComponent(username)+
       //"&password="+encodeURIComponent(password)
-      ,this.getRequestOptions("application/x-www-form-urlencoded")).map((response: Response) => response.json()).subscribe(
-      (data:OAuthResult) => {
+      ,this.getRequestOptions("application/x-www-form-urlencoded")).subscribe(
+      (data) => {
         observer.next(data);
         observer.complete();
       },
@@ -141,16 +142,15 @@ export class RestConnectorService {
   public getCurrentLogin() : LoginResult{
     return this.storage.get(TemporaryStorageService.SESSION_INFO);
   }
-  public getAbout() : Observable<any>{
+  public getAbout(){
       let url=this.createUrl("_about",null);
-      return this.get(url,this.getRequestOptions())
-          .map((response) => response.json());
+      return this.get<any>(url,this.getRequestOptions());
   }
-  public isLoggedIn() : Observable<LoginResult>{
+  public isLoggedIn(){
     let url=this.createUrl("authentication/:version/validateSession",null);
     return new Observable<LoginResult>((observer : Observer<LoginResult>)=> {
         this.locator.locateApi().subscribe(() => {
-            this.get(url, this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
+            this.get<LoginResult>(url, this.getRequestOptions()).subscribe(
                 (data: LoginResult) => {
                     this.toolPermissions = data.toolPermissions;
                     this.event.broadcastEvent(FrameEventsService.EVENT_UPDATE_LOGIN_STATE, data);
@@ -182,11 +182,10 @@ export class RestConnectorService {
         });
     });
   }
-  public hasAccessToScope(scope:string) : Observable<AccessScope>{
+  public hasAccessToScope(scope:string) {
     let url=this.createUrl("authentication/:version/hasAccessToScope/?scope=:scope",null,[[":scope",scope]]);
-    return this.get(url,this.getRequestOptions()).map((response: Response) => response.json());
+    return this.get<AccessScope>(url,this.getRequestOptions());
   }
-  private toolPermissions: string[];
   public hasToolPermissionInstant(permission:string){
     if(this.toolPermissions)
       return this.toolPermissions.indexOf(permission) != -1;
@@ -209,7 +208,7 @@ export class RestConnectorService {
       }
     });
   }
-  public login(username:string,password:string,scope:string=null) : Observable<string>{
+  public login(username:string,password:string,scope:string=null){
 
     let url = this.createUrl("authentication/:version/validateSession", null);
     if(scope) {
@@ -217,12 +216,12 @@ export class RestConnectorService {
     }
     return new Observable<string>((observer : Observer<string>)=>{
       if(scope){
-        this.post(url,JSON.stringify({
+        this.post<LoginResult>(url,JSON.stringify({
           userName:username,
           password:password,
           scope:scope
-        }),this.getRequestOptions()).map((response: Response) => response.json()).subscribe(
-          (data:LoginResult) => {
+        }),this.getRequestOptions()).subscribe(
+          (data) => {
             if(data.isValidLogin)
               this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
             this.storage.set(TemporaryStorageService.SESSION_INFO,data);
@@ -236,8 +235,8 @@ export class RestConnectorService {
           });
       }
       else {
-        this.get(url, this.getRequestOptions("",username,password)).map((response: Response) => response.json()).subscribe(
-          (data: LoginResult) => {
+        this.get<LoginResult>(url, this.getRequestOptions("",username,password)).subscribe(
+          (data) => {
             if(data.isValidLogin)
               this.event.broadcastEvent(FrameEventsService.EVENT_USER_LOGGED_IN,data);
             this.storage.set(TemporaryStorageService.SESSION_INFO,data);
@@ -296,7 +295,7 @@ export class RestConnectorService {
   public sendDataViaXHR(url : string,file : File,method='POST',fieldName='file',onProgress:Function=null) : Observable<XMLHttpRequest>{
     return Observable.create( (observer:Observer<XMLHttpRequest>) => {
       try {
-        var xhr: XMLHttpRequest = new XMLHttpRequest();
+        let xhr: XMLHttpRequest = new XMLHttpRequest();
         xhr.onreadystatechange = () => {
           if (xhr.readyState === 4) {
             if(onProgress)
@@ -310,11 +309,11 @@ export class RestConnectorService {
             }
           }
         };
-        let options=this.getRequestOptions("");
+        let options:any=this.getRequestOptions("");
         xhr.withCredentials=options.withCredentials;
         xhr.open(method, this.endpointUrl+url, true);
-        for (let key of options.headers.keys()) {
-           xhr.setRequestHeader(key, options.headers.get(key));
+        for (let key in options.headers) {
+           xhr.setRequestHeader(key, options.headers[key]);
         }
         let formData = new FormData();
         formData.append(fieldName, file, file.name);
@@ -338,32 +337,32 @@ export class RestConnectorService {
       }
     });
   }
-  private request(method:string,url:string,body:any,options:RequestOptionsArgs,appendUrl=true){
-      return new Observable<Response>((observer : Observer<Response>) => {
+  private request<T>(method:string,url:string,body:any,options:any,appendUrl=true){
+      return new Observable<T>((observer : Observer<T>) => {
           this.locator.locateApi().subscribe(data => {
               this._lastActionTime=new Date().getTime();
               this._currentRequestCount++;
               let requestUrl=(appendUrl ? this.endpointUrl : '') + url;
               let call=null;
               if(method=='GET'){
-                call=this.http.get(requestUrl, options);
+                call=this.http.get<T>(requestUrl, options);
               }
               else if(method=='POST'){
-                  call=this.http.post(requestUrl,body, options);
+                  call=this.http.post<T>(requestUrl,body, options);
               }
               else if(method=='PUT'){
-                  call=this.http.put(requestUrl,body, options);
+                  call=this.http.put<T>(requestUrl,body, options);
               }
               else if(method=='DELETE'){
-                  call=this.http.delete(requestUrl, options);
+                  call=this.http.delete<T>(requestUrl, options);
               }
               else{
                 throw new Error("Unknown request method "+method);
               }
-              call.subscribe(response => {
+              call.subscribe((response:any) => {
                       this._currentRequestCount--;
                       this.checkHeaders(response);
-                      observer.next(response);
+                      observer.next(response.body);
                       observer.complete();
                   },
                   error => {
@@ -372,10 +371,10 @@ export class RestConnectorService {
                       if (!this._autoLogin) {
 
                       }else if (error.status == RestConstants.HTTP_UNAUTHORIZED) {
-                          if(this.cordova.isRunningCordova() && options.headers.has('Authorization')){
+                          if(this.cordova.isRunningCordova() && options.headers['Authorization']){
                             this.cordova.reinitStatus(this.locator.endpointUrl).subscribe(()=>{
-                              options.headers.set('Authorization','Bearer '+this.cordova.oauth.access_token);
-                              this.request(method,url,body,options,appendUrl).subscribe((data:Response)=>{
+                              options.headers['Authorization']='Bearer '+this.cordova.oauth.access_token;
+                              this.request<T>(method,url,body,options,appendUrl).subscribe(data=>{
                                 console.log("reinit request succeeded");
                                   observer.next(data);
                                   observer.complete();
@@ -400,16 +399,16 @@ export class RestConnectorService {
           });
       });
   }
-  public get(url:string,options:RequestOptionsArgs,appendUrl=true) : Observable<Response>{
+  public get<T>(url:string,options:any,appendUrl=true) : Observable<T>{
     return this.request('GET',url,null,options,appendUrl);
   }
-  public post(url:string,body : any,options:RequestOptionsArgs) : Observable<Response>{
+  public post<T>(url:string,body : any,options:any) : Observable<T>{
     return this.request('POST',url,body,options);
   }
-  public put(url:string,body : any,options:RequestOptionsArgs) : Observable<Response>{
+  public put<T>(url:string,body : any,options:any) : Observable<T>{
       return this.request('PUT',url,body,options);
   }
-  public delete(url:string,options:RequestOptionsArgs) : Observable<Response>{
+  public delete<T>(url:string,options:any) : Observable<T>{
       return this.request('DELETE',url,null,options);
   }
 

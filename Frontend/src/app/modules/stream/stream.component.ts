@@ -9,7 +9,6 @@ import * as EduData from "../../common/rest/data-object"; //
 import {RestCollectionService} from "../../common/rest/services/rest-collection.service"; //
 import {Toast} from "../../common/ui/toast"; //
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
-import {RestMetadataService} from '../../common/rest/services/rest-metadata.service';
 import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
@@ -106,7 +105,6 @@ export class StreamComponent {
     private nodeService: RestNodeService,
     private cordova: CordovaService,
     private searchService: RestSearchService,
-    private metadataService:RestMetadataService,
     private event:FrameEventsService,
     private streamService:RestStreamService,
     private storage : TemporaryStorageService,

@@ -1,7 +1,6 @@
 
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
 import 'rxjs/add/operator/map';
-import { HttpModule } from '@angular/http';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
@@ -12,19 +11,18 @@ import {SessionStorageService} from "../../common/services/session-storage.servi
 import {RestNetworkService} from "../../common/rest/services/rest-network.service";
 import {Toast} from "../../common/ui/toast";
 import {Observable} from "rxjs/Rx";
-import {Http} from "@angular/http";
 import {AccessScope, Application, LoginResult, Service} from "../../common/rest/data-object";
 import {Helper} from "../../common/helper";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {RestConstants} from "../../common/rest/rest-constants";
+import {HttpClient} from '@angular/common/http';
 
 
 @Component({
     selector: 'app-services',
     templateUrl: 'services.component.html',
     styleUrls: ['services.component.scss'],
-    providers: [HttpModule]
 })
 export class ServicesComponent {
 
@@ -45,7 +43,7 @@ export class ServicesComponent {
         private config : ConfigurationService,
         private session : SessionStorageService,
         private translate : TranslateService,
-        private http:Http,
+        private http:HttpClient,
         private sanitizer: DomSanitizer,
         private configService:ConfigurationService,
         private network : RestNetworkService) {
