@@ -850,6 +850,7 @@ export class CollectionsMainComponent {
     }
 
     private setOptionsCollection() {
+      this.optionsCollection=[];
       if(this.isAllowedToEditCollection()){
           this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.EDIT", "edit",()=>this.collectionEdit()));
       }
