@@ -12,12 +12,13 @@ import {ConfigurationService} from "../../services/configuration.service";
 export class IconComponent implements AfterViewInit{
     @ViewChild('icon') icon: ElementRef;
     class = 'material-icons';
-  constructor() {
-  }
+    constructor() {
+    }
     ngAfterViewInit() {
         const id=this.icon.nativeElement.textContent;
         if(id.startsWith("edu-")){
             this.class="edu-icons";
+            this.icon.nativeElement.innerText=id.substr(4);
         }
     }
 }

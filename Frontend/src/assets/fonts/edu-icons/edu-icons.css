@@ -1,18 +1,18 @@
 @font-face {
   font-family: 'Edu-Icons';
-  src:  url('Edu-Icons.eot?1pib6e');
-  src:  url('Edu-Icons.eot?1pib6e#iefix') format('embedded-opentype'),
+  src:  url('Edu-Icons.eot');
+  src:  local('Edu-Icons'),
+    url('Edu-Icons.eot?1pib6e#iefix') format('embedded-opentype'),
     url('Edu-Icons.ttf?1pib6e') format('truetype'),
-    url('Edu-Icons.woff?1pib6e') format('woff'),
-    url('Edu-Icons.svg?1pib6e#Edu-Icons') format('svg');
+    url('Edu-Icons.woff?1pib6e') format('woff');
   font-weight: normal;
   font-style: normal;
 }
-
-[class^="edu-icons"], [class*=" edu-icons"] {
+.edu-icons{
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'Edu-Icons' !important;
   speak: none;
+  font-size:24px;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;

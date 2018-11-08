@@ -857,7 +857,7 @@ export class CollectionsMainComponent {
       if(this.pinningAllowed && this.isAllowedToDeleteCollection()) {
         /*TODO: Step
         Font with pin-icon*/
-          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.PIN", "pin", () => this.pinCollection()));
+          this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.PIN", "edu-pin", () => this.pinCollection()));
       }
       if(this.isAllowedToEditCollection()) {
           this.optionsCollection.push(new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", () => this.collectionPermissions()));

@@ -344,6 +344,17 @@ span.thumb{
   display:none; /* preview thumb for range does not work */
 }
 
+.btn, .btn-large,
+.btn-floating,
+.btn-large,
+.btn-flat {
+  icon{
+    font-size:1.3rem;
+    i {
+      font-size: inherit;
+    }
+  }
+}
 .collection {
   .collection-item {
     padding: 2px 20px 9px 20px;
