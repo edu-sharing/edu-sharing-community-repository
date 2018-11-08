@@ -12,7 +12,7 @@
        (click)="click(option)"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.disabled]="!option.isEnabled">
-      <i class="material-icons">{{option.icon}}</i>
+      <icon>{{option.icon}}</icon>
     </a>
 
   </div>
@@ -21,7 +21,7 @@
        tabindex="0"
        (keyup.enter)="showDropdown()"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="canShowDropdown()"><a><i class="material-icons">more_vert</i></a></div>
+       *ngIf="canShowDropdown()"><a><icon>more_vert</icon></a></div>
 
   <div *ngFor="let option of optionsAlways.slice().reverse();let i=index;"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
@@ -34,7 +34,7 @@
        tabindex="0"
        (keyup.enter)="click(option)"
        (click)="click(option)">
-    <i class="material-icons" title="{{option.showName ? null : (option.name | translate)}}">{{option.icon}}</i><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
+    <icon title="{{option.showName ? null : (option.name | translate)}}">{{option.icon}}</icon><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
   </div>
 
 </div>

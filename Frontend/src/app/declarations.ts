@@ -46,11 +46,13 @@
   import {FooterComponent} from "./common/ui/footer/footer.component";
   import {ReplaceCharsPipe} from "./common/ui/replace-chars.pipe";
   import {CalendarComponent} from "./common/ui/calendar/calendar.component";
+  import {IconComponent} from './common/ui/icon/icon.component';
 
 export const DECLARATIONS = [
       MdsTestComponent,
       GlobalProgressComponent,
       AttributeHtmlPipe,
+      IconComponent,
       CustomIconComponent,
       CalendarComponent,
       DebugResultPipe,
