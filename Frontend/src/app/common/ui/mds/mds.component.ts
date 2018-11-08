@@ -786,7 +786,7 @@ export class MdsComponent{
             }
           }
           else if(widget.type=='checkbox'){
-            element.checked=props[0];
+            element.checked=props[0]=='true';
           }
           else if(widget.type=='checkboxVertical' || widget.type=='checkboxHorizontal'){
             for(let input of element.getElementsByTagName('input')){
