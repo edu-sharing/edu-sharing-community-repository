@@ -16,7 +16,7 @@ import {RestConstants} from "../../common/rest/rest-constants";
 
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {CollectionContent, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
+import {Collection, CollectionContent, LoginResult, MdsMetadataset} from '../../common/rest/data-object';
 import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
 import {OrganizationOrganizations} from "../../common/rest/data-object";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
@@ -106,6 +106,14 @@ export class CollectionsMainComponent {
     tutorialElement: ElementRef;
     private reurl: any;
     optionsCollection:OptionItem[] = [];
+    private _collectionShare: Collection;
+    set collectionShare(collectionShare: Collection){
+        this._collectionShare=collectionShare;
+        this.refreshAll();
+    }
+    get collectionShare(){
+        return this._collectionShare;
+    }
   // default hides the tabs
 
   // inject services
@@ -838,8 +846,7 @@ export class CollectionsMainComponent {
         return this.isAllowedToDeleteCollection() || NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
     }
     private collectionPermissions(){
-        // TODO: Simon
-        /*We need editPermissions Function to invite people*/
+        this._collectionShare=this.collectionContent.collection;
     }
 
     private setOptionsCollection() {

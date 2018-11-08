@@ -29,10 +29,14 @@ export class ActionbarComponent{
   @Input() numberOfAlwaysVisibleOptionsMobile=1;
   /**
    * Appearance show actionbar as button or circles (collection)
+   * Values 'button' or 'round'
    * Appearance default = button;
-   * dropdownPosition is for position of dropdown (default = left)
    */
   @Input() appearance='button';
+    /**
+     * dropdownPosition is for position of dropdown (default = left)
+     * Values 'left' or 'right'
+     */
   @Input() dropdownPosition="left";
   public optionsAlways : OptionItem[] = [];
   public optionsMenu : OptionItem[] = [];
