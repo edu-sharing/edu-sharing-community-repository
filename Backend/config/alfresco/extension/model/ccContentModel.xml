@@ -357,6 +357,9 @@
                <type>d:text</type>
                <multiple>true</multiple>
             </property>
+            <property name="cm:esssotype">
+               <type>d:text</type>
+            </property>
          </properties>
          
          <associations>

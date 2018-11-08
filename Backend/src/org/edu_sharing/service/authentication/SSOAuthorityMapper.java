@@ -267,6 +267,8 @@ public class SSOAuthorityMapper {
 							personProperties.put(QName.createQName(CCConstants.PROP_USER_REPOSITORYID), appInfo.getAppId());
 						}
 						
+						personProperties.put(QName.createQName(CCConstants.PROP_USER_ESSSOTYPE), ssoType);
+						
 						if(isHashUserName()) {
 							personProperties.put(QName.createQName(CCConstants.CM_PROP_PERSON_ESORIGINALUID), originalUsername);
 						}
