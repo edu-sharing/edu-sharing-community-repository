@@ -112,6 +112,21 @@ public class RenderingProxy extends HttpServlet {
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
 		}
+		
+		String[] roles = req.getParameterValues("role");
+		if(roles != null && roles.length > 0) {
+			final String username = usernameDecrypted;
+			RunAsWork<Void> runAs = new RunAsWork<Void>() {
+				@Override
+				public Void doWork() throws Exception {
+					MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
+					String personId = new MCAlfrescoAPIClient().getUserInfo(username).get(CCConstants.SYS_PROP_NODE_UID);
+					apiClient.setProperty(personId, CCConstants.PROP_USER_ESREMOTEROLES, new ArrayList<String>(Arrays.asList(roles)));
+					return null;
+				}
+			};
+			AuthenticationUtil.runAsSystem(runAs);
+		}
 			
 		if("window".equals(display)) {
 			
@@ -155,22 +170,6 @@ public class RenderingProxy extends HttpServlet {
 				}else {
 					logger.warn("ticket:" + ticket +" is not valid");
 					return;
-				}
-				
-				String[] roles = req.getParameterValues("role");
-				if(roles != null && roles.length > 0) {
-					final String username = usernameDecrypted;
-					RunAsWork<Void> runAs = new RunAsWork<Void>() {
-						@Override
-						public Void doWork() throws Exception {
-							MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
-							String personId = new MCAlfrescoAPIClient().getUserInfo(username).get(CCConstants.SYS_PROP_NODE_UID);
-							apiClient.setProperty(personId, CCConstants.PROP_USER_ESREMOTEROLES, new ArrayList<String>(Arrays.asList(roles)));
-							return null;
-						}
-					};
-					AuthenticationUtil.runAsSystem(runAs);
-					
 				}
 				
 			}else {
