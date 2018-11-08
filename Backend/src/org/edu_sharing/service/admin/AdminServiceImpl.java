@@ -628,11 +628,10 @@ public class AdminServiceImpl implements AdminService  {
 		//new JobExecuter().start(ImporterJob.class, authInfo, setsParam.toArray(new String[setsParam.size()]));
 		
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
-		List<String> sets=new ArrayList<>();
-		sets.add(set);
+		List<String> sets=new ArrayList(Arrays.asList(set.split(",")));
 		if(fileUrl!=null && !fileUrl.isEmpty() && !(fileUrl.startsWith("http://") || fileUrl.startsWith("https://")))
 				throw new Exception("file url "+fileUrl+" is not a valid url");
-		if(fileUrl!=null)
+		if(fileUrl!=null && !fileUrl.isEmpty())
 			sets.add(fileUrl);
 		paramsMap.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
 		paramsMap.put("sets", sets);
