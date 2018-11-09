@@ -399,22 +399,17 @@ $badgeWidth:250px;
     background-color: #444;
     color:#fff;
     z-index: 1;
-    custom-icon{
-      width:12px;
-      height:12px;
-      position:initial;
-    }
+  }
+}
+:host /deep/{
+  .collectionPinned icon i{
+    font-size: 12px;
   }
 }
 .list .cardSmallList.dark-color,
 .list .cardList.dark-color{
   .row_1,.row_2,.row_3,.row_4,.row_5,.row_6 {
     color: #000 !important;
-  }
-}
-:host /deep/{
-  .collectionPinned custom-icon g{
-    fill:#fff;
   }
 }
 .checkbox{
