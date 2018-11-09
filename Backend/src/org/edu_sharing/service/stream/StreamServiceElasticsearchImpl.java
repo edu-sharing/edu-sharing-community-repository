@@ -99,7 +99,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 
 
 	}
-	private static final String PROPERTY_XML = "elasticsearch.properties.xml";
+	private static String PROPERTY_XML = "/org/edu_sharing/service/stream/stream.elasticsearch.properties";
 	public StreamServiceElasticsearchImpl() {
 		if(client!=null)
 			return;
@@ -141,7 +141,7 @@ public class StreamServiceElasticsearchImpl implements StreamService {
 			String[] servers=null;
 			String prop=null;
 			try {
-				prop=PropertiesHelper.getProperty("server",PROPERTY_XML,PropertiesHelper.XML);
+				prop=PropertiesHelper.getProperty("server",PROPERTY_XML,PropertiesHelper.TEXT);
 			}
 			catch(Exception e) {
 			}			
