@@ -14,6 +14,6 @@
          tabindex="0"
          (keyup.enter)="click(option)"
          (click)="click(option)"
-      ><icon>{{option.icon}}</icon> {{option.name | translate}}</a>
+      ><icon [id]="option.icon"></icon> {{option.name | translate}}</a>
   </div>
 </div>
