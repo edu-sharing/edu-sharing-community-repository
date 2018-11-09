@@ -855,11 +855,9 @@ export class CollectionsMainComponent {
           this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.EDIT", "edit",()=>this.collectionEdit()));
       }
       if(this.pinningAllowed && this.isAllowedToDeleteCollection()) {
-        /*TODO: Step
-        Font with pin-icon*/
           this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.PIN", "edu-pin", () => this.pinCollection()));
       }
-      if(this.isAllowedToEditCollection()) {
+      if(this.isAllowedToEditCollection() && this.collectionContent.collection.type!=RestConstants.COLLECTIONTYPE_EDITORIAL) {
           this.optionsCollection.push(new OptionItem("WORKSPACE.OPTION.INVITE", "group_add", () => this.collectionPermissions()));
       }
       if(this.isAllowedToDeleteCollection()) {
