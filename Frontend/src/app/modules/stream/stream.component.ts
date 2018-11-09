@@ -1,7 +1,5 @@
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
 import 'rxjs/add/operator/map';
-import { HttpModule } from '@angular/http';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
