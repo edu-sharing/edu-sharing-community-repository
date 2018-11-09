@@ -84,6 +84,7 @@
   "TOOLPERMISSION_ERROR_FOOTER":"If you think that's an error, contact your administrator and and ask for permission {{permission}}",
   "TOOLPERMISSION":{
     "TOOLPERMISSION_INVITE":"The permission to share content",
+    "TOOLPERMISSION_INVITE_STREAM":"The permission to add content to the stream",
     "TOOLPERMISSION_INVITE_LINK":"The permission to create content links",
     "TOOLPERMISSION_INVITE_HISTORY":"The permission to view the sharing history",
     "TOOLPERMISSION_INVITED":"The permission to see the list of invited users",

@@ -91,11 +91,11 @@ export class ActionbarHelperService{
     if(type=='ADD_TO_STREAM') {
       if (NodeHelper.allFiles(nodes)) {
         option = new OptionItem("WORKSPACE.OPTION.STREAM", "event", callback);
-        option.isEnabled = NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH);
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH);
+          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH) && this.connectors.getRestConnector().hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_STREAM);
         }
+        option.isEnabled = option.enabledCallback(null);
       }
     }
     if(type=='INVITE'){

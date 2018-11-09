@@ -25,6 +25,8 @@ import org.edu_sharing.service.stream.model.ContentEntry;
 import org.edu_sharing.service.stream.model.ContentEntry.Audience.STATUS;
 import org.edu_sharing.service.stream.model.StreamSearchRequest;
 import org.edu_sharing.service.stream.model.StreamSearchResult;
+import org.edu_sharing.service.toolpermission.ToolPermissionException;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.usage.Usage2Service;
 
 public class StreamDao {
@@ -32,6 +34,9 @@ public class StreamDao {
 		try {
 			StreamService service=StreamServiceFactory.getStreamService();
 			ContentEntry entry=convertStreamEntry(newEntry);
+			if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_STREAM)){
+				throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_STREAM);
+			}
 			for(String node : newEntry.getNodes()) {
 				NodeDao nodeDao=NodeDao.getNode(repoDao, node);
 				if(!nodeDao.getAccessAsString().contains(CCConstants.PERMISSION_CC_PUBLISH)) {

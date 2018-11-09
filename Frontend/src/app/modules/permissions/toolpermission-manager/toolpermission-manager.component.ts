@@ -40,6 +40,8 @@ export class ToolpermissionManagerComponent {
   static STATUS_UNKNOWN="UNKNOWN";
   static GROUPS:any=[{name:"SHARING",icon:"share",permissions:[
         RestConstants.TOOLPERMISSION_INVITE,
+        RestConstants.TOOLPERMISSION_INVITE_STREAM,
+        RestConstants.TOOLPERMISSION_INVITE_LINK,
         RestConstants.TOOLPERMISSION_INVITE_SHARE,
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
         RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE,

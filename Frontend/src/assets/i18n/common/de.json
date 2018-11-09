@@ -83,6 +83,7 @@
   "TOOLPERMISSION_ERROR_FOOTER":"Falls Sie dies für einen Fehler halten, kontaktieren Sie den Administrator und fragen Sie nach Freigabe der Berechtigung {{permission}}",
   "TOOLPERMISSION":{
     "TOOLPERMISSION_INVITE":"Die Berechtigung zum Freigeben von Materialien",
+    "TOOLPERMISSION_INVITE_STREAM":"Die Berechtigung zum Freigeben von Materialien auf den Stream",
     "TOOLPERMISSION_INVITE_LINK":"Die Berechtigung zum Erstellen von Links auf Materialien",
     "TOOLPERMISSION_INVITE_HISTORY":"Die Berechtigung zum Anzeigen der Freigabe-Historie",
     "TOOLPERMISSION_INVITE_SHARE":"Die Berechtigung zum Freigeben von Materialien in gemeinsamen Ordnern",
