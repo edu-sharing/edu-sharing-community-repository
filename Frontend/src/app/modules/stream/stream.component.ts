@@ -111,7 +111,6 @@ export class StreamComponent {
     private toast : Toast,
     private collectionService : RestCollectionService,
     private config : ConfigurationService,
-    private http: Http,
     private translate : TranslateService) {
       Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=>{
         UIHelper.setTitle('STREAM.TITLE',title,translate,config);
