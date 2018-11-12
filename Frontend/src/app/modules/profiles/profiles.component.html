@@ -76,7 +76,7 @@
     </div>
   </div>
   <div class="about">
-    <img class="quotes" src="assets/images/quotes.svg">
+    <i class="quotes edu-icons">quotes</i>
     <div *ngIf="edit">
       <label for="about">{{'PROFILES.ABOUT_LABEL' | translate}}</label>
       <textarea id="about" class="materialize-textarea" [(ngModel)]="userEdit.profile.about"></textarea>
@@ -86,7 +86,7 @@
       <div *ngIf="!user.profile.about" class="empty">{{'PROFILES.NO_ABOUT'+(isMe ? "_ME" : "") | translate}}</div>
     </div>
   </div>
-  <div class="authorityName">
+  <div class="authorityName" *ngIf="!edit">
     <label>{{'USER.authorityName' | translate}}</label>
     <div>{{ user.authorityName }}</div>
   </div>
