@@ -113,14 +113,14 @@ table, div {
     color: white;
 }
 .card-image-icon-circle{
-  width:130px;
-  height:130px;
+  width:140px;
+  height:140px;
   border-radius: 50%;
   background-color: #fff;
   margin:auto;
   margin-top: 10px;
   i{
-    margin-top: 31px;
+    margin-top: 36px;
     font-size: 75px;
   }
 }
@@ -220,7 +220,7 @@ table, div {
 }
 .collection-option{
   position: absolute;
-  top: 150px;
+  top: 160px;
   right: 10px;
 }
 
@@ -366,7 +366,7 @@ table, div {
     .collection-option{
       position: absolute;
       top: auto;
-      bottom: 90px;
+      bottom: 120px;
     }
     .card-collection-image-container {
         height: 200px;
