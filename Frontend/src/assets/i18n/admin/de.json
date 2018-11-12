@@ -131,6 +131,7 @@
       "OAI_RECORD_HANDLER_CLASS_NAME_EXAMPLE":"org.edu_sharing.repository.server.importer.RecordHandlerLOM",
       "OAI_BINARY_HANDLER_CLASS_NAME":"Binary Handler Klassenname (Optional)",
       "OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE":"org.edu_sharing.repository.server.importer.BinaryHandlerTechnicalLocation",
+      "OAI_FORCE_UPDATE":"Alle bestehenden Nodes neu importieren/überschreiben",
       "OAI_START":"OAI Import",
       "OAI_SAVE":"Werte für nächsten Import speichern",
       "ADMINISTRATION":"Import Administration",

@@ -55,6 +55,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
+import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -306,7 +307,7 @@ public class OAIPMHLOMImporter implements Importer{
 							return null;
 						}
 
-						if (persistentHandler.mustBePersisted(identifier, timeStamp)) {
+						if (persistentHandler.mustBePersisted(identifier, timeStamp) || job!=null && job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
 							logger.info("identifier:" + identifier + " timeStamp: " + timeStamp + " will be created/updated");
 							handleGetRecordStuff(cursor, identifier);
 						} else {

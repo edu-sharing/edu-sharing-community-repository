@@ -231,7 +231,7 @@
       <label for="OAI_FILE">{{'ADMIN.IMPORT.OAI_FILE' | translate}}</label>
       <input type="text" id="OAI_FILE" [(ngModel)]="oai.file">
       <label for="OAI_IDS">{{'ADMIN.IMPORT.OAI_IDS' | translate}}</label>
-      <input type="text" id="OAI_IDS" [(ngModel)]="oai.oaiIds">
+      <input type="text" id="OAI_IDS" [(ngModel)]="oai.ids">
       <label for="OAI_CLASS_NAME">{{'ADMIN.IMPORT.OAI_CLASS_NAME' | translate}}</label>
       <select id="OAI_CLASS_NAME" [(ngModel)]="oai.className">
         <option *ngFor="let option of oaiClasses">{{ option }}</option>
@@ -245,6 +245,10 @@
     <label for="OAI_BINARY_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}</label>
     <input type="text" id="OAI_BINARY_HANDLER_CLASS_NAME" [(ngModel)]="oai.binaryHandlerClassName">
     <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
+    <div class="oaiForce">
+      <input type="checkbox" id="OAI_FORCE_UPDATE" class="filled-in" [(ngModel)]="oai.forceUpdate">
+      <label for="OAI_FORCE_UPDATE">{{'ADMIN.IMPORT.OAI_FORCE_UPDATE' | translate}}</label>
+    </div>
     <div class="oaiSave">
         <input type="checkbox" id="oaiSave" class="filled-in" [(ngModel)]="oaiSave"><label for="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</label>
     </div>

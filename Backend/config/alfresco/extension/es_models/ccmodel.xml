@@ -597,6 +597,10 @@
 				<property name="ccm:replicationmodified">
 					<type>d:date</type>
 				</property>
+				<!-- for detecting last update of imported data  -->
+				<property name="ccm:importmodified">
+					<type>d:datetime</type>
+				</property>
 
 				<!-- for elixier objects thumbnail url -->
 				<property name="ccm:thumbnailurl">

@@ -43,6 +43,7 @@ import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.importer.RecordHandlerInterface;
 import org.edu_sharing.repository.server.importer.RecordHandlerLOM;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -50,6 +51,11 @@ public class ImporterJob extends AbstractJob {
 
 	public static Logger logger=Logger.getLogger(ImporterJob.class);
 	private JobExecutionContext context;
+	private JobDataMap jobDataMap;
+
+	public JobDataMap getJobDataMap() {
+		return jobDataMap;
+	}
 
 	public ImporterJob() {
 
@@ -57,7 +63,7 @@ public class ImporterJob extends AbstractJob {
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		Map jobDataMap = context.getJobDetail().getJobDataMap();
+		jobDataMap = context.getJobDetail().getJobDataMap();
 		String username = (String) jobDataMap.get(OAIConst.PARAM_USERNAME);
 		
 		if(username == null || username.trim().equals("")) {
