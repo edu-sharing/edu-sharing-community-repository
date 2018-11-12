@@ -113,12 +113,16 @@ table, div {
     color: white;
 }
 .card-image-icon-circle{
-  width:150px;
-  height:150px;
+  width:130px;
+  height:130px;
   border-radius: 50%;
   background-color: #fff;
   margin:auto;
   margin-top: 10px;
+  i{
+    margin-top: 31px;
+    font-size: 75px;
+  }
 }
 .collection-header-image{
   position: relative;
