@@ -24,7 +24,7 @@
                 <div *ngIf="changing.indexOf(key)!=-1"><spinner-small></spinner-small></div>
                 <div *ngIf="changing.indexOf(key)==-1">
                     <div class="text">{{'PERMISSIONS.TOOLPERMISSIONS.STATUS_'+getEffective(key) | translate}}</div>
-                    <custom-icon *ngIf="isImplicit(key)" [iconId]="'inherit'"class="inherit" title="{{'PERMISSIONS.TOOLPERMISSIONS.INHERIT' | translate}}"></custom-icon>
+                    <i *ngIf="isImplicit(key)" class="inherit edu-icons" title="{{'PERMISSIONS.TOOLPERMISSIONS.INHERIT' | translate}}">inherit</i>
                     <i *ngIf="getEffective(key)=='UNKNOWN'" class="inherit material-icons" title="{{'PERMISSIONS.TOOLPERMISSIONS.INHERIT_UNKNOWN' | translate}}">warning</i>
                 </div>
               </div>
