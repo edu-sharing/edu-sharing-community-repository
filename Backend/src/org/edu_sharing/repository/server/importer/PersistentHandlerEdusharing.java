@@ -54,6 +54,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
+import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
+import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.springframework.context.ApplicationContext;
@@ -173,32 +175,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				licenseValidChanged = true;
 			}
 
-			boolean nodeMustBeUpdated = false;
-			if (newTimeStamp != null && oldTimeStamp != null && !newTimeStamp.isEmpty() && !oldTimeStamp.isEmpty()) {
-				Date newDate = null;
-				try {
-					newDate = sdf.parse(newTimeStamp);
-					Date oldDate = sdf.parse(oldTimeStamp);
-
-					if (newDate.after(oldDate)) {
-						nodeMustBeUpdated = true;
-					}
-
-				} catch (ParseException e) {
-					getLogger().error(e.getMessage() + " while comparing old and new timestamp for id:" + replicationId + " oldTimeStamp:" + oldTimeStamp
-							+ " newTimeStamp:" + newTimeStamp);
-
-					// if old date was damaged but new date is ok
-					if (newDate != null) {
-						nodeMustBeUpdated = true;
-					}
-
-				}
-			}
-
-			if (nodeMustBeUpdated) {
-				// @TODO update only when timestamp changed
-				// updateNode(alfResult.keySet().iterator().next(),newNodeProps);
+			if (mustBePersisted(replicationId,nodeReplId)) {
 				getLogger().info(" newTimeStamp is after oldTimeStamp have to update object id:" + replicationId);
                 updateNode((String) childId.getId(), newNodeProps);
                 setModifiedDate((String) childId.getId(), newNodeProps);
@@ -473,7 +450,9 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		if (replId == null) {
 			return false;
 		}
-		
+		if(job!=null && job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
+			return true;
+		}
 		String oldTimeStamp = getReplicationIdTimestampMap().get(replId);
 
 		// we will not safe without timestamp

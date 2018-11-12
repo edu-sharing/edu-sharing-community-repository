@@ -307,7 +307,7 @@ public class OAIPMHLOMImporter implements Importer{
 							return null;
 						}
 
-						if (persistentHandler.mustBePersisted(identifier, timeStamp) || job!=null && job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
+						if (persistentHandler.mustBePersisted(identifier, timeStamp)) {
 							logger.info("identifier:" + identifier + " timeStamp: " + timeStamp + " will be created/updated");
 							handleGetRecordStuff(cursor, identifier);
 						} else {

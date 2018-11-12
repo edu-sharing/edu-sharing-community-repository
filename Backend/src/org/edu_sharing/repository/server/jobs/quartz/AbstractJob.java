@@ -39,7 +39,13 @@ public abstract class AbstractJob implements Job,InterruptableJob {
 	protected Log logger = LogFactory.getLog(AbstractJob.class);
 	
 	boolean isStarted = false;
-	
+
+	private JobDataMap jobDataMap;
+
+	public JobDataMap getJobDataMap() {
+		return jobDataMap;
+	}
+
 	protected Class[] allJobs =  new Class[] { ImporterJob.class, RefreshCacheJob.class,RemoveDeletedImportsJob.class,RemoveImportedObjectsJob.class,GetAllDamagedObjects.class,RefreshPublisherListJob.class, TrackingJob.class, ExporterJob.class,RefreshValuespaceFileJob.class};
 	protected boolean isInterrupted=false;
 
@@ -69,5 +75,10 @@ public abstract class AbstractJob implements Job,InterruptableJob {
 	@Override
 	public void interrupt() throws UnableToInterruptJobException {
 		isInterrupted = true;
+	}
+
+	@Override
+	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+		this.jobDataMap=jobExecutionContext.getJobDetail().getJobDataMap();
 	}
 }

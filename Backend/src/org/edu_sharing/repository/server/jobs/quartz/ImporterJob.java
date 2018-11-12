@@ -51,11 +51,6 @@ public class ImporterJob extends AbstractJob {
 
 	public static Logger logger=Logger.getLogger(ImporterJob.class);
 	private JobExecutionContext context;
-	private JobDataMap jobDataMap;
-
-	public JobDataMap getJobDataMap() {
-		return jobDataMap;
-	}
 
 	public ImporterJob() {
 
@@ -63,8 +58,8 @@ public class ImporterJob extends AbstractJob {
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		jobDataMap = context.getJobDetail().getJobDataMap();
-		String username = (String) jobDataMap.get(OAIConst.PARAM_USERNAME);
+		super.execute(context);
+		String username = (String) context.getJobDetail().getJobDataMap().get(OAIConst.PARAM_USERNAME);
 		
 		if(username == null || username.trim().equals("")) {
 			throw new JobExecutionException("no user provided");

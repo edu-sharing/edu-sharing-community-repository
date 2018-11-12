@@ -47,6 +47,7 @@ public class RemoveDeletedImportsJob extends AbstractJob {
 	Logger logger = Logger.getLogger(RemoveDeletedImportsJob.class);
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
+		super.execute(context);
 		logger.info("start");
 		try {
 			
