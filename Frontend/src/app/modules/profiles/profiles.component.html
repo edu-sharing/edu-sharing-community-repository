@@ -90,7 +90,7 @@
     <label>{{'USER.authorityName' | translate}}</label>
     <div>{{ user.authorityName }}</div>
   </div>-->
-  <div class="changePassword">
+  <div class="changePassword" *ngIf="edit">
     <div class="toggle" (click)="changePassword=!changePassword">
       <div class="clickable">
         <i *ngIf="!changePassword" class="material-icons">lock</i>
@@ -104,7 +104,7 @@
       <label for="oldPassword">{{'OLD_PASSWORD' | translate }}</label>
       <input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="oldPassword" required="true">
       <label for="password">{{'NEW_PASSWORD' | translate }}</label>
-      <input-password [(value)]="password" [required]="true" [id]="password"></input-password>
+      <input-password [hint]="true" [(value)]="password" [required]="true" [id]="password"></input-password>
     </div>
   </div>
   </div>
