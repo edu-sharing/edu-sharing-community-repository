@@ -343,9 +343,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				simpleProps.put(propKey, props.get(propKey));
 			}
 		}
-
-		mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
-		createChildobjects(nodeId, nodeProps);
+		synchronized (this) {
+			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
+			createChildobjects(nodeId, nodeProps);
+		}
 
 	}
 
