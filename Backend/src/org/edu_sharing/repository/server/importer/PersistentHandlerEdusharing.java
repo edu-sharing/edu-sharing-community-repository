@@ -469,7 +469,6 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		try {
 			newDate = sdf.parse(timeStamp);
 			Date oldDate = sdf.parse(oldTimeStamp);
-
 			if (newDate.after(oldDate)) {
 				return true;
 			}
