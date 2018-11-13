@@ -48,6 +48,8 @@ import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.transaction.TransactionService;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -193,15 +195,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			// insert
 			String nodeId;
 			getLogger().debug("found no local Object for: Id:" + replicationId + " catalog:" + lomCatalogId + " creating new one");
-			try{			
-				nodeId=createNode(targetFolder, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
-			
-			}catch(org.alfresco.service.cmr.repository.DuplicateChildNodeNameException e){
-				String name = (String)newNodeProps.get(CCConstants.CM_NAME);
-				name = name + System.currentTimeMillis();
-				newNodeProps.put(CCConstants.CM_NAME, name);
-				nodeId=createNode(targetFolder, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
-			}
+			nodeId=createNode(targetFolder, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
 			setModifiedDate(nodeId,newNodeProps);
 			// add it to the replication id map (full catalog + repl id)
 			replIdMap.put(nodeReplId,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId));
@@ -346,10 +340,14 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		try {
 			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
 		}catch(DuplicateChildNodeNameException e){
-			simpleProps.put(CCConstants.CM_NAME, (String) simpleProps.get(CCConstants.CM_NAME) + System.currentTimeMillis());
+			simpleProps.put(CCConstants.CM_NAME, makeUniqueName((String) simpleProps.get(CCConstants.CM_NAME)));
 			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
 		}
 		createChildobjects(nodeId, nodeProps);
+	}
+
+	private String makeUniqueName(String name) {
+		return name+"_"+ DigestUtils.sha1Hex(System.currentTimeMillis()+""+RandomUtils.nextLong());
 	}
 
 	private void createChildobjects(String nodeId, HashMap<String, Object> nodeProps) throws Throwable {
@@ -396,7 +394,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		try {
 			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
 		} catch (DuplicateChildNodeNameException e) {
-			simpleProps.put(CCConstants.CM_NAME, (String) simpleProps.get(CCConstants.CM_NAME) + System.currentTimeMillis());
+			simpleProps.put(CCConstants.CM_NAME, makeUniqueName((String)simpleProps.get(CCConstants.CM_NAME)));
 			newNodeId = mcAlfrescoBaseClient.createNode(parentId, type, association, simpleProps);
 		}
 		if (aspects != null) {
