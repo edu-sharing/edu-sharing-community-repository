@@ -137,26 +137,26 @@ export class CollectionsMainComponent{
               UIHelper.setTitle('COLLECTIONS.TITLE',title,translationService,config);
               this.mdsService.getSet().subscribe((data:MdsMetadataset)=>{
                 this.referencesColumns=MdsHelper.getColumns(data,'collectionReferences');
-              })
-            });
+              });
 
-      this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-        if(data.isValidLogin && data.currentScope==null) {
-          this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
-          this.isGuest=data.isGuest;
-          if(data.isValidLogin){
-            this.organizationService.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
-              this.hasOrganizations=data.organizations.length>0;
-            });
-          }
-          this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
-            this.hasEditorial=data.collections.length>0;
-          });
-          this.initialize();
-        }else
-          RestHelper.goToLogin(this.router,this.config);
-      },(error:any)=> RestHelper.goToLogin(this.router,this.config));
+                this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+                    if(data.isValidLogin && data.currentScope==null) {
+                        this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
+                        this.isGuest=data.isGuest;
+                        if(data.isValidLogin){
+                            this.organizationService.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
+                                this.hasOrganizations=data.organizations.length>0;
+                            });
+                        }
+                        this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
+                            this.hasEditorial=data.collections.length>0;
+                        });
+                        this.initialize();
+                    }else
+                        RestHelper.goToLogin(this.router,this.config);
+                },(error:any)=> RestHelper.goToLogin(this.router,this.config));
 
+            });
     }
     public isMobile(){
       return this.uiService.isMobile();
