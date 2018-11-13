@@ -203,10 +203,10 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				nodeId=createNode(targetFolder, CCConstants.CCM_TYPE_IO, CCConstants.CM_ASSOC_FOLDER_CONTAINS, newNodeProps);
 			}
 			setModifiedDate(nodeId,newNodeProps);
-			// add it to the replication id map
+			// add it to the replication id map (full catalog + repl id)
 			replIdMap.put(nodeReplId,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId));
-			// and the timestamp map
-			replIdTimestampMap.put(nodeReplId,newTimeStamp);
+			// and the timestamp map (only replication id)
+			replIdTimestampMap.put(replicationId,newTimeStamp);
 			return nodeId;
 			
 		}
