@@ -131,6 +131,9 @@
       "PERMALINK":"Link to object",
       "USAGE_COUNT_TITLE":"Usage",
       "USAGE_COUNT":"Total uses",
+      "COLLECTIONS":"In {{count}} collection(s)",
+      "FORKED_PARENT":"Is variant of",
+      "FORKED_CHILDS":"Has {{count}} variant(s)",
       "USAGE_TYPE": {
         "LMS": "LMS-Courses",
         "COLLECTION": "Collections",
