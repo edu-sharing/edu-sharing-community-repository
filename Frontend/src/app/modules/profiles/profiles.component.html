@@ -86,16 +86,18 @@
       <div *ngIf="!user.profile.about" class="empty">{{'PROFILES.NO_ABOUT'+(isMe ? "_ME" : "") | translate}}</div>
     </div>
   </div>
-  <div class="authorityName" *ngIf="!edit">
+ <!-- <div class="authorityName" *ngIf="!edit">
     <label>{{'USER.authorityName' | translate}}</label>
     <div>{{ user.authorityName }}</div>
-  </div>
-  <div class="changePassword" *ngIf="edit">
+  </div>-->
+  <div class="changePassword">
     <div class="toggle" (click)="changePassword=!changePassword">
       <div class="clickable">
+        <i *ngIf="!changePassword" class="material-icons">lock</i>
+        <i *ngIf="changePassword" class="material-icons">lock_open</i>
+        {{'CHANGE_PASSWORD' | translate}}
         <i class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
         <i class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
-        {{'CHANGE_PASSWORD' | translate}}
       </div>
     </div>
     <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
