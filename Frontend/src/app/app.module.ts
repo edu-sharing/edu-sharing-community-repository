@@ -46,9 +46,7 @@ import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
     DECLARATIONS_SHARE_APP,
     DECLARATIONS_SERVICES
   ],
-  imports: [
-    IMPORTS,
-  ],
+  imports: IMPORTS,
   providers: [
     PROVIDERS,
     PROVIDERS_SEARCH

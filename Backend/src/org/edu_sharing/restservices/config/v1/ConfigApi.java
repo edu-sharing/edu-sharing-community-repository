@@ -9,6 +9,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.restservices.ApiService;
@@ -24,6 +25,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.json.JSONObject;
 
 @Path("/config/v1")
 @Api(tags = { "CONFIG v1" })
@@ -59,6 +61,25 @@ public class ConfigApi {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
 		}
     }
+	@GET
+	@Path("/language/defaults")
+	@ApiOperation(value = "get all inital language strings for angular")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+	public Response getLanguageDefaults() {
+		try {
+			return Response.status(Response.Status.OK).entity(I18nAngular.getLanguageStrings().toString()).build();
+		} catch (Throwable t) {
+			logger.error(t.getMessage(), t);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+		}
+	}
 	@GET
 	@Path("/language")
 	@ApiOperation(value = "get override strings for the current language", notes = "Language strings")
@@ -124,6 +145,8 @@ public class ConfigApi {
 		return convertKeyValue(variables.variable);
 	}
 	private Map<String,String> convertKeyValue(List<org.edu_sharing.service.config.model.KeyValuePair> pairs) {
+		if(pairs==null)
+			return null;
 		Map<String,String> map=new HashMap<String, String>();
 		for(org.edu_sharing.service.config.model.KeyValuePair pair : pairs) {
 			map.put(pair.key, pair.value);
@@ -131,14 +154,6 @@ public class ConfigApi {
 		return map;
 	}
 	private Map<String,String> getActiveLanguage(List<org.edu_sharing.service.config.model.Language> languages) {
-		if(languages!=null && languages.size()>0) {
-			String language=new AuthenticationToolAPI().getCurrentLanguage();
-			for(org.edu_sharing.service.config.model.Language entry : languages) {
-				if(entry.language.equalsIgnoreCase(language))
-					return convertKeyValue(entry.string);
-			}
-			logger.debug("no language override entries found in config for language "+language);
-		}
-		return null;
+		return convertKeyValue(ConfigServiceFactory.getLanguageData(languages));
 	}
 }

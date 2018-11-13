@@ -85,7 +85,7 @@
     [(show)]="userOpen"
     [options]="userMenuOptions"
   ></dropdown>
-  <div class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
+  <div *ngIf="helpOptions.length" class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
     <i class="material-icons">help_outline</i>
   </div>
   <dropdown class="helpMenu"

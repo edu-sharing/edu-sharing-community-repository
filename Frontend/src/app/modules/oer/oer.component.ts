@@ -1,12 +1,10 @@
 
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
 import 'rxjs/add/operator/map';
-import { HttpModule } from '@angular/http';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {Translation} from "../../common/translation";
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
-import {RestMetadataService} from '../../common/rest/services/rest-metadata.service';
 import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
@@ -29,7 +27,6 @@ import {MdsHelper} from "../../common/rest/mds-helper";
   selector: 'app-oer',
   templateUrl: 'oer.component.html',
   styleUrls: ['oer.component.scss'],
-  providers: [HttpModule]
   })
 
 
@@ -55,7 +52,6 @@ export class OerComponent {
     private connector:RestConnectorService,
     private nodeService: RestNodeService,
     private searchService: RestSearchService,
-    private metadataService:RestMetadataService,
     private mdsService:RestMdsService,
     private storage : TemporaryStorageService,
     private session : SessionStorageService,

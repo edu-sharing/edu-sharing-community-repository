@@ -7,7 +7,6 @@ import {RestSearchService} from "../../../common/rest/services/rest-search.servi
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {NodeHelper} from "../../../common/ui/node-helper";
-import {Http} from "@angular/http";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {Router} from "@angular/router";
 import {UIConstants} from "../../../common/ui/ui-constants";
@@ -17,6 +16,7 @@ import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
 import {ActionbarHelperService} from "../../../common/services/actionbar-helper";
+import {HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'search-node-store',
@@ -43,7 +43,7 @@ export class SearchNodeStoreComponent {
 
   constructor(private search : RestSearchService,
               private toast : Toast,
-              private http : Http,
+              private http : HttpClient,
               private router : Router,
               private config : ConfigurationService,
               private connector : RestConnectorService,

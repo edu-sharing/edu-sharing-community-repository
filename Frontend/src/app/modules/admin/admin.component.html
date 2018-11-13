@@ -81,7 +81,12 @@
                 <div class="description">{{('ADMIN.INFO.CHECK.'+check.name+'.STATUS_'+check.status) | translate:check.translate }}</div>
                 <div *ngIf="check.status!='OK'" class="solution">
                     <i class="material-icons">forward</i>
+                    <div>
                     {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION') | translate:check.translate }}
+                    <a *ngIf="check.status!='OK' && check.callback" class="solution-link clickable" (click)="check.callback()">
+                        {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION_LINK') | translate:check.translate }}
+                    </a>
+                    </div>
                 </div>
             </div>
             <i class="material-icons">{{check.status=='OK' ? 'check' : 'error_outline'}}</i>
@@ -288,18 +293,24 @@
                     </div>
                 </div>
                 <div class="job-col row-detail" *ngIf="jobsOpen[i]">
-                    <div class="job-row log-level">
-                        <label for="logLevel">{{'ADMIN.JOBS.LOG_LEVEL' | translate}}</label>
-                        <select id="logLevel"[(ngModel)]="jobsLogFilter[i]">
-                            <option value="undefined">Alles</option>
-                            <option value="4">{{'ADMIN.JOBS.LOG_LEVEL_4' | translate}}</option>
-                            <option value="3">{{'ADMIN.JOBS.LOG_LEVEL_3' | translate}}</option>
-                        </select>
+                    <div class="job-row log-filters">
+                        <div class="job-row log-filter">
+                            <label for="logLevel">{{'ADMIN.JOBS.LOG_FILTER' | translate}}</label>
+                            <input type="text" id="logFilter"[(ngModel)]="jobsLogFilter[i]" (ngModelChange)="updateJobLogs()">
+                        </div>
+                        <div class="job-row log-level">
+                            <label for="logLevel">{{'ADMIN.JOBS.LOG_LEVEL' | translate}}</label>
+                            <select id="logLevel"[(ngModel)]="jobsLogLevel[i]" (ngModelChange)="updateJobLogs()">
+                                <option value="undefined">Alles</option>
+                                <option value="4">{{'ADMIN.JOBS.LOG_LEVEL_4' | translate}}</option>
+                                <option value="3">{{'ADMIN.JOBS.LOG_LEVEL_3' | translate}}</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="job-col">
                         <div class="log">{{'ADMIN.JOBS.LOG' | translate}}</div>
                         <div class="log-data">
-                            <div *ngFor="let entry of getJobLog(job,i)" class="job-row"
+                            <div *ngFor="let entry of jobsLogData[i]" class="job-row"
                                  [class.status-error]="entry.level.syslogEquivalent<=3"
                                  [class.status-warning]="entry.level.syslogEquivalent<=4"
                             >

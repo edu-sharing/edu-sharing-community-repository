@@ -248,6 +248,11 @@ mds .mdsGroup{
       }
     }
   }
+  .widget_checkbox{
+    .input-hint-bottom{
+      margin-top: 0;
+    }
+  }
   > label,
   .widget_checkbox,
   .mdsVersion{
@@ -408,7 +413,8 @@ mds .mdsGroup{
       text-transform: uppercase;
     }
     img{
-      width:40%;
+      min-width:40%;
+      width:250px;
       height: 175px;
       object-fit: cover;
     }

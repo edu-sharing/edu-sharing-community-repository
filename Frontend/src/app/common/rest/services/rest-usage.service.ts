@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import 'rxjs/add/operator/map'
 import { Observable } from 'rxjs/Observable';
 import {RestConnectorService} from "./rest-connector.service";
@@ -28,23 +27,21 @@ export class RestUsageService extends AbstractRestService{
 
     public getNodeUsages = (node : string,
                    repository=RestConstants.HOME_REPOSITORY
-                  ): Observable<UsageList> => {
+                  ) => {
     let query=this.connector.createUrl("usage/:version/usages/node/:node",repository,
       [
         [":node",node]
       ]);
-    return this.connector.get(query,this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+    return this.connector.get<UsageList>(query,this.connector.getRequestOptions());
   }
     public getNodeUsagesCollection = (node : string,
                             repository=RestConstants.HOME_REPOSITORY
-    ): Observable<CollectionUsage[]> => {
+    ) => {
         let query=this.connector.createUrl("usage/:version/usages/node/:node/collections",repository,
             [
                 [":node",node]
             ]);
-        return this.connector.get(query,this.connector.getRequestOptions())
-            .map((response: Response) => response.json());
+        return this.connector.get<CollectionUsage[]>(query,this.connector.getRequestOptions());
     }
     public deleteNodeUsage = (node : string, usage : string,
                                       repository=RestConstants.HOME_REPOSITORY

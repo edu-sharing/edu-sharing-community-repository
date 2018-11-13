@@ -3,7 +3,6 @@ import {RestConstants} from "../rest-constants";
 import {Observable} from "rxjs";
 import {RestConnectorService} from "./rest-connector.service";
 import {IamUsers, IamAuthorities, OrganizationOrganizations} from "../data-object";
-import {Response} from "@angular/http";
 import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
@@ -11,7 +10,7 @@ export class RestOrganizationService extends AbstractRestService{
   constructor(connector : RestConnectorService) {
       super(connector);
   }
-  public removeMember = (organization : string,member : string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> => {
+  public removeMember = (organization : string,member : string,repository = RestConstants.HOME_REPOSITORY) => {
     let query = this.connector.createUrl("organization/:version/organizations/:repository/:organization/member/:member", repository,
       [
         [":organization",organization],
@@ -19,27 +18,26 @@ export class RestOrganizationService extends AbstractRestService{
       ]);
     return this.connector.delete(query, this.connector.getRequestOptions());
   }
-  public deleteOrganization = (organization : string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> => {
+  public deleteOrganization = (organization : string,repository = RestConstants.HOME_REPOSITORY) => {
     let query = this.connector.createUrl("organization/:version/organizations/:repository/:organization", repository,
       [
         [":organization",organization],
       ]);
     return this.connector.delete(query, this.connector.getRequestOptions());
   }
-  public createOrganization = (organization : string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> => {
+  public createOrganization = (organization : string,repository = RestConstants.HOME_REPOSITORY) => {
     let query = this.connector.createUrl("organization/:version/organizations/:repository/:organization", repository,
       [
         [":organization",organization],
       ]);
     return this.connector.put(query,null, this.connector.getRequestOptions());
   }
-  public getOrganizations = (pattern = "", request:any=null,repository = RestConstants.HOME_REPOSITORY): Observable<OrganizationOrganizations> => {
+  public getOrganizations = (pattern = "", request:any=null,repository = RestConstants.HOME_REPOSITORY) => {
     let query = this.connector.createUrlNoEscape("organization/:version/organizations/:repository/?pattern=:pattern&:request", repository,
     [
       [":pattern",encodeURIComponent(pattern)],
       [":request",this.connector.createRequestString(request)]
     ]);
-    return this.connector.get(query, this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+    return this.connector.get<OrganizationOrganizations>(query, this.connector.getRequestOptions());
   }
 }

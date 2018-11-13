@@ -69,8 +69,15 @@
           display:flex;
           flex-direction: row;
           align-items: center;
+          >div{
+            display: flex;
+            flex-direction: column;
+          }
           .material-icons{
             margin-right: 5px;
+          }
+          .solution-link{
+            text-transform: uppercase;
           }
         }
       }
@@ -369,11 +376,18 @@
         width: 100%;
       }
     }
-    .log-level{
+    .log-filters{
+        padding:10px 0!important;
+    }
+    .log-level,.log-filter{
       min-width:70px;
       color: $textLight;
       font-weight: bold;
       text-transform: uppercase;
+      max-width: 500px;
+      input{
+        margin-bottom: 0;
+      }
     }
     .log-date{
       min-width:100px;
@@ -399,12 +413,6 @@
       display: flex;
       flex-direction: row;
       align-items: center;
-    }
-    .log-level{
-      max-width: 400px;
-      >* {
-        padding: 10px 20px;
-      }
     }
     .job-col{
       display: flex;

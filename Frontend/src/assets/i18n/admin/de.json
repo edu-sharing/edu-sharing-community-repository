@@ -77,7 +77,8 @@
           "TITLE":"Freigabe-Zustand des Hauptverzeichnisses",
           "STATUS_OK":"Das Hauptverzeichnis ist aktuell nicht öffentlich sichtbar und alle darunterliegende Verzeichnisse können beliebig veröffentlicht werden",
           "STATUS_FAIL":"Das Hauptverzeichnis ist öffentlich sichtbar und alle neu erstellten Dateien und Ordner, unabhängig vom Ort, können potentiell von allen Nutzern abgerufen werden",
-          "SOLUTION":"Navigieren Sie als Administrator zum \"Firmen-Home\" und entfernen Sie die öffentliche Freigabe. Überprüfen Sie anschließend, dass alle Daten, die öffentlich verfügbar sein sollen, weiterhin abrufbar sind"
+          "SOLUTION":"Navigieren Sie als Administrator zum \"Firmen-Home\" und entfernen Sie die öffentliche Freigabe. Überprüfen Sie anschließend, dass alle Daten, die öffentlich verfügbar sein sollen, weiterhin abrufbar sind",
+          "SOLUTION_LINK":"Im Workspace öffnen"
         },
         "JOBS_RUNNING":{
           "TITLE":"Laufende Hintergrundaufgaben",
@@ -175,6 +176,7 @@
     },
     "JOBS":{
       "LOG":"Log-Einträge",
+      "LOG_FILTER":"Filtern nach Inhalt:",
       "LOG_LEVEL":"Filtern nach Schweregrad:",
       "LIST":"Bisherige Aufgaben",
       "NO_JOBS":"Es wurden noch keine Aufgaben ausgeführt. Aufgaben werden z.B. durch einen Importvorgang angelegt",

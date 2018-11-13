@@ -30,7 +30,6 @@ import {Helper} from "../../helper";
 import {RestHelper} from "../../rest/rest-helper";
 import {EventListener} from "../../../common/services/frame-events.service";
 import {ActionbarHelperService} from "../../services/actionbar-helper";
-import {Response} from "@angular/http";
 import {SuggestItem} from "../autocomplete/autocomplete.component";
 import {MainNavComponent} from "../main-nav/main-nav.component";
 import {RestSearchService} from '../../rest/services/rest-search.service';

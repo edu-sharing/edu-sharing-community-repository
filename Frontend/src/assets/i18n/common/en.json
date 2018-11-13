@@ -42,6 +42,7 @@
   "SELECT_FILE" : "select file",
   "NO_MORE_ELEMENTS" : "no further elements",
   "FIELD_MUST_BE_FILLED" : "This field cannot be empty.",
+  "CHOOSE_DATE":"Choose date",
   "SELECT_COLLECTION" : "Add to '{{name}}'",
   "SELECT_ROOT_DISABLED" : "select element",
   "CLOSE" : "close",
@@ -72,7 +73,7 @@
   "ORIGINAL_DELETED_INFO":"Only metadata accessable",
   "COMMON_API_ERROR": "An error occured. Please try again.",
   "COMMON_API_ERROR_TITLE": "Error details",
-  "RENDERSERVICE_API_ERROR":"error while reaching render service. Please report this error an administrator.",
+  "RENDERSERVICE_API_ERROR":"error while reaching rendering service. Please report this error an administrator.",
   "SYSTEM_FOLDER_DELETE_ERROR":"This system folder can not be deleted",
   "TOOLPERMISSION_ERROR":"You have insufficient permissions for this task",
   "TOOLPERMISSION_ERROR_TITLE":"Insufficient permissions",
@@ -80,6 +81,7 @@
   "TOOLPERMISSION_ERROR_FOOTER":"If you think that's an error, contact your administrator and and ask for permission {{permission}}",
   "TOOLPERMISSION":{
     "TOOLPERMISSION_INVITE":"The permission to share content",
+    "TOOLPERMISSION_INVITE_LINK":"The permission to create content links",
     "TOOLPERMISSION_INVITE_HISTORY":"The permission to view the sharing history",
     "TOOLPERMISSION_INVITED":"The permission to see the list of invited users",
     "TOOLPERMISSION_INVITE_SHARE":"The permission to share content in shared folders",
@@ -167,6 +169,8 @@
     "BREADCRUMB_INFO": "Save variant in:",
     "CHOOSE": "Storage Location",
     "FILE_PICKER_TITLE": "Choose storage location",
+    "CREATE":"Create",
+    "CREATE_EDIT":"Create & Open",
     "CREATED": "New variant was created and saved in a folder <b>\"{{folder}}\"</b>",
     "CREATED_LINK": "show"
   },
@@ -287,12 +291,37 @@
     }
   },
   "LICENSE":{
-    "NONE":"No or unknown license",
-    "MULTI":"Multiple licenses",
-    "COPYRIGHT_FREE":"Copyright, free access",
-    "COPYRIGHT_LICENSE":"Copyright, subject to licensing",
-    "SCHULFUNK":"German educational radio/television license (§47 UrhG)",
-    "CUSTOM":"Custom license"
+    "NAMES": {
+      "NONE": "No or unknown license",
+      "MULTI": "Multiple licenses",
+      "COPYRIGHT_FREE": "Copyright, free access",
+      "COPYRIGHT_LICENSE": "Copyright, subject to licensing",
+      "SCHULFUNK": "German educational radio/television license (§47 UrhG)",
+      "CUSTOM": "Custom license"
+    },
+    "DESCRIPTION":{
+      "NONE":"Usage and attribution according to the legal conditions specified in the object meta data or according to the general legal regulations.",
+      "MULTI":"The selected elements have different licenses.<br />Defining a license overwrites the license information of all items.",
+      "CC_BY":"The authors have to be credited in a manner specified by these.",
+      "CC_SHARE_ND":"Licensees may copy, distribute, display and perform only verbatim copies of the work, not derivative works and remixes based on it.",
+      "CC_SHARE_SA":"Licensees may copy, distribute, display, and perform the work and make derivative works and remixes based on it, as long as they distribute derivative works only under a license identical (\"not more restrictive\") to the license that governs the original work.",
+      "CC_COMMERCIAL_NC":"Licensees may copy, distribute, display, and perform the work and make derivative works and remixes based on it only for non-commercial purposes.",
+      "CC_0":"This work is dedicated to the public domain.<br /> You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission.",
+      "COPYRIGHT_FREE":"The work is accessible free of charge.<br />Use and attribution according to the generally applicable legal regulations.",
+      "COPYRIGHT_LICENSE":"The work may only be used by the licensed user group according to the conditions stipulated in the license agreement.<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices.",
+      "SCHULFUNK":"Access-restricted and time-limited offering for school radio according to §47 UrhG (German Act on Copyright and Related Rights).<br />Passing on to third parties is prohibited.<br />Attribution according to the generally applicable practices."
+    },
+    "GROUPS": {
+      "NONE": "No license chosen",
+      "COPYRIGHT": "protected by copyright law",
+      "COPYRIGHT_FREE": "protected by copyright law, open access",
+      "COPYRIGHT_LICENSE": "protected by copyright law, usage subject to license",
+      "CC_BY": "Creative Commons",
+      "CC_0": "CC 0 / Public Domain",
+      "SCHULFUNK": "German educational radio/television license (§47 UrhG)",
+      "EDU": "edu-sharing Licenses",
+      "CUSTOM": "define custom license"
+    }
   },
   "LIST":{
     "REORDER_TITLE":"Change columns",
@@ -319,8 +348,8 @@
     "LICENSE_NO_PERMISSIONS_MATERIAL":"You have insufficient permissions to license this material",
     "LICENSE_NO_PERMISSIONS":"You have insufficient permissions to license materials",
     "LICENSE_NO_PERMISSIONS_SAFE":"You may not change licenses in safe environment",
-    "ADD_CHILD_OBJECT":"Weitere Materialien hinzufügen",
-    "ADD_CHILD_OBJECT_DESCRIPTION":"Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen"
+    "ADD_CHILD_OBJECT":"Add further materials",
+    "ADD_CHILD_OBJECT_DESCRIPTION":"Create a series by attaching more materials to this object"
   },
   
   "SHARE_APP":{

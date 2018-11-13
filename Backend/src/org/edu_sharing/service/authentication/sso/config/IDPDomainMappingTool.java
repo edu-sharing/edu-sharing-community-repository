@@ -2,6 +2,7 @@ package org.edu_sharing.service.authentication.sso.config;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,7 +13,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.repository.server.importer.RecordHandlerLOMWithSubObjects;
 import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -29,6 +29,8 @@ public class IDPDomainMappingTool {
 	String file = "/idp.xml";
 
 	Document docMdSets = null;
+	
+	HashMap<String,String> mapper = new HashMap<String,String>();
 
 	public IDPDomainMappingTool() {
 		URL url = MetadataReader.class.getResource(file);
@@ -36,6 +38,7 @@ public class IDPDomainMappingTool {
 		try {
 			builder = factory.newDocumentBuilder();
 			docMdSets = builder.parse(url.openStream());
+			initMap();
 		} catch (ParserConfigurationException e) {
 			logger.error(e.getMessage(), e);
 		} catch (SAXException e) {
@@ -77,5 +80,28 @@ public class IDPDomainMappingTool {
 			return null;
 		}
 
+	}
+	
+	private void initMap(){
+		try {
+
+			xpath.reset();
+
+			NodeList idps = (NodeList) xpath.evaluate("/idp/idp-item", docMdSets, XPathConstants.NODESET);
+			for (int i = 0; i < idps.getLength(); i++) {
+				Node item = idps.item(i);
+				String domain = (String) xpath.evaluate("domain", item, XPathConstants.STRING);
+				String caption = (String) xpath.evaluate("caption", item, XPathConstants.STRING);
+				mapper.put(domain, caption);
+			}
+	
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		
+		}
+	}
+	
+	public HashMap<String, String> getMapper() {
+		return mapper;
 	}
 }

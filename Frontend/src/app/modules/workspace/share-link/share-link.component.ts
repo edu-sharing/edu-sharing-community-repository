@@ -8,7 +8,6 @@ import {ModalDialogComponent, DialogButton} from "../../../common/ui/modal-dialo
 import {Translation} from "../../../common/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {Helper} from "../../../common/helper";
-import { DatepickerOptions } from 'ng2-datepicker';
 import {DateHelper} from "../../../common/ui/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
@@ -25,7 +24,6 @@ import {UIAnimation} from "../../../common/ui/ui-animation";
 export class WorkspaceShareLinkComponent  {
   public loading=true;
   public _node: Node;
-  public dateOptions: DatepickerOptions;
   public enabled=true;
   public expiry=false;
   public password=false;
@@ -33,6 +31,7 @@ export class WorkspaceShareLinkComponent  {
   public _expiryDate : Date;
   private currentDate: number;
   private edit: boolean;
+  public today = new Date();
   public set expiryDate(date:Date){
     this._expiryDate=date;
     this.setExpiry(true);
@@ -49,10 +48,12 @@ export class WorkspaceShareLinkComponent  {
       this._expiryDate=new Date(new Date().getTime()+3600*24*1000);
       // console.log(data);
         if(data.length){
-        this.edit=true;
         this.currentShare=data[0];
         this.expiry=data[0].expiryDate>0;
         this.password=data[0].password;
+        if (this.password) {
+            this.edit=true;
+        };
         this.currentDate=data[0].expiryDate;
         if(this.expiry) {
           this.expiryDate=new Date(data[0].expiryDate);
@@ -110,9 +111,6 @@ export class WorkspaceShareLinkComponent  {
       this.password=false;
     }
   }
-  public setDate(){
-    this.setExpiry(true);
-  }
   private updateShare(date=this.currentDate){
     // console.log(date);
     this.currentShare.url=this.translate.instant('LOADING');
@@ -131,23 +129,22 @@ export class WorkspaceShareLinkComponent  {
   }
 
   public setPassword(){
-  //  TODO: @Simon
-  /*
-  Hier den Objekt mit einem Password versehen
-  */
-    this.updateShare();
+      if (!this.password) {
+          this.edit=false;
+      };
+      this.updateShare();
   }
   public constructor(
     private nodeService:RestNodeService,
     private translate:TranslateService,
     private toast:Toast,
   ){
+    /*
     this.dateOptions={};
     this.dateOptions.minDate=new Date(Date.now() - 1000 * 3600 * 24); // Minimal selectable date
     this.dateOptions.minYear=new Date().getFullYear();
     this.dateOptions.maxYear=new Date(new Date().getTime() * 1000 * 3600 * 365).getFullYear();
-    //this.dateOptions.format="DD.MM.YYYY";
-    Translation.applyToDateOptions(this.translate,this.dateOptions);
+    */
   }
 
     private createShare() {

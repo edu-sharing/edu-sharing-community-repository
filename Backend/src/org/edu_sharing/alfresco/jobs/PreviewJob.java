@@ -1,5 +1,6 @@
 package org.edu_sharing.alfresco.jobs;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,12 +51,14 @@ public class PreviewJob implements Job {
 			logger.error(e.getMessage(),e);
 			return;
 		}
-		
-		logger.info("starting, nodes with actions:" + ActionObserver.getInstance().getNodeActionsMap().size());
+
+		// put it in a variable and copy it to prevent ConcurrentModificationException
 		ActionObserver.getInstance().removeInactiveActions();
+		HashMap<NodeRef, List<Action>> nodeActionsMap = new HashMap<>(ActionObserver.getInstance().getNodeActionsMap());
+		logger.info("starting, nodes with actions:" + nodeActionsMap.size());
 		
 		int countRunning = 0;
-		for(Map.Entry<NodeRef,List<Action>> entry : ActionObserver.getInstance().getNodeActionsMap().entrySet())
+		for(Map.Entry<NodeRef,List<Action>> entry : nodeActionsMap.entrySet())
 		{
 			logger.info("node in actions map:" + entry.getKey() + " val:" + entry.getValue());
 			for(Action action : entry.getValue()) {
@@ -71,7 +74,7 @@ public class PreviewJob implements Job {
 		
 		if(countRunning < maxRunning) {
 			int newRunning = 0;
-			for(Map.Entry<NodeRef,List<Action>> entry : ActionObserver.getInstance().getNodeActionsMap().entrySet())
+			for(Map.Entry<NodeRef,List<Action>> entry : nodeActionsMap.entrySet())
 			{
 				for(Action action : entry.getValue()) {
 					
