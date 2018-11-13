@@ -343,11 +343,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				simpleProps.put(propKey, props.get(propKey));
 			}
 		}
-		synchronized (this) {
+		try {
 			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
-			createChildobjects(nodeId, nodeProps);
+		}catch(DuplicateChildNodeNameException e){
+			simpleProps.put(CCConstants.CM_NAME, (String) simpleProps.get(CCConstants.CM_NAME) + System.currentTimeMillis());
+			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
 		}
-
+		createChildobjects(nodeId, nodeProps);
 	}
 
 	private void createChildobjects(String nodeId, HashMap<String, Object> nodeProps) throws Throwable {
