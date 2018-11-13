@@ -175,7 +175,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 				licenseValidChanged = true;
 			}
 
-			if (mustBePersisted(replicationId,nodeReplId)) {
+			if (mustBePersisted(replicationId,newTimeStamp)) {
 				getLogger().info(" newTimeStamp is after oldTimeStamp have to update object id:" + replicationId);
                 updateNode((String) childId.getId(), newNodeProps);
                 setModifiedDate((String) childId.getId(), newNodeProps);
