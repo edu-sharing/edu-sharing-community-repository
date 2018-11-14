@@ -13,9 +13,11 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.codehaus.groovy.tools.shell.util.Logger;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
@@ -38,6 +40,8 @@ public class OrganisationService {
 	public static final String CCM_PROP_EDUGROUP_EDU_UNIQUENAME = "{http://www.campuscontent.de/model/1.0}edu_uniquename";
 	public static final QName QNAME_EDUGROUP = QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP);
 
+	Logger logger = Logger.create(OrganisationService.class);
+	
 	public String createOrganization(String orgName, String groupDisplayName, String scope) throws Exception {
         orgName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
         groupDisplayName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
@@ -146,6 +150,84 @@ public class OrganisationService {
 				return child.getChildRef();
 		}
 		return null;
+	}
+	
+	
+	/**
+	 * 
+	 * @param organisationName
+	 * @return Organisation admin Group
+	 */
+	public String getOrganisationAdminGroup(String organisationName) {
+		String authorityName = getAuthorityName(organisationName);
+		
+		NodeRef eduGroupNodeRef =authorityService.getAuthorityNodeRef(authorityName);
+		List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(eduGroupNodeRef);
+		for(ChildAssociationRef childGroup : childGroups){
+			String grouptype = (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE));
+			if(CCConstants.ADMINISTRATORS_GROUP_TYPE.equals(grouptype)){
+				return (String)nodeService.getProperty(childGroup.getChildRef(), QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME));
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * runs over organisation homefolder recursively and 
+	 * adds ORG_ADMIN Group as Coordinator if not already set
+	 * @param organisationName
+	 */
+	public void setOrgAdminPermissions(String organisationName) {
+		logger.debug("inviting orgadmin group as coordinator for org:" + organisationName);
+		String authorityName = getAuthorityName(organisationName);
+		NodeRef orgNodeRef = authorityService.getAuthorityNodeRef(authorityName);
+		NodeRef eduGroupHomeDir = (NodeRef)nodeService.getProperty(orgNodeRef, QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+		if(eduGroupHomeDir == null) {
+			logger.debug(organisationName + " is no organisation");
+			return;
+		}
+		
+		setOrgAdminPermissions(eduGroupHomeDir, getOrganisationAdminGroup(organisationName));
+		
+	}
+	
+	private void setOrgAdminPermissions(NodeRef parent, String adminAuthority) {
+		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(parent);
+		for(ChildAssociationRef childRef : childAssocs) {
+			
+			Set<AccessPermission> allSetPerms = permissionService.getAllSetPermissions(childRef.getChildRef());
+			
+			boolean isAlreadySet = false;
+			for(AccessPermission perm : allSetPerms) {
+				if(perm.getAuthority().equals(adminAuthority) 
+						&& perm.getPermission().equals(PermissionService.COORDINATOR)) {
+					isAlreadySet = true;
+				}
+			}
+			if(!isAlreadySet) {
+				logger.debug("will set org admingroup as Coordnator for:" + childRef.getChildRef() );
+				permissionService.setPermission(childRef.getChildRef(), adminAuthority, PermissionService.COORDINATOR, true);	
+			}
+			
+			if(nodeService.getType(childRef.getChildRef()).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
+				for(ChildAssociationRef mapChildRef : nodeService.getChildAssocs(childRef.getChildRef())){
+					setOrgAdminPermissions(mapChildRef.getChildRef(), adminAuthority);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * GROUP_ and ORG_ Prefixes are added if they ar not present
+	 * @param organisationName
+	 * @return
+	 */
+	public String getAuthorityName(String organisationName) {
+		organisationName = organisationName.replaceFirst(PermissionService.GROUP_PREFIX, "");
+		organisationName = organisationName.replaceFirst(AuthorityService.ORG_GROUP_PREFIX, "");
+		
+		return  PermissionService.GROUP_PREFIX + AuthorityService.ORG_GROUP_PREFIX + organisationName;
 	}
 	
 	public List<String> getMyOrganisations(boolean scoped){
