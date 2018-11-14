@@ -343,6 +343,8 @@ public class RenderingProxy extends HttpServlet {
 			return;
 		}
 		
+		
+		logger.debug("contentUrl:" + contentUrl);
 		if(doRedirect){
 			if(contentUrl == null){
 				resp.sendError(500, "no contenturl configured");
@@ -449,6 +451,9 @@ public class RenderingProxy extends HttpServlet {
 			}
 			urlWindow = UrlTool.setParam(urlWindow,key,value);
 		}
+		
+		logger.debug("urlWindow:" + urlWindow);
+		
 		resp.sendRedirect(urlWindow);
 		return false;
 	}
