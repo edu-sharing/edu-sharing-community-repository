@@ -61,6 +61,9 @@ public class RenderingProxy extends HttpServlet {
 		
 		String nodeId = req.getParameter("obj_id");
 		
+		
+		logger.debug("app_id: " +app_id + " rep_id:" +rep_id+ " proxyRepId: "+proxyRepId+ " signed:" +signed +" display:" + display + " nodeId:" + nodeId);
+		
 		boolean doRedirect = true;
 		if("inline".equals(display)){
 			doRedirect = false;
