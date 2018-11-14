@@ -53,7 +53,7 @@ export class WorkspaceFileUploadSelectComponent  {
   private ltiSharedSecret:string;
   private ltiTool: Node;
   private _link: string;
-  private _parent: Node;
+  _parent: Node;
   @Input() set parent(parent:Node){
     this.breadcrumbs=null;
     this._parent=parent;
