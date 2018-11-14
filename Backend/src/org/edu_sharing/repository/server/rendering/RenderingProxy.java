@@ -3,10 +3,10 @@ package org.edu_sharing.repository.server.rendering;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,12 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.axis.AxisFault;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.NumberUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.myfaces.application.ApplicationImpl;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -33,7 +31,6 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
-import org.edu_sharing.repository.server.tools.cache.ShibbolethSessionsCache;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
@@ -71,7 +68,9 @@ public class RenderingProxy extends HttpServlet {
 		
 		String nodeId = req.getParameter("obj_id");
 
-		String childobjectId = req.getParameter("childobject_id");
+        logger.debug("app_id: " +app_id + " rep_id:" +rep_id+ " proxyRepId: "+proxyRepId+ " signed:" +signed +" display:" + display + " nodeId:" + nodeId);
+
+        String childobjectId = req.getParameter("childobject_id");
 
 		String parentId=nodeId;
 		if(childobjectId!=null){
@@ -134,7 +133,22 @@ public class RenderingProxy extends HttpServlet {
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
 		}
-			
+
+		String[] roles = req.getParameterValues("role");
+		if(roles != null && roles.length > 0) {
+			final String username = usernameDecrypted;
+			RunAsWork<Void> runAs = new RunAsWork<Void>() {
+				@Override
+				public Void doWork() throws Exception {
+					MCAlfrescoAPIClient apiClient = new MCAlfrescoAPIClient();
+					String personId = new MCAlfrescoAPIClient().getUserInfo(username).get(CCConstants.SYS_PROP_NODE_UID);
+					apiClient.setProperty(personId, CCConstants.PROP_USER_ESREMOTEROLES, new ArrayList<String>(Arrays.asList(roles)));
+					return null;
+				}
+			};
+			AuthenticationUtil.runAsSystem(runAs);
+		}
+
 		if("window".equals(display)) {
 
 			openWindow(req, resp, nodeId, parentId, appInfoApplication, usernameDecrypted);
@@ -277,9 +291,7 @@ public class RenderingProxy extends HttpServlet {
 				    	
 					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(appInfoApplication.getPublicKey()));
 					value = Base64.encodeBase64String(esuidEncrptedBytes);
-						
-					value = URLEncoder.encode(value, "UTF-8");
-			    	
+
 			    }catch(Exception e){
 				    	e.printStackTrace();
 				    	resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"remote user auth failed "+ rep_id);
@@ -296,15 +308,14 @@ public class RenderingProxy extends HttpServlet {
 					}
 					byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
 					value = Base64.encodeBase64String(userEncryptedBytes);
-					value = URLEncoder.encode(value, "UTF-8");
-					
+
 				}catch(Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
 				
 			}
-			
+			value = URLEncoder.encode(value, "UTF-8");
 			contentUrl = UrlTool.setParam(contentUrl, key, value);
 		}
 		
