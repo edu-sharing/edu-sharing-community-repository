@@ -25,6 +25,7 @@ export class SearchService {
   sidenavSet = false;
   sidenavOpened = false;
   showspinner: boolean;
+  viewType = -1;
   constructor() {}
   clear(){
     this.searchTerm="";

@@ -1,12 +1,9 @@
-package org.edu_sharing.repository.client.rpc;
+package org.edu_sharing.service.nodeservice.model;
 
 import java.io.Serializable;
 
 public class GetPreviewResult implements Serializable {
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	String url;
@@ -22,7 +19,6 @@ public class GetPreviewResult implements Serializable {
 	
 	
 	public GetPreviewResult() {
-		// TODO Auto-generated constructor stub
 	}
 	
 	public GetPreviewResult(String url, String type, boolean createActionIsRunning) {

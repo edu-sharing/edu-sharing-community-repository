@@ -1586,15 +1586,15 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-	
+
 	public void setOwner(String username) {
 		nodeService.setOwner( this.getId(), username);
 	}
 
 	public void setProperty(String property, String value) {
-		nodeService.setProperty(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier(), this.getId(), property, value);	
+		nodeService.setProperty(Constants.storeRef.getProtocol(), Constants.storeRef.getIdentifier(), this.getId(), property, value);
 	}
-	
+
 	public NodeDao createFork(String sourceId) throws DAOException {
 		try {
 			org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(sourceId, nodeId, false);
