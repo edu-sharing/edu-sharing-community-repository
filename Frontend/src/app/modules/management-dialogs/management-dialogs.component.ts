@@ -33,6 +33,7 @@ export class WorkspaceManagementDialogsComponent  {
   @ViewChild('mds') mdsRef : MdsComponent;
   @Input() showLtiTools = false;
   @Input() uploadShowPicker = false;
+  @Input() uploadMultiple = true;
   @Input() fileIsOver = false;
   @Input() addToCollection:Node[];
   @Output() addToCollectionChange = new EventEmitter();
@@ -347,7 +348,7 @@ export class WorkspaceManagementDialogsComponent  {
     this.nodeMetadata=null;
     this.nodeMetadataChange.emit(null);
     this.createMetadata=null;
-    this.onCloseMetadata.emit();
+    this.onCloseMetadata.emit(node);
     if(refresh) {
       this.onRefresh.emit();
       if(node && node.aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION)!=-1) {
