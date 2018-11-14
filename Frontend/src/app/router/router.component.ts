@@ -22,6 +22,7 @@ import {StartupComponent} from '../modules/startup/startup.component';
 import {ShareAppComponent} from "../modules/share-app/share-app.component";
 import {SharingComponent} from "../modules/sharing/sharing.component";
 import {ServicesComponent} from "../modules/services/services.components";
+import {FileUploadComponent} from '../modules/file-upload/file-upload.component';
 
 
 
@@ -95,7 +96,9 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'collections/collection/:mode/:id', component: CollectionNewComponent},
   // login
     { path: UIConstants.ROUTER_PREFIX+'login', component: LoginComponent },
-  // admin
+  // file upload
+    { path: UIConstants.ROUTER_PREFIX+'upload', component: FileUploadComponent },
+// admin
     { path: UIConstants.ROUTER_PREFIX+'admin', component: AdminComponent },
   // permissions
     { path: UIConstants.ROUTER_PREFIX+'permissions', component: PermissionsRoutingComponent,
