@@ -30,11 +30,11 @@ import {TemporaryStorageService} from '../../common/services/temporary-storage.s
   styleUrls: ['file-upload.component.scss']
 })
 export class FileUploadComponent{
-    private filesToUpload: FileList;
-    private loading = true;
-    private _showUploadSelect: boolean;
+    filesToUpload: FileList;
+    loading = true;
+    _showUploadSelect: boolean;
 
-    private set showUploadSelect(showUploadSelect: boolean){
+    set showUploadSelect(showUploadSelect: boolean){
         if(!showUploadSelect){
             //@TODO: Tell the LMS to close?
             console.log("Close requested");
@@ -42,10 +42,10 @@ export class FileUploadComponent{
         }
         this._showUploadSelect=showUploadSelect;
     }
-    private get showUploadSelect(){
+    get showUploadSelect(){
         return this._showUploadSelect;
     }
-    private parent: Node;
+    parent: Node;
     private reurl: string;
    constructor(
        private translate : TranslateService,
