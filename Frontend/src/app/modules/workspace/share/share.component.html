@@ -83,7 +83,7 @@
             <label>
               <input type="checkbox" [disabled]="!publishPermission || publishInherit" [(ngModel)]="publishActive" (change)="setPublish(publishActive)">
               <span class="lever"></span>
-              {{ 'WORKSPACE.SHARE.PUBLISH' | translate}}
+              {{ ('WORKSPACE.SHARE.PUBLISH_'+(isCollection() ? 'COLLECTION' : _node.isDirectory ? 'DIRECTORY' : 'DOCUMENT')) | translate}}
             </label>
           </div>
           <div *ngIf="!publishPermission && !publishInherit" class="publishInfo">{{ 'WORKSPACE.SHARE.PUBLISH_NO_PERMISSION' | translate}}</div>

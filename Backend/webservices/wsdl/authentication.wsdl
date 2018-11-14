@@ -6,6 +6,28 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
   <schema elementFormDefault="qualified" targetNamespace="http://authentication.webservices.edu_sharing.org" xmlns="http://www.w3.org/2001/XMLSchema">
    <import namespace="http://lang.java"/>
    <import namespace="http://types.webservices.edu_sharing.org"/>
+   <element name="checkTicket">
+    <complexType>
+     <sequence>
+      <element name="username" type="xsd:string"/>
+      <element name="ticket" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="checkTicketResponse">
+    <complexType>
+     <sequence>
+      <element name="checkTicketReturn" type="xsd:boolean"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="AuthenticationException">
+    <sequence>
+     <element name="cause" nillable="true" type="xsd:anyType"/>
+     <element name="message" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="fault" type="impl:AuthenticationException"/>
    <element name="authenticateByApp">
     <complexType>
      <sequence>
@@ -35,28 +57,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element name="username" nillable="true" type="xsd:string"/>
     </sequence>
    </complexType>
-   <complexType name="AuthenticationException">
-    <sequence>
-     <element name="cause" nillable="true" type="xsd:anyType"/>
-     <element name="message" nillable="true" type="xsd:string"/>
-    </sequence>
-   </complexType>
-   <element name="fault" type="impl:AuthenticationException"/>
-   <element name="authenticateByCAS">
-    <complexType>
-     <sequence>
-      <element name="username" type="xsd:string"/>
-      <element name="proxyTicket" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="authenticateByCASResponse">
-    <complexType>
-     <sequence>
-      <element name="authenticateByCASReturn" type="impl:AuthenticationResult"/>
-     </sequence>
-    </complexType>
-   </element>
    <element name="authenticateByTrustedApp">
     <complexType>
      <sequence>
@@ -73,6 +73,21 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      </sequence>
     </complexType>
    </element>
+   <element name="authenticateByCAS">
+    <complexType>
+     <sequence>
+      <element name="username" type="xsd:string"/>
+      <element name="proxyTicket" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="authenticateByCASResponse">
+    <complexType>
+     <sequence>
+      <element name="authenticateByCASReturn" type="impl:AuthenticationResult"/>
+     </sequence>
+    </complexType>
+   </element>
    <element name="authenticate">
     <complexType>
      <sequence>
@@ -85,21 +100,6 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <complexType>
      <sequence>
       <element name="authenticateReturn" type="impl:AuthenticationResult"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="checkTicket">
-    <complexType>
-     <sequence>
-      <element name="username" type="xsd:string"/>
-      <element name="ticket" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="checkTicketResponse">
-    <complexType>
-     <sequence>
-      <element name="checkTicketReturn" type="xsd:boolean"/>
      </sequence>
     </complexType>
    </element>
@@ -184,21 +184,21 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    <wsdl:portType name="Authentication">
 
-      <wsdl:operation name="authenticateByApp">
+      <wsdl:operation name="checkTicket">
 
-         <wsdl:input message="impl:authenticateByAppRequest" name="authenticateByAppRequest"/>
+         <wsdl:input message="impl:checkTicketRequest" name="checkTicketRequest"/>
 
-         <wsdl:output message="impl:authenticateByAppResponse" name="authenticateByAppResponse"/>
+         <wsdl:output message="impl:checkTicketResponse" name="checkTicketResponse"/>
 
          <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="authenticateByCAS">
+      <wsdl:operation name="authenticateByApp">
 
-         <wsdl:input message="impl:authenticateByCASRequest" name="authenticateByCASRequest"/>
+         <wsdl:input message="impl:authenticateByAppRequest" name="authenticateByAppRequest"/>
 
-         <wsdl:output message="impl:authenticateByCASResponse" name="authenticateByCASResponse"/>
+         <wsdl:output message="impl:authenticateByAppResponse" name="authenticateByAppResponse"/>
 
          <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
 
@@ -214,21 +214,21 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="authenticate">
+      <wsdl:operation name="authenticateByCAS">
 
-         <wsdl:input message="impl:authenticateRequest" name="authenticateRequest"/>
+         <wsdl:input message="impl:authenticateByCASRequest" name="authenticateByCASRequest"/>
 
-         <wsdl:output message="impl:authenticateResponse" name="authenticateResponse"/>
+         <wsdl:output message="impl:authenticateByCASResponse" name="authenticateByCASResponse"/>
 
          <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
 
       </wsdl:operation>
 
-      <wsdl:operation name="checkTicket">
+      <wsdl:operation name="authenticate">
 
-         <wsdl:input message="impl:checkTicketRequest" name="checkTicketRequest"/>
+         <wsdl:input message="impl:authenticateRequest" name="authenticateRequest"/>
 
-         <wsdl:output message="impl:checkTicketResponse" name="checkTicketResponse"/>
+         <wsdl:output message="impl:authenticateResponse" name="authenticateResponse"/>
 
          <wsdl:fault message="impl:AuthenticationException" name="AuthenticationException"/>
 
@@ -240,17 +240,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
-      <wsdl:operation name="authenticateByApp">
+      <wsdl:operation name="checkTicket">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="authenticateByAppRequest">
+         <wsdl:input name="checkTicketRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="authenticateByAppResponse">
+         <wsdl:output name="checkTicketResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -264,17 +264,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="authenticateByCAS">
+      <wsdl:operation name="authenticateByApp">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="authenticateByCASRequest">
+         <wsdl:input name="authenticateByAppRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="authenticateByCASResponse">
+         <wsdl:output name="authenticateByAppResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -312,17 +312,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="authenticate">
+      <wsdl:operation name="authenticateByCAS">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="authenticateRequest">
+         <wsdl:input name="authenticateByCASRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="authenticateResponse">
+         <wsdl:output name="authenticateByCASResponse">
 
             <wsdlsoap:body use="literal"/>
 
@@ -336,17 +336,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       </wsdl:operation>
 
-      <wsdl:operation name="checkTicket">
+      <wsdl:operation name="authenticate">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="checkTicketRequest">
+         <wsdl:input name="authenticateRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="checkTicketResponse">
+         <wsdl:output name="authenticateResponse">
 
             <wsdlsoap:body use="literal"/>
 

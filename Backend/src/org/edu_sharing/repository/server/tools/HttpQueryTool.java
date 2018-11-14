@@ -100,6 +100,7 @@ public class HttpQueryTool {
 	}
 	
 	public String query(String url, Map<String,String> header, HttpMethodBase _method) {
+		logger.debug("url:" + url);
 		HttpClient client = new HttpClient();
 	
 		client.getParams().setParameter("http.useragent", "Test Client");

@@ -46,8 +46,6 @@
 	<entry key="username">admin</entry>
 	<entry key="password">admin</entry>
 	<entry key="publicfolderid"></entry>
-	<entry key="blowfishkey">thetestkey</entry>
-	<entry key="blowfishiv">initvect</entry>
 	<entry key="availablesearchcriterias">contenttypes,learningtime,learningresourcetype,groupsize,filetypes,period,user,keywords</entry>
 	<entry key="metadatasets">/org/edu_sharing/metadataset/metadatasets_default.xml</entry>
 	<entry key="devmode">false</entry>

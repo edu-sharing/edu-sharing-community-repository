@@ -210,11 +210,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	private String subtype = null;
 	
 	private String publicfolderid = null;
-	
-	private String blowfishkey = null;
-	
-	private String blowfishiv = null;
-	
+
 	private String searchclass = null;
 	
 	private String searchService = null;
@@ -390,11 +386,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		subtype  = PropertiesHelper.getProperty("subtype", appFile, PropertiesHelper.XML);
 	
 		publicfolderid = PropertiesHelper.getProperty("publicfolderid", appFile, PropertiesHelper.XML);
-		
-		blowfishkey = PropertiesHelper.getProperty("blowfishkey", appFile, PropertiesHelper.XML);
-		
-		blowfishiv = PropertiesHelper.getProperty("blowfishiv", appFile, PropertiesHelper.XML);	
-		
+
 		searchclass = PropertiesHelper.getProperty(KEY_SEARCHCLASS, appFile, PropertiesHelper.XML);	
 		
 		searchService = PropertiesHelper.getProperty("searchService", appFile, PropertiesHelper.XML);	
@@ -613,16 +605,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 
 	public String getPublicfolderid() {
 		return publicfolderid;
-	}
-	
-	public String getBlowfishkey() {
-		
-		return blowfishkey;
-	}
-
-	public String getBlowfishiv() {
-		
-		return blowfishiv;
 	}
 
 	/**
