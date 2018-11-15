@@ -90,6 +90,7 @@ export class MdsComponent{
   private childobjectDrag: number;
   @Input() set suggestions(suggestions:any){
     this._suggestions=suggestions;
+    this.applySuggestions();
   };
   @Input() set repository(repository:string){
     this.isLoading=false;
@@ -104,9 +105,8 @@ export class MdsComponent{
     this._setId=setId;
   }
   @Input() set invalidate(invalidate:Boolean){
-      console.log("invalidate: "+invalidate);
       if(invalidate && invalidate.valueOf())
-      setTimeout(()=>this.loadMds(),5);
+        setTimeout(()=>this.loadMds(),5);
   }
 
   @Input() set groupId(groupId:string){
@@ -122,7 +122,6 @@ export class MdsComponent{
     this.renderGroup(this._groupId,this.mds);
     this.isLoading=false;
     this.setValuesByProperty(this.mds,this._currentValues ? this._currentValues : {});
-    this.applySuggestions();
     setTimeout(()=>{
       this.showExtended(this.extended);
       this.onMdsLoaded.emit(this.mds);
@@ -1546,7 +1545,7 @@ export class MdsComponent{
 
     html+='<div class="mdsWidget widget_'+widget.type+' '+id.replace(':','_')+'"'+attr+' data-template="'+template.id+'">';
     if(template.rel=='suggestions'){
-      html+=`<div id="`+widget.id+`_badgeSuggestions" style="display:none" class="multivalueBadges"></div>`;
+      html+=`<div id="`+this.getWidgetDomId(widget)+`_badgeSuggestions" style="display:none" class="multivalueBadges"></div>`;
     }
     else if(this.isPrimitiveWidget(widget)){
       html+=this.renderPrimitiveWidget(widget,attr,widget.type);
@@ -2064,19 +2063,19 @@ export class MdsComponent{
         if (!this.currentWidgets)
           return;
         let values=this.getValues([],false);
-        for (var property in this._suggestions) {
+        for (let property in this._suggestions) {
           let widget: any = null;
           for (let w of this.currentWidgets) {
             if (w.id == property)
               widget = w;
           }
-          let element = document.getElementById(property + '_badgeSuggestions');
+          let element = document.getElementById(this.getWidgetDomId(widget) + '_badgeSuggestions');
           if (element) {
             element.style.display='';
             element.innerHTML = '';
             for(let item of this._suggestions[property]) {
                 if (Helper.indexOfNoCase(values[property], item.id) == -1) {
-                  element.innerHTML += this.getSuggestBadge(item.id, item.caption, property);
+                  element.innerHTML += this.getSuggestBadge(item.id, item.caption, this.getWidgetDomId(widget));
                 }
               }
             }
@@ -2088,7 +2087,7 @@ export class MdsComponent{
           }
         }
       }
-      , 10);
+      );
   }
 
   private getWidget(id: string,template:string=null,widgets=this.mds.widgets) {
