@@ -29,10 +29,3 @@ $path:'../../../assets/images/layout/';
   background: url($path + 'register.jpg') no-repeat center bottom;
   background-size: cover;
 }
-
-@media screen and (max-width: $mobileWidthPortrait) {
-  .register a{
-      display: block;
-      margin-top: 5px;
-  }
-}

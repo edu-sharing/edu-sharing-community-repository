@@ -75,13 +75,3 @@
     display:none;
   }
 }
-
-@media screen and (max-width: $mobileWidthPortrait) {
-  .register{
-    margin-bottom: -5px;
-    a{
-      display: block;
-      margin-top: 5px;
-    }
-  }
-}
