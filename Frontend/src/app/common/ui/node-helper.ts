@@ -476,7 +476,7 @@ export class NodeHelper{
             return;
           }
           progressCallback(true);
-          http.get(url).map((response: Response) => response.json()).subscribe((data: any) => {
+          http.get(url).subscribe((data: any) => {
             if (data.success)
               toast.toast(data.success, null, data.message ? data.success : data.message, data.message);
             else if (data.error)
