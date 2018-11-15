@@ -199,4 +199,12 @@ export class LoginAppComponent  implements OnInit {
 
         });
     }
+    private register(){
+        if(this.config.register.local){
+            this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+        }
+        else {
+            UIHelper.openBlankWindow(this.config.register.registerUrl,this.cordova);
+        }
+    }
 }
