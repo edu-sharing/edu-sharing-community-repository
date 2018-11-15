@@ -23,7 +23,6 @@
   import {UserProfileComponent} from "./common/ui/user-profile/user-profile.component";
   import {ToucheventDirective} from "./common/ui/touchevents/touchevents";
   import {NodeTitlePipe} from "./common/ui/node-title.pipe";
-  import {CustomIconComponent} from "./common/ui/custom-icon/custom-icon.component";
   import {BannerComponent} from "./common/ui/banner/banner.component";
   import {SmallCollectionComponent} from "./common/ui/small-collection/small-collection.component";
   import {CollectionChooserComponent} from "./common/ui/collection-chooser/collection-chooser.component";
@@ -53,7 +52,6 @@ export const DECLARATIONS = [
       GlobalProgressComponent,
       AttributeHtmlPipe,
       IconComponent,
-      CustomIconComponent,
       CalendarComponent,
       DebugResultPipe,
       FormatSizePipe,

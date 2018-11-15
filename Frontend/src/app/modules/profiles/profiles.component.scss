@@ -92,7 +92,7 @@ $path:'../../../assets/images/';
   .about,.stats,.authorityName,.changePassword{
     max-width: 500px;
     margin: auto;
-    padding:0 20px;
+    padding:0 25px;
   }
   .changePassword{
     padding-top: 10px;
@@ -129,6 +129,7 @@ $path:'../../../assets/images/';
     position: absolute;
     top:20px;
     left:30px;
+    color: $textMain;
   }
   .statsBackground{
     background-color: #fff;
@@ -176,7 +177,13 @@ $path:'../../../assets/images/';
   }
 }
 @media only screen and (max-width: $mobileWidth - $mobileStage*2) {
+
   .profiles {
+    margin-bottom: 40px;
+    .stats{
+      padding-left: 8px;
+      padding-right: 8px;
+    }
     .top {
       .edit {
         span{

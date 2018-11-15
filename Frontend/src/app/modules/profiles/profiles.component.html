@@ -76,7 +76,7 @@
     </div>
   </div>
   <div class="about">
-    <img class="quotes" src="assets/images/quotes.svg">
+    <i class="quotes edu-icons">quotes</i>
     <div *ngIf="edit">
       <label for="about">{{'PROFILES.ABOUT_LABEL' | translate}}</label>
       <textarea id="about" class="materialize-textarea" [(ngModel)]="userEdit.profile.about"></textarea>
@@ -86,23 +86,25 @@
       <div *ngIf="!user.profile.about" class="empty">{{'PROFILES.NO_ABOUT'+(isMe ? "_ME" : "") | translate}}</div>
     </div>
   </div>
-  <div class="authorityName">
+ <!-- <div class="authorityName" *ngIf="!edit">
     <label>{{'USER.authorityName' | translate}}</label>
     <div>{{ user.authorityName }}</div>
-  </div>
+  </div>-->
   <div class="changePassword" *ngIf="edit">
     <div class="toggle" (click)="changePassword=!changePassword">
       <div class="clickable">
+        <i *ngIf="!changePassword" class="material-icons">lock</i>
+        <i *ngIf="changePassword" class="material-icons">lock_open</i>
+        {{'CHANGE_PASSWORD' | translate}}
         <i class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
         <i class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
-        {{'CHANGE_PASSWORD' | translate}}
       </div>
     </div>
     <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
       <label for="oldPassword">{{'OLD_PASSWORD' | translate }}</label>
       <input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="oldPassword" required="true">
       <label for="password">{{'NEW_PASSWORD' | translate }}</label>
-      <input-password [(value)]="password" [required]="true" [id]="password"></input-password>
+      <input-password [hint]="true" [(value)]="password" [required]="true" [id]="password"></input-password>
     </div>
   </div>
   </div>

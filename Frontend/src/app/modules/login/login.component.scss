@@ -56,7 +56,6 @@ powered-by{
     position: fixed;
     top:calc(15% + 410px);
   }
-
   .branding{
     position: absolute;
     top: 25px;
@@ -72,5 +71,15 @@ powered-by{
   .card{
     top: 0;
     bottom: 0;
+  }
+}
+
+@media screen and (max-width: $mobileWidthPortrait) {
+  .register{
+    margin-bottom: -5px;
+    a{
+      display: block;
+      margin-top: 5px;
+    }
   }
 }
