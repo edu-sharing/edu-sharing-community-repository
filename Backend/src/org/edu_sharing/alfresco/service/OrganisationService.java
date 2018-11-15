@@ -17,7 +17,7 @@ import org.alfresco.service.cmr.security.AccessPermission;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
-import org.codehaus.groovy.tools.shell.util.Logger;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
@@ -40,7 +40,7 @@ public class OrganisationService {
 	public static final String CCM_PROP_EDUGROUP_EDU_UNIQUENAME = "{http://www.campuscontent.de/model/1.0}edu_uniquename";
 	public static final QName QNAME_EDUGROUP = QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP);
 
-	Logger logger = Logger.create(OrganisationService.class);
+	Logger logger = Logger.getLogger(OrganisationService.class);
 	
 	public String createOrganization(String orgName, String groupDisplayName, String scope) throws Exception {
         orgName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
@@ -195,25 +195,25 @@ public class OrganisationService {
 	private void setOrgAdminPermissions(NodeRef parent, String adminAuthority) {
 		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(parent);
 		for(ChildAssociationRef childRef : childAssocs) {
-			
 			Set<AccessPermission> allSetPerms = permissionService.getAllSetPermissions(childRef.getChildRef());
 			
 			boolean isAlreadySet = false;
 			for(AccessPermission perm : allSetPerms) {
-				if(perm.getAuthority().equals(adminAuthority) 
+				if(perm.isSetDirectly() 
+						&& perm.getAuthority().equals(adminAuthority) 
 						&& perm.getPermission().equals(PermissionService.COORDINATOR)) {
 					isAlreadySet = true;
 				}
 			}
 			if(!isAlreadySet) {
-				logger.debug("will set org admingroup as Coordnator for:" + childRef.getChildRef() );
+				
+				String name = (String)nodeService.getProperty(childRef.getChildRef(), QName.createQName(CCConstants.CM_NAME));
+				logger.debug("will set org admingroup as Coordnator for:" + childRef.getChildRef() + " name:"+name);
 				permissionService.setPermission(childRef.getChildRef(), adminAuthority, PermissionService.COORDINATOR, true);	
 			}
 			
 			if(nodeService.getType(childRef.getChildRef()).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
-				for(ChildAssociationRef mapChildRef : nodeService.getChildAssocs(childRef.getChildRef())){
-					setOrgAdminPermissions(mapChildRef.getChildRef(), adminAuthority);
-				}
+				setOrgAdminPermissions(childRef.getChildRef(), adminAuthority);
 			}
 		}
 	}
