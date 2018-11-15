@@ -1083,7 +1083,7 @@ export class CordovaService {
    * Cordova needs to refresh tokens
    */
   private reiniting=false;
-  public reinitStatus(endpointUrl:string):Observable<void>{
+  public reinitStatus(endpointUrl:string,goToLogin=true,loginNext=window.location.href):Observable<void>{
       return new Observable<void>((observer: Observer<void>) => {
 
           console.info("cordova: reinit");
@@ -1101,8 +1101,10 @@ export class CordovaService {
           }
           console.log("cordova: refresh oAuth");
           if(!this.oauth){
-              console.log("cordova: no oAuth, go to Login")
-              this.goToLogin();
+              console.log("cordova: no oAuth, go to Login:"+goToLogin+", next: "+loginNext);
+              if(goToLogin) {
+                  this.goToLogin(loginNext);
+              }
               observer.error(null);
               observer.complete();
               return;
@@ -1255,7 +1257,7 @@ export class CordovaService {
         return cordova.file.applicationDirectory+'www/';
     }
 
-    private goToLogin() {
-        this.router.navigate([UIConstants.ROUTER_PREFIX,"app"],{queryParams:{next:window.location.href}});
+    private goToLogin(next) {
+        this.router.navigate([UIConstants.ROUTER_PREFIX,"app"],{queryParams:{next:next}});
     }
 }

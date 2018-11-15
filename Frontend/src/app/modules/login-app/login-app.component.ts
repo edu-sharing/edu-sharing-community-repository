@@ -48,6 +48,7 @@ export class LoginAppComponent  implements OnInit {
         private router:Router,
         private route:ActivatedRoute,
         private translation: TranslateService,
+        private storage: SessionStorageService,
         private cordova: CordovaService,
         private configService: ConfigurationService,
         private locator: RestLocatorService,
@@ -182,7 +183,7 @@ export class LoginAppComponent  implements OnInit {
         return 'assets/images/app-icon.svg';
     }
     private init() {
-        Translation.initializeCordova(this.translation,this.cordova).subscribe(()=>{
+        Translation.initialize(this.translation,this.configService,this.storage,this.route).subscribe(()=>{
             console.log("INIT TranslationService .. OK");
             this.locator.locateApi().subscribe(()=>{
                 this.serverurl=this.locator.endpointUrl;

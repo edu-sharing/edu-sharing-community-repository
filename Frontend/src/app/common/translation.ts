@@ -30,7 +30,8 @@ export class Translation  {
   };
   // none means that only labels should be shown (for dev)
   private static DEFAULT_SUPPORTED_LANGUAGES = ["de","en","none"];
-  public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
+
+    public static initialize(translate : TranslateService,config : ConfigurationService,storage:SessionStorageService,route:ActivatedRoute) : Observable<string> {
     return new Observable<string>((observer: Observer<string>) => {
       config.get("supportedLanguages",Translation.DEFAULT_SUPPORTED_LANGUAGES).subscribe((data: string[]) => {
         if(config.getLocator().getCordova().isRunningCordova()){

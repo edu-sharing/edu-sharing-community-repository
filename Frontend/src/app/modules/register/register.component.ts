@@ -35,7 +35,7 @@ export class RegisterComponent{
     state = 'register';
 
     public cancel(){
-        this.router.navigate([UIConstants.ROUTER_PREFIX+"login"]);
+        RestHelper.goToLogin(this.router,this.configService,null,null);
     }
 
     public requestDone(email: string ){
@@ -68,11 +68,13 @@ export class RegisterComponent{
               }
           }
       });
-    Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
+
+    Translation.initialize(this.translate,this.configService,this.storage,this.route).subscribe(()=> {
         UIHelper.setTitle('REGISTER.TITLE', title, translate, configService);
             this.isLoading=false;
             if(!this.configService.instant("register.local",true)) {
-                this.router.navigate([UIConstants.ROUTER_PREFIX,"login"]);
+                console.log("no register.local set, will go to login");
+                RestHelper.goToLogin(this.router,this.configService,null,null);
             }
             setTimeout(()=>this.setParams());
             this.connector.isLoggedIn().subscribe((data)=>{
@@ -81,6 +83,7 @@ export class RegisterComponent{
                 }
             });
     });
+
     }
 
       onRegisterDone(){
