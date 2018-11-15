@@ -150,7 +150,8 @@ export class RestConstants {
   public static FILTER_FILES="files";
   public static FILTER_FOLDERS="folders";
   public static ALL="-all-";
-  public static COUNT_UNLIMITED = 2147483647;
+  // use not the maximum int value to prevent overflows in repository
+  public static COUNT_UNLIMITED = 1247483647;
   public static USERHOME='-userhome-';
   public static SHARED_FILES='-shared_files-';
   public static MY_SHARED_FILES='-my_shared_files-';

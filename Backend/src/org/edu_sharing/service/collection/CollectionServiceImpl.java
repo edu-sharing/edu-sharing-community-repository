@@ -663,7 +663,7 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 	
 	@Override
-	public List<NodeRef> getChildReferences(String parentId, String scope, SortDefinition sortDefinition) {
+	public List<NodeRef> getChildren(String parentId, String scope, SortDefinition sortDefinition,List<String> filter) {
 		try{
 			if(parentId == null){
                 SearchParameters searchParams=new SearchParameters();
@@ -696,7 +696,7 @@ public class CollectionServiceImpl implements CollectionService{
 				}
 				return returnVal;
 			}else{
-				List<ChildAssociationRef> children =  nodeService.getChildrenChildAssociationRefAssoc(parentId,null,null,sortDefinition);
+				List<ChildAssociationRef> children =  nodeService.getChildrenChildAssociationRefAssoc(parentId,null,filter,sortDefinition);
 				List<NodeRef> returnVal = new ArrayList<NodeRef>();
 				for(ChildAssociationRef child : children){
 					returnVal.add(child.getChildRef());
@@ -824,7 +824,7 @@ public class CollectionServiceImpl implements CollectionService{
 
 	@Override
 	public void setOrder(String parentId, String[] nodes) {
-		List<NodeRef> refs=getChildReferences(parentId, null, new SortDefinition());
+		List<NodeRef> refs=getChildren(parentId, null, new SortDefinition(),Arrays.asList(new String[]{"files"}));
 		int order=0;
 		
 		String mode=CCConstants.COLLECTION_ORDER_MODE_CUSTOM;

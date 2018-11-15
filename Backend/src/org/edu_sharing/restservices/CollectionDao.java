@@ -1,10 +1,7 @@
 package org.edu_sharing.restservices;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -19,14 +16,10 @@ import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.collection.v1.model.CollectionBase;
+import org.edu_sharing.restservices.collection.v1.model.CollectionBaseEntries;
 import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.Preview;
-import org.edu_sharing.restservices.shared.User;
-import org.edu_sharing.restservices.shared.UserProfile;
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -89,94 +82,106 @@ public class CollectionDao {
 		}			
 	}
 
-	public static List<CollectionBase> getCollections(RepositoryDao repoDao, String parentId, SearchScope scope, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
-
+	public static CollectionBaseEntries getCollectionsReferences(RepositoryDao repoDao, String parentId, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
 		try {
-			
-			List<CollectionBase> result = new ArrayList<CollectionBase>();
-
-            // if this collection is ordered by user, use the position of the elements as primary order criteria
-            if(!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(getCollection(repoDao, parentId).getOrderMode())) {
-                sortDefinition.addSortDefinitionEntry(
-                        new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
-            }
-
-			List<org.alfresco.service.cmr.repository.NodeRef> children = 
-					repoDao.getCollectionClient().getChildReferences(
-							ROOT.equals(parentId) ? null : parentId, 
-							scope.toString(),sortDefinition);
-
-
-            //NodeDao.convertAlfrescoNodeRef(repoDao,children)
-			NodeEntries sorted = NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),NodeDao.convertAlfrescoNodeRef(repoDao,children),skipCount,maxItems);
-			for (Node child : sorted.getNodes()) {
-	
-				String nodeType = child.getType();
-				
-				if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP).equals(nodeType)) {
-	
-					// it's a collection
-					
-					//Collection collection = getCollection(repoDao, nodeId).asCollection();
-					Collection collection = child.getCollection();
-					
-					result.add(collection);
-					
-				} else if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(nodeType)){
-	
-					// it's a references				
-					
-					CollectionReference collRef = new CollectionReference();
-					
-					NodeRef ref=child.getRef();
-					collRef.setRef(ref);
-										
-					String shortproporiginal = CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_ORIGINAL);
-					if(!filter.getProperties().contains(shortproporiginal)){
-						filter.getProperties().add(shortproporiginal);
-					}
-					
-					final Node node=child;
-					collRef.setReference(node);
-					collRef.setAccess(node.getAccess());
-					HashMap<String,String[]> props = collRef.getReference().getProperties();
-					String[] prop=props.get(shortproporiginal);
-					final String originalId=prop!=null && prop.length>0 ? prop[0] : null;
-					collRef.setOriginalId(originalId);		
-					try{
-						collRef.setAccessOriginal(NodeDao.getNode(repoDao,originalId).asNode().getAccess());
-					}catch(Throwable t){
-						// user may has no access to the original, this is okay
-					}
-					AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-
-						@Override
-						public Void doWork() throws Exception {
-							try{
-								NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao,originalId);
-								node.setCreatedBy(nodeDaoOriginal.asNode().getCreatedBy());
-							}catch(Throwable t){
-								collRef.setOriginalId(null);
-								// original maybe deleted
-							}
-							return null;
-						}
-						
-					});					
-					
-					Preview preview = collRef.getReference().getPreview();
-					collRef.setPreview(preview);
-										
-					result.add(collRef);
-				}
+			if(parentId==null || parentId.equals(ROOT)){
+				throw new IllegalArgumentException("Invalid parameter for parentId");
 			}
-			
-			return result;
-			
-		} catch (Exception e) {
 
+			return getCollectionsChildren(repoDao, parentId, null, filter, Arrays.asList(new String[]{"files"}), sortDefinition, skipCount, maxItems);
+		} catch (Exception e) {
 			throw DAOException.mapping(e);
 		}
+	}
+	public static CollectionBaseEntries getCollectionsSubcollections(RepositoryDao repoDao, String parentId, SearchScope scope, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
+		try {
+			return getCollectionsChildren(repoDao, parentId, scope, filter, Arrays.asList(new String[]{"folders"}), sortDefinition, skipCount, maxItems);
+		} catch (Exception e) {
+			throw DAOException.mapping(e);
+		}
+	}
+	private static CollectionBaseEntries getCollectionsChildren(RepositoryDao repoDao, String parentId, SearchScope scope, Filter propFilter, List<String> filter, SortDefinition sortDefinition, int skipCount, int maxItems) throws DAOException {
+		List<CollectionBase> result = new ArrayList<CollectionBase>();
+		// if this collection is ordered by user, use the position of the elements as primary order criteria
+		if(!ROOT.equals(parentId) && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(getCollection(repoDao, parentId).getOrderMode())) {
+			sortDefinition.addSortDefinitionEntry(
+					new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
+		}
+
+		List<org.alfresco.service.cmr.repository.NodeRef> children =
+				repoDao.getCollectionClient().getChildren(
+						ROOT.equals(parentId) ? null : parentId,
+						scope!=null ? scope.toString() : null,sortDefinition,filter);
+
+
+		//NodeDao.convertAlfrescoNodeRef(repoDao,children)
+		NodeEntries sorted = NodeDao.convertToRest(repoDao,Filter.createShowAllFilter(),NodeDao.convertAlfrescoNodeRef(repoDao,children),skipCount,maxItems);
+		Pagination pagination = sorted.getPagination();
+		for (Node child : sorted.getNodes()) {
+
+			String nodeType = child.getType();
+
+			if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP).equals(nodeType)) {
+
+				// it's a collection
+
+				//Collection collection = getCollection(repoDao, nodeId).asCollection();
+				Collection collection = child.getCollection();
+
+				result.add(collection);
+
+			} else if (CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO).equals(nodeType)){
+
+				// it's a references
+
+				CollectionReference collRef = new CollectionReference();
+
+				NodeRef ref=child.getRef();
+				collRef.setRef(ref);
+
+				String shortproporiginal = CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_ORIGINAL);
+				if(!propFilter.getProperties().contains(shortproporiginal)){
+					propFilter.getProperties().add(shortproporiginal);
+				}
+
+				final Node node=child;
+				collRef.setReference(node);
+				collRef.setAccess(node.getAccess());
+				HashMap<String,String[]> props = collRef.getReference().getProperties();
+				String[] prop=props.get(shortproporiginal);
+				final String originalId=prop!=null && prop.length>0 ? prop[0] : null;
+				collRef.setOriginalId(originalId);
+				try{
+					collRef.setAccessOriginal(NodeDao.getNode(repoDao,originalId).asNode().getAccess());
+				}catch(Throwable t){
+					// user may has no access to the original, this is okay
+				}
+				AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+
+					@Override
+					public Void doWork() throws Exception {
+						try{
+							NodeDao nodeDaoOriginal = NodeDao.getNode(repoDao,originalId);
+							node.setCreatedBy(nodeDaoOriginal.asNode().getCreatedBy());
+						}catch(Throwable t){
+							collRef.setOriginalId(null);
+							// original maybe deleted
+						}
+						return null;
+					}
+
+				});
+
+				Preview preview = collRef.getReference().getPreview();
+				collRef.setPreview(preview);
+
+				result.add(collRef);
+			}
+		}
+		CollectionBaseEntries obj=new CollectionBaseEntries();
+		obj.setEntries(result);
+		obj.setPagination(pagination);
+		return obj;
 	}
 
 	private String getOrderMode() {

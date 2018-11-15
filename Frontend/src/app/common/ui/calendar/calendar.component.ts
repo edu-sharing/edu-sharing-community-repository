@@ -3,7 +3,6 @@ import {TranslateService} from "@ngx-translate/core";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {Node, NodeList, IamUsers, IamUser, CollectionContent, Collection} from "../../rest/data-object";
 import {RestConstants} from "../../rest/rest-constants";
 import {RestCollectionService} from "../../rest/services/rest-collection.service";
 import {Toast} from "../toast";

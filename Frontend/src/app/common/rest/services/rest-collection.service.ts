@@ -7,7 +7,7 @@ import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 
 import * as EduData from "../data-object";
-import {CollectionWrapper} from "../data-object";
+import {CollectionSubcollections, CollectionWrapper} from '../data-object';
 import {AbstractRestService} from "./abstract-rest-service";
 
 @Injectable()
@@ -46,30 +46,43 @@ export class RestCollectionService extends AbstractRestService{
       query="*",
       request:any=null,
       repository=RestConstants.HOME_REPOSITORY
-  ): Observable<EduData.CollectionContent>=>{
+  )=>{
       let http=this.connector.createUrlNoEscape("collection/:version/collections/:repository/search?query=:query&:request",repository,[
         [":query",encodeURIComponent(query)],
         [":request",this.connector.createRequestString(request)]
       ]);
-      return this.connector.get(http,this.connector.getRequestOptions());
+      return this.connector.get<CollectionSubcollections>(http,this.connector.getRequestOptions());
   }
 
 
-  public getCollectionContent = (
+  public getCollectionSubcollections = (
       collection : string,
       scope = RestConstants.COLLECTIONSCOPE_ALL,
       propertyFilter : string[] = [],
       request:any = null,
       repository=RestConstants.HOME_REPOSITORY
     ) => {
-    let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection/children?scope=:scope&:propertyFilter&:request",repository,[
+    let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection/children/collections?scope=:scope&:propertyFilter&:request",repository,[
       [":collection",encodeURIComponent(collection)],
       [":scope",encodeURIComponent(scope)],
       [":request",this.connector.createRequestString(request)],
       [":propertyFilter",RestHelper.getQueryString("propertyFilter",propertyFilter)]
     ]);
-    return this.connector.get<EduData.CollectionContent>(query,this.connector.getRequestOptions());
+    return this.connector.get<EduData.CollectionSubcollections>(query,this.connector.getRequestOptions());
   }
+    public getCollectionReferences = (
+        collection : string,
+        propertyFilter : string[] = [],
+        request:any = null,
+        repository=RestConstants.HOME_REPOSITORY
+    ) => {
+        let query=this.connector.createUrlNoEscape("collection/:version/collections/:repository/:collection/children/references?:propertyFilter&:request",repository,[
+            [":collection",encodeURIComponent(collection)],
+            [":request",this.connector.createRequestString(request)],
+            [":propertyFilter",RestHelper.getQueryString("propertyFilter",propertyFilter)]
+        ]);
+        return this.connector.get<EduData.CollectionReferences>(query,this.connector.getRequestOptions());
+    }
 
   public getCollectionMetadata = (collectionId:string, repository=RestConstants.HOME_REPOSITORY) => {
     let query=this.connector.createUrl("collection/:version/collections/:repository/:collectionid",repository,[[":collectionid",collectionId]]);

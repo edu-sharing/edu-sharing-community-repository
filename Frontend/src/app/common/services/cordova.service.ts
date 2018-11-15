@@ -1257,7 +1257,7 @@ export class CordovaService {
         return cordova.file.applicationDirectory+'www/';
     }
 
-    private goToLogin(next) {
+    private goToLogin(next:string) {
         this.router.navigate([UIConstants.ROUTER_PREFIX,"app"],{queryParams:{next:next}});
     }
 }

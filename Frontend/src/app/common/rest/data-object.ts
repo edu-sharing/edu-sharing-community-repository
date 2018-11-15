@@ -966,32 +966,13 @@ export class NodeRef {
   archived:boolean;
   isHomeRepo:boolean;
 }
-
-export class CollectionContent {
-
-  collection:Collection; // meta data of collection
-  collections:Array<Collection>; // array of sub collections
-  references:Array<CollectionReference>; // array of content nodes references
-
-  constructor() {
-    this.collection = new Collection();
-    this.collection.ref = new NodeRef();
-    this.collections = new Array<Collection>();
-    this.references = new Array<CollectionReference>();
-  }
-
-  getCollectionID() :string {
-    if (this.collection==null) return null;
-    if (this.collection.ref==null) return null;
-    return this.collection.ref.id;
-  }
-
-  setCollectionID(id:string):void {
-    if (this.collection==null) this.collection = new Collection();
-    if (this.collection.ref==null) this.collection.ref = new NodeRef();
-    this.collection.ref.id = id;
-  }
-
+export interface CollectionReferences {
+    references: Array<CollectionReference>;
+    pagination: Pagination;
+}
+export interface CollectionSubcollections {
+    collections:Array<Collection>;
+    pagination: Pagination;
 }
 
 export class Permissions {

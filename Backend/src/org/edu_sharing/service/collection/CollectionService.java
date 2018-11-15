@@ -51,7 +51,7 @@ public interface CollectionService {
 	
 	public HashMap<String,HashMap<String,Object>> getChildren(String parentId, String scope);
 	
-	public List<NodeRef> getChildReferences(String parentId, String scope, SortDefinition sortDefinition);
+	public List<NodeRef> getChildren(String parentId, String scope, SortDefinition sortDefinition,List<String> filter);
 
 	public Collection get(String storeId, String storeProtocol, String collectionId);
 	

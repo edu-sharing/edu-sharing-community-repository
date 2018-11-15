@@ -3,8 +3,7 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../router/router.component";
 
-import {Translation} from './../../common/translation';
-
+import {Translation} from "../../common/translation";
 
 import * as EduData from "../../common/rest/data-object";
 
@@ -16,7 +15,7 @@ import {RestConstants} from "../../common/rest/rest-constants";
 
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
-import {Collection, CollectionContent, LoginResult, MdsMetadataset} from '../../common/rest/data-object';
+import {Collection, LoginResult, MdsMetadataset, NodeRef} from '../../common/rest/data-object';
 import {RestOrganizationService} from "../../common/rest/services/rest-organization.service";
 import {OrganizationOrganizations} from "../../common/rest/data-object";
 import {OptionItem} from "../../common/ui/actionbar/option-item";
@@ -44,6 +43,7 @@ import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
 import {ActionbarHelperService} from "../../common/services/actionbar-helper";
+import {RestLocatorService} from '../../common/rest/services/rest-locator.service';
 
 // component class
 @Component({
@@ -65,8 +65,8 @@ export class CollectionsMainComponent {
     public isLoading:boolean = true;
     public isReady:boolean = false;
 
-  public collectionContent:EduData.CollectionContent;
-  private collectionContentOriginal: EduData.CollectionContent;
+  public collectionContent:any;
+  private collectionContentOriginal: any;
   private filteredOutCollections:Array<EduData.Collection> = new Array<EduData.Collection>();
   private filteredOutReferences:Array<EduData.CollectionReference> = new Array<EduData.CollectionReference>();
   private collectionIdParamSubscription:any;
@@ -107,6 +107,14 @@ export class CollectionsMainComponent {
     private reurl: any;
     optionsCollection:OptionItem[] = [];
     private _collectionShare: Collection;
+    private static PROPERTY_FILTER=[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];
+    private static DEFAULT_REQUEST={sortBy: [
+            RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+            RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+            RestConstants.CM_MODIFIED_DATE
+            ],
+        sortAscending: [false,true,false],
+    };
     set collectionShare(collectionShare: Collection){
         this._collectionShare=collectionShare;
         this.refreshAll();
@@ -140,8 +148,7 @@ export class CollectionsMainComponent {
     this.collectionsColumns.push(new ListItem("COLLECTION", 'title'));
     this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
     this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
-    this.collectionContent = new EduData.CollectionContent();
-    this.collectionContent.setCollectionID(RestConstants.ROOT);
+    this.setCollectionId(RestConstants.ROOT);
     Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
       UIHelper.setTitle('COLLECTIONS.TITLE',title,translationService,config);
       this.mdsService.getSet().subscribe((data:MdsMetadataset)=>{
@@ -157,7 +164,7 @@ export class CollectionsMainComponent {
               this.hasOrganizations=data.organizations.length>0;
             });
           }
-          this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
+          this.collectionService.getCollectionSubcollections(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data)=>{
             this.hasEditorial=data.collections.length>0;
           });
           this.initialize();
@@ -202,6 +209,7 @@ export class CollectionsMainComponent {
       this.infoClose=()=>{
         this.orderActive=false;
       }
+      this.loadMoreReferences(true);
     }
     else{
       this.infoTitle=null;
@@ -227,11 +235,10 @@ export class CollectionsMainComponent {
   }
   selectTab(tab:string){
     if ((this.tabSelected!=tab)
-      || (this.collectionContent.getCollectionID()!=RestConstants.ROOT)) {
+      || (this.getCollectionId()!=RestConstants.ROOT)) {
 
       this.tabSelected = tab;
-      this.collectionContent = new EduData.CollectionContent();
-      this.collectionContent.setCollectionID(RestConstants.ROOT);
+      this.setCollectionId(RestConstants.ROOT);
       this.parentCollectionId = new EduData.Reference(RestConstants.HOME_REPOSITORY, RestConstants.ROOT);
       this.contentDetailObject = null;
       this.navigate();
@@ -522,58 +529,80 @@ export class CollectionsMainComponent {
 
     refreshContent(callback:Function=null) : void {
         if (!this.isReady) return;
-        this.isLoading=true;
         this.onSelection([]);
+        this.isLoading=true;
 
     // set correct scope
-    let scope=this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
-
-        this.collectionService.getCollectionContent(this.collectionContent.collection.ref.id,
-          scope,
-          [RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR],
-          {sortBy: [
-            RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
-            RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
-            RestConstants.CM_MODIFIED_DATE
-           ],
-            sortAscending: [false,true,false],
-            count:RestConstants.COUNT_UNLIMITED
-          },
-          this.collectionContent.collection.ref.repo
-        ).subscribe((collection:EduData.CollectionContent) => {
-            console.log(collection);
-            this.lastError = null;
-            // transfere sub collections and content
-            this.collectionContent.collections = collection.collections;
-            this.collectionContent.references = collection.references;
-            this.collectionContentOriginal=Helper.deepCopy(this.collectionContent);
-            // add an empty collection for the "add new colleciton" card
-            //if (this.isAllowedToEditCollection()) this.collectionContent.collections.unshift(new EduData.Collection());
-
-
-            //this.sortCollectionContent();
-            this.isLoading=false;
-            this.setOptionsCollection();
-            this.mainNavRef.refreshBanner();
-            if(this.collectionContent.getCollectionID()==RestConstants.ROOT && this.isAllowedToEditCollection()) {
-                setTimeout(() => {
-                    this.tutorialElement = this.listCollections.addElementRef;
-                });
-            }
-            if(callback)
-              callback();
-        },(error:any)=>{
-            this.toast.error(error);
-        });
-
-
-        if ((this.collectionContent.getCollectionID()!=RestConstants.ROOT) && (this.collectionContent.collection.permission==null)) {
-            this.nodeService.getNodePermissions(this.collectionContent.getCollectionID()).subscribe( permission => {
-                this.collectionContent.collection.permission = permission.permissions;
-            });
+    let request:any=Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
+    // when loading child collections, we load all of them
+    if(!this.isRootLevelCollection()){
+        request.count=RestConstants.COUNT_UNLIMITED;
+    }
+    this.collectionService.getCollectionSubcollections(this.collectionContent.collection.ref.id,
+      this.getScope(),[],request,this.collectionContent.collection.ref.repo
+    ).subscribe((collection) => {
+        console.log(collection);
+        this.lastError = null;
+        // transfere sub collections and content
+        this.collectionContent.collections = collection.collections;
+        this.collectionContent.collectionsPagination = collection.pagination;
+        if(this.isRootLevelCollection()){
+            this.finishCollectionLoading(callback);
+            return;
         }
+        request.count=null;
+        this.collectionService.getCollectionReferences(this.collectionContent.collection.ref.id,
+            CollectionsMainComponent.PROPERTY_FILTER,request,this.collectionContent.collection.ref.repo).subscribe((refs)=>{
+            this.collectionContent.references=refs.references;
+            this.collectionContent.referencesPagination=refs.pagination;
+            this.finishCollectionLoading(callback);
+        })
 
+    },(error:any)=>{
+        this.toast.error(error);
+    });
+
+
+    if ((this.getCollectionId()!=RestConstants.ROOT) && (this.collectionContent.collection.permission==null)) {
+        this.nodeService.getNodePermissions(this.getCollectionId()).subscribe( permission => {
+            this.collectionContent.collection.permission = permission.permissions;
+        });
+    }
   }
+  loadMoreReferences(loadAll=false){
+      if(this.collectionContent.references.length==this.collectionContent.referencesPagination.total)
+          return;
+      if(this.collectionContent.referencesLoading)
+          return;
+      let request:any=Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
+      request.offset=this.collectionContent.references.length;
+      if(loadAll){
+          request.count=RestConstants.COUNT_UNLIMITED;
+      }
+      this.collectionContent.referencesLoading=true;
+      this.collectionService.getCollectionReferences(this.collectionContent.collection.ref.id,
+          CollectionsMainComponent.PROPERTY_FILTER,request,this.collectionContent.collection.ref.repo).subscribe((refs)=> {
+            this.collectionContent.references=this.collectionContent.references.concat(refs.references);
+          this.collectionContent.referencesLoading=false;
+      });
+  }
+    loadMoreCollections(){
+        if(this.collectionContent.collections.length==this.collectionContent.collectionsPagination.total)
+            return;
+        if(this.collectionContent.collectionsLoading)
+            return;
+        let request:any=Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
+        request.offset=this.collectionContent.collections.length;
+        console.log(request);
+        this.collectionContent.collectionsLoading=true;
+        this.collectionService.getCollectionSubcollections(this.collectionContent.collection.ref.id,this.getScope(),[],request,this.collectionContent.collection.ref.repo).subscribe((refs)=> {
+            this.collectionContent.collections=this.collectionContent.collections.concat(refs.collections);
+            this.collectionContent.collectionsLoading=false;
+        });
+    }
+    getScope(){
+        return this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
+    }
   onCreateCollection(){
     this.router.navigate([UIConstants.ROUTER_PREFIX+"collections/collection", "new", this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
   }
@@ -654,8 +683,7 @@ export class CollectionsMainComponent {
     if (id=="-root-") {
 
       // display root collections with tabs
-      this.collectionContent = new EduData.CollectionContent();
-      this.collectionContent.setCollectionID(RestConstants.ROOT);
+      this.setCollectionId(RestConstants.ROOT);
       this.refreshContent(callback);
     } else {
 
@@ -664,7 +692,7 @@ export class CollectionsMainComponent {
 
       this.collectionService.getCollection(id).subscribe( collection => {
         // set the collection and load content data by refresh
-        this.collectionContent = new EduData.CollectionContent();
+        this.setCollectionId(null);
         this.collectionContent.collection = collection.collection;
 
         this.renderBreadcrumbs();
@@ -863,5 +891,31 @@ export class CollectionsMainComponent {
       if(this.isAllowedToDeleteCollection()) {
             this.optionsCollection.push(new OptionItem("COLLECTIONS.ACTIONBAR.DELETE", "delete", () => this.collectionDelete()));
       }
+    }
+
+    private setCollectionId(id: string) {
+        this.collectionContent = {collections:[],references:[]};
+        this.collectionContent.collection = new Collection();
+        this.collectionContent.collection.ref=new NodeRef();
+        this.collectionContent.collection.ref.id = id;
+    }
+
+    private getCollectionId() {
+        let c=this.collectionContent.collection;
+        return c!=null && c.ref!=null ? c.ref.id : null;
+    }
+
+    private finishCollectionLoading(callback:Function) {
+        this.collectionContentOriginal=Helper.deepCopy(this.collectionContent);
+        this.setOptionsCollection();
+        this.mainNavRef.refreshBanner();
+        if(this.getCollectionId()==RestConstants.ROOT && this.isAllowedToEditCollection()) {
+            setTimeout(() => {
+                this.tutorialElement = this.listCollections.addElementRef;
+            });
+        }
+        this.isLoading=false;
+        if(callback)
+            callback();
     }
 }
