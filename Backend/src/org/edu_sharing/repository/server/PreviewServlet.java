@@ -117,9 +117,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			
 			// check nodetype for security reasons
 			String inNodeId=nodeId;
+			HashMap<String,Object> props = new HashMap<>();
 			if (nodeId != null) {
 				try {
-					HashMap<String,Object> props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
+					props = nodeService.getProperties(storeRef.getProtocol(),storeRef.getIdentifier(),nodeId);
 					
 					// For collections: Fetch the original object for preview
 					if(props.containsKey(CCConstants.CCM_PROP_IO_ORIGINAL)){
@@ -189,7 +190,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				//Attention the url of GetPreviewResult of generated/userdefined previews points on this servlet so don't use it
 				
 				GetPreviewResult getPrevResult = null;
-				if(version != null && !version.trim().equals("") && !isCollection){
+				// check if version is requested and version seems to be NOT the current node version
+				if(version != null && !version.trim().equals("") && !isCollection && !version.equals(props.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION))){
 					HashMap<String, HashMap<String,Object>> versionHistory = nodeService.getVersionHistory(nodeId);
 					if(versionHistory != null){
 						for(Map.Entry<String, HashMap<String,Object>> entry : versionHistory.entrySet()){
