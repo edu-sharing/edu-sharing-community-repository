@@ -8,6 +8,9 @@
 }
 .suggestions{
   padding-top:40px;
+  .badge i{
+    color: $workspaceInheritColor;
+  }
 }
 .mdsCardJumpmarks{
   margin-left:-220px!important;
