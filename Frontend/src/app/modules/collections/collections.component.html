@@ -77,7 +77,6 @@
                   [listClass]="'subcollections'"
                   [addElement]="isAllowedToEditCollection() ? createCollectionElement : null"
                   [hasHeading]="false"
-                  [isLoading]="isLoading"
                   [viewType]="isRootLevelCollection() ? 1 : 2"
                   [dragDrop]="true"
                   [canDrop]="canDropOnCollection"
@@ -88,6 +87,9 @@
                   (doubleClickRow)="onCollectionsClick($event)"
                   (onAddElement)="onCreateCollection()"
                   [nodes]="collectionContent.collections"
+                  [isLoading]="collectionContent.collectionsLoading"
+                  [hasMore]="collectionContent.collections.length<collectionContent.collectionsPagination.total"
+                  (loadMore)="isRootLevelCollection() ? loadMoreCollections() : null"
                 ></listTable>
 
                 <!-- when empty at root level -->
@@ -124,7 +126,6 @@
                 <listTable
                   [addElement]="isUserAllowedToEdit(collectionContent.collection) ? createCollectionReference : null"
                   [hasHeading]="false"
-                  [isLoading]="isLoading"
                   [viewType]="1"
                   [dragDrop]="true"
                   [orderElements]="isUserAllowedToEdit(collectionContent.collection)"
@@ -140,6 +141,9 @@
                   [canDelete]="canDelete"
                   (onDelete)="deleteReference($event)"
                   [(nodes)]="collectionContent.references"
+                  [isLoading]="collectionContent.referencesLoading"
+                  [hasMore]="collectionContent.references.length<collectionContent.referencesPagination.total"
+                  (loadMore)="loadMoreReferences()"
                 ></listTable>
 
                 <!-- NO CONTENT NOTICE -->
