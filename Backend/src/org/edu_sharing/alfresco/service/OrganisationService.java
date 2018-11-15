@@ -178,9 +178,12 @@ public class OrganisationService {
 	 * adds ORG_ADMIN Group as Coordinator if not already set
 	 * @param organisationName
 	 */
-	public void setOrgAdminPermissions(String organisationName) {
+	public void setOrgAdminPermissions(String organisationName) throws Exception {
 		logger.debug("inviting orgadmin group as coordinator for org:" + organisationName);
 		String authorityName = getAuthorityName(organisationName);
+		if(!authorityService.authorityExists(authorityName)) {
+			throw new Exception("No Organisation Found for " + organisationName);
+		}
 		NodeRef orgNodeRef = authorityService.getAuthorityNodeRef(authorityName);
 		NodeRef eduGroupHomeDir = (NodeRef)nodeService.getProperty(orgNodeRef, QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
 		if(eduGroupHomeDir == null) {

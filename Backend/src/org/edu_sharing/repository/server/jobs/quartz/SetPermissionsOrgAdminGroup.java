@@ -46,11 +46,17 @@ public class SetPermissionsOrgAdminGroup extends AbstractJob {
 		
 		logger.info("running for " + orgs.length + " orgs");
 		
-		int i = 0;
-		for(String org : orgs) {
-			logger.info("org nr" + i);
-			organisationService.setOrgAdminPermissions(org);
-			i++;
+		try {
+			int i = 0;
+			for(String org : orgs) {
+				logger.info("org nr:" + i + " " + org);
+				
+					organisationService.setOrgAdminPermissions(org);
+					i++;
+				
+			}
+		}catch(Exception e) {
+			logger.error(e.getMessage(),e);
 		}
 	}
 	
