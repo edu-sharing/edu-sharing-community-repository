@@ -681,4 +681,23 @@ public class AdminServiceImpl implements AdminService  {
 		}
 	}
 	
+	
+	@Override
+	public void startJob(String jobClass, HashMap<String,Object> params) throws Exception {	
+		
+		if(params == null) {
+			params = new HashMap<String,Object>();
+		}
+		params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
+		params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+		
+		Class job = Class.forName(jobClass);
+		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(job, params);
+		if(jobListener != null && jobListener.isVetoed()){
+			throw new Exception("job was vetoed by " + jobListener.getVetoBy());
+		}
+		
+	}
+	
+	
 }

@@ -36,5 +36,6 @@ public class OAIConst {
 	public static final String PARAM_OAI_CATALOG_IDS = "catalogids";
 	public static final String PARAM_RECORDHANDLER = "record_handler";
 	public static final String PARAM_IMPORTERCLASS = "importer_class";
+	public static final String PARAM_USERNAME = "username";
 	
 }

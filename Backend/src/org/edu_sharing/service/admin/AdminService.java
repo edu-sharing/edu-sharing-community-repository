@@ -72,4 +72,5 @@ public interface AdminService {
 
 	void refreshEduGroupCache(boolean keepExisting);
 	
+	void startJob(String jobClass, HashMap<String, Object> params) throws Exception;
 }

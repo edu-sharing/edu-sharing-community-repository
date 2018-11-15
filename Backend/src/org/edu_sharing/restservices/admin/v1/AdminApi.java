@@ -40,6 +40,7 @@ import org.edu_sharing.restservices.admin.v1.model.XMLResult;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.GlobalGroup;
@@ -774,6 +775,42 @@ public class AdminApi {
 	public Response options12() {
 		
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+	}
+	
+	
+	@POST
+	@Path("/job/{jobClass}")
+	@ApiOperation(value = "Start a Job.", notes = "Start a Job.")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+	public Response startJob(
+			@ApiParam(value = "jobClass", required = true) @PathParam("jobClass") String jobClass,
+			@ApiParam(value = "params", required = true) HashMap<String, String> params,
+			@Context HttpServletRequest req) {
+		try {
+			AdminServiceFactory.getInstance().startJob(jobClass, new HashMap<String,Object>(params));
+			return Response.ok().build();
+		} catch (NotAnAdminException e) {
+			return ErrorResponse.createResponse(e);
+		} catch (Exception e) {
+			return ErrorResponse.createResponse(e);
+		}
+
+	}
+
+	@OPTIONS
+	@Path("/job")
+	@ApiOperation(hidden = true, value = "")
+
+	public Response options14() {
+
+		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, POST").build();
 	}
 
 }
