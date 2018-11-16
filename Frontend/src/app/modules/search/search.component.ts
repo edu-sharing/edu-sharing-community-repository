@@ -231,7 +231,7 @@ export class SearchComponent {
            }
            this.printListener();
            if(this.searchService.viewType==-1) {
-               this.setViewType(this.config.instant('searchViewType', this.temporaryStorageService.get('view', '1')));
+               this.setViewType(this.config.instant('searchViewType', this.config.instant('searchViewType', 1)));
            }
            this.groupResults=this.config.instant('searchGroupResults',false);
 
