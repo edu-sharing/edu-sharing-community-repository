@@ -86,10 +86,10 @@
       <div *ngIf="!user.profile.about" class="empty">{{'PROFILES.NO_ABOUT'+(isMe ? "_ME" : "") | translate}}</div>
     </div>
   </div>
- <!-- <div class="authorityName" *ngIf="!edit">
+  <div class="authorityName" *ngIf="!edit">
     <label>{{'USER.authorityName' | translate}}</label>
     <div>{{ user.authorityName }}</div>
-  </div>-->
+  </div>
   <div class="changePassword" *ngIf="edit">
     <div class="toggle" (click)="changePassword=!changePassword">
       <div class="clickable">
