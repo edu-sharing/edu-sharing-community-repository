@@ -6,8 +6,7 @@ import {RestConnectorService} from "./rest-connector.service";
 import {RestHelper} from "../rest-helper";
 import {RestConstants} from "../rest-constants";
 import {
-  ArchiveRestore, ArchiveSearch, Node, MdsMetadatasets, MdsMetadataset, MdsValues,
-  MdsValueList, STREAM_STATUS
+  STREAM_STATUS
 } from "../data-object";
 
 @Injectable()
@@ -20,7 +19,7 @@ export class RestStreamService {
       [":query",encodeURIComponent(queryString)],
       [":request",this.connector.createRequestString(request)]
     ]);
-    return this.connector.post<MdsMetadatasets>(query,JSON.stringify(queryProperties),this.connector.getRequestOptions());
+    return this.connector.post<any>(query,JSON.stringify(queryProperties),this.connector.getRequestOptions());
 
   }
   public addEntry = (entry:any,repository=RestConstants.HOME_REPOSITORY) => {

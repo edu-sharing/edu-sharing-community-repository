@@ -497,6 +497,7 @@ export class UIHelper{
     static filterValidOptions(ui: UIService, options: OptionItem[]) {
         if(options==null)
             return null;
+        options = options.filter((value)=>value!=null);
         let optionsFiltered:OptionItem[]=[];
         for(let option of options){
             if((!option.onlyMobile || option.onlyMobile && ui.isMobile()) &&

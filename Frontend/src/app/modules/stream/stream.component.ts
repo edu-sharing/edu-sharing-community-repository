@@ -37,6 +37,9 @@ import 'rxjs/add/operator/pairwise';
 import { Subscription } from 'rxjs/Subscription';
 import { RoutesRecognized } from '@angular/router';
 import * as moment from 'moment';
+import {ActionbarHelperService} from '../../common/services/actionbar-helper';
+import {RestIamService} from '../../common/rest/services/rest-iam.service';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 
 @Component({
@@ -50,7 +53,7 @@ import * as moment from 'moment';
 
 
 export class StreamComponent {
-
+  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   connectorList: ConnectorList;
   createConnectorName: string;
   createConnectorType: Connector;
@@ -72,8 +75,8 @@ export class StreamComponent {
   dateToDisplay: string;
   amountToRandomize: number;
 
-  moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','arrow_upward',(node: Node)=>{
-    this.updateStream(node, STREAM_STATUS.PROGRESS).subscribe( (data) => {
+  moveUpOption = new OptionItem('STREAM.OBJECT.OPTION.MOVEUP','arrow_upward',(node: any)=>{
+    this.updateStream(node.id, STREAM_STATUS.PROGRESS).subscribe( (data) => {
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
       this.toast.toast("STREAM.TOAST.MOVEUP");
     }, error => console.log(error));
@@ -105,10 +108,12 @@ export class StreamComponent {
     private searchService: RestSearchService,
     private event:FrameEventsService,
     private streamService:RestStreamService,
+    private iam:RestIamService,
     private storage : TemporaryStorageService,
     private session : SessionStorageService,
     private title : Title,
     private toast : Toast,
+    private actionbar: ActionbarHelperService,
     private collectionService : RestCollectionService,
     private config : ConfigurationService,
     private translate : TranslateService) {
@@ -229,6 +234,7 @@ export class StreamComponent {
   menuOptions(option: any) {
     this.menuOption = option;
     this.imagesToLoad = -1;
+    this.actionOptions=[];
     if (option === 'new') {
       this.streams = [];
       this.updateDataFromJSON(STREAM_STATUS.OPEN);
@@ -240,6 +246,10 @@ export class StreamComponent {
       this.actionOptions[0] = this.collectionOption;
       this.actionOptions[1] = this.removeOption;
     }
+      let nodeStore = this.actionbar.createOptionIfPossible('ADD_NODE_STORE',null,(node: Node) => {
+          this.addToStore(node);
+      });
+      this.actionOptions.push(nodeStore);
   }
 
   goToOption(option: any) {
@@ -290,12 +300,21 @@ export class StreamComponent {
     this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.nodes[0].ref.id])
   }
 
-  private addToCollection(node: EduData.Node) {
+  private addToCollection(nodes: any) {
+    /*
     let result = this.streams.filter( (n: any) => (n.id == node) ).map( (n: any) => { return n.nodes } );
     this.collectionNodes = [].concat.apply([], result);
+    */
+    this.collectionNodes=nodes.nodes;
 
   }
-
+  private addToStore(nodes:any) {
+    this.globalProgress=true;
+    RestHelper.addToStore(nodes.nodes,this.toast,this.iam,()=>{
+        this.globalProgress=false;
+        this.mainNavRef.refreshNodeStore();
+    });
+  }
   public getJSON(streamStatus: any, sortAscendingCreated: boolean = false): Observable<any> {
     console.log(this.streams.length);
     let request:any={offset: (this.streams ? this.streams.length : 0), sortBy:["priority","created"],sortAscending:[false,sortAscendingCreated]};

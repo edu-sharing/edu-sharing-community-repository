@@ -6,7 +6,7 @@ export class RestConstants {
   public static ME="-me-";
   public static ROOT="-root-";
   public static DEFAULT="-default-";
-
+  static NODE_STORE_LIST = "BASKET";
   public static DUPLICATE_NODE_RESPONSE=409;
 
   public static DEFAULT_SORT_CRITERIA : string[]=["cm:name"];
@@ -24,6 +24,7 @@ export class RestConstants {
   public static AUTHORITY_TYPE_EVERYONE = "EVERYONE";
   public static AUTHORITY_TYPE_UNKNOWN = "UNKNOWN";
   public static AUTHORITY_EVERYONE = "GROUP_EVERYONE";
+
   public static getAuthorityEveryone(){
     return {authorityName:RestConstants.AUTHORITY_EVERYONE,authorityType:RestConstants.AUTHORITY_TYPE_EVERYONE};
   }

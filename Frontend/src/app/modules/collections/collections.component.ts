@@ -413,23 +413,24 @@ export class CollectionsMainComponent {
             }
         }
       if (fromList || nodes && nodes.length) {
-            let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
-            if (download)
-                options.push(download);
+          let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
+          options.push(download);
+          let nodeStore = this.actionbar.createOptionIfPossible('ADD_NODE_STORE',nodes,(node: Node) => {
+              this.addToStore(ActionbarHelperService.getNodes(nodes,node));
+          });
+          options.push(nodeStore);
       }
       if(fromList) {
           let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelperService.getNodes(nodes, node)[0]));
           remove.showCallback = (node: Node) => {
               return this.isAllowedToDeleteNodes(ActionbarHelperService.getNodes(nodes, node));
           };
-          if(remove)
-            options.push(remove);
+          options.push(remove);
       }
       if(fromList || nodes && nodes.length==1) {
           if (this.config.instant("nodeReport", false)) {
               let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelperService.getNodes(nodes, node)[0]);
-              if(report)
-                options.push(report);
+              options.push(report);
           }
       }
 
@@ -917,5 +918,13 @@ export class CollectionsMainComponent {
         this.isLoading=false;
         if(callback)
             callback();
+    }
+
+    private addToStore(nodes:Node[]) {
+        this.globalProgress=true;
+        RestHelper.addToStore(nodes,this.toast,this.iamService,()=>{
+            this.globalProgress=false;
+            this.mainNavRef.refreshNodeStore();
+        });
     }
 }

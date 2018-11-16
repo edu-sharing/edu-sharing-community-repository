@@ -265,21 +265,16 @@ export class MainNavComponent implements AfterViewInit{
     this._currentScope=currentScope;
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,currentScope);
   }
-  /**
-   * The current search query, will be inserted in the search field
-   */
-
-  @Input() set onInvalidNodeStore(data:Boolean){
-    this.iam.getNodeList(SearchNodeStoreComponent.LIST).subscribe((data:NodeList)=>{
-      if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
-        this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
-      this.nodeStoreCount=data.nodes.length;
-      setTimeout(()=>{
-        this.nodeStoreAnimation=-1;
-      },1500);
-    });
-  };
-
+  public refreshNodeStore(){
+      this.iam.getNodeList(RestConstants.NODE_STORE_LIST).subscribe((data:NodeList)=>{
+          if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
+              this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
+          this.nodeStoreCount=data.nodes.length;
+          setTimeout(()=>{
+              this.nodeStoreAnimation=-1;
+          },1500);
+      });
+  }
 
   onEvent(event:string,data:any){
     if(event==FrameEventsService.EVENT_PARENT_SEARCH){
@@ -397,7 +392,7 @@ export class MainNavComponent implements AfterViewInit{
               });
           }
         });
-        this.onInvalidNodeStore=new Boolean(true);
+        this.refreshNodeStore();
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
           if(data.hasAccess)
             buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE"});
