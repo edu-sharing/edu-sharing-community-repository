@@ -763,12 +763,15 @@ $orderAnimationTime:$transitionNormal*5;
 .cardList{
   .more{
     position:absolute;
-    right:-10px;
-    top:$cardHeight - 40px;
+    right: 1px;  // leave space for fade background
+    top:$cardHeight - 50px;
+    padding:10px!important;
     @include fadeRight(#fff,20px);
     padding-bottom: 5px;
     a{
       padding-left: 10px;
+      position: relative;
+      left:10px;
     }
   }
   .moreAlways{
