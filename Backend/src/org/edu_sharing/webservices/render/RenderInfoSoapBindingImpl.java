@@ -171,6 +171,15 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			rir.setEduSchoolPrimaryAffiliation(primaryAffiliation);
 		}
 		
+		String remoteRoles = userInfo.get(CCConstants.PROP_USER_ESREMOTEROLES);
+		if(remoteRoles != null && !remoteRoles.trim().equals("")) {
+			remoteRoles = remoteRoles.replace("[", "");
+			remoteRoles = remoteRoles.replace("]", "");
+			remoteRoles = remoteRoles.replaceAll(" ", "");
+			String[] splitted = remoteRoles.split(",");
+			rir.setRemoteRoles(splitted);
+		}
+
 		HashMap<String, Boolean> perms = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, PermissionServiceHelper.PERMISSIONS);
 
 		rir.setPermissions(PermissionServiceHelper.getPermissionsAsString(perms).toArray(new String[0]));

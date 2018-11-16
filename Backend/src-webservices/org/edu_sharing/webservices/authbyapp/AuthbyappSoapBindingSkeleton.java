@@ -31,6 +31,24 @@ public class AuthbyappSoapBindingSkeleton implements org.edu_sharing.webservices
         org.apache.axis.description.FaultDesc _fault;
         org.apache.axis.description.ParameterDesc [] _params;
         _params = new org.apache.axis.description.ParameterDesc [] {
+            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "ticket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
+        };
+        _oper = new org.apache.axis.description.OperationDesc("checkTicket", _params, new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "checkTicketReturn"));
+        _oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        _oper.setElementQName(new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "checkTicket"));
+        _oper.setSoapAction("");
+        _myOperationsList.add(_oper);
+        if (_myOperations.get("checkTicket") == null) {
+            _myOperations.put("checkTicket", new java.util.ArrayList());
+        }
+        ((java.util.List)_myOperations.get("checkTicket")).add(_oper);
+        _fault = new org.apache.axis.description.FaultDesc();
+        _fault.setName("AuthenticationException");
+        _fault.setQName(new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "fault"));
+        _fault.setClassName("org.edu_sharing.webservices.authentication.AuthenticationException");
+        _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
+        _oper.addFault(_fault);
+        _params = new org.apache.axis.description.ParameterDesc [] {
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "applicationId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
             new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "ssoData"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://types.webservices.edu_sharing.org", "KeyValue"), org.edu_sharing.webservices.types.KeyValue[].class, false, false), 
         };
@@ -49,24 +67,6 @@ public class AuthbyappSoapBindingSkeleton implements org.edu_sharing.webservices
         _fault.setClassName("org.edu_sharing.webservices.authentication.AuthenticationException");
         _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
         _oper.addFault(_fault);
-        _params = new org.apache.axis.description.ParameterDesc [] {
-            new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "ticket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false), 
-        };
-        _oper = new org.apache.axis.description.OperationDesc("checkTicket", _params, new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "checkTicketReturn"));
-        _oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
-        _oper.setElementQName(new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "checkTicket"));
-        _oper.setSoapAction("");
-        _myOperationsList.add(_oper);
-        if (_myOperations.get("checkTicket") == null) {
-            _myOperations.put("checkTicket", new java.util.ArrayList());
-        }
-        ((java.util.List)_myOperations.get("checkTicket")).add(_oper);
-        _fault = new org.apache.axis.description.FaultDesc();
-        _fault.setName("AuthenticationException");
-        _fault.setQName(new javax.xml.namespace.QName("http://authbyapp.webservices.edu_sharing.org", "fault"));
-        _fault.setClassName("org.edu_sharing.webservices.authentication.AuthenticationException");
-        _fault.setXmlType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"));
-        _oper.addFault(_fault);
     }
 
     public AuthbyappSoapBindingSkeleton() {
@@ -76,15 +76,15 @@ public class AuthbyappSoapBindingSkeleton implements org.edu_sharing.webservices
     public AuthbyappSoapBindingSkeleton(org.edu_sharing.webservices.authbyapp.AuthByApp impl) {
         this.impl = impl;
     }
-    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByTrustedApp(java.lang.String applicationId, org.edu_sharing.webservices.types.KeyValue[] ssoData) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
-    {
-        org.edu_sharing.webservices.authentication.AuthenticationResult ret = impl.authenticateByTrustedApp(applicationId, ssoData);
-        return ret;
-    }
-
     public boolean checkTicket(java.lang.String ticket) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
     {
         boolean ret = impl.checkTicket(ticket);
+        return ret;
+    }
+
+    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByTrustedApp(java.lang.String applicationId, org.edu_sharing.webservices.types.KeyValue[] ssoData) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException
+    {
+        org.edu_sharing.webservices.authentication.AuthenticationResult ret = impl.authenticateByTrustedApp(applicationId, ssoData);
         return ret;
     }
 

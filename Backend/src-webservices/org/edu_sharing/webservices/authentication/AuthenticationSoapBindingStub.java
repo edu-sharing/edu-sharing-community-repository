@@ -24,6 +24,25 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         org.apache.axis.description.OperationDesc oper;
         org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("checkTicket");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "ticket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        oper.setReturnClass(boolean.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "checkTicketReturn"));
+        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        oper.addFault(new org.apache.axis.description.FaultDesc(
+                      new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "fault"),
+                      "org.edu_sharing.webservices.authentication.AuthenticationException",
+                      new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"), 
+                      true
+                     ));
+        _operations[0] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
         oper.setName("authenticateByApp");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "applicationId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
@@ -38,25 +57,6 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         oper.setReturnType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationResult"));
         oper.setReturnClass(org.edu_sharing.webservices.authentication.AuthenticationResult.class);
         oper.setReturnQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByAppReturn"));
-        oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        oper.addFault(new org.apache.axis.description.FaultDesc(
-                      new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "fault"),
-                      "org.edu_sharing.webservices.authentication.AuthenticationException",
-                      new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationException"), 
-                      true
-                     ));
-        _operations[0] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("authenticateByCAS");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "proxyTicket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationResult"));
-        oper.setReturnClass(org.edu_sharing.webservices.authentication.AuthenticationResult.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByCASReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         oper.addFault(new org.apache.axis.description.FaultDesc(
@@ -89,14 +89,14 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         _operations[2] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("authenticate");
+        oper.setName("authenticateByCAS");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "password"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "proxyTicket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
         oper.setReturnType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationResult"));
         oper.setReturnClass(org.edu_sharing.webservices.authentication.AuthenticationResult.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateReturn"));
+        oper.setReturnQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByCASReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         oper.addFault(new org.apache.axis.description.FaultDesc(
@@ -108,14 +108,14 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         _operations[3] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("checkTicket");
+        oper.setName("authenticate");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "username"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "ticket"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "password"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
-        oper.setReturnClass(boolean.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "checkTicketReturn"));
+        oper.setReturnType(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "AuthenticationResult"));
+        oper.setReturnClass(org.edu_sharing.webservices.authentication.AuthenticationResult.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         oper.addFault(new org.apache.axis.description.FaultDesc(
@@ -314,7 +314,7 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         }
     }
 
-    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByApp(java.lang.String applicationId, java.lang.String username, java.lang.String email, java.lang.String ticket, boolean createUser) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException {
+    public boolean checkTicket(java.lang.String username, java.lang.String ticket) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -326,11 +326,11 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByApp"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "checkTicket"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {applicationId, username, email, ticket, new java.lang.Boolean(createUser)});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {username, ticket});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -338,9 +338,9 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         else {
             extractAttachments(_call);
             try {
-                return (org.edu_sharing.webservices.authentication.AuthenticationResult) _resp;
+                return ((java.lang.Boolean) _resp).booleanValue();
             } catch (java.lang.Exception _exception) {
-                return (org.edu_sharing.webservices.authentication.AuthenticationResult) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.authentication.AuthenticationResult.class);
+                return ((java.lang.Boolean) org.apache.axis.utils.JavaUtils.convert(_resp, boolean.class)).booleanValue();
             }
         }
   } catch (org.apache.axis.AxisFault axisFaultException) {
@@ -356,7 +356,7 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
 }
     }
 
-    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByCAS(java.lang.String username, java.lang.String proxyTicket) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException {
+    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByApp(java.lang.String applicationId, java.lang.String username, java.lang.String email, java.lang.String ticket, boolean createUser) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -368,11 +368,11 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByCAS"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByApp"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {username, proxyTicket});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {applicationId, username, email, ticket, new java.lang.Boolean(createUser)});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -440,7 +440,7 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
 }
     }
 
-    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticate(java.lang.String username, java.lang.String password) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException {
+    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticateByCAS(java.lang.String username, java.lang.String proxyTicket) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -452,11 +452,11 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticate"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticateByCAS"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {username, password});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {username, proxyTicket});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -482,7 +482,7 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
 }
     }
 
-    public boolean checkTicket(java.lang.String username, java.lang.String ticket) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException {
+    public org.edu_sharing.webservices.authentication.AuthenticationResult authenticate(java.lang.String username, java.lang.String password) throws java.rmi.RemoteException, org.edu_sharing.webservices.authentication.AuthenticationException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -494,11 +494,11 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
         _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
         _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
-        _call.setOperationName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "checkTicket"));
+        _call.setOperationName(new javax.xml.namespace.QName("http://authentication.webservices.edu_sharing.org", "authenticate"));
 
         setRequestHeaders(_call);
         setAttachments(_call);
- try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {username, ticket});
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {username, password});
 
         if (_resp instanceof java.rmi.RemoteException) {
             throw (java.rmi.RemoteException)_resp;
@@ -506,9 +506,9 @@ public class AuthenticationSoapBindingStub extends org.apache.axis.client.Stub i
         else {
             extractAttachments(_call);
             try {
-                return ((java.lang.Boolean) _resp).booleanValue();
+                return (org.edu_sharing.webservices.authentication.AuthenticationResult) _resp;
             } catch (java.lang.Exception _exception) {
-                return ((java.lang.Boolean) org.apache.axis.utils.JavaUtils.convert(_resp, boolean.class)).booleanValue();
+                return (org.edu_sharing.webservices.authentication.AuthenticationResult) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.webservices.authentication.AuthenticationResult.class);
             }
         }
   } catch (org.apache.axis.AxisFault axisFaultException) {

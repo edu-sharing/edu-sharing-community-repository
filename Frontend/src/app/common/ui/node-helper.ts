@@ -383,24 +383,17 @@ export class NodeHelper{
         }
         return '';
       }
-      if (item.name == RestConstants.CCM_PROP_REPLICATIONSOURCE) {
-        if (typeof data.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE] !== 'undefined' && data.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE] != '') {
-          let rawSrc = data.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE].toString();
+      if (item.name == RestConstants.CCM_PROP_REPLICATIONSOURCE || item.name == RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN) {
+        if (typeof data.properties[item.name] !== 'undefined' && data.properties[item.name] != '') {
+          let rawSrc = data.properties[item.name].toString().trim();
           let src = rawSrc.substring(rawSrc.lastIndexOf(":") + 1).toLowerCase();
-          return '<img alt="'+src+'" src="'+NodeHelper.getSourceIconPath(src)+'">';
+          src = src.replace(/\s/g,"_");
+          src = src.replace(/\./g,"_");
+          src = src.replace(/\//g,"_");
+          return '<img alt="'+rawSrc+'" title="'+rawSrc+'" src="'+NodeHelper.getSourceIconPath(src)+'">';
         }
         return '<img alt="" src="'+NodeHelper.getSourceIconPath('home')+'">';
       }
-      if (item.name == RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN) {
-          if (typeof data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN] !== 'undefined' && data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN] != '') {
-              let rawSrc = data.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN].toString();
-              let src = rawSrc.substring(rawSrc.lastIndexOf(":") + 1).toLowerCase();
-              src = src.replace(/\s/g,"");
-              return '<img alt="' + src + '" src="' + NodeHelper.getSourceIconPath(src) + '">';
-          }
-          return '<img alt="" src="' + NodeHelper.getSourceIconPath('home') + '">';
-      }
-
 
       return NodeHelper.getNodeAttribute(translate,config, data, item);
     }
@@ -476,7 +469,7 @@ export class NodeHelper{
             return;
           }
           progressCallback(true);
-          http.get(url).map((response: Response) => response.json()).subscribe((data: any) => {
+          http.get(url).subscribe((data: any) => {
             if (data.success)
               toast.toast(data.success, null, data.message ? data.success : data.message, data.message);
             else if (data.error)

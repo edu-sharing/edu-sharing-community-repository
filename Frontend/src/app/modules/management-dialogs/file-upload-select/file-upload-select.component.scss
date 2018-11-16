@@ -73,6 +73,7 @@ hr{
   margin-top: 10px;
 }
 .location{
+  margin-top: 20px;
   padding:20px;
   background-color: $backgroundColor;
   .caption{
@@ -85,5 +86,17 @@ hr{
     color:$primary;
     text-transform: uppercase;
     font-weight: bold;
+  }
+  .no-breadcrumbs{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    color:$textLight;
+  }
+}
+:host /deep/ {
+  .location .breadcrumb{
+    max-height: unset!important;
+    flex-wrap: wrap;
   }
 }

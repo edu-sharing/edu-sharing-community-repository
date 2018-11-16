@@ -91,7 +91,9 @@
 ></workspace-file-upload>
 <workspace-file-upload-select *ngIf="showUploadSelect"
                               [isFileOver]="fileIsOver"
+                              [(parent)]="parent"
                               [showPicker]="uploadShowPicker"
+                              [multiple]="uploadMultiple"
                               (onCancel)="closeUploadSelect()"
                               (onFileSelected)="uploadFile($event)"
                               (onLinkSelected)="createUrlLink($event)"

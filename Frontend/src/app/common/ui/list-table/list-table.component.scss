@@ -840,9 +840,14 @@ $orderAnimationTime:$transitionNormal*5;
     }
   }
   .row .node_ccm_replicationsource  img,
+  .row .node_ccm_lifecyclecontributer_publisherFN img{
+      height:20px;
+      border-radius: 50%;
+  }
   .row .node_ccm_commonlicense_key img{
       height:20px;
   }
+  .cardList .node_ccm_lifecyclecontributer_publisherFN img,
   .cardList .node_ccm_replicationsource img{
     margin-top: 5px;
   }
@@ -901,7 +906,7 @@ $orderAnimationTime:$transitionNormal*5;
   font-size: 90%;
 }
 
-.cardList .row .column.node_ccm_commonlicense_key,  .cardList .row > div.node_ccm_replicationsource {
+.cardList .row .column.node_ccm_commonlicense_key,  .cardList .row > div.node_ccm_replicationsource, .cardList .row > div.node_ccm_lifecyclecontributer_publisherFN {
   display: inline-block;
 }
 
