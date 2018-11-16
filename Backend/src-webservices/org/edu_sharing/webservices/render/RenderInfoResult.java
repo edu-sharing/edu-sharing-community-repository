@@ -40,6 +40,8 @@ public class RenderInfoResult  implements java.io.Serializable {
 
     private java.lang.Boolean publishRight;
 
+    private java.lang.String[] remoteRoles;
+
     private org.edu_sharing.webservices.usage.UsageResult usage;
 
     private java.lang.Boolean userReadAllowed;
@@ -64,6 +66,7 @@ public class RenderInfoResult  implements java.io.Serializable {
            org.edu_sharing.webservices.types.KeyValue[] properties,
            org.edu_sharing.webservices.types.KeyValue[] propertiesToolInstance,
            java.lang.Boolean publishRight,
+           java.lang.String[] remoteRoles,
            org.edu_sharing.webservices.usage.UsageResult usage,
            java.lang.Boolean userReadAllowed) {
            this.aspects = aspects;
@@ -82,6 +85,7 @@ public class RenderInfoResult  implements java.io.Serializable {
            this.properties = properties;
            this.propertiesToolInstance = propertiesToolInstance;
            this.publishRight = publishRight;
+           this.remoteRoles = remoteRoles;
            this.usage = usage;
            this.userReadAllowed = userReadAllowed;
     }
@@ -408,6 +412,26 @@ public class RenderInfoResult  implements java.io.Serializable {
 
 
     /**
+     * Gets the remoteRoles value for this RenderInfoResult.
+     * 
+     * @return remoteRoles
+     */
+    public java.lang.String[] getRemoteRoles() {
+        return remoteRoles;
+    }
+
+
+    /**
+     * Sets the remoteRoles value for this RenderInfoResult.
+     * 
+     * @param remoteRoles
+     */
+    public void setRemoteRoles(java.lang.String[] remoteRoles) {
+        this.remoteRoles = remoteRoles;
+    }
+
+
+    /**
      * Gets the usage value for this RenderInfoResult.
      * 
      * @return usage
@@ -504,6 +528,9 @@ public class RenderInfoResult  implements java.io.Serializable {
             ((this.publishRight==null && other.getPublishRight()==null) || 
              (this.publishRight!=null &&
               this.publishRight.equals(other.getPublishRight()))) &&
+            ((this.remoteRoles==null && other.getRemoteRoles()==null) || 
+             (this.remoteRoles!=null &&
+              java.util.Arrays.equals(this.remoteRoles, other.getRemoteRoles()))) &&
             ((this.usage==null && other.getUsage()==null) || 
              (this.usage!=null &&
               this.usage.equals(other.getUsage()))) &&
@@ -614,6 +641,17 @@ public class RenderInfoResult  implements java.io.Serializable {
         }
         if (getPublishRight() != null) {
             _hashCode += getPublishRight().hashCode();
+        }
+        if (getRemoteRoles() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getRemoteRoles());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getRemoteRoles(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
         }
         if (getUsage() != null) {
             _hashCode += getUsage().hashCode();
@@ -732,6 +770,13 @@ public class RenderInfoResult  implements java.io.Serializable {
         elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "publishRight"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
         elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("remoteRoles");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "remoteRoles"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
+        elemField.setItemQName(new javax.xml.namespace.QName("http://render.webservices.edu_sharing.org", "item"));
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("usage");

@@ -352,6 +352,15 @@
 		           <tokenised>false</tokenised>
 		       </index>
             </property>
+            <!-- edu-sharing customization: current roles of an lms course -->
+            <property name="cm:esremoteroles">
+               <type>d:text</type>
+               <multiple>true</multiple>
+            </property>
+            <property name="cm:esssotype">
+               <type>d:text</type>
+            </property>
+
             <!-- like active, locked... -->
             <property name="cm:espersonstatus">
             	<type>d:text</type>

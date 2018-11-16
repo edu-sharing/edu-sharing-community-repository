@@ -1,0 +1,10 @@
+<global-progress *ngIf="loading"></global-progress>
+<workspace-management
+    [parent]="parent"
+    [(showUploadSelect)]="showUploadSelect"
+    [uploadShowPicker]="true"
+    [uploadMultiple]="false"
+    [(filesToUpload)]="filesToUpload"
+    (onUploadFileSelected)="uploadNodes($event)"
+    (onCloseMetadata)="onDone($event)"
+></workspace-management>

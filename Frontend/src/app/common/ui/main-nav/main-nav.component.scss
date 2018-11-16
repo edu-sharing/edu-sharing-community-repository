@@ -369,7 +369,7 @@ user-profile{
     width:100%;
     bottom:0;
     display:flex;
-    background-color: $workspaceTopBarFontColor;
+    background-color: #fff;
     overflow-x: auto;
     height:$mobileTabNavHeight;
     @include materialShadow();

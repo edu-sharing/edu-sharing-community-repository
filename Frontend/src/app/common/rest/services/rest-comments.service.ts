@@ -20,7 +20,7 @@ export class RestCommentsService {
       let query=this.connector.createUrl('comment/:version/comments/:repository/:node', repository, [
         [':node',node]
       ]);
-      return this.connector.get(query,this.connector.getRequestOptions()) .map((response: Response) => response.json());
+      return this.connector.get(query,this.connector.getRequestOptions());
   }
   addComment(node:string,comment:string,repository = RestConstants.HOME_REPOSITORY): Observable<Response> {
     let query = this.connector.createUrl('comment/:version/comments/:repository/:node', repository, [

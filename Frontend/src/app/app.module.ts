@@ -23,6 +23,7 @@ import {DECLARATIONS_SHARE_APP} from './modules/share-app/declarations';
 import {DECLARATIONS_SHARING} from './modules/sharing/declarations';
 import {DECLARATIONS_REGISTER} from './modules/register/declarations';
 import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
+import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -39,6 +40,7 @@ import {DECLARATIONS_SERVICES} from "./modules/services/declarations";
     DECLARATIONS_LOGIN,
     DECLARATIONS_REGISTER,
     DECLARATIONS_LOGINAPP,
+    DECLARATIONS_FILE_UPLOAD,
     DECLARATIONS_STARTUP,
     DECLARATIONS_PERMISSIONS,
     DECLARATIONS_OER,

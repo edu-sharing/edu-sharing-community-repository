@@ -54,6 +54,7 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element name="properties" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
      <element name="propertiesToolInstance" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
      <element name="publishRight" nillable="true" type="xsd:boolean"/>
+     <element name="remoteRoles" nillable="true" type="impl:ArrayOf_xsd_string"/>
      <element name="usage" nillable="true" type="tns3:UsageResult"/>
      <element name="userReadAllowed" nillable="true" type="xsd:boolean"/>
     </sequence>

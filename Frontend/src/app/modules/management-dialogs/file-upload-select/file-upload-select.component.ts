@@ -37,6 +37,9 @@ export class WorkspaceFileUploadSelectComponent  {
    */
   @Input() supportsDrop = true;
   @Input() isFileOver=false;
+    /**
+     * Allow the user to use a file picker to choose the parent?
+     */
     @Input() showPicker=false;
   /**
    * Show the lti option and support generation of lti files?
@@ -49,15 +52,16 @@ export class WorkspaceFileUploadSelectComponent  {
   private ltiConsumerKey:string;
   private ltiSharedSecret:string;
   private ltiTool: Node;
-    private _link: string;
-  @Input() set parent(parent:string){
-    if(parent==RestConstants.USERHOME){
-      this.breadcrumbs=[];
-      return;
+  private _link: string;
+  _parent: Node;
+  @Input() set parent(parent:Node){
+    this.breadcrumbs=null;
+    this._parent=parent;
+    if(parent) {
+        this.nodeService.getNodeParents(parent.ref.id).subscribe((data: NodeList) => {
+            this.breadcrumbs = data.nodes.reverse();
+        });
     }
-    this.nodeService.getNodeParents(parent).subscribe((data:NodeList)=>{
-      this.breadcrumbs=data.nodes;
-    })
   }
   @Output() parentChange = new EventEmitter();
   @Output() onCancel=new EventEmitter();
@@ -123,8 +127,8 @@ export class WorkspaceFileUploadSelectComponent  {
     */
   }
   public parentChoosed(event:Node[]){
-    this.parent=event[0].ref.id;
-    this.parentChange.emit(this.parent);
+    this._parent=event[0];
+    this.parentChange.emit(this._parent);
     this.chooseParent=false;
   }
   public constructor(
@@ -132,7 +136,6 @@ export class WorkspaceFileUploadSelectComponent  {
     private searchService:RestSearchService,
     private toast:Toast,
   ){
-    this.parent=RestConstants.USERHOME;
     this.setState("");
   }
 

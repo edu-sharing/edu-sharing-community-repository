@@ -24,7 +24,7 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	Boolean hasContentLicense;
 
 	Boolean isDirectory;
-	
+
 	UsageResult usage;
 	
 	int contentHash;
@@ -38,7 +38,7 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	Child[] children;
 
 	String iconUrl;
-	
+
 	String previewUrl;
 	
 	String mimeTypeUrl;
@@ -50,6 +50,8 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	private java.lang.String[] permissions;
 	
 	String eduSchoolPrimaryAffiliation;
+
+	String[] remoteRoles;
 
 	public Boolean getGuestReadAllowed() {
 		return guestReadAllowed;
@@ -225,4 +227,14 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	public void setDirectory(Boolean directory) {
 		isDirectory = directory;
 	}
+
+    public void setRemoteRoles(String[] remoteRoles) {
+		this.remoteRoles = remoteRoles;
+	}
+
+    public String[] getRemoteRoles() {
+		return remoteRoles;
+	}
+
+
 }

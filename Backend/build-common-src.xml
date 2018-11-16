@@ -366,8 +366,15 @@
 	
 	<target name="deploy-compiled-gwt-dev-ie-reload" depends="compile-gwt-dev-ie8, deploy-gwt, reload">
 	</target>
-	
-	<target name="deploy" depends="prepare-alfresco-webapps, compile-java, prepare, deploy-java, deploy-public, deploy-ng, deploy-ng-extension">
+	<target name="file-extension-internal" if="extension-name">
+		<available property="extensionFile" file="${extensions.path}${extension-name}/build.xml"/>
+	</target>
+	<target name="deploy-extension-internal" depends="file-extension-internal" if="extensionFile">
+		<echo>build-extension exists, will call target deploy-extensions</echo>
+		<ant antfile="${extensions.path}${extension-name}/build.xml" taskname="deploy-extension"/>
+	</target>
+
+	<target name="deploy" depends="prepare-alfresco-webapps, compile-java, prepare, deploy-java, deploy-public, deploy-ng, deploy-ng-extension, deploy-extension-internal">
 	</target>
 	<target name="deploy-reload" depends="deploy, reload" description="Deploy and Reload tomcat app">
 	</target>

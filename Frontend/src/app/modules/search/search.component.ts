@@ -73,7 +73,6 @@ export class SearchComponent {
   public mdsExtended=false;
   public sidenavTab=0;
   public collectionsMore=false;
-  view = ListTableComponent.VIEW_TYPE_GRID;
   searchFail: boolean = false;
   public nodeReport: Node;
   public nodeVariant: Node;
@@ -232,9 +231,10 @@ export class SearchComponent {
              }
            }
            this.printListener();
-           this.view = this.config.instant('searchViewType',this.temporaryStorageService.get('view', '1'));
+           if(this.searchService.viewType==-1) {
+               this.setViewType(this.config.instant('searchViewType', this.config.instant('searchViewType', 1)));
+           }
            this.groupResults=this.config.instant('searchGroupResults',false);
-           this.setViewType(this.view);
 
            this.searchService.collectionsColumns=[];
            this.searchService.collectionsColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
@@ -496,13 +496,13 @@ export class SearchComponent {
     this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{mainnav:this.mainnav,id:id}});
   }
   setViewType(type:number){
-    this.view = type;
+    this.searchService.viewType = type;
     this.temporaryStorageService.set('view', type);
     if(this.viewToggle)
       this.viewToggle.icon=type==ListTableComponent.VIEW_TYPE_GRID ? 'list' : 'view_module';
   }
   toggleView() {
-    if(this.view == ListTableComponent.VIEW_TYPE_LIST) {
+    if(this.searchService.viewType == ListTableComponent.VIEW_TYPE_LIST) {
       this.setViewType(ListTableComponent.VIEW_TYPE_GRID);
     } else {
       this.setViewType(ListTableComponent.VIEW_TYPE_LIST);
@@ -709,7 +709,7 @@ export class SearchComponent {
     this.viewToggle = new OptionItem('', '', (node: Node) => this.toggleView());
     this.viewToggle.isToggle = true;
     options.push(this.viewToggle);
-    this.setViewType(this.view);
+    this.setViewType(this.searchService.viewType);
 
     return options;
   }

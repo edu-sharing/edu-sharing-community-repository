@@ -153,6 +153,8 @@ export class TranslationLoader implements TranslateLoader {
     //  .map((res: Response) => res.json());
     if(lang=="none"){
         return new Observable<any>((observer : Observer<any>) => {
+            this.initializedLanguage={};
+            this.initializing=null;
             observer.next({});
             observer.complete();
             console.log("initalized without translation");

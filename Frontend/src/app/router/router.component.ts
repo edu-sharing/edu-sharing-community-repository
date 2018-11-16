@@ -25,6 +25,7 @@ import {ShareAppComponent} from "../modules/share-app/share-app.component";
 import {SharingComponent} from "../modules/sharing/sharing.component";
 import {RegisterComponent} from '../modules/register/register.component';
 import {ServicesComponent} from "../modules/services/services.components";
+import {FileUploadComponent} from '../modules/file-upload/file-upload.component';
 
 
 
@@ -102,6 +103,8 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'register/:status', component: RegisterComponent },
     { path: UIConstants.ROUTER_PREFIX+'register/:status/:key', component: RegisterComponent },
     { path: UIConstants.ROUTER_PREFIX+'register/:status/:key/:email', component: RegisterComponent },
+  // file upload
+    { path: UIConstants.ROUTER_PREFIX+'upload', component: FileUploadComponent },
   // admin
     { path: UIConstants.ROUTER_PREFIX+'admin', component: AdminComponent },
   // permissions
