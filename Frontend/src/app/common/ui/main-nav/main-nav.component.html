@@ -98,6 +98,7 @@
   <div *ngFor="let button of sidebarButtons" class="button" [class.selected]="_currentScope==button.scope"
        (click)="openButton(button)"
        (keyup.enter)="openButton(button)"
+       class="waves-effect"
        [class.collection-item-seperate]="button.isSeperate"
        [class.clickable]="!button.isDisabled"
        [class.disabled]="button.isDisabled"

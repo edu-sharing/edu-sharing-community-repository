@@ -365,8 +365,10 @@ user-profile{
     @include materialShadow();
     >div{
       color:$textLight;
+      border-top: 4px solid transparent;
       &.selected{
         color:$primary;
+        border-color: $primary;
         >div >span{
           font-weight:bold;
         }
@@ -377,7 +379,7 @@ user-profile{
       flex-grow: 1;
       flex-direction: column;
       align-items: center;
-      padding:11px 10px;
+      padding:9px 10px;
       >span{
         padding-top:1px;
         font-size:9pt;
