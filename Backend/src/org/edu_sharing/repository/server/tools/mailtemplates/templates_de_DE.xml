@@ -49,7 +49,7 @@
 			<div class="center">
 				<img src="{{image:/assets/images/register/register-mail.png}}">
 				<h1>Hallo {{firstName}} {{lastName}},</h1>
-				<p>Sie haben den Passwort vergessen?
+				<p>Sie haben Ihr Passwort vergessen?
 				</p>
 				</p>
 					Klicken Sie auf den unteren Button, um ein neues Passwort festzulegen.
