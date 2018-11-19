@@ -117,8 +117,7 @@ table, div {
   height:150px;
   border-radius: 50%;
   background-color: #fff;
-  margin:auto;
-  margin-top: 10px;
+  @include unselectableText();
 }
 .collection-header-image{
   position: relative;
@@ -199,7 +198,9 @@ table, div {
     overflow: hidden;
     margin: auto;
     text-align: center;
-    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .collections-header  {
@@ -253,6 +254,8 @@ table, div {
   padding: 5px;
   background-color: #fff;
   cursor: pointer;
+  z-index: 1;
+  @include materialShadow();
 }
 .section-headline {
   float:left;
