@@ -7,12 +7,15 @@
   width:100%;
   max-width:100%;
   z-index:98;
-  height: $mainnavHeight;
-  background: $workspaceTopBarBackground;
-  color:$workspaceTopBarFontColor;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  >div{
+    width:100%;
+    height: $mainnavHeight;
+    background: $workspaceTopBarBackground;
+    color:$workspaceTopBarFontColor;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 .tab-nav{
   display: none;
@@ -359,11 +362,15 @@ user-profile{
     width:100%;
     bottom:0;
     display:flex;
-    background-color: #fff;
-    overflow-x: auto;
-    height:$mobileTabNavHeight;
-    @include materialShadow();
     >div{
+      display:flex;
+      width:100%;
+      background-color: #fff;
+      overflow-x: auto;
+      height:$mobileTabNavHeight;
+      @include materialShadow();
+    }
+    .button{
       color:$textLight;
       border-top: 4px solid transparent;
       &.selected{

@@ -55,8 +55,8 @@
 
   <div class="addMobile fixed-action-btn"
        *ngIf="createAllowed"
-       (click)="createMobile()"
-       ><a class="btn-floating btn-large waves-effect"><i class="material-icons">add</i></a>
+       (click)="createMobile()">
+    <div class="mobile-move-bottom"><a class="btn-floating btn-large waves-effect"><i class="material-icons">add</i></a></div>
     <!--
   <ul>
     <li><a class="btn-floating btn-floating-inverted" (click)="showUploadSelect=true"><i class="material-icons">cloud_upload</i></a></li>
@@ -139,23 +139,29 @@
                   (onDeleteNodes)="deleteNode=$event"
                   (onUpdateOptions)="updateOptions($event)"
   ></workspace-tree>
-<breadcrumbs class="breadcrumbFrame" *ngIf="isLoggedIn"
-  [breadcrumbsAsNode]="path"
-  [searchQuery]="searchQuery"
-  [home]="'WORKSPACE.'+root"
-  [canDrop]="canDropBreadcrumbs"
-  (onDrop)="handleDrop($event)"
-  [homeId]="getRootFolderId()"
-  (onClick)="openBreadcrumb($event)"
-></breadcrumbs>
+<div class="breadcrumbFrame">
+    <div class="mobile-move-top">
+        <breadcrumbs *ngIf="isLoggedIn"
+          [breadcrumbsAsNode]="path"
+          [searchQuery]="searchQuery"
+          [home]="'WORKSPACE.'+root"
+          [canDrop]="canDropBreadcrumbs"
+          (onDrop)="handleDrop($event)"
+          [homeId]="getRootFolderId()"
+          (onClick)="openBreadcrumb($event)"
+        ></breadcrumbs>
+    </div>
+</div>
   <recycle *ngIf="root=='RECYCLE'" class="explorer"
            [searchWorkspace]="searchQuery"
            [isInsideWorkspace]="true"></recycle>
-  <actionbar class="actionbarFrame"
+<div class="actionbarFrame"><div class="mobile-move-top">
+  <actionbar class=""
              *ngIf="actionOptions && actionOptions.length"
              [@fadeFast]="actionOptions && actionOptions.length"
              [options]="actionOptions"
 ></actionbar>
+</div></div>
   <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'" (contextmenu)="createContext($event)"
   [current]="currentFolderRef"
   [selection]="selection"

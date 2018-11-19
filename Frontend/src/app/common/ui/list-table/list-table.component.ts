@@ -569,7 +569,7 @@ export class ListTableComponent implements EventListener{
   private setSorting(sortBy : string,isPrimaryElement : boolean){
     if(!this.canBeSorted(sortBy))
       return;
-    if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*3){
+    if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*4){
       this.sortMenu=true;
       return;
     }
