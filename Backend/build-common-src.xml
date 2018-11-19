@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <project name="edusharing" basedir="." default="deploy">
 	<import file="build-common.xml" />
-	
+	<import file="${extensions.path}${extension-name}/build.xml" optional="true" />
+
 	<property name="gwt.module" value="org.edu_sharing.repository.CCSearch" />
 
 	<!-- 
@@ -366,8 +367,23 @@
 	
 	<target name="deploy-compiled-gwt-dev-ie-reload" depends="compile-gwt-dev-ie8, deploy-gwt, reload">
 	</target>
-	
-	<target name="deploy" depends="prepare-alfresco-webapps, compile-java, prepare, deploy-java, deploy-public, deploy-ng, deploy-ng-extension">
+
+	<!-- check which targets the build.xml of the current extension supports -->
+	<target name="extension-check-targets" if="extension-name">
+		<script language="javascript">
+			if(project.getTargets().containsKey("deploy-extension"))
+				project.setProperty("deploy-extension","true");
+			if(project.getTargets().containsKey("release-extension"))
+			project.setProperty("release-extension","true");
+		</script>
+	</target>
+	<target name="deploy-extension-internal" depends="extension-check-targets" if="deploy-extension">
+		<ant antfile="${extensions.path}${extension-name}/build.xml" target="deploy-extension"/>
+	</target>
+	<target name="release-extension-internal" depends="extension-check-targets" if="release-extension">
+		<ant antfile="${extensions.path}${extension-name}/build.xml" target="release-extension"/>
+	</target>
+	<target name="deploy" depends="prepare-alfresco-webapps, compile-java, prepare, deploy-java, deploy-public, deploy-ng, deploy-ng-extension, deploy-extension-internal">
 	</target>
 	<target name="deploy-reload" depends="deploy, reload" description="Deploy and Reload tomcat app">
 	</target>

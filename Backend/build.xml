@@ -110,11 +110,12 @@
 			</fileset>
 		</copy>
 		<!-- overwrite the config stuff with extension config-->
-		<antcall target="release-extension-config"></antcall>
-		<antcall target="release-public"></antcall>
-		<antcall target="release-extension-public"></antcall>
-		<antcall target="release-ng"></antcall>
-		<antcall target="release-extension-ng"></antcall>
+		<antcall target="release-extension-config" />
+		<antcall target="release-public" />
+		<antcall target="release-extension-public" />
+		<antcall target="release-ng" />
+		<antcall target="release-extension-ng" />
+		<antcall target="release-extension-internal" />
 
 		<condition property="extension-name" value="${extension-name}" else="">
 		        <isset property="extension-name"/>
@@ -127,7 +128,6 @@
 
 		<!--clean up version tmp file -->
 		<delete file="version_tmp.properties"></delete>
-
 	</target>
 
 	<target name="release-extension-gitinfo" if="extension-name">
