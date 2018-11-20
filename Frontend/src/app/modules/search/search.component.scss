@@ -660,6 +660,9 @@ div.dialog.darken {
   .sidenav{
     height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 180px);
   }
+  .sidenavNoRepositories{
+    height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 65px - 70px);
+  }
   .sidenavContainer .apply{
     bottom:$mobileTabNavHeight;
   }
