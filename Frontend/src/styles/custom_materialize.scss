@@ -6,6 +6,12 @@
 .btn{
   background-color:$primary!important;
   color:$textOnPrimary!important;
+  >.material-icons{
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    top: 4px;
+  }
 }
 .btn:focus:not(.disabled){
     background-color:$primaryDark!important;

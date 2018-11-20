@@ -10,31 +10,34 @@ md-input{
   top:calc(15% + 490px);
   color: $textVeryLight;
 }
-.powered-long{
-  top:calc(15% + 530px);
+.card-cancel{
+  z-index: 1;
 }
-.branding{
-  width:100%;
-  height:100px;
+.branding {
+  width: 100%;
+  height: 100px;
   text-align: center;
-  img{
+  margin-top: 10px;
+  img {
     max-height: 100px;
+  }
+}
+.choose{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 230px;
+  >div{
+    display:flex;
+    flex-direction: column;
+    .choose-label{
+      color: $textLight;
+      margin: 0 0 5px 10px;
+    }
   }
 }
 .register{
   color:$textLight;
-}
-.useUrl{
-  .goto{
-    display: inline-flex;
-    align-items: center;
-    text-transform: uppercase;
-    padding-top: 5px;
-    i{
-      padding-left: 4px;
-      font-size: 20px;
-    }
-  }
 }
 @media screen and (max-height: ($mobileHeight)) {
   .card{
@@ -52,11 +55,12 @@ md-input{
 
   .branding{
     position: absolute;
-    top: 25px;
-    left: calc(50% - 75px);
-    height:50px;
+    top: -27px;
+    left: 0;
+    display: flex;
+    justify-content: center;
     img{
-      width:100px;
+      width:80px;
       height:auto;
     }
   }
