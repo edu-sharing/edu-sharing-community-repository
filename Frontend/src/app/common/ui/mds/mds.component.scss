@@ -6,10 +6,13 @@
   padding-right: 0;
   padding-top: 0;
 }
-.suggestions{
-  padding-top:40px;
-  .badge i{
-    color: $workspaceInheritColor;
+:host /deep/ {
+  .suggestions {
+    padding-top: 40px;
+
+    .badge i {
+      color: $workspaceInheritColor;
+    }
   }
 }
 .mdsCardJumpmarks{
