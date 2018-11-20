@@ -399,7 +399,8 @@ export class MainNavComponent implements AfterViewInit{
         });
         this.onInvalidNodeStore=new Boolean(true);
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
-          if(data.hasAccess)
+          // safe needs access and not be app (oauth not supported)
+          if(data.hasAccess && !this.cordova.isRunningCordova())
             buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE"});
           this.addMoreButtons(buttons);
         },(error:any)=>this.addMoreButtons(buttons));
