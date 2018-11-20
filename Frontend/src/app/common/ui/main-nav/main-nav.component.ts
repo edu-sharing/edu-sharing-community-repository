@@ -204,7 +204,7 @@ export class MainNavComponent implements AfterViewInit{
             });
         }
         else{
-            this.handleScrollHide(event);
+            this.handleScrollHide();
             this.posScrollElements(event,elements);
         }
     }
@@ -706,7 +706,6 @@ export class MainNavComponent implements AfterViewInit{
     /**
      * Method to dynamically hide objects when scrolling on mobile
      * Add css class mobile-move-top or mobile-move-bottom for specific items
-     * @param event
      */
     private handleScrollHide() {
       if(this.tabNav.nativeElement==null)
