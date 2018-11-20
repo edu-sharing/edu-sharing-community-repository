@@ -71,7 +71,7 @@ table, div {
 
 .section-headline {
     color: #5F5F5F;
-    padding: 20px 15px 12px;
+    padding: 20px 15px 20px;
 }
 
 .collections-breadcrumb {
@@ -281,6 +281,7 @@ table, div {
   .actionbarMaterials{
     position: absolute;
     right:20px;
+    margin-top: -5px;
   }
 }
 :host /deep/{
@@ -329,9 +330,6 @@ table, div {
         margin-top: 240px+$mainnavHeight;
       }
     }
-  .section-headline{
-    padding: 20px 0 12px;
-  }
   .collection-new-preview-headline{
     overflow-wrap: break-word;
     display: -webkit-box;
