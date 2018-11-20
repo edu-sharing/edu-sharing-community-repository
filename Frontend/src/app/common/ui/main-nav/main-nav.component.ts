@@ -154,6 +154,7 @@ export class MainNavComponent implements AfterViewInit{
     private lastScroll = -1;
     private elementsTopY = 0;
     private elementsBottomY = 0;
+    private fixScrollElements = false;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
       if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -702,7 +703,12 @@ export class MainNavComponent implements AfterViewInit{
         return options;
     }
 
-    private handleScrollHide(event:any) {
+    /**
+     * Method to dynamically hide objects when scrolling on mobile
+     * Add css class mobile-move-top or mobile-move-bottom for specific items
+     * @param event
+     */
+    private handleScrollHide() {
       if(this.tabNav.nativeElement==null)
           return;
       if(this.lastScroll==-1) {
@@ -726,6 +732,9 @@ export class MainNavComponent implements AfterViewInit{
         }
       let diffTop=window.scrollY-this.lastScroll;
       let diffBottom=window.scrollY-this.lastScroll;
+      if(diffTop<0) diffTop*=2;
+      if(diffBottom<0) diffBottom*=2;
+
       if(diffTop>0 && bottom<0){
           diffTop=0;
       }
@@ -736,7 +745,7 @@ export class MainNavComponent implements AfterViewInit{
       this.elementsTopY=Math.max(0,this.elementsTopY);
       this.elementsBottomY+=diffBottom;
       this.elementsBottomY=Math.max(0,this.elementsBottomY);
-        if(!UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)){
+        if(this.fixScrollElements || !UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)){
             this.elementsTopY=0;
             this.elementsBottomY=0;
         }
@@ -752,5 +761,9 @@ export class MainNavComponent implements AfterViewInit{
       console.log(this.elementsTopY+" "+this.elementsBottomY);
         this.lastScroll=window.scrollY;
         //console.log(event);
+    }
+    public setFixMobileElements(fix:boolean){
+        this.fixScrollElements=fix;
+        this.handleScrollHide();
     }
 }

@@ -52,7 +52,7 @@
     <div class="top scrollWithBanner" [class.topNoRepositories]="!(repositories && repositories.length>2)" [class.no-mainnav]="!mainnav" *ngIf="initalized">
         <div class="mobile-move-top">
             <div class="extendedSearch" #extendedSearch>
-                <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="searchService.sidenavOpened=!searchService.sidenavOpened" (click)="searchService.sidenavOpened=!searchService.sidenavOpened" class="pointed filtertoggler">
+                <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="toggleSidenav()" (click)="toggleSidenav()" class="pointed filtertoggler">
                     <span>{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
                     <span class="mobile">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
                     <i class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>

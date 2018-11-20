@@ -1141,4 +1141,9 @@ export class SearchComponent {
       }
       return null;
   }
+
+    toggleSidenav() {
+        this.searchService.sidenavOpened=!this.searchService.sidenavOpened;
+        this.mainNavRef.setFixMobileElements(this.searchService.sidenavOpened);
+    }
 }
