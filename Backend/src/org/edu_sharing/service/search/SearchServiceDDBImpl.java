@@ -106,6 +106,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 		
 		SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
+		searchResultNodeRef.setNodeCount(nrOfResult);
 		List<NodeRef> data=new ArrayList<>();
 		
 		HashMap<String,HashMap<String,Object>> result = new HashMap<String, HashMap<String,Object>>();
@@ -228,6 +229,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			// fetch binary info
 			String all = httpGet(DDB_API+"/items/"+nodeId+"/aip?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
 			JSONObject allJson = new JSONObject(all);
+			
 			try {
 				JSONArray binaries = (JSONArray)allJson.getJSONObject("binaries").getJSONArray("binary");			
 				JSONObject binary = null;
@@ -259,6 +261,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			}catch(Throwable t) {}
 			try {
 				JSONObject meta=allJson.getJSONObject("edm").getJSONObject("RDF").getJSONObject("ProvidedCHO");
+				System.out.println(meta);
 				try {
 				properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER,
 						VCardTool.nameToVCard(meta.getString("publisher")));
@@ -280,7 +283,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			
 			String previewUrl;
 			try {
-				previewUrl=DDB_API+allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+				previewUrl=DDB_API+ "/binary/" + allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
 			}
 			catch(Throwable t) {
 				previewUrl=new MimeTypesV2(appInfo).getPreview(CCConstants.CCM_TYPE_IO, properties, null);
@@ -532,12 +535,14 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 		
 		for(Map.Entry<String, String[]> entry : criterias.entrySet()) {
-			String[] values = criterias.get(entry.getKey());
-			if(values != null && values.length > 0) {
-				String value = values[0];
-				if(!value.trim().equals("")) {
-					if(fuzzy) value += "*";
-					extSearch.add(entry.getKey() +":("+value+")");
+			if(!entry.getKey().startsWith("ngsearch")) {
+				String[] values = criterias.get(entry.getKey());
+				if(values != null && values.length > 0) {
+					String value = values[0];
+					if(!value.trim().equals("")) {
+						if(fuzzy) value += "*";
+						extSearch.add(entry.getKey() +":("+value+")");
+					}
 				}
 			}
 		}
