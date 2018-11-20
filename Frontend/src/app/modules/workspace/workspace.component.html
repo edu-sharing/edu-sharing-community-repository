@@ -24,6 +24,7 @@
      (fileOver)="fileIsOver=$event">
 
   <main-nav
+    #mainNav
     [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
     [currentScope]="isSafe ? 'safe' : 'workspace'"
     [searchEnabled]="!isBlocked"

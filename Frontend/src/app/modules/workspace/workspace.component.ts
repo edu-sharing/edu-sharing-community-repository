@@ -37,6 +37,7 @@ import {DateHelper} from '../../common/ui/DateHelper';
 import {CordovaService} from "../../common/services/cordova.service";
 import {EventListener} from "../../common/services/frame-events.service";
 import {HttpClient} from '@angular/common/http';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 
 @Component({
     selector: 'workspace-main',
@@ -101,6 +102,7 @@ export class WorkspaceMainComponent implements EventListener{
     public addNodesToCollection : Node[];
     public variantNode : Node;
     @ViewChild('dropdown') dropdownElement : ElementRef;
+    @ViewChild('mainNav') mainNavRef : MainNavComponent;
     private dropdownPosition: string;
     private dropdownLeft: string;
     private dropdownRight: string;
@@ -902,6 +904,10 @@ export class WorkspaceMainComponent implements EventListener{
     private setSelection(nodes : Node[]) {
         this.selection=nodes;
         this.actionOptions=this.getOptions(nodes,false);
+        this.setFixMobileNav();
+    }
+    private setFixMobileNav() {
+        this.mainNavRef.setFixMobileElements(this.selection && this.selection.length>0);
     }
     private updateLicense(){
         this.closeMetadata();
