@@ -1,6 +1,8 @@
 {
   "SEARCH": {
     "TITLE": "Search",
+    "TUTORIAL_HEADING":"searching an finding",
+    "TUTORIAL_DESCRIPTION":"The search field allows you to quickly find interesting materials. Use filters to narrow down your search results.",
     "COLLECTIONS": "Collections",
     "MATERIALS": "Materials",
     "IGNORED_PARAMETERS": "The result contains objects which may not fit all given search criterias",
