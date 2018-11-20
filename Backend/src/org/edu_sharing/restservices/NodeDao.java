@@ -653,20 +653,15 @@ public class NodeDao {
 	public List<NodeVersion> getHistory() throws DAOException {
 
 		List<NodeVersion> history = new ArrayList<NodeVersion>();
-		for (String versionLabel : getNodeHistory().keySet()) {
-			NodeDao node=NodeDao.getNode(repoDao,nodeId);
-			String[] version=versionLabel.split("\\.");
-			NodeVersion nodeVersion=node.getVersion(Integer.parseInt(version[0]),Integer.parseInt(version[1]));
+		for (Entry<String, HashMap<String, Object>> version : getNodeHistory().entrySet()) {
+			NodeVersion nodeVersion=convertVersionProps(version.getKey(),version.getValue());
 			history.add(nodeVersion);
 		}
 		// Sort by version
-		Collections.sort(history,new Comparator<NodeVersion>() {
-			@Override
-			public int compare(NodeVersion o1, NodeVersion o2) {
-				if(o1.getVersion().getMajor()==o2.getVersion().getMajor())
-					return o1.getVersion().getMinor()>o2.getVersion().getMinor() ? 1 : -1;
-				return o1.getVersion().getMajor()>o2.getVersion().getMajor() ? 1 : -1;
-			}
+		Collections.sort(history, (o1, o2) -> {
+			if(o1.getVersion().getMajor()==o2.getVersion().getMajor())
+				return o1.getVersion().getMinor()>o2.getVersion().getMinor() ? 1 : -1;
+			return o1.getVersion().getMajor()>o2.getVersion().getMajor() ? 1 : -1;
 		});
 
 		return history;
@@ -1076,6 +1071,10 @@ public class NodeDao {
 
 		HashMap<String, Object> versionProps = getNodeHistory().get(versionLabel);
 
+		return convertVersionProps(versionLabel, versionProps);
+	}
+
+	private NodeVersion convertVersionProps(String versionLabel, HashMap<String, Object> versionProps) throws DAOException {
 		if (versionProps == null) {
 			return null;
 		}
