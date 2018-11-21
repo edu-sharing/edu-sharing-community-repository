@@ -1,6 +1,8 @@
 package org.edu_sharing.service.nodeservice;
 
 import java.util.HashMap;
+
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.search.SearchServiceDDBImpl;
 
 public class NodeServiceDDBImpl extends NodeServiceAdapter{
@@ -19,5 +21,11 @@ public class NodeServiceDDBImpl extends NodeServiceAdapter{
 		return searchservice.getProperties(nodeId);
 
    }
+	
+	@Override
+	public String getType(String nodeId) {
+		// TODO Auto-generated method stub
+		return CCConstants.CCM_TYPE_IO;
+	}
 	
 }

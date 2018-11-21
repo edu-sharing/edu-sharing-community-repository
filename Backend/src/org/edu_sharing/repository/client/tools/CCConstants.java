@@ -1801,6 +1801,8 @@ public class CCConstants {
 	 * @return
 	 */
 	public static String getValidLocalName(String value){
+		
+		if(value == null) return null;
 
 		for(Map.Entry<String,String> entry: getNameSpaceMap().entrySet()){
 			if(value.contains(entry.getKey())){
