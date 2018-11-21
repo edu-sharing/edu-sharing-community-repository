@@ -28,4 +28,10 @@ public class NodeServiceDDBImpl extends NodeServiceAdapter{
 		return CCConstants.CCM_TYPE_IO;
 	}
 	
+	@Override
+	public String[] getAspects(String storeProtocol, String storeId, String nodeId) {
+		// TODO Auto-generated method stub
+		return new String[] {};
+	}
+	
 }
