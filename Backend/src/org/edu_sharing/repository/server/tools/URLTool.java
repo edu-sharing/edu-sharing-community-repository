@@ -201,7 +201,7 @@ public class URLTool{
 	}
 	
 	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId){
-		String previewURL = getBaseUrl();
+		String previewURL = getBaseUrl(true);
 		previewURL += "/preview?nodeId="+node+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
 		previewURL =  addOAuthAccessToken(previewURL);
 		return previewURL;
@@ -217,7 +217,7 @@ public class URLTool{
 	
 	
 	public static String getShareServletUrl(NodeRef node, String token){
-		String shareUrl = getBaseUrl();
+		String shareUrl = getBaseUrl(true);
 		shareUrl += "/share?nodeId="+node.getId()+"&token="+token;
 		return shareUrl;
 	}
@@ -344,14 +344,7 @@ public class URLTool{
 	}
 	
 	public static String getRedirectServletLink(String repId, String nodeId){
-		
-		
-		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		
-		
-		String hostOrDomain = (homeRepository.getDomain() == null || homeRepository.getDomain().trim().equals(""))? homeRepository.getHost() : homeRepository.getDomain();
-		
-		String url = homeRepository.getClientprotocol()+"://"+hostOrDomain+":"+homeRepository.getClientport()+"/"+homeRepository.getWebappname() + "/" + CCConstants.EDU_SHARING_SERVLET_PATH_REDIRECT;
+		String url = getBaseUrl(true) + "/" + CCConstants.EDU_SHARING_SERVLET_PATH_REDIRECT;
 		//if no cookies are allowed render jsessionid in url. Attention: the host or domain in appinfo must match the client ones
 		Context context = Context.getCurrentInstance();
 		//context can be null when not accessing true ContextManagementFilter (i.i by calling nativealfrsco webservice)
