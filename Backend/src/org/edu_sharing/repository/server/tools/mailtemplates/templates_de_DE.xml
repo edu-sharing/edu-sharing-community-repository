@@ -52,10 +52,10 @@
 				<p>Sie haben Ihr Passwort vergessen?
 				</p>
 				</p>
-					Klicken Sie auf den unteren Button, um ein neues Passwort festzulegen.
+					Klicken Sie auf den Button, um ein neues Passwort festzulegen.
 				</p>
 				<a class="btn" href="{{link}}">neues Passwort</a>
-				<p>Alternativ, können Sie auch den Aktivierungscode kopieren und ihn in das Formular einfügen.</p>
+				<p>Alternativ können Sie auch den Aktivierungscode kopieren und ihn in das Formular einfügen:</p>
 				<div class="center"><div class="input-field">{{key}}</div></div>
 				<br>
 				
@@ -73,8 +73,8 @@
 				Name: {{firstName}} {{lastName}} 
 				<br>E-Mail: <a href="mailto:{{email}}">{{email}}</a>
 				</p>
-				{{if organisation}}
-					<p>Organisation des Nutzers: {{organisation}}</p>
+				{{if organization}}
+					<p>Organisation des Nutzers: {{organization}}</p>
 				{{endif}}
 				<a class="btn" href="{{link}}">Zur Nutzerverwaltung</a>
 			</div>
