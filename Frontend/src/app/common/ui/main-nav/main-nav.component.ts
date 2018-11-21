@@ -745,7 +745,8 @@ export class MainNavComponent implements AfterViewInit{
       this.elementsTopY=Math.max(0,this.elementsTopY);
       this.elementsBottomY+=diffBottom;
       this.elementsBottomY=Math.max(0,this.elementsBottomY);
-        if(this.fixScrollElements || !UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)){
+      // for ios elastic scroll
+        if(window.scrollY<=0 || this.fixScrollElements || !UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)){
             this.elementsTopY=0;
             this.elementsBottomY=0;
         }
