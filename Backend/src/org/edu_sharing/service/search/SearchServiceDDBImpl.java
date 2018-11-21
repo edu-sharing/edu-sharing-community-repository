@@ -261,7 +261,6 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			}catch(Throwable t) {}
 			try {
 				JSONObject meta=allJson.getJSONObject("edm").getJSONObject("RDF").getJSONObject("ProvidedCHO");
-				System.out.println(meta);
 				try {
 				properties.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER,
 						VCardTool.nameToVCard(meta.getString("publisher")));
@@ -408,7 +407,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		
 		try {
 			String url = DDB_API + getPath(criteriasAsMap, 0, 0, facets);
-			System.out.println("url:" + url);
+			logger.debug("url:" + url);
 			
 			String json = this.query(url);
 			//System.out.println(json);
@@ -497,7 +496,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			searchToken.setQueryString(uri);
 			
 			
-			System.out.println("ddb url:" + uri);
+			logger.debug("ddb url:" + uri);
 			return searchDDB(repositoryId,APIKey,uri);
 			
 		}
@@ -617,7 +616,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	        isr.close();
 	        connection.disconnect();
 	        String jsonString = sb.toString();
-	        System.out.println(jsonString);
+	      
 			JSONObject jo = new JSONObject(jsonString);
 	    	
 			Integer nrOfResult = (Integer)jo.get("numberOfResults");
