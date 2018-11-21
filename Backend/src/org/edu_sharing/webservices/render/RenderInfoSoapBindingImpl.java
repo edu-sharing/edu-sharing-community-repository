@@ -278,13 +278,13 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		//Preview Url not longer in cache
 		String renderServiceUrlPreview = URLTool.getRenderServiceURL(nodeRef.getId(), true);
-		if(!isRemoteObject) {
-			if (renderServiceUrlPreview != null) {
-				props.put(CCConstants.CM_ASSOC_THUMBNAILS, renderServiceUrlPreview);
-			} else {
-				props.put(CCConstants.CM_ASSOC_THUMBNAILS, URLTool.getPreviewServletUrl(nodeRef));
-			}
+		
+		if (renderServiceUrlPreview != null) {
+			props.put(CCConstants.CM_ASSOC_THUMBNAILS, renderServiceUrlPreview);
+		} else {
+			props.put(CCConstants.CM_ASSOC_THUMBNAILS, URLTool.getPreviewServletUrl(nodeRef));
 		}
+		
 		
 		//put license
 		String commonLicensekey = (String)props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
