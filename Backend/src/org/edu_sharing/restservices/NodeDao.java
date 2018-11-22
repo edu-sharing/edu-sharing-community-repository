@@ -1617,12 +1617,9 @@ public class NodeDao {
  		String tmpNodeId = new RemoteObjectService().getRemoteObject(repId, nodeId);
  		
  		NodeRemote nodeRemote = new NodeRemote();
- 		//its a remote object
- 		if(tmpNodeId.equals(nodeId)) {
- 			nodeRemote.setNode(new NodeDao(RepositoryDao.getRepository(repId),nodeId).asNode());
- 		}else {
- 			nodeRemote.setNode(new NodeDao(RepositoryDao.getRepository(repId),nodeId).asNode());
- 			nodeRemote.setRemote(new NodeDao(RepositoryDao.getRepository(RepositoryDao.HOME),tmpNodeId).asNode());
+		nodeRemote.setNode(new NodeDao(RepositoryDao.getRepository(repId),nodeId,Filter.createShowAllFilter()).asNode());
+ 		if(!tmpNodeId.equals(nodeId)) {
+ 			nodeRemote.setRemote(new NodeDao(RepositoryDao.getRepository(RepositoryDao.HOME),tmpNodeId,Filter.createShowAllFilter()).asNode());
  		}
  		
  		return nodeRemote;

@@ -109,6 +109,7 @@ export class Node {
   properties: any;
   mediatype: string;
   mimetype: string;
+  iconURL: string;
   licenseURL: string;
   size: number;
   preview: Preview;
