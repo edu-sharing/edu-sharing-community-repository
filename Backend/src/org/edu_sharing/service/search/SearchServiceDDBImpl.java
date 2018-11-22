@@ -283,19 +283,16 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			try {
 				JSONObject webresource = allJson.getJSONObject("edm").getJSONObject("RDF").getJSONObject("WebResource");
 				String licenseUrl = webresource.getJSONObject("rights").getString("@resource");
-				System.out.println("licenseUrl:" + licenseUrl);
 				
 				for(Map.Entry<String, String> entry : CCConstants.getLicenseMap().entrySet()) {
 					String matching = entry.getKey().replace("/1.0/deed.", "");
 					matching = matching.replaceFirst("https://", "");
 					matching = matching.replaceFirst("http://", "");
-					System.out.println("matchingUrl:" + matching);
 					
 					if(licenseUrl != null) {
 						String tempLicenseurl = licenseUrl.replaceFirst("https://", "");
 						tempLicenseurl = tempLicenseurl.replaceFirst("http://", "");
 						if(tempLicenseurl.startsWith(matching)) {
-							System.out.println("matched");
 							properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,entry.getValue());
 						}
 					}
