@@ -32,7 +32,7 @@
   "SELECT_FILE" : "select file",
   "NO_MORE_ELEMENTS" : "no further elements",
   "FIELD_MUST_BE_FILLED" : "This field cannot be empty.",
-  "SELECT_COLLECTION" : "Add to '{{name}}'",
+  "SELECT_COLLECTION" : "Add to selected collection",
   "SELECT_ROOT_DISABLED" : "select element",
   "CLOSE" : "close",
   "DOWNLOAD": "download",
