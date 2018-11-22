@@ -453,13 +453,13 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						//int count = facetteVal.getInt("count");
 						String val = facetteVal.getString("value");
 						//check for cleaner results
-						//if(val.toLowerCase().contains(value.toLowerCase())) {					
+						if(val.toLowerCase().contains(value.toLowerCase())) {					
 							SuggestFacetDTO dto = new SuggestFacetDTO();
 							dto.setFacet(val);
 							dto.setDisplayString(val);
-	
+							
 							result.add(dto);
-						//}
+						}
 					}
 					
 					
