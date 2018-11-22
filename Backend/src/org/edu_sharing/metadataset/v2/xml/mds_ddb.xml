@@ -80,8 +80,9 @@
 				<columns>
 					<column>cm:title</column>
 					<column>cm:creator</column>
-					<column>cclom:general_description</column>
-					<column>ccm:replicationsource</column>				
+					<column>ccm:commonlicense_key</column>
+					<column>ccm:replicationsource</column>	
+							
 				</columns>
 			</list>
 	</lists>
