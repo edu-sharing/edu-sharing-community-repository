@@ -111,7 +111,6 @@ export class Node {
   modifiedAt: Date;
   modifiedBy: Person;
   access: string[];
-  iconURL: string;
   contentVersion: string;
   repositoryType: string;
   contentUrl: string;
@@ -119,6 +118,7 @@ export class Node {
   properties: any;
   mediatype: string;
   mimetype: string;
+  iconURL: string;
   licenseURL: string;
   size: number;
   preview: Preview;
