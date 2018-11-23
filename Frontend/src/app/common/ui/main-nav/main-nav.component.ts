@@ -709,7 +709,7 @@ export class MainNavComponent implements AfterViewInit{
      * Add css class mobile-move-top or mobile-move-bottom for specific items
      */
     private handleScrollHide() {
-      if(this.tabNav.nativeElement==null)
+      if(this.tabNav==null || this.tabNav.nativeElement==null)
           return;
       if(this.lastScroll==-1) {
           this.lastScroll=window.scrollY;
@@ -759,7 +759,6 @@ export class MainNavComponent implements AfterViewInit{
           elementsBottom.item(i).style.position="relative";
           elementsBottom.item(i).style.top=this.elementsBottomY+"px";
       }
-      console.log(this.elementsTopY+" "+this.elementsBottomY);
         this.lastScroll=window.scrollY;
         //console.log(event);
     }
