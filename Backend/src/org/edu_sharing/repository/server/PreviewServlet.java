@@ -59,6 +59,7 @@ import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StreamUtils;
 
 
 public class PreviewServlet extends HttpServlet implements SingleThreadModel {
@@ -95,15 +96,19 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String nodeId = req.getParameter("nodeId");
-		
+
 		// Auth by usage, allow a specific node to render if the user has a current usage signature for it
 		SignatureVerifier.runAsAuthByUsage(nodeId,req.getSession(),new RunAsWork<Void>() {
 					@Override
 					public Void doWork() throws Exception {
 						fetchNodeData(req,resp);
 						return null;
-					}	
+					}
 		});
+	}
+
+	class UnsupportedTypeException extends Exception{
+
 	}
 	
 	private void fetchNodeData(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -167,12 +172,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						//throw new Exception();
 					}
 					
-					if (!nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_IO)) 
+					if (!nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_IO))
 							&& !nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_MAP))
 							&& !nodeType.equals(QName.createQName(CCConstants.CCM_TYPE_SAVED_SEARCH))) {
-						//resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "type is not an io and no map!");
-						//return;
-						throw new Exception();
+						throw new UnsupportedTypeException();
 					}
 				} catch (InvalidNodeRefException e) {
 					resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
@@ -318,7 +321,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			String noPermImage=mime.getNoPermissionsPreview();
 			resp.sendRedirect(noPermImage);
 			return;
-		} catch (Throwable e) {
+		}  catch(UnsupportedTypeException e){
+			// ignore, the node type ist not supported for image previews
+		}  catch (Throwable e) {
 			// smaller logging for collection ref (i.e. original may deleted, that occurs often)
 			if(isCollection)
 				logger.warn(e.getMessage());
@@ -442,7 +447,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		return false;
 	}
 	private DataInputStream postProcessImage(String nodeId,DataInputStream in,HttpServletRequest req){
-		float quality=0.7f;
+		float quality=DEFAULT_QUALITY;
 		
 		int width=0,height=0,maxHeight=0,maxWidth=0;
 		boolean crop=false;
@@ -481,7 +486,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		boolean fromCache=false;
 		
 		if(fullsize || isCacheable(width, height,maxWidth,maxHeight)){
-			File file=PreviewCache.getFileForNode(nodeId,fullsize ? width : -1,height,false);
+			File file=PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width,height,false);
 			if(file!=null && file.exists()){
 				try{
 					in.close();
@@ -500,7 +505,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		try{
 			// cache optimization, if no other tasks, just return the cached preview
 			if(fromCache && Math.abs(quality-DEFAULT_QUALITY)<0.1){
-				return in;
+				logger.debug("Sending direct image cache to client: "+nodeId);
+				byte[] img=StreamUtils.copyToByteArray(in);
+				return new DataInputStream(new ByteArrayInputStream(img));
 			}
 			
 			BufferedImage img=ImageIO.read(in);
