@@ -105,7 +105,7 @@ export class ApplyToLmsComponent{
         let params = reurl.indexOf("?") == -1 ? '?' : '&';
         params += 'nodeId=' + ccrepUrl;
         params += '&localId=' + encodeURIComponent(node.ref.id);
-        if (this.node.title)
+        if (node.title)
             params += '&title=' + encodeURIComponent(node.title);
         else
             params += '&title=' + encodeURIComponent(node.name);
