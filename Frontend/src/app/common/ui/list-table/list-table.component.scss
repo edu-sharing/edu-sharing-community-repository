@@ -244,26 +244,7 @@ $badgeWidth:250px;
   }
   .sortMenu{
     position: absolute;
-    z-index: $dialogZIndex+1;
     left:80px;
-    width: $contextMenuWidth;
-    .collection-item{
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-      .title{
-        flex-grow: 1;
-      }
-      a{
-        height:20px;
-      }
-      i{
-        position: initial;
-      }
-      &.active{
-        font-weight: bold;
-      }
-    }
   }
 }
 .row .icon{

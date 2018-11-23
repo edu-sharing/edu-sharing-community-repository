@@ -1,4 +1,5 @@
 import {RestConstants} from "./rest-constants";
+import {ListItem} from "../ui/list-item";
 /**
  * All Object types returned by the rest service
  */
@@ -130,6 +131,9 @@ export class Node {
   public Node(){
 
   }
+}
+export class SortItem extends ListItem{
+  mode: string;
 }
 export interface NodePermissionsHistory {
   date: number;

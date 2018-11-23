@@ -555,29 +555,25 @@ export class ListTableComponent implements EventListener{
   private clickRowSender(node : Node){
     this.clickRow.emit(node);
   }
-  private canBeSorted(sortBy : string){
-    return RestConstants.POSSIBLE_SORT_BY_FIELDS.indexOf(sortBy)!=-1;
+  private canBeSorted(sortBy : any){
+    return RestConstants.POSSIBLE_SORT_BY_FIELDS.indexOf(sortBy.name)!=-1;
   }
   private getSortableColumns(){
     let result:ListItem[]=[];
     for(let col of this.columnsAll){
-      if(this.canBeSorted(col.name))
+      if(this.canBeSorted(col))
         result.push(col);
     }
     return result;
   }
-  private setSorting(sortBy : string,isPrimaryElement : boolean){
+  private setSorting(sortBy : any,isPrimaryElement : boolean){
     if(!this.canBeSorted(sortBy))
       return;
     if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*4){
       this.sortMenu=true;
       return;
     }
-    let sortAscending=true;
-    if(sortBy==this.sortBy)
-      sortAscending=!this.sortAscending;
-
-    this.sortListener.emit({sortBy: sortBy,sortAscending: sortAscending });
+    this.sortListener.emit({sortBy: sortBy.name,sortAscending: sortBy.ascending });
   }
   public getTitle(node:Node){
     return RestHelper.getTitle(node);

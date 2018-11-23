@@ -184,13 +184,17 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 		if(searchToken.getFrom()%searchToken.getMaxResult()!=0)
 			throw new Exception("Pixabay only supports offsets which are dividable by the maxItems count");
 		try {
-			
+			String sortBy="popular";
+			if(CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED).equals(searchToken.getSortDefinition().getFirstSortBy())){
+				sortBy="latest";
+			}
 			int page=1 + searchToken.getFrom()/searchToken.getMaxResult();
 			String uri="&q="+URLEncoder.encodeUriComponent(searchWord)+
 					"&editors_choice="+editorsChoice+
 					"&image_type="+imageType+
 					"&orientation="+orientation+
 					"&safesearch=true"+
+					"&order="+sortBy+
 					"&per_page="+searchToken.getMaxResult()+
 					"&page="+page;
 			searchToken.setQueryString(uri);
