@@ -3,7 +3,7 @@ import {ActivatedRoute, Params, Router} from "@angular/router";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {Toast} from "../toast";
-import {Node, NodeWrapper} from "../../rest/data-object";
+import {Node, NodeRemoteWrapper, NodeWrapper} from "../../rest/data-object";
 import {RestConstants} from "../../rest/rest-constants";
 import {SearchService} from "../../../modules/search/search.service";
 import {FrameEventsService} from "../../services/frame-events.service";
@@ -67,40 +67,11 @@ export class ApplyToLmsComponent{
   }
 
   forward() {
-    let reurl = this.reurl;
-    console.log(reurl);
-    let ccrepUrl='ccrep://'+encodeURIComponent(this.node.ref.repo)+'/'+encodeURIComponent(this.node.ref.id);
-    if(reurl=="IFRAME" || reurl=="WINDOW"){
-      (this.node as any).objectUrl=ccrepUrl;
-      NodeHelper.appendImageData(this.connector,this.node).subscribe((data:Node)=>{
-        this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE,data);
-        window.history.back();
+      this.nodeApi.prepareUsage(this.node.ref.id,this.node.ref.repo).subscribe((nodeWrapper)=> {
+          this.applyNode(nodeWrapper);
       },(error)=>{
-        console.warn("failed to fetch image data",error);
-        this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE,this.node);
-        window.history.back();
+          this.toast.error(error);
       });
-      return;
-    }
-    let params = reurl.indexOf("?")==-1 ? '?' : '&';
-    params += 'nodeId='+ccrepUrl;
-    params += '&localId='+encodeURIComponent(this.node.ref.id);
-    if(this.node.title)
-      params += '&title='+encodeURIComponent(this.node.title);
-    else
-      params += '&title='+encodeURIComponent(this.node.name);
-    params += '&mimeType='+encodeURIComponent(this.node.mimetype);
-    params += '&mediatype='+encodeURIComponent(this.node.mediatype);
-    params += '&h='+ApplyToLmsComponent.roundNumber(this.node.properties[RestConstants.CCM_PROP_HEIGHT]);
-    params += '&w='+ApplyToLmsComponent.roundNumber(this.node.properties[RestConstants.CCM_PROP_WIDTH]);
-    params += '&v='+this.node.contentVersion;
-    params += '&repoType='+encodeURIComponent(this.node.repositoryType);
-    // reurl + params
-    let contentParams = this.node.contentUrl.indexOf("?")==-1 ? '?' : '&';
-    contentParams+="LMS_URL="+encodeURIComponent(reurl);
-    //console.log(reurl+params);
-    console.log(this.node.contentUrl + contentParams);
-    window.location.replace(this.node.contentUrl + contentParams);// + params;
   }
 
   public static navigateToSearchUsingReurl(router:Router,url=window.location.href) {
@@ -113,4 +84,54 @@ export class ApplyToLmsComponent{
         return 0;
       return number;
   }
+
+    private applyNode(wrapper: NodeRemoteWrapper) {
+        let node=wrapper.node;
+        // copy the main object to remote (in this case, it's simply a regular, local object)
+        if(!wrapper.remote)
+            wrapper.remote=wrapper.node;
+        let reurl = this.reurl;
+        console.log(reurl);
+        // the ccrep should always point to the local object (relevant if it's from a remote repo)
+        let ccrepUrl = 'ccrep://' + encodeURIComponent(wrapper.remote.ref.repo) + '/' + encodeURIComponent(wrapper.remote.ref.id);
+        if (reurl == "IFRAME" || reurl=="WINDOW") {
+            (node as any).objectUrl = ccrepUrl;
+            NodeHelper.appendImageData(this.connector, node).subscribe((data: Node) => {
+                this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE, data);
+                window.history.back();
+            },(error)=>{
+                console.warn("failed to fetch image data",error);
+                this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE,this.node);
+                window.history.back();
+            });
+            return;
+        }
+        let params = reurl.indexOf("?") == -1 ? '?' : '&';
+        params += 'nodeId=' + ccrepUrl;
+        params += '&localId=' + encodeURIComponent(node.ref.id);
+        if (node.title)
+            params += '&title=' + encodeURIComponent(node.title);
+        else
+            params += '&title=' + encodeURIComponent(node.name);
+        params += '&mimeType=' + encodeURIComponent(node.mimetype);
+        params += '&mediatype=' + encodeURIComponent(node.mediatype);
+        params += '&h=' + ApplyToLmsComponent.roundNumber(node.properties[RestConstants.CCM_PROP_HEIGHT]);
+        params += '&w=' + ApplyToLmsComponent.roundNumber(node.properties[RestConstants.CCM_PROP_WIDTH]);
+        if(node.contentVersion)
+            params += '&v=' + node.contentVersion;
+        if(node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE])
+            params += '&resourceType=' + encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]);
+        if(node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION])
+            params += '&resourceVersion=' + encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION]);
+        params += '&isDirectory=' + node.isDirectory;
+        params += '&iconURL=' + encodeURIComponent(node.iconURL);
+        params += '&previewURL=' + encodeURIComponent(node.preview.url);
+        params += '&repoType=' + encodeURIComponent(node.repositoryType);
+        // reurl + params
+        //let contentParams = node.contentUrl.indexOf("?") == -1 ? '?' : '&';
+        //contentParams += "LMS_URL=" + encodeURIComponent(reurl);
+        console.log(reurl+params);
+        //console.log(node.contentUrl + contentParams);
+        window.location.replace(reurl + params);// + params;
+    }
 }

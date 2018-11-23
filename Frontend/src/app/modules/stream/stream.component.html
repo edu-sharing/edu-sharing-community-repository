@@ -94,17 +94,7 @@
     <div class="create fixed-action-btn"
          *ngIf="createAllowed"
          (click)="create()"
-    ><a class="btn-floating btn-large waves-effect"><i class="material-icons">add</i></a>
-        <!--
-      <ul>
-        <li><a class="btn-floating btn-floating-inverted" (click)="showUploadSelect=true"><i class="material-icons">cloud_upload</i></a></li>
-        <li><a class="btn-floating btn-floating-inverted" (click)="addFolderName=''"><i class="material-icons">create_new_folder</i></a></li>
-        <li *ngFor="let connector of connectorList ? connectorList.connectors : null">
-          <a class="btn-floating btn-floating-inverted" (click)="createConnectorName='';createConnectorType=connector"><i class="material-icons">{{connector.icon}}</i></a>
-        </li>
-        <li><a class="btn-floating btn-floating-inverted" (click)="listLTI()"><i class="material-icons">extension</i></a></li>
-      </ul>
-      -->
+    ><div class="mobile-move-bottom"><a class="btn-floating btn-large waves-effect"><i class="material-icons">add</i></a></div>
     </div>
     <div class="dialog dialogCreate" *ngIf="showCreate" (click)="showCreate=false" (contextmenu)="showCreate=false;$event.preventDefault();$event.stopPropagation();"></div>
     <!-- <input type="file" accept="image/*" capture="camera" #camera (change)="uploadCamera($event)"> -->

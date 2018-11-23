@@ -28,10 +28,14 @@
 package org.edu_sharing.repository.server.tools;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,9 +44,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.authentication.Context;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.extensions.surf.util.URLEncoder;
-
-import javax.servlet.http.HttpServletRequest;
 
 
 public class URLTool{
@@ -201,10 +204,28 @@ public class URLTool{
 	}
 	
 	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId){
-		String previewURL = getBaseUrl();
-		previewURL += "/preview?nodeId="+node+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
-		previewURL =  addOAuthAccessToken(previewURL);
-		return previewURL;
+		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+		NodeService alfNodeService = serviceRegistry.getNodeService();
+		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId),node);
+		QName type = serviceRegistry.getNodeService().getType(nodeRef);
+		if(type.equals(QName.createQName(CCConstants.CCM_TYPE_REMOTEOBJECT))) {
+			String repoId = (String)alfNodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID));
+			String remoteNodeId = (String)alfNodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID));
+			try {
+				HashMap<String, Object> props = NodeServiceFactory.getNodeService(repoId).getProperties(null,null,remoteNodeId);
+				return  (String)props.get(CCConstants.CM_ASSOC_THUMBNAILS);
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+			
+		}else {
+			String previewURL = getBaseUrl(true);
+			previewURL += "/preview?nodeId="+node+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
+			previewURL =  addOAuthAccessToken(previewURL);
+			return previewURL;
+		}
 	}
 	public static String getPreviewServletUrl(NodeRef node){
 		return getPreviewServletUrl(node.getId(), node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier());
@@ -217,7 +238,7 @@ public class URLTool{
 	
 	
 	public static String getShareServletUrl(NodeRef node, String token){
-		String shareUrl = getBaseUrl();
+		String shareUrl = getBaseUrl(true);
 		shareUrl += "/share?nodeId="+node.getId()+"&token="+token;
 		return shareUrl;
 	}
@@ -344,14 +365,7 @@ public class URLTool{
 	}
 	
 	public static String getRedirectServletLink(String repId, String nodeId){
-		
-		
-		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-		
-		
-		String hostOrDomain = (homeRepository.getDomain() == null || homeRepository.getDomain().trim().equals(""))? homeRepository.getHost() : homeRepository.getDomain();
-		
-		String url = homeRepository.getClientprotocol()+"://"+hostOrDomain+":"+homeRepository.getClientport()+"/"+homeRepository.getWebappname() + "/" + CCConstants.EDU_SHARING_SERVLET_PATH_REDIRECT;
+		String url = getBaseUrl(true) + "/" + CCConstants.EDU_SHARING_SERVLET_PATH_REDIRECT;
 		//if no cookies are allowed render jsessionid in url. Attention: the host or domain in appinfo must match the client ones
 		Context context = Context.getCurrentInstance();
 		//context can be null when not accessing true ContextManagementFilter (i.i by calling nativealfrsco webservice)

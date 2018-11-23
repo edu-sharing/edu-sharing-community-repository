@@ -805,7 +805,7 @@ $orderAnimationTime:$transitionNormal*5;
   }
 }
 .cardList .moreSingle{
-  right:-5px;
+  right:10px;
   text-transform: uppercase;
 }
 .cardList .moreSingle i{
@@ -973,6 +973,9 @@ $orderAnimationTime:$transitionNormal*5;
       border-top:1px solid $cardSeperatorLineColor;
       .typeicon{
         display:none!important;
+      }
+      .more a{
+        left:0;
       }
   }
   .cardList.addElement{

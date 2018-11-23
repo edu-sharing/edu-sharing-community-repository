@@ -328,7 +328,6 @@ export class RestHelper{
         });
     }
   public static goToLogin(router : Router,config:ConfigurationService,scope:string=null,next=window.location.href) {
-
     if(config.getLocator().getCordova().isRunningCordova()){
           config.getLocator().getCordova().reinitStatus(config.getLocator().endpointUrl,true,next).subscribe(()=>{});
           return;

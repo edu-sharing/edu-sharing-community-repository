@@ -37,11 +37,14 @@ $sidenavWidth:300px;
 .rowRepositories{
   position: fixed;
   top:$mainnavHeight;
-  width:100%;
-  z-index:13;
-  margin-bottom: 0;
-  ul{
-    border-bottom: none;
+  width: 100%;
+  z-index: 13;
+  >div {
+    width: 100%;
+    margin-bottom: 0;
+    ul {
+      border-bottom: none;
+    }
   }
 }
 .rowRepositories.no-mainnav{
@@ -246,16 +249,18 @@ a, a:hover, a:visited, a:active, button {
 
 .top {
   position: fixed;
-  background-color: #fff;
-  display: flex;
-  padding: 20px;
   top: $mainnavHeight+48px;
   z-index: 12;
   width:100%;
-  height:$secondaryBarHeight;
-  @include materialShadow();
-  &.no-mainnav{
-    top:48px;
+  >div {
+    height: $secondaryBarHeight;
+    background-color: #fff;
+    display: flex;
+    padding: 20px;
+    @include materialShadow();
+    &.no-mainnav {
+      top: 48px;
+    }
   }
 }
 small-collection{
@@ -600,6 +605,12 @@ div.dialog.darken {
     overflow-x: auto;
   }
 }
+@media all and (max-width: $mobileWidth) {
+  .contentSidenav{
+    width:calc(100% - 20px)!important;
+    margin-left: 10px!important;
+  }
+}
 @media all and (max-width: $mobileWidth+$mobileStage*1) {
     :host /deep/ .collections{
       .list{
@@ -618,10 +629,6 @@ div.dialog.darken {
     .content_wrapper {
         margin: 0;
     }
-  .contentSidenav{
-    width:calc(100% - 20px);
-  }
-
     #results {
         width: 100%;
     }
@@ -652,6 +659,9 @@ div.dialog.darken {
   }
   .sidenav{
     height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 180px);
+  }
+  .sidenavNoRepositories{
+    height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 65px - 70px);
   }
   .sidenavContainer .apply{
     bottom:$mobileTabNavHeight;

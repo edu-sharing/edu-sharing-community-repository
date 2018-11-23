@@ -10,8 +10,10 @@
     "ERROR":"Zugangsdaten fehlerhaft",
     "REGISTER_TEXT":"Noch keinen Zugang?",
     "REGISTER_LINK":"Zur Registrierung",
-    "USE_URL_TEXT":"Über externen Anbieter anmelden (z.B. Shibboleth)",
-    "USE_URL_LINK":"Zum Anbieter",
+    "CHOOSE_URL":"für Nutzende einer verbundenen Organisation",
+    "CHOOSE_URL_BUTTON":"Login über meine Organisation",
+    "CHOOSE_LOCAL":"für lokale Nutzende",
+    "CHOOSE_LOCAL_BUTTON":"edu-sharing Login",
     "SAFE_PREVIOUS":"Um sich im geschützten Bereich anzumelden, melden Sie sich bitte zuerst im Workspace an",
     "NO_ACCESS":"Keine Berechtigungen für diesen Bereich"
   },

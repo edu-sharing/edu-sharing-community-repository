@@ -203,6 +203,7 @@ export class SearchComponent {
   updateSelection(selection:Node[]){
     this.selection=selection;
     this.updateActionbar(selection);
+    this.setFixMobileNav();
   }
    ngOnInit() {
     setTimeout(()=> {
@@ -1137,4 +1138,13 @@ export class SearchComponent {
       }
       return null;
   }
+
+    toggleSidenav() {
+        this.searchService.sidenavOpened=!this.searchService.sidenavOpened;
+        this.setFixMobileNav();
+    }
+
+    private setFixMobileNav() {
+        this.mainNavRef.setFixMobileElements(this.searchService.sidenavOpened || this.selection && this.selection.length>0);
+    }
 }

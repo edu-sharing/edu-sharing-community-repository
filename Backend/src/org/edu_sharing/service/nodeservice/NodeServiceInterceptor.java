@@ -1,5 +1,6 @@
 package org.edu_sharing.service.nodeservice;
 
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
@@ -66,7 +67,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             try{
                 return invocation.proceed();
             }
-            catch(AccessDeniedException|InsufficientPermissionException t)
+            catch(AccessDeniedException|InsufficientPermissionException|AuthenticationCredentialsNotFoundException t)
             {
                 // catch exception, check
                 logger.info("Method threw "+t.getMessage()+", will check signature");

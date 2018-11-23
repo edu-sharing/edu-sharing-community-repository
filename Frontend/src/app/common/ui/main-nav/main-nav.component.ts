@@ -78,6 +78,7 @@ export class MainNavComponent implements AfterViewInit{
   @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
   @ViewChild('scrolltotop') scrolltotop:ElementRef;
   @ViewChild('userRef') userRef:ElementRef;
+  @ViewChild('tabNav') tabNav:ElementRef;
   public config: any={};
   private editUrl: string;
   public nodeStoreAnimation=0;
@@ -150,6 +151,10 @@ export class MainNavComponent implements AfterViewInit{
     public _showUser = false;
   @Input() searchQuery:string;
   @Output() searchQueryChange = new EventEmitter<string>();
+    private lastScroll = -1;
+    private elementsTopY = 0;
+    private elementsBottomY = 0;
+    private fixScrollElements = false;
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
       if(event.code=="Escape" && this.canOpen && this.displaySidebar){
@@ -199,6 +204,7 @@ export class MainNavComponent implements AfterViewInit{
             });
         }
         else{
+            this.handleScrollHide();
             this.posScrollElements(event,elements);
         }
     }
@@ -394,7 +400,8 @@ export class MainNavComponent implements AfterViewInit{
         });
         this.refreshNodeStore();
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
-          if(data.hasAccess)
+          // safe needs access and not be app (oauth not supported)
+          if(data.hasAccess && !this.cordova.isRunningCordova())
             buttons.push({path:'workspace/safe',scope:'safe',icon:"lock",name:"SIDEBAR.SECURE"});
           this.addMoreButtons(buttons);
         },(error:any)=>this.addMoreButtons(buttons));
@@ -693,5 +700,69 @@ export class MainNavComponent implements AfterViewInit{
             options.push(new OptionItem(entry.key,entry.icon,()=>window.open(entry.url)));
         }
         return options;
+    }
+
+    /**
+     * Method to dynamically hide objects when scrolling on mobile
+     * Add css class mobile-move-top or mobile-move-bottom for specific items
+     */
+    private handleScrollHide() {
+      if(this.tabNav.nativeElement==null)
+          return;
+      if(this.lastScroll==-1) {
+          this.lastScroll=window.scrollY;
+          return;
+      }
+      let elementsTop:any=document.getElementsByClassName("mobile-move-top");
+      let elementsBottom:any=document.getElementsByClassName("mobile-move-bottom");
+      let top=-1,bottom=-1;
+      for(let i=0;i<elementsTop.length;i++) {
+          let rect=elementsTop.item(i).getBoundingClientRect();
+          if(bottom==-1 || bottom<rect.bottom){
+              bottom=rect.bottom;
+          }
+      }
+        for(let i=0;i<elementsBottom.length;i++) {
+            let rect=elementsBottom.item(i).getBoundingClientRect();
+            if(top==-1 || top>rect.top){
+                top=rect.top;
+            }
+        }
+      let diffTop=window.scrollY-this.lastScroll;
+      let diffBottom=window.scrollY-this.lastScroll;
+      if(diffTop<0) diffTop*=2;
+      if(diffBottom<0) diffBottom*=2;
+
+      if(diffTop>0 && bottom<0){
+          diffTop=0;
+      }
+        if(diffBottom>0 && top>window.innerHeight){
+            diffBottom=0;
+        }
+      this.elementsTopY+=diffTop;
+      this.elementsTopY=Math.max(0,this.elementsTopY);
+      this.elementsBottomY+=diffBottom;
+      this.elementsBottomY=Math.max(0,this.elementsBottomY);
+      // for ios elastic scroll
+        if(window.scrollY<=0 || this.fixScrollElements || !UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)){
+            this.elementsTopY=0;
+            this.elementsBottomY=0;
+        }
+      //this.navbarOffsetY=Math.min(this.navbarOffsetY,bottom-top);
+        for(let i=0;i<elementsTop.length;i++) {
+            elementsTop.item(i).style.position="relative";
+            elementsTop.item(i).style.top=-this.elementsTopY+"px";
+        }
+      for(let i=0;i<elementsBottom.length;i++) {
+          elementsBottom.item(i).style.position="relative";
+          elementsBottom.item(i).style.top=this.elementsBottomY+"px";
+      }
+      console.log(this.elementsTopY+" "+this.elementsBottomY);
+        this.lastScroll=window.scrollY;
+        //console.log(event);
+    }
+    public setFixMobileElements(fix:boolean){
+        this.fixScrollElements=fix;
+        this.handleScrollHide();
     }
 }
