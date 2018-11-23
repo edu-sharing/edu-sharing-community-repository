@@ -116,12 +116,12 @@ export class ApplyToLmsComponent{
         if(node.contentVersion)
             params += '&v=' + node.contentVersion;
         if(node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE])
-            params += '&resourceType=' + node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE];
+            params += '&resourceType=' + encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]);
         if(node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION])
-            params += '&resourceVersion=' + node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION];
+            params += '&resourceVersion=' + encodeURIComponent(node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION]);
         params += '&isDirectory=' + node.isDirectory;
-        params += '&iconURL=' + node.iconURL;
-        params += '&previewURL=' + node.preview.url;
+        params += '&iconURL=' + encodeURIComponent(node.iconURL);
+        params += '&previewURL=' + encodeURIComponent(node.preview.url);
         params += '&repoType=' + encodeURIComponent(node.repositoryType);
         // reurl + params
         //let contentParams = node.contentUrl.indexOf("?") == -1 ? '?' : '&';
