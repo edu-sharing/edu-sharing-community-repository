@@ -208,9 +208,7 @@ public class CollectionServiceImpl implements CollectionService{
                  */
                 String refId = client.copyNode(originalNodeId, collectionId, true);
 
-                client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
                 permissionService.setPermissions(refId, null, true);
-				client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
 				client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
 
 
