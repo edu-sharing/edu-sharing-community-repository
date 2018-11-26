@@ -207,8 +207,7 @@ public class URLTool{
 		}
 		return result;
 	}
-	
-	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId){
+	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId,String baseUrl) {
 		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 		NodeService alfNodeService = serviceRegistry.getNodeService();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId),node);
@@ -224,13 +223,16 @@ public class URLTool{
 				e.printStackTrace();
 				return null;
 			}
-			
+
 		}else {
-			String previewURL = getBaseUrl(true);
+			String previewURL = baseUrl;
 			previewURL += "/preview?nodeId="+node+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
 			previewURL =  addOAuthAccessToken(previewURL);
 			return previewURL;
 		}
+	}
+	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId){
+		return getPreviewServletUrl(node,storeProtocol,storeId,getBaseUrl(true));
 	}
 	public static String getPreviewServletUrl(NodeRef node){
 		return getPreviewServletUrl(node.getId(), node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier());
