@@ -42,7 +42,7 @@ export class NodeInfoComponent{
     this.nodeApi.getNodeParents(this._node.ref.id,true).subscribe((data:NodeList)=>{
       this._path=data.nodes.reverse();
     });
-    this.nodeApi.getChildren(this._node.ref.id,[],{propertyFilter:[RestConstants.ALL],count:RestConstants.COUNT_UNLIMITED}).subscribe((data:NodeList)=>{
+    this.nodeApi.getChildren(this._node.ref.id,[RestConstants.FILTER_SPECIAL],{propertyFilter:[RestConstants.ALL],count:RestConstants.COUNT_UNLIMITED}).subscribe((data:NodeList)=>{
       this._children=data.nodes;
     });
   }
