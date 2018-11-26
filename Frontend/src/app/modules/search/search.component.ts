@@ -357,7 +357,7 @@ export class SearchComponent {
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
-  public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.getMdsValues()){
+  public routeSearch(query=this.searchService.searchTerm,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.getMdsValues()){
     this.scrollTo();
     //this.searchService.init();
     this.router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{
@@ -367,6 +367,8 @@ export class SearchComponent {
       repositoryFilter:this.getEnabledRepositories().join(','),
       mds:mds,repository:repository,
       mdsExtended:this.mdsExtended,
+      materialsSortBy:this.searchService.sort.materialsSortBy,
+      materialsSortAscending:this.searchService.sort.materialsSortAscending,
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
@@ -565,6 +567,15 @@ export class SearchComponent {
   }
 
     private updateSort() {
+        let sort=MdsHelper.getSortInfo(this.currentMdsSet,'search');
+        if(sort && sort.columns && sort.columns.length) {
+            this.searchService.sort.materialsColumns = [];
+            for (let column of sort.columns) {
+                let item = new SortItem("NODE", column.id);
+                item.mode = column.mode;
+                this.searchService.sort.materialsColumns.push(item);
+            }
+        }
         let state=this.currentRepository+":"+this.mdsId;
         console.log(state);
         // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
@@ -573,18 +584,9 @@ export class SearchComponent {
         this.searchService.sort.state = state;
         this.searchService.sort.materialsColumns = null;
         this.searchService.sort.materialsSortBy = null;
-        let sort=MdsHelper.getSortInfo(this.currentMdsSet,'search')
         if(sort) {
             this.searchService.sort.materialsSortBy = sort.default.sortBy;
             this.searchService.sort.materialsSortAscending = sort.default.sortAscending;
-            if (sort.columns && sort.columns.length) {
-                this.searchService.sort.materialsColumns = [];
-                for (let column of sort.columns) {
-                    let item = new SortItem("NODE", column.id);
-                    item.mode = column.mode;
-                    this.searchService.sort.materialsColumns.push(item);
-                }
-            }
         }
     }
     private updateColumns() {
@@ -593,7 +595,7 @@ export class SearchComponent {
   sortMaterials(sort:any){
       this.searchService.sort.materialsSortBy=sort.name;
       this.searchService.sort.materialsSortAscending=sort.ascending;
-    this.refresh();
+      this.routeSearch();
   }
   private importNode(node: Node) {
     this.globalProgress=true;
@@ -800,6 +802,12 @@ export class SearchComponent {
       this.loadSavedSearch();
       if(param['mdsExtended'])
         this.mdsExtended=param['mdsExtended']=='true';
+      if(param['materialsSortBy']){
+        // set a valid state first
+        this.updateSort();
+        this.searchService.sort.materialsSortBy=param['materialsSortBy'];
+        this.searchService.sort.materialsSortAscending=param['materialsSortAscending']=='true';
+      }
       if(param['parameters']){
         this.currentValues=JSON.parse(param['parameters']);
       }
@@ -864,6 +872,7 @@ export class SearchComponent {
     let sortAscending=[false,false];
 
     // order set by user and order is not of type score (which would be the default mode)
+    console.log(this.searchService.sort);
     if(this.searchService.sort.materialsSortBy && this.searchService.sort.materialsSortBy!=RestConstants.LUCENE_SCORE){
         sortBy=[this.searchService.sort.materialsSortBy];
         sortAscending=[this.searchService.sort.materialsSortAscending];
