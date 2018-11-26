@@ -143,13 +143,7 @@ public class URLTool{
 		if(dynamic) {
 			try {
 				HttpServletRequest req = Context.getCurrentInstance().getRequest();
-				String path = req.getScheme() + "://" + req.getServerName();
-				int port = req.getLocalPort();
-				if (port != 80 && port != 443) {
-					path += ":" + port;
-				}
-				path += "/" + homeRepository.getWebappname();
-				return path;
+				return getBaseUrlFromRequest(req);
 			}
 			catch(Throwable t){
 				logger.debug("Failed to get dynamic base url, will use the one defined in homeApp");
@@ -158,7 +152,18 @@ public class URLTool{
 
 		return getBaseUrl(homeRepository.getAppId());
 	}
-	
+
+	public static String getBaseUrlFromRequest(HttpServletRequest req) {
+		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
+		String path = req.getScheme() + "://" + req.getServerName();
+		int port = req.getLocalPort();
+		if (port != 80 && port != 443) {
+			path += ":" + port;
+		}
+		path += "/" + homeRepository.getWebappname();
+		return path;
+	}
+
 	public static String getBaseUrl(String repositoryId){
 		ApplicationInfo repository = ApplicationInfoList.getRepositoryInfoById(repositoryId);
 		String hostOrDomain = (repository.getDomain() == null || repository.getDomain().trim().equals(""))? repository.getHost() : repository.getDomain();
