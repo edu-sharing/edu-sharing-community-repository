@@ -8,11 +8,14 @@
   color:$textOnPrimary!important;
 }
 .btn,.btn-flat{
+  display:inline-flex;
+  align-items: center;
+  >span{
+    flex-grow:1;
+  }
   >.material-icons{
     display: inline-flex;
     align-items: center;
-    position: relative;
-    top: 4px;
   }
 }
 .btn:focus:not(.disabled){
@@ -267,7 +270,6 @@ input[type=search]:read-only{
 }
 .btn-icon i,.btn-icon-only i, .align-icon{
   position:relative;
-  top:4px;
   left:-10px;
 }
 

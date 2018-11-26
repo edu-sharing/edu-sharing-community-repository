@@ -70,4 +70,5 @@ public interface CollectionService {
 
 	void writePreviewImage(String collectionId, InputStream is, String mimeType) throws Exception;
 
+    List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId);
 }

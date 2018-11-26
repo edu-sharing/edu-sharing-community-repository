@@ -85,7 +85,12 @@
 .remove{
   position: relative;
   z-index: 2;
+  cursor: pointer;
 }
 .remove i,.type{
   color:$textLight;
+}
+.disabled{
+  opacity:0.5;
+  cursor:default;
 }
