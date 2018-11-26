@@ -244,26 +244,7 @@ $badgeWidth:250px;
   }
   .sortMenu{
     position: absolute;
-    z-index: $dialogZIndex+1;
     left:80px;
-    width: $contextMenuWidth;
-    .collection-item{
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-      .title{
-        flex-grow: 1;
-      }
-      a{
-        height:20px;
-      }
-      i{
-        position: initial;
-      }
-      &.active{
-        font-weight: bold;
-      }
-    }
   }
 }
 .row .icon{
@@ -780,7 +761,7 @@ $orderAnimationTime:$transitionNormal*5;
   }
 }
 .cardList .moreSingle{
-  right:-5px;
+  right:10px;
   text-transform: uppercase;
 }
 .cardList .moreSingle i{
@@ -941,6 +922,9 @@ $orderAnimationTime:$transitionNormal*5;
       border-top:1px solid $cardSeperatorLineColor;
       .typeicon{
         display:none!important;
+      }
+      .more a{
+        left:0;
       }
   }
   .cardList.addElement{

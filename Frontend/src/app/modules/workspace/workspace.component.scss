@@ -155,14 +155,15 @@
 .actionbarFrame{
   width:auto;
   position: fixed;
-  right:0;
-  margin-right:10px;
-  z-index:97;
-  padding-top:19px;
-  padding-left:20px;
   top: $mainnavHeight;
-  background: linear-gradient(to right, rgba(255,255,255,0.001) 0,#fff 10px,#fff 100%); /* safari fix */
-
+  right:0;
+  z-index: 97;
+  >div {
+    margin-right: 10px;
+    padding-top: 19px;
+    padding-left: 20px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.001) 0, #fff 10px, #fff 100%); /* safari fix */
+  }
 }
 .viewType{
   position:fixed;
@@ -179,21 +180,24 @@
 .breadcrumbFrame{
   position:fixed;
   top: $mainnavHeight;
-  left:0px;
-  padding-left:320px;
+  left:0;
   width:100%;
   height:$workspaceBreadcrumbsHeight;
   z-index:96;
-  background-color: #fff;
-  padding-top: 22px;
-  padding-bottom: 20px;
-  padding-right:50px;
+  >div {
+    background-color: #fff;
+    padding-left:320px;
+    padding-top: 22px;
+    padding-bottom: 20px;
+    padding-right: 50px;
+    @include materialShadow();
+  }
 }
 :host /deep/ .breadcrumbFrame div{
   word-break: break-all;
   /* word-break-wrap: ; */
 }
-.breadcrumbFrame,.tree,.metadata{
+.tree,.metadata{
   @include materialShadow();
 }
 
@@ -221,7 +225,7 @@
   .addMobile{
     display:inherit;
   }
-  .breadcrumbFrame{
+  .breadcrumbFrame >div{
     padding-left:10px;
   }
   .addDesktopMenu{

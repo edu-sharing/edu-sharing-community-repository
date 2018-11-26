@@ -3,9 +3,19 @@ import {RestConstants} from "./rest-constants";
 import {Authority, LocalPermissions, Permission} from "./data-object";
 
 export class MdsHelper{
-
+    static getSortInfo(mdsSet: any, name: string) {
+        if(mdsSet) {
+            for (let list of mdsSet.sorts) {
+                if (list.id == name) {
+                    return list;
+                }
+            }
+            console.error('mds does not define sort info for ' + name + ', invalid configuration!');
+        }
+        return null;
+    }
   static getColumns(mdsSet: any, name: string) {
-    let columns=[];
+    let columns:ListItem[]=[];
     if(mdsSet) {
       for (let list of mdsSet.lists) {
         if (list.id == name) {
@@ -17,7 +27,7 @@ export class MdsHelper{
           return columns;
         }
       }
-      console.info('mds does not define columns for ' + name + ', using defaults');
+      console.warn('mds does not define columns for ' + name + ', invalid configuration!');
     }
     if(name=='search' || name=='collectionReferences') {
       columns.push(new ListItem("NODE", RestConstants.CM_PROP_TITLE));

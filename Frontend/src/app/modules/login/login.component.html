@@ -9,33 +9,41 @@
 
   <spinner *ngIf="isLoading" class="center"></spinner>
   <div *ngIf="!isLoading">
-  <div class="card center-card">
+  <div class="card center-card card-action">
     <div class="card-content">
-    <div class="card-title">{{caption | translate}}</div>
+      <div *ngIf="previousStage" class="card-cancel" (click)="stage=previousStage;previousStage=null"><i class="material-icons">close</i></div>
+      <div class="card-title">{{caption | translate}}</div>
       <div class="branding"><img src="assets/images/logo.svg"></div>
-      <div class="card-scroll ">
-      <form (ngSubmit)="login()" #loginForm>
-      <div *ngIf="showUsername">
-        <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-        <input #usernameInput type="text" requried name="username" id="username" (keyup.enter)="checkConditions()" [(ngModel)]="username" autofocus/>
-      </div>
-      <div>
-        <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
-      <!--<input #passwordInput requried type="password" name="password" id="password" (keydown.enter)="login()" (change)="checkConditions()" [(ngModel)]="password"/>-->
-        <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
-      </div>
-      </form>
-      <div class="useUrl" *ngIf="config.loginUrl">
-          <div>{{'LOGIN.USE_URL_TEXT' | translate}}</div>
-          <a (click)="openLoginUrl()" class="clickable goto"><span>{{'LOGIN.USE_URL_LINK' | translate}}</span> <i class="material-icons">arrow_forward</i></a>
-      </div>
-      <div class="register" *ngIf="config.registerUrl">
-        {{'LOGIN.REGISTER_TEXT' | translate}}
-        <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
-      </div>
+      <div class="card-scroll">
+          <div *ngIf="stage=='choose'" [@dialog]="stage=='choose'" class="choose">
+              <div>
+                  <div class="choose-label">{{'LOGIN.CHOOSE_URL' | translate}}</div>
+                  <a class="btn waves-effect waves-light" (click)="openLoginUrl()" (keyup.enter)="openLoginUrl()" tabindex="0">{{'LOGIN.CHOOSE_URL_BUTTON' | translate}} <i class="material-icons">arrow_forward</i></a>
+              </div>
+              <div>
+                  <div class="choose-label">{{'LOGIN.CHOOSE_LOCAL' | translate}}</div>
+                  <a class="btn waves-effect waves-light" (click)="showLogin()" (keyup.enter)="showLogin()" tabindex="0">{{'LOGIN.CHOOSE_LOCAL_BUTTON' | translate}}</a>
+              </div>
+          </div>
+          <div *ngIf="stage=='login'" [@dialog]="stage=='login'">
+          <form (ngSubmit)="login()" #loginForm>
+            <div *ngIf="showUsername">
+              <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
+              <input #usernameInput type="text" required name="username" id="username" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="username" autofocus/>
+            </div>
+            <div>
+              <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
+                <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
+            </div>
+          </form>
+          <div class="register" *ngIf="config.registerUrl">
+            {{'LOGIN.REGISTER_TEXT' | translate}}
+            <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
+          </div>
+        </div>
       </div>
     </div>
-      <div class="card-action">
+      <div class="card-action" *ngIf="stage=='login'">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>

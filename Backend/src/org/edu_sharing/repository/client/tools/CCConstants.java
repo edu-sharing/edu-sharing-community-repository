@@ -1591,6 +1591,7 @@ public class CCConstants {
 	}
 
 	public final static String COMMON_LICENSE_CC_ZERO_LINK = "https://creativecommons.org/publicdomain/zero/1.0/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_PDM_LINK = "http://creativecommons.org/publicdomain/mark/1.0/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_BY_SA_LINK = "https://creativecommons.org/licenses/by-sa/${version}/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_BY_ND_LINK = "https://creativecommons.org/licenses/by-nd/${version}/deed.${locale}";
@@ -1600,6 +1601,26 @@ public class CCConstants {
 	public final static String COMMON_LICENSE_EDU_LINK = "http://edu-sharing.net/licenses/edu-nc-nd/1.0/de";
 	public final static String COMMON_LICENSE_CUSTOM_LINK = "http://edu-sharing.net/licenses/custom-licence/1.0/de";
 
+	
+	private static Map<String,String> licenseMap = null;
+	
+	public static Map<String,String> getLicenseMap(){
+		if(licenseMap == null) {
+			licenseMap = new HashMap<String,String>();
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_SA_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_SA);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_ND_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_ND);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_NC_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_NC);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_NC_ND_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_NC_ND);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_NC_SA_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_NC_SA);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_ZERO_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_ZERO);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_PDM_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_PDM);
+		}
+		return licenseMap;
+	}
+	
+	
+	
 	private static ArrayList<String> permission = null;
 
 	public static ArrayList<String> getPermissionList(){
@@ -1802,6 +1823,8 @@ public class CCConstants {
 	 * @return
 	 */
 	public static String getValidLocalName(String value){
+		
+		if(value == null) return null;
 
 		for(Map.Entry<String,String> entry: getNameSpaceMap().entrySet()){
 			if(value.contains(entry.getKey())){

@@ -84,6 +84,17 @@ export class UIAnimation{
         animate(time, style({transform:'scaleY(0.5)',opacity:0}))      ])
     ];
   }
+    /**
+     * Useful animation to switch different content insides a dialog (navigating between contents)
+     * @param time
+     * @returns {AnimationStateTransitionMetadata[]}
+     */
+    public static switchDialog(time=UIAnimation.ANIMATION_TIME_NORMAL){
+        return [transition(':enter', [
+            style({'transform-origin':'50% 0%',transform:'scaleY(0)',opacity:0}),
+            animate(time, style({transform:'scaleY(1)',opacity:1}))
+        ])];
+    }
   /**
    * Useful animation for showing any modal cards
    * @param time

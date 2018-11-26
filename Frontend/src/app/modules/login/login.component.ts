@@ -18,13 +18,18 @@ import {Helper} from '../../common/helper';
 import {RestHelper} from '../../common/rest/rest-helper';
 import {PlatformLocation} from '@angular/common';
 
-import {CordovaService} from "../../common/services/cordova.service";
+import {CordovaService} from '../../common/services/cordova.service';
+import {trigger} from "@angular/animations";
+import {UIAnimation} from "../../common/ui/ui-animation";
 import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
 
 @Component({
   selector: 'workspace-login',
   templateUrl: 'login.component.html',
-  styleUrls: ['login.component.scss']
+  styleUrls: ['login.component.scss'],
+    animations: [
+        trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST)),
+    ]
 })
 export class LoginComponent  implements OnInit{
     loginUrl: any;
@@ -42,6 +47,9 @@ export class LoginComponent  implements OnInit{
   public mainnav=true;
   private caption='LOGIN.TITLE';
   private config: any={};
+  // stage (login or choose)
+  private previousStage = '';
+  private stage = 'login';
   private checkConditions(){
     this.disabled=!this.username;// || !this.password;
   }
@@ -99,9 +107,13 @@ export class LoginComponent  implements OnInit{
               }
             }
               this.loginUrl=configService.instant('loginUrl');
-              if(params['local']!='true' && !configService.instant('loginAllowLocal',false) && this.loginUrl && data.statusCode!=RestConstants.STATUS_CODE_OK){
+              const allowLocal=configService.instant('loginAllowLocal',false);
+              if(params['local']!='true' && !allowLocal && this.loginUrl && data.statusCode!=RestConstants.STATUS_CODE_OK){
                 this.openLoginUrl();
                 return;
+            }
+            if(this.loginUrl && allowLocal){
+              this.stage='choose';
             }
           });
           this.showUsername=this.scope!=RestConstants.SAFE_SCOPE;
@@ -182,4 +194,9 @@ export class LoginComponent  implements OnInit{
       UIHelper.goToDefaultLocation(this.router,this.configService);
     }
   }
+
+    showLogin() {
+        this.previousStage=this.stage;
+        this.stage='login';
+    }
 }

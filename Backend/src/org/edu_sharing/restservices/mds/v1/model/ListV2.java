@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.edu_sharing.metadataset.v2.MetadataColumn;
-import org.edu_sharing.metadataset.v2.MetadataGroup;
 import org.edu_sharing.metadataset.v2.MetadataList;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataTemplate;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -28,15 +24,15 @@ public class ListV2 {
 				}
 			}
 		}
-		
-		
-		@JsonProperty("id")
-		public String getId() {
-			return id;
-		}
-		public void setId(String id) {
-			this.id = id;
-		}
+
+	@JsonProperty("id")
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 		@JsonProperty("columns")
 		public List<ColumnV2> getColumns() {
 			return columns;

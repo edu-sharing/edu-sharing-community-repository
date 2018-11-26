@@ -351,7 +351,9 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	        	}
 	        	
 	        	//for collections and solr set originalid (will be overwritten by collectionservice if a reference io is created)
-	        	nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),eduNodeRef.getId());
+				// the id will be written on copy, so may it already exists -> then keep it
+				if(nodeService.getProperty(eduNodeRef,QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL))==null)
+	        		nodeService.setProperty(eduNodeRef, QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL),eduNodeRef.getId());
 	        	
 				NodeRef personRef = personService.getPerson((String) props.get(ContentModel.PROP_CREATOR));
 				Map<QName, Serializable> userInfo = nodeService.getProperties(personRef);

@@ -44,6 +44,7 @@
   </div>
 </div>
 <div #topbar class="topBar {{ 'topBar-'+_currentScope}} scrollWithBanner" [class.noUser]="!_showUser">
+    <div class="mobile-move-top2">
   <div class="menuButtonOuter">
     <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
       <img class="material-icons eduImage" [src]="getIconSource()" alt="{{'EDU_LOGO_ALT' | translate}}"/>
@@ -92,20 +93,24 @@
             [(show)]="helpOpen"
             [options]="helpOptions"
   ></dropdown>
+    </div>
 </div>
 <div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
-<div class="tab-nav" *ngIf="canOpen && _currentScope!='render'">
-  <div *ngFor="let button of sidebarButtons" class="button" [class.selected]="_currentScope==button.scope"
-       (click)="openButton(button)"
-       (keyup.enter)="openButton(button)"
-       [class.collection-item-seperate]="button.isSeperate"
-       [class.clickable]="!button.isDisabled"
-       [class.disabled]="button.isDisabled"
-       tabindex="0"
-       title="{{'GOTO' | translate}} {{button.name | translate}}">
-    <i *ngIf="button.icon" class="material-icons">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}">
-      <span>{{(button.isCustom ? button.name : button.name+"_SHORT") | translate}}</span>
-  </div>
+<div class="tab-nav" #tabNav *ngIf="canOpen && _currentScope!='render'" [style.bottom]="-navbarOffsetY+'px'">
+    <div class="mobile-move-bottom">
+          <div *ngFor="let button of sidebarButtons" [class.selected]="_currentScope==button.scope"
+               (click)="openButton(button)"
+               (keyup.enter)="openButton(button)"
+               class="button waves-effect"
+               [class.collection-item-seperate]="button.isSeperate"
+               [class.clickable]="!button.isDisabled"
+               [class.disabled]="button.isDisabled"
+               tabindex="0"
+               title="{{'GOTO' | translate}} {{button.name | translate}}">
+            <i *ngIf="button.icon" class="material-icons">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}">
+              <span>{{(button.isCustom ? button.name : button.name+"_SHORT") | translate}}</span>
+          </div>
+    </div>
 </div>
 <search-node-store
   *ngIf="showNodeStore"

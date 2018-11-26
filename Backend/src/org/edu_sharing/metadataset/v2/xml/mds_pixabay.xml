@@ -34,6 +34,19 @@
 				</values>
 			</widget>
 		</widgets>
+		<sorts>
+			<sort>
+				<id>search</id>
+				<default>
+					<sortBy>score</sortBy>
+					<sortAscending>false</sortAscending>
+				</default>
+				<columns>
+					<column mode="descending">score</column>
+					<column mode="descending">cm:modified</column>
+				</columns>
+			</sort>
+		</sorts>
 		<lists>
 			<list>
 				<id>search</id>

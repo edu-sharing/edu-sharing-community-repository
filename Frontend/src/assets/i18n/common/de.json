@@ -162,6 +162,9 @@
   },
   "NODE" : {
     "cm:name": "Dateiname",
+    "cm:title": "Titel",
+    "ccm:replicationsource": "Herkunft",
+    "score": "Relevanz",
     "description": "Beschreibung",
     "mimetype": "Dateityp",
     "size": "Größe",

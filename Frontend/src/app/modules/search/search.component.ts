@@ -13,8 +13,8 @@ import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
 import {
-  Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
-  MdsMetadatasets, MdsInfo, Collection, CollectionWrapper, SearchList
+    Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
+    MdsMetadatasets, MdsInfo, Collection, CollectionWrapper, SearchList, SortItem
 } from '../../common/rest/data-object';
 import {ListTableComponent} from '../../common/ui/list-table/list-table.component';
 import {OptionItem} from '../../common/ui/actionbar/option-item';
@@ -202,6 +202,7 @@ export class SearchComponent {
   updateSelection(selection:Node[]){
     this.selection=selection;
     this.updateActionbar(selection);
+    this.setFixMobileNav();
   }
    ngOnInit() {
     setTimeout(()=> {
@@ -563,27 +564,37 @@ export class SearchComponent {
     this.searchFail=this.searchService.searchResult.length<1 && this.searchService.searchResultCollections.length<1;
   }
 
-  private updateColumns() {
-    /*
-    this.config.get("searchColumns").subscribe((data:any)=>{
-      this.columns=[];
-      if(data && data.length){
-        for(let item of data){
-          this.columns.push(new ListItem("NODE",item));
+    private updateSort() {
+        let state=this.currentRepository+":"+this.mdsId;
+        console.log(state);
+        // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
+        if(state==this.searchService.sort.state)
+          return;
+        this.searchService.sort.state = state;
+        this.searchService.sort.materialsColumns = null;
+        this.searchService.sort.materialsSortBy = null;
+        let sort=MdsHelper.getSortInfo(this.currentMdsSet,'search')
+        if(sort) {
+            this.searchService.sort.materialsSortBy = sort.default.sortBy;
+            this.searchService.sort.materialsSortAscending = sort.default.sortAscending;
+            if (sort.columns && sort.columns.length) {
+                this.searchService.sort.materialsColumns = [];
+                for (let column of sort.columns) {
+                    let item = new SortItem("NODE", column.id);
+                    item.mode = column.mode;
+                    this.searchService.sort.materialsColumns.push(item);
+                }
+            }
         }
-      }
-      else{
-        this.columns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
-        this.columns.push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
-        this.columns.push(new ListItem("NODE",RestConstants.CCM_PROP_LICENSE));
-        this.columns.push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
-      }
-    });
-    */
-    this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
-
+    }
+    private updateColumns() {
+      this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
   }
-
+  sortMaterials(sort:any){
+      this.searchService.sort.materialsSortBy=sort.name;
+      this.searchService.sort.materialsSortAscending=sort.ascending;
+    this.refresh();
+  }
   private importNode(node: Node) {
     this.globalProgress=true;
     this.nodeApi.importNode(node.ref.repo,node.ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
@@ -758,6 +769,7 @@ export class SearchComponent {
     console.log('mds ready');
     this.currentMdsSet=mds;
     this.updateColumns();
+    this.updateSort();
     if (this.searchService.searchResult.length < 1) {
       this.initalized = true;
       if(!this.currentValues && this.mdsRef) {
@@ -846,28 +858,26 @@ export class SearchComponent {
         this.searchRepository(repos,criterias,init,position+1,count);
         return;
     }
-    /*
-    let properties=[RestConstants.CM_MODIFIED_DATE,
-      RestConstants.CM_CREATOR,
-      RestConstants.CCM_PROP_WIDTH,
-      RestConstants.CCM_PROP_HEIGHT,
-      RestConstants.CCM_PROP_AUTHOR_FREETEXT,
-      RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR_FN,
-      RestConstants.CCM_PROP_METADATACONTRIBUTER_CREATOR_FN,
-      RestConstants.CCM_PROP_LICENSE,
-      RestConstants.CCM_PROP_REPLICATIONSOURCE,
-      RestConstants.CCM_PROP_QUESTIONSALLOWED];*/
+
+    // default order: lucene score, modified date
+    let sortBy=[RestConstants.LUCENE_SCORE,RestConstants.CM_MODIFIED_DATE];
+    let sortAscending=[false,false];
+
+    // order set by user and order is not of type score (which would be the default mode)
+    if(this.searchService.sort.materialsSortBy && this.searchService.sort.materialsSortBy!=RestConstants.LUCENE_SCORE){
+        sortBy=[this.searchService.sort.materialsSortBy];
+        sortAscending=[this.searchService.sort.materialsSortAscending];
+    }
     let properties=[RestConstants.ALL];
     this.search.search(criterias,
       [RestConstants.LOM_PROP_GENERAL_KEYWORD],
       {
-        sortBy: [RestConstants.LUCENE_SCORE,RestConstants.CM_MODIFIED_DATE],
-        sortAscending: false,
+        sortBy: sortBy,
+        sortAscending: sortAscending,
         count:this.currentRepository==RestConstants.ALL && !this.groupResults ?
           Math.max(5,Math.round(this.connector.numberPerRequest/(this.repositories.length-1))) : null,
         offset: this.searchService.skipcount[position],
-        propertyFilter: [
-          properties]
+        propertyFilter: [properties]
       },
       RestConstants.CONTENT_TYPE_FILES,
       repo ? repo.id : RestConstants.HOME_REPOSITORY,
@@ -1141,4 +1151,13 @@ export class SearchComponent {
       }
       return null;
   }
+
+    toggleSidenav() {
+        this.searchService.sidenavOpened=!this.searchService.sidenavOpened;
+        this.setFixMobileNav();
+    }
+
+    private setFixMobileNav() {
+        this.mainNavRef.setFixMobileElements(this.searchService.sidenavOpened || this.selection && this.selection.length>0);
+    }
 }

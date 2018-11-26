@@ -12,8 +12,9 @@ import {ConfigurationService} from "../services/configuration.service";
 import {UIConstants} from "../ui/ui-constants";
 import NumberFormat = Intl.NumberFormat;
 import NumberFormatOptions = Intl.NumberFormatOptions;
-import {CordovaService} from '../services/cordova.service';
 import {RestConnectorService} from './services/rest-connector.service';
+import {Toast} from '../ui/toast';
+import {RestIamService} from './services/rest-iam.service';
 
 export class RestHelper{
     private static SPACES_STORE_REF = "workspace://SpacesStore/";
@@ -60,8 +61,7 @@ export class RestHelper{
   }
   public static errorMessageContains(error:any,needle:string){
     try{
-      let json=JSON.parse(error._body);
-      return json.message.indexOf(needle)!=-1;
+      return error.error.message.indexOf(needle)!=-1;
     }catch(e){}
     return false;
   }
@@ -312,8 +312,8 @@ export class RestHelper{
     return perm;
   }
 
-  public static goToLogin(router : Router,config:ConfigurationService,scope="",next=window.location.href) {
-      
+  public static goToLogin(router : Router,config:ConfigurationService,scope:string=null,next=window.location.href) {
+
     if(config.getLocator().getCordova().isRunningCordova()){
           config.getLocator().getCordova().reinitStatus(config.getLocator().endpointUrl);
           return;
