@@ -16,6 +16,7 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.repoproxy.RepoProxy;
 import org.edu_sharing.webservices.alfresco.extension.KeyValue;
 import org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper;
 import org.edu_sharing.webservices.alfresco.extension.RepositoryNode;
@@ -30,6 +31,7 @@ public class NodeServiceWSImpl extends NodeServiceAdapter {
 	public NodeServiceWSImpl(String appId) {
 		super(appId);
 		appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+		//new RepoProxy().remoteAuth(appInfo);
 	}
 
 	@Override

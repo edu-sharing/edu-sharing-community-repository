@@ -16,24 +16,20 @@ import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.apache.axis.AxisFault;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.MCBaseClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.restservices.repoproxy.RepoProxy;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
@@ -211,7 +207,7 @@ public class RenderingProxy extends HttpServlet {
 			if(key.equals("u") && !homeRep.getAppId().equals(rep_id)){
 				final String usernameDecrypted2 = usernameDecrypted;
 				
-				final String finalRepId = rep_id;
+				ApplicationInfo remoteRepo = ApplicationInfoList.getRepositoryInfoById(rep_id);
 				
 				AuthenticationUtil.RunAsWork<String> runAs = new AuthenticationUtil.RunAsWork<String>(){
 					
@@ -230,55 +226,7 @@ public class RenderingProxy extends HttpServlet {
 						/**
 						 *make sure that the remote user exists
 						 */
-						if(personData == null || personData.size() < 1){
-							throw new Exception("unknown local user "+localUsername);
-						}else{
-							
-							/**
-							 * only do the create process if remote user does not exist
-							 */
-							MCAlfrescoBaseClient remoteClient = null;
-							boolean remoteUserExists = false;
-							try{
-								MCBaseClient remoteClientBase = RepoFactory.getInstance(finalRepId, apiClient.getAuthenticationInfo());
-								if(remoteClientBase instanceof MCAlfrescoBaseClient) {
-									remoteClient = (MCAlfrescoBaseClient)remoteClientBase;
-									HashMap<String,String> remoteUserInfo = remoteClient.getUserInfo(personData.get(CCConstants.PROP_USER_ESUID) + "@" + homeRep.getAppId());
-									if(remoteUserInfo != null && remoteUserInfo.size() > 0){
-										remoteUserExists = true;
-									}
-								}
-							}catch(AxisFault e){
-								
-								boolean userDoesNotExsist = false;
-								for (org.w3c.dom.Element ele : e.getFaultDetails()) {
-									
-									if (ele.getNodeName().equals("faultData")) {
-										if(ele.getTextContent().contains("does not exist")){
-											userDoesNotExsist = true;
-											logger.error( ele.getTextContent());
-										}										
-									}
-								}
-								if(!userDoesNotExsist){
-									logger.error(e.getMessage(),e);
-									throw new Exception(e);
-								}
-							}
-							catch(Throwable e){
-								logger.error(e.getMessage(),e);
-								throw new Exception(e);
-							}
-							
-							HashMap<String,String> localAuthInfo = apiClient.getAuthenticationInfo();							
-							if(!remoteUserExists){
-								try{
-									new AuthenticatorRemoteRepository().getAuthInfoForApp(localAuthInfo, ApplicationInfoList.getRepositoryInfoById(finalRepId));
-								}catch(Throwable e){
-									throw new Exception(e);
-								}
-							}
-						}
+						new RepoProxy().remoteAuth(remoteRepo);
 						
 						
 						return personData.get(CCConstants.PROP_USER_ESUID);
@@ -286,10 +234,10 @@ public class RenderingProxy extends HttpServlet {
 				};
 				
 			    try{
-				    	String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
-				    	value = esuid + "@" + homeRep.getAppId();
+			    	String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
+			    	value = esuid + "@" + homeRep.getAppId();
 				    	
-					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(appInfoApplication.getPublicKey()));
+					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(remoteRepo.getPublicKey()));
 					value = Base64.encodeBase64String(esuidEncrptedBytes);
 
 			    }catch(Exception e){
@@ -297,23 +245,24 @@ public class RenderingProxy extends HttpServlet {
 				    	resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"remote user auth failed "+ rep_id);
 				    	return;
 			    }
-			}
+			}else {
 			
-			//request.getParameter encodes the value, so we have to decode it again
-			if(key.equals("u")){
-				try {
-					ApplicationInfo targetApplication = ApplicationInfoList.getRenderService();
-					if(!homeRep.getAppId().equals(rep_id)){
-						targetApplication = ApplicationInfoList.getRepositoryInfoById(rep_id);
+				//request.getParameter encodes the value, so we have to decode it again
+				if(key.equals("u")){
+					try {
+						ApplicationInfo targetApplication = ApplicationInfoList.getRenderService();
+						if(!homeRep.getAppId().equals(rep_id)){
+							targetApplication = ApplicationInfoList.getRepositoryInfoById(rep_id);
+						}
+						byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
+						value = Base64.encodeBase64String(userEncryptedBytes);
+	
+					}catch(Exception e) {
+						logger.error(e.getMessage(), e);
 					}
-					byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
-					value = Base64.encodeBase64String(userEncryptedBytes);
-
-				}catch(Exception e) {
-					logger.error(e.getMessage(), e);
+					
+					
 				}
-				
-				
 			}
 			value = URLEncoder.encode(value, "UTF-8");
 			contentUrl = UrlTool.setParam(contentUrl, key, value);

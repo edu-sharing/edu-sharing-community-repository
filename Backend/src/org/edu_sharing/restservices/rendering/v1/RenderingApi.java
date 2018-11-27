@@ -22,6 +22,7 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RenderingDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
+import org.edu_sharing.restservices.repoproxy.RepoProxy;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
@@ -118,6 +119,11 @@ public class RenderingApi {
 			@Context HttpServletRequest req){
 
 		try {
+			
+			if(RepoProxy.myTurn(repository)) {
+				return new RepoProxy().getDetailsSnippetWithParameters(repository, node, nodeVersion, parameters, req);
+			}
+			
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			if (repoDao == null) {
 				return Response.status(Response.Status.NOT_FOUND).build();
