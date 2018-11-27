@@ -184,7 +184,8 @@
     "virtual:usagecount": "Anz. Verwendungen",
     "ccm:author_freetext":"Freie Urheber-Angabe",
     "ccm:lifecyclecontributer_authorFN":"Autor",
-    "ccm:wf_status":"Status"
+    "ccm:wf_status":"Status",
+    "ccm:eaf_productionyear":"Produktionsjahr"
   },
   "LICENSE":{
     "NAMES": {
