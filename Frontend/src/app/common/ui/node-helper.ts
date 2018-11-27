@@ -482,7 +482,6 @@ export class NodeHelper{
         item.isEnabled=item.enabledCallback(null);
         item.showCallback=(node:Node)=>{
             let nodes=NodeHelper.getActionbarNodes(selectedNodes,node);
-            console.log(item,c,nodes);
             if(c.mode=='nodes' && (!nodes || nodes.length))
                 return false;
             if(c.mode=='noNodes' && nodes && nodes.length)
