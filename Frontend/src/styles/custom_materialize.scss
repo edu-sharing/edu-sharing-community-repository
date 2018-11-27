@@ -16,6 +16,9 @@
 .btn:focus:not(.disabled){
     background-color:$primaryDark!important;
 }
+.btn-complementary:focus:not(.disabled){
+  background-color:darken($primaryComplementary,20%)!important;
+}
 .btn-flat{
   color:$primary;
   background: #fff;
@@ -321,6 +324,9 @@ img.align-icon {
   i{
     height: 100%;
   }
+}
+.btn-complementary{
+  background-color: $primaryComplementary!important;
 }
 .btn-floating.btn-large i {
   line-height: 0px;
