@@ -796,7 +796,8 @@ export class WorkspaceMainComponent implements EventListener{
                 apply.showCallback=((node:Node)=> {
                     return this.reurlDirectories || !node.isDirectory;
                 });
-                options.push(apply);
+                if(apply.showCallback(nodes[0]))
+                    options.push(apply);
             }
             if(this.isAdmin){
                 let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
