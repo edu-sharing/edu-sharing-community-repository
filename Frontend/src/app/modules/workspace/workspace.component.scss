@@ -60,15 +60,6 @@
 .addDesktop,.addMobile {
   z-index: 115;
 }
-.addDesktop span{
-  position: relative;
-  top:-3px;
-  padding-left:4px;
-}
-.addDesktop i{
-  position: relative;
-  top:1px;
-}
 .addMobile{
   z-index:85;
   position:fixed;
