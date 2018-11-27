@@ -22,4 +22,10 @@ export class BannerComponent {
       this.onUpdate.emit(this.banner);
     });
   }
+
+    clickBanner() {
+        if(this.banner.href) {
+            window.open(this.banner.href);
+        }
+    }
 }
