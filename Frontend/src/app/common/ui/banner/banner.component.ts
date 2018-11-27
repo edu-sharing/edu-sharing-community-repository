@@ -25,7 +25,7 @@ export class BannerComponent {
 
     clickBanner() {
         if(this.banner.href) {
-            window.open(this.banner.href);
+            window.location.href=this.banner.href;
         }
     }
 }
