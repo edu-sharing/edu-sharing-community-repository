@@ -156,7 +156,7 @@ public class MetadataSetV2 {
 			}
 		}
 		for(MetadataSort sort : mdsOverride.getSorts()){
-			if(sorts.contains(sorts)){
+			if(sorts.contains(sort)){
 				sorts.remove(sort);
 				sorts.add(0,sort);
 			}
