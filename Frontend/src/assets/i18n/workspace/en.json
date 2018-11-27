@@ -114,6 +114,10 @@
       "USAGE_TYPE":{
         "MOODLE":"Moodle-Courses",
         "COLLECTION":"Collections"
+      },
+      "USAGE_SUBTYPE":{
+        "COURSE":"Course",
+        "PAGE":"Page"
       }
     },
     "INHERIT_DISABLED":"Inherition is currently disabled",
