@@ -433,6 +433,8 @@ export class NodeHelper{
           continue;
         if (c.mode=='nodes' && c.isDirectory != 'any' && selectedNodes && c.isDirectory != selectedNodes[0].isDirectory)
           continue;
+        if(c.toolpermission && !connector.hasToolPermissionInstant(c.toolpermission))
+          continue;
         if (!c.multiple && selectedNodes && selectedNodes.length > 1)
           continue;
         let position = c.position;
