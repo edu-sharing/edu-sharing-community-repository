@@ -10,6 +10,7 @@ export class InputPasswordComponent{
     @Input() id="passwordInput";
     @Input() required=false;
     @Input() value:string;
+    @Input() autocomplete:string;
     @Input() inputClass:string;
     @Input() hint:false;
     @Output() valueChange = new EventEmitter();
@@ -17,6 +18,7 @@ export class InputPasswordComponent{
     @Output() change = new EventEmitter();
     @Output() keydown = new EventEmitter();
     @Output() keyup = new EventEmitter();
+    @Output() ngModelChange = new EventEmitter();
     @ViewChild('input') nativeInput : ElementRef;
     public set _value(_value:string){
       this.value=_value;

@@ -34,11 +34,11 @@ export class RegisterFormComponent{
     public privacyUrl: string;
     public mailValid: boolean;
 
-    public checkMail(){
-        this.mailValid = UIHelper.isEmail(this.info.email);
+    public checkMail(mail:string){
+        this.mailValid = UIHelper.isEmail(mail);
     }
-  public checkPassword(){
-      this.password_strength = UIHelper.getPasswordStrengthString(this.info.password);
+  public checkPassword(password:string){
+      this.password_strength = UIHelper.getPasswordStrengthString(password);
   }
 
     public register(){
