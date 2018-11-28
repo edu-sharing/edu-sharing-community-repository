@@ -29,9 +29,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
+import io.swagger.client.api.MdsV1Api;
 import io.swagger.client.api.NodeV1Api;
 import io.swagger.client.api.RenderingV1Api;
 import io.swagger.client.api.SearchV1Api;
+import io.swagger.client.model.MdsEntriesV2;
+import io.swagger.client.model.MdsV2;
 import io.swagger.client.model.NodeEntries;
 import io.swagger.util.Json;
 
@@ -119,6 +122,33 @@ public class RepoProxy {
 		}
 		return null;
 	 }
+	 
+	 public Response getMetadataSetsV2(
+		    	String repository,
+				HttpServletRequest req) {
+		try {
+			MdsEntriesV2 result = new MdsV1Api(getApiClient(repository)).getMetadataSetsV2(repository);
+			return Response.status(Response.Status.OK).entity(result).build();
+		} catch (ApiException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	 
+	 public Response getMetadataSetV2(
+		    	String repository,
+		    	String mdsId,
+				HttpServletRequest req) {
+		try {
+			 	MdsV2 result = new MdsV1Api(getApiClient(repository)).getMetadataSetV2(repository,mdsId);
+				return Response.status(Response.Status.OK).entity(result).build();
+		} catch (ApiException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	 }
 	
 	
 	public static boolean myTurn(String repoId) {
@@ -199,4 +229,6 @@ public class RepoProxy {
 
 		return remoteAuthInfo;
 	}
+	
+	
 }

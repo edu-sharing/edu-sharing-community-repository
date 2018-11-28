@@ -24,6 +24,7 @@ import org.edu_sharing.restservices.mds.v1.model.MdsEntry;
 import org.edu_sharing.restservices.mds.v1.model.SuggestionParam;
 import org.edu_sharing.restservices.mds.v1.model.Suggestions;
 import org.edu_sharing.restservices.mds.v1.model.ValueParameters;
+import org.edu_sharing.restservices.repoproxy.RepoProxy;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.MdsV2;
 
@@ -122,6 +123,10 @@ public class MdsApi {
     	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 		@Context HttpServletRequest req) {
     	
+    	if(RepoProxy.myTurn(repository)) {
+    		return new RepoProxy().getMetadataSetsV2(repository, req);
+    	}
+    	
     	try {
     			    		    	
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
@@ -211,6 +216,10 @@ public class MdsApi {
     	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
     	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
 		@Context HttpServletRequest req) {
+    	
+    	if(RepoProxy.myTurn(repository)) {
+    		return new RepoProxy().getMetadataSetV2(repository, mdsId, req);
+    	}
     	
     	try {
     			    		    	
