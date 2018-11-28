@@ -268,6 +268,11 @@ public class MdsApi {
         	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
         	@ApiParam(value = "suggestionParam") SuggestionParam suggestionParam,
     		@Context HttpServletRequest req) {
+    	
+    		if(RepoProxy.myTurn(repository)) {
+    			return new RepoProxy().getValuesV2(repository, mdsId, suggestionParam, req);
+    		}
+    	
         	try {
      	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);	    	
     	    	MdsDaoV2 mds = MdsDaoV2.getMds(repoDao, mdsId);
