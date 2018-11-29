@@ -279,30 +279,6 @@ module.exports = [
     "clobbers": [
       "device"
     ]
-  },
-  {
-    "id": "cordova-plugin-android-permissions.Permissions",
-    "file": "plugins/cordova-plugin-android-permissions/www/permissions-dummy.js",
-    "pluginId": "cordova-plugin-android-permissions",
-    "clobbers": [
-      "cordova.plugins.permissions"
-    ]
-  },
-  {
-    "id": "cordova-plugin-screen-orientation.screenorientation",
-    "file": "plugins/cordova-plugin-screen-orientation/www/screenorientation.js",
-    "pluginId": "cordova-plugin-screen-orientation",
-    "clobbers": [
-      "cordova.plugins.screenorientation"
-    ]
-  },
-  {
-    "id": "cordova-plugin-http.CordovaHttpPlugin",
-    "file": "plugins/cordova-plugin-http/www/cordovaHTTP.js",
-    "pluginId": "cordova-plugin-http",
-    "clobbers": [
-      "CordovaHttpPlugin"
-    ]
   }
 ];
 module.exports.metadata = 
@@ -317,10 +293,7 @@ module.exports.metadata =
   "com.napolitano.cordova.plugin.intent": "0.1.3",
   "cordova-plugin-whitelist": "1.3.3",
   "cordova-plugin-inappbrowser": "2.0.2",
-  "cordova-plugin-device": "2.0.2",
-  "cordova-plugin-android-permissions": "1.0.0",
-  "cordova-plugin-screen-orientation": "3.0.1",
-  "cordova-plugin-http": "1.2.0"
+  "cordova-plugin-device": "2.0.2"
 };
 // BOTTOM OF METADATA
 });
