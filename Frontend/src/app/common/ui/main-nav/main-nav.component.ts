@@ -107,6 +107,7 @@ export class MainNavComponent{
   }
   private scrollInitialPositions : any[]=[];
   @HostListener('window:scroll', ['$event'])
+  @HostListener('window:touchmove', ['$event'])
   handleScroll(event: Event) {
     let y=0;
     try {
