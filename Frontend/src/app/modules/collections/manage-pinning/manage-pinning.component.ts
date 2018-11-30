@@ -66,9 +66,11 @@ export class CollectionManagePinningComponent {
   }
   private dragStartColumn(event:any,index:number,node : Node){
     event.dataTransfer.effectAllowed = 'all';
+    event.dataTransfer.setData("text",index);
     this.currentDragColumn=node;
   }
   private allowDragColumn(event:any,index:number,target:Node){
+    console.log(event);
     if(!this.currentDragColumn)
       return;
     event.preventDefault();
@@ -81,6 +83,8 @@ export class CollectionManagePinningComponent {
   }
   private dropColumn(event:any,index:number,target:Node){
     this.currentDragColumn=null;
+    event.preventDefault();
+    event.stopPropagation();
   }
 
   public apply(){
