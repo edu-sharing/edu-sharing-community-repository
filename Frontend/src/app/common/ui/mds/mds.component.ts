@@ -634,7 +634,8 @@ export class MdsComponent{
     if(values==null)
       return;
     if(!force){
-      if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.checkFileExtension(callback,values)){
+      // only for io and not links
+      if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.currentNode.properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(callback,values)){
         return;
       }
     }
