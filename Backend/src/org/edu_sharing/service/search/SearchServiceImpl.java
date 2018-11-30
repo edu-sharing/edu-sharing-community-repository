@@ -21,6 +21,8 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.FieldHighlightParameters;
+import org.alfresco.service.cmr.search.GeneralHighlightParameters;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
@@ -712,11 +714,36 @@ public class SearchServiceImpl implements SearchService {
 					searchParameters.addFieldFacet(fieldFacet);
 				}
 			}
+			
+			List<FieldHighlightParameters> fieldHighlightParameters = new ArrayList<FieldHighlightParameters>();
+			fieldHighlightParameters.add( new FieldHighlightParameters("cm:name",255,100,false,"",""));
+			fieldHighlightParameters.add( new FieldHighlightParameters("cm:title",255,100,false,"",""));
+			fieldHighlightParameters.add( new FieldHighlightParameters("cm:description",255,100,false,"",""));
+			fieldHighlightParameters.add( new FieldHighlightParameters("cclom:description",255,100,false,"",""));
+			fieldHighlightParameters.add( new FieldHighlightParameters("content",255,100,false,"",""));
+			fieldHighlightParameters.add( new FieldHighlightParameters("ia:descriptionEvent",255,100,false,"",""));
+			fieldHighlightParameters.add( new FieldHighlightParameters("ia:whatEvent",255,100,false,"",""));
+			fieldHighlightParameters.add( new FieldHighlightParameters("lnk:title",255,100,false,"",""));
+			GeneralHighlightParameters ghp = new GeneralHighlightParameters(255,100,false,"","",null,true,fieldHighlightParameters);
+			searchParameters.setHighlight(ghp);
+			
 			ResultSet resultSet;
 			if (scoped)
 				resultSet = searchService.query(searchParameters);
 			else
 				resultSet = serviceRegistry.getSearchService().query(searchParameters);
+			
+/*			Map<NodeRef, List<Pair<String, List<String>>>> hightlightning = resultSet.getHighlighting();
+			for(Map.Entry<NodeRef, List<Pair<String, List<String>>>> entry : hightlightning.entrySet()) {
+				System.out.println("Highlightning NodeRef:" +entry.getKey());
+				for(Pair<String,List<String>> pair :entry.getValue()) {
+					System.out.println("		Pair:" +pair.getFirst());
+					for(String val :  pair.getSecond()) {
+						System.out.println("		val:" + val);
+					}
+				}
+			}
+			*/
 
 			SearchResultNodeRef sr = new SearchResultNodeRef();
 			sr.setData(AlfrescoDaoHelper.unmarshall(resultSet.getNodeRefs(), ApplicationInfoList.getHomeRepository().getAppId()));

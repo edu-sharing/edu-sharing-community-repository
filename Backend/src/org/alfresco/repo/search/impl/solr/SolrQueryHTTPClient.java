@@ -675,6 +675,7 @@ public class SolrQueryHTTPClient implements BeanFactoryAware, InitializingBean
         buildStatsParameters(searchParameters, encoder, url);
         buildFacetIntervalParameters(searchParameters, encoder, url);
         buildRangeParameters(searchParameters, encoder, url);
+        buildHightlightParameters(searchParameters, encoder, url);
         
         /**
          * edu-sharing extension add groupby
@@ -687,8 +688,6 @@ public class SolrQueryHTTPClient implements BeanFactoryAware, InitializingBean
         	}
         	
         }
-
-        buildHightlightParameters(searchParameters, encoder, url);
     }
     
     protected void buildFacetParameters(SearchParameters searchParameters, boolean isSharded, URLCodec encoder, StringBuilder url)
