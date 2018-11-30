@@ -11,5 +11,6 @@
 	<import resource="classpath:org/edu_sharing/spring/base-services.xml"/>
 	<import resource="classpath:org/edu_sharing/spring/extension-services.xml"/>
 	<import resource="classpath:org/edu_sharing/spring/connectors.xml"/>
+	<import resource="classpath:org/edu_sharing/spring/plugin-services.xml"/>
 	
 </beans>
