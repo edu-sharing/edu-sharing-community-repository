@@ -142,6 +142,13 @@ public class MimeTypesV2 {
 		return getPreviewPath()+"no-permissions.svg";
 	}
 	/**
+	 * Gets a "Element deleted" preview image
+	 * @return
+	 */
+	public String getNodeDeletedPreview() {
+		return getPreviewPath()+"node-deleted.svg";
+	}
+	/**
 	 * Returns the guessed node-type (used for the preview files), e.g. file-folder, file-word or file-image
 	 * @param properties
 	 * @return

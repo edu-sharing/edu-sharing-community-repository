@@ -294,12 +294,15 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			}
 
 		} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-			
 			MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
-			String noPermImage=mime.getNoPermissionsPreview();
-			resp.sendRedirect(noPermImage);
+			resp.sendRedirect(mime.getNoPermissionsPreview());
 			return;
-		}  catch(UnsupportedTypeException e){
+		}  catch (InvalidNodeRefException e) {
+			MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+			resp.sendRedirect(mime.getNodeDeletedPreview());
+			return;
+		}
+		catch (UnsupportedTypeException e){
 			// ignore, the node type ist not supported for image previews
 		}  catch (Throwable e) {
 			// smaller logging for collection ref (i.e. original may deleted, that occurs often)
