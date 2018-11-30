@@ -27,7 +27,6 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
-import org.edu_sharing.restservices.repoproxy.RepoProxy;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
@@ -37,6 +36,7 @@ import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.SearchResult;
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.CombineMode;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -86,8 +86,8 @@ public class SearchApi {
 		try {
 			
 			
-			if(RepoProxy.myTurn(repository)) {
-				return new RepoProxy().searchV2(repository, mdsId, query, contentType, maxItems, skipCount, sortProperties, sortAscending, parameters, propertyFilter, req);
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().searchV2(repository, mdsId, query, contentType, maxItems, skipCount, sortProperties, sortAscending, parameters, propertyFilter, req);
 			}
 
 			Filter filter = new Filter(propertyFilter);

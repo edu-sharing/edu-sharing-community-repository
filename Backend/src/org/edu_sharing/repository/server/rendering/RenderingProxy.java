@@ -29,10 +29,10 @@ import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
-import org.edu_sharing.restservices.repoproxy.RepoProxy;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 
@@ -226,8 +226,10 @@ public class RenderingProxy extends HttpServlet {
 						/**
 						 *make sure that the remote user exists
 						 */
-						new RepoProxy().remoteAuth(remoteRepo,false);
-						
+						if(RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
+							RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
+						}
+					
 						
 						return personData.get(CCConstants.PROP_USER_ESUID);
 					}

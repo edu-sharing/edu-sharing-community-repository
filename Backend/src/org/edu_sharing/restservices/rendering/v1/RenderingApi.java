@@ -22,7 +22,6 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RenderingDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
-import org.edu_sharing.restservices.repoproxy.RepoProxy;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
@@ -32,6 +31,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
@@ -120,8 +121,8 @@ public class RenderingApi {
 
 		try {
 			
-			if(RepoProxy.myTurn(repository)) {
-				return new RepoProxy().getDetailsSnippetWithParameters(repository, node, nodeVersion, parameters, req);
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().getDetailsSnippetWithParameters(repository, node, nodeVersion, parameters, req);
 			}
 			
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);

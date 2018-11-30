@@ -24,9 +24,9 @@ import org.edu_sharing.restservices.mds.v1.model.MdsEntry;
 import org.edu_sharing.restservices.mds.v1.model.SuggestionParam;
 import org.edu_sharing.restservices.mds.v1.model.Suggestions;
 import org.edu_sharing.restservices.mds.v1.model.ValueParameters;
-import org.edu_sharing.restservices.repoproxy.RepoProxy;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.MdsV2;
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -123,8 +123,8 @@ public class MdsApi {
     	@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 		@Context HttpServletRequest req) {
     	
-    	if(RepoProxy.myTurn(repository)) {
-    		return new RepoProxy().getMetadataSetsV2(repository, req);
+    	if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+    		return RepoProxyFactory.getRepoProxy().getMetadataSetsV2(repository, req);
     	}
     	
     	try {
@@ -217,8 +217,8 @@ public class MdsApi {
     	@ApiParam(value = "ID of metadataset (or \"-default-\" for default metadata set)",required=true, defaultValue="-default-" ) @PathParam("metadataset") String mdsId,
 		@Context HttpServletRequest req) {
     	
-    	if(RepoProxy.myTurn(repository)) {
-    		return new RepoProxy().getMetadataSetV2(repository, mdsId, req);
+    	if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+    		return RepoProxyFactory.getRepoProxy().getMetadataSetV2(repository, mdsId, req);
     	}
     	
     	try {
@@ -269,8 +269,8 @@ public class MdsApi {
         	@ApiParam(value = "suggestionParam") SuggestionParam suggestionParam,
     		@Context HttpServletRequest req) {
     	
-    		if(RepoProxy.myTurn(repository)) {
-    			return new RepoProxy().getValuesV2(repository, mdsId, suggestionParam, req);
+    		if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+    			return RepoProxyFactory.getRepoProxy().getValuesV2(repository, mdsId, suggestionParam, req);
     		}
     	
         	try {

@@ -36,7 +36,6 @@ import org.edu_sharing.restservices.PersonDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.node.v1.model.*;
-import org.edu_sharing.restservices.repoproxy.RepoProxy;
 import org.edu_sharing.restservices.shared.ACL;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
@@ -52,6 +51,7 @@ import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.nodeservice.AssocInfo;
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
@@ -733,8 +733,8 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 
-    	if(RepoProxy.myTurn(repository)) {
-    		return new RepoProxy().getChildren(repository, node, maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
+    	if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+    		return RepoProxyFactory.getRepoProxy().getChildren(repository, node, maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
     	}
     	
     	try {
