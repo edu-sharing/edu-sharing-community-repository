@@ -27,8 +27,13 @@ public class NgServlet extends HttpServlet {
 				html=html.substring(0,pos)+head+html.substring(pos);
 			}
 			if(req.getHeader("User-Agent")!=null && req.getHeader("User-Agent").contains("cordova / edu-sharing-app")){
+				String platform="";
+				if(req.getHeader("User-Agent").contains("ios"))
+					platform="ios";
+				if(req.getHeader("User-Agent").contains("android"))
+					platform="android";
 				html=html.substring(0,pos)+
-						"<script type=\"text/javascript\" src=\"assets/cordova/android/cordova.js\"></script>"
+						"<script type=\"text/javascript\" src=\"assets/cordova/"+platform+"/cordova.js\"></script>"
 						+html.substring(pos);
 				logger.info("cordova app, add cordova.js to header");
 			}

@@ -1185,7 +1185,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     private hasOpenWindows() {
-        return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
+        return this.editNodeLicense || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode;
     }
 }
 interface ClipboardObject{
