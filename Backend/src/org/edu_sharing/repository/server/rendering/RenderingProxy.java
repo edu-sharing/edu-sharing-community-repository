@@ -226,7 +226,7 @@ public class RenderingProxy extends HttpServlet {
 						/**
 						 *make sure that the remote user exists
 						 */
-						new RepoProxy().remoteAuth(remoteRepo);
+						new RepoProxy().remoteAuth(remoteRepo,false);
 						
 						
 						return personData.get(CCConstants.PROP_USER_ESUID);
