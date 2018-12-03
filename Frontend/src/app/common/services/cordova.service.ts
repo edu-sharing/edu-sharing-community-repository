@@ -139,6 +139,16 @@ export class CordovaService {
       // --> navigation issues exist anyway, need to check that later
       document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
+      this.onNewShareContent().subscribe(
+          (data: any) => {
+              // this.router.navigate(['share', URI]);
+              if(this.hasValidConfig()) {
+                  this.router.navigate([UIConstants.ROUTER_PREFIX, 'app', 'share'], {queryParams: data});
+              }
+          }, (error) => {
+              console.log("ERROR on new share event", error);
+          });
+      /*
       let shareInterval=setInterval(()=>{
           if(this.hasValidConfig()) {
               console.log("share content register");
@@ -153,6 +163,7 @@ export class CordovaService {
                   });
           }
       },1000);
+      */
 
 
       // hide the splashscreen (if still showing)
@@ -212,14 +223,12 @@ export class CordovaService {
                        this.lastIntent=intent;
                        this.observerShareContent.next({uri:uri,mimetype:intent.type});
                        // clear handler to just fire it on first app opening
-                       (window as any).plugins.intent.getCordovaIntent(null);
                        return;
                    }
                    uri = intent.extras["android.intent.extra.STREAM"];
                    // it's a file
                    if(uri){
                        this.lastIntent=intent;
-                       (window as any).plugins.intent.getCordovaIntent(null);
                        (window as any).plugins.intent.getRealPathFromContentUrl(uri,(file:string)=>{
                            this.observerShareContent.next({uri:uri,file:file,mimetype:intent.type});
                        },(error:any)=>{
@@ -245,14 +254,12 @@ export class CordovaService {
                        console.log(target+"!="+current+", logout and go to new location "+intent.data);
                        this.resetAndGoToServerlist('url='+intent.data);
                    }
-                   (window as any).plugins.intent.getCordovaIntent(null);
                }
                else{
                    handleIntentBase(intent);
                }
-
+               (window as any).plugins.intent.getCordovaIntent(null);
            };
-           console.log((window as any).plugins);
            (window as any).plugins.intent.getCordovaIntent(handleIntent);
            (window as any).plugins.intent.setNewIntentHandler(handleIntent);
            /*
