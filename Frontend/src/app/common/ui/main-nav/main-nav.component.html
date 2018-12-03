@@ -3,7 +3,7 @@
   (onCancel)="showProfile=false"
 ></user-profile>
 <app-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></app-banner>
-
+<global-progress *ngIf="globalProgress"></global-progress>
 <div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
 <div class="card center-card card-scroll card-high card-wide card-action" *ngIf="licenseAgreement" [@cardAnimation]="licenseAgreement">
   <div class="card-content">

@@ -86,6 +86,7 @@ export class MainNavComponent{
   licenseAgreementHTML: string;
   canEditProfile: boolean;
   private licenseAgreementNode: Node;
+  globalProgress = false;
   public setNodeStore(value:boolean){
     UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
   }
@@ -431,8 +432,11 @@ export class MainNavComponent{
     UIHelper.openBlankWindow(url,this.cordova);
   }
   private logout(){
+    this.globalProgress=true;
     if(this.cordova.isRunningCordova()){
-      this.cordova.restartCordova();
+      this.connector.logout().subscribe(()=> {
+          this.cordova.restartCordova();
+      });
       return;
     }
     if(this.config.logout) {
@@ -572,6 +576,7 @@ export class MainNavComponent{
       window.location.href=this.config.logout.next;
     else
       this.login(false);
+    this.globalProgress=false;
   }
   getIconSource() {
     return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
