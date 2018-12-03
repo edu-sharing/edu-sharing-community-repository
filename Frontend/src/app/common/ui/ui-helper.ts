@@ -535,7 +535,7 @@ export class UIHelper{
      */
     static errorContains(error: any, data: string) {
         try{
-            return JSON.parse(error._body).message.indexOf(data)!=-1;
+            return error.error.message.indexOf(data)!=-1;
         }catch(e){}
         return false;
     }
