@@ -550,7 +550,7 @@ export class MainNavComponent implements AfterViewInit{
       if(add) {
         buttons.push({path: 'permissions', scope: 'permissions', icon: "group_add", name: "SIDEBAR.PERMISSIONS"});
       }
-      if(this.isAdmin && this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0){
+      if(this.isAdmin){
         buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN"});
       }
       this.checkConfig(buttons);
