@@ -7,11 +7,11 @@ $borderRadius:2px;
 .sorting,.text{
   float:left;
   padding:0!important;
-  position:relative;
-  top:-2px;
 }
 .sorting{
-  height:13px;
+  height: 24px;
+  display: flex;
+  align-items: center;
 }
 .sorting a i{
   width:12px;
