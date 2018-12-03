@@ -1038,13 +1038,14 @@ export class CordovaService {
   public static TEST_OK:string = "OK";
 
   // oAuth login that is used when running as mobile app
-  public loginOAuth(endpointUrl:string, username: string = "", password: string = ""): Observable<OAuthResult> {
+  public loginOAuth(endpointUrl:string, username: string = "", password: string = "",grantType = "password"): Observable<OAuthResult> {
 
     let url = endpointUrl + "../oauth2/token";
     let headers = {'Content-Type':'application/x-www-form-urlencoded','Accept': '*/*'};
-    let options = { headers: headers, withCredentials: false };
+    let options = { headers: headers };
 
-    let data = "client_id=eduApp&grant_type=password&client_secret=secret" +
+    let data = "client_id=eduApp&client_secret=secret" +
+      "&grant_type=" + encodeURIComponent(grantType) +
       "&username=" + encodeURIComponent(username) +
       "&password=" + encodeURIComponent(password);
 

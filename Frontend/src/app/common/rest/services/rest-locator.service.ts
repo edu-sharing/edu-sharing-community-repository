@@ -8,6 +8,7 @@ import {subscribeOn} from "rxjs/operator/subscribeOn";
 import {CordovaService} from '../../services/cordova.service';
 import {environment} from "../../../../environments/environment";
 import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
+import {OAuthResult} from "../data-object";
 
 @Injectable()
 export class RestLocatorService {
@@ -33,6 +34,18 @@ export class RestLocatorService {
   }
 
   constructor(private http : HttpClient,private cordova:CordovaService) {
+  }
+  public createOAuthFromSession(){
+      return new Observable((observer : Observer) => {
+          this.cordova.loginOAuth(this.endpointUrl,null,null,"session").subscribe((oauthTokens: OAuthResult) => {
+              this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, JSON.stringify(oauthTokens));
+              observer.next(oauthTokens);
+              observer.complete();
+          },(error)=>{
+              observer.error(error);
+              observer.complete();
+          });
+    });
   }
   public getCordova(){
     return this.cordova;

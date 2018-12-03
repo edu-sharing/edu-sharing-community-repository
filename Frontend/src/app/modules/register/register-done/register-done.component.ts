@@ -10,6 +10,8 @@ import {SessionStorageService} from "../../../common/services/session-storage.se
 import {UIConstants} from "../../../common/ui/ui-constants";
 import {RestRegisterService} from '../../../common/rest/services/rest-register.service';
 import {UIHelper} from "../../../common/ui/ui-helper";
+import {CordovaService} from "../../../common/services/cordova.service";
+import {RestLocatorService} from "../../../common/rest/services/rest-locator.service";
 
 @Component({
   selector: 'app-register-done',
@@ -56,14 +58,26 @@ export class RegisterDoneComponent{
     constructor(private connector: RestConnectorService,
                 private toast: Toast,
                 private register: RestRegisterService,
+                private config: ConfigurationService,
+                private cordova: CordovaService,
+                private locator: RestLocatorService,
                 private router: Router
     ) {}
     private activate(keyUrl: string) {
         this.loading=true;
         if(this.inputState=='done') {
             this.register.activate(keyUrl).subscribe(() => {
-                this.router.navigate([UIConstants.ROUTER_PREFIX + "workspace"]);
-            }, (error: any) => {
+                if(this.cordova.isRunningCordova()){
+                    this.locator.createOAuthFromSession().subscribe(()=>{
+                        UIHelper.goToDefaultLocation(this.router, this.config);
+                    },(error)=>{
+                        this.toast.error(error);
+                    });
+                }
+                else {
+                    UIHelper.goToDefaultLocation(this.router, this.config);
+                }
+            }, (error) => {
                 if (UIHelper.errorContains(error, "InvalidKeyException")) {
                     this.toast.error(null, "REGISTER.TOAST_INVALID_KEY");
                 }
