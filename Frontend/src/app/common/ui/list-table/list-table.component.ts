@@ -566,14 +566,21 @@ export class ListTableComponent implements EventListener{
     }
     return result;
   }
-  private setSorting(sortBy : any,isPrimaryElement : boolean){
-    if(!this.canBeSorted(sortBy))
-      return;
+  private setSortingIntern(sortBy : ListItem,isPrimaryElement : boolean){
     if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*4){
       this.sortMenu=true;
       return;
     }
-    this.sortListener.emit({sortBy: sortBy.name,sortAscending: sortBy.ascending });
+    let ascending=this.sortAscending;
+    if(this.sortBy==sortBy.name)
+        ascending=!ascending;
+    (sortBy as any).ascending=ascending;
+    this.setSorting(sortBy);
+  }
+  private setSorting(sortBy : any){
+      if(!this.canBeSorted(sortBy))
+          return;
+      this.sortListener.emit({sortBy: sortBy.name,sortAscending: sortBy.ascending });
   }
   public getTitle(node:Node){
     return RestHelper.getTitle(node);
