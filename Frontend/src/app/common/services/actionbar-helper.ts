@@ -104,7 +104,9 @@ export class ActionbarHelperService{
         option = new OptionItem("WORKSPACE.OPTION.STREAM", "event", callback);
         option.enabledCallback = (node: Node) => {
           let list = ActionbarHelperService.getNodes(nodes, node);
-          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH) && this.connectors.getRestConnector().hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_STREAM);
+          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH) &&
+              this.connectors.getRestConnector().hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_STREAM) &&
+              RestNetworkService.allFromHomeRepo(list,this.repositories);
         }
         option.isEnabled = option.enabledCallback(null);
       }
