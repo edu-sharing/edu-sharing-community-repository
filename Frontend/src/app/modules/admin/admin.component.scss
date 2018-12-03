@@ -189,9 +189,15 @@
   }
   .oai{
     max-width: 500px;
-    .oaiSave{
+    .oaiSave,.oaiForce{
       float: left;
       width: 100%;
+    }
+    .input-hint-bottom{
+      margin-bottom: 15px;
+    }
+    select{
+      margin-bottom: 20px;
     }
   }
   >.btn{

@@ -67,6 +67,7 @@
       "GROUP_GROUPS":"Folgende Gruppen haben Zugriff:",
       "USAGES":"Benutzt und freigegeben in:",
       "USAGE_INFO":"{{instance}}: Verwendet in {{type}} {{name}}",
+      "USAGE_INDIRECT":"Diese Freigabe ist über eine Sammlungsreferenz erzeugt und kann nicht entfernt werden",
       "DELETED":"wird gelöscht",
       "TYPE_VIEWER":"Betrachter",
       "TYPE_VIEWER_DESCRIPTION":"darf sehen",

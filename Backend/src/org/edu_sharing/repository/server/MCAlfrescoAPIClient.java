@@ -95,6 +95,7 @@ import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentStreamListener;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.CopyService;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.MLText;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -141,7 +142,6 @@ import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
-import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.SearchCriterias;
@@ -184,6 +184,7 @@ import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.model.NodeRefImpl;
+import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
@@ -2238,7 +2239,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			final String property) throws Exception {
 
 		final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
-		logger.info("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
+		logger.debug("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
 
 		RetryingTransactionCallback callback = new RetryingTransactionCallback() {
 			@Override
@@ -2502,7 +2503,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 	}
 
-	public void createVersion(String nodeId, HashMap _properties) throws Exception {
+	public synchronized void createVersion(String nodeId, HashMap _properties) throws Exception {
 
 		Map<String, Serializable> properties = null;
 		if (_properties != null) {
@@ -3138,10 +3139,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			fromID = childAssocRef.getParentRef().getId();
 		}
 		if (childAssocRef.getParentRef().getId().equals(fromID)) {
-			nodeService.deleteNode(nodeRef);
+			
 			if(!recycle){
-				nodeService.deleteNode(new NodeRef(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE,nodeID));
+				nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
 			}
+			nodeService.deleteNode(nodeRef);
+			
 		} else {
 			nodeService.removeChild(new NodeRef(storeRef, fromID), nodeRef);
 		}

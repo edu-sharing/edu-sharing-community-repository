@@ -246,6 +246,7 @@ public class MetadataReaderV2 {
 		mds.setTemplates(getTemplates());
 		mds.setGroups(getGroups());
 		mds.setLists(getLists());
+		mds.setSorts(getSorts());
 		mds.setQueries(getQueries());
 		
 		return mds;
@@ -523,7 +524,7 @@ public class MetadataReaderV2 {
 				String name=data.getNodeName();
 				String value=data.getTextContent();
 				if(name.equals("id"))
-					list.setId(value);			
+					list.setId(value);
 				if(name.equals("columns")){
 					List<MetadataColumn> columns=new ArrayList<>();
 					NodeList list3=data.getChildNodes();
@@ -551,7 +552,55 @@ public class MetadataReaderV2 {
 		}
 		return lists;
 	}
-	
+	private List<MetadataSort> getSorts() throws XPathExpressionException {
+		List<MetadataSort> sorts=new ArrayList<>();
+		NodeList sortsNode = (NodeList) xpath.evaluate("/metadataset/sorts/sort", doc, XPathConstants.NODESET);
+		for(int i=0;i<sortsNode.getLength();i++){
+			Node listNode=sortsNode.item(i);
+			NodeList list2=listNode.getChildNodes();
+			MetadataSort sort=new MetadataSort();
+			for(int j=0;j<list2.getLength();j++){
+				Node data=list2.item(j);
+				String name=data.getNodeName();
+				String value=data.getTextContent();
+				if(name.equals("id"))
+					sort.setId(value);
+				if(name.equals("default")){
+					NodeList list3=data.getChildNodes();
+					for(int k=0;k<list3.getLength();k++){
+						Node data2=list3.item(k);
+						if(data2.getNodeName().equals("sortBy")){
+							sort.getDefaultValue().setSortBy(data2.getTextContent());
+						}
+						if(data2.getNodeName().equals("sortAscending")){
+							sort.getDefaultValue().setSortAscending(new Boolean(data2.getTextContent()).booleanValue());
+						}
+					}
+				}
+				if(name.equals("columns")){
+					List<MetadataSortColumn> columns=new ArrayList<>();
+					NodeList list3=data.getChildNodes();
+					for(int k=0;k<list3.getLength();k++){
+						String column=list3.item(k).getTextContent();
+						NamedNodeMap attributes = list3.item(k).getAttributes();
+						if(!column.trim().isEmpty()){
+							MetadataSortColumn col=new MetadataSortColumn();
+							col.setId(column);
+							if(attributes!=null){
+								Node mode = attributes.getNamedItem("mode");
+								if(mode!=null)
+									col.setMode(mode.getTextContent());
+							}
+							columns.add(col);
+						}
+					}
+					sort.setColumns(columns);
+				}
+			}
+			sorts.add(sort);
+		}
+		return sorts;
+	}
 	private String getTranslation(MetadataTranslatable translatable,String key,String fallback){
 		return getTranslation(translatable,key,fallback,locale);
 	}

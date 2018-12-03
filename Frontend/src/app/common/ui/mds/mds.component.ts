@@ -648,11 +648,11 @@ export class MdsComponent{
     // check if file extension changed and warn
     if(!force){
         // for regular nodes
-        if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.checkFileExtension(this.currentNode.name,callback,values)){
+        if(this.currentNode && this.currentNode.type==RestConstants.CCM_TYPE_IO && !this.currentNode.properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this.currentNode.name,callback,values)){
             return;
         }
         // for childobjects
-        if(this._groupId==MdsComponent.TYPE_CHILDOBJECT && !this.checkFileExtension(this._currentValues[RestConstants.CM_NAME][0],callback,values)){
+        if(this._groupId==MdsComponent.TYPE_CHILDOBJECT && !this._currentValues.properties[RestConstants.CCM_PROP_IO_WWWURL] && !this.checkFileExtension(this._currentValues[RestConstants.CM_NAME][0],callback,values)){
             return;
         }
     }

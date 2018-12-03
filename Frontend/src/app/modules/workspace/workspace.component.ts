@@ -788,7 +788,8 @@ export class WorkspaceMainComponent implements EventListener{
                 apply.showCallback=((node:Node)=> {
                     return this.reurlDirectories || !node.isDirectory;
                 });
-                options.push(apply);
+                if(apply.showCallback(nodes[0]))
+                    options.push(apply);
             }
             if(this.isAdmin){
                 let debug = new OptionItem("WORKSPACE.OPTION.DEBUG", "build", (node: Node) => this.debugNode(node));
@@ -1172,7 +1173,7 @@ export class WorkspaceMainComponent implements EventListener{
     }
 
     hasOpenWindows() {
-        return this.editNodeLicense || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
+        return this.editNodeLicense || this.editNodeTemplate || this.editNodeMetadata || this.createConnectorName || this.showUploadSelect || this.dialogTitle || this.addFolderName || this.sharedNode || this.workflowNode || this.filesToUpload;
     }
     private recoverScrollposition() {
         console.log("recover scroll "+this.storage.get('workspace_scroll',0));

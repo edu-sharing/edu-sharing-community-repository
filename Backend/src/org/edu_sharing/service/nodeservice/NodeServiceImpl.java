@@ -3,9 +3,11 @@ package org.edu_sharing.service.nodeservice;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -380,8 +382,26 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return result;
 	}
-
 	@Override
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types) {
+		Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
+		List<ChildAssociationRef> assocs = nodeService.getChildAssocs(new NodeRef(store, nodeId),typesConverted);
+		List<NodeRef> result=new ArrayList<>();
+		for(ChildAssociationRef assoc : assocs){
+			result.add(assoc.getChildRef());
+		}
+		List<ChildAssociationRef> maps = nodeService.getChildAssocs(new NodeRef(store, nodeId), Collections.singleton(QName.createQName(CCConstants.CCM_TYPE_MAP)));
+		String user = AuthenticationUtil.getFullyAuthenticatedUser();
+		// run in parallel to increase performance
+		maps.parallelStream().forEach((map)->{
+			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types))
+			,user);
+		});
+		logger.info("Get children recursive finished with "+result.size()+" nodes");
+		return result;
+	}
+
+		@Override
 	public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
 		List<ChildAssociationRef> children = this.getChildrenAssocsByType(store, parentId, type);
 		for (ChildAssociationRef child : children) {
@@ -811,25 +831,28 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     private boolean shouldFilter(NodeRef node, List<String> filter) {
 		// filter nodes for link inivitation and usages
-		if(filter==null)
-			filter=new ArrayList<>();
-		String type=nodeService.getType(node).toString();
-		String mapType=(String)nodeService.getProperty(node,QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
-		String name=(String)nodeService.getProperty(node,QName.createQName(CCConstants.CM_NAME));
-		if(!filter.contains("special") && (
-				CCConstants.CCM_TYPE_SHARE.equals(type) ||
+		if (filter == null)
+			filter = new ArrayList<>();
+		String type = nodeService.getType(node).toString();
+		String mapType = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
+		String name = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CM_NAME));
+		if (filter.contains("special")) {
+			// special mode, we do not filter anything
+			return false;
+		}
+		if (CCConstants.CCM_TYPE_SHARE.equals(type) ||
 				CCConstants.CCM_TYPE_USAGE.equals(type) ||
-				CCConstants.CM_TYPE_THUMBNAIL.equals(type))){
+				CCConstants.CM_TYPE_THUMBNAIL.equals(type)) {
 			return true;
 		}
 		// filter the metadata template file
-		if(nodeService.hasAspect(node,QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE))){
+		if (nodeService.hasAspect(node, QName.createQName(CCConstants.CCM_ASSOC_METADATA_PRESETTING_TEMPLATE))) {
 			return true;
 		}
-		if(CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(mapType) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)){
+		if (CCConstants.CCM_VALUE_MAP_TYPE_FAVORITE.equals(mapType) || CCConstants.CCM_VALUE_MAP_TYPE_EDUGROUP.equals(mapType)) {
 			return true;
 		}
-		if(!filter.contains("special") && (".DS_Store".equals(name) || "._.DS_Store".equals(name))){
+		if ((".DS_Store".equals(name) || "._.DS_Store".equals(name))) {
 			return true;
 		}
         if(filter.size()==0)

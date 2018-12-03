@@ -39,7 +39,7 @@ public class JobLogger extends ConsoleAppender {
 
     @Override
     protected void subAppend(LoggingEvent event) {
-        super.subAppend(event);
+        //super.subAppend(event);
         if(event.getLoggerName().equals(JobHandler.class.getName())){
             return;
         }
@@ -61,7 +61,7 @@ public class JobLogger extends ConsoleAppender {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 }

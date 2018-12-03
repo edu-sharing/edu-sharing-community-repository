@@ -48,7 +48,6 @@ import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
-import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -208,9 +207,7 @@ public class CollectionServiceImpl implements CollectionService{
                  */
                 String refId = client.copyNode(originalNodeId, collectionId, true);
 
-                client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
                 permissionService.setPermissions(refId, null, true);
-				client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
 				client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
 
 
@@ -848,5 +845,20 @@ public class CollectionServiceImpl implements CollectionService{
 			nodeService.updateNodeNative(node, props);
 			order++;
 		}
+	}
+
+	/**
+	 * Get all reference objects for a given node
+	 * Uses solr
+	 * @param nodeId
+	 * @return
+	 */
+	@Override
+	public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId){
+		SearchToken token=new SearchToken();
+		token.setMaxResult(Integer.MAX_VALUE);
+		token.setContentType(ContentType.ALL);
+		token.setLuceneString("ASPECT:\"ccm:collection_io_reference\" AND @ccm\\:original:"+ QueryParser.escape(nodeId)+" AND NOT @sys\\:node-uuid:"+QueryParser.escape(nodeId));
+		return SearchServiceFactory.getSearchService(appInfo.getAppId()).search(token).getData();
 	}
 }

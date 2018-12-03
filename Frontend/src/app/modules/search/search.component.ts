@@ -13,8 +13,8 @@ import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
 import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
 import {
-  Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
-  MdsMetadatasets, MdsInfo, Collection, CollectionWrapper, SearchList
+    Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
+    MdsMetadatasets, MdsInfo, Collection, CollectionWrapper, SearchList, SortItem
 } from '../../common/rest/data-object';
 import {ListTableComponent} from '../../common/ui/list-table/list-table.component';
 import {OptionItem} from '../../common/ui/actionbar/option-item';
@@ -358,7 +358,7 @@ export class SearchComponent {
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
-  public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.getMdsValues()){
+  public routeSearch(query=this.searchService.searchTerm,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.getMdsValues()){
     this.scrollTo();
     //this.searchService.init();
     this.router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{
@@ -368,6 +368,8 @@ export class SearchComponent {
       repositoryFilter:this.getEnabledRepositories().join(','),
       mds:mds,repository:repository,
       mdsExtended:this.mdsExtended,
+      materialsSortBy:this.searchService.sort.materialsSortBy,
+      materialsSortAscending:this.searchService.sort.materialsSortAscending,
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
@@ -567,27 +569,37 @@ export class SearchComponent {
     this.searchFail=this.searchService.searchResult.length<1 && this.searchService.searchResultCollections.length<1;
   }
 
-  private updateColumns() {
-    /*
-    this.config.get("searchColumns").subscribe((data:any)=>{
-      this.columns=[];
-      if(data && data.length){
-        for(let item of data){
-          this.columns.push(new ListItem("NODE",item));
+    private updateSort() {
+        let sort=MdsHelper.getSortInfo(this.currentMdsSet,'search');
+        if(sort && sort.columns && sort.columns.length) {
+            this.searchService.sort.materialsColumns = [];
+            for (let column of sort.columns) {
+                let item = new SortItem("NODE", column.id);
+                item.mode = column.mode;
+                this.searchService.sort.materialsColumns.push(item);
+            }
         }
-      }
-      else{
-        this.columns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
-        this.columns.push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
-        this.columns.push(new ListItem("NODE",RestConstants.CCM_PROP_LICENSE));
-        this.columns.push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
-      }
-    });
-    */
-    this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
-
+        let state=this.currentRepository+":"+this.mdsId;
+        console.log(state);
+        // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
+        if(state==this.searchService.sort.state)
+          return;
+        this.searchService.sort.state = state;
+        this.searchService.sort.materialsColumns = null;
+        this.searchService.sort.materialsSortBy = null;
+        if(sort) {
+            this.searchService.sort.materialsSortBy = sort.default.sortBy;
+            this.searchService.sort.materialsSortAscending = sort.default.sortAscending;
+        }
+    }
+    private updateColumns() {
+      this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
   }
-
+  sortMaterials(sort:any){
+      this.searchService.sort.materialsSortBy=sort.name;
+      this.searchService.sort.materialsSortAscending=sort.ascending;
+      this.routeSearch();
+  }
   private importNode(node: Node) {
     this.globalProgress=true;
     this.nodeApi.importNode(node.ref.repo,node.ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
@@ -755,6 +767,7 @@ export class SearchComponent {
     console.log('mds ready');
     this.currentMdsSet=mds;
     this.updateColumns();
+    this.updateSort();
     if (this.searchService.searchResult.length < 1) {
       this.initalized = true;
       if(!this.currentValues && this.mdsRef) {
@@ -785,6 +798,12 @@ export class SearchComponent {
       this.loadSavedSearch();
       if(param['mdsExtended'])
         this.mdsExtended=param['mdsExtended']=='true';
+      if(param['materialsSortBy']){
+        // set a valid state first
+        this.updateSort();
+        this.searchService.sort.materialsSortBy=param['materialsSortBy'];
+        this.searchService.sort.materialsSortAscending=param['materialsSortAscending']=='true';
+      }
       if(param['parameters']){
         this.currentValues=JSON.parse(param['parameters']);
       }
@@ -843,28 +862,27 @@ export class SearchComponent {
         this.searchRepository(repos,criterias,init,position+1,count);
         return;
     }
-    /*
-    let properties=[RestConstants.CM_MODIFIED_DATE,
-      RestConstants.CM_CREATOR,
-      RestConstants.CCM_PROP_WIDTH,
-      RestConstants.CCM_PROP_HEIGHT,
-      RestConstants.CCM_PROP_AUTHOR_FREETEXT,
-      RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR_FN,
-      RestConstants.CCM_PROP_METADATACONTRIBUTER_CREATOR_FN,
-      RestConstants.CCM_PROP_LICENSE,
-      RestConstants.CCM_PROP_REPLICATIONSOURCE,
-      RestConstants.CCM_PROP_QUESTIONSALLOWED];*/
+
+    // default order: lucene score, modified date
+    let sortBy=[RestConstants.LUCENE_SCORE,RestConstants.CM_MODIFIED_DATE];
+    let sortAscending=[false,false];
+
+    // order set by user and order is not of type score (which would be the default mode)
+    console.log(this.searchService.sort);
+    if(this.searchService.sort.materialsSortBy && this.searchService.sort.materialsSortBy!=RestConstants.LUCENE_SCORE){
+        sortBy=[this.searchService.sort.materialsSortBy];
+        sortAscending=[this.searchService.sort.materialsSortAscending];
+    }
     let properties=[RestConstants.ALL];
     this.search.search(criterias,
       [RestConstants.LOM_PROP_GENERAL_KEYWORD],
       {
-        sortBy: [RestConstants.LUCENE_SCORE,RestConstants.CM_MODIFIED_DATE],
-        sortAscending: false,
+        sortBy: sortBy,
+        sortAscending: sortAscending,
         count:this.currentRepository==RestConstants.ALL && !this.groupResults ?
           Math.max(5,Math.round(this.connector.numberPerRequest/(this.repositories.length-1))) : null,
         offset: this.searchService.skipcount[position],
-        propertyFilter: [
-          properties]
+        propertyFilter: [properties]
       },
       RestConstants.CONTENT_TYPE_FILES,
       repo ? repo.id : RestConstants.HOME_REPOSITORY,

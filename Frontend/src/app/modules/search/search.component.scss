@@ -68,6 +68,16 @@ $sidenavWidth:300px;
   color:$textLight;
   padding-bottom: 5px;
   margin-left: 15px;
+  >div{
+    display: inline-flex;
+    >span{
+      padding-left: 3px;
+    }
+    >i{
+      font-size: 20px;
+      padding-left: 5px;
+    }
+  }
 }
 .collections{
   min-height: $listCardSmallHeight+10px;
@@ -585,6 +595,9 @@ div.dialog.darken {
 @media all and (max-width: $mobileWidth) {
   .switchToCollections{
     display: none;
+  }
+  .content_wrapper {
+    width: 100%;
   }
   .extendedSearch{
     span{

@@ -37,8 +37,10 @@ public interface NodeService {
 	public String getCompanyHome();
 
 	public HashMap<String, String[]> getNameProperty(String name);
-	
-	public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
+
+    List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types);
+
+    public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
 	
 	public void setOwner(String nodeId, String username);
 	

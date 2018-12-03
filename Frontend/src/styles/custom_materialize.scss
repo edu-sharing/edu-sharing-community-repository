@@ -6,11 +6,17 @@
 .btn,button:focus{
   background-color:$primary!important;
   color:$textOnPrimary!important;
+}
+.btn,.btn-flat{
+  display:inline-flex;
+  align-items: center;
+  >span{
+    flex-grow:1;
+  }
   >.material-icons{
     display: inline-flex;
     align-items: center;
-    position: relative;
-    top: 4px;
+    margin-right: 5px;
   }
 }
 .btn:focus:not(.disabled){
@@ -275,7 +281,6 @@ input[type=search]:read-only{
 }
 .btn-icon i,.btn-icon-only i, .align-icon{
   position:relative;
-  top:4px;
   left:-10px;
 }
 
@@ -328,11 +333,6 @@ img.align-icon {
 .btn-complementary{
   background-color: $primaryComplementary!important;
 }
-.btn-floating.btn-large i {
-  line-height: 0px;
-  position: relative;
-  top: 7px;
-}
 .btn-floating-inverted{
   background-color:#fff;
 }
@@ -355,7 +355,9 @@ img.align-icon {
 span.thumb{
   display:none; /* preview thumb for range does not work */
 }
-
+.btn-floating.btn-large i{
+  font-size:28px;
+}
 .btn, .btn-large,
 .btn-floating,
 .btn-large,

@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.importer;
 
+import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,8 +78,12 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void setBinaryHandler(BinaryHandler binaryHandler) {
-		this.binaryHandler = binaryHandler;
+	public void setBinaryHandler(Constructor<BinaryHandler> binaryHandler) {
+		try {
+			this.binaryHandler = binaryHandler.newInstance();
+		} catch (Exception e) {
+			logger.error(e);
+		}
 	}
 	
 	@Override
@@ -100,7 +105,7 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void setRecordHandler(RecordHandlerInterface recordHandler) {
+	public void setRecordHandler(Constructor<RecordHandlerInterface> recordHandler) {
 		
 	}
 	
@@ -328,12 +333,17 @@ public class SerloImporter implements Importer{
 	}
 	
 	@Override
-	public void startImport(String[] oaiIDs, String set) {
+	public void startImport(String[] oaiIDs) {
 		logger.error("not implemented yet");
 	}
 
 	@Override
 	public void setJob(ImporterJob importerJob) {
+
+	}
+
+	@Override
+	public void setMetadataSetId(String metadataSetId) {
 
 	}
 

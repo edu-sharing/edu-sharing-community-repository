@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.rendering;
 
 import java.io.IOException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -322,7 +323,7 @@ public class RenderingProxy extends HttpServlet {
 			
 		long timestamp = System.currentTimeMillis();
 		contentUrl = UrlTool.setParam(contentUrl, "ts",""+timestamp);
-		
+
 		Signing sigTool = new Signing();
 		
 		String data = rep_id + nodeId + timestamp;

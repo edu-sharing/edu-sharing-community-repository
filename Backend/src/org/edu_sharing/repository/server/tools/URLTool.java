@@ -143,13 +143,7 @@ public class URLTool{
 		if(dynamic) {
 			try {
 				HttpServletRequest req = Context.getCurrentInstance().getRequest();
-				String path = req.getScheme() + "://" + req.getServerName();
-				int port = req.getLocalPort();
-				if (port != 80 && port != 443) {
-					path += ":" + port;
-				}
-				path += "/" + homeRepository.getWebappname();
-				return path;
+				return getBaseUrlFromRequest(req);
 			}
 			catch(Throwable t){
 				logger.debug("Failed to get dynamic base url, will use the one defined in homeApp");
@@ -158,7 +152,18 @@ public class URLTool{
 
 		return getBaseUrl(homeRepository.getAppId());
 	}
-	
+
+	public static String getBaseUrlFromRequest(HttpServletRequest req) {
+		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
+		String path = req.getScheme() + "://" + req.getServerName();
+		int port = req.getLocalPort();
+		if (port != 80 && port != 443) {
+			path += ":" + port;
+		}
+		path += "/" + homeRepository.getWebappname();
+		return path;
+	}
+
 	public static String getBaseUrl(String repositoryId){
 		ApplicationInfo repository = ApplicationInfoList.getRepositoryInfoById(repositoryId);
 		String hostOrDomain = (repository.getDomain() == null || repository.getDomain().trim().equals(""))? repository.getHost() : repository.getDomain();
@@ -202,8 +207,7 @@ public class URLTool{
 		}
 		return result;
 	}
-	
-	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId){
+	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId,String baseUrl) {
 		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 		NodeService alfNodeService = serviceRegistry.getNodeService();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId),node);
@@ -219,13 +223,16 @@ public class URLTool{
 				e.printStackTrace();
 				return null;
 			}
-			
+
 		}else {
-			String previewURL = getBaseUrl(true);
+			String previewURL = baseUrl;
 			previewURL += "/preview?nodeId="+node+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
 			previewURL =  addOAuthAccessToken(previewURL);
 			return previewURL;
 		}
+	}
+	public static String getPreviewServletUrl(String node, String storeProtocol,String storeId){
+		return getPreviewServletUrl(node,storeProtocol,storeId,getBaseUrl(true));
 	}
 	public static String getPreviewServletUrl(NodeRef node){
 		return getPreviewServletUrl(node.getId(), node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier());

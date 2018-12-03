@@ -18,6 +18,7 @@ public class MetadataSetV2 {
 	private List<MetadataTemplate> templates;
 	private List<MetadataGroup> groups;
 	private List<MetadataList> lists;
+	private List<MetadataSort> sorts;
 	private MetadataQueries queries;
 	private MetadataCreate create;
 	public String getId() {
@@ -100,6 +101,15 @@ public class MetadataSetV2 {
 	public void setLists(List<MetadataList> lists) {
 		this.lists = lists;
 	}
+
+	public List<MetadataSort> getSorts() {
+		return sorts;
+	}
+
+	public void setSorts(List<MetadataSort> sorts) {
+		this.sorts = sorts;
+	}
+
 	public void overrideWith(MetadataSetV2 mdsOverride) {
 		if(mdsOverride.getId()!=null)
 			setId(mdsOverride.getId());
@@ -143,6 +153,15 @@ public class MetadataSetV2 {
 			}
 			else{
 				lists.add(0,list);
+			}
+		}
+		for(MetadataSort sort : mdsOverride.getSorts()){
+			if(sorts.contains(sort)){
+				sorts.remove(sort);
+				sorts.add(0,sort);
+			}
+			else{
+				sorts.add(0,sort);
 			}
 		}
 		if(mdsOverride.getCreate()!=null) {

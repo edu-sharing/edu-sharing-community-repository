@@ -5,7 +5,7 @@
       <div class="card-title">{{'COLLECTIONS.PINNING.TITLE' | translate }}</div>
       <div class="card-scroll">
         <div *ngFor="let collection of pinnedCollections;let i=index" class="entry"
-             [draggable]="true"
+             draggable="true"
              (dragend)="currentDragColumn=null"
              (dragover)="allowDragColumn($event,i,collection)" (drop)="dropColumn($event,i,collection)"
              (dragstart)="dragStartColumn($event,i,collection)"

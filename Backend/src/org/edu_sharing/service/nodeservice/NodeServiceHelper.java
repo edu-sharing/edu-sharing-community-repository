@@ -51,12 +51,12 @@ public class NodeServiceHelper {
 		 */
 		HashMap<String,String[]>  propsLongKeys = (HashMap<String,String[]>)new NameSpaceTool<String[]>()
 				.transformKeysToLongQname(properties);
-		
+
 		HashMap<String, String[]> result = new HashMap<String, String[]>();
 
 		for (Map.Entry<String,String[]> property : propsLongKeys.entrySet()) {
 			if(result.containsKey(property.getKey())) continue;
-			
+
 			result.put(property.getKey(), property.getValue());
 		}
 
@@ -76,7 +76,7 @@ public class NodeServiceHelper {
 			HashMap<String, Object> props = service.getProperties(ref.getStoreRef().getProtocol(),ref.getStoreRef().getIdentifier(),ref.getId());
 			result.add(props);
 		}
-		return result;		
+		return result;
 	}
 
     public static boolean isChildOf(NodeService nodeService,String childId, String parentId) {

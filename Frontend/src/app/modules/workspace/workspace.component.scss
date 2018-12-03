@@ -60,15 +60,6 @@
 .addDesktop,.addMobile {
   z-index: 115;
 }
-.addDesktop span{
-  position: relative;
-  //top:-3px;
-  padding-left:4px;
-}
-.addDesktop i{
-  position: relative;
-  //top:1px;
-}
 .addMobile{
   z-index:85;
   position:fixed;
@@ -159,6 +150,7 @@
   right:0;
   z-index: 97;
   >div {
+    height:$workspaceBreadcrumbsHeight - 3px;
     margin-right: 10px;
     padding-top: 19px;
     padding-left: 20px;

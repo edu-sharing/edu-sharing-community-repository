@@ -304,6 +304,10 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		List<org.edu_sharing.webservices.types.Child> childrenConverted = new ArrayList<>();
 		List<Map<String, Object>> children = getChildNodes(nodeId);
+		String baseUrl=getHeaderValue("baseUrl",MessageContext.getCurrentContext());
+		// when baseUrl is not available from client (e.g. a request from LMS)
+		if(baseUrl==null || baseUrl.isEmpty())
+			baseUrl=URLTool.getBaseUrl(false);
 		for(Map<String, Object> child : children) {
 			org.edu_sharing.webservices.types.Child childConverted=new org.edu_sharing.webservices.types.Child();
 			String childId=(String) child.get(CCConstants.SYS_PROP_NODE_UID);
@@ -313,7 +317,12 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			childConverted.setProperties(convertProperties(child));
 			childConverted.setAspects(aspects);
 			childConverted.setIconUrl(new MimeTypesV2(appInfo).getIcon(type,child,Arrays.asList(childAspects)));
-			childConverted.setPreviewUrl(URLTool.getPreviewServletUrl(new NodeRef(MCAlfrescoAPIClient.storeRef, childId)));
+			childConverted.setPreviewUrl(
+					URLTool.getPreviewServletUrl(
+							childId,
+							StoreRef.PROTOCOL_WORKSPACE,
+							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							baseUrl));
 			childrenConverted.add(childConverted);
 
 		}
@@ -365,8 +374,11 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			rir.setPropertiesToolInstance(propsResultToolInstance.toArray(new KeyValue[propsResultToolInstance.size()]));
 		}
 		String clientBaseUrl = appInfo.getClientBaseUrl();
-		String previewUrl = URLTool.getPreviewServletUrl(new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId));
-		
+		String previewUrl = URLTool.getPreviewServletUrl(
+				nodeId,
+				StoreRef.PROTOCOL_WORKSPACE,
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+				baseUrl);
 		rir.setPreviewUrl(previewUrl);
 		rir.setMimeTypeUrl(new MimeTypes(clientBaseUrl).getIconUrl(props, Theme.getThemeId()));
 		rir.setAspects(client.getAspects(nodeId));

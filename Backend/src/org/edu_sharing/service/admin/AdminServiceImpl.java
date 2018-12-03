@@ -713,18 +713,18 @@ public class AdminServiceImpl implements AdminService  {
 	}
 	
 	@Override
-	public void importOai(String set,String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds) throws Exception{	
+	public void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds, boolean forceUpdate) throws Exception{
 		//new JobExecuter().start(ImporterJob.class, authInfo, setsParam.toArray(new String[setsParam.size()]));
 		
 		HashMap<String,Object> paramsMap = new HashMap<String,Object>();
-		List<String> sets=new ArrayList<>();
-		sets.add(set);
+		List<String> sets=new ArrayList(Arrays.asList(set.split(",")));
 		if(fileUrl!=null && !fileUrl.isEmpty() && !(fileUrl.startsWith("http://") || fileUrl.startsWith("https://")))
 				throw new Exception("file url "+fileUrl+" is not a valid url");
-		if(fileUrl!=null)
+		if(fileUrl!=null && !fileUrl.isEmpty())
 			sets.add(fileUrl);
 		paramsMap.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
 		paramsMap.put("sets", sets);
+		paramsMap.put(OAIConst.PARAM_FORCE_UPDATE,forceUpdate);
 		if(oaiBaseUrl != null && !oaiBaseUrl.trim().equals("")){
 			paramsMap.put(OAIConst.PARAM_OAI_BASE_URL, oaiBaseUrl);
 		}

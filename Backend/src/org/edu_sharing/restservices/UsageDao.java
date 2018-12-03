@@ -73,6 +73,7 @@ public class UsageDao {
 			usageResult.setAppUserMail(usage.getAppUserMail());
 		}
 
+		usageResult.setType(usage.getType().name());
 		usageResult.setCourseId(usage.getCourseId());
 		usageResult.setDistinctPersons(usage.getDistinctPersons());
 		usageResult.setGuid(usage.getGuid());

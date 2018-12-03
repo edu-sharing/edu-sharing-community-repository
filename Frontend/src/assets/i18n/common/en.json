@@ -166,7 +166,8 @@
     "virtual:usagecount": "usage count",
     "ccm:author_freetext":"General Author information",
     "ccm:lifecyclecontributer_authorFN":"author",
-    "ccm:wf_status":"status"
+    "ccm:wf_status":"status",
+    "ccm:eaf_productionyear":"Production year"
   },
   "COOKIE_INFO":{
     "DESCRIPTION":"edu-sharing uses cookies to improve the user-friendliness of the site.\nIf you continue to use it, we'll assume you are ok with that.",

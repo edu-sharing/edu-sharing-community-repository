@@ -439,12 +439,13 @@ export class NodeRenderComponent implements EventListener{
             this.isOpenable = false;
         }
         else {
-            let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
+            let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', null);
             openFolder.isEnabled = false;
-            this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node: NodeWrapper) => {
+            this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((original: NodeWrapper) => {
 
-                this.nodeApi.getNodeParents(node.node.parent.id, false, [], node.node.parent.repo).subscribe((data: NodeList) => {
+                this.nodeApi.getNodeParents(original.node.parent.id, false, [], original.node.parent.repo).subscribe(() => {
                     openFolder.isEnabled = true;
+                    openFolder.callback=() => this.goToWorkspace(login, original.node);
                     //.isEnabled = data.node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
                 });
             }, (error: any) => {

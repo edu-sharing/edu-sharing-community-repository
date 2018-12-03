@@ -8,11 +8,11 @@ $previewHeight:160px;
 .sorting,.text{
   float:left;
   padding:0!important;
-  position:relative;
-  top:-2px;
 }
 .sorting{
-  height:13px;
+  height: 24px;
+  display: flex;
+  align-items: center;
 }
 .sorting a i{
   width:12px;
@@ -245,26 +245,7 @@ $badgeWidth:250px;
   }
   .sortMenu{
     position: absolute;
-    z-index: $dialogZIndex+1;
     left:80px;
-    width: $contextMenuWidth;
-    .collection-item{
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-      .title{
-        flex-grow: 1;
-      }
-      a{
-        height:20px;
-      }
-      i{
-        position: initial;
-      }
-      &.active{
-        font-weight: bold;
-      }
-    }
   }
 }
 .row .icon{
@@ -1048,7 +1029,7 @@ $orderAnimationTime:$transitionNormal*5;
   .cardList .row .more{
     position: absolute;
     top: 45px;
-    left: calc(100% - 55px);
+    left: calc(100% - 65px);
   }
   .cardList .row_1{
     height: auto;

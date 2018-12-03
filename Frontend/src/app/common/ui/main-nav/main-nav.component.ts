@@ -92,8 +92,8 @@ export class MainNavComponent implements AfterViewInit{
   userMenuOptions: OptionItem[];
   helpOptions: OptionItem[]=[];
   tutorialElement: ElementRef;
-
-
+  globalProgress = false;
+  
   public showEditProfile: boolean;
   public showProfile: boolean;
 
@@ -165,6 +165,7 @@ export class MainNavComponent implements AfterViewInit{
       }
   }
     @HostListener('window:scroll', ['$event'])
+    @HostListener('window:touchmove', ['$event'])
     handleScroll(event: any) {
         let elementsScroll=document.getElementsByClassName('scrollWithBanner');
         let elementsAlign=document.getElementsByClassName('alignWithBanner');
@@ -448,8 +449,11 @@ export class MainNavComponent implements AfterViewInit{
     UIHelper.openBlankWindow(url,this.cordova);
   }
   private logout(){
+    this.globalProgress=true;
     if(this.cordova.isRunningCordova()){
-      this.cordova.restartCordova();
+      this.connector.logout().subscribe(()=> {
+          this.cordova.restartCordova();
+      });
       return;
     }
     if(this.config.logout) {
@@ -590,6 +594,7 @@ export class MainNavComponent implements AfterViewInit{
       window.location.href=this.config.logout.next;
     else
       this.login(false);
+    this.globalProgress=false;
   }
   getIconSource() {
     return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
@@ -707,7 +712,7 @@ export class MainNavComponent implements AfterViewInit{
      * Add css class mobile-move-top or mobile-move-bottom for specific items
      */
     private handleScrollHide() {
-      if(this.tabNav.nativeElement==null)
+      if(this.tabNav==null || this.tabNav.nativeElement==null)
           return;
       if(this.lastScroll==-1) {
           this.lastScroll=window.scrollY;
@@ -757,7 +762,6 @@ export class MainNavComponent implements AfterViewInit{
           elementsBottom.item(i).style.position="relative";
           elementsBottom.item(i).style.top=this.elementsBottomY+"px";
       }
-      console.log(this.elementsTopY+" "+this.elementsBottomY);
         this.lastScroll=window.scrollY;
         //console.log(event);
     }

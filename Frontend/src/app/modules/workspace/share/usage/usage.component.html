@@ -20,7 +20,9 @@
                 <div class="name">
                     <span class="primary">{{getName(usage)}}</span>
                 </div>
-                <div class="remove clickable" tabindex="0" (keyup.enter)="remove(usage)" (click)="remove(usage)" [class.invisible]="!showDelete">
+                <div class="remove" tabindex="0" (keyup.enter)="remove(usage)" (click)="remove(usage)"
+                     title="{{(usage.type=='INDIRECT' ? 'WORKSPACE.SHARE.USAGE_INDIRECT' : '') | translate}}"
+                     [class.disabled]="usage.type=='INDIRECT'" [class.invisible]="!showDelete">
                     <i class="material-icons" *ngIf="!isDeleted(usage)">cancel</i>
                     <i class="material-icons" *ngIf="isDeleted(usage)">undo</i>
                 </div>

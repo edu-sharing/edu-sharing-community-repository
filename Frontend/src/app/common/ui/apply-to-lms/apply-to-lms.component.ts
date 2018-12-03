@@ -101,7 +101,7 @@ export class ApplyToLmsComponent{
                 window.history.back();
             },(error)=>{
                 console.warn("failed to fetch image data",error);
-                this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE,this.node);
+                this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE,node);
                 window.history.back();
             });
             return;

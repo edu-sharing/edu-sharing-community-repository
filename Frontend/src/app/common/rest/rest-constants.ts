@@ -149,6 +149,7 @@ export class RestConstants {
   public static STATUS_CODE_PREVIOUS_USER_WRONG = "PREVIOUS_USER_WRONG";
 
   public static FILTER_FILES="files";
+  public static FILTER_SPECIAL="special";
   public static FILTER_FOLDERS="folders";
   public static ALL="-all-";
   // use not the maximum int value to prevent overflows in repository

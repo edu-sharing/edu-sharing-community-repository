@@ -434,16 +434,6 @@ export class NodeHelper{
             options.splice(i,1);
           continue;
         }
-        if(c.mode=='nodes' && (!selectedNodes || selectedNodes.length))
-          continue;
-        if(c.mode=='noNodes' && selectedNodes && selectedNodes.length)
-          continue;
-        if(c.mode=='noNodesNotEmpty' && (selectedNodes && selectedNodes.length || !allNodes || !allNodes.length))
-          continue;
-        if (c.mode=='nodes' && c.isDirectory != 'any' && selectedNodes && c.isDirectory != selectedNodes[0].isDirectory)
-          continue;
-        if (!c.multiple && selectedNodes && selectedNodes.length > 1)
-          continue;
         let position = c.position;
         if (c.position < 0)
           position = options.length - c.position;
@@ -483,10 +473,31 @@ export class NodeHelper{
           });
         });
         item.isSeperate = c.isSeperate;
-        if (c.permission) {
-          item.isEnabled = NodeHelper.getNodesRight(selectedNodes, c.permission);
+        item.enabledCallback=(node:Node)=>{
+            if (c.permission) {
+                return NodeHelper.getNodesRight(NodeHelper.getActionbarNodes(selectedNodes, node), c.permission);
+            }
+            return true;
         }
-        options.splice(position, 0, item);
+        item.isEnabled=item.enabledCallback(null);
+        item.showCallback=(node:Node)=>{
+            let nodes=NodeHelper.getActionbarNodes(selectedNodes,node);
+            if(c.mode=='nodes' && (!nodes || nodes.length))
+                return false;
+            if(c.mode=='noNodes' && nodes && nodes.length)
+                return false;
+            if(c.mode=='noNodesNotEmpty' && (nodes && nodes.length || !allNodes || !allNodes.length))
+                return false;
+            if (c.mode=='nodes' && c.isDirectory != 'any' && nodes && c.isDirectory != nodes[0].isDirectory)
+                return false;
+            if(c.toolpermission && !connector.hasToolPermissionInstant(c.toolpermission))
+                return false;
+            if (!c.multiple && nodes && nodes.length > 1)
+                return false;
+            return true;
+        }
+        if(item.showCallback(null))
+            options.splice(position, 0, item);
       }
 
     }
@@ -643,6 +654,9 @@ export class NodeHelper{
           prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
       }
       return prop;
+  }
+  public static getActionbarNodes(nodes:Node[],node:Node):Node[] {
+      return node ? [node] : nodes;
   }
 }
 

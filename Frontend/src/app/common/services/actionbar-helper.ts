@@ -10,7 +10,7 @@ import {RestNetworkService} from '../rest/services/rest-network.service';
 export class ActionbarHelperService{
   private repositories: Repository[];
   public static getNodes(nodes:Node[],node:Node):Node[] {
-      return node ? [node] : nodes ? nodes : [];
+      return NodeHelper.getActionbarNodes(nodes,node);
   }
   constructor(
     private connector : RestConnectorService,

@@ -306,6 +306,7 @@
 				<property name="ccm:usagecourseid">
 					<type>d:text</type>
 				</property>
+				<!-- is a link to the original node id for collection references -->
 				<property name="ccm:usageparentnodeid">
 					<type>d:text</type>
 				</property>
@@ -622,6 +623,10 @@
 				<!-- for sorting  -->
 				<property name="ccm:replicationmodified">
 					<type>d:date</type>
+				</property>
+				<!-- for detecting last update of imported data  -->
+				<property name="ccm:importmodified">
+					<type>d:datetime</type>
 				</property>
 
 				<!-- for elixier objects thumbnail url -->

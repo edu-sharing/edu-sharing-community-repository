@@ -476,7 +476,8 @@ export class CordovaService {
 
     // callback - to sync with ios sharescreen
     let callbackWrapper:Function = (val:any) => {
-      if (this.isReallyRunningCordova() && this.isIOS()) {
+        /*
+      if (this.isReallyRunningCordova() & this.isIOS()) {
         if (key==CordovaService.STORAGE_OAUTHTOKENS) {
 
           // see what was the last ios share oauth expire date
@@ -522,9 +523,9 @@ export class CordovaService {
         } else {
           callback(val);
         }
-      } else {
+      } else {*/
         callback(val);
-      }
+      //}
     } 
 
     // get value from HTML5 local storage
