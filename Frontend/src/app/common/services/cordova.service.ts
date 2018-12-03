@@ -1042,7 +1042,7 @@ export class CordovaService {
 
     let url = endpointUrl + "../oauth2/token";
     let headers = {'Content-Type':'application/x-www-form-urlencoded','Accept': '*/*'};
-    let options = { headers: headers };
+    let options = { headers: headers, withCredentials: true };
 
     let data = "client_id=eduApp&client_secret=secret" +
       "&grant_type=" + encodeURIComponent(grantType) +
