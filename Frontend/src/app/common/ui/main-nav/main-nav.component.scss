@@ -77,7 +77,7 @@ user-profile{
   margin-left: 16px;
   width: 24px;
   */
-  margin-left: 0px;
+  margin-left: 0;
   width: 35px;
 }
 
@@ -184,7 +184,7 @@ user-profile{
 .searchInputGroup{
   position: relative;
   width:100%;
-  max-width:600px;
+  max-width:500px;
 }
 .noUser .searchInputGroup{
   width:calc(100% - 150px);
@@ -325,6 +325,9 @@ user-profile{
 @media screen and (max-width: ($mobileWidth+$mobileStage*5)) {
   .searchInputGroup{
     width: calc(100% - 80px);
+  }
+  .user{
+    max-width: 160px;
   }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*2)) {
