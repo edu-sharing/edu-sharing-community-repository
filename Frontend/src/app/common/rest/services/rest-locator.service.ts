@@ -36,8 +36,8 @@ export class RestLocatorService {
   constructor(private http : HttpClient,private cordova:CordovaService) {
   }
   public createOAuthFromSession(){
-      return new Observable((observer : Observer) => {
-          this.cordova.loginOAuth(this.endpointUrl,null,null,"session").subscribe((oauthTokens: OAuthResult) => {
+      return new Observable((observer : Observer<OAuthResult>) => {
+          this.cordova.loginOAuth(this.endpointUrl,null,null,"session").subscribe((oauthTokens) => {
               this.cordova.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, JSON.stringify(oauthTokens));
               observer.next(oauthTokens);
               observer.complete();
