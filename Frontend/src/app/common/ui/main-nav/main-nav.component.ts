@@ -165,6 +165,7 @@ export class MainNavComponent implements AfterViewInit{
       }
   }
     @HostListener('window:scroll', ['$event'])
+    @HostListener('window:touchmove', ['$event'])
     handleScroll(event: any) {
         let elementsScroll=document.getElementsByClassName('scrollWithBanner');
         let elementsAlign=document.getElementsByClassName('alignWithBanner');
