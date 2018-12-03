@@ -92,8 +92,8 @@ export class MainNavComponent implements AfterViewInit{
   userMenuOptions: OptionItem[];
   helpOptions: OptionItem[]=[];
   tutorialElement: ElementRef;
-
-
+  globalProgress = false;
+  
   public showEditProfile: boolean;
   public showProfile: boolean;
 
@@ -448,8 +448,11 @@ export class MainNavComponent implements AfterViewInit{
     UIHelper.openBlankWindow(url,this.cordova);
   }
   private logout(){
+    this.globalProgress=true;
     if(this.cordova.isRunningCordova()){
-      this.cordova.restartCordova();
+      this.connector.logout().subscribe(()=> {
+          this.cordova.restartCordova();
+      });
       return;
     }
     if(this.config.logout) {
@@ -590,6 +593,7 @@ export class MainNavComponent implements AfterViewInit{
       window.location.href=this.config.logout.next;
     else
       this.login(false);
+    this.globalProgress=false;
   }
   getIconSource() {
     return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
