@@ -1904,7 +1904,7 @@ public class NodeApi  {
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeRemote.class),        
 		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
