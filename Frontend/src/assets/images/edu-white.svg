@@ -1,16 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="31px" height="32px" viewBox="0 0 31 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-    <title>Waben</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Header-mit-Suche" transform="translate(-27.000000, -16.000000)" fill="#FFFFFF">
-            <g id="Waben" transform="translate(27.000000, 16.000000)">
-                <polygon id="Fill-1" points="18.3155918 22.8468005 14.2432432 15.6339266 18.3155918 8.42105263 26.4612006 8.42105263 30.5335491 15.6339266 26.4612006 22.8468005"></polygon>
-                <polygon id="Fill-2" points="4.07234854 0 0 7.21287392 4.07234854 14.4257478 12.2179573 14.4257478 16.2903059 7.21287392 12.2179573 0"></polygon>
-                <polygon id="Fill-3" points="4.07234854 16.8421053 0 24.0549792 4.07234854 31.2678531 12.2179573 31.2678531 16.2903059 24.0549792 12.2179573 16.8421053"></polygon>
-            </g>
-        </g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 31 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;">
+    <g id="Waben" transform="matrix(0.885809,0,0,0.885809,3.4763,2.15133)">
+        <path id="Fill-1" d="M18.316,22.847L14.243,15.634L18.316,8.421L26.461,8.421L30.534,15.634L26.461,22.847L18.316,22.847Z" style="fill:white;"/>
+        <path id="Fill-2" d="M4.072,0L0,7.213L4.072,14.426L12.218,14.426L16.29,7.213L12.218,0L4.072,0Z" style="fill:white;"/>
+        <path id="Fill-3" d="M4.072,16.842L0,24.055L4.072,31.268L12.218,31.268L16.29,24.055L12.218,16.842L4.072,16.842Z" style="fill:white;"/>
     </g>
 </svg>
