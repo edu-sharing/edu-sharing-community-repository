@@ -116,7 +116,6 @@
             <div class="groupName">{{'WORKSPACE.SHARE.GROUP_INHERIT' | translate}}</div>
             <div class="inheritCheck">
               <input type="checkbox" [(ngModel)]="inherited" (change)="updatePublishState()" class="filled-in" id="inherit"> <label for="inherit">{{'WORKSPACE.SHARE.INHERIT' | translate}}
-              <!-- <img class="inherit" src="assets/images/inherit.svg" /> -->
             </label></div>
           </div>
           <div class="inherit" [class.crossed]="!inherited" *ngIf="inherited && inherit && inherit.length">

@@ -1,11 +1,6 @@
 @import "../../../../styles/variables.scss";
 
 :host /deep/{
-  .table .inherit svg{
-    width:14px;
-    height:auto;
-    margin-top:5px;
-  }
   .table .allowed #Mask{
     fill:$colorStatusPositive;
   }
@@ -99,6 +94,8 @@
       cursor: default;
       padding-left: 10px;
       font-size: 16px;
+      display: flex;
+      align-items: center;
     }
   }
 }

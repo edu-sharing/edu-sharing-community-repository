@@ -100,7 +100,7 @@
     top:3px;
   }
 }
-.icon,.remove{
+.icon,.remove,.inherit{
   min-width: 24px;
 }
 .remove{
@@ -109,6 +109,10 @@
 }
 .remove i,.type{
   color:$textLight;
+}
+.remove .inherit{
+  color:$workspaceInheritColor;
+  font-size: 21px;
 }
 @media screen and (max-width: $mobileWidth) {
   .permission >div >div span{

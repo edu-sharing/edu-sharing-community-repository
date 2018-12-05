@@ -140,7 +140,7 @@
                     <div class="nodeComments" (click)="select(node,'comments')"><i class="material-icons">comment</i> <div>{{getOriginalNode(node).commentCount}}</div></div>
                 </div>
                 <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
-                <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><icon id="edu-pin"></icon></div>
+                <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
                 <div class="checkbox column" *ngIf="hasCheckbox">
                     <input (click)="select(node,'checkbox')" type="checkbox" class="filled-in" [attr.id]="id+'select'+i"
                            checked="{{getSelectedPos(node)!=-1 ? 'checked' : ''}}"/>

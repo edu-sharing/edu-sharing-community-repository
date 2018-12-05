@@ -32,8 +32,10 @@
 .light a{
   color:#fff;
 }
-.more icon{
-  font-size:1.5rem;
+.more{
+  .edu-icons,.material-icons {
+    font-size: 1.5rem;
+  }
 }
 .actionAlways{
   text-transform: uppercase;
@@ -73,13 +75,13 @@
     background: white !important;
     color: $primary !important;
     border-radius: 50%;
-    display:block;
+    display:flex;
     width:45px;
     height:45px;
     line-height:45px;
     text-align: center;
     @include materialShadowBottom();
-    icon{
+    .edu-icons,.material-icons{
       position: relative;
       font-size: 24px;
     }
@@ -87,8 +89,10 @@
       display: none;
     }
   }
-  .actionAlways icon{
-    right: 4px !important;
+  .actionAlways{
+    .edu-icons,.material-icons {
+      right: 4px !important;
+    }
   }
 }
 
