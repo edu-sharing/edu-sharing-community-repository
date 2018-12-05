@@ -579,7 +579,7 @@ export class MainNavComponent{
     this.globalProgress=false;
   }
   getIconSource() {
-    return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
+    return this.configService.instant('mainnav.icon.url','assets/images/edu-white.svg');
   }
   saveLicenseAgreement(){
     this.licenseAgreement=false;
