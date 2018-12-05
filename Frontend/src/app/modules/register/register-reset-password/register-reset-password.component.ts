@@ -27,15 +27,11 @@ import {RestRegisterService} from "../../../common/rest/services/rest-register.s
 })
 export class RegisterResetPasswordComponent{
     @Output() onLoading=new EventEmitter();
-    public password_strength ="";
     public new_password ="";
     public key: string;
 
-    public checkPassword(){
-        this.password_strength = UIHelper.getPasswordStrengthString(this.new_password);
-    }
     public buttonCheck(){
-        if (this.password_strength != "weak" && this.new_password.trim()){
+        if (UIHelper.getPasswordStrengthString(this.new_password) != "weak" && this.new_password.trim()){
             return true;
         } else {
             return false;
