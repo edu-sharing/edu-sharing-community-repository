@@ -3,7 +3,7 @@ import {Title} from "@angular/platform-browser";
 import {ConfigurationService} from "../services/configuration.service";
 import {
     Collection, Connector, ConnectorList, Filetype, LoginResult, MdsInfo, Node,
-    NodeLock, ParentList
+    NodeLock, OAuthResult, ParentList
 } from "../rest/data-object";
 import {ActivatedRoute, NavigationExtras, Router} from "@angular/router";
 import {UIConstants} from "./ui-constants";
@@ -24,6 +24,7 @@ import {CordovaService} from "../services/cordova.service";
 import {SearchService} from "../../modules/search/search.service";
 import {OptionItem} from "./actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
+import {Observable, Observer} from "rxjs";
 export class UIHelper{
 
   public static evaluateMediaQuery(type:string,value:number){
@@ -549,5 +550,22 @@ export class UIHelper{
             return error.error.message.indexOf(data)!=-1;
         }catch(e){}
         return false;
+    }
+
+    /**
+     * waits until the given component/object is not null and available
+     * @param clz the class where the component is attached (usually "this")
+     * @param componentName The name of the property
+     */
+    static waitForComponent(clz:any, componentName: string) {
+        return new Observable((observer : Observer<any>) => {
+            let interval=setInterval(()=> {
+                if (clz[componentName]) {
+                    observer.next(clz[componentName]);
+                    observer.complete();
+                    clearInterval(interval);
+                }
+            },1000/60);
+        });
     }
 }

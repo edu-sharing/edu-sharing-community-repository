@@ -4,7 +4,7 @@
     <div class="card center-card card-action header-high card-high">
 
         <div class="card-content">
-            <div *ngIf="state == 'register' || state=='request'" class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+            <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
             <div class="card-title">
                 {{(state=='request' || state=='done-reset' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}
             </div>
