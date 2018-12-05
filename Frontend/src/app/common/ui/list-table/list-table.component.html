@@ -134,7 +134,7 @@
                     <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i class="material-icons">filter_none</i>
                 </div>
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
-                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
+                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="presentation">
                 </div>
                 <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                 <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><custom-icon iconId="pin"></custom-icon></div>
