@@ -354,14 +354,23 @@ public class URLTool{
 	public static String getNgRenderNodeUrl(String nodeId,String version) {
 		return getNgRenderNodeUrl(nodeId, version, false);
 	}
+	
+	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic) {
+		return getNgRenderNodeUrl(nodeId, version, dynamic, null);
+	}
+	
 	/**
 	 * Get the url to the angular rendering component
 	 * @param nodeId
 	 * @param version may be null to use the latest
 	 * @return
 	 */
-	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic) {
-		return getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.trim().isEmpty() ? "/"+version : "");
+	public static String getNgRenderNodeUrl(String nodeId,String version,boolean dynamic, String repository) {
+		String ngComponentsUrl =  getNgComponentsUrl()+"render/"+nodeId+(version!=null && !version.trim().isEmpty() ? "/"+version : "");
+		if(repository != null) {
+			ngComponentsUrl+="?repository="+repository;
+		}
+		return ngComponentsUrl;
 	}
 	
 	public static String getRedirectServletLink(String repId, String nodeId){
