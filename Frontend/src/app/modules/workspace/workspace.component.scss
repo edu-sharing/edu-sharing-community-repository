@@ -174,9 +174,9 @@
   top: $mainnavHeight;
   left:0;
   width:100%;
-  height:$workspaceBreadcrumbsHeight;
   z-index:96;
   >div {
+    height:$workspaceBreadcrumbsHeight;
     background-color: #fff;
     padding-left:320px;
     padding-top: 22px;
