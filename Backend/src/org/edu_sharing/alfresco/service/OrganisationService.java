@@ -35,12 +35,14 @@ public class OrganisationService {
 	PermissionService permissionService;
 
 	public static String ORGANIZATION_GROUP_FOLDER = "EDU_SHARED";
-
+	
 	public static final String CCM_PROP_EDUGROUP_EDU_HOMEDIR = "{http://www.campuscontent.de/model/1.0}edu_homedir";
 	public static final String CCM_PROP_EDUGROUP_EDU_UNIQUENAME = "{http://www.campuscontent.de/model/1.0}edu_uniquename";
 	public static final QName QNAME_EDUGROUP = QName.createQName(CCConstants.CCM_ASPECT_EDUGROUP);
 
 	Logger logger = Logger.getLogger(OrganisationService.class);
+	
+	boolean useOrgPrefix = true;
 	
 	public String createOrganization(String orgName, String groupDisplayName, String scope) throws Exception {
         orgName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
@@ -178,9 +180,12 @@ public class OrganisationService {
 	 * adds ORG_ADMIN Group as Coordinator if not already set
 	 * @param organisationName
 	 */
-	public void setOrgAdminPermissions(String organisationName) {
+	public void setOrgAdminPermissions(String organisationName) throws Exception {
 		logger.debug("inviting orgadmin group as coordinator for org:" + organisationName);
 		String authorityName = getAuthorityName(organisationName);
+		if(!authorityService.authorityExists(authorityName)) {
+			throw new Exception("No Organisation Found for " + organisationName);
+		}
 		NodeRef orgNodeRef = authorityService.getAuthorityNodeRef(authorityName);
 		NodeRef eduGroupHomeDir = (NodeRef)nodeService.getProperty(orgNodeRef, QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
 		if(eduGroupHomeDir == null) {
@@ -227,7 +232,12 @@ public class OrganisationService {
 		organisationName = organisationName.replaceFirst(PermissionService.GROUP_PREFIX, "");
 		organisationName = organisationName.replaceFirst(AuthorityService.ORG_GROUP_PREFIX, "");
 		
-		return  PermissionService.GROUP_PREFIX + AuthorityService.ORG_GROUP_PREFIX + organisationName;
+		if(this.isUseOrgPrefix()) {
+			return  PermissionService.GROUP_PREFIX + AuthorityService.ORG_GROUP_PREFIX + organisationName;
+		}else {
+			return  PermissionService.GROUP_PREFIX + organisationName;
+		}
+		
 	}
 	
 	public List<String> getMyOrganisations(boolean scoped){
@@ -282,5 +292,13 @@ public class OrganisationService {
 
 	public void setPermissionService(PermissionService permissionService) {
 		this.permissionService = permissionService;
+	}
+	
+	public void setUseOrgPrefix(boolean useOrgPrefix) {
+		this.useOrgPrefix = useOrgPrefix;
+	}
+	
+	public boolean isUseOrgPrefix() {
+		return useOrgPrefix;
 	}
 }

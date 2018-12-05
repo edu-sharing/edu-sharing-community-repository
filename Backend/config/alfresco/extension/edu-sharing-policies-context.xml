@@ -56,4 +56,21 @@
            	<value>true</value>
         </property>
    	 </bean>
+   	 
+   	 
+   	 <bean id="eduOrganisationService" class="org.edu_sharing.alfresco.service.OrganisationService">
+     	<property name="authorityService">
+        		<ref bean="AuthorityService" />
+        </property>
+        <property name="nodeService">
+    	    		<ref bean="NodeService" />
+    		</property>
+    		<property name="eduAuthorityService">
+        		<ref bean="eduAuthorityService" />
+        </property>
+         <property name="permissionService">
+            <ref bean="PermissionService" />
+        </property>
+        <property name="repositoryHelper" ref="repositoryHelper"/>
+    </bean>
 </beans>
