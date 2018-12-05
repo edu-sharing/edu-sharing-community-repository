@@ -35,7 +35,7 @@ export class RegisterComponent{
     state = 'register';
 
     public cancel(){
-        RestHelper.goToLogin(this.router,this.configService,null,null);
+        RestHelper.goToLogin(this.router, this.configService, null, null);
     }
 
     public requestDone(email: string ){
@@ -89,7 +89,9 @@ export class RegisterComponent{
       onRegisterDone(){
           let email=this.registerForm.info.email;
           this.state='done';
-          setTimeout(()=>this.registerDone.email=email);
+          // will loose state when going back to register form
+          //this.router.navigate([UIConstants.ROUTER_PREFIX,"register","done","-",email]);
+          UIHelper.waitForComponent(this,"registerDone").subscribe(()=>this.registerDone.email=email);
           this.toast.toast("REGISTER.TOAST");
       }
 

@@ -475,11 +475,10 @@
 				<html><![CDATA[
               <cclom:title>
               <cm:name>
+              <cclom:general_description>
               <cclom:general_keyword>
-              
               <license>
               <ccm:author_freetext>
-              <cclom:general_description>
               <cclom:size>
               <cm:created>
               <cm:modified>

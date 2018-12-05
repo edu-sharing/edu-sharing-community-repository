@@ -260,7 +260,8 @@ export class CordovaService {
                }
                (window as any).plugins.intent.getCordovaIntent(null);
            };
-           (window as any).plugins.intent.getCordovaIntent(handleIntent);
+           console.log((window as any).plugins);
+           (window as any).plugins.intent.getCordovaIntent(handleIntentBase);
            (window as any).plugins.intent.setNewIntentHandler(handleIntent);
            /*
            (window as any).plugins.webintent.onNewIntent((uri:string)=> {

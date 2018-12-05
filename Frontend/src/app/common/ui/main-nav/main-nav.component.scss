@@ -218,6 +218,7 @@ user-profile{
 .topBar .user{
   text-align: right;
   position: relative;
+  // space for links like imprint
   top:5px;
   display: flex;
   margin-right: 7px;
@@ -416,6 +417,9 @@ user-profile{
     display:none;
   }
   .topBar {
+    .user{
+      top: 0;
+    }
     .iconPerson {
       display: inherit;
     }
