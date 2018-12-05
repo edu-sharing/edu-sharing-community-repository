@@ -598,7 +598,7 @@ export class MainNavComponent implements AfterViewInit{
     this.globalProgress=false;
   }
   getIconSource() {
-    return this.configService.instant('mainnav.icon.url','assets/images/edu-white.svg');
+    return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
   }
   saveLicenseAgreement(){
     this.licenseAgreement=false;
