@@ -353,7 +353,6 @@ public class RenderingProxy extends HttpServlet {
 					Usage usage = null;
 					if(repoInfo != null && !ApplicationInfoList.getHomeRepository().getAppId().equals(repoInfo.getAppId())){
 						Usage2ServiceLocator locator = new Usage2ServiceLocator();
-						locator.setusage2EndpointAddress("http://localhost:8080/edu-sharing/services/usage2");
 						locator.setusage2EndpointAddress(repoInfo.getWebServiceHotUrl());
 						Usage2 u2 = locator.getusage2();
 						Usage2Result u2r = u2.getUsage("ccrep://" + repoInfo.getAppId()+"/"+ nodeId, req.getParameter("app_id"), req.getParameter("course_id"), usernameDecrypted, req.getParameter("resource_id"));
