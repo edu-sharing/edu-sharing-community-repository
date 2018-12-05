@@ -57,4 +57,10 @@ public class RepoProxyDummyImpl extends RepoProxyAbstract {
 		return ErrorResponse.createResponse(e);
 	}
 	
+	@Override
+	public Response prepareUsage(String repository, String node, HttpServletRequest req) {
+		// TODO Auto-generated method stub
+		return ErrorResponse.createResponse(e);
+	}
+	
 }
