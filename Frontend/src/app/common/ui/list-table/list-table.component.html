@@ -172,7 +172,7 @@
                          (mouseenter)="animateIcon(node,true)"
                          (mouseleave)="animateIcon(node,false)"
                          [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
-                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{ node.title }}"/>
+                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{getAttributeText(node,columnsVisible[0])}}"/>
                     <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
                         <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
                             <i class="material-icons">layers</i>
