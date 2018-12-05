@@ -15,11 +15,8 @@
         <input required [ngClass]="{'valid': mailValid, 'invalid': !mailValid && info.email.trim()}" type="email" name="email" id="email" placeholder="{{'REGISTER.PL_MAIL' | translate}}" (ngModelChange)="checkMail($event)" [(ngModel)]="info.email"/>
     </div>
     <div>
-        <div *ngIf="info.password" class="strength">
-            <span class='{{password_strength}}'>{{'REGISTER.PW_'+password_strength | translate}}</span>
-        </div>
         <label for="password">{{'USER.password' | translate}} *</label>
-        <input-password [hint]="true" autocomplete="new-password" [inputClass]="password_strength == 'strong' || password_strength == 'medium' ? 'valid' : password_strength == 'accept' ? 'middle' : password_strength == 'weak' ? 'invalid' : null" id="password" required="true" (ngModelChange)="checkPassword($event)" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
+        <input-password [hint]="true" [displayStrength]="true" autocomplete="new-password" id="password" required="true" (keydown.enter)="register()" [(value)]="info.password" placeholder="{{'REGISTER.PL_PASSWORD' | translate}}"></input-password>
     </div>
     <div>
         <label for="organization">{{'REGISTER.ORGANIZATION' | translate}}</label>

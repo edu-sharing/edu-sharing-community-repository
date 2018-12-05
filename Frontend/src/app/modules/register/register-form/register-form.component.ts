@@ -28,19 +28,14 @@ export class RegisterFormComponent{
         password: '',
         allowNotifications: false
     };
-    public password_strength='';
     public news = true;
     public agree = false;
     public privacyUrl: string;
     public mailValid: boolean;
 
-    public checkMail(mail:string){
+    public checkMail(mail:string) {
         this.mailValid = UIHelper.isEmail(mail);
     }
-  public checkPassword(password:string){
-      this.password_strength = UIHelper.getPasswordStrengthString(password);
-  }
-
     public register(){
         this.onLoading.emit(true);
         this.registerService.register(this.info).subscribe(()=>{
@@ -70,7 +65,7 @@ export class RegisterFormComponent{
   }
 
     public canRegister(){
-        return this.info.firstName.trim() && this.mailValid && this.info.password && this.password_strength != 'weak'
+        return this.info.firstName.trim() && this.mailValid && this.info.password && UIHelper.getPasswordStrengthString(this.info.password) != 'weak'
             && this.agree;
     }
 
