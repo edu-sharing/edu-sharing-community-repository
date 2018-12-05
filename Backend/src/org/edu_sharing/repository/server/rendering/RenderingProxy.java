@@ -35,6 +35,9 @@ import org.edu_sharing.service.rendering.RenderingTool;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
+import org.edu_sharing.webservices.usage2.Usage2;
+import org.edu_sharing.webservices.usage2.Usage2Result;
+import org.edu_sharing.webservices.usage2.Usage2ServiceLocator;
 
 public class RenderingProxy extends HttpServlet {
 
@@ -92,6 +95,7 @@ public class RenderingProxy extends HttpServlet {
 			return;
 		}
 		
+		ApplicationInfo repoInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);
 		//Signatur validation
 		//current repo knows the app
 		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(app_id);
@@ -147,7 +151,7 @@ public class RenderingProxy extends HttpServlet {
 
 		if("window".equals(display)) {
 
-			openWindow(req, resp, nodeId, parentId, appInfoApplication, usernameDecrypted);
+			openWindow(req, resp, nodeId, parentId, appInfoApplication,repoInfo, usernameDecrypted);
 			return;
 		}
 		
@@ -174,13 +178,13 @@ public class RenderingProxy extends HttpServlet {
 			
 			if(contentUrl == null) logger.warn("no content url configured");
 		}else{
-			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);
-			if(appInfo == null){
+			
+			if(repoInfo == null){
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"unknown rep_id "+ rep_id);
 				return;
 			}
 			
-			contentUrl = appInfo.getClientBaseUrl() +"/renderingproxy";
+			contentUrl = repoInfo.getClientBaseUrl() +"/renderingproxy";
 			contentUrl = UrlTool.setParam(contentUrl, "proxyRepId", ApplicationInfoList.getHomeRepository().getAppId());
 		}
 		
@@ -310,7 +314,7 @@ public class RenderingProxy extends HttpServlet {
 		
 	}
 
-	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo appInfoApplication, String usernameDecrypted) throws IOException {
+	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo appInfoApplication, ApplicationInfo repoInfo, String usernameDecrypted) throws IOException {
 		String ts = req.getParameter("ts");
 		String uEncrypted = req.getParameter("u");
 
@@ -346,7 +350,32 @@ public class RenderingProxy extends HttpServlet {
 			HttpSession session = req.getSession(true);
 			if(Long.parseLong(ts) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
 				try {
-					Usage usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), parentId, req.getParameter("resource_id"));
+					Usage usage = null;
+					if(repoInfo != null && !ApplicationInfoList.getHomeRepository().getAppId().equals(repoInfo.getAppId())){
+						Usage2ServiceLocator locator = new Usage2ServiceLocator();
+						locator.setusage2EndpointAddress("http://localhost:8080/edu-sharing/services/usage2");
+						locator.setusage2EndpointAddress(repoInfo.getWebServiceHotUrl());
+						Usage2 u2 = locator.getusage2();
+						Usage2Result u2r = u2.getUsage("ccrep://" + repoInfo.getAppId()+"/"+ nodeId, req.getParameter("app_id"), req.getParameter("course_id"), usernameDecrypted, req.getParameter("resource_id"));
+						if(u2r != null) {
+							usage = new Usage();
+							usage.setAppUser(u2r.getAppUser());
+							usage.setAppUserMail(u2r.getAppUserMail());
+							usage.setCourseId(u2r.getCourseId());
+							usage.setDistinctPersons(u2r.getDistinctPersons());
+							usage.setFromUsed(u2r.getFromUsed());
+							usage.setLmsId(u2r.getLmsId());
+							usage.setNodeId(u2r.getNodeId());
+							usage.setParentNodeId(u2r.getParentNodeId());
+							usage.setResourceId(u2r.getResourceId());
+							usage.setToUsed(u2r.getToUsed());
+							usage.setUsageCounter(u2r.getUsageCounter());
+							usage.setUsageVersion(u2r.getUsageVersion());
+							usage.setUsageXmlParams(u2r.getUsageXmlParams());
+						}
+					}else {
+						usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), parentId, req.getParameter("resource_id"));
+					}
 					if(usage==null)
 						throw new SecurityException("No usage found for course id "+req.getParameter("course_id")+" and resource id "+req.getParameter("resource_id"));
 					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, parentId);
