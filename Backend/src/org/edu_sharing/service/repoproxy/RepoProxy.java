@@ -34,5 +34,7 @@ public interface RepoProxy {
 	boolean myTurn(String repoId);
 	
 	public HashMap<String, String> remoteAuth(ApplicationInfo repoInfo, boolean validate);
+
+	Response prepareUsage(String repository, String node, HttpServletRequest req);
 	
 }

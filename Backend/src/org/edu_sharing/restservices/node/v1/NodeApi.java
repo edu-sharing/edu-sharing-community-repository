@@ -1918,6 +1918,11 @@ public class NodeApi  {
 	    @Context HttpServletRequest req) {
 	    
 	    	try {
+	    		
+	    		if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+	    			return RepoProxyFactory.getRepoProxy().prepareUsage(repository, node, req);
+	    		}
+	    		
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeRemote nodeRemote = NodeDao.prepareUsage(repoDao.getId(), node);
