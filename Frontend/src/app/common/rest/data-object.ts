@@ -1045,6 +1045,7 @@ export class Organizations {
 export class Profile {
   displayName:string;
   groupType:string;
+  scopeType:string;
 }
 
 export class PersonalProfile {

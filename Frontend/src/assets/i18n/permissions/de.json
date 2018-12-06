@@ -70,6 +70,10 @@
       "null":"Kein / Normale Gruppe",
       "EDITORIAL":"Redaktionsgruppe",
       "ORG_ADMINISTRATORS":"Administrationsgruppe"
+    },
+    "SCOPE_TYPE":{
+      "null":"Kein / Normale Sichtbarkeit",
+      "global":"Repository übergreifend"
     }
   }
 }
