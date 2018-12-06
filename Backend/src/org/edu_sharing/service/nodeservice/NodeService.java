@@ -106,4 +106,6 @@ public interface NodeService {
 	 * @param enable
 	 */
 	void setTemplateStatus(String nodeId, Boolean enable) throws Throwable;
+
+    String getPrimaryParent(String protocol, String store, String nodeId);
 }

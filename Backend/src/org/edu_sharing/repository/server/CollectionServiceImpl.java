@@ -1,15 +1,13 @@
 package org.edu_sharing.repository.server;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.CollectionService;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.Collection;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -52,7 +50,7 @@ public class CollectionServiceImpl extends RemoteServiceServlet implements Colle
 	}
 	
 	@Override
-	public HashMap<String, HashMap<String, Object>> getChildren(String parentId, String scope) {
+	public List<NodeRef> getChildren(String parentId, String scope) {
 		org.edu_sharing.service.collection.CollectionService collectionService = CollectionServiceFactory.getCollectionService(ApplicationInfoList.getHomeRepository().getAppId());
 		return collectionService.getChildren(parentId, scope);
 	}

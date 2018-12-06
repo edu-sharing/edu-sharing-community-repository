@@ -801,46 +801,25 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		return result;
 	}
 	
-	public List<NodeRef> searchNodeRefs(String luceneString, boolean eduGroupContext){
-		
-		ResultSet resultSet = null;
-		if(eduGroupContext){
-			
-			Set<String> authoritiesForUser = authorityService.getAuthorities();
-			List<String> eduGroupNames = Arrays.asList(EduGroupCache.getNames());
-			
-			List<String> eduGroupNamesOfUser = new ArrayList<String>();
-			for (String authority : authoritiesForUser) {
-				if(eduGroupNames.contains(authority)){
-					eduGroupNamesOfUser.add(authority);
-				}
-			}
-			
-			if(eduGroupNamesOfUser.size()==0){
-				// user has no org -> so no results
-				return new ArrayList<NodeRef>();
-			}
-			
-			ESSearchParameters essp = new ESSearchParameters();
-			essp.setAuthorities(eduGroupNamesOfUser.toArray(new String[eduGroupNamesOfUser.size()]));
-			essp.setQuery(luceneString);
-			essp.setLanguage(SearchService.LANGUAGE_LUCENE);
-			essp.addStore(storeRef);
-			essp.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
-			resultSet = searchService.query(essp);
-			
-		} else {
-			
-			SearchParameters parameters=new SearchParameters();
-			parameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-			parameters.setQuery(luceneString);
-			parameters.addStore(storeRef);
-			parameters.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
-			resultSet = searchService.query(parameters);
-			
+	public List<NodeRef> searchNodeRefs(String luceneString, boolean userContextSearch){
+
+		Set<String> authorities;
+		if(userContextSearch) {
+			authorities = authorityService.getAuthorities();
+			authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
 		}
-		
-		return resultSet.getNodeRefs();
+		else{
+			authorities=new HashSet<>();
+			authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
+		}
+
+		ESSearchParameters essp = new ESSearchParameters();
+		essp.setAuthorities(authorities.toArray(new String[authorities.size()]));
+		essp.setQuery(luceneString);
+		essp.setLanguage(SearchService.LANGUAGE_LUCENE);
+		essp.addStore(storeRef);
+		essp.addSort(CCConstants.CM_PROP_C_MODIFIED, false);
+		return searchService.query(essp).getNodeRefs();
 	}
 	
 

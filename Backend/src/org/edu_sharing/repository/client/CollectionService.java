@@ -1,7 +1,8 @@
 package org.edu_sharing.repository.client;
 
-import java.util.HashMap;
+import java.util.List;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.Collection;
 
@@ -51,7 +52,7 @@ public interface CollectionService extends RemoteService {
 	public Collection get(String storeId, String storeProtocol, String collectionId);
 
 
-	public HashMap<String,HashMap<String,Object>> getChildren(String parentId, String scope);
+	public List<NodeRef> getChildren(String parentId, String scope);
 
 	String[] addToCollection(String collectionId, String[] originalNodeIds) throws CCException;
 

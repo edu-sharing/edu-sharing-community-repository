@@ -250,4 +250,9 @@ public class NodeServiceAdapter implements NodeService {
 
 	}
 
+	@Override
+	public String getPrimaryParent(String protocol, String store, String nodeId) {
+		return null;
+	}
+
 }
