@@ -415,6 +415,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		
 		searchable = PropertiesHelper.getProperty(KEY_SEARCHABLE, appFile, PropertiesHelper.XML);
 		
+		if(searchable == null) searchable = "true";
+		
 		path = PropertiesHelper.getProperty("path", appFile, PropertiesHelper.XML);
 		
 		metadatsets = PropertiesHelper.getProperty(KEY_METADATASETS, appFile, PropertiesHelper.XML);
