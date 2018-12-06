@@ -249,7 +249,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	private String websitepreviewrenderservice;
 	
-	private String searchable = null;
+	private String searchable = "true";
 	
 	//file that contains metadatasets for the repository
 	private String metadatsets = null;
