@@ -138,9 +138,9 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		if(generalTitleI18n == null || generalTitleI18n.size() == 0){
 			throw new Exception("title is required!");
 		}
-		
-		String generallanguage = (String) xpath.evaluate("metadata/lom/general/language", nodeRecord, XPathConstants.STRING);
-	
+
+		List generallanguage = convertListToString((NodeList)xpath.evaluate("metadata/lom/general/language", nodeRecord, XPathConstants.NODESET));
+
 		Node generalNode = (Node) xpath.evaluate("metadata/lom/general", nodeRecord, XPathConstants.NODE);
 
 		List generalKeywords = getMultivalue(generalNode, "keyword");
@@ -560,7 +560,8 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			}
 
 			lomReplicationTypicalAgeRangeList = getMultivalue(nodeEducational, "typicalAgeRange");
-			String educationalLanguage = (String) xpath.evaluate("language", nodeEducational, XPathConstants.STRING);
+			List educationalLanguage = convertListToString((NodeList)xpath.evaluate("language", nodeEducational, XPathConstants.NODESET));
+			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LANGUAGE, educationalLanguage);
 
 			// SAFE PART
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE, learningResourceTypeToSafeList);
@@ -568,7 +569,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_CONTEXT, contextToSafeList);
 
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_TYPICALAGERANGE, lomReplicationTypicalAgeRangeList);
-			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LANGUAGE, educationalLanguage);
+
 			educationalToSafeList.add(eduCationalToSafe);
 		}
 		// SAFE PART
@@ -869,7 +870,15 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		}
 	}
 
-	
+	private static List<String> convertListToString(NodeList nodes) {
+		List<String> result=new ArrayList<>(nodes.getLength());
+		for(int i=0;i<nodes.getLength();i++){
+			result.add(nodes.item(i).getTextContent());
+		}
+		return result;
+	}
+
+
 	/**
 	 * //since we deactivated the multilang = true global alf prop we can not use the MLText anymore
 	 * this method returns a list of strings including all values of all languages
