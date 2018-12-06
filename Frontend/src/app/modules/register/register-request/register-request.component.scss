@@ -4,8 +4,16 @@
   margin-bottom: 20px;
   text-align: center;
 }
+img{
+  width: auto;
+  height: 150px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 h4{
-  margin-bottom: 20px;
+  //margin-bottom: 20px;
 }
 p{
   white-space: pre-line;
