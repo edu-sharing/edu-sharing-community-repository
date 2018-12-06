@@ -126,6 +126,7 @@ public class GroupDao {
 				public Void doWork() throws Exception {
 					((MCAlfrescoAPIClient)repoDao.getBaseClient()).createOrUpdateGroup(groupName, profile.getDisplayName());
 					setGroupType(profile);
+					setScopeType(profile);
 					return null;
 				}
 			});
