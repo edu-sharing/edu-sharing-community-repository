@@ -728,7 +728,11 @@ public class NodeDao {
 		data.setIconURL(getIconURL());
 		data.setLicenseURL(getLicenseURL());
 		data.setSize(getSize());
-		data.setPreview(getPreview());
+		try {
+			data.setPreview(getPreview());
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		data.setRepositoryType(getRepositoryType());
 
 		if(isCollection()){

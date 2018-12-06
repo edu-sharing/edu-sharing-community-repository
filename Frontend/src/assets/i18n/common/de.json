@@ -321,7 +321,8 @@
   },
   "GROUP" : {
     "displayName" : "Gruppenname",
-    "groupType" : "Typ"
+    "groupType" : "Typ",
+    "scopeType" : "Sichtbarkeit"
   },
   "ORG" : {
     "displayName" : "Organisations-Name",

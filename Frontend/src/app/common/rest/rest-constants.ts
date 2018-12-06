@@ -278,8 +278,10 @@ export class RestConstants {
   public static CCM_PROP_SAVED_SEARCH_PARAMETERS="ccm:saved_search_parameters";
   public static GROUP_TYPE_ADMINISTRATORS="ORG_ADMINISTRATORS";
   public static GROUP_TYPE_EDITORIAL="EDITORIAL";
+  public static GROUP_SCOPETYPE_GLOBAL = "global";
   public static VALID_GROUP_TYPES = [null,RestConstants.GROUP_TYPE_ADMINISTRATORS,RestConstants.GROUP_TYPE_EDITORIAL];
   public static VALID_GROUP_TYPES_ORG = [null,RestConstants.GROUP_TYPE_EDITORIAL];
+  public static VALID_SCOPE_TYPES = [null,RestConstants.GROUP_SCOPETYPE_GLOBAL];
   public static COLLECTIONTYPE_DEFAULT = "default";
   public static COLLECTIONTYPE_EDITORIAL = "EDITORIAL";
   public static COLLECTIONTYPE_CURRICULUM = "CURRICULUM";

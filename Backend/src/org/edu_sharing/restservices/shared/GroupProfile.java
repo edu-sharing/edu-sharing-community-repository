@@ -13,6 +13,7 @@ public class GroupProfile  {
   
   private String displayName = null;
   private String groupType = null;
+  private String scopeType = null;
 
   public GroupProfile(){}
   public GroupProfile(Group group) {
@@ -36,6 +37,16 @@ public class GroupProfile  {
   public void setGroupType(String groupType) {
 	this.groupType = groupType;
   }
+  
+  @JsonProperty("scopeType")
+  public void setScopeType(String scopeType) {
+	this.scopeType = scopeType;
+}
+  
+  public String getScopeType() {
+	return scopeType;
+}
+  
 @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();

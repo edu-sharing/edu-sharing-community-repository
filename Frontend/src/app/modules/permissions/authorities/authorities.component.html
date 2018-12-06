@@ -53,6 +53,12 @@
             <select id="groupType" name="groupType" [(ngModel)]="edit.profile.groupType">
               <option *ngFor="let type of GROUP_TYPES" [value]="type">{{('PERMISSIONS.GROUP_TYPE.'+type) | translate}}</option>
             </select>
+            <div *ngIf="isAdmin">
+              <label for="scopeType">{{'GROUP.scopeType' | translate}}</label>
+              <select id="scopeType" name="scopeType" [(ngModel)]="edit.profile.scopeType">
+                <option *ngFor="let scope of SCOPE_TYPES" [value]="scope">{{('PERMISSIONS.SCOPE_TYPE.'+scope) | translate}}</option>
+              </select>
+            </div>
           </div>
           <div *ngIf="_mode=='ORG'">
             <label for="orgName">{{'ORG.displayName' | translate}}</label>

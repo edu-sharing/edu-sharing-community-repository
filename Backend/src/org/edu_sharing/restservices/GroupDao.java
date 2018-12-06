@@ -41,6 +41,9 @@ public class GroupDao {
 			if(result!=null) {
 				groupDao.setGroupType(profile);
 			}
+			if(result != null) {
+				groupDao.setScopeType(profile);
+			}
 			return groupDao;
 		} catch (Exception e) {
 			throw DAOException.mapping(e);
@@ -138,6 +141,14 @@ public class GroupDao {
 		if(profile.getGroupType()!=null){
 			authorityService.addAuthorityAspect(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_ASPECT_GROUPEXTENSION);
 			authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE,profile.getGroupType());
+		}
+
+	}
+	
+	protected void setScopeType(GroupProfile profile) {
+		if(profile.getScopeType()!=null){
+			authorityService.addAuthorityAspect(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_ASPECT_SCOPE);
+			authorityService.setAuthorityProperty(PermissionService.GROUP_PREFIX+groupName, CCConstants.CCM_PROP_SCOPE_TYPE,profile.getScopeType());
 		}
 
 	}

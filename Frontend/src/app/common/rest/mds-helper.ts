@@ -5,11 +5,13 @@ import {Authority, LocalPermissions, Permission} from "./data-object";
 export class MdsHelper{
     static getSortInfo(mdsSet: any, name: string) {
         if(mdsSet) {
-            for (let list of mdsSet.sorts) {
-                if (list.id == name) {
-                    return list;
+            if (mdsSet.sorts) {
+                for (let list of mdsSet.sorts) {
+                    if (list.id == name) {
+                        return list;
+                    }
                 }
-            }
+             }
             console.error('mds does not define sort info for ' + name + ', invalid configuration!');
         }
         return null;

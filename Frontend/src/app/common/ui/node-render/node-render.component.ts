@@ -292,7 +292,7 @@ export class NodeRenderComponent implements EventListener{
       return;
     }
     this.addDownloadButton(download);
-    this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+    this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
         if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
           this.downloadButton.name = 'DOWNLOAD_ALL';
         }
@@ -303,7 +303,7 @@ export class NodeRenderComponent implements EventListener{
       showDownloadButton:false,
       showDownloadAdvice:!this.isOpenable
     };
-    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters)
+    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
                 console.error(data);
@@ -498,7 +498,7 @@ export class NodeRenderComponent implements EventListener{
         if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data =>{
              this.sequenceParent = data.node;
-               this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+               this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
                    if(data.nodes.length > 0)
                     this.sequence = data;
                     setTimeout(()=>this.setScrollparameters(),100);
@@ -507,7 +507,7 @@ export class NodeRenderComponent implements EventListener{
             });
         } else {
             this.sequenceParent = this._node;
-            this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+            this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
                 if(data.nodes.length > 0)
                   this.sequence = data;
                   setTimeout(()=>this.setScrollparameters(),100);

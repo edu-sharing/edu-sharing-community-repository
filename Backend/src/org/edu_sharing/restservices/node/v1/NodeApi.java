@@ -51,6 +51,7 @@ import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.nodeservice.AssocInfo;
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
@@ -732,6 +733,10 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 
+    	if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+    		return RepoProxyFactory.getRepoProxy().getChildren(repository, node, maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
+    	}
+    	
     	try {
     		Filter propFilter = new Filter(propertyFilter);
     		
@@ -1899,7 +1904,7 @@ public class NodeApi  {
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeRemote.class),        
 		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -1913,6 +1918,11 @@ public class NodeApi  {
 	    @Context HttpServletRequest req) {
 	    
 	    	try {
+	    		
+	    		if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+	    			return RepoProxyFactory.getRepoProxy().prepareUsage(repository, node, req);
+	    		}
+	    		
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeRemote nodeRemote = NodeDao.prepareUsage(repoDao.getId(), node);
