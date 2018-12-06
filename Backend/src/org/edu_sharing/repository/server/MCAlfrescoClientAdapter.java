@@ -38,7 +38,7 @@ public class MCAlfrescoClientAdapter extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public HashMap<String, HashMap<String, Object>> search(String luceneString, boolean eduGroupContext)
+	public HashMap<String, HashMap<String, Object>> search(String luceneString, ContextSearchMode mode)
 			throws Throwable {
 		return null;
 	}

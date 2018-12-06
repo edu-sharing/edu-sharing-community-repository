@@ -635,14 +635,11 @@ public class CollectionServiceImpl implements CollectionService{
 				 * level 0 nodes -> maybe cache level 0 with an node property
 				 */
 				String queryString = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION + "\"" + " AND @ccm\\:collectionlevel0:true";
-				boolean eduGroupScope = false;
-				if(SearchScope.EDU_GROUPS.name().equals(scope)){
-					eduGroupScope = true;
-				}
+				MCAlfrescoAPIClient.ContextSearchMode mode = getContextModeForScope(scope);
 				if(SearchScope.MY.name().equals(scope)){
 					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
 				}
-				List<NodeRef> searchResult = client.searchNodeRefs(queryString,eduGroupScope);
+				List<NodeRef> searchResult = client.searchNodeRefs(queryString,mode);
 				for(NodeRef entry : searchResult){
 					String parent = nodeService.getPrimaryParent(entry.getStoreRef().getProtocol(),entry.getStoreRef().getIdentifier(),entry.getId());
 					if(Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
@@ -672,23 +669,25 @@ public class CollectionServiceImpl implements CollectionService{
 				 * level 0 nodes -> maybe cache level 0 with an node property
 				 */
 				String queryString = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION + "\"" + " AND @ccm\\:collectionlevel0:true";
-				boolean eduGroupScope = false;
-				if(Scope.EDU_GROUPS.name().equals(scope)){
-					eduGroupScope = true;
-				}
+				MCAlfrescoAPIClient.ContextSearchMode mode = getContextModeForScope(scope);
 				
-				if(Scope.MY.name().equals(scope)){
+				if(SearchScope.MY.name().equals(scope)){
 					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
+				}
+				else if(SearchScope.EDU_GROUPS.name().equals(scope)){
+					// hide my collections in "shared" tab
+					queryString += " AND NOT OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
 				}
 				else if(SearchScope.TYPE_EDITORIAL.name().equals(scope)){
 					queryString += " AND @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
 				}
-				else{
+
+				if(SearchScope.EDU_GROUPS.name().equals(scope) || SearchScope.EDU_ALL.name().equals(scope) ){
 					// do hide the editorial collections when not in editorial scope mode
 					queryString += " AND NOT @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
 				}
 				List<NodeRef> returnVal = new ArrayList<>();
-				List<NodeRef> nodeRefs = client.searchNodeRefs(queryString,eduGroupScope);
+				List<NodeRef> nodeRefs = client.searchNodeRefs(queryString,mode);
 				for(NodeRef nodeRef : nodeRefs){
 					if(isSubCollection(nodeRef)){
 						continue;
@@ -707,6 +706,17 @@ public class CollectionServiceImpl implements CollectionService{
 		}catch(Throwable e){
 			throw new RuntimeException(e);
 		}
+	}
+
+	private MCAlfrescoAPIClient.ContextSearchMode getContextModeForScope(String scope) {
+		MCAlfrescoAPIClient.ContextSearchMode mode = MCAlfrescoAPIClient.ContextSearchMode.Default;
+		if(Scope.EDU_GROUPS.name().equals(scope)){
+			mode = MCAlfrescoAPIClient.ContextSearchMode.UserAndGroups;
+		}
+		else if(Scope.EDU_ALL.name().equals(scope)){
+			mode = MCAlfrescoAPIClient.ContextSearchMode.Public;
+		}
+		return mode;
 	}
 
 	private boolean isSubCollection(NodeRef nodeRef) {

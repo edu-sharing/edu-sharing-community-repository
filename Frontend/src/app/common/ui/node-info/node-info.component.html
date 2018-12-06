@@ -5,7 +5,7 @@
     <div class="card-title">{{'NODE_INFO.TITLE' | translate:{name:_node.name} }}</div>
     <div class="card-scroll">
       <div><span>{{'NODE.cm:name' | translate}}</span><span>{{_node.name}}</span></div>
-      <div><span>{{'NODE.sys:node-uuid' | translate}}</span><span><a class="clickable" (click)="openNode(_node)">{{_node.ref.id}}</a></span></div>
+      <div><span>{{'NODE.sys:node-uuid' | translate}}</span><span><a class="clickable" (click)="openNodeWorkspace(_node)">{{_node.ref.id}}</a></span></div>
       <div><span>{{'NODE_INFO.NODE_TYPE' | translate}}</span><span>{{_node.type}}</span></div>
       <div><span>{{'NODE_INFO.NODE_ASPECTS' | translate}}</span><span class="aspects">{{_node.aspects.join("\n")}}</span></div>
       <div><span>{{'NODE.mimetype' | translate}}</span><span>{{_node.mimetype}} / {{_node.mediatype}}</span></div>

@@ -786,10 +786,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	
 	@Override
-	public HashMap<String, HashMap<String, Object>> search(String luceneString, boolean eduGroupContext)
+	public HashMap<String, HashMap<String, Object>> search(String luceneString, ContextSearchMode mode)
 			throws Throwable {
 		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
-		List<NodeRef> nodeRefs = searchNodeRefs(luceneString,eduGroupContext);
+		List<NodeRef> nodeRefs = searchNodeRefs(luceneString,mode);
 		for (NodeRef nodeRef : nodeRefs) {
 			try{
 				HashMap<String, Object> props = getProperties(nodeRef.getId());
@@ -800,21 +800,26 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 		return result;
 	}
-	
-	public List<NodeRef> searchNodeRefs(String luceneString, boolean userContextSearch){
+	public List<NodeRef> searchNodeRefs(String luceneString, ContextSearchMode mode){
 
-		Set<String> authorities;
-		if(userContextSearch) {
-			authorities = authorityService.getAuthorities();
+		Set<String> authorities=null;
+		if(mode.equals(ContextSearchMode.UserAndGroups)) {
+			authorities = new HashSet<>(authorityService.getAuthorities());
+			authorities.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+			// remove the admin role, otherwise may results in inconsistent results
+			authorities.remove(CCConstants.AUTHORITY_ROLE_ADMINISTRATOR);
 			authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
 		}
-		else{
+		else if(mode.equals(ContextSearchMode.Public)){
 			authorities=new HashSet<>();
 			authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
 		}
+		SearchParameters essp = new SearchParameters();
 
-		ESSearchParameters essp = new ESSearchParameters();
-		essp.setAuthorities(authorities.toArray(new String[authorities.size()]));
+		if(authorities!=null){
+			essp = new ESSearchParameters();
+			((ESSearchParameters)essp).setAuthorities(authorities.toArray(new String[authorities.size()]));
+		}
 		essp.setQuery(luceneString);
 		essp.setLanguage(SearchService.LANGUAGE_LUCENE);
 		essp.addStore(storeRef);

@@ -1284,6 +1284,8 @@ public class CCConstants {
 
 	public final static String AUTHORITY_GROUP_EVERYONE = "GROUP_EVERYONE";
 
+	public final static String AUTHORITY_ROLE_ADMINISTRATOR = "ROLE_ADMINISTRATOR";
+
 	//Authorities edu sharing
 	public final static String AUTHORITY_GROUP_Edu_Sharing_ALL = "GROUP_Edu-Sharing_ALL";
 
