@@ -229,6 +229,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
             HashMap newimportFolderProps = new HashMap();
             newimportFolderProps.put(CCConstants.CM_NAME, set);
             newimportFolderProps.put(CCConstants.CM_PROP_C_TITLE, set);
+            getLogger().info("Folder for set "+set+" does not yet exists, will be created");
             folderId = mcAlfrescoBaseClient.createNode(folderId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
         } else {
             folderId = (String) setChild.get(CCConstants.SYS_PROP_NODE_UID);
@@ -241,6 +242,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			HashMap newimportFolderProps = new HashMap();
 			newimportFolderProps.put(CCConstants.CM_NAME, cursor);
 			newimportFolderProps.put(CCConstants.CM_PROP_C_TITLE, cursor);
+			getLogger().info("Folder for set "+set+" with cursor "+cursor+" does not yet exists, will be created");
 			folderId = mcAlfrescoBaseClient.createNode(folderId, CCConstants.CCM_TYPE_MAP, newimportFolderProps);
 		} else {
 			folderId = (String) cursorChild.get(CCConstants.SYS_PROP_NODE_UID);
