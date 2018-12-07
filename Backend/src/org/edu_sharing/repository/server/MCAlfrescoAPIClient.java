@@ -784,12 +784,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 
 	@Override
-	public HashMap<String, HashMap<String, Object>> search(String luceneString, boolean eduGroupContext)
+	public HashMap<String, HashMap<String, Object>> search(String luceneString, ContextSearchMode mode)
 			throws Throwable {
 		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
 		SearchParameters token=new SearchParameters();
 		token.setQuery(luceneString);
-		List<NodeRef> nodeRefs = searchNodeRefs(token,eduGroupContext);
+		List<NodeRef> nodeRefs = searchNodeRefs(token,mode);
 		for (NodeRef nodeRef : nodeRefs) {
 			try{
 				HashMap<String, Object> props = getProperties(nodeRef.getId());
@@ -800,55 +800,37 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		}
 		return result;
 	}
-
-    public List<NodeRef> searchNodeRefs(SearchParameters token, boolean eduGroupContext){
-
-        ResultSet resultSet = null;
-        if(eduGroupContext){
-
-            Set<String> authoritiesForUser = authorityService.getAuthorities();
-            List<String> eduGroupNames = Arrays.asList(EduGroupCache.getNames());
-
-            List<String> eduGroupNamesOfUser = new ArrayList<String>();
-            for (String authority : authoritiesForUser) {
-                if(eduGroupNames.contains(authority)){
-                    eduGroupNamesOfUser.add(authority);
-                }
-            }
-
-            if(eduGroupNamesOfUser.size()==0){
-                // user has no org -> so no results
-                return new ArrayList<NodeRef>();
-            }
-
-            ESSearchParameters essp = new ESSearchParameters();
-            essp.setAuthorities(eduGroupNamesOfUser.toArray(new String[eduGroupNamesOfUser.size()]));
-            essp.setQuery(token.getQuery());
-            for(SearchParameters.SortDefinition sort : token.getSortDefinitions()){
-				essp.addSort(sort);
-			}
-            essp.setLanguage(SearchService.LANGUAGE_LUCENE);
-            essp.addStore(storeRef);
-            for(SearchParameters.SortDefinition def : token.getSortDefinitions()) {
-                essp.addSort(def);
-            }
-            resultSet = searchService.query(essp);
-
-        } else {
-
-            SearchParameters parameters=new SearchParameters();
-            parameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-            parameters.setQuery(token.getQuery());
-            parameters.addStore(storeRef);
-			for(SearchParameters.SortDefinition sort : token.getSortDefinitions()){
-				parameters.addSort(sort);
-			}
-			resultSet = searchService.query(parameters);
-
+	
+	public List<NodeRef> searchNodeRefs(SearchParameters token, ContextSearchMode mode){
+        Set<String> authorities=null;
+        if(mode.equals(ContextSearchMode.UserAndGroups)) {
+            authorities = new HashSet<>(authorityService.getAuthorities());
+            authorities.remove(CCConstants.AUTHORITY_GROUP_EVERYONE);
+            // remove the admin role, otherwise may results in inconsistent results
+            authorities.remove(CCConstants.AUTHORITY_ROLE_ADMINISTRATOR);
+            authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
         }
+        else if(mode.equals(ContextSearchMode.Public)){
+            authorities=new HashSet<>();
+            authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
+        }
+        SearchParameters essp = new SearchParameters();
 
-        return resultSet.getNodeRefs();
-    }
+        if(authorities!=null){
+            essp = new ESSearchParameters();
+            ((ESSearchParameters)essp).setAuthorities(authorities.toArray(new String[authorities.size()]));
+        }
+        essp.setQuery(token.getQuery());
+        for(SearchParameters.SortDefinition sort : token.getSortDefinitions()){
+            essp.addSort(sort);
+        }
+        essp.setLanguage(SearchService.LANGUAGE_LUCENE);
+        essp.addStore(storeRef);
+        for(SearchParameters.SortDefinition def : token.getSortDefinitions()) {
+            essp.addSort(def);
+        }
+        return searchService.query(essp).getNodeRefs();
+	}
 	
 
 	public String[] searchNodeIds(String luceneString) {
@@ -3134,12 +3116,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			fromID = childAssocRef.getParentRef().getId();
 		}
 		if (childAssocRef.getParentRef().getId().equals(fromID)) {
-			
+
 			if(!recycle){
 				nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
 			}
 			nodeService.deleteNode(nodeRef);
-			
+
 		} else {
 			nodeService.removeChild(new NodeRef(storeRef, fromID), nodeRef);
 		}

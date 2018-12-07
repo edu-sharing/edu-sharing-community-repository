@@ -54,14 +54,14 @@ export class NodeInfoComponent{
   close(){
     this.onClose.emit();
   }
-  openWorkspace(node:Node){
-      this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace"],{queryParams:{id:node.parent.id,file:node.ref.id}});
-  }
   openNode(node:Node){
     this._path=null;
     this._children=null;
     this.node=node;
-
+  }
+  openNodeWorkspace(node:Node){
+    this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace"],{queryParams:{id:node.parent.id,file:node.ref.id}});
+    this.close();
   }
   openBreadcrumb(pos:number){
     let node=this._path[pos-1];

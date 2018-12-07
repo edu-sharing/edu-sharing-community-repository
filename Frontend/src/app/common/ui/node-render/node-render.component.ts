@@ -119,13 +119,13 @@ export class NodeRenderComponent implements EventListener{
       return;
      }
     if (event.code == "ArrowLeft" && this.canSwitchBack()) {
-      this.node = this.list[this.getPosition() - 1];
+      this.switchPosition(this.getPosition() - 1);
       event.preventDefault();
       event.stopPropagation();
       return;
     }
     if (event.code == "ArrowRight" && this.canSwitchForward()) {
-      this.node = this.list[this.getPosition() + 1];
+        this.switchPosition(this.getPosition() + 1);
       event.preventDefault();
       event.stopPropagation();
       return;
