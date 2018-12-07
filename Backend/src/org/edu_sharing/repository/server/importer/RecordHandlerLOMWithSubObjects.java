@@ -41,18 +41,18 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetValueKatalog;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -955,15 +955,8 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			String contributeRoleValue = (String) xpath.evaluate("role/value", nodeContribute, XPathConstants.STRING);
 			String contributeEntity = (String) xpath.evaluate("entity", nodeContribute, XPathConstants.STRING);
 			String contributeDate = (String) xpath.evaluate("date", nodeContribute, XPathConstants.STRING);
-			
-			Date date = null;
-			try {
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
-				date = df.parse(contributeDate);
-			} catch (Exception e) {
-				logger.debug("error wrong contribute date:"+contributeDate);
-			}
 
+			Date date = convertToDate(contributeDate);
 			if (date != null){
 				map.put(CCConstants.LOM_PROP_CONTRIBUTE_DATE, date);
 			}
@@ -983,7 +976,20 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		else
 			return null;
 	}
-	
+
+	private Date convertToDate(String date) {
+		try {
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
+			return df.parse(date);
+		} catch (Exception e) {
+			try {
+				return new DateTime(date).toDate();
+			}catch(Exception e2) {
+				logger.debug("error parsing date:" + date);
+			}
+		}
+	}
+
 	private void putMultiLangValue(HashMap map, String property, String xmlTag, Node node ) throws XPathExpressionException{
 		ArrayList<String>  multilangValue = getMultiLangValueNew((Node) xpath.evaluate(xmlTag, node, XPathConstants.NODE));
 		
