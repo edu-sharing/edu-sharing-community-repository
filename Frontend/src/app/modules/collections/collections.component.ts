@@ -85,7 +85,6 @@ export class CollectionsMainComponent implements GwtEventListener {
     private person : EduData.User;
     public mainnav = true;
     private path : EduData.Node[];
-    private hasOrganizations = false;
     private hasEditorial = false;
     private nodeOptions: OptionItem[]=[];
     public isGuest = true;
@@ -144,11 +143,6 @@ export class CollectionsMainComponent implements GwtEventListener {
         if(data.isValidLogin && data.currentScope==null) {
           this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
           this.isGuest=data.isGuest;
-          if(data.isValidLogin){
-            this.organizationService.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
-              this.hasOrganizations=data.organizations.length>0;
-            });
-          }
           this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
             console.log(data);
             this.hasEditorial=data.collections.length>0;

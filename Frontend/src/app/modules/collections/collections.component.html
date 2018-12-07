@@ -26,7 +26,7 @@
         <a class="table-tab-title-long" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY' | translate }}</a>
         <a class="table-tab-title-short" [class.active]="(tabSelected==='MY')">{{ 'COLLECTIONS.TAB.MY_SHORT' | translate }}</a>
       </li>
-      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyOrganizations()" (click)="selectTabMyOrganizations()" *ngIf="hasOrganizations">
+      <li class="clickable tab col s3" tabindex="0" (keyup.enter)="selectTabMyOrganizations()" (click)="selectTabMyOrganizations()">
         <a class="table-tab-title-long" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</a>
         <a class="table-tab-title-short" [class.active]="(tabSelected==='EDU_GROUPS')">{{ 'COLLECTIONS.TAB.EDU_GROUPS_SHORT' | translate }}</a>
       </li>
