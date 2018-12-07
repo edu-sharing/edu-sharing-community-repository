@@ -986,6 +986,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 				return new DateTime(date).toDate();
 			}catch(Exception e2) {
 				logger.debug("error parsing date:" + date);
+				return null;
 			}
 		}
 	}
