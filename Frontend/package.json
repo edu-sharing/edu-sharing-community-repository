@@ -7,7 +7,6 @@
     "start": "ng serve",
     "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
     "build": "..\\Edu-Sharing-Internal\\Frontend\\build.sh",
-    "build-app": "..\\Edu-Sharing-Internal\\Frontend\\build.sh \"\" \"\" app",
     "lint": "tslint \"src/**/*.ts\"",
     "test": "ng test",
     "pree2e": "webdriver-manager update",
