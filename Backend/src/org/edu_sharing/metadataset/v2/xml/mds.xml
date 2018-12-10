@@ -25,7 +25,7 @@
 				<caption>cm_title_wwwurl</caption>
 				<placeholder>cm_title_placeholder</placeholder>
 				<type>text</type>
-				<condition type="PROPERTY">ccm:wwwurl</condition>			
+				<condition type="PROPERTY">ccm:wwwurl</condition>
 			</widget>
 			<widget>
 				<id>ccm:wwwurl</id>
@@ -33,7 +33,7 @@
 				<placeholder>cm_wwwurl_placeholder</placeholder>
 				<type>text</type>
 				<required>true</required>
-				<condition type="PROPERTY">ccm:wwwurl</condition>			
+				<condition type="PROPERTY">ccm:wwwurl</condition>
 			</widget>
 			<widget>
 				<id>cclom:general_description</id>
@@ -321,6 +321,27 @@
 				<valuespace>context.xml</valuespace>
 				<valuespace_i18n>valuespace_context_i18n</valuespace_i18n>
 			</widget>
+			<widget>
+				<id>add_to_stream_title</id>
+				<caption>cb_add_to_stream_title</caption>
+				<placeholder>cb_add_to_stream_title_placeholder</placeholder>
+				<type>text</type>
+				<required>true</required>							
+			</widget>
+			<widget>
+				<id>add_to_stream_description</id>
+				<caption>cb_add_to_stream_description</caption>
+				<placeholder>cb_add_to_stream_description_placeholder</placeholder>
+				<type>text</type>			
+			</widget>
+			<widget>
+				<id>add_to_stream_priority</id>
+				<caption>cb_add_to_stream_priority</caption>
+				<min>1</min>
+				<max>10</max>
+				<defaultvalue>5</defaultvalue>
+				<type>slider</type>		
+			</widget>
 		</widgets>
 		<templates>
 			<template>
@@ -329,7 +350,7 @@
 				<icon>description</icon>
 				<html><![CDATA[
 			  <preview>
-              <ccm:wwwurl>		 
+              <ccm:wwwurl>
               <cm:name>
               <cclom:title>
               <cclom:general_keyword>
@@ -505,6 +526,23 @@
 				]]></html>
 			</template>
 			<template>
+				<id>node_comments_render</id>
+				<caption>dialog_upload_tab_comments</caption>
+				<html><![CDATA[
+				<comments>
+				]]></html>
+			</template>
+			<template>
+				<id>add_to_stream</id>
+				<caption>dialog_add_to_stream</caption>
+				<html><![CDATA[
+					<add_to_stream_title>
+					<add_to_stream_description>
+					<cclom:general_keyword>
+				]]>
+				</html>
+			</template>
+			<template>
 				<id>collection_editorial</id>
 				<caption>collection_editorial</caption>
 				<html><![CDATA[
@@ -563,6 +601,7 @@
 			<group>
 				<id>io_render</id>
 				<views>
+					<view>node_comments_render</view>
 					<view>node_general_render</view>
 					<view>node_contributor_render</view>
 				</views>
@@ -578,6 +617,12 @@
 				<views>
 					<view>search</view>
 					<view>search_suggestions</view>
+				</views>
+			</group>
+			<group>
+				<id>add_to_stream</id>
+				<views>
+					<view>add_to_stream</view>
 				</views>
 			</group>
 		</groups>

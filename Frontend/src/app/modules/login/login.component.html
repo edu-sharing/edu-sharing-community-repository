@@ -36,16 +36,16 @@
                 <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
             </div>
           </form>
-          <div class="register" *ngIf="config.registerUrl">
-            {{'LOGIN.REGISTER_TEXT' | translate}}
-            <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
+          <div class="register" *ngIf="config.register.local || config.register.registerUrl">
+              {{'LOGIN.REGISTER_TEXT' | translate}}
+              <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
           </div>
         </div>
       </div>
     </div>
       <div class="card-action" *ngIf="stage=='login'">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-        <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
+        <a class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
   </div>
   <powered-by mode="white"></powered-by>

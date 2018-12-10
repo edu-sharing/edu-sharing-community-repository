@@ -22,6 +22,9 @@
 .btn:focus:not(.disabled){
     background-color:$primaryDark!important;
 }
+.btn-complementary:focus:not(.disabled){
+  background-color:darken($primaryComplementary,20%)!important;
+}
 .btn-flat{
   color:$primary;
   background: #fff;
@@ -147,18 +150,25 @@ input[type=radio]+label,
   font-size: 1rem;
   margin-left: 0;
   text-transform: none;
+  line-height: 17pt;
 }
-input:not([type]):focus:not([readonly]),
-input[type=search]:focus:not([readonly]),
-input[type=email]:focus:not([readonly]),
-input[type=password]:focus:not([readonly]),
-input[type=number]:focus:not([readonly]),
-input[type=text]:focus:not([readonly]),
-.materialize-textarea:focus:not([readonly]){
+input:not([type]),
+input[type=search],
+input[type=email],
+input[type=password],
+input[type=number],
+input[type=text],
+.materialize-textarea{
   /*box-shadow: 0 1px 0 0 $primary!important;
   border-bottom: 1px solid $primary!important;*/
-  border:1px solid $primaryMediumLight!important;
-  box-shadow: none!important;
+  &:focus:not([readonly]) {
+    border-color:$primaryMediumLight !important;
+    box-shadow: none !important;
+  }
+  &.valid{
+    border-color:$colorStatusPositive !important;
+    box-shadow: none !important;
+  }
 }
 .materialize-textarea{
   overflow-y: auto!important;
@@ -320,10 +330,8 @@ img.align-icon {
     height: 100%;
   }
 }
-.btn-floating.btn-large i {
-  line-height: 0px;
-  position: relative;
-  top: 7px;
+.btn-complementary{
+  background-color: $primaryComplementary!important;
 }
 .btn-floating-inverted{
   background-color:#fff;
@@ -347,7 +355,20 @@ img.align-icon {
 span.thumb{
   display:none; /* preview thumb for range does not work */
 }
-
+.btn-floating.btn-large i{
+  font-size:28px;
+}
+.btn, .btn-large,
+.btn-floating,
+.btn-large,
+.btn-flat {
+  icon{
+    font-size:1.3rem;
+    i {
+      font-size: inherit;
+    }
+  }
+}
 .collection {
   .collection-item {
     padding: 2px 20px 9px 20px;

@@ -87,4 +87,7 @@ public interface PermissionService {
 	public List<String> getPermissionsForAuthority(String nodeId,String authorityId) throws Exception;
 
 	void setPermission(String nodeId, String authority, String permission);
+
+
+	List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception;
 }

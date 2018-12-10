@@ -57,7 +57,7 @@
   <div class="addMobile fixed-action-btn"
        *ngIf="createAllowed"
        (click)="createMobile()">
-    <div class="mobile-move-bottom"><a class="btn-floating btn-large waves-effect"><i class="material-icons">add</i></a></div>
+    <div class="mobile-move-bottom"><a class="btn-floating btn-large btn-complementary waves-effect"><i class="material-icons">add</i></a></div>
     <!--
   <ul>
     <li><a class="btn-floating btn-floating-inverted" (click)="showUploadSelect=true"><i class="material-icons">cloud_upload</i></a></li>
@@ -69,7 +69,7 @@
   </ul>
   -->
   </div>
-  <div class="addDesktop btn waves-effect"
+  <div class="addDesktop btn btn-complementary waves-effect"
        tabindex="0"
        [class.disabled]="!createAllowed"
        (keyup.enter)="createContext()"
@@ -182,6 +182,7 @@
 <workspace-management
 [(showLtiTools)]="showLtiTools"
 [(addToCollection)]="addNodesToCollection"
+[(addNodesStream)]="addNodesStream"
 [(nodeLicense)]="editNodeLicense"
 [(nodeMetadata)]="editNodeMetadata"
 [(nodeTemplate)]="editNodeTemplate"

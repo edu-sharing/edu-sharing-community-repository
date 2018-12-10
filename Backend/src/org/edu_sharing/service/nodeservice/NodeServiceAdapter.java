@@ -224,7 +224,14 @@ public class NodeServiceAdapter implements NodeService {
 		// TODO Auto-generated method stub
 		
 	}
-	
+
+	@Override
+	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation,
+			HashMap<String, Object> _props) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	@Override
 	public String getType(String nodeId) {
 		// TODO Auto-generated method stub
@@ -260,6 +267,16 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public String getContentMimetype(String protocol, String storeId, String nodeId) {
+		return null;
+	}
+
+	@Override
+	public String getPrimaryParent(String nodeId) {
+		return null;
+	}
+
+	@Override
+	public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID, String childType) {
 		return null;
 	}
 

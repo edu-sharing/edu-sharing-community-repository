@@ -139,6 +139,16 @@ export class CordovaService {
       // --> navigation issues exist anyway, need to check that later
       document.addEventListener("backbutton", ()=>this.onBackKeyDown(), false);
       // when new share contet - go to share screen
+      this.onNewShareContent().subscribe(
+          (data: any) => {
+              // this.router.navigate(['share', URI]);
+              if(this.hasValidConfig()) {
+                  this.router.navigate([UIConstants.ROUTER_PREFIX, 'app', 'share'], {queryParams: data});
+              }
+          }, (error) => {
+              console.log("ERROR on new share event", error);
+          });
+      /*
       let shareInterval=setInterval(()=>{
           if(this.hasValidConfig()) {
               console.log("share content register");
@@ -153,6 +163,7 @@ export class CordovaService {
                   });
           }
       },1000);
+      */
 
 
       // hide the splashscreen (if still showing)
@@ -212,14 +223,12 @@ export class CordovaService {
                        this.lastIntent=intent;
                        this.observerShareContent.next({uri:uri,mimetype:intent.type});
                        // clear handler to just fire it on first app opening
-                       (window as any).plugins.intent.getCordovaIntent(null);
                        return;
                    }
                    uri = intent.extras["android.intent.extra.STREAM"];
                    // it's a file
                    if(uri){
                        this.lastIntent=intent;
-                       (window as any).plugins.intent.getCordovaIntent(null);
                        (window as any).plugins.intent.getRealPathFromContentUrl(uri,(file:string)=>{
                            this.observerShareContent.next({uri:uri,file:file,mimetype:intent.type});
                        },(error:any)=>{
@@ -245,12 +254,11 @@ export class CordovaService {
                        console.log(target+"!="+current+", logout and go to new location "+intent.data);
                        this.resetAndGoToServerlist('url='+intent.data);
                    }
-                   (window as any).plugins.intent.getCordovaIntent(null);
                }
                else{
                    handleIntentBase(intent);
                }
-
+               (window as any).plugins.intent.getCordovaIntent(null);
            };
            console.log((window as any).plugins);
            (window as any).plugins.intent.getCordovaIntent(handleIntentBase);
@@ -1039,13 +1047,14 @@ export class CordovaService {
   public static TEST_OK:string = "OK";
 
   // oAuth login that is used when running as mobile app
-  public loginOAuth(endpointUrl:string, username: string = "", password: string = ""): Observable<OAuthResult> {
+  public loginOAuth(endpointUrl:string, username: string = "", password: string = "",grantType = "password"): Observable<OAuthResult> {
 
     let url = endpointUrl + "../oauth2/token";
     let headers = {'Content-Type':'application/x-www-form-urlencoded','Accept': '*/*'};
-    let options = { headers: headers, withCredentials: false };
+    let options = { headers: headers, withCredentials: true };
 
-    let data = "client_id=eduApp&grant_type=password&client_secret=secret" +
+    let data = "client_id=eduApp&client_secret=secret" +
+      "&grant_type=" + encodeURIComponent(grantType) +
       "&username=" + encodeURIComponent(username) +
       "&password=" + encodeURIComponent(password);
 
@@ -1084,7 +1093,7 @@ export class CordovaService {
    * Cordova needs to refresh tokens
    */
   private reiniting=false;
-  public reinitStatus(endpointUrl:string):Observable<void>{
+  public reinitStatus(endpointUrl:string,goToLogin=true,loginNext=window.location.href):Observable<void>{
       return new Observable<void>((observer: Observer<void>) => {
 
           console.info("cordova: reinit");
@@ -1102,8 +1111,10 @@ export class CordovaService {
           }
           console.log("cordova: refresh oAuth");
           if(!this.oauth){
-              console.log("cordova: no oAuth, go to Login")
-              this.goToLogin();
+              console.log("cordova: no oAuth, go to Login:"+goToLogin+", next: "+loginNext);
+              if(goToLogin) {
+                  this.goToLogin(loginNext);
+              }
               observer.error(null);
               observer.complete();
               return;
@@ -1256,7 +1267,7 @@ export class CordovaService {
         return cordova.file.applicationDirectory+'www/';
     }
 
-    private goToLogin() {
-        this.router.navigate([UIConstants.ROUTER_PREFIX,"app"],{queryParams:{next:window.location.href}});
+    private goToLogin(next:string) {
+        this.router.navigate([UIConstants.ROUTER_PREFIX,"app"],{queryParams:{next:next}});
     }
 }

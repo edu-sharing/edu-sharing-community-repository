@@ -54,6 +54,9 @@
   "TODAY" : "Heute",
   "YESTERDAY" : "Gestern",
   "DAYS_AGO" : "Vor {{ days }} Tagen",
+  "HOURS_AGO" : "Vor {{ hours }} Stunden",
+  "MINUTES_AGO" : "Vor {{ minutes }} Minuten",
+  "JUST_NOW" : "Gerade eben",
   "CREATE" : "Erstellen",
   "LOGOUT" : "Abmelden",
   "INVALID_OPERATION":"Diese Funktion wird leider nicht unterstützt",
@@ -82,6 +85,7 @@
   "TOOLPERMISSION_ERROR_FOOTER":"Falls Sie dies für einen Fehler halten, kontaktieren Sie den Administrator und fragen Sie nach Freigabe der Berechtigung {{permission}}",
   "TOOLPERMISSION":{
     "TOOLPERMISSION_INVITE":"Die Berechtigung zum Freigeben von Materialien",
+    "TOOLPERMISSION_INVITE_STREAM":"Die Berechtigung zum Freigeben von Materialien auf den Stream",
     "TOOLPERMISSION_INVITE_LINK":"Die Berechtigung zum Erstellen von Links auf Materialien",
     "TOOLPERMISSION_INVITE_HISTORY":"Die Berechtigung zum Anzeigen der Freigabe-Historie",
     "TOOLPERMISSION_INVITE_SHARE":"Die Berechtigung zum Freigeben von Materialien in gemeinsamen Ordnern",
@@ -142,6 +146,7 @@
     "WORKSPACE":"Workspace",
     "SEARCH":"Suchumgebung",
     "COLLECTIONS":"Sammlungen",
+    "STREAM":"Stream",
     "SECURE":"Safe",
     "PERMISSIONS":"Nutzerverwaltung",
     "LOGIN":"Login",
@@ -149,6 +154,7 @@
     "WORKSPACE_SHORT":"Workspace",
     "SEARCH_SHORT":"Suche",
     "COLLECTIONS_SHORT":"Sammlungen",
+    "STREAM_SHORT":"Stream",
     "SECURE_SHORT":"Safe",
     "PERMISSIONS_SHORT":"Nutzer",
     "LOGIN_SHORT":"Login",
@@ -267,6 +273,17 @@
       "INVALID_METADATA":"Fehlerhafte Beschreibung",
       "OTHER":"Anderer Fehler"
     }
+  },
+  "COMMENTS_SINGLE":"Kommentar",
+  "COMMENTS_MULTIPLE":"Kommentare",
+  "NODE_COMMENTS":{
+    "TITLE":"Kommentare",
+    "NEW_COMMENT_PLACEHOLDER":"Neuer Kommentar...",
+    "NO_COMMENTS":"Noch keine Kommentare vorhanden",
+    "OPTION_EDIT":"Bearbeiten",
+    "OPTION_DELETE":"Löschen",
+    "DELETE_COMMENT":"Kommentar löschen?",
+    "DELETE_COMMENT_MESSAGE":"Sind Sie sicher, dass Sie den gewählten Kommentar löschen möchten?"
   },
   "COLLECTION":{
     "INFO_REFERENCES":"Sammlung",
@@ -442,6 +459,17 @@
     "DOWNLOAD_TRY_AGAIN":"Erneut versuchen",
     "API_FORBIDDEN":"Keine Rechte, um auf diesen Inhalt zuzugreifen",
     "API_FORBIDDEN_LOGIN":"Bitte anmelden, um auf diesen Bereich zuzugreifen"
+  },
+  "ADD_TO_STREAM":{
+    "TITLE":"Zum Stream hinzufügen",
+    "AUDIENCE_TYPE":"Auf Stream von...",
+    "AUDIENCE_EVERYONE":"Allen",
+    "AUDIENCE_EVERYONE_INFO":"Der Eintrag wird bei allen Nutzern auf dem Stream erscheinen",
+    "AUDIENCE_CUSTOM":"Einzelnen Personen oder Gruppen",
+    "SUCCESSFUL":"Element(e) wurden zum Stream hinzugefügt",
+    "ERROR": {
+      "NO_PERSON_INVITED": "Keine Personen gewählt"
+    }
   },
   "VCARD":{
     "Givenname":"Vorname",

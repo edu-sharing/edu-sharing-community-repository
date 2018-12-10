@@ -19,10 +19,13 @@ import {RestAdminService} from "./common/rest/services/rest-admin.service";
 import {RestNetworkService} from "./common/rest/services/rest-network.service";
 import {RestToolService} from "./common/rest/services/rest-tool.service";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
+import {RestCommentsService} from "./common/rest/services/rest-comments.service";
+import {RestStreamService} from "./common/rest/services/rest-stream.service";
 import {RestUtilitiesService} from "./common/rest/services/rest-utilities.service";
 import {RestSharingService} from "./common/rest/services/rest-sharing.service";
 import {ActionbarHelperService} from "./common/services/actionbar-helper";
 import {PermissionNamePipe} from "./common/ui/permission-name.pipe";
+import {RestRegisterService} from './common/rest/services/rest-register.service';
 
 
 export const PROVIDERS:any=[
@@ -39,8 +42,11 @@ export const PROVIDERS:any=[
   RestMdsService,
   RestNodeService,
   RestSearchService,
+  RestRegisterService,
+  RestStreamService,
   RestUsageService,
   RestOrganizationService,
+  RestCommentsService,
   RestToolService,
   RestUtilitiesService,
   TemporaryStorageService,

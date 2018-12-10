@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.edu_sharing.restservices.shared.Pagination;
 
 @ApiModel(description = "")
 public class CollectionEntries {
 
 	private List<Collection> collections = new ArrayList<Collection>();
-	private List<CollectionReference> references = new ArrayList<CollectionReference>();
-
+	private Pagination pagination;
 	/**
 	   **/
 	@ApiModelProperty(required = true, value = "")
@@ -26,16 +26,11 @@ public class CollectionEntries {
 		this.collections = collections;
 	}
 
-
-	/**
-	   **/
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("references")
-	public List<CollectionReference> getReferences() {
-		return references;
+	public Pagination getPagination() {
+		return pagination;
 	}
 
-	public void setReferences(List<CollectionReference> references) {
-		this.references = references;
+	public void setPagination(Pagination pagination) {
+		this.pagination = pagination;
 	}
 }

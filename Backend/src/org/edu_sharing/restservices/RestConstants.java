@@ -15,7 +15,7 @@ public class RestConstants {
 	public static final String MESSAGE_SKIP_COUNT=	"skip a number of items";
 	public static final String MESSAGE_FILTER=		"filter by type files,folders";
 	public static final String MESSAGE_SORT_PROPERTIES="sort properties";	
-	public static final String MESSAGE_SORT_ASCENDING="sort ascending, true if not set";
+	public static final String MESSAGE_SORT_ASCENDING="sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index";
 	public static final ApiResponse[] RETURN_TYPES = null;
 	
 	public static final String HTTP_200="OK.";

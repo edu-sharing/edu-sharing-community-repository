@@ -109,8 +109,7 @@
                        (contextmenu)="callOption(option,node);$event.preventDefault();$event.stopPropagation();"
                        tabindex="0"
                        (keyup.enter)="callOption(option,node)"
-                       (click)="callOption(option,node)">
-                        <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
+                       (click)="callOption(option,node)"><i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
                 </div>
             </div>
             <div class="row waves-effect node-row"
@@ -136,10 +135,14 @@
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
                     <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="presentation">
                 </div>
+                <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
+                    <div class="nodeRating"></div>
+                    <div class="nodeComments" (click)="select(node,'comments')"><i class="material-icons">comment</i> <div>{{getOriginalNode(node).commentCount}}</div></div>
+                </div>
                 <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
-                <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><custom-icon iconId="pin"></custom-icon></div>
+                <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><i icon iconId="edu-pin"></i></div>
                 <div class="checkbox column" *ngIf="hasCheckbox">
-                    <input (click)="select(node,true)" type="checkbox" class="filled-in" [attr.id]="id+'select'+i"
+                    <input (click)="select(node,'checkbox')" type="checkbox" class="filled-in" [attr.id]="id+'select'+i"
                            checked="{{getSelectedPos(node)!=-1 ? 'checked' : ''}}"/>
                     <label [attr.for]="id+'select'+i">&nbsp;</label>
                 </div>
@@ -162,7 +165,7 @@
                         ><i class="material-icons">{{validatePermissions(node).button.icon}}</i> {{ validatePermissions(node).button.caption | translate}}</a>
                     </div>
                 </div>
-                <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)" >
+                <div class="preview column" *ngIf="viewType==1 || viewType==2" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,'preview')" >
                     <img *ngIf="node.preview.url && !(isCollection(node) && node.preview.isIcon) || (viewType==2 && !node.preview.isIcon)"
                          src="{{(!isCollection(node) || !node.preview.isIcon) ? node.preview.url+(isHomeNode(node) && animateNode!=node ? '&crop=true&width=200&height=150' : '') : null}}"
                          [attr.role]="'presentation'"
@@ -177,7 +180,7 @@
                     </div>
                 </div>
 
-                <div class="nodeDeleted" *ngIf="isDeleted(node)" (click)="select(node,false)">
+                <div class="nodeDeleted" *ngIf="isDeleted(node)" (click)="select(node)">
                     <div>
                         <i class="material-icons">delete</i>
                         <div class="headline">{{'ORIGINAL_DELETED' | translate }}</div>
@@ -188,7 +191,7 @@
                     </div>
                 </div>
 
-                <div class="icon column" *ngIf="hasIcon && viewType==0" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)">
+                <div class="icon column" *ngIf="hasIcon && viewType==0" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node)">
                     <div class="icon-bg">
                         <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title}}"/>
                         <i *ngIf="!isCollection(node) && icon" class="material-icons">{{icon}}</i>

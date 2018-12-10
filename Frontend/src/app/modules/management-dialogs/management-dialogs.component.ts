@@ -61,8 +61,12 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow : Node;
     @Output() nodeWorkflowChange = new EventEmitter();
-    @Input() nodeReport : Node;
-    @Output() nodeReportChange = new EventEmitter();
+  @Input() nodeComment : Node;
+  @Output() nodeCommentChange = new EventEmitter();
+  @Input() nodeReport : Node;
+  @Output() nodeReportChange = new EventEmitter();
+  @Input() addNodesStream : Node[];
+  @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeVariant : Node;
     @Output() nodeVariantChange = new EventEmitter();
   @Input() nodeMetadata : Node;
@@ -261,6 +265,9 @@ export class WorkspaceManagementDialogsComponent  {
     this.filesToUploadChange.emit(null);
     this.onRefresh.emit();
   }
+  public refresh(){
+    this.onRefresh.emit();
+  }
  public uploadFile(event:any){
    this.onUploadFileSelected.emit(event);
  }
@@ -388,7 +395,10 @@ export class WorkspaceManagementDialogsComponent  {
       win.close();
     });
   }
-
+  public closeStream() {
+    this.addNodesStream=null;
+    this.addNodesStreamChange.emit(null);
+  }
   public closeReport() {
     this.nodeReport=null;
     this.nodeReportChange.emit(null);
@@ -397,6 +407,10 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeVariant=null;
         this.nodeVariantChange.emit(null);
     }
+  public closeComments() {
+    this.nodeComment=null;
+    this.nodeCommentChange.emit(null);
+  }
   private cancelAddToCollection(){
     this.dialogTitle=null;
     this.addToCollection=null;

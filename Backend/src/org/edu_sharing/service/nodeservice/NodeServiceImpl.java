@@ -172,11 +172,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null,parentId,null);
 		return this.createNodeBasic(Constants.storeRef, parentId, nodeType,childAssociation, toSafeProps);
 	}
-
+	@Override
 	public String createNodeBasic(String parentID, String nodeTypeString, HashMap<String, Object> _props) {
 		return this.createNodeBasic(Constants.storeRef, parentID, nodeTypeString,CCConstants.CM_ASSOC_FOLDER_CONTAINS, _props);
 	}
-
+	@Override
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, Object> _props) {
 		childAssociation = (childAssociation == null) ? CCConstants.CM_ASSOC_FOLDER_CONTAINS : childAssociation;
 		Map<QName, Serializable> properties = transformPropMap(_props);
@@ -202,8 +202,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return childRef.getChildRef().getId();
 	}
-	
-	
+
+	@Override
+	public String getPrimaryParent(String nodeId) {
+		return nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).getParentRef().getId();
+	}
+
 	@Override
 	public String getCompanyHome(){
 		return repositoryHelper.getCompanyHome().getId();
@@ -646,6 +650,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return mlText;
 	}
 	
+	@Override
 	public String getType(String nodeId) {
 		return nodeService.getType(new NodeRef(Constants.storeRef, nodeId)).toString();
 	}
@@ -902,6 +907,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return new NodeRef(Constants.storeRef, parentID);
 	}
 
+	@Override
+	public List<ChildAssociationRef> getChildrenChildAssociationRefType(String parentID,String childType){
+		NodeRef parentNodeRef = getParentRef(parentID);
+		if(childType==null) {
+			return nodeService.getChildAssocs(parentNodeRef);
+		}
+		else {
+			return nodeService.getChildAssocs(parentNodeRef,new HashSet<>(Arrays.asList(QName.createQName(childType))));
+		}
+
+	}
 	public void createVersion(String nodeId, HashMap _properties) throws Exception{
 		apiClient.createVersion(nodeId, _properties);
 	}

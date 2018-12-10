@@ -1,0 +1,19 @@
+<spinner *ngIf="loading"></spinner>
+<div class="done-info" *ngIf="!loading">
+    <img *ngIf="inputState == 'done'" src="assets/images/register/register-confirm.svg" alt="done">
+    <img *ngIf="inputState != 'done'" src="assets/images/register/register-mail.svg" alt="done">
+    <h4> {{'REGISTER.DONE.TITLE' | translate}} </h4>
+    <p class="mail-info">{{'REGISTER.DONE.MAIL_INFO' | translate }} <span (click)='editMail()'>{{email}} <i *ngIf="!keyUrl" class='material-icons'>edit</i></span> {{'REGISTER.DONE.MAIL_INFO2' | translate }}</p>
+    <p>{{(inputState=='done-reset' ? 'REGISTER.REQUEST' : 'REGISTER.DONE')+'.MAIL_NOTE' | translate}}</p>
+    <div *ngIf="!keyUrl" class="keyForm">
+        <form (ngSubmit)="keyInput.trim() ? activate(keyInput) : null">
+            <input type="text" placeholder="{{'REGISTER.DONE.KEY_PL' | translate}}" id="key" name="key" [(ngModel)]="keyInput">
+            <div class="input-hint-bottom">{{'REGISTER.DONE.ACTIVATE_HINT' | translate}}</div>
+        </form>
+
+    </div>
+
+    <b>{{'REGISTER.DONE.NO_MAIL' | translate }}</b>
+    <small>{{'REGISTER.DONE.NO_MAIL_INFO' | translate }}</small>
+    <a *ngIf="!keyUrl" class="send-mail" (click)="sendMail()">{{'REGISTER.DONE.SEND_MAIL' | translate }}</a>
+</div>

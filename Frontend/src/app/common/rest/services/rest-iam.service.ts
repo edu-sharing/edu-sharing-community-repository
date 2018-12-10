@@ -129,6 +129,16 @@ export class RestIamService extends AbstractRestService{
     let query=this.connector.createUrl("iam/:version/people/:repository/:user/preferences",repository,[[":user",user]]);
     return this.connector.put(query,JSON.stringify(preferences),this.connector.getRequestOptions());
   }
+  public removeUserAvatar = (user=RestConstants.ME,repository=RestConstants.HOME_REPOSITORY): Observable<Response> => {
+    let query=this.connector.createUrl("iam/:version/people/:repository/:user/avatar",repository,[[":user",user]]);
+    return this.connector.delete(query,this.connector.getRequestOptions());
+  }
+  public setUserAvatar = (avatar : File,
+                          user=RestConstants.ME,
+                          repository=RestConstants.HOME_REPOSITORY) => {
+    let query=this.connector.createUrl("iam/:version/people/:repository/:user/avatar",repository,[[":user",user]]);
+    return this.connector.sendDataViaXHR(query,avatar,"PUT","avatar");
+  }
   public createUser = (user : string,password : string,profile : UserProfile,repository=RestConstants.HOME_REPOSITORY) => {
     let query=this.connector.createUrl("iam/:version/people/:repository/:user/?password=:password",repository,[
       [":user",user],

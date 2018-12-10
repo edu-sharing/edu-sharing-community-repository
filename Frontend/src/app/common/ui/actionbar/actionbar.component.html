@@ -2,8 +2,9 @@
           [callbackObject]="node"
           [options]="optionsMenu"
           [showDisabled]="showDisabled"
+          [position]="dropdownPosition"
 ></dropdown>
-<div class="actionbar">
+<div [class.actionbar-round]="appearance=='round'">
   <div *ngIf="optionsToggle.length" class="actionToggle" [class.actionToggleDivider]="optionsAlways.length">
     <a *ngFor="let option of optionsToggle"
        tabindex="0"
@@ -11,7 +12,7 @@
        (click)="click(option)"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.disabled]="!option.isEnabled">
-      <i class="material-icons">{{option.icon}}</i>
+      <i icon [iconId]="option.icon"></i>
     </a>
 
   </div>
@@ -20,7 +21,7 @@
        tabindex="0"
        (keyup.enter)="showDropdown()"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="canShowDropdown()"><a><i class="material-icons">more_vert</i></a></div>
+       *ngIf="canShowDropdown()"><i icon iconId="more_vert"></i></div>
 
   <div *ngFor="let option of optionsAlways.slice().reverse();let i=index;"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
@@ -33,7 +34,7 @@
        tabindex="0"
        (keyup.enter)="click(option)"
        (click)="click(option)">
-    <i class="material-icons" title="{{option.showName ? null : (option.name | translate)}}">{{option.icon}}</i><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
+    <i icon title="{{option.showName ? null : (option.name | translate)}}" [iconId]="option.icon"></i><span class="actionAlwaysCaption" *ngIf="option.showName"> {{option.name | translate}}</span>
   </div>
 
 </div>

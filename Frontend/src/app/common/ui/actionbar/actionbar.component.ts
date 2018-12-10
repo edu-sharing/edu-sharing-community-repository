@@ -27,10 +27,22 @@ export class ActionbarComponent{
    */
   @Input() numberOfAlwaysVisibleOptions=2;
   @Input() numberOfAlwaysVisibleOptionsMobile=1;
+  /**
+   * Appearance show actionbar as button or circles (collection)
+   * Values 'button' or 'round'
+   * Appearance default = button;
+   */
+  @Input() appearance='button';
+    /**
+     * dropdownPosition is for position of dropdown (default = left)
+     * Values 'left' or 'right'
+     */
+  @Input() dropdownPosition="left";
   public optionsAlways : OptionItem[] = [];
   public optionsMenu : OptionItem[] = [];
   public optionsToggle : OptionItem[] = [];
   public dropdown = false;
+
   /**
    * backgroundType for color matching, either bright, dark or primary
    * @type {boolean}
@@ -40,6 +52,11 @@ export class ActionbarComponent{
    * Set a node that will be returned by callbacks (optional, otherwise the return value is always null)
    * @type {null}
    */
+  /**
+   * Style, currently default or 'flat' if all always visible icons should get a flat look
+   * @type {string}
+   */
+  @Input() style = 'default';
   @Input() node:Node = null;
   /**
    * Should disabled ("greyed out") options be shown or hidden?

@@ -20,8 +20,8 @@ import org.springframework.context.ApplicationContext;
 import antlr.collections.List;
 
 public class PreviewCache {
-	public static int[] CACHE_SIZES_WIDTH=new int[]{200,250,320,400,400,600};
-	public static int[] CACHE_SIZES_HEIGHT=new int[]{150,200,240,300,350,450};
+	public static int[] CACHE_SIZES_WIDTH=new int[] {200,200,250,320,400,400,400,600,200,400};
+	public static int[] CACHE_SIZES_HEIGHT=new int[]{150,200,200,240,300,350,400,450,200,400};
 	
 
 	private static final String STORE_LOCATION = "previewCache";

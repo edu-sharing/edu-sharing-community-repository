@@ -2,6 +2,7 @@ package org.edu_sharing.service.authority;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -69,6 +70,9 @@ public interface AuthorityService {
 		return org.edu_sharing.alfresco.service.AuthorityService.getGroupName(groupName, parentGroup);
 	}
 	boolean authorityExists(String authority);
+	Map<String, Serializable> getUserInfo(String userName) throws Exception;
+	void createOrUpdateUser(Map<String, Serializable> userInfo) throws Exception;
+
 	NodeRef getAuthorityNodeRef(String authority);
 
 }

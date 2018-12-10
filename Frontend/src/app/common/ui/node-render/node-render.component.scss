@@ -189,6 +189,33 @@ a.edusharing_rendering_content{
   height: calc(100% - #{$mainnavHeight} - 130px) !important;
 }
 
+:host /deep/ {
+  .mdsWidget .comment .avatarCircle{
+    cursor:default!important;;
+  }
+  .nodeDetails {
+    margin:15px;
+    color: $primary;
+    display: flex;
+    align-items:center;
+    min-width: 160px;
+    justify-content: flex-end;
+    .item {
+      display: flex;
+      @include clickable();
+      >i{
+        padding-left: 5px;
+      }
+      >div{
+        margin:0 10px;
+        span{
+          text-transform: uppercase;
+        }
+      }
+    }
+
+  }
+}
 div.download {
   margin-top: -8px;
 }
@@ -217,3 +244,4 @@ div.download {
   }
 
 }
+

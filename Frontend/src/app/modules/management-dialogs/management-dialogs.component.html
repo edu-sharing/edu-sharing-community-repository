@@ -6,6 +6,13 @@
   (openContributor)="nodeContributor=$event[0]"
   (onDone)="updateLicense()"
 ></workspace-license>
+<add-stream
+  *ngIf="addNodesStream"
+  [nodes]="addNodesStream"
+  (onLoading)="globalProgress=$event"
+  (onCancel)="closeStream()"
+  (onDone)="closeStream()"
+></add-stream>
 <workspace-share *ngIf="nodeShare"
                  [nodeId]="nodeShare.ref.id"
                  [sendMessages]="true"
@@ -30,6 +37,13 @@
   (onCancel)="closeReport()"
   (onDone)="closeReport()"
 ></node-report>
+<node-comments
+  *ngIf="nodeComment"
+  [node]="nodeComment"
+  (onChange)="refresh()"
+  (onLoading)="globalProgress=$event"
+  (onCancel)="closeComments()"
+></node-comments>
 <node-variant
         *ngIf="nodeVariant"
         [node]="nodeVariant"

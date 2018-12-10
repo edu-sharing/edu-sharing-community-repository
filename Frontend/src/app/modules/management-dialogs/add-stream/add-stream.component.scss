@@ -1,0 +1,61 @@
+@import "../../../../styles/variables.scss";
+
+:host /deep/{
+  .edusharing-autocomplete-wrapper{
+    margin-bottom: 0;
+  }
+  .mdsEmbedded{
+    #add_to_stream_title_container{
+      font-weight: bold;
+      input {
+        font-size: 120%;
+      }
+    }
+  }
+}
+.wrapper {
+  display:flex;
+  flex-direction: column;
+  height: 100%;
+  >mds,>div{
+  }
+  mds{
+    flex-grow: 1;
+  }
+  .search{
+    width: calc(100% - #{$cardPadding});
+  }
+  .audience {
+    h4 {
+      font-size: 12pt;
+      width:100%;
+    }
+    margin: 0 $cardPadding*-1;
+    margin-bottom: -12px;
+    padding: 0 $cardPadding;
+    padding-bottom: 12px;
+    background-color: $actionDialogBackground;
+    input[type=radio]+label{
+      width:100%;
+    }
+    .audienceEveryone,.audienceSearch{
+      min-height: 270px;
+    }
+    .audienceEveryone{
+      text-align: center;
+      font-size:120%;
+      color:$textLight;
+      padding-top: 40px;
+    }
+    .audienceSearch{
+      padding-top: 20px;
+      .badge{
+        background-color: #fff;
+      }
+      .toInvite{
+        min-height: 170px;
+      }
+    }
+  }
+
+}

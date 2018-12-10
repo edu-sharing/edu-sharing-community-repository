@@ -100,6 +100,7 @@ export class WorkspaceMainComponent implements EventListener{
     public isSafe = false;
     private isLoggedIn = false;
     public addNodesToCollection : Node[];
+    public addNodesStream : Node[];
     public variantNode : Node;
     @ViewChild('dropdown') dropdownElement : ElementRef;
     @ViewChild('mainNav') mainNavRef : MainNavComponent;
@@ -303,16 +304,7 @@ export class WorkspaceMainComponent implements EventListener{
     private createConnector(event : any){
         let name=event.name+"."+event.type.filetype;
         this.createConnectorName=null;
-        let prop=RestHelper.createNameProperty(name);
-        prop[RestConstants.LOM_PROP_TECHNICAL_FORMAT]=[event.type.mimetype];
-        if(event.type.mimetype=='application/zip') {
-            prop[RestConstants.CCM_PROP_CCRESSOURCETYPE] = [event.type.ccressourcetype];
-            prop[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE] = [event.type.ccresourcesubtype];
-            prop[RestConstants.CCM_PROP_CCRESSOURCEVERSION] = [event.type.ccressourceversion];
-        }
-        if(event.type.editorType){
-            prop[RestConstants.CCM_PROP_EDITOR_TYPE] = [event.type.editorType];
-        }
+        let prop=NodeHelper.propertiesFromConnector(event);
         let win:any;
         if(!this.cordova.isRunningCordova())
             win=window.open("");
@@ -828,6 +820,9 @@ export class WorkspaceMainComponent implements EventListener{
             let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToCollection(node));
             if (collection && !this.isSafe)
                 options.push(collection);
+            let stream = this.actionbar.createOptionIfPossible('ADD_TO_STREAM',nodes,(node:Node)=>this.addToStream(node));
+            if (stream && !this.isSafe)
+                options.push(stream);
         }
         if(nodes && nodes.length && allFiles) {
             let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT',nodes, (node: Node) => this.createVariant(node));
@@ -1096,6 +1091,10 @@ export class WorkspaceMainComponent implements EventListener{
         let nodes=this.getNodeList(node);
         this.addNodesToCollection=nodes;
     }
+  private addToStream(node: Node) {
+    let nodes=this.getNodeList(node);
+    this.addNodesStream=nodes;
+  }
     private createVariant(node: Node) {
         let nodes=this.getNodeList(node);
         this.variantNode=nodes[0];

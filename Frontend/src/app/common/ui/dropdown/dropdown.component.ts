@@ -24,7 +24,7 @@ export class DropdownComponent{
   @ViewChild('dropdownContainer') dropdownContainerElement : ElementRef;
   _show: boolean;
   _options: OptionItem[];
-
+  @Input() position = 'left';
   @Input() set show(show:boolean){
     this._show=show;
     if(show)

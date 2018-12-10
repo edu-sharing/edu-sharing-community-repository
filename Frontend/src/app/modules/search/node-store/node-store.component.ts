@@ -29,7 +29,6 @@ import {HttpClient} from '@angular/common/http';
 })
 export class SearchNodeStoreComponent {
 
-  public static LIST="BASKET";
   @Output() onClose=new EventEmitter();
   private selected:Node[] = [];
 
@@ -101,7 +100,7 @@ export class SearchNodeStoreComponent {
       return;
     }
     this.loading=true;
-    this.iam.removeNodeList(SearchNodeStoreComponent.LIST,this.selected[position].ref.id).subscribe(()=>{
+    this.iam.removeNodeList(RestConstants.NODE_STORE_LIST,this.selected[position].ref.id).subscribe(()=>{
       this.deleteSelection(position+1);
     });
   }
@@ -109,7 +108,7 @@ export class SearchNodeStoreComponent {
   private refresh() {
     this.loading=true;
     this.onSelection([]);
-    this.iam.getNodeList(SearchNodeStoreComponent.LIST,{sortBy:[this.sortBy],sortAscending:this.sortAscending}).subscribe((data:NodeList)=>{
+    this.iam.getNodeList(RestConstants.NODE_STORE_LIST,{sortBy:[this.sortBy],sortAscending:this.sortAscending}).subscribe((data:NodeList)=>{
       this.nodes=data.nodes;
       this.loading=false;
     });

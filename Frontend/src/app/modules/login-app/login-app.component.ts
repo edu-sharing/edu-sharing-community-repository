@@ -30,8 +30,6 @@ export class LoginAppComponent  implements OnInit {
 
     private state:StateUI = StateUI.NOINTERNET;
 
-    private instanceTS:number = null;
-
     public isLoading=true;
     public disabled=true;
     private username="";
@@ -43,20 +41,18 @@ export class LoginAppComponent  implements OnInit {
     servers: any;
     currentServer: any;
     private locationNext: string;
+    config: any;
 
     constructor(
         private toast:Toast,
         private router:Router,
         private route:ActivatedRoute,
         private translation: TranslateService,
+        private storage: SessionStorageService,
         private cordova: CordovaService,
-        private config: ConfigurationService,
+        private configService: ConfigurationService,
         private locator: RestLocatorService,
-        //private applicationRef: ApplicationRef
     ){
-
-        this.instanceTS = Date.now();
-        console.log("CONSTRUCTOR LoginAppComponent",this.instanceTS);
 
         this.isLoading=true;
 
@@ -178,8 +174,8 @@ export class LoginAppComponent  implements OnInit {
             window.location.replace(this.locationNext);
         }
         else {
-            this.config.getAll().subscribe(() => {
-                UIHelper.goToDefaultLocation(this.router, this.config, {replaceUrl: true});
+            this.configService.getAll().subscribe(() => {
+                UIHelper.goToDefaultLocation(this.router, this.configService, {replaceUrl: true});
             });
         }
     }
@@ -187,14 +183,29 @@ export class LoginAppComponent  implements OnInit {
         return 'assets/images/app-icon.svg';
     }
     private init() {
-        Translation.initializeCordova(this.translation,this.cordova).subscribe(()=>{
+        Translation.initialize(this.translation,this.configService,this.storage,this.route).subscribe(()=>{
             console.log("INIT TranslationService .. OK");
             this.locator.locateApi().subscribe(()=>{
                 this.serverurl=this.locator.endpointUrl;
                 this.state=StateUI.LOGIN;
-                this.isLoading=false;
+                this.configService.getAll().subscribe((config)=>{
+                    this.config=config;
+                    if(!this.config.register)
+                    // default register mode: allow local registration if not disabled
+                        this.config.register={local:true};
+
+                    this.isLoading=false;
+                });
             });
 
         });
+    }
+    private register(){
+        if(this.config.register.local){
+            this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+        }
+        else {
+            UIHelper.openBlankWindow(this.config.register.registerUrl,this.cordova);
+        }
     }
 }

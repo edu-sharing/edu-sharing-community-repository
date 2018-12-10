@@ -937,13 +937,10 @@ public class NodeApi  {
 	    	}
 	    	
 	    	RepositoryDao repoDaoHome = RepositoryDao.getRepository(RepositoryDao.HOME);
-	    	if("-userhome-".equals(parent)){
-	    		parent = repoDaoHome.getUserHome();
-    		}
-	    	if("-inbox-".equals(parent)){
-	    		parent = repoDaoHome.getUserInbox();
-    		}
-	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node).importNode(parent);
+			node=NodeDao.mapNodeConstants(repoDaoHome,node);
+			parent=NodeDao.mapNodeConstants(repoDaoHome,parent);
+
+			NodeDao nodeDao=NodeDao.getNode(repoDao, node).importNode(parent);
 	    	NodeEntry response=new NodeEntry();
 	    	response.setNode(nodeDao.asNode());
 	    	return Response.status(Response.Status.OK).entity(response).build();
@@ -1082,13 +1079,9 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-inbox-".equals(node)){
-    			node = repoDao.getUserInbox();
-    		}
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	resolveURLTitle(properties);
 	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
 	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
@@ -1269,13 +1262,9 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-userhome-".equals(source)){
-	    		source = repoDao.getUserHome();
-    		}
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			source=NodeDao.mapNodeConstants(repoDao,source);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	NodeDao child = nodeDao.createChildByMove(source);
 	    			
 	    	NodeEntry response = new NodeEntry();

@@ -36,6 +36,14 @@ powered-by{
 }
 .register{
   color:$textLight;
+  a{
+    text-transform: uppercase;
+    i{
+      font-size: 11pt;
+      position: relative;
+      top: 3px;
+    }
+  }
 }
 @media screen and (max-height: ($mobileHeight)) {
   .card{
@@ -51,7 +59,6 @@ powered-by{
     position: fixed;
     top:calc(15% + 410px);
   }
-
   .branding{
     position: absolute;
     top: -27px;

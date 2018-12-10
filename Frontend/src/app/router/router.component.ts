@@ -18,12 +18,14 @@ import {ConfigurationService} from "../common/services/configuration.service";
 import {AdminComponent} from "../modules/admin/admin.component";
 import {MessagesComponent} from "../modules/messages/messages.component";
 import {UIConstants} from "../common/ui/ui-constants";
+import {StreamComponent} from "../modules/stream/stream.component";
+import {ProfilesComponent} from "../modules/profiles/profiles.component";
 import {StartupComponent} from '../modules/startup/startup.component';
 import {ShareAppComponent} from "../modules/share-app/share-app.component";
 import {SharingComponent} from "../modules/sharing/sharing.component";
+import {RegisterComponent} from '../modules/register/register.component';
 import {ServicesComponent} from "../modules/services/services.components";
 import {FileUploadComponent} from '../modules/file-upload/file-upload.component';
-
 
 
 
@@ -96,9 +98,14 @@ export var ROUTES=[
     { path: UIConstants.ROUTER_PREFIX+'collections/collection/:mode/:id', component: CollectionNewComponent},
   // login
     { path: UIConstants.ROUTER_PREFIX+'login', component: LoginComponent },
+  // register
+    { path: UIConstants.ROUTER_PREFIX+'register', component: RegisterComponent },
+    { path: UIConstants.ROUTER_PREFIX+'register/:status', component: RegisterComponent },
+    { path: UIConstants.ROUTER_PREFIX+'register/:status/:key', component: RegisterComponent },
+    { path: UIConstants.ROUTER_PREFIX+'register/:status/:key/:email', component: RegisterComponent },
   // file upload
     { path: UIConstants.ROUTER_PREFIX+'upload', component: FileUploadComponent },
-// admin
+  // admin
     { path: UIConstants.ROUTER_PREFIX+'admin', component: AdminComponent },
   // permissions
     { path: UIConstants.ROUTER_PREFIX+'permissions', component: PermissionsRoutingComponent,
@@ -109,6 +116,10 @@ export var ROUTES=[
     },
     // oer
     { path: UIConstants.ROUTER_PREFIX+'oer', component: OerComponent },
+    // stream
+    { path: UIConstants.ROUTER_PREFIX+'stream', component: StreamComponent },
+    // profiles
+    { path: UIConstants.ROUTER_PREFIX+'profiles/:authority', component: ProfilesComponent },
 
     // messages
     { path: UIConstants.ROUTER_PREFIX+'messages/:message', component: MessagesComponent },

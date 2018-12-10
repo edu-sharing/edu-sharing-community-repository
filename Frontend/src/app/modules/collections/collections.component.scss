@@ -113,8 +113,8 @@ table, div {
     color: white;
 }
 .card-image-icon-circle{
-  width:150px;
-  height:150px;
+  width:140px;
+  height:140px;
   border-radius: 50%;
   background-color: #fff;
   @include unselectableText();
@@ -212,7 +212,13 @@ table, div {
   height: 100%;
   width: 100%;
   cursor: pointer;
+  border-radius: 50%;
   //background: #ff000042;
+}
+.collection-option{
+  position: absolute;
+  top: 160px;
+  right: 10px;
 }
 
 .collections-header  {
@@ -222,7 +228,7 @@ table, div {
     height: 110%;
     width: 250px;
     position: fixed;
-    overflow-y: auto;
+    //overflow-y: auto;
     top:$mainnavHeight;
 }
 .dark-color{
@@ -237,38 +243,6 @@ table, div {
     display: none;
 }
 
-
-.collections-edit-button {
-    right: 63px;
-}
-.collections-delete-button,.collections-pin-button {
-    right: 17px;
-}
-.collections-edit-button,
-.collections-pin-button,
-.collections-delete-button{
-  i{
-    position: relative;
-    top: -1px;
-    left: -1px;
-  }
-}
-.collections-pin-button,.collections-edit-button,.collections-delete-button{
-  position: absolute;
-  width:40px;
-  height:40px;
-  top: 160px;
-  color: $primary;
-  border-radius: 50%;
-  padding: 9px;
-  background-color: #fff;
-  cursor: pointer;
-  z-index: 1;
-  @include materialShadow();
-}
-.collections-pin-button{
-  top: 10px;
-}
 .section-headline {
   float:left;
   width:100%;
@@ -285,9 +259,6 @@ table, div {
   }
 }
 :host /deep/{
-  .collections-pin-button custom-icon g{
-    fill: $primary;
-  }
   footer{
     float:left;
     width:100%;
@@ -389,23 +360,11 @@ table, div {
     .collections-master-div-notabs {
         min-width: unset;
     }
-    .collections-pin-button,
-    .collections-edit-button,
-    .collections-delete-button{
+    .collection-option{
       position: absolute;
       top: auto;
-      bottom:15px;
+      bottom: 120px;
     }
-    .collections-pin-button {
-      right: 105px;
-    }
-    .collections-edit-button {
-        right: 60px;
-    }
-    .collections-delete-button {
-      right: 15px;
-    }
-
     .card-collection-image-container {
         height: 200px;
     }

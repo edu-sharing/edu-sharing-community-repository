@@ -20,20 +20,18 @@
           <form (ngSubmit)="login()" #loginForm>
             <div>
               <label for="username">{{'LOGIN.USERNAME' | translate}}</label>
-              <input type="text" requried name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username"/>
+              <input type="text" required name="username" id="username" (keyup)="checkConditions()" [(ngModel)]="username"/>
             </div>
             <div>
               <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
               <!-- input requried type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/> -->
-              <input-password id="password" required="true" (keyup)="checkConditions()" (keydown.enter)="login()" [(value)]="password"></input-password>
+              <input-password id="password" required (keyup)="checkConditions()" (keydown.enter)="login()" [(value)]="password"></input-password>
             </div>
           </form>
-          <!--
-          <div class="register" *ngIf="config.registerUrl">
+          <div class="register" *ngIf="config.register.local || config.register.registerUrl">
             {{'LOGIN.REGISTER_TEXT' | translate}}
-            <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
+            <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
           </div>
-          -->
         </div>
       </div>
       <div class="card-action">

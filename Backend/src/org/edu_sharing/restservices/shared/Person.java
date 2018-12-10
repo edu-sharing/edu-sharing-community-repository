@@ -11,6 +11,7 @@ public class Person {
 	private String firstName = null;
 	private String lastName = null;
 	private String mailbox = null;
+	private UserProfile profile = null;
 
 	@ApiModelProperty(required = false, value = "")
 	@JsonProperty("firstName")
@@ -41,8 +42,16 @@ public class Person {
 	public void setMailbox(String mailbox) {
 		this.mailbox = mailbox;
 	}
-
 	
+	@JsonProperty
+	public UserProfile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(UserProfile profile) {
+		this.profile = profile;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

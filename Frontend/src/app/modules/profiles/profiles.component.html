@@ -1,0 +1,109 @@
+<main-nav
+  [title]="'PROFILES.TITLE_NAV'"
+  [currentScope]="'profiles'"
+  [searchEnabled]="false"
+></main-nav>
+
+<global-progress *ngIf="globalProgress"></global-progress>
+<div class="profiles" *ngIf="user">
+  <div class="main">
+  <div class="top" style.background-color="{{ (edit ? userEdit : user) | authorityColor }}">
+    <div class="profile-gradient"></div>
+    <img *ngIf="!edit && user.profile.avatar" class="profile-background" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
+    <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="profile-background" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
+    <img *ngIf="edit && avatarFile" class="profile-background" [src]="avatarImage">
+    <a class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
+    <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i class="material-icons">close</i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
+    <user-avatar *ngIf="!edit"
+     [user]="user"
+    ></user-avatar>
+    <user-avatar *ngIf="edit"
+     [user]="userEdit"
+     [customImage]="avatarFile"
+    ></user-avatar>
+
+    <div *ngIf="edit" class="editAvatar">
+      <input #avatar type="file" (change)="updateAvatar($event)" accept="image/*" class="hide">
+      <div class="new-avatar-button" (click)="avatar.click()">
+        <span>{{'PROFILES.IMG_CHANGE' | translate}}</span>
+      </div>
+      <i *ngIf="hasAvatar()" class="material-icons clickable" (click)="clearAvatar()">delete</i>
+    </div>
+
+    <div *ngIf="!edit">
+      <div class="name">{{user | authorityName}}</div>
+      <div class="mail"><a href="mailto:{{user.profile.email}}">{{user.profile.email}}</a></div>
+    </div>
+    <div *ngIf="edit">
+      <input type="text" [(ngModel)]="userEdit.profile.firstName" placeholder="{{'USER.firstName' | translate}}">
+      <input type="text" [(ngModel)]="userEdit.profile.lastName" placeholder="{{'USER.lastName' | translate}}">
+      <div class="email">
+        <input type="email" [(ngModel)]="userEdit.profile.email" placeholder="{{'USER.email' | translate}}">
+      </div>
+    </div>
+    <div class="save">
+      <div *ngIf="edit" class="btn-flat waves-effect waves-light" (click)="saveEdits()">{{'SAVE' | translate}}</div>
+    </div>
+  </div>
+  <div class="statsBackground">
+    <div class="stats">
+      <div>
+        <div class="stat">
+          {{'PROFILES.STATS.MATERIALS' | translate}}
+        </div>
+        <div class="value">
+          {{ user.stats.nodeCount }}
+        </div>
+      </div>
+      <div>
+        <div class="stat">
+          {{'PROFILES.STATS.COLLECTIONS' | translate}}
+        </div>
+        <div class="value">
+          {{ user.stats.collectionCount }}
+        </div>
+      </div>
+      <div>
+        <div class="stat">
+          {{'PROFILES.STATS.MATERIALS_CC' | translate}}
+        </div>
+        <div class="value">
+          {{ user.stats.nodeCountCC }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="about">
+    <i icon iconId="edu-quotes" class="quotes">quotes</i>
+    <div *ngIf="edit">
+      <label for="about">{{'PROFILES.ABOUT_LABEL' | translate}}</label>
+      <textarea id="about" class="materialize-textarea" [(ngModel)]="userEdit.profile.about"></textarea>
+    </div>
+    <div *ngIf="!edit">
+      <div *ngIf="user.profile.about" class="profile">{{user.profile.about}}</div>
+      <div *ngIf="!user.profile.about" class="empty">{{'PROFILES.NO_ABOUT'+(isMe ? "_ME" : "") | translate}}</div>
+    </div>
+  </div>
+  <div class="authorityName" *ngIf="!edit">
+    <label>{{'USER.authorityName' | translate}}</label>
+    <div>{{ user.authorityName }}</div>
+  </div>
+  <div class="changePassword" *ngIf="edit">
+    <div class="toggle">
+      <div class="clickable" (click)="changePassword=!changePassword">
+        <i *ngIf="!changePassword" class="material-icons">lock</i>
+        <i *ngIf="changePassword" class="material-icons">lock_open</i>
+        {{'CHANGE_PASSWORD' | translate}}
+        <i class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
+        <i class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
+      </div>
+    </div>
+    <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
+      <label for="oldPassword">{{'OLD_PASSWORD' | translate }}</label>
+      <input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="oldPassword" required="true">
+      <label for="password">{{'NEW_PASSWORD' | translate }}</label>
+      <input-password [hint]="true" [displayStrength]="true" [(value)]="password" required="true" id="password"></input-password>
+    </div>
+  </div>
+  </div>
+</div>

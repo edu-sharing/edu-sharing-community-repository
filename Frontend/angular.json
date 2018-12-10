@@ -23,6 +23,7 @@
               "src/assets/fonts/opensans_regular/stylesheet.css",
               "src/assets/fonts/opensans_bold/stylesheet.css",
               "src/assets/fonts/material-design-icons/material-icons.css",
+              "src/assets/fonts/edu-icons/edu-icons.css",
               "src/assets/css/nouislider.min.css",
               "src/styles/custom_materialize.scss",
               "src/styles/material-theme.scss",
@@ -38,6 +39,7 @@
               "src/assets/js/jquery.1.12.4.min.js",
               "src/assets/js/nouislider.min.js",
               "node_modules/materialize-css/dist/js/materialize.min.js",
+              "node_modules/moment/min/moment-with-locales.min.js",
               "src/assets/js/chart.js"
             ]
           },
@@ -93,6 +95,7 @@
               "src/assets/fonts/opensans_regular/stylesheet.css",
               "src/assets/fonts/opensans_bold/stylesheet.css",
               "src/assets/fonts/material-design-icons/material-icons.css",
+              "src/assets/fonts/edu-icons/edu-icons.css",
               "src/assets/css/nouislider.min.css",
               "src/styles/custom_materialize.scss",
               "src/styles/dialogs.scss",

@@ -8,7 +8,6 @@
     [searchPlaceholder]="'SEARCH.SEARCH_STUFF'"
     [canOpen]="true"
     [(searchQuery)]="searchService.searchTerm"
-    [onInvalidNodeStore]="invalidateNodeStore"
     (onSearch)="routeAndClearSearch($event)"
   ></main-nav>
   <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
@@ -291,6 +290,7 @@
   [(nodeReport)]="nodeReport"
   [(nodeVariant)]="nodeVariant"
   [(addToCollection)]="addNodesToCollection"
+  [(addNodesStream)]="addNodesStream"
 ></workspace-management>
 <div *ngIf="showMoreRepositories" class="dialog moreRepositories" (click)="showMoreRepositories=false">
   <div class="collection" [class.no-mainnav]="!mainnav">

@@ -1,5 +1,6 @@
 @import "../../../../styles/variables.scss";
 $borderRadius:2px;
+$previewHeight:160px;
 
 .heading div{
   padding:0px 0px;
@@ -379,10 +380,8 @@ $badgeWidth:250px;
     background-color: #444;
     color:#fff;
     z-index: 1;
-    custom-icon{
-      width:12px;
-      height:12px;
-      position:initial;
+    >i{
+      font-size: 12px;
     }
   }
 }
@@ -390,11 +389,6 @@ $badgeWidth:250px;
 .list .cardList.dark-color{
   .row_1,.row_2,.row_3,.row_4,.row_5,.row_6 {
     color: #000 !important;
-  }
-}
-:host /deep/{
-  .collectionPinned custom-icon g{
-    fill:#fff;
   }
 }
 .checkbox{
@@ -480,6 +474,35 @@ $orderAnimationTime:$transitionNormal*5;
   width: 25px;
   padding: 3px !important;
   z-index: 1;
+}
+.nodeRatingComments {
+  position: absolute;
+  z-index: 1;
+  top: $previewHeight - 60px;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 10px;
+  background: linear-gradient(to bottom,rgba(0,0,0,0.001) 0,rgba(0,0,0,0.75) 100%);
+  .nodeRating{
+    flex-grow: 1;
+  }
+  .nodeComments {
+    right: 0;
+    border-radius: 0;
+    border-top-left-radius: 3px;
+    color: #fff;
+    width: 60px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    > i {
+      margin-right: 4px;
+      font-size: 16pt;
+    }
+  }
 }
 
 .typeicon > img {
@@ -717,7 +740,7 @@ $orderAnimationTime:$transitionNormal*5;
   right:45px;
 }
 .cardList .preview{
-  height:160px;
+  height:$previewHeight;
   padding:0!important;
   margin-top:-10px;
   margin-bottom:15px;
@@ -910,6 +933,13 @@ $orderAnimationTime:$transitionNormal*5;
   .cardList .row_4{
     display:block!important;
   }
+  .cardList{
+    .collection_info,.collection_scope {
+      float:initial;
+      display:flex!important;
+      margin:5px 0;
+    }
+  }
 }
 @media all and (max-width: ($mobileWidth)) {
     .cardList.nodeCollection .collectionEditorial {
@@ -972,6 +1002,10 @@ $orderAnimationTime:$transitionNormal*5;
     right:auto;
     left:15px;
     top:23px;
+  }
+  .cardList .nodeRatingComments{
+    width:160px;
+    height:40px;
   }
   .cardList .previewCollection{
     left: 46px;

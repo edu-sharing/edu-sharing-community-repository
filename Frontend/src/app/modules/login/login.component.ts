@@ -54,10 +54,20 @@ export class LoginComponent  implements OnInit{
     this.disabled=!this.username;// || !this.password;
   }
   private recoverPassword(){
-    window.location.href=this.config.recoverPasswordUrl;
+      if(this.config.register.local){
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"register","request"]);
+      }
+      else {
+          window.location.href = this.config.register.recoverUrl;
+      }
   }
   private register(){
-    window.location.href=this.config.registerUrl;
+      if(this.config.register.local){
+          this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
+      }
+      else {
+          window.location.href = this.config.register.registerUrl;
+      }
   }
   openLoginUrl(){
       window.location.href=this.loginUrl;
@@ -79,6 +89,9 @@ export class LoginComponent  implements OnInit{
       UIHelper.setTitle('LOGIN.TITLE',title,translate,configService);
       this.configService.getAll().subscribe((data:any)=>{
         this.config=data;
+        if(!this.config.register)
+            // default register mode: allow local registration if not disabled
+            this.config.register={local:true};
 
         this.username=this.configService.instant('defaultUsername','');
         this.password=this.configService.instant('defaultPassword','');

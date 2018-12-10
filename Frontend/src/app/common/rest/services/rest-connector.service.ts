@@ -157,7 +157,7 @@ export class RestConnectorService {
                     this.storage.set(TemporaryStorageService.SESSION_INFO, data);
                     this._logoutTimeout = data.sessionTimeout;
                     if(data.statusCode!=RestConstants.STATUS_CODE_OK && this.cordova.isRunningCordova()){
-                      this.cordova.reinitStatus(this.locator.endpointUrl).subscribe(()=>{
+                      this.cordova.reinitStatus(this.locator.endpointUrl,false).subscribe(()=>{
                         this.isLoggedIn().subscribe((data:LoginResult)=>{
                                 observer.next(data);
                                 observer.complete();
@@ -372,7 +372,7 @@ export class RestConnectorService {
 
                       }else if (error.status == RestConstants.HTTP_UNAUTHORIZED) {
                           if(this.cordova.isRunningCordova() && options.headers['Authorization']){
-                            this.cordova.reinitStatus(this.locator.endpointUrl).subscribe(()=>{
+                            this.cordova.reinitStatus(this.locator.endpointUrl,true).subscribe(()=>{
                               options.headers['Authorization']='Bearer '+this.cordova.oauth.access_token;
                               this.request<T>(method,url,body,options,appendUrl).subscribe(data=>{
                                 console.log("reinit request succeeded");

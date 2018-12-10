@@ -3,7 +3,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {RestIamService} from "../../rest/services/rest-iam.service";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {RestConnectorService} from "../../rest/services/rest-connector.service";
-import {Node, NodeList, IamUsers, IamUser, CollectionContent} from "../../rest/data-object";
+import {Node, NodeList, IamUsers, IamUser} from "../../rest/data-object";
 import {RestConstants} from "../../rest/rest-constants";
 import {RestCollectionService} from "../../rest/services/rest-collection.service";
 import {Toast} from "../toast";
@@ -179,7 +179,7 @@ export class FileChooserComponent implements OnInit{
         offset: this.offset,
         sortBy: [this.sortBy],
         sortAscending: this.sortAscending
-      }).subscribe((data:CollectionContent)=>{
+      }).subscribe((data)=>{
         let result:any=[];
         for(let c of data.collections){
           let obj:any=c;

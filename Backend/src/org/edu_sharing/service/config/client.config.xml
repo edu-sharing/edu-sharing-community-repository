@@ -2,9 +2,7 @@
 <config>
 	<values>
 		<extension></extension>
-		<registerUrl></registerUrl>
 		<loginUrl></loginUrl>
-		<recoverPasswordUrl></recoverPasswordUrl>
 		<editProfileUrl></editProfileUrl>
 		<branding>true</branding>
 		<editProfile>true</editProfile>

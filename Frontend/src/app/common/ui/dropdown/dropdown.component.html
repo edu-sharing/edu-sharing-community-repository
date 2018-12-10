@@ -4,7 +4,7 @@
      [@openOverlay]="_show" *ngIf="_show" (contextmenu)="hide();$event.preventDefault();$event.stopPropagation();" (click)="hide()">
   <div [@openOverlay]="_show"
        #dropdownRef
-       class="moreOpen collection" (keydown.escape)="hide();$event.preventDefault();$event.stopPropagation();">
+       class="moreOpen collection" [class.dropdown-right]="position=='right'" (keydown.escape)="hide();$event.preventDefault();$event.stopPropagation();">
       <a class="collection-item waves-effect collection-item-{{option.name | replaceChars:{search:'.',replace:'-'} }}"
          *ngFor="let option of _options;let i=index;"
          [class.collection-item-seperate]="option.isSeperate"
@@ -14,6 +14,6 @@
          tabindex="0"
          (keyup.enter)="click(option)"
          (click)="click(option)"
-      ><i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
+      ><i icon [iconId]="option.icon"></i> {{option.name | translate}}</a>
   </div>
 </div>

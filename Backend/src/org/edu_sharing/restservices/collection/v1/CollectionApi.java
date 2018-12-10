@@ -33,11 +33,7 @@ import org.edu_sharing.restservices.DAOValidationException;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.collection.v1.model.Collection;
-import org.edu_sharing.restservices.collection.v1.model.CollectionBase;
-import org.edu_sharing.restservices.collection.v1.model.CollectionEntries;
-import org.edu_sharing.restservices.collection.v1.model.CollectionEntry;
-import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
+import org.edu_sharing.restservices.collection.v1.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.search.SearchService;
@@ -321,13 +317,10 @@ public class CollectionApi {
 	}
 
 	@GET
-	
-	@Path("/collections/{repository}/{collection}/children")
-	
-	@ApiOperation(value = "Get collections.", notes = "Get collections.")
-	
+	@Path("/collections/{repository}/{collection}/children/references")
+	@ApiOperation(value = "Get references objects for collection.")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionEntries.class),
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ReferenceEntries.class),
 	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -335,10 +328,9 @@ public class CollectionApi {
 	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
 	    })
 
-	public Response getCollections(
+	public Response getCollectionsReferences(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
-			@ApiParam(value = "scope", required = true) @QueryParam("scope") @DefaultValue(value = "MY") SearchScope scope,
+			@ApiParam(value = "ID of parent collection", required = true) @PathParam("collection") String parentId,
             @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
             @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
             @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
@@ -347,45 +339,66 @@ public class CollectionApi {
 			@Context HttpServletRequest req) {
 
 		try {
-
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			
-			if (repoDao == null) {
-				
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
-			CollectionEntries response = new CollectionEntries();
-			
-			List<Collection> collections = new ArrayList<Collection>();
-			List<CollectionReference> references = new ArrayList<CollectionReference>();
-			
-			logger.info("started DAO");
-			
+			ReferenceEntries response = new ReferenceEntries();
+			List<CollectionReference> references = new ArrayList<>();
 			Filter filter = new Filter();
 			filter.setProperties(propertyFilter);
-			
-			for (CollectionBase item : CollectionDao.getCollections(repoDao, parentId, scope, filter,sortDefinition,skipCount==null ? 0 : skipCount,maxItems==null ? 500 : maxItems)) {
-				
-				if (item instanceof Collection) {
-					collections.add((Collection) item);
-				} else if (item instanceof CollectionReference) {
+			CollectionBaseEntries base = CollectionDao.getCollectionsReferences(repoDao, parentId, filter, sortDefinition, skipCount == null ? 0 : skipCount, maxItems == null ? 500 : maxItems);
+			for(CollectionBase item : base.getEntries()) {
 					references.add((CollectionReference) item);
-				}
 			}
-			
-			logger.info("finished DAO");
-			
-			response.setCollections(collections);
 			response.setReferences(references);
-
-			Response resp = Response.status(Response.Status.OK).entity(response).build();
-			logger.info("finished building response");
-			return resp;
+			response.setPagination(base.getPagination());
+			return Response.status(Response.Status.OK).entity(response).build();
 
 		} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
+	}
+
+	@GET
+	@Path("/collections/{repository}/{collection}/children/collections")
+	@ApiOperation(value = "Get child collections for collection (or root).")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ReferenceEntries.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+
+	public Response getCollectionsSubcollections(
+			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
+			@ApiParam(value = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
+			@ApiParam(value = "scope", required = true) @QueryParam("scope") @DefaultValue(value = "MY") SearchScope scope,
+			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
+			@ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
+			CollectionEntries response = new CollectionEntries();
+			List<Collection> collections = new ArrayList<>();
+			Filter filter = new Filter();
+			filter.setProperties(propertyFilter);
+			CollectionBaseEntries base = CollectionDao.getCollectionsSubcollections(repoDao, parentId, scope, filter, sortDefinition, skipCount == null ? 0 : skipCount, maxItems == null ? 500 : maxItems);
+			for(CollectionBase item : base.getEntries()) {
+				collections.add((Collection) item);
+			}
+			response.setCollections(collections);
+			response.setPagination(base.getPagination());
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
 	@POST

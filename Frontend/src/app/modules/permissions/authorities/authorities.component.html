@@ -33,7 +33,10 @@
           [options]="optionsActionbar"
   ></actionbar>
 </div>
-
+<toolpermission-manager *ngIf="toolpermissionAuthority"
+                        [authority]="toolpermissionAuthority"
+                        (onClose)="toolpermissionAuthority=null"
+></toolpermission-manager>
 
 <div *ngIf="edit" [@fade]="edit" class="dialog darken"></div>
   <div *ngIf="edit" [@cardAnimation]="edit" class="card center-card card-action">

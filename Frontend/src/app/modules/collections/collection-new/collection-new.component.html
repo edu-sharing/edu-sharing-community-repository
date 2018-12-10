@@ -74,6 +74,7 @@
   <section *ngIf="newCollectionStep==STEP_GENERAL" class="card center-card card-high card-action collectionShadow collection-new-container collection-basic">
 
       <div class="card-content">
+          <div class="card-cancel" (click)="goBack()"><i class="material-icons">close</i></div>
         <div class="card-title">
           {{ 'collectionNew_preview' | translate }}
         </div>
@@ -100,7 +101,7 @@
                   <img [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'" class="card-image-preview"/>
               </div>
 
-              <div *ngIf="imageData" class="card-collection-image-container">
+              <div *ngIf="imageData" class="card-collection-image-container" (keyup.enter)="file.click()" (click)="file.click()">
                   <div class="card-image-container">
                       <img [src]="imageData" class="card-image-preview" >
                   </div>

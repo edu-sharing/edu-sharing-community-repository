@@ -137,4 +137,10 @@ public class PermissionServiceAdapter implements PermissionService {
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String authority, String[] permissions) {
 		return null;
 	}
+	@Override
+	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -15,6 +15,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.stream.StreamServiceFactory;
+import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.springframework.context.ApplicationContext;
 
 public class NodeServiceInterceptor implements MethodInterceptor {
@@ -41,6 +43,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             argumentId=1;
         }
         if(methodName.equals("getChildrenChildAssociationRefAssoc") ||
+                methodName.equals("getChildrenChildAssociationRefType") ||
                 methodName.equals("getType") ||
                 methodName.equals("getVersionHistory")){
             argumentId=0;
@@ -83,7 +86,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         NodeService nodeService = serviceRegistry.getNodeService();
         int i = 0;
         while(nodeId!=null) {
-            if (hasSignature(nodeId) || hasUsage(nodeId)) {
+            if (hasSignature(nodeId) || hasUsage(nodeId) || accessibleViaStream(nodeId)) {
                 logger.debug("Node "+nodeId+" -> will run as system");
                 return AuthenticationUtil.runAsSystem(() -> {
                     try {
@@ -109,6 +112,15 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             }
         }
         return invocation.proceed();
+    }
+
+    private static boolean accessibleViaStream(String nodeId) {
+        try {
+            return StreamServiceHelper.canCurrentAuthorityAccessNode(StreamServiceFactory.getStreamService(), nodeId);
+        }catch(Throwable t){
+            logger.warn(t.getMessage());
+        }
+        return false;
     }
 
     private static boolean hasSignature(String nodeId) {

@@ -6,7 +6,7 @@ export class RestConstants {
   public static ME="-me-";
   public static ROOT="-root-";
   public static DEFAULT="-default-";
-
+  static NODE_STORE_LIST = "BASKET";
   public static DUPLICATE_NODE_RESPONSE=409;
 
   public static DEFAULT_SORT_CRITERIA : string[]=["cm:name"];
@@ -24,6 +24,10 @@ export class RestConstants {
   public static AUTHORITY_TYPE_EVERYONE = "EVERYONE";
   public static AUTHORITY_TYPE_UNKNOWN = "UNKNOWN";
   public static AUTHORITY_EVERYONE = "GROUP_EVERYONE";
+
+  public static getAuthorityEveryone(){
+    return {authorityName:RestConstants.AUTHORITY_EVERYONE,authorityType:RestConstants.AUTHORITY_TYPE_EVERYONE};
+  }
   public static PERMISSION_OWNER = "Owner";
   public static PERMISSION_CONSUMER = "Consumer";
   public static PERMISSION_COLLABORATOR = "Collaborator";
@@ -148,7 +152,8 @@ export class RestConstants {
   public static FILTER_SPECIAL="special";
   public static FILTER_FOLDERS="folders";
   public static ALL="-all-";
-  public static COUNT_UNLIMITED = 2147483647;
+  // use not the maximum int value to prevent overflows in repository
+  public static COUNT_UNLIMITED = 1247483647;
   public static USERHOME='-userhome-';
   public static SHARED_FILES='-shared_files-';
   public static MY_SHARED_FILES='-my_shared_files-';
@@ -191,6 +196,7 @@ export class RestConstants {
   public static ACCESS_CHANGE_PERMISSIONS="ChangePermissions";
   public static ACCESS_CONSUMER="Consumer";
   public static ACCESS_CC_PUBLISH="CCPublish";
+  public static ACCESS_COMMENT="Comment";
   public static CONTENT_TYPE_FILES="FILES";
   public static CONTENT_TYPE_FILES_AND_FOLDERS="FILES_AND_FOLDERS";
   public static CONTENT_TYPE_ALL="ALL";
@@ -208,6 +214,7 @@ export class RestConstants {
 
 
   public static TOOLPERMISSION_INVITE="TOOLPERMISSION_INVITE";
+  public static TOOLPERMISSION_INVITE_STREAM="TOOLPERMISSION_INVITE_STREAM";
   public static TOOLPERMISSION_INVITE_LINK="TOOLPERMISSION_INVITE_LINK";
   public static TOOLPERMISSION_INVITE_SHARE="TOOLPERMISSION_INVITE_SHARE";
   public static TOOLPERMISSION_INVITE_HISTORY="TOOLPERMISSION_INVITE_HISTORY";
@@ -237,6 +244,7 @@ export class RestConstants {
   public static WORKFLOW_STATUS_CHECKED:WorkflowDefinition={id:'400_checked',color:"#42A053",hasReceiver:false,next:null};
 
   public static POSSIBLE_SORT_BY_FIELDS=[RestConstants.CM_NAME,
+    RestConstants.LOM_PROP_TITLE,
     RestConstants.CM_MODIFIED_DATE,
     RestConstants.LOM_PROP_TITLE,
     RestConstants.CM_PROP_C_CREATED,
@@ -262,6 +270,7 @@ export class RestConstants {
     "PDM":"https://creativecommons.org/choose/mark/"
 
   }
+
   public static DEFAULT_QUERY_NAME="ngsearch";
 
   public static HTTP_UNAUTHORIZED = 401;

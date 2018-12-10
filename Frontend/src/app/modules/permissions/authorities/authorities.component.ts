@@ -48,6 +48,7 @@ export class PermissionsAuthoritiesComponent {
   public _searchQuery: string;
   private manageMemberSearch:string;
   public options:OptionItem[]=[];
+  public toolpermissionAuthority:any;
   public optionsActionbar:OptionItem[];
   private orgs: OrganizationOrganizations;
   public addMembers: any;
@@ -206,6 +207,9 @@ export class PermissionsAuthoritiesComponent {
       return;
     let options:OptionItem[]=[];
     let list=this.getList(null);
+    if(!all && this.isAdmin && this._mode=='ORG'){
+      options.push(new OptionItem("PERMISSIONS.MENU_TOOLPERMISSIONS_GLOBAL","playlist_add_check",(data:any)=>{this.toolpermissionAuthority=RestConstants.getAuthorityEveryone()}));
+    }
     if(!all && !list.length){
       if(this._mode=='GROUP') {
         options.push(new OptionItem("PERMISSIONS.MENU_CREATE_GROUP", "add", (data: any) => this.createGroup()))
@@ -226,7 +230,7 @@ export class PermissionsAuthoritiesComponent {
     }
 
     if(all || list.length){
-      if(this._mode=='USER' && !all){
+      if(this._mode=='USER'){
         options.push(new OptionItem("PERMISSIONS.MENU_ADD_TO_GROUP","group",(data:any)=>this.addToGroup(data)))
       }
       if(list.length==1 || all) {
@@ -236,6 +240,9 @@ export class PermissionsAuthoritiesComponent {
         }
         if(this._mode=='GROUP' || this.orgs && this.orgs.canCreate)
           options.push(new OptionItem("PERMISSIONS.MENU_EDIT", "edit", (data: any) => this.editAuthority(data)));
+
+        if(this.isAdmin)
+          options.push(new OptionItem("PERMISSIONS.MENU_TOOLPERMISSIONS","playlist_add_check",(data:any)=>{this.toolpermissionAuthority=this.getList(data)[0]}));
       }
       if(this._mode=='GROUP')
         options.push(new OptionItem("PERMISSIONS.MENU_DELETE","delete",(data:any)=>this.deleteAuthority(data,(list:any)=>this.startDelete(list))));
@@ -244,6 +251,9 @@ export class PermissionsAuthoritiesComponent {
       if(this._mode=='ORG' && this.orgs && this.orgs.canCreate)
         options.push(new OptionItem("PERMISSIONS.MENU_DELETE","delete",(data:any)=>this.deleteAuthority(data,(list:any)=>this.deleteOrg(list))));
     }
+    console.log(all);
+    console.log(list);
+    console.log(options);
     if(all){
       this.options=options;
     }

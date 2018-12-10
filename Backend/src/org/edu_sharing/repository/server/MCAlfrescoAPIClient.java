@@ -180,6 +180,7 @@ import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.edu_sharing.repository.server.tools.search.QueryBuilder;
 import org.edu_sharing.repository.server.tools.search.QueryValidationFailedException;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.connector.ConnectorService;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.model.NodeRefImpl;
@@ -1209,7 +1210,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		 * run over all properties and format the date props with with current
 		 * user locale
 		 */
-		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
+		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
 			String mdsId=CCConstants.metadatasetdefault_id;
 			if(propsCopy.containsKey(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)){
 				mdsId=(String)propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
@@ -1557,6 +1558,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			List<NodeRef> childs = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_CHILDIO);
 			if (childs != null) {
 				properties.put(CCConstants.VIRT_PROP_CHILDOBJECTCOUNT, "" + childs.size());
+			}
+			List<NodeRef> comments = this.getChildrenByAssociationNodeIds(nodeRef.getStoreRef(),nodeRef.getId(), CCConstants.CCM_ASSOC_COMMENT);
+			if (comments != null) {
+				properties.put(CCConstants.VIRT_PROP_COMMENTCOUNT,comments.size());
 			}
 
 			// add permalink

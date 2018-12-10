@@ -23,11 +23,12 @@
   import {UserProfileComponent} from "./common/ui/user-profile/user-profile.component";
   import {ToucheventDirective} from "./common/ui/touchevents/touchevents";
   import {NodeTitlePipe} from "./common/ui/node-title.pipe";
-  import {CustomIconComponent} from "./common/ui/custom-icon/custom-icon.component";
   import {BannerComponent} from "./common/ui/banner/banner.component";
   import {SmallCollectionComponent} from "./common/ui/small-collection/small-collection.component";
   import {CollectionChooserComponent} from "./common/ui/collection-chooser/collection-chooser.component";
+  import {UserAvatarComponent} from "./common/ui/user-avatar/user-avatar.component";
   import {InfobarComponent} from "./common/ui/infobar/infobar.component";
+  import {AuthorityColorPipe} from "./common/ui/authority-color.pipe";
   import {TimePipe} from "./common/ui/time.pipe";
   import {AutocompleteComponent} from "./common/ui/autocomplete/autocomplete.component";
   import {AuthoritySearchInputComponent} from "./common/ui/authority-search-input/authority-search-input.component";
@@ -45,12 +46,13 @@
   import {ReplaceCharsPipe} from "./common/ui/replace-chars.pipe";
   import {CalendarComponent} from "./common/ui/calendar/calendar.component";
   import {SortDropdownComponent} from "./common/ui/sort-dropdown/sort-dropdown.component";
+  import {IconComponent} from './common/ui/icon/icon.component';
 
 export const DECLARATIONS = [
       MdsTestComponent,
       GlobalProgressComponent,
       AttributeHtmlPipe,
-      CustomIconComponent,
+      IconComponent,
       CalendarComponent,
       DebugResultPipe,
       FormatSizePipe,
@@ -61,6 +63,7 @@ export const DECLARATIONS = [
       AuthorityNamePipe,
       AutocompleteComponent,
       AuthoritySearchInputComponent,
+      AuthorityColorPipe,
       NodeTitlePipe,
       SpinnerComponent,
       SpinnerSmallComponent,
@@ -76,6 +79,7 @@ export const DECLARATIONS = [
       SmallCollectionComponent,
       MainNavComponent,
       UserProfileComponent,
+      UserAvatarComponent,
       MdsComponent,
       RouterComponent,
       FileDropDirective,

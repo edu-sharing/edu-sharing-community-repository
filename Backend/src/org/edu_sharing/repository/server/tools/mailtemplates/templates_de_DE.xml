@@ -23,6 +23,66 @@
 		]]>
 		</message>
 	</template>
+	<template name="userRegister">
+		<subject>Bitte bestätigen Sie Ihren Account</subject>
+		<message><![CDATA[
+			<div class="center">
+				<img src="{{image:/assets/images/register/register-mail.png}}">
+				<h1>Hallo {{firstName}} {{lastName}},</h1>
+				<p>
+					nur noch ein Schritt, um die Registrierung abzuschließen!
+					<br/>Klicken Sie auf den unteren Button, um die E-Mail Adresse zu bestätigen.
+				</p>
+				<a class="btn" href="{{link}}">ACCOUNT BESTÄTIGEN</a>
+				<p>
+					Um die Registrierung abzuschließen, können Sie auch den Aktivierungscode kopieren und ihn in das Formular einfügen.
+				</p>
+				</p>
+				<div class="center"><div class="input-field">{{key}}</div></div>
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="userRecoverPassword">
+		<subject>Passwort zurücksetzen</subject>
+		<message><![CDATA[
+			<div class="center">
+				<img src="{{image:/assets/images/register/register-mail.png}}">
+				<h1>Hallo {{firstName}} {{lastName}},</h1>
+				<p>Sie haben Ihr Passwort vergessen?
+				</p>
+				</p>
+					Klicken Sie auf den Button, um ein neues Passwort festzulegen.
+				</p>
+				<a class="btn" href="{{link}}">neues Passwort</a>
+				<p>Alternativ können Sie auch den Aktivierungscode kopieren und ihn in das Formular einfügen:</p>
+				<div class="center"><div class="input-field">{{key}}</div></div>
+				<br>
+				
+			</div>
+		]]>
+		</message>
+	</template>
+	<template name="userRegisterInformation">
+		<subject>Neuer Benutzer hat sich registriert</subject>
+		<message><![CDATA[
+			<div class="center">
+				<img src="{{image:/assets/images/register/new_user.png}}">
+				<h1>Ein neuer Nutzer hat sich im System registriert!</h1>
+				<p>
+				Name: {{firstName}} {{lastName}} 
+				<br>E-Mail: <a href="mailto:{{email}}">{{email}}</a>
+				</p>
+				{{if organization}}
+					<p>Organisation des Nutzers: {{organization}}</p>
+				{{endif}}
+				<a class="btn" href="{{link}}">Zur Nutzerverwaltung</a>
+			</div>
+		]]>
+		</message>
+	</template>
+
+
 	<template name="nodeIssue">
 		<subject>{{reporterEmail}} hat ein Problem gemeldet</subject>
 		<message><![CDATA[
@@ -40,7 +100,7 @@
 	</template>
 	<template name="footer">
 		<message><![CDATA[
-			<a href="http://edu-sharing.net" style="float:left;">www.edu-sharing.net</a>
+			<a href="http://edu-sharing.com" style="float:left;">www.edu-sharing.com</a>
 			<a href="https://twitter.com/edusharing" style="float:right;">@edusharing</a>
 		]]>
 		</message>

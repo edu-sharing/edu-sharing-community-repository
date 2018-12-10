@@ -1,19 +1,24 @@
 import {NodeHelper} from "../ui/node-helper";
-import { Node} from "../rest/data-object";
+import {Node, Repository} from '../rest/data-object';
 import {RestConstants} from "../rest/rest-constants";
 import {OptionItem} from "../ui/actionbar/option-item";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {Injectable} from "@angular/core";
+import {RestNetworkService} from '../rest/services/rest-network.service';
 @Injectable()
 export class ActionbarHelperService{
+  private repositories: Repository[];
   public static getNodes(nodes:Node[],node:Node):Node[] {
       return NodeHelper.getActionbarNodes(nodes,node);
   }
   constructor(
     private connector : RestConnectorService,
+    private networkService : RestNetworkService,
     private connectors : RestConnectorsService
-  ){}
+  ){
+      this.networkService.getRepositories().subscribe((repositories)=>this.repositories=repositories.repositories);
+  }
   /**
    * Add a given option for a specified type and checks the rights if possible
    * returns the option if it could be created, null otherwise
@@ -42,6 +47,12 @@ export class ActionbarHelperService{
         }
         option.isEnabled=option.enabledCallback(null);
       }
+    }
+    if(type=='ADD_NODE_STORE'){
+        option=new OptionItem('SEARCH.ADD_NODE_STORE', 'bookmark_border',callback);
+        option.showCallback=(node:Node)=>{
+            return ActionbarHelperService.getNodes(nodes,node).length && RestNetworkService.allFromHomeRepo(ActionbarHelperService.getNodes(nodes,node),this.repositories);
+        };
     }
     if(type=='NODE_TEMPLATE') {
       if (nodes && nodes.length==1 && NodeHelper.allFolders(nodes)) {
@@ -86,6 +97,18 @@ export class ActionbarHelperService{
           option.isEnabled=NodeHelper.getNodesRight(nodes,RestConstants.ACCESS_DELETE);
           option.isSeperate=true;
 
+      }
+    }
+    if(type=='ADD_TO_STREAM') {
+      if (NodeHelper.allFiles(nodes)) {
+        option = new OptionItem("WORKSPACE.OPTION.STREAM", "event", callback);
+        option.enabledCallback = (node: Node) => {
+          let list = ActionbarHelperService.getNodes(nodes, node);
+          return NodeHelper.getNodesRight(list,RestConstants.ACCESS_CC_PUBLISH) &&
+              this.connectors.getRestConnector().hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_STREAM) &&
+              RestNetworkService.allFromHomeRepo(list,this.repositories);
+        }
+        option.isEnabled = option.enabledCallback(null);
       }
     }
     if(type=='INVITE'){

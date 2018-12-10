@@ -272,21 +272,16 @@ export class MainNavComponent implements AfterViewInit{
     this._currentScope=currentScope;
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,currentScope);
   }
-  /**
-   * The current search query, will be inserted in the search field
-   */
-
-  @Input() set onInvalidNodeStore(data:Boolean){
-    this.iam.getNodeList(SearchNodeStoreComponent.LIST).subscribe((data:NodeList)=>{
-      if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
-        this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
-      this.nodeStoreCount=data.nodes.length;
-      setTimeout(()=>{
-        this.nodeStoreAnimation=-1;
-      },1500);
-    });
-  };
-
+  public refreshNodeStore(){
+      this.iam.getNodeList(RestConstants.NODE_STORE_LIST).subscribe((data:NodeList)=>{
+          if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
+              this.nodeStoreAnimation=data.nodes.length-this.nodeStoreCount;
+          this.nodeStoreCount=data.nodes.length;
+          setTimeout(()=>{
+              this.nodeStoreAnimation=-1;
+          },1500);
+      });
+  }
 
   onEvent(event:string,data:any){
     if(event==FrameEventsService.EVENT_PARENT_SEARCH){
@@ -297,8 +292,13 @@ export class MainNavComponent implements AfterViewInit{
     this.userOpen=false;
     this.showProfile=true;
   }
+  public openProfile(){
+    this.router.navigate([UIConstants.ROUTER_PREFIX+"profiles",RestConstants.ME]);
+    this.displaySidebar=false;
+    this.userOpen=false;
+  }
   public getCurrentScopeIcon(){
-    if(this._currentScope=='login')
+    if(this._currentScope=='login' || this._currentScope=='profiles')
       return 'person';
     if(this._currentScope=='oer')
         return 'public'
@@ -381,7 +381,8 @@ export class MainNavComponent implements AfterViewInit{
         }
         buttons.push({path:'search',scope:'search',icon:"search",name:"SIDEBAR.SEARCH",queryParams:reurl});
         buttons.push({path:'collections',scope:'collections',icon:"layers",name:"SIDEBAR.COLLECTIONS",queryParams:reurl});
-        if(data.isGuest){
+        buttons.push({path:'stream',scope:'stream',icon:"event",name:"SIDEBAR.STREAM"});
+          if(data.isGuest){
           buttons.push({path:'login',scope:'login',icon:"person",name:"SIDEBAR.LOGIN"});
         }
         this.isGuest=data.isGuest;
@@ -399,7 +400,7 @@ export class MainNavComponent implements AfterViewInit{
               });
           }
         });
-        this.onInvalidNodeStore=new Boolean(true);
+        this.refreshNodeStore();
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
           // safe needs access and not be app (oauth not supported)
           if(data.hasAccess && !this.cordova.isRunningCordova())
@@ -684,12 +685,9 @@ export class MainNavComponent implements AfterViewInit{
             option.isSeperateBottom=true;
             this.userMenuOptions.push(option);
         }
-      if(this.editUrl && !this.isGuest){
-        this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.editProfile()));
-      }
-      if(this.showEditProfile && this.canEditProfile && !this.editUrl && !this.isGuest){
-        this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfileDialog()));
-      }
+        if(!this.isGuest){
+            this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfile()));
+        }
       if(!this.isGuest){
         this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
       }
