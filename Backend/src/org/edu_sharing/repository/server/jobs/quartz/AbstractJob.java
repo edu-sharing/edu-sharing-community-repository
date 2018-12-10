@@ -57,9 +57,11 @@ public abstract class AbstractJob implements Job {
 	public abstract Class[] getJobClasses();
 	
 	protected synchronized void addJobClass(Class job) {
-		ArrayList<Class> list = new ArrayList<Class>(Arrays.asList(allJobs));
-		list.add(job);
-		allJobs = list.toArray(new Class[list.size()]);
+		if(!Arrays.asList(allJobs).contains(job)) {
+			ArrayList<Class> list = new ArrayList<Class>(Arrays.asList(allJobs));
+			list.add(job);
+			allJobs = list.toArray(new Class[list.size()]);
+		}
 	}
 	
 	
