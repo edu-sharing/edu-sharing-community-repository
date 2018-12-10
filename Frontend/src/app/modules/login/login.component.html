@@ -46,8 +46,6 @@
       <div class="card-action" *ngIf="stage=='login'">
         <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
-        <a class="waves-effect waves-light btn" tabindex="0" [class.disabled]="disabled" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-        <a class="btn-flat" tabindex="0" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()" (keyup.enter)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
   </div>
   <powered-by mode="white"></powered-by>
