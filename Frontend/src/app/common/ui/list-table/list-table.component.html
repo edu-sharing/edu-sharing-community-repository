@@ -36,15 +36,7 @@
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
 
-        <div class="dialog" *ngIf="sortMenu" (click)="sortMenu=null" (contextmenu)="sortMenu=false;$event.preventDefault();$event.stopPropagation();"></div>
-        <div class="sortMenu collection" *ngIf="sortMenu" [@openOverlay]="sortMenu">
-            <div class="collection-item-title">{{'SORT_BY' | translate}}</div>
-            <a *ngFor="let item of getSortableColumns();let i = index" (click)="setSorting(item.name,false);sortMenu=false" class="collection-item" [class.active]="sortBy==item.name">
-                <div class="title">{{item.type+"."+item.name | translate}}</div>
-                <a *ngIf="sortBy==item.name"><i class="material-icons" *ngIf="sortAscending">arrow_upward</i><i class="material-icons" *ngIf="!sortAscending">arrow_downward</i></a>
-                <a *ngIf="sortBy!=item.name"></a>
-            </a>
-        </div>
+        <sort-dropdown class="sortMenu" [(open)]="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
 
         <div class="heading">
         <div class="checkbox" *ngIf="hasCheckbox">
@@ -55,8 +47,8 @@
         <div class="icon" *ngIf="hasIcon">&nbsp;</div>
             <div *ngFor="let item of columnsVisible;let i = index"
              class="{{getItemCssClass(item)}} row_{{i+1}}">
-            <a class="text" [class.clickable]="canBeSorted(item.name)" (click)="setSorting(item.name,i==0)">{{item.type+"."+item.name | translate}}</a>
-            <div *ngIf="sortBy" class="sorting" (click)="setSorting(item.name,i==0)">
+            <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item,i==0)">{{item.type+"."+item.name | translate}}</a>
+            <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,i==0)">
                 <a class="" *ngIf="sortBy==item.name && sortAscending"><i class="material-icons">arrow_drop_up</i></a>
                 <a class="" *ngIf="sortBy==item.name && !sortAscending"><i class="material-icons">arrow_drop_down</i></a>
             </div>
@@ -142,7 +134,7 @@
                     <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i class="material-icons">filter_none</i>
                 </div>
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
-                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
+                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="presentation">
                 </div>
                 <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                 <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><custom-icon iconId="pin"></custom-icon></div>
@@ -177,7 +169,7 @@
                          (mouseenter)="animateIcon(node,true)"
                          (mouseleave)="animateIcon(node,false)"
                          [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
-                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{ node.title }}"/>
+                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{getAttributeText(node,columnsVisible[0])}}"/>
                     <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
                         <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
                             <i class="material-icons">layers</i>

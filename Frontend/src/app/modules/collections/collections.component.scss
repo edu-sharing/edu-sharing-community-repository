@@ -71,7 +71,7 @@ table, div {
 
 .section-headline {
     color: #5F5F5F;
-    padding: 20px 15px 12px;
+    padding: 20px 15px 20px;
 }
 
 .collections-breadcrumb {
@@ -117,8 +117,7 @@ table, div {
   height:150px;
   border-radius: 50%;
   background-color: #fff;
-  margin:auto;
-  margin-top: 10px;
+  @include unselectableText();
 }
 .collection-header-image{
   position: relative;
@@ -202,7 +201,9 @@ table, div {
     overflow: hidden;
     margin: auto;
     text-align: center;
-    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .big-edit-button{
   position: absolute;
@@ -262,7 +263,8 @@ table, div {
   padding: 9px;
   background-color: #fff;
   cursor: pointer;
-  @include materialShadowBottom();
+  z-index: 1;
+  @include materialShadow();
 }
 .collections-pin-button{
   top: 10px;
@@ -279,6 +281,7 @@ table, div {
   .actionbarMaterials{
     position: absolute;
     right:20px;
+    margin-top: -5px;
   }
 }
 :host /deep/{
@@ -327,9 +330,6 @@ table, div {
         margin-top: 240px+$mainnavHeight;
       }
     }
-  .section-headline{
-    padding: 20px 0 12px;
-  }
   .collection-new-preview-headline{
     overflow-wrap: break-word;
     display: -webkit-box;
@@ -345,10 +345,12 @@ table, div {
   }
   .breadcrumb-space{
     background: transparent;
+    padding:0;
+    margin-top: 0;
   }
     .collections-breadcrumb{
       position: absolute;
-      top: 239px+$mainnavHeight;
+      top: 259px+$mainnavHeight;
       right: 10px;
       max-width: calc(100% - 100px);
     }

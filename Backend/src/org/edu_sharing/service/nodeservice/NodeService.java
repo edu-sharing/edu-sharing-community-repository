@@ -34,8 +34,10 @@ public interface NodeService {
 	public String getCompanyHome();
 
 	public HashMap<String, String[]> getNameProperty(String name);
-	
-	public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
+
+    List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types);
+
+    public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value);
 	
 	public void setOwner(String nodeId, String username);
 	
@@ -122,10 +124,12 @@ public interface NodeService {
 	 */
 	void setTemplateStatus(String nodeId, Boolean enable) throws Throwable;
 
+    String getPrimaryParent(String protocol, String store, String nodeId);
+
 	String getContentMimetype(String protocol, String storeId, String nodeId);
 
 	List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc);
-	
+
 	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value);
 
     GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId);

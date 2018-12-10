@@ -925,6 +925,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPLICATIONSOURCEID = "{http://www.campuscontent.de/model/1.0}replicationsourceid";
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMP = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestamp";
 	public final static String CCM_PROP_IO_REPLICATION_MODIFIED = "{http://www.campuscontent.de/model/1.0}replicationmodified";
+	public final static String CCM_PROP_IO_IMPORT_MODIFIED = "{http://www.campuscontent.de/model/1.0}importmodified";
 
 	//replicationsourcetimestampFORMATED is an generated prop, to keep the original
 	public final static String CCM_PROP_IO_REPLICATIONSOURCETIMESTAMPFORMATED = "{http://www.campuscontent.de/model/1.0}replicationsourcetimestampFORMATED";
@@ -1315,6 +1316,8 @@ public class CCConstants {
 
 	public final static String AUTHORITY_GROUP_EVERYONE = "GROUP_EVERYONE";
 
+	public final static String AUTHORITY_ROLE_ADMINISTRATOR = "ROLE_ADMINISTRATOR";
+
 	//Authorities edu sharing
 	public final static String AUTHORITY_GROUP_Edu_Sharing_ALL = "GROUP_Edu-Sharing_ALL";
 
@@ -1590,6 +1593,7 @@ public class CCConstants {
 	}
 
 	public final static String COMMON_LICENSE_CC_ZERO_LINK = "https://creativecommons.org/publicdomain/zero/1.0/deed.${locale}";
+	public final static String COMMON_LICENSE_CC_PDM_LINK = "http://creativecommons.org/publicdomain/mark/1.0/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_BY_LINK = "https://creativecommons.org/licenses/by/${version}/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_BY_SA_LINK = "https://creativecommons.org/licenses/by-sa/${version}/deed.${locale}";
 	public final static String COMMON_LICENSE_CC_BY_ND_LINK = "https://creativecommons.org/licenses/by-nd/${version}/deed.${locale}";
@@ -1598,6 +1602,26 @@ public class CCConstants {
 	public final static String COMMON_LICENSE_CC_BY_NC_ND_LINK = "https://creativecommons.org/licenses/by-nc-nd/${version}/deed.${locale}";
 	public final static String COMMON_LICENSE_EDU_LINK = "http://edu-sharing.net/licenses/edu-nc-nd/1.0/de";
 	public final static String COMMON_LICENSE_CUSTOM_LINK = "http://edu-sharing.net/licenses/custom-licence/1.0/de";
+
+
+	private static Map<String,String> licenseMap = null;
+
+	public static Map<String,String> getLicenseMap(){
+		if(licenseMap == null) {
+			licenseMap = new HashMap<String,String>();
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_SA_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_SA);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_ND_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_ND);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_NC_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_NC);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_NC_ND_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_NC_ND);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_BY_NC_SA_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_BY_NC_SA);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_ZERO_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_CC_ZERO);
+			licenseMap.put(CCConstants.COMMON_LICENSE_CC_PDM_LINK.split("\\$")[0],CCConstants.COMMON_LICENSE_PDM);
+		}
+		return licenseMap;
+	}
+
+
 
 	private static ArrayList<String> permission = null;
 
@@ -1801,6 +1825,8 @@ public class CCConstants {
 	 * @return
 	 */
 	public static String getValidLocalName(String value){
+
+		if(value == null) return null;
 
 		for(Map.Entry<String,String> entry: getNameSpaceMap().entrySet()){
 			if(value.contains(entry.getKey())){

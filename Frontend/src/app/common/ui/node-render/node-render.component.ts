@@ -125,13 +125,13 @@ export class NodeRenderComponent implements EventListener{
       return;
      }
     if (event.code == "ArrowLeft" && this.canSwitchBack()) {
-      this.node = this.list[this.getPosition() - 1];
+      this.switchPosition(this.getPosition() - 1);
       event.preventDefault();
       event.stopPropagation();
       return;
     }
     if (event.code == "ArrowRight" && this.canSwitchForward()) {
-      this.node = this.list[this.getPosition() + 1];
+        this.switchPosition(this.getPosition() + 1);
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -305,7 +305,7 @@ export class NodeRenderComponent implements EventListener{
       return;
     }
     this.addDownloadButton(download);
-    this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+    this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
         if(data.nodes.length > 0 || this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
           this.downloadButton.name = 'DOWNLOAD_ALL';
         }
@@ -320,7 +320,7 @@ export class NodeRenderComponent implements EventListener{
       showDownloadButton:false,
       showDownloadAdvice:!this.isOpenable
     };
-    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters)
+    this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version ? this.version : "-1",parameters,this.repository)
         .subscribe((data:any)=>{
             if (!data.detailsSnippet) {
                 console.error(data);
@@ -423,12 +423,13 @@ export class NodeRenderComponent implements EventListener{
             this.isOpenable = false;
         }
         else {
-            let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', () => this.goToWorkspace(login, this._node));
+            let openFolder = new OptionItem('SHOW_IN_FOLDER', 'folder', null);
             openFolder.isEnabled = false;
-            this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((node: NodeWrapper) => {
+            this.nodeApi.getNodeMetadata(this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]).subscribe((original: NodeWrapper) => {
 
-                this.nodeApi.getNodeParents(node.node.parent.id, false, [], node.node.parent.repo).subscribe((data: NodeList) => {
+                this.nodeApi.getNodeParents(original.node.parent.id, false, [], original.node.parent.repo).subscribe(() => {
                     openFolder.isEnabled = true;
+                    openFolder.callback=() => this.goToWorkspace(login, original.node);
                     //.isEnabled = data.node.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
                 });
             }, (error: any) => {
@@ -514,7 +515,7 @@ export class NodeRenderComponent implements EventListener{
         if(this._node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) != -1) {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data =>{
              this.sequenceParent = data.node;
-               this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+               this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
                    if(data.nodes.length > 0)
                     this.sequence = data;
                     setTimeout(()=>this.setScrollparameters(),100);
@@ -523,7 +524,7 @@ export class NodeRenderComponent implements EventListener{
             });
         } else {
             this.sequenceParent = this._node;
-            this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id).subscribe((data:NodeList)=>{
+            this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.repository).subscribe((data:NodeList)=>{
                 if(data.nodes.length > 0)
                   this.sequence = data;
                   setTimeout(()=>this.setScrollparameters(),100);

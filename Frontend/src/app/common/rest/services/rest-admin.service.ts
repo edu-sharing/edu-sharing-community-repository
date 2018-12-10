@@ -100,9 +100,9 @@ export class RestAdminService extends AbstractRestService{
     let query=this.connector.createUrl("admin/:version/catalina",null);
     return this.connector.get<string[]>(query,this.connector.getRequestOptions());
   }
-  public importOAI(baseUrl:string,set:string,metadataPrefix:string,className:string,importerClassName:string,recordHandlerClassName:string,binaryHandlerClassName="",metadataset="",fileUrl="",oaiIds=""){
+  public importOAI(baseUrl:string,set:string,metadataPrefix:string,className:string,importerClassName:string,recordHandlerClassName:string,binaryHandlerClassName="",metadataset="",fileUrl="",ids="",forceUpdate="false"){
     let query=this.connector.createUrl("admin/:version/import/oai?baseUrl=:baseUrl&set=:set&metadataPrefix=:metadataPrefix&className=:className&importerClassName=:importerClassName" +
-        "&recordHandlerClassName=:recordHandlerClassName&binaryHandlerClassName=:binaryHandlerClassName&metadataset=:metadataset&fileUrl=:fileUrl&oaiIds=:oaiIds",null,[
+        "&recordHandlerClassName=:recordHandlerClassName&binaryHandlerClassName=:binaryHandlerClassName&metadataset=:metadataset&fileUrl=:fileUrl&oaiIds=:ids&forceUpdate=:forceUpdate",null,[
       [":baseUrl",baseUrl],
       [":set",set],
       [":metadataPrefix",metadataPrefix],
@@ -112,7 +112,8 @@ export class RestAdminService extends AbstractRestService{
       [":binaryHandlerClassName",binaryHandlerClassName],
       [":metadataset",metadataset],
       [":fileUrl",fileUrl],
-      [":oaiIds",oaiIds]
+      [":ids",ids],
+      [":forceUpdate",forceUpdate]
     ]);
     return this.connector.post(query,null,this.connector.getRequestOptions());
   }

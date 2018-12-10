@@ -51,7 +51,7 @@ export class WorkspaceUsageComponent  {
         return usage.courseId;
     }
     public remove(usage:any){
-        if(this.showDelete) {
+        if(this.showDelete && usage.type!='INDIRECT') {
             if(this.isDeleted(usage))
                 this.deleteList.splice(this.deleteList.indexOf(usage),1);
             else

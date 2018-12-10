@@ -10,13 +10,14 @@ import org.edu_sharing.alfresco.action.RessourceInfoTool;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.Theme;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.RepositoryDao;
 
 public class MimeTypesV2 {
 	public static final String MIME_DIRECTORY="application/x-directory";
 
 	private static HashMap<String, String> extensionMimeMap;
-	private String basePath;
+	private final ApplicationInfo appInfo;
 	private String theme;
 
 	public static List<String> WORD=Arrays.asList(new String[]{	
@@ -60,13 +61,7 @@ public class MimeTypesV2 {
 			});
 	
 	public MimeTypesV2(ApplicationInfo appInfo){
-		this.basePath=appInfo.getClientBaseUrl();
-		if(this.basePath.endsWith("/")){
-			this.basePath = this.basePath.substring(0, this.basePath.length() - 1);
-		}
-		if(!this.basePath.startsWith("http") && !this.basePath.startsWith("/")){
-			this.basePath = "/" +this.basePath;
-		}
+		this.appInfo=appInfo;
 		this.theme=Theme.getThemeId();
 		if(theme == null){
 			theme = CCConstants.THEME_DEFAULT_ID;
@@ -89,7 +84,20 @@ public class MimeTypesV2 {
 	 * @return
 	 */
 	public String getThemePath(){
-		return basePath + "/themes/"+theme+"/";
+		return getBasePath() + "/themes/"+theme+"/";
+	}
+	private String getBasePath(){
+		if(appInfo.ishomeNode()){
+			return URLTool.getBaseUrl(true);
+		}
+		String basePath=appInfo.getClientBaseUrl();
+		if(basePath.endsWith("/")){
+			basePath = basePath.substring(0, basePath.length() - 1);
+		}
+		if(!basePath.startsWith("http") && !basePath.startsWith("/")){
+			basePath = "/" +basePath;
+		}
+		return basePath;
 	}
 	/**
 	 * Gets the path where the repo stores mime type icons
@@ -132,6 +140,13 @@ public class MimeTypesV2 {
 	 */
 	public String getNoPermissionsPreview() {
 		return getPreviewPath()+"no-permissions.svg";
+	}
+	/**
+	 * Gets a "Element deleted" preview image
+	 * @return
+	 */
+	public String getNodeDeletedPreview() {
+		return getPreviewPath()+"node-deleted.svg";
 	}
 	/**
 	 * Returns the guessed node-type (used for the preview files), e.g. file-folder, file-word or file-image

@@ -8,7 +8,7 @@ import {Injectable} from "@angular/core";
 @Injectable()
 export class ActionbarHelperService{
   public static getNodes(nodes:Node[],node:Node):Node[] {
-      return node ? [node] : nodes;
+      return NodeHelper.getActionbarNodes(nodes,node);
   }
   constructor(
     private connector : RestConnectorService,

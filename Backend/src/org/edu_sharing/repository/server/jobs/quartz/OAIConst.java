@@ -39,6 +39,8 @@ public class OAIConst {
 	public static final String PARAM_IMPORTERCLASS = "importer_class";
 	public static final String PARAM_USERNAME = "username";
 	public static final String PARAM_OAI_IDS = "oai_ids";
-	
+	// forcefully update all data, also override any existing ones
+	public static final String PARAM_FORCE_UPDATE = "force_update";
+
 	
 }

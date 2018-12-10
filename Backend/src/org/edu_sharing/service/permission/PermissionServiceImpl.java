@@ -1100,6 +1100,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if(personActiveStatus != null && !personActiveStatus.trim().equals("")) {
 			searchQuery.append(" AND @cm\\:espersonstatus:\"" + personActiveStatus + "\"");
 		}
+		
+		/**
+		 * filter out remote users
+		 */
+		String homeRepo = ApplicationInfoList.getHomeRepository().getAppId();
+		searchQuery.append(" AND (ISUNSET:\"cm:repositoryid\" OR ISNULL:\"cm:repositoryid\" OR @cm\\:repositoryId:\"" + homeRepo + "\")");
 
 		logger.info("findUsers: " + searchQuery);
 

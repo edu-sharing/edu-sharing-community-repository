@@ -42,7 +42,7 @@ export class NodeInfoComponent{
     this.nodeApi.getNodeParents(this._node.ref.id,true).subscribe((data:NodeList)=>{
       this._path=data.nodes.reverse();
     });
-    this.nodeApi.getChildren(this._node.ref.id,[],{propertyFilter:[RestConstants.ALL],count:RestConstants.COUNT_UNLIMITED}).subscribe((data:NodeList)=>{
+    this.nodeApi.getChildren(this._node.ref.id,[RestConstants.FILTER_SPECIAL],{propertyFilter:[RestConstants.ALL],count:RestConstants.COUNT_UNLIMITED}).subscribe((data:NodeList)=>{
       this._children=data.nodes;
     });
   }
@@ -54,14 +54,14 @@ export class NodeInfoComponent{
   close(){
     this.onClose.emit();
   }
-  openWorkspace(node:Node){
-      this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace"],{queryParams:{id:node.parent.id,file:node.ref.id}});
-  }
   openNode(node:Node){
     this._path=null;
     this._children=null;
     this.node=node;
-
+  }
+  openNodeWorkspace(node:Node){
+    this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace"],{queryParams:{id:node.parent.id,file:node.ref.id}});
+    this.close();
   }
   openBreadcrumb(pos:number){
     let node=this._path[pos-1];

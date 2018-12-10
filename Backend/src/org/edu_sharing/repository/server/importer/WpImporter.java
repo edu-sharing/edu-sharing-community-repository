@@ -1,24 +1,18 @@
 package org.edu_sharing.repository.server.importer;
 
+import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.rpc.SchoolContextValues;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.SchoolContextServiceImpl;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.json.simple.JSONArray;
@@ -94,7 +88,7 @@ public class WpImporter implements Importer{
 	}
 	
 	@Override
-	public void setBinaryHandler(BinaryHandler binaryHandler) {
+	public void setBinaryHandler(Constructor<BinaryHandler> binaryHandler) {
 	}
 	
 	@Override
@@ -116,7 +110,7 @@ public class WpImporter implements Importer{
 	}
 	
 	@Override
-	public void setRecordHandler(RecordHandlerInterface recordHandler) {
+	public void setRecordHandler(Constructor<RecordHandlerInterface> recordHandler) {
 		
 	}
 	
@@ -200,12 +194,17 @@ public class WpImporter implements Importer{
 	}
 	
 	@Override
-	public void startImport(String[] oaiIDs, String set) {
+	public void startImport(String[] oaiIDs) {
 		logger.error("not implemented yet");
 	}
 
 	@Override
 	public void setJob(ImporterJob importerJob) {
+
+	}
+
+	@Override
+	public void setMetadataSetId(String metadataSetId) {
 
 	}
 

@@ -106,6 +106,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 		
 		SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
+		searchResultNodeRef.setNodeCount(nrOfResult);
 		List<NodeRef> data=new ArrayList<>();
 		
 		HashMap<String,HashMap<String,Object>> result = new HashMap<String, HashMap<String,Object>>();
@@ -228,6 +229,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			// fetch binary info
 			String all = httpGet(DDB_API+"/items/"+nodeId+"/aip?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
 			JSONObject allJson = new JSONObject(all);
+			
 			try {
 				JSONArray binaries = (JSONArray)allJson.getJSONObject("binaries").getJSONArray("binary");			
 				JSONObject binary = null;
@@ -278,9 +280,35 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			}catch(Throwable t) {}
 			
 			
+			try {
+				JSONObject webresource = allJson.getJSONObject("edm").getJSONObject("RDF").getJSONObject("WebResource");
+				String licenseUrl = webresource.getJSONObject("rights").getString("@resource");
+				
+				for(Map.Entry<String, String> entry : CCConstants.getLicenseMap().entrySet()) {
+					String matching = entry.getKey().replace("/1.0/deed.", "");
+					matching = matching.replaceFirst("https://", "");
+					matching = matching.replaceFirst("http://", "");
+					
+					if(licenseUrl != null) {
+						String tempLicenseurl = licenseUrl.replaceFirst("https://", "");
+						tempLicenseurl = tempLicenseurl.replaceFirst("http://", "");
+						if(tempLicenseurl.startsWith(matching)) {
+							properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,entry.getValue());
+						}
+					}
+					
+				}
+				
+				
+				
+			}catch(Throwable e) {
+				
+			}
+			
+			
 			String previewUrl;
 			try {
-				previewUrl=DDB_API+allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
+				previewUrl=DDB_API+ "/binary/" + allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
 			}
 			catch(Throwable t) {
 				previewUrl=new MimeTypesV2(appInfo).getPreview(CCConstants.CCM_TYPE_IO, properties, null);
@@ -405,7 +433,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		
 		try {
 			String url = DDB_API + getPath(criteriasAsMap, 0, 0, facets);
-			System.out.println("url:" + url);
+			logger.debug("url:" + url);
 			
 			String json = this.query(url);
 			//System.out.println(json);
@@ -425,13 +453,13 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						//int count = facetteVal.getInt("count");
 						String val = facetteVal.getString("value");
 						//check for cleaner results
-						//if(val.toLowerCase().contains(value.toLowerCase())) {					
+						if(val.toLowerCase().contains(value.toLowerCase())) {					
 							SuggestFacetDTO dto = new SuggestFacetDTO();
 							dto.setFacet(val);
 							dto.setDisplayString(val);
-	
+							
 							result.add(dto);
-						//}
+						}
 					}
 					
 					
@@ -494,7 +522,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			searchToken.setQueryString(uri);
 			
 			
-			System.out.println("ddb url:" + uri);
+			logger.debug("ddb url:" + uri);
 			return searchDDB(repositoryId,APIKey,uri);
 			
 		}
@@ -532,12 +560,14 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 		
 		for(Map.Entry<String, String[]> entry : criterias.entrySet()) {
-			String[] values = criterias.get(entry.getKey());
-			if(values != null && values.length > 0) {
-				String value = values[0];
-				if(!value.trim().equals("")) {
-					if(fuzzy) value += "*";
-					extSearch.add(entry.getKey() +":("+value+")");
+			if(!entry.getKey().startsWith("ngsearch")) {
+				String[] values = criterias.get(entry.getKey());
+				if(values != null && values.length > 0) {
+					String value = values[0];
+					if(!value.trim().equals("")) {
+						if(fuzzy) value += "*";
+						extSearch.add(entry.getKey() +":("+value+")");
+					}
 				}
 			}
 		}
@@ -612,7 +642,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 	        isr.close();
 	        connection.disconnect();
 	        String jsonString = sb.toString();
-	        System.out.println(jsonString);
+	      
 			JSONObject jo = new JSONObject(jsonString);
 	    	
 			Integer nrOfResult = (Integer)jo.get("numberOfResults");

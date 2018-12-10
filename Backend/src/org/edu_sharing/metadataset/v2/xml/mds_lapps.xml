@@ -47,6 +47,16 @@
 				]]></html>
 			</template>
 		</templates>
+		<sorts>
+			<sort>
+				<id>search</id>
+				<default>
+					<sortBy>score</sortBy>
+					<sortAscending>false</sortAscending>
+				</default>
+				<!-- no columns because we currently don't support sorting for this repository -->
+			</sort>
+		</sorts>
 		<groups>
 			<group>
 				<id>ngsearch</id>

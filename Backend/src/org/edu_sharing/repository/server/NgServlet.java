@@ -33,7 +33,12 @@ public class NgServlet extends HttpServlet {
 				html = addLRMI(html,url);
 			}
 			if(req.getHeader("User-Agent")!=null && req.getHeader("User-Agent").contains("cordova / edu-sharing-app")){
-				html=addToHead("<script type=\"text/javascript\" src=\"assets/cordova/android/cordova.js\"></script>",html);
+                String platform="";
+                if(req.getHeader("User-Agent").contains("ios"))
+                    platform="ios";
+                if(req.getHeader("User-Agent").contains("android"))
+                    platform="android";
+				html=addToHead("<script type=\"text/javascript\" src=\"assets/cordova/"+platform+"/cordova.js\"></script>",html);
 				logger.info("cordova app, add cordova.js to header");
 			}
 			resp.setHeader("Content-Type","text/html");

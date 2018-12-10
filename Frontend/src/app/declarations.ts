@@ -44,6 +44,7 @@
   import {FooterComponent} from "./common/ui/footer/footer.component";
   import {ReplaceCharsPipe} from "./common/ui/replace-chars.pipe";
   import {CalendarComponent} from "./common/ui/calendar/calendar.component";
+  import {SortDropdownComponent} from "./common/ui/sort-dropdown/sort-dropdown.component";
 
 export const DECLARATIONS = [
       MdsTestComponent,
@@ -70,6 +71,7 @@ export const DECLARATIONS = [
       ActionbarComponent,
       InputPasswordComponent,
       DropdownComponent,
+      SortDropdownComponent,
       NodeInfoComponent,
       SmallCollectionComponent,
       MainNavComponent,

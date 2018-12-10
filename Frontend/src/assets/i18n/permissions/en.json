@@ -65,11 +65,11 @@
     "NO_ORG":"View all",
     "INTERNAL_NAME":"Internal name",
     "CURRENT_MEMBERS":"Current members of group {{group}}:",
-    "DOWNLOAD_MEMBER_FILENAME":"Users.csv"
-  },
-  "GROUP_TYPE":{
-    "null":"None / Regular group",
-    "EDITORIAL":"Editorial group",
-    "ORG_ADMINISTRATORS":"Administration group"
+    "DOWNLOAD_MEMBER_FILENAME":"Users.csv",
+    "GROUP_TYPE":{
+      "null":"none / regular group",
+      "EDITORIAL":"editorial group",
+      "ORG_ADMINISTRATORS":"administrators"
+    }
   }
 }

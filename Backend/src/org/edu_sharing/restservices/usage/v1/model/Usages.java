@@ -62,6 +62,7 @@ public class Usages {
 	    private String guid;
 		private String appSubtype;
 		private String appType;
+		private String type;
 
 
 		@ApiModelProperty(required = true, value = "")
@@ -217,7 +218,16 @@ public class Usages {
 			return appType;
 		}
 
-		@XmlRootElement(name = "usage")
+		@JsonProperty
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        @XmlRootElement(name = "usage")
 		public static class Parameters {
 			@XmlElement public General general;
 

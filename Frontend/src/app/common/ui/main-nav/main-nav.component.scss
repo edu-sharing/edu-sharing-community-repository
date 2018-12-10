@@ -7,12 +7,15 @@
   width:100%;
   max-width:100%;
   z-index:98;
-  height: $mainnavHeight;
-  background: $workspaceTopBarBackground;
-  color:$workspaceTopBarFontColor;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  >div{
+    width:100%;
+    height: $mainnavHeight;
+    background: $workspaceTopBarBackground;
+    color:$workspaceTopBarFontColor;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 .tab-nav{
   display: none;
@@ -117,7 +120,7 @@ user-profile{
   span {
     font-size: 130%;
     position: relative;
-    margin-left: 10px;
+    margin-left: 6px;
   }
   .nodeStore{
     margin-right:10px;
@@ -216,6 +219,7 @@ user-profile{
 .topBar .user{
   text-align: right;
   position: relative;
+  // space for links like imprint
   top:5px;
   display: table;
 }
@@ -295,6 +299,7 @@ user-profile{
   display: none;
   i {
     font-size: 25px;
+    margin-right: 0;
   }
 }
 .topBar .scopeIcon{
@@ -359,14 +364,20 @@ user-profile{
     width:100%;
     bottom:0;
     display:flex;
-    background-color: #fff;
-    overflow-x: auto;
-    height:$mobileTabNavHeight;
-    @include materialShadow();
     >div{
+      display:flex;
+      width:100%;
+      background-color: #fff;
+      overflow-x: auto;
+      height:$mobileTabNavHeight;
+      @include materialShadow();
+    }
+    .button{
       color:$textLight;
+      border-top: 4px solid transparent;
       &.selected{
         color:$primary;
+        border-color: $primary;
         >div >span{
           font-weight:bold;
         }
@@ -377,7 +388,7 @@ user-profile{
       flex-grow: 1;
       flex-direction: column;
       align-items: center;
-      padding:11px 10px;
+      padding:9px 10px;
       >span{
         padding-top:1px;
         font-size:9pt;
@@ -394,6 +405,9 @@ user-profile{
     display:none;
   }
   .topBar {
+    .user{
+      top: 0;
+    }
     .iconPerson {
       display: inherit;
     }

@@ -47,7 +47,11 @@ import org.edu_sharing.repository.client.rpc.User;
  * This interface is used for the repository Methods that are used only by Alfresco Repository
  */
 public interface MCAlfrescoClient {
-	
+	enum ContextSearchMode{
+		Default,
+		UserAndGroups,
+		Public
+	}
 	
 	/**
 	 * get all favorite folders for the current user
@@ -85,7 +89,7 @@ public interface MCAlfrescoClient {
 	 * @return
 	 * @throws Throwable
 	 */
-	public HashMap<String, HashMap<String, Object>> search(String luceneString, boolean eduGroupContext) throws Throwable;
+	public HashMap<String, HashMap<String, Object>> search(String luceneString, ContextSearchMode mode) throws Throwable;
 	
 	/**
 	 * search for nodeId's with a lucene string

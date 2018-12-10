@@ -9,8 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -48,7 +46,6 @@ import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
-import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
@@ -208,9 +205,7 @@ public class CollectionServiceImpl implements CollectionService{
                  */
                 String refId = client.copyNode(originalNodeId, collectionId, true);
 
-                client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
                 permissionService.setPermissions(refId, null, true);
-				client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
 				client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
 
 
@@ -433,13 +428,14 @@ public class CollectionServiceImpl implements CollectionService{
 			/**
 			 * first remove the children so that the usages from the original are also removed
 			 */
-			HashMap<String, HashMap<String, Object>> refObjects = this.getChildren(collectionId, null);
-			for(Map.Entry<String, HashMap<String, Object>> entry : refObjects.entrySet()){
-				if(entry.getValue().get(CCConstants.NODETYPE).equals(CCConstants.CCM_TYPE_MAP) ){
-					remove(entry.getKey());
+			List<NodeRef> refObjects = this.getChildren(collectionId, null);
+			for(NodeRef entry : refObjects){
+				String type=nodeService.getType(entry.getId());
+				if(type.equals(CCConstants.CCM_TYPE_MAP) ){
+					remove(entry.getId());
 				}
-				if(entry.getValue().get(CCConstants.NODETYPE).equals(CCConstants.CCM_TYPE_IO) ){
-					removeFromCollection(collectionId, entry.getKey());
+				if(type.equals(CCConstants.CCM_TYPE_IO) ){
+					removeFromCollection(collectionId, entry.getId());
 				}
 			}
 			/**
@@ -479,7 +475,8 @@ public class CollectionServiceImpl implements CollectionService{
 				logger.warn("reference object "+nodeId + " has no originId, can not remove usage");
 				return;
 			}
-			
+
+
 			Usage2Service usageService = new Usage2Service();
 			
 			usageService.deleteUsage(appInfo.getAppId(), 
@@ -627,9 +624,10 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 
 	@Override
-	public HashMap<String,HashMap<String,Object>> getChildren(String parentId, String scope){
+	public List<NodeRef> getChildren(String parentId, String scope){
 		
 		try{
+			List<NodeRef> returnVal = new ArrayList<>();
 			if(parentId == null){
 				
 				/**
@@ -637,26 +635,27 @@ public class CollectionServiceImpl implements CollectionService{
 				 * level 0 nodes -> maybe cache level 0 with an node property
 				 */
 				String queryString = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION + "\"" + " AND @ccm\\:collectionlevel0:true";
-				boolean eduGroupScope = false;
-				if(SearchScope.EDU_GROUPS.name().equals(scope)){
-					eduGroupScope = true;
-				}
+				MCAlfrescoAPIClient.ContextSearchMode mode = getContextModeForScope(scope);
 				if(SearchScope.MY.name().equals(scope)){
 					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
 				}
-				HashMap<String,HashMap<String,Object>> returnVal = new HashMap<String,HashMap<String,Object>>();
-				Set<Entry<String, HashMap<String, Object>>> searchResult = client.search(queryString,eduGroupScope).entrySet();
-				for(Map.Entry<String, HashMap<String,Object>> entry : searchResult){
-					String parent = (String)entry.getValue().get(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID);
+				SearchParameters token = new SearchParameters();
+				token.setQuery(queryString);
+				List<NodeRef> searchResult = client.searchNodeRefs(token,mode);
+				for(NodeRef entry : searchResult){
+					String parent = nodeService.getPrimaryParent(entry.getStoreRef().getProtocol(),entry.getStoreRef().getIdentifier(),entry.getId());
 					if(Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
 						continue;
 					}
-					returnVal.put(entry.getKey(), entry.getValue());
+					returnVal.add(entry);
 				}
-				return returnVal;
 			}else{
-				return client.getChildren(parentId);
+				List<ChildAssociationRef> list = nodeService.getChildrenChildAssociationRef(parentId);
+				for(ChildAssociationRef entry : list){
+					returnVal.add(entry.getChildRef());
+				}
 			}
+			return returnVal;
 		} catch(Throwable e) {
 			throw new RuntimeException(e.getMessage());
 		}
@@ -673,21 +672,26 @@ public class CollectionServiceImpl implements CollectionService{
 				 * level 0 nodes -> maybe cache level 0 with an node property
 				 */
 				String queryString = "ASPECT:\"" + CCConstants.CCM_ASPECT_COLLECTION + "\"" + " AND @ccm\\:collectionlevel0:true";
-				boolean eduGroupScope = false;
-				if(Scope.EDU_GROUPS.name().equals(scope)){
-					eduGroupScope = true;
-				}
+				MCAlfrescoAPIClient.ContextSearchMode mode = getContextModeForScope(scope);
 				
-				if(Scope.MY.name().equals(scope)){
+				if(SearchScope.MY.name().equals(scope)){
 					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
 				}
-				
-				if(SearchScope.TYPE_EDITORIAL.name().equals(scope)){
+				else if(SearchScope.EDU_GROUPS.name().equals(scope)){
+					// hide my collections in "shared" tab
+					queryString += " AND NOT OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
+				}
+				else if(SearchScope.TYPE_EDITORIAL.name().equals(scope)){
 					queryString += " AND @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
+				}
+
+				if(SearchScope.EDU_GROUPS.name().equals(scope) || SearchScope.EDU_ALL.name().equals(scope) ){
+					// do hide the editorial collections when not in editorial scope mode
+					queryString += " AND NOT @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
 				}
 				List<NodeRef> returnVal = new ArrayList<>();
                 searchParams.setQuery(queryString);
-				List<NodeRef> nodeRefs = client.searchNodeRefs(searchParams,eduGroupScope);
+				List<NodeRef> nodeRefs = client.searchNodeRefs(searchParams,mode);
 				for(NodeRef nodeRef : nodeRefs){
 					if(isSubCollection(nodeRef)){
 						continue;
@@ -706,6 +710,17 @@ public class CollectionServiceImpl implements CollectionService{
 		}catch(Throwable e){
 			throw new RuntimeException(e);
 		}
+	}
+
+	private MCAlfrescoAPIClient.ContextSearchMode getContextModeForScope(String scope) {
+		MCAlfrescoAPIClient.ContextSearchMode mode = MCAlfrescoAPIClient.ContextSearchMode.Default;
+		if(Scope.EDU_GROUPS.name().equals(scope)){
+			mode = MCAlfrescoAPIClient.ContextSearchMode.UserAndGroups;
+		}
+		else if(Scope.EDU_ALL.name().equals(scope)){
+			mode = MCAlfrescoAPIClient.ContextSearchMode.Public;
+		}
+		return mode;
 	}
 
 	private boolean isSubCollection(NodeRef nodeRef) {
@@ -848,5 +863,20 @@ public class CollectionServiceImpl implements CollectionService{
 			nodeService.updateNodeNative(node, props);
 			order++;
 		}
+	}
+
+	/**
+	 * Get all reference objects for a given node
+	 * Uses solr
+	 * @param nodeId
+	 * @return
+	 */
+	@Override
+	public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId){
+		SearchToken token=new SearchToken();
+		token.setMaxResult(Integer.MAX_VALUE);
+		token.setContentType(ContentType.ALL);
+		token.setLuceneString("ASPECT:\"ccm:collection_io_reference\" AND @ccm\\:original:"+ QueryParser.escape(nodeId)+" AND NOT @sys\\:node-uuid:"+QueryParser.escape(nodeId));
+		return SearchServiceFactory.getSearchService(appInfo.getAppId()).search(token).getData();
 	}
 }

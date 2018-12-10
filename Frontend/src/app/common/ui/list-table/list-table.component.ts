@@ -555,29 +555,32 @@ export class ListTableComponent implements EventListener{
   private clickRowSender(node : Node){
     this.clickRow.emit(node);
   }
-  private canBeSorted(sortBy : string){
-    return RestConstants.POSSIBLE_SORT_BY_FIELDS.indexOf(sortBy)!=-1;
+  private canBeSorted(sortBy : any){
+    return RestConstants.POSSIBLE_SORT_BY_FIELDS.indexOf(sortBy.name)!=-1;
   }
   private getSortableColumns(){
     let result:ListItem[]=[];
     for(let col of this.columnsAll){
-      if(this.canBeSorted(col.name))
+      if(this.canBeSorted(col))
         result.push(col);
     }
     return result;
   }
-  private setSorting(sortBy : string,isPrimaryElement : boolean){
-    if(!this.canBeSorted(sortBy))
-      return;
-    if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*3){
+  private setSortingIntern(sortBy : ListItem,isPrimaryElement : boolean){
+    if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*4){
       this.sortMenu=true;
       return;
     }
-    let sortAscending=true;
-    if(sortBy==this.sortBy)
-      sortAscending=!this.sortAscending;
-
-    this.sortListener.emit({sortBy: sortBy,sortAscending: sortAscending });
+    let ascending=this.sortAscending;
+    if(this.sortBy==sortBy.name)
+        ascending=!ascending;
+    (sortBy as any).ascending=ascending;
+    this.setSorting(sortBy);
+  }
+  private setSorting(sortBy : any){
+      if(!this.canBeSorted(sortBy))
+          return;
+      this.sortListener.emit({sortBy: sortBy.name,sortAscending: sortBy.ascending });
   }
   public getTitle(node:Node){
     return RestHelper.getTitle(node);
@@ -739,7 +742,11 @@ export class ListTableComponent implements EventListener{
 
   }
   private getAttribute(data : any,item : ListItem) : SafeHtml{
-    return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
+    //return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
+    return NodeHelper.getAttribute(this.translate,this.config,data,item);
+  }
+  private getAttributeText(data : any,item : ListItem) : string{
+      return NodeHelper.getAttribute(this.translate,this.config,data,item);
   }
   private getLRMIAttribute(data : any,item : ListItem) : string{
     return NodeHelper.getLRMIAttribute(this.translate,this.config,data,item);

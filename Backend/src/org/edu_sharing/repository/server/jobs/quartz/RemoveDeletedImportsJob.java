@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.importer.ImportCleaner;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
@@ -46,6 +47,7 @@ public class RemoveDeletedImportsJob extends AbstractJob {
 	Logger logger = Logger.getLogger(RemoveDeletedImportsJob.class);
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
+		super.execute(context);
 		logger.info("start");
 		try {
 			
@@ -75,7 +77,7 @@ public class RemoveDeletedImportsJob extends AbstractJob {
 			
 			
 			
-			HashMap<String, HashMap<String, Object>>  allNodes = new PersistentHandlerEdusharing(this).getAllNodesInImportfolder();
+			List<NodeRef> allNodes = new PersistentHandlerEdusharing(this).getAllNodesInImportfolder();
 			new ImportCleaner(oaiBaseUrl, catalogsList, metadataPrefix).removeDeletedImportedObjects(allNodes);
 			
 		} catch (Throwable e) {

@@ -56,12 +56,12 @@
   "DAYS_AGO" : "Vor {{ days }} Tagen",
   "CREATE" : "Erstellen",
   "LOGOUT" : "Abmelden",
-  "USER_LANGUAGE": "Sprache ändern",
   "INVALID_OPERATION":"Diese Funktion wird leider nicht unterstützt",
   "SHOW_IN_FOLDER":"Zum Speicherort",
   "SORT_BY":"Sortieren nach",
   "CLEAR_FILTERS":"Alle Filter zurücksetzen",
   "EDIT_ACCOUNT":"Account Verwalten",
+  "CHANGE_LANGUAGE":"Sprache ändern",
   "DEFAULT_METADATASET":"Standard-Metadatenset ({{name}})",
   "NO_MATCHES" : "Keine übereinstimmenden Einträge",
   "NO_CC_PUBLISH" : "Kein Recht zum Veröffentlichen",
@@ -162,6 +162,9 @@
   },
   "NODE" : {
     "cm:name": "Dateiname",
+    "cm:title": "Titel",
+    "ccm:replicationsource": "Herkunft",
+    "score": "Relevanz",
     "description": "Beschreibung",
     "mimetype": "Dateityp",
     "size": "Größe",
@@ -181,7 +184,8 @@
     "virtual:usagecount": "Anz. Verwendungen",
     "ccm:author_freetext":"Freie Urheber-Angabe",
     "ccm:lifecyclecontributer_authorFN":"Autor",
-    "ccm:wf_status":"Status"
+    "ccm:wf_status":"Status",
+    "ccm:eaf_productionyear":"Produktionsjahr"
   },
   "LICENSE":{
     "NAMES": {
@@ -317,7 +321,8 @@
   },
   "GROUP" : {
     "displayName" : "Gruppenname",
-    "groupType" : "Typ"
+    "groupType" : "Typ",
+    "scopeType" : "Sichtbarkeit"
   },
   "ORG" : {
     "displayName" : "Organisations-Name",
@@ -352,6 +357,12 @@
     "H5P": {
       "NAME": "H5P",
       "TITLE": "Neuer H5P-Inhalt",
+      "PLACEHOLDER": "Name des Inhalts",
+      "FILENAME": "Folgende Datei wird erstellt"
+    },
+    "MOODLE": {
+      "NAME": "MOODLE",
+      "TITLE": "Neuer Moodle-Inhalt",
       "PLACEHOLDER": "Name des Inhalts",
       "FILENAME": "Folgende Datei wird erstellt"
     },

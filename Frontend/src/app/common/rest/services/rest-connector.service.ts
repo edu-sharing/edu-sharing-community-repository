@@ -97,7 +97,7 @@ export class RestConnectorService {
       let path=request.path;
       let body=request.body;
       if(method=='get'){
-        this.get(path,this.getRequestOptions()).map((response: Response) => response.json()).subscribe((data:any)=>{
+        this.get(path,this.getRequestOptions()).subscribe((data:any)=>{
           this.notifyFrame(data,request,true);
         },(error:any)=>this.notifyFrame(error,request,false));
       }

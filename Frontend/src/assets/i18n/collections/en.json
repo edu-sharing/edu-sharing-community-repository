@@ -3,6 +3,8 @@
   "COLLECTIONS": {
     "TITLE": "Collections",
     "CREATE_COLLECTION" : "Create\ncollection",
+    "TUTORIAL_HEADING":"Collect what you like",
+    "TUTORIAL_DESCRIPTION":"Create your own collections and fill them with interesting materials - privately or together with others.",
     "ADD_MATERIAL" : "Add\nmaterial",
     "ERROR_DELETE": "An error occurred while deleting the collection.",
     "ENTER_NAME" : "Please enter a name for this collection.",
@@ -26,15 +28,15 @@
     "TAB":{
       "TYPE_EDITORIAL_LONG":" editorially managed collections ",
       "MY_LONG" : " collections created by you ",
-      "EDU_GROUPS_LONG" : " collections that have been shared by or with you. ",
-      "EDU_ALL_LONG" : " all collections that are available to you ",
+      "EDU_GROUPS_LONG" : " collections that have been shared with you. ",
+      "EDU_ALL_LONG" : " all collections that are publicly available",
       "TYPE_EDITORIAL":"Editorial",
       "MY" : "My",
       "EDU_GROUPS" : "Shared",
-      "EDU_ALL" : "All",
+      "EDU_ALL" : "Public",
       "MY_SHORT" : "My",
       "EDU_GROUPS_SHORT" : "Shared",
-      "EDU_ALL_SHORT" : "All",
+      "EDU_ALL_SHORT" : "Public",
       "TYPE_EDITORIAL_SHORT":"Editorial"
     },
     "CREATE_TYPE":"Create new collection...",

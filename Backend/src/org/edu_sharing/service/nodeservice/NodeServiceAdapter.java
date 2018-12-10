@@ -64,7 +64,12 @@ public class NodeServiceAdapter implements NodeService {
 		return null;
 	}
 
-    @Override
+	@Override
+	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId, List<String> types) {
+		return null;
+	}
+
+	@Override
     public NodeRef getChild(StoreRef store, String parentId, String type, String property, Serializable value) {
         return null;
     }
@@ -267,11 +272,11 @@ public class NodeServiceAdapter implements NodeService {
 	public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition) {
 		return null;
 	}
-	
+
 	@Override
 	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -283,4 +288,9 @@ public class NodeServiceAdapter implements NodeService {
 	public <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition) {
 		return list;
 	}
+	@Override
+	public String getPrimaryParent(String protocol, String store, String nodeId) {
+		return null;
+	}
+
 }

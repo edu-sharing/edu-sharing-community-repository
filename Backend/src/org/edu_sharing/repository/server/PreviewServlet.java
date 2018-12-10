@@ -51,6 +51,7 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StreamUtils;
 
 
 public class PreviewServlet extends HttpServlet implements SingleThreadModel {
@@ -88,7 +89,11 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		fetchNodeData(req,resp);
 	}
-	
+
+	class UnsupportedTypeException extends Exception{
+
+	}
+
 	private void fetchNodeData(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		ServletOutputStream op = resp.getOutputStream();
 		String nodeId=null;
@@ -157,9 +162,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					if (!nodeType.equals(CCConstants.CCM_TYPE_IO)
 							&& !nodeType.equals(CCConstants.CCM_TYPE_MAP)
 							&& !nodeType.equals(CCConstants.CCM_TYPE_SAVED_SEARCH)) {
-						//resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "type is not an io and no map!");
-						//return;
-						throw new Exception();
+						throw new UnsupportedTypeException();
 					}
 				} catch (InvalidNodeRefException e) {
 					resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
@@ -292,12 +295,17 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			}
 
 		} catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
-			
 			MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
-			String noPermImage=mime.getNoPermissionsPreview();
-			resp.sendRedirect(noPermImage);
+			resp.sendRedirect(mime.getNoPermissionsPreview());
 			return;
-		} catch (Throwable e) {
+		}  catch (InvalidNodeRefException e) {
+			MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+			resp.sendRedirect(mime.getNodeDeletedPreview());
+			return;
+		}
+		catch (UnsupportedTypeException e){
+			// ignore, the node type ist not supported for image previews
+		}  catch (Throwable e) {
 			// smaller logging for collection ref (i.e. original may deleted, that occurs often)
 			if(isCollection)
 				logger.warn(e.getMessage());
@@ -418,7 +426,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		return false;
 	}
 	private DataInputStream postProcessImage(String nodeId,DataInputStream in,HttpServletRequest req){
-		float quality=0.7f;
+		float quality=DEFAULT_QUALITY;
 		
 		int width=0,height=0,maxHeight=0,maxWidth=0;
 		boolean crop=false;
@@ -455,9 +463,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		}
 		
 		boolean fromCache=false;
-		
 		if(fullsize || isCacheable(width, height,maxWidth,maxHeight)){
-			File file=PreviewCache.getFileForNode(nodeId,fullsize ? width : -1,height,false);
+			File file=PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width,height,false);
 			if(file!=null && file.exists()){
 				try{
 					in.close();
@@ -476,7 +483,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		try{
 			// cache optimization, if no other tasks, just return the cached preview
 			if(fromCache && Math.abs(quality-DEFAULT_QUALITY)<0.1){
-				return in;
+				logger.debug("Sending direct image cache to client: "+nodeId);
+				byte[] img=StreamUtils.copyToByteArray(in);
+				return new DataInputStream(new ByteArrayInputStream(img));
 			}
 			
 			BufferedImage img=ImageIO.read(in);
@@ -538,13 +547,11 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			imgOut.getGraphics().fillRect(0, 0,imgOut.getWidth(),imgOut.getHeight());
 			imgOut.getGraphics().drawImage(img, 0, 0, null);
 		
-			if(scale && !fromCache && (isCacheable(width, height,maxWidth,maxHeight) || fullsize)){
+			if(!fromCache && (isCacheable(width, height,maxWidth,maxHeight) || fullsize)){
 				// Drop alpha (weird colors in jpg otherwise)
 				ImageIO.write(imgOut, "JPG",PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width, height,true));
 			}
-		
-			// Drop alpha (weird colors in jpg otherwise)
-			
+
 			JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(null);
 			jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
 			jpegParams.setCompressionQuality(quality);
@@ -614,7 +621,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					
 				}
 				
-				resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
+				resp.setContentType(mimetype);
 				
 				resp.setContentLength((int) in.available());
 

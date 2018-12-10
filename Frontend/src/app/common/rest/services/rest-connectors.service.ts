@@ -43,9 +43,9 @@ export class RestConnectorsService extends AbstractRestService{
     for(let filetype of connector.filetypes){
       if(filetype.mimetype==node.mimetype && (mode==this.MODE_NONE || mode==this.MODE_EDIT && filetype.editable || mode==this.MODE_CREATE && filetype.creatable)) {
         if(filetype.mimetype=='application/zip'){
-         if(   filetype.ccressourceversion==node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION]
-           && filetype.ccressourcetype==node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]
-           && filetype.ccresourcesubtype==node.properties[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE])
+         if((!filetype.ccressourceversion || filetype.ccressourceversion==node.properties[RestConstants.CCM_PROP_CCRESSOURCEVERSION])
+            && filetype.ccressourcetype==node.properties[RestConstants.CCM_PROP_CCRESSOURCETYPE]
+            && (!filetype.ccresourcesubtype || filetype.ccresourcesubtype==node.properties[RestConstants.CCM_PROP_CCRESSOURCESUBTYPE]))
            return filetype;
          continue;
         }

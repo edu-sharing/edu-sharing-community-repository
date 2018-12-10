@@ -45,6 +45,7 @@ import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.TaxonTool;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -62,8 +63,7 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 	HashMap toSafeMap = new HashMap();
 	
 	public RecordHandlerLOM( String metadataSetId) {
-		logger.info("initializing...");
-		
+
 		this.metadataSetId = metadataSetId;
 		
 		if(metadataSetId == null || metadataSetId.trim().equals("")){
@@ -116,8 +116,7 @@ public class RecordHandlerLOM implements RecordHandlerInterface {
 		String titleEntry = (String)generalTitleI18n.values().iterator().next();
 		toSafeMap.put(CCConstants.LOM_PROP_GENERAL_TITLE, titleEntry);
 		String name = new String(titleEntry);
-		name = name.replaceAll(
-				RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+		name = NodeServiceHelper.cleanupCmName(name);
 
 		//replace ending dot with nothing
 		//cmNameReadableName = cmNameReadableName.replaceAll("\\.$", "");

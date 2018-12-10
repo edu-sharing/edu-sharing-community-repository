@@ -7,6 +7,18 @@
   background-color:$primary!important;
   color:$textOnPrimary!important;
 }
+.btn,.btn-flat{
+  display:inline-flex;
+  align-items: center;
+  >span{
+    flex-grow:1;
+  }
+  >.material-icons{
+    display: inline-flex;
+    align-items: center;
+    margin-right: 5px;
+  }
+}
 .btn:focus:not(.disabled){
     background-color:$primaryDark!important;
 }
@@ -259,7 +271,6 @@ input[type=search]:read-only{
 }
 .btn-icon i,.btn-icon-only i, .align-icon{
   position:relative;
-  top:4px;
   left:-10px;
 }
 

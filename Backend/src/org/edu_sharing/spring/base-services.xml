@@ -73,4 +73,7 @@
 			<value>/app:company_home/ccm:collections</value>
 		</property>
 	</bean>
+	
+	<bean id="repoProxy" class="org.edu_sharing.service.repoproxy.RepoProxyDummyImpl">
+	</bean>
 </beans>

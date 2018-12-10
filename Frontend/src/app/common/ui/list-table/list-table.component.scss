@@ -7,11 +7,11 @@ $borderRadius:2px;
 .sorting,.text{
   float:left;
   padding:0!important;
-  position:relative;
-  top:-2px;
 }
 .sorting{
-  height:13px;
+  height: 24px;
+  display: flex;
+  align-items: center;
 }
 .sorting a i{
   width:12px;
@@ -244,26 +244,7 @@ $badgeWidth:250px;
   }
   .sortMenu{
     position: absolute;
-    z-index: $dialogZIndex+1;
     left:80px;
-    width: $contextMenuWidth;
-    .collection-item{
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-      .title{
-        flex-grow: 1;
-      }
-      a{
-        height:20px;
-      }
-      i{
-        position: initial;
-      }
-      &.active{
-        font-weight: bold;
-      }
-    }
   }
 }
 .row .icon{
@@ -763,12 +744,15 @@ $orderAnimationTime:$transitionNormal*5;
 .cardList{
   .more{
     position:absolute;
-    right:-10px;
-    top:$cardHeight - 40px;
+    right: 1px;  // leave space for fade background
+    top:$cardHeight - 50px;
+    padding:10px!important;
     @include fadeRight(#fff,20px);
     padding-bottom: 5px;
     a{
-      padding-left: 10px;
+      padding-left: 5px;
+      position: relative;
+      left:10px;
     }
   }
   .moreAlways{
@@ -777,7 +761,7 @@ $orderAnimationTime:$transitionNormal*5;
   }
 }
 .cardList .moreSingle{
-  right:-5px;
+  right:10px;
   text-transform: uppercase;
 }
 .cardList .moreSingle i{
@@ -939,6 +923,9 @@ $orderAnimationTime:$transitionNormal*5;
       .typeicon{
         display:none!important;
       }
+      .more a{
+        left:0;
+      }
   }
   .cardList.addElement{
     height:90px;
@@ -1006,7 +993,7 @@ $orderAnimationTime:$transitionNormal*5;
   .cardList .row .more{
     position: absolute;
     top: 45px;
-    left: calc(100% - 55px);
+    left: calc(100% - 65px);
   }
   .cardList .row_1{
     height: auto;

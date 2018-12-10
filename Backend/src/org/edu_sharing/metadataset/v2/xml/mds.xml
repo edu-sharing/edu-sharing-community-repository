@@ -454,11 +454,10 @@
 				<html><![CDATA[
               <cclom:title>
               <cm:name>
+              <cclom:general_description>
               <cclom:general_keyword>
-              
               <license>
               <ccm:author_freetext>
-              <cclom:general_description>
               <cclom:size>
               <cm:created>
               <cm:modified>
@@ -582,6 +581,45 @@
 				</views>
 			</group>
 		</groups>
+		<sorts>
+			<sort>
+				<id>search</id>
+				<default>
+					<sortBy>score</sortBy>
+					<sortAscending>false</sortAscending>
+				</default>
+				<columns>
+					<column mode="descending">score</column>
+					<column>cm:modified</column>
+					<!-- currently not working (solr error) -->
+					<!-- <column>ccm:commonlicense_key</column> -->
+					<column>cm:title</column>
+					<column>ccm:replicationsource</column>
+				</columns>
+			</sort>
+		</sorts>
+		<lists>
+			<list>
+				<id>search</id>
+				<columns>
+					<column>cm:title</column>
+					<column>cm:modified</column>
+					<column>ccm:commonlicense_key</column>
+					<column>ccm:replicationsource</column>
+				</columns>
+			</list>
+		</lists>
+		<lists>
+			<list>
+				<id>collectionReferences</id>
+				<columns>
+					<column>cm:title</column>
+					<column>cm:modified</column>
+					<column>ccm:commonlicense_key</column>
+					<column>ccm:replicationsource</column>
+				</columns>
+			</list>
+		</lists>
 		<queries>
 			<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
 			<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>

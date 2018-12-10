@@ -33,6 +33,7 @@ import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
+import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.service.usage.UsageException;
@@ -162,7 +163,10 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				}
 
 			} catch(UsageException e) {
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+				//httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+				MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+				httpServletResponse.sendRedirect(mime.getNodeDeletedPreview());
+				return;
 			}
 
 			//authService.authenticate(ApplicationInfoList.getHomeRepository().getUsername(), ApplicationInfoList.getHomeRepository().getPassword().toCharArray());

@@ -1,7 +1,6 @@
 package org.edu_sharing.service.collection;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -49,7 +48,7 @@ public interface CollectionService {
 	
 	public void move(String toCollection, String nodeId);
 	
-	public HashMap<String,HashMap<String,Object>> getChildren(String parentId, String scope);
+	public List<NodeRef> getChildren(String parentId, String scope);
 	
 	public List<NodeRef> getChildReferences(String parentId, String scope, SortDefinition sortDefinition);
 
@@ -70,4 +69,5 @@ public interface CollectionService {
 
 	void writePreviewImage(String collectionId, InputStream is, String mimeType) throws Exception;
 
+    List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId);
 }

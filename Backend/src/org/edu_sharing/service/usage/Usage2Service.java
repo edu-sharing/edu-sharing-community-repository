@@ -17,6 +17,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO8601DateFormat;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationTool;
@@ -28,7 +29,13 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.collection.CollectionServiceImpl;
+import org.edu_sharing.service.search.SearchServiceFactory;
+import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.context.ApplicationContext;
+
+import javax.ws.rs.QueryParam;
 
 public class Usage2Service {
 	
@@ -156,6 +163,19 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		  }
 		
 		return result;
+	}
+	
+	public List<Usage> getUsages(String repositoryId,
+			String nodeId,
+			Long from,
+			Long to) throws Exception {
+		 List<Usage> result = new ArrayList<Usage>();
+		 
+		 for(Map.Entry<String, HashMap<String, Object>> entry : usageDao.getUsages(repositoryId, nodeId, from, to).entrySet()) {
+			 result.add(getUsageResult(entry.getValue()));
+		 }
+		 
+		 return result;
 	}
 
 
@@ -311,7 +331,7 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 			for (String key : usages.keySet()) {
 				result.add(getUsageResult(usages.get(key)));
 			}
-			
+			addUsagesFromReferenceObjects(parentNodeId,result);
 			return result;
 		}catch(Throwable e){
 			logger.error(e.getMessage(), e);
@@ -328,7 +348,24 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 	
     }
 
-    public boolean deleteUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String resourceId) throws UsageException {
+	/**
+	 * Add indirect usages which are attached to collection reference objects
+	 * @param parentNodeId
+	 * @param result
+	 */
+	private void addUsagesFromReferenceObjects(String parentNodeId, ArrayList<Usage> result) {
+		List<org.edu_sharing.service.model.NodeRef> nodes = CollectionServiceFactory.getLocalService().getReferenceObjects(parentNodeId);
+		for(org.edu_sharing.service.model.NodeRef node : nodes){
+			HashMap<String, HashMap<String, Object>> usages = usageDao.getUsages(node.getNodeId());
+			for (String key : usages.keySet()) {
+				Usage usage = getUsageResult(usages.get(key));
+				usage.setType(Usage.Type.INDIRECT);
+				result.add(usage);
+			}
+		}
+	}
+
+	public boolean deleteUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String resourceId) throws UsageException {
     	logger.info("starting");
 		
 		

@@ -1,4 +1,5 @@
 import {RestConstants} from "./rest-constants";
+import {ListItem} from "../ui/list-item";
 /**
  * All Object types returned by the rest service
  */
@@ -111,7 +112,6 @@ export class Node {
   modifiedAt: Date;
   modifiedBy: Person;
   access: string[];
-  iconURL: string;
   contentVersion: string;
   repositoryType: string;
   contentUrl: string;
@@ -119,6 +119,7 @@ export class Node {
   properties: any;
   mediatype: string;
   mimetype: string;
+  iconURL: string;
   licenseURL: string;
   size: number;
   preview: Preview;
@@ -130,6 +131,9 @@ export class Node {
   public Node(){
 
   }
+}
+export class SortItem extends ListItem{
+  mode: string;
 }
 export interface NodePermissionsHistory {
   date: number;
@@ -1041,6 +1045,7 @@ export class Organizations {
 export class Profile {
   displayName:string;
   groupType:string;
+  scopeType:string;
 }
 
 export class PersonalProfile {

@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -48,6 +49,7 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.ISO8601DateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.mail.EmailException;
@@ -231,6 +233,124 @@ public class AlfServicesWrapper implements UsageDAO{
 			}
 		}
 		return result;
+	}
+	
+	@Override
+	public HashMap<String, HashMap<String, Object>> getUsages(String repositoryId, String nodeId, Long from, Long to) throws Exception {
+		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(repositoryId);
+		if(appInfo == null) {
+			throw new Exception("unknown application " +repositoryId);
+		}
+		
+		if(!ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType())) {
+			throw new Exception("application " + repositoryId +" is not an repository");
+		}
+			
+		if(repositoryId.equals("-home-")) {
+			repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
+		}
+		
+		final String repositoryIdF = repositoryId;
+		
+		
+		
+		RunAsWork<HashMap<String, HashMap<String, Object>>> runAs = new RunAsWork<HashMap<String,HashMap<String,Object>>>() {
+			@Override
+			public HashMap<String, HashMap<String, Object>> doWork() throws Exception {
+				
+				HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
+				
+				if(ApplicationInfoList.getHomeRepository().getAppId().equals(appInfo.getAppId())) {
+					String queryString = "TYPE:\"{http://www.campuscontent.de/model/1.0}usage\"";
+					if(nodeId != null && nodeId.trim().length() > 0) {
+						queryString += " AND @ccm\\:usageparentnodeid:" + nodeId;
+					}
+					if(from != null) {
+						
+						String fromFormated = ISO8601DateFormat.format(new Date(from));
+						
+						Long to2 = (to == null) ? new Date().getTime() : to;
+						String toFormated = ISO8601DateFormat.format(new Date(to2));
+						queryString += " AND @cm\\:created:[" + fromFormated + " TO " + toFormated + "]";
+					}
+					
+					ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, queryString);
+					for (NodeRef nodeRef : resultSet.getNodeRefs()) {
+						
+						try{
+							Map<QName, Serializable> tmpprops = nodeService.getProperties(nodeRef);
+							HashMap<String, Object> props = new HashMap<String, Object>();
+							for (QName key : tmpprops.keySet()) {
+								String propName = key.toString();
+								Object propValue = tmpprops.get(key);
+								if(propValue != null) props.put(propName, propValue.toString());
+							}
+							ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
+							props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
+							
+							result.put(nodeRef.getId(), props);
+						}catch(org.alfresco.service.cmr.repository.InvalidNodeRefException e){
+							logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
+						}
+					}
+				}else {
+					String queryString = "TYPE:\"{http://www.campuscontent.de/model/1.0}remoteobject\" AND @ccm\\:remoterepositoryid:" + repositoryIdF;
+					if(nodeId != null && nodeId.trim().length() > 0) {
+						queryString += " AND @ccm\\:remotenodeid:" + nodeId;
+					}
+					if(from != null) {
+						
+						String fromFormated = ISO8601DateFormat.format(new Date(from));
+						
+						Long to2 = (to == null) ? new Date().getTime() : to;
+						String toFormated = ISO8601DateFormat.format(new Date(to2));
+						queryString += " AND @cm\\:created:[" + fromFormated + " TO " + toFormated + "]";
+					}
+					
+					ResultSet resultSet = searchService.query(storeRef, SearchService.LANGUAGE_LUCENE, queryString);
+					for (NodeRef nodeRef : resultSet.getNodeRefs()) {
+						
+						try{
+							Map<QName, Serializable> remoteProps = nodeService.getProperties(nodeRef);
+							
+							List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(nodeRef);
+							for(ChildAssociationRef childRef : childAssocs) {
+								if(QName.createQName(CCConstants.CCM_TYPE_USAGE).equals(nodeService.getType(childRef.getChildRef()))){
+						
+									HashMap<String, Object> props = new HashMap<String, Object>();
+									Map<QName, Serializable> tmpprops = nodeService.getProperties(nodeRef);
+									for (QName key : tmpprops.keySet()) {
+										String propName = key.toString();
+										Object propValue = tmpprops.get(key);
+										if(propValue != null) props.put(propName, propValue.toString());
+									}
+									ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
+									props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
+									
+									/**
+									 * add remote object props
+									 */
+									props.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, remoteProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID).toString());
+									props.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, remoteProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID).toString());
+									result.put(nodeRef.getId(), props);
+								}
+							}
+							
+							
+							
+							
+							
+						}catch(org.alfresco.service.cmr.repository.InvalidNodeRefException e){
+							logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
+						}
+					}
+				}
+				
+				return result;
+			}
+		};
+		
+		return AuthenticationUtil.runAsSystem(runAs);
 	}
 
 	public HashMap<String, HashMap<String, Object>> getChildrenByType(String nodeId, String type) {
