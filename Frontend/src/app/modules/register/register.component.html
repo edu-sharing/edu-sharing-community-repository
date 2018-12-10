@@ -4,7 +4,7 @@
     <div class="card center-card card-action header-high card-high">
 
         <div class="card-content">
-            <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+            <div class="card-cancel" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()"><i class="material-icons">close</i></div>
             <div class="card-title">
                 {{(state=='request' || state=='done-reset' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}
             </div>
@@ -19,7 +19,7 @@
                 <app-register-reset-password *ngIf="state=='reset-password'" (onLoading)="isLoading=$event" #resetPassword></app-register-reset-password>
                 <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset'" class="register">
                     {{'LOGIN.REGISTER_TEXT' | translate}}
-                    <a (click)="linkRegister()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
+                    <a (click)="linkRegister()" (keyup.enter)="linkRegister()" tabindex="0"  class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
                 </div>
             </div>
         </div>

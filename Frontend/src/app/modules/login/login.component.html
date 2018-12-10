@@ -13,6 +13,7 @@
     <div class="card-content">
       <div *ngIf="previousStage" class="card-cancel" (click)="stage=previousStage;previousStage=null"><i class="material-icons">close</i></div>
       <div class="card-title">{{caption | translate}}</div>
+      <div class="branding"><img src="assets/images/logo.svg"></div>
       <div class="card-scroll">
           <div *ngIf="stage=='choose'" [@dialog]="stage=='choose'" class="choose">
               <div>
@@ -43,6 +44,8 @@
       </div>
     </div>
       <div class="card-action" *ngIf="stage=='login'">
+        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+        <a class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
   </div>
   <powered-by mode="white"></powered-by>
