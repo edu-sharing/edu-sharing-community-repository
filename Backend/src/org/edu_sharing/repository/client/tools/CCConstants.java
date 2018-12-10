@@ -197,6 +197,8 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_IO = "{http://www.campuscontent.de/model/1.0}io";
 
+	public final static String CCM_TYPE_CONFIGOBJECT = "{http://www.campuscontent.de/model/1.0}configobject";
+
 	public final static String CCM_TYPE_SAVED_SEARCH = "{http://www.campuscontent.de/model/1.0}saved_search";
 
 	public final static String CCM_TYPE_COMMENT = "{http://www.campuscontent.de/model/1.0}comment";
@@ -950,6 +952,8 @@ public class CCConstants {
 
 	public static final String SCHOOLCONTEXT_PATH_SEPARATOR = "#";
 
+	public final static String CCM_PROP_CONFIGOBJECT_VALUE = "{http://www.campuscontent.de/model/1.0}configvalue";
+
 	public final static String CCM_PROP_REMOTEOBJECT_REPOSITORYID = "{http://www.campuscontent.de/model/1.0}remoterepositoryid";
 	public final static String CCM_PROP_REMOTEOBJECT_NODEID = "{http://www.campuscontent.de/model/1.0}remotenodeid";
 	public final static String CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE = "{http://www.campuscontent.de/model/1.0}remoterepositorytype";
@@ -1309,6 +1313,8 @@ public class CCConstants {
 	public final static String I18n_SYSTEMFOLDER_BASE = "systemfolder_base";
 
 	public final static String I18n_SYSTEMFOLDER_UPDATE = "systemfolder_update";
+
+	public final static String I18n_SYSTEMFOLDER_CONFIG = "systemfolder_config";
 
 	public final static String I18n_SYSTEMFOLDER_NOTIFY = "systemfolder_notify";
 

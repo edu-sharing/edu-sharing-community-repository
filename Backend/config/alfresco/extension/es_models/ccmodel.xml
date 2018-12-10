@@ -78,6 +78,16 @@
 			</mandatory-aspects>
 		</type>
 
+		<type name="ccm:configobject">
+			<title>Campus Content configuration object</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<!-- config value as json string-->
+				<property name="ccm:configvalue">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</type>
 
 		<type name="ccm:sysupdate">
 			<title>edu-sharing system update marker</title>

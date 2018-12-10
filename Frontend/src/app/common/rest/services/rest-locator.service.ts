@@ -50,6 +50,22 @@ export class RestLocatorService {
   public getCordova(){
     return this.cordova;
   }
+    public getConfigDynamic(key:string) : Observable<any>{
+        return new Observable<any>((observer : Observer<any>) => {
+            this.locateApi().subscribe(data => {
+                let query = RestLocatorService.createUrl("config/:version/dynamic/:key", null,[[":key",key]]);
+                this.http.get<any>(this.endpointUrl + query, this.getRequestOptions())
+                    .subscribe(response => {
+                        // unmarshall encapuslated json response
+                        observer.next(JSON.parse(response.body.value));
+                        observer.complete();
+                    },(error:any)=>{
+                        observer.error(error);
+                        observer.complete();
+                    });
+            });
+        });
+    }
   public getConfig() : Observable<any>{
     return new Observable<any>((observer : Observer<any>) => {
       this.locateApi().subscribe(data => {
