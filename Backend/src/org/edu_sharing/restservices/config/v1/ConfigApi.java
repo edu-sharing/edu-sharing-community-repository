@@ -4,28 +4,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import io.swagger.annotations.*;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.Context;
 import org.edu_sharing.restservices.ApiService;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.config.v1.model.Config;
 import org.edu_sharing.restservices.config.v1.model.Language;
 import org.edu_sharing.restservices.config.v1.model.Variables;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.service.NotAnAdminException;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.config.DynamicConfig;
 import org.edu_sharing.service.config.model.Values;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import org.edu_sharing.webservices.util.AuthenticationUtil;
 import org.json.JSONObject;
+import org.stringtemplate.v4.ST;
 
 @Path("/config/v1")
 @Api(tags = { "CONFIG v1" })
@@ -139,6 +143,48 @@ public class ConfigApi {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
 		}
     }
+	@GET
+	@Path("/dynamic/{key}")
+	@ApiOperation(value = "Get a config entry (appropriate rights for the entry are required)")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = DynamicConfig.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+	public Response getDynamicValue(@ApiParam(value = "Key of the config value that should be fetched",required=true ) @PathParam("key") String key) {
+		try {
+			DynamicConfig config = ConfigServiceFactory.getConfigService().getDynamicValue(key);
+			return Response.status(Response.Status.OK).entity(config).build();
+		} catch (Throwable t) {
+			logger.error(t.getMessage(), t);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+		}
+	}
+	@POST
+	@Path("/dynamic/{key}")
+	@ApiOperation(value = "Set a config entry (admin rights required)", notes="the body must be a json encapsulated string")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = DynamicConfig.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+	})
+	public Response setDynamicValue(@ApiParam(value = "Key of the config value that should be fetched",required=true ) @PathParam("key") String key,
+									@ApiParam(value = "Is everyone allowed to read the value",required=true ) @QueryParam("public") Boolean readPublic,
+									@ApiParam(value = "Must be a json-encapsulated string",required=true )String value) {
+		try {
+			DynamicConfig config = ConfigServiceFactory.getConfigService().setDynamicValue(key,readPublic==null ? false : readPublic.booleanValue(), new JSONObject(value));
+			return Response.status(Response.Status.OK).entity(config).build();
+		} catch (Throwable t) {
+			logger.error(t.getMessage(), t);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+		}
+	}
 	private Map<String, String> convertVariables(org.edu_sharing.service.config.model.Variables variables) {
 		if(variables==null || variables.variable==null)
 			return null;

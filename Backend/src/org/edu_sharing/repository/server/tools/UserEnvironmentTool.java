@@ -50,8 +50,6 @@ public class UserEnvironmentTool {
     }
         /**
          * use this for running this class in an runAs context
-         * @param appId
-         * @param username
          * @throws Throwable
          */
 	public UserEnvironmentTool(String runAsUser) throws Throwable{
@@ -184,6 +182,9 @@ public class UserEnvironmentTool {
 			result = (String)edu_SharingSystemFolderNotify.get(CCConstants.SYS_PROP_NODE_UID);
 		}
 		return result;
+	}
+	public String getEdu_SharingConfigFolder() throws Throwable {
+		return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE, CCConstants.I18n_SYSTEMFOLDER_CONFIG);
 	}
     public String getEdu_SharingServiceFolder() throws Throwable {
         return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE, CCConstants.I18n_SYSTEMFOLDER_SERVICE);
