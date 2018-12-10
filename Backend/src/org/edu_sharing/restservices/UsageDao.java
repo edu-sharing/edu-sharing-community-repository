@@ -86,21 +86,25 @@ public class UsageDao {
 		usageResult.setResourceId(usage.getResourceId());
 		usageResult.setUsageCounter(usage.getUsageCounter());
 		usageResult.setUsageVersion(usage.getUsageVersion());
-		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(Usage.Parameters.class);
-
-			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			jaxbUnmarshaller.setEventHandler(new ValidationEventHandler() {
-				@Override
-				public boolean handleEvent(ValidationEvent event) {
-					// ignore all errors, try to parse what is possible
-					return true;
-				}
-			});
-			usageResult.setUsageXmlParams(
-					(Usage.Parameters) jaxbUnmarshaller.unmarshal(new StringReader(usage.getUsageXmlParams())));
-		} catch (Throwable t) {
-			logger.warn("Error converting usage xml " + usage.getUsageXmlParams(), t);
+		String xmlParams = usage.getUsageXmlParams();
+		
+		if(xmlParams != null) {
+			try {
+				JAXBContext jaxbContext = JAXBContext.newInstance(Usage.Parameters.class);
+	
+				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+				jaxbUnmarshaller.setEventHandler(new ValidationEventHandler() {
+					@Override
+					public boolean handleEvent(ValidationEvent event) {
+						// ignore all errors, try to parse what is possible
+						return true;
+					}
+				});
+				usageResult.setUsageXmlParams(
+						(Usage.Parameters) jaxbUnmarshaller.unmarshal(new StringReader(usage.getUsageXmlParams())));
+			} catch (Throwable t) {
+				logger.warn("Error converting usage xml " + usage.getUsageXmlParams(), t);
+			}
 		}
 		return usageResult;
 	}
