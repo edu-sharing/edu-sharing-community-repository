@@ -31,18 +31,28 @@ export class ConfigurationService {
         return;
       }
       //this.http.get("assets/config.json").map((response: Response) => response.json()).subscribe((data:any)=>{
-      this.locator.getConfig().subscribe((data:any)=>{
+      this.locator.getConfig().subscribe((data)=>{
         this.data=data.current;
         observer.next(this.data);
         observer.complete();
-      },(error:any)=>{
+      },(error)=>{
         // no language available, so use a fixed string
         this.toast.error(error,'Error fetching configuration data. Please contact administrator.<br />Fehler beim Abrufen der Konfigurationsdaten. Bitte Administrator kontaktieren.');
         console.warn(error)
       });
     });
   }
-
+  public getDynamic(key:string,name:string,defaultValue:any=null){
+      return Observable.create( (observer:Observer<any>) => {
+          this.locator.getConfigDynamic(key).subscribe((data)=>{
+              observer.next(this.instantInternal(name,defaultValue,data));
+              observer.complete();
+          },(error)=>{
+              observer.error(error);
+              observer.complete();
+          });
+      });
+  }
   /**
    * Gets a value
    * Example: config.get("extension").subscribe((data)=>console.log(data));
