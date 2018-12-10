@@ -38,7 +38,7 @@
           </form>
           <div class="register" *ngIf="config.registerUrl">
             {{'LOGIN.REGISTER_TEXT' | translate}}
-            <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
+            <a tabindex="0" (click)="register()" (keyup.enter)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
           </div>
         </div>
       </div>

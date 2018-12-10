@@ -25,7 +25,7 @@
 <div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
-  <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
+  <div class="sidenavClose clickable" tabindex="0" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false"><i class="material-icons">close</i></div>
   <div class="sidenavImage">
     <img src="assets/images/layout/sidenav.jpg">
     <div><i class="material-icons">account_circle</i>
