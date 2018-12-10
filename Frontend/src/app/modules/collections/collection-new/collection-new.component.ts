@@ -507,14 +507,13 @@ export class CollectionNewComponent {
   private setParent(id:string,parent:Collection) {
     this.parentId = id;
     this.parentCollection = parent;
-    if(this.parentCollection && this.parentCollection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
-      this.newCollectionStep = this.STEP_GENERAL;
-      this.newCollectionType=RestConstants.COLLECTIONTYPE_EDITORIAL;
-    }
     this.currentCollection=new Collection();
     this.currentCollection.title="";
     this.currentCollection.description="";
     this.currentCollection.color=this.COLORS1[0];
+      if(this.parentCollection && this.parentCollection.type==RestConstants.COLLECTIONTYPE_EDITORIAL){
+          this.setCollectionType(RestConstants.COLLECTIONTYPE_EDITORIAL);
+      }
     this.updateAvailableSteps();
     this.isLoading=false;
   }
