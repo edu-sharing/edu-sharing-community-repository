@@ -3114,10 +3114,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			fromID = childAssocRef.getParentRef().getId();
 		}
 		if (childAssocRef.getParentRef().getId().equals(fromID)) {
-			nodeService.deleteNode(nodeRef);
+
 			if(!recycle){
-				nodeService.deleteNode(new NodeRef(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE,nodeID));
+				nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
 			}
+			nodeService.deleteNode(nodeRef);
+
 		} else {
 			nodeService.removeChild(new NodeRef(storeRef, fromID), nodeRef);
 		}
