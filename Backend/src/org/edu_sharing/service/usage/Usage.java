@@ -1,6 +1,7 @@
 package org.edu_sharing.service.usage;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +43,10 @@ public class Usage {
     private String resourceId;
     
     private String guid;
+    
+    private Date created;
+    
+    private Date modified;
 
 
 
@@ -155,6 +160,22 @@ public class Usage {
 
 	public void setResourceId(String resourceId) {
 		this.resourceId = resourceId;
+	}
+	
+	public Date getCreated() {
+		return created;
+	}
+	
+	public Date getModified() {
+		return modified;
+	}
+	
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+	
+	public void setModified(Date modified) {
+		this.modified = modified;
 	}
     
     

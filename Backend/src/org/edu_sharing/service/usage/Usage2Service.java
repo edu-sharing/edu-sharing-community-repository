@@ -454,6 +454,12 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		if (usageCounter != null) {
 			usageResult.setUsageCounter(new Integer((String) usageCounter));
 		}
+		
+		String modified = (String)usage.get(CCConstants.CM_PROP_C_MODIFIED);
+		usageResult.setModified(new Date(new Long(modified)));
+		
+		String created = (String)usage.get(CCConstants.CM_PROP_C_CREATED);
+		usageResult.setCreated(new Date(new Long(created)));
 
 		logger.info("returning");
 		return usageResult;

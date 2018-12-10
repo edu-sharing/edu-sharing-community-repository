@@ -1,15 +1,18 @@
 package org.edu_sharing.restservices.usage.v1.model;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.edu_sharing.restservices.collection.v1.model.Collection;
+import org.edu_sharing.restservices.shared.Node;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModelProperty;
-import org.edu_sharing.restservices.collection.v1.model.Collection;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 public class Usages {
 
@@ -63,6 +66,10 @@ public class Usages {
 		private String appSubtype;
 		private String appType;
 		private String type;
+		
+		private Date created;
+		
+		private Date modified;
 
 
 		@ApiModelProperty(required = true, value = "")
@@ -226,6 +233,22 @@ public class Usages {
         public String getType() {
             return type;
         }
+        
+        public void setCreated(Date created) {
+			this.created = created;
+		}
+        
+        public Date getCreated() {
+			return created;
+		}
+        
+        public void setModified(Date modified) {
+			this.modified = modified;
+		}
+        
+        public Date getModified() {
+			return modified;
+		}
 
         @XmlRootElement(name = "usage")
 		public static class Parameters {
@@ -250,6 +273,18 @@ public class Usages {
 
 		public void setCollection(Collection collection) {
 			this.collection = collection;
+		}
+	}
+	
+	public static class NodeUsage extends Usage{
+		private Node node;
+		
+		public Node getNode() {
+			return node;
+		}
+		
+		public void setNode(Node node) {
+			this.node = node;
 		}
 	}
 }

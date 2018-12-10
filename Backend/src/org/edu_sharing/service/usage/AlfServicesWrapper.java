@@ -283,7 +283,15 @@ public class AlfServicesWrapper implements UsageDAO{
 							for (QName key : tmpprops.keySet()) {
 								String propName = key.toString();
 								Object propValue = tmpprops.get(key);
-								if(propValue != null) props.put(propName, propValue.toString());
+								if(propValue != null) {
+									
+									if(propValue instanceof Date) {
+										props.put(propName, new Long(((Date)propValue).getTime()).toString());
+									}else {
+										props.put(propName, propValue.toString());
+									}
+									
+								}
 							}
 							ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
 							props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
@@ -322,7 +330,13 @@ public class AlfServicesWrapper implements UsageDAO{
 									for (QName key : tmpprops.keySet()) {
 										String propName = key.toString();
 										Object propValue = tmpprops.get(key);
-										if(propValue != null) props.put(propName, propValue.toString());
+										if(propValue != null) {
+											if(propValue instanceof Date) {
+												props.put(propName, new Long(((Date)propValue).getTime()).toString());
+											}else {
+												props.put(propName, propValue.toString());
+											}
+										}
 									}
 									ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
 									props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
