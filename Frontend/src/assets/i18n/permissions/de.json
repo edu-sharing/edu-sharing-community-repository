@@ -73,6 +73,10 @@
       "EDITORIAL":"Redaktionsgruppe",
       "ORG_ADMINISTRATORS":"Administrationsgruppe"
     },
+    "SCOPE_TYPE":{
+      "null":"Kein / Normale Sichtbarkeit",
+      "global":"Repository übergreifend"
+    },
     "TOOLPERMISSIONS":{
       "TITLE":"Berechtigungen festlegen für {{name}}",
       "EVERYONE_ALLOWED":"Ausgangswert für alle Gruppen & Nutzer",

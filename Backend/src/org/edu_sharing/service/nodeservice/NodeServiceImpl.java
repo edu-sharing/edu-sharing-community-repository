@@ -1135,4 +1135,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return new GetPreviewResult(defaultImageUrl, GetPreviewResult.TYPE_DEFAULT, false);
 	}
 
+	@Override
+	public String getPrimaryParent(String protocol, String store, String nodeId) {
+		return nodeService.getPrimaryParent(new NodeRef(new StoreRef(protocol, store), nodeId)).getParentRef().getId();
+	}
 }

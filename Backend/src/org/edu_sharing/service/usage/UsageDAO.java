@@ -16,6 +16,11 @@ public interface UsageDAO {
 	
 	public HashMap<String, HashMap<String, Object>> getUsagesByAppId(String appId) throws Exception;
 	
+	public HashMap<String, HashMap<String, Object>> getUsages(String repositoryId,
+			String nodeId,
+			Long from,
+			Long to) throws Exception;
+	
 	public String createUsage(String parentId, HashMap<String,Object> properties);
 	
 	public void updateUsage(String usageNodeId, HashMap<String,Object> properties);

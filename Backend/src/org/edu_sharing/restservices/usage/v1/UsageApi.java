@@ -3,7 +3,11 @@ package org.edu_sharing.restservices.usage.v1;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -11,14 +15,12 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.DAOMissingException;
-import org.edu_sharing.restservices.DAOSecurityException;
-import org.edu_sharing.restservices.DAOValidationException;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.UsageDao;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
+import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -184,4 +186,24 @@ public class UsageApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+	
+	@GET
+	@Path("/usages/repository/{repositoryId}/{nodeid}")
+	public Response getUsages(@ApiParam(value = "ID of repository", required = true) @PathParam("repositoryId") String repositoryId,
+			@ApiParam(value = "ID of node", required = false) @PathParam("nodeId") String nodeId,
+			@ApiParam(value = "from date", required = false) @PathParam("from") Long from,
+			@ApiParam(value = "to date", required = false) @PathParam("to") Long to,
+			@Context HttpServletRequest req) {
+		
+		try {
+			List<Usage> usages = new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).
+					getUsages(repositoryId, nodeId, from, to);
+			return Response.status(Response.Status.OK).entity(usages).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+		
+	}
+	
+	
 }

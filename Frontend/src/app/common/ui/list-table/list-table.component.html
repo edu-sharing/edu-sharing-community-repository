@@ -133,7 +133,7 @@
                     <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i class="material-icons">filter_none</i>
                 </div>
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
-                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
+                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="presentation">
                 </div>
                 <div *ngIf="viewType==1 && !isCollection(node) && !node.isDirectory" class="nodeRatingComments">
                     <div class="nodeRating"></div>
@@ -172,7 +172,7 @@
                          (mouseenter)="animateIcon(node,true)"
                          (mouseleave)="animateIcon(node,false)"
                          [class.blurred]="isDeleted(node) || noPermissions(node) || applyMode && node.access.indexOf('CCPublish')==-1"
-                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{ node.title }}"/>
+                         alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{getAttributeText(node,columnsVisible[0])}}"/>
                     <div class="previewCollectionContainer" *ngIf="isCollection(node) && node.preview.isIcon && viewType!=2">
                         <div class="previewCollection" [style.backgroundColor]="getCollectionColor(node)">
                             <i class="material-icons">layers</i>

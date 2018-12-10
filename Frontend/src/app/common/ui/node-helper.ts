@@ -392,7 +392,7 @@ export class NodeHelper{
           src = src.replace(/\//g,"_");
           return '<img alt="'+rawSrc+'" title="'+rawSrc+'" src="'+NodeHelper.getSourceIconPath(src)+'">';
         }
-        return '<img alt="" src="'+NodeHelper.getSourceIconPath('home')+'">';
+        return '<img alt="repository" src="'+NodeHelper.getSourceIconPath('home')+'">';
       }
 
       return NodeHelper.getNodeAttribute(translate,config, data, item);

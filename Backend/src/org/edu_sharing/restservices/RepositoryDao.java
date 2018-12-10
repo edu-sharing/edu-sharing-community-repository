@@ -83,7 +83,7 @@ public class RepositoryDao {
 			List<RepositoryDao> result = new ArrayList<RepositoryDao>();
 			for (ApplicationInfo appInfo : ApplicationInfoList.getRepositoryInfosOrdered()) {
 	
-				if (ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType())) {
+				if (ApplicationInfo.TYPE_REPOSITORY.equals(appInfo.getType()) && appInfo.getSearchable()) {
 					result.add(getRepository(appInfo.getAppId()));
 				}
 			}

@@ -238,7 +238,7 @@ export class MainNavComponent implements AfterViewInit{
             }
         }
         if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
-            this.scrolltotop.nativeElement.style.display = 'block';
+            this.scrolltotop.nativeElement.style.display = 'flex';
         } else {
             this.scrolltotop.nativeElement.style.display = 'none';
         }

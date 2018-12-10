@@ -164,6 +164,19 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 		
 		return result;
 	}
+	
+	public List<Usage> getUsages(String repositoryId,
+			String nodeId,
+			Long from,
+			Long to) throws Exception {
+		 List<Usage> result = new ArrayList<Usage>();
+		 
+		 for(Map.Entry<String, HashMap<String, Object>> entry : usageDao.getUsages(repositoryId, nodeId, from, to).entrySet()) {
+			 result.add(getUsageResult(entry.getValue()));
+		 }
+		 
+		 return result;
+	}
 
 
 	public Usage setUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String _version, String resourceId, String xmlParams) throws UsageException{

@@ -294,7 +294,6 @@ public class NodeServiceAdapter implements NodeService {
 	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
 		// TODO Auto-generated method stub
 
-
 	}
 
 	@Override
@@ -306,4 +305,9 @@ public class NodeServiceAdapter implements NodeService {
 	public <T> List<T> sortNodeRefList(List<T> list, List<String> filter, SortDefinition sortDefinition) {
 		return list;
 	}
+	@Override
+	public String getPrimaryParent(String protocol, String store, String nodeId) {
+		return null;
+	}
+
 }

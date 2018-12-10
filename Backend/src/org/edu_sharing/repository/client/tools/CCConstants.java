@@ -1333,6 +1333,8 @@ public class CCConstants {
 
 	public final static String AUTHORITY_GROUP_EVERYONE = "GROUP_EVERYONE";
 
+	public final static String AUTHORITY_ROLE_ADMINISTRATOR = "ROLE_ADMINISTRATOR";
+
 	//Authorities edu sharing
 	public final static String AUTHORITY_GROUP_Edu_Sharing_ALL = "GROUP_Edu-Sharing_ALL";
 
@@ -1624,9 +1626,9 @@ public class CCConstants {
 	public final static String COMMON_LICENSE_EDU_LINK = "http://edu-sharing.net/licenses/edu-nc-nd/1.0/de";
 	public final static String COMMON_LICENSE_CUSTOM_LINK = "http://edu-sharing.net/licenses/custom-licence/1.0/de";
 
-	
+
 	private static Map<String,String> licenseMap = null;
-	
+
 	public static Map<String,String> getLicenseMap(){
 		if(licenseMap == null) {
 			licenseMap = new HashMap<String,String>();
@@ -1641,9 +1643,9 @@ public class CCConstants {
 		}
 		return licenseMap;
 	}
-	
-	
-	
+
+
+
 	private static ArrayList<String> permission = null;
 
 	public static ArrayList<String> getPermissionList(){
@@ -1851,7 +1853,7 @@ public class CCConstants {
 	 * @return
 	 */
 	public static String getValidLocalName(String value){
-		
+
 		if(value == null) return null;
 
 		for(Map.Entry<String,String> entry: getNameSpaceMap().entrySet()){

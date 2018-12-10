@@ -41,18 +41,18 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetValueKatalog;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -138,9 +138,9 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		if(generalTitleI18n == null || generalTitleI18n.size() == 0){
 			throw new Exception("title is required!");
 		}
-		
-		String generallanguage = (String) xpath.evaluate("metadata/lom/general/language", nodeRecord, XPathConstants.STRING);
-	
+
+		List generallanguage = convertListToString((NodeList)xpath.evaluate("metadata/lom/general/language", nodeRecord, XPathConstants.NODESET));
+
 		Node generalNode = (Node) xpath.evaluate("metadata/lom/general", nodeRecord, XPathConstants.NODE);
 
 		List generalKeywords = getMultivalue(generalNode, "keyword");
@@ -560,7 +560,8 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			}
 
 			lomReplicationTypicalAgeRangeList = getMultivalue(nodeEducational, "typicalAgeRange");
-			String educationalLanguage = (String) xpath.evaluate("language", nodeEducational, XPathConstants.STRING);
+			List educationalLanguage = convertListToString((NodeList)xpath.evaluate("language", nodeEducational, XPathConstants.NODESET));
+			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LANGUAGE, educationalLanguage);
 
 			// SAFE PART
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE, learningResourceTypeToSafeList);
@@ -568,7 +569,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_CONTEXT, contextToSafeList);
 
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_TYPICALAGERANGE, lomReplicationTypicalAgeRangeList);
-			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LANGUAGE, educationalLanguage);
+
 			educationalToSafeList.add(eduCationalToSafe);
 		}
 		// SAFE PART
@@ -869,7 +870,15 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		}
 	}
 
-	
+	private static List<String> convertListToString(NodeList nodes) {
+		List<String> result=new ArrayList<>(nodes.getLength());
+		for(int i=0;i<nodes.getLength();i++){
+			result.add(nodes.item(i).getTextContent());
+		}
+		return result;
+	}
+
+
 	/**
 	 * //since we deactivated the multilang = true global alf prop we can not use the MLText anymore
 	 * this method returns a list of strings including all values of all languages
@@ -946,15 +955,8 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			String contributeRoleValue = (String) xpath.evaluate("role/value", nodeContribute, XPathConstants.STRING);
 			String contributeEntity = (String) xpath.evaluate("entity", nodeContribute, XPathConstants.STRING);
 			String contributeDate = (String) xpath.evaluate("date", nodeContribute, XPathConstants.STRING);
-			
-			Date date = null;
-			try {
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
-				date = df.parse(contributeDate);
-			} catch (Exception e) {
-				logger.debug("error wrong contribute date:"+contributeDate);
-			}
 
+			Date date = convertToDate(contributeDate);
 			if (date != null){
 				map.put(CCConstants.LOM_PROP_CONTRIBUTE_DATE, date);
 			}
@@ -974,7 +976,21 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		else
 			return null;
 	}
-	
+
+	private Date convertToDate(String date) {
+		try {
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
+			return df.parse(date);
+		} catch (Exception e) {
+			try {
+				return new DateTime(date).toDate();
+			}catch(Exception e2) {
+				logger.debug("error parsing date:" + date);
+				return null;
+			}
+		}
+	}
+
 	private void putMultiLangValue(HashMap map, String property, String xmlTag, Node node ) throws XPathExpressionException{
 		ArrayList<String>  multilangValue = getMultiLangValueNew((Node) xpath.evaluate(xmlTag, node, XPathConstants.NODE));
 		

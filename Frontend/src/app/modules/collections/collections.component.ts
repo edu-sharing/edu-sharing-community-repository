@@ -83,7 +83,6 @@ export class CollectionsMainComponent {
     private person : EduData.User;
     public mainnav = true;
     private path : EduData.Node[];
-    private hasOrganizations = false;
     private hasEditorial = false;
     private nodeOptions: OptionItem[]=[];
     public isGuest = true;
@@ -124,53 +123,50 @@ export class CollectionsMainComponent {
     }
   // default hides the tabs
 
-  // inject services
-  constructor(
-    private frame : FrameEventsService,
-    private temporaryStorageService : TemporaryStorageService,
-    private collectionService : RestCollectionService,
-    private nodeService : RestNodeService,
-    private organizationService : RestOrganizationService,
-    private iamService : RestIamService,
-    private mdsService : RestMdsService,
-    private storage : SessionStorageService,
-    private connector : RestConnectorService,
-    private route:ActivatedRoute,
-    private uiService:UIService,
-    private router : Router,
-    private toast : Toast,
-    private title:Title,
-    private location:Location,
-    private actionbar : ActionbarHelperService,
-    private tempStorage :TemporaryStorageService,
-    private config:ConfigurationService,
-    private translationService: TranslateService) {
-    this.collectionsColumns.push(new ListItem("COLLECTION", 'title'));
-    this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
-    this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
-    this.setCollectionId(RestConstants.ROOT);
-    Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
-      UIHelper.setTitle('COLLECTIONS.TITLE',title,translationService,config);
-      this.mdsService.getSet().subscribe((data:MdsMetadataset)=>{
-        this.referencesColumns=MdsHelper.getColumns(data,'collectionReferences');
-      });
-        this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-            if(data.isValidLogin && data.currentScope==null) {
-                this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
-                this.isGuest=data.isGuest;
-                if(data.isValidLogin){
-                    this.organizationService.getOrganizations().subscribe((data:OrganizationOrganizations)=>{
-                        this.hasOrganizations=data.organizations.length>0;
-                    });
-                }
-                this.collectionService.getCollectionSubcollections(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data)=>{
-                    this.hasEditorial=data.collections.length>0;
-                });
-                this.initialize();
-            }else
-                RestHelper.goToLogin(this.router,this.config);
-        },(error:any)=> RestHelper.goToLogin(this.router,this.config));
-    });
+    // inject services
+    constructor(
+      private frame : FrameEventsService,
+      private temporaryStorageService : TemporaryStorageService,
+        private location : Location,
+        private collectionService : RestCollectionService,
+        private nodeService : RestNodeService,
+        private organizationService : RestOrganizationService,
+        private iamService : RestIamService,
+        private mdsService : RestMdsService,
+      private actionbar : ActionbarHelperService,
+      private storage : SessionStorageService,
+      private connector : RestConnectorService,
+        private route:ActivatedRoute,
+        private uiService:UIService,
+        private router : Router,
+        private tempStorage :TemporaryStorageService,
+        private toast : Toast,
+      private title:Title,
+      private config:ConfigurationService,
+        private translationService: TranslateService) {
+            this.collectionsColumns.push(new ListItem("COLLECTION", 'title'));
+            this.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
+            this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
+            this.setCollectionId(RestConstants.ROOT);
+            Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
+              UIHelper.setTitle('COLLECTIONS.TITLE',title,translationService,config);
+              this.mdsService.getSet().subscribe((data:MdsMetadataset)=>{
+                this.referencesColumns=MdsHelper.getColumns(data,'collectionReferences');
+              });
+
+                this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+                    if(data.isValidLogin && data.currentScope==null) {
+                        this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
+                        this.isGuest=data.isGuest;
+                        this.collectionService.getCollectionSubcollections(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data)=>{
+                            this.hasEditorial=data.collections.length>0;
+                        });
+                        this.initialize();
+                    }else
+                        RestHelper.goToLogin(this.router,this.config);
+                },(error:any)=> RestHelper.goToLogin(this.router,this.config));
+
+            });
     }
     public isMobile(){
       return this.uiService.isMobile();
