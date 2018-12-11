@@ -6,6 +6,8 @@
 .btn{
   background-color:$primary!important;
   color:$textOnPrimary!important;
+}
+.btn,.btn-flat{
   >.material-icons{
     display: inline-flex;
     align-items: center;
