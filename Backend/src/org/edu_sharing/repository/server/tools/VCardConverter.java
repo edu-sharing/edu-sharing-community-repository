@@ -187,6 +187,10 @@ public class VCardConverter {
 	 */
 	public static HashMap<String, Object> getVCardHashMap(String type, String property, String value) {
 
+		if(value == null) {
+			return new HashMap<String, Object>();
+		}
+		
 		HashMap<String, Object> result = null;
 		
 		// VCard
