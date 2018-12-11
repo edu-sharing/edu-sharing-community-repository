@@ -341,11 +341,6 @@ public class AlfServicesWrapper implements UsageDAO{
 									ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
 									props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
 									
-									/**
-									 * add remote object props
-									 */
-									props.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, remoteProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID).toString());
-									props.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, remoteProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID).toString());
 									result.put(nodeRef.getId(), props);
 								}
 							}
