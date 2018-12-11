@@ -326,7 +326,7 @@ public class AlfServicesWrapper implements UsageDAO{
 								if(QName.createQName(CCConstants.CCM_TYPE_USAGE).equals(nodeService.getType(childRef.getChildRef()))){
 						
 									HashMap<String, Object> props = new HashMap<String, Object>();
-									Map<QName, Serializable> tmpprops = nodeService.getProperties(nodeRef);
+									Map<QName, Serializable> tmpprops = nodeService.getProperties(childRef.getChildRef());
 									for (QName key : tmpprops.keySet()) {
 										String propName = key.toString();
 										Object propValue = tmpprops.get(key);
@@ -338,10 +338,10 @@ public class AlfServicesWrapper implements UsageDAO{
 											}
 										}
 									}
-									ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
+									ChildAssociationRef childssocRef = nodeService.getPrimaryParent(childRef.getChildRef());
 									props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
 									
-									result.put(nodeRef.getId(), props);
+									result.put(childRef.getChildRef().getId(), props);
 								}
 							}
 							
