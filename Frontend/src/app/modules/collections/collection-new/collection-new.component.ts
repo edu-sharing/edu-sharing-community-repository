@@ -358,13 +358,13 @@ export class CollectionNewComponent {
       if(this.newCollectionType=='EDITORIAL'){
         steps.push(this.STEP_METADATA);
       }
-      if(this.newCollectionType=='CUSTOM'){
+      if(this.newCollectionType=='CUSTOM' && this.canInvite){
         steps.push(this.STEP_PERMISSIONS);
       }
       if(this.newCollectionType=='EDITORIAL'){
         //steps.push(this.STEP_SETTINGS);
       }
-      if(this.newCollectionType=='EDITORIAL'){
+      if(this.newCollectionType=='EDITORIAL' && this.canInvite){
         steps.push(this.STEP_EDITORIAL_GROUPS);
       }
       return steps;
@@ -445,7 +445,12 @@ export class CollectionNewComponent {
     }
     private save3(collection:Collection){
     if(this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL){
-      this.permissions=this.getEditorialGroupPermissions();
+        // user has access to editorial group but can't invite (strange setting but may happens)
+        if(!this.canInvite){
+            this.save4(collection);
+            return;
+        }
+        this.permissions=this.getEditorialGroupPermissions();
     }
     if((this.newCollectionType==RestConstants.COLLECTIONSCOPE_CUSTOM || this.newCollectionType==RestConstants.GROUP_TYPE_EDITORIAL) && this.permissions && this.permissions.permissions && this.permissions.permissions.length){
       if(this.originalPermissions && this.originalPermissions.inherited){
