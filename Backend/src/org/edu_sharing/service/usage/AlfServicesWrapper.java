@@ -124,6 +124,8 @@ public class AlfServicesWrapper implements UsageDAO{
 				// TODO allow multivalues
 				value = (String) ((ArrayList) object).get(0);
 				
+			} else if(object instanceof Date) {
+				value = new Long(((Date)object).getTime()).toString();
 			} else if(object != null){
 
 				value = object.toString();
@@ -278,21 +280,8 @@ public class AlfServicesWrapper implements UsageDAO{
 					for (NodeRef nodeRef : resultSet.getNodeRefs()) {
 						
 						try{
-							Map<QName, Serializable> tmpprops = nodeService.getProperties(nodeRef);
-							HashMap<String, Object> props = new HashMap<String, Object>();
-							for (QName key : tmpprops.keySet()) {
-								String propName = key.toString();
-								Object propValue = tmpprops.get(key);
-								if(propValue != null) {
-									
-									if(propValue instanceof Date) {
-										props.put(propName, new Long(((Date)propValue).getTime()).toString());
-									}else {
-										props.put(propName, propValue.toString());
-									}
-									
-								}
-							}
+							
+							HashMap<String, Object> props = getProperties(nodeRef);
 							ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
 							props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
 							
@@ -319,35 +308,18 @@ public class AlfServicesWrapper implements UsageDAO{
 					for (NodeRef nodeRef : resultSet.getNodeRefs()) {
 						
 						try{
-							Map<QName, Serializable> remoteProps = nodeService.getProperties(nodeRef);
 							
 							List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(nodeRef);
 							for(ChildAssociationRef childRef : childAssocs) {
 								if(QName.createQName(CCConstants.CCM_TYPE_USAGE).equals(nodeService.getType(childRef.getChildRef()))){
 						
-									HashMap<String, Object> props = new HashMap<String, Object>();
-									Map<QName, Serializable> tmpprops = nodeService.getProperties(childRef.getChildRef());
-									for (QName key : tmpprops.keySet()) {
-										String propName = key.toString();
-										Object propValue = tmpprops.get(key);
-										if(propValue != null) {
-											if(propValue instanceof Date) {
-												props.put(propName, new Long(((Date)propValue).getTime()).toString());
-											}else {
-												props.put(propName, propValue.toString());
-											}
-										}
-									}
+									HashMap<String, Object> props = getProperties(childRef.getChildRef());
 									ChildAssociationRef childssocRef = nodeService.getPrimaryParent(childRef.getChildRef());
 									props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
 									
 									result.put(childRef.getChildRef().getId(), props);
 								}
 							}
-							
-							
-							
-							
 							
 						}catch(org.alfresco.service.cmr.repository.InvalidNodeRefException e){
 							logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
