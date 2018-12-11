@@ -206,7 +206,7 @@ public class UsageApi {
 				nodeId = null;
 			}
 			
-			List<Usage> usages = new UsageDao(homeRepo).
+			List<Usages.NodeUsage> usages = new UsageDao(homeRepo).
 					getUsages(repositoryId, nodeId, from, to);
 			return Response.status(Response.Status.OK).entity(usages).build();
 		} catch (Throwable t) {
