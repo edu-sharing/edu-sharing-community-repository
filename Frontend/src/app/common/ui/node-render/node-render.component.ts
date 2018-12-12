@@ -136,6 +136,7 @@ export class NodeRenderComponent implements EventListener{
     private _nodeId : string;
     @Input() set node(node: Node|string){
       let id=(node as Node).ref ? (node as Node).ref.id : (node as string);
+      jQuery('#nodeRenderContent').html('');
       this._nodeId=id;
       this.loadRenderData();
     }
