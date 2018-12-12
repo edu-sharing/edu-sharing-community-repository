@@ -60,8 +60,7 @@ export class AdminComponent {
   public jobsLogFilter:any = [];
   public jobsLogLevel:any = [];
   public jobsLogData:any = [];
-  public lucene:any={offset:0,count:100};
-  public browseMode='NODEREF';
+  public lucene:any={mode:'NODEREF',offset:0,count:100};
   public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
@@ -99,6 +98,7 @@ export class AdminComponent {
     'custom_html_headers','public_key'
   ];
   luceneNodes: Node[];
+  luceneCount: number;
   searchColumns: ListItem[]=[];
   nodeInfo: Node;
   public selectedTemplate:string = '';
@@ -129,6 +129,7 @@ export class AdminComponent {
         this.node.getNodeMetadata(this.lucene.noderef,[RestConstants.ALL]).subscribe((node)=>{
             this.globalProgress=false;
             this.luceneNodes=[node.node];
+            this.luceneCount=1;
         },(error)=>{
             this.globalProgress=false;
             this.toast.error(error);
@@ -152,6 +153,7 @@ export class AdminComponent {
       this.globalProgress=false;
       console.log(data);
       this.luceneNodes=data.nodes;
+      this.luceneCount=data.pagination.total;
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
