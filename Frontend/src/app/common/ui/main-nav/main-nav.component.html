@@ -51,7 +51,7 @@
     <div class="mobile-move-top2">
   <div class="menuButtonOuter">
     <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
-      <img class="material-icons eduImage" [src]="getIconSource()" alt="{{'EDU_LOGO_ALT' | translate}}"/>
+      <img class="material-icons eduImage" [src]="getIconSource()" alt=""/>
       <i class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
       <span>{{title | translate}}</span>
       <i class="material-icons barIcon">keyboard_arrow_right</i>
