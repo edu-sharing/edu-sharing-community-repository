@@ -84,7 +84,7 @@
       <user-avatar [user]="user.person" [size]="'xsmall'"></user-avatar>
       <div *ngIf="!isGuest">{{userName}}</div>
       <div *ngIf="isGuest">{{'USER_GUEST' | translate}}</div>
-      <i class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
+      <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
       <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
     </div>
   <dropdown class="userMenu"

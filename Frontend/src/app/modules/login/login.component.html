@@ -38,16 +38,13 @@
           </form>
           <div class="register" *ngIf="config.register.local || config.register.registerUrl">
               {{'LOGIN.REGISTER_TEXT' | translate}}
-              <a (click)="register()" (keyup.enter)="register()" tabindex="0" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
+              <a (click)="register()" (keyup.enter)="register()" tabindex="0" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}} <i aria-hidden="true" class="material-icons">arrow_forward</i></a>
           </div>
         </div>
       </div>
     </div>
       <div class="card-action" *ngIf="stage=='login'">
-        <a class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-        <a class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
   </div>
   <powered-by mode="white"></powered-by>
-  </div>
   </div>

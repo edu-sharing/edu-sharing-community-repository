@@ -193,7 +193,7 @@
 
                 <div class="icon column" *ngIf="hasIcon && viewType==0" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node)">
                     <div class="icon-bg">
-                        <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="{{'SEARCH.PREVIEWIMAGE_FOR' | translate}} {{node.title}}"/>
+                        <img *ngIf="getIconUrl(node) && !isCollection(node)" src="{{getIconUrl(node)}}" [attr.role]="presentation" alt=""/>
                         <i *ngIf="!isCollection(node) && icon" class="material-icons">{{icon}}</i>
                         <i *ngIf="isCollection(node)" class="material-icons" [style.color]="getCollectionColor(node)">layers</i>
                     </div>

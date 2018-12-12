@@ -302,6 +302,9 @@
     position:fixed;
     right:25px;
     bottom:25px+$mobileTabNavHeight;
+    &:focus{
+        @include removeDefaultFocus();
+    }
 }
 .dialogCreate{
     z-index:100;

@@ -60,7 +60,7 @@
                 </label>
               </div>
             </div>
-            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i class="material-icons">{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
+            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i aria-hidden="true" class="material-icons">{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
           </div>
         </div>
         <div class="allLicenses" *ngIf="!oerMode">

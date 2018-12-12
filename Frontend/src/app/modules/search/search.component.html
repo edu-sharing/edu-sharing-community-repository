@@ -26,7 +26,7 @@
             <span>
               <img [src]="getSourceIconPath('more')"><span class="repositoryTitle">{{ 'SEARCH.REPOSITORY_MORE' | translate }}</span>
             </span>
-                          <i class="material-icons" >keyboard_arrow_down</i>
+                          <i aria-hidden="true" class="material-icons" >keyboard_arrow_down</i>
                       </a>
                   </li>
                   <li class="clickable tab col s3" *ngIf="repositories.length>4 && extendedRepositorySelected"
@@ -35,7 +35,7 @@
                       (click)="currentRepository==repositories[3].id ? showMoreRepositories=true : setRepository(repositories[3].id)">
                       <a [class.active]="currentRepository==repositories[3].id">
                           <img [src]="getSourceIcon(repositories[3])"><span class="repositoryTitle">{{ repositories[3].title }}</span>
-                          <i class="material-icons" (click)="$event.stopPropagation();showMoreRepositories=true">keyboard_arrow_down</i>
+                          <i aria-hidden="true" class="material-icons" (click)="$event.stopPropagation();showMoreRepositories=true">keyboard_arrow_down</i>
                       </a>
                   </li>
                   <!--
@@ -54,7 +54,7 @@
                 <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="toggleSidenav()" (click)="toggleSidenav()" class="pointed filtertoggler">
                     <span>{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
                     <span class="mobile">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
-                    <i class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
+                    <i aria-hidden="true" class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
             </div>
             <div class="switchToCollections" *ngIf="isGuest">
                 <a tabindex="0" title="{{'SEARCH.TO_COLLECTIONS' | translate}}" class="clickable" (click)="switchToCollections()" (keyup.enter)="switchToCollections()">{{'SEARCH.TO_COLLECTIONS' | translate}} <i class="material-icons">arrow_forward</i></a>
