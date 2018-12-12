@@ -1,9 +1,7 @@
 package org.edu_sharing.restservices.organization.v1;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -16,22 +14,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.DAOMissingException;
-import org.edu_sharing.restservices.DAOSecurityException;
-import org.edu_sharing.restservices.DAOValidationException;
-import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.OrganizationDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.iam.v1.model.UserEntries;
 import org.edu_sharing.restservices.organization.v1.model.OrganizationEntries;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.restservices.shared.Organization;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -172,9 +165,17 @@ public class OrganizationApi  {
     	
     	try {
 
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	Organization group = OrganizationDao.create(repoDao, organization,scope).asOrganization();
-	    	
+    		
+    		Organization group = (Organization)new MCAlfrescoAPIClient().doInTransaction(new RetryingTransactionCallback<Organization>() {
+
+				@Override
+				public Organization execute() throws Throwable {			
+					RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			    	Organization group = OrganizationDao.create(repoDao, organization,scope).asOrganization();
+			    	return group;
+				}
+			});							
+    		
 	    	return Response.status(Response.Status.OK).entity(group).build();
 	
     	} catch (Throwable t) {
