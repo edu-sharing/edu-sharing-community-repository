@@ -357,8 +357,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return null;
 	}
-    public List<ChildAssociationRef> getChildrenAssocsByType(StoreRef store, String nodeId, String type) {
-        List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+    private List<ChildAssociationRef> getChildrenAssocsByType(StoreRef store, String nodeId, String type) {
+        List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId), Collections.singleton(QName.createQName(type)));
         return childAssocList;
     }
 
@@ -366,15 +366,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
         List<ChildAssociationRef> childAssocList = getChildrenAssocsByType(store,nodeId,type);
 		for (ChildAssociationRef child : childAssocList) {
-
-			String childType = nodeService.getType(child.getChildRef()).toString();
-			if (childType.equals(type)) {
-
-				HashMap<String, Object> resultProps = getPropertiesWithoutChildren(child.getChildRef());
-				String childNodeId = child.getChildRef().getId();
-				result.put(childNodeId, resultProps);
-
-			}
+			HashMap<String, Object> resultProps = getPropertiesWithoutChildren(child.getChildRef());
+			String childNodeId = child.getChildRef().getId();
+			result.put(childNodeId, resultProps);
 		}
 		return result;
 	}
