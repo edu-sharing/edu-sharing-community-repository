@@ -29,12 +29,7 @@ package org.edu_sharing.service.usage;
 
 import java.io.Serializable;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -340,12 +335,9 @@ public class AlfServicesWrapper implements UsageDAO{
 
 	public HashMap<String, HashMap<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
 		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
-		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId),Collections.singleton(QName.createQName(type)));
 		for (ChildAssociationRef child : childAssocList) {
-			String childType = nodeService.getType(child.getChildRef()).toString();
-			if (childType.equals(type)) {
-				result.put(child.getChildRef().getId(), getProperties(child.getChildRef()));
-			}
+			result.put(child.getChildRef().getId(), getProperties(child.getChildRef()));
 		}
 		return result;
 	}
