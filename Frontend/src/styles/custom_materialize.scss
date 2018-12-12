@@ -10,13 +10,13 @@
 .btn,.btn-flat{
   display:inline-flex;
   align-items: center;
-  >span{
-    flex-grow:1;
-  }
+    >span{
+      margin-left: 5px;
+      flex-grow:1;
+    }
   >.material-icons{
     display: inline-flex;
     align-items: center;
-    margin-right: 5px;
   }
 }
 .btn:focus:not(.disabled){
