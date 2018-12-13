@@ -60,6 +60,7 @@ export class AdminComponent {
   public jobsLogFilter:any = [];
   public jobsLogLevel:any = [];
   public jobsLogData:any = [];
+  public jobClasses:SuggestItem[]=[];
   public lucene:any={mode:'NODEREF',offset:0,count:100};
   public oaiSave=true;
   public repositoryVersion:string;
@@ -183,7 +184,8 @@ export class AdminComponent {
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-        this.storage.refresh();
+          this.prepareJobClasses();
+          this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
@@ -833,6 +835,18 @@ export class AdminComponent {
           }
           console.log(this.jobsLogData);
       }
+    }
+
+    private prepareJobClasses() {
+        let job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob",this.translate.instant("ADMIN.JOBS.NAMES.RefreshCacheJob"));
+        job.secondaryTitle=job.id;
+        this.jobClasses.push(job);
+        job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjects",this.translate.instant("ADMIN.JOBS.NAMES.RemoveImportedObjects"));
+        job.secondaryTitle=job.id;
+        this.jobClasses.push(job);
+        job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveOrphanCollectionReferencesJob"));
+        job.secondaryTitle=job.id;
+        this.jobClasses.push(job);
     }
 }
 

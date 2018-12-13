@@ -268,9 +268,17 @@
         <form (ngSubmit)="startJob()">
             <div class="inputGroupGrow">
                 <div class="info">{{'ADMIN.TOOLKIT.JOB_CLASS' | translate }}</div>
-                <input type="text" name="jobClass" [(ngModel)]="job.class" placeholder="org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob">
+                <div class="autocomplete">
+                    <autocomplete
+                            [suggestions]="jobClasses"
+                            [fixed]="true"
+                            [allowAny]="true"
+                            (addItem)="job.class=$event.item.id"
+                            (addAny)="job.class=$event"></autocomplete>
+                    <div>{{job.class}}</div>
+                </div>
             </div>
-            <textarea name="jobParams" class="jobParams" [(ngModel)]="job.params" placeholder='{"param1":"value1","param2":"value2"}'></textarea>
+            <textarea name="jobParams" class="jobParams materialize-textarea" [(ngModel)]="job.params" placeholder='{"param1":"value1","param2":"value2"}'></textarea>
             <div class="btn-flat btn-shadow" (click)="startJob()">{{'ADMIN.TOOLKIT.START_JOB' | translate }}</div>
         </form>
     </div>
@@ -411,7 +419,7 @@
   <div *ngIf="lucene.mode=='SOLR'" class="group">
     <div class="inputGroupGrow">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</div>
-      <input type="text" name="luceneQuery" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'>
+      <textarea name="luceneQuery" class="materialize-textarea" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'></textarea>
     </div>
     <div class="inputGroupGrow">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>

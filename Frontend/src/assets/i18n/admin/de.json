@@ -197,7 +197,12 @@
       "LOG_LEVEL_6":"Info",
       "LOG_LEVEL_4":"Warning",
       "LOG_LEVEL_3":"Error",
-      "LOG_LEVEL_0":"Fatal"
+      "LOG_LEVEL_0":"Fatal",
+      "NAMES":{
+        "RefreshCacheJob":"Node-Cache neu aufbauen",
+        "RemoveImportedObjects":"Alle importierten Nodes löschen",
+        "RemoveOrphanCollectionReferencesJob":"Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen"
+      }
     },
     "FOLDERTEMPLATES":{
       "EDUGROUP": "Organisation",
