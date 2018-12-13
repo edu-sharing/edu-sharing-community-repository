@@ -174,6 +174,10 @@ public class OAILOMExporter {
 			String urlKey = commonLicenceKey.toLowerCase().replaceAll("_", "-").replaceFirst("cc-", "");
 			String url = "https://creativecommons.org/licenses/" + urlKey + "/" + commonLicenseVersion;
 			
+			if(commonLicenceKey.equals(CCConstants.COMMON_LICENSE_CC_ZERO)) {
+				url = CCConstants.COMMON_LICENSE_CC_ZERO_LINK.replace("deed.${locale}", "legalcode");
+			}
+			
 			createAndAppendElement("value",copyrightAndOtherRestrictions,"yes");
 			Element description = createAndAppendElement("description",rights);
 			Element rightsDescStrEle = createAndAppendElement("string", description,url);
