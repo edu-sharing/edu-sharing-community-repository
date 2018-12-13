@@ -239,6 +239,18 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 							publishToOAI = true;
 						}
 					}
+					
+					for(ACE ace : acesToUpdate) {
+						if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+							publishToOAI = true;
+						}
+					}
+					
+					for(ACE ace : acesNotChanged) {
+						if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+							publishToOAI = true;
+						}
+					}
 				}
 			}
 		}

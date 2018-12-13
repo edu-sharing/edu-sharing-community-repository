@@ -148,6 +148,9 @@ public class OAILOMExporter {
 			}
 		}
 		
+		Element ieur = createAndAppendElement("intendedEndUserRole", educational);
+		createAndAppendElement("value",ieur,QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE));
+		
 		//@todo when its available
 		String tarFrom = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM));
 		String tarTo = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO));
