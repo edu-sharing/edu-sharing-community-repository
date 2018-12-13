@@ -148,7 +148,7 @@ export class SuggestItem {
   public index: number;
   public originalObject : any;
   public secondaryTitle: string;
-  constructor(public id: string, public title: string, public materialIcon: string = null, public iconUrl: string = null, public key?: string = null) {
+  constructor(public id: string, public title: string, public materialIcon: string = null, public iconUrl: string = null, public key: string = null) {
   }
 
 }
