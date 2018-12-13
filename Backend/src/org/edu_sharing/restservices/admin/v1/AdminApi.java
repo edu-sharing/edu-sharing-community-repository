@@ -750,11 +750,11 @@ public class AdminApi {
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response refreshCache(
-			@ApiParam(value = "refresh cache root folder id", required = true) @PathParam("rootFolder") String rootFolder,
+			@ApiParam(value = "refresh cache root folder id", required = true) @PathParam("folder") String rootFolder,
 			@ApiParam(value = "sticky", required = true, defaultValue = "false") @QueryParam("sticky") Boolean sticky,
 			@Context HttpServletRequest req) {
 		try {
-			AdminServiceFactory.getInstance().startCacheRefreshingJob(rootFolder, sticky == null ? false : true);
+			AdminServiceFactory.getInstance().startCacheRefreshingJob(rootFolder, sticky != null && sticky);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
