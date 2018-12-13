@@ -54,6 +54,10 @@ export class AdminComponent {
           icon:"info_outline"
       },
       {
+          id:"CONFIG",
+          icon:"build"
+      },
+      {
           id:"APPLICATIONS",
           icon:"apps"
       },
@@ -497,7 +501,7 @@ export class AdminComponent {
     this.globalProgress=true;
     this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : "",sticky).subscribe(()=>{
       this.globalProgress=false;
-      this.toast.toast('ADMIN.IMPORT.CACHE_REFRESHED');
+      this.toast.toast('ADMIN.TOOLKIT.CACHE_REFRESHED');
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -854,7 +858,7 @@ export class AdminComponent {
     testMail() {
         this.globalProgress=true;
         this.admin.testMail(this.mailReceiver,this.mailTemplate).subscribe(()=>{
-          this.toast.toast('ADMIN.TOOLKIT.MAIL_SENT',{receiver:this.mailReceiver});
+          this.toast.toast('ADMIN.CONFIG.MAIL_SENT',{receiver:this.mailReceiver});
             this.globalProgress=false;
         },(error)=>{
           this.toast.error(error);

@@ -14,7 +14,6 @@ $sidenavWidth:250px;
     background-color: #fff;
     height: calc(100% - #{$mainnavHeight});
     overflow-y: auto;
-    padding:5px 0;
     width: $sidenavWidth;
     >div {
       height: 100%;
@@ -136,6 +135,16 @@ $sidenavWidth:250px;
     }
   }
 }
+.config{
+  .xml{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    >div {
+      padding: 30px 0;
+    }
+  }
+}
 .applications{
   .tableRow div{
     max-width: 160px;
@@ -167,9 +176,6 @@ $sidenavWidth:250px;
   }
   .btnXml,.useFile{
     margin-top: 20px;
-  }
-  .btnXmlEditor{
-    margin-left: 15px;
   }
   .warning{
     width:100%;
@@ -247,20 +253,6 @@ $sidenavWidth:250px;
   .btn{
     float:right;
   }
-  .administration{
-    input{
-      width:200px;
-      margin-left: 50px;
-      position: relative;
-      top: 8px;
-    }
-    .cacheGroup,.propertyGroup{
-      width: 100%;
-    }
-    .propertyGroup{
-      padding-top: 30px;
-    }
-  }
 }
 .table{
   display:table;
@@ -320,6 +312,28 @@ $sidenavWidth:250px;
     }
     .btn-flat{
       margin-bottom: 10px;
+    }
+  }
+  .caches{
+    input{
+      width:200px;
+    }
+    .cacheGroup,.propertyGroup{
+      width: 100%;
+    }
+    .inputGroup .btn-flat{
+      margin:0 5px;
+    }
+    .propertyGroup{
+      padding-top: 30px;
+      display: flex;
+      align-items: center;
+      >input{
+        margin-bottom: 0;
+      }
+      >a{
+        margin-left: 10px;
+      }
     }
   }
   .group{

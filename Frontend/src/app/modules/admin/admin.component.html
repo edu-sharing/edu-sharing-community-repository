@@ -9,6 +9,37 @@
               [buttons]="warningButtons"
               [isCancelable]="false"
 ></modal-dialog>
+<div class="dialog darken" *ngIf="xmlAppProperties">
+    <div class="card center-card card-action card-high card-wide">
+        <div class="card-content">
+            <div class="card-cancel" (click)="xmlAppProperties=null"><i class="material-icons">close</i></div>
+            <div class="card-title">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:currentAppXml} }}</div>
+            <div class="card-scroll">
+                <div class="warning">{{'ADMIN.APPLICATIONS.APP_XML_WARNING' | translate}}</div>
+                <div *ngFor="let value of xmlAppKeys;let i=index;" class="appEditor">
+                    <div class="property">{{value}}</div>
+                    <div class="inputGroup">
+                        <textarea *ngIf="isMultilineProperty(value)" class="materialize-textarea" [(ngModel)]="xmlAppProperties[value]"></textarea>
+                        <input    *ngIf="!isMultilineProperty(value)" type="text" [(ngModel)]="xmlAppProperties[value]">
+                        <!-- Api does currently not support deleting -->
+                        <i class="material-icons clickable" (click)="removeAppProperty(i)" *ngIf="false">delete</i>
+                    </div>
+                    <div class="input-hint-bottom" *ngIf="currentApp">{{'ADMIN.APPLICATIONS.'+currentApp+"."+value | translate}}</div>
+                </div>
+                <div class="addProperty">
+                    <div class="property">{{'ADMIN.APPLICATIONS.ADD_PROPERTY' | translate}}</div>
+                    <input type="text" id="additionalProperty" placeholder="{{'ADMIN.APPLICATIONS.PROPERTY_NAME_PLACEHOLDER' | translate}}" [(ngModel)]="xmlAppAdditionalPropertyName">
+                    <input type="text" placeholder="{{'ADMIN.APPLICATIONS.PROPERTY_VALUE_PLACEHOLDER' | translate}}" [(ngModel)]="xmlAppAdditionalPropertyValue">
+                </div>
+
+            </div>
+        </div>
+        <div class="card-action">
+            <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="saveApp()" (click)="saveApp()">{{'APPLY' | translate }}</a>
+            <a class="btn-flat" tabindex="0" (keyup.enter)="closeAppEditor()" (click)="closeAppEditor()">{{'CANCEL' | translate }}</a>
+        </div>
+    </div>
+</div>
 <node-info *ngIf="nodeInfo"
     [node]="nodeInfo"
     (onClose)="nodeInfo=null"
@@ -72,6 +103,31 @@
         </div>
     </div>
 </div>
+<div *ngIf="mode=='CONFIG'" class="content config">
+    <div class="heading"><i class="material-icons">build</i><span>{{'ADMIN.CONFIG.XML_CONFIG' | translate}}</span></div>
+    <div class="group xml">
+        <div *ngFor="let xml of editableXmls">
+            <a class="btn waves-effect waves-light"
+             (click)="editApp(xml)">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:xml.file} }}</a>
+        </div>
+    </div>
+    <div class="heading"><i class="material-icons">mail</i><span>{{'ADMIN.CONFIG.TEST_MAIL' | translate}}</span></div>
+    <div class="group">
+        <form (ngSubmit)="testMail()">
+            <div class="inputGroupGrow">
+                <div class="info">{{'ADMIN.CONFIG.TEST_MAIL_RECEIVER' | translate }}</div>
+                <input type="email" name="receiver" [(ngModel)]="mailReceiver">
+            </div>
+            <div class="inputGroupGrow">
+                <div class="info">{{'ADMIN.CONFIG.TEST_MAIL_TEMPLATE' | translate }}</div>
+                <select name="template" [(ngModel)]="mailTemplate">
+                    <option *ngFor="let template of mailTemplates">{{template}}</option>
+                </select>
+            </div>
+            <a class="btn btn-shadow" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.CONFIG.TEST_MAIL_SEND' | translate }}</a>
+        </form>
+    </div>
+</div>
 <div *ngIf="mode=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
   <form (ngSubmit)="registerApp()">
@@ -107,40 +163,6 @@
       <div class="edit"><i class="material-icons clickable" (click)="editApp(app)">edit</i></div>
       <div class="download"><i class="material-icons clickable" (click)="downloadApp(app)">cloud_download</i></div>
       <div class="delete"><i class="material-icons clickable" (click)="removeApp(app)">delete</i></div>
-    </div>
-  </div>
-  <a *ngFor="let xml of editableXmls"
-     class="btn waves-effect waves-light btnXmlEditor"
-     (click)="editApp(xml)">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:xml.file} }}</a>
-  <div class="dialog darken" *ngIf="xmlAppProperties">
-    <div class="card center-card card-action card-high card-wide">
-      <div class="card-content">
-        <div class="card-cancel" (click)="xmlAppProperties=null"><i class="material-icons">close</i></div>
-        <div class="card-title">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:currentAppXml} }}</div>
-        <div class="card-scroll">
-          <div class="warning">{{'ADMIN.APPLICATIONS.APP_XML_WARNING' | translate}}</div>
-          <div *ngFor="let value of xmlAppKeys;let i=index;" class="appEditor">
-            <div class="property">{{value}}</div>
-            <div class="inputGroup">
-              <textarea *ngIf="isMultilineProperty(value)" class="materialize-textarea" [(ngModel)]="xmlAppProperties[value]"></textarea>
-              <input    *ngIf="!isMultilineProperty(value)" type="text" [(ngModel)]="xmlAppProperties[value]">
-              <!-- Api does currently not support deleting -->
-              <i class="material-icons clickable" (click)="removeAppProperty(i)" *ngIf="false">delete</i>
-            </div>
-            <div class="input-hint-bottom" *ngIf="currentApp">{{'ADMIN.APPLICATIONS.'+currentApp+"."+value | translate}}</div>
-        </div>
-        <div class="addProperty">
-          <div class="property">{{'ADMIN.APPLICATIONS.ADD_PROPERTY' | translate}}</div>
-          <input type="text" id="additionalProperty" placeholder="{{'ADMIN.APPLICATIONS.PROPERTY_NAME_PLACEHOLDER' | translate}}" [(ngModel)]="xmlAppAdditionalPropertyName">
-          <input type="text" placeholder="{{'ADMIN.APPLICATIONS.PROPERTY_VALUE_PLACEHOLDER' | translate}}" [(ngModel)]="xmlAppAdditionalPropertyValue">
-        </div>
-
-      </div>
-    </div>
-    <div class="card-action">
-      <a class="waves-effect waves-light btn" tabindex="0" (keyup.enter)="saveApp()" (click)="saveApp()">{{'APPLY' | translate }}</a>
-      <a class="btn-flat" tabindex="0" (keyup.enter)="closeAppEditor()" (click)="closeAppEditor()">{{'CANCEL' | translate }}</a>
-    </div>
     </div>
   </div>
 </div>
@@ -233,16 +255,6 @@
     </div>
     <a class="btn-flat btn-shadow" (click)="removeImports()">{{'ADMIN.IMPORT.REMOVE_IMPORTS' | translate}}</a>
     <a class="btn waves-effect waves-light" (click)="oaiImport()">{{'ADMIN.IMPORT.OAI_START' | translate}}</a>
-  </div>
-  <div class="heading"><i class="material-icons">settings</i><span>{{'ADMIN.IMPORT.ADMINISTRATION' | translate}}</span></div>
-  <div class="administration">
-      <div class="inputGroup">
-          <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.IMPORT.CACHE_ROOT_FOLDER' | translate}}</a>
-          <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
-      </div>
-        <div class="cacheGroup inputGroup"><a class="btn-flat btn-shadow" (click)="refreshCache(false)">{{'ADMIN.IMPORT.REFRESH_CACHE' | translate}}</a></div>
-        <div class="inputGroup"><a class="btn-flat btn-shadow" (click)="refreshCache(true)">{{'ADMIN.IMPORT.STICKY_REFRESH_CACHE' | translate}}</a></div>
-        <div class="propertyGroup"><a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.IMPORT.PROPERTY_VALUESPACE' | translate}}</a><input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.IMPORT.PROPERTY_NAME' | translate}}"></div>
   </div>
 </div>
 <div *ngIf="mode=='JOBS'" class="content jobs">
@@ -345,14 +357,30 @@
     <div class="info">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
     <div class="btn-flat btn-shadow" (click)="refreshEduGroupCache()">{{'ADMIN.TOOLKIT.REFRESH_EDU_GROUP_CACHE' | translate }}</div>
   </div>
-  <div class="heading"><i class="material-icons">cached</i><span>{{'ADMIN.TOOLKIT.CACHE_INFO' | translate}}</span></div>
-  <div class="group">
-    <form (ngSubmit)="getCacheInfo()">
-      <input type="text" name="cacheInfo" class="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
-      <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
-    </form>
-  </div>
-  <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
+  <div class="heading"><i class="material-icons">cached</i><span>{{'ADMIN.TOOLKIT.CACHE' | translate}}</span></div>
+    <div class="group">
+        <form (ngSubmit)="getCacheInfo()">
+            <input type="text" name="cacheInfo" class="cacheInfo" [(ngModel)]="cacheInfo" placeholder="{{'ADMIN.TOOLKIT.CACHE_NAME' | translate }}">
+            <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
+        </form>
+    </div>
+    <div class="group caches">
+        <div class="inputGroup">
+            <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate}}</a>
+            <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
+        </div>
+        <div class="group">
+            <div class="inputGroup">
+                <a class="btn-flat btn-shadow" (click)="refreshCache(false)">{{'ADMIN.TOOLKIT.REFRESH_CACHE' | translate}}</a>
+                <a class="btn-flat btn-shadow" (click)="refreshCache(true)">{{'ADMIN.TOOLKIT.STICKY_REFRESH_CACHE' | translate}}</a>
+            </div>
+        </div>
+        <div class="propertyGroup">
+            <input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.TOOLKIT.PROPERTY_NAME' | translate}}">
+            <a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.TOOLKIT.PROPERTY_VALUESPACE' | translate}}</a>
+        </div>
+    </div>
+    <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
   <div class="group">
     <input #uploadTempSelect type="file" style="display:none" id="uploadTempSelect" (change)="updateUploadTempFile($event)">
     <div class="inputGroup">
@@ -361,22 +389,6 @@
     </div>
     <a class="btn waves-effect waves-light" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</a>
   </div>
-    <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.TEST_MAIL' | translate}}</span></div>
-    <div class="group">
-        <form (ngSubmit)="testMail()">
-            <div class="inputGroupGrow">
-                <div class="info">{{'ADMIN.TOOLKIT.TEST_MAIL_RECEIVER' | translate }}</div>
-                <input type="email" name="receiver" [(ngModel)]="mailReceiver">
-            </div>
-            <div class="inputGroupGrow">
-                <div class="info">{{'ADMIN.TOOLKIT.TEST_MAIL_TEMPLATE' | translate }}</div>
-                <select name="template" [(ngModel)]="mailTemplate">
-                    <option *ngFor="let template of mailTemplates">{{template}}</option>
-                </select>
-            </div>
-            <a class="btn btn-shadow" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.TOOLKIT.TEST_MAIL_SEND' | translate }}</a>
-        </form>
-    </div>
   <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
   <div class="group catalina">
     <div class="btn-flat btn-shadow" (click)="refreshCatalina()"><i class="material-icons">refresh</i></div>
