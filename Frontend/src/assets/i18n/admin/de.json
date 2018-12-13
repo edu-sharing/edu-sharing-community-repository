@@ -134,11 +134,11 @@
       "OAI_FORCE_UPDATE":"Alle bestehenden Nodes neu importieren/überschreiben",
       "OAI_START":"OAI Import",
       "OAI_SAVE":"Werte für nächsten Import speichern",
-      "ADMINISTRATION":"Import Administration",
-      "CACHE_NAME":"Cache Name",
-      "REFRESH_CACHE":"Refresh Cache",
-      "CACHE_REFRESHED":"Cache refreshed",
-      "STICKY_REFRESH_CACHE":"Stick Refresh Cache",
+      "ADMINISTRATION":"Cache & Valuespace",
+      "CACHE_ROOT_FOLDER":"Start-Ordner für Aufbau",
+      "REFRESH_CACHE":"Node-Cache vollständig neu aufbauen",
+      "CACHE_REFRESHED":"Cache wird aufgebaut.\nÜberprüfen Sie die Aufgabenliste, um den Status einzusehen",
+      "STICKY_REFRESH_CACHE":"Node-Cache aktualisieren (aktueller Cache bleibt)",
       "REMOVE_IMPORTS":"Remove Deleted Imports",
       "IMPORTS_REMOVED":"Imports removed",
       "PROPERTY_VALUESPACE":"Write Properties to Valuespacefile",
@@ -199,7 +199,6 @@
       "LOG_LEVEL_3":"Error",
       "LOG_LEVEL_0":"Fatal",
       "NAMES":{
-        "RefreshCacheJob":"Node-Cache neu aufbauen",
         "RemoveImportedObjects":"Alle importierten Nodes löschen",
         "RemoveOrphanCollectionReferencesJob":"Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen"
       }

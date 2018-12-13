@@ -204,7 +204,7 @@
     </div>
     <a class="btn waves-effect waves-light" (click)="importCollections()">{{'ADMIN.IMPORT.COLLECTION_START' | translate}}</a>
   </div>
-  <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.EXCEL' | translate}}</span></div>
+  <div class="heading"><i class="material-icons">table_chart</i><span>{{'ADMIN.IMPORT.EXCEL' | translate}}</span></div>
   <div class="csv">
     <input #csvSelect type="file" style="display:none" id="csvSelect" accept=".xls, .xlsx" (change)="updateExcelFile($event)">
     <div class="inputGroup">
@@ -255,11 +255,15 @@
     <a class="btn-flat btn-shadow" (click)="removeImports()">{{'ADMIN.IMPORT.REMOVE_IMPORTS' | translate}}</a>
     <a class="btn waves-effect waves-light" (click)="oaiImport()">{{'ADMIN.IMPORT.OAI_START' | translate}}</a>
   </div>
-  <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.ADMINISTRATION' | translate}}</span></div>
+  <div class="heading"><i class="material-icons">settings</i><span>{{'ADMIN.IMPORT.ADMINISTRATION' | translate}}</span></div>
   <div class="administration">
-    <div class="cacheGroup"><a class="btn-flat btn-shadow" (click)="refreshCache(false)">{{'ADMIN.IMPORT.REFRESH_CACHE' | translate}}</a><input type="text" [(ngModel)]="cacheName" placeholder="{{'ADMIN.IMPORT.CACHE_NAME' | translate}}"></div>
-    <a class="btn-flat btn-shadow" (click)="refreshCache(true)">{{'ADMIN.IMPORT.STICKY_REFRESH_CACHE' | translate}}</a>
-    <div class="propertyGroup"><a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.IMPORT.PROPERTY_VALUESPACE' | translate}}</a><input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.IMPORT.PROPERTY_NAME' | translate}}"></div>
+      <div class="inputGroup">
+          <a class="btn-flat btn-shadow" (click)="chooseDirectory=true">{{'ADMIN.IMPORT.CACHE_ROOT_FOLDER' | translate}}</a>
+          <div class="directory"><div *ngIf="parentNode">{{ parentNode.name}} ({{parentNode.ref.id}})</div></div>
+      </div>
+        <div class="cacheGroup inputGroup"><a class="btn-flat btn-shadow" (click)="refreshCache(false)">{{'ADMIN.IMPORT.REFRESH_CACHE' | translate}}</a></div>
+        <div class="inputGroup"><a class="btn-flat btn-shadow" (click)="refreshCache(true)">{{'ADMIN.IMPORT.STICKY_REFRESH_CACHE' | translate}}</a></div>
+        <div class="propertyGroup"><a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.IMPORT.PROPERTY_VALUESPACE' | translate}}</a><input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.IMPORT.PROPERTY_NAME' | translate}}"></div>
   </div>
 </div>
 <div *ngIf="tab=='JOBS'" class="content jobs">
