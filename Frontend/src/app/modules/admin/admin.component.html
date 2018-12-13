@@ -37,37 +37,16 @@
               (onCancel)="chooseCollection=false"
               (onChoose)="pickCollection($event)"
 ></file-chooser>
-<div class="row row-dark">
-  <div class="col s12">
-    <ul class="tabs">
-      <li class="clickable tab col s3" (click)="setTab('INFO')">
-        <a [class.active]="tab=='INFO'" >{{'ADMIN.TAB.INFO' | translate}}</a>
-      </li>
-      <li class="clickable tab col s3" (click)="setTab('APPLICATIONS')">
-        <a [class.active]="tab=='APPLICATIONS'" >{{'ADMIN.TAB.APPLICATIONS' | translate}}</a>
-      </li>
-      <li class="clickable tab col s3" (click)="setTab('UPDATE')">
-        <a [class.active]="tab=='UPDATE'" >{{'ADMIN.TAB.UPDATE' | translate}}</a>
-      </li>
-      <li class="clickable tab col s3" (click)="setTab('IMPORT')">
-        <a [class.active]="tab=='IMPORT'" >{{'ADMIN.TAB.IMPORT' | translate}}</a>
-      </li>
-      <li class="clickable tab col s3" (click)="setTab('JOBS')">
-        <a [class.active]="tab=='JOBS'" >{{'ADMIN.TAB.JOBS' | translate}}</a>
-      </li>
-      <li class="clickable tab col s3" (click)="setTab('TOOLKIT')">
-        <a [class.active]="tab=='TOOLKIT'" >{{'ADMIN.TAB.TOOLKIT' | translate}}</a>
-      </li>
-      <li class="clickable tab col s3" (click)="setTab('BROWSER')">
-        <a [class.active]="tab=='BROWSER'" >{{'ADMIN.TAB.BROWSER' | translate}}</a>
-      </li>
-      <li class="clickable tab col s3" (click)="setTab('FOLDERTEMPLATES')">
-        <a [class.active]="tab=='FOLDERTEMPLATES'" >{{'ADMIN.TAB.FOLDERTEMPLATES' | translate}}</a>
-      </li>
-    </ul>
-  </div>
+<div class="main">
+<div class="main-nav">
+    <div>
+        <div *ngFor="let button of buttons" class="button clickable" [class.active]="mode==button.id" tabindex="0" (click)="setMode(button.id)" (keyup.enter)="setMode(button.id)">
+            <i icon [iconId]="button.icon"></i><span>{{('ADMIN.MODE.'+button.id) | translate }}</span>
+        </div>
+    </div>
 </div>
-<div *ngIf="tab=='INFO'" class="content info">
+<div class="main-content">
+<div *ngIf="mode=='INFO'" class="content info">
   <div class="heading">{{'ADMIN.INFO.REPOSITORY' | translate}}</div>
   <div class="version">{{ repositoryVersion }}</div>
   <div class="heading">{{'ADMIN.INFO.NG' | translate}}</div>
@@ -93,7 +72,7 @@
         </div>
     </div>
 </div>
-<div *ngIf="tab=='APPLICATIONS'" class="content applications">
+<div *ngIf="mode=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
   <form (ngSubmit)="registerApp()">
     <input type="text" name="appUrl" class="appUrl" [(ngModel)]="appUrl" placeholder="{{'ADMIN.APPLICATIONS.URL' | translate}}">
@@ -165,7 +144,7 @@
     </div>
   </div>
 </div>
-<div *ngIf="tab=='UPDATE'" class="content update">
+<div *ngIf="mode=='UPDATE'" class="content update">
   <div class="hint">
     {{'ADMIN.UPDATE.HINT' | translate}}
   </div>
@@ -184,7 +163,7 @@
     </div>
   </div>
 </div>
-<div *ngIf="tab=='IMPORT'" class="content import">
+<div *ngIf="mode=='IMPORT'" class="content import">
   <div class="heading"><i class="material-icons">layers</i><span>{{'ADMIN.IMPORT.COLLECTION' | translate}}</span></div>
   <div class="collections">
     <input #xmlCollectionsSelect type="file" style="display:none" id="xmlCollectionsSelect" accept=".xml, .zip" (change)="updateCollectionsFile($event)">
@@ -266,7 +245,7 @@
         <div class="propertyGroup"><a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.IMPORT.PROPERTY_VALUESPACE' | translate}}</a><input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.IMPORT.PROPERTY_NAME' | translate}}"></div>
   </div>
 </div>
-<div *ngIf="tab=='JOBS'" class="content jobs">
+<div *ngIf="mode=='JOBS'" class="content jobs">
     <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
     <div class="group">
         <form (ngSubmit)="startJob()">
@@ -356,7 +335,7 @@
         </div>
     </div>
 </div>
-<div *ngIf="tab=='TOOLKIT'" class="content toolkit">
+<div *ngIf="mode=='TOOLKIT'" class="content toolkit">
   <div class="heading"><i class="material-icons">refresh</i><span>{{'ADMIN.TOOLKIT.REFRESH_APP' | translate}}</span></div>
   <div class="group">
     <div class="info">{{'ADMIN.TOOLKIT.REFRESH_APP_INFO' | translate }}</div>
@@ -404,7 +383,7 @@
     <textarea id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
   </div>
 </div>
-<div *ngIf="tab=='BROWSER'" class="content browser">
+<div *ngIf="mode=='BROWSER'" class="content browser">
   <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.NODE_BROWSER' | translate}}</span></div>
     <div class="inputGroupGrow">
         <div class="info">{{'ADMIN.BROWSER.MODE' | translate }}</div>
@@ -460,7 +439,7 @@
         ></listTable>
     </div>
 </div>
-<div *ngIf="tab=='FOLDERTEMPLATES'" class="content foldertemplates">
+<div *ngIf="mode=='FOLDERTEMPLATES'" class="content foldertemplates">
   <form (ngSubmit)="applyTemplate()">
     <autocomplete
             [id]="eduGroup"
@@ -487,5 +466,7 @@
     <div class="btn-flat btn-shadow btnXml" (click)="templateSelect.click()">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_TEMPLATE' | translate}}</div>
     <div class="upload-hint">{{'ADMIN.FOLDERTEMPLATES.UPLOAD_HINT' | translate}}</div>
   </div>
+</div>
+</div>
 </div>
 <global-progress *ngIf="globalProgress"></global-progress>

@@ -48,7 +48,41 @@ export class AdminComponent {
       "passwordRequest",
       "userRegisterInformation"
   ];
-  public tab : string;
+  buttons=[
+      {
+          id:"INFO",
+          icon:"info_outline"
+      },
+      {
+          id:"APPLICATIONS",
+          icon:"apps"
+      },
+      {
+          id:"UPDATE",
+          icon:"update"
+      },
+      {
+          id:"IMPORT",
+          icon:"cloud_download"
+      },
+      {
+          id:"JOBS",
+          icon:"check"
+      },
+      {
+          id:"TOOLKIT",
+          icon:"settings"
+      },
+      {
+          id:"BROWSER",
+          icon:"search"
+      },
+      {
+          id:"FOLDERTEMPLATES",
+          icon:"create_new_folder"
+      },
+  ]
+  public mode : string;
   public globalProgress=true;
   public appUrl:string;
   public propertyName:string;
@@ -203,9 +237,9 @@ export class AdminComponent {
         this.globalProgress=false;
         this.route.queryParams.subscribe((data:any)=>{
             if(data['mode'])
-                this.tab=data['mode'];
+                this.mode=data['mode'];
             else
-              this.tab='INFO';
+              this.mode='INFO';
         });
         this.showWarning=true;
         this.admin.getServerUpdates().subscribe((data:ServerUpdate[])=>{
@@ -222,7 +256,7 @@ export class AdminComponent {
         this.reloadJobStatus();
         this.runChecks();
           setInterval(()=>{
-            if(this.tab=='JOBS')
+            if(this.mode=='JOBS')
                 this.reloadJobStatus();
         },10000);
         this.admin.getOAIClasses().subscribe((classes:string[])=>{
@@ -388,8 +422,8 @@ export class AdminComponent {
       }),
     ];
   }
-  public setTab(tab:string){
-    this.router.navigate(['./'],{queryParams:{mode:tab},relativeTo:this.route});
+  public setMode(mode:string){
+    this.router.navigate(['./'],{queryParams:{mode:mode},relativeTo:this.route});
   }
   public pickDirectory(event : Node[]){
     this.parentNode=event[0];
@@ -488,7 +522,7 @@ export class AdminComponent {
         let additional:any={
             link:{
                 caption:"ADMIN.IMPORT.OPEN_JOBS",
-                callback:()=>this.setTab('JOBS')
+                callback:()=>this.setMode('JOBS')
             },
         };
       this.toast.toast('ADMIN.IMPORT.OAI_STARTED',null,null,null, additional);

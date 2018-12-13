@@ -4,7 +4,7 @@
     "UNDERSTAND":"Verstanden, Fortfahren",
     "WARNING_TITLE":"Administrationsbereich",
     "WARNING_INFO":"Dieser Bereich ist nur zur Administration des Repositorys gedacht.\nFalsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\n\nFühren Sie keine Aktionen durch, bei denen sie unsicher sind!",
-    "TAB":{
+    "MODE":{
       "INFO":"Info",
       "APPLICATIONS":"Quellen",
       "UPDATE":"Server Update",
