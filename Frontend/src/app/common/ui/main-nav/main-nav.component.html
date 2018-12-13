@@ -25,7 +25,7 @@
 <div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
-  <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
+  <div class="sidenavClose clickable" tabindex="0" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false"><i class="material-icons">close</i></div>
   <div class="sidenavImage">
     <img src="assets/images/layout/sidenav.jpg">
     <div><i class="material-icons">account_circle</i>
@@ -48,7 +48,7 @@
     <div class="mobile-move-top2">
   <div class="menuButtonOuter">
     <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
-      <img class="material-icons eduImage" [src]="getIconSource()" alt="{{'EDU_LOGO_ALT' | translate}}"/>
+      <img class="material-icons eduImage" [src]="getIconSource()" alt=""/>
       <i class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
       <span>{{title | translate}}</span>
       <i class="material-icons barIcon">keyboard_arrow_right</i>
@@ -69,7 +69,7 @@
     <a *ngIf="config.imprintUrl" class="clickable" (click)="openImprint()">{{ 'IMPRINT' | translate }}</a>
     <a *ngIf="config.privacyInformationUrl" class="clickable" (click)="openPrivacy()">{{ 'PRIVACY_INFORMATION' | translate }}</a>
   </div>
-  <div *ngIf="user && _currentScope=='search'" #nodeStoreRef class="nodeStore" class="clickable nodeStore" (click)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
+  <div *ngIf="user && _currentScope=='search'" #nodeStoreRef class="nodeStore" class="clickable nodeStore" tabindex="0" (click)="setNodeStore(true)" (keyup.enter)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
     <i class="material-icons barIcon">bookmark_border</i>
     <div class="nodeStoreCount">{{nodeStoreCount}}</div>
     <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">

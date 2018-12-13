@@ -335,7 +335,7 @@
     "REORDER_DRAG_DROP":"You can change the order of the elements via drag & drop"
   },
   "DIALOG":{
-    "COLLECTION_SHARE_PUBLIC":"Publish material in collection?",
+    "COLLECTION_SHARE_PUBLIC":"Add material to collection?",
     "COLLECTION_SHARE_PUBLIC_INFO":"By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it."
   },
   "NO_SIZE":"-",

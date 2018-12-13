@@ -29,12 +29,7 @@ package org.edu_sharing.service.usage;
 
 import java.io.Serializable;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -124,6 +119,8 @@ public class AlfServicesWrapper implements UsageDAO{
 				// TODO allow multivalues
 				value = (String) ((ArrayList) object).get(0);
 				
+			} else if(object instanceof Date) {
+				value = new Long(((Date)object).getTime()).toString();
 			} else if(object != null){
 
 				value = object.toString();
@@ -278,13 +275,8 @@ public class AlfServicesWrapper implements UsageDAO{
 					for (NodeRef nodeRef : resultSet.getNodeRefs()) {
 						
 						try{
-							Map<QName, Serializable> tmpprops = nodeService.getProperties(nodeRef);
-							HashMap<String, Object> props = new HashMap<String, Object>();
-							for (QName key : tmpprops.keySet()) {
-								String propName = key.toString();
-								Object propValue = tmpprops.get(key);
-								if(propValue != null) props.put(propName, propValue.toString());
-							}
+							
+							HashMap<String, Object> props = getProperties(nodeRef);
 							ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
 							props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
 							
@@ -311,34 +303,18 @@ public class AlfServicesWrapper implements UsageDAO{
 					for (NodeRef nodeRef : resultSet.getNodeRefs()) {
 						
 						try{
-							Map<QName, Serializable> remoteProps = nodeService.getProperties(nodeRef);
 							
 							List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(nodeRef);
 							for(ChildAssociationRef childRef : childAssocs) {
 								if(QName.createQName(CCConstants.CCM_TYPE_USAGE).equals(nodeService.getType(childRef.getChildRef()))){
 						
-									HashMap<String, Object> props = new HashMap<String, Object>();
-									Map<QName, Serializable> tmpprops = nodeService.getProperties(nodeRef);
-									for (QName key : tmpprops.keySet()) {
-										String propName = key.toString();
-										Object propValue = tmpprops.get(key);
-										if(propValue != null) props.put(propName, propValue.toString());
-									}
-									ChildAssociationRef childssocRef = nodeService.getPrimaryParent(nodeRef);
+									HashMap<String, Object> props = getProperties(childRef.getChildRef());
+									ChildAssociationRef childssocRef = nodeService.getPrimaryParent(childRef.getChildRef());
 									props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID, childssocRef.getParentRef().getId());
 									
-									/**
-									 * add remote object props
-									 */
-									props.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, remoteProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID).toString());
-									props.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, remoteProps.get(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID).toString());
-									result.put(nodeRef.getId(), props);
+									result.put(childRef.getChildRef().getId(), props);
 								}
 							}
-							
-							
-							
-							
 							
 						}catch(org.alfresco.service.cmr.repository.InvalidNodeRefException e){
 							logger.error("nodeRef: "+nodeRef+" does not exist. maybe an archived usage node:"+e.getMessage());
@@ -359,12 +335,9 @@ public class AlfServicesWrapper implements UsageDAO{
 
 	public HashMap<String, HashMap<String, Object>> getChildrenByType(StoreRef store, String nodeId, String type) {
 		HashMap<String, HashMap<String, Object>> result = new HashMap<String, HashMap<String, Object>>();
-		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId));
+		List<ChildAssociationRef> childAssocList = nodeService.getChildAssocs(new NodeRef(store, nodeId),Collections.singleton(QName.createQName(type)));
 		for (ChildAssociationRef child : childAssocList) {
-			String childType = nodeService.getType(child.getChildRef()).toString();
-			if (childType.equals(type)) {
-				result.put(child.getChildRef().getId(), getProperties(child.getChildRef()));
-			}
+			result.put(child.getChildRef().getId(), getProperties(child.getChildRef()));
 		}
 		return result;
 	}

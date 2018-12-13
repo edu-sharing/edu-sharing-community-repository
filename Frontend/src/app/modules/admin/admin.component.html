@@ -396,19 +396,19 @@
   <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.NODE_BROWSER' | translate}}</span></div>
     <div class="inputGroupGrow">
         <div class="info">{{'ADMIN.BROWSER.MODE' | translate }}</div>
-        <select [(ngModel)]="browseMode">
+        <select [(ngModel)]="lucene.mode">
             <option value="NODEREF">Node-Ref / Node-Id</option>
             <option value="SOLR">Solr / Lucene Query</option>
         </select>
     </div>
-    <div *ngIf="browseMode=='NODEREF'" class="group">
+    <div *ngIf="lucene.mode=='NODEREF'" class="group">
         <div class="inputGroupGrow">
             <div class="info">{{'ADMIN.BROWSER.NODEREF' | translate }}</div>
             <input type="text" name="noderef" [(ngModel)]="lucene.noderef" placeholder='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'>
         </div>
         <a class="btn waves-effect waves-light" (click)="searchNoderef()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
     </div>
-  <div *ngIf="browseMode=='SOLR'" class="group">
+  <div *ngIf="lucene.mode=='SOLR'" class="group">
     <div class="inputGroupGrow">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</div>
       <input type="text" name="luceneQuery" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'>
@@ -440,7 +440,9 @@
                 [columns]="searchColumns"
                 [hasHeading]="true"
                 [nodes]="luceneNodes"
+                [hasCheckbox]="true"
                 [hasIcon]="true"
+                [totalCount]="luceneCount"
                 [isClickable]="true"
                 (clickRow)="debugNode($event)"
         ></listTable>
