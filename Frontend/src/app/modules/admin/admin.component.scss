@@ -1,5 +1,7 @@
 @import "../../../styles/variables.scss";
 
+
+$sidenavWidth:250px;
 .main{
   display: flex;
   width: 100%;
@@ -13,7 +15,7 @@
     height: calc(100% - #{$mainnavHeight});
     overflow-y: auto;
     padding:5px 0;
-    width: 300px;
+    width: $sidenavWidth;
     >div {
       height: 100%;
       .button {
@@ -24,6 +26,9 @@
         i {
           margin-right: 10px;
         }
+        &:hover{
+          background-color: $veryLightBackground;
+        }
         &.active {
           color: $primary;
           font-weight: bold;
@@ -33,7 +38,7 @@
     }
   }
   .main-content{
-    margin-left: 300px;
+    margin-left: $sidenavWidth;
     flex-grow: 1;
     padding:20px 0;
   }
