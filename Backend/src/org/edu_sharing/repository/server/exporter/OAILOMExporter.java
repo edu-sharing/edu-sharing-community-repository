@@ -148,6 +148,9 @@ public class OAILOMExporter {
 			}
 		}
 		
+		Element ieur = createAndAppendElement("intendedEndUserRole", educational);
+		createAndAppendElement("value",ieur,QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE));
+		
 		//@todo when its available
 		String tarFrom = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM));
 		String tarTo = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO));
@@ -170,6 +173,10 @@ public class OAILOMExporter {
 			
 			String urlKey = commonLicenceKey.toLowerCase().replaceAll("_", "-").replaceFirst("cc-", "");
 			String url = "https://creativecommons.org/licenses/" + urlKey + "/" + commonLicenseVersion;
+			
+			if(commonLicenceKey.equals(CCConstants.COMMON_LICENSE_CC_ZERO)) {
+				url = CCConstants.COMMON_LICENSE_CC_ZERO_LINK.replace("deed.${locale}", "legalcode");
+			}
 			
 			createAndAppendElement("value",copyrightAndOtherRestrictions,"yes");
 			Element description = createAndAppendElement("description",rights);
