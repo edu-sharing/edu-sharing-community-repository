@@ -27,11 +27,11 @@
         </div>
     </div>
     <div class="col m4 l3 choose-menu-main" [ngClass]="showMenuOptions ? '' : 'hideMenu'">
-            <div class="choose-menu" (click)="goToOption('new')" [ngClass]="menuOption == 'new' ? 'm-active' : 'm-inactive'">
-                <i class="menuic material-icons ">date_range</i> <div class="menu-icon-text">{{'STREAM.MENU.OPTION1' | translate }}</div>
+            <div tabindex="0" class="choose-menu" (click)="goToOption('new')" (keyup.enter)="goToOption('new')" [ngClass]="menuOption == 'new' ? 'm-active' : 'm-inactive'">
+                <i aria-hidden="true" class="menuic material-icons ">date_range</i> <div class="menu-icon-text">{{'STREAM.MENU.OPTION1' | translate }}</div>
             </div>
-            <div class="choose-menu" (click)="goToOption('seen')" [ngClass]="menuOption == 'seen' ? 'm-active' : 'm-inactive'">
-                <i class="menuic material-icons ">visibility</i> <div class="menu-icon-text">{{'STREAM.MENU.OPTION2' | translate }}</div>
+            <div tabindex="0" class="choose-menu" (click)="goToOption('seen')" (keyup.enter)="goToOption('seen')" [ngClass]="menuOption == 'seen' ? 'm-active' : 'm-inactive'">
+                <i aria-hidden="true" class="menuic material-icons ">visibility</i> <div class="menu-icon-text">{{'STREAM.MENU.OPTION2' | translate }}</div>
             </div>
     </div>
     <div class="col s12 m7 l6 remove-horizontal-padding">
@@ -77,7 +77,7 @@
                 <div class="stream-box-kompetenzen" > <div class="chip" *ngFor="let keyword of strm.properties['cclom:general_keyword']">{{keyword}}</div> </div>
 
             <div class="stream-box-nonodes" *ngIf="strm.nodes.length === 0"> {{'STREAM.OBJECT.NONODES' | translate }} </div>
-            <div [lazyLoad]="strm.nodes[0].preview.url" class="stream-box-image" (click)="onStreamObjectClick(strm)" *ngIf="strm.nodes[0]">
+            <div tabindex="0" [lazyLoad]="strm.nodes[0].preview.url" class="stream-box-image" (click)="onStreamObjectClick(strm)" (keyup.enter)="onStreamObjectClick(strm)" *ngIf="strm.nodes[0]">
                 <div class="bottom-left">{{ (strm.nodes[0].name.length > 40) ? (strm.nodes[0].name | slice:0:40)+'...':(strm.nodes[0].name) }}</div>
                 <div class="bottom-right">{{ strm.nodes[0].commentCount }} </div>
                 <div class="bottom-right-icon"><i class="material-icons stic" >comment</i> </div>
@@ -89,13 +89,7 @@
     <div class="col m1 l3"></div>
 </div> <!-- row -->
 
-
-
-    <div tabindex="0" class="create fixed-action-btn"
-         *ngIf="createAllowed"
-         (click)="create()"
-         (keyup.enter)="create()"
-    ><div class="mobile-move-bottom"><a class="btn-floating btn-large btn-complementary waves-effect"><i class="material-icons">add</i></a></div>
+    <div  class="create fixed-action-btn" *ngIf="createAllowed"><div class="mobile-move-bottom"><a tabindex="0" (click)="create()" (keyup.enter)="create()" class="btn-floating btn-large btn-complementary waves-effect"><i class="material-icons">add</i></a></div>
     </div>
     <div class="dialog dialogCreate" *ngIf="showCreate" (click)="showCreate=false" (contextmenu)="showCreate=false;$event.preventDefault();$event.stopPropagation();"></div>
     <!-- <input type="file" accept="image/*" capture="camera" #camera (change)="uploadCamera($event)"> -->

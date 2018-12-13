@@ -52,9 +52,9 @@
   <div class="menuButtonOuter">
     <div (click)="openSidenav()" (keyup.enter)="openSidenav()" tabindex="0" class="menuButton" [class.clickable]="canOpen" *ngIf="showScope" title="{{'CHOOSEENVIRONMENT' | translate}}">
       <img class="material-icons eduImage" [src]="getIconSource()" alt=""/>
-      <i class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
+      <i aria-hidden="true" class="material-icons scopeIcon">{{getCurrentScopeIcon()}}</i>
       <span>{{title | translate}}</span>
-      <i class="material-icons barIcon">keyboard_arrow_right</i>
+      <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
     </div>
   </div>
   <div class="topBarSearch" [class.noScope]="!showScope">
@@ -69,11 +69,11 @@
   </form>
   </div>
   <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">
-    <a *ngIf="config.imprintUrl" class="clickable" (click)="openImprint()">{{ 'IMPRINT' | translate }}</a>
-    <a *ngIf="config.privacyInformationUrl" class="clickable" (click)="openPrivacy()">{{ 'PRIVACY_INFORMATION' | translate }}</a>
+    <a tabindex="0" *ngIf="config.imprintUrl" class="clickable" (click)="openImprint()" (keyup.enter)="openImprint()">{{ 'IMPRINT' | translate }}</a>
+    <a tabindex="0" *ngIf="config.privacyInformationUrl" class="clickable" (click)="openPrivacy()" (keyup.enter)="openPrivacy()">{{ 'PRIVACY_INFORMATION' | translate }}</a>
   </div>
   <div *ngIf="user && (_currentScope=='search' || _currentScope=='stream' || _currentScope=='collections')" #nodeStoreRef class="clickable nodeStore" (click)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
-    <i class="material-icons barIcon">bookmark_border</i>
+    <i aria-hidden="true" class="material-icons barIcon">bookmark_border</i>
     <div class="nodeStoreCount">{{nodeStoreCount}}</div>
     <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">
       <div>+{{nodeStoreAnimation}}</div>
@@ -100,7 +100,7 @@
   ></dropdown>
     </div>
 </div>
-<div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i class="material-icons">keyboard_arrow_up</i></div>
+<div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i aria-hidden="true" class="material-icons">keyboard_arrow_up</i></div>
 <div class="tab-nav" #tabNav *ngIf="canOpen && _currentScope!='render'" [style.bottom]="-navbarOffsetY+'px'">
     <div class="mobile-move-bottom">
           <div *ngFor="let button of sidebarButtons" [class.selected]="_currentScope==button.scope"
@@ -112,7 +112,7 @@
                [class.disabled]="button.isDisabled"
                tabindex="0"
                title="{{'GOTO' | translate}} {{button.name | translate}}">
-            <i *ngIf="button.icon" class="material-icons">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}">
+            <i *ngIf="button.icon" aria-hidden="true" class="material-icons">{{button.icon}}</i><img *ngIf="button.alticon" class="align-icon" src="{{button.alticon}}">
               <span>{{(button.isCustom ? button.name : button.name+"_SHORT") | translate}}</span>
           </div>
     </div>
