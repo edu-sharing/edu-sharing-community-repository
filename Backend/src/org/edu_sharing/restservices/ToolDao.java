@@ -68,7 +68,7 @@ public class ToolDao {
 		}
 		
 		NodeDao child = new ToolDao().create(repository, toolDefinition, renameIfExists, versionComment, properties,
-				CCConstants.CCM_TYPE_TOOL_INSTANCE, null, CCConstants.CCM_ASSOC_TOOL_INSTANCES);
+				CCConstants.CCM_TYPE_TOOL_INSTANCE, null, CCConstants.getValidLocalName(CCConstants.CCM_ASSOC_TOOL_INSTANCES));
 		
 		return child;
 	}

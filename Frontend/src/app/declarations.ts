@@ -1,7 +1,4 @@
-  import {RestTestComponent} from "./common/rest/directives/rest-test/rest-test.component";
-  import {RestNodeTestComponent} from "./common/rest/directives/rest-node-test/rest-node-test.component";
   import {DebugResultPipe} from "./common/rest/pipes/debug-result.pipe";
-  import {FileComponent} from "./common/rest/directives/file/file.component";
   import {SpinnerComponent} from "./common/ui/spinner/spinner.component";
   import {ListTableComponent} from "./common/ui/list-table/list-table.component";
   import {FileChooserComponent} from "./common/ui/file-chooser/file-chooser.component";
@@ -19,11 +16,7 @@
   import {MdsComponent} from "./common/ui/mds/mds.component";
   import {ApplyToLmsComponent} from "./common/ui/apply-to-lms/apply-to-lms.component";
   import {ModalLoadingComponent} from "./common/ui/modal-loading/modal-loading.component";
-  import {RestCollectionTestComponent} from "./common/rest/directives/rest-collection-test/rest-collection-test.component";
-  import {RestIamTestComponent} from "./common/rest/directives/rest-iam-test/rest-iam-test.component";
-  import {RestMdsTestComponent} from "./common/rest/directives/rest-mds-test/rest-mds-test.component";
   import {AttributeHtmlPipe} from "./common/ui/attribute-html.pipe";
-  import {RestArchiveTestComponent} from "./common/rest/directives/rest-archive-test/rest-archive-test.component";
   import {MdsTestComponent} from "./common/test/mds-test/mds-test.component";
   import {ModalDialogToastComponent} from "./common/ui/modal-dialog-toast/modal-dialog-toast.component";
   import {ToolListComponent} from "./common/ui/tool-list/tool-list.component";
@@ -43,30 +36,32 @@
   import {KeysPipe} from './common/keys.pipe';
   import {InfiniteScrollDirective} from './common/ui/infinite-scroll.directive';
   import {NodeInfoComponent} from "./common/ui/node-info/node-info.component";
+  import {DropdownComponent} from "./common/ui/dropdown/dropdown.component";
+  import {TutorialComponent} from "./common/ui/tutorial/tutorial.component";
   import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
+  import {InputPasswordComponent} from "./common/ui/input-password/input-password.component";
+  import {PoweredByComponent} from "./common/ui/powered-by/powered-by.component";
   import {FooterComponent} from "./common/ui/footer/footer.component";
+  import {ReplaceCharsPipe} from "./common/ui/replace-chars.pipe";
+  import {CalendarComponent} from "./common/ui/calendar/calendar.component";
+  import {SortDropdownComponent} from "./common/ui/sort-dropdown/sort-dropdown.component";
 
 export const DECLARATIONS = [
-      RestTestComponent,
       MdsTestComponent,
       GlobalProgressComponent,
-      RestNodeTestComponent,
-      RestArchiveTestComponent,
-      RestCollectionTestComponent,
-      RestIamTestComponent,
-      RestMdsTestComponent,
       AttributeHtmlPipe,
       CustomIconComponent,
+      CalendarComponent,
       DebugResultPipe,
       FormatSizePipe,
       NodeDatePipe,
       TimePipe,
       PermissionNamePipe,
+      ReplaceCharsPipe,
       AuthorityNamePipe,
       AutocompleteComponent,
       AuthoritySearchInputComponent,
       NodeTitlePipe,
-      FileComponent,
       SpinnerComponent,
       SpinnerSmallComponent,
       ListTableComponent,
@@ -74,6 +69,9 @@ export const DECLARATIONS = [
       CollectionChooserComponent,
       BreadcrumbsComponent,
       ActionbarComponent,
+      InputPasswordComponent,
+      DropdownComponent,
+      SortDropdownComponent,
       NodeInfoComponent,
       SmallCollectionComponent,
       MainNavComponent,
@@ -89,9 +87,11 @@ export const DECLARATIONS = [
       ModalDialogToastComponent,
       ToolListComponent,
       ToucheventDirective,
+      PoweredByComponent,
       BannerComponent,
       FooterComponent,
       InfiniteScrollDirective,
       KeysPipe,
-      CookieInfoComponent
+      CookieInfoComponent,
+      TutorialComponent
     ];

@@ -1,13 +1,8 @@
 package org.edu_sharing.restservices.admin.v1;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -30,19 +25,13 @@ import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.CollectionDao;
-import org.edu_sharing.restservices.DAOException;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.admin.v1.model.AdminStatistics;
 import org.edu_sharing.restservices.admin.v1.model.CollectionsResult;
 import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
 import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
 import org.edu_sharing.restservices.admin.v1.model.UploadResult;
 import org.edu_sharing.restservices.admin.v1.model.XMLResult;
-import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Group;
@@ -50,11 +39,14 @@ import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.SearchResult;
+import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.GlobalGroup;
+import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
+import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
@@ -167,6 +159,44 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+	@GET
+	@Path("/jobs")
+
+	@ApiOperation(value = "get all running jobs")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = JobInfo[].class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getJobs(@Context HttpServletRequest req) {
+		try {
+			return Response.ok().entity(AdminServiceFactory.getInstance().getJobs()).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@DELETE
+	@Path("/jobs/{job}")
+
+	@ApiOperation(value = "cancel a running job")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response cancelJob(@Context HttpServletRequest req,
+							  @PathParam("job") String name) {
+		try {
+			AdminServiceFactory.getInstance().cancelJob(name);
+			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
 
 	@GET
 	@Path("/statistics")
@@ -200,6 +230,31 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+    @GET
+    @Path("/statistics/nodes")
+
+    @ApiOperation(value = "get statistics for node actions")
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = TrackingNode[].class),
+            @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+            @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+            @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+            @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+    public Response getStatisticsNode(@Context HttpServletRequest req,
+    			@ApiParam(value = "date range from", required = false) @QueryParam("dateFrom") Long dateFrom,
+    			@ApiParam(value = "date range to", required = false) @QueryParam("dateTo") Long dateTo
+              ) {
+        try {
+            // load instance to validate session
+            AdminService service = AdminServiceFactory.getInstance();
+            List<TrackingNode> tracks=TrackingDAO.getNodeStatistics(new Date(dateFrom),new Date(dateTo));
+            return Response.ok().entity(tracks).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
 
 	@GET
 	@Path("/applications/{xml}")
@@ -634,10 +689,11 @@ public class AdminApi {
 			@ApiParam(value = "BinaryHandler class name (may be empty for none)", required = false, defaultValue = "") @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
 			@ApiParam(value = "url to file", required = false) @QueryParam("fileUrl") String fileUrl,
 			@ApiParam(value = "OAI Ids to import, can be null than the whole set will be imported", required = false, defaultValue = "") @QueryParam("oaiIds") String oaiIds,
+			@ApiParam(value = "force Update of all entries", required = false, defaultValue = "false") @QueryParam("forceUpdate") Boolean forceUpdate,
 			@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().importOai(set, fileUrl, baseUrl, metadataset, metadataPrefix, className,
-					importerClassName, recordHandlerClassName, binaryHandlerClassName, oaiIds);
+					importerClassName, recordHandlerClassName, binaryHandlerClassName, oaiIds, forceUpdate != null ? forceUpdate.booleanValue() : false);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
@@ -826,6 +882,32 @@ public class AdminApi {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}
 
+	@POST
+	@Path("/mail/{receiver}/{template}")
+	@ApiOperation(value = "Test a mail template", notes = "Sends the given template as a test to the given receiver.")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+
+	public Response testMail(
+			@ApiParam(required = true) @PathParam("receiver") String receiver,
+			@ApiParam(required = true) @PathParam("template") String template,
+			@Context HttpServletRequest req) {
+		try {
+			AdminServiceFactory.getInstance().testMail(receiver,template);
+			return Response.ok().build();
+		} catch (NotAnAdminException e) {
+			return ErrorResponse.createResponse(e);
+		} catch (Exception e) {
+			return ErrorResponse.createResponse(e);
+		}
+
+	}
+
 	@GET
 	@Path("/export/lom")
 
@@ -967,5 +1049,28 @@ public class AdminApi {
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
 	}
 
+	
+	@DELETE
+	@Path("/deletePerson")
 
+	@ApiOperation(value = "delete person", notes = "delete person.")
+
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response deletePerson(
+			@ApiParam(value = "username", required = true) @QueryParam("username") String username,
+		
+			@Context HttpServletRequest req) {
+		try {
+			new PersonLifecycleService().deletePerson(username);
+			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	
 }

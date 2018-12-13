@@ -9,7 +9,7 @@ import {isNumeric} from "rxjs/util/isNumeric";
  */
 @Pipe({name: 'formatTime'})
 export class TimePipe implements PipeTransform {
-  transform(value : any,args:any): string {
+  transform(value : number,args:any): string {
     if(!isNumeric(value))
       return "invalid value";
 

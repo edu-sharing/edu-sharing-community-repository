@@ -1,4 +1,5 @@
 import {RestConstants} from "./rest-constants";
+import {ListItem} from "../ui/list-item";
 /**
  * All Object types returned by the rest service
  */
@@ -80,6 +81,15 @@ export interface Application {
   xml: string;
 }
 
+export interface Service {
+    active: boolean;
+    id: string;
+    name: string;
+    url: string;
+    logo: string;
+    interfaces: any[];
+    statisticsInterface: string;
+}
 
 export interface Preview {
   data: Blob; // image, may null, see @NodeHelper.appendImageData
@@ -122,6 +132,9 @@ export class Node {
 
   }
 }
+export class SortItem extends ListItem{
+  mode: string;
+}
 export interface NodePermissionsHistory {
   date: number;
   permissions: LocalPermissions;
@@ -133,10 +146,18 @@ export interface Pagination {
   from: number;
   count: number;
 }
+export interface SharingInfo{
+  password: boolean;
+  expired: boolean;
+  passwordMatches: boolean;
+  invitedBy: Person;
+  node: Node;
+}
 export interface NodeShare {
   token: string;
   email: string;
   expiryDate: number;
+  password: boolean;
   invitedAt: number;
   downloadCount: number;
   url: string;
@@ -569,11 +590,14 @@ export interface MdsValueList {
   values: MdsValue[];
 }
 
-
+export interface  MdsValuesParameters {
+    query : string;
+    property : string;
+    pattern : string;
+}
 export interface MdsValues{
-  query : string;
-  property : string;
-  pattern : string;
+  valueParameters:MdsValuesParameters;
+  criterias : any;
 }
 
 export interface Parent {
@@ -755,18 +779,30 @@ export interface Usage {
   courseId: string;
   distinctPersons: number;
   appId: string;
+  appType: string;
+  appSubtype: string;
   nodeId: string;
   parentNodeId: string;
   usageVersion: string;
-  usageXmlParams: string;
+  usageXmlParams: UsageXmlParams;
   resourceId: string;
   guid: string;
+}
+export interface UsageXmlParams{
+    general: UsageXmlParamsGeneral;
+}
+export interface UsageXmlParamsGeneral {
+    referencedInName: string;
+    referencedInType: string;
+    referencedInInstance: string;
 }
 
 export interface UsageList {
   usages: Usage[];
 }
-
+export interface CollectionUsage extends Usage{
+    collection: Collection;
+}
 export interface Filetype {
   mimetype: string;
   filetype: string;
@@ -1009,6 +1045,7 @@ export class Organizations {
 export class Profile {
   displayName:string;
   groupType:string;
+  scopeType:string;
 }
 
 export class PersonalProfile {

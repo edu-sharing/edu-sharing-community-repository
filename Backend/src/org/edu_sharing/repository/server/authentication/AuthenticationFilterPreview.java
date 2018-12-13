@@ -14,6 +14,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
@@ -32,6 +33,7 @@ import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
+import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.edu_sharing.service.usage.UsageException;
@@ -161,12 +163,16 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				}
 
 			} catch(UsageException e) {
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+				//httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+				MimeTypesV2 mime=new MimeTypesV2(ApplicationInfoList.getHomeRepository());
+				httpServletResponse.sendRedirect(mime.getNodeDeletedPreview());
+				return;
 			}
 
-			authService.authenticate(ApplicationInfoList.getHomeRepository().getUsername(), ApplicationInfoList.getHomeRepository().getPassword().toCharArray());
-			ticket = authService.getCurrentTicket();
-			invalidateTicket = true;
+			//authService.authenticate(ApplicationInfoList.getHomeRepository().getUsername(), ApplicationInfoList.getHomeRepository().getPassword().toCharArray());
+			//ticket = authService.getCurrentTicket();
+            //invalidateTicket = true;
+            ((HttpServletRequest)req).getSession(true).setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID,nodeId);
 		}
 		else if (accessToken != null && !accessToken.trim().equals("")) {
 			//oAuth
@@ -218,11 +224,10 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				return;
 			}
 		}
-		
 		try{
 			chain.doFilter(req, resp);
 		} finally {
-			
+
 			if (invalidateTicket) {
 				authService.invalidateTicket(ticket);
 			}else{
@@ -235,7 +240,6 @@ public class AuthenticationFilterPreview implements javax.servlet.Filter {
 				}
 			}
 		}
-		
 	}
 	
 	private void remotePreview(ServletRequest req, HttpServletResponse httpServletResponse, String rep_id, String remoteTicket) throws IOException{

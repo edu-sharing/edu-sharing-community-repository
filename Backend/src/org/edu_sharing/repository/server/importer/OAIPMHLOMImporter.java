@@ -30,8 +30,12 @@ package org.edu_sharing.repository.server.importer;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Constructor;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,8 +51,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
+import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -57,7 +64,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class OAIPMHLOMImporter implements Importer{
-	
+
+	// best thread scaling seems to be at a max at 4-8 threads
+	// check the cpu and choose between a thread count between 1 - 6, leaving 1 core from the cpu at least untouched
+	private static final int THREAD_COUNT = Math.max(1, Math.min(6,Runtime.getRuntime().availableProcessors()-1));
 	Logger logger = Logger.getLogger(OAIPMHLOMImporter.class);
 	
 	XPathFactory pfactory = XPathFactory.newInstance();
@@ -69,20 +79,22 @@ public class OAIPMHLOMImporter implements Importer{
 	
 	public String metadataPrefix = "oai_elixier";//oai_lom
 	
-	private RecordHandlerInterface recordHandler;
+	private Constructor<RecordHandlerInterface> recordHandler;
 	
 	PersistentHandlerInterface persistentHandler;
 	
-	BinaryHandler binaryHandler;
+	Constructor<BinaryHandler> binaryHandler;
 	int nrOfResumptions = -1;
 	int nrOfRecords = -1;
 	
-	String[] sets = new String[]{"contake","melt"};
+	String set = "contake";
 	
 	String oai_base_url = null;
 	
 	String urlGetRecors = "";
-	
+	private ImporterJob job;
+	private String metadataSetId;
+
 	/**
 	 * @param oai_base_url
 	 * @param recordHandler
@@ -92,6 +104,7 @@ public class OAIPMHLOMImporter implements Importer{
 	 * @param sets
 	 * @throws Exception
 	 */
+	/*
 	public OAIPMHLOMImporter(String oai_base_url,PersistentHandlerInterface persistentHandler, RecordHandlerInterface recordHandler, BinaryHandler binaryHandler, int nrOfResumptions, int nrOfRecords, String metadataPrefix, String[] sets) throws Exception{
 		
 		this.oai_base_url = oai_base_url;
@@ -103,7 +116,7 @@ public class OAIPMHLOMImporter implements Importer{
 		this.sets = sets;
 		this.metadataPrefix = metadataPrefix;
 	}
-	
+	*/
 	public OAIPMHLOMImporter(){
 	}
 
@@ -111,15 +124,12 @@ public class OAIPMHLOMImporter implements Importer{
 		
 		//take identifiers list cause some of the sets don't work: XML-Verarbeitungsfehler: nicht wohlgeformt
 		String url = this.oai_base_url+"?verb=ListIdentifiers&metadataPrefix="+this.metadataPrefix;
-		for(String set : sets){
-			String setUrl = url+"&set="+set;
-			this.updateWithIdentifiersList(setUrl,set);
-		}
-		
+		String setUrl = url+"&set="+set;
+		this.updateWithIdentifiersList(setUrl);
 	}
 	
 	public static void main(String[] args){
-		
+		/*
 		String[] sets = new String[]{"melt","elixier","lehreronline","mbnrw","siemens"};
 	
 		String url = "http://daunddort.de/cp/oai_pmh/oai.php?verb=ListIdentifiers&metadataPrefix=oai_elixier";
@@ -147,12 +157,13 @@ public class OAIPMHLOMImporter implements Importer{
 				}
 				
 			});
-			importer.setRecordHandler(new RecordHandlerLOMTest());
+			importer.setRecordHandler(RecordHandlerLOMTest.class.getConstructor(String.class));
 			importer.setSet(sets[0]);
 			importer.startImport();
 		}catch(Throwable e){
 			e.printStackTrace();
 		}
+		*/
 	}
 	
 	public void updateWithRecordsList(String url,String set) throws Throwable{
@@ -192,10 +203,11 @@ public class OAIPMHLOMImporter implements Importer{
 			for(int i = 0; i < nrOfRs; i++){
 				logger.info("node:" + (i+1) +" from:"+nrOfRs);
 				Node nodeRecord = nodeList.item(i);
-				recordHandler.handleRecord(nodeRecord,cursor,set);
-				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
-				if(binaryHandler != null){
-					binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
+				RecordHandlerInterface handler = getRecordHandler();
+				handler.handleRecord(nodeRecord,cursor,set);
+				String nodeId = persistentHandler.safe(handler.getProperties(), cursor, set);
+				if(getBinaryHandler() != null){
+					getBinaryHandler().safe(nodeId, handler.getProperties(),nodeRecord);
 				}
 				new MCAlfrescoAPIClient().createVersion(nodeId, null);
 			}
@@ -204,7 +216,11 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 	}
 	
-	public void updateWithIdentifiersList(String url,String set) throws Throwable{
+	public void updateWithIdentifiersList(String url) throws Throwable{
+		if(job!=null && job.isInterrupted()){
+			logger.info("Will cancel oai fetching, job is aborted");
+			return;
+		}
 		logger.info("url:"+url);
 		String queryResult = new HttpQueryTool().query(url);
 		if(queryResult != null){
@@ -232,11 +248,11 @@ public class OAIPMHLOMImporter implements Importer{
 						Integer cursorAsNumber = new Integer(cursor);
 						int actualNrOfResumption = cursorAsNumber / 100;
 						if(actualNrOfResumption <= this.nrOfResumptions){
-							updateWithIdentifiersList(urlNext,set);
+							updateWithIdentifiersList(urlNext);
 						}
 					}else{
 						logger.info("token:"+token);
-						updateWithIdentifiersList(urlNext,set);
+						updateWithIdentifiersList(urlNext);
 					}
 				}catch(NumberFormatException e){
 					logger.error(e.getMessage(),e);
@@ -245,39 +261,71 @@ public class OAIPMHLOMImporter implements Importer{
 				logger.info("no more resumption. import finished!");
 			}
 		}
+		else{
+			logger.warn("Result for query url "+url+" was empty!");
+		}
 	}
+
 	
-	
+	private ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT, r -> {
+		Thread t = new Thread(r);
+		t.setPriority(Thread.NORM_PRIORITY-1);
+		return t;
+	});
 	public void handleIdentifierList(Document docIdentifiers, String cursor, String set) throws Throwable{
 		NodeList nodeList = (NodeList)xpath.evaluate("/OAI-PMH/ListIdentifiers/header", docIdentifiers, XPathConstants.NODESET);
-		
 		int nrOfRs = this.nrOfRecords;
 		if(nrOfRs == -1 || nrOfRs > nodeList.getLength()){
 			nrOfRs = nodeList.getLength();
 		}
+		List<Callable<Void>> threads = new ArrayList<>();
+		final String authority = AuthenticationUtil.getFullyAuthenticatedUser();
+		if(job!=null && job.isInterrupted()) {
+			logger.info("Will cancel identifier reading, job is aborted");
+			return;
+		}
+		long time=System.currentTimeMillis();
 		for(int i = 0; i < nrOfRs;i++){
-			Node headerNode = nodeList.item(i);
-			String identifier = (String)xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
-			String timeStamp = (String)xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
-			
-			String status = (String)xpath.evaluate("@status", headerNode, XPathConstants.STRING);
-			if(status != null && status.trim().equals("deleted")){
-				
-				logger.info("Object with Identifier:"+identifier+" is deleted. Will continue with the next one");
-				continue;
-			}
-			
-			if(persistentHandler.mustBePersisted(identifier, timeStamp)){
-				logger.info("identifier:" + identifier + " timeStamp: " + timeStamp+ " will be created/updated");
-				handleGetRecordStuff(cursor,set,identifier);
-			}else {
-				logger.info("identifier:" + identifier + " timeStamp: " + timeStamp+ " will NOT be updated");
-			}
-			
 			if(i > MAX_PER_RESUMPTION){
 				logger.error("only " +MAX_PER_RESUMPTION +" for one resumption token are allowed here");
 				break;
 			}
+			final Node headerNode = nodeList.item(i);
+			threads.add(()->{
+				AuthenticationUtil.runAs(()-> {
+					String identifier = (String) xpath.evaluate("identifier", headerNode, XPathConstants.STRING);
+					try {
+						if(job!=null && job.isInterrupted()){
+							return null;
+						}
+						String timeStamp = (String) xpath.evaluate("datestamp", headerNode, XPathConstants.STRING);
+						logger.debug("import "+identifier+" "+timeStamp);
+						String status = (String) xpath.evaluate("@status", headerNode, XPathConstants.STRING);
+						if (status != null && status.trim().equals("deleted")) {
+
+							logger.info("Object with Identifier:" + identifier + " is deleted. Will continue with the next one");
+							return null;
+						}
+
+						if (persistentHandler.mustBePersisted(identifier, timeStamp)) {
+							logger.info("identifier:" + identifier + " timeStamp: " + timeStamp + " will be created/updated");
+							handleGetRecordStuff(cursor, identifier);
+						} else {
+							logger.debug("identifier:" + identifier + " timeStamp: " + timeStamp + " will NOT be updated");
+						}
+					} catch (Throwable t) {
+						logger.warn("Error while handling identifier "+identifier,t);
+					}
+					return null;
+				},authority);
+				return null;
+			});
+		}
+		// wait until all previously started threads have finished
+		executor.invokeAll(threads);
+		time=(System.currentTimeMillis()-time);
+		if(threads.size()>0) {
+			logger.info(THREAD_COUNT + " Threads finished (" + threads.size() + ", " + (time / 1000) + " s -> " + (time / threads.size()) + "ms per entry)");
 		}
 	}
 
@@ -291,39 +339,47 @@ public class OAIPMHLOMImporter implements Importer{
 	private String getRecordUrl(String identifier) {
 		String url = oai_base_url+"?verb=GetRecord"+"&identifier="+identifier+"&metadataPrefix="+metadataPrefix;
 		if(oai_base_url.contains("sodis")) {
-			url+= "&set=" +sets[0];
+			url+= "&set=" +set;
 		}
 		return url;
 	}
 	
-	public void startImport(String[] oaiIDs, String set) {
+	public void startImport(String[] oaiIDs) {
 		for(String oaiID : oaiIDs) {
 			String url = getRecordUrl(oaiID);
 			logger.info("url record:"+url);
 			String result = new HttpQueryTool().query(url);
 			if(result != null && !result.trim().equals("")){
-				handleGetRecordStuff("IDList",set,oaiID);
+				handleGetRecordStuff("IDList",oaiID);
 			}
 		}
 	}
-	
+
+	@Override
+	public void setJob(ImporterJob importerJob) {
+		this.job = importerJob;
+	}
+
 	public static final int MAX_PER_RESUMPTION = 5000;
 	
-	protected void handleGetRecordStuff( String cursor, String set, String identifier){
+	protected void handleGetRecordStuff( String cursor, String identifier){
 		try{
+			long time=System.currentTimeMillis();
 			Document doc = getRecordAsDoc(identifier);
 			if(doc==null){
 				logger.info("Fetching of "+identifier+" failed, skipping entry!");
 				return;
 			}
+			logger.debug("Fetching oai "+identifier+" took "+(System.currentTimeMillis()-time)+" ms");
 			String errorcode = (String)xpath.evaluate("/OAI-PMH/error", doc, XPathConstants.STRING);
 			if(errorcode == null || errorcode.trim().equals("")){
 				Node nodeRecord = getRecordNodeFromDoc(doc);
-				recordHandler.handleRecord(nodeRecord, cursor, set);
-				String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
+				RecordHandlerInterface handler = getRecordHandler();
+				handler.handleRecord(nodeRecord, cursor, set);
+				String nodeId = persistentHandler.safe(handler.getProperties(), cursor, set);
 				if(nodeId != null) {
-					if(binaryHandler != null){
-						binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
+					if(getBinaryHandler() != null){
+						getBinaryHandler().safe(nodeId, handler.getProperties(),nodeRecord);
 					}
 					new MCAlfrescoAPIClient().createVersion(nodeId,null);
 				}
@@ -411,7 +467,7 @@ public class OAIPMHLOMImporter implements Importer{
 	}
 	
 	@Override
-	public void setBinaryHandler(BinaryHandler binaryHandler) {
+	public void setBinaryHandler(Constructor<BinaryHandler> binaryHandler) {
 		this.binaryHandler = binaryHandler;
 	}
 	
@@ -433,16 +489,40 @@ public class OAIPMHLOMImporter implements Importer{
 	public void setPersistentHandler(PersistentHandlerInterface persistentHandler) {
 		this.persistentHandler = persistentHandler;
 	}
-	
+
+	private RecordHandlerInterface getRecordHandler(){
+		try {
+			RecordHandlerInterface handler = this.recordHandler.newInstance(metadataSetId);
+			handler.setImporter(this);
+			return handler;
+		} catch (Exception e) {
+			logger.error(e);
+			return null;
+		}
+	}
+	private BinaryHandler getBinaryHandler(){
+		if(binaryHandler==null)
+			return null;
+		try {
+			BinaryHandler handler = this.binaryHandler.newInstance();
+			return handler;
+		} catch (Exception e) {
+			logger.error(e);
+			return null;
+		}
+	}
 	@Override
-	public void setRecordHandler(RecordHandlerInterface recordHandler) {
+	public void setRecordHandler(Constructor<RecordHandlerInterface> recordHandler) {
 		this.recordHandler = recordHandler;
-		this.recordHandler.setImporter(this);
 	}
 	
 	@Override
 	public void setSet(String set) {
-		this.sets = new String[]{set};	
+		this.set = set;
 	}
-	
+
+	@Override
+	public void setMetadataSetId(String metadataSetId) {
+		this.metadataSetId = metadataSetId;
+	}
 }

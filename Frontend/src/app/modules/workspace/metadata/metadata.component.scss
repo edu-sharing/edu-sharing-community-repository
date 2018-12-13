@@ -63,9 +63,11 @@ $side:20px;
 }
 
 .description{
-  color:$textLight;
+  color: $textMain;
   font-size:90%;
   float:left;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 .descriptionValue{
   white-space: pre-wrap;
@@ -96,6 +98,52 @@ $side:20px;
 }
 .description,.value{
   width:calc(100% - 30px);
+}
+/*Value show in memu-tabs*/
+.value-properties{
+  float: right;
+  line-height: 40px;
+  margin-right: 18px;
+}
+// Statiskik Canvas
+canvas{
+  margin: 20px 0;
+}
+listTable{
+  float:left;
+  width:100%;
+  padding: 10px 0 30px;
+}
+.statistic-value{
+  margin-left: 25px;
+  margin-top: -14px;
+  margin-bottom: 10px;
+  width: 110%;
+
+  .point{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    float: left;
+    text-align: center;
+    //width: 64px;
+    width:128px;
+    color: #383838;
+    font-weight: bold;
+    font-size: 26px;
+    i{
+      color: $textLight;
+      font-size: 20px;
+    }
+  }
+}
+
+.usage-count{
+  margin: 20px 0;
+  float: left;
+}
+.usage-counter{
+  font-weight: bold;
 }
 .preview{
   width:calc(100% + 24px);

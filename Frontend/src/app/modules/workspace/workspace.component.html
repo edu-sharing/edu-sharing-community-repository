@@ -1,6 +1,6 @@
 <div class="dialog darken dropZone" fileDrop
      (onFileDrop)="onFileDrop($event)"
-     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !showUploadSelect">
+     (fileOver)="fileIsOver=$event" *ngIf="fileIsOver && !hasOpenWindows()">
   <div>
     <i class="material-icons" *ngIf="!searchQuery && createAllowed && !filesToUpload">cloud_upload</i>
     <i class="material-icons" *ngIf="!(!searchQuery && createAllowed && !filesToUpload)">cloud_off</i>
@@ -24,10 +24,11 @@
      (fileOver)="fileIsOver=$event">
 
   <main-nav
+    #mainNav
     [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
     [currentScope]="isSafe ? 'safe' : 'workspace'"
     [searchEnabled]="!isBlocked"
-    [searchPlaceholder]="'WORKSPACE.SEARCH'"
+    [searchPlaceholder]="isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH' "
     [canOpen]="mainnav"
     [searchQuery]="searchQuery"
     (onSearch)="doSearch($event)"
@@ -50,35 +51,13 @@
                 [buttons]="dialogButtons"
                 [priority]="10"
   ></modal-dialog>
-  <div class="dialog darken dropZone" *ngIf="fileIsOver && false">
-    <div>
-      <p><i class="material-icons">cloud_download</i></p>
-      <p>{{'WORKSPACE.DROP_FILES' | translate}}</p>
-    </div>
-  </div>
-  <workspace-share *ngIf="sharedNode"
-  [nodeId]="sharedNode.ref.id"
-  [sendMessages]="true"
-  (onLoading)="globalProgress=$event"
-  (onClose)="sharedNode=null"
-  ></workspace-share>
-  <workspace-workflow *ngIf="workflowNode"
-                         [nodeId]="workflowNode.ref.id"
-                         (onLoading)="globalProgress=$event"
-                      (onDone)="closeWorkflow()"
-                      (onClose)="workflowNode=null"
-  ></workspace-workflow>
-  <workspace-share-link *ngIf="shareLinkNode"
-                         [node]="shareLinkNode"
-                         (onLoading)="globalProgress=$event"
-                         (onClose)="shareLinkNode=null"
-  ></workspace-share-link>
+
 
 
   <div class="addMobile fixed-action-btn"
        *ngIf="createAllowed"
-       (click)="createMobile()"
-       ><a class="btn-floating btn-large waves-effect"><i class="material-icons">add</i></a>
+       (click)="createMobile()">
+    <div class="mobile-move-bottom"><a class="btn-floating btn-large waves-effect"><i class="material-icons">add</i></a></div>
     <!--
   <ul>
     <li><a class="btn-floating btn-floating-inverted" (click)="showUploadSelect=true"><i class="material-icons">cloud_upload</i></a></li>
@@ -129,7 +108,7 @@
     <a class="collection-item" [class.rootSelected]="root=='SHARED_FILES'" (click)="showSelectRoot=false;setRoot('SHARED_FILES')"><i class="material-icons">group</i> {{ 'WORKSPACE.SHARED_FILES' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i class="material-icons">share</i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i class="material-icons">send</i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
-    <a *ngIf="supportsWorkflow()" class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i class="material-icons">inbox</i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i class="material-icons">inbox</i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
     <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i class="material-icons">delete</i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
 
@@ -137,7 +116,7 @@
                         [folder]="addFolderName"
                         [parent]="currentFolder"
                         (onCancel)="addFolderName=null"
-  (onFolderAdded)="addFolder($event)"
+                        (onFolderAdded)="addFolder($event)"
   ></workspace-add-folder>
 
   <workspace-create-connector *ngIf="createConnectorName!=null"
@@ -156,28 +135,34 @@
                   [isSafe]="isSafe"
                   [options]="explorerOptions"
                   (onDrop)="handleDrop($event)"
-  (onSetRoot)="setRoot($event)"
-  (onOpenNode)="openNode($event)"
-                  (onDeleteNodes)="deleteNode($event)"
+                  (onSetRoot)="setRoot($event)"
+                  (onOpenNode)="openNode($event)"
+                  (onDeleteNodes)="deleteNode=$event"
                   (onUpdateOptions)="updateOptions($event)"
   ></workspace-tree>
-<breadcrumbs class="breadcrumbFrame" *ngIf="isLoggedIn"
-  [breadcrumbsAsNode]="path"
-  [searchQuery]="searchQuery"
-  [home]="'WORKSPACE.'+root"
-  [canDrop]="canDropBreadcrumbs"
-  (onDrop)="handleDrop($event)"
-  [homeId]="getRootFolderId()"
-  (onClick)="openBreadcrumb($event)"
-></breadcrumbs>
+<div class="breadcrumbFrame">
+    <div class="mobile-move-top">
+        <breadcrumbs *ngIf="isLoggedIn"
+          [breadcrumbsAsNode]="path"
+          [searchQuery]="searchQuery"
+          [home]="'WORKSPACE.'+root"
+          [canDrop]="canDropBreadcrumbs"
+          (onDrop)="handleDrop($event)"
+          [homeId]="getRootFolderId()"
+          (onClick)="openBreadcrumb($event)"
+        ></breadcrumbs>
+    </div>
+</div>
   <recycle *ngIf="root=='RECYCLE'" class="explorer"
            [searchWorkspace]="searchQuery"
            [isInsideWorkspace]="true"></recycle>
-  <actionbar class="actionbarFrame"
+<div class="actionbarFrame"><div class="mobile-move-top">
+  <actionbar class=""
              *ngIf="actionOptions && actionOptions.length"
              [@fadeFast]="actionOptions && actionOptions.length"
              [options]="actionOptions"
 ></actionbar>
+</div></div>
   <workspace-explorer class="explorer"  [class.explorerMetadata]="metadataNode" *ngIf="root!='RECYCLE'" (contextmenu)="createContext($event)"
   [current]="currentFolderRef"
   [selection]="selection"
@@ -201,6 +186,11 @@
 [(nodeMetadata)]="editNodeMetadata"
 [(nodeTemplate)]="editNodeTemplate"
 [(nodeDeleteOnCancel)]="editNodeDeleteOnCancel"
+[(nodeWorkflow)]="workflowNode"
+[(nodeVariant)]="variantNode"
+[(nodeShare)]="sharedNode"
+[(nodeDelete)]="deleteNode"
+[(nodeShareLink)]="shareLinkNode"
 [(filesToUpload)]="filesToUpload"
 [fileIsOver]="fileIsOver"
 [(showUploadSelect)]="showUploadSelect"
@@ -209,8 +199,10 @@
 [(nodeContributor)]="contributorNode"
 (onRefresh)="refresh()"
 (onUploadFileSelected)="uploadFiles($event)"
+(onUploadFilesProcessed)="afterUpload($event)"
 (onUpdateLicense)="updateLicense()"
 (onCloseMetadata)="closeMetadata()"
+(onDelete)="deleteDone()"
 >
 </workspace-management>
 

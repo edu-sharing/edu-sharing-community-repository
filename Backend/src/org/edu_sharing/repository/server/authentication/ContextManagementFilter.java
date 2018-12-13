@@ -72,7 +72,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		} finally {
 			
 			log.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" cleaning up");
-			
+
 			NodeServiceInterceptor.setEduSharingScope((String)null);
 			SubsystemChainingAuthenticationService.setSuccessFullAuthenticationMethod((String)null);
 			

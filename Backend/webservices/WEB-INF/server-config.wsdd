@@ -136,7 +136,7 @@
 			deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
 			encodingStyle="" />
 		<typeMapping xmlns:ns="http://rpc.client.repository.edu_sharing.org"
-			qname="ns:GetPreviewResult" type="java:org.edu_sharing.repository.client.rpc.GetPreviewResult"
+			qname="ns:GetPreviewResult" type="java:org.edu_sharing.service.nodeservice.model.GetPreviewResult"
 			serializer="org.apache.axis.encoding.ser.BeanSerializerFactory"
 			deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory"
 			encodingStyle="" />

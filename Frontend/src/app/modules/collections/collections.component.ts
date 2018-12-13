@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 import {RouterComponent} from "../../router/router.component";
@@ -14,7 +14,6 @@ import {RestIamService} from "../../common/rest/services/rest-iam.service";
 import {RestHelper} from "../../common/rest/rest-helper";
 import {RestConstants} from "../../common/rest/rest-constants";
 
-import {GwtInterfaceService, GwtEventListener} from "../../common/services/gwt-interface.service";
 import {Toast} from "../../common/ui/toast";
 import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
 import {CollectionContent, LoginResult, MdsMetadataset} from "../../common/rest/data-object";
@@ -32,9 +31,8 @@ import {ConfigurationService} from "../../common/services/configuration.service"
 import {SessionStorageService} from "../../common/services/session-storage.service";
 import {UIConstants} from "../../common/ui/ui-constants";
 import {ListItem} from "../../common/ui/list-item";
-import {AddElement} from "../../common/ui/list-table/list-table.component";
+import {AddElement, ListTableComponent} from "../../common/ui/list-table/list-table.component";
 import {RestMdsService} from "../../common/rest/services/rest-mds.service";
-import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
 import {NodeHelper} from "../../common/ui/node-helper";
 import {TranslateService} from "@ngx-translate/core";
 import {MdsHelper} from "../../common/rest/mds-helper";
@@ -45,16 +43,17 @@ import {Helper} from "../../common/helper";
 import {UIService} from "../../common/services/ui.service";
 import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
 import {ColorHelper} from '../../common/ui/color-helper';
+import {ActionbarHelperService} from "../../common/services/actionbar-helper";
 
 // component class
 @Component({
   selector: 'app-collections',
   templateUrl: 'collections.component.html',
   styleUrls: ['collections.component.scss'],
-  providers: [GwtInterfaceService],
 })
-export class CollectionsMainComponent implements GwtEventListener {
+export class CollectionsMainComponent{
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
+  @ViewChild('listCollections') listCollections :  ListTableComponent;
 
   public dialogTitle : string;
     public globalProgress=false;
@@ -65,7 +64,6 @@ export class CollectionsMainComponent implements GwtEventListener {
     public tabSelected:string = RestConstants.COLLECTIONSCOPE_MY;
     public isLoading:boolean = true;
     public isReady:boolean = false;
-    private clearSearchOnNextStateChange:boolean = false;
 
     public collectionContent:EduData.CollectionContent;
     private collectionContentOriginal: EduData.CollectionContent;
@@ -104,11 +102,12 @@ export class CollectionsMainComponent implements GwtEventListener {
     private listOptions: OptionItem[];
     private _orderActive: boolean;
     optionsMaterials:OptionItem[];
+    tutorialElement: ElementRef;
+    private reurl: any;
   // default hides the tabs
 
     // inject services
     constructor(
-      public gwtInterface:GwtInterfaceService,
       private frame : FrameEventsService,
       private temporaryStorageService : TemporaryStorageService,
         private location : Location,
@@ -117,11 +116,13 @@ export class CollectionsMainComponent implements GwtEventListener {
         private organizationService : RestOrganizationService,
         private iamService : RestIamService,
         private mdsService : RestMdsService,
+      private actionbar : ActionbarHelperService,
       private storage : SessionStorageService,
       private connector : RestConnectorService,
         private route:ActivatedRoute,
         private uiService:UIService,
         private router : Router,
+        private tempStorage :TemporaryStorageService,
         private toast : Toast,
       private title:Title,
       private config:ConfigurationService,
@@ -131,30 +132,31 @@ export class CollectionsMainComponent implements GwtEventListener {
             this.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
             this.collectionContent = new EduData.CollectionContent();
             this.collectionContent.setCollectionID(RestConstants.ROOT);
-            this.gwtInterface.addListenerOfGwtEvents(this);
             Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
               UIHelper.setTitle('COLLECTIONS.TITLE',title,translationService,config);
               this.mdsService.getSet().subscribe((data:MdsMetadataset)=>{
                 this.referencesColumns=MdsHelper.getColumns(data,'collectionReferences');
-              })
+              });
+
+                this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+                    if(data.isValidLogin && data.currentScope==null) {
+                        this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
+                        this.isGuest=data.isGuest;
+                        this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
+                            this.hasEditorial=data.collections.length>0;
+                        });
+                        this.initialize();
+                    }else
+                        RestHelper.goToLogin(this.router,this.config);
+                },(error:any)=> RestHelper.goToLogin(this.router,this.config));
+
             });
-
-      this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
-        if(data.isValidLogin && data.currentScope==null) {
-          this.pinningAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PINNING);
-          this.isGuest=data.isGuest;
-          this.collectionService.getCollectionContent(RestConstants.ROOT,RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL).subscribe((data:CollectionContent)=>{
-            console.log(data);
-            this.hasEditorial=data.collections.length>0;
-          });
-          this.initialize();
-        }else
-          RestHelper.goToLogin(this.router,this.config);
-      },(error:any)=> RestHelper.goToLogin(this.router,this.config));
-
     }
     public isMobile(){
       return this.uiService.isMobile();
+    }
+    public isMobileWidth(){
+        return window.innerWidth<UIConstants.MOBILE_WIDTH;
     }
     public setCustomOrder(event:any){
       let checked=event.target.checked;
@@ -203,6 +205,7 @@ export class CollectionsMainComponent implements GwtEventListener {
       params.mainnav=this.mainnav;
       if(addToOther)
         params.addToOther=addToOther;
+      params.reurl=this.reurl;
       this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:params});
     }
     closeAddToOther(){
@@ -278,7 +281,6 @@ export class CollectionsMainComponent implements GwtEventListener {
       if(this.frame.isRunningInFrame()) {
       }
       else{
-        //ApplyToLmsComponent.navigateToSearchUsingReurl(this.router);
         this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{addToCollection:this.collectionContent.collection.ref.id}});
       }
     }
@@ -292,19 +294,29 @@ export class CollectionsMainComponent implements GwtEventListener {
         this.optionsMaterials=this.getOptions(nodes,false);
     }
     getOptions(nodes:Node[]=null,fromList:boolean) {
-        if (fromList && (!nodes || !nodes.length)) {
-            //nodes = [new Node()];
+        if(this.reurl){
+            // no action bar in apply mode
+            if(!fromList){
+                return [];
+            }
+            let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.tempStorage,ActionbarHelperService.getNodes(nodes,node)[0],this.reurl));
+            apply.enabledCallback=((node:Node)=> {
+                return NodeHelper.getNodesRight(ActionbarHelperService.getNodes(nodes,node),RestConstants.ACCESS_CC_PUBLISH);
+            });
+            return [apply];
         }
+
         let options: OptionItem[] = [];
         if (!fromList) {
             if (nodes && nodes.length) {
-                let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector, (node: Node) => this.addToOther = ActionbarHelper.getNodes(nodes, node));
-                if (collection)
-                    options.push(collection);
-
+                if (NodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CC_PUBLISH)) {
+                    let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOther = ActionbarHelperService.getNodes(nodes, node));
+                    if (collection)
+                        options.push(collection);
+                }
                 if (this.isAllowedToDeleteNodes(nodes)) {
                     let remove = new OptionItem('COLLECTIONS.DETAIL.REMOVE', 'remove_circle_outline', (node: Node) => {
-                        this.deleteMultiple(ActionbarHelper.getNodes(nodes, node));
+                        this.deleteMultiple(ActionbarHelperService.getNodes(nodes, node));
                     });
                     if (remove)
                         options.push(remove);
@@ -312,31 +324,28 @@ export class CollectionsMainComponent implements GwtEventListener {
             }
         }
         if (fromList) {
-            let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION', nodes, this.connector,
-                (node: Node) => this.addToOtherCollection(node));
+            let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => this.addToOtherCollection(node));
             if (collection) {
                 collection.name = 'COLLECTIONS.DETAIL.ADD_TO_OTHER';
                 options.push(collection);
             }
         }
       if (fromList || nodes && nodes.length) {
-
-            let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes, this.connector,
-                (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelper.getNodes(nodes, node)));
+            let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
             if (download)
                 options.push(download);
       }
       if(fromList) {
-          let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelper.getNodes(nodes, node)[0]));
+          let remove = new OptionItem("COLLECTIONS.DETAIL.REMOVE", "remove_circle_outline", (node: Node) => this.deleteReference(ActionbarHelperService.getNodes(nodes, node)[0]));
           remove.showCallback = (node: Node) => {
-              return this.isAllowedToDeleteNodes(ActionbarHelper.getNodes(nodes, node));
+              return this.isAllowedToDeleteNodes(ActionbarHelperService.getNodes(nodes, node));
           };
           if(remove)
             options.push(remove);
       }
       if(fromList || nodes && nodes.length==1) {
           if (this.config.instant("nodeReport", false)) {
-              let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelper.getNodes(nodes, node)[0]);
+              let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport = ActionbarHelperService.getNodes(nodes, node)[0]);
               if(report)
                 options.push(report);
           }
@@ -422,8 +431,10 @@ export class CollectionsMainComponent implements GwtEventListener {
     }
 
     buttonCollectionEdit() : void {
-        this.router.navigate([UIConstants.ROUTER_PREFIX+'collections/collection','edit',this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
-        return;
+        if (this.isAllowedToEditCollection()){
+            this.router.navigate([UIConstants.ROUTER_PREFIX+'collections/collection','edit',this.collectionContent.collection.ref.id],{queryParams:{mainnav:this.mainnav}});
+            return;
+        }
     }
 
     // gets called by user if something went wrong to start fresh from beginning
@@ -438,11 +449,6 @@ export class CollectionsMainComponent implements GwtEventListener {
         if (!this.isReady) return;
         this.isLoading=true;
         this.onSelection([]);
-        // clear search field in GWT top area
-        if (this.clearSearchOnNextStateChange) {
-            this.clearSearchOnNextStateChange=false;
-            this.gwtInterface.sendEvent("clearsearch", null);
-        }
 
         // set correct scope
         let scope=this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
@@ -455,7 +461,8 @@ export class CollectionsMainComponent implements GwtEventListener {
             RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
             RestConstants.CM_MODIFIED_DATE
            ],
-            sortAscending: [false,true,false]
+            sortAscending: [false,true,false],
+            count:RestConstants.COUNT_UNLIMITED
           },
           this.collectionContent.collection.ref.repo
         ).subscribe((collection:EduData.CollectionContent) => {
@@ -472,6 +479,11 @@ export class CollectionsMainComponent implements GwtEventListener {
             //this.sortCollectionContent();
             this.isLoading=false;
             this.mainNavRef.refreshBanner();
+            if(this.collectionContent.getCollectionID()==RestConstants.ROOT && this.isAllowedToEditCollection()) {
+                setTimeout(() => {
+                    this.tutorialElement = this.listCollections.addElementRef;
+                });
+            }
             if(callback)
               callback();
         },(error:any)=>{
@@ -479,7 +491,7 @@ export class CollectionsMainComponent implements GwtEventListener {
         });
 
 
-        if ((this.collectionContent.getCollectionID()!="-root-") && (this.collectionContent.collection.permission==null)) {
+        if ((this.collectionContent.getCollectionID()!=RestConstants.ROOT) && (this.collectionContent.collection.permission==null)) {
             this.nodeService.getNodePermissions(this.collectionContent.getCollectionID()).subscribe( permission => {
                 this.collectionContent.collection.permission = permission.permissions;
             });
@@ -616,9 +628,6 @@ export class CollectionsMainComponent implements GwtEventListener {
     }
 
   private initialize() {
-
-      this.listOptions = this.getOptions(null,true);
-
     // load user profile
     this.iamService.getUser().subscribe( iamUser => {
       // WIN
@@ -626,7 +635,6 @@ export class CollectionsMainComponent implements GwtEventListener {
       this.person = iamUser.person;
 
       // set app to ready state
-      this.gwtInterface.addListenerOfGwtEvents(this);
       this.isReady = true;
       // subscribe to parameters of url
       this.collectionIdParamSubscription = this.route.queryParams.subscribe(params => {
@@ -635,10 +643,13 @@ export class CollectionsMainComponent implements GwtEventListener {
             this.tabSelected=params['scope'];
         else
             this.tabSelected=RestConstants.COLLECTIONSCOPE_MY;
+        this.reurl=params['reurl'];
         if(this.isGuest)
           this.tabSelected=RestConstants.COLLECTIONSCOPE_ALL;
         if(params['mainnav'])
           this.mainnav=params['mainnav']!='false';
+
+        this.listOptions = this.getOptions(null,true);
 
         this._orderActive = false;
         this.infoTitle = null;

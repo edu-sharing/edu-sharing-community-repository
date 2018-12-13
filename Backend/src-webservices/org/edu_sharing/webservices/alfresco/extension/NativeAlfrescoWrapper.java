@@ -36,7 +36,7 @@ public interface NativeAlfrescoWrapper extends java.rmi.Remote {
     public org.edu_sharing.webservices.alfresco.extension.RepositoryNode[] searchNodes(java.lang.String store, java.lang.String luceneQuery, java.lang.String permission, java.lang.String[] propertiesToReturn) throws java.rmi.RemoteException;
     public java.lang.String validateTicket(java.lang.String ticket) throws java.rmi.RemoteException;
     public org.edu_sharing.webservices.alfresco.extension.RepositoryNode[] getVersionHistory(java.lang.String nodeId) throws java.rmi.RemoteException;
-    public org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException;
+    public org.edu_sharing.service.nodeservice.model.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException;
     public void createShare(java.lang.String nodeId, java.lang.String[] emails, long expiryDate) throws java.rmi.RemoteException;
     public org.edu_sharing.repository.client.rpc.Share[] getShares(java.lang.String nodeId) throws java.rmi.RemoteException;
     public boolean isOwner(java.lang.String nodeId, java.lang.String user) throws java.rmi.RemoteException;

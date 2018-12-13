@@ -5,7 +5,6 @@
   "rules": {
     "class-name": true,
     "eofline": true,
-    "forin": true,
     "indent": [
       true,
       "spaces"
@@ -18,7 +17,7 @@
     ],
     "member-access": false,
     "member-ordering": [
-      true,
+      false,
       "static-before-instance",
       "variables-before-functions"
     ],
@@ -37,11 +36,11 @@
     "no-duplicate-variable": true,
     "no-empty": false,
     "no-eval": true,
-    "no-inferrable-types": true,
+    "no-inferrable-types": false,
     "no-shadowed-variable": false,
     "no-string-literal": false,
     "no-switch-case-fall-through": true,
-    "no-trailing-whitespace": true,
+    "no-trailing-whitespace": false,
     "no-unused-expression": true,
     "no-unused-variable": true,
     "no-unreachable": true,

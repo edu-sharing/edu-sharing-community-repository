@@ -3,12 +3,10 @@
 md-input{
   width:100%;
 }
-.powered{
-  text-align: center;
-  width: 100%;
-  position:fixed;
-  top:calc(15% + 490px);
-  color: $textVeryLight;
+powered-by{
+  position: fixed;
+  left: 0;
+  top: calc(15% + 510px);
 }
 .card-cancel{
   z-index: 1;
@@ -49,7 +47,8 @@ md-input{
   .card-title{
     margin-bottom: 15px;
   }
-  .powered{
+  powered-by{
+    position: fixed;
     top:calc(15% + 410px);
   }
 

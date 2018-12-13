@@ -36,8 +36,8 @@ public class Test {
 		TestRecordHandler trh = new TestRecordHandler();
 		
 		try {
-			OAIPMHLOMImporter imp = new OAIPMHLOMImporter("http://sodis.de/cp/oai_pmh/oai.php",ph, trh, null,-1, -1, "oai_lom-de", new String[] {"omega_activated"});
-			imp.startImport();
+			//OAIPMHLOMImporter imp = new OAIPMHLOMImporter("http://sodis.de/cp/oai_pmh/oai.php",ph, trh, null,-1, -1, "oai_lom-de", new String[] {"omega_activated"});
+			//imp.startImport();
 			System.out.println("count:" + trh.getCounter());
 			for(Map.Entry<String,Integer> entry : trh.getReplicationIdCounter().entrySet()) {
 				System.out.println("replid:" + entry.getKey() +": " + entry.getValue());

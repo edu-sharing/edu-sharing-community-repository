@@ -52,6 +52,9 @@
       <li class="clickable tab col s3" (click)="setTab('IMPORT')">
         <a [class.active]="tab=='IMPORT'" >{{'ADMIN.TAB.IMPORT' | translate}}</a>
       </li>
+      <li class="clickable tab col s3" (click)="setTab('JOBS')">
+        <a [class.active]="tab=='JOBS'" >{{'ADMIN.TAB.JOBS' | translate}}</a>
+      </li>
       <li class="clickable tab col s3" (click)="setTab('TOOLKIT')">
         <a [class.active]="tab=='TOOLKIT'" >{{'ADMIN.TAB.TOOLKIT' | translate}}</a>
       </li>
@@ -69,6 +72,26 @@
   <div class="version">{{ repositoryVersion }}</div>
   <div class="heading">{{'ADMIN.INFO.NG' | translate}}</div>
   <div class="version">{{ ngVersion }}</div>
+  <div class="heading">{{'ADMIN.INFO.SYSTEM_CHECKS' | translate}}</div>
+  <div class="checks">
+      <div class="reload"><i class="material-icons clickable" (click)="runChecks()">refresh</i></div>
+      <div *ngFor="let check of getSystemChecks()" class="check" [class.check-fail]="check.status=='FAIL'" [class.check-warn]="check.status=='WARN'">
+            <div class="data">
+                <div class="title">{{('ADMIN.INFO.CHECK.'+check.name+'.TITLE') | translate:check.translate }}</div>
+                <div class="description">{{('ADMIN.INFO.CHECK.'+check.name+'.STATUS_'+check.status) | translate:check.translate }}</div>
+                <div *ngIf="check.status!='OK'" class="solution">
+                    <i class="material-icons">forward</i>
+                    <div>
+                    {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION') | translate:check.translate }}
+                    <a *ngIf="check.status!='OK' && check.callback" class="solution-link clickable" (click)="check.callback()">
+                        {{('ADMIN.INFO.CHECK.'+check.name+'.SOLUTION_LINK') | translate:check.translate }}
+                    </a>
+                    </div>
+                </div>
+            </div>
+            <i class="material-icons">{{check.status=='OK' ? 'check' : 'error_outline'}}</i>
+        </div>
+    </div>
 </div>
 <div *ngIf="tab=='APPLICATIONS'" class="content applications">
   <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
@@ -196,20 +219,38 @@
   </div>
   <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.OAI' | translate}}</span></div>
   <div class="oai">
-    <input type="text" [(ngModel)]="oai.url" placeholder="{{'ADMIN.IMPORT.OAI_URL' | translate}}">
-    <input type="text" [(ngModel)]="oai.set" placeholder="{{'ADMIN.IMPORT.OAI_SET' | translate}}">
-    <input type="text" [(ngModel)]="oai.prefix" placeholder="{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}">
-    <input type="text" [(ngModel)]="oai.metadata" placeholder="{{'ADMIN.IMPORT.OAI_METADATA' | translate}}">
-    <input type="text" [(ngModel)]="oai.file" placeholder="{{'ADMIN.IMPORT.OAI_FILE' | translate}}">
-    <input type="text" [(ngModel)]="oai.oaiIds" placeholder="{{'ADMIN.IMPORT.OAI_IDS' | translate}}">
-    <select [(ngModel)]="oai.className">
-      <option *ngFor="let option of oaiClasses">{{ option }}</option>
-    </select>
-    <input type="text" [(ngModel)]="oai.importerClassName" placeholder="{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}">
-    <input type="text" [(ngModel)]="oai.recordHandlerClassName" placeholder="{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}">
-    <input type="text" [(ngModel)]="oai.binaryHandlerClassName" placeholder="{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}">
+    <label for="OAI_URL">{{'ADMIN.IMPORT.OAI_URL' | translate}}</label>
+    <input type="text" id="OAI_URL" [(ngModel)]="oai.url">
+    <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_URL_EXAMPLE' | translate}}</div>
+    <label for="OAI_SET">{{'ADMIN.IMPORT.OAI_SET' | translate}}</label>
+    <input type="text" id="OAI_SET" [(ngModel)]="oai.set">
+      <label for="OAI_PREFIX">{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}</label>
+      <input type="text" id="OAI_PREFIX" [(ngModel)]="oai.prefix">
+      <label for="OAI_METADATA">{{'ADMIN.IMPORT.OAI_METADATA' | translate}}</label>
+      <input type="text" id="OAI_METADATA" [(ngModel)]="oai.metadata">
+      <label for="OAI_FILE">{{'ADMIN.IMPORT.OAI_FILE' | translate}}</label>
+      <input type="text" id="OAI_FILE" [(ngModel)]="oai.file">
+      <label for="OAI_IDS">{{'ADMIN.IMPORT.OAI_IDS' | translate}}</label>
+      <input type="text" id="OAI_IDS" [(ngModel)]="oai.ids">
+      <label for="OAI_CLASS_NAME">{{'ADMIN.IMPORT.OAI_CLASS_NAME' | translate}}</label>
+      <select id="OAI_CLASS_NAME" [(ngModel)]="oai.className">
+        <option *ngFor="let option of oaiClasses">{{ option }}</option>
+      </select>
+      <label for="OAI_SET">{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}</label>
+      <input type="text" id="OAI_IMPORTER_CLASS_NAME" [(ngModel)]="oai.importerClassName">
+    <label for="OAI_RECORD_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}</label>
+    <input type="text" id="OAI_RECORD_HANDLER_CLASS_NAME" [(ngModel)]="oai.recordHandlerClassName">
+    <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
+
+    <label for="OAI_BINARY_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}</label>
+    <input type="text" id="OAI_BINARY_HANDLER_CLASS_NAME" [(ngModel)]="oai.binaryHandlerClassName">
+    <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
+    <div class="oaiForce">
+      <input type="checkbox" id="OAI_FORCE_UPDATE" class="filled-in" [(ngModel)]="oai.forceUpdate">
+      <label for="OAI_FORCE_UPDATE">{{'ADMIN.IMPORT.OAI_FORCE_UPDATE' | translate}}</label>
+    </div>
     <div class="oaiSave">
-      <input type="checkbox" id="oaiSave" class="filled-in" [(ngModel)]="oaiSave"><label for="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</label>
+        <input type="checkbox" id="oaiSave" class="filled-in" [(ngModel)]="oaiSave"><label for="oaiSave">{{'ADMIN.IMPORT.OAI_SAVE' | translate}}</label>
     </div>
     <a class="btn-flat btn-shadow" (click)="removeImports()">{{'ADMIN.IMPORT.REMOVE_IMPORTS' | translate}}</a>
     <a class="btn waves-effect waves-light" (click)="oaiImport()">{{'ADMIN.IMPORT.OAI_START' | translate}}</a>
@@ -220,6 +261,88 @@
     <a class="btn-flat btn-shadow" (click)="refreshCache(true)">{{'ADMIN.IMPORT.STICKY_REFRESH_CACHE' | translate}}</a>
     <div class="propertyGroup"><a class="btn-flat btn-shadow" (click)="getPropertyValues()">{{'ADMIN.IMPORT.PROPERTY_VALUESPACE' | translate}}</a><input type="text" [(ngModel)]="propertyName" placeholder="{{'ADMIN.IMPORT.PROPERTY_NAME' | translate}}"></div>
   </div>
+</div>
+<div *ngIf="tab=='JOBS'" class="content jobs">
+    <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
+    <div class="group">
+        <form (ngSubmit)="startJob()">
+            <div class="inputGroupGrow">
+                <div class="info">{{'ADMIN.TOOLKIT.JOB_CLASS' | translate }}</div>
+                <input type="text" name="jobClass" [(ngModel)]="job.class" placeholder="org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob">
+            </div>
+            <textarea name="jobParams" class="jobParams" [(ngModel)]="job.params" placeholder='{"param1":"value1","param2":"value2"}'></textarea>
+            <div class="btn-flat btn-shadow" (click)="startJob()">{{'ADMIN.TOOLKIT.START_JOB' | translate }}</div>
+        </form>
+    </div>
+    <div class="heading"><i class="material-icons">history</i><span>{{'ADMIN.JOBS.LIST' | translate}}</span></div>
+    <div class="group">
+        <div class="reload"><i class="material-icons clickable" (click)="reloadJobStatus()">refresh</i></div>
+        <div class="no-jobs" *ngIf="!jobs || !jobs.length">{{'ADMIN.JOBS.NO_JOBS' | translate}}</div>
+        <div *ngFor="let job of jobs;let i=index" class="job">
+            <div class="job-col">
+                <div class="job-row job-main"
+                     [class.status-error]="job.worstLevel.syslogEquivalent<=3"
+                     [class.status-warning]="job.worstLevel.syslogEquivalent<=4"
+                     [class.status-fine]="job.worstLevel.syslogEquivalent>=6"
+                     [class.status-aborted]="job.status=='Aborted'">
+                    <div class="job-col col-name">
+                        <div class="name">{{job.jobDetail.name}}</div>
+                        <div class="class">{{job.jobDetail.jobClass}}</div>
+                    </div>
+                    <div class="job-col col-time">
+                        <div class="date">
+                            {{job.startTime | formatDate:{time:true,relative:false} }}
+                            <span *ngIf="job.finishTime">
+                                - {{job.finishTime | formatDate:{time:true,relative:false} }}
+                            </span>
+                        </div>
+                        <div class="job-status {{job.status.toLowerCase()}}">
+                            <span>
+                                {{'ADMIN.JOBS.'+job.status | translate}}
+                                <span *ngIf="job.worstLevel.syslogEquivalent==4">{{'ADMIN.JOBS.WITH_WARNINGS' | translate}}</span>
+                                <span *ngIf="job.worstLevel.syslogEquivalent<4">{{'ADMIN.JOBS.WITH_ERRORS' | translate}}</span>
+                            </span>
+                            <spinner-small *ngIf="job.status=='Running'"></spinner-small>
+                            <i class="material-icons cancel clickable" *ngIf="job.status=='Running'" (click)="cancelJob(job)">close</i>
+                        </div>
+                    </div>
+                    <div class="job-col col-more" [class.clickable]="job.log && job.log.length" (click)="job.log && job.log.length ? jobsOpen[i]=jobsOpen[i] ? false : true : null">
+                        <i class="material-icons" *ngIf="job.log && job.log.length">{{jobsOpen[i] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</i>
+                    </div>
+                </div>
+                <div class="job-col row-detail" *ngIf="jobsOpen[i]">
+                    <div class="job-row log-filters">
+                        <div class="job-row log-filter">
+                            <label for="logLevel">{{'ADMIN.JOBS.LOG_FILTER' | translate}}</label>
+                            <input type="text" id="logFilter"[(ngModel)]="jobsLogFilter[i]" (ngModelChange)="updateJobLogs()">
+                        </div>
+                        <div class="job-row log-level">
+                            <label for="logLevel">{{'ADMIN.JOBS.LOG_LEVEL' | translate}}</label>
+                            <select id="logLevel"[(ngModel)]="jobsLogLevel[i]" (ngModelChange)="updateJobLogs()">
+                                <option value="undefined">Alles</option>
+                                <option value="4">{{'ADMIN.JOBS.LOG_LEVEL_4' | translate}}</option>
+                                <option value="3">{{'ADMIN.JOBS.LOG_LEVEL_3' | translate}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="job-col">
+                        <div class="log">{{'ADMIN.JOBS.LOG' | translate}}</div>
+                        <div class="log-data">
+                            <div *ngFor="let entry of jobsLogData[i]" class="job-row"
+                                 [class.status-error]="entry.level.syslogEquivalent<=3"
+                                 [class.status-warning]="entry.level.syslogEquivalent<=4"
+                            >
+                                <div class="log-level">{{'ADMIN.JOBS.LOG_LEVEL_'+entry.level.syslogEquivalent | translate}}</div>
+                                <div class="log-date">{{entry.date | formatDate:{time:true,date:false,relative:false} }}</div>
+                                <div class="log-class">{{ entry.className.split(".")[entry.className.split(".").length-1] }}</div>
+                                <div class="log-message">{{entry.message}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div *ngIf="tab=='TOOLKIT'" class="content toolkit">
   <div class="heading"><i class="material-icons">refresh</i><span>{{'ADMIN.TOOLKIT.REFRESH_APP' | translate}}</span></div>
@@ -238,17 +361,6 @@
       <div class="btn-flat btn-shadow" (click)="getCacheInfo()">{{'ADMIN.TOOLKIT.CACHE_INFO' | translate }}</div>
     </form>
   </div>
-  <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.START_JOB' | translate}}</span></div>
-  <div class="group">
-    <form (ngSubmit)="startJob()">
-      <div class="inputGroupGrow">
-        <div class="info">{{'ADMIN.TOOLKIT.JOB_CLASS' | translate }}</div>
-        <input type="text" name="jobClass" [(ngModel)]="job.class" placeholder="org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob">
-      </div>
-      <textarea name="jobParams" class="jobParams" [(ngModel)]="job.params" placeholder='{"param1":"value1","param2":"value2"}'></textarea>
-      <div class="btn-flat btn-shadow" (click)="startJob()">{{'ADMIN.TOOLKIT.START_JOB' | translate }}</div>
-    </form>
-  </div>
   <div class="heading"><i class="material-icons">file_upload</i><span>{{'ADMIN.TOOLKIT.UPLOAD_TEMP' | translate}}</span></div>
   <div class="group">
     <input #uploadTempSelect type="file" style="display:none" id="uploadTempSelect" (change)="updateUploadTempFile($event)">
@@ -258,6 +370,22 @@
     </div>
     <a class="btn waves-effect waves-light" (click)="startUploadTempFile()">{{'ADMIN.TOOLKIT.UPLOAD_TEMP_START' | translate}}</a>
   </div>
+    <div class="heading"><i class="material-icons">done</i><span>{{'ADMIN.TOOLKIT.TEST_MAIL' | translate}}</span></div>
+    <div class="group">
+        <form (ngSubmit)="testMail()">
+            <div class="inputGroupGrow">
+                <div class="info">{{'ADMIN.TOOLKIT.TEST_MAIL_RECEIVER' | translate }}</div>
+                <input type="email" name="receiver" [(ngModel)]="mailReceiver">
+            </div>
+            <div class="inputGroupGrow">
+                <div class="info">{{'ADMIN.TOOLKIT.TEST_MAIL_TEMPLATE' | translate }}</div>
+                <select name="template" [(ngModel)]="mailTemplate">
+                    <option *ngFor="let template of mailTemplates">{{template}}</option>
+                </select>
+            </div>
+            <a class="btn btn-shadow" [class.disabled]="!mailReceiver || !mailTemplate" (click)="testMail()">{{'ADMIN.TOOLKIT.TEST_MAIL_SEND' | translate }}</a>
+        </form>
+    </div>
   <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
   <div class="group catalina">
     <div class="btn-flat btn-shadow" (click)="refreshCatalina()"><i class="material-icons">refresh</i></div>
@@ -265,8 +393,22 @@
   </div>
 </div>
 <div *ngIf="tab=='BROWSER'" class="content browser">
-  <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.LUCENE_SEARCH' | translate}}</span></div>
-  <div class="group">
+  <div class="heading"><i class="material-icons">search</i><span>{{'ADMIN.BROWSER.NODE_BROWSER' | translate}}</span></div>
+    <div class="inputGroupGrow">
+        <div class="info">{{'ADMIN.BROWSER.MODE' | translate }}</div>
+        <select [(ngModel)]="lucene.mode">
+            <option value="NODEREF">Node-Ref / Node-Id</option>
+            <option value="SOLR">Solr / Lucene Query</option>
+        </select>
+    </div>
+    <div *ngIf="lucene.mode=='NODEREF'" class="group">
+        <div class="inputGroupGrow">
+            <div class="info">{{'ADMIN.BROWSER.NODEREF' | translate }}</div>
+            <input type="text" name="noderef" [(ngModel)]="lucene.noderef" placeholder='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"'>
+        </div>
+        <a class="btn waves-effect waves-light" (click)="searchNoderef()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
+    </div>
+  <div *ngIf="lucene.mode=='SOLR'" class="group">
     <div class="inputGroupGrow">
       <div class="info">{{'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</div>
       <input type="text" name="luceneQuery" [(ngModel)]="lucene.query" placeholder='@cm\:name:"*"'>
@@ -291,18 +433,20 @@
       <input type="number" name="luceneCount" [(ngModel)]="lucene.count">
       <a class="btn waves-effect waves-light" (click)="searchLucene()">{{'ADMIN.BROWSER.LUCENE_START' | translate}}</a>
   </div>
-  <div>
-      <listTable
-              [viewType]="0"
-              [columns]="searchColumns"
-              [hasHeading]="true"
-              [nodes]="luceneNodes"
-              [hasIcon]="true"
-              [isClickable]="true"
-              (clickRow)="debugNode($event)"
-      ></listTable>
   </div>
-  </div>
+    <div>
+        <listTable
+                [viewType]="0"
+                [columns]="searchColumns"
+                [hasHeading]="true"
+                [nodes]="luceneNodes"
+                [hasCheckbox]="true"
+                [hasIcon]="true"
+                [totalCount]="luceneCount"
+                [isClickable]="true"
+                (clickRow)="debugNode($event)"
+        ></listTable>
+    </div>
 </div>
 <div *ngIf="tab=='FOLDERTEMPLATES'" class="content foldertemplates">
   <form (ngSubmit)="applyTemplate()">

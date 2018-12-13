@@ -427,7 +427,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "nodeId"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"), java.lang.String.class, false, false);
         oper.addParameter(param);
         oper.setReturnType(new javax.xml.namespace.QName("http://rpc.client.repository.edu_sharing.org", "GetPreviewResult"));
-        oper.setReturnClass(org.edu_sharing.repository.client.rpc.GetPreviewResult.class);
+        oper.setReturnClass(org.edu_sharing.service.nodeservice.model.GetPreviewResult.class);
         oper.setReturnQName(new javax.xml.namespace.QName("http://extension.alfresco.webservices.edu_sharing.org", "getPreviewUrlReturn"));
         oper.setStyle(org.apache.axis.constants.Style.WRAPPED);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
@@ -1404,7 +1404,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
 
             qName = new javax.xml.namespace.QName("http://rpc.client.repository.edu_sharing.org", "GetPreviewResult");
             cachedSerQNames.add(qName);
-            cls = org.edu_sharing.repository.client.rpc.GetPreviewResult.class;
+            cls = org.edu_sharing.service.nodeservice.model.GetPreviewResult.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -2420,7 +2420,7 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
 }
     }
 
-    public org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException {
+    public org.edu_sharing.service.nodeservice.model.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
@@ -2444,9 +2444,9 @@ public class NativeAlfrescoWrapperSoapBindingStub extends org.apache.axis.client
         else {
             extractAttachments(_call);
             try {
-                return (org.edu_sharing.repository.client.rpc.GetPreviewResult) _resp;
+                return (org.edu_sharing.service.nodeservice.model.GetPreviewResult) _resp;
             } catch (java.lang.Exception _exception) {
-                return (org.edu_sharing.repository.client.rpc.GetPreviewResult) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.repository.client.rpc.GetPreviewResult.class);
+                return (org.edu_sharing.service.nodeservice.model.GetPreviewResult) org.apache.axis.utils.JavaUtils.convert(_resp, org.edu_sharing.service.nodeservice.model.GetPreviewResult.class);
             }
         }
   } catch (org.apache.axis.AxisFault axisFaultException) {

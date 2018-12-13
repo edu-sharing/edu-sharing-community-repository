@@ -14,6 +14,8 @@ public class Edu_SharingProperties {
 	
 	public static final String KEY_FUZZY_USERSEARCH = "fuzzy_usersearch";
 	
+	public static final String KEY_PERSON_ACTIVE_STATUS = "person_active_status";
+	
 	public static final String PROPERTY_FILE = "edu-sharing.properties";
 	
 	
@@ -29,6 +31,8 @@ public class Edu_SharingProperties {
 	
 	boolean fuzzyUserSearch = false;
 	
+	String personActiveStatus = null;
+	
 	
 	
 	private  Edu_SharingProperties() {
@@ -41,7 +45,7 @@ public class Edu_SharingProperties {
 				helpUrlCustom = PropertiesHelper.getProperty(KEY_HELP_URL_CUSTOM, PROPERTY_FILE, PropertiesHelper.TEXT);
 				helpUrlShare = PropertiesHelper.getProperty(KEY_HELP_URL_SHARE, PROPERTY_FILE, PropertiesHelper.TEXT);
 				fuzzyUserSearch = Boolean.parseBoolean(PropertiesHelper.getProperty(KEY_FUZZY_USERSEARCH, PROPERTY_FILE, PropertiesHelper.TEXT));
-			
+				personActiveStatus = PropertiesHelper.getProperty(KEY_PERSON_ACTIVE_STATUS, PROPERTY_FILE, PropertiesHelper.TEXT);
 			
 			}catch(Exception e){
 				e.printStackTrace();
@@ -74,6 +78,9 @@ public class Edu_SharingProperties {
 		return fuzzyUserSearch;
 	}
 	
+	public String getPersonActiveStatus() {
+		return personActiveStatus;
+	}
 	
 	public static final Edu_SharingProperties instance = new Edu_SharingProperties();
 	

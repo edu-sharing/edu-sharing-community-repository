@@ -9,6 +9,7 @@
       "APPLICATIONS":"Quellen",
       "UPDATE":"Server Update",
       "IMPORT":"Import",
+      "JOBS":"Aufgaben",
       "TOOLKIT":"Tool Kit",
       "BROWSER":"Browser",
       "FOLDERTEMPLATES": "Ordnervorlagen"
@@ -63,7 +64,41 @@
     },
     "INFO":{
       "REPOSITORY":"Repository-Version (Server-Side)",
-      "NG":"Angular/Interface-Version (Client-Side)"
+      "NG":"Angular/Interface-Version (Client-Side)",
+      "SYSTEM_CHECKS":"Allgemeine Systemtests",
+      "CHECK":{
+        "RENDERING":{
+          "TITLE":"Repository + Renderingservice Version",
+          "STATUS_OK":"Version beider Systeme stimmt überein: {{repository}}",
+          "STATUS_FAIL":"Version von Repository ({{repository}}) und Renderingservice ({{renderservice}}) stimmen nicht überein oder Renderingservice wurde nicht gefunden. Inhalte werden möglicherweise falsch oder gar nicht angezeigt",
+          "SOLUTION":"Überprüfen Sie, ob ein Renderingservice angebunden ist (Quellen) und ob die korrekte Version installiert ist"
+        },
+        "COMPANY_HOME":{
+          "TITLE":"Freigabe-Zustand des Hauptverzeichnisses",
+          "STATUS_OK":"Das Hauptverzeichnis ist aktuell nicht öffentlich sichtbar und alle darunterliegende Verzeichnisse können beliebig veröffentlicht werden",
+          "STATUS_FAIL":"Das Hauptverzeichnis ist öffentlich sichtbar und alle neu erstellten Dateien und Ordner, unabhängig vom Ort, können potentiell von allen Nutzern abgerufen werden",
+          "SOLUTION":"Navigieren Sie als Administrator zum \"Firmen-Home\" und entfernen Sie die öffentliche Freigabe. Überprüfen Sie anschließend, dass alle Daten, die öffentlich verfügbar sein sollen, weiterhin abrufbar sind",
+          "SOLUTION_LINK":"Im Workspace öffnen"
+        },
+        "JOBS_RUNNING":{
+          "TITLE":"Laufende Hintergrundaufgaben",
+          "STATUS_OK":"Aktuell sind keine Aufgaben im Hintergrund aktiv und die Systemleistung nicht beeinträchtigt",
+          "STATUS_WARN":"Aktuell ist/sind {{count}} Aufgabe(n) im Hintergrund aktiv. Die Systemleistung wird möglicherweise negativ beeinflusst",
+          "SOLUTION":"Überprüfen Sie laufende Aufgaben unter \"Aufgaben\", beenden Sie eventuell nicht mehr benötigte oder versuchen Sie die Anzahl aktueller Zugriffe zu minimieren"
+        },
+        "MAIL_SETUP":{
+          "TITLE":"Mailserver-Konfiguration",
+          "STATUS_OK":"Der Mailserver {{mail.smtp.server}} wird für das Versenden von E-Mails verwendet",
+          "STATUS_FAIL":"Es wurde noch kein Mailserver registriert",
+          "SOLUTION":"Wechseln Sie in den Bereich \"Quellen\" und bearbeiten Sie die Datei ccmail.properties.xml. Tragen Sie die korrekten Werte für Ihr Mail-System ein"
+        },
+        "MAIL_REPORT":{
+          "TITLE":"Problem-Melden Funktion",
+          "STATUS_OK":"Die Funktion ist aktiv, eingehende Anfragen werden an die Adresse {{mail.report.receiver}} versendet.",
+          "STATUS_FAIL":"Die Funktion ist aktiv, aber die Konfiguration ist ungültig.",
+          "SOLUTION":"Wechseln Sie in den Bereich \"Quellen\" und bearbeiten Sie die Datei ccmail.properties.xml. Fügen Sie \"mail.report.receiver\" hinzu und tragen Sie die E-Mail-Adresse für eingehende Anfragen ein"
+        }
+      }
     },
     "IMPORT":{
       "EXCEL":"Import Excel Data",
@@ -76,22 +111,27 @@
       "PARENT_COLLECTION_CHOOSE":"Gewünschte Hauptsammlung wählen",
       "EXCEL_START":"Import Starten",
       "COLLECTION_START":"Import starten",
-      "OAI":"OAI Data",
+      "OAI":"Datenimport OAI-Quelle",
       "OAI_STARTED":"OAI Import-Job gestartet",
-      "OAI_URL":"OAI Base URL",
+      "OPEN_JOBS":"Status anzeigen",
+      "OAI_URL":"OAI Base URL:",
+      "OAI_URL_EXAMPLE":"http://server.domain/oai/provider",
       "OAI_NO_URL":"OAI Base URL fehlt",
-      "OAI_SET":"OAI Set/Catalog ID",
+      "OAI_SET":"OAI Sets/Catalog ID (Komma-Getrennt)",
       "OAI_NO_SET":"OAI Set/Catalog ID fehlt",
       "OAI_PREFIX":"OAI Metadata Prefix",
       "OAI_NO_PREFIX":"OAI Metadata Prefix fehlt",
-      "OAI_METADATA":"OAI Metadata Set",
-      "OAI_FILE":"URL to File",
-      "OAI_IDS":"Specific id's to import, comma seperated",
+      "OAI_METADATA":"OAI Metadata Set (Optional)",
+      "OAI_FILE":"Datei-URL (Optional)",
+      "OAI_IDS":"Ausgewählte Import-Ids (Komma-Getrennt) (Optional)",
       "OAI_IMPORTER":"Importer Job",
-      "OAI_IMPORTER_CLASS_NAME":"Importer Class Name",
-      "OAI_RECORD_HANDLER_CLASS_NAME":"Record Handler Class Name",
-      "OAI_BINARY_HANDLER_CLASS_NAME":"Binary Handler Class Name",
-      "OAI_STARTED":"OAI Import-Job gestartet",
+      "OAI_CLASS_NAME":"Klassenname",
+      "OAI_IMPORTER_CLASS_NAME":"Importer Klassenname",
+      "OAI_RECORD_HANDLER_CLASS_NAME":"Record Handler Klassenname",
+      "OAI_RECORD_HANDLER_CLASS_NAME_EXAMPLE":"org.edu_sharing.repository.server.importer.RecordHandlerLOM",
+      "OAI_BINARY_HANDLER_CLASS_NAME":"Binary Handler Klassenname (Optional)",
+      "OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE":"org.edu_sharing.repository.server.importer.BinaryHandlerTechnicalLocation",
+      "OAI_FORCE_UPDATE":"Alle bestehenden Nodes neu importieren/überschreiben",
       "OAI_START":"OAI Import",
       "OAI_SAVE":"Werte für nächsten Import speichern",
       "ADMINISTRATION":"Import Administration",
@@ -120,17 +160,44 @@
       "UPLOAD_TEMP_START":"Hochladen",
       "UPLOAD_TEMP_DONE":"Datei wurde unter {{filename}} auf dem Server abgelegt",
       "JOB_CLASS":"Klassenname der Job-Klasse:",
-      "JOB_STARTED":"Der Job wurde gestartet. Überprüfen Sie die catalina.out für den Status",
-      "START_JOB":"Job ausführen"
+      "JOB_STARTED":"Die Aufgabe wurde gestartet. Überprüfen Sie die Aufgabenliste, um den Status einzusehen",
+      "START_JOB":"Aufgabe ausführen",
+      "TEST_MAIL":"E-Mail-Templates testen",
+      "TEST_MAIL_RECEIVER":"Empfänger Test-E-Mail:",
+      "TEST_MAIL_TEMPLATE":"Template für E-Mail:",
+      "TEST_MAIL_SEND":"Senden",
+      "MAIL_SENT":"Test-E-Mail an {{receiver}} gesendet"
     },
     "BROWSER":{
-      "LUCENE_SEARCH":"Suche via Lucene",
+      "NODE_BROWSER":"Node-Browser",
+      "MODE":"Modus:",
+      "NODEREF":"UUID der gesuchten Node:",
       "LUCENE_QUERY":"Lucene-Query:",
       "LUCENE_AUTHORITIES":"Suchen als folgende Authorities:",
       "LUCENE_OFFSET":"Start bei:",
       "LUCENE_COUNT":"Anzahl Treffer:",
       "LUCENE_START":"Suchen",
       "ADD_AUTHORITY":"Authority suchen..."
+    },
+    "JOBS":{
+      "LOG":"Log-Einträge",
+      "LOG_FILTER":"Filtern nach Inhalt:",
+      "LOG_LEVEL":"Filtern nach Schweregrad:",
+      "LIST":"Bisherige Aufgaben",
+      "NO_JOBS":"Es wurden noch keine Aufgaben ausgeführt. Aufgaben werden z.B. durch einen Importvorgang angelegt",
+      "TOAST_CANCELED":"Die Aufgabe wurde abgebrochen. Es kann jedoch einen Moment dauern, bis der Status aktualisiert wird.",
+      "CANCEL_TITLE":"Aufgabe abbrechen?",
+      "CANCEL_MESSAGE":"Das Abbrechen einer Aufgabe kann zu einem inkonsistenten Datenzustand oder sogar Datenverlust führen.\n\nSind Sie wirklich sicher, dass Sie die Aufgabe abbrechen möchten?",
+      "WITH_WARNINGS":"(hat Warnungen)",
+      "WITH_ERRORS":"(hat Fehler)",
+      "Aborted":"Abgebrochen",
+      "Finished":"Abgeschlossen",
+      "Running":"Wird ausgeführt...",
+      "LOG_LEVEL_7":"Debug",
+      "LOG_LEVEL_6":"Info",
+      "LOG_LEVEL_4":"Warning",
+      "LOG_LEVEL_3":"Error",
+      "LOG_LEVEL_0":"Fatal"
     },
     "FOLDERTEMPLATES":{
       "EDUGROUP": "Organisation",

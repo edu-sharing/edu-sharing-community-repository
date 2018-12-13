@@ -3,6 +3,12 @@ import {TranslateService} from "@ngx-translate/core";
 import {isNumeric} from "rxjs/util/isNumeric";
 import {Translation} from "../translation";
 
+export class FormatOptions {
+    showDate?=true;
+    showAlwaysTime?=false;
+    useRelativeLabels?=true;
+}
+
 export class DateHelper{
   /**
    * Fill a date (day + month) string, e.g. 2 -> 02
@@ -32,11 +38,11 @@ export class DateHelper{
    * @param {string} format
    * @returns {string}
    */
-  public static formatDateByPattern(date: any,format:string) : string{
+  public static formatDateByPattern(date: number|any,format:string) : string{
     if(!isNumeric(date)) {
       return date;
     }
-    let dateObject = new Date(date * 1);
+    let dateObject = new Date((date as number) * 1);
     format=format.replace("y",""+dateObject.getFullYear());
     format=format.replace("M",""+DateHelper.fillDate(dateObject.getMonth()));
     format=format.replace("d",""+DateHelper.fillDate(dateObject.getDate()));
@@ -50,12 +56,12 @@ export class DateHelper{
    * @param showAlwaysTime
    * @returns {any}
    */
-  public static formatDate(translation : TranslateService,date: any,showAlwaysTime=false,useRelativeLabels=true) : string{
+  public static formatDate(translation : TranslateService,date: number|any,options:FormatOptions = new FormatOptions()) : string{
     try {
       if(!isNumeric(date)) {
         return date;
       }
-      let dateObject = new Date(date * 1);
+      let dateObject = new Date((date as number) * 1);
       let dateToday = new Date();
       let dateYesterday = new Date();
       dateYesterday.setDate(dateYesterday.getDate()-1);
@@ -66,22 +72,22 @@ export class DateHelper{
       let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
       let addDate=true;
       let timeFormat="HH:mm";
-      if (isToday && useRelativeLabels) {
+      if (isToday && options.useRelativeLabels) {
         prefix = translation.instant("TODAY");
         addDate = false;
       }
-      else if(isYesterday && useRelativeLabels){
+      else if(isYesterday && options.useRelativeLabels){
         prefix = translation.instant("YESTERDAY");
         addDate = false;
       }
-      else if(diffDays<6 && useRelativeLabels){
+      else if(diffDays<6 && options.useRelativeLabels){
         prefix = translation.instant("DAYS_AGO",{days:diffDays});
         addDate = false;
-        if(!showAlwaysTime)
+        if(!options.showAlwaysTime)
           timeFormat = "";
       }
       else{
-        if(!showAlwaysTime)
+        if(!options.showAlwaysTime)
           timeFormat="";
       }
       // ng2's dateformatter is super slow, but it doesn't matter, we just iterate it once :)
@@ -95,6 +101,9 @@ export class DateHelper{
           str += DateHelper.fillDate(dateObject.getDate()) + "." + DateHelper.fillDate(dateObject.getMonth() + 1) + "." + dateObject.getFullYear();
         }
         //str += DateFormatter.format(dateObject, Translation.getLanguage(), dateFormat).trim();
+      }
+      if(options.showDate==false){
+          str="";
       }
       // ie fixes, timeFormat not working
       if(timeFormat){
@@ -117,7 +126,7 @@ export class DateHelper{
       */
     }
     catch(e){
-      return (date as string);
+      return (date as any);
     }
   }
   static getDateFromDatepicker(date:Date){

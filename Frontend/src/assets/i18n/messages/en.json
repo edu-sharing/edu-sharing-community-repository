@@ -4,14 +4,16 @@
     "INVALID":"unknown error",
     "share_expired":"This link has expired.",
     "share_file_deleted":"The object has been deleted.",
-    "invalid_share":"ivalid link",
+    "invalid_share":"invalid link",
+    "security_error":"security error",
     "share_empty":"The object can not be loaded.",
     "DETAILS":{
       "share_expired":"The shared link has expired or has been terminated by the owner of the material.",
       "share_file_deleted":"The shared link points to an object which has been deleted. Please contact the author.",
       "invalid_share":"The link is invalid.",
+      "security_error":"The access to the given resource is restricted.",
       "share_empty":"The link points to an incompatible file or a file without content.",
-      "INVALID":""
+      "INVALID":"Wenn dieser Fehler erneut auftritt, kontaktieren Sie bitte den Betreiber des Systems"
     }
   }
 }

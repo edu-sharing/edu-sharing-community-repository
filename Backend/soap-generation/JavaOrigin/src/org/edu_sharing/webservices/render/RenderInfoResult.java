@@ -2,6 +2,7 @@ package org.edu_sharing.webservices.render;
 
 import java.util.List;
 
+import org.edu_sharing.webservices.types.Child;
 import org.edu_sharing.webservices.types.KeyValue;
 import org.edu_sharing.webservices.usage.UsageResult;
 
@@ -21,7 +22,9 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	Boolean userReadAllowed;
 	
 	Boolean hasContentLicense;
-	
+
+	Boolean isDirectory;
+
 	UsageResult usage;
 	
 	int contentHash;
@@ -32,7 +35,10 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	
 	KeyValue[] labels;
 	
-	
+	Child[] children;
+
+	String iconUrl;
+
 	String previewUrl;
 	
 	String mimeTypeUrl;
@@ -44,7 +50,7 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
 	private java.lang.String[] permissions;
 	
 	String eduSchoolPrimaryAffiliation;
-	
+
 	String[] remoteRoles;
 
 	public Boolean getGuestReadAllowed() {
@@ -197,14 +203,38 @@ Permissions(nur wegen gast?), Usage(nur wegen xml param), Version,modifiedDate (
     public String getEduSchoolPrimaryAffiliation() {
 		return eduSchoolPrimaryAffiliation;
 	}
-    
+
+	public Child[] getChildren() {
+		return children;
+	}
+
+	public void setChildren(Child[] children) {
+		this.children = children;
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
+	}
+
+	public Boolean getDirectory() {
+		return isDirectory;
+	}
+
+	public void setDirectory(Boolean directory) {
+		isDirectory = directory;
+	}
+
     public void setRemoteRoles(String[] remoteRoles) {
 		this.remoteRoles = remoteRoles;
 	}
-    
+
     public String[] getRemoteRoles() {
 		return remoteRoles;
 	}
-    
-   
+
+
 }

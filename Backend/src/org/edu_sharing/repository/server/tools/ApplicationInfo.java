@@ -146,7 +146,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	public static final String AUTHBYAPP_USERNAME_PROP_USERNAME = "USERNAME";
 	
 	public static final String WEBSITEPREVIEWRENDERSERVICE = "websitepreviewrenderservice";
-	
+
+	public static final String REPOSITORY_TYPE_MEMUCHO = "MEMUCHO";
+
 	private String host = null;
 	
 	/**
@@ -247,7 +249,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 	
 	private String websitepreviewrenderservice;
 	
-	private String searchable = null;
+	private String searchable = "true";
 	
 	//file that contains metadatasets for the repository
 	private String metadatsets = null;
@@ -412,6 +414,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		availableSearchCriterias = PropertiesHelper.getProperty("availablesearchcriterias", appFile, PropertiesHelper.XML);
 		
 		searchable = PropertiesHelper.getProperty(KEY_SEARCHABLE, appFile, PropertiesHelper.XML);
+		
+		if(searchable == null) searchable = "true";
 		
 		path = PropertiesHelper.getProperty("path", appFile, PropertiesHelper.XML);
 		

@@ -36,15 +36,7 @@
     <div class="headingGroup" *ngIf="hasHeading && viewType==0">
         <div class="totalCount" *ngIf="totalCount && hasCheckbox && !isLoading">({{selectedNodes && selectedNodes.length ? selectedNodes.length+'/'+totalCount : totalCount}})</div>
 
-        <div class="dialog" *ngIf="sortMenu" (click)="sortMenu=null" (contextmenu)="sortMenu=false;$event.preventDefault();$event.stopPropagation();"></div>
-        <div class="sortMenu collection" *ngIf="sortMenu" [@openOverlay]="sortMenu">
-            <div class="collection-item-title">{{'SORT_BY' | translate}}</div>
-            <a *ngFor="let item of getSortableColumns();let i = index" (click)="setSorting(item.name,false);sortMenu=false" class="collection-item" [class.active]="sortBy==item.name">
-                <div class="title">{{item.type+"."+item.name | translate}}</div>
-                <a *ngIf="sortBy==item.name"><i class="material-icons" *ngIf="sortAscending">arrow_upward</i><i class="material-icons" *ngIf="!sortAscending">arrow_downward</i></a>
-                <a *ngIf="sortBy!=item.name"></a>
-            </a>
-        </div>
+        <sort-dropdown class="sortMenu" [(open)]="sortMenu" [sortBy]="sortBy" [sortAscending]="sortAscending" [columns]="getSortableColumns()" (onSort)="setSorting($event)"></sort-dropdown>
 
         <div class="heading">
         <div class="checkbox" *ngIf="hasCheckbox">
@@ -55,8 +47,8 @@
         <div class="icon" *ngIf="hasIcon">&nbsp;</div>
             <div *ngFor="let item of columnsVisible;let i = index"
              class="{{getItemCssClass(item)}} row_{{i+1}}">
-            <a class="text" [class.clickable]="canBeSorted(item.name)" (click)="setSorting(item.name,i==0)">{{item.type+"."+item.name | translate}}</a>
-            <div *ngIf="sortBy" class="sorting" (click)="setSorting(item.name,i==0)">
+            <a class="text" [class.clickable]="canBeSorted(item)" (click)="setSortingIntern(item,i==0)">{{item.type+"."+item.name | translate}}</a>
+            <div *ngIf="sortBy" class="sorting" (click)="setSortingIntern(item,i==0)">
                 <a class="" *ngIf="sortBy==item.name && sortAscending"><i class="material-icons">arrow_drop_up</i></a>
                 <a class="" *ngIf="sortBy==item.name && !sortAscending"><i class="material-icons">arrow_drop_down</i></a>
             </div>
@@ -72,7 +64,7 @@
         </div>
     </div>
     <div [class.cardContainer]="viewType==1 || viewType==2" *ngIf="!reorderDialog">
-        <div *ngIf="addElement" class="addElement clickable"
+        <div *ngIf="addElement" class="addElement clickable" #addElementRef
              tabindex="0"
              (keyup.enter)="addElementClicked()"
              (click)="addElementClicked()"
@@ -88,9 +80,7 @@
         <div *ngFor="let node of _nodes; let i = index" class="collection-item rowFrame"
              [class.order-animation]="orderElementsActive"
              [class.nodeCollection]="isCollection(node)"
-             [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
              [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
-             [class.dark-color]="isCollection(node) && getCollection(node).preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
              [class.tableList]="viewType==0"
              [class.cardList]="viewType==1"
              [class.cardSmallList]="viewType==2"
@@ -100,7 +90,7 @@
                  *ngIf="dropdown==node && _options && _options.length"
                  (click)="dropdown=null" (contextmenu)="dropdown=null;$event.preventDefault();$event.stopPropagation();"
             >
-                <div class="moreOpen collection"
+            <div class="moreOpen collection"
                      #dropdown
                      *ngIf="dropdown==node && _options && _options.length"
                      [@openOverlay]="dropdown==node && dropdownBottom==null"
@@ -110,7 +100,7 @@
                      [style.bottom]="dropdownBottom"
                      [style.right]="dropdownRight"
                 >
-                    <a class="collection-item"
+                    <a class="collection-item collection-item-{{option.name | replaceChars:{search:'.',replace:'-'} }}"
                        [class.collection-item-seperate-bottom]="option.isSeperateBottom && i"
                        [class.collection-item-seperate]="option.isSeperate && i"
                        *ngFor="let option of _options;let i=index"
@@ -123,10 +113,13 @@
                         <i class="material-icons">{{option.icon}}</i> {{option.name | translate}}</a>
                 </div>
             </div>
-            <div class="row waves-effect"
+            <div class="row waves-effect node-row"
                  [class.noCCPublish]="applyMode && node.access.indexOf('CCPublish')==-1"
                  [class.noPermissions]="noPermissions(node)"
                  [class.selected]="getSelectedPos(node)!=-1"
+                 [style.backgroundColor]="isCollection(node) ? (viewType==2 ? node.preview.isIcon ? getCollectionColor(node) : '#000' : getCollectionColor(node)) : null"
+                 [style.border-color]="isCollection(node) ? getCollectionColor(node) : null"
+                 [class.dark-color]="isCollection(node) && getCollection(node).preview.isIcon && isBrightColorCollection(getCollectionColor(node))"
                  [title]="viewType==0 ? '' : getTitle(node)"
                  [draggable]="dragDrop"
                  (dragend)="dragHover=null"
@@ -135,9 +128,14 @@
                  (contextmenu)="contextMenu($event,node)"
                  (dragover)="allowDrag($event,node)"
                  (dragenter)="allowDrag($event,node)"
-                 (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keypress)="($event.which === 13)?doubleClick(node):0">
+                 (keydown)="handleKeyboard($event)"
+                 (drop)="drop($event,node)" (dragstart)="dragStart($event,node)" tabindex="0" (keyup.enter)="doubleClick(node)">
+
+                <div *ngIf="viewType==1 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
+                    <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i class="material-icons">filter_none</i>
+                </div>
                 <div *ngIf="viewType==1 && !isCollection(node)" class="typeicon column">
-                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="">
+                    <img src="{{getIconUrl(node)}}" [attr.role]="presentation" alt="presentation">
                 </div>
                 <div *ngIf="isCollection(node) && getCollection(node).type=='EDITORIAL'" class="collectionEditorial"><i class="material-icons">star</i></div>
                 <div *ngIf="isCollection(node) && getCollection(node).pinned" class="collectionPinned"><custom-icon iconId="pin"></custom-icon></div>
@@ -199,8 +197,13 @@
                     </div>
                 </div>
                 <div *ngFor="let item of columnsVisible;let i = index" class="column {{getItemCssClass(item)}} row_{{i+1}}" [class.clickable]="isClickable" (dblclick)="doubleClick(node)" (click)="select(node,false)">
-                    <div class="hiddendiv" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
-                    <div class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
+                    <div class="display-none" [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
+                    <div class="row-group">
+                        <div class="rowInner" [innerHTML]="getAttribute(node,item)"></div>
+                        <div *ngIf="i==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
+                            <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i class="material-icons">filter_none</i>
+                        </div>
+                    </div>
                 </div>
                 <div *ngFor="let option of optionsAlways"
                      class="more moreAlways column"

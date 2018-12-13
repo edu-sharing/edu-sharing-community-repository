@@ -7,7 +7,6 @@ import {RestSearchService} from "../../../common/rest/services/rest-search.servi
 import {RestIamService} from "../../../common/rest/services/rest-iam.service";
 import {ConfigurationService} from "../../../common/services/configuration.service";
 import {NodeHelper} from "../../../common/ui/node-helper";
-import {Http} from "@angular/http";
 import {RestConnectorService} from "../../../common/rest/services/rest-connector.service";
 import {Router} from "@angular/router";
 import {UIConstants} from "../../../common/ui/ui-constants";
@@ -16,7 +15,8 @@ import {TranslateService} from "@ngx-translate/core";
 import {OptionItem} from "../../../common/ui/actionbar/option-item";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../common/ui/ui-animation";
-import {ActionbarHelper} from '../../../common/ui/actionbar/actionbar-helper';
+import {ActionbarHelperService} from "../../../common/services/actionbar-helper";
+import {HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'search-node-store',
@@ -43,10 +43,11 @@ export class SearchNodeStoreComponent {
 
   constructor(private search : RestSearchService,
               private toast : Toast,
-              private http : Http,
+              private http : HttpClient,
               private router : Router,
               private config : ConfigurationService,
               private connector : RestConnectorService,
+              private actionbar : ActionbarHelperService,
               private temporaryStorageService : TemporaryStorageService,
               private translate : TranslateService,
               private iam : RestIamService,
@@ -76,7 +77,7 @@ export class SearchNodeStoreComponent {
   private updateActionOptions() {
     this.actionOptions=[];
     if(this.selected && this.selected.length){
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD',this.selected,this.connector,(node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
+      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', this.selected, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, node ? [node] : this.selected));
       /*let download=new OptionItem("WORKSPACE.OPTION.DOWNLOAD", "cloud_download",
         (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,node ? [node] : this.selected));
         */

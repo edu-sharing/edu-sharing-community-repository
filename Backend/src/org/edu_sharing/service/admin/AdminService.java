@@ -14,9 +14,14 @@ import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.service.admin.model.GlobalGroup;
+import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 
 public interface AdminService {
+
+    List<JobInfo> getJobs() throws Throwable;
+
+	void cancelJob(String jobName) throws Throwable;
 
 	void refreshApplicationInfo();
 
@@ -40,7 +45,7 @@ public interface AdminService {
 	List<GlobalGroup> getGlobalGroups() throws Throwable;
 
 	void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
-			String importerJobClassName, String importerClassName, String recordHandlerClassName,String binaryHandlerClassName, String oaiIds) throws Exception;
+                   String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds, boolean forceUpdate) throws Exception;
 
 	List<String> getImporterClasses() throws Exception;
 
@@ -85,4 +90,5 @@ public interface AdminService {
 	void refreshEduGroupCache(boolean keepExisting);
 
 
+    void testMail(String receiver, String template);
 }

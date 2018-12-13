@@ -1,0 +1,10 @@
+<div class="calendar">
+    <div>
+    <input type="text" readonly [ngModel]="getFormatted()" (click)="showDatepicker=!showDatepicker" placeholder="{{'CHOOSE_DATE' | translate}}">
+    <i class="material-icons clickable" (click)="showDatepicker=!showDatepicker">event</i>
+    </div>
+    <div *ngIf="showDatepicker" class="picker">
+        <mat-calendar [minDate]="minDate" [maxDate]="maxDate" (selectedChange)="setDate($event)" [selected]="date"></mat-calendar>
+    </div>
+    <div *ngIf="showDatepicker" class="dialog picker-background" (click)="showDatepicker=false" (contextmenu)="showDatepicker=false"></div>
+</div>

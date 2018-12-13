@@ -10,6 +10,12 @@
   float:left;
   width:33.33%;
 }
+.dialog-collections{
+  z-index: $dialogZIndex+1;
+}
+.card-collections{
+  z-index: $dialogZIndex+2;
+}
 .hintNoFuzzy{
   margin-top: -10px;
   margin-bottom: 10px;
@@ -41,7 +47,7 @@
   position: absolute;
   color:$textLight;
   left:37px;
-  top:27px;
+  top:30px;
 }
 .invited,.advanced{
   padding:0 20px;
@@ -96,7 +102,7 @@ a.active{
   margin: 20px -20px;
   padding:20px 20px;
   padding-right:30px;
-  background: $backgroundColor;
+  background: white;
   float: left;
   width: calc(100% + 40px);
   .publishElements{
@@ -108,11 +114,8 @@ a.active{
     color: $textLight;
     float: right;
     padding-right: 20px;
-    span{
-      position: relative;
-      top: -3px;
-      left: -5px;
-    }
+    display: inline-flex;
+    align-items: center;
   }
   label{
     color: $textPrimary;
@@ -133,6 +136,9 @@ a.active{
       margin-right: -100px;
     }
   }
+}
+.publish-grey{
+  background: $backgroundColor;
 }
 .group{
   display:flex;
@@ -170,7 +176,7 @@ a.active{
 .crossed{
   text-decoration: line-through;
 }
-.groupEntry{
+.groupEntry,.usageEntry{
   width:100%;
   display:flex;
   background: #eee;
@@ -183,6 +189,9 @@ a.active{
     width: 100%;
   }
   border:2px dashed transparent;
+}
+.groupEntry{
+  height: 35px;
 }
 .added{
   background: transparent;
@@ -242,6 +251,28 @@ img.inherit{
   overflow: auto;
   overflow-x: hidden;
   @include iosScrolling();
+  .collections{
+    background-color:$actionDialogBackground;
+    margin: 0 -20px;
+    margin-top: 30px;
+    padding: 20px 40px;
+    .title{
+      font-weight: bold;
+      padding-bottom: 5px;
+    }
+    .link{
+      padding-top: 15px;
+      color:$primary;
+      text-transform: uppercase;
+      font-weight: bold;
+      align-items: center;
+      @include clickable();
+      display:flex;
+      div{
+        padding:0 7px;
+      }
+    }
+  }
 }
 .tabContentInvite{
   padding-top: 0;
@@ -269,12 +300,33 @@ img.inherit{
   top: -60px;
 }
 label.notify{
-  color:$textPrimary;
+  color:$textPrimary!important;
 }
 label.notify p{
   color:$textLight;
 }
 
+.share-link{
+  position: absolute;
+  top: 14px;
+  right: 60px;
+  text-transform: uppercase;
+  color:$primary;
+  cursor: pointer;
+
+  span{
+    vertical-align: middle;
+  }
+  i{
+    vertical-align: middle;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 1px 3px 1px #d0d0d0;
+    display: inline-table;
+    padding: 3px;
+    margin-right: 8px;
+  }
+}
 .state{
   font-size: 9pt;
   position: absolute;
@@ -319,7 +371,7 @@ label.notify p{
   }
 
 }
-@media screen and (max-width: $mobileWidth - $mobileStage*2) {
+@media screen and (max-width: ($mobileWidth - $mobileStage*2)) {
   .groupHeading{
     flex-direction:column;
     padding-bottom:5px;
@@ -327,6 +379,7 @@ label.notify p{
   .inheritCheck{
     padding-left:5px;
   }
+
   .state{
     left: 10px;
     .show-state > span{
@@ -340,5 +393,9 @@ label.notify p{
       }
     }
   }
-
+  .share-link{
+    span{
+      display: none;
+    }
+  }
 }

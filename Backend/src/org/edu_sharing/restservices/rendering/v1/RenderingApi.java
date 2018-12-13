@@ -12,10 +12,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.NodeDao;
@@ -31,6 +31,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 
 
 @Path("/rendering/v1")
@@ -63,38 +67,30 @@ public class RenderingApi {
 	    	@ApiParam(value = "ID of node",required=true ) @PathParam("node") String node,
 	    	@ApiParam(value = "version of node",required=false) @QueryParam("version") String nodeVersion,
 			@Context HttpServletRequest req){
-		
-		RunAsWork<Response> runAs = new RunAsWork<Response>() {
-			@Override
-			public Response doWork() throws Exception {
-				try {
-					RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-					if (repoDao == null) {
-						return Response.status(Response.Status.NOT_FOUND).build();
-					}
-					String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion,null);
-					
-					Node nodeJson = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter()).asNode();
-					String mimeType = nodeJson.getMimetype();
-					
-					
-					RenderingDetailsEntry response = new RenderingDetailsEntry();
-					response.setDetailsSnippet(detailsSnippet);
-					response.setMimeType(mimeType);
-					response.setNode(nodeJson);
 
-					return Response.status(Response.Status.OK).entity(response).build();
-			
-			    	}catch (Throwable t) {
-			    		
-			    		logger.error(t.getMessage(), t);
-			    		return ErrorResponse.createResponse(t);
-			    	}
+		try{
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			if (repoDao == null) {
+				return Response.status(Response.Status.NOT_FOUND).build();
 			}
-		};
-		
-		return run(req, node, runAs);
-		
+			String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion,null);
+
+			Node nodeJson = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter()).asNode();
+			String mimeType = nodeJson.getMimetype();
+
+
+			RenderingDetailsEntry response = new RenderingDetailsEntry();
+			response.setDetailsSnippet(detailsSnippet);
+			response.setMimeType(mimeType);
+			response.setNode(nodeJson);
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		}catch (Throwable t) {
+
+			logger.error(t.getMessage(), t);
+			return ErrorResponse.createResponse(t);
+		}
 	}
 	
 	
@@ -122,41 +118,38 @@ public class RenderingApi {
 	    	@ApiParam(value = "version of node",required=false) @QueryParam("version") String nodeVersion,
 	    	@ApiParam(value = "additional parameters to send to the rendering service",required=false) Map<String,String> parameters,
 			@Context HttpServletRequest req){
-		
-		
-		RunAsWork<Response> runAs = new RunAsWork<Response>() {
-			@Override
-			public Response doWork() throws Exception {	
-				try {
-						RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-						if (repoDao == null) {
-							return Response.status(Response.Status.NOT_FOUND).build();
-						}
-						String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion,parameters);
-						
-						Node nodeJson = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter()).asNode();
-						String mimeType = nodeJson.getMimetype();
-						
-						
-						RenderingDetailsEntry response = new RenderingDetailsEntry();
-						response.setDetailsSnippet(detailsSnippet);
-						response.setMimeType(mimeType);
-						response.setNode(nodeJson);
+
+		try {
 			
-						return Response.status(Response.Status.OK).entity(response).build();
-				}catch (Throwable t) {
-			
-					logger.error(t.getMessage(), t);
-					return ErrorResponse.createResponse(t);
-				}
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().getDetailsSnippetWithParameters(repository, node, nodeVersion, parameters, req);
 			}
-		};
-		
-		return run(req, node, runAs);
-	}
-	
-	private Response run(HttpServletRequest req, String nodeId, RunAsWork<Response> runAsWork ) {
-		HttpSession session = req.getSession();
-		return SignatureVerifier.runAsAuthByUsage(nodeId, session, runAsWork);
+			
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			if (repoDao == null) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion,parameters);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
+			Node nodeJson = nodeDao.asNode();
+			String mimeType = nodeJson.getMimetype();
+
+			if(repoDao.isHomeRepo())
+				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node),TrackingService.EventType.VIEW_MATERIAL);
+
+
+			RenderingDetailsEntry response = new RenderingDetailsEntry();
+			response.setDetailsSnippet(detailsSnippet);
+			response.setMimeType(mimeType);
+			response.setNode(nodeJson);
+
+			return Response.status(Response.Status.OK).entity(response).build();
+		}catch (Throwable t) {
+
+			logger.error(t.getMessage(), t);
+			return ErrorResponse.createResponse(t);
+		}
+
 	}
 }

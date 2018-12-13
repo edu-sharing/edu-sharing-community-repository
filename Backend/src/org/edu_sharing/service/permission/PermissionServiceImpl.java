@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
@@ -102,8 +103,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		permissionService = serviceRegistry.getPermissionService();
 
 		personService = serviceRegistry.getPersonService();
-		toolPermission = ToolPermissionServiceFactory.getInstance();
 
+	}
+
+	public PermissionServiceImpl() {
+		this(ApplicationInfoList.getHomeRepository().getAppId());
 	}
 
 	/**
@@ -223,8 +227,36 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 
 		if(createHandle) {
-			createHandle(AuthorityType.EVERYONE,nodeId);
+			
+			/**
+			 * no transaction cause of
+			 * org.hibernate.HibernateException: connnection proxy not usable after transaction completion
+			 *
+			 * problem is when handle service fails
+			 */
+			createHandle(AuthorityType.EVERYONE,nodeId);	
 		}
+
+
+		boolean publishToOAI = false;
+
+		List<String> licenseList = (List<String>)serviceRegistry.getNodeService().getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId), QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
+		if(licenseList!=null) {
+			for (String license : licenseList) {
+				if (license != null && license.startsWith("CC_")) {
+					for (ACE ace : acesToAdd) {
+						if (ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+							publishToOAI = true;
+						}
+					}
+				}
+			}
+		}
+		if(publishToOAI) {
+			OAIExporterService service = new OAIExporterService();
+			if(service.available()) service.export(nodeId);
+		}
+
 
 
 		boolean publishToOAI = false;
@@ -382,7 +414,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 	}
 
-	public void createHandle(AuthorityType authorityType, String _nodeId) {
+	public void createHandle(AuthorityType authorityType, String _nodeId) throws Exception {
+		
+		
 		if (AuthorityType.EVERYONE.equals(authorityType)) {
 
 			String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId),
@@ -410,16 +444,14 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			if(toolPermission.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE)) {
 				try {
 					 handleService = new HandleService();
+					 /**
+					  * test handleservice to prevent property handleid isset but can not be pushed to handleservice cause of configration problems
+					  */
+					 handleService.handleServiceAvailable();
 					 handle = handleService.generateHandle();
 
-				}catch(HandleServiceNotConfiguredException e) {
-					logger.info("handle server not configured");
-					return;
-				} catch (SQLException e) {
+				}catch (SQLException e) {
 					logger.error("sql error while creating handle id",e);
-					return;
-				}catch(Exception e) {
-					logger.error(e.getMessage(),e);
 					return;
 				}
 			}
@@ -456,12 +488,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				logger.error(e1.getMessage(), e1);
 			}
 			if(handleService != null && handle != null) {
-				try {
-					String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
-					handleService.createHandle(handle,handleService.getDefautValues(contentLink));
-				}catch(Exception e) {
-					logger.error(e.getMessage());
-				}
+				
+				String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
+				handleService.createHandle(handle,handleService.getDefautValues(contentLink));
+				
 			}
 		}
 	}
@@ -957,6 +987,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 	}
 
+	@Override
 	public StringBuffer getFindUsersSearchString(HashMap<String, String> propVals, boolean globalContext) {
 
 		boolean fuzzyUserSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
@@ -1084,6 +1115,18 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			searchQuery.append(" AND (").append(subQuery).append(")");
 		}
 
+		//cm:espersonstatus
+		String personActiveStatus = Edu_SharingProperties.instance.getPersonActiveStatus();
+		if(personActiveStatus != null && !personActiveStatus.trim().equals("")) {
+			searchQuery.append(" AND @cm\\:espersonstatus:\"" + personActiveStatus + "\"");
+		}
+		
+		/**
+		 * filter out remote users
+		 */
+		String homeRepo = ApplicationInfoList.getHomeRepository().getAppId();
+		searchQuery.append(" AND (ISUNSET:\"cm:repositoryid\" OR ISNULL:\"cm:repositoryid\" OR @cm\\:repositoryId:\"" + homeRepo + "\")");
+
 		logger.info("findUsers: " + searchQuery);
 
 		return searchQuery;
@@ -1097,6 +1140,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		}
 	}
 
+	@Override
 	public StringBuffer getFindGroupsSearchString(String searchWord, boolean globalContext) {
 		boolean fuzzyGroupSearch = !globalContext || ToolPermissionServiceFactory.getInstance()
 				.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY);
@@ -1458,8 +1502,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					// create new repo client so that current admin authinfo from the runAs thread
 					// is used
 					MCAlfrescoAPIClient repoClient = new MCAlfrescoAPIClient();
-					org.edu_sharing.service.permission.PermissionService permissionService = new PermissionServiceImpl(
-							ApplicationInfoList.getHomeRepository().getAppId());
+
 					String notifyId = repoClient.createNode(notifyFolder, CCConstants.CCM_TYPE_NOTIFY, notifyProps);
 
 					String nameInvitedObj = repoClient.getProperty(Constants.storeRef, nodeId, CCConstants.CM_NAME);
@@ -1472,7 +1515,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					for (ACE ace : aclToCopy.getAces()) {
 						// set inherited to false so that no permissions from the parent systemfolder
 						// are inherited
-						permissionService.setPermissions(notifyId, ace.getAuthority(),
+						setPermissions(notifyId, ace.getAuthority(),
 								new String[] { ace.getPermission() }, false);
 					}
 
@@ -1493,7 +1536,15 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String permission) {
 		return hasAllPermissions(storeProtocol,storeId,nodeId,new String[]{permission}).get(permission);
 	}
-
+	@Override
+	public boolean hasPermission(String storeProtocol, String storeId, String nodeId, String authority, String permission) {
+		return hasAllPermissions(storeProtocol,storeId,nodeId,authority,new String[]{permission}).get(permission);
+	}
+	@Override
+	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String authority,
+													  String[] permissions) {
+		return AuthenticationUtil.runAs(()->hasAllPermissions(storeProtocol,storeId,nodeId,permissions),authority);
+	}
 	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {
@@ -1505,7 +1556,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if (permissions != null && permissions.length > 0) {
 			for (String permission : permissions) {
-				AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
+					AccessStatus accessStatus = permissionService.hasPermission(nodeRef, permission);
 				// Guest only has read permissions, no modify permissions
 				if(guest && !Arrays.asList(GUEST_PERMISSIONS).contains(permission)){
 					accessStatus=AccessStatus.DENIED;
@@ -1559,5 +1610,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	@Override
 	public void setPermission(String nodeId, String authority, String permission) {
 		permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId), authority, permission, true);
+	}
+
+	public void setToolPermission(ToolPermissionService toolPermission) {
+		this.toolPermission = toolPermission;
 	}
 }

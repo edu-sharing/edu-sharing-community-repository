@@ -7,10 +7,7 @@ import java.util.List;
 
 import org.edu_sharing.metadataset.v2.MetadataCreate;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
-import org.edu_sharing.restservices.mds.v1.model.GroupV2;
-import org.edu_sharing.restservices.mds.v1.model.ListV2;
-import org.edu_sharing.restservices.mds.v1.model.ViewV2;
-import org.edu_sharing.restservices.mds.v1.model.WidgetV2;
+import org.edu_sharing.restservices.mds.v1.model.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -37,9 +34,10 @@ public class MdsV2 {
 	private List<ViewV2> views;
 	private List<GroupV2> groups;
 	private List<ListV2> lists;
-	
+	private List<SortV2> sorts;
 
-	@JsonProperty("name")
+
+	@JsonProperty
 	public String getName() {
 		return name;
 	}
@@ -53,7 +51,7 @@ public class MdsV2 {
 	public void setCreate(Create create) {
 		this.create = create;
 	}
-	@JsonProperty("widgets")
+	@JsonProperty
 	public List<WidgetV2> getWidgets() {
 		return widgets;
 	}
@@ -63,7 +61,7 @@ public class MdsV2 {
 	public void setWidgets(List<WidgetV2> widgets) {
 		this.widgets = widgets;
 	}
-	@JsonProperty("views")
+	@JsonProperty
 	public List<ViewV2> getViews() {
 		return views;
 	}
@@ -71,7 +69,7 @@ public class MdsV2 {
 	public void setViews(List<ViewV2> views) {
 		this.views = views;
 	}
-	@JsonProperty("groups")
+	@JsonProperty
 	public List<GroupV2> getGroups() {
 		return groups;
 	}
@@ -79,12 +77,19 @@ public class MdsV2 {
 	public void setGroups(List<GroupV2> groups) {
 		this.groups = groups;
 	}
-	@JsonProperty("lists")
+	@JsonProperty
 	public List<ListV2> getLists() {
 		return lists;
 	}
 	public void setLists(List<ListV2> lists) {
 		this.lists = lists;
 	}
-	
+	@JsonProperty
+	public List<SortV2> getSorts() {
+		return sorts;
+	}
+
+	public void setSorts(List<SortV2> sorts) {
+		this.sorts = sorts;
+	}
 }

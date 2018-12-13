@@ -1,6 +1,6 @@
 import {
-  Component, Input, Output, EventEmitter, OnInit, ElementRef, ViewChild,
-  HostListener, Renderer, ChangeDetectorRef
+    Component, Input, Output, EventEmitter, OnInit, ElementRef, ViewChild,
+    HostListener, Renderer, ChangeDetectorRef, AfterViewInit
 } from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../ui-animation";
@@ -21,7 +21,6 @@ import {SearchNodeStoreComponent} from "../../../modules/search/node-store/node-
 import {UIHelper} from "../ui-helper";
 import {UIConstants} from "../ui-constants";
 import {RestHelper} from "../../rest/rest-helper";
-import {Http} from "@angular/http";
 import {Toast} from "../toast";
 import {TemporaryStorageService} from "../../services/temporary-storage.service";
 import {ConfigurationHelper} from "../../rest/configuration-helper";
@@ -29,6 +28,8 @@ import {CordovaService} from '../../services/cordova.service';
 import {SessionStorageService} from "../../services/session-storage.service";
 import {RestNodeService} from "../../rest/services/rest-node.service";
 import {Translation} from "../../translation";
+import {OptionItem} from "../actionbar/option-item";
+import {HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'main-nav',
@@ -67,7 +68,8 @@ import {Translation} from "../../translation";
 /**
  * An edu-sharing file-picker modal dialog
  */
-export class MainNavComponent{
+export class MainNavComponent implements AfterViewInit{
+  private static bannerPositionInterval: any;
   private static ID_ATTRIBUTE_NAME='data-banner-id';
 
   @ViewChild('search') search : ElementRef;
@@ -75,145 +77,32 @@ export class MainNavComponent{
   @ViewChild('topbar') topbar:ElementRef;
   @ViewChild('nodeStoreRef') nodeStoreRef:ElementRef;
   @ViewChild('scrolltotop') scrolltotop:ElementRef;
+  @ViewChild('userRef') userRef:ElementRef;
+  @ViewChild('tabNav') tabNav:ElementRef;
   public config: any={};
   private editUrl: string;
   public nodeStoreAnimation=0;
   public showNodeStore=false;
   private nodeStoreCount = 0;
-  private static bannerPositionInterval: any;
   acceptLicenseAgreement: boolean;
   licenseAgreement: boolean;
   licenseAgreementHTML: string;
   canEditProfile: boolean;
   private licenseAgreementNode: Node;
+  userMenuOptions: OptionItem[];
+  helpOptions: OptionItem[]=[];
+  tutorialElement: ElementRef;
   globalProgress = false;
-  public setNodeStore(value:boolean){
-    UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
-  }
+  
   public showEditProfile: boolean;
   public showProfile: boolean;
 
-  public helpUrl = 'http://docs.edu-sharing.com/confluence/edp/';
-  public whatsNewUrl = 'http://docs.edu-sharing.com/confluence/edp/de/was-ist-neu-in-edu-sharing';
   private toolpermissions: string[];
   public canAccessWorkspace = true;
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if(event.code=="Escape" && this.canOpen && this.displaySidebar){
-      event.preventDefault();
-      event.stopPropagation();
-      this.displaySidebar=false;
-      return;
-    }
-  }
   private scrollInitialPositions : any[]=[];
-  @HostListener('window:scroll', ['$event'])
-  @HostListener('window:touchmove', ['$event'])
-  handleScroll(event: Event) {
-    let y=0;
-    try {
-      let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
-      y = rect.bottom-rect.top;
-    }catch(e){
-    }
-    let elementsScroll=document.getElementsByClassName('scrollWithBanner');
-    let elementsAlign=document.getElementsByClassName('alignWithBanner');
-    let elements:any=[];
-    for(let i=0;i<elementsScroll.length;i++) {
-      elements.push(elementsScroll[i]);
-    }
-    for(let i=0;i<elementsAlign.length;i++) {
-      elements.push(elementsAlign[i]);
-    }
-    if(event==null) {
-            // re-init the positions, reset the elements
-            this.scrollInitialPositions=[];
-      for(let i=0;i<elements.length;i++) {
-        let element: any = elements[i];
-        element.style.position = null;
-        element.style.top = null;
-                // disable transition for instant refreshes
-                element.style.transition="none"
-        }
-            // give the browser layout engine some time to remove the values, otherwise the elements will have not their initial positions
-            setTimeout(()=> {
-                for (let i = 0; i < elements.length; i++) {
-                    let element: any = elements[i];
-                    element.style.transition=null;
-                    if (!element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)) {
-                        element.setAttribute(MainNavComponent.ID_ATTRIBUTE_NAME, Math.random());
-                    }
-                    if (this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])
-                     continue;
-                    // getComputedStyle does report wrong values in search sidenav
-                    this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)] = window.getComputedStyle(element).getPropertyValue('top');
-                    //this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=element.getBoundingClientRect().top;
-                }
-                console.log(this.scrollInitialPositions);
-                this.posScrollElements(event,elements);
-            });
-      }
-        else{
-            this.posScrollElements(event,elements);
-        }
-    }
-    posScrollElements(event:Event, elements: any[]){
-        let y=0;
-        try {
-            let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
-            y = rect.bottom-rect.top;
-        }catch(e){
-        }
-      for(let i=0;i<elements.length;i++) {
-        let element:any=elements[i];
-        if(y==0){
-          element.style.position=null;
-          element.style.top=null;
-          continue;
-        }
-        if(element.className.indexOf('alignWithBanner')!=-1){
-          element.style.position = 'relative';
-          if(event==null) {
-            element.style.top = y + 'px';
-          }
-        }
-        else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
-          element.style.position = 'fixed';
-                element.style.top = this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)];
-        } else {
-          element.style.position = 'absolute';
-                element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])+y + 'px';
-      }
-    }
-    if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
-      this.scrolltotop.nativeElement.style.display = 'block';
-    } else {
-      this.scrolltotop.nativeElement.style.display = 'none';
-    }
-  }
+
   private touchStart : any;
-  @HostListener('document:touchstart',['$event']) onTouchStart(event:any) {
-    this.touchStart=event;
-  }
-  @HostListener('document:touchend',['$event']) onTouchEnd(event:any) {
-    let horizontal=event.changedTouches[0].clientX-this.touchStart.changedTouches[0].clientX;
-    let vertical=event.changedTouches[0].clientY-this.touchStart.changedTouches[0].clientY;
-    let horizontalRelative=horizontal/window.innerWidth;
-    if(Math.abs(horizontal)/Math.abs(vertical)<5)
-      return;
-    if(this._currentScope=='render')
-      return;
-    if(this.touchStart.changedTouches[0].clientX<window.innerWidth/7){
-      if(horizontalRelative>0.2){
-        this.displaySidebar=true;
-      }
-    }
-    if(this.touchStart.changedTouches[0].clientX>window.innerWidth/7){
-      if(horizontalRelative<-0.2){
-        this.displaySidebar=false;
-      }
-    }
-  }
+
 
   private sidebarButtons : any=[];
   public displaySidebar=false;
@@ -221,6 +110,8 @@ export class MainNavComponent{
   public userName : string;
   public userOpen = false;
   public helpOpen = false;
+  public _currentScope:string;
+
   /**
    * Show and enables the search field
    */
@@ -249,7 +140,134 @@ export class MainNavComponent{
   /**
    * The current scope identifier, to mark correct element in the menu as active
    */
-  public _currentScope:string;
+    /**
+     * Called when a search event happened, emits the search string and additional event info
+     * {query:string,cleared:boolean}
+     * @type {EventEmitter}
+     */
+    @Output() onSearch=new EventEmitter();
+    public isGuest = false;
+    private isAdmin = false;
+    public _showUser = false;
+  @Input() searchQuery:string;
+  @Output() searchQueryChange = new EventEmitter<string>();
+    private lastScroll = -1;
+    private elementsTopY = 0;
+    private elementsBottomY = 0;
+    private fixScrollElements = false;
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+      if(event.code=="Escape" && this.canOpen && this.displaySidebar){
+          event.preventDefault();
+          event.stopPropagation();
+          this.displaySidebar=false;
+          return;
+      }
+  }
+    @HostListener('window:scroll', ['$event'])
+    @HostListener('window:touchmove', ['$event'])
+    handleScroll(event: any) {
+        let elementsScroll=document.getElementsByClassName('scrollWithBanner');
+        let elementsAlign=document.getElementsByClassName('alignWithBanner');
+        let elements:any=[];
+        for(let i=0;i<elementsScroll.length;i++) {
+            elements.push(elementsScroll[i]);
+        }
+        for(let i=0;i<elementsAlign.length;i++) {
+            elements.push(elementsAlign[i]);
+        }
+        if(event==null) {
+            // re-init the positions, reset the elements
+            this.scrollInitialPositions=[];
+            for(let i=0;i<elements.length;i++) {
+                let element: any = elements[i];
+                element.style.position = null;
+                element.style.top = null;
+                // disable transition for instant refreshes
+                element.style.transition="none"
+            }
+            // give the browser layout engine some time to remove the values, otherwise the elements will have not their initial positions
+            setTimeout(()=> {
+                for (let i = 0; i < elements.length; i++) {
+                    let element: any = elements[i];
+                    element.style.transition=null;
+                    if (!element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)) {
+                        element.setAttribute(MainNavComponent.ID_ATTRIBUTE_NAME, Math.random());
+                    }
+                    if (this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])
+                        continue;
+                    // getComputedStyle does report wrong values in search sidenav
+                    this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)] = window.getComputedStyle(element).getPropertyValue('top');
+                    //this.scrollInitialPositions[element.getAttribute(ATTRIBUTE_NAME)]=element.getBoundingClientRect().top;
+                }
+                console.log(this.scrollInitialPositions);
+                this.posScrollElements(event,elements);
+            });
+        }
+        else{
+            this.handleScrollHide();
+            this.posScrollElements(event,elements);
+        }
+    }
+    posScrollElements(event:Event, elements: any[]){
+        let y=0;
+        try {
+            let rect=document.getElementsByTagName("header")[0].getBoundingClientRect();
+            y = rect.bottom-rect.top;
+        }catch(e){
+        }
+        for(let i=0;i<elements.length;i++) {
+            let element:any=elements[i];
+            if(y==0){
+                element.style.position=null;
+                element.style.top=null;
+                continue;
+            }
+            if(element.className.indexOf('alignWithBanner')!=-1){
+                element.style.position = 'relative';
+                if(event==null) {
+                    element.style.top = y + 'px';
+                }
+            }
+            else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
+                element.style.position = 'fixed';
+                element.style.top = this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)];
+            } else {
+                element.style.position = 'absolute';
+                element.style.top = Number.parseInt(this.scrollInitialPositions[element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)])+y + 'px';
+            }
+        }
+        if((window.pageYOffset || document.documentElement.scrollTop) > 400) {
+            this.scrolltotop.nativeElement.style.display = 'flex';
+        } else {
+            this.scrolltotop.nativeElement.style.display = 'none';
+        }
+    }
+  @HostListener('document:touchstart',['$event']) onTouchStart(event:any) {
+      this.touchStart=event;
+  }
+    @HostListener('document:touchend',['$event']) onTouchEnd(event:any) {
+        let horizontal=event.changedTouches[0].clientX-this.touchStart.changedTouches[0].clientX;
+        let vertical=event.changedTouches[0].clientY-this.touchStart.changedTouches[0].clientY;
+        let horizontalRelative=horizontal/window.innerWidth;
+        if(Math.abs(horizontal)/Math.abs(vertical)<5)
+            return;
+        if(this._currentScope=='render')
+            return;
+        if(this.touchStart.changedTouches[0].clientX<window.innerWidth/7){
+            if(horizontalRelative>0.2){
+                this.displaySidebar=true;
+            }
+        }
+        if(this.touchStart.changedTouches[0].clientX>window.innerWidth/7){
+            if(horizontalRelative<-0.2){
+                this.displaySidebar=false;
+            }
+        }
+    }
+  public setNodeStore(value:boolean){
+      UIHelper.changeQueryParameter(this.router,this.route,"nodeStore",value);
+  }
   @Input() set currentScope(currentScope:string){
     this._currentScope=currentScope;
     this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,currentScope);
@@ -257,8 +275,7 @@ export class MainNavComponent{
   /**
    * The current search query, will be inserted in the search field
    */
-  @Input() searchQuery:string;
-  @Output() searchQueryChange = new EventEmitter<string>();
+
   @Input() set onInvalidNodeStore(data:Boolean){
     this.iam.getNodeList(SearchNodeStoreComponent.LIST).subscribe((data:NodeList)=>{
       if(data.nodes.length-this.nodeStoreCount>0 && this.nodeStoreAnimation==-1)
@@ -270,15 +287,7 @@ export class MainNavComponent{
     });
   };
 
-  /**
-   * Called when a search event happened, emits the search string and additional event info
-   * {query:string,cleared:boolean}
-   * @type {EventEmitter}
-   */
-  @Output() onSearch=new EventEmitter();
-  public isGuest = false;
-  private isAdmin = false;
-  public _showUser = false;
+
   onEvent(event:string,data:any){
     if(event==FrameEventsService.EVENT_PARENT_SEARCH){
       this.doSearch(data,false);
@@ -332,17 +341,18 @@ export class MainNavComponent{
               private configService : ConfigurationService,
               private storage : TemporaryStorageService,
               private session : SessionStorageService,
-              private http : Http,
+              private http : HttpClient,
               private org : RestOrganizationService,
               private router : Router,
               private route : ActivatedRoute,
               private toast : Toast,
               private renderer: Renderer
   ){
-
+    // get last buttons from cache for faster app navigation
+    this.sidebarButtons=this.storage.get(TemporaryStorageService.MAIN_NAV_BUTTONS,[]);
     this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
       if(!data.isValidLogin) {
-        this.canOpen=false;
+        this.canOpen=data.isGuest;
         this.checkConfig([]);
         return;
       }
@@ -356,7 +366,7 @@ export class MainNavComponent{
 
         let reurl=null;
         if(params["reurl"])
-          reurl={reurl:params["reurl"]};
+          reurl={reurl:params["reurl"],applyDirectories:params["applyDirectories"]};
         this.showNodeStore=params['nodeStore']=="true";
         if(!data.isGuest && this.canAccessWorkspace) {
           //buttons.push({url:this.connector.getAbsoluteEndpointUrl()+"../classic.html",scope:'workspace_old',icon:"cloud",name:"SIDEBAR.WORKSPACE_OLD"});
@@ -370,7 +380,7 @@ export class MainNavComponent{
           });
         }
         buttons.push({path:'search',scope:'search',icon:"search",name:"SIDEBAR.SEARCH",queryParams:reurl});
-        buttons.push({path:'collections',scope:'collections',icon:"layers",name:"SIDEBAR.COLLECTIONS"});
+        buttons.push({path:'collections',scope:'collections',icon:"layers",name:"SIDEBAR.COLLECTIONS",queryParams:reurl});
         if(data.isGuest){
           buttons.push({path:'login',scope:'login',icon:"person",name:"SIDEBAR.LOGIN"});
         }
@@ -383,6 +393,11 @@ export class MainNavComponent{
           this.configService.getAll().subscribe(()=>{
             this.userName=ConfigurationHelper.getPersonWithConfigDisplayName(this.user.person,this.configService);
           });
+          if(data.statusCode==RestConstants.STATUS_CODE_OK) {
+              setTimeout(() => {
+                  this.tutorialElement = this.userRef;
+              });
+          }
         });
         this.onInvalidNodeStore=new Boolean(true);
         this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((data:AccessScope)=>{
@@ -422,9 +437,11 @@ export class MainNavComponent{
   private showUserMenu(){
     if(this._currentScope=='login')
       return;
+    this.updateUserOptions();
     this.userOpen=true;
   }
   public showHelpMenu(){
+    this.updateHelpOptions();
     this.helpOpen=true;
   }
   public showHelp(url:string){
@@ -534,7 +551,7 @@ export class MainNavComponent{
       if(add) {
         buttons.push({path: 'permissions', scope: 'permissions', icon: "group_add", name: "SIDEBAR.PERMISSIONS"});
       }
-      if(this.isAdmin && this.connector.getApiVersion()>=RestConstants.API_VERSION_4_0){
+      if(this.isAdmin){
         buttons.push({path:'admin',scope:'admin',icon:"settings",name:"SIDEBAR.ADMIN"});
       }
       this.checkConfig(buttons);
@@ -549,12 +566,12 @@ export class MainNavComponent{
   private checkConfig(buttons: any[]) {
     this.configService.getAll().subscribe((data:any)=>{
       this.config=data;
+      this.updateHelpOptions();
       this.editUrl=data["editProfileUrl"];
       this.showEditProfile=data["editProfile"];
-      this.helpUrl=this.configService.instant("helpUrl",this.helpUrl);
-      this.whatsNewUrl=this.configService.instant("whatsNewUrl",this.whatsNewUrl);
       this.hideButtons(buttons);
       this.addButtons(buttons);
+      this.storage.set(TemporaryStorageService.MAIN_NAV_BUTTONS,this.sidebarButtons);
       this.showLicenseAgreement();
     },(error:any)=>this.hideButtons(buttons));
   }
@@ -567,8 +584,10 @@ export class MainNavComponent{
       let pos=button.position;
       if(pos<0)
         pos=this.sidebarButtons.length-pos;
+      button.isCustom=true;
       this.sidebarButtons.splice(pos,0,button);
     }
+    console.log(this.sidebarButtons);
   }
 
   private finishLogout() {
@@ -579,7 +598,7 @@ export class MainNavComponent{
     this.globalProgress=false;
   }
   getIconSource() {
-    return this.configService.instant('mainnav.icon.url','assets/images/edu-white.svg');
+    return this.configService.instant('mainnav.icon.url','assets/images/edu-white-alpha.svg');
   }
   saveLicenseAgreement(){
     this.licenseAgreement=false;
@@ -624,4 +643,134 @@ export class MainNavComponent{
     });
 
   }
+
+    private updateUserOptions() {
+      this.userMenuOptions=[];
+        //<a *ngIf="isGuest && !config.loginOptions" class="collection-item" (click)="showAddDesktop=false;login(true)" (keyup.enter)="showAddDesktop=false;login(true)" tabindex="0" title="{{ 'SIDEBAR.LOGIN' | translate}}"><i class="material-icons">person</i> {{ 'SIDEBAR.LOGIN' | translate}}</a>
+        //<a *ngFor="let loginOption of isGuest?config.loginOptions:null" class="collection-item" tabindex="0" title="{{loginOption.name}}" href="{{loginOption.url}}">{{loginOption.name}}</a>
+        if(this.isGuest){
+          if(this.config.loginOptions){
+            for(let login of this.config.loginOptions){
+              this.userMenuOptions.push(new OptionItem(login.name,'',()=>window.location.href=login.url));
+            }
+          }
+          else{
+              this.userMenuOptions.push(new OptionItem('SIDEBAR.LOGIN','person',()=>this.login(true)));
+          }
+      }
+      if(this._currentScope=='search') {
+        let option=new OptionItem('SEARCH.NODE_STORE.TITLE','bookmark_border',()=>this.setNodeStore(true));
+          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+          option.isSeperateBottom=true;
+          this.userMenuOptions.push(option);
+      }
+      for(let option of this.getConfigMenuHelpOptions()){
+          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+          this.userMenuOptions.push(option);
+      }
+      if(this.config.imprintUrl){
+          let option=new OptionItem('IMPRINT','info_outline',()=>this.openImprint());
+          option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+          option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+          option.isSeperateBottom=!this.config.privacyInformationUrl;
+          this.userMenuOptions.push(option);
+      }
+        if(this.config.privacyInformationUrl){
+            let option=new OptionItem('PRIVACY_INFORMATION','verified_user',()=>this.openPrivacy());
+            option.mediaQueryType=UIConstants.MEDIA_QUERY_MAX_WIDTH;
+            option.mediaQueryValue=UIConstants.MOBILE_TAB_SWITCH_WIDTH;
+            option.isSeperateBottom=true;
+            this.userMenuOptions.push(option);
+        }
+      if(this.editUrl && !this.isGuest){
+        this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.editProfile()));
+      }
+      if(this.showEditProfile && this.canEditProfile && !this.editUrl && !this.isGuest){
+        this.userMenuOptions.push(new OptionItem('EDIT_ACCOUNT','assignment_ind',()=>this.openProfileDialog()));
+      }
+      if(!this.isGuest){
+        this.userMenuOptions.push(new OptionItem('LOGOUT','undo',()=>this.logout()));
+      }
+    }
+
+    private updateHelpOptions() {
+      this.helpOptions=this.getConfigMenuHelpOptions();
+    }
+
+    private getConfigMenuHelpOptions() {
+      if(!this.config.helpMenuOptions){
+          console.warn("config does not contain helpMenuOptions, will not display any options");
+          return [];
+      }
+        let options:OptionItem[]=[];
+        for(let entry of this.config.helpMenuOptions){
+            options.push(new OptionItem(entry.key,entry.icon,()=>window.open(entry.url)));
+        }
+        return options;
+    }
+
+    /**
+     * Method to dynamically hide objects when scrolling on mobile
+     * Add css class mobile-move-top or mobile-move-bottom for specific items
+     */
+    private handleScrollHide() {
+      if(this.tabNav==null || this.tabNav.nativeElement==null)
+          return;
+      if(this.lastScroll==-1) {
+          this.lastScroll=window.scrollY;
+          return;
+      }
+      let elementsTop:any=document.getElementsByClassName("mobile-move-top");
+      let elementsBottom:any=document.getElementsByClassName("mobile-move-bottom");
+      let top=-1,bottom=-1;
+      for(let i=0;i<elementsTop.length;i++) {
+          let rect=elementsTop.item(i).getBoundingClientRect();
+          if(bottom==-1 || bottom<rect.bottom){
+              bottom=rect.bottom;
+          }
+      }
+        for(let i=0;i<elementsBottom.length;i++) {
+            let rect=elementsBottom.item(i).getBoundingClientRect();
+            if(top==-1 || top>rect.top){
+                top=rect.top;
+            }
+        }
+      let diffTop=window.scrollY-this.lastScroll;
+      let diffBottom=window.scrollY-this.lastScroll;
+      if(diffTop<0) diffTop*=2;
+      if(diffBottom<0) diffBottom*=2;
+
+      if(diffTop>0 && bottom<0){
+          diffTop=0;
+      }
+        if(diffBottom>0 && top>window.innerHeight){
+            diffBottom=0;
+        }
+      this.elementsTopY+=diffTop;
+      this.elementsTopY=Math.max(0,this.elementsTopY);
+      this.elementsBottomY+=diffBottom;
+      this.elementsBottomY=Math.max(0,this.elementsBottomY);
+      // for ios elastic scroll
+        if(window.scrollY<=0 || this.fixScrollElements || !UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH,UIConstants.MOBILE_TAB_SWITCH_WIDTH)){
+            this.elementsTopY=0;
+            this.elementsBottomY=0;
+        }
+      //this.navbarOffsetY=Math.min(this.navbarOffsetY,bottom-top);
+        for(let i=0;i<elementsTop.length;i++) {
+            elementsTop.item(i).style.position="relative";
+            elementsTop.item(i).style.top=-this.elementsTopY+"px";
+        }
+      for(let i=0;i<elementsBottom.length;i++) {
+          elementsBottom.item(i).style.position="relative";
+          elementsBottom.item(i).style.top=this.elementsBottomY+"px";
+      }
+        this.lastScroll=window.scrollY;
+        //console.log(event);
+    }
+    public setFixMobileElements(fix:boolean){
+        this.fixScrollElements=fix;
+        this.handleScrollHide();
+    }
 }

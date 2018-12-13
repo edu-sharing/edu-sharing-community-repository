@@ -7,7 +7,6 @@ import {
 import {FormatSizePipe} from "./file-size.pipe";
 import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {Observable, Observer} from "rxjs";
-import {Response, ResponseContentType, Http} from "@angular/http";
 import {ConfigurationService} from "../services/configuration.service";
 import {RestHelper} from "../rest/rest-helper";
 import {Toast} from "./toast";
@@ -24,6 +23,8 @@ import {Helper} from "../helper";
 import {ConfigurationHelper} from "../rest/configuration-helper";
 import {CordovaService} from "../services/cordova.service";
 import {VCard} from "../VCard";
+import {HttpClient} from '@angular/common/http';
+import {HttpResponse} from '@angular/common/http/src/response';
 
 export class NodeHelper{
   /**
@@ -190,8 +191,7 @@ export class NodeHelper{
    * @param item
    * @returns {any}
    */
-  public static getCollectionAttribute(translate : TranslateService,collection : any,item : string) : string
-  {
+  public static getCollectionAttribute(translate : TranslateService,collection : any,item : string) : string{
     if(item=='info'){
       let childs=collection.childReferencesCount;
       let coll=collection.childCollectionsCount;
@@ -255,13 +255,16 @@ export class NodeHelper{
    */
   public static appendImageData(rest:RestConnectorService,node: Node,quality=60) : Observable<Node>{
   return new Observable<Node>((observer : Observer<Node>)=>{
-    let options=rest.getRequestOptions();
-    options.responseType=ResponseContentType.Blob;
+    let options:any=rest.getRequestOptions();
+    options.responseType='blob';
 
-    rest.get(node.preview.url+"&quality="+quality,options,false).subscribe((data:Response)=>{
+    rest.get(node.preview.url+"&quality="+quality,options,false).subscribe((data:HttpResponse<Blob>)=>{
     //rest.get("http://localhost:8081/edu-sharing/rest/authentication/v1/validateSession",options,false).subscribe((data:Response)=>{
-      node.preview.data=data.blob();
+      node.preview.data=data.body;
       observer.next(node);
+      observer.complete();
+    },(error)=>{
+      observer.error(error);
       observer.complete();
     });
   });
@@ -343,7 +346,9 @@ export class NodeHelper{
   public static getUserDisplayName(user:AuthorityProfile|User){
     return (user.profile.firstName+" "+user.profile.lastName).trim();
   }
-
+    static isSavedSearchObject(node: Node) {
+        return node.mediatype=='saved_search';
+    }
   /**
    * Get an attribute (property) from a node
    * The attribute will be cached add the object
@@ -378,14 +383,18 @@ export class NodeHelper{
         }
         return '';
       }
-      if (item.name == RestConstants.CCM_PROP_REPLICATIONSOURCE) {
-        if (typeof data.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE] !== 'undefined' && data.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE] != '') {
-          let rawSrc = data.properties[RestConstants.CCM_PROP_REPLICATIONSOURCE].toString();
+      if (item.name == RestConstants.CCM_PROP_REPLICATIONSOURCE || item.name == RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_PUBLISHER_FN) {
+        if (typeof data.properties[item.name] !== 'undefined' && data.properties[item.name] != '') {
+          let rawSrc = data.properties[item.name].toString().trim();
           let src = rawSrc.substring(rawSrc.lastIndexOf(":") + 1).toLowerCase();
-          return '<img alt="'+src+'" src="'+NodeHelper.getSourceIconPath(src)+'">';
+          src = src.replace(/\s/g,"_");
+          src = src.replace(/\./g,"_");
+          src = src.replace(/\//g,"_");
+          return '<img alt="'+rawSrc+'" title="'+rawSrc+'" src="'+NodeHelper.getSourceIconPath(src)+'">';
         }
-        return '<img alt="" src="'+NodeHelper.getSourceIconPath('home')+'">';
+        return '<img alt="repository" src="'+NodeHelper.getSourceIconPath('home')+'">';
       }
+
       return NodeHelper.getNodeAttribute(translate,config, data, item);
     }
     if(item.type=='COLLECTION'){
@@ -416,7 +425,7 @@ export class NodeHelper{
    * @param options
    * @param progressCallback
    */
-  public static applyCustomNodeOptions(toast:Toast, http:Http, connector:RestConnectorService, custom: any,allNodes:Node[], selectedNodes: Node[], options: OptionItem[], progressCallback:Function,replaceUrl:any={}) {
+  public static applyCustomNodeOptions(toast:Toast, http:HttpClient, connector:RestConnectorService, custom: any,allNodes:Node[], selectedNodes: Node[], options: OptionItem[], progressCallback:Function,replaceUrl:any={}) {
     if (custom) {
       for (let c of custom) {
         if(c.remove){
@@ -425,18 +434,6 @@ export class NodeHelper{
             options.splice(i,1);
           continue;
         }
-        if(c.mode=='nodes' && (!selectedNodes || selectedNodes.length))
-          continue;
-        if(c.mode=='noNodes' && selectedNodes && selectedNodes.length)
-          continue;
-        if(c.mode=='noNodesNotEmpty' && (selectedNodes && selectedNodes.length || !allNodes || !allNodes.length))
-          continue;
-        if (c.mode=='nodes' && c.isDirectory != 'any' && selectedNodes && c.isDirectory != selectedNodes[0].isDirectory)
-          continue;
-        if(c.toolpermission && !connector.hasToolPermissionInstant(c.toolpermission))
-          continue;
-        if (!c.multiple && selectedNodes && selectedNodes.length > 1)
-          continue;
         let position = c.position;
         if (c.position < 0)
           position = options.length - c.position;
@@ -462,7 +459,7 @@ export class NodeHelper{
             return;
           }
           progressCallback(true);
-          http.get(url).map((response: Response) => response.json()).subscribe((data: any) => {
+          http.get(url).subscribe((data: any) => {
             if (data.success)
               toast.toast(data.success, null, data.message ? data.success : data.message, data.message);
             else if (data.error)
@@ -476,10 +473,31 @@ export class NodeHelper{
           });
         });
         item.isSeperate = c.isSeperate;
-        if (c.permission) {
-          item.isEnabled = NodeHelper.getNodesRight(selectedNodes, c.permission);
+        item.enabledCallback=(node:Node)=>{
+            if (c.permission) {
+                return NodeHelper.getNodesRight(NodeHelper.getActionbarNodes(selectedNodes, node), c.permission);
+            }
+            return true;
         }
-        options.splice(position, 0, item);
+        item.isEnabled=item.enabledCallback(null);
+        item.showCallback=(node:Node)=>{
+            let nodes=NodeHelper.getActionbarNodes(selectedNodes,node);
+            if(c.mode=='nodes' && (!nodes || nodes.length))
+                return false;
+            if(c.mode=='noNodes' && nodes && nodes.length)
+                return false;
+            if(c.mode=='noNodesNotEmpty' && (nodes && nodes.length || !allNodes || !allNodes.length))
+                return false;
+            if (c.mode=='nodes' && c.isDirectory != 'any' && nodes && c.isDirectory != nodes[0].isDirectory)
+                return false;
+            if(c.toolpermission && !connector.hasToolPermissionInstant(c.toolpermission))
+                return false;
+            if (!c.multiple && nodes && nodes.length > 1)
+                return false;
+            return true;
+        }
+        if(item.showCallback(null))
+            options.splice(position, 0, item);
       }
 
     }
@@ -498,15 +516,16 @@ export class NodeHelper{
    * Download one or multiple nodes
    * @param node
    */
-  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[]) {
+  static downloadNodes(toast:Toast,connector:RestConnectorService,nodes: Node[], fileName="download.zip") {
     if(nodes.length==1)
       return this.downloadNode(toast,connector.getCordovaService(),nodes[0]);
 
     let nodesString=RestHelper.getNodeIds(nodes).join(",");
-      this.downloadUrl(toast,connector.getCordovaService(),connector.getAbsoluteEndpointUrl()+
-      "../eduservlet/download?appId="+
-      encodeURIComponent(nodes[0].ref.repo)+
-      "&nodeIds="+encodeURIComponent(nodesString),"download.zip");
+    let url=connector.getAbsoluteEndpointUrl()+
+        "../eduservlet/download?appId="+
+        encodeURIComponent(nodes[0].ref.repo)+
+        "&nodeIds="+encodeURIComponent(nodesString)+"&fileName="+encodeURIComponent(fileName);
+    this.downloadUrl(toast,connector.getCordovaService(),url,fileName);
   }
 
   static getLRMIProperty(data: any, item: ListItem) {
@@ -620,6 +639,9 @@ export class NodeHelper{
         }
     }
       return false;
+  }
+  public static getActionbarNodes(nodes:Node[],node:Node):Node[] {
+      return node ? [node] : nodes;
   }
 }
 

@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.rendering;
 
 import java.io.IOException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -16,29 +17,35 @@ import javax.servlet.http.HttpSession;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.apache.axis.AxisFault;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.repository.server.MCBaseClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.repository.server.tools.security.SignatureVerifier;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.rendering.RenderingTool;
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
+import org.edu_sharing.service.usage.Usage;
+import org.edu_sharing.service.usage.Usage2Service;
+import org.edu_sharing.webservices.usage2.Usage2;
+import org.edu_sharing.webservices.usage2.Usage2Result;
+import org.edu_sharing.webservices.usage2.Usage2ServiceLocator;
 
 public class RenderingProxy extends HttpServlet {
 
-	
+
+	private static final String[] ALLOWED_GET_PARAMS = new String[]{
+			"closeOnBack","childobject","childobject_order"
+	};
 	Logger logger = Logger.getLogger(RenderingProxy.class);
 	
 	@Override
@@ -60,10 +67,21 @@ public class RenderingProxy extends HttpServlet {
 		String display = req.getParameter("display");
 		
 		String nodeId = req.getParameter("obj_id");
-		
-		
-		logger.debug("app_id: " +app_id + " rep_id:" +rep_id+ " proxyRepId: "+proxyRepId+ " signed:" +signed +" display:" + display + " nodeId:" + nodeId);
-		
+
+        logger.debug("app_id: " +app_id + " rep_id:" +rep_id+ " proxyRepId: "+proxyRepId+ " signed:" +signed +" display:" + display + " nodeId:" + nodeId);
+
+        String childobjectId = req.getParameter("childobject_id");
+
+		String parentId=nodeId;
+		if(childobjectId!=null){
+			boolean isChild=AuthenticationUtil.runAsSystem(()-> NodeServiceHelper.isChildOf(NodeServiceFactory.getLocalService(),childobjectId,parentId));
+			if(!isChild){
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"Node "+childobjectId+" is not a child of "+parentId);
+				return;
+			}
+			nodeId = childobjectId;
+		}
+
 		boolean doRedirect = true;
 		if("inline".equals(display)){
 			doRedirect = false;
@@ -78,6 +96,7 @@ public class RenderingProxy extends HttpServlet {
 			return;
 		}
 		
+		ApplicationInfo repoInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);
 		//Signatur validation
 		//current repo knows the app
 		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(app_id);
@@ -103,19 +122,19 @@ public class RenderingProxy extends HttpServlet {
 		
 		
 		String uEncrypted = req.getParameter("u");
-		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
-		
+		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
+
 		String usernameDecrypted = null;
 		Encryption encryptionTool = new Encryption("RSA");
 		
 		try {
 			
-			usernameDecrypted = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRepo.getPrivateKey()));
+			usernameDecrypted = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRep.getPrivateKey()));
 		}catch(GeneralSecurityException e) {
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
 		}
-		
+
 		String[] roles = req.getParameterValues("role");
 		if(roles != null && roles.length > 0) {
 			final String username = usernameDecrypted;
@@ -130,80 +149,15 @@ public class RenderingProxy extends HttpServlet {
 			};
 			AuthenticationUtil.runAsSystem(runAs);
 		}
-			
+
 		if("window".equals(display)) {
-			
-			if(uEncrypted == null) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no user provided");
-				return;
-			}
-			
-			String encTicket = req.getParameter("ticket");
-			if(encTicket == null) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no ticket provided");
-				return;
-			}
-			
-			String ticket = null;
-			Encryption enc = new Encryption("RSA");
-			try {
-				ticket = enc.decrypt(Base64.decodeBase64(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
-			}catch(GeneralSecurityException e) {
-				logger.error(e.getMessage(), e);
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
-				return;
-			}
-			
-			
-			
-			/**
-			 * when it's an lms the user who is in a course where the node is used (Angular path can not handle signatures) 
-			 * 
-			 * doing edu ticket auth
-			 */
-			if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
-				HttpSession session = req.getSession(true);
-				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
-				req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
-				
-				//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
-				AuthenticationToolAPI authTool = new AuthenticationToolAPI();
-				if(authTool.validateTicket(ticket)) {
-					authTool.storeAuthInfoInSession(usernameDecrypted, ticket,CCConstants.AUTH_TYPE_DEFAULT, session);
-				}else {
-					logger.warn("ticket:" + ticket +" is not valid");
-					return;
-				}
-				
-			}else {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
-				return;
-			}
 
-			String version=req.getParameter("version");
-
-			if(version==null) {
-				logger.info("parameter version missing, will use latest (-1)");
-			}
-			try {
-				if(Double.parseDouble(version)<1)
-					version=null;
-			}catch(Throwable t) {
-				logger.warn("parameter version is non-numeric ("+version+"), will use latest (-1)");
-				version=null;
-			}
-			String closeOnBack="";
-			if(req.getParameter("closeOnBack")!=null){
-				closeOnBack="?closeOnBack="+req.getParameter("closeOnBack");
-			}
-			String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version)+closeOnBack;
-			resp.sendRedirect(urlWindow);
+			openWindow(req, resp, nodeId, parentId, appInfoApplication,repoInfo, usernameDecrypted);
 			return;
 		}
 		
 		String contentUrl = null;
 		
-		final ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
 		if(homeRep.getAppId().equals(rep_id)){
 			contentUrl = homeRep.getContentUrl();
 			
@@ -224,13 +178,13 @@ public class RenderingProxy extends HttpServlet {
 			
 			if(contentUrl == null) logger.warn("no content url configured");
 		}else{
-			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(rep_id);
-			if(appInfo == null){
+			
+			if(repoInfo == null){
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"unknown rep_id "+ rep_id);
 				return;
 			}
 			
-			contentUrl = appInfo.getClientBaseUrl() +"/renderingproxy";
+			contentUrl = repoInfo.getClientBaseUrl() +"/renderingproxy";
 			contentUrl = UrlTool.setParam(contentUrl, "proxyRepId", ApplicationInfoList.getHomeRepository().getAppId());
 		}
 		
@@ -257,7 +211,7 @@ public class RenderingProxy extends HttpServlet {
 			if(key.equals("u") && !homeRep.getAppId().equals(rep_id)){
 				final String usernameDecrypted2 = usernameDecrypted;
 				
-				final String finalRepId = rep_id;
+				ApplicationInfo remoteRepo = ApplicationInfoList.getRepositoryInfoById(rep_id);
 				
 				AuthenticationUtil.RunAsWork<String> runAs = new AuthenticationUtil.RunAsWork<String>(){
 					
@@ -276,66 +230,20 @@ public class RenderingProxy extends HttpServlet {
 						/**
 						 *make sure that the remote user exists
 						 */
-						if(personData == null || personData.size() < 1){
-							throw new Exception("unknown local user "+localUsername);
-						}else{
-							
-							/**
-							 * only do the create process if remote user does not exist
-							 */
-							MCAlfrescoBaseClient remoteClient = null;
-							boolean remoteUserExists = false;
-							try{
-								MCBaseClient remoteClientBase = RepoFactory.getInstance(finalRepId, apiClient.getAuthenticationInfo());
-								if(remoteClientBase instanceof MCAlfrescoBaseClient) {
-									remoteClient = (MCAlfrescoBaseClient)remoteClientBase;
-									HashMap<String,String> remoteUserInfo = remoteClient.getUserInfo(personData.get(CCConstants.PROP_USER_ESUID) + "@" + homeRep.getAppId());
-									if(remoteUserInfo != null && remoteUserInfo.size() > 0){
-										remoteUserExists = true;
-									}
-								}
-							}catch(AxisFault e){
-								
-								boolean userDoesNotExsist = false;
-								for (org.w3c.dom.Element ele : e.getFaultDetails()) {
-									
-									if (ele.getNodeName().equals("faultData")) {
-										if(ele.getTextContent().contains("does not exist")){
-											userDoesNotExsist = true;
-											logger.error( ele.getTextContent());
-										}										
-									}
-								}
-								if(!userDoesNotExsist){
-									logger.error(e.getMessage(),e);
-									throw new Exception(e);
-								}
-							}
-							catch(Throwable e){
-								logger.error(e.getMessage(),e);
-								throw new Exception(e);
-							}
-							
-							HashMap<String,String> localAuthInfo = apiClient.getAuthenticationInfo();							
-							if(!remoteUserExists){
-								try{
-									new AuthenticatorRemoteRepository().getAuthInfoForApp(localAuthInfo, ApplicationInfoList.getRepositoryInfoById(finalRepId));
-								}catch(Throwable e){
-									throw new Exception(e);
-								}
-							}
+						if(RepoProxyFactory.getRepoProxy().myTurn(rep_id)) {
+							RepoProxyFactory.getRepoProxy().remoteAuth(remoteRepo,false);
 						}
-						
+					
 						
 						return personData.get(CCConstants.PROP_USER_ESUID);
 					}
 				};
 				
 			    try{
-				    	String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
-				    	value = esuid + "@" + homeRep.getAppId();
+			    	String esuid = AuthenticationUtil.runAs(runAs, usernameDecrypted.trim());
+			    	value = esuid + "@" + homeRep.getAppId();
 				    	
-					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(appInfoApplication.getPublicKey()));
+					byte[] esuidEncrptedBytes = encryptionTool.encrypt(value.getBytes(), encryptionTool.getPemPublicKey(remoteRepo.getPublicKey()));
 					value = Base64.encodeBase64String(esuidEncrptedBytes);
 
 			    }catch(Exception e){
@@ -343,23 +251,24 @@ public class RenderingProxy extends HttpServlet {
 				    	resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"remote user auth failed "+ rep_id);
 				    	return;
 			    }
-			}
+			}else {
 			
-			//request.getParameter encodes the value, so we have to decode it again
-			if(key.equals("u")){
-				try {
-					ApplicationInfo targetApplication = ApplicationInfoList.getRenderService();
-					if(!homeRep.getAppId().equals(rep_id)){
-						targetApplication = ApplicationInfoList.getRepositoryInfoById(rep_id);
+				//request.getParameter encodes the value, so we have to decode it again
+				if(key.equals("u")){
+					try {
+						ApplicationInfo targetApplication = ApplicationInfoList.getRenderService();
+						if(!homeRep.getAppId().equals(rep_id)){
+							targetApplication = ApplicationInfoList.getRepositoryInfoById(rep_id);
+						}
+						byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
+						value = Base64.encodeBase64String(userEncryptedBytes);
+	
+					}catch(Exception e) {
+						logger.error(e.getMessage(), e);
 					}
-					byte[] userEncryptedBytes = encryptionTool.encrypt(usernameDecrypted.getBytes(), encryptionTool.getPemPublicKey(targetApplication.getPublicKey()));
-					value = Base64.encodeBase64String(userEncryptedBytes);
-
-				}catch(Exception e) {
-					logger.error(e.getMessage(), e);
+					
+					
 				}
-				
-				
 			}
 			value = URLEncoder.encode(value, "UTF-8");
 			contentUrl = UrlTool.setParam(contentUrl, key, value);
@@ -368,7 +277,7 @@ public class RenderingProxy extends HttpServlet {
 			
 		long timestamp = System.currentTimeMillis();
 		contentUrl = UrlTool.setParam(contentUrl, "ts",""+timestamp);
-		
+
 		Signing sigTool = new Signing();
 		
 		String data = rep_id + nodeId + timestamp;
@@ -404,5 +313,124 @@ public class RenderingProxy extends HttpServlet {
 		}
 		
 	}
-	
+
+	private boolean openWindow(HttpServletRequest req, HttpServletResponse resp, String nodeId, String parentId, ApplicationInfo appInfoApplication, ApplicationInfo repoInfo, String usernameDecrypted) throws IOException {
+		String ts = req.getParameter("ts");
+		String uEncrypted = req.getParameter("u");
+
+		if(uEncrypted == null) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no user provided");
+			return true;
+		}
+
+		String encTicket = req.getParameter("ticket");
+		if(encTicket == null) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,"no ticket provided");
+			return true;
+		}
+
+		String ticket = null;
+		Encryption enc = new Encryption("RSA");
+		try {
+			ticket = enc.decrypt(Base64.decodeBase64(encTicket.getBytes()), enc.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey().trim()));
+		}catch(GeneralSecurityException e) {
+			logger.error(e.getMessage(), e);
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
+			return true;
+		}
+
+
+		/**
+		 * when it's an lms the user who is in a course where the node is used (Angular path can not handle signatures)
+		 *
+		 * doing edu ticket auth
+		 */
+		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
+			req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
+			HttpSession session = req.getSession(true);
+			if(Long.parseLong(ts) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
+				try {
+					Usage usage = null;
+					if(repoInfo != null && !ApplicationInfoList.getHomeRepository().getAppId().equals(repoInfo.getAppId())){
+						Usage2ServiceLocator locator = new Usage2ServiceLocator();
+						locator.setusage2EndpointAddress(repoInfo.getWebServiceHotUrl());
+						Usage2 u2 = locator.getusage2();
+						Usage2Result u2r = u2.getUsage("ccrep://" + repoInfo.getAppId()+"/"+ nodeId, req.getParameter("app_id"), req.getParameter("course_id"), usernameDecrypted, req.getParameter("resource_id"));
+						if(u2r != null) {
+							usage = new Usage();
+							usage.setAppUser(u2r.getAppUser());
+							usage.setAppUserMail(u2r.getAppUserMail());
+							usage.setCourseId(u2r.getCourseId());
+							usage.setDistinctPersons(u2r.getDistinctPersons());
+							usage.setFromUsed(u2r.getFromUsed());
+							usage.setLmsId(u2r.getLmsId());
+							usage.setNodeId(u2r.getNodeId());
+							usage.setParentNodeId(u2r.getParentNodeId());
+							usage.setResourceId(u2r.getResourceId());
+							usage.setToUsed(u2r.getToUsed());
+							usage.setUsageCounter(u2r.getUsageCounter());
+							usage.setUsageVersion(u2r.getUsageVersion());
+							usage.setUsageXmlParams(u2r.getUsageXmlParams());
+						}
+					}else {
+						usage = new Usage2Service().getUsage(req.getParameter("app_id"), req.getParameter("course_id"), parentId, req.getParameter("resource_id"));
+					}
+					if(usage==null)
+						throw new SecurityException("No usage found for course id "+req.getParameter("course_id")+" and resource id "+req.getParameter("resource_id"));
+					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, parentId);
+					req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_TIMESTAMP, ts);
+				}
+				catch (Throwable t){
+					logger.warn("Usage fetching failed for node "+nodeId+": "+t.getMessage());
+				}
+			}
+
+			//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
+			AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+			if(authTool.validateTicket(ticket)) {
+				authTool.storeAuthInfoInSession(usernameDecrypted, ticket,CCConstants.AUTH_TYPE_DEFAULT, session);
+			}else {
+				logger.warn("ticket:" + ticket +" is not valid");
+				return true;
+			}
+		}else {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,"only LMS apps allowed for display=\"window\"");
+			return true;
+		}
+
+		String version=req.getParameter("version");
+
+		if(version==null) {
+			logger.info("parameter version missing, will use latest (-1)");
+		}
+		try {
+			if(Double.parseDouble(version)<1)
+				version=null;
+		}catch(Throwable t) {
+			logger.warn("parameter version is non-numeric ("+version+"), will use latest (-1)");
+			version=null;
+		}
+
+		String urlWindow = URLTool.getNgRenderNodeUrl(nodeId,version,false,(repoInfo != null) ? repoInfo.getAppId() : null);
+		
+
+		Map parameterMap = req.getParameterMap();
+		for(Object o : parameterMap.entrySet()) {
+			Map.Entry entry = (Map.Entry) o;
+			String key = (String)entry.getKey();
+			if(!Arrays.asList(ALLOWED_GET_PARAMS).contains(key)) {
+				continue;
+			}
+			String value;
+			if(entry.getValue() instanceof String[]){
+				value = ((String[])entry.getValue())[0];
+			}else{
+				value = (String)entry.getValue();
+			}
+			urlWindow = UrlTool.setParam(urlWindow,key,value);
+		}
+		resp.sendRedirect(urlWindow);
+		return false;
+	}
+
 }

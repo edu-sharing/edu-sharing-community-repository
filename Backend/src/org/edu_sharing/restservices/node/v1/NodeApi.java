@@ -50,6 +50,8 @@ import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
+import org.edu_sharing.service.nodeservice.AssocInfo;
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
@@ -244,13 +246,9 @@ public class NodeApi  {
     		Filter filter = new Filter(propertyFilter);
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-saved_search-".equals(node)){
-	    		node = repoDao.getUserSavedSearch();
-	    	}
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(nodeDao.asNode());
@@ -483,27 +481,9 @@ public class NodeApi  {
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+    		return ErrorResponse.createResponse(t);
     	}
-
     }
 
 	@GET
@@ -630,25 +610,8 @@ public class NodeApi  {
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	    	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
     	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+    		return ErrorResponse.createResponse(t);
     	}
 
     }
@@ -740,7 +703,7 @@ public class NodeApi  {
     	
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, DELETE").build();
     }
-    
+
     @GET
     @Path("/nodes/{repository}/{node}/children")    
     
@@ -766,49 +729,48 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_FILTER) @QueryParam("filter") List<String> filter,
 	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-	     
+	    @ApiParam(value = "Filter for a specific association. May be empty",required = false,defaultValue = "") @QueryParam("assocName") String assocName,
 	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 
+    	if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+    		return RepoProxyFactory.getRepoProxy().getChildren(repository, node, maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
+    	}
+    	
     	try {
     		Filter propFilter = new Filter(propertyFilter);
     		
-    		NodeEntries response=new NodeEntries();
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-inbox-".equals(node)){
-    			node = repoDao.getUserInbox();
-    		}
-	    	if("-saved_search-".equals(node)){
-	    		node = repoDao.getUserSavedSearch();
-	    	}
+	    	node=NodeDao.mapNodeConstants(repoDao,node);
 	    	List<NodeRef> children;
 
-	    	if("-shared_files-".equals(node)){
+            SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
+
+            NodeEntries response;
+            if("-shared_files-".equals(node)){
 		    	User person = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson();
 		    	children = person.getSharedFolders();
-	    	}
+		    	List<org.alfresco.service.cmr.repository.NodeRef> converted=NodeDao.convertApiNodeRef(children);
+                children=NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(converted,filter,sortDefinition));
+
+            }
 	    	else if("-my_shared_files-".equals(node)){
-	    		children = NodeDao.getFilesSharedByMe(repoDao);
-	    	}
+	    		children = NodeDao.getFilesSharedByMe(repoDao,filter,sortDefinition);
+            }
 	    	else if("-workflow_receive-".equals(node)){
-	    		children = NodeDao.getWorkflowReceive(repoDao);
+	    		children = NodeDao.getWorkflowReceive(repoDao,filter,sortDefinition);
 	    	}
 	    	else if("-to_me_shared_files-".equals(node)){
-	    		children = NodeDao.getFilesSharedToMe(repoDao);
+	    		children = NodeDao.getFilesSharedToMe(repoDao,filter,sortDefinition);
 	    	}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
-	    		children = nodeDao.getChildren();
-	    	}
-	    	
-			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
-
-			List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
+	    		children = nodeDao.getChildren(assocName,filter,sortDefinition);
+            }
+            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
+			//List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
 	    	//Collections.sort(children);
-	    	response=createResponseFromNodeList(response,sorted,skipCount,maxItems);
+			//NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);
 	    
 	    	
 	    	return Response.status(Response.Status.OK).entity(response).build();
@@ -819,6 +781,57 @@ public class NodeApi  {
     	}
        
     }
+	@GET
+	@Path("/nodes/{repository}/{node}/assocs")
+
+	@ApiOperation(
+			value = "Get related nodes.",
+			notes = "Get nodes related based on an assoc.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntries.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response getAssocs(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
+			@ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@ApiParam(value = "Either where the given node should be the \"SOURCE\" or the \"TARGET\"",required = true) @QueryParam("direction") AssocInfo.Direction direction,
+			@ApiParam(value = "Association name (e.g. ccm:forkio).") @QueryParam("assocName") String assocName,
+			@ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Context HttpServletRequest req) {
+
+		try {
+			Filter propFilter = new Filter(propertyFilter);
+
+			NodeEntries response=new NodeEntries();
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			List<NodeRef> children;
+
+            SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
+
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
+			children = nodeDao.getAssocs(new AssocInfo(direction,assocName),null,sortDefinition);
+            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		}
+		catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
     @DELETE
     @Path("/nodes/{repository}/{node}/shares/{shareId}")    
     
@@ -877,6 +890,7 @@ public class NodeApi  {
 	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @ApiParam(value = "share id",required=true ) @PathParam("shareId") String shareId,
 	    @ApiParam(value = "expiry date for this share, leave empty or -1 for unlimited",required=false,defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED ) @QueryParam("expiryDate") Long expiryDate,
+	    @ApiParam(value = "new password for share, leave empty if you don't want to change it",required=false,defaultValue="") @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -884,7 +898,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
 	    	
-	    	NodeShare response=nodeDao.updateShare(shareId,expiryDate==null?ShareService.EXPIRY_DATE_UNLIMITED:expiryDate);
+	    	NodeShare response=nodeDao.updateShare(shareId,expiryDate==null?ShareService.EXPIRY_DATE_UNLIMITED:expiryDate,password);
 	    	return Response.status(Response.Status.OK).entity(response).build();
     	}
     	catch (Throwable t) {
@@ -997,13 +1011,14 @@ public class NodeApi  {
     	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @ApiParam(value = "expiry date for this share, leave empty or -1 for unlimited",required=false,defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED ) @QueryParam("expiryDate") Long expiryDate,
+	    @ApiParam(value = "password for this share, use none to not use a password",required=false,defaultValue="") @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
-	    	NodeShare response=nodeDao.createShare(expiryDate==null ? ShareService.EXPIRY_DATE_UNLIMITED : expiryDate);
+	    	NodeShare response=nodeDao.createShare(expiryDate==null ? ShareService.EXPIRY_DATE_UNLIMITED : expiryDate,password);
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
     	}
@@ -1012,7 +1027,8 @@ public class NodeApi  {
     	}
        
     }    
-    private NodeEntries createResponseFromNodeList(NodeEntries response,List<Node> sorted, Integer skipCount, Integer maxItems) {
+    public static NodeEntries createResponseFromNodeList(List<Node> sorted, Integer skipCount, Integer maxItems) {
+		NodeEntries response = new NodeEntries();
     	int min = (skipCount != null) ? Math.min(sorted.size(), skipCount) : 0;
     	int max = (maxItems != null) ? Math.min(sorted.size(), min + maxItems) : sorted.size();   
     		
@@ -1060,6 +1076,7 @@ public class NodeApi  {
 	    @ApiParam(value = "rename if the same node name exists",required=false,defaultValue="false") @QueryParam("renameIfExists") Boolean renameIfExists,
 	    @ApiParam(value = "comment, leave empty = no inital version", required=false ) @QueryParam("versionComment")  String versionComment,
 	    @ApiParam(value = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}" , required=true ) HashMap<String, String[]> properties,	    
+	    @ApiParam(value = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,	    
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1073,7 +1090,10 @@ public class NodeApi  {
     		}
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	resolveURLTitle(properties);
-	    	NodeDao child = nodeDao.createChild(type, aspects, properties,renameIfExists==null ? false : renameIfExists.booleanValue());
+	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
+	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
+					assocType!=null && !assocType.trim().isEmpty() ? assocType : null);
+	    	
 			if(versionComment!=null && !versionComment.isEmpty()){
 				child.createVersion(versionComment);
 			}
@@ -1103,7 +1123,7 @@ public class NodeApi  {
 		     properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),url);
 			 return;
 		 }
-		 String title=info.getTitle()+" - "+info.getPage();
+		 String title=info.getTitle();
 		 if(info.getTitle()==null)
 			 title=info.getPage();
     	String[] name = new String[]{title};
@@ -1123,8 +1143,51 @@ public class NodeApi  {
     	
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, POST").build();
     }
+	@POST
+	@Path("/nodes/{repository}/{node}/children/_fork")
 
-    @POST
+	@ApiOperation(
+			value = "Create a copy of a node by creating a forked version (variant)."
+	)
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
+					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response createForkOfNode(
+			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+			@ApiParam(value = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
+			@ApiParam(value = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
+			@ApiParam(value = "flag for children",required=true) @QueryParam("withChildren") boolean withChildren,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			source=NodeDao.mapNodeConstants(repoDao,source);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao child = nodeDao.createFork(source);
+
+			NodeEntry response = new NodeEntry();
+			response.setNode(child.asNode());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@POST
     @Path("/nodes/{repository}/{node}/children/_copy")    
     
     @ApiOperation(
@@ -1152,14 +1215,12 @@ public class NodeApi  {
     	try {
     		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	if("-userhome-".equals(node)){
-    			node = repoDao.getUserHome();
-    		}
-	    	if("-userhome-".equals(source)){
-	    		source = repoDao.getUserHome();
-    		}
-	    	NodeDao child = nodeDao.createChildByCopy(source, withChildren);
+
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			source=NodeDao.mapNodeConstants(repoDao,source);
+
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao child = nodeDao.createChildByCopy(source, withChildren);
 	    			
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(child.asNode());
@@ -1717,7 +1778,8 @@ public class NodeApi  {
     	try {
 		
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			node=NodeDao.mapNodeConstants(repoDao,node);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
 	    	NodePermissionEntry response = new NodePermissionEntry(); 
 	    	
@@ -1831,7 +1893,7 @@ public class NodeApi  {
 		
 		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, @POST").build();
 	}
-	
+		
 	
 	  @POST
 	    @Path("/nodes/{repository}/{node}/prepareUsage")    
@@ -1842,7 +1904,7 @@ public class NodeApi  {
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeRemote.class),        
 		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
 		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
 		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
@@ -1856,6 +1918,11 @@ public class NodeApi  {
 	    @Context HttpServletRequest req) {
 	    
 	    	try {
+	    		
+	    		if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+	    			return RepoProxyFactory.getRepoProxy().prepareUsage(repository, node, req);
+	    		}
+	    		
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeRemote nodeRemote = NodeDao.prepareUsage(repoDao.getId(), node);
@@ -1892,5 +1959,113 @@ public class NodeApi  {
 			
 			return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET, @POST").build();
 		}
+		
+		
+		@POST
+	    @Path("/nodes/{repository}/{node}/owner")    
+	    
+	    @ApiOperation(
+	    	value = "Set owner of node.", 
+	    	notes = "Set owner of node.")
+	    
+	    @ApiResponses(
+	    	value = { 
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		    })
+
+	    public Response setOwner(
+	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@ApiParam(value = "username",required=false ) @QueryParam("username")  String username,
+			@Context HttpServletRequest req) {
+	    
+	    	try {
+			
+		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+		    	nodeDao.setOwner(username);   	
+		    	return Response.status(Response.Status.OK).build();
+		
+	    	} catch (DAOValidationException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (DAOSecurityException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (DAOMissingException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (Throwable t) {
+	    		
+	    		logger.error(t.getMessage(), t);
+	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+	    	}
+
+	    }
+		
+		@POST
+	    @Path("/nodes/{repository}/{node}/property")    
+	    
+	    @ApiOperation(
+	    	value = "Set single property of node.", 
+	    	notes = "Set single property of node.")
+	    
+	    @ApiResponses(
+	    	value = { 
+		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
+		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
+		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
+		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
+		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
+		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		    })
+
+	    public Response setProperty(
+	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
+	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@ApiParam(value = "property",required=true ) @QueryParam("property")  String property,
+	    	@ApiParam(value = "value",required=true ) @QueryParam("value")  String value,
+			@Context HttpServletRequest req) {
+	    
+	    	try {
+			
+		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+		    	nodeDao.setProperty(property, value);
+		    	return Response.status(Response.Status.OK).build();
+		
+	    	} catch (DAOValidationException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (DAOSecurityException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (DAOMissingException t) {
+	    		
+	    		logger.warn(t.getMessage(), t);
+	    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+	    		
+	    	} catch (Throwable t) {
+	    		
+	    		logger.error(t.getMessage(), t);
+	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+	    	}
+
+	    }
 }
 

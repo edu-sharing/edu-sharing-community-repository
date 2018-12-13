@@ -196,6 +196,9 @@
 				<property name="ccm:share_expirydate">
 					<type>d:long</type>
 				</property>
+				<property name="ccm:share_password">
+					<type>d:text</type>
+				</property>
 				<property name="ccm:share_mail">
 					<type>d:text</type>
 				</property>
@@ -277,6 +280,7 @@
 				<property name="ccm:usagecourseid">
 					<type>d:text</type>
 				</property>
+				<!-- is a link to the original node id for collection references -->
 				<property name="ccm:usageparentnodeid">
 					<type>d:text</type>
 				</property>
@@ -354,6 +358,26 @@
        		<title>Tool Permission</title>
          	<parent>ccm:io</parent>
        </type>
+        <type name="ccm:service_node">
+            <title>Service discovery information object</title>
+            <parent>cm:cmobject</parent>
+            <properties>
+                <property name="ccm:service_node_name">
+                    <type>d:text</type>
+                </property>
+                <property name="ccm:service_node_description">
+                    <type>d:text</type>
+                    <multiple>true</multiple>
+                </property>
+                <property name="ccm:service_node_type">
+                    <type>d:text</type>
+                </property>
+                <!-- json object of the service node -->
+                <property name="ccm:service_node_data">
+                    <type>d:text</type>
+                </property>
+            </properties>
+        </type>
 		<type name="ccm:tool_instance">
        		<title>Tool Instance</title>
        		<parent>cm:cmobject</parent>
@@ -501,7 +525,19 @@
 			</properties>
 		</aspect>
 
-		<aspect name="ccm:iometadata">
+        <aspect name="ccm:tracking">
+            <title>Metadata for simple tracking/statistics information</title>
+            <properties>
+                <property name="ccm:tracking_downloads">
+                    <type>d:int</type>
+                </property>
+                <property name="ccm:tracking_views">
+                    <type>d:int</type>
+                </property>
+            </properties>
+        </aspect>
+
+        <aspect name="ccm:iometadata">
 			<title>Metadata for an information object</title>
 			<parent>ccm:basemetadata</parent>
 			<properties>
@@ -561,6 +597,10 @@
 				<!-- for sorting  -->
 				<property name="ccm:replicationmodified">
 					<type>d:date</type>
+				</property>
+				<!-- for detecting last update of imported data  -->
+				<property name="ccm:importmodified">
+					<type>d:datetime</type>
 				</property>
 
 				<!-- for elixier objects thumbnail url -->
@@ -1218,8 +1258,15 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
-
-
+				<!-- ccm:oerinteractivitytype -->
+				<property name="ccm:oer_interactivitytype">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>			
+				<property name="ccm:educational_use">
+					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
 			</properties>
 		</aspect>
 
@@ -1243,6 +1290,20 @@
 					</target>
 				</child-association>
 			</associations>
+		</aspect>
+
+		<aspect name="ccm:forked">
+			<title>A node that is a variant (forked) of a parent node</title>
+			<properties>
+				<property name="ccm:forked_origin">
+					<type>d:noderef</type>
+					<multiple>false</multiple>
+				</property>
+				<property name="ccm:forked_origin_version">
+					<type>d:text</type>
+					<multiple>false</multiple>
+				</property>
+			</properties>
 		</aspect>
 		
 		<aspect name="ccm:shares">
@@ -1423,7 +1484,15 @@
 				</property>
 			</properties>
 		</aspect>
-		
+		<aspect name="ccm:io_childobject">
+			<title>a childobject for a series of nodes</title>
+			<properties>
+				<property name="ccm:childobject_order">
+					<type>d:int</type>
+				</property>
+			</properties>
+		</aspect>
+
 		<aspect name="ccm:collection">
 			<title>aspect for marking a map as a collection</title>
 			<properties>

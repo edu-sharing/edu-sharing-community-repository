@@ -1398,9 +1398,9 @@ public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing
         return ret;
     }
 
-    public org.edu_sharing.repository.client.rpc.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException
+    public org.edu_sharing.service.nodeservice.model.GetPreviewResult getPreviewUrl(java.lang.String storeProtocol, java.lang.String storeIdentifier, java.lang.String nodeId) throws java.rmi.RemoteException
     {
-        org.edu_sharing.repository.client.rpc.GetPreviewResult ret = impl.getPreviewUrl(storeProtocol, storeIdentifier, nodeId);
+    	org.edu_sharing.service.nodeservice.model.GetPreviewResult ret = impl.getPreviewUrl(storeProtocol, storeIdentifier, nodeId);
         return ret;
     }
 

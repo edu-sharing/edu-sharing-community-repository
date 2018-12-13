@@ -20,8 +20,27 @@ export class WorkspaceFileUploadSelectComponent  {
   public disabled=true;
   public chooseParent=false;
   @ViewChild('fileSelect') file : ElementRef;
+  @ViewChild('link') linkRef : ElementRef;
+  /**
+   * priority, useful if the dialog seems not to be in the foreground
+   * Values greater 0 will raise the z-index
+   */
+  @Input() priority = 0;
+  /**
+   * Allow multiple files uploaded
+   * @type {boolean}
+   */
+  @Input() multiple = true;
+  /**
+   * Should this widget display that it supports dropping
+   * @type {boolean}
+   */
+  @Input() supportsDrop = true;
   @Input() isFileOver=false;
-  @Input() showPicker=false;
+    /**
+     * Allow the user to use a file picker to choose the parent?
+     */
+    @Input() showPicker=false;
   /**
    * Show the lti option and support generation of lti files?
    * @type {boolean}
@@ -33,15 +52,16 @@ export class WorkspaceFileUploadSelectComponent  {
   private ltiConsumerKey:string;
   private ltiSharedSecret:string;
   private ltiTool: Node;
-    private _link: string;
-  @Input() set parent(parent:string){
-    if(parent==RestConstants.USERHOME){
-      this.breadcrumbs=[];
-      return;
+  private _link: string;
+  _parent: Node;
+  @Input() set parent(parent:Node){
+    this.breadcrumbs=null;
+    this._parent=parent;
+    if(parent) {
+        this.nodeService.getNodeParents(parent.ref.id).subscribe((data: NodeList) => {
+            this.breadcrumbs = data.nodes.reverse();
+        });
     }
-    this.nodeService.getNodeParents(parent).subscribe((data:NodeList)=>{
-      this.breadcrumbs=data.nodes;
-    })
   }
   @Output() parentChange = new EventEmitter();
   @Output() onCancel=new EventEmitter();
@@ -53,6 +73,9 @@ export class WorkspaceFileUploadSelectComponent  {
   }
   public selectFile(){
     this.file.nativeElement.click();
+  }
+  public onDrop(fileList:any){
+      this.onFileSelected.emit(fileList);
   }
   public filesSelected(event:any) : void {
     this.onFileSelected.emit(event.target.files);
@@ -84,6 +107,7 @@ export class WorkspaceFileUploadSelectComponent  {
     link=link.trim();
     this.disabled=!link;
     this.ltiAllowed=true;
+    /*
     if(this.cleanupUrlForLti(link)) {
         this.searchService.search([{
             property: "url",
@@ -100,10 +124,11 @@ export class WorkspaceFileUploadSelectComponent  {
                 }
             });
     }
+    */
   }
   public parentChoosed(event:Node[]){
-    this.parent=event[0].ref.id;
-    this.parentChange.emit(this.parent);
+    this._parent=event[0];
+    this.parentChange.emit(this._parent);
     this.chooseParent=false;
   }
   public constructor(
@@ -111,7 +136,6 @@ export class WorkspaceFileUploadSelectComponent  {
     private searchService:RestSearchService,
     private toast:Toast,
   ){
-    this.parent=RestConstants.USERHOME;
     this.setState("");
   }
 

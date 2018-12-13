@@ -16,11 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.Store;
 import javax.servlet.http.HttpSession;
 import javax.xml.soap.SOAPException;
 
+import org.alfresco.repo.search.impl.querymodel.impl.functions.Child;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -44,7 +47,11 @@ import org.edu_sharing.repository.server.tools.LocaleValidator;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.license.LicenseService;
+import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.usage.AlfServicesWrapper;
 import org.edu_sharing.service.usage.UsageDAO;
@@ -76,9 +83,11 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			MCAlfrescoAPIClient client = new MCAlfrescoAPIClient();
 			RenderInfoResult result = getBaseData(userName, nodeId, version, client);
 			UsageDAO usageDao = new AlfServicesWrapper();
-			HashMap<String, Object> usageMap =  usageDao.getUsage(lmsId, courseId, nodeId, resourceId);
-			if(usageMap != null){
-				result.setUsage(transform(new UsageService().getUsageResult(usageMap)));
+			if(lmsId!=null && courseId!=null) {
+				HashMap<String, Object> usageMap = usageDao.getUsageOnNodeOrParents(lmsId, courseId, nodeId, resourceId);
+				if (usageMap != null) {
+					result.setUsage(transform(new UsageService().getUsageResult(usageMap)));
+				}
 			}
 			return result;
 			
@@ -140,8 +149,9 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 	
 	
 	private RenderInfoResult getBaseData(String userName, String nodeId, String version, MCAlfrescoAPIClient client) throws RemoteException, Throwable{
-		
-		if (!client.exists(nodeId)) {
+		NodeService nodeService=NodeServiceFactory.getLocalService();
+		org.edu_sharing.service.permission.PermissionService permissionService=PermissionServiceFactory.getLocalService();
+		if (!nodeService.exists(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId)) {
 			throw new RemoteException(EXCEPTION_NODE_DOES_NOT_EXISTS);
 		}
 		
@@ -169,8 +179,8 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			String[] splitted = remoteRoles.split(",");
 			rir.setRemoteRoles(splitted);
 		}
-		
-		HashMap<String, Boolean> perms = client.hasAllPermissions(nodeId, userName, PermissionServiceHelper.PERMISSIONS);
+
+		HashMap<String, Boolean> perms = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, new String[]{CCConstants.PERMISSION_READ,CCConstants.PERMISSION_CC_PUBLISH});
 
 		rir.setPermissions(PermissionServiceHelper.getPermissionsAsString(perms).toArray(new String[0]));
 		rir.setPublishRight(new Boolean(perms.get(CCConstants.PERMISSION_CC_PUBLISH)));
@@ -178,7 +188,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		//this does not work anymore in alfresco-5.0.d:
 		//HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.ALL_AUTHORITIES, new String[]{PermissionService.READ});
-		HashMap<String, Boolean> permsGuest = client.hasAllPermissions(nodeId, PermissionService.GUEST_AUTHORITY, new String[]{PermissionService.READ});
+		HashMap<String, Boolean> permsGuest = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, PermissionService.GUEST_AUTHORITY, new String[]{PermissionService.READ});
 		rir.setGuestReadAllowed(new Boolean(permsGuest.get(PermissionService.READ)));
 
 		HashMap versionProps = null;
@@ -224,6 +234,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}
 
 
+
 		String locale = getHeaderValue("locale", MessageContext.getCurrentContext());
 
 		locale = (locale != null) ? locale : "en_EN";
@@ -236,9 +247,19 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		//properties without clientinfo cause of admin etc. ticket 
 		NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId);
 		Map<String,Object> props = (versionProps == null) ? client.getPropertiesCached(nodeRef, true, true, false) : versionProps;//client.getProperties(nodeId);
-		// fix axis bug that emoji crash: https://issues.apache.org/jira/browse/AXIS-2908
+        // fix axis bug that emoji crash: https://issues.apache.org/jira/browse/AXIS-2908
 		props=removeUTF16Chars(props);
 
+		// child object: inherit all props from parent
+		if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_IO_CHILDOBJECT)){
+			ChildAssociationRef parentRef = client.getParent(nodeRef);
+			Map<String,Object> propsParent = new HashMap<String, Object>(client.getPropertiesCached(parentRef.getParentRef(), true, true, false));
+			// override it with the props from the child
+			for(Map.Entry<String,Object> entry : props.entrySet()){
+				propsParent.put(entry.getKey(),entry.getValue());
+			}
+			props=propsParent;
+		}
 		String nodeType = (String)props.get(CCConstants.NODETYPE);
 		boolean isRemoteObject = CCConstants.CCM_TYPE_REMOTEOBJECT.equals(nodeType);
 		ApplicationInfo appInfo=ApplicationInfoList.getHomeRepository();
@@ -249,6 +270,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			HashMap<String, Object> propsNew = NodeServiceFactory.getNodeService(appInfo.getAppId()).getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), remoteId);
 			props.putAll(propsNew);
 		}
+		rir.setIconUrl(new MimeTypesV2(appInfo).getIcon(nodeType,props,Arrays.asList(aspects)));
 
 		if(collectionRefOriginalDeleted){
 			props.put(CCConstants.VIRT_PROP_ORIGINAL_DELETED, "true");
@@ -256,11 +278,14 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		
 		//Preview Url not longer in cache
 		String renderServiceUrlPreview = URLTool.getRenderServiceURL(nodeRef.getId(), true);
+		
 		if (renderServiceUrlPreview != null) {
 			props.put(CCConstants.CM_ASSOC_THUMBNAILS, renderServiceUrlPreview);
 		} else {
 			props.put(CCConstants.CM_ASSOC_THUMBNAILS, URLTool.getPreviewServletUrl(nodeRef));
 		}
+		
+		
 		//put license
 		String commonLicensekey = (String)props.get(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
 		if(commonLicensekey != null){
@@ -275,16 +300,33 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		}
 		
 		props=VCardConverter.addVCardProperties(nodeType,props);
-		List<KeyValue> propsresult = new ArrayList<KeyValue>();
+		rir.setProperties(convertProperties(props));
 		
-		//MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getRepositoryInfoById(appId),CCConstants.metadatasetdefault_id);
-		for(Map.Entry<String,Object> entry : props.entrySet()){
-			//MetadataWidget viewProperty = (isRemoteObject) ? null :  mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
-			if(entry.getKey() != null && entry.getValue() != null) {
-				propsresult.add(new KeyValue(entry.getKey(),entry.getValue().toString()));
-			}
+		List<org.edu_sharing.webservices.types.Child> childrenConverted = new ArrayList<>();
+		List<Map<String, Object>> children = getChildNodes(nodeId);
+		String baseUrl=getHeaderValue("baseUrl",MessageContext.getCurrentContext());
+		// when baseUrl is not available from client (e.g. a request from LMS)
+		if(baseUrl==null || baseUrl.isEmpty())
+			baseUrl=URLTool.getBaseUrl(false);
+		for(Map<String, Object> child : children) {
+			org.edu_sharing.webservices.types.Child childConverted=new org.edu_sharing.webservices.types.Child();
+			String childId=(String) child.get(CCConstants.SYS_PROP_NODE_UID);
+			String type=nodeService.getType(childId);
+			String[] childAspects=nodeService.getAspects((String) child.get(CCConstants.SYS_PROP_STORE_PROTOCOL),(String) child.get(CCConstants.SYS_PROP_STORE_IDENTIFIER),childId);
+			child=VCardConverter.addVCardProperties(type,child);
+			childConverted.setProperties(convertProperties(child));
+			childConverted.setAspects(aspects);
+			childConverted.setIconUrl(new MimeTypesV2(appInfo).getIcon(type,child,Arrays.asList(childAspects)));
+			childConverted.setPreviewUrl(
+					URLTool.getPreviewServletUrl(
+							childId,
+							StoreRef.PROTOCOL_WORKSPACE,
+							StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							baseUrl));
+			childrenConverted.add(childConverted);
+
 		}
-		rir.setProperties(propsresult.toArray(new KeyValue[propsresult.size()]));
+		rir.setChildren(childrenConverted.toArray(new org.edu_sharing.webservices.types.Child[childrenConverted.size()]));
 		//rir.setLabels(labelResult.toArray(new KeyValue[labelResult.size()]));
 		
 		
@@ -294,9 +336,10 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 		 * maybe check mediacenter groupmembership when readContent vs readMetadata is important
 		 */
 		
+		//set default
 		//Has the user alf permissions on the node? -> check if he also has read_all permissions
-		if(client.hasPermissions(nodeId, userName, new String[] {CCConstants.PERMISSION_READ}))
-			rir.setHasContentLicense(client.hasPermissions(nodeId, userName, new String[] {CCConstants.PERMISSION_READ_ALL}));
+		if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, CCConstants.PERMISSION_READ))
+			rir.setHasContentLicense(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, CCConstants.PERMISSION_READ_ALL));
 		else // otherwise, we currently assume the material is embedded in a course (usage), so do allow read access
 			rir.setHasContentLicense(true);
 		String cost = (String)props.get(CCConstants.CCM_PROP_IO_CUSTOM_LICENSE_KEY);
@@ -304,10 +347,10 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			
 			String permissionsNodeId = nodeId;
 			if (Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
-				permissionsNodeId = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+				permissionsNodeId = client.getProperty(MCAlfrescoAPIClient.storeRef, nodeId , CCConstants.CCM_PROP_IO_ORIGINAL);
 							
 			}
-			if(!client.hasPermissions(permissionsNodeId, userName, new String[] {CCConstants.PERMISSION_READ_ALL})) {
+			if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), permissionsNodeId, userName,CCConstants.PERMISSION_READ_ALL)) {
 				rir.setHasContentLicense(false);
 			}	
 			
@@ -331,15 +374,35 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			rir.setPropertiesToolInstance(propsResultToolInstance.toArray(new KeyValue[propsResultToolInstance.size()]));
 		}
 		String clientBaseUrl = appInfo.getClientBaseUrl();
-		String previewUrl = URLTool.getPreviewServletUrl(new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId));
-		
+		String previewUrl = URLTool.getPreviewServletUrl(
+				nodeId,
+				StoreRef.PROTOCOL_WORKSPACE,
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+				baseUrl);
 		rir.setPreviewUrl(previewUrl);
 		rir.setMimeTypeUrl(new MimeTypes(clientBaseUrl).getIconUrl(props, Theme.getThemeId()));
 		rir.setAspects(client.getAspects(nodeId));
-		
+		rir.setDirectory(MimeTypesV2.isDirectory(props));
 		addMetadataTemplate(rir,locale,nodeType,props,appInfo);
 
 		return rir;
+	}
+	private KeyValue[] convertProperties(Map<String,Object> propertiesIn) {
+		List<KeyValue> propsresult = new ArrayList<KeyValue>();
+
+		//MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getRepositoryInfoById(appId),CCConstants.metadatasetdefault_id);
+		for(Map.Entry<String,Object> entry : propertiesIn.entrySet()){
+			//MetadataWidget viewProperty = (isRemoteObject) ? null :  mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
+			if(entry.getKey() != null && entry.getValue() != null) {
+				propsresult.add(new KeyValue(entry.getKey(),entry.getValue().toString()));
+			}
+		}
+		return propsresult.toArray(new KeyValue[propsresult.size()]);
+	}
+
+	private List<Map<String, Object>> getChildNodes(String nodeId) throws Throwable {
+		return NodeServiceHelper.getSubobjects(NodeServiceFactory.getLocalService(),nodeId);
+
 	}
 	private static HashMap<String, Object> removeUTF16Chars(Map<String, Object> props){
 		HashMap<String, Object> propsClean = new HashMap(props);
@@ -371,27 +434,16 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			mdsId = CCConstants.metadatasetdefault_id;
 		MetadataSetV2 mds = MetadataReaderV2.getMetadataset(appInfo, mdsId,locale);
 		
-		HashMap<String, String[]> props2 = new HashMap<String, String[]>();
-		for(String key : props.keySet()){			
+		HashMap<String, String[]> propsConverted = new HashMap<String, String[]>();
+		for(String key : props.keySet()){
 			String keyLocal=CCConstants.getValidLocalName(key);
 			
 			if(props.get(key) == null) continue;
 			
 			String[] values=new ValueTool().getMultivalue(props.get(key).toString());
-			
-			if (values!=null && values.length > 0){
-				int i=0;
-				for(String value :values){
-					HashMap<String, Object> vcard = VCardConverter.getVCardHashMap(type, key, value);
-					if(vcard!=null)
-						values[i]=VCardConverter.getNameForVCard(key,vcard);
-					i++;
-				}
-			}
-			
-			props2.put(keyLocal, values);
+			propsConverted.put(keyLocal, values);
 		}
-		rir.setMdsTemplate(new MetadataTemplateRenderer(mds,props2).render("io_render"));
+		rir.setMdsTemplate(new MetadataTemplateRenderer(mds,propsConverted).render("io_render"));
 	}
 
 	String getHeaderValue(String key, MessageContext msgContext) throws SOAPException, AxisFault{

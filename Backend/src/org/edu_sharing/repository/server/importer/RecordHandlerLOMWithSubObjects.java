@@ -41,22 +41,24 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.alfresco.service.cmr.security.AuthorityType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.metadataset.MetadataSetValueKatalog;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.metadataset.MetadataReader;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 
-	Log logger = LogFactory.getLog(RecordHandlerLOMWithSubObjects.class);
+	Logger logger = Logger.getLogger(RecordHandlerLOMWithSubObjects.class);
 	XPathFactory pfactory = XPathFactory.newInstance();
 	XPath xpath = pfactory.newXPath();
 
@@ -77,8 +79,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 	}
 	
 	public RecordHandlerLOMWithSubObjects(String metadataSetId, String metadataPrefix) {
-		logger.info("initializing...");
-		
+
 		this.askElixier = askElixier;
 		
 		this.metadataPrefix = metadataPrefix;
@@ -100,7 +101,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 
 	public void handleRecord(Node nodeRecord, String cursor, String set) throws Throwable {
 		
-		logger.debug("starting...");
 		xpath.reset();
 		
 		toSafeMap.clear();
@@ -131,8 +131,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			generalIdentifierToSafeMap.put(CCConstants.LOM_PROP_IDENTIFIER_CATALOG, tmpLomCatalogId);
 			
 			generalIdentifierList.add(generalIdentifierToSafeMap);
-		
-			logger.info("lomCatalogId:" + lomCatalogId + " replicationId:" + replicationId);
 		}
 
 		ArrayList<String> generalTitleI18n = getMultiLangValueNew((Node) xpath.evaluate("metadata/lom/general/title", nodeRecord, XPathConstants.NODE));
@@ -140,9 +138,9 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		if(generalTitleI18n == null || generalTitleI18n.size() == 0){
 			throw new Exception("title is required!");
 		}
-		
-		String generallanguage = (String) xpath.evaluate("metadata/lom/general/language", nodeRecord, XPathConstants.STRING);
-	
+
+		List generallanguage = convertListToString((NodeList)xpath.evaluate("metadata/lom/general/language", nodeRecord, XPathConstants.NODESET));
+
 		Node generalNode = (Node) xpath.evaluate("metadata/lom/general", nodeRecord, XPathConstants.NODE);
 
 		List generalKeywords = getMultivalue(generalNode, "keyword");
@@ -194,8 +192,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 		String titleEntry = generalTitleI18n.get(0);
 		toSafeMap.put(CCConstants.LOM_PROP_GENERAL_TITLE, titleEntry);
 		String name = new String(titleEntry);
-		name = name.replaceAll(
-				RepoFactory.getEdusharingProperty(CCConstants.EDU_SHARING_PROPERTIES_PROPERTY_VALIDATOR_REGEX_CM_NAME), "_");
+		name = NodeServiceHelper.cleanupCmName(name);
 
 		//replace ending dot with nothing
 		name = name.replaceAll("[\\.]*$", "");
@@ -290,7 +287,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 							replLifecycleContributer.put(lc_property, tmpLCList);
 							
 						}else{
-							logger.error("can not map lifecycle contributer role "+role+" to edu-sharing property");
+							logger.warn("can not map lifecycle contributer role "+role+" to edu-sharing property");
 						}
 					}
 				
@@ -563,7 +560,8 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			}
 
 			lomReplicationTypicalAgeRangeList = getMultivalue(nodeEducational, "typicalAgeRange");
-			String educationalLanguage = (String) xpath.evaluate("language", nodeEducational, XPathConstants.STRING);
+			List educationalLanguage = convertListToString((NodeList)xpath.evaluate("language", nodeEducational, XPathConstants.NODESET));
+			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LANGUAGE, educationalLanguage);
 
 			// SAFE PART
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LEARNINGRESOURCETYPE, learningResourceTypeToSafeList);
@@ -571,7 +569,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_CONTEXT, contextToSafeList);
 
 			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_TYPICALAGERANGE, lomReplicationTypicalAgeRangeList);
-			eduCationalToSafe.put(CCConstants.LOM_PROP_EDUCATIONAL_LANGUAGE, educationalLanguage);
+
 			educationalToSafeList.add(eduCationalToSafe);
 		}
 		// SAFE PART
@@ -870,11 +868,17 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			}
 
 		}
-
-		logger.debug("returning");
 	}
 
-	
+	private static List<String> convertListToString(NodeList nodes) {
+		List<String> result=new ArrayList<>(nodes.getLength());
+		for(int i=0;i<nodes.getLength();i++){
+			result.add(nodes.item(i).getTextContent());
+		}
+		return result;
+	}
+
+
 	/**
 	 * //since we deactivated the multilang = true global alf prop we can not use the MLText anymore
 	 * this method returns a list of strings including all values of all languages
@@ -907,7 +911,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 	
 	
 	public List getMultivalue(Node parent, String nodeName) throws XPathExpressionException {
-		logger.debug("starting");
 		if (parent == null){
 			logger.debug("returning null cause parent == null");
 			return null;
@@ -936,7 +939,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 				}
 			}
 		}
-		logger.debug("returning");
 		if (result.size() > 0)
 			return result;
 		else
@@ -944,7 +946,6 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 	}
 
 	public ArrayList<HashMap<String, Object>> getContributes(Node parent) throws XPathExpressionException {
-		logger.debug("starting");
 		ArrayList<HashMap<String, Object>> result = new ArrayList<HashMap<String, Object>>();
 		NodeList contributes = (NodeList) xpath.evaluate("contribute", parent, XPathConstants.NODESET);
 		for (int i = 0; i < contributes.getLength(); i++) {
@@ -954,15 +955,8 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			String contributeRoleValue = (String) xpath.evaluate("role/value", nodeContribute, XPathConstants.STRING);
 			String contributeEntity = (String) xpath.evaluate("entity", nodeContribute, XPathConstants.STRING);
 			String contributeDate = (String) xpath.evaluate("date", nodeContribute, XPathConstants.STRING);
-			
-			Date date = null;
-			try {
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
-				date = df.parse(contributeDate);
-			} catch (Exception e) {
-				logger.debug("error wrong contribute date:"+contributeDate);
-			}
 
+			Date date = convertToDate(contributeDate);
 			if (date != null){
 				map.put(CCConstants.LOM_PROP_CONTRIBUTE_DATE, date);
 			}
@@ -977,13 +971,26 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 			// @TODO contributeRoleSource
 			result.add(map);
 		}
-		logger.debug("returning");
 		if (result.size() > 0)
 			return result;
 		else
 			return null;
 	}
-	
+
+	private Date convertToDate(String date) {
+		try {
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
+			return df.parse(date);
+		} catch (Exception e) {
+			try {
+				return new DateTime(date).toDate();
+			}catch(Exception e2) {
+				logger.debug("error parsing date:" + date);
+				return null;
+			}
+		}
+	}
+
 	private void putMultiLangValue(HashMap map, String property, String xmlTag, Node node ) throws XPathExpressionException{
 		ArrayList<String>  multilangValue = getMultiLangValueNew((Node) xpath.evaluate(xmlTag, node, XPathConstants.NODE));
 		
@@ -1037,9 +1044,7 @@ public class RecordHandlerLOMWithSubObjects implements RecordHandlerInterface {
 	}
 
 	private String adaptValue(String value) {
-		logger.debug("starting");
 		String result = org.htmlparser.util.Translate.decode(value);
-		logger.debug("returning");
 		return result;
 	}
 	

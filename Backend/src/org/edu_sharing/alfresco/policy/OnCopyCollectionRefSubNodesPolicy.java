@@ -28,7 +28,10 @@ public class OnCopyCollectionRefSubNodesPolicy  implements OnCopyNodePolicy{
 	public void init(){
 		this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "getCopyCallback"),
                QName.createQName(CCConstants.CCM_TYPE_USAGE), new JavaBehaviour(this, "getCopyCallback"));
-		
+
+		this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "getCopyCallback"),
+				QName.createQName(CCConstants.CCM_TYPE_SHARE), new JavaBehaviour(this, "getCopyCallback"));
+
 		this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "getCopyCallback"),
 	               QName.createQName(CCConstants.CCM_TYPE_ASSIGNED_LICENSE), new JavaBehaviour(this, "getCopyCallback"));
 	}

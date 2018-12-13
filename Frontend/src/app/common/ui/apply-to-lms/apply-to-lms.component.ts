@@ -94,10 +94,14 @@ export class ApplyToLmsComponent{
         console.log(reurl);
         // the ccrep should always point to the local object (relevant if it's from a remote repo)
         let ccrepUrl = 'ccrep://' + encodeURIComponent(wrapper.remote.ref.repo) + '/' + encodeURIComponent(wrapper.remote.ref.id);
-        if (reurl == "IFRAME") {
+        if (reurl == "IFRAME" || reurl=="WINDOW") {
             (node as any).objectUrl = ccrepUrl;
             NodeHelper.appendImageData(this.connector, node).subscribe((data: Node) => {
                 this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE, data);
+                window.history.back();
+            },(error)=>{
+                console.warn("failed to fetch image data",error);
+                this.events.broadcastEvent(FrameEventsService.EVENT_APPLY_NODE,node);
                 window.history.back();
             });
             return;

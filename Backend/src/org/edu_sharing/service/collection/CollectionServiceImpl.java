@@ -18,6 +18,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.thumbnail.ThumbnailService;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
@@ -54,6 +55,7 @@ import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -203,9 +205,7 @@ public class CollectionServiceImpl implements CollectionService{
                  */
                 String refId = client.copyNode(originalNodeId, collectionId, true);
 
-                client.setProperty(refId, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
                 permissionService.setPermissions(refId, null, true);
-				client.addAspect(refId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
 				client.addAspect(refId, CCConstants.CCM_ASPECT_POSITIONABLE);
 
 
@@ -639,7 +639,9 @@ public class CollectionServiceImpl implements CollectionService{
 				if(SearchScope.MY.name().equals(scope)){
 					queryString += " AND OWNER:\"" + authInfo.get(CCConstants.AUTH_USERNAME)+"\"";
 				}
-				List<NodeRef> searchResult = client.searchNodeRefs(queryString,mode);
+				SearchParameters token = new SearchParameters();
+				token.setQuery(queryString);
+				List<NodeRef> searchResult = client.searchNodeRefs(token,mode);
 				for(NodeRef entry : searchResult){
 					String parent = nodeService.getPrimaryParent(entry.getStoreRef().getProtocol(),entry.getStoreRef().getIdentifier(),entry.getId());
 					if(Arrays.asList(client.getAspects(parent)).contains(CCConstants.CCM_ASPECT_COLLECTION)){
@@ -660,10 +662,11 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 	
 	@Override
-	public List<NodeRef> getChildReferences(String parentId, String scope) {
+	public List<NodeRef> getChildReferences(String parentId, String scope, SortDefinition sortDefinition) {
 		try{
 			if(parentId == null){
-				
+                SearchParameters searchParams=new SearchParameters();
+                sortDefinition.applyToSearchParameters(searchParams);
 				/**
 				 * @TODO owner + inherit off -> node will be found even if search is done in edu-group context 
 				 * level 0 nodes -> maybe cache level 0 with an node property
@@ -687,7 +690,8 @@ public class CollectionServiceImpl implements CollectionService{
 					queryString += " AND NOT @ccm\\:collectiontype:\"" + CCConstants.COLLECTIONTYPE_EDITORIAL + "\"";
 				}
 				List<NodeRef> returnVal = new ArrayList<>();
-				List<NodeRef> nodeRefs = client.searchNodeRefs(queryString,mode);
+                searchParams.setQuery(queryString);
+				List<NodeRef> nodeRefs = client.searchNodeRefs(searchParams,mode);
 				for(NodeRef nodeRef : nodeRefs){
 					if(isSubCollection(nodeRef)){
 						continue;
@@ -696,7 +700,7 @@ public class CollectionServiceImpl implements CollectionService{
 				}
 				return returnVal;
 			}else{
-				List<ChildAssociationRef> children =  client.getChildrenChildAssociationRef(parentId);
+				List<ChildAssociationRef> children =  nodeService.getChildrenChildAssociationRefAssoc(parentId,null,null,sortDefinition);
 				List<NodeRef> returnVal = new ArrayList<NodeRef>();
 				for(ChildAssociationRef child : children){
 					returnVal.add(child.getChildRef());
@@ -835,7 +839,7 @@ public class CollectionServiceImpl implements CollectionService{
 
 	@Override
 	public void setOrder(String parentId, String[] nodes) {
-		List<NodeRef> refs=getChildReferences(parentId, null);
+		List<NodeRef> refs=getChildReferences(parentId, null, new SortDefinition());
 		int order=0;
 		
 		String mode=CCConstants.COLLECTION_ORDER_MODE_CUSTOM;
@@ -859,5 +863,20 @@ public class CollectionServiceImpl implements CollectionService{
 			nodeService.updateNodeNative(node, props);
 			order++;
 		}
+	}
+
+	/**
+	 * Get all reference objects for a given node
+	 * Uses solr
+	 * @param nodeId
+	 * @return
+	 */
+	@Override
+	public List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId){
+		SearchToken token=new SearchToken();
+		token.setMaxResult(Integer.MAX_VALUE);
+		token.setContentType(ContentType.ALL);
+		token.setLuceneString("ASPECT:\"ccm:collection_io_reference\" AND @ccm\\:original:"+ QueryParser.escape(nodeId)+" AND NOT @sys\\:node-uuid:"+QueryParser.escape(nodeId));
+		return SearchServiceFactory.getSearchService(appInfo.getAppId()).search(token).getData();
 	}
 }

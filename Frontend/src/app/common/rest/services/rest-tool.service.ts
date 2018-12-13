@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import 'rxjs/add/operator/map'
 import { Observable } from 'rxjs/Observable';
 import {RestConnectorService} from "./rest-connector.service";
@@ -33,14 +32,13 @@ export class RestToolService extends AbstractRestService{
   public createToolDefinition = (properties : any,
                         renameIfExists = false,
                         versionComment = RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-                        repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
+                        repository=RestConstants.HOME_REPOSITORY) => {
     let query=this.connector.createUrlNoEscape("tool/:version/tools/:repository/tooldefinitions/?renameIfExists=:rename&versionComment=:versionComment",repository,
       [
         [":rename",encodeURIComponent(""+renameIfExists)],
         [":versionComment",encodeURIComponent(versionComment)],
       ]);
-    return this.connector.post(query,JSON.stringify(properties),this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+    return this.connector.post<NodeWrapper>(query,JSON.stringify(properties),this.connector.getRequestOptions());
   }
   /** Create a new tool instance (for a tool definition) object
    *
@@ -54,15 +52,14 @@ export class RestToolService extends AbstractRestService{
                                  properties : any,
                                  renameIfExists = false,
                                  versionComment = RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-                                 repository=RestConstants.HOME_REPOSITORY) : Observable<NodeWrapper> => {
+                                 repository=RestConstants.HOME_REPOSITORY) => {
     let query=this.connector.createUrlNoEscape("tool/:version/tools/:repository/:parent/toolinstances/?renameIfExists=:rename&versionComment=:versionComment",repository,
       [
         [":parent",encodeURIComponent(parent)],
         [":rename",encodeURIComponent(""+renameIfExists)],
         [":versionComment",encodeURIComponent(versionComment)],
       ]);
-    return this.connector.post(query,JSON.stringify(properties),this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+    return this.connector.post<NodeWrapper>(query,JSON.stringify(properties),this.connector.getRequestOptions());
   }
   /** Get instances of a tool definition object
    *
@@ -75,8 +72,7 @@ export class RestToolService extends AbstractRestService{
     let query=this.connector.createUrl("tool/:version/tools/:repository/:tooldefinition/toolinstances",repository,      [
         [":tooldefinition",tooldefinition]
       ]);
-    return this.connector.get(query,this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
+    return this.connector.get(query,this.connector.getRequestOptions());
   }
 
 

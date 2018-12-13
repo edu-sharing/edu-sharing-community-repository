@@ -3,6 +3,8 @@
   "COLLECTIONS": {
     "TITLE": "Collections",
     "CREATE_COLLECTION" : "Create\ncollection",
+    "TUTORIAL_HEADING":"Collect what you like",
+    "TUTORIAL_DESCRIPTION":"Create your own collections and fill them with interesting materials - privately or together with others.",
     "ADD_MATERIAL" : "Add\nmaterial",
     "ERROR_DELETE": "An error occurred while deleting the collection.",
     "ENTER_NAME" : "Please enter a name for this collection.",

@@ -3,20 +3,13 @@ package org.edu_sharing.restservices;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.edu_sharing.metadataset.v2.MetadataGroup;
-import org.edu_sharing.metadataset.v2.MetadataList;
+import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
-import org.edu_sharing.metadataset.v2.MetadataSetInfo;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.MetadataTemplate;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.restservices.mds.v1.model.GroupV2;
-import org.edu_sharing.restservices.mds.v1.model.ListV2;
-import org.edu_sharing.restservices.mds.v1.model.Suggestions;
-import org.edu_sharing.restservices.mds.v1.model.ViewV2;
-import org.edu_sharing.restservices.mds.v1.model.WidgetV2;
+import org.edu_sharing.restservices.mds.v1.model.*;
+import org.edu_sharing.restservices.search.v1.model.SearchParameters;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.MdsV2;
 import com.google.gwt.user.client.ui.SuggestOracle;
 
@@ -28,13 +21,13 @@ public class MdsDaoV2 {
 		return RepoFactory.getMetadataSetsV2ForRepository(repoDao.getId());
 	}
 	
-	public Suggestions getSuggestions(String queryId,String parameter,String value) throws DAOException{
+	public Suggestions getSuggestions(String queryId,String parameter,String value, List<MdsQueryCriteria> criterias) throws DAOException{
 		Suggestions result = new Suggestions();
 		ArrayList<Suggestions.Suggestion> suggestionsResult = new ArrayList<Suggestions.Suggestion>();
 		result.setValues(suggestionsResult);
 		try{
 			List<? extends SuggestOracle.Suggestion>  suggestions =		
-					MetadataSearchHelper.getSuggestions(this.repoDao.getId(), mds, queryId, parameter, value);
+					MetadataSearchHelper.getSuggestions(this.repoDao.getId(), mds, queryId, parameter, value, criterias);
 
 			for(SuggestOracle.Suggestion suggest : suggestions){
 				Suggestions.Suggestion suggestion = new Suggestions.Suggestion();
@@ -94,7 +87,8 @@ public class MdsDaoV2 {
     	data.setViews(getViews());
     	data.setGroups(getGroups());
     	data.setLists(getLists());
-    	
+    	data.setSorts(getSorts());
+
     	return data; 
 	}
 
@@ -123,11 +117,19 @@ public class MdsDaoV2 {
 	}
 	
 	private List<ListV2> getLists() {
-		List<ListV2> result = new ArrayList<ListV2>();
+		List<ListV2> result = new ArrayList<>();
 		for (MetadataList type : this.mds.getLists()) {
 			result.add(new ListV2(type));
 		}
 		return result;		
+	}
+
+	private List<SortV2> getSorts() {
+		List<SortV2> result = new ArrayList<>();
+		for (MetadataSort type : this.mds.getSorts()) {
+			result.add(new SortV2(type));
+		}
+		return result;
 	}
 	
 	public MetadataSetV2 getMds() {

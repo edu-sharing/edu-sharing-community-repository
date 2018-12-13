@@ -8,6 +8,7 @@
     "TITLE_SAFE": "Safe",
     "NO_MATCHING_ITEMS": "Keine Elemente entsprechen der Suchanfrage",
     "SEARCH": "Suchen...",
+    "SAFE_SEARCH": "Safe durchsuchen...",
     "MY_FILES": "Meine Inhalte",
     "ADD": "Neu",
     "ADD_OBJECT": "Neues Material",
@@ -64,6 +65,10 @@
       "GROUP_INHERIT":"Geerbte Rechte",
       "GROUP_USERS":"Folgende Nutzer haben Zugriff:",
       "GROUP_GROUPS":"Folgende Gruppen haben Zugriff:",
+      "USAGES":"Benutzt und freigegeben in:",
+      "USAGE_INFO":"{{instance}}: Verwendet in {{type}} {{name}}",
+      "USAGE_INDIRECT":"Diese Freigabe ist über eine Sammlungsreferenz erzeugt und kann nicht entfernt werden",
+      "DELETED":"wird gelöscht",
       "TYPE_VIEWER":"Betrachter",
       "TYPE_VIEWER_DESCRIPTION":"darf sehen",
       "TYPE_COWORKER":"Mitarbeiter",
@@ -106,6 +111,14 @@
         "CHANGED":"Geändert",
         "REMOVED":"Entfernt",
         "EMPTY":"Es wurden noch keine Freigaben angepasst"
+      },
+      "USAGE_TYPE":{
+        "MOODLE":"Moodle-Kurse",
+        "COLLECTION":"Sammlungen"
+      },
+      "USAGE_SUBTYPE":{
+        "COURSE":"Kurs",
+        "PAGE":"Seite"
       }
     },
     "INHERIT_DISABLED":"Rechtevererbung ist aktuell ausgeschaltet",
@@ -125,7 +138,17 @@
       "RESTORE_TITLE":"Zurücksetzen?",
       "RESTORE_MESSAGE":"Sind Sie sicher, dass Sie die Version des Elements ändern möchten?",
       "PERMALINK":"Link Zum Objekt",
-      "USAGE_COUNT":"Anzahl der Verwendungen",
+      "USAGE_COUNT_TITLE":"Verwendungen",
+      "USAGE_COUNT":"Verwendung insgesamt: ",
+      "COLLECTIONS":"In {{count}} Sammlung(en) enthalten",
+      "FORKED_PARENT":"Ist Variante von",
+      "FORKED_CHILDS":"Hat {{count}} Variante(n)",
+      "USAGE_TYPE": {
+        "LMS": "LMS-Kurse",
+        "COLLECTION": "Sammlungen",
+        "DOWNLOAD": "Downloads",
+        "VIEW": "Aufrufe"
+      },
       "COMMENT": {
         "MAIN_FILE_UPLOAD": "Datei wurde erstellt",
         "METADATA_UPDATE": "Metadaten aktualisiert",
@@ -186,7 +209,9 @@
       "CONTRIBUTOR":"Beteiligte",
       "SHARE_LINK":"Download-Link freigeben",
       "WORKFLOW":"Workflow",
-      "TEMPLATE":"Metadaten Vorlage"
+      "TEMPLATE":"Metadaten Vorlage",
+      "VARIANT": "Variante anlegen",
+      "VARIANT_OPEN": "Als Variante öffnen"
     },
     "NODE_TEMPLATE" : {
       "STATUS": "Automatische Übernahme von Metadaten",
@@ -196,12 +221,18 @@
     "SHARE_LINK":{
       "TITLE":"Link für {{ name }} freigeben",
       "EXPIRY_TITLE":"Ablaufdatum für den Link angeben",
+      "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
+      "PASSWORD":"Passwortschutz",
+      "PASSWORD_INFO":"Dieser Link wird mit einem Passwort geschützt",
+      "PASSWORD_PLACEHOLDER":"Passwort angeben...",
+      "PASSWORD_PLACEHOLDER_EDIT":"Passwort ist schon gesetzt",
       "DISABLED":"Linkfreigabe ist deaktiviert",
       "EXPIRY_INFO":"Nach diesem Zeitpunkt ist das Objekt unter diesem Link für Eingeladene nicht mehr verfügbar",
       "LINK":"Link zum Objekt",
       "ACTIVATE":"Linkfreigabe aktivieren",
       "COPY_CLIPBOARD":"Link kopieren",
       "LINK_INFO":"Jeder, der Zugriff auf den Link hat, darf das Objekt herunterladen.",
+      "LINK_INFO_FOLDER":"Jeder, der Zugriff auf den Link hat, darf alle Dateien des Ordners herunterladen. Auf Unterordner kann nicht zugegriffen werden.",
       "LINK_DOWNLOADS":"Bisherige Downloads: {{ count }}",
       "COPIED_CLIPBOARD":"Link wurde in die Zwischenablage kopiert",
       "COPIED_CLIPBOARD_ERROR":"Link konnte nicht kopiert werden. Bitte markieren und kopieren Sie den Link manuell"
@@ -230,7 +261,6 @@
       "METADATACONTRIBUTOR":"Beteiligte an Metadaten",
       "SCOPE":"tätig als",
       "DATE":"tätig am (Optional)",
-      "CHOOSE_DATE":"Datum wählen",
       "MORE":"weitere Daten angeben",
       "ORG_INFO":"Organisation des Beteiligten (Optional)",
       "ADDRESS_INFO":"Adresse des Beteiligten (Optional)",
@@ -281,7 +311,7 @@
       "VERSION":"Version",
       "LOCALE":"Rechtsordnung",
       "RELEASE_WITHOUT_LICENSE":"Um ein Objekt freizugeben muss eine Lizenz definiert werden",
-      "CUSTOM_RIGHTS":"Lizenzbedingungen definieren...",
+      "CUSTOM_RIGHTS":"GNU GPL oder andere Lizenzen...",
       "RELEASE":"Objekt mit dieser Lizenz veröffentlichen",
       "RELEASE_MULTI":"{{count}} Objekte mit dieser Lizenz veröffentlichen",
       "CONTACT":"Andere Nutzende dürfen mich für weitere Lizenzverhandlungen kontaktieren",

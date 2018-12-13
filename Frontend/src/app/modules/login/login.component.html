@@ -13,7 +13,7 @@
     <div class="card-content">
       <div *ngIf="previousStage" class="card-cancel" (click)="stage=previousStage;previousStage=null"><i class="material-icons">close</i></div>
       <div class="card-title">{{caption | translate}}</div>
-      <div class="branding"><img src="assets/images/logo.svg"></div>
+      <div class="branding"><img src="assets/images/logo.svg" alt=""></div>
       <div class="card-scroll">
           <div *ngIf="stage=='choose'" [@dialog]="stage=='choose'" class="choose">
               <div>
@@ -33,12 +33,12 @@
             </div>
             <div>
               <label for="password">{{'LOGIN.PASSWORD' | translate}}</label>
-              <input #passwordInput required type="password" name="password" id="password" (keydown.enter)="login()" (keyup)="checkConditions()" [(ngModel)]="password"/>
+                <input-password #passwordInput id="password" required="true" (keydown.enter)="login()" [(value)]="password"></input-password>
             </div>
           </form>
           <div class="register" *ngIf="config.registerUrl">
             {{'LOGIN.REGISTER_TEXT' | translate}}
-            <a (click)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
+            <a tabindex="0" (click)="register()" (keyup.enter)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
           </div>
         </div>
       </div>
@@ -48,8 +48,6 @@
         <a class="btn-flat" *ngIf="config.recoverPasswordUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
   </div>
-  <div class="powered center" *ngIf="config.branding">
-    {{ 'LOGIN.POWERED_BY' | translate}}
-  </div>
+  <powered-by mode="white"></powered-by>
   </div>
   </div>

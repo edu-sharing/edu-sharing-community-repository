@@ -15,15 +15,25 @@ import {TemporaryStorageService} from "../services/temporary-storage.service";
 import {UIService} from "../services/ui.service";
 import {RestCollectionService} from "../rest/services/rest-collection.service";
 import {NodeHelper} from "./node-helper";
-import {RestConnectorService} from "../rest/services/rest-connector.service";
 import {RestConnectorsService} from "../rest/services/rest-connectors.service";
 import {FrameEventsService} from "../services/frame-events.service";
 import {RestNodeService} from "../rest/services/rest-node.service";
 import {PlatformLocation} from "@angular/common";
-import {AbstractRestService} from "../rest/services/abstract-rest-service";
+import {ListItem} from './list-item';
 import {CordovaService} from "../services/cordova.service";
 import {SearchService} from "../../modules/search/search.service";
+import {OptionItem} from "./actionbar/option-item";
+import {RestConnectorService} from "../rest/services/rest-connector.service";
 export class UIHelper{
+
+  public static evaluateMediaQuery(type:string,value:number){
+    if(type==UIConstants.MEDIA_QUERY_MAX_WIDTH)
+      return value>window.innerWidth;
+    if(type==UIConstants.MEDIA_QUERY_MIN_WIDTH)
+        return value<window.innerWidth;
+    console.warn("Unsupported media query "+type);
+    return true;
+  }
 
   public static setTitleNoTranslation(name:string,title:Title,config:ConfigurationService) {
     config.get("branding").subscribe((branding:boolean)=>{
@@ -240,23 +250,27 @@ export class UIHelper{
         UIHelper.addToCollection(collectionService,router,toast,collection,nodes,callback,position+1,true);
       });
   }
-  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,connectorList:ConnectorList,node : Node,type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
+  static openConnector(connector:RestConnectorsService,events:FrameEventsService,toast:Toast,node : Node,connectorList:ConnectorList=connector.getCurrentList(),type : Filetype=null,win : any = null,connectorType : Connector = null,newWindow=true){
     if(connectorType==null){
-      connectorType=RestConnectorsService.connectorSupportsEdit(connectorList,node);
+      connectorType=connector.connectorSupportsEdit(node,connectorList);
     }
+    console.log(connectorList);
     let isCordova=connector.getRestConnector().getCordovaService().isRunningCordova();
-    if(win==null && newWindow && !isCordova)
-      win=window.open("");
+    if(win==null && newWindow) {
+        win = UIHelper.getNewWindow(connector.getRestConnector());
+    }
 
-    connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
+      connector.nodeApi.isLocked(node.ref.id).subscribe((result:NodeLock)=>{
       if(result.isLocked) {
         toast.error(null, "TOAST.NODE_LOCKED");
         win.close();
         return;
       }
       connector.generateToolUrl(connectorList,connectorType,type,node).subscribe((url:string)=>{
-          if(win)
-            win.location.href=url;
+          if(win) {
+              win.location.href = url;
+              console.log(win);
+          }
           else if(isCordova){
             UIHelper.openBlankWindow(url,connector.getRestConnector().getCordovaService());
           }
@@ -267,12 +281,14 @@ export class UIHelper{
               events.addWindow(win);
           }
         },
-        (error:string)=>{
+        (error)=>{
+          console.warn(error);
           toast.error(null,error);
           if(win)
             win.close();
         });
     },(error:any)=> {
+      console.warn(error);
       toast.error(error);
       if(win)
         win.close();
@@ -348,6 +364,14 @@ export class UIHelper{
     }
   }
 
+  static getDefaultCollectionColumns() {
+      let columns=[];
+      columns.push(new ListItem("COLLECTION","title"));
+      columns.push(new ListItem("COLLECTION","info"));
+      columns.push(new ListItem("COLLECTION","scope"));
+      return columns;
+  }
+
   static addHttpIfRequired(link: string) {
       if(link.indexOf("://")==-1){
         return "http://"+link;
@@ -396,5 +420,37 @@ export class UIHelper{
       else {
         return window.open(url, '_blank',);
       }
+    }
+
+    static filterValidOptions(ui: UIService, options: OptionItem[]) {
+        if(options==null)
+            return null;
+        let optionsFiltered:OptionItem[]=[];
+        for(let option of options){
+            if((!option.onlyMobile || option.onlyMobile && ui.isMobile()) &&
+                (!option.onlyDesktop || option.onlyDesktop && !ui.isMobile()) &&
+                (!option.mediaQueryType || option.mediaQueryType && UIHelper.evaluateMediaQuery(option.mediaQueryType,option.mediaQueryValue)))
+                optionsFiltered.push(option);
+        }
+        return optionsFiltered;
+    }
+    static filterToggleOptions(options: OptionItem[],toggle:boolean) {
+        let result:OptionItem[]=[];
+        for(let option of options){
+            if(option.isToggle==toggle)
+                result.push(option);
+        }
+        return result;
+    }
+
+    /**
+     * open a window (blank) to prevent popup blocking
+     * @param {RestConnectorService} connector
+     * @returns {any}
+     */
+    public static getNewWindow(connector:RestConnectorService) {
+        if(connector.getCordovaService().isRunningCordova())
+            return null;
+        return window.open("");
     }
 }

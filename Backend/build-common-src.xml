@@ -75,6 +75,31 @@
 		<condition property="src-java.path" value="${src.dir}:${src-webservices.dir}:${extensions.path}${extension-name}/src" else="${src.dir}:${src-webservices.dir}">
 			<isset property="extension-name"/>
 		</condition>
+		
+		<script language="javascript">
+			
+			echo = project.createTask("echo");
+			
+			var pluginNames = project.getProperty("plugin-names");
+			if(pluginNames != null &amp;&amp; pluginNames.trim().length > 0){
+				var pluginNamesArr = pluginNames.split(",");
+				for (var i = 0; i &lt; pluginNamesArr.length; i++) {
+			   		
+					echo.setMessage("plugin active:" + pluginNamesArr[i]);
+					echo.perform();
+			   	 	
+					var pluginsPath = project.getProperty("plugins.path");
+					if(pluginsPath != null &amp;&amp; pluginsPath.trim().length > 0){
+						var javaPathCurrent = project.getProperty("src-java.path");
+						project.setProperty("src-java.path",javaPathCurrent +":"+pluginsPath+pluginNamesArr[i]+"/src" );
+					}else{
+						echo.setMessage("missing property plugins.path");
+						echo.perform();
+					}
+				}
+			}
+		</script>
+		
 		<echo>current source path: ${src-java.path}</echo>
 	</target>
 	
@@ -143,11 +168,12 @@
 		
 		<mkdir dir="${output.dir}" />
 		<copy todir="${output.dir}">
-			<fileset dir="${src.dir}" includes="**/*.xml, **/*.properties">	
+			<fileset dir="${src.dir}" includes="**/*.xml, **/*.properties, **/*.json">
 			</fileset>
 		</copy>
 		
 		<antcall target="copy_extension_resources"></antcall>
+		<antcall target="copy_plugin_resources"></antcall>
 		
 		<javac destdir="${output.dir}" debug="true" deprecation="false" optimize="false" failonerror="true">
 			<src path="${src-java.path}" />
@@ -332,6 +358,27 @@
 			</fileset>
 		</copy>
 	</target>
+	
+	<target name="copy_plugin_resources" if="plugin-names">
+		<script language="javascript">
+			var pluginNames = project.getProperty("plugin-names");
+			if(pluginNames != null &amp;&amp; pluginNames.trim().length > 0){
+				var pluginNamesArr = pluginNames.split(",");
+				for(var i = 0;i &lt; pluginNamesArr.length; i++){
+					project.setProperty("tmp.plugin",pluginNamesArr[i]);
+					project.executeTarget("copy_plugin_resources_for_plugin");
+				}
+			}
+		</script>
+	</target>
+	<target name="copy_plugin_resources_for_plugin">
+		<echo>plugins are active: ${plugin-names}</echo>
+		<echo>plugin current: ${tmp.plugin}</echo>
+		<copy todir="${output.dir}" overwrite="true">
+			<fileset dir="${plugins.path}${tmp.plugin}/src" includes="**/*.xml, **/*.properties">	
+			</fileset>
+		</copy>
+	</target>
 
 
 
@@ -345,6 +392,7 @@
 	</target>
 	
 	<target name="check-ng">
+		<echo>check ng ${user.dir}</echo>
 	    <available file="ng" property="ng.present"/>
 	</target>
 	

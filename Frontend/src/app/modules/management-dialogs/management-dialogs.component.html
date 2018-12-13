@@ -3,9 +3,26 @@
   [nodes]="nodeLicense"
   (onLoading)="globalProgress=$event"
   (onCancel)="closeLicense()"
+  (openContributor)="nodeContributor=$event[0]"
   (onDone)="updateLicense()"
 ></workspace-license>
-
+<workspace-share *ngIf="nodeShare"
+                 [nodeId]="nodeShare.ref.id"
+                 [sendMessages]="true"
+                 (onLoading)="globalProgress=$event"
+                 (onClose)="closeShare()"
+></workspace-share>
+<workspace-workflow *ngIf="nodeWorkflow"
+                    [nodeId]="nodeWorkflow.ref.id"
+                    (onLoading)="globalProgress=$event"
+                    (onDone)="closeWorkflow(true)"
+                    (onClose)="closeWorkflow()"
+></workspace-workflow>
+<workspace-share-link *ngIf="nodeShareLink"
+                      [node]="nodeShareLink"
+                      (onLoading)="globalProgress=$event"
+                      (onClose)="closeShareLink()"
+></workspace-share-link>
 <node-report
   *ngIf="nodeReport"
   [node]="nodeReport"
@@ -13,6 +30,13 @@
   (onCancel)="closeReport()"
   (onDone)="closeReport()"
 ></node-report>
+<node-variant
+        *ngIf="nodeVariant"
+        [node]="nodeVariant"
+        (onLoading)="globalProgress=$event"
+        (onCancel)="closeVariant()"
+        (onDone)="closeVariant()"
+></node-variant>
 <collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"
@@ -52,9 +76,9 @@
      [parentNode]="metadataParent"
      (onCancel)="closeEditor(false)"
      (onDone)="closeEditor(true,$event)"
-     (openLicense)="nodeLicense=[nodeMetadata]"
+     (openLicense)="nodeLicense=[nodeMetadata];editorPending=true;"
      (openTemplate)="nodeTemplate=nodeMetadata"
-     (openContributor)="nodeContributor=nodeMetadata"
+     (openContributor)="nodeContributor=nodeMetadata;editorPending=true;"
 ></mds>
 <node-template *ngIf="nodeTemplate"
      [nodeId]="nodeTemplate.ref.id"
@@ -67,7 +91,9 @@
 ></workspace-file-upload>
 <workspace-file-upload-select *ngIf="showUploadSelect"
                               [isFileOver]="fileIsOver"
+                              [(parent)]="parent"
                               [showPicker]="uploadShowPicker"
+                              [multiple]="uploadMultiple"
                               (onCancel)="closeUploadSelect()"
                               (onFileSelected)="uploadFile($event)"
                               (onLinkSelected)="createUrlLink($event)"

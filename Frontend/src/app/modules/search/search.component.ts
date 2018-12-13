@@ -2,59 +2,58 @@
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
 import 'rxjs/add/operator/map';
 import { SearchService } from './search.service';
-import {HttpModule, Http} from '@angular/http';
 import { WindowRefService } from './window-ref.service';
 import { Subscription } from 'rxjs/Subscription';
 import { SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
 import {Router, ActivatedRoute} from '@angular/router';
-import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../common/translation";
+import {TranslateService} from '@ngx-translate/core';
+import {Translation} from '../../common/translation';
 import {RestSearchService} from '../../common/rest/services/rest-search.service';
-import {RestMetadataService} from '../../common/rest/services/rest-metadata.service';
 import {RestNodeService} from '../../common/rest/services/rest-node.service';
 import {RestConstants} from '../../common/rest/rest-constants';
-import {RestConnectorService} from "../../common/rest/services/rest-connector.service";
+import {RestConnectorService} from '../../common/rest/services/rest-connector.service';
 import {
-  Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
-  MdsMetadatasets, MdsInfo, Collection, CollectionWrapper, SearchList
-} from "../../common/rest/data-object";
-import {ListTableComponent} from "../../common/ui/list-table/list-table.component";
-import {OptionItem} from "../../common/ui/actionbar/option-item";
-import {TemporaryStorageService} from "../../common/services/temporary-storage.service";
-import {Helper} from "../../common/helper";
-import {UIHelper} from "../../common/ui/ui-helper";
-import {Title} from "@angular/platform-browser";
-import {ConfigurationService} from "../../common/services/configuration.service";
-import {Toast} from "../../common/ui/toast";
-import {SessionStorageService} from "../../common/services/session-storage.service";
-import {RestNetworkService} from "../../common/rest/services/rest-network.service";
-import {WorkspaceMainComponent} from "../workspace/workspace.component";
-import {UIAnimation} from "../../common/ui/ui-animation";
-import {trigger} from "@angular/animations";
-import {NodeHelper} from "../../common/ui/node-helper";
-import {RestCollectionService} from "../../common/rest/services/rest-collection.service";
-import {RestMdsService} from "../../common/rest/services/rest-mds.service";
-import {RestHelper} from "../../common/rest/rest-helper";
-import {RestIamService} from "../../common/rest/services/rest-iam.service";
-import {SearchNodeStoreComponent} from "./node-store/node-store.component";
-import {UIConstants} from "../../common/ui/ui-constants";
-import {ListItem} from "../../common/ui/list-item";
-import {MdsComponent} from "../../common/ui/mds/mds.component";
-import {RequestObject} from "../../common/rest/request-object";
-import {DialogButton} from "../../common/ui/modal-dialog/modal-dialog.component";
-import {ActionbarHelper} from "../../common/ui/actionbar/actionbar-helper";
-import {WorkspaceManagementDialogsComponent} from "../management-dialogs/management-dialogs.component";
-import {ConfigurationHelper} from "../../common/rest/configuration-helper";
-import {MdsHelper} from "../../common/rest/mds-helper";
-import {MainNavComponent} from "../../common/ui/main-nav/main-nav.component";
+    Node, NodeList, LoginResult, NetworkRepositories, Repository, NodeWrapper,
+    MdsMetadatasets, MdsInfo, Collection, CollectionWrapper, SearchList, SortItem
+} from '../../common/rest/data-object';
+import {ListTableComponent} from '../../common/ui/list-table/list-table.component';
+import {OptionItem} from '../../common/ui/actionbar/option-item';
+import {TemporaryStorageService} from '../../common/services/temporary-storage.service';
+import {Helper} from '../../common/helper';
+import {UIHelper} from '../../common/ui/ui-helper';
+import {Title} from '@angular/platform-browser';
+import {ConfigurationService} from '../../common/services/configuration.service';
+import {Toast} from '../../common/ui/toast';
+import {SessionStorageService} from '../../common/services/session-storage.service';
+import {RestNetworkService} from '../../common/rest/services/rest-network.service';
+import {WorkspaceMainComponent} from '../workspace/workspace.component';
+import {UIAnimation} from '../../common/ui/ui-animation';
+import {trigger} from '@angular/animations';
+import {NodeHelper} from '../../common/ui/node-helper';
+import {RestCollectionService} from '../../common/rest/services/rest-collection.service';
+import {RestMdsService} from '../../common/rest/services/rest-mds.service';
+import {RestHelper} from '../../common/rest/rest-helper';
+import {RestIamService} from '../../common/rest/services/rest-iam.service';
+import {SearchNodeStoreComponent} from './node-store/node-store.component';
+import {UIConstants} from '../../common/ui/ui-constants';
+import {ListItem} from '../../common/ui/list-item';
+import {MdsComponent} from '../../common/ui/mds/mds.component';
+import {RequestObject} from '../../common/rest/request-object';
+import {DialogButton} from '../../common/ui/modal-dialog/modal-dialog.component';
+import {WorkspaceManagementDialogsComponent} from '../management-dialogs/management-dialogs.component';
+import {ConfigurationHelper} from '../../common/rest/configuration-helper';
+import {MdsHelper} from '../../common/rest/mds-helper';
+import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {UIService} from '../../common/services/ui.service';
+import {ActionbarHelperService} from "../../common/services/actionbar-helper";
+import {HttpClient} from '@angular/common/http';
 
 
 @Component({
   selector: 'app-search',
   templateUrl: 'search.component.html',
   styleUrls: ['search.component.scss'],
-  providers: [HttpModule, WindowRefService, RestMetadataService],
+  providers: [WindowRefService],
   animations: [
     trigger('fromLeft', UIAnimation.fromLeft()),
   ]
@@ -63,16 +62,20 @@ import {UIService} from '../../common/services/ui.service';
 
 
 export class SearchComponent {
-  public initalized:boolean;
+    toolPermissions: string[];
+    public initalized:boolean;
+  public tutorialElement:ElementRef;
   @ViewChild('mds') mdsRef: MdsComponent;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('managementDialogs') managementDialogs : WorkspaceManagementDialogsComponent;
+  @ViewChild('extendedSearch') extendedSearch : ElementRef;
   public mdsSuggestions:any={}
   public mdsExtended=false;
   public sidenavTab=0;
   public collectionsMore=false;
   searchFail: boolean = false;
   public nodeReport: Node;
+  public nodeVariant: Node;
   public currentRepository:string=RestConstants.HOME_REPOSITORY;
   public currentRepositoryObject:Repository;
 
@@ -108,6 +111,8 @@ export class SearchComponent {
   private isSearching = false;
   private groupedRepositories: Repository[];
   private enabledRepositories: string[];
+  // we only initalize the banner once to prevent flickering
+  private bannerInitalized = false;
   public get mdsId(){
     return this._mdsId;
   }
@@ -145,13 +150,14 @@ export class SearchComponent {
 
   constructor(
     private router : Router,
-    private http : Http,
+    private http : HttpClient,
     private connector:RestConnectorService,
     private RestNodeService: RestNodeService,
     private mdsService:RestMdsService,
     private iam:RestIamService,
     private search: RestSearchService,
     private collectionApi : RestCollectionService,
+    private actionbar : ActionbarHelperService,
     private nodeApi: RestNodeService,
     private toast : Toast,
     private translate : TranslateService,
@@ -165,6 +171,17 @@ export class SearchComponent {
     private network : RestNetworkService,
     private temporaryStorageService: TemporaryStorageService
   ) {
+  }
+  public getValuesForMds(){
+      // add the primary search word to the currentValuesAll so that the mds is aware of it
+      let values=Helper.deepCopy(this.currentValues);
+      if(!values){
+          values=[];
+      }
+      if(this.searchService.searchTerm){
+          values[RestConstants.PRIMARY_SEARCH_CRITERIA]=[this.searchService.searchTerm];
+      }
+      return values;
   }
   public setRepository(repository:string){
     this.routeSearch(this.searchService.searchTerm,repository,null,null);
@@ -185,8 +202,13 @@ export class SearchComponent {
   updateSelection(selection:Node[]){
     this.selection=selection;
     this.updateActionbar(selection);
+    this.setFixMobileNav();
   }
    ngOnInit() {
+    setTimeout(()=> {
+        this.tutorialElement = this.mainNavRef.search;
+    });
+    this.searchService.clear();
     this.initalized=true;
     this.searchService.clear();
     if(this.searchService.reinit){
@@ -194,17 +216,17 @@ export class SearchComponent {
       this.initalized=false;
       this.searchService.showspinner=true;
     }
-     this.savedSearchColumns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
+     this.savedSearchColumns.push(new ListItem('NODE',RestConstants.CM_PROP_TITLE));
      this.connector.setRoute(this.activatedRoute).subscribe(()=> {
          Translation.initialize(this.translate,this.config,this.storage,this.activatedRoute).subscribe(()=>{
            UIHelper.setTitle('SEARCH.TITLE', this.title, this.translate, this.config);
            if(this.setSidenavSettings()) {
              // auto, never, always
-             let sidenavMode = this.config.instant("searchSidenavMode","never");
-             if (sidenavMode == "never") {
+             let sidenavMode = this.config.instant('searchSidenavMode','never');
+             if (sidenavMode == 'never') {
                this.searchService.sidenavOpened = false;
              }
-             if (sidenavMode == "always") {
+             if (sidenavMode == 'always') {
                this.searchService.sidenavOpened = true;
              }
            }
@@ -215,46 +237,47 @@ export class SearchComponent {
            this.groupResults=this.config.instant('searchGroupResults',false);
 
            this.searchService.collectionsColumns=[];
-           this.searchService.collectionsColumns.push(new ListItem("NODE", RestConstants.CM_NAME));
-           this.searchService.collectionsColumns.push(new ListItem("COLLECTION", 'info'));
-           this.searchService.collectionsColumns.push(new ListItem("COLLECTION",'scope'));
+           this.searchService.collectionsColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
+           this.searchService.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
+           this.searchService.collectionsColumns.push(new ListItem('COLLECTION','scope'));
            this.updateActionbar(null);
            setInterval(() => this.updateHasMore(), 1000);
+            this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT).subscribe((unchecked)=>{
+                this.network.getRepositories().subscribe((data: NetworkRepositories) => {
+                    this.allRepositories=Helper.deepCopy(data.repositories);
+                    this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config,!unchecked);
+                    if(this.repositories.length<1){
+                        console.warn('After filtering repositories via config, none left. Will use the home repository as default');
+                        console.log(this.allRepositories);
+                        console.log(this.config.instant('availableRepositories'));
+                        this.repositories = this.getHomeRepoList();
+                    }
+                    if (this.repositories.length < 2) {
+                        this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
+                        /*this.repositories = null;*/
 
-           this.network.getRepositories().subscribe((data: NetworkRepositories) => {
-             this.allRepositories=Helper.deepCopy(data.repositories);
-             this.repositories=ConfigurationHelper.filterValidRepositories(data.repositories,this.config);
-             if(this.repositories.length<1){
-               console.warn("After filtering repositories via config, none left. Will use the home repository as default");
-               console.log(this.allRepositories);
-               console.log(this.config.instant('availableRepositories'));
-               this.repositories = this.getHomeRepoList();
-             }
-             if (this.repositories.length < 2) {
-               this.repositoryIds = [this.repositories.length ? this.repositories[0].id : RestConstants.HOME_REPOSITORY];
-               /*this.repositories = null;*/
+                    }
+                    this.updateCurrentRepositoryId();
+                    if(this.repositories) {
+                        let all = new Repository();
+                        all.id = RestConstants.ALL;
+                        all.title = this.translate.instant('SEARCH.REPOSITORY_ALL');
+                        all.repositoryType = 'ALL';
+                        this.repositories.splice(0, 0, all);
+                        this.updateRepositoryOrder();
+                    }
+                    this.initParams();
 
-             }
-             this.updateCurrentRepositoryId();
-             if(this.repositories) {
-               let all = new Repository();
-               all.id = RestConstants.ALL;
-               all.title = this.translate.instant('SEARCH.REPOSITORY_ALL');
-               all.repositoryType = 'ALL';
-               this.repositories.splice(0, 0, all);
-               this.updateRepositoryOrder();
-             }
-               this.initParams();
-
-           }, (error: any) => {
-             console.warn("could not fetch repository list. Remote repositories can not be shown. Some features might not work properly. Please check the error and re-configure the repository");
-             this.repositories = this.getHomeRepoList();
-             this.allRepositories=[];
-             let home:any={id:'local',isHomeRepo:true};
-             this.allRepositories.push(home);
-             this.repositoryIds = [];
-             this.initParams();
-           });
+                }, (error: any) => {
+                    console.warn('could not fetch repository list. Remote repositories can not be shown. Some features might not work properly. Please check the error and re-configure the repository');
+                    this.repositories = this.getHomeRepoList();
+                    this.allRepositories=[];
+                    let home:any={id:'local',isHomeRepo:true};
+                    this.allRepositories.push(home);
+                    this.repositoryIds = [];
+                    this.initParams();
+                });
+            });
        });
      });
   }
@@ -307,7 +330,7 @@ export class SearchComponent {
   setSidenavSettings() {
     if(this.searchService.sidenavSet)
       return false;
-    console.log("update sidenav");
+    console.log('update sidenav');
     this.searchService.sidenavSet=true;
     if(this.innerWidth < this.breakpoint) {
       this.searchService.sidenavOpened = false;
@@ -334,16 +357,18 @@ export class SearchComponent {
     }
     this.routeSearch(query.query,this.currentRepository,this.mdsId,parameters);
   }
-  public routeSearch(query:string,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.getMdsValues()){
+  public routeSearch(query=this.searchService.searchTerm,repository=this.currentRepository,mds=this.mdsId,parameters:any=this.getMdsValues()){
     this.scrollTo();
     //this.searchService.init();
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"search"],{queryParams:{
+    this.router.navigate([UIConstants.ROUTER_PREFIX+'search'],{queryParams:{
       addToCollection:this.addToCollection ? this.addToCollection.ref.id : null,
       query:query,
       parameters:parameters && Object.keys(parameters) ? JSON.stringify(parameters) : null,
-      repositoryFilter:this.getEnabledRepositories().join(","),
+      repositoryFilter:this.getEnabledRepositories().join(','),
       mds:mds,repository:repository,
       mdsExtended:this.mdsExtended,
+      materialsSortBy:this.searchService.sort.materialsSortBy,
+      materialsSortAscending:this.searchService.sort.materialsSortAscending,
       reurl:this.searchService.reurl}});
   }
   getSearch(searchString:string = null, init = false,properties:any=this.currentValues) {
@@ -413,14 +438,15 @@ export class SearchComponent {
     if(init) {
       this.searchService.searchResultCollections = [];
       if(this.isHomeRepository() || this.currentRepository==RestConstants.ALL) {
-        this.search.search(criterias, [], {
+        this.search.search(this.getCriterias(properties,searchString,false), [], {
           sortBy: [
             RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
             RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
             RestConstants.CM_MODIFIED_DATE
           ],
           sortAscending: [false,true,false]
-        }, RestConstants.CONTENT_TYPE_COLLECTIONS,this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository,this.mdsId).subscribe(
+        }, RestConstants.CONTENT_TYPE_COLLECTIONS,
+            this.currentRepository==RestConstants.ALL ? RestConstants.HOME_REPOSITORY : this.currentRepository,this.mdsId,[],'collections').subscribe(
           (data: NodeList) => {
             this.searchService.searchResultCollections = data.nodes;
             this.searchService.resultCount.collections = data.pagination.total;
@@ -459,15 +485,15 @@ export class SearchComponent {
     this.renderedNode = node;
     this.render_options=[];
     let queryParams={
-      "repository" : RestNetworkService.isFromHomeRepo(node,this.allRepositories) ? null : node.ref.repo
+      'repository' : RestNetworkService.isFromHomeRepo(node,this.allRepositories) ? null : node.ref.repo
     };
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_OPTIONS, this.render_options);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.searchService.searchResult);
     this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_ORIGIN, "search");
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"render", node.ref.id],{queryParams:queryParams});
+    this.router.navigate([UIConstants.ROUTER_PREFIX+'render', node.ref.id],{queryParams:queryParams});
   }
-  switchToCollections(id=""){
-    this.router.navigate([UIConstants.ROUTER_PREFIX+"collections"],{queryParams:{mainnav:this.mainnav,id:id}});
+  switchToCollections(id=''){
+    this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{mainnav:this.mainnav,id:id}});
   }
   setViewType(type:number){
     this.searchService.viewType = type;
@@ -528,7 +554,7 @@ export class SearchComponent {
   }
   private updateHasMore() {
     try {
-      this.hasMoreCollections = document.getElementById("collections").scrollHeight > 90 + 40;
+      this.hasMoreCollections = document.getElementById('collections').scrollHeight > 90 + 40;
     }catch(e){}
   }
   public updateMds(){
@@ -540,27 +566,37 @@ export class SearchComponent {
     this.searchFail=this.searchService.searchResult.length<1 && this.searchService.searchResultCollections.length<1;
   }
 
-  private updateColumns() {
-    /*
-    this.config.get("searchColumns").subscribe((data:any)=>{
-      this.columns=[];
-      if(data && data.length){
-        for(let item of data){
-          this.columns.push(new ListItem("NODE",item));
+    private updateSort() {
+        let sort=MdsHelper.getSortInfo(this.currentMdsSet,'search');
+        if(sort && sort.columns && sort.columns.length) {
+            this.searchService.sort.materialsColumns = [];
+            for (let column of sort.columns) {
+                let item = new SortItem("NODE", column.id);
+                item.mode = column.mode;
+                this.searchService.sort.materialsColumns.push(item);
+            }
         }
-      }
-      else{
-        this.columns.push(new ListItem("NODE",RestConstants.CM_PROP_TITLE));
-        this.columns.push(new ListItem("NODE",RestConstants.CM_MODIFIED_DATE));
-        this.columns.push(new ListItem("NODE",RestConstants.CCM_PROP_LICENSE));
-        this.columns.push(new ListItem("NODE",RestConstants.CCM_PROP_REPLICATIONSOURCE));
-      }
-    });
-    */
-    this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
-
+        let state=this.currentRepository+":"+this.mdsId;
+        console.log(state);
+        // do not update state if current state is valid (otherwise sort info is lost when comming back from rendering)
+        if(state==this.searchService.sort.state)
+          return;
+        this.searchService.sort.state = state;
+        this.searchService.sort.materialsColumns = null;
+        this.searchService.sort.materialsSortBy = null;
+        if(sort) {
+            this.searchService.sort.materialsSortBy = sort.default.sortBy;
+            this.searchService.sort.materialsSortAscending = sort.default.sortAscending;
+        }
+    }
+    private updateColumns() {
+      this.searchService.columns=MdsHelper.getColumns(this.currentMdsSet,'search');
   }
-
+  sortMaterials(sort:any){
+      this.searchService.sort.materialsSortBy=sort.name;
+      this.searchService.sort.materialsSortAscending=sort.ascending;
+      this.routeSearch();
+  }
   private importNode(node: Node) {
     this.globalProgress=true;
     this.nodeApi.importNode(node.ref.repo,node.ref.id,RestConstants.INBOX).subscribe((data:NodeWrapper)=>{
@@ -579,7 +615,7 @@ export class SearchComponent {
   }
 
   private getWorkspaceUrl(node: Node) {
-    return UIConstants.ROUTER_PREFIX+"workspace/files?root=MY_FILES&id="+node.parent.id+"&file="+node.ref.id;
+    return UIConstants.ROUTER_PREFIX+'workspace/files?root=MY_FILES&id='+node.parent.id+'&file='+node.ref.id;
   }
 
   private getOptions(nodes:Node[]=this.selection,fromList:boolean) {
@@ -588,7 +624,7 @@ export class SearchComponent {
     }
     let options=[];
     if(this.searchService.reurl) {
-      let apply=new OptionItem("APPLY", "redo", (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelper.getNodes(this.selection,node)[0],this.searchService.reurl));
+      let apply=new OptionItem('APPLY', 'redo', (node: Node) => NodeHelper.addNodeToLms(this.router,this.temporaryStorageService,ActionbarHelperService.getNodes(this.selection,node)[0],this.searchService.reurl));
       apply.enabledCallback=((node:Node)=> {
         return node.access.indexOf(RestConstants.ACCESS_CC_PUBLISH) != -1;
       });
@@ -598,8 +634,8 @@ export class SearchComponent {
     }
     if (this.addToCollection) {
       if (fromList || nodes && nodes.length) {
-        let addTo = new OptionItem(fromList ? "SEARCH.ADD_TO_COLLECTION_SHORT" : "SEARCH.ADD_TO_COLLECTION", "layers", (node: Node) => {
-          this.addToCollectionList(this.addToCollection, ActionbarHelper.getNodes(nodes,node), () => {
+        let addTo = new OptionItem(fromList ? 'SEARCH.ADD_TO_COLLECTION_SHORT' : 'SEARCH.ADD_TO_COLLECTION', 'layers', (node: Node) => {
+          this.addToCollectionList(this.addToCollection, ActionbarHelperService.getNodes(nodes,node), () => {
             this.switchToCollections(this.addToCollection.ref.id);
           });
         });
@@ -608,7 +644,7 @@ export class SearchComponent {
 
         options.push(addTo);
       }
-      let cancel = new OptionItem("CANCEL", 'close', (node: Node) => {
+      let cancel = new OptionItem('CANCEL', 'close', (node: Node) => {
         this.switchToCollections(this.addToCollection.ref.id);
       });
       if(!fromList) {
@@ -617,8 +653,8 @@ export class SearchComponent {
       return options;
     }
     if(fromList || nodes && nodes.length) {
-      let collection = ActionbarHelper.createOptionIfPossible('ADD_TO_COLLECTION',nodes, this.connector,(node: Node) => {
-        this.addNodesToCollection = ActionbarHelper.getNodes(nodes,node);
+      let collection = this.actionbar.createOptionIfPossible('ADD_TO_COLLECTION', nodes, (node: Node) => {
+          this.addNodesToCollection = ActionbarHelperService.getNodes(nodes, node);
       });
       if(collection) {
           collection.showCallback = (node: Node) => {
@@ -627,9 +663,12 @@ export class SearchComponent {
           if(fromList || RestNetworkService.allFromHomeRepo(nodes,this.allRepositories))
               options.push(collection);
       }
+      let variant = this.actionbar.createOptionIfPossible('CREATE_VARIANT', nodes, (node: Node) => this.nodeVariant = ActionbarHelperService.getNodes(nodes, node)[0]);
+      if (variant)
+          options.push(variant);
 
-      let nodeStore = new OptionItem("SEARCH.ADD_NODE_STORE", "bookmark_border", (node: Node) => {
-        this.addToStore(ActionbarHelper.getNodes(nodes,node));
+      let nodeStore = new OptionItem('SEARCH.ADD_NODE_STORE', 'bookmark_border', (node: Node) => {
+        this.addToStore(ActionbarHelperService.getNodes(nodes,node));
       });
       nodeStore.showCallback=(node:Node)=>{
         return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
@@ -655,7 +694,7 @@ export class SearchComponent {
 
       if(fromList || nodes && nodes.length==1){
         if(!this.isGuest && (fromList || RestNetworkService.supportsImport(nodes[0].ref.repo,this.allRepositories))) {
-          let save = new OptionItem("SAVE", "reply", (node: Node) => this.importNode(this.getCurrentNode(node)));
+          let save = new OptionItem('SAVE', 'reply', (node: Node) => this.importNode(this.getCurrentNode(node)));
           save.showCallback=(node:Node)=>{
             return RestNetworkService.supportsImport(node.ref.repo, this.allRepositories);
           };
@@ -663,13 +702,12 @@ export class SearchComponent {
         }
       }
 
-      let download = ActionbarHelper.createOptionIfPossible('DOWNLOAD', nodes,this.connector,
-        (node: Node) => NodeHelper.downloadNodes(this.toast,this.connector,ActionbarHelper.getNodes(nodes,node)));
+      let download = this.actionbar.createOptionIfPossible('DOWNLOAD', nodes, (node: Node) => NodeHelper.downloadNodes(this.toast, this.connector, ActionbarHelperService.getNodes(nodes, node)));
       if (download)
         options.push(download);
 
-      if((fromList || nodes && nodes.length==1) && this.config.instant("nodeReport",false)){
-        let report = new OptionItem("NODE_REPORT.OPTION", "flag", (node: Node) => this.nodeReport=this.getCurrentNode(node));
+      if((fromList || nodes && nodes.length==1) && this.config.instant('nodeReport',false)){
+        let report = new OptionItem('NODE_REPORT.OPTION', 'flag', (node: Node) => this.nodeReport=this.getCurrentNode(node));
         report.showCallback=(node:Node)=>{
           return RestNetworkService.isFromHomeRepo(node,this.allRepositories);
         }
@@ -677,9 +715,9 @@ export class SearchComponent {
           options.push(report);
       }
     }
-    let custom=this.config.instant("searchNodeOptions");
+    let custom=this.config.instant('searchNodeOptions');
     NodeHelper.applyCustomNodeOptions(this.toast,this.http,this.connector,custom,this.searchService.searchResult, nodes, options,(load:boolean)=>this.globalProgress=load);
-    this.viewToggle = new OptionItem("", "", (node: Node) => this.toggleView());
+    this.viewToggle = new OptionItem('', '', (node: Node) => this.toggleView());
     this.viewToggle.isToggle = true;
     options.push(this.viewToggle);
     this.setViewType(this.searchService.viewType);
@@ -724,15 +762,16 @@ export class SearchComponent {
     this.iam.addNodeList(SearchNodeStoreComponent.LIST,selection[position].ref.id).subscribe(()=>{
       this.addToStore(selection,position+1,errors);
     },(error:any)=>{
-      if(RestHelper.errorMessageContains(error,"Node is already in list"))
+      if(RestHelper.errorMessageContains(error,'Node is already in list'))
         this.toast.error(null,'SEARCH.ADDED_TO_NODE_STORE_EXISTS',{name:RestHelper.getTitle(selection[position])});
       this.addToStore(selection,position+1,errors+1)
     });
   }
   private onMdsReady(mds:any=null){
-    console.log("mds ready");
+    console.log('mds ready');
     this.currentMdsSet=mds;
     this.updateColumns();
+    this.updateSort();
     if (this.searchService.searchResult.length < 1) {
       this.initalized = true;
       if(!this.currentValues && this.mdsRef) {
@@ -741,12 +780,15 @@ export class SearchComponent {
       if(this.searchService.reinit)
         this.getSearch(this.searchService.searchTerm, true,this.currentValues);
     }
-    //if(this.mainNavRef)
-    //  this.mainNavRef.refreshBanner();
+    if(this.mainNavRef && !this.bannerInitalized) {
+        this.mainNavRef.refreshBanner();
+        this.bannerInitalized=true;
+    }
     this.searchService.reinit=true;
   }
   private prepare(param:any) {
     this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
+      this.toolPermissions=data.toolPermissions;
       if (data.isValidLogin && data.currentScope != null) {
           RestHelper.goToLogin(this.router,this.config);
           return;
@@ -760,6 +802,12 @@ export class SearchComponent {
       this.loadSavedSearch();
       if(param['mdsExtended'])
         this.mdsExtended=param['mdsExtended']=='true';
+      if(param['materialsSortBy']){
+        // set a valid state first
+        this.updateSort();
+        this.searchService.sort.materialsSortBy=param['materialsSortBy'];
+        this.searchService.sort.materialsSortAscending=param['materialsSortAscending']=='true';
+      }
       if(param['parameters']){
         this.currentValues=JSON.parse(param['parameters']);
       }
@@ -818,28 +866,27 @@ export class SearchComponent {
         this.searchRepository(repos,criterias,init,position+1,count);
         return;
     }
-    /*
-    let properties=[RestConstants.CM_MODIFIED_DATE,
-      RestConstants.CM_CREATOR,
-      RestConstants.CCM_PROP_WIDTH,
-      RestConstants.CCM_PROP_HEIGHT,
-      RestConstants.CCM_PROP_AUTHOR_FREETEXT,
-      RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR_FN,
-      RestConstants.CCM_PROP_METADATACONTRIBUTER_CREATOR_FN,
-      RestConstants.CCM_PROP_LICENSE,
-      RestConstants.CCM_PROP_REPLICATIONSOURCE,
-      RestConstants.CCM_PROP_QUESTIONSALLOWED];*/
+
+    // default order: lucene score, modified date
+    let sortBy=[RestConstants.LUCENE_SCORE,RestConstants.CM_MODIFIED_DATE];
+    let sortAscending=[false,false];
+
+    // order set by user and order is not of type score (which would be the default mode)
+    console.log(this.searchService.sort);
+    if(this.searchService.sort.materialsSortBy && this.searchService.sort.materialsSortBy!=RestConstants.LUCENE_SCORE){
+        sortBy=[this.searchService.sort.materialsSortBy];
+        sortAscending=[this.searchService.sort.materialsSortAscending];
+    }
     let properties=[RestConstants.ALL];
     this.search.search(criterias,
       [RestConstants.LOM_PROP_GENERAL_KEYWORD],
       {
-        sortBy: [RestConstants.LUCENE_SCORE,RestConstants.CM_MODIFIED_DATE],
-        sortAscending: false,
+        sortBy: sortBy,
+        sortAscending: sortAscending,
         count:this.currentRepository==RestConstants.ALL && !this.groupResults ?
           Math.max(5,Math.round(this.connector.numberPerRequest/(this.repositories.length-1))) : null,
         offset: this.searchService.skipcount[position],
-        propertyFilter: [
-          properties]
+        propertyFilter: [properties]
       },
       RestConstants.CONTENT_TYPE_FILES,
       repo ? repo.id : RestConstants.HOME_REPOSITORY,
@@ -942,15 +989,14 @@ export class SearchComponent {
       });
   }
 
-  private getCriterias(properties=this.currentValues,searchString=this.searchService.searchTerm) {
+  private getCriterias(properties=this.currentValues,searchString=this.searchService.searchTerm,addAll=true) {
     let criterias:any=[];
     if(searchString)
       criterias.push({'property': RestConstants.PRIMARY_SEARCH_CRITERIA, 'values': [searchString]});
+    if(!addAll)
+      return criterias;
     if(properties) {
-      for (var property in properties) {
-        if(properties[property] && properties[property].length)
-          criterias.push({'property':property,'values':properties[property]});
-      }
+        criterias=criterias.concat(RestSearchService.convertCritierias(properties));
     }
     return criterias;
   }
@@ -999,12 +1045,12 @@ export class SearchComponent {
 
   private invalidateMds() {
     if(this.currentRepository==RestConstants.ALL){
-      console.log("all repositories, invalidate manually");
+      console.log('all repositories, invalidate manually');
         this.reloadMds=new Boolean(false);
         this.onMdsReady();
     }
     else{
-      console.log("invalidate mds");
+      console.log('invalidate mds');
       this.reloadMds=new Boolean(true);
     }
   }
@@ -1036,7 +1082,7 @@ export class SearchComponent {
         if(param['query'])
           this.searchService.searchTerm=param['query'];
         if(param['repositoryFilter']) {
-            this.enabledRepositories = param['repositoryFilter'].split(",");
+            this.enabledRepositories = param['repositoryFilter'].split(',');
             // do a reload of the repos
             this.repositoryIds=[];
         }
@@ -1055,9 +1101,9 @@ export class SearchComponent {
         this.updateCurrentRepositoryId();
 
         console.log(this.repositories);
-        if(this.config.instant("availableRepositories") && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
-          let use=this.config.instant("availableRepositories");
-          console.info("current repository "+this.currentRepository+" is restricted by context, switching to primary "+use);
+        if(this.config.instant('availableRepositories') && this.repositories.length && this.currentRepository!=RestConstants.ALL && RestNetworkService.getRepositoryById(this.currentRepository,this.repositories)==null){
+          let use=this.config.instant('availableRepositories');
+          console.info('current repository '+this.currentRepository+' is restricted by context, switching to primary '+use);
           console.log(this.repositories);
           this.routeSearch(this.searchService.searchTerm,use,RestConstants.DEFAULT);
         }
@@ -1074,16 +1120,16 @@ export class SearchComponent {
           if(this.mdsSets){
             UIHelper.prepareMetadatasets(this.translate,this.mdsSets);
             try {
-              console.log("mds for current repo " +this.currentRepository);
+              console.log('mds for current repo ' +this.currentRepository);
               console.log(this.mdsSets);
               this.mdsId = this.mdsSets[0].id;
               if (param['mds'] && Helper.indexOfObjectArray(this.mdsSets,'id',param['mds'])!=-1)
                 this.mdsId = param['mds'];
             }
             catch(e){
-              console.warn("got invalid mds list from repository:");
+              console.warn('got invalid mds list from repository:');
               console.warn(this.mdsSets);
-              console.warn("will continue with default mds");
+              console.warn('will continue with default mds');
               this.mdsId=RestConstants.DEFAULT;
             }
             this.prepare(param);
@@ -1114,4 +1160,13 @@ export class SearchComponent {
       }
       return null;
   }
+
+    toggleSidenav() {
+        this.searchService.sidenavOpened=!this.searchService.sidenavOpened;
+        this.setFixMobileNav();
+    }
+
+    private setFixMobileNav() {
+        this.mainNavRef.setFixMobileElements(this.searchService.sidenavOpened || this.selection && this.selection.length>0);
+    }
 }

@@ -3,13 +3,11 @@ import {RestMdsService} from "./common/rest/services/rest-mds.service";
 import {RestIamService} from "./common/rest/services/rest-iam.service";
 import {RestArchiveService} from "./common/rest/services/rest-archive.service";
 import {RestConnectorService} from "./common/rest/services/rest-connector.service";
-import {GwtInterfaceService} from "./common/services/gwt-interface.service";
 import {RestSearchService} from "./common/rest/services/rest-search.service";
 import {Toast} from "./common/ui/toast";
 import {RestCollectionService} from "./common/rest/services/rest-collection.service";
 import {RestUsageService} from "./common/rest/services/rest-usage.service";
 import {TemporaryStorageService} from "./common/services/temporary-storage.service";
-import {RestMetadataService} from "./common/rest/services/rest-metadata.service";
 import {SessionStorageService} from "./common/services/session-storage.service";
 import {RestOrganizationService} from "./common/rest/services/rest-organization.service";
 import {UIService} from "./common/services/ui.service";
@@ -22,13 +20,14 @@ import {RestNetworkService} from "./common/rest/services/rest-network.service";
 import {RestToolService} from "./common/rest/services/rest-tool.service";
 import {RestLocatorService} from "./common/rest/services/rest-locator.service";
 import {RestUtilitiesService} from "./common/rest/services/rest-utilities.service";
+import {RestSharingService} from "./common/rest/services/rest-sharing.service";
+import {ActionbarHelperService} from "./common/services/actionbar-helper";
 import {PermissionNamePipe} from "./common/ui/permission-name.pipe";
 
 
-export const PROVIDERS=[
+export const PROVIDERS:any=[
   FrameEventsService,
   Toast,
-  GwtInterfaceService,
   RestLocatorService,
   RestConnectorService,
   RestConnectorsService,
@@ -45,8 +44,9 @@ export const PROVIDERS=[
   RestToolService,
   RestUtilitiesService,
   TemporaryStorageService,
+  ActionbarHelperService,
   PermissionNamePipe,
-  RestMetadataService,
+  RestSharingService,
   SessionStorageService,
   ConfigurationService,
   UIService,

@@ -267,21 +267,25 @@ $imagePath: '../../../../assets/images/collections/';
   top: 20%;
   text-align: center;
 }
-.color-option {
+.color-group{
+  display: flex;
+  flex-wrap: wrap;
+  margin: auto;
+  max-width: 220px;
+  justify-content: center;
+  .color-option {
     display:inline-block;
     border-radius: 50%;
     width: 29px;
     height: 29px;
     margin-left: 3px;
     margin-right: 3px;
-    border-width: 3px;
-    border-color: transparent;
-    border-style: solid;
+    margin-bottom: 8px;
     cursor: pointer;
-}
-
-.color-selected {
-    border-color: black;
+  }
+  .color-selected {
+    border: 2px solid #333;
+  }
 }
 
 .icon-bottom {
@@ -333,6 +337,7 @@ $imagePath: '../../../../assets/images/collections/';
     height: 240px;
     background-color: white;
     color: white;
+    cursor: pointer;
 }
 
 .card-image-icon-container {
@@ -403,7 +408,9 @@ $imagePath: '../../../../assets/images/collections/';
 label{
 }
 
-
+input,textarea{
+  background-color: transparent;
+}
 input[type="radio"] {
     margin: 0px 4px 8px 13px;
     cursor: pointer;
@@ -455,6 +462,11 @@ input[type="radio"] {
 @media screen and (max-height: $mobileHeight){
   .card, .card-high, .card-low {
     top:$mainnavHeight+15px;
+  }
+}
+@media only screen and (max-width: $mobileTabSwitchWidth) {
+  .collections-master-div{
+    margin-bottom: $mobileTabNavHeight;
   }
 }
 @media screen and (max-width: $mobileWidth+$mobileStage*3) and (max-height: $mobileHeight+$mobileStage*2) {

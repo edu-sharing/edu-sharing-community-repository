@@ -2,22 +2,13 @@ import {Injectable} from "@angular/core";
 import {RestConstants} from "../rest-constants";
 import {Observable} from "rxjs";
 import {RestConnectorService} from "./rest-connector.service";
-import {IamUsers, IamAuthorities, OrganizationOrganizations, NetworkRepositories, Repository,Node} from "../data-object";
-import {Response} from "@angular/http";
+import {IamUsers, IamAuthorities, OrganizationOrganizations, NetworkRepositories, Repository, Node, Application} from "../data-object";
 import {Helper} from "../../helper";
 import {AbstractRestService} from "./abstract-rest-service";
+import {Service} from "../data-object";
 
 @Injectable()
 export class RestNetworkService extends AbstractRestService{
-  constructor(connector : RestConnectorService) {
-      super(connector);
-  }
-  public getRepositories = (): Observable<NetworkRepositories> => {
-    let query = this.connector.createUrl("network/:version/repositories",null);
-    return this.connector.get(query, this.connector.getRequestOptions())
-      .map((response: Response) => response.json());
-  }
-
   public static supportsImport(repository: string, repositories: Repository[]) {
     if(repositories==null)
       return false;
@@ -62,4 +53,27 @@ export class RestNetworkService extends AbstractRestService{
     }
     return false;
   }
+    constructor(connector : RestConnectorService) {
+        super(connector);
+    }
+    public getRepositories = () => {
+        let query = this.connector.createUrl("network/:version/repositories",null);
+        return this.connector.get<NetworkRepositories>(query, this.connector.getRequestOptions());
+    }
+
+
+    public addService = (jsondata:string): Observable<any> => {
+        let query=this.connector.createUrl("network/:version/services",null);
+        return this.connector.post<any>(query,jsondata,this.connector.getRequestOptions())
+    }
+
+    public getServices = () => {
+        let query=this.connector.createUrl("network/:version/services",null);
+        return this.connector.get<Service[]>(query,this.connector.getRequestOptions())
+    }
+
+    public getStatistics = (url:string) => {
+        return this.connector.get<any>(url,this.connector.getRequestOptions(), false);
+    }
+
 }

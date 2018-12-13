@@ -21,6 +21,7 @@ import {PlatformLocation} from '@angular/common';
 import {CordovaService} from '../../common/services/cordova.service';
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../common/ui/ui-animation";
+import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
 
 @Component({
   selector: 'workspace-login',
@@ -32,7 +33,7 @@ import {UIAnimation} from "../../common/ui/ui-animation";
 })
 export class LoginComponent  implements OnInit{
     loginUrl: any;
-    @ViewChild('passwordInput') passwordInput : ElementRef;
+  @ViewChild('passwordInput') passwordInput : InputPasswordComponent;
   @ViewChild('usernameInput') usernameInput : ElementRef;
   @ViewChild('loginForm') loginForm : ElementRef;
 
@@ -82,7 +83,16 @@ export class LoginComponent  implements OnInit{
         this.username=this.configService.instant('defaultUsername','');
         this.password=this.configService.instant('defaultPassword','');
         this.route.queryParams.forEach((params: Params) => {
-          this.connector.onAllRequestsReady().subscribe(()=>this.isLoading=false);
+          this.connector.onAllRequestsReady().subscribe(()=>{
+            this.isLoading=false;
+              setTimeout(()=>{
+                  if (this.username && this.passwordInput)
+                      this.passwordInput.nativeInput.nativeElement.focus();
+                  else if(this.usernameInput){
+                      this.usernameInput.nativeElement.focus();
+                  }
+              },100);
+          });
           this.scope=params['scope'];
           if(!this.scope)
             this.scope=null;
@@ -118,8 +128,6 @@ export class LoginComponent  implements OnInit{
                 this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((scope:AccessScope)=>{
                   if(scope.hasAccess){
                     this.username=data.authorityName;
-                    if (this.passwordInput)
-                      this.passwordInput.nativeElement.focus();
                   }
                   else{
                     this.toast.error(null,'LOGIN.NO_ACCESS');
@@ -132,13 +140,7 @@ export class LoginComponent  implements OnInit{
               }
             },(error:any)=>RestHelper.goToLogin(this.router,this.configService));
           }
-          setTimeout(()=>{
-            if (this.username && this.passwordInput)
-              this.passwordInput.nativeElement.focus();
-            else if(this.usernameInput){
-              this.usernameInput.nativeElement.focus();
-            }
-          },250);
+
 
           if(this.scope==RestConstants.SAFE_SCOPE){
             this.caption='LOGIN.TITLE_SAFE';

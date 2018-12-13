@@ -33,6 +33,7 @@ import {ListItem} from "../../../common/ui/list-item";
 })
 export class PermissionsAuthoritiesComponent {
   public GROUP_TYPES=RestConstants.VALID_GROUP_TYPES;
+  public SCOPE_TYPES=RestConstants.VALID_SCOPE_TYPES;
   public ORG_TYPES=RestConstants.VALID_GROUP_TYPES_ORG;
   public list : any[]=[];
   public edit : any;
@@ -215,7 +216,9 @@ export class PermissionsAuthoritiesComponent {
         if(this.orgs && this.orgs.canCreate){
           options.push(new OptionItem("PERMISSIONS.MENU_CREATE_USER", "add", (data: any) => this.createAuthority()));
         }
-        options.push(new OptionItem("PERMISSIONS.EXPORT_MEMBER", "cloud_download", (data: any) => this.downloadMembers()));
+        let download = new OptionItem("PERMISSIONS.EXPORT_MEMBER", "cloud_download", (data: any) => this.downloadMembers())
+        download.onlyDesktop=true;
+        options.push(download);
       }
     }
     if(!all && this._mode=='ORG' && this.orgs && this.orgs.canCreate){
@@ -297,6 +300,7 @@ export class PermissionsAuthoritiesComponent {
         }
         else {
           this.globalProgress=true;
+          console.log("groupescope:" , this.edit.profile);
           this.iam.createGroup(name, this.edit.profile, this.org ? this.org.groupName : "").subscribe(() => {
             this.edit = null;
             this.globalProgress=false;
@@ -587,6 +591,7 @@ export class PermissionsAuthoritiesComponent {
   private createGroup(){
       this.createAuthority();
       this.edit.profile.groupType=null;
+      this.edit.profile.scopeType=null;
   }
   private createOrg() {
     this.createGroup();

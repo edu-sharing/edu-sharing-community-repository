@@ -1,0 +1,10 @@
+<div class="tutorial" *ngIf="show" [@fade]="show" [style.background]="background" (click)="next()">
+    <div #tutoral [style.left]="pos.left" [style.top]="pos.top" [style.width]="pos.width" class="align-tutorial">
+        <div class="heading">{{heading | translate}}</div>
+        <div class="description">{{description | translate}}</div>
+        <div class="buttons">
+            <a class="btn-flat waves-effect waves-light" *ngIf="showSkip" (click)="skip()" (keyup.enter)="skip()">{{'SKIP' | translate}}</a>
+            <a class="btn waves-effect waves-light" (click)="next()" (keyup.enter)="next()">{{'NEXT' | translate}}</a>
+        </div>
+    </div>
+</div>

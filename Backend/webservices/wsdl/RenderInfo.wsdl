@@ -32,13 +32,20 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element maxOccurs="unbounded" minOccurs="0" name="item" type="tns2:KeyValue"/>
     </sequence>
    </complexType>
+   <complexType name="ArrayOf_tns2_Child">
+    <sequence>
+     <element maxOccurs="unbounded" minOccurs="0" name="item" type="tns2:Child"/>
+    </sequence>
+   </complexType>
    <complexType name="RenderInfoResult">
     <sequence>
      <element name="aspects" nillable="true" type="impl:ArrayOf_xsd_string"/>
+     <element name="children" nillable="true" type="impl:ArrayOf_tns2_Child"/>
      <element name="contentHash" type="xsd:int"/>
      <element name="eduSchoolPrimaryAffiliation" nillable="true" type="xsd:string"/>
      <element name="guestReadAllowed" nillable="true" type="xsd:boolean"/>
      <element name="hasContentLicense" nillable="true" type="xsd:boolean"/>
+     <element name="iconUrl" nillable="true" type="xsd:string"/>
      <element name="labels" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
      <element name="mdsTemplate" nillable="true" type="xsd:string"/>
      <element name="mimeTypeUrl" nillable="true" type="xsd:string"/>
@@ -79,6 +86,14 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <sequence>
      <element name="key" nillable="true" type="xsd:string"/>
      <element name="value" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="Child">
+    <sequence>
+     <element name="aspects" nillable="true" type="impl:ArrayOf_xsd_string"/>
+     <element name="iconUrl" nillable="true" type="xsd:string"/>
+     <element name="previewUrl" nillable="true" type="xsd:string"/>
+     <element name="properties" nillable="true" type="impl:ArrayOf_tns2_KeyValue"/>
     </sequence>
    </complexType>
   </schema>

@@ -1,0 +1,144 @@
+@import "../../../styles/variables.scss";
+
+.container{
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  max-width: 800px;
+
+  .container-inside{
+      margin: 0 auto;
+      padding: 5% 0;
+      width: 90%;
+  }
+}
+
+.password-required{
+  margin: 0 auto;
+  width: 400px;
+
+  .btn{
+    width: 100%;
+    margin-top: -5px;
+  }
+}
+
+.branding{
+  position: relative;
+  height:100px;
+  text-align: center;
+  margin-bottom: 80px;
+  img{
+    width: auto;
+    height: 100%;
+  }
+}
+.details{
+  margin-bottom: 20px;
+  position: relative;
+  width: 90%;
+  left: 5%;
+  .details-type{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon{
+    margin-right: 14px;
+    width: 50px;
+    height: auto;
+  }
+  .name{
+    font-size: 210%;
+    font-weight: bold;
+    height: 42px;
+    word-break: break-all;
+    overflow: hidden;
+  }
+}
+.details-opacity{
+  opacity: .5;
+}
+.password-required,.password-valid{
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+}
+.password-correct{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $colorStatusPositive;
+  font-size: 10pt;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 10px;
+
+  i{
+    margin-right: 10px;
+    border-radius: 50%;
+    border: 2px solid $colorStatusPositive;
+    padding: 2px;
+    display: table;
+  }
+}
+
+.download{
+  margin-top: 10px;
+  text-align: center;
+}
+
+.download-top{
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+powered-by{
+  position: fixed;
+  left: 0;
+  bottom: 3%;
+}
+
+.folder{
+  border: 6px solid $actionDialogBackground;
+  border-radius: 6px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  position: relative;
+}
+:host /deep/ {
+  .heading {
+    background: $actionDialogBackground;
+  }
+}
+@media screen and (max-width:($mobileWidth)), screen and (max-height:($mobileHeightLandscape)) {
+  .container{
+    width: 100%;
+  }
+  .password-required{
+    width: 100%;
+  }
+  .branding{
+    margin-bottom: -30px;
+    //text-align: right;
+    img{
+      width: 100px;
+      height: auto;
+    }
+  }
+  powered-by{
+    display: none;
+  }
+  .folder{
+    border: none;
+    margin-top: 0;
+    width: 110%;
+    left: -5%;
+  }
+}
+
+@media screen and (max-height:($mobileHeightLandscape)) {
+  .branding{
+    display: none;
+  }
+}

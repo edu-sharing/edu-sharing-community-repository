@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.MdsDao;
 import org.edu_sharing.restservices.MdsDaoV2;
 import org.edu_sharing.restservices.NodeDao;
@@ -37,9 +36,9 @@ import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.SearchResult;
+import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.CombineMode;
-import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 
@@ -85,6 +84,11 @@ public class SearchApi {
 			@Context HttpServletRequest req) {
 
 		try {
+			
+			
+			if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+				return RepoProxyFactory.getRepoProxy().searchV2(repository, mdsId, query, contentType, maxItems, skipCount, sortProperties, sortAscending, parameters, propertyFilter, req);
+			}
 
 			Filter filter = new Filter(propertyFilter);
 

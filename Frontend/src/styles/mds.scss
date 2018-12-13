@@ -13,6 +13,21 @@
     float: left;
   }
 }
+.templateLink,.licenseLink,.contributorsLink{
+  font-weight: bold;
+  text-transform: uppercase;
+  padding-top: 10px;
+  padding-bottom: 30px;
+  float: left;
+  width: 100%;
+  i{
+    position: relative;
+    top: 6px;
+  }
+}
+.contributorsLink{
+  padding-top: 0;
+}
 .mdsViewHeader{
   font-size:140%;
   font-weight:bold;
@@ -47,6 +62,10 @@ mds .mdsGroup{
       display: flex;
       align-self: center;
     }
+  }
+  .label-light{
+    color:$textVeryLight;
+    padding: 5px 10px;
   }
   > div{
     padding: 15px 0px;
@@ -91,6 +110,8 @@ mds .mdsGroup{
     font-size:80%;
     margin-top:-5px;
     margin-bottom:2px;
+    margin-left:0.75em;
+    margin-right:0.75em;
   }
   .suggestionInput{
     position: relative;
@@ -122,7 +143,7 @@ mds .mdsGroup{
     width:100%;
     max-width:600px;
     margin-top: -18px;
-    top: 53px;
+    top: 60px;
   }
   .suggestionListAll{
     max-height: 300px;
@@ -158,15 +179,18 @@ mds .mdsGroup{
     }
     .btn-flat{
       overflow: hidden;
-      padding:0 1rem;
+      height: 41px;
+      padding: 0.3em 1rem
     }
   }
   .widget_range{
     height: 50px;
+    margin: 0 10px;
   }
   .widget_duration{
     width: 100%;
     float: left;
+    padding-top: 10px;
   }
   .widget_multivalueGroup{
     .widgetGroup{
@@ -182,7 +206,7 @@ mds .mdsGroup{
   }
   .widget_duration div.inputField{
     padding-top: 5px;
-    width:40px;
+    width:50px;
     float:left;
     text-align: center;
   }
@@ -191,13 +215,15 @@ mds .mdsGroup{
   }
   .widget_duration div.inputField label{
     font-size:70%;
+    position: relative;
+    top: -10px;
   }
   .widget_duration div.inputField span{
     position: relative;
     top:18px;
   }
   .widget_duration div.inputSlider{
-    width:calc(100% - 130px);
+    width:calc(100% - 170px);
     float:right;
     position: relative;
     top:35px;
@@ -246,20 +272,17 @@ mds .mdsGroup{
       max-height:20px;
     }
   }
-  .templateLink,.licenseLink,.contributorsLink{
-    font-weight: bold;
-    text-transform: uppercase;
-    padding-top: 10px;
-    padding-bottom: 30px;
-    float: left;
-    width: 100%;
-    i{
-      position: relative;
-      top: 6px;
+  .workflow_container {
+    .caption{
+      display:flex;
+      .mds-workflow-status {
+        width: 14px;
+        height: 14px;
+        align-self: center;
+        margin-right: 10px;
+        border-radius: 50%;
+      }
     }
-  }
-  .contributorsLink{
-    padding-top: 0;
   }
   .version {
     margin-top: 10px;
@@ -306,14 +329,76 @@ mds .mdsGroup{
   .mdsAuthor{
     float:left;
     width:100%;
-  }
-  .mdsAuthor{
+    .mdsAuthorFreetext,.mdsAuthorPerson{
+      margin: 0 10px;
+    }
     .materialize-textarea{
-      min-height:1.5rem;
-      height:1.5rem;
+      min-height:2.5rem;
+      height:2.5rem;
+      margin-top: 10px;
+    }
+  }
+  .childobjects_container {
+    >label{
+      font-weight: bold;
+    }
+    float:left;
+    width:calc(100% + 50px);
+    margin-left:-25px;
+    padding:15px 25px;
+    background-color: $workspaceMetadataBackground;
+    .mdsChildobjects {
+      padding-bottom: 20px;
+      float: left;
+      width: 100%;
+      .btn-flat {
+        float: left;
+        margin-top: 10px;
+      }
+      .list {
+        padding: 10px 0;
+        float: left;
+        width: 100%;
+        > div {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          padding: 6px 15px;
+          cursor: default;
+        }
+        > div:hover {
+          background-color: $workspaceSelectedBackground;
+        }
+        .icon {
+          width: $tableIconSize;
+          height: $tableIconSize;
+          background: #fff;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 12px;
+          > img {
+            width: 50%;
+          }
+        }
+        .name {
+          flex-grow: 1;
+          @include shortenText();
+          margin-right: 10px;
+        }
+        .license,.edit,.remove {
+          margin:0 5px;
+          color: $primary;
+          position: relative;
+          top: 2px;
+        }
+      }
     }
   }
   .mdsPreview{
+    width:100%;
+    float:left;
     .previewImage {
       text-align: center;
       width:100%;
@@ -330,25 +415,28 @@ mds .mdsGroup{
       text-transform: uppercase;
     }
     img{
-      width:40%;
+      min-width:40%;
+      width:250px;
       height: 175px;
       object-fit: cover;
     }
   }
 }
-.vcardGroup{
-  width: 50%;
+.vcard {
+  display: flex;
+  width: 100%;
   float: left;
-  padding: 10px;
-  .vcardFirstInput{
-    width:calc(100% - 30px);
-    float:right;
-  }
-  i{
-    float:left;
-    color:$textLight;
-    position: relative;
-    top:3px;
+  padding-left: 10px;
+  .vcardGroup {
+    width: 0;
+    flex-grow: 1;
+    display: flex;
+    padding: 10px 10px;
+    > i {
+      color: $textLight;
+      align-self: center;
+      margin-right: 5px;
+    }
   }
 }
 .treeGroup {

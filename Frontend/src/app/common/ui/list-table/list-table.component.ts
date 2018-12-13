@@ -56,6 +56,7 @@ export class ListTableComponent implements EventListener{
   public static VIEW_TYPE_GRID = 1;
   public static VIEW_TYPE_GRID_SMALL = 2;
   @ViewChild('drag') drag : ElementRef;
+  @ViewChild('addElementRef') addElementRef : ElementRef;
 
 
   private optionsAlways:OptionItem[]=[];
@@ -103,7 +104,7 @@ export class ListTableComponent implements EventListener{
    * @param options
    */
   @Input() set options(options : OptionItem[]){
-    options=OptionItem.filterValidOptions(this.ui,options);
+    options=UIHelper.filterValidOptions(this.ui,options);
     this._options=[];
     if(!options)
       return;
@@ -116,6 +117,7 @@ export class ListTableComponent implements EventListener{
       if(option.showAlways)
         this.optionsAlways.push(option);
     }
+    console.log(this._options);
   }
 
   /**
@@ -238,6 +240,12 @@ export class ListTableComponent implements EventListener{
    */
   @Input() listClass="list";
   /**
+   * Should the list table fetch the repo list (useful to detect remote repo nodes)
+   * Must be set at initial loading!
+   * @type {boolean}
+   */
+  @Input() loadRepositories=true;
+  /**
    *  For collection elements only, tells if the current user can delete the given item
    *  Function should return a boolean
    * @type {boolean}
@@ -339,11 +347,16 @@ export class ListTableComponent implements EventListener{
               private sanitizer: DomSanitizer) {
     this.id=Math.random();
     frame.addListener(this);
+    setTimeout(()=>this.loadRepos());
+  }
+  loadRepos(){
+    if(!this.loadRepositories)
+      return;
     this.locator.locateApi().subscribe(()=>{
-      this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
-        this.repositories=data.repositories;
-        this.cd.detectChanges();
-      });
+        this.network.getRepositories().subscribe((data:NetworkRepositories)=>{
+          this.repositories=data.repositories;
+          this.cd.detectChanges();
+        });
     });
   }
   onEvent(event:string,data:any){
@@ -542,29 +555,32 @@ export class ListTableComponent implements EventListener{
   private clickRowSender(node : Node){
     this.clickRow.emit(node);
   }
-  private canBeSorted(sortBy : string){
-    return RestConstants.POSSIBLE_SORT_BY_FIELDS.indexOf(sortBy)!=-1;
+  private canBeSorted(sortBy : any){
+    return RestConstants.POSSIBLE_SORT_BY_FIELDS.indexOf(sortBy.name)!=-1;
   }
   private getSortableColumns(){
     let result:ListItem[]=[];
     for(let col of this.columnsAll){
-      if(this.canBeSorted(col.name))
+      if(this.canBeSorted(col))
         result.push(col);
     }
     return result;
   }
-  private setSorting(sortBy : string,isPrimaryElement : boolean){
-    if(!this.canBeSorted(sortBy))
-      return;
-    if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*3){
+  private setSortingIntern(sortBy : ListItem,isPrimaryElement : boolean){
+    if(isPrimaryElement && window.innerWidth<UIConstants.MOBILE_WIDTH+UIConstants.MOBILE_STAGE*4){
       this.sortMenu=true;
       return;
     }
-    let sortAscending=true;
-    if(sortBy==this.sortBy)
-      sortAscending=!this.sortAscending;
-
-    this.sortListener.emit({sortBy: sortBy,sortAscending: sortAscending });
+    let ascending=this.sortAscending;
+    if(this.sortBy==sortBy.name)
+        ascending=!ascending;
+    (sortBy as any).ascending=ascending;
+    this.setSorting(sortBy);
+  }
+  private setSorting(sortBy : any){
+      if(!this.canBeSorted(sortBy))
+          return;
+      this.sortListener.emit({sortBy: sortBy.name,sortAscending: sortBy.ascending });
   }
   public getTitle(node:Node){
     return RestHelper.getTitle(node);
@@ -624,6 +640,9 @@ export class ListTableComponent implements EventListener{
   public getCollection(node : any){
     return node.collection ? node.collection : node
   }
+  private getReference(node: any) {
+      return node.reference ? node.reference : node;
+  }
   public isHomeNode(node : any){
     // repos not loaded or not availale. assume true so that small images are loaded
     if(!this.repositories)
@@ -631,7 +650,7 @@ export class ListTableComponent implements EventListener{
     return RestNetworkService.isFromHomeRepo(node,this.repositories);
   }
   public getIconUrl(node : any){
-    return node.reference ? node.reference.iconURL : node.iconURL;
+    return this.getReference(node).iconURL;
   }
   public isCollection(node : any){
     return node.collection || node.hasOwnProperty('childCollectionsCount');
@@ -723,7 +742,8 @@ export class ListTableComponent implements EventListener{
 
   }
   private getAttribute(data : any,item : ListItem) : SafeHtml{
-    return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
+    //return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
+    return NodeHelper.getAttribute(this.translate,this.config,data,item);
   }
   private getAttributeText(data : any,item : ListItem) : string{
       return NodeHelper.getAttribute(this.translate,this.config,data,item);
@@ -762,6 +782,25 @@ export class ListTableComponent implements EventListener{
   public getItemCssClass(item:ListItem){
     return item.type.toLowerCase()+"_"+item.name.replace(":","_");
   }
+
+    handleKeyboard(event:any) {
+        if(this.viewType==ListTableComponent.VIEW_TYPE_LIST && (event.key=="ArrowUp" || event.key=="ArrowDown")){
+            let next=event.key=="ArrowDown";
+            let elements:any=document.getElementsByClassName("node-row");
+            for(let i=0;i<elements.length;i++){
+                let element=elements.item(i);
+                if(element==event.srcElement){
+                    if(next && i<elements.length-1)
+                        elements.item(i+1).focus();
+                    if(!next && i>0){
+                        elements.item(i-1).focus();
+                    }
+                }
+            }
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
 }
 export class AddElement{
   constructor(public label:string,public icon="add"){}

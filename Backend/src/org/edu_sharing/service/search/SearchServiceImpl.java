@@ -712,9 +712,6 @@ public class SearchServiceImpl implements SearchService {
 					searchParameters.addFieldFacet(fieldFacet);
 				}
 			}
-			if (searchToken.getSortDefinition() != null) {
-				searchToken.getSortDefinition().applyToSearchParameters(searchParameters);
-			}
 			ResultSet resultSet;
 			if (scoped)
 				resultSet = searchService.query(searchParameters);
@@ -808,7 +805,7 @@ public class SearchServiceImpl implements SearchService {
 		toSearch.put("firstName", searchWord);
 		toSearch.put("lastName", searchWord);
 		
-		PermissionServiceImpl permissionService = (PermissionServiceImpl)PermissionServiceFactory.getPermissionService(null);
+		org.edu_sharing.service.permission.PermissionService permissionService = PermissionServiceFactory.getPermissionService(null);
 
 		StringBuffer findUsersQuery =  permissionService.getFindUsersSearchString(toSearch, globalContext);
 		StringBuffer findGroupsQuery = permissionService.getFindGroupsSearchString(searchWord, globalContext);

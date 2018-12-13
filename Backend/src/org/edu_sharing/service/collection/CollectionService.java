@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.service.search.model.SortDefinition;
 
 public interface CollectionService {
 	
@@ -48,7 +50,7 @@ public interface CollectionService {
 	
 	public List<NodeRef> getChildren(String parentId, String scope);
 	
-	public List<NodeRef> getChildReferences(String parentId, String scope);
+	public List<NodeRef> getChildReferences(String parentId, String scope, SortDefinition sortDefinition);
 
 	public Collection get(String storeId, String storeProtocol, String collectionId);
 	
@@ -63,8 +65,9 @@ public interface CollectionService {
 
 	Collection createAndSetScope(String parentId, Collection collection) throws Throwable;
 
-	public void setPinned(String[] collections);
+    public void setPinned(String[] collections);
 
 	void writePreviewImage(String collectionId, InputStream is, String mimeType) throws Exception;
 
+    List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId);
 }
