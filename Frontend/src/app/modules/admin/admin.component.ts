@@ -461,7 +461,7 @@ export class AdminComponent {
   }
   public refreshCache(sticky:boolean){
     this.globalProgress=true;
-    this.admin.refreshCache(this.cacheName,sticky).subscribe(()=>{
+    this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : "",sticky).subscribe(()=>{
       this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.CACHE_REFRESHED');
     },(error:any)=>{
@@ -841,10 +841,7 @@ export class AdminComponent {
     }
 
     private prepareJobClasses() {
-        let job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RefreshCacheJob",this.translate.instant("ADMIN.JOBS.NAMES.RefreshCacheJob"));
-        job.secondaryTitle=job.id;
-        this.jobClasses.push(job);
-        job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjects",this.translate.instant("ADMIN.JOBS.NAMES.RemoveImportedObjects"));
+        let job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjects",this.translate.instant("ADMIN.JOBS.NAMES.RemoveImportedObjects"));
         job.secondaryTitle=job.id;
         this.jobClasses.push(job);
         job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveOrphanCollectionReferencesJob"));
