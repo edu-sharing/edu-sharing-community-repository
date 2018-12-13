@@ -35,6 +35,9 @@
   color: $primary;
   text-align: right;
   @include clickable();
+  &:focus{
+    @include setGlobalFocus;
+  }
 }
 .card-jumpmarks{
   position:fixed;

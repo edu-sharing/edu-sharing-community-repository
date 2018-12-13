@@ -180,7 +180,7 @@ public class RenderInfoSoapBindingImpl implements org.edu_sharing.webservices.re
 			rir.setRemoteRoles(splitted);
 		}
 
-		HashMap<String, Boolean> perms = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, PermissionServiceHelper.PERMISSIONS);
+		HashMap<String, Boolean> perms = permissionService.hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId, userName, new String[]{CCConstants.PERMISSION_READ,CCConstants.PERMISSION_CC_PUBLISH});
 
 		rir.setPermissions(PermissionServiceHelper.getPermissionsAsString(perms).toArray(new String[0]));
 		rir.setPublishRight(new Boolean(perms.get(CCConstants.PERMISSION_CC_PUBLISH)));

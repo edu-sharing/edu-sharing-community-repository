@@ -13,7 +13,7 @@
   }
   .topBarSearch form input,
   .topBarSearch form i {
-    color: #999 !important;
+    color: #505050 !important;
   }
   .topBar {
     position: relative !important;
@@ -106,7 +106,7 @@
 .content{
   position: relative;
   top:-20px;
-  width:100%;
+  width: calc(100% +10px);
   padding:0 4%;
   overflow: hidden;
 }
@@ -119,6 +119,9 @@
   float:right;
   text-transform: uppercase;
   font-weight: bold;
+  a{
+    padding: 0 10px;
+  }
 }
 .list{
   width:calc(100% + #{$cardWidth + 60px});

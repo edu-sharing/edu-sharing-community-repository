@@ -25,7 +25,7 @@
 <div class="dialog darken dialog-sidenav" *ngIf="displaySidebar" [@fade]="displaySidebar" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false" tabindex="0"></div>
 
 <div #sidebar tabindex="0" class="sidenav" *ngIf="displaySidebar" [@fromLeft]="displaySidebar">
-  <div class="sidenavClose clickable" (click)="displaySidebar=false"><i class="material-icons">close</i></div>
+  <div class="sidenavClose clickable" tabindex="0" (click)="displaySidebar=false" (keyup.enter)="displaySidebar=false"><i class="material-icons">close</i></div>
   <div class="sidenavImage" style.background-color="{{ (user ? user.person : null) | authorityColor }}">
     <div class="profile-gradient"></div>
     <img *ngIf="user && user.person.profile.avatar" class="profile-background" [src]="user.person.profile.avatar+'&crop=true&width=200&height=200'">
@@ -72,7 +72,7 @@
     <a tabindex="0" *ngIf="config.imprintUrl" class="clickable" (click)="openImprint()" (keyup.enter)="openImprint()">{{ 'IMPRINT' | translate }}</a>
     <a tabindex="0" *ngIf="config.privacyInformationUrl" class="clickable" (click)="openPrivacy()" (keyup.enter)="openPrivacy()">{{ 'PRIVACY_INFORMATION' | translate }}</a>
   </div>
-  <div *ngIf="user && (_currentScope=='search' || _currentScope=='stream' || _currentScope=='collections')" #nodeStoreRef class="clickable nodeStore" (click)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
+  <div *ngIf="user && (_currentScope=='search' || _currentScope=='stream' || _currentScope=='collections')" #nodeStoreRef class="clickable nodeStore" tabindex="0" (click)="setNodeStore(true)" (keyup.enter)="setNodeStore(true)" title="{{'SEARCH.NODE_STORE.TITLE' | translate}}">
     <i aria-hidden="true" class="material-icons barIcon">bookmark_border</i>
     <div class="nodeStoreCount">{{nodeStoreCount}}</div>
     <div *ngIf="nodeStoreAnimation>0" [@nodeStore]="nodeStoreAnimation>0" class="clickable nodeStoreAnimation" (click)="setNodeStore(true)">

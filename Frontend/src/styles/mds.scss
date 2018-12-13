@@ -397,6 +397,8 @@ mds .mdsGroup{
     }
   }
   .mdsPreview{
+    width:100%;
+    float:left;
     .previewImage {
       text-align: center;
       width:100%;

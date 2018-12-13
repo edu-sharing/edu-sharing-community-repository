@@ -196,7 +196,7 @@
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
                 <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0 && !addToCollection">
                     <div class="collectionsHeading">
-                        <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})<a *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
+                        <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})<a tabindex="0" *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore" (keyup.enter)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
                     </div>
                     <div class="collections" [class.collectionsMore]="collectionsMore" id="collections">
                         <listTable
@@ -259,7 +259,7 @@
                 <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories && !searchService.showspinner">
                     <div *ngFor="let repo of groupedRepositories;let i=index">
                         <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
-                        <a class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
+                        <a tabindex="0" class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)" (keyup.enter)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
                         <div class="noResults" *ngIf="searchService.searchResultRepositories[i] && !searchService.searchResultRepositories[i].length && !searchService.showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
                         <listTable [class.list]="view==0" *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
                                    [nodes]="searchService.searchResultRepositories[i]"
@@ -270,7 +270,7 @@
                                    [hasCheckbox]="false"
                                    [hasHeading]="false"
                                    [isClickable]="true"
-                                   [viewType]="view"
+                                   [viewType]="searchService.viewType"
                                    [hasMore]="false"
                                    [applyMode]="applyMode"
                                    [scrollWindow]="true"

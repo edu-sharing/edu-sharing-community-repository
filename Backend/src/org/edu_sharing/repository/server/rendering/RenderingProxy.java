@@ -122,14 +122,14 @@ public class RenderingProxy extends HttpServlet {
 		
 		
 		String uEncrypted = req.getParameter("u");
-		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
-		
+		ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
+
 		String usernameDecrypted = null;
 		Encryption encryptionTool = new Encryption("RSA");
 		
 		try {
 			
-			usernameDecrypted = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRepo.getPrivateKey()));
+			usernameDecrypted = encryptionTool.decrypt(Base64.decodeBase64(uEncrypted.getBytes()), encryptionTool.getPemPrivateKey(homeRep.getPrivateKey()));
 		}catch(GeneralSecurityException e) {
 			logger.error(e.getMessage(), e);
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN,e.getMessage());
@@ -158,7 +158,6 @@ public class RenderingProxy extends HttpServlet {
 		
 		String contentUrl = null;
 		
-		final ApplicationInfo homeRep = ApplicationInfoList.getHomeRepository();
 		if(homeRep.getAppId().equals(rep_id)){
 			contentUrl = homeRep.getContentUrl();
 			

@@ -347,6 +347,16 @@
     position: relative;
     float:left;
     width:100%;
+    .autocomplete{
+      flex-direction: column;
+      >autocomplete{
+        width: calc(100% - 18px);
+        margin-bottom: -30px;
+      }
+      >div{
+        margin:0 20px;
+      }
+    }
   }
   .no-jobs{
     font-size: 120%;

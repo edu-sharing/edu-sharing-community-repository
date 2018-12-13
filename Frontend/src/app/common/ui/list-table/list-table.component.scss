@@ -280,6 +280,7 @@ $badgeWidth:250px;
 }
 .row:focus{
   @include setGlobalInsetFocus();
+  outline: 1px $primary solid;
   /* background-color:$workspaceSelectedBackground!important; */
 }
 .cardSmallList .row:focus{
@@ -316,7 +317,11 @@ $badgeWidth:250px;
 }
 .list .nodeCollection .row {
   background-color: transparent;
+  &:focus{
+    outline: 2px dashed $primary;
+  }
 }
+
 .previewCollection{
   width: 70px;
   height: 70px;
