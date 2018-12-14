@@ -318,7 +318,7 @@ $badgeWidth:250px;
 .list .nodeCollection .row {
   background-color: transparent;
   &:focus{
-    outline: 2px dashed $primary;
+    @include setGlobalDashedFocus();
   }
 }
 

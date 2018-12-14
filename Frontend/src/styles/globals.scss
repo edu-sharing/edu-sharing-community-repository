@@ -147,6 +147,15 @@ a:focus,
 .clickable:focus {
   @include setGlobalInsetFocus();
 }
+.focus-underline{
+  cursor: pointer;
+  &:focus{
+    box-shadow: none !important;
+    @include removeDefaultFocus();
+    padding-bottom: 2px;
+    border-bottom: 1px solid $focusColor;
+  }
+}
 
 @media screen and (max-width: $mobileWidth) {
   .hidemobile {
