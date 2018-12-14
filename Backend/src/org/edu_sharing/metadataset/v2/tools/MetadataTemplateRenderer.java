@@ -188,6 +188,11 @@ public class MetadataTemplateRenderer {
 					if(valuesMap.containsKey(value))
 						value=valuesMap.get(value).getCaption();
 
+					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
+						if(widget.getFormat().contains("${value}")) {
+							value = widget.getFormat().replace("${value}", value);
+						}
+					}
 					boolean isLink=false;
 					if(widget.getLink()!=null && !widget.getLink().isEmpty()){
 						widgetHtml+="<a href=\""+value+"\" target=\""+widget.getLink()+"\">";
@@ -217,11 +222,6 @@ public class MetadataTemplateRenderer {
 					}
 					if(!value.trim().isEmpty())
 						empty=false;
-					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
-						if(widget.getFormat().contains("${value}")) {
-							value = widget.getFormat().replace("${value}", value);
-						}
-					}
 					widgetHtml+=value;
 					widgetHtml+="</div>";
 					if(isLink) {
