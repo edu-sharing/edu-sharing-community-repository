@@ -89,6 +89,7 @@ import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -622,7 +623,22 @@ public class AdminServiceImpl implements AdminService  {
 	public int importExcel(String parent,InputStream csv) throws Exception{
 		return new ExcelLOMImporter(parent,csv).getRowCount();
 	}
-	
+
+	@Override
+	public String importOaiXml(InputStream xml, String recordHandlerClassName, String binaryHandlerClassName) throws Exception {
+		HashMap<String, Object> paramsMap=new HashMap<>();
+		if(recordHandlerClassName != null && !recordHandlerClassName.trim().equals("")){
+			paramsMap.put(OAIConst.PARAM_RECORDHANDLER,recordHandlerClassName);
+		}
+		if(binaryHandlerClassName != null && !binaryHandlerClassName.trim().equals("")){
+			paramsMap.put(OAIConst.PARAM_BINARYHANDLER,binaryHandlerClassName);
+		}
+		paramsMap.put(OAIConst.PARAM_USERNAME, AuthenticationUtil.getFullyAuthenticatedUser());
+		paramsMap.put(OAIConst.PARAM_XMLDATA, StreamUtils.copyToByteArray(xml));
+		paramsMap.put(OAIConst.PARAM_FORCE_UPDATE,true);
+		return new ImporterJob().start(JobHandler.createJobDataMap(paramsMap));
+	}
+
 	@Override
 	public void importOai(String set, String fileUrl, String oaiBaseUrl, String metadataSetId, String metadataPrefix, String importerJobClassName, String importerClassName, String recordHandlerClassName, String binaryHandlerClassName, String oaiIds, boolean forceUpdate) throws Exception{
 		//new JobExecuter().start(ImporterJob.class, authInfo, setsParam.toArray(new String[setsParam.size()]));

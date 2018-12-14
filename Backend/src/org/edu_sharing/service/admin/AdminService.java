@@ -89,6 +89,7 @@ public interface AdminService {
 
 	void refreshEduGroupCache(boolean keepExisting);
 
-
     void testMail(String receiver, String template);
+
+    String importOaiXml(InputStream xml, String recordHandlerClassName, String binaryHandlerClassName) throws Exception;
 }

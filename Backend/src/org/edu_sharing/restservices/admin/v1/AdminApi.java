@@ -700,6 +700,31 @@ public class AdminApi {
 		}
 	}
 
+	@POST
+	@Path("/import/oai/xml")
+	@ApiOperation(value = "Import single xml via oai (for testing)")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Node.class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response importOaiXML (@ApiParam(value = "RecordHandler class name", required = false, defaultValue = "org.edu_sharing.repository.server.importer.RecordHandlerLOM") @QueryParam("recordHandlerClassName") String recordHandlerClassName,
+							  @ApiParam(value = "BinaryHandler class name (may be empty for none)", required = false, defaultValue = "") @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
+							  @FormDataParam("xml") InputStream xml,
+								@Context HttpServletRequest req) {
+		try {
+			String node=AdminServiceFactory.getInstance().importOaiXml(xml, recordHandlerClassName, binaryHandlerClassName);
+			if(node==null) {
+				throw new Exception("Importer failed to create node");
+			}
+			Node result=NodeDao.getNode(RepositoryDao.getHomeRepository(),node,Filter.createShowAllFilter()).asNode();
+			return Response.ok().entity(result).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
 	@OPTIONS
 	@Path("/import/oai")
 	@ApiOperation(hidden = true, value = "")
