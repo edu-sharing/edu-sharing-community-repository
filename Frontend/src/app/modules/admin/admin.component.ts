@@ -856,7 +856,7 @@ export class AdminComponent {
     }
 
     private prepareJobClasses() {
-        let job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjects",this.translate.instant("ADMIN.JOBS.NAMES.RemoveImportedObjects"));
+        let job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveImportedObjectsJob"));
         job.secondaryTitle=job.id;
         this.jobClasses.push(job);
         job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveOrphanCollectionReferencesJob"));

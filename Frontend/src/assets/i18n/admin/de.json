@@ -200,7 +200,7 @@
       "LOG_LEVEL_3":"Error",
       "LOG_LEVEL_0":"Fatal",
       "NAMES":{
-        "RemoveImportedObjects":"Alle importierten Nodes löschen",
+        "RemoveImportedObjectsJob":"Alle importierten Nodes löschen",
         "RemoveOrphanCollectionReferencesJob":"Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen"
       }
     },
