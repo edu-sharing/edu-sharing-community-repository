@@ -485,6 +485,9 @@
     "Region":"Bundesland",
     "Country":"Land"
   },
+  "ICON_LABELS":{
+    "more_vert":"Optionen"
+  },
   "LANGUAGE":{
     "INTERNATIONAL": "International",
     "ar": "Arabisch",

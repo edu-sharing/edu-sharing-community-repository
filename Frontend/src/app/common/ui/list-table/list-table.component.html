@@ -214,7 +214,7 @@
                     <i class="material-icons">{{option.icon}}</i>
                 </div>
 
-                <div class="more column" *ngIf="_options && _options.length>1"><a (click)="showDropdown(node)"><i class="material-icons">more_vert</i></a></div>
+                <div class="more column" *ngIf="_options && _options.length>1"><a (click)="showDropdown(node)"><i icon iconId="more_vert" aria="true"></i></a></div>
                 <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)"><a [class.disabled]="!optionIsValid(_options[0],node)" (click)="callOption(_options[0],node)"><i class="material-icons">{{_options[0].icon}}</i> <span class="actionText">{{_options[0].name | translate}}</span></a></div>
             </div>
         </div>
