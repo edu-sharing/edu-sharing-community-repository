@@ -61,7 +61,7 @@
 }
 @mixin setGlobalDashedFocus(){
   @include removeDefaultFocus();
-  outline: 2px dashed $primary;
+  outline: 2px dashed $focusColor;
 }
 
 @mixin focusShadow(){
