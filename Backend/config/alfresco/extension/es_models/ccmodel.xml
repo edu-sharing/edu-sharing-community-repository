@@ -1566,7 +1566,7 @@
 					<type>d:date</type>
 				</property>
 				<property name="ccm:eaf_grade">
-					<type>d:date</type>
+					<type>d:text</type>
 				</property>
 				<property name="ccm:eaf_productioncountry">
 					<type>d:text</type>
