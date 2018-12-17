@@ -227,34 +227,49 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 
 		if(createHandle) {
-			
+
 			/**
 			 * no transaction cause of
 			 * org.hibernate.HibernateException: connnection proxy not usable after transaction completion
 			 *
 			 * problem is when handle service fails
 			 */
-			createHandle(AuthorityType.EVERYONE,nodeId);	
+			createHandle(AuthorityType.EVERYONE,nodeId);
 		}
 
 
-		boolean publishToOAI = false;
+		OAIExporterService service = new OAIExporterService();
+		if(service.available()) {
+			boolean publishToOAI = false;
 
-		List<String> licenseList = (List<String>)serviceRegistry.getNodeService().getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId), QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
-		if(licenseList!=null) {
-			for (String license : licenseList) {
-				if (license != null && license.startsWith("CC_")) {
-					for (ACE ace : acesToAdd) {
-						if (ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
-							publishToOAI = true;
+			List<String> licenseList = (List<String>)serviceRegistry.getNodeService().getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,nodeId), QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
+
+			if(licenseList != null) {
+				for(String license : licenseList) {
+					if(license != null && license.startsWith("CC_")) {
+						for(ACE ace : acesToAdd) {
+							if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+								publishToOAI = true;
+							}
+						}
+
+						for(ACE ace : acesToUpdate) {
+							if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+								publishToOAI = true;
+							}
+						}
+
+						for(ACE ace : acesNotChanged) {
+							if(ace.getAuthorityType().equals(AuthorityType.EVERYONE.toString())) {
+								publishToOAI = true;
+							}
 						}
 					}
 				}
 			}
-		}
-		if(publishToOAI) {
-			OAIExporterService service = new OAIExporterService();
-			if(service.available()) service.export(nodeId);
+			if(publishToOAI) {
+				service.export(nodeId);
+			}
 		}
 
 
@@ -395,8 +410,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	public void createHandle(AuthorityType authorityType, String _nodeId) throws Exception {
-		
-		
+
+
 		if (AuthorityType.EVERYONE.equals(authorityType)) {
 
 			String version = (String)nodeService.getProperty(new NodeRef(Constants.storeRef,_nodeId),
@@ -468,10 +483,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				logger.error(e1.getMessage(), e1);
 			}
 			if(handleService != null && handle != null) {
-				
+
 				String contentLink = URLTool.getNgRenderNodeUrl(_nodeId, newVersion) ;
 				handleService.createHandle(handle,handleService.getDefautValues(contentLink));
-				
+
 			}
 		}
 	}
@@ -1100,7 +1115,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		if(personActiveStatus != null && !personActiveStatus.trim().equals("")) {
 			searchQuery.append(" AND @cm\\:espersonstatus:\"" + personActiveStatus + "\"");
 		}
-		
+
 		/**
 		 * filter out remote users
 		 */
