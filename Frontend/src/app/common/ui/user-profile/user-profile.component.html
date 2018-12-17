@@ -17,8 +17,8 @@
           <input type="email" id="email" name="email" [(ngModel)]="user.profile.email" required="true">
           <div class="changePassword">
             <div class="clickable" (click)="changePassword=!changePassword">
-              <i class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
-              <i class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
+              <i aria-hidden="true" class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
+              <i aria-hidden="true" class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
               {{'CHANGE_PASSWORD' | translate}}
             </div>
           </div>

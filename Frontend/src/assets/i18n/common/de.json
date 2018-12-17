@@ -401,7 +401,7 @@
     "REORDER_DRAG_DROP":"Sie können die Reihenfolge der Elemente durch Drag & Drop verändern"
   },
   "DIALOG":{
-    "COLLECTION_SHARE_PUBLIC":"Material in Sammlung freigeben?",
+    "COLLECTION_SHARE_PUBLIC":"Material zur Sammlung hinzufügen?",
     "COLLECTION_SHARE_PUBLIC_INFO":"Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben."
   },
   "NO_SIZE":"-",

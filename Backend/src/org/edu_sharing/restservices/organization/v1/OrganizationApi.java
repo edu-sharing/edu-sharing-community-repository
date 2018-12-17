@@ -208,7 +208,7 @@ public class OrganizationApi  {
     	try {
 
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	OrganizationDao organizationDao = OrganizationDao.get(repoDao, organization);
+	    	OrganizationDao organizationDao = OrganizationDao.getInstant(repoDao, organization);
 	    	
 	    	organizationDao.delete();
 	    	

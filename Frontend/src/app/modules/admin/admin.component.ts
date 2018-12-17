@@ -63,8 +63,8 @@ export class AdminComponent {
   public jobsLogFilter:any = [];
   public jobsLogLevel:any = [];
   public jobsLogData:any = [];
-  public lucene:any={offset:0,count:100};
-  public browseMode='NODEREF';
+  public jobClasses:SuggestItem[]=[];
+  public lucene:any={mode:'NODEREF',offset:0,count:100};
   public oaiSave=true;
   public repositoryVersion:string;
   public ngVersion:string;
@@ -102,6 +102,7 @@ export class AdminComponent {
     'custom_html_headers','public_key'
   ];
   luceneNodes: Node[];
+  luceneCount: number;
   searchColumns: ListItem[]=[];
   nodeInfo: Node;
   public selectedTemplate:string = '';
@@ -132,6 +133,7 @@ export class AdminComponent {
         this.node.getNodeMetadata(this.lucene.noderef,[RestConstants.ALL]).subscribe((node)=>{
             this.globalProgress=false;
             this.luceneNodes=[node.node];
+            this.luceneCount=1;
         },(error)=>{
             this.globalProgress=false;
             this.toast.error(error);
@@ -155,6 +157,7 @@ export class AdminComponent {
       this.globalProgress=false;
       console.log(data);
       this.luceneNodes=data.nodes;
+      this.luceneCount=data.pagination.total;
     },(error:any)=>{
       this.globalProgress=false;
       this.toast.error(error);
@@ -184,7 +187,8 @@ export class AdminComponent {
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
       Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-        this.storage.refresh();
+          this.prepareJobClasses();
+          this.storage.refresh();
       UIHelper.setTitle('ADMIN.TITLE', this.title, this.translate, this.config);
       this.warningButtons=[
         new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>{window.history.back()}),
@@ -457,7 +461,7 @@ export class AdminComponent {
   }
   public refreshCache(sticky:boolean){
     this.globalProgress=true;
-    this.admin.refreshCache(this.cacheName,sticky).subscribe(()=>{
+    this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : "",sticky).subscribe(()=>{
       this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.CACHE_REFRESHED');
     },(error:any)=>{
@@ -834,6 +838,15 @@ export class AdminComponent {
           }
           console.log(this.jobsLogData);
       }
+    }
+
+    private prepareJobClasses() {
+        let job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjects",this.translate.instant("ADMIN.JOBS.NAMES.RemoveImportedObjects"));
+        job.secondaryTitle=job.id;
+        this.jobClasses.push(job);
+        job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveOrphanCollectionReferencesJob"));
+        job.secondaryTitle=job.id;
+        this.jobClasses.push(job);
     }
 }
 

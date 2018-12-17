@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
   <div class="card center-card card-high card-action" [@cardAnimation]="this">
     <div class="card-content">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div class="card-cancel" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()"><i class="material-icons">close</i></div>
       <span class="card-title ">{{'SEARCH.NODE_STORE.TITLE' | translate }}</span>
       <spinner *ngIf="loading"></spinner>
       <div class="card-scroll" *ngIf="!loading">
@@ -29,6 +29,7 @@
     </div>
     <div class="card-action">
       <a class="btn-flat"
+         tabindex="0"
          (keyup.enter)="cancel()"
          (click)="cancel()"
       >{{'CLOSE' | translate}}</a>

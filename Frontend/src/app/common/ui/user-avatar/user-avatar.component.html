@@ -4,12 +4,10 @@
       <img [src]="_customImage" class="userImage" alt="user image">
     </div>
     <div *ngIf="!_customImage">
-      <img *ngIf="user.profile && user.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=200&height=200'" class="userImage" alt="user image">
+      <img *ngIf="user.profile && user.profile.avatar" [src]="user.profile.avatar+'&crop=true&width=200&height=200'" class="userImage" alt="">
       <!-- <img *ngIf="!(profile && profile.avatar)" src="assets/images/user-profile.svg">-->
-      <svg style.background="linear-gradient(to bottom,#F3F3F3,{{ user | authorityColor}})"
+      <svg alt="" style.background="linear-gradient(to bottom,#F3F3F3,{{ user | authorityColor}})"
            *ngIf="!(user.profile && user.profile.avatar)" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <!-- Generator: Sketch 48.2 (47327) - http://www.bohemiancoding.com/sketch -->
-        <title>ic_person_black_24px</title>
         <defs>
           <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-{{id}}">
             <stop stop-color="#F3F3F3" offset="0%"></stop>
@@ -26,5 +24,5 @@
       </svg>
     </div>
   </div>
-  <img *ngIf="isEditorialUser()" class="editorial-badge" src="assets/images/editorial-badge.svg">
+  <img *ngIf="isEditorialUser()" class="editorial-badge" src="assets/images/editorial-badge.svg" alt="">
 </div>

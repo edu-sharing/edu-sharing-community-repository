@@ -779,9 +779,9 @@ export class MdsComponent{
         }
         else if(element) {
           if(this.isSliderWidget(widget)){
-            if(widget.type=='range' && properties[this.getWidgetDomId(widget)+'_from'] && properties[this.getWidgetDomId(widget)+'_to']){
-              let from=properties[this.getWidgetDomId(widget)+'_from'][0];
-              let to=properties[this.getWidgetDomId(widget)+'_to'][0];
+            if(widget.type=='range' && properties[widget.id+'_from'] && properties[widget.id+'_to']){
+              let from=properties[widget.id+'_from'][0];
+              let to=properties[widget.id+'_to'][0];
               element.noUiSlider.set([from,to]);
             }
             if(!props)

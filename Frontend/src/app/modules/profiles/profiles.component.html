@@ -94,8 +94,8 @@
         <i *ngIf="!changePassword" class="material-icons">lock</i>
         <i *ngIf="changePassword" class="material-icons">lock_open</i>
         {{'CHANGE_PASSWORD' | translate}}
-        <i class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
-        <i class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
+        <i aria-hidden="true" class="material-icons" *ngIf="!changePassword">keyboard_arrow_right</i>
+        <i aria-hidden="true" class="material-icons" *ngIf="changePassword">keyboard_arrow_down</i>
       </div>
     </div>
     <div *ngIf="changePassword" class="password" [@overlay]="changePassword">

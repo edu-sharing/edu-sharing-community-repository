@@ -1,7 +1,7 @@
 <div *ngIf="show" [@fromBottom]="show" class="notice">
     <div class="description">{{'COOKIE_INFO.DESCRIPTION' | translate}}</div>
-    <div class="more clickable" (click)="dialog=true">{{'COOKIE_INFO.MORE_LINK' | translate}}</div>
-    <div class="ok"><a class="btn-flat waves-effect waves-light" (click)="accept()">{{'OK' | translate}}</a></div>
+    <div class="more clickable" tabindex="0" (click)="dialog=true" (keyup.enter)="dialog=true">{{'COOKIE_INFO.MORE_LINK' | translate}}</div>
+    <div class="ok"><a tabindex="0" class="btn-flat waves-effect waves-light" (click)="accept()" (keyup.enter)="accept()">{{'OK' | translate}}</a></div>
 </div>
 <modal-dialog *ngIf="dialog"
     [isCancelable]="true"

@@ -8,6 +8,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -189,14 +190,23 @@ public class UsageApi {
 	
 	@GET
 	@Path("/usages/repository/{repositoryId}/{nodeid}")
-	public Response getUsages(@ApiParam(value = "ID of repository", required = true) @PathParam("repositoryId") String repositoryId,
-			@ApiParam(value = "ID of node", required = false) @PathParam("nodeId") String nodeId,
-			@ApiParam(value = "from date", required = false) @PathParam("from") Long from,
-			@ApiParam(value = "to date", required = false) @PathParam("to") Long to,
+	public Response getUsages(@ApiParam(value = "ID of repository", required = true, defaultValue=RepositoryDao.HOME)  @PathParam("repositoryId") String repositoryId,
+			@ApiParam(value = "ID of node. Use -all- for getting usages of all nodes", required = true, defaultValue="-all-") @PathParam("nodeId") String nodeId,
+			@ApiParam(value = "from date", required = false) @QueryParam("from") Long from,
+			@ApiParam(value = "to date", required = false) @QueryParam("to") Long to,
 			@Context HttpServletRequest req) {
 		
 		try {
-			List<Usage> usages = new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).
+			RepositoryDao homeRepo = RepositoryDao.getRepository(RepositoryDao.HOME);
+			if(RepositoryDao.HOME.equals(repositoryId)) {
+				repositoryId = homeRepo.getId();
+			}
+			
+			if("-all-".equals(nodeId)) {
+				nodeId = null;
+			}
+			
+			List<Usages.NodeUsage> usages = new UsageDao(homeRepo).
 					getUsages(repositoryId, nodeId, from, to);
 			return Response.status(Response.Status.OK).entity(usages).build();
 		} catch (Throwable t) {

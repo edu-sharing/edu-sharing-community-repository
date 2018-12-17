@@ -22,7 +22,20 @@ export class AutocompleteComponent{
    * @type {boolean}
    */
   @Input() allowAny=false;
-  @Input() maxSuggestions: number = 10;
+
+  private _fixed=false;
+    /**
+     * should the suggestions be fixed (basically all results are always shown, never reset
+     * If active, updateInput() is not called
+     */
+  @Input() set fixed(fixed:boolean){
+      this._fixed=fixed;
+      if(fixed){
+          this.maxSuggestions=9999999;
+          this.inputMinLength=0;
+      }
+    }
+    @Input() maxSuggestions: number = 10;
 
   @Input() set suggestions(suggestions: SuggestItem[]) {
       this._suggestions = [];
@@ -77,7 +90,9 @@ itemChosen(item:SuggestItem) {
   }
 
   clear() {
-    this._suggestions = [];
+    if(!this._fixed) {
+        this._suggestions = [];
+    }
     this.valueInput = '';
     this.activeItem = -1;
     this.showSuggestions=false;
@@ -89,7 +104,9 @@ itemChosen(item:SuggestItem) {
       this.showSuggestions = true;
      } else {
        this.showSuggestions = false;
-       this._suggestions = [];
+       if(!this._fixed) {
+           this._suggestions = [];
+       }
        this.activeItem = -1;
      }
   }
@@ -131,7 +148,7 @@ export class SuggestItem {
   public index: number;
   public originalObject : any;
   public secondaryTitle: string;
-  constructor(public id: string, public title: string, public materialIcon: string, public iconUrl: string, public key?: string) {
+  constructor(public id: string, public title: string, public materialIcon: string = null, public iconUrl: string = null, public key: string = null) {
   }
 
 }

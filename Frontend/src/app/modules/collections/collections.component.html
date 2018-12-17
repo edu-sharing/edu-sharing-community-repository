@@ -5,7 +5,7 @@
   [currentScope]="'collections'"
   [searchEnabled]="false"
 ></main-nav>
-<tutorial [element]="tutorialElement" [heading]="'COLLECTIONS.TUTORIAL_HEADING'" [description]="'COLLECTIONS.TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial>
+<tutorial tabindex="0" [element]="tutorialElement" [heading]="'COLLECTIONS.TUTORIAL_HEADING'" [description]="'COLLECTIONS.TUTORIAL_DESCRIPTION'" [showSkip]="false"></tutorial>
 <collections-manage-pinning
   *ngIf="addPinning"
   [addCollection]="addPinning"

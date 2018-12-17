@@ -79,6 +79,12 @@ $cardActionHeight:77px;
     font-size: 12pt;
     position: relative;
     top: -25px;
+    &:focus{
+      @include removeDefaultFocus();
+      i{
+        @include focusShadow();
+      }
+    }
   }
 }
 

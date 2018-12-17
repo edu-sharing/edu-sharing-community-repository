@@ -95,8 +95,8 @@
         </div>
       </div>
       <a class="more clickable" (click)="more=!more">
-        <i class="material-icons" *ngIf="more">keyboard_arrow_down</i>
-        <i class="material-icons" *ngIf="!more">keyboard_arrow_right</i>
+        <i aria-hidden="true" class="material-icons" *ngIf="more">keyboard_arrow_down</i>
+        <i aria-hidden="true" class="material-icons" *ngIf="!more">keyboard_arrow_right</i>
         <span>{{'WORKSPACE.CONTRIBUTOR.MORE' | translate}}</span>
       </a>
       <div *ngIf="more" [@overlay]="more" class="moreOpen">

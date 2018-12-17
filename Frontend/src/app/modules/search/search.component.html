@@ -10,7 +10,7 @@
     [(searchQuery)]="searchService.searchTerm"
     (onSearch)="routeAndClearSearch($event)"
   ></main-nav>
-  <tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
+  <tutorial tabindex="0" [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
   ></tutorial>
 
   <div class="rowRepositories scrollWithBanner" [class.no-mainnav]="!mainnav" *ngIf="repositories && repositories.length>2">
@@ -26,7 +26,7 @@
             <span>
               <img [src]="getSourceIconPath('more')"><span class="repositoryTitle">{{ 'SEARCH.REPOSITORY_MORE' | translate }}</span>
             </span>
-                          <i class="material-icons" >keyboard_arrow_down</i>
+                          <i aria-hidden="true" class="material-icons" >keyboard_arrow_down</i>
                       </a>
                   </li>
                   <li class="clickable tab col s3" *ngIf="repositories.length>4 && extendedRepositorySelected"
@@ -35,7 +35,7 @@
                       (click)="currentRepository==repositories[3].id ? showMoreRepositories=true : setRepository(repositories[3].id)">
                       <a [class.active]="currentRepository==repositories[3].id">
                           <img [src]="getSourceIcon(repositories[3])"><span class="repositoryTitle">{{ repositories[3].title }}</span>
-                          <i class="material-icons" (click)="$event.stopPropagation();showMoreRepositories=true">keyboard_arrow_down</i>
+                          <i aria-hidden="true" class="material-icons" (click)="$event.stopPropagation();showMoreRepositories=true">keyboard_arrow_down</i>
                       </a>
                   </li>
                   <!--
@@ -54,7 +54,7 @@
                 <a tabindex="0" title="{{'SEARCH.TOGGLE_EXPANDED_SEARCH' | translate}}" (keyup.enter)="toggleSidenav()" (click)="toggleSidenav()" class="pointed filtertoggler">
                     <span>{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
                     <span class="mobile">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
-                    <i class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
+                    <i aria-hidden="true" class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i></a>
             </div>
             <div class="switchToCollections" *ngIf="isGuest">
                 <a tabindex="0" title="{{'SEARCH.TO_COLLECTIONS' | translate}}" class="clickable" (click)="switchToCollections()" (keyup.enter)="switchToCollections()">{{'SEARCH.TO_COLLECTIONS' | translate}} <i class="material-icons">arrow_forward</i></a>
@@ -196,7 +196,7 @@
             <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
                 <div *ngIf="!searchService.reurl && searchService.searchResultCollections.length>0 && !addToCollection">
                     <div class="collectionsHeading">
-                        <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})<a *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
+                        <div class="heading">{{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.resultCount.collections}})<a tabindex="0" *ngIf="hasMoreCollections" class="toggle clickable" (click)="collectionsMore=!collectionsMore" (keyup.enter)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a></div>
                     </div>
                     <div class="collections" [class.collectionsMore]="collectionsMore" id="collections">
                         <listTable
@@ -259,7 +259,7 @@
                 <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories && !searchService.showspinner">
                     <div *ngFor="let repo of groupedRepositories;let i=index">
                         <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
-                        <a class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
+                        <a tabindex="0" class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)" (keyup.enter)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
                         <div class="noResults" *ngIf="searchService.searchResultRepositories[i] && !searchService.searchResultRepositories[i].length && !searchService.showspinner" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">{{'SEARCH.QUERY_NO_RESULT' | translate}}.</div>
                         <listTable [class.list]="view==0" *ngIf="searchService.searchResultRepositories[i] && searchService.searchResultRepositories[i].length"
                                    [nodes]="searchService.searchResultRepositories[i]"
@@ -270,7 +270,7 @@
                                    [hasCheckbox]="false"
                                    [hasHeading]="false"
                                    [isClickable]="true"
-                                   [viewType]="view"
+                                   [viewType]="searchService.viewType"
                                    [hasMore]="false"
                                    [applyMode]="applyMode"
                                    [scrollWindow]="true"

@@ -12,6 +12,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
+import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
 import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
 import org.edu_sharing.service.permission.PermissionService;
@@ -86,21 +87,27 @@ public class UsageDao {
 		usageResult.setResourceId(usage.getResourceId());
 		usageResult.setUsageCounter(usage.getUsageCounter());
 		usageResult.setUsageVersion(usage.getUsageVersion());
-		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(Usage.Parameters.class);
-
-			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			jaxbUnmarshaller.setEventHandler(new ValidationEventHandler() {
-				@Override
-				public boolean handleEvent(ValidationEvent event) {
-					// ignore all errors, try to parse what is possible
-					return true;
-				}
-			});
-			usageResult.setUsageXmlParams(
-					(Usage.Parameters) jaxbUnmarshaller.unmarshal(new StringReader(usage.getUsageXmlParams())));
-		} catch (Throwable t) {
-			logger.warn("Error converting usage xml " + usage.getUsageXmlParams(), t);
+		usageResult.setCreated(usage.getCreated());
+		usageResult.setModified(usage.getModified());
+		String xmlParams = usage.getUsageXmlParams();
+		
+		if(xmlParams != null) {
+			try {
+				JAXBContext jaxbContext = JAXBContext.newInstance(Usage.Parameters.class);
+	
+				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+				jaxbUnmarshaller.setEventHandler(new ValidationEventHandler() {
+					@Override
+					public boolean handleEvent(ValidationEvent event) {
+						// ignore all errors, try to parse what is possible
+						return true;
+					}
+				});
+				usageResult.setUsageXmlParams(
+						(Usage.Parameters) jaxbUnmarshaller.unmarshal(new StringReader(usage.getUsageXmlParams())));
+			} catch (Throwable t) {
+				logger.warn("Error converting usage xml " + usage.getUsageXmlParams(), t);
+			}
 		}
 		return usageResult;
 	}
@@ -180,15 +187,16 @@ public class UsageDao {
 		}
 	}
 
-	public List<Usages.Usage> getUsages(String repositoryId, String nodeId, Long from, Long to) throws Exception {
+	public List<Usages.NodeUsage> getUsages(String repositoryId, String nodeId, Long from, Long to) throws Exception {
 
-		List<Usages.Usage> result = new ArrayList<Usages.Usage>();
+		RepositoryDao rd = RepositoryDao.getHomeRepository();
+		
+		List<Usages.NodeUsage> result = new ArrayList<Usages.NodeUsage>();
 		for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsages(repositoryId, nodeId, from,
 				to)) {
-
 			try {
-
-				Usages.Usage usageRest = convertUsage(usage, Usages.Usage.class);
+				Usages.NodeUsage usageRest = convertUsage(usage, Usages.NodeUsage.class);
+				usageRest.setNode(NodeDao.getNode(rd, usageRest.getParentNodeId(),Filter.createShowAllFilter()).asNode());
 				result.add(usageRest);
 			} catch (Throwable t) {
 			}
