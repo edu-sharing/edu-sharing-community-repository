@@ -422,6 +422,11 @@
     "Region":"State/Region",
     "Country":"Country"
   },
+  "ICON_LABELS":{
+    "more_vert":"Option",
+    "view_module":"Box view",
+    "list":"List view"
+  },
   "LANGUAGE":{
     "INTERNATIONAL":"international",
     "ar": "Arabic",

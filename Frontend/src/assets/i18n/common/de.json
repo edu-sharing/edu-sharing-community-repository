@@ -486,7 +486,9 @@
     "Country":"Land"
   },
   "ICON_LABELS":{
-    "more_vert":"Optionen"
+    "more_vert":"Optionen",
+    "view_module":"Kästchen ansicht",
+    "list":"Listen ansicht"
   },
   "LANGUAGE":{
     "INTERNATIONAL": "International",

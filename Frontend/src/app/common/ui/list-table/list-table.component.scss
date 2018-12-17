@@ -219,6 +219,10 @@ $badgeWidth:250px;
   min-width:60px;
   transition: $transitionNormal all;
   @include clickable();
+  &:focus{
+    @include focusShadow();
+    border-radius: 0;
+  }
 }
 .moreOpen{
   position:absolute;

@@ -12,7 +12,7 @@
        (click)="click(option)"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
        [class.disabled]="!option.isEnabled">
-      <i icon [iconId]="option.icon"></i>
+      <i icon [iconId]="option.icon" aria="true"></i>
     </a>
 
   </div>
@@ -21,7 +21,7 @@
        tabindex="0"
        (keyup.enter)="showDropdown()"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
-       *ngIf="canShowDropdown()"><i icon iconId="more_vert"></i></div>
+       *ngIf="canShowDropdown()"><i icon iconId="more_vert" aria="true"></i></div>
 
   <div *ngFor="let option of optionsAlways.slice().reverse();let i=index;"
        [class.light]="backgroundType=='dark' || backgroundType=='primary'"
