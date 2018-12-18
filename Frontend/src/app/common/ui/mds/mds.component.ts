@@ -1981,7 +1981,7 @@ export class MdsComponent{
         }
         else {
             html += `<a class="clickable licenseLink" onclick="`+this.getWindowComponent()+`.openLicenseDialog();">` +
-                this.translate.instant('MDS.LICENSE_LINK') + ` <i class="material-icons">arrow_forward</i></a>`;
+                this.translate.instant('MDS.LICENSE_LINK') + ` <i aria-hidden="true" class="material-icons">arrow_forward</i></a>`;
         }
         html+=`</div>`;
         return html;

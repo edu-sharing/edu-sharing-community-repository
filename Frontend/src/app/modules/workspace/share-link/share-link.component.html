@@ -1,7 +1,7 @@
 <div class="dialog darken" [style.z-index]="120 + priority" [@fade]="this"></div>
   <div class="card card-high center-card card-action" [style.z-index]="121 + priority" [@cardAnimation]="this">
     <div class="card-content">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'WORKSPACE.SHARE_LINK.TITLE' | translate:{name:_node ? _node.name : ''} }}</div>
       <div class="card-scroll">
         <spinner *ngIf="loading"></spinner>
@@ -45,7 +45,6 @@
               </div>
               <input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" placeholder="{{(edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER') | translate}}">
               </input-password>
-
             </div>
           </div>
 
@@ -64,7 +63,7 @@
                 <input type="text" #shareUrl [disabled]="!enabled" (click)="shareUrl.select()" readonly="true" [(ngModel)]="currentShare.url">
               </div>
               <div class="info-right copyLink">
-                <div (click)="copyClipboard()" class="btn-flat btn-shadow btn-icon btnVersion link-copy" *ngIf="enabled"> {{'WORKSPACE.SHARE_LINK.COPY_CLIPBOARD' |
+                <div tabindex="0" (click)="copyClipboard()" (keyup.enter)="copyClipboard()" class="btn-flat btn-shadow btn-icon btnVersion link-copy" *ngIf="enabled"> {{'WORKSPACE.SHARE_LINK.COPY_CLIPBOARD' |
                   translate}}</div>
               </div>
             </div>
@@ -77,7 +76,7 @@
 
     </div>
     <div class="card-action">
-      <a class="waves-effect waves-light btn" (keyup.enter)="cancel()" (click)="cancel()">{{'CLOSE' | translate }}</a>
+      <a tabindex="0" class="waves-effect waves-light btn" (keyup.enter)="cancel()" (click)="cancel()">{{'CLOSE' | translate }}</a>
     </div>
   </div>
 

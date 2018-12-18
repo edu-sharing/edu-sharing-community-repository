@@ -423,9 +423,12 @@
     "Country":"Country"
   },
   "ICON_LABELS":{
-    "more_vert":"Option",
-    "view_module":"Box view",
-    "list":"List view"
+    "more_vert": "Option",
+    "close": "close",
+    "help_outline": "Help",
+    "info_outline": "Information",
+    "view_module": "Box view",
+    "list": "List view"
   },
   "LANGUAGE":{
     "INTERNATIONAL":"international",

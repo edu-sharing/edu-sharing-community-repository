@@ -4,7 +4,7 @@
 <div class="dialog darken" *ngIf="reorderDialog">
     <div class="card center-card card-action">
         <div class="card-content">
-            <div class="card-cancel" (click)="closeReorder(false)"><i class="material-icons">close</i></div>
+            <div class="card-cancel" (click)="closeReorder(false)" tabindex="0" (keyup.enter)="closeReorder(false)"><i icon iconId="close" aria="true"></i></div>
             <span class="card-title ">{{'LIST.REORDER_TITLE' | translate }}</span>
             <div class="hint">{{'LIST.REORDER_DRAG_DROP' | translate }}</div>
             <div *ngFor="let item of columnsAll;let i=index;"

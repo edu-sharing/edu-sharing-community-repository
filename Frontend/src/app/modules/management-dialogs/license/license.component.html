@@ -1,7 +1,7 @@
 <div class="dialog darken" [style.z-index]="120 + priority" [@fade]="this"></div>
   <div class="card center-card card-action card-high card-wide" [style.z-index]="121 + priority" [@cardAnimation]="this">
     <div class="card-content">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div *ngIf="_nodes && _nodes.length==1" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:_nodes[0].name} }}</div>
       <div *ngIf="_nodes && _nodes.length!=1" class="card-title">{{'WORKSPACE.LICENSE.TITLE_MULTI' | translate:{count:_nodes.length} }}</div>
       <div *ngIf="_properties && !_nodes" class="card-title">{{'WORKSPACE.LICENSE.TITLE' | translate:{name:_properties['cm:name']} }}</div>
@@ -268,7 +268,7 @@
     </div>
 
     <div class="card-action">
-      <a class="waves-effect waves-light btn" [class.disabled]="loading || type=='MULTI'" (click)="saveLicense()">{{'SAVE' | translate }}</a>
-      <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+      <a class="waves-effect waves-light btn" tabindex="0" [class.disabled]="loading || type=='MULTI'" (click)="saveLicense()" (keyup.enter)="saveLicense()">{{'SAVE' | translate }}</a>
+      <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
     </div>
   </div>

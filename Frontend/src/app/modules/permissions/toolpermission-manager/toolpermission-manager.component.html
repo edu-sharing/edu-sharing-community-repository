@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
 <div class="card center-card card-action card-xwide card-high" [@cardAnimation]="this">
   <div class="card-content">
-      <div class="card-cancel" (click)="close()" *ngIf="changing.length==0"><i class="material-icons">close</i></div>
+      <div class="card-cancel" (click)="close()" *ngIf="changing.length==0" tabindex="0" (keyup.enter)="close()"><i icon iconId="close" aria="true"></i></div>
       <span class="card-title">{{'PERMISSIONS.TOOLPERMISSIONS.TITLE' | translate:{name:name} }}</span>
       <div class="heading" *ngIf="!isLoading">
         <div class="name">{{(_authority.authorityType=='GROUP' ? 'PERMISSIONS.TOOLPERMISSIONS.MEMBERS_ALLOWED' : _authority.authorityType=='EVERYONE' ? 'PERMISSIONS.TOOLPERMISSIONS.EVERYONE_ALLOWED' : 'PERMISSIONS.TOOLPERMISSIONS.USER_ALLOWED') | translate}}:</div>

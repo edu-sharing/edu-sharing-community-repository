@@ -203,6 +203,9 @@ a.edusharing_rendering_content{
     .item {
       display: flex;
       @include clickable();
+      &:focus{
+        @include setGlobalFocus();
+      }
       >i{
         padding-left: 5px;
       }

@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
 <div class="card center-card card-action card-high" [@cardAnimation]="this">
   <div class="card-content">
-    <div class="card-cancel" (click)="close()"><i class="material-icons">close</i></div>
+    <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
     <div class="card-title">{{'WORKSPACE.SHARE.HISTORY.TITLE' | translate }}</div>
     <div class="card-scroll historyCard">
       <spinner *ngIf="loading"></spinner>

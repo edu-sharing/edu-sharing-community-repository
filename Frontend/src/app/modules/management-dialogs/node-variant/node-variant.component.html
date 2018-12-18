@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
 <div class="card center-card card-action card-wide" [@cardAnimation]="this">
   <div class="card-content">
-    <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title" innerHTML="{{'NODE_VARIANT.TITLE' | translate : {name:_node.name} }}"></div>
     <div *ngIf="_node" class="card-scroll">
 
@@ -15,15 +15,15 @@
                     [home]="'WORKSPACE.MY_FILES'"
                     [clickable]="false"
             ></breadcrumbs>
-            <div class="btn-flat btn-shadow btnVersion" (click)="chooseDirectory=true">{{'NODE_VARIANT.CHOOSE' | translate}}</div>
+            <div tabindex="0" class="btn-flat btn-shadow btnVersion" (click)="chooseDirectory=true" (keyup.enter)="chooseDirectory=true">{{'NODE_VARIANT.CHOOSE' | translate}}</div>
         </div>
 
     </div>
   </div>
 
   <div class="card-action">
-    <a class="waves-effect waves-light btn" [class.disabled]="!variantName.trim()" (click)="create()">{{'NODE_VARIANT.CREATE'+(this.openViaConnector ? '_EDIT' : '') | translate }}</a>
-    <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+    <a class="waves-effect waves-light btn" [class.disabled]="!variantName.trim()" tabindex="0" (keyup.enter)="create()" (click)="create()">{{'NODE_VARIANT.CREATE'+(this.openViaConnector ? '_EDIT' : '') | translate }}</a>
+    <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
   </div>
 </div>
 

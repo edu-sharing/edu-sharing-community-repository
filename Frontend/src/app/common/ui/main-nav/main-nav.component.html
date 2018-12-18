@@ -92,7 +92,7 @@
     [options]="userMenuOptions"
   ></dropdown>
   <div *ngIf="helpOptions.length" class="help clickable" (click)="showHelpMenu()" (keyup.enter)="showHelpMenu()" tabindex="0">
-    <i class="material-icons">help_outline</i>
+    <i icon iconId="help_outline" aria="true"></i>
   </div>
   <dropdown class="helpMenu"
             [(show)]="helpOpen"

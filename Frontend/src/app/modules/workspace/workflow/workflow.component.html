@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
   <div class="card center-card card-high card-action" [@cardAnimation]="this">
     <div class="card-content">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'WORKSPACE.WORKFLOW.TITLE' | translate:{name:node ? node.name : ''} }}</div>
       <spinner *ngIf="loading"></spinner>
       <div class="card-scroll" *ngIf="!loading">

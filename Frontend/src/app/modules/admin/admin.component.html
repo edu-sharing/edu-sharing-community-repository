@@ -136,7 +136,7 @@
   <div class="dialog darken" *ngIf="xmlAppProperties">
     <div class="card center-card card-action card-high card-wide">
       <div class="card-content">
-        <div class="card-cancel" (click)="xmlAppProperties=null"><i class="material-icons">close</i></div>
+        <div class="card-cancel" (click)="xmlAppProperties=null" tabindex="0" (keyup.enter)="xmlAppProperties=null"><i icon iconId="close" aria="true"></i></div>
         <div class="card-title">{{'ADMIN.APPLICATIONS.EDIT_APP' | translate:{xml:currentAppXml} }}</div>
         <div class="card-scroll">
           <div class="warning">{{'ADMIN.APPLICATIONS.APP_XML_WARNING' | translate}}</div>

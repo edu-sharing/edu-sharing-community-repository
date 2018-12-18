@@ -35,7 +35,7 @@ export class IconComponent{
 
     }
     constructor(element:ElementRef,private translate:TranslateService) {
-        console.log(element);
+        // console.log(element);
         this.element=element;
     }
 

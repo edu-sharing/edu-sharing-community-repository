@@ -11,7 +11,7 @@
   <div *ngIf="!isLoading">
   <div class="card center-card card-action">
     <div class="card-content">
-      <div *ngIf="previousStage" class="card-cancel" (click)="stage=previousStage;previousStage=null"><i class="material-icons">close</i></div>
+      <div *ngIf="previousStage" class="card-cancel" (click)="stage=previousStage;previousStage=null" tabindex="0" (keyup.enter)="stage=previousStage;previousStage=null"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{caption | translate}}</div>
       <div class="branding"><img src="assets/images/logo.svg" alt=""></div>
       <div class="card-scroll">
