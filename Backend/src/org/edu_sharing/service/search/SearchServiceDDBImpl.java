@@ -38,6 +38,8 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
 
@@ -276,17 +278,54 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			}catch(Throwable t) {}
 			
 			
-			String previewUrl;
+			String imageUrl = null;
+
+			try {
+
+				JSONObject joPreview = (JSONObject)allJson.get("preview");
+				if(joPreview.has("thumbnail") && joPreview.get("thumbnail") != null && joPreview.get("thumbnail") instanceof JSONObject) {
+					JSONObject joThumbnail = (JSONObject)joPreview.getJSONObject("thumbnail");
+
+					String previewId = (String)joThumbnail.get("@href");
+
+
+					String thumbUrl = "https://iiif.deutsche-digitale-bibliothek.de/image/2/" + previewId + "/info.json";
+					String thumbResult = httpGet(thumbUrl, null);
+
+					JSONObject jo = new JSONObject(thumbResult);
+					JSONArray ja = (JSONArray)jo.get("sizes");
+
+
+
+					JSONObject joSize = (JSONObject)ja.get(0);
+
+					if(ja.length() > 3) {
+						joSize = (JSONObject)ja.get(1);
+					}
+
+					Integer width = (Integer)joSize.get("width");
+					Integer height = (Integer)joSize.get("height");
+
+					imageUrl = "https://iiif.deutsche-digitale-bibliothek.de/image/2/" + previewId + "/full/!" + width + "," + height + "/0/default.jpg";
+				}
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			/*String previewUrl;
 			try {
 				previewUrl=DDB_API+allJson.getJSONObject("preview").getJSONObject("thumbnail").getString("@href")+"?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
 			}
 			catch(Throwable t) {
 				previewUrl=new MimeTypesV2(appInfo).getPreview(CCConstants.CCM_TYPE_IO, properties, null);
+			}*/
+
+			if(imageUrl != null) {
+				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, imageUrl);
+				//for the gwt gui no persistent
+				properties.put(CCConstants.CM_ASSOC_THUMBNAILS, imageUrl);
 			}
-			properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, previewUrl);	
-			//for the gwt gui no persistent
-			properties.put(CCConstants.CM_ASSOC_THUMBNAILS, previewUrl);
-			
 			JSONObject item = allJson.getJSONObject("view").getJSONObject("item");				
 			try {
 				if(item != null){
@@ -378,13 +417,13 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			}
 		}
 		catch (Exception e) {
-			
+			e.printStackTrace();
 		}
 			
 			
 		return properties;
 	}
-	
+
 	public List<? extends  SuggestOracle.Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value) {
 		
 		List<SuggestOracle.Suggestion> result = new ArrayList<SuggestOracle.Suggestion>();
@@ -412,12 +451,12 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 						JSONObject facetteVal = (JSONObject)facetValues.get(j);
 						//int count = facetteVal.getInt("count");
 						String val = facetteVal.getString("value");
-						
-						if(val.contains(value)) {					
+
+						if(val.contains(value)) {
 							SuggestFacetDTO dto = new SuggestFacetDTO();
 							dto.setFacet(val);
 							dto.setDisplayString(val);
-	
+
 							result.add(dto);
 						}
 					}
@@ -490,7 +529,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			searchWord="";
 		}
 
-		boolean retval;		
+		boolean retval;
 
  		if(criterias.containsKey("title")) {
  			String ddbTitle =criterias.get("title")[0];
@@ -517,7 +556,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 
 /*		if(searchToken.getFrom()%searchToken.getMaxResult()!=0)
 			throw new Exception("Pixabay only supports offsets which are dividable by the maxItems count");
-	*/	
+	*/
 		String ext = "";
 		for (String s : extSearch) {
 		    if (!s.equals("") && !extSearch.get(extSearch.size() - 1).equals(s)){
@@ -527,20 +566,20 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 		    }
 		}
 		
-		
+
 		try {
 
 
 			String oauth  = "/search?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8");
 			String offset = "&offset="+searchToken.getFrom();
 			String rows = "&rows="+searchToken.getMaxResult();
-			
+
 			String uri=oauth+"&query="+org.springframework.extensions.surf.util.URLEncoder.encodeUriComponent(searchWord+" "+ext)+offset+rows;
 
 			searchToken.setQueryString(uri);
-			
+
 			return searchDDB(repositoryId,APIKey,uri);
-			
+
 		}
 		catch(IOException e){
 			InputStream is=connection.getErrorStream();
@@ -558,7 +597,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter{
 			throw t;
 		}
 
-	}	
+	}
 	
 	public static void main(String[] args) {
 		try {
