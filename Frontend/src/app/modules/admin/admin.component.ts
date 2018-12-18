@@ -748,7 +748,14 @@ export class AdminComponent {
             this.updateJobLogs();
         })
     }
-
+    getMajorVersion(version:string){
+      let v=version.split(".");
+      if(v.length<3)
+        return v;
+      v.splice(v.length-1,1);
+      console.log(v);
+      return v.concat(".");
+    }
     private runChecks() {
         this.systemChecks=[];
 
@@ -756,7 +763,7 @@ export class AdminComponent {
         this.connector.getAbout().subscribe((about)=>{
             this.systemChecks.push({
               name:"RENDERING",
-              status:about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
+              status:this.getMajorVersion(about.version.repository)==this.getMajorVersion(about.version.renderservice) ? 'OK' : 'FAIL',
               translate:about.version
             });
         },(error)=>{
