@@ -202,9 +202,9 @@ public class OAIPMHLOMImporter implements Importer{
 				Node nodeRecord = nodeList.item(i);
 				RecordHandlerInterface handler = getRecordHandler();
 				handler.handleRecord(nodeRecord,cursor,set);
-				String nodeId = persistentHandler.safe(handler.getProperties(), cursor, set);
+				String nodeId = persistentHandler.safe(handler, cursor, set);
 				if(getBinaryHandler() != null){
-					getBinaryHandler().safe(nodeId, handler.getProperties(),nodeRecord);
+					getBinaryHandler().safe(nodeId, handler,nodeRecord);
 				}
 				new MCAlfrescoAPIClient().createVersion(nodeId, null);
 			}
@@ -405,10 +405,10 @@ public class OAIPMHLOMImporter implements Importer{
 	private String handleRecordInternal(String cursor, Node nodeRecord) throws Throwable {
 		RecordHandlerInterface handler = getRecordHandler();
 		handler.handleRecord(nodeRecord, cursor, set);
-		String nodeId = persistentHandler.safe(handler.getProperties(), cursor, set);
+		String nodeId = persistentHandler.safe(handler, cursor, set);
 		if(nodeId != null) {
 			if(getBinaryHandler() != null){
-				getBinaryHandler().safe(nodeId, handler.getProperties(),nodeRecord);
+				getBinaryHandler().safe(nodeId, handler,nodeRecord);
 			}
 			if(job!=null && job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
 				NodeServiceFactory.getLocalService().deleteVersionHistory(nodeId);
@@ -479,7 +479,7 @@ public class OAIPMHLOMImporter implements Importer{
 	            
 	            xpath.reset();
 	            recordHandlerLom.handleRecord(standaloneRecordNode, new Integer(cursor).toString(), setName);
-	            persistentHandler.safe(recordHandlerLom.getProperties(), new Integer(cursor).toString(), setName);
+	            persistentHandler.safe(recordHandlerLom, new Integer(cursor).toString(), setName);
 				
 			} catch(Throwable e) {
 				logger.error(e.getMessage(),e);

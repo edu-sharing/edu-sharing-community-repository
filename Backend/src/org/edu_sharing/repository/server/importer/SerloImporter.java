@@ -322,8 +322,8 @@ public class SerloImporter implements Importer{
 				//just for filling search widget
 				eduProps.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CONTENT_PROVIDER,"serlo");
 				
-				String nodeId = persistentHandler.safe(eduProps, null, "serlo_"+set);
-				binaryHandler.safe(nodeId, eduProps, null);
+				String nodeId = persistentHandler.safe(new RecordHandlerStatic(eduProps), null, "serlo_"+set);
+				binaryHandler.safe(nodeId, new RecordHandlerStatic(eduProps), null);
 			}
 			
 		}catch(Throwable e){
