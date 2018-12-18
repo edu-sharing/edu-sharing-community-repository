@@ -13,6 +13,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiService;
@@ -21,7 +22,8 @@ import org.edu_sharing.restservices.UsageDao;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
-import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
+import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -206,9 +208,16 @@ public class UsageApi {
 				nodeId = null;
 			}
 			
-			List<Usages.NodeUsage> usages = new UsageDao(homeRepo).
-					getUsages(repositoryId, nodeId, from, to);
-			return Response.status(Response.Status.OK).entity(usages).build();
+			ToolPermissionService tps = ToolPermissionServiceFactory.getInstance();
+			
+			if(tps.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC)) {
+			
+				List<Usages.NodeUsage> usages = new UsageDao(homeRepo).
+						getUsages(repositoryId, nodeId, from, to);
+				return Response.status(Response.Status.OK).entity(usages).build();
+			}else {
+				throw new Exception("no toolpermission to use this service");
+			}
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}

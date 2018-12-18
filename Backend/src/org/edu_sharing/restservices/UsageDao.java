@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -14,6 +16,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
+import org.edu_sharing.restservices.usage.v1.model.Usages.NodeUsage;
 import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -189,18 +192,26 @@ public class UsageDao {
 
 	public List<Usages.NodeUsage> getUsages(String repositoryId, String nodeId, Long from, Long to) throws Exception {
 
-		RepositoryDao rd = RepositoryDao.getHomeRepository();
 		
-		List<Usages.NodeUsage> result = new ArrayList<Usages.NodeUsage>();
-		for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsages(repositoryId, nodeId, from,
-				to)) {
-			try {
-				Usages.NodeUsage usageRest = convertUsage(usage, Usages.NodeUsage.class);
-				usageRest.setNode(NodeDao.getNode(rd, usageRest.getParentNodeId(),Filter.createShowAllFilter()).asNode());
-				result.add(usageRest);
-			} catch (Throwable t) {
+		RunAsWork<List<Usages.NodeUsage>> runAs = new RunAsWork<List<Usages.NodeUsage>>() {
+			@Override
+			public List<Usages.NodeUsage> doWork() throws Exception {
+				RepositoryDao rd = RepositoryDao.getHomeRepository();
+				
+				List<Usages.NodeUsage> result = new ArrayList<Usages.NodeUsage>();
+				for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsages(repositoryId, nodeId, from,
+						to)) {
+					try {
+						Usages.NodeUsage usageRest = convertUsage(usage, Usages.NodeUsage.class);
+						usageRest.setNode(NodeDao.getNode(rd, usageRest.getParentNodeId(),Filter.createShowAllFilter()).asNode());
+						result.add(usageRest);
+					} catch (Throwable t) {
+					}
+				}
+				return result;
 			}
-		}
-		return result;
+		};
+		return AuthenticationUtil.runAsSystem(runAs);
+		
 	}
 }
