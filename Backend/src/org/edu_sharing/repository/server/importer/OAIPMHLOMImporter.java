@@ -512,10 +512,9 @@ public class OAIPMHLOMImporter implements Importer{
 		this.persistentHandler = persistentHandler;
 	}
 
-	private RecordHandlerInterface getRecordHandler(){
+	public RecordHandlerInterface getRecordHandler(){
 		try {
 			RecordHandlerInterface handler = this.recordHandler.newInstance(metadataSetId);
-			handler.setImporter(this);
 			return handler;
 		} catch (Exception e) {
 			logger.error(e);

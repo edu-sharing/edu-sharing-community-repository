@@ -208,6 +208,11 @@ public class WpImporter implements Importer{
 
 	}
 
+	@Override
+	public RecordHandlerInterface getRecordHandler() {
+		return null;
+	}
+
 	public static void main(String[] args){
 		Importer i = new WpImporter();
 		i.setBaseUrl("http://127.0.0.1/wordpress/wp-json/wp/v2/");

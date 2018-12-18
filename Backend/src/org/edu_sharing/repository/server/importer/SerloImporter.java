@@ -347,4 +347,9 @@ public class SerloImporter implements Importer{
 
 	}
 
+	@Override
+	public RecordHandlerInterface getRecordHandler() {
+		return null;
+	}
+
 }

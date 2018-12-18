@@ -81,11 +81,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	static ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	static ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	private String importFolderId;
+	private Importer importer;
 
-	public PersistentHandlerEdusharing(AbstractJob job) throws Throwable {
+	public PersistentHandlerEdusharing(AbstractJob job,Importer importer) throws Throwable {
 		mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 		this.job = job;
 		this.importFolderId=prepareImportFolder();
+		this.importer=importer;
 		// prepare cache
 		getAllNodesInImportfolder();
 		getReplicationIdTimestampMap();
@@ -352,7 +354,11 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		return name+"_"+ DigestUtils.sha1Hex(System.currentTimeMillis()+""+RandomUtils.nextLong());
 	}
 
+
 	private void createChildobjects(String nodeId, HashMap<String, Object> nodeProps) throws Throwable {
+		if(importer!=null && !importer.getRecordHandler().createSubobjects()){
+			return;
+		}
 		for (Object key : nodeProps.keySet()) {
 			String typekey = (String) key;
 			String[] splitted = typekey.split("#");

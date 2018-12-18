@@ -33,5 +33,9 @@ public interface RecordHandlerInterface extends RecordHandlerInterfaceBase {
 
 	public void handleRecord(Node nodeRecord,String cursor,String set) throws Throwable;
 
-    default void setImporter(Importer importer){}
+    /**
+     * override this in any Record Handler to control if the peristent handler shall create subojects later
+     * @return
+     */
+    default boolean createSubobjects(){return true;}
 }

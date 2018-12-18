@@ -85,7 +85,7 @@ public class ImporterJobDDB extends AbstractJob{
 			
 			ddbObject.put(CCConstants.CM_NAME, name);
 			
-			String nodeId = new PersistentHandlerEdusharing(this).safe(ddbObject, "0", "ddb");
+			String nodeId = new PersistentHandlerEdusharing(this,null).safe(ddbObject, "0", "ddb");
 			new MCAlfrescoAPIClient().createVersion(nodeId, ddbObject);
 			
 		}

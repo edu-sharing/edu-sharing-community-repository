@@ -154,7 +154,7 @@ public class ImporterJob extends AbstractJob {
 			logger.info("importer:" + importer.getClass().getName());
 
 			importer.setBinaryHandler(binaryHandler);
-			importer.setPersistentHandler(new PersistentHandlerEdusharing(this));
+			importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer));
 			importer.setRecordHandler(recordHandler);
 			importer.setJob(this);
 			importer.setSet("xml-import");
@@ -205,7 +205,7 @@ public class ImporterJob extends AbstractJob {
 				importer.setMetadataPrefix(metadataPrefix);
 				importer.setNrOfRecords(-1);
 				importer.setNrOfResumptions(-1);
-				importer.setPersistentHandler(new PersistentHandlerEdusharing(this));
+				importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer));
 				importer.setSet(set);
 				importer.setMetadataSetId(metadataSetId);
 				importer.setRecordHandler(recordHandler);
