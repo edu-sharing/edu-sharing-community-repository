@@ -51,7 +51,9 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
+import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -408,7 +410,10 @@ public class OAIPMHLOMImporter implements Importer{
 			if(getBinaryHandler() != null){
 				getBinaryHandler().safe(nodeId, handler.getProperties(),nodeRecord);
 			}
-			new MCAlfrescoAPIClient().createVersion(nodeId,null);
+			if(job!=null && job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
+				NodeServiceFactory.getLocalService().deleteVersionHistory(nodeId);
+			}
+			NodeServiceFactory.getLocalService().createVersion(nodeId,null);
 		}
 		return nodeId;
 	}
