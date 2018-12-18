@@ -747,6 +747,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_CONFIDENTAL = "TOOLPERMISSION_CONFIDENTAL";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_HANDLESERVICE = "TOOLPERMISSION_HANDLESERVICE";
+	
+	public final static String CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC = "TOOLPERMISSION_USAGE_STATISTIC";
 
 	/**
 	 * dynamic generated properties
