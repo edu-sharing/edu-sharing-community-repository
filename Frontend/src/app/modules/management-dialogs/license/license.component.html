@@ -23,7 +23,7 @@
                 <label for="CC_02">
                   <h4>{{'WORKSPACE.LICENSE.CC0.CC0' | translate}}</h4>
                   <h5 innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></h5>
-                  <h5><a [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -33,7 +33,7 @@
                 <label for="PDM2">
                   <h4>{{'WORKSPACE.LICENSE.CC0.PDM' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}</h5>
-                  <h5><a [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a class="focus-underline" [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -46,7 +46,7 @@
                 <label for="CC_BY">
                   <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_RADIO' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_INFO' | translate}}</h5>
-                  <h5><a [href]="getLicenseUrlVersion('CC_BY')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
@@ -56,11 +56,11 @@
                 <label for="CC_BY_SA">
                   <h4>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_RADIO' | translate}}</h4>
                   <h5>{{'WORKSPACE.LICENSE.CC.CC_BY_SA_INFO' | translate}}</h5>
-                  <h5><a [href]="getLicenseUrlVersion('CC_BY_SA')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
+                  <h5><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY_SA')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a></h5>
                 </label>
               </div>
             </div>
-            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i aria-hidden="true" class="material-icons">{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
+            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
           </div>
         </div>
         <div class="allLicenses" *ngIf="!oerMode">
@@ -70,7 +70,7 @@
           </select>
             <div>
           <div *ngIf="type=='CC_BY'" class="cc">
-            <h5 class="ccAbout"><a [href]="getLicenseUrlVersion('CC_BY_ABOUT')" target="_blank">{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate}}</a></h5>
+            <h5 class="ccAbout"><a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY_ABOUT')" target="_blank">{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate}}</a></h5>
             <div *ngIf="isAllowedLicense('CC_BY_SA') || isAllowedLicense('CC_BY_ND')">
               <h4>{{'WORKSPACE.LICENSE.CC.SHARE' | translate}}</h4>
               <h5>{{'WORKSPACE.LICENSE.CC.SHARE_INFO' | translate}}</h5>
@@ -84,7 +84,7 @@
               <input type="radio" name="CC_COMMERCIAL" [(ngModel)]="ccCommercial" value="" id="CC_C"><label for="CC_C">{{'YES' | translate}}</label>
               <input type="radio" name="CC_COMMERCIAL" [(ngModel)]="ccCommercial" value="NC" id="CC_NC"><label for="CC_NC">{{'NO' | translate}}</label>
             </div>
-            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i class="material-icons">{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
+            <div class="ccAuthor clickable" (click)="showCcAuthor=!showCcAuthor;"><i icon iconId="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i> {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}</div>
           </div>
               <div *ngIf="type=='COPYRIGHT'" class="copyright">
                 <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
@@ -178,7 +178,7 @@
             <div class="authorPerson" *ngIf="authorTab==1">
               <div class="vcard">
                 <div class="vcardGroup">
-                  <i class="material-icons">person</i>
+                  <i icon iconID="person"></i>
                   <div>
                     <label for="firstName">{{'VCARD.Givenname' | translate}}</label>
                     <input type="text" class="vcard_Givenname vcardFirstInput" id="firstName" [(ngModel)]="authorVCard.givenname">
@@ -192,7 +192,7 @@
                 </div>
               </div>
               <div class="contributors" *ngIf="_nodes && _nodes.length==1">
-                <a class="clickable contributorsLink" (click)="openContributorDialog()">{{'MDS.CONTRIBUTOR_LINK' | translate}} <i class="material-icons">arrow_forward</i></a>
+                <a class="clickable contributorsLink" (click)="openContributorDialog()">{{'MDS.CONTRIBUTOR_LINK' | translate}} <i icon iconId="arrow_forward"></i></a>
               </div>
             </div>
           </div>
