@@ -428,7 +428,10 @@
     "help_outline": "Help",
     "info_outline": "Information",
     "view_module": "Box view",
-    "list": "List view"
+    "list": "List view",
+    "keyboard_arrow_left": "previous",
+    "keyboard_arrow_right": "next",
+    "keyboard_arrow_up": "up"
   },
   "LANGUAGE":{
     "INTERNATIONAL":"international",

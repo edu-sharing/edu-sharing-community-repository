@@ -491,7 +491,10 @@
     "help_outline": "Hilfe",
     "info_outline": "Information",
     "view_module": "Kachelnansicht",
-    "list": "Listenansicht"
+    "list": "Listenansicht",
+    "keyboard_arrow_left": "zurück",
+    "keyboard_arrow_right": "weiter",
+    "keyboard_arrow_up": "nach oben"
   },
   "LANGUAGE":{
     "INTERNATIONAL": "International",

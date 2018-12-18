@@ -100,7 +100,7 @@
   ></dropdown>
     </div>
 </div>
-<div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i aria-hidden="true" class="material-icons">keyboard_arrow_up</i></div>
+<div #scrolltotop class="btn" id="scrollToTop" tabindex="0" (click)="scrollToTop()" (keyup.enter)="scrollToTop()"><i icon iconId="keyboard_arrow_up" aria="true"></i></div>
 <div class="tab-nav" #tabNav *ngIf="canOpen && _currentScope!='render'" [style.bottom]="-navbarOffsetY+'px'">
     <div class="mobile-move-bottom">
           <div *ngFor="let button of sidebarButtons" [class.selected]="_currentScope==button.scope"

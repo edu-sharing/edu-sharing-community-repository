@@ -2,8 +2,8 @@
 <main-nav #mainnav [currentScope]="'render'"></main-nav>
 <div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
   <div class="displayBar">
-    <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i class="material-icons">keyboard_arrow_left</i> {{'BACK' | translate}}</span>
-    <span *ngIf="_node" class="clickable showDetails" (click)="showDetails()" (keypress)="($event.which === 13)?showDetails():0" tabindex="0" title="{{'GOTO' | translate}} {{'INFO' | translate}}"><i class="material-icons">info_outline</i> <span class="uppercase hidemobile">{{'INFO' | translate}}</span></span>
+    <span class="clickable" title="{{'BACK' | translate}}" (click)="close()" (keypress)="($event.which === 13)?close():0" tabindex="0"><i icon iconId="keyboard_arrow_left"></i> {{'BACK' | translate}}</span>
+    <span *ngIf="_node" class="clickable showDetails" (click)="showDetails()" (keypress)="($event.which === 13)?showDetails():0" tabindex="0" title="{{'GOTO' | translate}} {{'INFO' | translate}}"><i icon iconId="info_outline"></i> <span class="uppercase hidemobile">{{'INFO' | translate}}</span></span>
     <span>
     <actionbar class="actionbarFrame"
                *ngIf="_node && !isLoading && options && options.length"
@@ -20,8 +20,8 @@
   </div>
 </div>
 <div *ngIf="getPosition()!=-1">
-  <div class="previous clickable" *ngIf="canSwitchBack()" (click)="switchPosition(getPosition()-1)"><i class="material-icons">keyboard_arrow_left</i></div>
-  <div class="next clickable" *ngIf="canSwitchForward()" (click)="switchPosition(getPosition()+1)"><i class="material-icons">keyboard_arrow_right</i></div>
+  <div tabindex="0" class="previous clickable" *ngIf="canSwitchBack()" (click)="switchPosition(getPosition()-1)" (keyup.enter)="switchPosition(getPosition()-1)"><i icon iconId="keyboard_arrow_left" aria="true"></i></div>
+  <div tabindex="0" class="next clickable" *ngIf="canSwitchForward()" (click)="switchPosition(getPosition()+1)" (keyup.enter)="switchPosition(getPosition()+1)"><i icon iconId="keyboard_arrow_right" aria="true"></i></div>
 </div>
 <div class="alignWithBanner">
   <div id="nodeRenderContentWrapper">
@@ -39,8 +39,8 @@
           </div>
         </div>
     </div>
-    <div class="scroller left clickable" *ngIf="canScrollLeft" (click)="scroll('left')" id="left"><i class="material-icons">keyboard_arrow_left</i></div>
-    <div class="scroller right clickable" *ngIf="canScrollRight" (click)="scroll('right')" id="right"><i class="material-icons">keyboard_arrow_right</i></div>
+    <div class="scroller left clickable" *ngIf="canScrollLeft" (click)="scroll('left')" id="left"><i icon iconId="keyboard_arrow_left" aria="true"></i></div>
+    <div class="scroller right clickable" *ngIf="canScrollRight" (click)="scroll('right')" id="right"><i icon iconId="keyboard_arrow_right" aria="true"></i></div>
     <div id="nodeRenderContent" [class.hide]="isLoading" ng-touchevent
        (ngSwipeRight)="canSwitchBack() ? switchPosition(getPosition()-1) : null"
        (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition()+1) : null">
