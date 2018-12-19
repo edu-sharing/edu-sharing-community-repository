@@ -40,7 +40,6 @@ public class Usage {
 
     private String usageXmlParams;
     
-    private String usageXmlParamsRaw;
 
     private String resourceId;
     
@@ -206,15 +205,6 @@ public class Usage {
 
 	public void setGuid(String guid) {
 		this.guid = guid;
-	}
-    
-
-	public void setUsageXmlParamsRaw(String usageXmlParamsRaw) {
-		this.usageXmlParamsRaw = usageXmlParamsRaw;
-	}
-	
-	public String getUsageXmlParamsRaw() {
-		return usageXmlParamsRaw;
 	}
 	
 }

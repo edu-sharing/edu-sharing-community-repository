@@ -113,7 +113,7 @@ public class UsageDao {
 			}
 			
 			
-			usage.setUsageXmlParamsRaw(org.json.XML.toJSONObject(xmlParams).toString());
+			usageResult.setUsageXmlParamsRaw(org.json.XML.toJSONObject(xmlParams).toString());
 		}
 		return usageResult;
 	}
