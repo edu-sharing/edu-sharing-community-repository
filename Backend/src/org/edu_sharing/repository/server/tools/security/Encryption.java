@@ -126,7 +126,9 @@ public class Encryption {
 
 	public static void main(String[] args){
 		//testRSA();
-		testAESwithRSAKeyEncr();		
+		//testAESwithRSAKeyEncr();	
+		
+		test2();
 	}
 	
 	private static void testRSA(){
@@ -164,6 +166,44 @@ public class Encryption {
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
+	}
+	
+	private static void test2() {
+		String pubkey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArFrFvCdsEwDuxaEgRwxBjBUhzc91hfaAQ52CWxI9Z73QNcI8kE5J+u25uEQeuxZgxyMciyFpu0R8XTpssumSYgM+VaUp4eeo5gkwwJyJ08FRyoOFM9uPdC9rnWBuYJLzFG9PIXuZKpfnIyVXiPVR3tW1jPzQDqcyucBq/qYLduXDsWdEngIMDCzbmIZlRCPmzfhWF8tgSK3VpUIp/sEv78zQMXqikmIXxFTBxEf0OBlKAwpYNIvVl6Yd8fwcuokOKSgjIKTVmVDpoN7lOm9CkNsJe4agmz6gRCxp6Cf/3dSAnRYndUXkf4jVuCMwSaVZkIdGub3wHRYfxqHhIqh0vQIDAQAB";
+		String privkey = "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCsWsW8J2wTAO7FoSBHDEGMFSHNz3WF9oBDnYJbEj1nvdA1wjyQTkn67bm4RB67FmDHIxyLIWm7RHxdOmyy6ZJiAz5VpSnh56jmCTDAnInTwVHKg4Uz2490L2udYG5gkvMUb08he5kql+cjJVeI9VHe1bWM/NAOpzK5wGr+pgt25cOxZ0SeAgwMLNuYhmVEI+bN+FYXy2BIrdWlQin+wS/vzNAxeqKSYhfEVMHER/Q4GUoDClg0i9WXph3x/By6iQ4pKCMgpNWZUOmg3uU6b0KQ2wl7hqCbPqBELGnoJ//d1ICdFid1ReR/iNW4IzBJpVmQh0a5vfAdFh/GoeEiqHS9AgMBAAECggEBAJMKEd22aC5CQnIaRzY1z4nZ0XALCIFUThLhQn+9rONffU0Pu6mFEPpha2s3ulvz+HaLjuNnixN3lv3WRTvRps+1Yq2gbX3LrD0sJAp+wdsE92llEPOv4c/GUPH/fcsoMvcBCypOjtpWo5tJVUeDuuf3vJ5eZIXLwKvV67H6KJeygDFxs5zIbl689qAprQOdSYCh+qcl2DdBjQj6VgfBUAVw5putzrfCOsViCxlMKLc/OXKknRClnkgk6Nh0JuubHPn0FA/zQbMdXG6/J0fciIYRlSiMv1681y45Mg+pvPZazCq7Fanv5ixwX7XxifHJsFusNWN7PkNRmOPPY9H3zEECgYEA4HhOwRDZZ+nNqZ+lZ7tqtNg92Bq7ynWW2mFpv1uv1NtU/LpHOXTwO1W+EqsYikvEVOp+UMHeHoXd6gOTv3qZ0NMy188vbIaYLE4Y3vnd0hItyPRxWYCDVst1xXq15NxMEip+kRNUPHoLXWLXzy48fttLgYcdHRyF5MrgbMSnV60CgYEAxJB0D2yO5GCXIa9l/xI5ou9qtPbmdlTvC3GZQy6OdfVE5Zlm35mkdA2SPri+JUuxXcGsyCtHmeUhL3qnR04cLB6Z9BuCyChL1SCl06vTPP2kztHKKhnGD6IOtAcfKfktiq/JDvxP/H88QmrfbFGeWevJQbCKK4K1i7/6ugj/c1ECgYBVGmfJXOkAM61spQFh/bVsERwJZcFS9hgWfZ5JFarpSarEEp/UUdiOtmhUzZeFP0qVYz42wfnDmr9S7L5Ed2f/u0LofT2eqLzi900IpLUL4yaGrN6Yr1ecPZFOKMLznO4eaQwJVsm2EBNk+YeWnhIDioLq/d303o6I+r3xnvFPFQKBgBD+dCpJNmlkOGy/H1BYIQeHL3CJ0A729NvGbHu0cLieBeDbzFsUi3VFHxmxGy9aRfFXJzr/EuepOZ9DOWcex6zA0IqcPkhTw4qfkfak6lRhkXgYByRwqgD7/81suDMGyfsti3JyOfAYh/suBjb1L32Stwmo26k7WbrFVEX1NTChAoGBANdgbZVW5G75STrjyEq+kyFPvS6MRWXmSxixUQ/pkexxo33n61cBRchVm2tSLBPXZox9c2j5gOcEcwWHuS/paGfzA9Hw8IN4g2RKOxumji2io/K8sF8epvFj0oyskaAq2LqXhuqkidUAmFs9v76az7im02qo0AKQTsOpfTOrvcZ6";
+		
+		String testString = "Test1234";
+		
+		try {
+			Encryption e = new Encryption("RSA");
+			PublicKey pk = e.getPemPublicKey(pubkey);
+			/*byte[] encrypted = e.encrypt(testString, pk);
+			System.out.println("Base64 encrypted:" + Base64.encodeBase64String(encrypted));
+			*/
+			
+			byte[] plainBytes = testString.getBytes();
+			Cipher cipher = Cipher.getInstance("RSA");
+			cipher.init(Cipher.ENCRYPT_MODE, pk);
+			byte[] encryptedBytes = cipher.doFinal(plainBytes);
+			String encryptedUsername = Base64.encodeBase64String(encryptedBytes);
+			encryptedUsername = URLEncoder.encode(encryptedUsername, "UTF-8");
+			
+			
+			
+			
+			PrivateKey privKey = e.getPemPrivateKey(privkey);
+			System.out.println("decrypted: " + e.decrypt(encryptedBytes, privKey));
+			
+		} catch (GeneralSecurityException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+		
 	}
 	
 	private static void testAESwithRSAKeyEncr(){

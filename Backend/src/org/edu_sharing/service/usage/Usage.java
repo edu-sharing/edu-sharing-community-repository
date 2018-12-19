@@ -39,6 +39,7 @@ public class Usage {
     private String usageVersion;
 
     private String usageXmlParams;
+    
 
     private String resourceId;
     
@@ -205,6 +206,5 @@ public class Usage {
 	public void setGuid(String guid) {
 		this.guid = guid;
 	}
-    
 	
 }
