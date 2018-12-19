@@ -1,5 +1,5 @@
   <div class="title">{{ title | translate}}
-   <i class="material-icons close clickable" (click)="cancel()">close</i>
+   <i tabindex="0" icon iconId="close" class="close" (click)="cancel()" (keyup.enter)="cancel()" aria="true"></i>
   </div>
   <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadData()">
     <listTable
@@ -13,7 +13,7 @@
       <form (ngSubmit)="loadData(true)" autocomplete="off">
           <input name="search" type="search" [(ngModel)]="searchQuery"
                  title="{{'SEARCH_COLLECTIONS' | translate}}" placeholder="{{'SEARCH_COLLECTIONS' | translate}}" />
-          <i class="material-icons searchIcon">search</i>
+          <i icon iconId="search" class="searchIcon">search</i>
       </form>
     </div>
       <listTable *ngIf="isLoading || list.length"
