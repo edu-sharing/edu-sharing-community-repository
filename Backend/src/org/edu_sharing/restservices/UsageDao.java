@@ -111,6 +111,9 @@ public class UsageDao {
 			} catch (Throwable t) {
 				logger.warn("Error converting usage xml " + usage.getUsageXmlParams(), t);
 			}
+			
+			
+			usage.setUsageXmlParamsRaw(org.json.XML.toJSONObject(xmlParams).toString());
 		}
 		return usageResult;
 	}

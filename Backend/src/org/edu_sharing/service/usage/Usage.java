@@ -39,6 +39,8 @@ public class Usage {
     private String usageVersion;
 
     private String usageXmlParams;
+    
+    private String usageXmlParamsRaw;
 
     private String resourceId;
     
@@ -206,5 +208,13 @@ public class Usage {
 		this.guid = guid;
 	}
     
+
+	public void setUsageXmlParamsRaw(String usageXmlParamsRaw) {
+		this.usageXmlParamsRaw = usageXmlParamsRaw;
+	}
+	
+	public String getUsageXmlParamsRaw() {
+		return usageXmlParamsRaw;
+	}
 	
 }
