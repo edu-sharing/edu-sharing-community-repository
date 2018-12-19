@@ -462,7 +462,7 @@ export class AdminComponent {
   }
   public refreshCache(sticky:boolean){
     this.globalProgress=true;
-    this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : "",sticky).subscribe(()=>{
+    this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : RestConstants.USERHOME,sticky).subscribe(()=>{
       this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.CACHE_REFRESHED');
     },(error:any)=>{
