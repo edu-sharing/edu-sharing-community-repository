@@ -825,13 +825,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		// filter nodes for link inivitation and usages
 		if (filter == null)
 			filter = new ArrayList<>();
-		String type = nodeService.getType(node).toString();
-		String mapType = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
-		String name = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CM_NAME));
+
 		if (filter.contains("special")) {
 			// special mode, we do not filter anything
 			return false;
 		}
+		String type = nodeService.getType(node).toString();
+		String mapType = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
+		String name = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CM_NAME));
 		if (CCConstants.CCM_TYPE_SHARE.equals(type) ||
 				CCConstants.CCM_TYPE_USAGE.equals(type) ||
 				CCConstants.CM_TYPE_THUMBNAIL.equals(type)) {

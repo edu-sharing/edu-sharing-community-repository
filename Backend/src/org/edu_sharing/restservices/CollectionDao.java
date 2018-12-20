@@ -29,6 +29,7 @@ import org.edu_sharing.restservices.shared.User;
 import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.service.Constants;
 import org.edu_sharing.service.collection.CollectionService;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -281,7 +282,17 @@ public class CollectionDao {
 		}
 			
 	}
+	public static void addToCollection(RepositoryDao repoDao,String collectionId,String nodeId) throws DAOException {
+		try {
 
+			CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+					addToCollection(collectionId,nodeId);
+
+		} catch (Throwable t) {
+
+			throw DAOException.mapping(t);
+		}
+	}
 	public void addToCollection(NodeDao node) throws DAOException {
 		
 		try {

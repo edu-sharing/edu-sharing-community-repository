@@ -136,14 +136,12 @@ public class CollectionServiceImpl implements CollectionService{
 	public String addToCollection(String collectionId, String refNodeId) throws Throwable {
 		
 		try{
-			List<String> aspects = Arrays.asList(client.getAspects(refNodeId));
-			
 			/**
 			 * use original
 			 */
 			String nodeId=refNodeId;
 			String originalNodeId;
-			if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
+			if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),refNodeId,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
 				originalNodeId = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), refNodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
 			}
 			else{
@@ -168,16 +166,22 @@ public class CollectionServiceImpl implements CollectionService{
 			if(!nodeType.equals(CCConstants.CCM_TYPE_IO)){
 				throw new Exception("Only Files are allowed to be added!");
 			}
-			
-			for(String node : client.getChildren(collectionId).keySet()){
+			NodeRef child = nodeService.getChild(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId, CCConstants.CCM_TYPE_IO, CCConstants.CCM_PROP_IO_ORIGINAL, originalNodeId);
+			if(child!=null){
+				String message = I18nServer.getTranslationDefaultResourcebundle("collection_already_in", locale);
+				throw new DuplicateNodeException(message);
+			}
+			/*
+			for(ChildAssociationRef node : nodeService.getChildrenChildAssociationRef(collectionId)){
 				// TODO: Maybe we can find a faster way to determine it?
-				String nodeRef = client.getProperty(Constants.storeRef.getProtocol(), MCAlfrescoAPIClient.storeRef.getIdentifier(), node, CCConstants.CCM_PROP_IO_ORIGINAL);
+				String nodeRef = client.getProperty(node.getChildRef().getStoreRef().getProtocol(),node.getChildRef().getStoreRef().getIdentifier(),node.getChildRef().getId(), CCConstants.CCM_PROP_IO_ORIGINAL);
 				if(originalNodeId.equals(nodeRef)){
 					String message = I18nServer.getTranslationDefaultResourcebundle("collection_already_in", locale);
 					
 					throw new DuplicateNodeException(message);
 				}
 			}
+			*/
 
 			// we need to copy as system because the user may just has full access to the ref (which may has different metadata)
             // we check the add children permissions before continuing
