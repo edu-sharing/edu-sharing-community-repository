@@ -34,6 +34,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tika.Tika;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
@@ -214,6 +216,23 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 					ressourceType = schema;
 					ressourceVersion = schemaVers;
 				}
+				
+				if(ressourceType == null || ressourceType.trim().equals("")) {
+					
+					NodeList ns = (NodeList)xpath.evaluate("//manifest/@*", doc, XPathConstants.NODESET);
+					for(int i = 0; i < ns.getLength(); i++) {
+						if(ns.item(i) != null) {
+							Node n = ns.item(i);
+							String tc = n.getTextContent();
+							if(tc.contains("http://www.imsproject.org/xsd/imscp_rootv1p1p2")) {
+								ressourceType = "ADL SCORM";
+								ressourceVersion ="1.2";
+							}
+						}
+					}
+					
+				}
+				
 				logger.info("ressourceType:" + ressourceType);
 				logger.info("ressourceVersion:" + ressourceVersion);
 
