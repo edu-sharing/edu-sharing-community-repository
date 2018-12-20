@@ -29,7 +29,6 @@ package org.edu_sharing.repository.server.tools;
 
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,8 +37,9 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 public class ApplicationInfo implements Comparable<ApplicationInfo>{
-	
-	
+
+	public static final long DEFAULT_OFFSET_MS = 10000;
+
 	/**
 	 * property file keys
 	 * 
@@ -901,12 +901,16 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>{
 		return privateKey;
 	}
 	
-	public String getMessageOffsetMs() {
-		return messageOffsetMs;
+	public long getMessageOffsetMs() {
+		if(messageOffsetMs!=null && !messageOffsetMs.isEmpty())
+			return new Long(messageOffsetMs);
+		return DEFAULT_OFFSET_MS;
 	}
 	
-	public String getMessageSendOffsetMs() {
-		return messageSendOffsetMs;
+	public long getMessageSendOffsetMs() {
+		if(messageSendOffsetMs!=null && !messageSendOffsetMs.isEmpty())
+			return new Long(messageSendOffsetMs);
+		return DEFAULT_OFFSET_MS;
 	}
 	
 	public String getLogo() {

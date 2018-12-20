@@ -348,7 +348,9 @@ public class RenderingProxy extends HttpServlet {
 		if(appInfoApplication != null && ApplicationInfo.TYPE_LMS.equals(appInfoApplication.getType())) {
 			req.getSession().removeAttribute(CCConstants.AUTH_SINGLE_USE_NODEID);
 			HttpSession session = req.getSession(true);
-			if(Long.parseLong(ts) > (System.currentTimeMillis() - SignatureVerifier.DEFAULT_OFFSET_MS)) {
+			if(		Long.parseLong(ts) > (System.currentTimeMillis() - appInfoApplication.getMessageOffsetMs())
+				||  Long.parseLong(ts) < (System.currentTimeMillis() + appInfoApplication.getMessageSendOffsetMs())
+					) {
 				try {
 					Usage usage = null;
 					if(repoInfo != null && !ApplicationInfoList.getHomeRepository().getAppId().equals(repoInfo.getAppId())){
@@ -383,6 +385,11 @@ public class RenderingProxy extends HttpServlet {
 				catch (Throwable t){
 					logger.warn("Usage fetching failed for node "+nodeId+": "+t.getMessage());
 				}
+			}
+			else{
+				String error="Error with timestamps between the local system and app "+appInfoApplication.getAppId();
+				logger.error(error);
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,error);
 			}
 
 			//new AuthenticationToolAPI().authenticateUser(usernameDecrypted, session);
