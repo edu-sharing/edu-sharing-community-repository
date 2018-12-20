@@ -67,6 +67,12 @@ import io.swagger.util.Json;
 public class NodeDao {
 	
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+	private static final String[] DAO_PERMISSIONS = new String[]{
+			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
+			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
+			org.alfresco.service.cmr.security.PermissionService.WRITE,
+			org.alfresco.service.cmr.security.PermissionService.DELETE,
+			CCConstants.PERMISSION_CC_PUBLISH};
 
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
@@ -362,7 +368,7 @@ public class NodeDao {
 				this.nodeProps = nodeRef.getProperties();
 			}
 	
-			this.hasPermissions = new PermissionServiceHelper(permissionService).hasAllPermissions(storeProtocol, storeId, nodeId);
+			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId,DAO_PERMISSIONS);
 	
 			
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
