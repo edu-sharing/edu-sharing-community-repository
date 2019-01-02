@@ -93,6 +93,10 @@ export class CordovaService {
       if (this.deviceResumeCallback!=null) this.deviceResumeCallback();
     };
 
+    if(this.isRunningCordova()) {
+        // deviceready may not work, because cordova is already loaded, so try to set it ready after some time
+        setTimeout(() => this.deviceIsReady = true, 1000);
+    }
     //adding listener for cordova events
     document.addEventListener('deviceready', () => {
       this.deviceIsReady = true;
