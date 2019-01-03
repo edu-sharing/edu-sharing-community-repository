@@ -41,7 +41,7 @@ public class NgServlet extends HttpServlet {
 				if (req.getHeader("User-Agent").contains("ionic / edu-sharing-app")) {
 					// when using ionic, a local webserver is running on 8080 which will serve the bridge files!
 					html = html.substring(0, pos) +
-							"<script type=\"text/javascript\" src=\"http://localhost:8080/cordova.js\"></script>"
+							"<script type=\"text/javascript\" src=\"http://localhost:54361/cordova.js\"></script>"
 							+ html.substring(pos);
 					logger.info("ionic app, add cordova.js to header");
 				}
