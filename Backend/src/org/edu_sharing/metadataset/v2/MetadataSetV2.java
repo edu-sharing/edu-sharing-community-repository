@@ -233,12 +233,13 @@ public class MetadataSetV2 {
 		  List<MetadataWidget> found=new ArrayList<>();
 		  boolean hasTemplate=false;
 		  for(MetadataWidget widget : widgets){
-		   if(widget.getId().equals(widgetId))
-			   found.add(widget);
-		   if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate())) {
-		   		if(!hasTemplate) found.clear();
-		   		hasTemplate=true;
-			   found.add(widget);
+		  widget.setHideIfEmpty(true);
+		  if(widget.getId().equals(widgetId) && widget.getTemplate()==null)
+		  		found.add(widget);
+		  if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate())) {
+		  		if(!hasTemplate) found.clear();
+		 		hasTemplate=true;
+			    found.add(widget);
 		   }
 		  }
 		  if(found.size()==0)
@@ -256,7 +257,6 @@ public class MetadataSetV2 {
 				  return widget;
 			  }
 		  }
-		  found.get(0).setHideIfEmpty(true);
 		  return found.get(0);
 	 }
 
