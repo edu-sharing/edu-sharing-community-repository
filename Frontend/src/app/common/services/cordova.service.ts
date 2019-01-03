@@ -1,17 +1,13 @@
-import { Injectable, HostListener } from "@angular/core";
-import { setTimeout } from "core-js/library/web/timers";
-import { Observable, Observer, ConnectableObservable } from "rxjs";
-import { Headers, Http, RequestOptions, RequestOptionsArgs, Response } from "@angular/http";
+import {Injectable} from '@angular/core';
+import {setTimeout} from 'core-js/library/web/timers';
+import {Observable, Observer} from 'rxjs';
+import {Headers, Http, Response} from '@angular/http';
 
-import { OAuthResult, LoginResult, NodeRef } from '../rest/data-object';
-import { RestConstants } from '../rest/rest-constants';
-import {PlatformLocation} from "@angular/common";
-import {Helper} from "../helper";
-import {UIConstants} from "../ui/ui-constants";
-import {NavigationEnd, Router} from "@angular/router";
-import {FrameEventsService} from "./frame-events.service";
+import {OAuthResult} from '../rest/data-object';
 import {Location} from '@angular/common';
-import {RestLocatorService} from "../rest/services/rest-locator.service";
+import {UIConstants} from '../ui/ui-constants';
+import {Router} from '@angular/router';
+import {FrameEventsService} from './frame-events.service';
 
 declare var cordova : any;
 
@@ -22,25 +18,19 @@ declare var cordova : any;
 export class CordovaService {
 
   // change this during development for testing true, but false is default
-  private forceCordovaMode: boolean = false;
+  private forceCordovaMode = false;
 
-  private deviceIsReady: boolean = false;
+  private deviceIsReady = false;
 
-  private deviceReadyCallback : Function = null;
-  private devicePauseCallback : Function = null;
   private deviceResumeCallback : Function = null;
 
-  private observerDeviceReady : Observer<void> = null;
   private observerShareContent : Observer<any> = null;
-
-  private deviceReadyObservable: ConnectableObservable<{}>;
 
   private appGoneBackgroundTS : number = null;
 
   private _oauth:OAuthResult;
   private serviceIsReady = false;
 
-  private lastShareTS:number = 0;
   private lastIntent: any;
 
   get oauth(){
@@ -354,7 +344,6 @@ export class CordovaService {
       let device:any = (window as any).device;
       return device.platform=="iOS";
     } catch (e) {
-        console.error(e);
       console.log("FAIL on Plugin cordova-plugin-device (1)");
       return false;
     }
@@ -1116,7 +1105,7 @@ export class CordovaService {
         (oauth: OAuthResult) => {
 
           if (oauth == null) {
-            observer.error("INVALID_CREDENTIALS"); "LOGIN.ERROR"
+            observer.error("INVALID_CREDENTIALS");
             observer.complete();
             return;
           }
@@ -1275,8 +1264,9 @@ export class CordovaService {
 
     getLanguage() {
       return new Observable<string>((observer: Observer<string>) => {
-
-        try {
+          observer.next(navigator.language.split("-")[0]);
+          observer.complete();
+        /*try {
           (navigator as any).globalization.getPreferredLanguage(
             (lang:any)=>{
               // WIN
@@ -1295,6 +1285,7 @@ export class CordovaService {
           observer.next("de");
           observer.complete();
         }
+        */
 
       });
     }

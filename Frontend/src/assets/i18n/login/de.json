@@ -36,6 +36,6 @@
     "NOTINTERNET_INFO" : "Hinweis",
     "NOTINTERNET_TEXT" : "Bitte die Verbindung zum Internet überprüfen. Dann kannst du es noch einmal probieren. Falls es gar nicht klappt, bitte die App beenden.",
     "NOTINTERNET_EXIT" : "Beenden",
-    "NOTINTERNET_RETRY" : "Nochmal"
+    "NOTINTERNET_RETRY" : "Erneut versuchen"
   }
 }

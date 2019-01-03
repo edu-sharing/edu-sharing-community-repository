@@ -21,6 +21,7 @@ import {PlatformLocation} from '@angular/common';
 import {CordovaService} from '../../common/services/cordova.service';
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../common/ui/ui-animation";
+import {RouterHelper} from '../../common/router.helper';
 
 @Component({
   selector: 'workspace-login',
@@ -185,7 +186,7 @@ export class LoginComponent  implements OnInit{
   private goToNext() {
     if(this.next){
       this.next=Helper.addGetParameter('fromLogin','true',this.next);
-      UIHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,this.next);
+      RouterHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,this.next);
       //window.location.assign(this.next);
     }
     else {
