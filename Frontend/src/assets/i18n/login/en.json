@@ -24,6 +24,7 @@
     "SERVERLIST":"Where do you wanna go?",
     "SERVERLIST_INFO":"Choose the server you like to connect with.",
     "LOGIN":"Login",
+    "LOGIN_TITLE":"Login",
     "LOGIN_INFO":"Login with your credentials.",
     "SERVERURL" : "Set own server",
     "SERVERURL_INFO" : "Enter the URL of the server you like to connect to.",

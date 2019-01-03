@@ -14,7 +14,7 @@
           <img class="card-title-image" 
           [src]="getServerIcon()"
           onerror="this.src = 'assets/images/app-icon.svg';"
-          >
+          > {{'LOGIN_APP.LOGIN_TITLE' | translate}}
           </div>
         <div class="card-scroll">
           <form (ngSubmit)="login()" #loginForm>
