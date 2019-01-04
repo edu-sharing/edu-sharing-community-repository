@@ -696,6 +696,8 @@ export class ListTableComponent implements EventListener{
       else
         this.selectedNodes=[node];
       this.onSelectionChanged.emit(this.selectedNodes);
+      event.preventDefault();
+      event.stopPropagation();
       return;
     }
     let pos=this.getSelectedPos(node);
@@ -756,7 +758,6 @@ export class ListTableComponent implements EventListener{
   }
   public askCCPublish(event:any,node : Node){
     NodeHelper.askCCPublish(this.translate,node);
-    event.preventDefault();
     event.stopPropagation();
   }
   public getItemCssClass(item:ListItem){

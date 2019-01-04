@@ -4,15 +4,15 @@
 }
 /**
   ios fix for wrong positioned input cursor
-  nop: when enabled, it will break position fixed dialog layouts.
- */
-//html,body{ @include iosScrolling(); }
+  nop: when enabled, it will break positio
+  font-smoothing: antialiased;n fixed dialog layouts.
+*/
+  //html,body{ @include iosScrolling(); }
 
 html,body,md-card{
   height:100%;
   font-family:'open_sansregular',sans-serif!important;
   font-size:10pt;
-  font-smoothing: antialiased;
   -webkit-font-smoothing: antialiased;
   background-color: $backgroundColor;
 }
