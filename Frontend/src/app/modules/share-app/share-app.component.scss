@@ -36,14 +36,14 @@
         padding-bottom: 15px;
       }
       .label{
-        @include limitLineCount(1);
+        @include limitLineCount(1,1.5);
         word-break: break-all;
         margin-bottom: 10px;
       }
       .description{
         font-size: 90%;
         color: $textLight;
-        @include limitLineCount(2);
+        @include limitLineCount(2,1.5);
       }
     }
   }

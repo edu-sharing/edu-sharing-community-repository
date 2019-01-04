@@ -49,6 +49,7 @@ export class ShareAppComponent {
     private editorType: string;
     private file: File;
     private fileName: string;
+    private loading=true;
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
@@ -166,6 +167,10 @@ export class ShareAppComponent {
                     sortAscending:false,
                 }).subscribe((data:CollectionContent)=>{
                     this.collections=data.collections;
+                    this.loading=false;
+                },(error)=>{
+                    this.toast.error(error)
+                    this.loading=false;
                 });
                 this.node.getNodeParents(RestConstants.INBOX, false).subscribe((data: ParentList) => {
                     this.inboxPath = data.nodes;
@@ -188,7 +193,7 @@ export class ShareAppComponent {
                     })
                 }
                 else{
-                    if(this.cordova.isRunningCordova() && this.cordova.getLastIntent().stream){
+                    if(this.cordova.isRunningCordova() && this.cordova.getLastIntent() && this.cordova.getLastIntent().stream){
                         let base64=this.cordova.getLastIntent().stream;
                         if(this.mimetype.startsWith("image/")) {
                             this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl("data:" + this.mimetype + ";base64," + base64);

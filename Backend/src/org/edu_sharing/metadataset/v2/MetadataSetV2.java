@@ -252,16 +252,15 @@ public class MetadataSetV2 {
 		  List<MetadataWidget> found=new ArrayList<>();
 		  boolean hasTemplate=false;
 		  for(MetadataWidget widget : widgets){
-		   if(widget.getId().equals(widgetId))
-			   found.add(widget);
-		   if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate())) {
-		   		if(!hasTemplate) found.clear();
-		   		hasTemplate=true;
-			   found.add(widget);
-		   }
+			  if(widget.getId().equals(widgetId) && widget.getTemplate()==null)
+					found.add(widget);
+			  if(widget.getId().equals(widgetId) && template.equals(widget.getTemplate())) {
+					if(!hasTemplate) found.clear();
+					hasTemplate=true;
+					found.add(widget);
+			  }
 		  }
-		  if(found.size()==0)
-		  	throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+		  List<MetadataWidget> result=new ArrayList<>();
 		  for(MetadataWidget widget : found) {
 			  boolean allowed = true;
 			  MetadataWidget.Condition cond = widget.getCondition();
@@ -272,11 +271,19 @@ public class MetadataSetV2 {
 			  	  allowed=empty==cond.isNegate();
 			  }
 			  if(allowed) {
-				  return widget;
+				  result.add(widget);
 			  }
 		  }
-		  found.get(0).setHideIfEmpty(true);
-		  return found.get(0);
+		// no condition matched
+		if(result.size()==0) result=found;
+
+		if(result.size()==0)
+			throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
+		if (result.size() > 1) {
+			logger.warn("Widget " + widgetId + " has multiple candidates (" + result.size() + ") when rendered with template " + template + ", will use the first one that matches. Check the metadataset definitions for that widget to ensure only one candidate always matches.");
+		}
+		result.get(0).setHideIfEmpty(true);
+		return result.get(0);
 	 }
 
 	private boolean isValueEmpty(String[] value) {
