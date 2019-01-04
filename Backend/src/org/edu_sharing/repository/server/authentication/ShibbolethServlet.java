@@ -41,6 +41,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -159,6 +161,13 @@ public class ShibbolethServlet extends HttpServlet {
 			if(shibbolethSessionId != null && !shibbolethSessionId.trim().equals("")){
 				ShibbolethSessions.put(shibbolethSessionId, new SessionInfo(ticket, req.getSession()));
 				req.getSession().setAttribute(CCConstants.AUTH_SSO_SESSIONID, shibbolethSessionId);
+			}
+			
+			Object alfAuthService = AlfAppContextGate.getApplicationContext().getBean("authenticationService");
+			if(alfAuthService instanceof SubsystemChainingAuthenticationService) {
+				SubsystemChainingAuthenticationService scAuthService = (SubsystemChainingAuthenticationService)alfAuthService;
+				String userName = ssoMap.get(ssoMapper.getSSOUsernameProp());
+				scAuthService.setEsLastLoginToNow(userName);
 			}
 			
 			//federated repositoryies arixs(edunex)
