@@ -906,7 +906,7 @@ export class CordovaService {
      let targetPath = (window as any).cordova.file.externalRootDirectory + "Download/";
      if (this.isIOS()) targetPath = (window as any).cordova.file.documentsDirectory;
      let filePath = encodeURI(targetPath + fileName);
-
+    console.log("target path: "+filePath);
      // iOS
      let fileTransfer:any = new (window as any).FileTransfer();
      fileTransfer.download(downloadURL, filePath, (result:any)=>{

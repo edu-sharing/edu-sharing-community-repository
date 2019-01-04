@@ -224,7 +224,12 @@ export class NodeHelper{
     if(cordova.isRunningCordova()){
         toast.toast('TOAST.DOWNLOAD_STARTED',{name:fileName});
         cordova.downloadContent(url,fileName,(deviceFileName:string)=>{
-            toast.toast('TOAST.DOWNLOAD_FINISHED',{name:fileName});
+            if(cordova.isAndroid()) {
+                toast.toast('TOAST.DOWNLOAD_FINISHED_ANDROID', {name: fileName});
+            }
+            else{
+                toast.toast('TOAST.DOWNLOAD_FINISHED_IOS', {name: fileName});
+            }
         },()=>{
             toast.error(null,'TOAST.DOWNLOAD_FAILED',{name:fileName},null,null,{
               link:{
