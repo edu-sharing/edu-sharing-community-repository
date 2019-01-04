@@ -33,7 +33,7 @@ public class NgServlet extends HttpServlet {
 				html = addLRMI(html,url);
 			}
 			if(req.getHeader("User-Agent")!=null){
-				if(req.getHeader("User-Agent").contains("cordova / edu-sharing-app"){
+				if(req.getHeader("User-Agent").contains("cordova / edu-sharing-app")){
                     String platform="";
                     if(req.getHeader("User-Agent").contains("ios"))
                         platform="ios";
