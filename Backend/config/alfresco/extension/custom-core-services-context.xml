@@ -689,7 +689,7 @@
     </bean>
      -->
      
-       <!-- for remembering current authentication method -->
+       <!-- for remembering current authentication method, record login date -->
      <bean id="authenticationService"
         class="org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService">
         <property name="sysAdminParams">
@@ -701,5 +701,16 @@
         <property name="sourceBeanName">
             <value>localAuthenticationService</value>
         </property>
+        <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+        <property name="personService">
+            <ref bean="personService" />
+        </property>
+        <property name="transactionService">
+        	<ref bean="transactionService" />
+      	</property>
     </bean>
+    
+    
 </beans>

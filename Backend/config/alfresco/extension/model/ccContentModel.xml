@@ -370,6 +370,10 @@
 		           <tokenised>false</tokenised>
 		       </index>
             </property>
+            
+            <property name="cm:esLastLogin">
+            	<type>d:datetime</type>
+            </property>
 
          </properties>
          
