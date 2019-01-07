@@ -11,7 +11,7 @@
   <div *ngIf="!isLoading">
   <div class="card center-card card-action">
     <div class="card-content">
-      <div *ngIf="previousStage" class="card-cancel" (click)="stage=previousStage;previousStage=null"><i class="material-icons">close</i></div>
+      <div *ngIf="previousStage" class="card-cancel" (click)="stage=previousStage;previousStage=null" tabindex="0" (keyup.enter)="stage=previousStage;previousStage=null"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{caption | translate}}</div>
       <div class="branding"><img src="assets/images/logo.svg" alt=""></div>
       <div class="card-scroll">
@@ -38,14 +38,14 @@
           </form>
           <div class="register" *ngIf="config.register.local || config.register.registerUrl">
               {{'LOGIN.REGISTER_TEXT' | translate}}
-              <a tabindex="0" (click)="register()" (keyup.enter)="register()" class="clickable">{{'LOGIN.REGISTER_LINK' | translate}}</a>
+              <a (click)="register()" (keyup.enter)="register()" class="focus-underline" tabindex="0">{{'LOGIN.REGISTER_LINK' | translate}} <i aria-hidden="true" class="material-icons">arrow_forward</i></a>
           </div>
         </div>
       </div>
     </div>
       <div class="card-action" *ngIf="stage=='login'">
-        <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()">{{'LOGIN.LOGIN' | translate }}</a>
-        <a tabindex="0" class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
+        <a tabindex="0" class="waves-effect waves-light btn" [class.disabled]="disabled" (click)="login()" (keyup.enter)="login()">{{'LOGIN.LOGIN' | translate }}</a>
+        <a tabindex="0" class="btn-flat" *ngIf="config.register.local || config.register.recoverUrl" (click)="recoverPassword()" (keyup.enter)="recoverPassword()">{{'LOGIN.RECOVER_PASSWORD' | translate }}</a>
       </div>
   </div>
   <powered-by mode="white"></powered-by>

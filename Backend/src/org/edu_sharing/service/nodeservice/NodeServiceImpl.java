@@ -16,6 +16,7 @@ import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
@@ -88,11 +89,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL,
 			CCConstants.CCM_PROP_IO_COMMONLICENSE_QUESTIONSALLOWED
 	};
-    private DictionaryService dictionaryService;
-    String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
+	private DictionaryService dictionaryService;
+	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	MetadataSets metadataSets = RepoFactory.getMetadataSetsForRepository(repositoryId);
 	private ServiceRegistry serviceRegistry = null;
 	private NodeService nodeService = null;
+	private VersionService versionService;
 	private ApplicationInfo application;
 	
 	Logger logger = Logger.getLogger(NodeServiceImpl.class);
@@ -109,6 +111,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		nodeService = serviceRegistry.getNodeService();
+		versionService = serviceRegistry.getVersionService();
 		dictionaryService = serviceRegistry.getDictionaryService();
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
 		application=ApplicationInfoList.getRepositoryInfoById(appId);
@@ -827,13 +830,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		// filter nodes for link inivitation and usages
 		if (filter == null)
 			filter = new ArrayList<>();
-		String type = nodeService.getType(node).toString();
-		String mapType = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
-		String name = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CM_NAME));
+
 		if (filter.contains("special")) {
 			// special mode, we do not filter anything
 			return false;
 		}
+		String type = nodeService.getType(node).toString();
+		String mapType = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CCM_PROP_MAP_TYPE));
+		String name = (String) nodeService.getProperty(node, QName.createQName(CCConstants.CM_NAME));
 		if (CCConstants.CCM_TYPE_SHARE.equals(type) ||
 				CCConstants.CCM_TYPE_USAGE.equals(type) ||
 				CCConstants.CM_TYPE_THUMBNAIL.equals(type)) {
@@ -915,7 +919,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void createVersion(String nodeId, HashMap _properties) throws Exception{
 		apiClient.createVersion(nodeId, _properties);
 	}
-	
+
+	@Override
+	public void deleteVersionHistory(String nodeId) throws Exception {
+		versionService.deleteVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId));
+	}
+
 	@Override
 	public void writeContent(StoreRef store, String nodeID, InputStream content, String mimetype, String _encoding,
 			String property) throws Exception {

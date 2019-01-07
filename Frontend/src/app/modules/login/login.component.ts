@@ -22,6 +22,7 @@ import {CordovaService} from '../../common/services/cordova.service';
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../common/ui/ui-animation";
 import {InputPasswordComponent} from "../../common/ui/input-password/input-password.component";
+import {RouterHelper} from '../../common/router.helper';
 
 @Component({
   selector: 'workspace-login',
@@ -96,6 +97,9 @@ export class LoginComponent  implements OnInit{
         this.username=this.configService.instant('defaultUsername','');
         this.password=this.configService.instant('defaultPassword','');
         this.route.queryParams.forEach((params: Params) => {
+          if(params['username'])
+              this.username=params['username'];
+
           this.connector.onAllRequestsReady().subscribe(()=>{
             this.isLoading=false;
               setTimeout(()=>{
@@ -200,7 +204,7 @@ export class LoginComponent  implements OnInit{
   private goToNext() {
     if(this.next){
       this.next=Helper.addGetParameter('fromLogin','true',this.next);
-      UIHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,this.next);
+      RouterHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,this.next);
       //window.location.assign(this.next);
     }
     else {

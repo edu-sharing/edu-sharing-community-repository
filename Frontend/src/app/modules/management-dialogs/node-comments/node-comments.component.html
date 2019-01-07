@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
   <div class="card center-card card-action card-high" [@cardAnimation]="this">
     <div class="card-content">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'NODE_COMMENTS.TITLE' | translate }}</div>
 
         <div *ngIf="_node" class="group">
@@ -26,8 +26,8 @@
                   <form (ngSubmit)="saveEditComment()">
                     <textarea name="comment" class="materialize-textarea" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="editCommentText"></textarea>
                     <div class="icons">
-                      <i class="material-icons clickable" (click)="editComment=null">close</i>
-                      <i class="material-icons clickable" (click)="saveEditComment()">save</i>
+                      <i tabindex="0" class="material-icons clickable" (click)="editComment=null" (keyup.enter)="editComment=null">close</i>
+                      <i tabindex="0" class="material-icons clickable" (click)="saveEditComment()" (keyup.enter)="saveEditComment()">save</i>
                     </div>
                   </form>
                 </div>
@@ -52,7 +52,7 @@
             <div class="right">
               <form (ngSubmit)="addComment()">
                 <textarea name="addComment" class="materialize-textarea" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="newComment"></textarea>
-                <i class="material-icons clickable" (click)="addComment()">send</i>
+                <i tabindex="0" class="material-icons send-icon" (click)="addComment()" (keyup.enter)="addComment()">send</i>
               </form>
             </div>
           </div>

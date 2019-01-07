@@ -21,6 +21,7 @@
         <div class="addToCollection">
             {{'SHARE_APP.ADD_TO_COLLECTION' | translate}}
         </div>
+        <spinner *ngIf="loading"></spinner>
         <listTable
                 [nodes]="collections"
                 [columns]="columns"

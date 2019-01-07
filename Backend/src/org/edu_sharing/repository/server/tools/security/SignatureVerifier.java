@@ -19,7 +19,6 @@ import org.edu_sharing.service.permission.PermissionService;
 
 public class SignatureVerifier {
 
-	public static final long DEFAULT_OFFSET_MS = 10000;
 	Logger logger = Logger.getLogger(SignatureVerifier.class);
 	
 	public class Result{
@@ -67,18 +66,13 @@ public class SignatureVerifier {
 			long messageSendTs = new Long(timeStamp);
 			long messageArrivedTs = System.currentTimeMillis();
 						
-			long messageSendOffset = DEFAULT_OFFSET_MS;
-			if(appInfo.getMessageSendOffsetMs() != null){
-				messageSendOffset  = new Long(appInfo.getMessageSendOffsetMs());
-			}
+			long messageSendOffset = appInfo.getMessageSendOffsetMs();
+
 			if((messageSendTs - messageSendOffset) > messageArrivedTs){
 				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MESSAGE SEND TIMESTAMP newer than MESSAGE ARRIVED TIMESTAMP");
 			}
 			
-			long messageOffset = 10000;
-			if(appInfo.getMessageOffsetMs() != null){
-				messageOffset  = new Long(appInfo.getMessageOffsetMs());
-			}
+			long messageOffset = appInfo.getMessageOffsetMs();
 			
 			if((messageArrivedTs - messageSendTs) > messageOffset ){
 				return new Result(HttpServletResponse.SC_BAD_REQUEST,"MESSAGE SEND TIMESTAMP TO OLD");

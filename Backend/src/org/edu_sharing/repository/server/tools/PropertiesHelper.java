@@ -33,12 +33,15 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class PropertiesHelper {
 
 	final public static String EXCEPTION_UNHANDLED_TYPE = "Unhandled type given.";
 	public static final String XML = "xml";
 	public static final String TEXT = "text";
+	
+	static Logger logger = Logger.getLogger(PropertiesHelper.class.getName());
 
 	public static Properties getProperties(String propertyFile, String type)
 			throws Exception {
@@ -60,9 +63,9 @@ public class PropertiesHelper {
 				is.close();
 
 			} catch (InvalidPropertiesFormatException e) {
-				e.printStackTrace();
+				logger.info(e.getMessage());
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.info(e.getMessage());
 			}
 			
 			return props;
@@ -76,14 +79,11 @@ public class PropertiesHelper {
 				is.close();
 				
 			} catch (InvalidPropertiesFormatException e) {
-
-				e.printStackTrace();
+				logger.info(e.getMessage());
 			} catch (IOException e) {
-
-				e.printStackTrace();
+				logger.info(e.getMessage());
 			} catch (Exception e) {
-
-				e.printStackTrace();
+				logger.info(e.getMessage());
 			}
 			return props;
 		} else {

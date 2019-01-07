@@ -20,7 +20,7 @@ public class ConfigServiceFactory {
 	}
 	public static Config getCurrentConfig(ServletRequest req) throws Exception {
 		try {
-			return getConfigService().getConfigByDomain(getCurrentDomain());
+			return getConfigService().getConfigByDomain(req==null ? getCurrentDomain() : getCurrentDomain(req));
 		}catch(Throwable t) {
 			return getConfigService().getConfig();
 		}

@@ -1,18 +1,19 @@
 import { Injectable } from '@angular/core';
-import {RestConstants} from "../rest-constants";
-import {RestHelper} from "../rest-helper";
-import {Observable, Observer} from "rxjs";
-import {RequestObject} from "../request-object";
-import {environment} from "../../../../environments/environment";
-import {OAuthResult, LoginResult, AccessScope} from "../data-object";
-import {FrameEventsService} from "../../services/frame-events.service";
-import {Router, ActivatedRoute} from "@angular/router";
-import {TemporaryStorageService} from "../../services/temporary-storage.service";
-import {UIConstants} from "../../ui/ui-constants";
-import {ConfigurationService} from "../../services/configuration.service";
-import {RestLocatorService} from "./rest-locator.service";
+import {RestConstants} from '../rest-constants';
+import {RestHelper} from '../rest-helper';
+import {Observable, Observer} from 'rxjs';
+import {RequestObject} from '../request-object';
+import {OAuthResult, LoginResult, AccessScope} from '../data-object';
+import {FrameEventsService} from '../../services/frame-events.service';
+import {Router, ActivatedRoute} from '@angular/router';
+import {TemporaryStorageService} from '../../services/temporary-storage.service';
+import {ConfigurationService} from '../../services/configuration.service';
+import {RestLocatorService} from './rest-locator.service';
 import {CordovaService} from '../../services/cordova.service';
-import {Toast} from "../../ui/toast";
+import {Toast} from '../../ui/toast';
+import {DialogButton} from '../../ui/modal-dialog/modal-dialog.component';
+import {PlatformLocation} from '@angular/common';
+import {RouterHelper} from '../../router.helper';
 import {HttpClient} from '@angular/common/http';
 
 /**
@@ -391,6 +392,12 @@ export class RestConnectorService {
                               this.goToLogin();
                           }
                       }
+                      console.log(error);
+                      if (this.cordova.isRunningCordova() && error.status==0){
+                          this.noConnectionDialog();
+                          observer.complete();
+                          return;
+                      }
 
 
                       observer.error(error);
@@ -399,6 +406,25 @@ export class RestConnectorService {
           });
       });
   }
+
+    noConnectionDialog(): any {
+      let buttons=[];
+      buttons.push(new DialogButton('LOGIN_APP.NOTINTERNET_RETRY',DialogButton.TYPE_PRIMARY,()=>{
+          //RouterHelper.navigateToAbsoluteUrl(this.platformLocation,this.router,window.location.href,true);
+          this.isLoggedIn().subscribe(()=>{
+              window.location.reload();
+          });
+      }));
+      if(this.cordova.isAndroid()) {
+          buttons.push(new DialogButton('LOGIN_APP.NOTINTERNET_EXIT', DialogButton.TYPE_CANCEL, () => {
+              this.cordova.exitApp();
+          }));
+      }
+      this.toast.showModalDialog('LOGIN_APP.NOTINTERNET','LOGIN_APP.NOTINTERNET_TEXT',buttons,true,()=>{
+          this.cordova.exitApp();
+      });
+    }
+
   public get<T>(url:string,options:any,appendUrl=true) : Observable<T>{
     return this.request('GET',url,null,options,appendUrl);
   }

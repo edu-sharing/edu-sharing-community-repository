@@ -454,7 +454,8 @@
     "FIELD_REQUIRED":"Das Feld {{ name }} muss ausgefüllt sein",
     "NO_CONNECTION":"Instabile Internetverbindung, Inhalt konnte nicht geladen werden. Bitte später erneut versuchen",
     "DOWNLOAD_STARTED":"Download von {{name}} wurde gestartet",
-    "DOWNLOAD_FINISHED":"Download von {{name}} abgeschlossen.<br />Sie finden das Element im Download-Ordner des Gerätes",
+    "DOWNLOAD_FINISHED_ANDROID":"Download von {{name}} abgeschlossen.<br />Sie finden das Element im Download-Ordner des Gerätes",
+    "DOWNLOAD_FINISHED_IOS":"Download von {{name}} abgeschlossen.<br />Sie finden das Element in der Dateien-App",
     "DOWNLOAD_FAILED":"Download von {{name}} fehlgeschlagen.<br />Überprüfen Sie die Internetverbindung und versuchen Sie es erneut",
     "DOWNLOAD_TRY_AGAIN":"Erneut versuchen",
     "API_FORBIDDEN":"Keine Rechte, um auf diesen Inhalt zuzugreifen",
@@ -484,6 +485,17 @@
     "City":"Ort",
     "Region":"Bundesland",
     "Country":"Land"
+  },
+  "ICON_LABELS":{
+    "more_vert": "Optionen",
+    "close": "schließen",
+    "help_outline": "Hilfe",
+    "info_outline": "Information",
+    "view_module": "Kachelnansicht",
+    "list": "Listenansicht",
+    "keyboard_arrow_left": "zurück",
+    "keyboard_arrow_right": "weiter",
+    "keyboard_arrow_up": "nach oben"
   },
   "LANGUAGE":{
     "INTERNATIONAL": "International",

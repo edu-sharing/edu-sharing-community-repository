@@ -502,23 +502,7 @@ public class CollectionApi {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 
-			CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
-					collectionId);
-
-			if (collectionDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-
-			NodeDao nodeDao = NodeDao.getNode(repoDao, nodeId);
-			
-			if (nodeDao == null) {
-
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-			
-			collectionDao.addToCollection(nodeDao);
-
+			CollectionDao.addToCollection(repoDao,collectionId,nodeId);
 			return Response.status(Response.Status.OK).build();
 
     	} catch (Throwable t) {

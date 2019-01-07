@@ -219,6 +219,10 @@ $badgeWidth:250px;
   min-width:60px;
   transition: $transitionNormal all;
   @include clickable();
+  &:focus{
+    @include focusShadow();
+    border-radius: 0;
+  }
 }
 .moreOpen{
   position:absolute;
@@ -318,7 +322,7 @@ $badgeWidth:250px;
 .list .nodeCollection .row {
   background-color: transparent;
   &:focus{
-    outline: 2px dashed $primary;
+    @include setGlobalDashedFocus();
   }
 }
 

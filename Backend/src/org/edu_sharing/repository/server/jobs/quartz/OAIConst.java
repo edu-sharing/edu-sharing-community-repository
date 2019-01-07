@@ -36,6 +36,7 @@ public class OAIConst {
 	public static final String PARAM_OAI_CATALOG_IDS = "catalogids";
 	public static final String PARAM_RECORDHANDLER = "record_handler";
 	public static final String PARAM_BINARYHANDLER = "binary_handler";
+	public static final String PARAM_XMLDATA = "xml_data";
 	public static final String PARAM_IMPORTERCLASS = "importer_class";
 	public static final String PARAM_USERNAME = "username";
 	public static final String PARAM_OAI_IDS = "oai_ids";

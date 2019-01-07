@@ -13,6 +13,7 @@ import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.login.v1.model.Login;
 import org.edu_sharing.restservices.login.v1.model.LoginCredentials;
 import org.edu_sharing.restservices.login.v1.model.ScopeAccess;
+import org.edu_sharing.restservices.register.v1.model.RegisterExists;
 import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.authentication.ScopeAuthenticationService;
@@ -92,6 +93,28 @@ public class RegisterApi {
 		try{
 			RegisterDao.activate(key);
 			return Response.ok().build();
+		}
+		catch(Throwable t){
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@GET
+	@Path("/exists/{mail}")
+	@ApiOperation(
+			value = "Check if the given mail is already successfully registered"
+	)
+	@ApiResponses(
+			value = {
+					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = RegisterExists.class),
+					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			})
+
+	public Response mailExists(@Context HttpServletRequest req,
+									@ApiParam(value = "The mail (authority) of the user to check",required=true ) @PathParam("mail") String mail
+	) {
+		try{
+			RegisterExists result = RegisterDao.mailExists(mail);
+			return Response.ok().entity(result).build();
 		}
 		catch(Throwable t){
 			return ErrorResponse.createResponse(t);

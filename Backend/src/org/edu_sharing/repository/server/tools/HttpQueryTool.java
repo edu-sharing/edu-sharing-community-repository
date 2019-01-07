@@ -164,7 +164,7 @@ public class HttpQueryTool {
 			}
 			
 			if(returnCode > 400){
-				throw new RuntimeException("Error HTTP Status: "+returnCode);
+				throw new RuntimeException("Error HTTP Status: "+returnCode+" "+result);
 			}
 
 		}catch(HttpException e){

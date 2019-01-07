@@ -97,6 +97,8 @@ public class JobHandler {
 	}
 
 	public void updateJobName(JobDetail jobDetail, String name) {
+		if(jobDetail==null)
+			return;
 		for(JobInfo info : jobs){
 			if(info.getJobDetail().equals(jobDetail)){
 				jobDetail.setName(name);
@@ -472,13 +474,7 @@ public class JobHandler {
 
 		String jobName = jobClass.getSimpleName() + IMMEDIATE_JOBNAME_SUFFIX;
 
-		JobDataMap jdm = new JobDataMap();
-
-		if (params != null && params.size() > 0) {
-			for (Map.Entry<String, Object> entry : params.entrySet()) {
-				jdm.put(entry.getKey(), entry.getValue());
-			}
-		}
+		JobDataMap jdm = createJobDataMap(params);
 
 		Trigger trigger = TriggerUtils.makeImmediateTrigger(0, 1);
 		String triggerName = jobClass.getSimpleName() + "ImmediateTrigger";
@@ -517,6 +513,17 @@ public class JobHandler {
 		return iJobListener;
 	}
 
+	public static JobDataMap createJobDataMap(HashMap<String, Object> params) {
+		JobDataMap jdm = new JobDataMap();
+
+		if (params != null && params.size() > 0) {
+			for (Map.Entry<String, Object> entry : params.entrySet()) {
+				jdm.put(entry.getKey(), entry.getValue());
+			}
+		}
+		return jdm;
+	}
+
 	/**
 	 * schedules the job. used for cron triggers not for immediate triggers the
 	 * job detail name for the scheduler is jobClass.getSimpleName() +
@@ -526,13 +533,7 @@ public class JobHandler {
 	 */
 	private void scheduleJob(JobConfig jobConfig) throws SchedulerException {
 		//String jobName = 
-		JobDataMap jdm = new JobDataMap();
-
-		if (jobConfig.getParams() != null && jobConfig.getParams().size() > 0) {
-			for (Map.Entry<String, Object> entry : jobConfig.getParams().entrySet()) {
-				jdm.put(entry.getKey(), entry.getValue());
-			}
-		}
+		JobDataMap jdm = createJobDataMap(jobConfig.getParams());
 
 		if (jobConfig.getTrigger() != null) {
 			JobDetail jobDetail = new JobDetail(jobConfig.getJobname(), null, jobConfig.getJobClass());

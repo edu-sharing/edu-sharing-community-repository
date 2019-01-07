@@ -1,5 +1,7 @@
 package org.edu_sharing.restservices;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.edu_sharing.restservices.register.v1.model.RegisterExists;
 import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
 import org.edu_sharing.service.register.RegisterServiceFactory;
 
@@ -41,6 +43,19 @@ public class RegisterDao {
             }
         }catch(Throwable t){
             throw DAOException.mapping(t);
+        }
+    }
+
+    public static RegisterExists mailExists(String mail) throws DAOException {
+        try {
+            RegisterExists exists = new RegisterExists();
+            AuthenticationUtil.runAsSystem(() -> {
+                exists.setExists(RegisterServiceFactory.getLocalService().userExists(mail));
+                return null;
+            });
+            return exists;
+        }catch(Exception e){
+            throw DAOException.mapping(e);
         }
     }
 }

@@ -29,4 +29,6 @@ public interface Importer {
 	public void setJob(ImporterJob importerJob);
 
 	public void setMetadataSetId(String metadataSetId);
+
+	RecordHandlerInterface getRecordHandler();
 }

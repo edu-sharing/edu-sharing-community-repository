@@ -13,7 +13,7 @@
     <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="profile-background" [src]="user.profile.avatar+'&crop=true&width=400&height=400'">
     <img *ngIf="edit && avatarFile" class="profile-background" [src]="avatarImage">
     <a class="edit clickable" *ngIf="isMe && !edit && editProfile" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></a>
-    <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i class="material-icons">close</i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
+    <a class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon iconId="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></a>
     <user-avatar *ngIf="!edit"
      [user]="user"
     ></user-avatar>

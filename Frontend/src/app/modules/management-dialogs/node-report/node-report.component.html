@@ -1,7 +1,7 @@
 <div class="dialog darken" [@fade]="this"></div>
 <div class="card center-card card-action card-wide" [@cardAnimation]="this">
   <div class="card-content">
-    <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+    <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
     <div class="card-title">{{'NODE_REPORT.TITLE' | translate }}</div>
     <div *ngIf="_node" class="card-scroll">
       <form (ngSubmit)="report()">
@@ -24,7 +24,7 @@
   </div>
 
   <div class="card-action">
-    <a class="waves-effect waves-light btn" (click)="report()">{{'NODE_REPORT.REPORT' | translate }}</a>
-    <a class="btn-flat" (click)="cancel()">{{'CANCEL' | translate }}</a>
+    <a class="waves-effect waves-light btn" (click)="report()"  tabindex="0" (keyup.enter)="report()">{{'NODE_REPORT.REPORT' | translate }}</a>
+    <a class="btn-flat" tabindex="0" (click)="cancel()" (keyup.enter)="cancel()">{{'CANCEL' | translate }}</a>
   </div>
 </div>

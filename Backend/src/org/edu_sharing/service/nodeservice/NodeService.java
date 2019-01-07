@@ -62,8 +62,10 @@ public interface NodeService {
 
     public List<ChildAssociationRef> getChildrenChildAssociationRefAssoc(String parentID, String asoocName, List<String> filter, SortDefinition sortDefinition);
 
-    public void createVersion(String nodeId, HashMap _properties) throws Exception;
-	
+	public void createVersion(String nodeId, HashMap _properties) throws Exception;
+
+	public void deleteVersionHistory(String nodeId) throws Exception;
+
 	public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
 			final String property) throws Exception;
 	

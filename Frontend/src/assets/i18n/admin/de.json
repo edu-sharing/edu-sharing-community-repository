@@ -123,6 +123,7 @@
       "OAI":"Datenimport OAI-Quelle",
       "OAI_STARTED":"OAI Import-Job gestartet",
       "OPEN_JOBS":"Status anzeigen",
+      "OAI_XML":"Einzelne OAI-XML-Datei importieren:",
       "OAI_URL":"OAI Base URL:",
       "OAI_URL_EXAMPLE":"http://server.domain/oai/provider",
       "OAI_NO_URL":"OAI Base URL fehlt",
@@ -203,7 +204,7 @@
       "LOG_LEVEL_3":"Error",
       "LOG_LEVEL_0":"Fatal",
       "NAMES":{
-        "RemoveImportedObjects":"Alle importierten Nodes löschen",
+        "RemoveImportedObjectsJob":"Alle importierten Nodes löschen",
         "RemoveOrphanCollectionReferencesJob":"Alle Sammlungsreferenzen mit fehlenden Originalobjekt löschen"
       }
     },

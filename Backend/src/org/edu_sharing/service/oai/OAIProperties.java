@@ -1,5 +1,6 @@
 package org.edu_sharing.service.oai;
 
+import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 
 public class OAIProperties {
@@ -9,14 +10,14 @@ public class OAIProperties {
 	public static String OAI_PATH = "oai.path";
 	String oaiPath = null;
 	
+	Logger logger = Logger.getLogger(OAIProperties.class);
 	
 	private OAIProperties() {
 		synchronized (OAIProperties.class) {
 			try {
 				oaiPath = PropertiesHelper.getProperty(OAI_PATH, PROPERTY_FILE, PropertiesHelper.TEXT);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.debug("could not load " + PROPERTY_FILE);
 			}
 		}
 	}

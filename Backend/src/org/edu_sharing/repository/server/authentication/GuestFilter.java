@@ -68,7 +68,7 @@ public class GuestFilter implements javax.servlet.Filter {
 				}
 			}
 		} catch (Throwable e) {
-			logger.warn("guest credentials seem to be wrong");
+			logger.warn("guest credentials seem to be wrong",e);
 		}
 
 		chain.doFilter(req, res);

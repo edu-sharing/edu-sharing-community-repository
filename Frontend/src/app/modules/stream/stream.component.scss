@@ -204,7 +204,7 @@
     padding-top: 67%;
     background-size: cover;
     &:focus{
-     @include setGlobalFocus();
+        @include setGlobalDashedFocus();
     }
 }
 

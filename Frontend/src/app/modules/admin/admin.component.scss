@@ -2,6 +2,7 @@
 
 
 $sidenavWidth:250px;
+$sidenavWidthMobile:66px;
 .main{
   display: flex;
   width: 100%;
@@ -40,6 +41,10 @@ $sidenavWidth:250px;
     margin-left: $sidenavWidth;
     flex-grow: 1;
     padding:20px 0;
+    .btn-flat{
+      min-height: 36px;
+      height: auto;
+    }
   }
 }
 .content{
@@ -553,6 +558,20 @@ $sidenavWidth:250px;
   position: fixed;
   z-index:10;
 }
+@media all and (max-width: $mobileWidth+$mobileStage*1) {
+  .main {
+    .main-nav {
+      .button > span {
+        display: none;
+      }
+      width: $sidenavWidthMobile;
+    }
+    .main-content{
+      margin-left: $sidenavWidthMobile;
+    }
+  }
+}
+
 @media all and (max-width: $mobileWidth+$mobileStage*3) {
   .applications {
     .file{

@@ -40,7 +40,7 @@ public abstract class AbstractJob implements Job,InterruptableJob {
 	
 	boolean isStarted = false;
 
-	private JobDataMap jobDataMap;
+	protected JobDataMap jobDataMap;
 
 	public JobDataMap getJobDataMap() {
 		return jobDataMap;

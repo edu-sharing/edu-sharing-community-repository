@@ -46,9 +46,9 @@ public class PersistentHandlerDB implements PersistentHandlerInterface{
 		dbStuff.cleanUp();
 	}
 	
-	public String safe(Map props, String cursor, String set) throws Throwable{
+	public String safe(RecordHandlerInterfaceBase recordHandler, String cursor, String set) throws Throwable{
 		
-		HashMap<String,String> tableStruct = this.getTableStructure(null, props, null);
+		HashMap<String,String> tableStruct = this.getTableStructure(null, recordHandler.getProperties(), null);
 			
 		String checkTableExistsSql = "show tables";
 		
@@ -123,7 +123,7 @@ public class PersistentHandlerDB implements PersistentHandlerInterface{
 		
 		return "";
 	}
-	
+
 	class DBStuff{
 		
 		Connection con = null;

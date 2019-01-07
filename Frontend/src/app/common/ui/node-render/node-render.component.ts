@@ -365,7 +365,7 @@ export class NodeRenderComponent implements EventListener{
   private addComments(){
       jQuery('.edusharing_rendering_metadata_header').append(`
       <div class="nodeDetails">
-        <div class="item" onclick="window.nodeRenderComponentRef.component.showComments()">
+        <div class="item" tabindex="0" onclick="window.nodeRenderComponentRef.component.showComments()" onkeypress="(event.keyCode==13)?window.nodeRenderComponentRef.component.showComments():0">
           <i class="material-icons">message</i><div>`+this._node.commentCount+` <span>`+this.translate.instant("COMMENTS_"+(this._node.commentCount==1 ? 'SINGLE' : 'MULTIPLE'))+`</span></div>
         </div>
       </div>

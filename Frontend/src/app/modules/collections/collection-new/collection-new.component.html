@@ -74,7 +74,7 @@
   <section *ngIf="newCollectionStep==STEP_GENERAL" class="card center-card card-high card-action collectionShadow collection-new-container collection-basic">
 
       <div class="card-content">
-          <div class="card-cancel" (click)="goBack()"><i class="material-icons">close</i></div>
+          <div class="card-cancel" tabindex="0" (keyup.enter)="goBack()" (click)="goBack()"><i icon iconId="close" aria="true"></i></div>
         <div class="card-title">
           {{ 'collectionNew_preview' | translate }}
         </div>

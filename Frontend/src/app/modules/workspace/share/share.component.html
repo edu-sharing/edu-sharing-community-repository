@@ -1,10 +1,9 @@
 <div class="dialog darken" [@fade]="this"></div>
   <div class="card center-card card-action card-high card-wide" [@cardAnimation]="this">
     <div class="card-content">
-      <div class="card-cancel" (click)="cancel()"><i class="material-icons">close</i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon iconId="close" aria="true"></i></div>
       <div class="card-title">{{'WORKSPACE.SHARE.TITLE' | translate }}</div>
-      <div class="share-link" (click)="openLink()" *ngIf="!isCollection()"><i class="material-icons">link</i> <span>{{'WORKSPACE.OPTION.SHARE_LINK' | translate}}</span></div>
-
+      <div class="share-link" tabindex="0" (click)="openLink()" (keyup.enter)="openLink()" *ngIf="!isCollection()"><i icon iconId="link"></i> <span>{{'WORKSPACE.OPTION.SHARE_LINK' | translate}}</span></div>
       <div class="row">
         <div class="col s12">
           <ul class="tabs">
@@ -235,8 +234,8 @@
     <div class="card-action">
       <!--State-->
       <div class="state" *ngIf="initialState">
-        <div *ngIf="getState()=='PRIVATE'" [class.state-changed]="isStateModified()"class="show-state"><i class="material-icons">lock</i><span> {{'WORKSPACE.SHARE.STATE.PRIVATE' | translate}}</span></div>
-        <div *ngIf="getState()=='SHARED'" [class.state-changed]="isStateModified()" class="show-state"><i class="material-icons">group</i><span> {{'WORKSPACE.SHARE.STATE.SHARED' | translate}}</span></div>
+        <div *ngIf="getState()=='PRIVATE'" [class.state-changed]="isStateModified()" class="show-state"><i icon iconId="lock"></i><span> {{'WORKSPACE.SHARE.STATE.PRIVATE' | translate}}</span></div>
+        <div *ngIf="getState()=='SHARED'" [class.state-changed]="isStateModified()" class="show-state"><i icon iconId="group"></i><span> {{'WORKSPACE.SHARE.STATE.SHARED' | translate}}</span></div>
         <div *ngIf="getState()=='PUBLIC'" [class.state-changed]="isStateModified()" class="show-state"><i class="material-icons" style="color: #42CA8D">public</i><span> {{'WORKSPACE.SHARE.STATE.PUBLIC' | translate}}</span></div>
       </div>
         <!--/ <i class="material-icons"></i>-->
@@ -260,7 +259,7 @@
 <div class="dialog darken dialog-collections" [@fade]="showCollections" *ngIf="showCollections"></div>
 <div class="card center-card card-action card-high card-collections" [@cardAnimation]="showCollections" *ngIf="showCollections">
   <div class="card-content">
-    <div class="card-cancel" (click)="showCollections=false"><i class="material-icons">close</i></div>
+    <div class="card-cancel" (click)="showCollections=false" tabindex="0" (keyup.enter)="showCollections=false"><i icon iconId="close" aria="true"></i></div>
     <span class="card-title">{{'WORKSPACE.SHARE.COLLECTIONS.TITLE' | translate }}</span>
     <listTable
       (clickRow)="openCollection($event.node)"

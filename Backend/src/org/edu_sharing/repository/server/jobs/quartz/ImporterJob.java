@@ -55,7 +55,6 @@ public class ImporterJob extends AbstractJob {
 	public ImporterJob() {
 
 	}
-
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		super.execute(context);
@@ -64,23 +63,25 @@ public class ImporterJob extends AbstractJob {
 		if(username == null || username.trim().equals("")) {
 			throw new JobExecutionException("no user provided");
 		}
-		
+
 		RunAsWork<Void> runAs = new RunAsWork<Void>() {
-			
+
 			@Override
 			public Void doWork() throws Exception {
-				start(context);
+				start(context,context.getJobDetail().getJobDataMap());
 				return null;
 			}
-			
-		}; 
+
+		};
 		AuthenticationUtil.runAs(runAs, username);
 		
 	}
-	
-	private void start(JobExecutionContext context) {
+	public String start(JobDataMap jobDataMap){
+		this.jobDataMap=jobDataMap;
+		return start(null,jobDataMap);
+	}
+	private String start(JobExecutionContext context, Map jobDataMap) {
 		logger.info("starting");
-		Map jobDataMap = context.getJobDetail().getJobDataMap();
 
 		Object setsParamObj = jobDataMap.get(OAIConst.PARAM_OAI_SETS);
 		// String setsParam = (String) jobDataMap.get("sets");
@@ -92,17 +93,18 @@ public class ImporterJob extends AbstractJob {
 		}
 
 		String urlImport = null;
-
-		for (String set : splitted) {
-			if (set.contains("http://")) {
-				urlImport = set.trim();
+		String[] sets = null;
+		if(splitted!=null) {
+			for (String set : splitted) {
+				if (set.contains("http://")) {
+					urlImport = set.trim();
+				}
 			}
+			if (urlImport != null) {
+				splitted.remove(urlImport);
+			}
+			sets = splitted.toArray(new String[splitted.size()]);
 		}
-		if (urlImport != null) {
-			splitted.remove(urlImport);
-		}
-
-		String[] sets = splitted.toArray(new String[splitted.size()]);
 		String oaiBaseUrl = (String) jobDataMap.get(OAIConst.PARAM_OAI_BASE_URL);
 		String metadataPrefix = (String) jobDataMap.get(OAIConst.PARAM_OAI_METADATA_PREFIX);
 		metadataPrefix = (metadataPrefix == null || metadataPrefix.trim().equals("")) ? "oai_lom-de" : metadataPrefix;
@@ -117,9 +119,50 @@ public class ImporterJob extends AbstractJob {
 		
 		String[] idArr = (oaiIds != null) ? oaiIds.split(",") : null;
 
+
+		byte[] xmlData= (byte[]) jobDataMap.get(OAIConst.PARAM_XMLDATA);
+
+
 		this.context = context;
 
+		if(xmlData!=null){
+			return start(xmlData,recordHandlerClass,binaryHandlerClass);
+		}
 		start(urlImport, oaiBaseUrl, metadataSetId, metadataPrefix, sets, recordHandlerClass,binaryHandlerClass, importerClass,idArr);
+		return null;
+	}
+
+	private String start(byte[] xmlData, String recordHandlerClass, String binaryHandlerClass){
+		try {
+			OAIPMHLOMImporter importer = new OAIPMHLOMImporter();
+			Constructor<RecordHandlerInterface> recordHandler = null;
+			Constructor<BinaryHandler> binaryHandler = null;
+
+			if (recordHandlerClass != null) {
+				Class tClass = Class.forName(recordHandlerClass);
+				recordHandler = tClass.getConstructor(String.class);
+			} else {
+				recordHandler = (Constructor) RecordHandlerLOM.class.getConstructor(String.class);
+			}
+			if (binaryHandlerClass != null) {
+				Class tClass = Class.forName(binaryHandlerClass);
+				binaryHandler = tClass.getConstructor();
+			} else {
+				binaryHandler = null;
+			}
+
+			logger.info("importer:" + importer.getClass().getName());
+
+			importer.setBinaryHandler(binaryHandler);
+			importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer));
+			importer.setRecordHandler(recordHandler);
+			importer.setJob(this);
+			importer.setSet("xml-import");
+			return importer.startImport(xmlData);
+		}catch(Throwable t){
+			logger.error(t.getMessage(),t);
+			return null;
+		}
 	}
 
 	protected void start(String urlImport, String oaiBaseUrl, String metadataSetId, String metadataPrefix,
@@ -135,7 +178,7 @@ public class ImporterJob extends AbstractJob {
 					importer = new OAIPMHLOMImporter();
 				}
 				try {
-					JobHandler.getInstance().updateJobName(context.getJobDetail(), "Importer Job " + importer.getClass().getSimpleName() + " " + new URL(oaiBaseUrl).getHost());
+					JobHandler.getInstance().updateJobName(context==null ? null : context.getJobDetail(), "Importer Job " + importer.getClass().getSimpleName() + " " + new URL(oaiBaseUrl).getHost());
 				} catch (Throwable t) {
 				}
 
@@ -162,7 +205,7 @@ public class ImporterJob extends AbstractJob {
 				importer.setMetadataPrefix(metadataPrefix);
 				importer.setNrOfRecords(-1);
 				importer.setNrOfResumptions(-1);
-				importer.setPersistentHandler(new PersistentHandlerEdusharing(this));
+				importer.setPersistentHandler(new PersistentHandlerEdusharing(this,importer));
 				importer.setSet(set);
 				importer.setMetadataSetId(metadataSetId);
 				importer.setRecordHandler(recordHandler);

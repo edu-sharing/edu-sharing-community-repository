@@ -25,6 +25,7 @@ export class RegisterDoneComponent{
     email = '';
     keyInput = '';
     private _keyUrl = '';
+    private static STATUS_INTERVAL = 5000;
     get keyUrl(){
         return this._keyUrl;
     }
@@ -62,7 +63,26 @@ export class RegisterDoneComponent{
                 private cordova: CordovaService,
                 private locator: RestLocatorService,
                 private router: Router
-    ) {}
+    ) {
+        setTimeout(()=>this.checkStatus(),RegisterDoneComponent.STATUS_INTERVAL);
+    }
+
+    // loop and check if the user has already registered in an other tab
+    private checkStatus() {
+        if(this.inputState!='done') {
+            setTimeout(()=>this.checkStatus(),RegisterDoneComponent.STATUS_INTERVAL);
+            return;
+        }
+        this.register.exists(this.email).subscribe((status)=>{
+            if(status.exists){
+                this.router.navigate([UIConstants.ROUTER_PREFIX,"login"],{queryParams:{"username":this.email}});
+                return;
+            }
+            setTimeout(()=>this.checkStatus(),RegisterDoneComponent.STATUS_INTERVAL);
+        },(error)=>{
+            setTimeout(()=>this.checkStatus(),RegisterDoneComponent.STATUS_INTERVAL);
+        });
+    }
     private activate(keyUrl: string) {
         this.loading=true;
         if(this.inputState=='done') {
