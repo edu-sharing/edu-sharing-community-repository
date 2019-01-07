@@ -9,9 +9,11 @@ import java.util.Map;
 public class TrackingNode {
     private final Node node;
     private final Map<TrackingService.EventType, Integer> counts;
+    private final String date;
 
-    public TrackingNode(Node node, Map<TrackingService.EventType,Integer> counts){
+    public TrackingNode(Node node, String date, Map<TrackingService.EventType,Integer> counts){
         this.node=node;
+        this.date=date;
         this.counts=counts;
     }
 
@@ -21,5 +23,9 @@ public class TrackingNode {
 
     public Map<TrackingService.EventType, Integer> getCounts() {
         return counts;
+    }
+
+    public String getDate() {
+        return date;
     }
 }
