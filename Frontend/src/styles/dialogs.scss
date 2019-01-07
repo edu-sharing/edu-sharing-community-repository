@@ -236,6 +236,12 @@ input[type=search]{
     padding:0 1.5rem;
   }
 }
+@media screen and (max-width: ($mobileHeightLandscape)) {
+  .center-card .btn,
+  .center-card .btn-flat{
+    padding:0 1.2rem;
+  }
+}
 @media screen and (max-height: ($mobileHeight)) {
   .card:not(.card-low), .card-high {
     top: 0;
