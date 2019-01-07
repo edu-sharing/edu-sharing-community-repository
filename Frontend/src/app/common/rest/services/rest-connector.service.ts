@@ -415,9 +415,11 @@ export class RestConnectorService {
               window.location.reload();
           });
       }));
-      buttons.push(new DialogButton('LOGIN_APP.NOTINTERNET_EXIT',DialogButton.TYPE_CANCEL,()=>{
-          this.cordova.exitApp();
-      }));
+      if(this.cordova.isAndroid()) {
+          buttons.push(new DialogButton('LOGIN_APP.NOTINTERNET_EXIT', DialogButton.TYPE_CANCEL, () => {
+              this.cordova.exitApp();
+          }));
+      }
       this.toast.showModalDialog('LOGIN_APP.NOTINTERNET','LOGIN_APP.NOTINTERNET_TEXT',buttons,true,()=>{
           this.cordova.exitApp();
       });
