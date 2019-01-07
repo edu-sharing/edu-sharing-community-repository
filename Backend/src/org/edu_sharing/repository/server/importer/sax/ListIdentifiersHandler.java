@@ -231,7 +231,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 					((RecordHandlerInterface)recordHandler).handleRecord(new ByteArrayInputStream(result.getBytes(Charset.forName("utf-8"))));
 				
 					if (recordHandler.getProperties().size() > 0) {
-						persistentHandler.safe(recordHandler.getProperties(), cursor, set);
+						persistentHandler.safe(recordHandler, cursor, set);
 					} else {
 						logger.warn("no properties found for object:" + replId);
 					}
@@ -249,10 +249,10 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 							Node nodeRecord = (Node)xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
 							((org.edu_sharing.repository.server.importer.RecordHandlerInterface)recordHandler).handleRecord(nodeRecord, cursor, set);
 							
-							String nodeId = persistentHandler.safe(recordHandler.getProperties(), cursor, set);
+							String nodeId = persistentHandler.safe((org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler, cursor, set);
 							if(nodeId != null) {
 								if(binaryHandler != null){
-									binaryHandler.safe(nodeId, recordHandler.getProperties(),nodeRecord);
+									binaryHandler.safe(nodeId, (org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler,nodeRecord);
 								}
 								new MCAlfrescoAPIClient().createVersion(nodeId,null);
 							}

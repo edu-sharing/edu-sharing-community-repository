@@ -160,6 +160,7 @@
   :host /deep/ .collections {
     width: 100%;
     overflow-x: auto;
+    @include iosScrolling();
     .list {
       width: max-content;
     }

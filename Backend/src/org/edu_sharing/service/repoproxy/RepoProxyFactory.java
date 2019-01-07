@@ -7,7 +7,6 @@ public class RepoProxyFactory {
 	static ApplicationContext applicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
 	public static RepoProxy getRepoProxy() {
 		RepoProxy repoProxy = (RepoProxy)applicationContext.getBean("repoProxy");
-		System.out.println("repoproxy:" + repoProxy.getClass().getName());
 		return repoProxy;
 	}
 }

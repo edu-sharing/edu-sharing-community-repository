@@ -34,16 +34,12 @@ import java.lang.reflect.Constructor;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
@@ -57,6 +53,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -205,9 +202,9 @@ public class OAIPMHLOMImporter implements Importer{
 				Node nodeRecord = nodeList.item(i);
 				RecordHandlerInterface handler = getRecordHandler();
 				handler.handleRecord(nodeRecord,cursor,set);
-				String nodeId = persistentHandler.safe(handler.getProperties(), cursor, set);
+				String nodeId = persistentHandler.safe(handler, cursor, set);
 				if(getBinaryHandler() != null){
-					getBinaryHandler().safe(nodeId, handler.getProperties(),nodeRecord);
+					getBinaryHandler().safe(nodeId, handler,nodeRecord);
 				}
 				new MCAlfrescoAPIClient().createVersion(nodeId, null);
 			}
@@ -371,18 +368,28 @@ public class OAIPMHLOMImporter implements Importer{
 				return;
 			}
 			logger.debug("Fetching oai "+identifier+" took "+(System.currentTimeMillis()-time)+" ms");
+			handleRecordDoc(doc,cursor,identifier);
+		}catch(org.xml.sax.SAXParseException e){
+			logger.error("SAXParseException occured: cursor:"+cursor+ " set:"+set +" identifier:"+ identifier );
+			logger.error(e.getMessage(),e);
+		}catch(Throwable e){
+			logger.error("Throwable occured at set: "+set+", identifier: "+identifier);
+			logger.error(e.getMessage(),e);
+		}
+	}
+
+	/**
+	 *
+	 * @param doc
+	 * @param cursor
+	 * @param identifier may be null, just for logging
+	 */
+	protected void handleRecordDoc(Document doc,String cursor,String identifier){
+		try{
 			String errorcode = (String)xpath.evaluate("/OAI-PMH/error", doc, XPathConstants.STRING);
 			if(errorcode == null || errorcode.trim().equals("")){
 				Node nodeRecord = getRecordNodeFromDoc(doc);
-				RecordHandlerInterface handler = getRecordHandler();
-				handler.handleRecord(nodeRecord, cursor, set);
-				String nodeId = persistentHandler.safe(handler.getProperties(), cursor, set);
-				if(nodeId != null) {
-					if(getBinaryHandler() != null){
-						getBinaryHandler().safe(nodeId, handler.getProperties(),nodeRecord);
-					}
-					new MCAlfrescoAPIClient().createVersion(nodeId,null);
-				}
+				handleRecordInternal(cursor, nodeRecord);
 			}else{
 				logger.error(errorcode);
 			}
@@ -395,12 +402,32 @@ public class OAIPMHLOMImporter implements Importer{
 		}
 	}
 
+	private String handleRecordInternal(String cursor, Node nodeRecord) throws Throwable {
+		RecordHandlerInterface handler = getRecordHandler();
+		handler.handleRecord(nodeRecord, cursor, set);
+		String nodeId = persistentHandler.safe(handler, cursor, set);
+		if(nodeId != null) {
+			if(getBinaryHandler() != null){
+				getBinaryHandler().safe(nodeId, handler,nodeRecord);
+			}
+			if(job!=null && job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE)) {
+				NodeServiceFactory.getLocalService().deleteVersionHistory(nodeId);
+			}
+			NodeServiceFactory.getLocalService().createVersion(nodeId,null);
+		}
+		return nodeId;
+	}
+
 	public Node getRecordNodeFromDoc(Document doc) throws XPathExpressionException {
 		return (Node) xpath.evaluate("/OAI-PMH/GetRecord/record", doc, XPathConstants.NODE);
 	}
 
 	public Document getRecordAsDoc(String identifier) throws ParserConfigurationException, SAXException, IOException {
 		String result = getRecordAsString(identifier);
+		return stringToXML(result);
+	}
+
+	private Document stringToXML(String result) throws ParserConfigurationException, SAXException, IOException {
 		if(result==null)
 			return null;
 		DocumentBuilder builder = factory.newDocumentBuilder();
@@ -452,7 +479,7 @@ public class OAIPMHLOMImporter implements Importer{
 	            
 	            xpath.reset();
 	            recordHandlerLom.handleRecord(standaloneRecordNode, new Integer(cursor).toString(), setName);
-	            persistentHandler.safe(recordHandlerLom.getProperties(), new Integer(cursor).toString(), setName);
+	            persistentHandler.safe(recordHandlerLom, new Integer(cursor).toString(), setName);
 				
 			} catch(Throwable e) {
 				logger.error(e.getMessage(),e);
@@ -490,10 +517,9 @@ public class OAIPMHLOMImporter implements Importer{
 		this.persistentHandler = persistentHandler;
 	}
 
-	private RecordHandlerInterface getRecordHandler(){
+	public RecordHandlerInterface getRecordHandler(){
 		try {
 			RecordHandlerInterface handler = this.recordHandler.newInstance(metadataSetId);
-			handler.setImporter(this);
 			return handler;
 		} catch (Exception e) {
 			logger.error(e);
@@ -524,5 +550,26 @@ public class OAIPMHLOMImporter implements Importer{
 	@Override
 	public void setMetadataSetId(String metadataSetId) {
 		this.metadataSetId = metadataSetId;
+	}
+
+	public String startImport(byte[] xml) throws Throwable {
+		Document xmlRecord = stringToXML(new String(xml));
+		Node main = xmlRecord.getFirstChild();
+		if(!main.getNodeName().equals("metadata")){
+			Document newDoc = factory.newDocumentBuilder().newDocument();
+			Node metadata = newDoc.appendChild(newDoc.createElement("metadata"));
+			metadata.appendChild(newDoc.adoptNode(main));
+			xmlRecord=newDoc;
+			//xmlRecord.removeChild(main);
+		}
+
+		TransformerFactory tf = TransformerFactory.newInstance();
+		Transformer transformer = tf.newTransformer();
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		StringWriter writer = new StringWriter();
+		transformer.transform(new DOMSource(xmlRecord), new StreamResult(writer));
+		String output = writer.getBuffer().toString();
+		logger.info("Import xml "+output);
+		return handleRecordInternal(null,xmlRecord);
 	}
 }

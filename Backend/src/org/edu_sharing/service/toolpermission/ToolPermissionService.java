@@ -347,6 +347,7 @@ public class ToolPermissionService {
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
 		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
+		toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC);
 
 		addConnectorToolpermissions(toInit);
 		return toInit;

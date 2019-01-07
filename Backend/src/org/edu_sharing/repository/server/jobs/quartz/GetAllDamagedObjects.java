@@ -72,7 +72,7 @@ public class GetAllDamagedObjects extends AbstractJob {
 		
 		List<NodeRef> allNodes = null;
 		try{
-			allNodes = new PersistentHandlerEdusharing(this).getAllNodesInImportfolder();
+			allNodes = new PersistentHandlerEdusharing(this,null).getAllNodesInImportfolder();
 		}catch(Throwable e){
 			logger.error("error while getting all nodes in Import Folder",e);
 		}

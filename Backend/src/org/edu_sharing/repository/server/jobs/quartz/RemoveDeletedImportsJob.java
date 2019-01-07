@@ -77,7 +77,7 @@ public class RemoveDeletedImportsJob extends AbstractJob {
 			
 			
 			
-			List<NodeRef> allNodes = new PersistentHandlerEdusharing(this).getAllNodesInImportfolder();
+			List<NodeRef> allNodes = new PersistentHandlerEdusharing(this,null).getAllNodesInImportfolder();
 			new ImportCleaner(oaiBaseUrl, catalogsList, metadataPrefix).removeDeletedImportedObjects(allNodes);
 			
 		} catch (Throwable e) {

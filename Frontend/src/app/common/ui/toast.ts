@@ -53,7 +53,7 @@ export class Toast{
     });
   }
   private openDetails(buttons:DialogButton[]=null){
-    this.onShowModal({title:this.dialogTitle,message:this.dialogMessage,translation:this.dialogParameters,buttons:buttons});
+    this.onShowModal({title:this.dialogTitle,message:this.dialogMessage,translation:this.dialogParameters,buttons:buttons,isCancelable:true});
   }
 
   private getToastOptions(text: string) {
@@ -189,7 +189,7 @@ export class Toast{
         text += '<br /><a onclick="window[\'toastComponent\'].openDetails()">' + this.translate.instant("DETAILS") + '</a>';
       }
       text=this.handleAdditional(text,additional);
-      this.toasty.error(this.getToastOptions(text))
+      this.toasty.error(this.getToastOptions(text));
     });
 
   }
@@ -207,4 +207,8 @@ export class Toast{
       }
       return text;
   }
+
+    showModalDialog(title: string,message: string,buttons : DialogButton[],isCancelable=true,onCancel:Function=null,messageParamters:any=null) {
+        this.onShowModal({title:title,message:message,isCancelable:isCancelable,translation:messageParamters,onCancel:onCancel,buttons:buttons});
+    }
 }

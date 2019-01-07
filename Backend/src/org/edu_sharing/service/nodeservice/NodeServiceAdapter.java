@@ -93,6 +93,11 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
+	public void deleteVersionHistory(String nodeId) throws Exception {
+
+	}
+
+	@Override
 	public void writeContent(StoreRef store, String nodeID, InputStream content, String mimetype, String _encoding,
 			String property) throws Exception {
 	}

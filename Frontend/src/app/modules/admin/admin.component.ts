@@ -91,6 +91,7 @@ export class AdminComponent {
   private excelFile: File;
   private collectionsFile: File;
   private uploadTempFile: File;
+  private uploadOaiFile: File;
   public xmlAppKeys: string[];
   public currentApp: string;
   private currentAppXml: string;
@@ -270,6 +271,9 @@ export class AdminComponent {
   public updateUploadTempFile(event:any){
     this.uploadTempFile=event.target.files[0];
   }
+    public updateUploadOaiFile(event:any){
+        this.uploadOaiFile=event.target.files[0];
+    }
   public updateCollectionsFile(event:any){
     this.collectionsFile=event.target.files[0];
   }
@@ -461,7 +465,7 @@ export class AdminComponent {
   }
   public refreshCache(sticky:boolean){
     this.globalProgress=true;
-    this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : "",sticky).subscribe(()=>{
+    this.admin.refreshCache(this.parentNode ? this.parentNode.ref.id : RestConstants.USERHOME,sticky).subscribe(()=>{
       this.globalProgress=false;
       this.toast.toast('ADMIN.IMPORT.CACHE_REFRESHED');
     },(error:any)=>{
@@ -482,23 +486,37 @@ export class AdminComponent {
     if(this.oaiSave){
       this.storage.set('admin_oai',this.oai);
     }
-    this.admin.importOAI(this.oai.url,this.oai.set,this.oai.prefix,this.oai.className,this.oai.importerClassName,
-        this.oai.recordHandlerClassName,this.oai.binaryHandlerClassName,this.oai.metadata,
-        this.oai.file,this.oai.ids,this.oai.forceUpdate).subscribe(()=>{      this.globalProgress=false;
-        let additional:any={
-            link:{
-                caption:"ADMIN.IMPORT.OPEN_JOBS",
-                callback:()=>this.setTab('JOBS')
-            },
-        };
-      this.toast.toast('ADMIN.IMPORT.OAI_STARTED',null,null,null, additional);
-    },(error:any)=>{
-      this.globalProgress=false;
-      this.toast.error(error);
-    })
+    if(this.uploadOaiFile){
+        this.admin.importOAIXML(this.uploadOaiFile,this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName).subscribe((node)=>{
+          this.debugNode(node);
+          this.globalProgress=false;
+        },(error)=>{
+          this.toast.error(error);
+            this.globalProgress=false;
+        })
+    }
+    else {
+        this.admin.importOAI(this.oai.url, this.oai.set, this.oai.prefix, this.oai.className, this.oai.importerClassName,
+            this.oai.recordHandlerClassName, this.oai.binaryHandlerClassName, this.oai.metadata,
+            this.oai.file, this.oai.ids, this.oai.forceUpdate).subscribe(() => {
+            this.globalProgress = false;
+            let additional: any = {
+                link: {
+                    caption: "ADMIN.IMPORT.OPEN_JOBS",
+                    callback: () => this.setTab('JOBS')
+                },
+            };
+            this.toast.toast('ADMIN.IMPORT.OAI_STARTED', null, null, null, additional);
+        }, (error: any) => {
+            this.globalProgress = false;
+            this.toast.error(error);
+        });
+    }
   }
 
   private oaiPreconditions() {
+    if(this.uploadOaiFile)
+      return true;
     if(!this.oai.url) {
       this.toast.error(null, 'ADMIN.IMPORT.OAI_NO_URL');
       return false;
@@ -733,7 +751,14 @@ export class AdminComponent {
             this.updateJobLogs();
         })
     }
-
+    getMajorVersion(version:string){
+      let v=version.split(".");
+      if(v.length<3)
+        return v;
+      v.splice(v.length-1,1);
+      console.log(v);
+      return v.concat(".");
+    }
     private runChecks() {
         this.systemChecks=[];
 
@@ -741,7 +766,7 @@ export class AdminComponent {
         this.connector.getAbout().subscribe((about)=>{
             this.systemChecks.push({
               name:"RENDERING",
-              status:about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
+              status:this.getMajorVersion(about.version.repository)==this.getMajorVersion(about.version.renderservice) ? 'OK' : 'FAIL',
               translate:about.version
             });
         },(error)=>{
@@ -841,7 +866,7 @@ export class AdminComponent {
     }
 
     private prepareJobClasses() {
-        let job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjects",this.translate.instant("ADMIN.JOBS.NAMES.RemoveImportedObjects"));
+        let job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveImportedObjectsJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveImportedObjectsJob"));
         job.secondaryTitle=job.id;
         this.jobClasses.push(job);
         job=new SuggestItem("org.edu_sharing.repository.server.jobs.quartz.RemoveOrphanCollectionReferencesJob",this.translate.instant("ADMIN.JOBS.NAMES.RemoveOrphanCollectionReferencesJob"));

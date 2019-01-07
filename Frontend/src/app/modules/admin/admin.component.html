@@ -219,6 +219,13 @@
   </div>
   <div class="heading"><i class="material-icons">description</i><span>{{'ADMIN.IMPORT.OAI' | translate}}</span></div>
   <div class="oai">
+      <label>{{'ADMIN.IMPORT.OAI_XML' | translate}}</label>
+      <input #uploadOaiSelect type="file" style="display:none" id="uploadOaiSelect" (change)="updateUploadOaiFile($event)">
+      <div class="inputGroup">
+          <a class="btn-flat btn-shadow" (click)="uploadOaiSelect.click()">{{'ADMIN.TOOLKIT.CHOOSE_UPLOAD_TEMP' | translate}}</a>
+          <div class="file">{{ (uploadOaiFile ? uploadOaiFile.name : '') }}</div>
+      </div>
+    <div *ngIf="!uploadOaiFile">
     <label for="OAI_URL">{{'ADMIN.IMPORT.OAI_URL' | translate}}</label>
     <input type="text" id="OAI_URL" [(ngModel)]="oai.url">
     <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_URL_EXAMPLE' | translate}}</div>
@@ -238,6 +245,7 @@
       </select>
       <label for="OAI_SET">{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}</label>
       <input type="text" id="OAI_IMPORTER_CLASS_NAME" [(ngModel)]="oai.importerClassName">
+    </div>
     <label for="OAI_RECORD_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}</label>
     <input type="text" id="OAI_RECORD_HANDLER_CLASS_NAME" [(ngModel)]="oai.recordHandlerClassName">
     <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
@@ -245,7 +253,7 @@
     <label for="OAI_BINARY_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}</label>
     <input type="text" id="OAI_BINARY_HANDLER_CLASS_NAME" [(ngModel)]="oai.binaryHandlerClassName">
     <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
-    <div class="oaiForce">
+    <div class="oaiForce" *ngIf="!uploadOaiFile">
       <input type="checkbox" id="OAI_FORCE_UPDATE" class="filled-in" [(ngModel)]="oai.forceUpdate">
       <label for="OAI_FORCE_UPDATE">{{'ADMIN.IMPORT.OAI_FORCE_UPDATE' | translate}}</label>
     </div>

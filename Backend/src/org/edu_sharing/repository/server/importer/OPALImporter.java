@@ -129,7 +129,7 @@ public class OPALImporter {
 							CCConstants.LOM_PROP_GENERAL_KEYWORD, 
 							SOURCE_PREFIX);
 					
-					persistentHandler.safe(eduProps, null, source);
+					persistentHandler.safe(new RecordHandlerStatic(eduProps), null, source);
 					
 				}				   
 				

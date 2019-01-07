@@ -63,9 +63,10 @@ public class RenderingServiceImpl implements RenderingService{
 		if(!this.permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_READ)){
 			throw new InsufficientPermissionException("no read permission");
 		}
+		String renderingServiceUrl = "";
 		try {
 			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(this.appInfo.getAppId());
-			String renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo, nodeId, AuthenticationUtil.getFullyAuthenticatedUser(),nodeVersion,parameters,RenderingTool.DISPLAY_DYNAMIC);
+			renderingServiceUrl = new RenderingTool().getRenderServiceUrl(appInfo, nodeId, AuthenticationUtil.getFullyAuthenticatedUser(),nodeVersion,parameters,RenderingTool.DISPLAY_DYNAMIC);
 			// base url for dynamic context routing of domains
 			renderingServiceUrl = UrlTool.setParam(renderingServiceUrl, "baseUrl",URLEncoder.encode(URLTool.getBaseUrl(true)));
 			logger.debug(renderingServiceUrl);
@@ -74,6 +75,7 @@ public class RenderingServiceImpl implements RenderingService{
 			String repository=VersionService.getVersionNoException(VersionService.Type.REPOSITORY);
 			String rs=VersionService.getVersionNoException(VersionService.Type.RENDERSERVICE);
 			String info="Repository version "+repository+", Renderservice version "+rs;
+			logger.info("called url:" + renderingServiceUrl);
 			if(repository.equals(rs)) {
 				logger.info(info);
 				throw t;

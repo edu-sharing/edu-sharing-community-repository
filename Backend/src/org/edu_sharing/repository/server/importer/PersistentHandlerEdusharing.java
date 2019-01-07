@@ -56,7 +56,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
-import org.edu_sharing.repository.server.jobs.quartz.ImporterJob;
 import org.edu_sharing.repository.server.jobs.quartz.OAIConst;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -81,11 +80,13 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	static ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	static ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	private String importFolderId;
+	private Importer importer;
 
-	public PersistentHandlerEdusharing(AbstractJob job) throws Throwable {
+	public PersistentHandlerEdusharing(AbstractJob job,Importer importer) throws Throwable {
 		mcAlfrescoBaseClient = new MCAlfrescoAPIClient();
 		this.job = job;
 		this.importFolderId=prepareImportFolder();
+		this.importer=importer;
 		// prepare cache
 		getAllNodesInImportfolder();
 		getReplicationIdTimestampMap();
@@ -131,7 +132,8 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		}
 	}
 
-	public String safe(Map newNodeProps, String cursor, String set) throws Throwable {
+	public String safe(RecordHandlerInterfaceBase recordHandler, String cursor, String set) throws Throwable {
+		HashMap<String, Object> newNodeProps = recordHandler.getProperties();
 		String replicationId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID);
 		String lomCatalogId = (String) newNodeProps.get(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE);
 
@@ -179,12 +181,12 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 			if (mustBePersisted(replicationId,newTimeStamp)) {
 				getLogger().info(" newTimeStamp is after oldTimeStamp have to update object id:" + replicationId);
-                updateNode((String) childId.getId(), newNodeProps);
+                updateNode((String) childId.getId(), newNodeProps, recordHandler.getPropertiesToRemove());
                 setModifiedDate((String) childId.getId(), newNodeProps);
             } else if (licenseValidChanged) {
 				getLogger().info(" license valid changed. have to update object. oldLicenseValid:" + oldLicenseValid + " newLicenseValid:"
 						+ newLicenseValid);
-                updateNode((String) childId.getId(), newNodeProps);
+                updateNode((String) childId.getId(), newNodeProps, recordHandler.getPropertiesToRemove());
                 setModifiedDate((String) childId.getId(), newNodeProps);
             } else {
 				getLogger().debug(" newTimeStamp.equals(oldTimeStamp) I'll do nothing");
@@ -321,7 +323,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		return allNodesInImportfolder;
 	}
 
-	public void updateNode(String nodeId, Map props) throws Throwable {
+	public void updateNode(String nodeId, Map props, List<String> propertiesToRemove) throws Throwable {
 		// idea first delete all childs and create them new
         synchronized (this) {
             HashMap children = mcAlfrescoBaseClient.getChildren(nodeId);
@@ -340,6 +342,14 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			}
 		}
 		try {
+			for (String prop : propertiesToRemove){
+				NodeServiceFactory.getLocalService().removeProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,prop);
+			}
+		}catch(Throwable t) {
+			getLogger().warn("failed to remove props from node "+nodeId);
+		}
+
+		try {
 			mcAlfrescoBaseClient.updateNode(nodeId, simpleProps);
 		}catch(DuplicateChildNodeNameException e){
 			simpleProps.put(CCConstants.CM_NAME, makeUniqueName((String) simpleProps.get(CCConstants.CM_NAME)));
@@ -352,7 +362,11 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 		return name+"_"+ DigestUtils.sha1Hex(System.currentTimeMillis()+""+RandomUtils.nextLong());
 	}
 
+
 	private void createChildobjects(String nodeId, HashMap<String, Object> nodeProps) throws Throwable {
+		if(importer!=null && !importer.getRecordHandler().createSubobjects()){
+			return;
+		}
 		for (Object key : nodeProps.keySet()) {
 			String typekey = (String) key;
 			String[] splitted = typekey.split("#");

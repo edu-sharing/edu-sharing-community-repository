@@ -723,6 +723,8 @@ export class ListTableComponent implements EventListener{
       else
         this.selectedNodes=[node];
       this.onSelectionChanged.emit(this.selectedNodes);
+      event.preventDefault();
+      event.stopPropagation();
       return;
     }
     let pos=this.getSelectedPos(node);
@@ -750,8 +752,9 @@ export class ListTableComponent implements EventListener{
 
   }
   private getAttribute(data : any,item : ListItem) : SafeHtml{
-    //return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
-    return NodeHelper.getAttribute(this.translate,this.config,data,item);
+    return this.sanitizer.bypassSecurityTrustHtml(NodeHelper.getAttribute(this.translate,this.config,data,item));
+    // faster, but will break background-color styles on workflows
+    //return NodeHelper.getAttribute(this.translate,this.config,data,item);
   }
   private getAttributeText(data : any,item : ListItem) : string{
       return NodeHelper.getAttribute(this.translate,this.config,data,item);
@@ -784,7 +787,6 @@ export class ListTableComponent implements EventListener{
   }
   public askCCPublish(event:any,node : Node){
     NodeHelper.askCCPublish(this.translate,node);
-    event.preventDefault();
     event.stopPropagation();
   }
   public getItemCssClass(item:ListItem){

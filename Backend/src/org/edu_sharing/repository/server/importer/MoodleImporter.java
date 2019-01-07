@@ -134,7 +134,7 @@ public class MoodleImporter {
 							SOURCE_PREFIX);
 					
 
-					persistentHandler.safe(eduProps, null, source);
+					persistentHandler.safe(new RecordHandlerStatic(eduProps), null, source);
 					
 				}
 				

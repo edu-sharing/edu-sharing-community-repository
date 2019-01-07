@@ -615,6 +615,7 @@ div.dialog.darken {
   }
   .collections{
     overflow-x: auto;
+    @include iosScrolling();
   }
 }
 @media all and (max-width: $mobileWidth) {

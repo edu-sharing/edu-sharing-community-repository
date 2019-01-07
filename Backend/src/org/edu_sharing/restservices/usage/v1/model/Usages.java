@@ -59,6 +59,8 @@ public class Usages {
 	    private String usageVersion;
 
 	    private Parameters usageXmlParams;
+	    
+	    private String usageXmlParamsRaw;
 
 	    private String resourceId;
 	    
@@ -263,6 +265,15 @@ public class Usages {
 				public String referencedInInstance;
 			}
 		}
+        
+        public void setUsageXmlParamsRaw(String usageXmlParamsRaw) {
+			this.usageXmlParamsRaw = usageXmlParamsRaw;
+		}
+        
+        @JsonProperty("usageXmlParamsRaw")
+        public String getUsageXmlParamsRaw() {
+			return usageXmlParamsRaw;
+		}
 	}
 	public static class CollectionUsage extends Usage {
 		private Collection collection;
@@ -287,4 +298,5 @@ public class Usages {
 			this.node = node;
 		}
 	}
+	
 }

@@ -69,6 +69,12 @@ import io.swagger.util.Json;
 public class NodeDao {
 	
 	private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+	private static final String[] DAO_PERMISSIONS = new String[]{
+			org.alfresco.service.cmr.security.PermissionService.ADD_CHILDREN,
+			org.alfresco.service.cmr.security.PermissionService.CHANGE_PERMISSIONS,
+			org.alfresco.service.cmr.security.PermissionService.WRITE,
+			org.alfresco.service.cmr.security.PermissionService.DELETE,
+			CCConstants.PERMISSION_CC_PUBLISH};
 
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
@@ -170,7 +176,7 @@ public class NodeDao {
 			throw DAOException.mapping(e);
 		}
 	}
-	
+
 	public static NodeSearch searchFingerprint(RepositoryDao repoDao, String nodeId, Filter filter) throws DAOException {
 		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
 		try {
@@ -179,7 +185,7 @@ public class NodeDao {
 			throw DAOException.mapping(e);
 		}
 	}
-	
+
 	public static NodeSearch search(RepositoryDao repoDao, String query,
 			int startIdx, int nrOfresults, List<String> facettes,
 			int facettesMinCount, int facettesLimit) throws DAOException {
@@ -400,9 +406,9 @@ public class NodeDao {
 			throw DAOException.mapping(t,nodeRef.getNodeId());
 		}
 	}
-	
+
 	public void refreshPermissions() {
-		this.hasPermissions = new PermissionServiceHelper(permissionService).hasAllPermissions(storeProtocol, storeId, nodeId);
+        this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId,DAO_PERMISSIONS);
 	}
 
     public static NodeEntries convertToRest(RepositoryDao repoDao,Filter propFilter,List<NodeRef> children, Integer skipCount, Integer maxItems) throws DAOException {

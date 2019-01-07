@@ -185,7 +185,7 @@ public class WpImporter implements Importer{
 					//just for filling search widget
 					eduProps.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CONTENT_PROVIDER,"mebisWp");
 					
-					persistentHandler.safe(eduProps, null, "mebiswb_"+set);
+					persistentHandler.safe(new RecordHandlerStatic(eduProps), null, "mebiswb_"+set);
 				}
 			
 			}catch(Throwable e){
@@ -206,6 +206,11 @@ public class WpImporter implements Importer{
 	@Override
 	public void setMetadataSetId(String metadataSetId) {
 
+	}
+
+	@Override
+	public RecordHandlerInterface getRecordHandler() {
+		return null;
 	}
 
 	public static void main(String[] args){

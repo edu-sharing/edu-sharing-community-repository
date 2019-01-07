@@ -134,6 +134,14 @@ export class RestAdminService extends AbstractRestService{
     ]);
     return this.connector.post(query,null,this.connector.getRequestOptions());
   }
+    public importOAIXML(xml:File,recordHandlerClassName:string,binaryHandlerClassName=""){
+        let query=this.connector.createUrl("admin/:version/import/oai/xml?recordHandlerClassName=:recordHandlerClassName&binaryHandlerClassName=:binaryHandlerClassName",null,[
+            [":recordHandlerClassName",recordHandlerClassName],
+            [":binaryHandlerClassName",binaryHandlerClassName],
+        ]);
+        return this.connector.sendDataViaXHR(query,xml,'POST','xml')
+            .map((response:XMLHttpRequest) => {return JSON.parse(response.response)});
+    }
   public refreshCache(rootFolder:string,sticky=false){
     let query=this.connector.createUrl("admin/:version/import/refreshCache/:rootFolder?sticky=:sticky",null,[
       [":rootFolder",rootFolder],
