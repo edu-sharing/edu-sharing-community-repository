@@ -726,6 +726,9 @@ export interface  OAuthResult{
   // for local use
   expires_ts?:number;
 }
+export interface RegisterExists{
+    exists:boolean;
+}
 export interface RegisterInformation{
     firstName: string;
     lastName: string;

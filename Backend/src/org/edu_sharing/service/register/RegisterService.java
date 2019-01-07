@@ -9,6 +9,8 @@ public interface RegisterService {
 
     boolean recoverPassword(String id) throws Exception;
 
+    boolean userExists(String mail) throws Exception;
+
     String activate(String key) throws InvalidKeyException,Throwable;
 
     void register(RegisterInformation info) throws DuplicateAuthorityException, Throwable;

@@ -97,6 +97,9 @@ export class LoginComponent  implements OnInit{
         this.username=this.configService.instant('defaultUsername','');
         this.password=this.configService.instant('defaultPassword','');
         this.route.queryParams.forEach((params: Params) => {
+          if(params['username'])
+              this.username=params['username'];
+
           this.connector.onAllRequestsReady().subscribe(()=>{
             this.isLoading=false;
               setTimeout(()=>{
